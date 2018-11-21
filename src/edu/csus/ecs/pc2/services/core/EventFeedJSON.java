@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.web.EventFeedFilter;
@@ -348,7 +348,7 @@ public class EventFeedJSON extends JSONUtilities {
         for (Run run : runs) {
             JudgementRecord judgementRecord = run.getJudgementRecord();
             if (run.isJudged() && !judgementRecord.isPreliminaryJudgement()) {
-                RunTestCase[] testCases = run.getRunTestCases();
+                RunTestCaseResult[] testCases = run.getRunTestCases();
                 for (int j = 0; j < testCases.length; j++) {
                     appendJSONEvent(stringBuilder, RUN_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getRunJSON(contest, testCases, j));
                     stringBuilder.append(NL);
@@ -359,7 +359,7 @@ public class EventFeedJSON extends JSONUtilities {
         return stringBuilder.toString();
     }
 
-    private String getRunJSON(IInternalContest contest, RunTestCase[] runTestCases, int ordinal) {
+    private String getRunJSON(IInternalContest contest, RunTestCaseResult[] runTestCases, int ordinal) {
         return jsonTool.convertToJSON(runTestCases, ordinal).toString();
     }
 

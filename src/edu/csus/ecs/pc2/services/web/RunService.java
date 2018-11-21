@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
 import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
@@ -76,7 +76,7 @@ public class RunService implements Feature {
             }
             JudgementRecord judgementRecord = run.getJudgementRecord();
             if (run.isJudged() && !judgementRecord.isPreliminaryJudgement()) {
-                RunTestCase[] testCases = run.getRunTestCases();
+                RunTestCaseResult[] testCases = run.getRunTestCases();
                 for (int j = 0; j < testCases.length; j++) {
                     childNode.add(jsonTool.convertToJSON(testCases, j));
                 }
@@ -107,7 +107,7 @@ public class RunService implements Feature {
             JudgementRecord judgementRecord = run.getJudgementRecord();
             if (run.isJudged() && !judgementRecord.isPreliminaryJudgement()) {
                 // runId's match runId's
-                RunTestCase[] testCases = run.getRunTestCases();
+                RunTestCaseResult[] testCases = run.getRunTestCases();
                 for (int j = 0; j < testCases.length; j++) {
                     if (testCases[j].getElementId().toString().equals(runId)) {
                         return Response.ok(jsonTool.convertToJSON(testCases, j).toString(), MediaType.APPLICATION_JSON).build();

@@ -89,7 +89,7 @@ public class Run extends Submission {
 
     private Vector<JudgementRecord> judgementList = new Vector<JudgementRecord>();
 
-    private Vector<RunTestCase> testcases = new Vector<RunTestCase>();
+    private Vector<RunTestCaseResult> testcases = new Vector<RunTestCaseResult>();
 
     private boolean deleted;
 
@@ -444,16 +444,16 @@ public class Run extends Submission {
      * 
      * @return a list of the testcase results
      */
-    public RunTestCase[] getRunTestCases() {
-        return (RunTestCase[]) testcases.toArray(new RunTestCase[testcases.size()]);
+    public RunTestCaseResult[] getRunTestCases() {
+        return (RunTestCaseResult[]) testcases.toArray(new RunTestCaseResult[testcases.size()]);
     }
 
-    public void addTestCase(RunTestCase runTestCaseResult) {
+    public void addTestCase(RunTestCaseResult runTestCaseResult) {
         testcases.add(runTestCaseResult);
     }
 
-    public void replaceTestCases(RunTestCase[] runTestCases) {
-        testcases = new Vector<RunTestCase>(Arrays.asList(runTestCases));
+    public void replaceTestCases(RunTestCaseResult[] runTestCases) {
+        testcases = new Vector<RunTestCaseResult>(Arrays.asList(runTestCases));
     }
 
     /**

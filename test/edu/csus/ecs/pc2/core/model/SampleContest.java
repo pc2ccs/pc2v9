@@ -1616,7 +1616,7 @@ public class SampleContest {
         }
         
         for (int i = 0; i < count; i++) {
-            RunTestCase runTestCaseResult = new RunTestCase(run, judgementRecord, i+1, run.isSolved());
+            RunTestCaseResult runTestCaseResult = new RunTestCaseResult(run, judgementRecord, i+1, run.isSolved());
             run.addTestCase (runTestCaseResult);
         }
     }

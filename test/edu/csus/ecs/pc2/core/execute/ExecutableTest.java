@@ -28,7 +28,7 @@ import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
-import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
@@ -127,8 +127,8 @@ public class ExecutableTest extends AbstractTestCase {
      */
     private int getFailedTestCount(Run run) {
         int count = 0;
-        RunTestCase[] cases = run.getRunTestCases();
-        for (RunTestCase runTestCaseResult : cases) {
+        RunTestCaseResult[] cases = run.getRunTestCases();
+        for (RunTestCaseResult runTestCaseResult : cases) {
             if (!runTestCaseResult.isPassed()) {
                 count++;
             }
@@ -144,8 +144,8 @@ public class ExecutableTest extends AbstractTestCase {
      */
     private int getPassedTestCount(Run run) {
         int count = 0;
-        RunTestCase[] cases = run.getRunTestCases();
-        for (RunTestCase runTestCaseResult : cases) {
+        RunTestCaseResult[] cases = run.getRunTestCases();
+        for (RunTestCaseResult runTestCaseResult : cases) {
             if (runTestCaseResult.isPassed()) {
                 count++;
             }
@@ -1030,9 +1030,9 @@ public class ExecutableTest extends AbstractTestCase {
 
     public void dumpRunTestCases(Run run) {
         System.out.println("dumpRunTestCases "+run);
-        RunTestCase[] runTestCases = run.getRunTestCases();
+        RunTestCaseResult[] runTestCases = run.getRunTestCases();
         int count = 1;
-        for (RunTestCase runTestCaseResult : runTestCases) {
+        for (RunTestCaseResult runTestCaseResult : runTestCases) {
             System.out.println("[" + count + "] is " + runTestCaseResult.isPassed() + "'" + runTestCaseResult.getJudgementId() + "'");
             count++;
         }

@@ -1288,7 +1288,7 @@ public class Filter implements Serializable {
         return (Clarification[]) list.toArray(new Clarification[list.size()]);
     }
 
-    public boolean matchesElapsedTime(RunTestCase runTestCaseResult) {
+    public boolean matchesElapsedTime(RunTestCaseResult runTestCaseResult) {
         long elapsedTime = runTestCaseResult.getElapsedMins();
         return matchesElapsedTime(elapsedTime);
     }

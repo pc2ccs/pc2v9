@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
@@ -478,10 +478,10 @@ public class JSONTool {
         return key;
     }
 
-    public ObjectNode convertToJSON(RunTestCase[] runTestCases, int ordinal) {
+    public ObjectNode convertToJSON(RunTestCaseResult[] runTestCases, int ordinal) {
         // {"id":"1312","judgement_id":"189549","ordinal":28,"judgement_type_id":"TLE",
         // "time":"2014-06-25T11:22:42.420+01","contest_time":"1:22:42.420"}
-        RunTestCase run = runTestCases[ordinal];
+        RunTestCaseResult run = runTestCases[ordinal];
         ObjectNode element = mapper.createObjectNode();
         element.put("id", run.getElementId().toString());
         element.put("judgement_id", run.getRunElementId().toString());

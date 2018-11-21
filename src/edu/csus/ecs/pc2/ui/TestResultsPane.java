@@ -65,7 +65,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
-import edu.csus.ecs.pc2.core.model.RunTestCase;
+import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
 import edu.csus.ecs.pc2.ui.cellRenderer.CheckBoxCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.LinkCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.RightJustifiedCellRenderer;
@@ -1388,7 +1388,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                 getTotalTestCasesLabel().setText("Total Test Cases: " + totalTestCases);
                 
                 // get the actually-run test case results for the current run
-                RunTestCase[] testCases = getCurrentTestCaseResults(currentRun);
+                RunTestCaseResult[] testCases = getCurrentTestCaseResults(currentRun);
 
                 // fill in the test case summary information
                 if (testCases == null || testCases.length==0) {
@@ -1499,7 +1499,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         }
     }
 
-    private int getNumFailedTestCases(RunTestCase[] testCases) {
+    private int getNumFailedTestCases(RunTestCaseResult[] testCases) {
         int failed = 0 ;
         if (testCases != null) {
             for (int i = 0; i < testCases.length; i++) {
@@ -1531,14 +1531,14 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
      * @param run
      * @return most recent RunTestCaseResults
      */
-    private RunTestCase[] getCurrentTestCaseResults(Run run) {
-        RunTestCase[] testCases = null;
-        RunTestCase[] allTestCases = run.getRunTestCases();
+    private RunTestCaseResult[] getCurrentTestCaseResults(Run run) {
+        RunTestCaseResult[] testCases = null;
+        RunTestCaseResult[] allTestCases = run.getRunTestCases();
         // hope the lastTestCase has the highest testNumber....
         if (allTestCases != null && allTestCases.length > 0) {
-            testCases = new RunTestCase[allTestCases[allTestCases.length-1].getTestNumber()];
+            testCases = new RunTestCaseResult[allTestCases[allTestCases.length-1].getTestNumber()];
             for (int i = allTestCases.length-1; i >= 0; i--) {
-                RunTestCase runTestCaseResult = allTestCases[i];
+                RunTestCaseResult runTestCaseResult = allTestCases[i];
                 int testCaseNumIndex = runTestCaseResult.getTestNumber()-1;
                 if (testCases[testCaseNumIndex] == null) {
                     testCases[testCaseNumIndex] = runTestCaseResult;
@@ -1557,7 +1557,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     private void loadTableWithAllTestCaseResults() {
         
         // get the test case results for the current run
-        RunTestCase[] allTestCases = getCurrentTestCaseResults(currentRun);
+        RunTestCaseResult[] allTestCases = getCurrentTestCaseResults(currentRun);
         
         //build a new table with the test cases and install it in the scrollpane
         resultsTable = getResultsTable(allTestCases);
@@ -1597,10 +1597,10 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     private void loadTableWithFailedTestCases() {
         
         // get the test case results for the current run
-        RunTestCase[] allTestCases = getCurrentTestCaseResults(currentRun);
+        RunTestCaseResult[] allTestCases = getCurrentTestCaseResults(currentRun);
         
         //extract failed cases into a Vector (list)
-        Vector<RunTestCase> failedTestCaseList = new Vector<RunTestCase>();
+        Vector<RunTestCaseResult> failedTestCaseList = new Vector<RunTestCaseResult>();
         if (allTestCases != null) {
             for (int i = 0; i < allTestCases.length; i++) {
                 //check for actual "failure" - ignoring "no validator" and "not executed" cases
@@ -1612,7 +1612,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         }
 
         //convert Vector to array
-        RunTestCase[] failedTestCases =  failedTestCaseList.toArray(new RunTestCase[failedTestCaseList.size()]);
+        RunTestCaseResult[] failedTestCases =  failedTestCaseList.toArray(new RunTestCaseResult[failedTestCaseList.size()]);
 
         //build a new table with just the failed cases and install it in the scrollpane
         resultsTable = getResultsTable(failedTestCases);
@@ -1624,7 +1624,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
      * The method sets not only the table data model but also the appropriate cell renderers and 
      * action/mouse listeners for the table.
      */
-    private JTable getResultsTable(RunTestCase [] testCases) {
+    private JTable getResultsTable(RunTestCaseResult [] testCases) {
 
         final JTable localResultsTable;
         
@@ -1772,7 +1772,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
      * @return an array of RunTestCaseResults containing only the failed test cases in the received array, 
      *          or returns null if the received array is null or zero-length.
      */
-    private RunTestCase[] removeNonFailuresFromTestCaseResults(RunTestCase[] testCaseResults) {
+    private RunTestCaseResult[] removeNonFailuresFromTestCaseResults(RunTestCaseResult[] testCaseResults) {
         
         if (testCaseResults!=null && testCaseResults.length>0) {
             
@@ -1785,22 +1785,22 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             }
             
             //convert to a List for easy removal (and automatic shifting of remaining elements)
-            Vector<RunTestCase> testCaseResultList = new Vector<RunTestCase>(Arrays.asList(testCaseResults));
+            Vector<RunTestCaseResult> testCaseResultList = new Vector<RunTestCaseResult>(Arrays.asList(testCaseResults));
 
-            Vector<RunTestCase> toBeRemoved = new Vector<RunTestCase>();
+            Vector<RunTestCaseResult> toBeRemoved = new Vector<RunTestCaseResult>();
             
             //find all passed and non-validated results (non-validated means they couldn't be "passed")
-            for (RunTestCase res : testCaseResultList) {
+            for (RunTestCaseResult res : testCaseResultList) {
                 if (res==null || res.isPassed() || !res.isValidated()) {
                     toBeRemoved.add(res);
                 }
             }
             //remove all found results from the list
-            for (RunTestCase removeRes : toBeRemoved) {
+            for (RunTestCaseResult removeRes : toBeRemoved) {
                 testCaseResultList.remove(removeRes);
             }
             
-            RunTestCase [] retArray = new RunTestCase[0];
+            RunTestCaseResult [] retArray = new RunTestCaseResult[0];
             //return an array of the remaining TestCaseResults (i.e. the ones that "failed")
             retArray = testCaseResultList.toArray(retArray);
             
@@ -1979,7 +1979,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         }
         
         //get any results which have already been executed
-        RunTestCase[] allTestCases = getCurrentTestCaseResults(currentRun);
+        RunTestCaseResult[] allTestCases = getCurrentTestCaseResults(currentRun);
         
         if (allTestCases==null || row>=allTestCases.length) {
             //the run either hasn't been executed at all (testcases=null) or the selected row is for a data set

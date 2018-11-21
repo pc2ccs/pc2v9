@@ -122,7 +122,7 @@ public class FilterTest extends TestCase {
         JudgementRecord record = new JudgementRecord(judgementId, judgerClientId, solved, false);
         int testNumber = 1;
 
-        RunTestCase testCase = new RunTestCase(run, record, testNumber, solved);
+        RunTestCaseResult testCase = new RunTestCaseResult(run, record, testNumber, solved);
         testCase.setElapsedMS(run.getElapsedMS());
 
         Filter filter = new Filter();
