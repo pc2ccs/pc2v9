@@ -43,7 +43,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
-import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
@@ -560,8 +560,8 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         for (int i = runs.length - numruns; i < runs.length; i++) {
             runs[i].setElapsedMins(300); // / set all runs to elapsed time 100
-            RunTestCaseResult[] testCases = runs[i].getRunTestCases();
-            for (RunTestCaseResult runTestCaseResult : testCases) {
+            RunTestCase[] testCases = runs[i].getRunTestCases();
+            for (RunTestCase runTestCaseResult : testCases) {
                 runTestCaseResult.setElapsedMS(300 * Constants.MS_PER_MINUTE);
             }
         }

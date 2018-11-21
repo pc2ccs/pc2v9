@@ -9,7 +9,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.ui.TestResultsPane.COLUMN;
 
 /**
@@ -31,7 +31,7 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
      * @param testCaseResults - the data to go in the model
      * @param columnNames - Strings defining the table column headers
      */
-    public TestCaseResultsTableModel(IInternalContest contest, RunTestCaseResult[] testCaseResults, Object[] columnNames) {
+    public TestCaseResultsTableModel(IInternalContest contest, RunTestCase[] testCaseResults, Object[] columnNames) {
         
         //create a default table model with zero rows and columns
         super ();
@@ -97,7 +97,7 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
 
                 //only provide compare & judges-output links if the problem associated with this test case has a judge's answer file
                 //only provide judge's data file link if the problem has a data file for this test case
-                // (Note that the RunTestCaseResult contains the runElementID BUT NOT THE RUN... :(  So we must go get the Run from the Contest Model
+                // (Note that the RunTestCase contains the runElementID BUT NOT THE RUN... :(  So we must go get the Run from the Contest Model
                 //   so we can get the Problem so we can find out whether it has things like judge's output, judge's data, and a Validator )
                 if (contest!=null && testCaseResults[row]!=null && testCaseResults[row].getRunElementId()!=null) {
                     Run theRun = contest.getRun(testCaseResults[row].getRunElementId());
