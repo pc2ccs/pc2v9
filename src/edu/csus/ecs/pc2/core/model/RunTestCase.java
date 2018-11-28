@@ -12,7 +12,7 @@ import edu.csus.ecs.pc2.core.Constants;
  */
 
 // $HeadURL$
-public class RunTestCaseResult implements IElementObject, IGetDate{
+public class RunTestCase implements IElementObject, IGetDate{
 
     /**
      * 
@@ -64,7 +64,7 @@ public class RunTestCaseResult implements IElementObject, IGetDate{
      * @param testNumber - the id of this test case
      * @param passed - boolean indicating whether the Run passed this test case or not
      */
-    public RunTestCaseResult(Run run, JudgementRecord record, int testNumber, boolean passed) {
+    public RunTestCase(Run run, JudgementRecord record, int testNumber, boolean passed) {
         runElementId = run.getElementId();
         judgementId = record.getJudgementId();
         this.testNumber = testNumber;
