@@ -1,0 +1,166 @@
+# Contest Configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 08:00 UTC) Java ver 1.8.0_25 build 4632 Windows 7 6.1 (amd64) 
+# Created: 2017-07-24 16:04:21 PDT
+--- 
+
+name: 'Problem Flag Test Contest'
+short-name: 'pft'
+elapsed: 0:00:00
+remaining: 5:00:00
+running: false
+# start-time: 2017-07-24 16:04:21 PDT
+start-time: 2017-12-08T22:40:07.000-08
+duration: 5:00:00
+scoreboard-freeze-length: 01:00:00
+
+# load-data-files: false
+
+auto-stop-clock-at-end: true
+
+default-clars:
+  - No response, read problem statement
+
+clar-categories:
+  - General
+
+judging-type:
+    computer-judged: true
+    manual-review: true
+    send-prelim-judgement: false
+
+computer-judged: true
+manual-review: true
+send-prelim-judgement: false
+
+languages:
+  - name: 'Java'
+    active: true
+    compilerCmd: 'javac {:mainfile}'
+    exemask: '{:basename}.class'
+    execCmd: 'java {:basename}'
+    runner: 'java'
+    runner-args: '{:basename}'
+    interpreted: false
+    use-judge-cmd: false
+    judge-exec-cmd: 'java {:basename}'
+    
+  - name: 'GNU C'
+    active: true
+    compilerCmd: 'gcc -g -O2 -std=gnu99 -static {:mainfile} -lm'
+    exemask: './a.out'
+    execCmd: './a.out'
+    runner: './a.out'
+    runner-args: ''
+    use-judge-cmd: true
+    judge-exec-cmd: '/usr/bin/wrapper_c {:timelimit}'
+
+  - name: 'GNU C++'
+    active: true
+    compilerCmd: 'g++ -g -O2 -static -std=gnu++11 {:mainfile}'
+    exemask: 'a.out'
+    execCmd: './a.out'
+    runner: './a.out'
+    runner-args: ''
+    use-judge-cmd: true
+    judge-exec-cmd: '/usr/bin/wrapper_c {:timelimit}'
+
+  - name: 'Python2'
+    active: true
+    compilerCmd: 'python -m py_compile {:mainfile}'
+    interpreted: true
+    exemask: ''
+    execCmd: 'python {:mainfile}'
+    runner: 'python'
+    runner-args: '{:mainfile}'
+    use-judge-cmd: true
+    judge-exec-cmd: '/usr/bin/wrapper_python {:timelimit} {:mainfile}'
+
+  - name: 'Python3'
+    active: true
+    compilerCmd: 'python3 -m py_compile {:mainfile}'
+    interpreted: true
+    exemask: ''
+    execCmd: 'python3 {:mainfile}'
+    runner: 'python3'
+    runner-args: '{:mainfile}'
+    use-judge-cmd: true
+    judge-exec-cmd: '/usr/bin/wrapper_python3 {:timelimit} {:mainfile}'
+
+  - name: 'C#'
+    active: true
+    compilerCmd: 'mcs {:mainfile}'
+    interpreted: false
+    exemask: '{:basename}.exe'
+    execCmd: 'mono {:basename}.exe'
+    runner: 'mono'
+    runner-args: '{:basename}.exe'
+    use-judge-cmd: false
+    judge-exec-cmd: '/usr/bin/wrapper_cs {:timelimit} {:basename}.exe'
+
+  - name: Perl
+    active: true
+
+auto-judging:
+  - account: JUDGE
+    site: 1
+    number: 2
+    letters: all
+    enabled: yes
+
+  - account: JUDGE
+    site: 1
+    number: 3
+    letters: A
+    enabled: yes
+
+  - account: JUDGE
+    site: 1
+    number: 4
+    letters: C,D,E
+    enabled: yes
+
+sites:
+  - number: 2
+    name: 'Site 2'
+    password: site2
+    IP: localhost
+    port: 51002
+
+  - number: 3
+    name: 'Site 3'
+    password: site3
+    IP: localhost
+    port: 52002
+
+  - number: 4
+    name: 'Site 4'
+    password: site4
+    IP: localhost
+    port: 53002
+
+  - number: 5
+    name: 'Site 5'
+    password: site5
+    IP: localhost
+    port: 54002
+
+
+accounts:
+  - account: TEAM
+    site: 1
+    count: 22
+
+  - account: FEEDER
+    site: 1
+    count: 1
+
+  - account: JUDGE
+    site: 1
+    count: 12
+
+  - account: SCOREBOARD
+    site: 1
+    count: 1
+
+
+# EOF Contest Configuration

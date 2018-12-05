@@ -1,0 +1,64 @@
+#
+# problemset.yaml - list of CCS problem definitions
+#
+# created on: Tue Dec  4 21:31:34 PST 2018
+# created by: $Id: mkprobset,v 1.8 2017/04/29 00:19:22 laned Exp $
+#
+# problems:
+problemset:
+# sumit is Sumit
+  - letter:     A
+    short-name: sumit
+
+    color:      Black
+    rgb:        '#000000'
+
+# sumit2 is Sumit 2
+  - letter:     B
+    short-name: sumit2
+
+    color:      White
+    rgb:        '#fbfbfb'
+
+# sumit3 is Sumit 3 FFFT
+  - letter:     C
+    short-name: sumit3
+
+    color:      Red
+    rgb:        '#df1328'
+
+# sumit4 is Sumit 4 TTTT
+  - letter:     D
+    short-name: sumit4
+
+    color:      Dark blue
+    rgb:        '#0967db'
+
+# sumit5 is Sumit 5 FFFF
+  - letter:     E
+    short-name: sumit5
+
+    color:      Dark green
+    rgb:        '#399956'
+
+# sumit6 is Sumit 6 TTTF
+  - letter:     F
+    short-name: sumit6
+
+    color:      Orange
+    rgb:        '#e38c3e'
+
+# sumit7 is Sumit 7 TFFT
+  - letter:     G
+    short-name: sumit7
+
+    color:      Yellow
+    rgb:        '#f3eb4b'
+
+# sumit8 is Sumit 8 FTTF
+  - letter:     H
+    short-name: sumit8
+
+    color:      Pink
+    rgb:        '#fb86d8'
+
