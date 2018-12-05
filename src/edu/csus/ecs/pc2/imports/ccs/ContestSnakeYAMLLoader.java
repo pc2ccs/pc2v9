@@ -1054,7 +1054,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     problemDataFile.setOutputValidatorFile(validatorFile);
                     contest.updateProblem(cleanProblem, problemDataFile);
                 } else {
-                    System.err.println("Warning: problem "+problem.getLetter()+" - "+problem.getShortName()+" custom validator import failed: " + validatorFile.getErrorMessage());
+                	// Halt loading and throw YamlLoadException 
+                    syntaxError("Error: problem "+problem.getLetter()+" - "+problem.getShortName()+" custom validator import failed: " + validatorFile.getErrorMessage());
                 }
             }
         }
