@@ -222,13 +222,16 @@ public class SitesPane extends JPanePlugin {
         
         if (nextSiteNumber == 2){
             
-            String message = "Warning - \"Profiles\" (the ability to switch between multiple contest configurations) are not supported when running multiple sites. \n\n"
-                    + "Also, if you plan to use ICPCTools (e.g. the Resolver) with PC^2, you MUST insure that every team in the contest, \n"
-                    + "across all sites in a multi-site contest, has a UNIQUE Team ID."
-                    + "\n(See the PC^2 Contest Administrator's Guide; specifically, the Appendix on the XML Event Feed.)"
-                    + " \n \nProceed?"; 
+            String message = "\nWarning:  \"Profiles\" are not supported when running multiple sites (that is, when running more than one PC^2 Server)."
+                    + "\n\n(\"Profiles\" refers to the ability to define multiple contest configurations and switch between them during a contest;"
+                    + "\n  this feature is not supported in multi-site contests.  See the \"Contest Profiles\" section in the PC^2 Contest Administrator's "
+                    + "\n  Guide for further details.)"
+                    + "\n\nAlso, if you plan to use ICPCTools (e.g. the Resolver) with PC^2 in a multi-site contest, you MUST insure that "
+                    + "\n  every team in the contest, including across all sites in a multi-site contest, has a UNIQUE Team ID."
+                    + "\n  (See the PC^2 Contest Administrator's Guide; specifically, the Appendix on the XML Event Feed, for further details.)"
+                    + " \n\nProceed with defining multiple sites?"; 
 
-            int result = FrameUtilities.yesNoCancelDialog(this, message, "Disable Profiles?");
+            int result = FrameUtilities.yesNoCancelDialog(this, message, "Multi-Site Limitations");
             
             if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.NO_OPTION) {
                 return;
