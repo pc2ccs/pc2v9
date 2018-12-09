@@ -222,7 +222,11 @@ public class SitesPane extends JPanePlugin {
         
         if (nextSiteNumber == 2){
             
-            String message = "Warning - \"Profiles\" are not supported when running multiple sites.  Proceed?"; 
+            String message = "Warning - \"Profiles\" (the ability to switch between multiple contest configurations) are not supported when running multiple sites. \n\n"
+                    + "Also, if you plan to use ICPCTools (e.g. the Resolver) with PC^2, you MUST insure that every team in the contest, \n"
+                    + "across all sites in a multi-site contest, has a UNIQUE Team ID."
+                    + "\n(See the PC^2 Contest Administrator's Guide; specifically, the Appendix on the XML Event Feed.)"
+                    + " \n \nProceed?"; 
 
             int result = FrameUtilities.yesNoCancelDialog(this, message, "Disable Profiles?");
             
