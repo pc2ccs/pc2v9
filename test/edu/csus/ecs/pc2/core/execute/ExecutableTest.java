@@ -28,7 +28,7 @@ import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
-import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
@@ -127,8 +127,8 @@ public class ExecutableTest extends AbstractTestCase {
      */
     private int getFailedTestCount(Run run) {
         int count = 0;
-        RunTestCaseResult[] cases = run.getRunTestCases();
-        for (RunTestCaseResult runTestCaseResult : cases) {
+        RunTestCase[] cases = run.getRunTestCases();
+        for (RunTestCase runTestCaseResult : cases) {
             if (!runTestCaseResult.isPassed()) {
                 count++;
             }
@@ -144,8 +144,8 @@ public class ExecutableTest extends AbstractTestCase {
      */
     private int getPassedTestCount(Run run) {
         int count = 0;
-        RunTestCaseResult[] cases = run.getRunTestCases();
-        for (RunTestCaseResult runTestCaseResult : cases) {
+        RunTestCase[] cases = run.getRunTestCases();
+        for (RunTestCase runTestCaseResult : cases) {
             if (runTestCaseResult.isPassed()) {
                 count++;
             }
@@ -1030,9 +1030,9 @@ public class ExecutableTest extends AbstractTestCase {
 
     public void dumpRunTestCases(Run run) {
         System.out.println("dumpRunTestCases "+run);
-        RunTestCaseResult[] runTestCases = run.getRunTestCases();
+        RunTestCase[] runTestCases = run.getRunTestCases();
         int count = 1;
-        for (RunTestCaseResult runTestCaseResult : runTestCases) {
+        for (RunTestCase runTestCaseResult : runTestCases) {
             System.out.println("[" + count + "] is " + runTestCaseResult.isPassed() + "'" + runTestCaseResult.getJudgementId() + "'");
             count++;
         }
@@ -1359,15 +1359,37 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     public void testCommentedPackageStatement() throws Exception {
-        if (isFastJUnitTesting()) {
-            return;
-        }
-
         String testBaseDirname = getDataDirectory(this.getName());
         String srcFilename = testBaseDirname + File.separator + "PracticeA.java";
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         Problem problem = createHelloProblemNoJudgesData(contest);
+
+        problem.setReadInputDataFromSTDIN(true);
+
+        assertFalse("Expecting using internal data files ", problem.isUsingExternalDataFiles());
+
+        Run run = createRun(submitter, javaLanguage, problem, 42, 120);
+
+        assertFileExists(srcFilename);
+        RunFiles runFiles = new RunFiles(run, srcFilename);
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+        /**
+         * If this method failes with ERROR - pc2 jar path not a directory '/software/pc2/cc/projects/pc2v9/build/prod:' then one must create pc2.jar, one can use createVERSIONandJar.xml to create
+         * pc2.jar.
+         */
+        Executable executable = runExecutableTest(run, runFiles, true, pc2YesJudgement);
+        List<String> list = executable.getTeamsOutputFilenames();
+        assertEquals("Expecting output filenames ", problem.getNumberTestCases(), list.size());
+    }
+
+    public void testPackageStatementSpace() throws Exception {
+        String testBaseDirname = getDataDirectory(this.getName());
+        String srcFilename = testBaseDirname + File.separator + "ISumitWithPackage.java";
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+
+        Problem problem = createISumitProblem(contest);
 
         problem.setReadInputDataFromSTDIN(true);
 

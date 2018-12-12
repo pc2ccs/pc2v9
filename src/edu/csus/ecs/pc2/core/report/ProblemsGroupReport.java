@@ -93,8 +93,7 @@ public class ProblemsGroupReport implements IReport {
             printWriter.println("No problems defined.");
         } else if (contestGroups.length == 0) {
             printWriter.println("No groups defined.");
-        }
-        else {
+        } else {
 
             int maxGroupColumnLength = 42;
             printWriter.print(StringUtilities.lpad(' ', maxGroupColumnLength + 21 + 6, "ID     Group Title                                  Problems Viewable"));
@@ -127,8 +126,8 @@ public class ProblemsGroupReport implements IReport {
                 if (allproblems) {
                     printWriter.print(StringUtilities.lpad(' ', 20, "All Problems "));
                 } else {
-                    printWriter.print(StringUtilities.lpad(' ', 3, problemsInGroupCount) + " of " +
-                            StringUtilities.lpad(' ', 3, problems.length)
+                    printWriter.print(StringUtilities.lpad(' ', 3, problemsInGroupCount) + " of "
+                            + StringUtilities.lpad(' ', 3, problems.length)
                             + " problems ");
 
                     String blankString = StringUtilities.lpad(' ', 8, "");
@@ -136,8 +135,7 @@ public class ProblemsGroupReport implements IReport {
                     for (Problem problem : problems) {
                         boolean b = problem.canView(group);
 
-                        if (b)
-                        {
+                        if (b) {
                             printWriter.print(centerString("" + getYesNo(b), 8));
                         } else {
                             printWriter.print(blankString);
@@ -184,18 +182,16 @@ public class ProblemsGroupReport implements IReport {
 
             int teamCount = teamCountPerGroup(group);
             String teamsString = Integer.toString(teamCount);
-            if (teamCount == 0)
-            {
+            if (teamCount == 0) {
                 teamsString = "NO";
             }
 
-            printWriter.println(StringUtilities.rpad(' ', 6, group.getGroupId()) + " " + group.getDisplayName() +
-                    " -  " + teamsString + " teams in group");
+            printWriter.println(StringUtilities.rpad(' ', 6, group.getGroupId()) + " " + group.getDisplayName()
+                    + " -  " + teamsString + " teams in group");
             for (Problem problem : problems) {
                 if (problem.canView(group)) {
                     printWriter.println("    Viewed " + problem.getLetter() + " " + problem.getDisplayName());
-                } else
-                {
+                } else {
                     printWriter.println("NOT Viewed " + problem.getLetter() + " " + problem.getDisplayName());
                 }
             }

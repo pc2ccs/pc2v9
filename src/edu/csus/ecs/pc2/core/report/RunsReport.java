@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
-import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
@@ -209,7 +209,7 @@ public class RunsReport implements IReport {
 
     private void writeTestCases(PrintWriter printWriter, String pad, IInternalContest internalContest, Run run) {
 
-        RunTestCaseResult[] testcases = run.getRunTestCases();
+        RunTestCase[] testcases = run.getRunTestCases();
         
         int numberOfTestCases = getTestCaseCount(run.getProblemId());
 
@@ -217,7 +217,7 @@ public class RunsReport implements IReport {
         
         printWriter.println(pad + "There are " + testcases.length + " test case results.");
 
-        for (RunTestCaseResult runTestCaseResult : testcases) {
+        for (RunTestCase runTestCaseResult : testcases) {
 
             String judgement = "Undetermined";
             if (runTestCaseResult.getJudgementId() != null) {

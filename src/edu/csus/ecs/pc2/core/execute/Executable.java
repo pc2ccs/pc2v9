@@ -39,7 +39,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
-import edu.csus.ecs.pc2.core.model.RunTestCaseResult;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.ui.IFileViewer;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
@@ -632,7 +632,7 @@ public class Executable extends Plugin implements IExecutable {
         // Judgement judgement = getContest().getJudgement(record.getJudgementId());
         // log.info(" Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " judgement = " + judgement);
 
-        RunTestCaseResult runTestCaseResult = new RunTestCaseResult(run, record, testNumber, passed);
+        RunTestCase runTestCaseResult = new RunTestCase(run, record, testNumber, passed);
         runTestCaseResult.setElapsedMS(executionData.getExecuteTimeMS());
         runTestCaseResult.setContestTimeMS(getContest().getContestTime().getElapsedMS());
         runTestCaseResult.setValidated(isValidated());
@@ -2172,7 +2172,7 @@ public class Executable extends Plugin implements IExecutable {
                String lineFromFile = scanner.nextLine();
                if (lineFromFile.startsWith("package ")) { 
                    // a match!
-                   name = lineFromFile.substring(8);
+                   name = lineFromFile.substring(8).replaceAll(" ", "");
                    name = replaceString(name, ";", ".");
                    break;
                }

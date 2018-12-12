@@ -1,0 +1,63 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.5build 20170704 (Tuesday, July 4th 2017 08:00 UTC) Java ver 1.8.0_25 build 4632 Windows 7 6.1 (amd64) 
+# Created: 2017-07-24 16:04:21 PDT
+--- 
+
+name: 'Sumit'
+source: 
+author: 
+license: 
+rights_owner: 
+
+input:
+    readFromSTDIN: false
+ 
+# All problem fields true
+# b1383 TTTT
+hideProblem: true
+showOutputWindow: true
+showCompare: true
+showValidationResults: true
+
+load-data-files: true
+stop-on-first-failed-test-case: true
+
+datafile: sumit.in
+datafile: sumit.ans
+
+# validator_flags: 
+
+limits:
+    timeout: 30
+
+validator: 
+    validatorProg: 'edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator'
+    validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir} '
+    usingInternal: false
+    validatorOption: 0
+
+    use-internal-validator: false
+
+judging-type:
+    computer-judged: false
+    manual-review: true
+    send-prelim-judgement: false
+
+input:
+    readFromSTDIN: true
+
+#     wrote (D)C:/test/current/ka/sumit/data/secret/sumit.in
+#     wrote (D)C:/test/current/ka/sumit/data/secret/sumit1.in
+#     wrote (D)C:/test/current/ka/sumit/data/secret/sumit2.in
+#     wrote (D)C:/test/current/ka/sumit/data/secret/sumit3.in
+#     wrote (D)C:/test/current/ka/sumit/data/secret/sumit4.in
+#     wrote (D)C:/test/current/ka/sumit/data/secret/sumit5.in
+#     wrote (D)C:/test/current/ka/sumit/data/secret/sumit6.in
+#     wrote (A)C:/test/current/ka/sumit/data/secret/sumit.ans
+#     wrote (A)C:/test/current/ka/sumit/data/secret/sumit1.ans
+#     wrote (A)C:/test/current/ka/sumit/data/secret/sumit2.ans
+#     wrote (A)C:/test/current/ka/sumit/data/secret/sumit3.ans
+#     wrote (A)C:/test/current/ka/sumit/data/secret/sumit4.ans
+#     wrote (A)C:/test/current/ka/sumit/data/secret/sumit5.ans
+#     wrote (A)C:/test/current/ka/sumit/data/secret/sumit6.ans
+

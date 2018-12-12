@@ -25,10 +25,8 @@ import edu.csus.ecs.pc2.core.model.Site;
  * Sends packets to server with contest configuration information.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class ContestImporter {
 
     private NoteList noteList = new NoteList();
@@ -269,6 +267,12 @@ public class ContestImporter {
         try {
 
             if (contestInformation != null) {
+                
+                // Special logic to not overwrite the contest title with blank
+                
+                contestInformation = replaceBlankContestTitle(theContest, contestInformation);
+                
+                
                 theController.updateContestInformation(contestInformation);
             }
 
@@ -297,6 +301,25 @@ public class ContestImporter {
             noteList.logError("Error storing configuration Information", e);
             throw new LoadContestDataException(noteList.size()+" errors in sending contest configuration data");
         }
+    }
+
+    /**
+     * If input contest title is blank or null, replace with current contest title.
+     * @param contest current contest model/data
+     * @param contestInformation new contest information
+     * @return the contest title
+     */
+    protected ContestInformation replaceBlankContestTitle(IInternalContest contest, ContestInformation contestInformation) {
+        
+        if (StringUtilities.isEmpty(contestInformation.getContestTitle())){
+            ContestInformation info = contest.getContestInformation();
+            if (info != null){
+                String currentTitle = info.getContestTitle();
+                contestInformation.setContestTitle(currentTitle);
+            }
+        }
+        
+        return contestInformation;
     }
 
     private void updateClientSettingsAJSettings(IInternalContest theContest, IInternalController theController, IInternalContest newContest, HashMap<String, Problem> probHash)
