@@ -1895,16 +1895,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void attemptToLogin(ClientId clientId, String password, ConnectionHandlerID connectionHandlerID) {
 
         info("ClientID=" + clientId);
-        System.out.println("Debug: attemptToLogin(): ClientId = " + clientId );
+        System.out.println("Debug: attemptToLogin(): received ClientId = " + clientId );
         
         if (clientId.getClientType().equals(Type.SERVER)) {
             // Server login
 
             int newSiteNumber = getServerSiteNumber(clientId.getSiteNumber(), password);
+            
             info("newSiteNumber = " + newSiteNumber);
-            System.out.println("Debug: attemptToLogin(): newSiteNumber = " + newSiteNumber);
-            info("contest.getSiteNumber() = " + contest.getSiteNumber());
-            System.out.println("Debug: attemptToLogin(): contest.getSiteNumber() = " + contest.getSiteNumber());
+            System.out.println("Debug: attemptToLogin(): ClientId's site number = " + newSiteNumber);
+            
+            info("My site number = " + contest.getSiteNumber());
+            System.out.println("Debug: attemptToLogin(): my site number = " + contest.getSiteNumber());
 
             if (newSiteNumber == contest.getSiteNumber()) {
                 getLog().warning("attemptToLogin() detected new site number equal to this site's number: " + newSiteNumber);
