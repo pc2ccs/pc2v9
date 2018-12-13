@@ -1894,12 +1894,21 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private void attemptToLogin(ClientId clientId, String password, ConnectionHandlerID connectionHandlerID) {
 
+        info("ClientID=" + clientId);
+        System.out.println("Debug: attemptToLogin(): ClientId = " + clientId );
+        
         if (clientId.getClientType().equals(Type.SERVER)) {
             // Server login
 
             int newSiteNumber = getServerSiteNumber(clientId.getSiteNumber(), password);
+            info("newSiteNumber = " + newSiteNumber);
+            System.out.println("Debug: attemptToLogin(): newSiteNumber = " + newSiteNumber);
+            info("contest.getSiteNumber() = " + contest.getSiteNumber());
+            System.out.println("Debug: attemptToLogin(): contest.getSiteNumber() = " + contest.getSiteNumber());
 
             if (newSiteNumber == contest.getSiteNumber()) {
+                getLog().warning("attemptToLogin() detected new site number equal to this site's number: " + newSiteNumber);
+                System.out.println("Debug: attemptToLogin(): new site number is equal to this site's number: " + newSiteNumber);
                 throw new SecurityException("Site " + newSiteNumber + " is already logged in (attempt from secondary site to login as same site a primary site)");
             }
 
