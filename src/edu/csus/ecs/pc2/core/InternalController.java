@@ -1399,9 +1399,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         if (clientId.getSiteNumber() == ClientId.UNSET) {
                             
                             info("LOGIN_REQUEST packet contains clientId object with site number of " + ClientId.UNSET + "; replacing with my site number (" + contest.getSiteNumber() + ")");
-                            System.out.println("Debug5: InternalController.receiveObject(): "
-                                    + "LOGIN_REQUEST packet contains clientId object with site number of " 
-                                    + ClientId.UNSET + "; replacing with my site number (" + contest.getSiteNumber() + ")");
                             
                             clientId = new ClientId(contest.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
                         }
@@ -1901,22 +1898,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void attemptToLogin(ClientId clientId, String password, ConnectionHandlerID connectionHandlerID) {
 
         info("ClientID=" + clientId);
-        System.out.println("Debug1: attemptToLogin(): received ClientId = " + clientId );
         
         if (clientId.getClientType().equals(Type.SERVER)) {
             // Server login
 
             int newSiteNumber = getServerSiteNumber(clientId.getSiteNumber(), password);
             
-            info("newSiteNumber = " + newSiteNumber);
-            System.out.println("Debug2: attemptToLogin(): ClientId's site number = " + newSiteNumber);
-            
+            info("newSiteNumber = " + newSiteNumber);           
             info("My site number = " + contest.getSiteNumber());
-            System.out.println("Debug3: attemptToLogin(): my site number = " + contest.getSiteNumber());
 
             if (newSiteNumber == contest.getSiteNumber()) {
                 getLog().warning("attemptToLogin() detected new site number equal to this site's number: " + newSiteNumber);
-                System.out.println("Debug4: attemptToLogin(): new site number is equal to this site's number: " + newSiteNumber);
                 throw new SecurityException("Site " + newSiteNumber + " is already logged in (attempt from secondary site to login as same site a primary site)");
             }
 
