@@ -226,9 +226,18 @@ public class SitesPane extends JPanePlugin {
                     + "\n\n(\"Profiles\" refers to the ability to define multiple contest configurations and switch between them during a contest;"
                     + "\n  this feature is not supported in multi-site contests.  See the \"Contest Profiles\" section in the PC^2 Contest Administrator's "
                     + "\n  Guide for further details.)"
-                    + "\n\nAlso, if you plan to use ICPCTools (e.g. the Resolver) with PC^2 in a multi-site contest, you MUST insure that "
-                    + "\n  every team in the contest, including across all sites in a multi-site contest, has a UNIQUE Team ID."
-                    + "\n  (See the PC^2 Contest Administrator's Guide; specifically, the Appendix on the XML Event Feed, for further details.)"
+                    
+                    + "\n\nAlso, if you plan to use ICPCTools (e.g. the Resolver) with PC^2 in a multi-site contest, be aware that by default PC^2 does not"
+                    + "\ngenerate unique Team IDs or Run IDs across multiple sites (that is, by default there will be a 'team 1' at each site, a 'team 2' at each site, etc.,"
+                    + "\nand there will be a 'run 1' at each site, a 'run 2' at each site, etc.).  THIS IS NOT COMPATIBLE WITH ICPC TOOLS such as the Resolver."
+                    
+                    + "\n\n If you plan to use any of the ICPC Tools with PC^2 in a multi-site contest, the following rules must be observed:"
+                    + "\n    \u2022 Use the 'Start Account At...' function on the PC^2 Admin's Accounts>Generate pane to insure assignment of unique account numbers (team IDs) to teams at each site."
+                    + "\n       (See the PC^2 Contest Administrator's Guide; specifically, the Appendix on the XML Event Feed, for further details.)"
+                    
+                    + "\n    \u2022 Use the 'baseRunNumber' attribute in the 'pc2v9.ini' file on each Site Server to establish a different starting point for Run IDs at each site."
+                    + "\n       (See the PC^2 Contest Administrator's Guide; specifically, the Appendix on pc2v9.ini Attributes, for further details.)"  
+                    
                     + " \n\nProceed with defining multiple sites?"; 
 
             int result = FrameUtilities.yesNoCancelDialog(this, message, "Multi-Site Limitations");
