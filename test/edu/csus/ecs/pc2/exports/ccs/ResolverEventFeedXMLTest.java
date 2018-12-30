@@ -491,6 +491,9 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     public void testTestCase() throws Exception {
 
+        final int NUM_RUNS = 12 ;
+        final int NUM_TESTCASES_PER_RUN = 5 ;
+        
         ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
         int siteNumber = 2;
@@ -501,7 +504,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
          * Add random runs
          */
 
-        Run[] runs = sample.createRandomRuns(testCaseContest, 12, true, true, true);
+        Run[] runs = sample.createRandomRuns(testCaseContest, NUM_RUNS, true, true, true);
 
         createDataFilesForContest(testCaseContest);
 
@@ -512,7 +515,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         /**
          * Add Run Judgements.
          */
-        addRunJudgements(testCaseContest, runs, 5);
+        addRunJudgements(testCaseContest, runs, NUM_TESTCASES_PER_RUN);
 
         String xml = eventFeedXML.toXML(testCaseContest);
 
@@ -528,13 +531,13 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         assertXMLCounts(xml, ResolverEventFeedXML.CONTEST_TAG, 1);
         assertXMLCounts(xml, ResolverEventFeedXML.INFO_TAG, 1);
-        assertXMLCounts(xml, ResolverEventFeedXML.JUDGEMENT_TAG, 9);
+        assertXMLCounts(xml, ResolverEventFeedXML.JUDGEMENT_TAG, NUM_RUNS*NUM_TESTCASES_PER_RUN + 9); //9 judgement defs + 1 judgement per testcase per run
         assertXMLCounts(xml, ResolverEventFeedXML.LANGUAGE_TAG, 18);
         assertXMLCounts(xml, ResolverEventFeedXML.PROBLEM_TAG, 18);
         assertXMLCounts(xml, ResolverEventFeedXML.REGION_TAG, 24);
         assertXMLCounts(xml, ResolverEventFeedXML.RUN_TAG, 12);
         assertXMLCounts(xml, ResolverEventFeedXML.TEAM_TAG, 34); // both teams and team tag in submissions
-        assertXMLCounts(xml, ResolverEventFeedXML.TESTCASE_TAG, 12 * 5);
+        assertXMLCounts(xml, ResolverEventFeedXML.TESTCASE_TAG, NUM_RUNS*NUM_TESTCASES_PER_RUN);
 
         /**
          * Test FINALIZE
@@ -661,12 +664,15 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
      */
     public void testAllInfoElements() throws Exception {
         
+        final int NUM_RUNS = 12;
+        final int NUM_TESTCASES_PER_RUN = 5;
+        
         ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
         
         IInternalContest standardContest = new SampleContest().createStandardContest();
         
-        Run[] runs = sample.createRandomRuns(standardContest, 12, true, true, true);
-        addRunJudgements(standardContest, runs, 5);
+        Run[] runs = sample.createRandomRuns(standardContest, NUM_RUNS, true, true, true);
+        addRunJudgements(standardContest, runs, NUM_TESTCASES_PER_RUN);
 
         String xml = eventFeedXML.toXML(standardContest);
         
@@ -680,13 +686,13 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         
         assertXMLCounts(xml, ResolverEventFeedXML.CONTEST_TAG, 1);
         assertXMLCounts(xml, ResolverEventFeedXML.INFO_TAG, 1);
-        assertXMLCounts(xml, ResolverEventFeedXML.JUDGEMENT_TAG, 9);
+        assertXMLCounts(xml, ResolverEventFeedXML.JUDGEMENT_TAG, NUM_RUNS*NUM_TESTCASES_PER_RUN + 9); //9 judgement defs + 1 judgement per test case per run
         assertXMLCounts(xml, ResolverEventFeedXML.LANGUAGE_TAG, 18);
         assertXMLCounts(xml, ResolverEventFeedXML.PROBLEM_TAG, 18);
         assertXMLCounts(xml, ResolverEventFeedXML.REGION_TAG, 120);
         assertXMLCounts(xml, ResolverEventFeedXML.RUN_TAG, 12);
         assertXMLCounts(xml, ResolverEventFeedXML.TEAM_TAG, 132); // both teams and team tag in submissions
-        assertXMLCounts(xml, ResolverEventFeedXML.TESTCASE_TAG, 12 * 5);
+        assertXMLCounts(xml, ResolverEventFeedXML.TESTCASE_TAG, NUM_RUNS*NUM_TESTCASES_PER_RUN);
         
 
         //    <info>
