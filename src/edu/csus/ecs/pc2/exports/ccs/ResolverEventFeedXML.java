@@ -650,6 +650,7 @@ public class ResolverEventFeedXML {
 //        <testcase>
 //        <i>3</i>
 //        <judged>True</judged>
+        // the following is wrong; the CLICS specification requires <judgement>acronym</judgement>
 //        <judgement_id>78</judgement_id>
 //        <n>57</n>
         
@@ -657,7 +658,14 @@ public class ResolverEventFeedXML {
         
         XMLUtilities.addChild(memento, "i", testCase.getTestNumber());
         XMLUtilities.addChild(memento, "judged", titleCaseBoolean(run.isJudged()));
-        XMLUtilities.addChild(memento, "judgement_id", run.getNumber());
+        
+//        the following statement is incorrect; see bug 1529
+//        XMLUtilities.addChild(memento, "judgement_id", run.getNumber());
+        
+        //the following replaces the above incorrect statement:
+        //output an XML memento containing "<judgement>acronym</judgement>", where "acronym" is the acronym associated with the judgement for the test case
+        XMLUtilities.addChild(memento, "judgement", contest.getJudgement(testCase.getJudgementId()).getAcronym());
+        
         XMLUtilities.addChild(memento, "n", problem.getNumberTestCases());
         
 //        <result>AC</result>
