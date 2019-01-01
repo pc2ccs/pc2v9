@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Purpose: run pc2tools program
+# Author : Douglas A. Lane <pc2@ecs.csus.edu>
+#
+# Tue Jan 01 06:06:51 2019 written 
+
+. `dirname $0`/pc2env
+
+# MacOS or not
+if [ -f /mach_kernel ]; then
+  # set our dock name (otherwise defaults to Starter)
+  PC2XOPS="-Xdock:name=`basename $0`"
+else
+  PC2XOPS=""
+fi
+
+CLASS_NAME=edu.csus.ecs.pc2.core.tools.PC2Tools
+
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp $pc2_classpath $CLASS_NAME $*
+
+# eof pc2tools 
