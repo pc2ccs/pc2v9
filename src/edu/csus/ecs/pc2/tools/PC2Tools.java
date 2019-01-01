@@ -17,6 +17,7 @@ public class PC2Tools {
                 "Usage PC2Tools [--help] [option] params", //
                 "", //
                 "--gen   - generate passwords to stdout, use --help --gen for usage", //
+                "--mer   - prints mail merge file to stdtout, use --help --mer for usage", //
                 "--help  - this message", //
                 "", };
 
@@ -37,6 +38,10 @@ public class PC2Tools {
         if (parseArguments.isOptPresent("--gen")) {
 
             PasswordGenerator.main(args);
+            
+        } else if (parseArguments.isOptPresent("--mer")) {
+
+            PrintMergeFile.main(args);
 
         } else if (args.length == 0 || args[0].equals("--help")) {
             usage();

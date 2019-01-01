@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.tools.PrintMergeFile;
 
 /**
  * Unit test.
@@ -87,7 +88,7 @@ public class MailMergeFileTest extends AbstractTestCase {
 
         String dir = getOutputDataDirectory();
         String passFilename = getOutputTestFilename(MailMergeFile.PASSWORD_LIST_FILENNAME);
-        String outFileName = getOutputTestFilename(MailMergeFile.DEFAULT_MERGE_OUTPUT_FILENAME);
+        String outFileName = getOutputTestFilename(PrintMergeFile.DEFAULT_TEAM_MERGE_OUTPUT_FILENAME);
 
         ensureDirectory(dir);
 
@@ -106,7 +107,7 @@ public class MailMergeFileTest extends AbstractTestCase {
         // Must have password list
         assertFileExists(passFilename);
 
-        new MailMergeFile().printMergeFile(outFileName, contest);
+        new PrintMergeFile().printMergeFile(outFileName, contest);
 
         assertFileExists(outFileName);
     }
