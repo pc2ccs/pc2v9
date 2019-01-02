@@ -358,7 +358,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (content == null) {
             return contest;
         }
-        
+
         setTitle(contest, null);
 
         String contestTitle = fetchValue(content, CONTEST_NAME_KEY);
@@ -393,7 +393,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (shortContestName != null) {
             setShortContestName(contest, shortContestName);
         }
-        
+
         if (null != fetchValue(content, AUTO_STOP_CLOCK_AT_END_KEY)) {
             // only set value if key present
 
@@ -460,14 +460,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
             }
         }
-        
-        Object maxOutputSize = fetchObjectValue(content, MAX_OUTPUT_SIZE_K_KEY);
-        if (maxOutputSize != null){
 
-            if (maxOutputSize instanceof Integer){
+        Object maxOutputSize = fetchObjectValue(content, MAX_OUTPUT_SIZE_K_KEY);
+        if (maxOutputSize != null) {
+
+            if (maxOutputSize instanceof Integer) {
                 int maxSizeInK = ((Integer) maxOutputSize).intValue();
-                if (maxSizeInK > 0){
-                    setMaxOutputSize (contest, maxSizeInK * 1000);
+                if (maxSizeInK > 0) {
+                    setMaxOutputSize(contest, maxSizeInK * 1000);
                 } else {
                     throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must be > 0 ", null, contestFileName);
                 }
@@ -508,7 +508,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
          * Manual Review global override.
          */
         boolean manualReviewOverride = false;
-        
+
         @SuppressWarnings("unchecked")
         LinkedHashMap<String, Object> judgingTypeContent = (LinkedHashMap<String, Object>) content.get(JUDGING_TYPE_KEY);
         if (judgingTypeContent != null) {
@@ -522,7 +522,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (loadProblemDataFiles) {
             for (Problem problem : problems) {
                 loadProblemInformationAndDataFiles(contest, directoryName, problem, overrideUsePc2Validator, manualReviewOverride);
-                if (overrideValidatorCommandLine != null){
+                if (overrideValidatorCommandLine != null) {
                     problem.setValidatorCommandLine(overrideValidatorCommandLine);
                 }
             }
@@ -586,7 +586,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      * Find group for input string.
      * 
      * @param groups
-     * @param groupInfo group external id or group name
+     * @param groupInfo
+     *            group external id or group name
      * @return null if no match, else the group
      */
     protected Group lookupGroupInfo(Group[] groups, String string) {
@@ -607,7 +608,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * 
-     * @param stop - true, auto stop at end of contest
+     * @param stop
+     *            - true, auto stop at end of contest
      */
     private void setAutoStopClockAtEnd(IInternalContest contest, boolean stop) {
         ContestInformation contestInformation = contest.getContestInformation();
@@ -796,8 +798,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             return content.get(key).toString();
         }
     }
-    
-    private boolean isValuePresent (Map<String, Object> content, String key){
+
+    private boolean isValuePresent(Map<String, Object> content, String key) {
         if (content == null) {
             return false;
         }
@@ -956,8 +958,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @Override
     public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem, boolean overrideUsePc2Validator, boolean overrideManualReview) {
 
-        Group[] groups = contest.getGroups();  // fetch once instead of fetching for each problem (in loop)
-        
+        Group[] groups = contest.getGroups(); // fetch once instead of fetching for each problem (in loop)
+
         // TODO CCS code this: do not add problem to contest model, new new parameter flag
 
         String problemDirectory = baseDirectoryName + File.separator + problem.getShortName();
@@ -1028,18 +1030,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (!usingCustomValidator) {
             if (!pc2FormatProblemYamlFile) {
                 // TODO CCS add CCS validator derived based on build script
-    
+
                 /**
                  * - Use CCS build command to build validator ('build' script name) - add validator created by build command - add CCS run script ('run' script name)
                  */
-    
+
                 // default-validator: /home/pc2/Desktop/codequest12_problems/default_validator
                 // override-validator: /usr/local/bin/mtsv {:problemletter} {:resfile} {:basename}
-    
+
                 // `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
-    
+
                 addClicsValidator(problem, problemDataFiles, baseDirectoryName);
-    
+
             } else {
                 addDefaultPC2Validator(problem, 1);
             }
@@ -1054,12 +1056,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     problemDataFile.setOutputValidatorFile(validatorFile);
                     contest.updateProblem(cleanProblem, problemDataFile);
                 } else {
-                	// Halt loading and throw YamlLoadException 
-                    syntaxError("Error: problem "+problem.getLetter()+" - "+problem.getShortName()+" custom validator import failed: " + validatorFile.getErrorMessage());
+                    // Halt loading and throw YamlLoadException
+                    syntaxError("Error: problem " + problem.getLetter() + " - " + problem.getShortName() + " custom validator import failed: " + validatorFile.getErrorMessage());
                 }
             }
         }
-        
+
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
         problem.setStopOnFirstFailedTestCase(stopOnFirstFail);
 
@@ -1089,8 +1091,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             boolean readFromSTDIN = fetchBooleanValue(problemInputContent, READ_FROM_STDIN_KEY, true);
             problem.setReadInputDataFromSTDIN(readFromSTDIN);
         }
-        
-        
+
         String groupListString = fetchValue(content, GROUPS_KEY);
         if (groupListString != null) {
 
@@ -1131,7 +1132,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      * 
      * @param content
      * @param problem
-     * @param contest 
+     * @param contest
      */
     protected void assignValidatorSettings(Map<String, Object> content, Problem problem) {
 
@@ -1151,28 +1152,28 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) object; // fetchList(content, VALIDATOR_KEY);
 
             boolean customType = fetchBooleanValue(map, IContestLoader.USING_CUSTOM_VALIDATOR, false);
-//            boolean pc2Type = fetchBooleanValue(map, IContestLoader.USING_PC2_VALIDATOR, false);
+            // boolean pc2Type = fetchBooleanValue(map, IContestLoader.USING_PC2_VALIDATOR, false);
             String validatorProg = fetchValue(map, "validatorProg");
 
             String validatorCmd = fetchValue(map, "validatorCmd");
             // junit does not expect NONE to be set....
-//            if (pc2Type) {
-                problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
-                problem.setOutputValidatorProgramName(validatorProg);
-                String validatorOption = fetchValue(map, "validatorOption");
+            // if (pc2Type) {
+            problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
+            problem.setOutputValidatorProgramName(validatorProg);
+            String validatorOption = fetchValue(map, "validatorOption");
 
-                PC2ValidatorSettings settings = new PC2ValidatorSettings();
-                if (validatorOption != null) {
-                    settings.setWhichPC2Validator(Integer.parseInt(validatorOption));
-                }
+            PC2ValidatorSettings settings = new PC2ValidatorSettings();
+            if (validatorOption != null) {
+                settings.setWhichPC2Validator(Integer.parseInt(validatorOption));
+            }
 
-                settings.setIgnoreCaseOnValidation(true);
+            settings.setIgnoreCaseOnValidation(true);
 
-                if (validatorCmd != null) {
-                    settings.setValidatorCommandLine(validatorCmd);
-                }
-                problem.setPC2ValidatorSettings(settings);
-//            }
+            if (validatorCmd != null) {
+                settings.setValidatorCommandLine(validatorCmd);
+            }
+            problem.setPC2ValidatorSettings(settings);
+            // }
             if (customType) {
                 problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
                 problem.setOutputValidatorProgramName(validatorProg);
@@ -1350,7 +1351,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     language.setUsingJudgeProgramExecuteCommandLine(useJudgeCommand);
 
                     boolean isInterpreted = fetchBooleanValue(map, INTERPRETED_LANGUAGE_KEY, language.isInterpreted());
-                    language.setInterpreted(isInterpreted); 
+                    language.setInterpreted(isInterpreted);
 
                     String judgeExecuteCommandLine = fetchValue(map, JUDGE_EXECUTE_COMMAND_KEY);
                     if (judgeExecuteCommandLine != null) {
@@ -1374,7 +1375,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         return (Language[]) languageList.toArray(new Language[languageList.size()]);
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
@@ -1392,7 +1393,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         if (list != null) {
-            
+
             for (Object object : list) {
 
                 Map<String, Object> map = (Map<String, Object>) object;
@@ -1421,7 +1422,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
 
                 Problem problem = new Problem(problemTitle);
-                
+
                 problem.setComputerJudged(true);
 
                 int actSeconds = fetchIntValue(map, TIMEOUT_KEY, seconds);
@@ -1442,19 +1443,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 problem.setLetter(problemLetter);
                 problem.setColorName(colorName);
                 problem.setColorRGB(colorRGB);
-                
+
                 /**
                  * Assign each proble default values from contest.yaml level
                  */
                 assignJudgingType(yamlContent, problem, manualReviewOverride);
-                
+
                 LinkedHashMap<String, Object> judgingTypeContent = (LinkedHashMap<String, Object>) yamlContent.get(JUDGING_TYPE_KEY);
                 if (judgingTypeContent != null) {
                     assignJudgingType(judgingTypeContent, problem, manualReviewOverride);
                 }
-                
+
                 assignJudgingType(map, problem, manualReviewOverride);
-                
 
                 boolean loadFilesFlag = fetchBooleanValue(map, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
                 problem.setUsingExternalDataFiles(!loadFilesFlag);
@@ -1474,7 +1474,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 if (inputValidatorCommandLine != null) {
                     problem.setInputValidatorCommandLine(inputValidatorCommandLine);
                 }
-                    
+
                 problemList.addElement(problem);
             }
         }
@@ -1519,7 +1519,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return out;
 
     }
-    
+
     protected int toInt(String string, int defaultNumber) {
 
         try {
@@ -1530,7 +1530,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         } catch (Exception e) {
             // ignore, will return default if a parsing error
         }
-        
+
         return defaultNumber;
 
     }
@@ -1545,7 +1545,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         return number;
     }
-    
 
     protected int[] getNumberList(String numberString) {
 
@@ -1925,7 +1924,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 if (validatorList.size() == 1) {
                     inputValidatorFilename = validatorList.get(0);
-                    
+
                 } else if (validatorList.size() > 1) {
                     inputValidatorFilename = validatorList.get(0);
 
@@ -2169,19 +2168,19 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // System.out.println("debug problem "+problem.getShortName()+" "+map);
         // }
 
-        if (isValuePresent(map, SEND_PRELIMINARY_JUDGEMENT_KEY )){
+        if (isValuePresent(map, SEND_PRELIMINARY_JUDGEMENT_KEY)) {
             boolean sendPreliminary = fetchBooleanValue(map, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
             problem.setPrelimaryNotification(sendPreliminary);
         }
 
-        if (isValuePresent(map, COMPUTER_JUDGING_KEY )){
+        if (isValuePresent(map, COMPUTER_JUDGING_KEY)) {
             boolean computerJudged = fetchBooleanValue(map, COMPUTER_JUDGING_KEY, false);
             problem.setComputerJudged(computerJudged);
         }
-        
-        boolean manualReview  = problem.isManualReview();
 
-        if (isValuePresent(map, MANUAL_REVIEW_KEY )){
+        boolean manualReview = problem.isManualReview();
+
+        if (isValuePresent(map, MANUAL_REVIEW_KEY)) {
             manualReview = fetchBooleanValue(map, MANUAL_REVIEW_KEY, false);
         }
 
@@ -2384,10 +2383,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (cdpConfigDirectory == null) {
             throw new Exception("Cannot find CDP for " + entry);
         } else {
-            
-            
+
             loadCCSTSVFiles(contest, cdpConfigDirectory);
-            
+
             contest = fromYaml(contest, cdpConfigDirectory.getAbsolutePath());
 
             if (contest.getSites().length == 0) {
@@ -2395,7 +2393,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 Site site = createFirstSite(contest.getSiteNumber(), "localhost", Constants.DEFAULT_PC2_PORT);
                 contest.addSite(site);
             }
-
 
         }
 
