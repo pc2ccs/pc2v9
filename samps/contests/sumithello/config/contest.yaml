@@ -3,12 +3,19 @@
 # Created: 2011-09-18 18:05:40 PDT
 --- 
 
+# CLICS-defined mappings:
 name: Sumit Hello Sample
 short-name: SumH
+start-time: 
+duration: 5:00:00
+scoreboard-freeze-length: 1:00:00
+penalty-time: 20
+
+# PC2-specific mappings:
+running: false
 elapsed: 0:00:00
 remaining: 5:00:00
-running: false
-scoreboard-freeze: 
+
 
 languages:
   - name: Java
@@ -28,18 +35,11 @@ problemset:
     short-name: hello
     color: red
     rgb: "#FF0000"
-#     2 data files written
-#     wrote reports\yaml09.18.40.546\hello\problem.yaml
-#     wrote reports\yaml09.18.40.546\hello\data\secret\hello.ans
 
   - letter: B
     short-name: sumit
     color: yellow
     rgb: "#FFFF00"
-#     3 data files written
-#     wrote reports\yaml09.18.40.546\sumit\problem.yaml
-#     wrote reports\yaml09.18.40.546\sumit\data\secret\sumit.dat
-#     wrote reports\yaml09.18.40.546\sumit\data\secret\sumit.ans
 
 sites:
  - number: 1
