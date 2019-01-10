@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.tools;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -35,6 +36,8 @@ public class ContestControl {
 	public static final String LOGIN_OPTION_STRING = "--login";
 
 	public static final String PASSWORD_OPTION_STRING = "--password";
+
+	private static final String TIME_PATTERN = "E, dd MMM yyyy HH:mm:ss z";
 
 	private static void usage() {
 
@@ -106,9 +109,9 @@ public class ContestControl {
 		} else if (parseArguments.isOptPresent(START_AT_OPTION_STRING)) {
 
 			checkForMissingOptionAndValue(parseArguments, LOGIN_OPTION_STRING);
-			checkForMissingOptionAndValue(parseArguments, START_IN_OPTION_STRING);
+			checkForMissingOptionAndValue(parseArguments, START_AT_OPTION_STRING);
 
-			String timeString = parseArguments.getOptValue(START_IN_OPTION_STRING);
+			String timeString = parseArguments.getOptValue(START_AT_OPTION_STRING);
 
 			new ContestControl().startAt(parseArguments, timeString);
 
@@ -123,7 +126,7 @@ public class ContestControl {
 		Plugin info = logInToContest(parseArguments);
 		info.getController().sendShutdownAllSites();
 
-		sleep(500);
+		sleep(500);  // let server respond
 		System.exit(0);
 
 	}
@@ -146,7 +149,7 @@ public class ContestControl {
 			Utilities.printStackTrace(System.err, e, "csus");
 		}
 
-		sleep(500);
+		sleep(500);  // let server respond
 		System.exit(0);
 
 	}
@@ -180,7 +183,7 @@ public class ContestControl {
 
 				Date now = new Date();
 
-				if (now.getTime() < date.getTime()) {
+				if (now.after(date)) {
 					System.out.println("Start at time " + date + " is not in the future (current time=" + now + ")");
 					fatalError("Start at time not in future");
 				}
@@ -197,7 +200,7 @@ public class ContestControl {
 			Utilities.printStackTrace(System.err, e, "csus");
 		}
 
-		sleep(500);
+		sleep(500);  // let server respond
 		System.exit(0);
 
 	}
@@ -216,10 +219,10 @@ public class ContestControl {
 
 		if (relativeTimeString.matches("\\d+")) {
 			// digits, assume seconds
-			curSeconds += Integer.parseInt(relativeTimeString);
+			curSeconds += Integer.parseInt(relativeTimeString) * 1000;
 			date = new Date(curSeconds);
 		} else if (relativeTimeString.matches("(\\d+)min")) {
-			curSeconds += (60 * Integer.parseInt(relativeTimeString.substring(0, relativeTimeString.length() - 3)));
+			curSeconds += (6000 * Integer.parseInt(relativeTimeString.substring(0, relativeTimeString.length() - 3)));
 			date = new Date(curSeconds);
 		}
 
@@ -241,13 +244,20 @@ public class ContestControl {
 			if (date == null) {
 				fatalError("Unable to parse date/time '" + timeString + "', try form: HH:mm or yyyy-MM-dd HH:mm");
 			}
+			
+			Date now = new Date();
+
+			if (now.after(date)) {
+				System.out.println("Start at time " + date + " is not in the future (current time=" + now + ")");
+				fatalError("Start at time not in future");
+			}
 
 			Plugin info = logInToContest(parseArguments);
 
 			IInternalContest contest = info.getContest();
 
 			ContestInformation contestInformation = contest.getContestInformation();
-
+			
 			ContestTime conTime = contest.getContestTime();
 
 			if (conTime.isContestRunning()) {
@@ -255,14 +265,20 @@ public class ContestControl {
 				System.exit(4);
 
 			} else {
-
-				contestInformation.setScheduledStartDate(date);
+			
+				contestInformation.setScheduledStartTime(toGregorianCalendar(date));
 				contestInformation.setAutoStartContest(true);
 				info.getController().updateContestInformation(contestInformation);
+				
+				sleep(500);  // let server respond
+				
+				contestInformation = contest.getContestInformation();
 
-				System.out.println("Contest will be automatically started at: " + date);
+				SimpleDateFormat format = new SimpleDateFormat(TIME_PATTERN);
+				System.out.println("Contest will be automatically started at: " + //
+				format.format(contestInformation.getScheduledStartTime().getTime()));
 
-				sleep(500);
+				sleep(500);  // let server respond
 				System.exit(0);
 			}
 		} catch (Exception e) {
@@ -270,6 +286,12 @@ public class ContestControl {
 			e.printStackTrace();
 		}
 
+	}
+
+	private GregorianCalendar toGregorianCalendar(Date date) {
+		GregorianCalendar gregorianCalendar = new GregorianCalendar();
+		gregorianCalendar.setTime(date);
+		return gregorianCalendar;
 	}
 
 	/**
@@ -285,10 +307,7 @@ public class ContestControl {
 	private Date parseDatetime(String timeString) {
 
 		String[] patterns = {
-				//
-				"HH:mm:ss", // 24HH:MM:ss
-				"HH:mm", //
-
+						
 				"MM/dd/yyyy HH:mm:ss", //
 				"MM/dd/yyyy HH:mm", //
 				"MM/dd/yy HH:mm", //
@@ -303,6 +322,24 @@ public class ContestControl {
 				SimpleDateFormat parser = new SimpleDateFormat(pattern);
 				parser.setLenient(false);
 				Date date = parser.parse(timeString);
+				if (date != null) {
+					return date;
+				}
+			} catch (ParseException e) {
+				// ignore, try next pattern
+			}
+		}
+		
+		/**
+		 * For HH:MM, etc. prepend today's date and see if that parses.
+		 */
+		String todaysDatePrefix = new SimpleDateFormat("yyyy-MM-dd ").format(new Date());
+		
+		for (String pattern : patterns) {
+			try {
+				SimpleDateFormat parser = new SimpleDateFormat(pattern);
+				parser.setLenient(false);
+				Date date = parser.parse(todaysDatePrefix + timeString.trim());
 				if (date != null) {
 					return date;
 				}
