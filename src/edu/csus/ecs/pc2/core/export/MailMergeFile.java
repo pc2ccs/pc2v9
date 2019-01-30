@@ -144,38 +144,6 @@ public class MailMergeFile {
         pw = null;
     }
 
-    private void run(String[] args) throws IOException {
-
-        String[] requireArguementArgs = { LOGIN_OPTION_STRING, PASSWORD_OPTION_STRING, "-w", "-u" };
-
-        arguments = new ParseArguments(args, requireArguementArgs);
-
-        if (args.length == 0) {
-            usage();
-            System.exit(2);
-        }
-
-        if (arguments.isOptPresent("--help")) {
-            usage();
-            System.exit(0);
-        }
-
-        String passwordFileName = PASSWORD_LIST_FILENNAME;
-
-        if (!Utilities.fileExists(passwordFileName)) {
-            throw new FileNotFoundException(passwordFileName);
-        }
-
-        if (arguments.isOptPresent(LOGIN_OPTION_STRING)) {
-
-            loginPrintMergeFile();
-
-        } else {
-
-            System.err.println("Misssing " + LOGIN_OPTION_STRING + " option");
-        }
-
-    }
 
     private void loginPrintMergeFile() throws IOException {
 
@@ -264,12 +232,42 @@ public class MailMergeFile {
         VersionInfo info = new VersionInfo();
         System.out.println(info.getSystemVersionInfo());
     }
+    
 
-    public static void main(String[] args) {
+    public void main(String[] args) {
+
         try {
-            new MailMergeFile().run(args);
+            String[] requireArguementArgs = { LOGIN_OPTION_STRING, PASSWORD_OPTION_STRING, "-w", "-u" };
+
+            arguments = new ParseArguments(args, requireArguementArgs);
+
+            if (args.length == 0) {
+                usage();
+                System.exit(2);
+            }
+
+            if (arguments.isOptPresent("--help")) {
+                usage();
+                System.exit(0);
+            }
+
+            String passwordFileName = PASSWORD_LIST_FILENNAME;
+
+            if (!Utilities.fileExists(passwordFileName)) {
+                throw new FileNotFoundException(passwordFileName);
+            }
+
+            if (arguments.isOptPresent(LOGIN_OPTION_STRING)) {
+
+                loginPrintMergeFile();
+
+            } else {
+
+                System.err.println("Misssing " + LOGIN_OPTION_STRING + " option");
+            }
+
         } catch (Exception e) {
-            e.printStackTrace(System.err);
+            Utilities.printStackTrace(System.err, e, "csus");
         }
     }
 
