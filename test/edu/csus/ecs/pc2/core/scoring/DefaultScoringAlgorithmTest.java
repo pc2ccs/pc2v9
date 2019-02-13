@@ -425,9 +425,18 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * @param contest
      */
     public void checkOutputXML (IInternalContest contest) {
+        checkOutputXML(contest, false);
+    }
+    /**
+     * Get XML from ScoringAlgorithm and test whether it can be parsed.
+     * @param contest
+     * @param obeyFreeze
+     */
+    public void checkOutputXML (IInternalContest contest, boolean obeyFreeze) {
        
         try {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+            defaultScoringAlgorithm.setObeyFreeze(obeyFreeze);
             String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
             
             // getStandings should always return a well-formed xml
@@ -436,7 +445,17 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+            Document document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+            
+            // getStandings should always return a well-formed xml
+            assertFalse("getStandings returned null ", xmlString == null);
+            assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
+
+            if (obeyFreeze) {
+                NodeList byTagName = document.getElementsByTagName("problemSummaryInfo");
+                assertTrue("1st item should be isPending", Boolean.parseBoolean(byTagName.item(0).getAttributes().getNamedItem("isPending").getNodeValue()));
+                assertFalse("2nd item should not be isPending", Boolean.parseBoolean(byTagName.item(1).getAttributes().getNamedItem("isPending").getNodeValue()));
+            }
         } catch (Exception e) {
             assertTrue("Error in XML output " + e.getMessage(), true);
             e.printStackTrace();
@@ -1414,6 +1433,54 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 rankIndex++;
             }
         }
+    }
+
+    /**
+     * Test whether SA respects send to team 
+     * @throws Exception 
+     */
+    public void testObeyFreeze() throws Exception{
+
+        // Sort order:
+        // Primary Sort = number of solved problems (high to low)
+        // Secondary Sort = score (low to high)
+        // Tertiary Sort = earliest submittal of last submission (low to high)
+        // Forth Sort = teamName (low to high)
+        // Fifth Sort = clientId (low to high)
+        
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+                "1,1,A,250,No",
+                "2,1,A,290,Yes", 
+
+                // t5 solves A, 310 pts = 20 + 290
+                // but with ECO settings, yes is not seen, so 0
+                
+        };
+               
+        InternalContest contest = new InternalContest();
+
+        initData(contest, 1, 5);
+        ContestTime contestTime = new ContestTime(1);
+        contestTime.setElapsedMins(300);
+        contest.updateContestTime(contestTime);
+        JudgementNotificationsList judgementNotificationsList = new JudgementNotificationsList();
+        for (String runInfoLine : runsData) {
+            SampleContest.addRunFromInfo(contest, runInfoLine);
+        }
+
+        Run[] runs = contest.getRuns();
+        NotificationSetting notificationSetting = new NotificationSetting(runs[0].getProblemId());
+        JudgementNotification judgementNotification = new JudgementNotification(true, 30);
+        notificationSetting.setFinalNotificationYes(judgementNotification);
+        JudgementNotification judgementNotificationNo = new JudgementNotification(false, 30);
+        notificationSetting.setFinalNotificationNo(judgementNotificationNo);
+        judgementNotificationsList.add(notificationSetting);
+        contest.getContestInformation().updateJudgementNotification(notificationSetting);
+
+        checkOutputXML(contest, true);
+
     }
 
     /**
