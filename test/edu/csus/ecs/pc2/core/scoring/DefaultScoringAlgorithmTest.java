@@ -1436,7 +1436,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     }
 
     /**
-     * Test whether SA respects send to team 
+     * Test whether SA respects obeyFreeze boolean 
      * @throws Exception 
      */
     public void testObeyFreeze() throws Exception{
