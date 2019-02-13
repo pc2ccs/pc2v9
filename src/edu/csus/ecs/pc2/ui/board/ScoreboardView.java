@@ -3,12 +3,8 @@ package edu.csus.ecs.pc2.ui.board;
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -18,24 +14,18 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.xml.transform.TransformerConfigurationException;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
-import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.XSLTransformer;
-import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
-import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
-import edu.csus.ecs.pc2.exports.ccs.StandingsJSON2016;
+import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.ui.BalloonColorListPane;
 import edu.csus.ecs.pc2.ui.BalloonPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
@@ -71,8 +61,6 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     private String xslDir;
 
-    private String outputDir = "html";
-
     private Log log;
 
     private JPanel mainViewPane = null;
@@ -88,12 +76,19 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     private JButton exitButton = null;
 
     private String currentXMLString = "";
-
+    
     private JButton refreshButton = null;
 
     private ContestClockDisplay contestClockDisplay = null;
 
     private JPanel clockPanel = null;
+
+    private ScoreboardCommon scoreboardCommon = new ScoreboardCommon();
+    
+    /*
+     * We set setObeyFrozen = true on this one.
+     */
+    private DefaultScoringAlgorithm algoFrozen = new DefaultScoringAlgorithm();
 
     /**
      * This method initializes
@@ -140,6 +135,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             }
         });
 
+        algoFrozen.setObeyFreeze(true);
         overRideLookAndFeel();
         FrameUtilities.centerFrame(this);
     }
@@ -246,152 +242,20 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     }
 
     private void generateOutput(String xmlString) {
-        // save it so we can refresh the html after updating the xsl
-        currentXMLString = xmlString;
-        File inputDir = new File(xslDir);
-        if (!inputDir.isDirectory()) {
-            log.warning("xslDir is not a directory");
-            return;
-        }
-        File outputDirFile = new File(outputDir);
-        if (!outputDirFile.exists() && !outputDirFile.mkdirs()) {
-            log.warning("Could not create " + outputDirFile.getAbsolutePath() + ", defaulting to current directory");
-            outputDir = ".";
-            outputDirFile = new File(outputDir);
-        }
-        if (!outputDirFile.isDirectory()) {
-            log.warning(outputDir + " is not a directory.");
-            return;
-        } else {
-            log.fine("Sending output to " + outputDirFile.getAbsolutePath());
-        }
+        String outputDir = contest.getContestInformation().getScoringProperties().getProperty(DefaultScoringAlgorithm.JUDGE_OUTPUT_DIR, "html");
+        scoreboardCommon.generateOutput(xmlString, xslDir, outputDir, log);
+        scoreboardCommon.generateResults(contest, controller, xmlString, xslDir, log);
         try {
-            File output = File.createTempFile("__t", ".tmp", new File("."));
-            FileOutputStream outputXML = new FileOutputStream(output);
-            outputXML.write(xmlString.getBytes());
-            outputXML.close();
-            if (output.length() > 0) {
-                File outputFile = new File("results.xml");
-                // behaviour of renameTo is platform specific, try the possibly
-                // atomic 1st
-                if (!output.renameTo(outputFile)) {
-                    // otherwise fallback to the delete then rename
-                    outputFile.delete();
-                    if (!output.renameTo(outputFile)) {
-                        log.warning("Could not create " + outputFile.getCanonicalPath());
-                    }
-                }
-            } else {
-                // 0 length file
-                log.warning("New results.xml is empty, not updating");
-                output.delete();
+            String frozenOutputDir = contest.getContestInformation().getScoringProperties().getProperty(DefaultScoringAlgorithm.PUBLIC_OUTPUT_DIR);
+            if (frozenOutputDir != null && frozenOutputDir.trim().length() > 0 && !frozenOutputDir.equals(outputDir)) {
+                Properties scoringProperties = scoreboardCommon.getScoringProperties(contest.getContestInformation().getScoringProperties());
+                String frozenXML = algoFrozen.getStandings(contest, scoringProperties, log);
+                scoreboardCommon.generateOutput(frozenXML, xslDir, frozenOutputDir, log);
             }
-            output = null;
-        } catch (FileNotFoundException e1) {
-            log.log(Log.WARNING, "Could not write to " + "results.xml", e1);
-        } catch (IOException e) {
-            log.log(Log.WARNING, "Problem writing to " + "results.xml", e);
+        } catch (Exception e) {
+            log.warning("Exception generating frozen html");
         }
-        // TODO consider changing this to use a filenameFilter
-        String[] inputFiles = inputDir.list();
-        XSLTransformer transformer = new XSLTransformer();
-        for (int i = 0; i < inputFiles.length; i++) {
-            String xslFilename = inputFiles[i];
-            if (xslFilename.endsWith(".xsl")) {
-                String outputFilename = xslFilename.substring(0, xslFilename.length() - 4) + ".html";
-                try {
-                    File output = File.createTempFile("__t", ".htm", outputDirFile);
-                    FileOutputStream outputStream = new FileOutputStream(output);
-                    transformer.transform(xslDir + File.separator + xslFilename, new ByteArrayInputStream(xmlString.getBytes()), outputStream);
-                    outputStream.close();
-                    if (output.length() > 0) {
-                        File outputFile = new File(outputDir + File.separator + outputFilename);
-                        if (xslFilename.equals("pc2export.xsl")) {
-                            // change that, we want the pc2export written as a
-                            // .dat in the cwd
-                            outputFile = new File("pc2export.dat");
-                        }
-                        // dump json and tsv and csv files in the html directory
-                        if (xslFilename.endsWith(".json.xsl") || xslFilename.endsWith(".tsv.xsl") || xslFilename.endsWith(".csv.xsl") || xslFilename.endsWith(".php.xsl")) {
-                            outputFile = new File(outputDir + File.separator + xslFilename.substring(0, xslFilename.length() - 4));
-                        }
-                        // behaviour of renameTo is platform specific, try the
-                        // possibly atomic 1st
-                        if (!output.renameTo(outputFile)) {
-                            // otherwise fallback to the delete then rename
-                            outputFile.delete();
-                            if (!output.renameTo(outputFile)) {
-                                log.warning("Could not create " + outputFile.getCanonicalPath());
-                            } else {
-                                log.finest("rename2 to " + outputFile.getCanonicalPath() + " succeeded.");
-                            }
-                        } else {
-                            log.finest("rename to " + outputFile.getCanonicalPath() + " succeeded.");
-                        }
-                    } else {
-                        // 0 length file
-                        log.warning("output from tranformation " + xslFilename + " was empty");
-                        output.delete();
-                    }
-                    output = null;
-                } catch (IOException e) {
-                    // TODO re-visit this log message
-                    log.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
-                } catch (TransformerConfigurationException e) {
-                    // unfortunately this prints the details to stdout (or maybe
-                    // stderr)
-                    log.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
-                }
-            }
-        }
-        FinalizeData finalizeData = contest.getFinalizeData();
-        if (finalizeData != null && finalizeData.isCertified()) {
-            File outputResultsDirFile = new File("results");
-            if (!outputResultsDirFile.exists() && !outputResultsDirFile.mkdirs()) {
-                log.warning("Could not create " + outputResultsDirFile.getAbsolutePath() + ", defaulting to current directory");
-                outputDir = ".";
-                outputResultsDirFile = new File(outputDir);
-            }
-            if (!outputResultsDirFile.isDirectory()) {
-                log.warning(outputDir + " is not a directory.");
-                return;
-            } else {
-                log.fine("Sending results output to " + outputResultsDirFile.getAbsolutePath());
-            }
-            try {
-                ResultsFile resultsFile = new ResultsFile();
-                String[] createTSVFileLines = resultsFile.createTSVFileLines(contest);
-                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + "results.tsv");
-                for (int i = 0; i < createTSVFileLines.length; i++) {
-                    outputFile.write(createTSVFileLines[i] + System.getProperty("line.separator"));
-                }
-                outputFile.close();
-            } catch (IllegalContestState | IOException e) {
-                log.log(Log.WARNING, "Trouble creating results.tsv", e);
-            }
-            try {
-                ScoreboardFile scoreboardFile = new ScoreboardFile();
-                String[] createTSVFileLines = scoreboardFile.createTSVFileLines(contest);
-                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + "scoreboard.tsv");
-                for (int i = 0; i < createTSVFileLines.length; i++) {
-                    outputFile.write(createTSVFileLines[i] + System.getProperty("line.separator"));
-                }
-                outputFile.close();
-            } catch (IllegalContestState | IOException e) {
-                log.log(Log.WARNING, "Trouble creating scoreboard.tsv", e);
-            }
-            StandingsJSON2016 standingsJson = new StandingsJSON2016();
-            try {
-                String createJSON = standingsJson.createJSON(contest, controller);
-                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + "scoreboard.json");
-                outputFile.write(createJSON);
-                outputFile.close();
-            } catch (IllegalContestState | IOException e) {
-                log.log(Log.WARNING, "Trouble creating scoreboard.json", e);
-            }
-        }
+
     }
 
     /**

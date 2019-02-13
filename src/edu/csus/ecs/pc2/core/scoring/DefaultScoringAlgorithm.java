@@ -15,6 +15,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.PermissionGroup;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.BalloonSettingsComparatorbySite;
@@ -65,13 +66,18 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     
     public static final String POINTS_PER_NO_SECURITY_VIOLATION = "Points per Security Violation";
     
+    public static final String JUDGE_OUTPUT_DIR = "Output HTML dir for Judges";
+
+    public static final String PUBLIC_OUTPUT_DIR = "Output Public HTML dir";
+    
     /**
      * properties.
      * 
      * key=name, value=default_value, type, min, max (colon delimited)
      */
     private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, { BASE_POINTS_PER_YES, "0:Integer" },
-            { POINTS_PER_NO_COMPILATION_ERROR, "0:Integer" }, { POINTS_PER_NO_SECURITY_VIOLATION, "0:Integer" } };
+            { POINTS_PER_NO_COMPILATION_ERROR, "0:Integer" }, { POINTS_PER_NO_SECURITY_VIOLATION, "0:Integer" }, { JUDGE_OUTPUT_DIR, "html:String" },
+            { PUBLIC_OUTPUT_DIR, "public_html:String" } };
     
     private Properties props = new Properties();
 
@@ -107,6 +113,22 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private boolean respectSendToTeam = false;
     private boolean respectEOC = false;
     
+    private boolean obeyFreeze = false;
+    
+
+    /**
+     * @return the obeyFreeze
+     */
+    public boolean isObeyFreeze() {
+        return obeyFreeze;
+    }
+
+    /**
+     * @param obeyFreeze the obeyFreeze to set
+     */
+    public void setObeyFreeze(boolean obeyFreeze) {
+        this.obeyFreeze = obeyFreeze;
+    }
 
     public DefaultScoringAlgorithm() {
         super();
@@ -267,6 +289,22 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
         
         this.log = inputLog;
+        long freezeSeconds = -1;
+        if (obeyFreeze) {
+            String freezeTime = theContest.getContestInformation().getFreezeTime();
+            try {
+                freezeSeconds = theContest.getContestTime().getContestLengthSecs()-Utilities.convertStringToSeconds(freezeTime);
+            } catch (Exception e) {
+                log.throwing("DefaultScoringAlgorithm", "getStandings", e);
+                freezeSeconds = -1;
+            }
+            if (freezeSeconds == -1) {
+                log.warning("Could not convert '"+freezeTime+"' to seconds");
+                throw new InvalidParameterException("Invalid freezeTime "+freezeTime);
+            }
+            log.fine("DEBUG: using freezeSeconds of "+freezeSeconds +" for str "+freezeTime);
+        }
+
         
         // TODO properties should be validated here
         props = properties;
@@ -371,6 +409,12 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     JudgementNotificationsList judgementNotificationsList = theContest.getContestInformation().getJudgementNotificationsList();
                     ContestTime contestTime = theContest.getContestTime();
                     if (respectEOC && RunUtilities.supppressJudgement(judgementNotificationsList, runs[i], contestTime)) {
+                        /**
+                         * If we are suppose to suppress this judgement, then change the run to a NEW run.
+                         */
+                        runToAdd = RunUtilities.createNewRun(runs[i], theContest);
+                    }
+                    if (obeyFreeze && RunUtilities.supppressJudgement(runs[i], freezeSeconds)) {
                         /**
                          * If we are suppose to suppress this judgement, then change the run to a NEW run.
                          */
