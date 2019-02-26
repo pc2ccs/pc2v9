@@ -190,4 +190,17 @@ public class PasswordGenerator {
             printArray(PasswordGenerator.generatePasswords(num, type, passwordLength, prefix));
         }
     }
+
+    /**
+     * Generate Joe Passwords.
+     */
+    public static List<String> generateJoePasswords(String prefix, int count) {
+        
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            list.add(prefix + (i+1));
+        }
+        
+        return list;
+    }
 }

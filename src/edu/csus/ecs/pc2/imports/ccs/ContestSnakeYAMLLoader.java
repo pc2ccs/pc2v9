@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
@@ -28,6 +29,7 @@ import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
+import edu.csus.ecs.pc2.core.export.MailMergeFile;
 import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
@@ -51,6 +53,8 @@ import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.tools.PasswordGenerator;
+import edu.csus.ecs.pc2.tools.PasswordType2;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
@@ -124,7 +128,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String[] contents;
         String contetYamlFilename = getContestYamlFilename(directoryName);
         try {
-            // TODO would it be easier to load all yaml files instead?
+            // SOMEDAY would it be easier to load all yaml files instead?
             contents = loadFileWithIncludes(directoryName, contetYamlFilename);
             contetYamlFilename = DEFAULT_SYSTEM_YAML_FILENAME;
             if (new File(directoryName + File.separator + contetYamlFilename).exists()) {
@@ -551,9 +555,61 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         // String[] answers = getGeneralAnswers(yamlLines);
-        // TODO CCS load general answer catagories into contest
+        // SOMEDAY CCS load general answer catagories into contest
 
         Account[] accounts = getAccounts(yamlLines);
+        
+        Map<String, Object> passwordYamlMap = fetchMap(content, "passwords");
+        
+        if (passwordYamlMap != null) {
+
+            String passTypeString = fetchValueDefault(passwordYamlMap, "type", PasswordType2.LETTERS_AND_DIGITS.toString());
+            PasswordType2 passwordType = PasswordType2.valueOf(passTypeString.toUpperCase());
+
+            String lengthString = fetchValueDefault(passwordYamlMap, "length", "8");
+            int length = getIntegerValue(lengthString, 8);
+
+            String prefix = fetchValueDefault(passwordYamlMap, "prefix", "");
+            
+            /**
+             * Assign team passwords
+             */
+
+            accounts = assignPasswords(contest, accounts, length, passwordType, prefix);
+
+            String targetDirectory = ".";
+            if (directoryName != null) {
+                targetDirectory = directoryName;
+            }
+
+            /**
+             * Override output directory for files
+             */
+            targetDirectory = fetchValueDefault(passwordYamlMap, "outdirname", targetDirectory);
+
+            String passfilename = fetchValueDefault(passwordYamlMap, "passfile", targetDirectory + File.separator + MailMergeFile.PASSWORD_LIST_FILENNAME);
+            
+            /**
+             * Write OS login passwords file (just a list of passwords in a text file)
+             */
+
+            generateOSPasswords(passfilename, accounts.length, passwordType, length, prefix);
+
+            String mergefilename = fetchValueDefault(passwordYamlMap, "mergefile", targetDirectory + File.separator + MailMergeFile.DEFAULT_MERGE_OUTPUT_FILENAME);
+
+            try {
+                /**
+                 * Write mail merge file
+                 */
+                MailMergeFile.writeFile(mergefilename, passfilename, Arrays.asList(accounts));
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            
+            // TODO TODAY write accounts.tsv file
+        }
+        
         contest.addAccounts(accounts);
 
         AutoJudgeSetting[] autoJudgeSettings = null;
@@ -580,6 +636,103 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         return contest;
 
+    }
+
+    /**
+     * Generate and write OS password file.
+     * @param passfilename
+     * @param count
+     * @param passwordType
+     * @param length
+     * @param prefix
+     */
+    private void generateOSPasswords(String passfilename, int count, PasswordType2 passwordType, int length, String prefix) {
+        
+        boolean joePassword = PasswordType2.JOE.equals(passwordType);
+        
+        List<String> passwords = null;
+        if (joePassword){
+            passwords = PasswordGenerator.generateJoePasswords("team", count);
+        } else {
+            passwords = PasswordGenerator.generatePasswords(count, passwordType, length, prefix);
+        }
+
+        String[] lines = (String[]) passwords.toArray(new String[passwords.size()]);
+
+        try {
+            Utilities.writeLinesToFile(passfilename, lines);
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Assign passwords to team accounts.
+     * 
+     * @param contest
+     * @param accounts
+     * @param length
+     * @param passwordType
+     * @param prefix
+     * @return
+     */
+    protected Account[] assignPasswords(IInternalContest contest, Account[] accounts, int length, PasswordType2 passwordType, String prefix) {
+
+        List<Account> teamAccounts = getTeamAccounts(accounts);
+
+        if (teamAccounts.size() > 0) {
+
+            // passwords:
+            //  - settings
+            //            length: 8
+            // # default is from letters and numbers from description
+            // #   type: joe
+            // #   type: digits
+            //            prefix: bark
+            // 
+            // # If account not specified defaults to TEAMS and JUDGES
+            //   
+            //  - account: TEAM
+            // # default all judges
+            //  - account: JUDGE
+            //            site: 1
+
+            boolean joePassword = PasswordType2.JOE.equals(passwordType);
+
+            if (joePassword) {
+                for (Account account : teamAccounts) {
+                    account.setPassword(account.getClientId().getName());
+                }
+            } else {
+                List<String> passwords = PasswordGenerator.generatePasswords(teamAccounts.size(), passwordType, length, prefix);
+
+                int i = 0;
+                for (Account account : teamAccounts) {
+                    account.setPassword(passwords.get(i));
+                    i++;
+                }
+            }
+        }
+        
+        // TODO assign judge and other accounts
+
+        return accounts;
+    }
+
+    /**
+     * Get all team accounts.
+     * @param accounts
+     * @return all team accounts.
+     */
+    private List<Account> getTeamAccounts(Account[] accounts) {
+        List<Account> list = new ArrayList<>();
+        for (Account account : accounts) {
+            if (ClientType.Type.TEAM.equals(account.getClientId().getClientType())){
+                list.add(account);
+            }
+        }
+        return list;
     }
 
     /**
@@ -660,7 +813,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (timeString.indexOf(':') > 0) {
             // likely form: HH:MM:SS
 
-            // TODO TODAY CLEANUP - make Utilties.stringToLongSecs static
+            // TODO REFACTOR CLEANUP - make Utilties.stringToLongSecs static
             // long secs = Utilities.stringToLongSecs(timeString);
             long secs = stringToLongSecs(timeString);
             return secs;
@@ -958,7 +1111,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         Group[] groups = contest.getGroups();  // fetch once instead of fetching for each problem (in loop)
         
-        // TODO CCS code this: do not add problem to contest model, new new parameter flag
+        // SOMEDAY CCS code this: do not add problem to contest model, new new parameter flag
 
         String problemDirectory = baseDirectoryName + File.separator + problem.getShortName();
 
@@ -1027,7 +1180,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         if (!usingCustomValidator) {
             if (!pc2FormatProblemYamlFile) {
-                // TODO CCS add CCS validator derived based on build script
+                // SOMEDAY CCS add CCS validator derived based on build script
     
                 /**
                  * - Use CCS build command to build validator ('build' script name) - add validator created by build command - add CCS run script ('run' script name)
@@ -1118,7 +1271,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
 
-        // TODO CCS - send preliminary - add bug - fix.
+        // SOMEDAY CCS - send preliminary - add bug - fix.
         // boolean sendPreliminary = fetchBooleanValue(content, SEND_PRELIMINARY_JUDGEMENT_KEY, false);
         // if (sendPreliminary){
         // problem.setPrelimaryNotification(true);
@@ -1228,7 +1381,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @Override
     public void dumpSerialzedFileList(Problem problem, String logPrefixId, SerializedFile[] sfList) {
-        // TODO Auto-generated method stub
+        // SOMEDAY Auto-generated method stub
 
     }
 
@@ -1359,7 +1512,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                         language.setUsingJudgeProgramExecuteCommandLine(false);
                     }
 
-                    // TODO handle interpreted languages, seems it should be in the export
+                    // SOMEDAY handle interpreted languages, seems it should be in the export
 
                     // boolean
 
@@ -1438,7 +1591,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 String colorName = fetchValue(map, "color");
                 String colorRGB = fetchValue(map, "rgb");
 
-                // TODO CCS assign Problem variables for color and letter
+                // SOMEDAY CCS assign Problem variables for color and letter
                 problem.setLetter(problemLetter);
                 problem.setColorName(colorName);
                 problem.setColorRGB(colorRGB);
@@ -1554,7 +1707,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             int[] out = new int[1];
             out[0] = getIntegerValue(list[0], 0);
             // if (out[0] < 1) {
-            // // TODO 669 throw invalid number in list exception
+            // // SOMEDAY 669 throw invalid number in list exception
             // }
             return out;
         } else {
@@ -1563,7 +1716,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             for (String n : list) {
                 out[i] = getIntegerValue(n, 0);
                 // if (out[i] < 1) {
-                // // TODO 669 throw invalid number in list exception
+                // // SOMEDAY 669 throw invalid number in list exception
                 // }
                 i++;
             }
@@ -1582,7 +1735,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         if (list != null) {
 
-            // TODO get accounts from contest too
+            // SOMEDAY get accounts from contest too
             Account[] accounts = getAccounts(yamlLines);
 
             for (Object object : list) {
@@ -1594,7 +1747,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 int siteNumber = fetchIntValue(map, "site", 1);
 
-                // TODO 669 check for syntax errors
+                // SOMEDAY 669 check for syntax errors
                 // syntaxError(AUTO_JUDGE_KEY + " name field missing in languages section");
 
                 String numberString = fetchValue(map, "number");
@@ -2060,15 +2213,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     private void validateCCSData(IInternalContest contest, Problem problem) {
 
-        // TODO CCS Load Validator
+        // SOMEDAY CCS Load Validator
 
-        // TODO CCS somehow find validator, compile, and test.
+        // SOMEDAY CCS somehow find validator, compile, and test.
         // the somehow is because there may be more than one validator in the validator directory
 
-        // TODO 1. Check files (all files present as required + check problem.yaml)
-        // TODO 2. Check compile (check that all programs compile)
-        // TODO 3. Check input (run input validators)
-        // TODO 4. Check solutions (run all solutions check that they get the expected verdicts)
+        // SOMEDAY 1. Check files (all files present as required + check problem.yaml)
+        // SOMEDAY 2. Check compile (check that all programs compile)
+        // SOMEDAY 3. Check input (run input validators)
+        // SOMEDAY 4. Check solutions (run all solutions check that they get the expected verdicts)
 
     }
 
@@ -2219,7 +2372,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      */
     public long stringToLongSecs(String s) {
 
-        // TODO TODAY CLEANUP - make Utilties.stringToLongSecs static - then remove stringToLongSecs method
+        // TODO REFACTOR CLEANUP - make Utilties.stringToLongSecs static - then remove stringToLongSecs method
 
         if (s == null || s.trim().length() == 0) {
             return -1;
