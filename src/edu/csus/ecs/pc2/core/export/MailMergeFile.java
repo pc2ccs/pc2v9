@@ -46,7 +46,7 @@ public class MailMergeFile {
     /**
      * Mail merge column names.
      */
-    public static String[] COLUMN_NAMES = { "uname", "upassword", "user", "password", "name", "univname" };
+    public static final String[] COLUMN_NAMES = { "uname", "upassword", "user", "password", "name", "univname" };
 
     private ParseArguments arguments = new ParseArguments();
 
@@ -183,6 +183,7 @@ public class MailMergeFile {
 
         if (arguments.isOptPresent(NON_TEAMS_OPTION_STRING)) {
             // TODO TODAY implment for non-teams
+            System.out.println("TODO - implement merge option "+NON_TEAMS_OPTION_STRING);
         } else {
             accounts.addAll(ClientUtility.getTeamAccounts(contest));
         }

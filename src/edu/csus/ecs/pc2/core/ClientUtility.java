@@ -17,8 +17,12 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-public class ClientUtility {
+public final class ClientUtility {
 
+    
+    private ClientUtility() {
+        // this constructor added to address checkstyle rule.
+    }
 
     /**
      * Client.

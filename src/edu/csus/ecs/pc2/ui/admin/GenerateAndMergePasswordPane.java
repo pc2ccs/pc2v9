@@ -36,178 +36,178 @@ import edu.csus.ecs.pc2.ui.MultipleFileViewer;
  */
 public class GenerateAndMergePasswordPane extends JPanePlugin {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -5737925511286832544L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5737925511286832544L;
 
-	private JTextField lengthTextBox;
+    private JTextField lengthTextBox;
 
-	private JTextField prefixTextField;
+    private JTextField prefixTextField;
 
-	private JTextField numberTextField;
+    private JTextField numberTextField;
 
-	private JComboBox<PasswordType2> passwordTypeComboBox = null;
+    private JComboBox<PasswordType2> passwordTypeComboBox = null;
 
-	private JLabel samplePasswordLabel;
+    private JLabel samplePasswordLabel;
 
-	public GenerateAndMergePasswordPane() {
-		setLayout(new BorderLayout(0, 0));
+    public GenerateAndMergePasswordPane() {
+        setLayout(new BorderLayout(0, 0));
 
-		JPanel panel = new JPanel();
-		add(panel);
-		panel.setLayout(null);
+        JPanel panel = new JPanel();
+        add(panel);
+        panel.setLayout(null);
 
-		JLabel lblType = new JLabel("Type");
-		lblType.setFont(new Font("SansSerif", Font.PLAIN, 13));
-		lblType.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblType.setBounds(10, 18, 91, 14);
-		panel.add(lblType);
+        JLabel lblType = new JLabel("Type");
+        lblType.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        lblType.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblType.setBounds(10, 18, 91, 14);
+        panel.add(lblType);
 
-		passwordTypeComboBox = new JComboBox<PasswordType2>();
-		passwordTypeComboBox.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				updateSample();
-			}
-		});
-		passwordTypeComboBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
-		passwordTypeComboBox.setBounds(111, 15, 238, 20);
-		panel.add(passwordTypeComboBox);
+        passwordTypeComboBox = new JComboBox<PasswordType2>();
+        passwordTypeComboBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                updateSample();
+            }
+        });
+        passwordTypeComboBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        passwordTypeComboBox.setBounds(111, 15, 238, 20);
+        panel.add(passwordTypeComboBox);
 
-		JLabel lengthLabel = new JLabel("Length");
-		lengthLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
-		lengthLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		lengthLabel.setBounds(10, 88, 91, 14);
-		panel.add(lengthLabel);
+        JLabel lengthLabel = new JLabel("Length");
+        lengthLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        lengthLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        lengthLabel.setBounds(10, 88, 91, 14);
+        panel.add(lengthLabel);
 
-		lengthTextBox = new JTextField();
+        lengthTextBox = new JTextField();
 
-		lengthTextBox.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				super.keyReleased(e);
-				updateSample();
-			}
-		});
+        lengthTextBox.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                updateSample();
+            }
+        });
 
-		lengthTextBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
-		lengthTextBox.setBounds(115, 85, 46, 20);
-		panel.add(lengthTextBox);
-		lengthTextBox.setColumns(10);
-		lengthTextBox.setDocument(new IntegerDocument());
-		lengthTextBox.setText("8");
+        lengthTextBox.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        lengthTextBox.setBounds(115, 85, 46, 20);
+        panel.add(lengthTextBox);
+        lengthTextBox.setColumns(10);
+        lengthTextBox.setDocument(new IntegerDocument());
+        lengthTextBox.setText("8");
 
-		JLabel lblPrefix = new JLabel("Prefix");
-		lblPrefix.setFont(new Font("SansSerif", Font.PLAIN, 13));
-		lblPrefix.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblPrefix.setBounds(10, 123, 91, 14);
-		panel.add(lblPrefix);
+        JLabel lblPrefix = new JLabel("Prefix");
+        lblPrefix.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        lblPrefix.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblPrefix.setBounds(10, 123, 91, 14);
+        panel.add(lblPrefix);
 
-		prefixTextField = new JTextField();
-		prefixTextField.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				super.keyReleased(e);
-				updateSample();
-			}
-		});
-		prefixTextField.setFont(new Font("SansSerif", Font.PLAIN, 13));
-		prefixTextField.setBounds(111, 120, 100, 20);
-		panel.add(prefixTextField);
-		prefixTextField.setColumns(10);
+        prefixTextField = new JTextField();
+        prefixTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                updateSample();
+            }
+        });
+        prefixTextField.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        prefixTextField.setBounds(111, 120, 100, 20);
+        panel.add(prefixTextField);
+        prefixTextField.setColumns(10);
 
-		JLabel lblSample = new JLabel("Sample");
-		lblSample.setFont(new Font("SansSerif", Font.PLAIN, 13));
-		lblSample.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblSample.setBounds(10, 161, 91, 20);
-		panel.add(lblSample);
+        JLabel lblSample = new JLabel("Sample");
+        lblSample.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        lblSample.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblSample.setBounds(10, 161, 91, 20);
+        panel.add(lblSample);
 
-		samplePasswordLabel = new JLabel("Sample Password ");
-		samplePasswordLabel.setFont(new Font("Monospaced", Font.PLAIN, 13));
-		samplePasswordLabel.setBounds(115, 161, 277, 20);
-		panel.add(samplePasswordLabel);
+        samplePasswordLabel = new JLabel("Sample Password ");
+        samplePasswordLabel.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        samplePasswordLabel.setBounds(115, 161, 277, 20);
+        panel.add(samplePasswordLabel);
 
-		JPanel buttonPanel = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
-		flowLayout.setHgap(45);
-		add(buttonPanel, BorderLayout.SOUTH);
+        JPanel buttonPanel = new JPanel();
+        FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
+        flowLayout.setHgap(45);
+        add(buttonPanel, BorderLayout.SOUTH);
 
-		JButton viewSampleButton = new JButton("View Sample");
-		viewSampleButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				viewSampleList();
-			}
-		});
-		viewSampleButton.setMnemonic('V');
-		buttonPanel.add(viewSampleButton);
+        JButton viewSampleButton = new JButton("View Sample");
+        viewSampleButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                viewSampleList();
+            }
+        });
+        viewSampleButton.setMnemonic('V');
+        buttonPanel.add(viewSampleButton);
 
-		JButton btnExport = new JButton("Export");
-		btnExport.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				handleExport();
-			}
-		});
-		btnExport.setMnemonic('X');
-		buttonPanel.add(btnExport);
+        JButton btnExport = new JButton("Export");
+        btnExport.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleExport();
+            }
+        });
+        btnExport.setMnemonic('X');
+        buttonPanel.add(btnExport);
 
-		
 
-		JLabel countLabel = new JLabel("Number");
-		countLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		countLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
-		countLabel.setBounds(10, 53, 91, 14);
-		panel.add(countLabel);
 
-		numberTextField = new JTextField();
-		numberTextField.setText("80");
-		numberTextField.setFont(new Font("SansSerif", Font.PLAIN, 13));
-		numberTextField.setColumns(10);
-		numberTextField.setBounds(115, 50, 46, 20);
-		panel.add(numberTextField);
-		
-		loadComboBox(passwordTypeComboBox);
-	}
+        JLabel countLabel = new JLabel("Number");
+        countLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        countLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        countLabel.setBounds(10, 53, 91, 14);
+        panel.add(countLabel);
 
-	private void loadComboBox(JComboBox<PasswordType2> comboBox) {
+        numberTextField = new JTextField();
+        numberTextField.setText("80");
+        numberTextField.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        numberTextField.setColumns(10);
+        numberTextField.setBounds(115, 50, 46, 20);
+        panel.add(numberTextField);
 
-		PasswordType2[] values = PasswordType2.values();
+        loadComboBox(passwordTypeComboBox);
+    }
 
-		int letValIndex = 0;
-		int idx = 0;
-		for (PasswordType2 passwordType2 : values) {
+    private void loadComboBox(JComboBox<PasswordType2> comboBox) {
 
-			if (PasswordType2.LETTERS_AND_DIGITS.equals(passwordType2)) {
-				letValIndex = idx;
-			}
+        PasswordType2[] values = PasswordType2.values();
 
-			if (!PasswordType2.NONE.equals(passwordType2)) {
-				comboBox.addItem(passwordType2);
-				idx++;
-			}
+        int letValIndex = 0;
+        int idx = 0;
+        for (PasswordType2 passwordType2 : values) {
 
-		}
-		comboBox.setSelectedIndex(letValIndex);
+            if (PasswordType2.LETTERS_AND_DIGITS.equals(passwordType2)) {
+                letValIndex = idx;
+            }
 
-	}
+            if (!PasswordType2.NONE.equals(passwordType2)) {
+                comboBox.addItem(passwordType2);
+                idx++;
+            }
 
-	protected void handleExport() {
+        }
+        comboBox.setSelectedIndex(letValIndex);
 
-		// TODO write to file
-	    
-	    File file = saveAsFileDialog(this, ".", MailMergeFile.PASSWORD_LIST_FILENNAME);
-	    
-	    if (file != null) {
+    }
+
+    protected void handleExport() {
+
+        // TODO write to file
+
+        File file = saveAsFileDialog(this, ".", MailMergeFile.PASSWORD_LIST_FILENNAME);
+
+        if (file != null) {
             // Save panel to file
-            
+
             if (file.isFile()){
-                
+
                 int result = FrameUtilities.yesNoCancelDialog(this, "Overwrite "+file.getName()+" ?", "Overwrite File?");
 
                 if (result != JOptionPane.YES_OPTION) {
                     return;
                 }
             }
-            
+
             List<String> list = generatePasswords();
             try {
                 writeFileContents(file.getAbsolutePath(), list);
@@ -215,100 +215,103 @@ public class GenerateAndMergePasswordPane extends JPanePlugin {
                 showMessage(this, "Cannot write file", "Cannot write file "+file.getAbsolutePath()+". "+e.getMessage());
             }
         }
-	}
+    }
 
-	/**
-	 * Generate passwords based on pane fields.
-	 * 
-	 */
-	protected List<String> generatePasswords() {
+    /**
+     * Generate passwords based on pane fields.
+     * 
+     */
+    protected List<String> generatePasswords() {
 
-		List<String> outList = new ArrayList<String>();
+        List<String> outList = new ArrayList<String>();
 
-		int count = getCount();
+        int count = getCount();
 
-		int passwordLength = getPasswordLength();
+        int passwordLength = getPasswordLength();
 
-		String prefix = getPasswordPrefix();
+        String prefix = getPasswordPrefix();
 
-		PasswordType2 passwordType = getPasswordType();
-		
-		List<String> list = null;
-		if (!PasswordType2.JOE.equals(passwordType)) {
-			list = PasswordGenerator.generatePasswords(count, passwordType, passwordLength, prefix);
-		}
+        PasswordType2 passwordType = getPasswordType();
 
-		for (int i = 0; i < count; i++) {
+        List<String> list = null;
+        if (!PasswordType2.JOE.equals(passwordType)) {
+            list = PasswordGenerator.generatePasswords(count, passwordType, passwordLength, prefix);
+        }
 
-			if (PasswordType2.JOE.equals(passwordType)) {
-				String joePassword = (prefix == null ? "" : prefix) + "team" + (i + 1);
-				outList.add(joePassword);
-			} else {
-				outList.add(list.get(i));
-			}
-		}
+        for (int i = 0; i < count; i++) {
 
-		return outList;
-	}
+            if (PasswordType2.JOE.equals(passwordType)) {
+                if (prefix == null){
+                    prefix = "";
+                }
+                String joePassword = prefix + "team" + (i + 1);
+                outList.add(joePassword);
+            } else {
+                outList.add(list.get(i));
+            }
+        }
 
-	protected void viewSampleList() {
+        return outList;
+    }
 
-		System.out.println("debug 22 code viewSampleList ");
-		
-		MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
-		
-		List<String> list = generatePasswords();
-		String[] lines = (String[]) list.toArray(new String[list.size()]);
+    protected void viewSampleList() {
+
+        System.out.println("debug 22 code viewSampleList ");
+
+        MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
+
+        List<String> list = generatePasswords();
+        String[] lines = (String[]) list.toArray(new String[list.size()]);
         multipleFileViewer.addTextintoPane("Passwords", lines); 
         multipleFileViewer.setTitle(" Passwords (Build " + new VersionInfo().getBuildNumber() + ")");
         FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
         multipleFileViewer.setVisible(true);
-	}
+    }
 
-	protected void updateSample() {
+    protected void updateSample() {
 
-		List<String> list = generatePasswords();
-		samplePasswordLabel.setText(list.get(0));
-	}
+        List<String> list = generatePasswords();
+        samplePasswordLabel.setText(list.get(0));
+    }
 
-	private PasswordType2 getPasswordType() {
-		return (PasswordType2) passwordTypeComboBox.getSelectedItem();
-	}
+    private PasswordType2 getPasswordType() {
+        return (PasswordType2) passwordTypeComboBox.getSelectedItem();
+    }
 
-	private String getPasswordPrefix() {
-		String prefix = prefixTextField.getText().trim();
-		if (prefix.length() == 0) {
-			prefix = null;
-		}
-		return prefix;
-	}
+    private String getPasswordPrefix() {
+        String prefix = prefixTextField.getText().trim();
+        if (prefix.length() == 0) {
+            prefix = null;
+        }
+        return prefix;
+    }
 
-	/**
-	 * Number of passwords.
-	 */
-	private int getCount() {
-		String countString = numberTextField.getText();
-		int count = 1;
-		if (countString.trim().length() > 0) {
-			count = Integer.parseInt(countString);
-		}
-		return count;
-	}
+    /**
+     * Number of passwords.
+     */
+    private int getCount() {
+        String countString = numberTextField.getText();
+        int count = 1;
+        if (countString.trim().length() > 0) {
+            count = Integer.parseInt(countString);
+        }
+        return count;
+    }
 
-	/**
-	 * Number of passwords.
-	 */
-	private int getPasswordLength() {
-		String countString = lengthTextBox.getText();
-		int count = 1;
-		if (countString.trim().length() > 0) {
-			count = Integer.parseInt(countString);
-		}
-		return count;
-	}
+    /**
+     * Number of passwords.
+     */
+    private int getPasswordLength() {
+        String countString = lengthTextBox.getText();
+        int count = 1;
+        if (countString.trim().length() > 0) {
+            count = Integer.parseInt(countString);
+        }
+        return count;
+    }
 
-	@Override
-	public String getPluginTitle() {
-		return "Generare Passwords and Merge Pane";
-	}
+    @Override
+    public String getPluginTitle() {
+        return "Generare Passwords and Merge Pane";
+    }
 }
