@@ -4,9 +4,14 @@ import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -315,6 +320,53 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         dialog.pack();
         FrameUtilities.centerFrameOver(parentFrame, dialog);
         dialog.setVisible(true);
+    }
+    
+    /**
+     * Save file as.
+     * @param parent
+     * @param startDirectory
+     * @param defaultFileName
+     * @return file or null if no file chosen.
+     */
+    protected File saveAsFileDialog(Component parent, String startDirectory, String defaultFileName) {
+
+        File inFile = new File(startDirectory + File.separator + defaultFileName);
+        JFileChooser chooser = new JFileChooser(startDirectory);
+
+        chooser.setSelectedFile(inFile);
+
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        int action = chooser.showSaveDialog(parent);
+
+        switch (action) {
+            case JFileChooser.APPROVE_OPTION:
+                File file = chooser.getSelectedFile();
+                return file;
+            case JFileChooser.CANCEL_OPTION:
+            case JFileChooser.ERROR_OPTION:
+            default:
+                break;
+        }
+        return null;
+
+    }
+    
+
+    /**
+     * Write ArrayList to file.
+     * @param filename
+     * @param datalines
+     * @throws FileNotFoundException
+     */
+    public void writeFileContents(String filename, List<String> datalines) throws FileNotFoundException {
+        PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
+        for (String s : datalines) {
+            writer.println(s);
+        }
+        writer.close();
+        writer = null;
     }
 
 }

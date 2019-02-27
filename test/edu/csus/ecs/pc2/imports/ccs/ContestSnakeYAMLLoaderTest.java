@@ -3010,6 +3010,87 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
     }
     
+    /**
+     * Test override settings to assign passwords.
+     * 
+     * @throws Exception
+     */
+    public void testTeamYamlPasswordsOverride() throws Exception {
+        String[] yamlLines = { //
+                "passwords:", //
+                "   length: 12", //
+                "# default is from letters and numbers from description", //
+                "#   type: joe", //
+                "#   type: digits", //
+                "   prefix: bark", //
+                "accounts:", //
+                "  - account: TEAM", //
+                "    site: 1", //
+                "    count: 80", //
+        };
+
+
+        String dirname = getOutputDataDirectory(getName());
+        ensureDirectory(dirname);
+
+//        String yamlFileName = dirname + File.separator + "contest.yaml";
+//         startExplorer(dirname);
+//         editFile(yamlFileName);
+
+        IInternalContest contest = loader.fromYaml(null, yamlLines, dirname);
+        
+        Account[] teams = getTeamAccounts(contest);
+        
+        assertEquals("Team count", 80, teams.length);
+        
+        for (Account account : teams) {
+            assertFalse("Not expecting joe password "+account.getPassword(), account.getClientId().getName().equals(account.getPassword()));
+            assertEquals("Expecting password with length 12", 12, account.getPassword().length());
+            assertEquals("Expecting password with prefix bark", "bark",  account.getPassword().substring(0,4));
+        }
+    }
+    
+    /**
+     * Test default password generation and assignment.
+     * 
+     * @throws Exception
+     */
+    public void testTeamYamlPasswordsDefault() throws Exception {
+        
+        String dirname = getOutputDataDirectory(getName());
+        ensureDirectory(dirname);
+        
+        String[] yamlLines = { //
+                "passwords:", //
+                "#   length: 12", //
+                "# default is from letters and numbers from description", //
+                "#   type: joe", //
+                "#   type: digits", //
+                "   prefix: ''", //
+                "   outdir: "+dirname, //
+                "accounts:", //
+                "  - account: TEAM", //
+                "    site: 1", //
+                "    count: 80", //
+        };
+
+//        String yamlFileName = dirname + File.separator + "contest.yaml";
+//         startExplorer(dirname);
+//         editFile(yamlFileName);
+
+        IInternalContest contest = loader.fromYaml(null, yamlLines, dirname);
+        
+        Account[] teams = getTeamAccounts(contest);
+        
+        assertEquals("Team count", 80, teams.length);
+        
+        for (Account account : teams) {
+            assertFalse("Not expecting joe password "+account.getPassword(), account.getClientId().getName().equals(account.getPassword()));
+            assertEquals("Expecting password with length 8", 8, account.getPassword().length());
+            assertFalse("Expecting password without prefix bark", "bark".equals(account.getPassword().substring(0,4)));
+        }
+    }
+
     
     public void testGroupLookup() throws Exception {
 
