@@ -574,8 +574,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             /**
              * Assign team passwords
              */
-
-            accounts = assignPasswords(contest, accounts, length, passwordType, prefix);
+            Account[] updatedAccounts = assignPasswords(contest, accounts, length, passwordType, prefix);
 
             String targetDirectory = ".";
             if (directoryName != null) {
@@ -593,7 +592,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
              * Write OS login passwords file (just a list of passwords in a text file)
              */
 
-            generateOSPasswords(passfilename, accounts.length, passwordType, length, prefix);
+            generateOSPasswords(passfilename, updatedAccounts.length, passwordType, length, prefix);
+            System.out.println("Wrote OS Passwords to: "+passfilename);
 
             String mergefilename = fetchValueDefault(passwordYamlMap, "mergefile", targetDirectory + File.separator + MailMergeFile.DEFAULT_MERGE_OUTPUT_FILENAME);
 
@@ -601,7 +601,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 /**
                  * Write mail merge file
                  */
-                MailMergeFile.writeFile(mergefilename, passfilename, Arrays.asList(accounts));
+                MailMergeFile.writeFile(mergefilename, passfilename, Arrays.asList(updatedAccounts));
+                
+                System.out.println("Wrote Merge File to: "+mergefilename);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -680,6 +682,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     protected Account[] assignPasswords(IInternalContest contest, Account[] accounts, int length, PasswordType2 passwordType, String prefix) {
 
         List<Account> teamAccounts = getTeamAccounts(accounts);
+        
+        if (teamAccounts.size() == 0){
+            
+            teamAccounts = getTeamAccounts(contest.getAccounts());
+            
+        }
 
         if (teamAccounts.size() > 0) {
 
@@ -716,8 +724,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
         
         // TODO assign judge and other accounts
-
-        return accounts;
+        
+        return (Account[]) teamAccounts.toArray(new Account[teamAccounts.size()]);
     }
 
     /**
