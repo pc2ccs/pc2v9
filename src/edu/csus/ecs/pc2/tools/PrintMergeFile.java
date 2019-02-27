@@ -158,8 +158,6 @@ public class PrintMergeFile {
 
         arguments = new ParseArguments(args, requiredArguments);
 
-        arguments.dumpArgs(System.out); // debug 22
-        
         if (args.length == 0 || arguments.isOptPresent("--help")) {
             usage();
         } else {
