@@ -107,7 +107,7 @@ public class MailMergeFileTest extends AbstractTestCase {
         // Must have password list
         assertFileExists(passFilename);
 
-        new PrintMergeFile().printMergeFile(outFileName, contest);
+        new PrintMergeFile().printMergeFile(outFileName, passFilename, contest);
 
         assertFileExists(outFileName);
     }

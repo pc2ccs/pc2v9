@@ -55,8 +55,9 @@ public class PrintMergeFile {
      * Login and print merge file.
      * 
      * @param outputFilename
+     * @param passwordFileName 
      */
-    private void loginPrintMergeFile(String outputFilename) {
+    private void loginPrintMergeFile(String outputFilename, String passwordFileName) {
 
         // Get login
         String loginName = "";
@@ -82,8 +83,8 @@ public class PrintMergeFile {
             System.exit(4);
         }
 
-        printMergeFile(outputFilename, plugin.getContest());
-
+        printMergeFile(outputFilename, passwordFileName, plugin.getContest());
+        
     }
 
     /**
@@ -92,7 +93,7 @@ public class PrintMergeFile {
      * @param outputFilename
      * @param contest
      */
-    public void printMergeFile(String outputFilename, IInternalContest contest) {
+    public void printMergeFile(String outputFilename,  String unixPasswordsFile, IInternalContest contest) {
 
         List<Account> accounts = new ArrayList<>();
 
@@ -106,9 +107,6 @@ public class PrintMergeFile {
         } else {
             accounts.addAll(ClientUtility.getTeamAccounts(contest));
         }
-
-
-        String unixPasswordsFile = MailMergeFile.PASSWORD_LIST_FILENNAME;
 
         haltIfFileMissing(unixPasswordsFile, "Unix password list");
 
@@ -131,16 +129,18 @@ public class PrintMergeFile {
                 // 
                 "Usage: PrintMergeFile [options] --login LOGIN [--password PASSWORD] ", //
                 "", //
-                "Purpose:  write a team merge file to file "+DEFAULT_TEAM_MERGE_OUTPUT_FILENAME, //
+                "Purpose:  write a team merge file to file " + DEFAULT_TEAM_MERGE_OUTPUT_FILENAME, //
                 "Writes a TSV file, fields " + columnNames + ".  ", // 
                 "First line of file contains field names", //
                 "", //
-                
-                "--login LOGIN ", //
+                "Input:  list of OS passwords in file " + MailMergeFile.PASSWORD_LIST_FILENNAME, //
+                "        The login, team name and pc2 password are pulled from a running pc2 server",
+                "Output: writes merge file to "+DEFAULT_TEAM_MERGE_OUTPUT_FILENAME, //
+                "", //
+                "--passfile filename  - use alternative password file, default uses "+MailMergeFile.PASSWORD_LIST_FILENNAME, //
+                "--mergefile outfilename - use outfilename, default output written to "+DEFAULT_TEAM_MERGE_OUTPUT_FILENAME, //
+                "--login LOGIN ", //   xx
                 "--password PASSWORD ", //
-                "", //
-                "", //
-                
                 "", //
         };
 
@@ -154,16 +154,26 @@ public class PrintMergeFile {
 
     public void run(String[] args) {
 
-        String[] requiredArguments = { "--login", "--password", };
+        String[] requiredArguments = { "--login", "--password", "--passfile", "--mergfile" };
 
         arguments = new ParseArguments(args, requiredArguments);
 
+        arguments.dumpArgs(System.out); // debug 22
+        
         if (args.length == 0 || arguments.isOptPresent("--help")) {
             usage();
-        } else 
+        } else {
 
-        {
-
+            String passwordFileName = MailMergeFile.PASSWORD_LIST_FILENNAME;
+            if (arguments.getOptValue("--passfile") != null) {
+                passwordFileName = arguments.getOptValue("--passfile");
+            }
+            
+            String outputFilename = DEFAULT_TEAM_MERGE_OUTPUT_FILENAME;
+            if (arguments.getOptValue("--mergefile") != null){
+                outputFilename = arguments.getOptValue("--mergefile");
+            }
+            
             String loginName = arguments.getOptValue("--login");
             String password = arguments.getOptValue("--password");
 
@@ -178,23 +188,18 @@ public class PrintMergeFile {
                 password = loginName;
             }
 
-            String passwordFileName = MailMergeFile.PASSWORD_LIST_FILENNAME;
-
             haltIfFileMissing(passwordFileName, "Unix password file");
             if (arguments.isOptPresent(LOGIN_OPTION_STRING)) {
-
-                // TODO add --file and -of to override  outputFilename
-                String outputFilename = DEFAULT_TEAM_MERGE_OUTPUT_FILENAME;
                 
-                // TODO assign outfielname to DEFAULT_OTHER_MERGE_OUTPUT_FILENAME
 
-                loginPrintMergeFile(outputFilename);
+                loginPrintMergeFile(outputFilename, passwordFileName);
 
                 System.err.println("Wrote merge file to " + outputFilename);
-
+                System.exit(0);
             } else {
 
                 System.err.println("Misssing " + LOGIN_OPTION_STRING + " option");
+                System.exit(4);
             }
         }
     }
