@@ -7,20 +7,27 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.export.MailMergeFile;
 import edu.csus.ecs.pc2.tools.PasswordGenerator;
 import edu.csus.ecs.pc2.tools.PasswordType2;
+import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
+import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 
 /**
  * Generate and Merge Passwords Panel.
@@ -186,14 +193,28 @@ public class GenerateAndMergePasswordPane extends JPanePlugin {
 	protected void handleExport() {
 
 		// TODO write to file
+	    
+	    File file = saveAsFileDialog(this, ".", MailMergeFile.PASSWORD_LIST_FILENNAME);
+	    
+	    if (file != null) {
+            // Save panel to file
+            
+            if (file.isFile()){
+                
+                int result = FrameUtilities.yesNoCancelDialog(this, "Overwrite "+file.getName()+" ?", "Overwrite File?");
 
-		// TODO prompt for file name
-		System.out.println("debug 22 code handleExport ");
-
-		List<String> list = generatePasswords();
-		for (String string : list) {
-			System.out.println(string);
-		}
+                if (result != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+            
+            List<String> list = generatePasswords();
+            try {
+                writeFileContents(file.getAbsolutePath(), list);
+            } catch (FileNotFoundException e) {
+                showMessage(this, "Cannot write file", "Cannot write file "+file.getAbsolutePath()+". "+e.getMessage());
+            }
+        }
 	}
 
 	/**
@@ -233,11 +254,15 @@ public class GenerateAndMergePasswordPane extends JPanePlugin {
 	protected void viewSampleList() {
 
 		System.out.println("debug 22 code viewSampleList ");
-
+		
+		MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
+		
 		List<String> list = generatePasswords();
-		for (String string : list) {
-			System.out.println(string);
-		}
+		String[] lines = (String[]) list.toArray(new String[list.size()]);
+        multipleFileViewer.addTextintoPane("Passwords", lines); 
+        multipleFileViewer.setTitle(" Passwords (Build " + new VersionInfo().getBuildNumber() + ")");
+        FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+        multipleFileViewer.setVisible(true);
 	}
 
 	protected void updateSample() {
