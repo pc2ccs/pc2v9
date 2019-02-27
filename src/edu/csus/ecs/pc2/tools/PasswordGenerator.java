@@ -105,7 +105,7 @@ public class PasswordGenerator {
 
         String[] usage = { //
         //
-                "Usage PasswordGenerator [--help] --gen num type|- length|- prefix ", //
+                "Usage PasswordGenerator [--help] num type|- length|- prefix ", //
                 "", //
                 "Generate passwords to stdout, by default outputs " + DEFAULT_PASSWORD_NUMBER + " passwords.", //
                 "", //
@@ -167,6 +167,9 @@ public class PasswordGenerator {
                         break;
                     case "D":
                         type = PasswordType2.DIGITS;
+                        break;
+                    default:
+                        type = PasswordType2.valueOf(argValue);
                         break;
                 }
             }
