@@ -12,6 +12,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.PermissionGroup;
@@ -320,7 +321,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         countPreliminaryJudgements = theContest.getContestInformation().isPreliminaryJudgementsUsedByBoard();
         
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
-        IMemento summaryMememento = createSummaryMomento (theContest.getContestInformation(), mementoRoot);
+        IMemento summaryMememento = createSummaryMomento (theContest, mementoRoot);
         
         AccountList accountList = getAccountList(theContest);
         Problem[] allProblems = theContest.getProblems();
@@ -950,7 +951,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      * @param mementoRoot
      */
-    private IMemento createSummaryMomento(ContestInformation contestInformation, XMLMemento mementoRoot) {
+    private IMemento createSummaryMomento(IInternalContest contest, XMLMemento mementoRoot) {
+        ContestInformation contestInformation = contest.getContestInformation();
         IMemento memento = mementoRoot.createChild("standingsHeader");
         String title = contestInformation.getContestTitle();
         if (title == null || title.length() == 0) {
@@ -963,10 +965,77 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         memento.putString("systemURL", versionInfo.getSystemURL());
         memento.putString("currentDate", new Date().toString());
         memento.putString("generatorId", "$Id$");
+        // bug 1540
+        String value = "Live (unfrozen) scoreboard";
+        ContestTime contestTime = contest.getContestTime();
+        if (obeyFreeze) {
+            if (contestInformation.isUnfrozen() && contest.getFinalizeData().isCertified()) {
+                value = "Final Scoreboard";
+            } else {
+                String freezeTime = contestInformation.getFreezeTime();
+                long freezeSeconds = -1;
+                try {
+                    freezeSeconds = contestTime.getContestLengthSecs() - Utilities.convertStringToSeconds(freezeTime);
+                } catch (Exception e) {
+                    log.throwing("DefaultScoringAlgorithm", "createSummaryMemento", e);
+                    freezeSeconds = -1;
+                }
+                if (freezeSeconds == -1) {
+                    log.warning("Could not convert '" + freezeTime + "' to seconds");
+                    value = ""; // no freeze, was invalid
+                } else {
+                    if (freezeSeconds == 0) {
+                        value = ""; // no freeze
+                    } else {
+                        long remaingTime = contestTime.getRemainingSecs(); 
+                        if (remaingTime <= 0 || remaingTime > freezeSeconds) {
+                            // during frozen
+                            value = "Scoreboard was frozen with " + prettyFreezeTime(freezeTime) + " remaining in the contest; all submissions after that are shown as 'Pending'";
+                        } else {
+                            // before frozen
+                            value = "Scoreboard will be frozen with " + prettyFreezeTime(freezeTime) + " remaining in the contest; all submissions after that will be shown as 'Pending'";
+                        }
+                    }
+                }
+            }
+        }
+        memento.putString("scoreboardMessage", value);
 
         return memento;
     }
     
+    private String prettyFreezeTime(String freezeTime) {
+        int count = freezeTime.length() - freezeTime.replace(":", "").length();
+        if (count < 2) {
+            // handle invalid format per spec which says it should be h:mm:ss
+            for (; count < 2; count++) {
+                freezeTime = freezeTime + ":00";
+            }
+        }
+        String result = "";
+        long freeze = Utilities.convertStringToSeconds(freezeTime);
+        long hours = TimeUnit.SECONDS.toHours(freeze);
+        long minutes = TimeUnit.SECONDS.toMinutes(freeze-hours*60*60);
+        String comma = "";
+        if (hours > 0) {
+            result = hours + " hour";
+            if (hours > 1) {
+                result = result+"s";
+            }
+            comma = ", ";
+        }
+        if (minutes > 0) {
+            result = result + comma + minutes + " minute";
+            if (minutes > 1) {
+                result = result+"s";
+            }
+        }
+        if (result == "") {
+            result = freezeTime;
+        }
+        return result;
+    }
+
     /**
      * 
      * @return a list of name/value pairs for default scoring properties.

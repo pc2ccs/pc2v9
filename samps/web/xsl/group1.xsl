@@ -30,10 +30,7 @@
 		    &#160;
 		    <!-- XXX probably can remove these with the full title -->
 		    <br/>
-		    <!-- hmm, these comment add the ^M to the output -->
-		    <xsl:comment>
-		    Standings as of 1 hour to go.  Scoreboard is now frozen.&lt;br/>
-		    </xsl:comment>
+		    <xsl:value-of select="/contestStandings/standingsHeader/@scoreboardMessage"/>
 	    </center>
 	</font>
 	    <center>
