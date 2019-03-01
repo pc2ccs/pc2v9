@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -291,6 +292,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         
         this.log = inputLog;
         long freezeSeconds = -1;
+        boolean isThawn = false;
         if (obeyFreeze) {
             String freezeTime = theContest.getContestInformation().getFreezeTime();
             try {
@@ -303,7 +305,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 log.warning("Could not convert '"+freezeTime+"' to seconds");
                 throw new InvalidParameterException("Invalid freezeTime "+freezeTime);
             }
-            log.fine("DEBUG: using freezeSeconds of "+freezeSeconds +" for str "+freezeTime);
+            FinalizeData finalizeData = theContest.getFinalizeData(); // sometimes, eg junit this is null
+            if (finalizeData != null && finalizeData.isCertified() && theContest.getContestInformation().isUnfrozen()) {
+                isThawn = true;
+            }
+            log.fine("DEBUG: using freezeSeconds of "+freezeSeconds +" for str "+freezeTime+", with isThawn="+isThawn);
         }
 
         
@@ -415,7 +421,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                          */
                         runToAdd = RunUtilities.createNewRun(runs[i], theContest);
                     }
-                    if (obeyFreeze && RunUtilities.supppressJudgement(runs[i], freezeSeconds)) {
+                    if (obeyFreeze && RunUtilities.supppressJudgement(runs[i], freezeSeconds) && !isThawn) {
                         /**
                          * If we are suppose to suppress this judgement, then change the run to a NEW run.
                          */
