@@ -981,7 +981,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 String freezeTime = contestInformation.getFreezeTime();
                 long freezeSeconds = -1;
                 try {
-                    freezeSeconds = contestTime.getContestLengthSecs() - Utilities.convertStringToSeconds(freezeTime);
+                    freezeSeconds = Utilities.convertStringToSeconds(freezeTime);
                 } catch (Exception e) {
                     log.throwing("DefaultScoringAlgorithm", "createSummaryMemento", e);
                     freezeSeconds = -1;
@@ -993,8 +993,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     if (freezeSeconds == 0) {
                         value = ""; // no freeze
                     } else {
-                        long remaingTime = contestTime.getRemainingSecs(); 
-                        if (remaingTime <= 0 || remaingTime > freezeSeconds) {
+                        long remaingTime = contestTime.getRemainingSecs();
+                        if (remaingTime < freezeSeconds) {
                             // during frozen
                             value = "Scoreboard was frozen with " + prettyFreezeTime(freezeTime) + " remaining in the contest; all submissions after that are shown as 'Pending'";
                         } else {
