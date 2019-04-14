@@ -259,7 +259,8 @@
 	<target name="test" depends="compile-tests" description="run junit tests">
 		<delete dir="${testresults.dir}"/>
 		<mkdir dir="${testresults.xml.dir}"/>
-		<junit errorProperty="test.failed" failureProperty="test.failed">
+		<junit errorProperty="test.failed" failureProperty="test.failed" fork="yes">
+                        <jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true"/>
 			<classpath refid="project.classpath"/>
 			<formatter type="brief" usefile="false"/>
 			<formatter type="xml"/>
