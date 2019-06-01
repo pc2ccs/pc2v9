@@ -1,0 +1,23 @@
+# GitLab build configuration
+image: openjdk:8
+
+before_script:
+  - apt-get update
+  - apt-get install -y ant
+
+# TODO re-orgranize xml into building, testing, packing.
+build:
+  stage: build
+  script:
+    - ant -f package.xml
+  artifacts:
+    paths:
+    - dist/*.zip
+    - dist/*.jar
+    - dist/*.txt
+    expire_in: 1 month
+
+test:
+  stage: test
+  script:
+    - echo "Do a test here!"
