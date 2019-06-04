@@ -17,7 +17,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -612,7 +611,6 @@ public class MultiFileComparator extends JFrame  {
 
                 DefaultListModel<String> outputListModel = (DefaultListModel<String>) (outputDisplayList.getModel());
                 outputListModel.clear();
-                // Vector<String> v = new Vector<String>();
                 while (lineRead != null) {
                     outputListModel.addElement(lineRead);
                     lineRead = new String();
