@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -20,6 +21,7 @@ import java.io.IOException;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -82,10 +84,16 @@ public class MultiFileComparator extends JFrame  {
     private JScrollPane teamOutputScrollPane;
 
     private JScrollPane judgesOutputScrollPane;
+    
+    private BoundedRangeModel judgesScModel;
+    
+    private BoundedRangeModel teamScModel;
 
     private JLabel lblTestCaseDataFile;
 
     private int[] currentTestCaseNums;
+    
+    private boolean hideScrollLockWarning;
 
     private String[] currentTeamOutputFileNames;
 
@@ -97,7 +105,20 @@ public class MultiFileComparator extends JFrame  {
 
     private Process process = null;
 
+    
+    private int displayWarningDialogWithCheckbox(JFrame parentFrame, String msg, JCheckBox checkbox, String title) {
+
+        checkbox.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10));
+        Object[] params = { msg, checkbox };
+
+        int response = JOptionPane.showConfirmDialog(parentFrame, params, title, JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        return response;
+    }
+    
     public  MultiFileComparator() {
+        
+        
         super();
         setTitle("Test Case Outputs for Run ID:  xxx");
         setMinimumSize(new Dimension(650, 600));
@@ -108,12 +129,56 @@ public class MultiFileComparator extends JFrame  {
         getContentPane().add(pnlSouthPanel, BorderLayout.SOUTH);
 
         final JCheckBox chckbxLockScrolling = new JCheckBox("Lock Scrolling");
+        
+        
         chckbxLockScrolling.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Sorry; this function isn't implemented yet",
-                        "Not Implemented", JOptionPane.INFORMATION_MESSAGE);
-                chckbxLockScrolling.setEnabled(false);
-                chckbxLockScrolling.setSelected(false);
+                if(chckbxLockScrolling.isSelected()) {
+                    
+                    if (!hideScrollLockWarning) {
+
+                        String message = "Warning: If Team and Judge outputs are different sizes, \n" + 
+                                "then if scrolling is locked you will only be able to scroll as far as\n" + 
+                                "the bottom of the smaller output.  To examine farther than that in the larger\n" + 
+                                "output, be sure to unlock scrolling."
+                                + "\n\n";
+
+                        JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+                        
+                        JFrame warning = new JFrame();
+
+                        int response = displayWarningDialogWithCheckbox(warning, message, checkbox, "Scroll Lock Warning");
+                           
+                         
+                        if (checkbox.isSelected()) {
+                            hideScrollLockWarning = true;
+                        }
+                        if (!(response == JOptionPane.YES_OPTION)) {
+                            return;
+                        }
+                    }
+                    
+                    
+                    
+                    // need to store current vertical scroll bar model so it can be 
+                    // reset if "Lock Scrolling" is unchecked 
+                    judgesScModel = judgesOutputScrollPane.getVerticalScrollBar().getModel();
+                    teamScModel = teamOutputScrollPane.getVerticalScrollBar().getModel();
+                    
+                    int judgesLstSize = lstJudgesOutput.getModel().getSize();
+                    int teamLstSize = lstTeamOutput.getModel().getSize();
+                    
+     
+                    if(teamLstSize <= judgesLstSize) {
+                        judgesOutputScrollPane.getVerticalScrollBar().setModel(teamOutputScrollPane.getVerticalScrollBar().getModel());
+                    } else {
+                        teamOutputScrollPane.getVerticalScrollBar().setModel(judgesOutputScrollPane.getVerticalScrollBar().getModel());
+                    }
+                
+                } else {
+                    judgesOutputScrollPane.getVerticalScrollBar().setModel(judgesScModel);
+                    teamOutputScrollPane.getVerticalScrollBar().setModel(teamScModel);
+                }
             }
         });
         pnlSouthPanel.add(chckbxLockScrolling);
