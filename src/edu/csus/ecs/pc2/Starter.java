@@ -32,6 +32,8 @@ public final class Starter  {
      */
     public static void main(String[] args) {
         
+        System.out.println ("Running PC2 Starter...");
+        
         IInternalContest model = new InternalContest();
         InternalController controller = new InternalController (model);
         
