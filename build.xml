@@ -54,6 +54,10 @@
     <property name="name" value="pc2"/>
     <property name="jar.name" value="${name}.jar"/>
     <property name="jar.path" value="${dist.dir}/${jar.name}"/>
+    <property environment="env"/>
+    <condition property="exists.CI_PIPELINE_IID">
+        <isset property="env.CI_PIPELINE_IID"/>
+    </condition>
 
     <tstamp>
         <format property="date" pattern="yyyyMMdd" timezone="UTC" />
@@ -103,10 +107,12 @@
         </condition>
     </target>
 
-    <target name="init" depends="properties">
+    <target name="init" depends="properties, -execgit, -getenv">
         <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpathref="checkstyle.classpath"/>
         <!-- Create the time stamp -->
         <tstamp />
+    </target>
+    <target name="-execgit" unless="exists.CI_PIPELINE_IID">
         <exec executable="git" outputproperty="repo.version" failifexecutionfails="false" errorproperty="">
             <arg value="rev-list"/>
             <arg value="${git_hash}"/>
@@ -118,11 +124,9 @@
                <isset property="repo.version"/>
             </not>
         </condition>
-        <property environment="env"/>
-        <condition property="repo.version" value="${env.CI_PIPELINE_IID}"
-                   else="${repo.version}">
-            <isset property="env.CI_PIPELINE_IID"/>
-        </condition>
+    </target>
+    <target name="-getenv" if="exists.CI_PIPELINE_IID">
+        <property name="repo.version" value="${env.CI_PIPELINE_IID}"/>
     </target>
 
     <target name="compile" depends="init,checkstyle" description="compile the source ">
