@@ -100,6 +100,17 @@
 
     <property environment="env"/>
 
+    <macrodef name="add">
+       <attribute name="operand1"/>
+       <attribute name="operand2"/>
+       <attribute name="result"/>
+       <sequential>
+           <script language="javascript">
+              tmp = parseInt("@{operand1}") + parseInt("@{operand2}");
+              project.setProperty("@{result}", tmp);
+           </script>
+       </sequential>
+    </macrodef>
     <target name="properties">
         <available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <condition property="git_hash" value="${env.GIT_COMMIT}" else="HEAD">
@@ -126,7 +137,11 @@
         </condition>
     </target>
     <target name="-getenv" if="exists.CI_PIPELINE_IID">
+       <add operand1="5145" operand2="${env.CI_PIPELINE_IID}" result="repo.version"/>
+<!--
+TODO consider switching back to this at 9.7.0/9.8build
         <property name="repo.version" value="${env.CI_PIPELINE_IID}"/>
+-->
     </target>
 
     <target name="compile" depends="init,checkstyle" description="compile the source ">
