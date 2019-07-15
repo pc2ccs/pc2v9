@@ -24,7 +24,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
- - OS name and version: [e.g. Windows 10 or Ubuntu Linux 18.04]
+ - OS name and version: [e.g. Windows 10 or Ubuntu 18.04]
  - Browser (if the bug is related to web-based team clients) [e.g. chrome, safari]
  - PC2 Version [e.g. 9.6.0]
 
