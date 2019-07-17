@@ -4,7 +4,7 @@ image: openjdk:8
 before_script:
   - echo "Runnning before_script setup..."
   - apt-get update
-  - apt-get install -y ant
+  - apt-get install -y ant git
 
 after_script:
   - echo "Running after_script cleanup..."
@@ -20,6 +20,7 @@ build:
     - dist/*.zip
     - dist/*.jar
     - dist/*.txt
+    - dist/*.gz
     expire_in: 1 month
 
 test:
