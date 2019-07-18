@@ -4,26 +4,45 @@ image: openjdk:8
 before_script:
   - echo "Runnning before_script setup..."
   - apt-get update
-  - apt-get install -y ant
+  - apt-get install -y ant git
 
 after_script:
   - echo "Running after_script cleanup..."
 
-# TODO re-orgranize xml into building, testing, packing.
-build:
+# Define the stages to which jobs can be assigned.
+# The order of stages in this parameter defines the order of execution: all jobs of the same stage are run in parallel;
+#  jobs of the next stage are run after successful completion of jobs from previous stages.
+# If all jobs of all stages the commit is marked with status "passed".
+# Jobs that don't specify a stage are assigned to the "test" stage.
+stages:
+  - build
+  - test
+  - deploy
+
+# TODO re-organize package.xml (along with build.xml) into building, testing, packaging.
+
+# TODO figure out how to restrict the build/test/deploy to the current branch
+
+job-build:
   stage: build
   script:
     - echo "Running ant on package.xml"
-    - ant -f package.xml
+    - ant -file package.xml
   artifacts:
     paths:
     - dist/*.zip
     - dist/*.jar
     - dist/*.txt
+    - dist/*.gz
     expire_in: 1 month
 
-test:
+job-test:
   stage: test
   script:
     - echo "Running test stage..."
     - echo "Do a test here!"
+
+job-deploy:
+  stage: deploy
+  script:
+    - echo "Running (currently empty) deploy stage"
