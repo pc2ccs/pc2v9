@@ -1,13 +1,13 @@
 # GitLab build configuration
 image: openjdk:8
+# if we wanted openconnect, use:
+#image: openjdk:8-slim-buster
 
 before_script:
-  - echo "Runnning before_script setup..."
-  - apt-get update
-  - apt-get install -y ant git
+  - echo "Running (empty) before_script cleanup..."
 
 after_script:
-  - echo "Running after_script cleanup..."
+  - echo "Running (empty) after_script cleanup..."
 
 # Define the stages to which jobs can be assigned.
 # The order of stages in this parameter defines the order of execution: all jobs of the same stage are run in parallel;
@@ -22,12 +22,17 @@ stages:
 # TODO re-organize package.xml (along with build.xml) into building, testing, packaging.
 
 # TODO figure out how to restrict the build/test/deploy to the current branch
+# ANSEWR: use only,  but really there should be different deploy steps
+#   for master (or maybe tags?) vs the other branches
 
 job-build:
   stage: build
   script:
+    - apt-get update
+    - apt-get install -y ant git
     - echo "Running ant on package.xml"
     - ant -file package.xml
+    - echo $CI_JOB_ID > dist/ci_job_id.txt
   artifacts:
     paths:
     - dist/*.zip
@@ -45,4 +50,8 @@ job-test:
 job-deploy:
   stage: deploy
   script:
-    - echo "Running (currently empty) deploy stage"
+    - echo "Running deploy stage"
+    - apt-get install -y curl
+    - export BUILDNUMBER=`echo dist/pc2-*.zip | sed 's#^dist.*build-\([0-9]*\)[.~].*#\1#'`
+    - BUILD_JOB_ID=$(cat dist/ci_job_id.txt)
+    - curl "http://pc2.ecs.csus.edu/cgi-bin/grabgitlabartifacts.cgi?authkey=$AUTHKEY&url=https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/jobs/$BUILD_JOB_ID/artifacts&buildnumber=$BUILDNUMBER"
