@@ -57,26 +57,23 @@ public class AboutPane extends JPanePlugin {
         //create the logo image from the images folder
         BufferedImage pc2LogoImage = null;
         try {
-            //TODO: read the image from the pc2.jar images folder
-            pc2LogoImage = ImageIO.read(new File("./images/PC2Logo135x135.png"));
+            //TODO: read the image from the *pc2.jar* images folder
+            pc2LogoImage = ImageIO.read(new File("./images/PC2Logo135x135x.png"));
         } catch (IOException e1) {
-            //TODO: remove println
-            System.out.println ("Problem reading PC2 logo file.");
             e1.printStackTrace();
             try {
-                //TODO: read the image from the pc2.jar images folder
+                //TODO: read the image from the *pc2.jar* images folder
                 pc2LogoImage = ImageIO.read(new File("./images/csus_logo.png"));
-                System.out.println ("Found CSUS logo file");
             } catch (IOException e2) {
-                //TODO: remove println
-                System.out.println ("Problem reading CSUS logo file.");
                 e2.printStackTrace();
             }
         }
         
-        //add the logo image to the logo panel
-        JLabel logoLabel = new JLabel(new ImageIcon(pc2LogoImage));
-        logoPanel.add(logoLabel);
+        if (pc2LogoImage != null) {
+            //add the logo image to the logo panel
+            JLabel logoLabel = new JLabel(new ImageIcon(pc2LogoImage));
+            logoPanel.add(logoLabel);
+        }
         
         //add the logoPanel to the center panel
         centerPanel.add(logoPanel, BorderLayout.WEST);
