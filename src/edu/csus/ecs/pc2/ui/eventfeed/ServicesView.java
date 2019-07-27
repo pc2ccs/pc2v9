@@ -87,7 +87,7 @@ public class ServicesView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(520, 430));
+        this.setSize(new java.awt.Dimension(600, 430));
         this.setContentPane(getMainViewPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Services");

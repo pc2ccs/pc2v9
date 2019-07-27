@@ -125,7 +125,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(800, 400));
+        this.setSize(new java.awt.Dimension(800, 450));
         this.setContentPane(getMainViewPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Scoreboard");
