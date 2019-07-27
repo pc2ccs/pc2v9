@@ -118,11 +118,14 @@ public class DateDifferizerTest extends TestCase {
         long newsecs ;
 
         long diffSeconds = 31536000;
+        long diffSecondsAlt = diffSeconds+86400;
 
         diff = new DateDifferizer(date, Calendar.YEAR, 1);
         newsecs = diff.diffInSec();
-        assertEquals("Expecting same diff seconds for 23:59 seconds", diffSeconds, newsecs);
-
+        // if last year had an leap day we might be off by a day
+        if (newsecs != diffSecondsAlt) {
+            assertEquals("Expecting same diff seconds for 23:59 seconds", diffSeconds, newsecs);
+        }
         // Countdown format.
         expectedTimeString = diff.toString();
         assertEquals("1 year", expectedTimeString);

@@ -299,6 +299,8 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
                             valName = "CustomCppClicsInterfaceValidator.amd64";
                         }
                     }
+                } else if (osName.toLowerCase().contains("mac os x")) {
+                        valName = "CustomCppClicsInterfaceValidator";
                 }
             }
         }

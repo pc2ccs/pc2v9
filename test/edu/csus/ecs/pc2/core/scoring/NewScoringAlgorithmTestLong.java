@@ -86,10 +86,15 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     private Properties populateProperties(int perNo, int perMin, int baseYes) {
         Properties props = DefaultScoringAlgorithm.getDefaultProperties();
+        System.out.println(props);
         Enumeration<Object> keys = props.keys();
+        System.out.println(keys);
         while (keys.hasMoreElements()) {
             String key = (String) keys.nextElement();
             String value = props.getProperty(key);
+            if (value.equals("public_html") || value.equals("html")) {
+                continue;
+            }
             switch (Integer.parseInt(value)) {
                 case 0:
                     props.put(key, Integer.toString(baseYes));

@@ -205,7 +205,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getChckbxUnfrozen() {
         if (chckbxUnfrozen == null) {
             chckbxUnfrozen = new JCheckBox("Unfrozen");
-            chckbxUnfrozen.setToolTipText("Unfreezing means the final results can be released to the public via the Contest API");
+            chckbxUnfrozen.setToolTipText("Unfreezing means the final results can be released to the public via the Contest API and public html");
             chckbxUnfrozen.setBounds(431, 474, 139, 29);
             chckbxUnfrozen.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

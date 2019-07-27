@@ -36,10 +36,8 @@
         </HEAD>
         <BODY>
 <IMG WIDTH="1500" SRC="banner.png"/>
-                    <xsl:comment>
-                    Scoreboard as of 1 hour to go.  Scoreboard is now frozen.&lt;br/>
-                    </xsl:comment>
 <center>
+		    <xsl:value-of select="/contestStandings/standingsHeader/@scoreboardMessage"/>
                     <xsl:for-each select="/contestStandings/standingsHeader/groupList/group">
                     <xsl:call-template name="groupLink">
                     <xsl:with-param name="group" select="@id"/>

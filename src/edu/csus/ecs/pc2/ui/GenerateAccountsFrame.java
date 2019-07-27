@@ -1,20 +1,19 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.ui.admin.GenerateAndMergePasswordPane;
 
 /**
- * 
+ * Generate Acccounts Frame.
+ *  
  * @author pc2@ecs.csus.edu
- * @version $Id$
- * 
  */
-
-// $HeadURL$
-// $Id$
-
 public class GenerateAccountsFrame extends JFrame implements UIPlugin {
 
     /**
@@ -31,13 +30,22 @@ public class GenerateAccountsFrame extends JFrame implements UIPlugin {
     private IInternalController controller;
 
     private GenerateAccountsPane generateAccountsPane = null;
-
+    
+    private GenerateAndMergePasswordPane generateAndMergePasswordPane = null;
+    
     /**
      * This method initializes
      * 
      */
     public GenerateAccountsFrame() {
         super();
+        
+        JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+        getContentPane().add(tabbedPane, BorderLayout.CENTER);
+        
+        tabbedPane.addTab("Accounts", null, getGenerateAccountsPane(), null);
+        
+        tabbedPane.addTab("Passwords", null, getGenerateAndMergePasswordPane(), null);
         initialize();
     }
 
@@ -48,7 +56,7 @@ public class GenerateAccountsFrame extends JFrame implements UIPlugin {
     private void initialize() {
         this.setSize(new java.awt.Dimension(549,349));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.setContentPane(getGenerateAccountsPane());
+        
         this.setTitle("Generate Accounts");
 
         FrameUtilities.centerFrame(this);
@@ -61,6 +69,9 @@ public class GenerateAccountsFrame extends JFrame implements UIPlugin {
 
         getGenerateAccountsPane().setContestAndController(contest, controller);
         getGenerateAccountsPane().setParentFrame(this);
+        
+        getGenerateAndMergePasswordPane().setContestAndController(contest, controller);
+        getGenerateAndMergePasswordPane().setParentFrame(this);
     }
 
 
@@ -69,7 +80,12 @@ public class GenerateAccountsFrame extends JFrame implements UIPlugin {
         return "Generate Accounts Frame";
     }
 
-
+    public GenerateAndMergePasswordPane getGenerateAndMergePasswordPane() {
+        if (generateAndMergePasswordPane == null) {
+            generateAndMergePasswordPane = new GenerateAndMergePasswordPane();
+        }
+        return generateAndMergePasswordPane;
+    }
 
     public GenerateAccountsPane getGenerateAccountsPane() {
         if (generateAccountsPane == null) {

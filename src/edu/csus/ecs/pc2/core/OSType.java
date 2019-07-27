@@ -36,6 +36,12 @@ public enum OSType {
     I386("Uni/Linux (32 bit, i386)"),
 
     /**
+     * MAC OS X 64 bit.
+     *
+     */
+    MAC64("MacOS X (64 bit)"),
+
+    /**
      * The OS could not be determined.
      * 
      * This value is different than UNDEFINED.  This value

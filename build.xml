@@ -4,8 +4,9 @@
         v9 build file
     </description>
     <!-- set global properties for this build -->
-    <property name="apt.build.javac.target" value="1.7" />
-    <property name="apt.build.javac.source" value="1.7" />
+    <property name="lastECSbuild" value="5146" />
+    <property name="apt.build.javac.target" value="1.8" />
+    <property name="apt.build.javac.source" value="1.8" />
     <property name="src.dir" location="src" />
     <property name="test.dir" location="test" />
     <property name="build.dir" location="build" />
@@ -38,8 +39,8 @@
     <property name="javacVerbose" value="off"/>
     <property name="logExtension" value=".log"/>
     <property name="compilerArg" value=""/>
-    <property name="javacSource" value="1.7"/>
-    <property name="javacTarget" value="1.7"/>
+    <property name="javacSource" value="1.8"/>
+    <property name="javacTarget" value="1.8"/>
     <path id="path_bootclasspath">
             <fileset dir="${java.home}/lib">
                 <include name="*.jar"/>
@@ -54,6 +55,10 @@
     <property name="name" value="pc2"/>
     <property name="jar.name" value="${name}.jar"/>
     <property name="jar.path" value="${dist.dir}/${jar.name}"/>
+    <property environment="env"/>
+    <condition property="exists.CI_PIPELINE_IID">
+        <isset property="env.CI_PIPELINE_IID"/>
+    </condition>
 
     <tstamp>
         <format property="date" pattern="yyyyMMdd" timezone="UTC" />
@@ -79,7 +84,7 @@
         value="${date.english} ${time.english}" />
 
     <!-- version is used in the jar manifest & in package.xml -->
-    <property name="version" value="9.6.0"/>
+    <property name="version" value="9.7build"/>
 
     <path id="project.classpath">
         <pathelement location="${build.prod.dir}"/>
@@ -96,6 +101,17 @@
 
     <property environment="env"/>
 
+    <macrodef name="add">
+       <attribute name="operand1"/>
+       <attribute name="operand2"/>
+       <attribute name="result"/>
+       <sequential>
+           <script language="javascript">
+              tmp = parseInt("@{operand1}") + parseInt("@{operand2}");
+              project.setProperty("@{result}", tmp);
+           </script>
+       </sequential>
+    </macrodef>
     <target name="properties">
         <available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <condition property="git_hash" value="${env.GIT_COMMIT}" else="HEAD">
@@ -103,10 +119,12 @@
         </condition>
     </target>
 
-    <target name="init" depends="properties">
+    <target name="init" depends="properties, -execgit, -getenv">
         <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpathref="checkstyle.classpath"/>
         <!-- Create the time stamp -->
         <tstamp />
+    </target>
+    <target name="-execgit" unless="exists.CI_PIPELINE_IID">
         <exec executable="git" outputproperty="repo.version" failifexecutionfails="false" errorproperty="">
             <arg value="rev-list"/>
             <arg value="${git_hash}"/>
@@ -118,6 +136,13 @@
                <isset property="repo.version"/>
             </not>
         </condition>
+    </target>
+    <target name="-getenv" if="exists.CI_PIPELINE_IID">
+       <add operand1="${lastECSbuild}" operand2="${env.CI_PIPELINE_IID}" result="repo.version"/>
+<!--
+TODO consider switching back to this at 9.7.0/9.8build
+        <property name="repo.version" value="${env.CI_PIPELINE_IID}"/>
+-->
     </target>
 
     <target name="compile" depends="init,checkstyle" description="compile the source ">
@@ -246,7 +271,7 @@
     <target name="javadocs-api" description="Creates API javadocs">
         <mkdir dir="${docs.api.dir}" />
 	<javadoc access="protected" author="true" classpath="vendor/lib/mclb.jar:vendor/lib/jackson-annotations-2.5.4.jar:vendor/lib/jackson-databind-2.5.4.jar:vendor/lib/jackson-core-2.5.4.jar:vendor/lib/snakeyaml-1.16.jar"
-    destdir="${docs.api.dir}" doctitle="PC&amp;sup2; Version 9 API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.api.listener" source="1.7" sourcepath="src" splitindex="true" use="true" version="true" useexternalfile="true">
+    destdir="${docs.api.dir}" doctitle="PC&amp;sup2; Version 9 API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.api.listener" source="1.8" sourcepath="src" splitindex="true" use="true" version="true" useexternalfile="true">
 	    <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistloc="${packagelistloc.dir}"/> 
         </javadoc>
     </target>
@@ -260,7 +285,8 @@
 	<target name="test" depends="compile-tests" description="run junit tests">
 		<delete dir="${testresults.dir}"/>
 		<mkdir dir="${testresults.xml.dir}"/>
-		<junit errorProperty="test.failed" failureProperty="test.failed">
+		<junit errorProperty="test.failed" failureProperty="test.failed" fork="yes">
+                        <jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true"/>
 			<classpath refid="project.classpath"/>
 			<formatter type="brief" usefile="false"/>
 			<formatter type="xml"/>
