@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.util.Date;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -85,10 +86,10 @@ public class AboutPane extends JPanePlugin {
                 "Build Date      : "+versionInfo.getVersionDate(), //;
                 "Build Number    : "+versionInfo.getBuildNumber(), //
                 "", //
-                "os              : "+osName+" " + osVer+" ("+osArch+")", //
+                "OS              : "+osName+" " + osVer+" ("+osArch+")", //
                 "Java Version    : "+javaVer, //
                 "", //
-                "Date            : "+new Date(), //
+                "Today's Date    : "+new Date(), //
                 "",
                 versionInfo.getSystemVersionInfo(), // 
         };
@@ -104,5 +105,14 @@ public class AboutPane extends JPanePlugin {
     @Override
     public String getPluginTitle() {
         return "About Information Pane";
+    }
+    
+    public static void main (String [] args) {
+        
+        JFrame frame = new JFrame();
+        AboutPane pane = new AboutPane();
+        frame.add(pane);
+        frame.setSize(600, 400);
+        frame.setVisible(true);
     }
 }
