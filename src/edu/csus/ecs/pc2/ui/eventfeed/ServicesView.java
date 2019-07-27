@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.ui.AboutPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.EventFeedServerPane;
@@ -86,7 +87,7 @@ public class ServicesView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(515, 319));
+        this.setSize(new java.awt.Dimension(520, 430));
         this.setContentPane(getMainViewPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Services");
@@ -193,6 +194,9 @@ public class ServicesView extends JFrame implements UIPlugin {
                 
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
+
+                AboutPane aboutPane = new AboutPane();
+                addUIPlugin(getMainTabbedPane(), "About", aboutPane);
 
                 showMessage("");
 
