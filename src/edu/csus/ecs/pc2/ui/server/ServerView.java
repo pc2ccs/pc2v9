@@ -39,6 +39,7 @@ import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.report.ContestSummaryReports;
+import edu.csus.ecs.pc2.ui.AboutPane;
 import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.EventFeedServerPane;
@@ -548,6 +549,9 @@ public class ServerView extends JFrame implements UIPlugin {
 
         ContestTimesPane contestTimesPane = new ContestTimesPane();
         addUIPlugin(getMainTabbedPane(), "Times", contestTimesPane);
+        
+        AboutPane aboutPane = new AboutPane();
+        addUIPlugin(getMainTabbedPane(), "About", aboutPane);
         
         setSelectedTab(getMainTabbedPane(), "Logins");
         

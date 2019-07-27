@@ -27,7 +27,6 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
  */
 public class AboutPane extends JPanePlugin {
     
-    // TODO Bug 1466  Add to ServerView tab
     // TODO Bug 1466  Add to TeamView tab
     // TODO Bug 1466  Add to Judge tab
     // TODO Bug 1466  Add to ScoreboardView tab
