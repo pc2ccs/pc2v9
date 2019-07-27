@@ -12,9 +12,11 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.PermissionGroup;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.BalloonSettingsComparatorbySite;
@@ -28,6 +30,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -65,13 +68,18 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     
     public static final String POINTS_PER_NO_SECURITY_VIOLATION = "Points per Security Violation";
     
+    public static final String JUDGE_OUTPUT_DIR = "Output HTML dir for Judges";
+
+    public static final String PUBLIC_OUTPUT_DIR = "Output Public HTML dir";
+    
     /**
      * properties.
      * 
      * key=name, value=default_value, type, min, max (colon delimited)
      */
     private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, { BASE_POINTS_PER_YES, "0:Integer" },
-            { POINTS_PER_NO_COMPILATION_ERROR, "0:Integer" }, { POINTS_PER_NO_SECURITY_VIOLATION, "0:Integer" } };
+            { POINTS_PER_NO_COMPILATION_ERROR, "0:Integer" }, { POINTS_PER_NO_SECURITY_VIOLATION, "0:Integer" }, { JUDGE_OUTPUT_DIR, "html:String" },
+            { PUBLIC_OUTPUT_DIR, "public_html:String" } };
     
     private Properties props = new Properties();
 
@@ -107,6 +115,22 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private boolean respectSendToTeam = false;
     private boolean respectEOC = false;
     
+    private boolean obeyFreeze = false;
+    
+
+    /**
+     * @return the obeyFreeze
+     */
+    public boolean isObeyFreeze() {
+        return obeyFreeze;
+    }
+
+    /**
+     * @param obeyFreeze the obeyFreeze to set
+     */
+    public void setObeyFreeze(boolean obeyFreeze) {
+        this.obeyFreeze = obeyFreeze;
+    }
 
     public DefaultScoringAlgorithm() {
         super();
@@ -267,6 +291,27 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
         
         this.log = inputLog;
+        long freezeSeconds = -1;
+        boolean isThawn = false;
+        if (obeyFreeze) {
+            String freezeTime = theContest.getContestInformation().getFreezeTime();
+            try {
+                freezeSeconds = theContest.getContestTime().getContestLengthSecs()-Utilities.convertStringToSeconds(freezeTime);
+            } catch (Exception e) {
+                log.throwing("DefaultScoringAlgorithm", "getStandings", e);
+                freezeSeconds = -1;
+            }
+            if (freezeSeconds == -1) {
+                log.warning("Could not convert '"+freezeTime+"' to seconds");
+                throw new InvalidParameterException("Invalid freezeTime "+freezeTime);
+            }
+            FinalizeData finalizeData = theContest.getFinalizeData(); // sometimes, eg junit this is null
+            if (finalizeData != null && finalizeData.isCertified() && theContest.getContestInformation().isUnfrozen()) {
+                isThawn = true;
+            }
+            log.fine("DEBUG: using freezeSeconds of "+freezeSeconds +" for str "+freezeTime+", with isThawn="+isThawn);
+        }
+
         
         // TODO properties should be validated here
         props = properties;
@@ -282,7 +327,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         countPreliminaryJudgements = theContest.getContestInformation().isPreliminaryJudgementsUsedByBoard();
         
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
-        IMemento summaryMememento = createSummaryMomento (theContest.getContestInformation(), mementoRoot);
+        IMemento summaryMememento = createSummaryMomento (theContest, mementoRoot);
         
         AccountList accountList = getAccountList(theContest);
         Problem[] allProblems = theContest.getProblems();
@@ -371,6 +416,12 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     JudgementNotificationsList judgementNotificationsList = theContest.getContestInformation().getJudgementNotificationsList();
                     ContestTime contestTime = theContest.getContestTime();
                     if (respectEOC && RunUtilities.supppressJudgement(judgementNotificationsList, runs[i], contestTime)) {
+                        /**
+                         * If we are suppose to suppress this judgement, then change the run to a NEW run.
+                         */
+                        runToAdd = RunUtilities.createNewRun(runs[i], theContest);
+                    }
+                    if (obeyFreeze && RunUtilities.supppressJudgement(runs[i], freezeSeconds) && !isThawn) {
                         /**
                          * If we are suppose to suppress this judgement, then change the run to a NEW run.
                          */
@@ -906,7 +957,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      * @param mementoRoot
      */
-    private IMemento createSummaryMomento(ContestInformation contestInformation, XMLMemento mementoRoot) {
+    private IMemento createSummaryMomento(IInternalContest contest, XMLMemento mementoRoot) {
+        ContestInformation contestInformation = contest.getContestInformation();
         IMemento memento = mementoRoot.createChild("standingsHeader");
         String title = contestInformation.getContestTitle();
         if (title == null || title.length() == 0) {
@@ -919,10 +971,77 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         memento.putString("systemURL", versionInfo.getSystemURL());
         memento.putString("currentDate", new Date().toString());
         memento.putString("generatorId", "$Id$");
+        // bug 1540
+        String value = "Live (unfrozen) scoreboard";
+        ContestTime contestTime = contest.getContestTime();
+        if (obeyFreeze) {
+            if (contestInformation.isUnfrozen() && contest.getFinalizeData().isCertified()) {
+                value = "Final Scoreboard";
+            } else {
+                String freezeTime = contestInformation.getFreezeTime();
+                long freezeSeconds = -1;
+                try {
+                    freezeSeconds = Utilities.convertStringToSeconds(freezeTime);
+                } catch (Exception e) {
+                    log.throwing("DefaultScoringAlgorithm", "createSummaryMemento", e);
+                    freezeSeconds = -1;
+                }
+                if (freezeSeconds == -1) {
+                    log.warning("Could not convert '" + freezeTime + "' to seconds");
+                    value = ""; // no freeze, was invalid
+                } else {
+                    if (freezeSeconds == 0) {
+                        value = ""; // no freeze
+                    } else {
+                        long remaingTime = contestTime.getRemainingSecs();
+                        if (remaingTime < freezeSeconds) {
+                            // during frozen
+                            value = "Scoreboard was frozen with " + prettyFreezeTime(freezeTime) + " remaining in the contest; all submissions after that are shown as 'Pending'";
+                        } else {
+                            // before frozen
+                            value = "Scoreboard will be frozen with " + prettyFreezeTime(freezeTime) + " remaining in the contest; all submissions after that will be shown as 'Pending'";
+                        }
+                    }
+                }
+            }
+        }
+        memento.putString("scoreboardMessage", value);
 
         return memento;
     }
     
+    private String prettyFreezeTime(String freezeTime) {
+        int count = freezeTime.length() - freezeTime.replace(":", "").length();
+        if (count < 2) {
+            // handle invalid format per spec which says it should be h:mm:ss
+            for (; count < 2; count++) {
+                freezeTime = freezeTime + ":00";
+            }
+        }
+        String result = "";
+        long freeze = Utilities.convertStringToSeconds(freezeTime);
+        long hours = TimeUnit.SECONDS.toHours(freeze);
+        long minutes = TimeUnit.SECONDS.toMinutes(freeze-hours*60*60);
+        String comma = "";
+        if (hours > 0) {
+            result = hours + " hour";
+            if (hours > 1) {
+                result = result+"s";
+            }
+            comma = ", ";
+        }
+        if (minutes > 0) {
+            result = result + comma + minutes + " minute";
+            if (minutes > 1) {
+                result = result+"s";
+            }
+        }
+        if (result == "") {
+            result = freezeTime;
+        }
+        return result;
+    }
+
     /**
      * 
      * @return a list of name/value pairs for default scoring properties.

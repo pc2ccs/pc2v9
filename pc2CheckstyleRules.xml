@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+    "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
+    "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+
+<!-- $HeadURL$ Checkstyle configuration that checks coding conventions from: 
+	- the Java Language Specification at http://java.sun.com/docs/books/jls/second_edition/html/index.html 
+	- the Sun Code Conventions at http://java.sun.com/docs/codeconv/ - the Javadoc 
+	guidelines at http://java.sun.com/j2se/javadoc/writingdoccomments/index.html 
+	- the JDK Api documentation http://java.sun.com/j2se/docs/api/index.html 
+	- some best practices Checkstyle is very configurable. Be sure to read the 
+	documentation at http://checkstyle.sf.net (or in your downloaded distribution). 
+	Most Checks are configurable, be sure to consult the documentation. To completely 
+	disable a check, just comment it out or delete it from the file. Finally, 
+	it is worth reading the documentation. $Log$ -->
+
+<module name="Checker">
+
+	<!-- all reported file names will be relative to the specified directory. 
+		See http://checkstyle.sourceforge.net/5.x/config.html#Checker -->
+	<property name="basedir" value="${basedir}" />
+
+	<!-- Checks whether files end with a new line. -->
+	<!-- See http://checkstyle.sf.net/config_misc.html#NewlineAtEndOfFile -->
+	<module name="NewlineAtEndOfFile">
+        <property name="lineSeparator" value="lf" />  <!-- Unix, Windows, and MacOSX all end lines with "LF" -->
+    </module>
+
+	<!-- Checks that property files contain the same keys. -->
+	<!-- See http://checkstyle.sf.net/config_misc.html#Translation -->
+	<module name="Translation" />
+
+	<!-- Checks that there are no tab characters ('\t') in the source code. -->
+	<module name="FileTabCharacter" />
+
+	<!-- Checks that a file doesn't exceed a certain max length -->
+	<module name="FileLength">
+		<property name="max" value="2000" />  <!-- (2000 is the default) -->
+	</module>
+
+	<!-- Create a syntax tree for each Java source file and invoke all the following 
+		checks on each tree node -->
+	<module name="TreeWalker">
+
+		<!-- Checks related to Javadoc comments. -->
+		<!-- See http://checkstyle.sf.net/config_javadoc.html -->
+
+		<!-- require Javadoc comments on (public) methods and constructors-->
+		<module name="JavadocMethod">
+  			<property name="scope" value="public"/>
+		</module>
+
+		<!-- require Javadoc comments on all public types -->
+		<module name="JavadocType">
+			<property name="scope" value="public" />
+		</module>
+
+		<!-- Check Javadoc comments for proper format/style -->
+		<module name="JavadocStyle" />
+
+
+		<!-- Checks related to Naming Conventions. -->
+		<!-- See http://checkstyle.sf.net/config_naming.html -->
+
+		<!-- Checks that constant names conform to a format specified by the format 
+			property. A constant is a static and final field or an interface/annotation 
+			field, except serialVersionUID and serialPersistentFields. The default value 
+			for format is "^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$" -->
+		<module name="ConstantName" />
+
+		<!-- Checks that local final variable names conform to a format specified 
+			by the format property. A catch parameter and resources in try statements 
+			are considered to be a local, final variables. The default value for format 
+			is "^[a-z][a-zA-Z0-9]*$" -->
+		<module name="LocalFinalVariableName" />
+
+		<!-- Checks that local, non-final variable names conform to a format specified 
+			by the format property. A catch parameter is considered to be a local variable. -->
+		<module name="LocalVariableName">
+			<property name="format"
+				value="^(gbc_|gl_|fl_|gbl_)?[a-z][a-zA-Z0-9]*(_[0-9]+)?$" />
+		</module>
+
+		<!-- Checks that instance variable names conform to a format specified 
+			by the format property. -->
+		<module name="MemberName">
+			<property name="format" value="^[a-z][a-zA-Z0-9]*(_[0-9]+)?$" />
+		</module>
+
+		<!-- Checks that method names conform to a format specified by the format 
+			property. Also, checks if a method name has the same name as the residing 
+			class. The default is false (it is not allowed). (It is legal in Java to 
+			have method with the same name as a class; as long as a return type is specified 
+			it is a method and not a constructor which it could be easily confused as.) -->
+		<module name="MethodName">
+			<property name="format" value="^[a-z][a-zA-Z0-9]*(_[0-9]+)?$" />
+		</module>
+
+		<!-- Checks that package names conform to a format specified by the format 
+			property. The default value of format is "^[a-z]+(\.[a-zA-Z_][a-zA-Z0-9_]*)*$", 
+			chosen to match the requirements in the Java Language specification and the 
+			Sun coding conventions. -->
+		<module name="PackageName" />
+
+		<!-- Checks that method parameter names conform to a format specified by 
+			the format property. The default value for 'format' is "^[a-z][a-zA-Z0-9]*$" -->
+		<module name="ParameterName" />
+
+		<!-- Checks that {@code static}, non-{@code final} variable names conform 
+			to a format specified by the format property. The default value for 'format' 
+			is "^[a-z][a-zA-Z0-9]*$" -->
+		<module name="StaticVariableName" />
+
+		<!-- Checks that type names for classes, interfaces, enums, and annotations 
+			conform to a format specified by the format property. -->
+		<module name="TypeName">
+			<property name="format" value="^[A-Z][a-zA-Z0-9_]*$" />
+		</module>
+
+
+		<!-- Checks related to imports -->
+		<!-- See http://checkstyle.sf.net/config_import.html -->
+		<module name="AvoidStarImport" />
+		<module name="RedundantImport" />
+
+		<!-- Checks related to Size Violations. -->
+		<!-- See http://checkstyle.sf.net/config_sizes.html -->
+
+		<module name="LineLength">
+			<property name="ignorePattern" value="\$(Id|HeadURL).*\$" />
+			<property name="max" value="200" /> <!-- (80 is the default) -->
+		</module>
+
+		<module name="MethodLength">
+			<property name="max" value="255" />  <!-- (150 is the default) -->
+			<property name="countEmpty" value="false" />  <!-- (the default is 'true' (count empty lines) ) -->
+		</module>
+
+		<module name="ParameterNumber">
+			<property name="max" value="9" /> <!-- (7 is the default) -->
+		</module>
+
+
+		<!-- Checks related to whitespace -->
+		<!-- See http://checkstyle.sf.net/config_whitespace.html -->
+		<!-- disable all whitespace checks for now TJB <module name="EmptyForIteratorPad"/> 
+			<module name="MethodParamPad"/> <module name="NoWhitespaceAfter"/> <module 
+			name="NoWhitespaceBefore"/> -->
+
+		<module name="OperatorWrap" />
+		<!-- <module name="ParenPad"/> needs further discussion TJB -->
+		<!-- disable all whitespace for now TJB <module name="TypecastParenPad"/> -->
+		<!-- disable all whitespace for now TJB <module name="WhitespaceAfter"/> 
+			<module name="WhitespaceAround"> -->
+		<!-- all minus generic start/end -->
+		<!-- disable all whitespace for now TJB <property name="tokens" value="ASSIGN, 
+			BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, COLON, 
+			DIV, DIV_ASSIGN, EQUAL, GE, GT, LAND, LCURLY, LE, LITERAL_ASSERT, LITERAL_CATCH, 
+			LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_RETURN, 
+			LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, LOR, LT, MINUS, MINUS_ASSIGN, 
+			MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION, RCURLY, SL, SLIST, 
+			SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN, TYPE_EXTENSION_AND, WILDCARD_TYPE"/> 
+			</module> -->
+
+
+		<!-- Modifier Checks -->
+		<!-- See http://checkstyle.sf.net/config_modifiers.html -->
+		<module name="ModifierOrder" />
+		<module name="RedundantModifier" />
+
+
+		<!-- Checks for blocks. You know, those {}'s -->
+		<!-- See http://checkstyle.sf.net/config_blocks.html -->
+		<module name="AvoidNestedBlocks" />
+		<module name="EmptyBlock" />
+		<module name="LeftCurly" />
+		<module name="NeedBraces" />
+		<module name="RightCurly" />
+
+
+		<!-- Checks for common coding problems -->
+		<!-- See http://checkstyle.sf.net/config_coding.html -->
+		<module name="AvoidInlineConditionals" />
+		<module name="EmptyStatement" />
+		<module name="EqualsHashCode" />
+		<module name="HiddenField">
+			<property name="ignoreSetter" value="true" />
+			<property name="ignoreConstructorParameter" value="true" />
+		</module>
+		<module name="IllegalInstantiation" />
+		<module name="InnerAssignment" />
+		<!-- <module name="MagicNumber"/> 1929 errors catches dims -->
+		<module name="MissingSwitchDefault" />
+		<module name="SimplifyBooleanExpression" />
+		<module name="SimplifyBooleanReturn" />
+
+		<!-- Checks related to class design -->
+		<!-- See http://checkstyle.sf.net/config_design.html -->
+		<!-- <module name="DesignForExtension"/> discuss TJB -->
+		<module name="FinalClass" />
+		<module name="HideUtilityClassConstructor" />
+		<module name="InterfaceIsType" />
+		<module name="VisibilityModifier">
+			<property name="protectedAllowed" value="true" />
+		</module>
+
+		<!-- Miscellaneous other checks. -->
+		<!-- See http://checkstyle.sf.net/config_misc.html -->
+		<module name="ArrayTypeStyle" />
+		<!-- <module name="FinalParameters"/> not yet TJB -->
+		<!-- <module name="TodoComment"/> do we really need this TJB -->
+		<module name="UpperEll" />
+
+	</module> <!-- End TreeWalker -->
+
+</module>
