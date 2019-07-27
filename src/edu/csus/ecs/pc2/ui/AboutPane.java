@@ -60,11 +60,11 @@ public class AboutPane extends JPanePlugin {
             //TODO: read the image from the *pc2.jar* images folder
             pc2LogoImage = ImageIO.read(new File("./images/PC2Logo135x135.png"));
         } catch (IOException e1) {
-            e1.printStackTrace();
             try {
                 //TODO: read the image from the *pc2.jar* images folder
                 pc2LogoImage = ImageIO.read(new File("./images/csus_logo.png"));
             } catch (IOException e2) {
+                //TODO: should LOG this instead of printing to console
                 e2.printStackTrace();
             }
         }
