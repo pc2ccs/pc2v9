@@ -27,8 +27,6 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
  */
 public class AboutPane extends JPanePlugin {
     
-    // TODO Bug 1466 Add to AdminView
-    
     private VersionInfo versionInfo = new VersionInfo();
     
     public AboutPane() {
