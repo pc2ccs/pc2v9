@@ -58,7 +58,7 @@ public class AboutPane extends JPanePlugin {
         BufferedImage pc2LogoImage = null;
         try {
             //TODO: read the image from the *pc2.jar* images folder
-            pc2LogoImage = ImageIO.read(new File("./images/PC2Logo135x135x.png"));
+            pc2LogoImage = ImageIO.read(new File("./images/PC2Logo135x135.png"));
         } catch (IOException e1) {
             e1.printStackTrace();
             try {
