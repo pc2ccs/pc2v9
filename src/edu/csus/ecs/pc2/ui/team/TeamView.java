@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.ui.AboutPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
@@ -87,7 +88,7 @@ public class TeamView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(556,521));
+        this.setSize(new java.awt.Dimension(620,521));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getMainViewPane());
         this.setTitle("The TeamView");
@@ -278,6 +279,10 @@ public class TeamView extends JFrame implements UIPlugin {
                         }
                     }
                 }          
+                
+                AboutPane aboutPane = new AboutPane();
+                addUIPlugin(getMainTabbedPane(), "About", aboutPane);
+
 
                 updateFrameTitle(contest.getContestTime().isContestRunning());
                 
