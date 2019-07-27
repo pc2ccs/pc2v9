@@ -124,6 +124,12 @@ public class AboutPane extends JPanePlugin {
                 "Today's Date    : "+new Date(), //
                 "",
                 versionInfo.getSystemVersionInfo(), // 
+                "",
+                "Copyright \u00A9 2019 PC2 Development Team: "
+                + "John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. "
+                + "All rights reserved.", //
+                ""
+                
         };
         
         return String.join("\n", lines);
