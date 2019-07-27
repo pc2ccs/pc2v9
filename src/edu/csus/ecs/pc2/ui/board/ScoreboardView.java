@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.ui.AboutPane;
 import edu.csus.ecs.pc2.ui.BalloonColorListPane;
 import edu.csus.ecs.pc2.ui.BalloonPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
@@ -222,6 +223,9 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                         }
                     }
                 }
+
+                AboutPane aboutPane = new AboutPane();
+                addUIPlugin(getMainTabbedPane(), "About", aboutPane);
 
                 showMessage("");
 
