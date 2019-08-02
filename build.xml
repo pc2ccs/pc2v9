@@ -138,11 +138,17 @@
         </condition>
     </target>
     <target name="-getenv" if="exists.CI_PIPELINE_IID">
-       <add operand1="${lastECSbuild}" operand2="${env.CI_PIPELINE_IID}" result="repo.version"/>
+       <add operand1="${lastECSbuild}" operand2="${env.CI_PIPELINE_IID}" result="repo.version0"/>
 <!--
 TODO consider switching back to this at 9.7.0/9.8build
-        <property name="repo.version" value="${env.CI_PIPELINE_IID}"/>
+        <property name="repo.version0" value="${env.CI_PIPELINE_IID}"/>
 -->
+        <condition property="version.add" value="~${env.CI_COMMIT_REF_SLUG}" else="">
+           <not>
+               <equals arg1="${env.CI_COMMIT_REF_SLUG}" arg2="master"/>
+           </not>
+        </condition>
+        <property name="repo.version" value="${repo.version0}${version.add}"/>
     </target>
 
     <target name="compile" depends="init,checkstyle" description="compile the source ">

@@ -54,5 +54,4 @@ job-deploy:
     - apt-get install -y curl
     - export BUILDNUMBER=`echo dist/pc2-*.zip | sed 's#^dist.*build-\([0-9]*\)[.~].*#\1#'`
     - BUILD_JOB_ID=$(cat dist/ci_job_id.txt)
-#    - curl "http://pc2.ecs.csus.edu/cgi-bin/grabgitlabartifacts.cgi?authkey=$AUTHKEY&url=https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/$CI_BUILD_REF_NAME/download&buildnumber=$BUILDNUMBER"
     - curl "http://pc2.ecs.csus.edu/cgi-bin/grabgitlabartifacts.cgi?authkey=$AUTHKEY&url=https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/jobs/$BUILD_JOB_ID/artifacts&buildnumber=$BUILDNUMBER"
