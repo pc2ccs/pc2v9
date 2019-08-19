@@ -107,8 +107,9 @@ public class AboutPane extends JPanePlugin {
                 versionInfo.getSystemVersionInfo(), // 
                 "",
                 "Copyright \u00A9 1989,2019 PC2 Development Team: "
-                + "John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. "
-                + "All rights reserved.", //
+                        + "John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. ", //
+                "PC^2 is licensed under the Eclipse Public License Version 2.0; "
+                        + "see file LICENSE.TXT for details.",
                 ""
                 
         };
