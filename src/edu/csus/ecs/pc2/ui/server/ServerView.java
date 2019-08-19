@@ -39,6 +39,7 @@ import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.report.ContestSummaryReports;
+import edu.csus.ecs.pc2.ui.AboutPane;
 import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.EventFeedServerPane;
@@ -116,7 +117,7 @@ public class ServerView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new Dimension(750, 400));
+        this.setSize(new Dimension(800, 450));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Server View");
         this.setContentPane(getMainViewPane());
@@ -548,6 +549,9 @@ public class ServerView extends JFrame implements UIPlugin {
 
         ContestTimesPane contestTimesPane = new ContestTimesPane();
         addUIPlugin(getMainTabbedPane(), "Times", contestTimesPane);
+        
+        AboutPane aboutPane = new AboutPane();
+        addUIPlugin(getMainTabbedPane(), "About", aboutPane);
         
         setSelectedTab(getMainTabbedPane(), "Logins");
         

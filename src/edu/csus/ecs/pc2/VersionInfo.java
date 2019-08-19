@@ -104,7 +104,7 @@ public class VersionInfo {
      * @return system name.
      */
     public final String getSystemName() {
-        return "CSUS Programming Contest System";
+        return "CSUS Programming Contest Control System";
     }
 
     /**

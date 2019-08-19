@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.ui.AboutPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
@@ -289,7 +290,10 @@ public class JudgeView extends JFrame implements UIPlugin {
                     }
                 }
                 
-                
+                AboutPane aboutPane = new AboutPane();
+                addUIPlugin(getMainTabbedPane(), "About", aboutPane);
+
+
                 /**
                  * Start Auto Judging
                  */

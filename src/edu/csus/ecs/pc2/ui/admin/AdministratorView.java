@@ -31,6 +31,7 @@ import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
+import edu.csus.ecs.pc2.ui.AboutPane;
 import edu.csus.ecs.pc2.ui.AccountsPane;
 import edu.csus.ecs.pc2.ui.AutoJudgesPane;
 import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
@@ -137,7 +138,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
      */
     private void initialize() {
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.setBounds(new java.awt.Rectangle(0, 0, 1024, 750));
+        this.setBounds(new java.awt.Rectangle(0, 0, 1080, 750));
         this.setContentPane(getJPanel());
         this.setTitle("PC^2 Administrator");
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -290,6 +291,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ContestTimesPane contestTimesPane = new ContestTimesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Times", contestTimesPane);
 
+                AboutPane aboutPane = new AboutPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "About", aboutPane);
+
                 /**
                  * add UI components involved with Running the contest to the RunContest tabbed pane
                  */
@@ -374,6 +378,10 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 TeamStatusPane teamStatusPane = new TeamStatusPane();
                 addUIPlugin(getRunContestTabbedPane(), "Team Status", teamStatusPane);
+
+                AboutPane aboutPane2 = new AboutPane();
+                addUIPlugin(getRunContestTabbedPane(), "About", aboutPane2);
+
 
                 setSelectedTab (getRunContestTabbedPane(), "Runs");
                 setSelectedTab (getConfigureContestTabbedPane(), "Accounts");
