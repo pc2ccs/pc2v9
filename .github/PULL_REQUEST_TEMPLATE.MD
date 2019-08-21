@@ -5,7 +5,7 @@ Before submitting your Pull Request, please make sure you have done the followin
 - [ ] Read the [Guidelines for contributing to PC^2](../CONTRIBUTING.MD)
 - [ ] Created JUnit (or similar) tests to demonstrate that your code works as intended
 - [ ] Verified that all existing JUnit tests continue to succeed
-- [ ] Additional list items here?
+- [ ] Provided appropriate *documentation* for your code
 
 ## Description
 Please explain what your Pull Request does -- what it is intended to add to PC^2 and/or what it fixes.
