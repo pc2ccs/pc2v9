@@ -1,4 +1,5 @@
-Thank you for working to help us improve PC^2!     Please fill in the following fields in order to help us understand what issue you are reporting.
+Thank you for working to help us improve PC^2!  
+Please fill in the following fields in order to help us understand what issue you are reporting.
 
 **Describe the issue**: please provide a clear and concise description of what the bug is.  
 ...
@@ -21,5 +22,5 @@ Thank you for working to help us improve PC^2!     Please fill in the following 
  - Browser (if the bug is related to web-based team clients) `[e.g. Chrome Version 75.0.3770.142 or Safari Version 11.1.2`]:
  - PC2 Version `[e.g. 9.7.0`]:  
 
-**Additional context**
-Add any other context about the issue here.
+**Additional context**: please add any other context about the issue here.  
+...
