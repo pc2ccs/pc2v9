@@ -1,10 +1,10 @@
-Thank you for contributing a suggestion for a new feature in PC^2!
+Thank you for contributing a suggestion for a new feature in PC^2!  
 In order to help us understand the proposed feature, please fill in the following fields:
 
-**Is your feature request related to a problem?** Please provide a clear and concise description of what the problem is (for example: "I'm always frustrated when ... "  
+**Is your feature request related to a problem?** Please provide a clear and concise description of what the problem is (for example: "I'm always frustrated when ... " ) 
 ...
 
-**Is your feature request something totally new that doesn't exist in PC^2?**  Please provide a clear and concise description of the proposed feature:  
+**Feature Description**: please provide a clear and concise description of the proposed feature:  
 ...
 
 **Have you considered other ways to accomplish the same thing?** Please provide a clear and concise description of any alternative solutions or features you've considered.  
