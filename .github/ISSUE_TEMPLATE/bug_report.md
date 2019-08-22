@@ -18,9 +18,9 @@ Please fill in the following fields in order to help us understand what issue yo
 **Screenshots**:  if applicable, please add attachments showing screenshots to help explain the issue.
 
 **Environment**: please complete the following information:
- - OS name and version under which the issue was detected `[e.g. Windows 10 or Ubuntu 18.04`]:
- - Browser (if the bug is related to web-based team clients) `[e.g. Chrome Version 75.0.3770.142 or Safari Version 11.1.2`]:
- - PC2 Version `[e.g. 9.7.0`]:  
+ - OS name and version under which the issue was detected (e.g. Windows 10 or Ubuntu 18.04):
+ - Browser (if the bug is related to web-based team clients) (e.g. Chrome Version 75.0.3770.142 or Safari Version 11.1.2):
+ - PC2 Version (e.g. 9.7.0):  
 
 **Additional context**: please add any other context about the issue here.  
 ...
