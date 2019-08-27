@@ -12,12 +12,10 @@ These are mostly guidelines, not rules. Use your best judgment, and feel free to
   * [Design Approach](#design) 
   * [Coding Style](#style)
 * [How can I contribute?](#howtocontribute)
-* [Issues and Bugs](#issue)
-* [Feature Requests](#feature)
-* [Improving Documentation](#docs)
+  * [Reporting Bugs](#reportingbugs)
+  * [Suggesting New Features](#suggestingfeatures)
 * [Issue Submission Guidelines](#submit)
 * [Pull Request Submission Guidelines](#submit-pr)
-* [Signing the CLA](#cla)
 
 
 ## <a name="thingstoknow"></a> Things to know before you get started
@@ -30,15 +28,15 @@ Each contest site runs a single **Server** module (in a multi-site contest each 
 
 There are various types of Client modules:
   * Contest Administors run an **Admin** module.
-  * Each Judge (human or automated) runs a **Judge** module.
-  * Each contest team runs either a **Team** module or interfaces with the system via a browser using a **Web Client Team** module.
+  * Each contest Judge (human or automated) runs a **Judge** module.
+  * Each contest Team runs either a **Team** module or interfaces with the system via a browser using a **Web Client Team** module.
   * Scoreboards are displayed by a **Scoreboard** module.
   * An **Event Feed** module can be used to generate a [CLICS Event Feed](https://clics.ecs.baylor.edu/index.php?title=Main_Page).
 
 Clients communicate _only_ with the Server module for their site -- never with any other client nor with any server but the one
 designated as their "site server" (which is declared via a configuration file named **pc2v9.ini**).
 
-All modules display a User Interface (UI) defined in subpackages of the **edu.csus.ecs.pc2.ui** package.  
+All modules display a User Interface (UI) defined in a corresponding subpackage of the **edu.csus.ecs.pc2.ui** package.  
 The various UI packages share common tools and structures defined in packages such as **edu.csus.ecs.pc2.core**, 
 **edu.csus.ecs.pc2.api**, **edu.csus.ecs.pc2.services**, and **edu.csus.ecs.pc2.tools**.
 
@@ -69,11 +67,11 @@ For this reason, we have adopted a set of coding guidelines which we expect all 
 everyone on the original PC^2 core development team agreed on all the elements of our guidelines.  However, everyone did agree that
 it was more important to _have a set of standard guidelines_ than it was to have unanimous agreement on what those guidelines are.)
 
-Please see our [PC^2 Coding Style Guidelines document](../CodingStyle.md) for insight into what is expected of code contributions to PC^2.
+Please see our [PC^2 Coding Style Guidelines document](./CodingStyle.md) for insight into what is expected of code contributions to PC^2.
 
 ## <a name="howtocontribute"></a>  How can I contribute?
 
-### Reporting Bugs
+### <a name="reportingbugs"></a> Reporting Bugs
 
 * **Do not open up a GitHub issue if the bug is a security vulnerability
   in PC^2**; instead to refer to our [security policy](https://need.a.url.here).
@@ -81,11 +79,12 @@ Please see our [PC^2 Coding Style Guidelines document](../CodingStyle.md) for in
 * **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/pc2ccs/pc2v9/issues).
 
 * If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/pc2ccs/pc2v9/issues/new).
-Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** 
-demonstrating the expected behavior that is not occurring.
+Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
+
+<Additional text here referring to our existing bug-reporting template.
 
 
-### Suggesting Enhancements
+### <a name="suggestingfeatures"></a>  Suggesting New Features
 
-<Text here describing how to suggest an enhancement/new feature>
+<Text here describing how to suggest an enhancement/new feature, including a reference to our existing feature_request template.>
 
