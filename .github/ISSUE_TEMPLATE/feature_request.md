@@ -1,3 +1,12 @@
+---
+name: Feature request
+about: Suggest an idea for this project
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 Thank you for contributing a suggestion for a new feature in PC^2!  
 In order to help us understand the proposed feature, please fill in the following fields:
 
