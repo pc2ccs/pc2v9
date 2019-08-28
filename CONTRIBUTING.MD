@@ -3,19 +3,22 @@
 First, thanks for your interest in contributing to the PC^2 project -- we welcome new contributions!  
 
 The following is a set of guidelines for contributing to PC^2, which is hosted in the **PC2CCS** Organization on GitHub. 
-These are mostly guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
 
 #### Table of Contents
 
-* [Things to know before you get started](#thingstoknow)  
-  * [Code Organization](#codeorg)  
-  * [Design Approach](#design) 
+* [Things to know before you get started](#thingstoknow)
+  * [Code Organization](#codeorg)
+  * [Design Approach](#design)
   * [Coding Style](#style)
-* [How can I contribute?](#howtocontribute)
+  
+* [Providing Feedback](#feedback)
   * [Reporting Bugs](#reportingbugs)
   * [Suggesting New Features](#suggestingfeatures)
-* [Issue Submission Guidelines](#submit)
-* [Pull Request Submission Guidelines](#submit-pr)
+  * [Issue Submission Guidelines](#issueguidelines)
+  
+* [How can I contribute?](#howtocontribute)
+  * [Your First Code Contribution](#firstcodecontribution)
+  * [Pull Request Submission Guidelines](#submit-pr)
 
 
 ## <a name="thingstoknow"></a> Things to know before you get started
@@ -61,7 +64,7 @@ the existing tabs -- avoiding user confusion.
 Everyone has their own coding "style", and there are plenty examples of flame wars over _this_ or _that_ method, format, technique,
 approach, etc.  However, without asserting that one particular style element is "better" or "worse" than another, we have found that
 it's much more important to have a _consistent_ code style in a project 
-than it is to argue about which particular approach is "better".  
+than it is to argue about which particular code style is "better".  
 
 For this reason, we have adopted a set of coding guidelines which we expect all contributors to PC^2 to follow.  (Believe us, not even
 everyone on the original PC^2 core development team agreed on all the elements of our guidelines.  However, everyone did agree that
@@ -69,22 +72,51 @@ it was more important to _have a set of standard guidelines_ than it was to have
 
 Please see our [PC^2 Coding Style Guidelines document](./CodingStyle.md) for insight into what is expected of code contributions to PC^2.
 
-## <a name="howtocontribute"></a>  How can I contribute?
+## <a name="feedback"></a> Providing Feedback
+
+There are several ways that PC^2 users can provide feedback to help our developers improve the system.
 
 ### <a name="reportingbugs"></a> Reporting Bugs
 
 * **Do not open up a GitHub issue if the bug is a security vulnerability
   in PC^2**; instead to refer to our [security policy](https://need.a.url.here).
 
-* **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/pc2ccs/pc2v9/issues).
+* **Ensure the bug was not already reported** by searching on GitHub under [PC2V9 Issues](https://github.com/pc2ccs/pc2v9/issues).
 
 * If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/pc2ccs/pc2v9/issues/new).
 Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
 
-<Additional text here referring to our existing bug-reporting template.
-
+<Additional text here referring to our existing bug-reporting template.>
 
 ### <a name="suggestingfeatures"></a>  Suggesting New Features
 
 <Text here describing how to suggest an enhancement/new feature, including a reference to our existing feature_request template.>
 
+### <a name="issueguidelines"></a> Issue Submission Guidelines
+
+<Text here explaining the bug_report and feature_request templates>
+ 
+## <a name="howtocontribute"></a>  How can I contribute?
+
+If you are interested in doing more than providing feedback -- you want to contribute code to PC^2 -- then keep reading!
+
+### <a name="firstcodecontribution"></a>  Your First Code Contribution
+
+Unsure where to begin contributing to PC^2? You can start by looking through the PC^2 [Issues List](https://github.com/pc2ccs/pc2v9/issues) for
+issues labeled `beginner` and `help-wanted`.  
+
+* `Beginner` issues should only require a few lines of code, and a test or two.
+* `Help-wanted` issues are items which are likely to be a bit more involved than `beginner` issues.
+
+Regardless of what issue you choose to work on, the overall process is the same:
+
+* Create your own [fork](https://help.github.com/en/articles/fork-a-repo) of the pc2v9 repository.
+* Optionally, create a clone of your fork on your own machine.
+* Create a Git Branch for the work, following the [PC2 Branch Naming Guidelines](./BranchNaming).
+* Develop the code to implement your bug fix or feature.
+* If the branch work was done on a clone of your fork, push the branch code from your local clone to your PC2v9 fork on GitHub.
+* Submit a _Pull Request_ following the PR Submission Guidelines (outlined below).
+
+### <a name="submit-pr"></a> Pull Request Submission Guidelines
+
+<Text here identifying our PR Guidelines>
