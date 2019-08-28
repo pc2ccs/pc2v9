@@ -13,7 +13,6 @@ The following is a set of guidelines for contributing to PC^2, which is hosted i
 * [Providing Feedback](#feedback)
   * [Reporting Bugs](#reportingbugs)
   * [Suggesting New Features](#suggestingfeatures)
-  * [Issue Submission Guidelines](#issueguidelines)
 * [How can I contribute?](#howtocontribute)
   * [Your First Code Contribution](#firstcodecontribution)
   * [Pull Request Submission Guidelines](#submit-pr)
@@ -72,7 +71,7 @@ Please see our [PC^2 Coding Style Guidelines document](./CodingStyle.md) for ins
 
 ## <a name="feedback"></a> Providing Feedback
 
-There are several ways that PC^2 users can provide feedback to help our developers improve the system.
+There are several ways that PC^2 users can provide feedback to help improve the system.
 
 ### <a name="reportingbugs"></a> Reporting Bugs
 
@@ -81,18 +80,14 @@ There are several ways that PC^2 users can provide feedback to help our develope
 
 * **Ensure the bug was not already reported** by searching on GitHub under [PC2V9 Issues](https://github.com/pc2ccs/pc2v9/issues).
 
-* If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/pc2ccs/pc2v9/issues/new).
-Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
-
-Additional text here referring to our existing bug-reporting template.
+* If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/pc2ccs/pc2v9/issues/new/choose).
+Choose the "Bug Report" template and click "Get Started", then fill in each of the template sections.  Be sure to include a **title and clear description**, **steps to reproduce the bug**, and a description of what you _expected_ to happen (but didn't) when those "steps to reproduce" are followed.  Please also include relevant PC^2 **log** information (either inline in the report, or as an attachment if the relevant log data is long), as well as attachments showing any relevant screenshots, along with a description of the environment in which the bug manifested.
 
 ### <a name="suggestingfeatures"></a>  Suggesting New Features
 
-Text here describing how to suggest an enhancement/new feature, including a reference to our existing feature_request template.
+If you have an idea for a new feature, or a suggestion for a better way to handle an existing operation, we'd love to hear about it!
+Please feel free to [open a new-feature request](https://github.com/pc2ccs/pc2v9/issues/new/choose) by selecting the **feature request** issue template and filling in the relevant information.
 
-### <a name="issueguidelines"></a> Issue Submission Guidelines
-
-Text here explaining the bug_report and feature_request templates...
  
 ## <a name="howtocontribute"></a>  How can I contribute?
 
@@ -100,7 +95,7 @@ If you are interested in doing more than providing feedback -- you want to contr
 
 ### <a name="firstcodecontribution"></a>  Your First Code Contribution
 
-Unsure where to begin contributing to PC^2? You can start by looking through the PC^2 [Issues List](https://github.com/pc2ccs/pc2v9/issues) for
+Unsure how to begin contributing to PC^2? You can start by looking through the PC^2 [Issues List](https://github.com/pc2ccs/pc2v9/issues) for
 issues labeled `beginner` and `help-wanted`.  
 
 * `Beginner` issues should only require a few lines of code, and a test or two.
@@ -109,10 +104,10 @@ issues labeled `beginner` and `help-wanted`.
 Regardless of what issue you choose to work on, the overall process is the same:
 
 * Create your own [fork](https://help.github.com/en/articles/fork-a-repo) of the pc2v9 repository.
-* Optionally, create a clone of your fork on your own machine.
-* Create a Git Branch for the work, following the [PC2 Branch Naming Guidelines](./BranchNaming).
+* Optionally, clone your fork onto your own machine.
+* Create a Git Branch for the work, following the [PC2 Branch Naming Guidelines](./BranchNaming.md).
 * Develop the code to implement your bug fix or feature.
-* Create automated tests (e.g. JUnits) to demonstrate that your code works as intended.
+* Create automated tests (e.g. Java JUnits) to demonstrate that your code works as intended.
 * If the branch work was done on a clone of your fork, push the branch code from your local clone to your PC2v9 fork on GitHub.
 * Submit a _Pull Request_ following the PR Submission Guidelines (outlined below).
 
