@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
  * Produces a medium-sized collection of output to stdout with each line having a different begining label.
  * "Medium-sized" is define relative to the program "LargeLabeledStdout"...

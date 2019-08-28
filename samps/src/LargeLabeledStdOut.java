@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
  * Produces a large collection of output to stdout with each line having a different beginning label.
  * 

@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
  * This class encapsulates settings for configuring a "custom validator".
  * Settings include the validator program name (that is, the program which acts as

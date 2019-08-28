@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /*
 Java solution of the 'Ship Traffic' problem.
 ACM ICPC World Finals 2015, Morocco.

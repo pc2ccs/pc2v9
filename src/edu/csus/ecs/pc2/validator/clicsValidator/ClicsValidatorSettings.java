@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
  * This class encapsulates a set of options for configuring the PC2/CLICS "default validator".
  * Options include whether validation should be case-sensitive and/or space-sensitive, and
