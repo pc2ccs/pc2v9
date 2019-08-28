@@ -112,6 +112,7 @@ Regardless of what issue you choose to work on, the overall process is the same:
 * Optionally, create a clone of your fork on your own machine.
 * Create a Git Branch for the work, following the [PC2 Branch Naming Guidelines](./BranchNaming).
 * Develop the code to implement your bug fix or feature.
+* Create automated tests (e.g. JUnits) to demonstrate that your code works as intended.
 * If the branch work was done on a clone of your fork, push the branch code from your local clone to your PC2v9 fork on GitHub.
 * Submit a _Pull Request_ following the PR Submission Guidelines (outlined below).
 
