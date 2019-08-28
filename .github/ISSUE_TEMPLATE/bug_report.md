@@ -1,3 +1,12 @@
+---
+name: Bug report
+about: Create a report to help us improve PC^2
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 Thank you for working to help us improve PC^2!  
 Please fill in the following fields in order to help us understand what issue you are reporting.
 
