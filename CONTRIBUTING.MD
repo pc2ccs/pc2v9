@@ -104,11 +104,13 @@ issues labeled `beginner` and `help-wanted`.
 Regardless of what issue you choose to work on, the overall process is the same:
 
 * Create your own [fork](https://help.github.com/en/articles/fork-a-repo) of the pc2v9 repository.
-* Optionally, clone your fork onto your own machine.
-* Create a Git Branch for the work, following the [PC2 Branch Naming Guidelines](./BranchNaming.md).
+* Optionally, clone your fork onto your own machine (it's usually easier to work on a clone on your own machine,
+    using your own IDE/Tools).
+* Create a Git Branch (called a _topic branch_ for the work, following the [PC2 Branch Naming Guidelines](./BranchNaming.md).
 * Develop the code to implement your bug fix or feature.
 * Create automated tests (e.g. Java JUnits) to demonstrate that your code works as intended.
 * If the branch work was done on a clone of your fork, push the branch code from your local clone to your PC2v9 fork on GitHub.
+  Do NOT merge your toic branch into your master branch.
 * Submit a _Pull Request_ following the PR Submission Guidelines (outlined below).
 
 ### <a name="submit-pr"></a> Pull Request Submission Guidelines
@@ -117,5 +119,13 @@ When you have completed the above steps and come up with a bug fix or enhancemen
 
 Prior to submitting a PR, be sure that you have complied with all the preceding steps, including following the [PC^2 Coding Style Guidelines](./CodingStyle.md) and the creation of automated tests (e.g. JUnits) which demonstrate that your code works as intended (failure to adhere to these steps will almost certainly result in rejection of your PR, regardless of how "cool" the new feature might be).
 
-To submit a PR, follow the steps in the GitHub [Creating a Pull Request](https://help.github.com/en/articles/creating-a-pull-request-from-a-fork) guide.
+To submit a PR, follow the steps in the GitHub [Creating a Pull Request](https://help.github.com/en/articles/creating-a-pull-request-from-a-fork) guide. Specifically, these steps are:
+
+* Navigate to the original PC2v9 project repository (https://github.com/pc2ccs/pc2v9).
+* Click the **New Pull Request** button.
+* Click the **Compare across forks** link.
+* Click the **base:master** dropdown and enter the name for the new branch (use the same name as the name of the branch in your fork).
+* Click the **head repository** dropdown and enter the name of your forked repository.
+* Click the **compare** dropdown and enter the name of the branch in your forked repository.
+
 
