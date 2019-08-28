@@ -10,12 +10,10 @@ The following is a set of guidelines for contributing to PC^2, which is hosted i
   * [Code Organization](#codeorg)
   * [Design Approach](#design)
   * [Coding Style](#style)
-  
 * [Providing Feedback](#feedback)
   * [Reporting Bugs](#reportingbugs)
   * [Suggesting New Features](#suggestingfeatures)
   * [Issue Submission Guidelines](#issueguidelines)
-  
 * [How can I contribute?](#howtocontribute)
   * [Your First Code Contribution](#firstcodecontribution)
   * [Pull Request Submission Guidelines](#submit-pr)
@@ -86,15 +84,15 @@ There are several ways that PC^2 users can provide feedback to help our develope
 * If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/pc2ccs/pc2v9/issues/new).
 Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
 
-<Additional text here referring to our existing bug-reporting template.>
+Additional text here referring to our existing bug-reporting template.
 
 ### <a name="suggestingfeatures"></a>  Suggesting New Features
 
-<Text here describing how to suggest an enhancement/new feature, including a reference to our existing feature_request template.>
+Text here describing how to suggest an enhancement/new feature, including a reference to our existing feature_request template.
 
 ### <a name="issueguidelines"></a> Issue Submission Guidelines
 
-<Text here explaining the bug_report and feature_request templates>
+Text here explaining the bug_report and feature_request templates...
  
 ## <a name="howtocontribute"></a>  How can I contribute?
 
@@ -119,4 +117,4 @@ Regardless of what issue you choose to work on, the overall process is the same:
 
 ### <a name="submit-pr"></a> Pull Request Submission Guidelines
 
-<Text here identifying our PR Guidelines>
+Text here identifying our PR Guidelines
