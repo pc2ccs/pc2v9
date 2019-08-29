@@ -110,7 +110,7 @@ Regardless of what issue you choose to work on, the overall process is the same:
 * Develop the code to implement your bug fix or feature.
 * Create automated tests (e.g. Java JUnits) to demonstrate that your code works as intended.
 * If the branch work was done on a clone of your fork, push the branch code from your local clone to your PC2v9 fork on GitHub.
-  Do NOT merge your toic branch into your master branch.
+  Do NOT merge your topic branch into your master branch.
 * Submit a _Pull Request_ following the PR Submission Guidelines (outlined below).
 
 ### <a name="submit-pr"></a> Pull Request Submission Guidelines
@@ -121,11 +121,19 @@ Prior to submitting a PR, be sure that you have complied with all the preceding 
 
 To submit a PR, follow the steps in the GitHub [Creating a Pull Request](https://help.github.com/en/articles/creating-a-pull-request-from-a-fork) guide. Specifically, these steps are:
 
-* Navigate to the original PC2v9 project repository (https://github.com/pc2ccs/pc2v9).
+* Navigate to the original PC2v9 project repository [Pull Requests](https://github.com/pc2ccs/pc2v9/pulls).
 * Click the **New Pull Request** button.
-* Click the **Compare across forks** link.
-* Click the **base:master** dropdown and enter the name for the new branch (use the same name as the name of the branch in your fork).
+* In the **Compare changes** paragraph, click the **Compare across forks** link.
+* Insure that the **base:repository** dropdown shows **pc2ccs/pc2v9** and that the **base** (branch) dropdown shows **master**.
 * Click the **head repository** dropdown and enter the name of your forked repository.
 * Click the **compare** dropdown and enter the name of the branch in your forked repository.
+* Click the **Create pull request** button.
+* Scroll down in the Pull Request Template **Write** tab area and fill in the following information:
+  * Description (describe what changes your Pull Request makes to the PC^2 system)
+  * Issue number (enter the Issue number from the [PC2v9 Issues list](https://github.com/pc2ccs/pc2v9/issues); for example,
+    enter "Fixes #1234").
+  * Environment (describe the environment in which your Pull Request code was created and tested).
+* Click the **Create pull request** button.
+
 
 
