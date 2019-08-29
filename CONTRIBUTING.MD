@@ -3,19 +3,19 @@
 First, thanks for your interest in contributing to the PC^2 project -- we welcome new contributions!  
 
 The following is a set of guidelines for contributing to PC^2, which is hosted in the **PC2CCS** Organization on GitHub. 
-These are mostly guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
 
 #### Table of Contents
 
-* [Things to know before you get started](#thingstoknow)  
-  * [Code Organization](#codeorg)  
-  * [Design Approach](#design) 
+* [Things to know before you get started](#thingstoknow)
+  * [Code Organization](#codeorg)
+  * [Design Approach](#design)
   * [Coding Style](#style)
-* [How can I contribute?](#howtocontribute)
+* [Providing Feedback](#feedback)
   * [Reporting Bugs](#reportingbugs)
   * [Suggesting New Features](#suggestingfeatures)
-* [Issue Submission Guidelines](#submit)
-* [Pull Request Submission Guidelines](#submit-pr)
+* [How can I contribute?](#howtocontribute)
+  * [Your First Code Contribution](#firstcodecontribution)
+  * [Pull Request Submission Guidelines](#submit-pr)
 
 
 ## <a name="thingstoknow"></a> Things to know before you get started
@@ -61,7 +61,7 @@ the existing tabs -- avoiding user confusion.
 Everyone has their own coding "style", and there are plenty examples of flame wars over _this_ or _that_ method, format, technique,
 approach, etc.  However, without asserting that one particular style element is "better" or "worse" than another, we have found that
 it's much more important to have a _consistent_ code style in a project 
-than it is to argue about which particular approach is "better".  
+than it is to argue about which particular code style is "better".  
 
 For this reason, we have adopted a set of coding guidelines which we expect all contributors to PC^2 to follow.  (Believe us, not even
 everyone on the original PC^2 core development team agreed on all the elements of our guidelines.  However, everyone did agree that
@@ -69,21 +69,70 @@ it was more important to _have a set of standard guidelines_ than it was to have
 
 Please see our [PC^2 Coding Style Guidelines document](./CodingStyle.md) for insight into what is expected of code contributions to PC^2.
 
-## <a name="howtocontribute"></a>  How can I contribute?
+## <a name="feedback"></a> Providing Feedback
+
+There are several ways that PC^2 users can provide feedback to help improve the system.
 
 ### <a name="reportingbugs"></a> Reporting Bugs
 
 * **Do not open up a GitHub issue if the bug is a security vulnerability
   in PC^2**; instead to refer to our [security policy](https://need.a.url.here).
 
-* **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/pc2ccs/pc2v9/issues).
+* **Ensure the bug was not already reported** by searching on GitHub under [PC2V9 Issues](https://github.com/pc2ccs/pc2v9/issues).
 
-* If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/pc2ccs/pc2v9/issues/new).
-Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
-
-<Additional text here referring to our existing bug-reporting template.
-
+* If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/pc2ccs/pc2v9/issues/new/choose).
+Choose the "Bug Report" template and click "Get Started", then fill in each of the template sections.  Be sure to include a **title and clear description**, **steps to reproduce the bug**, and a description of what you _expected_ to happen (but didn't) when those "steps to reproduce" are followed.  Please also include relevant PC^2 **log** information (either inline in the report, or as an attachment if the relevant log data is long), as well as attachments showing any relevant screenshots, along with a description of the environment in which the bug manifested.
 
 ### <a name="suggestingfeatures"></a>  Suggesting New Features
 
-<Text here describing how to suggest an enhancement/new feature, including a reference to our existing feature_request template.>
+If you have an idea for a new feature, or a suggestion for a better way to handle an existing operation, we'd love to hear about it!
+Please feel free to [open a new-feature request](https://github.com/pc2ccs/pc2v9/issues/new/choose) by selecting the **feature request** issue template and filling in the relevant information.
+
+ 
+## <a name="howtocontribute"></a>  How can I contribute?
+
+If you are interested in doing more than providing feedback -- you want to contribute code to PC^2 -- then keep reading!
+
+### <a name="firstcodecontribution"></a>  Your First Code Contribution
+
+Unsure how to begin contributing to PC^2? You can start by looking through the PC^2 [Issues List](https://github.com/pc2ccs/pc2v9/issues) for
+issues labeled `beginner` and `help-wanted`.  
+
+* `Beginner` issues should only require a few lines of code, and a test or two.
+* `Help-wanted` issues are items which are likely to be a bit more involved than `beginner` issues.
+
+Regardless of what issue you choose to work on, the overall process is the same:
+
+* Create your own [fork](https://help.github.com/en/articles/fork-a-repo) of the pc2v9 repository.
+* Optionally, clone your fork onto your own machine (it's usually easier to work on a clone on your own machine,
+    using your own IDE/Tools).
+* Create a Git Branch (called a _topic branch_ for the work, following the [PC2 Branch Naming Guidelines](./BranchNaming.md).
+* Develop the code to implement your bug fix or feature.
+* Create automated tests (e.g. Java JUnits) to demonstrate that your code works as intended.
+* If the branch work was done on a clone of your fork, push the branch code from your local clone to your PC2v9 fork on GitHub.
+  Do NOT merge your topic branch into your master branch.
+* Submit a _Pull Request_ following the PR Submission Guidelines (outlined below).
+
+### <a name="submit-pr"></a> Pull Request Submission Guidelines
+
+When you have completed the above steps and come up with a bug fix or enhancement, the final step is to submit a [Pull Request](https://help.github.com/en/articles/about-pull-requests).  Pull Requests (PR's) allow you to submit a request to the PC^2 maintainers to merge your code into the PC^2 master branch and thus make it part of an upcoming public distribution of PC^2.
+
+Prior to submitting a PR, be sure that you have complied with all the preceding steps, including following the [PC^2 Coding Style Guidelines](./CodingStyle.md) and the creation of automated tests (e.g. JUnits) which demonstrate that your code works as intended (failure to adhere to these steps will almost certainly result in rejection of your PR, regardless of how "cool" the new feature might be).
+
+To submit a PR, follow the steps in the GitHub [Creating a Pull Request](https://help.github.com/en/articles/creating-a-pull-request-from-a-fork) guide. Specifically, these steps are:
+
+* Navigate to the original PC2v9 project repository [Pull Requests](https://github.com/pc2ccs/pc2v9/pulls).
+* Click the **New Pull Request** button.
+* In the **Compare changes** paragraph, click the **Compare across forks** link.
+* Insure that the **base:repository** dropdown shows **pc2ccs/pc2v9** and that the **base** (branch) dropdown shows **master**.
+* Click the **head repository** dropdown and enter the name of your forked repository.
+* Click the **compare** dropdown and enter the name of the branch in your forked repository.
+* Click the **Create pull request** button.
+* Scroll down in the Pull Request Template **Write** tab area and fill in the following information:
+  * Description (describe what changes your Pull Request makes to the PC^2 system)
+  * Issue number (enter the Issue number from the [PC2v9 Issues list](https://github.com/pc2ccs/pc2v9/issues); for example,
+    enter "Fixes #1234").
+  * Environment (describe the environment in which your Pull Request code was created and tested).
+* Click the **Create pull request** button.
+
+
