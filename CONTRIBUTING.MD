@@ -76,7 +76,7 @@ There are several ways that PC^2 users can provide feedback to help improve the 
 ### <a name="reportingbugs"></a> Reporting Bugs
 
 * **Do not open up a GitHub issue if the bug is a security vulnerability
-  in PC^2**; instead to refer to our [security policy](https://need.a.url.here).
+  in PC^2**; instead to refer to our [security policy](./SecurityPolicy.md).
 
 * **Ensure the bug was not already reported** by searching on GitHub under [PC2V9 Issues](https://github.com/pc2ccs/pc2v9/issues).
 
