@@ -1,4 +1,5 @@
 @echo off
+REM Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 
 rem Purpose: print pc2 version number
 rem Author : pc2@ecs.csus.edu
