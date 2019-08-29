@@ -1,3 +1,4 @@
+<?php /* Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. */ ?>
 <?php 
 		if(version_compare(phpversion(),'4.3.0')>=0) { 
   			  if(!preg_match ( '/^SESS[0-9a-zA-Z]+$/',$_REQUEST['SESSION_NAME'])) { 

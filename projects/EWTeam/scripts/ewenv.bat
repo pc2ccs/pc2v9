@@ -1,4 +1,5 @@
 
+REM Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 rem Purpose: to be called by the other scripts to setup the environment
 rem Author : pc2@ecs.csus.edu
 rem $HeadURL$

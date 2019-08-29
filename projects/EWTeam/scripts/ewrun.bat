@@ -1,4 +1,5 @@
 @echo off
+REM Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 
 rem Purpose: Start the ew Team server/java bridge 
 rem Author : pc2@ecs.csus.edu
