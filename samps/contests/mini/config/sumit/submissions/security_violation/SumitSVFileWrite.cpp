@@ -1,3 +1,4 @@
+/* Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. */
 //
 // File:    SumitSVFileWrite.cpp
 // Purpose: to output Hello World then write to a file

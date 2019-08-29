@@ -1,4 +1,5 @@
 #
+# Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 # File:    sumit.pl
 # Purpose: to sum the integers - and write to a file  
 # Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
