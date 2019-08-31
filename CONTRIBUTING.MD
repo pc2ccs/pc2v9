@@ -40,7 +40,8 @@ All modules display a User Interface (UI) defined in a corresponding subpackage 
 The various UI packages share common tools and structures defined in packages such as **edu.csus.ecs.pc2.core**, 
 **edu.csus.ecs.pc2.api**, **edu.csus.ecs.pc2.services**, and **edu.csus.ecs.pc2.tools**.
 
-Further details on the Code Organization of PC^2 can be found on the [PC2 Developer's Wiki](need a link here).
+Further details on the Code Organization of PC^2 can be found on the
+[PC2 Developer's Wiki](https://github.com/pc2ccs/pc2v9/wiki/PC2-Developer%27s-Wiki).
 
 ### <a name="design"></a> Design Approach
 
