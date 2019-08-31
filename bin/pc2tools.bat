@@ -1,6 +1,5 @@
 @echo off
 REM Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-REM Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 
 rem Purpose: start the pc2tools program
 rem Author : Douglas A. Lane <pc2@ecs.csus.edu>
