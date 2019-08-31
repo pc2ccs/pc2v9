@@ -1,4 +1,5 @@
 /* Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. */
+/* Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. */
 // Note: this is the solution written for DNA (as the problem was
 // called then) for ICPC 2013, slightly modified for the new format. /Per
 

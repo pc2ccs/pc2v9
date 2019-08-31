@@ -1,4 +1,5 @@
 /* Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. */
+/* Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. */
 // This approach attempts to do a generic hill-climbing approach to
 // place the N shafts, starting with them uniformly distributed.
 #include <iostream>
