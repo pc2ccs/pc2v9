@@ -1,3 +1,4 @@
+/* Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. */
 /* Solution to "Tiles", variant "precalc or FFT", FFT-based solutions.
    The assumption is we're looking for the area that gives the maximum possible
    number of tiles, with the area being in [a, b), where a and b are the two
