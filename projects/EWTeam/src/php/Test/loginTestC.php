@@ -1,3 +1,4 @@
+<?php /* Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. */ ?>
 <?php
 	if(is_resource(@fsockopen('localhost', 50005))) {
 

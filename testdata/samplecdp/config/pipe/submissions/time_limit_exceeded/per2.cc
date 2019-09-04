@@ -1,3 +1,4 @@
+/* Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. */
 // Has the ideas for the fast solution but only uses them to speed up
 // some parts of the slow solution.  Should make sure this times out
 // if we go for requiring O(log n) solution.

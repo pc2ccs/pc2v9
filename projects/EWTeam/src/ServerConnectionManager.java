@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 import java.security.Permission;
 import java.util.HashMap;
 import java.util.logging.Level;

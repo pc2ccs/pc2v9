@@ -1,3 +1,4 @@
+<?php /* Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. */ ?>
 <?php 
 
 		// $Id: getClars.php 51 2013-10-11 22:51:36Z laned $

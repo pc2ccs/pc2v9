@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

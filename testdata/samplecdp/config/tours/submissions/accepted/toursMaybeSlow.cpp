@@ -1,3 +1,4 @@
+/* Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. */
 // An ostensibly O(N^3) algorithm that I have no idea how to defeat.  It might
 // actually be O(N^2) in disguise.  The problem is that edges which are only
 // part of large cycles also tend to be in an equivalence class together.
