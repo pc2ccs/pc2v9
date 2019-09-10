@@ -107,7 +107,7 @@ Regardless of what issue you choose to work on, the overall process is the same:
 * Create your own [fork](https://help.github.com/en/articles/fork-a-repo) of the pc2v9 repository.
 * Optionally, clone your fork onto your own machine (it's usually easier to work on a clone on your own machine,
     using your own IDE/Tools).
-* Create a Git Branch (called a _topic branch_ for the work, following the [PC2 Branch Naming Guidelines](./BranchNaming.md).
+* Create a Git Branch (called a _topic branch_) for the work, following the _Branch Naming Guidelines_ in the PC2v9 [Development Environment](https://github.com/pc2ccs/pc2v9/wiki/Development-Environment) page.
 * Develop the code to implement your bug fix or feature.
 * Create automated tests (e.g. Java JUnits) to demonstrate that your code works as intended.
 * If the branch work was done on a clone of your fork, push the branch code from your local clone to your PC2v9 fork on GitHub.
