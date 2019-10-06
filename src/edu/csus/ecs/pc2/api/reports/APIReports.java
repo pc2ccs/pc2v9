@@ -64,11 +64,11 @@ public class APIReports extends BaseClient {
             print(" in " + run.getLanguage().getName());
 
             if (run.isFinalJudged()) {
-                println("  Final Judgement: " + run.getJudgementName());
+                print("  Final Judgement: " + run.getJudgementName());
             } else if (run.isPreliminaryJudged()) {
-                println("  Preliminary Judgement: " + run.getJudgementName());
+                print("  Preliminary Judgement: " + run.getJudgementName());
             } else {
-                println("  Judgement: not judged yet ");
+                print("  Judgement: not judged yet ");
             }
 
             println();
@@ -83,11 +83,71 @@ public class APIReports extends BaseClient {
     public void onLoginAction() {
         
         println("Contest title: '" + getContest().getContestTitle() + "'");
-//        new PrintContestTitle(), //
-//        new PrintSiteName(), /
+
         println("Site Name = " + getContest().getSiteName());
-//        new PrintClockInfo(), //
         
+        printClockInfo();
+        
+        println("Contacted: host=" + getContest().getServerHostName() + " port=" + getContest().getServerPort());
+        
+        println();
+        
+        printRunSummary();
+        
+        println();
+        
+        printRuns();
+        
+        println();
+        
+//        printClarSummary();
+        
+//        printTeamSummary();
+//        new PrintTeams(), //
+        
+        printTeamInfo();
+        
+        println();
+    }
+    
+    private void printRunSummary() {
+
+        print("Run summary: ");
+
+        if (getContest().getRuns().length == 0) {
+            println("No runs in system");
+            return;
+        }
+
+        IRun[] runs = getContest().getRuns();
+        Arrays.sort(runs, new IRunComparator());
+
+        int deleted = 0;
+        int judged = 0;
+        int notjudged = 0;
+
+        for (IRun run : runs) {
+
+            if (run.isDeleted()) {
+                deleted++;
+            } else if (run.isFinalJudged()) {
+                judged++;
+            } else {
+                notjudged++;
+            }
+
+        }
+
+        if (notjudged == 0) {
+            println("ALL (" + runs.length + ") runs judged.  " + judged + " judged, " + deleted + " deleted.");
+
+        } else {
+            println(notjudged + " of " + runs.length + " to be judged.  " + judged + " judged, " + deleted + " deleted.");
+        }
+
+    }
+
+    private void printClockInfo() {
         IContestClock clock = getContest().getContestClock();
         print("Clock:");
         print(" length=" + clock.getContestLengthSecs() + " (" + ContestTime.formatTime(clock.getContestLengthSecs()) + ")");
@@ -95,17 +155,10 @@ public class APIReports extends BaseClient {
         print(" elapsed=" + clock.getElapsedSecs() + " (" + ContestTime.formatTime(clock.getElapsedSecs()) + ")");
         println();
         
-        println("Contacted: host=" + getContest().getServerHostName() + " port=" + getContest().getServerPort());
         
-        println();
-        printRuns();
-        
-//printRunSummary();
-//        printClarSummary();
-        
-//        printTeamSummary();
-//        new PrintTeams(), //
-        
+    }
+
+    private void printTeamInfo() {
         println("There are " + getContest().getTeams().length + " team ");
         for (ITeam team : getContest().getTeams()) {
             IGroup group = team.getGroup();
@@ -115,13 +168,9 @@ public class APIReports extends BaseClient {
             }
             println(team.getLoginName() + " title: " + team.getLoginName() + " group: " + name);
         }
-        println("");
-        println();
-        
-        
         
     }
-    
+
     // TODO dal Fix APIAbstractTest to no longer require GUI ScrollyFrame, once done rename onLoginActionOrig
 //    @Override
     public void onLoginActionOrig() {
