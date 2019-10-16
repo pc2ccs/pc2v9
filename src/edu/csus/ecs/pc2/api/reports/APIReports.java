@@ -79,8 +79,7 @@ public class APIReports extends BaseClient {
         System.out.println();
     }
 
-    @Override
-    public void onLoginAction() {
+    public void printDefaultInfo() {
         
         println("Contest title: '" + getContest().getContestTitle() + "'");
 
@@ -171,38 +170,56 @@ public class APIReports extends BaseClient {
         
     }
 
-    // TODO dal Fix APIAbstractTest to no longer require GUI ScrollyFrame, once done rename onLoginActionOrig
-//    @Override
-    public void onLoginActionOrig() {
+    @Override
+    public void onLoginAction() {
 
         System.out.println(new VersionInfo().getSystemVersionInfo());
+
+        boolean printAllReports = bcParseArguments.isOptPresent("--all");
+
+        System.out.println("debug 22 aww "+printAllReports);
         
-        if (bcParseArguments.getArgCount() == 0){
-            System.err.println("No report number(s) specified");
-            System.exit(4);
+        if (! printAllReports){
+            if (bcParseArguments.getArgCount() == 0) {
+                printDefaultInfo();
+                System.exit(0);
+            }
         }
 
         APIPrintReports apiPrintReports = new APIPrintReports();
         APIAbstractTest[] list = apiPrintReports.getReportsList();
 
-        String[] reportNumbers = bcParseArguments.getArgList();
+        if (printAllReports) {
 
-        for (String reportNum : reportNumbers) {
-
-            int reportNumber = toInt(reportNum, 0);
-
-            if (reportNumber < 1 || reportNumber > list.length) {
-                System.err.println("No such report for: " + reportNum);
-            } else {
-
-                APIAbstractTest report = list[reportNumber - 1];
-                report.setAPISettings(null, getContest(), getServerConnection());
-                System.out.println("API Report: " + report.getTitle());
+            int reportNumber = 1;
+            for (APIAbstractTest report : list) {
+                report.setAPISettings(getContest(), getServerConnection());
+                System.out.println("API Report[" + reportNumber + "]: " + report.getTitle());
                 report.printTest();
+                reportNumber++;
             }
 
+        } else {
+
+            String[] reportNumbers = bcParseArguments.getArgList();
+
+            for (String reportNum : reportNumbers) {
+
+                int reportNumber = toInt(reportNum, 0);
+
+                if (reportNumber < 1 || reportNumber > list.length) {
+                    System.err.println("No such report for: " + reportNum);
+                } else {
+
+                    APIAbstractTest report = list[reportNumber - 1];
+                    report.setAPISettings(getContest(), getServerConnection());
+                    System.out.println("API Report[" + reportNumber + "]: " + report.getTitle());
+                    report.printTest();
+                }
+
+            }
         }
-        
+
         System.exit(0);
     }
 
@@ -218,13 +235,16 @@ public class APIReports extends BaseClient {
     public void printProgramUsageInformation() {
 
         String[] lines = { // 
-        "Usage: APIReports [--help] [-F optionsfile] --login user [--password pass] reportLIst ", //
+        "Usage: APIReports [--help] [-F optionsfile] [--all] --login user [--password pass] reportLIst ", //
                 "", // 
                 "Purpose: Print contest reports/information", // 
                 "", // 
-                "--help    this message", // 
-//                "", // 
-//                "reportList - list of report numbers, see below ", // 
+                "Ex. APIReports --login a3 ", // 
+                "", // 
+                "--help    this message", //
+                "--all     print all reports", 
+                "", // 
+                "reportList - list of report numbers, see below. ", // 
                 "", // 
         };
 
@@ -232,9 +252,8 @@ public class APIReports extends BaseClient {
             System.out.println(s);
         }
         
-        // TODO dal Fix APIAbstractTest to no longer require GUI ScrollyFrame, once done enable show all reports
-//        System.out.println("##  Title");
-//        printReportsList();
+        System.out.println("##  Title");
+        printReportsList();
 
         VersionInfo info = new VersionInfo();
         System.out.println(info.getSystemVersionInfo());
@@ -242,7 +261,7 @@ public class APIReports extends BaseClient {
 
     public static void main(String[] args) throws LoginFailureException, NotLoggedInException {
         APIReports reports = new APIReports();
-        reports.login(args);
+            reports.login(args);
     }
 
 }
