@@ -5,6 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.Serializable;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.util.Arrays;
@@ -133,6 +137,8 @@ public class ZipPC2 {
          */
         String[] simpleFileExtensions = { "log", "html", "ini", "set", "tab",
                 "tpl", "properties" };
+        
+        String [] fileMasks = { "opts.*" };
 
         File file = new File(".");
         String[] dirEntryList = file.list();
@@ -143,6 +149,12 @@ public class ZipPC2 {
 
             for (String name : simpleFileExtensions) {
                 if (dirEntryName.endsWith(name)) {
+                    addFileToList(dirEntryName);
+                }
+            }
+            
+            for (String mask : fileMasks) {
+                if (matchesGlob(mask, dirEntryName)) {
                     addFileToList(dirEntryName);
                 }
             }
@@ -179,6 +191,19 @@ public class ZipPC2 {
 
         addFileToList("pc2export.dat");
 
+    }
+
+    /**
+     * Match filename to mask.
+     * 
+     * @param mask
+     * @param dirEntryName
+     * @return true if dirEntryName matches glob matches
+     */
+    protected boolean matchesGlob(String mask, String dirEntryName) {
+        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:"+mask);
+        Path path = Paths.get(dirEntryName);
+        return matcher.matches(path);
     }
 
     /**
