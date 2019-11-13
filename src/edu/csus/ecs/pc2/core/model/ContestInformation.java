@@ -54,6 +54,11 @@ public class ContestInformation implements Serializable{
      */
     private boolean ccsTestMode = false;
     
+    //Shadow Mode settings
+    String primaryCCS_URL = "";
+    String primaryCCS_user_login = "";
+    String primaryCCS_user_pw = "";
+    
     /**
      * Max output file size.
      */
@@ -409,6 +414,62 @@ public class ContestInformation implements Serializable{
         this.rsiCommand = rsiCommand;
     }
     
+    /**
+     * Returns the URL to a "Primary CCS"; only relevant when operating this
+     * instance of the PC2 CCS as a "Shadow CCS".
+     * @return a String containing the URL of the Primary CCS which we're shadowing
+     */
+    public String getPrimaryCCS_URL() {
+        return primaryCCS_URL;
+    }
+
+    /**
+     * Sets the value of the URL used to access the Primary CCS (used only when
+     * operating this instance of PC2 as a "Shadow CCS").
+     * @param primaryCCS_URL a String giving the URL of the Primary CCS (the CCS being shadowed)
+     */
+    public void setPrimaryCCS_URL(String primaryCCS_URL) {
+        this.primaryCCS_URL = primaryCCS_URL;
+    }
+
+    /**
+     * Returns a String containing the user login account to be used when connecting 
+     * to a Primary CCS (only useful when operating this instance of PC2 as a "Shadow CCS").
+     * @return a String containing the Primary CCS user account name
+     */
+    public String getPrimaryCCS_user_login() {
+        return primaryCCS_user_login;
+    }
+
+    /**
+     * Sets the value of the user login (account) for the Primary CCS (only useful
+     * when operating this instance of PC2 as a "Shadow CCS").
+     * @param primaryCCS_user_login the primary CCS login account name
+     */
+    public void setPrimaryCCS_user_login(String primaryCCS_user_login) {
+        this.primaryCCS_user_login = primaryCCS_user_login;
+    }
+
+    /**
+     * Returns a String containing the password used for logging in to the 
+     * Primary CCS (only useful when operating this instance of PC2 as a
+     * "Shadow CCS").
+     * @return a String containing a password
+     */
+    public String getPrimaryCCS_user_pw() {
+        //TODO: consider some method of encrypting the password
+        return primaryCCS_user_pw;
+    }
+
+    /**
+     * Sets the value of the password to be used when connecting to a Primary CCS
+     * (only useful when operating this instance of PC2 as a "Shadow CCS").
+     * @param primaryCCS_user_pw a String containing a password
+     */
+    public void setPrimaryCCS_user_pw(String primaryCCS_user_pw) {
+        this.primaryCCS_user_pw = primaryCCS_user_pw;
+    }
+
     /**
      * Get the Run Submission Interface (RSI) command.
      * 
