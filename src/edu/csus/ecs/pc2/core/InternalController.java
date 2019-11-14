@@ -1358,23 +1358,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 incomingPacket(packet);
 
-                if (PacketType.Type.AUTO_REGISTRATION_LOGIN_REQUEST.equals(packet.getType())) {
 
-                    packetArchiver.writeNextPacket(packet);
-
-                    String loginName = PacketFactory.getStringValue(packet, PacketFactory.LOGIN);
-
-                    if (isEnableAutoRegistration()) {
-
-                        handleAutoRegistration(packet, connectionHandlerID);
-
-                    } else {
-                        info("Client attempted to auto register, auto registration not enabled, tried to use '" + loginName + "' " + connectionHandlerID);
-                        String message = "Auto Registration not allowed";
-                        sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
-                    }
-
-                } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
+                if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
                     
                     if (packetHandler.forwardedToProxy((packet))) {
                         
@@ -1596,54 +1581,54 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
     }
 
-    private String[] removeFirstElement(String[] stringArray) {
-        String[] newArray = new String[stringArray.length - 1];
-        System.arraycopy(stringArray, 1, newArray, 0, newArray.length);
-        return newArray;
-    }
+//    private String[] removeFirstElement(String[] stringArray) {
+//        String[] newArray = new String[stringArray.length - 1];
+//        System.arraycopy(stringArray, 1, newArray, 0, newArray.length);
+//        return newArray;
+//    }
 
-    /**
-     * Handle client attempt to auto register.
-     * 
-     * @param packet
-     * @param connectionHandlerID
-     */
-    private void handleAutoRegistration(Packet packet, ConnectionHandlerID connectionHandlerID) {
-
-        String autoLoginInformation = PacketFactory.getStringValue(packet, PacketFactory.AUTO_REG_REQUEST_INFO);
-
-        String delimit = PacketType.FIELD_DELIMIT;
-        String[] fields = autoLoginInformation.split(delimit);
-
-        String errorMessage = null;
-
-        if (fields.length == 0) {
-            errorMessage = "Missing team name, enter a team name";
-        } else if (fields.length == 1) {
-            errorMessage = "Missing team member name(s), enter team member name";
-        } else {
-            String teamName = fields[0];
-            String[] teamMemberNames = removeFirstElement(fields);
-            Account account = contest.autoRegisterTeam(teamName, teamMemberNames, null);
-
-            try {
-                Packet newAccountPacket = PacketFactory.createAutoRegReply(getServerClientId(), account.getClientId(), account);
-                sendToClient(connectionHandlerID, newAccountPacket);
-
-                contest.storeConfiguration(getLog());
-                Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, account);
-                sendToJudgesAndOthers(newAccountsPacket, true);
-            } catch (Exception e) {
-                logException(e);
-            }
-        }
-
-        if (errorMessage != null) {
-            info("Client attempted to auto register, auto registration not enabled, tried to use '" + autoLoginInformation + "' " + connectionHandlerID);
-            String message = "Auto Registration not allowed";
-            sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
-        }
-    }
+//    /**
+//     * Handle client attempt to auto register.
+//     * 
+//     * @param packet
+//     * @param connectionHandlerID
+//     */
+//    private void handleAutoRegistration(Packet packet, ConnectionHandlerID connectionHandlerID) {
+//
+//        String autoLoginInformation = PacketFactory.getStringValue(packet, PacketFactory.AUTO_REG_REQUEST_INFO);
+//
+//        String delimit = PacketType.FIELD_DELIMIT;
+//        String[] fields = autoLoginInformation.split(delimit);
+//
+//        String errorMessage = null;
+//
+//        if (fields.length == 0) {
+//            errorMessage = "Missing team name, enter a team name";
+//        } else if (fields.length == 1) {
+//            errorMessage = "Missing team member name(s), enter team member name";
+//        } else {
+//            String teamName = fields[0];
+//            String[] teamMemberNames = removeFirstElement(fields);
+//            Account account = contest.autoRegisterTeam(teamName, teamMemberNames, null);
+//
+//            try {
+//                Packet newAccountPacket = PacketFactory.createAutoRegReply(getServerClientId(), account.getClientId(), account);
+//                sendToClient(connectionHandlerID, newAccountPacket);
+//
+//                contest.storeConfiguration(getLog());
+//                Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, account);
+//                sendToJudgesAndOthers(newAccountsPacket, true);
+//            } catch (Exception e) {
+//                logException(e);
+//            }
+//        }
+//
+//        if (errorMessage != null) {
+//            info("Client attempted to auto register, auto registration not enabled, tried to use '" + autoLoginInformation + "' " + connectionHandlerID);
+//            String message = "Auto Registration not allowed";
+//            sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
+//        }
+//    }
 
     public void sendToJudgesAndOthers(Packet packet, boolean sendToServers) {
 
@@ -1664,14 +1649,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
-    private boolean isEnableAutoRegistration() {
-        try {
-            return contest.getContestInformation().isEnableAutoRegistration();
-        } catch (Exception e) {
-            getLog().log(Log.WARNING, "Unable to determine auto reg value", e);
-            return false;
-        }
-    }
 
     /**
      * Creates and saves a ClientSettings.
