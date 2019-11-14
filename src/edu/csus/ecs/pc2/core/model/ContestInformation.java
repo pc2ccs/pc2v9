@@ -8,7 +8,6 @@ import java.util.Properties;
 
 import edu.csus.ecs.pc2.core.DateUtilities;
 import edu.csus.ecs.pc2.core.StringUtilities;
-import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 
 /**
@@ -108,10 +107,6 @@ public class ContestInformation implements Serializable{
     
     private Properties scoringProperties = new Properties();
     
-    /**
-     * The password type for the new passwords.
-     */
-    private PasswordType autoRegistrationPasswordType = PasswordType.RANDOM;
 
 //    /** replaced with scheduledStartTime; see below
 //     * Contest Start/Date Time.
@@ -494,14 +489,6 @@ public class ContestInformation implements Serializable{
      */
     public int getLastRunNumberSubmitted() {
         return lastRunNumberSubmitted;
-    }
-
-    public PasswordType getAutoRegistrationPasswordType() {
-        return autoRegistrationPasswordType;
-    }
-
-    public void setAutoRegistrationPasswordType(PasswordType autoRegistrationPasswordType) {
-        this.autoRegistrationPasswordType = autoRegistrationPasswordType;
     }
 
     /**
