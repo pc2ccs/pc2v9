@@ -115,7 +115,6 @@ public class ContestInformationPane extends JPanePlugin {
     private JLabel labelPrimaryCCSURL;
     private JTextField textfieldPrimaryCCSURL;
     //TODO: add textfields for user (login account) and password
-    private JCheckBox checkboxIsShadowMode;
     
     Border blackline = BorderFactory.createLineBorder(Color.black);
     private Component horizontalStrut;
@@ -143,6 +142,9 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JPanel ccsTestModePane;
     private Component horizontalStrut_3;
+
+    private JCheckBox shadowModeCheckbox;
+    private Component horizontalStrut_1;
     
 
     /**
@@ -250,6 +252,10 @@ public class ContestInformationPane extends JPanePlugin {
             ccsTestModePane.setLayout(new FlowLayout(FlowLayout.LEFT));
             
             ccsTestModePane.setBorder (BorderFactory.createTitledBorder("CCS Test Mode"));
+            
+            //the following line keeps the pane from expanding beyond the necessary size when the window is enlarged,
+            // but it causes BoxLayout to move the pane to the Center instead of being left-justified.  Don't know why...
+//            ccsTestModePane.setMaximumSize(new Dimension(600,100));
             
             runSubmissionInterfaceLabel = new JLabel();
             runSubmissionInterfaceLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
@@ -470,25 +476,42 @@ public class ContestInformationPane extends JPanePlugin {
             
             shadowModePane.setLayout(new FlowLayout(FlowLayout.LEFT));
             
-            checkboxIsShadowMode = new JCheckBox("Enable Shadow Mode", false);
-            checkboxIsShadowMode.setToolTipText("Shadow Mode allows PC2 to fetch submissions from a remote Contest Control System "
-                    + "(called the 'Primary CCS')");
-            shadowModePane.add(checkboxIsShadowMode);
-            shadowModePane.add(getHorizontalStrut());
+            shadowModePane.setBorder(BorderFactory.createTitledBorder("Shadow Mode"));
             
             labelPrimaryCCSURL = new JLabel();
             labelPrimaryCCSURL.setHorizontalAlignment(SwingConstants.RIGHT);
             labelPrimaryCCSURL.setText("Primary CCS URL:");
-            shadowModePane.add (labelPrimaryCCSURL);
             
-            textfieldPrimaryCCSURL = getPrimaryCCSURLTextfield() ;
-            shadowModePane.add(textfieldPrimaryCCSURL) ;
+            //the content of the pane:
             
-            shadowModePane.setBorder(BorderFactory.createTitledBorder("Shadow Mode"));
+            shadowModePane.add(getShadowModeCheckbox());
+            shadowModePane.add(getHorizontalStrut_1());
+            shadowModePane.add(labelPrimaryCCSURL);
+            shadowModePane.add(getPrimaryCCSURLTextfield()) ;
+            
+
         }
         return shadowModePane;
+        
     }
 
+
+    private JCheckBox getShadowModeCheckbox() {
+        if(shadowModeCheckbox == null) {
+            
+            shadowModeCheckbox = new JCheckBox("Enable Shadow Mode", false);
+            shadowModeCheckbox.setToolTipText("Shadow Mode allows PC2 to fetch submissions from a remote Contest Control System "
+                    + "(called the 'Primary CCS')");
+            shadowModeCheckbox.setMnemonic(KeyEvent.VK_S);
+            shadowModeCheckbox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return shadowModeCheckbox;
+        
+    }
 
     private JButton getUnfreezeScoreboardButton() {
         if (unfreezeScoreboardButton == null) {
@@ -729,6 +752,7 @@ public class ContestInformationPane extends JPanePlugin {
                 getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
                 getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
+                getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
                 getMaxOutputSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
                 getContestFreezeLengthtextField().setText(contestInformation.getFreezeTime());
                 getRunSubmissionInterfaceCommandTextField().setText(contestInformation.getRsiCommand());
@@ -1191,13 +1215,6 @@ public class ContestInformationPane extends JPanePlugin {
         return runSubmissionInterfaceCommandTextField;
     }
 
-    private Component getHorizontalStrut() {
-        if (horizontalStrut == null) {
-        	horizontalStrut = Box.createHorizontalStrut(20);
-        }
-        return horizontalStrut;
-    }
-
     private Component getHorizontalStrut_2() {
         if (horizontalStrut_2 == null) {
         	horizontalStrut_2 = Box.createHorizontalStrut(20);
@@ -1210,5 +1227,11 @@ public class ContestInformationPane extends JPanePlugin {
         	horizontalStrut_3 = Box.createHorizontalStrut(20);
         }
         return horizontalStrut_3;
+    }
+    private Component getHorizontalStrut_1() {
+        if (horizontalStrut_1 == null) {
+        	horizontalStrut_1 = Box.createHorizontalStrut(20);
+        }
+        return horizontalStrut_1;
     }
 }
