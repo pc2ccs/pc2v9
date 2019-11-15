@@ -54,9 +54,10 @@ public class ContestInformation implements Serializable{
     private boolean ccsTestMode = false;
     
     //Shadow Mode settings
-    String primaryCCS_URL = "";
-    String primaryCCS_user_login = "";
-    String primaryCCS_user_pw = "";
+    private boolean shadowMode = false;
+    private String primaryCCS_URL = "";
+    private String primaryCCS_user_login = "";
+    private String primaryCCS_user_pw = "";
     
     /**
      * Max output file size.
@@ -238,6 +239,9 @@ public class ContestInformation implements Serializable{
             if (ccsTestMode != contestInformation.isCcsTestMode()) {
                 return false;
             }
+            if (shadowMode != contestInformation.isShadowMode()) {
+                return false;
+            }
             if (! StringUtilities.stringSame(externalYamlPath, contestInformation.externalYamlPath)) {
                 return false;
             }
@@ -396,6 +400,14 @@ public class ContestInformation implements Serializable{
         this.ccsTestMode = ccsTestMode;
     }
     
+    public boolean isShadowMode() {
+        return shadowMode;
+    }
+
+    public void setShadowMode(boolean shadowMode) {
+        this.shadowMode = shadowMode;
+    }
+
     public void setRsiCommand(String rsiCommand) {
         this.rsiCommand = rsiCommand;
     }
