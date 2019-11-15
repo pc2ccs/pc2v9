@@ -117,7 +117,6 @@ public class ContestInformationPane extends JPanePlugin {
     //TODO: add textfields for user (login account) and password
     
     Border blackline = BorderFactory.createLineBorder(Color.black);
-    private Component horizontalStrut;
 
     private JPanel judgeSettingsPane;
 
@@ -263,8 +262,11 @@ public class ContestInformationPane extends JPanePlugin {
             runSubmissionInterfaceLabel.setToolTipText("CCS Run Submission Interface Command");
             runSubmissionInterfaceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             
+            //the contents of the pane:
+            
             ccsTestModePane.add(getCcsTestModeCheckbox(), null);
             ccsTestModePane.add(getHorizontalStrut_2());
+            
             ccsTestModePane.add(runSubmissionInterfaceLabel, null);
             ccsTestModePane.add(getRunSubmissionInterfaceCommandTextField(), null);
 
@@ -590,7 +592,7 @@ public class ContestInformationPane extends JPanePlugin {
             updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
             updateButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    updateContestInformation();
+                     updateContestInformation();
                 }
             });
         }
@@ -676,6 +678,7 @@ public class ContestInformationPane extends JPanePlugin {
         
         //fill in Shadow Mode information
         newContestInformation.setPrimaryCCS_URL(getPrimaryCCSURLTextfield().getText());
+        newContestInformation.setShadowMode(getShadowModeCheckbox().isSelected());
         
         //fill in additional field values
         String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();
@@ -745,6 +748,7 @@ public class ContestInformationPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 ContestInformation contestInformation = getContest().getContestInformation();
+                
                 getContestTitleTextField().setText(contestInformation.getContestTitle());
                 selectDisplayRadioButton();
                 getJudgesDefaultAnswerTextField().setText(contestInformation.getJudgesDefaultAnswer());
@@ -806,7 +810,7 @@ public class ContestInformationPane extends JPanePlugin {
     class ContestInformationListenerImplementation implements IContestInformationListener {
 
         public void contestInformationAdded(ContestInformationEvent event) {
-            populateGUI();
+             populateGUI();
             savedContestInformation = event.getContestInformation();
         }
 
