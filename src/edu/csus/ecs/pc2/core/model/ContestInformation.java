@@ -254,6 +254,12 @@ public class ContestInformation implements Serializable{
             if (! StringUtilities.stringSame(primaryCCS_URL, contestInformation.primaryCCS_URL)) {
                 return false;
             }
+            if (! StringUtilities.stringSame(primaryCCS_user_login, contestInformation.primaryCCS_user_login)) {
+                return false;
+            }
+            if (! StringUtilities.stringSame(primaryCCS_user_pw, contestInformation.primaryCCS_user_pw)) {
+                return false;
+            }
             if ((thawed == null && contestInformation.getThawed() != null) || (thawed != null && !thawed.equals(contestInformation.getThawed()))) {
                 return false;
             }
