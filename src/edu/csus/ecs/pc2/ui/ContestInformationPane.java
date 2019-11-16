@@ -910,8 +910,10 @@ public class ContestInformationPane extends JPanePlugin {
         newContestInformation.setCcsTestMode(getCcsTestModeCheckbox().isSelected());
         
         //fill in Shadow Mode information
-        newContestInformation.setPrimaryCCS_URL(getPrimaryCCSURLTextfield().getText());
         newContestInformation.setShadowMode(getShadowModeCheckbox().isSelected());
+        newContestInformation.setPrimaryCCS_URL(getPrimaryCCSURLTextfield().getText());
+        newContestInformation.setPrimaryCCS_user_login(getPrimaryCCSLoginTextfield().getText());
+        newContestInformation.setPrimaryCCS_user_pw(getPrimaryCCSPasswdTextfield().getText());
         
         //fill in additional field values
         String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();
