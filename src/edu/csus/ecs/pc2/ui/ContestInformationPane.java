@@ -1004,6 +1004,8 @@ public class ContestInformationPane extends JPanePlugin {
                 
                 getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
                 getPrimaryCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL());
+                getPrimaryCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
+                getPrimaryCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
                 
                 //add the scheduled start time to the GUI
                 GregorianCalendar cal = contestInformation.getScheduledStartTime();
