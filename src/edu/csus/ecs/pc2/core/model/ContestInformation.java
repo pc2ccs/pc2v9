@@ -251,6 +251,9 @@ public class ContestInformation implements Serializable{
             if (! StringUtilities.stringSame(rsiCommand, contestInformation.rsiCommand)) {
                 return false;
             }
+            if (! StringUtilities.stringSame(primaryCCS_URL, contestInformation.primaryCCS_URL)) {
+                return false;
+            }
             if ((thawed == null && contestInformation.getThawed() != null) || (thawed != null && !thawed.equals(contestInformation.getThawed()))) {
                 return false;
             }
