@@ -144,6 +144,13 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JCheckBox shadowModeCheckbox;
     private Component horizontalStrut_1;
+
+    //set this true to display outlines around Contest Information Pane sections
+    private boolean showPaneOutlines = true;
+
+    private JPanel contestTitlePane;
+
+    private JLabel contestTitleLabel;
     
 
     /**
@@ -222,10 +229,17 @@ public class ContestInformationPane extends JPanePlugin {
             
             remoteCCSSettingsPane = new JPanel();
             
-            Border lineBorder2px = new LineBorder(Color.blue, 2);
-            TitledBorder titleBorder = new TitledBorder("Remote CCS Settings ");
-            titleBorder.setBorder(lineBorder2px);
-            remoteCCSSettingsPane.setBorder(titleBorder);
+            if (showPaneOutlines) {
+                
+                Border lineBorder2px = new LineBorder(Color.blue, 2);
+                TitledBorder titleBorder = new TitledBorder("Remote CCS Settings ");
+                titleBorder.setBorder(lineBorder2px);
+                remoteCCSSettingsPane.setBorder(titleBorder);
+                
+            } else {
+                remoteCCSSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
+            }
+            
             remoteCCSSettingsPane.setLayout(new BoxLayout(remoteCCSSettingsPane, BoxLayout.Y_AXIS));
 
             //the contents of the pane:
@@ -312,27 +326,54 @@ public class ContestInformationPane extends JPanePlugin {
         if (contestSettingsPane == null) {
             contestSettingsPane = new JPanel();
             contestSettingsPane.setLayout(new FlowLayout(FlowLayout.LEFT));
-            contestSettingsPane.setMinimumSize(new Dimension(300,100));
-                        
-            Border lineBorder2px = new LineBorder(Color.blue, 2);
-            TitledBorder titleBorder = new TitledBorder("Contest Settings");
-            titleBorder.setBorder(lineBorder2px);
-            contestSettingsPane.setBorder(titleBorder);
-           
-            //contents of the pane:
-            
-            contestSettingsPane.add(getContestTitleTextField(), null);
-            
+            contestSettingsPane.setMinimumSize(new Dimension(300, 100));
+
+            if (showPaneOutlines) {
+                
+                Border lineBorder2px = new LineBorder(Color.blue, 2);
+                TitledBorder titleBorder = new TitledBorder("Contest Settings");
+                titleBorder.setBorder(lineBorder2px);
+                
+                contestSettingsPane.setBorder(titleBorder);
+                
+            } else {
+                contestSettingsPane.setBorder(new EmptyBorder(2, 2, 2, 2));
+            }
+
+            // contents of the pane:
+
+            contestSettingsPane.add(getContestTitlePane(), null);
+
             contestSettingsPane.add(getScheduledStartTimePane());
-            
+
             contestSettingsPane.add(getScoreboardFreezePane());
             contestSettingsPane.add(getHorizontalStrut_3());
-                                    
-            contestSettingsPane.add(getUnfreezeScoreboardButton());
 
+            contestSettingsPane.add(getUnfreezeScoreboardButton());
 
         }
         return contestSettingsPane;
+    }
+
+    private JPanel getContestTitlePane() {
+        if (contestTitlePane == null) {
+            
+            contestTitlePane = new JPanel();
+            
+            contestTitlePane.add(getContestTitleLabel());
+            contestTitlePane.add(getContestTitleTextField(), null);
+
+        }
+        return contestTitlePane;
+    }
+
+    private JLabel getContestTitleLabel() {
+        
+        if (contestTitleLabel == null) {
+            
+            contestTitleLabel = new JLabel("Contest title: ");
+        }
+        return contestTitleLabel;
     }
 
     /**
@@ -345,10 +386,15 @@ public class ContestInformationPane extends JPanePlugin {
             
             judgeSettingsPane = new JPanel();
             
-            Border lineBorder2px = new LineBorder(Color.blue, 2);
-            TitledBorder titleBorder = new TitledBorder("Judging Settings");
-            titleBorder.setBorder(lineBorder2px);
-            judgeSettingsPane.setBorder(titleBorder);
+            if (showPaneOutlines) {
+                
+                Border lineBorder2px = new LineBorder(Color.blue, 2);
+                TitledBorder titleBorder = new TitledBorder("Judging Settings");
+                titleBorder.setBorder(lineBorder2px);
+                judgeSettingsPane.setBorder(titleBorder);
+            } else {
+                judgeSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
+            }
             
             judgeSettingsPane.setLayout(new BoxLayout(judgeSettingsPane, BoxLayout.Y_AXIS));
             
@@ -377,10 +423,15 @@ public class ContestInformationPane extends JPanePlugin {
             teamSettingsPane = new JPanel();
             teamSettingsPane.setMaximumSize(new Dimension(32767, 200));
 
-            Border lineBorder2px = new LineBorder(Color.blue, 2);
-            TitledBorder titleBorder = new TitledBorder("Team Settings");
-            titleBorder.setBorder(lineBorder2px);
-            teamSettingsPane.setBorder(titleBorder);
+            if (showPaneOutlines) {
+                
+                Border lineBorder2px = new LineBorder(Color.blue, 2);
+                TitledBorder titleBorder = new TitledBorder("Team Settings");
+                titleBorder.setBorder(lineBorder2px);
+                teamSettingsPane.setBorder(titleBorder);
+            } else {
+                teamSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
+            }
             
             teamSettingsPane.setLayout(new FlowLayout(FlowLayout.LEFT));
 
