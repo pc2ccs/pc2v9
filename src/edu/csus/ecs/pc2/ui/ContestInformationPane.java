@@ -7,6 +7,9 @@ import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
@@ -146,11 +149,19 @@ public class ContestInformationPane extends JPanePlugin {
     private Component horizontalStrut_1;
 
     //set this true to display outlines around Contest Information Pane sections
-    private boolean showPaneOutlines = true;
+    private boolean showPaneOutlines = false;
 
     private JPanel contestTitlePane;
 
     private JLabel contestTitleLabel;
+
+    private JLabel labelPrimaryCCSLogin;
+
+    private JLabel labelPrimaryCCSPasswd;
+
+    private JTextField textfieldPrimaryCCSLogin;
+
+    private JTextField textfieldPrimaryCCSPasswd;
     
 
     /**
@@ -527,20 +538,33 @@ public class ContestInformationPane extends JPanePlugin {
         if (shadowModePane == null) {
             shadowModePane = new JPanel();
             
-            shadowModePane.setLayout(new FlowLayout(FlowLayout.LEFT));
-            
+//            shadowModePane.setLayout(new FlowLayout(FlowLayout.LEFT));
+            shadowModePane.setLayout(new GridBagLayout());
+                               
             shadowModePane.setBorder(BorderFactory.createTitledBorder("Shadow Mode"));
             
             labelPrimaryCCSURL = new JLabel();
             labelPrimaryCCSURL.setHorizontalAlignment(SwingConstants.RIGHT);
-            labelPrimaryCCSURL.setText("Primary CCS URL:");
+            labelPrimaryCCSURL.setText("Primary CCS URL:  ");
+            
+            labelPrimaryCCSLogin = new JLabel();
+            labelPrimaryCCSLogin.setHorizontalAlignment(SwingConstants.RIGHT);
+            labelPrimaryCCSLogin.setText("Primary CCS Login (account):  ");
+            
+            labelPrimaryCCSPasswd = new JLabel();
+            labelPrimaryCCSPasswd.setHorizontalAlignment(SwingConstants.RIGHT);
+            labelPrimaryCCSPasswd.setText("Primary CCS Password:  ");
             
             //the content of the pane:
             
-            shadowModePane.add(getShadowModeCheckbox());
-            shadowModePane.add(getHorizontalStrut_1());
-            shadowModePane.add(labelPrimaryCCSURL);
-            shadowModePane.add(getPrimaryCCSURLTextfield()) ;
+            shadowModePane.add(getShadowModeCheckbox(), getShadowModeCheckboxConstraints());
+            shadowModePane.add(labelPrimaryCCSURL, getPrimaryCCSURLLabelConstraints());
+            shadowModePane.add(getPrimaryCCSURLTextfield(), getPrimaryCCSURLTextfieldConstraints()) ;
+            shadowModePane.add(labelPrimaryCCSLogin, getPrimaryCCSLoginLabelConstraints());
+            shadowModePane.add(getPrimaryCCSLoginTextfield(), getPrimaryCCSLoginTextfieldConstraints()) ;
+            shadowModePane.add(labelPrimaryCCSPasswd, getPrimaryCCSPasswdLabelConstraints());
+            shadowModePane.add(getPrimaryCCSPasswdTextfield(), getPrimaryCCSPasswdTextfieldConstraints()) ;
+
             
 
         }
@@ -548,6 +572,244 @@ public class ContestInformationPane extends JPanePlugin {
         
     }
 
+
+    private Object getPrimaryCCSPasswdTextfieldConstraints() {
+        GridBagConstraints c = new GridBagConstraints();
+        //row & col at upper left of component
+            c.gridx = 2;
+            c.gridy = 2;
+        //number of cols and rows the component occupies
+            c.gridwidth = 1;
+            c.gridheight = 1;
+        //how to fill when the component is smaller than the available display area
+        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
+            c.fill = GridBagConstraints.NONE;
+        //internal padding (space in pixels) around the component
+            c.ipadx = 0; // 0 is also the default
+            c.ipady = 0;
+        //external padding (in pixels) added around the top, left, bottom, and right of the component
+        //  (the default is "no inset")
+            c.insets = new Insets(1, 1, 1, 1);
+        //where to anchor the component if it is smaller than the display area
+            c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
+        //how to distribute space among columns (weightx) and rows (weighty) 
+        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
+        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
+        // puts any extra space between its grid of cells and the edges of the container.
+        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
+        // Larger numbers indicate that the component's row or column should get more space. 
+        //For each column, the weight is related to the highest weightx specified for a component within that column, 
+        // with each multicolumn component's weight being split somehow between the columns the component is in. 
+        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
+            c.weightx = 0.6;
+            c.weighty = 0.6;
+
+        return c;
+    }
+
+    private Object getPrimaryCCSPasswdLabelConstraints() {
+        GridBagConstraints c = new GridBagConstraints();
+        //row & col at upper left of component
+            c.gridx = 1;
+            c.gridy = 2;
+        //number of cols and rows the component occupies
+            c.gridwidth = 1;
+            c.gridheight = 1;
+        //how to fill when the component is smaller than the available display area
+        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
+            c.fill = GridBagConstraints.BOTH;
+        //internal padding (space in pixels) around the component
+            c.ipadx = 0; // 0 is also the default
+            c.ipady = 0;
+        //external padding (in pixels) added around the top, left, bottom, and right of the component
+        //  (the default is "no inset")
+            c.insets = new Insets(1, 1, 1, 1);
+        //where to anchor the component if it is smaller than the display area
+            c.anchor = GridBagConstraints.CENTER; // CENTER is also the default
+        //how to distribute space among columns (weightx) and rows (weighty) 
+        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
+        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
+        // puts any extra space between its grid of cells and the edges of the container.
+        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
+        // Larger numbers indicate that the component's row or column should get more space. 
+        //For each column, the weight is related to the highest weightx specified for a component within that column, 
+        // with each multicolumn component's weight being split somehow between the columns the component is in. 
+        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
+            c.weightx = 0.1;
+            c.weighty = 0.1;
+
+        return c;
+    }
+
+    private Object getPrimaryCCSLoginTextfieldConstraints() {
+        GridBagConstraints c = new GridBagConstraints();
+        //row & col at upper left of component
+            c.gridx = 2;
+            c.gridy = 1;
+        //number of cols and rows the component occupies
+            c.gridwidth = 1;
+            c.gridheight = 1;
+        //how to fill when the component is smaller than the available display area
+        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
+            c.fill = GridBagConstraints.NONE;
+        //internal padding (space in pixels) around the component
+            c.ipadx = 0; // 0 is also the default
+            c.ipady = 0;
+        //external padding (in pixels) added around the top, left, bottom, and right of the component
+        //  (the default is "no inset")
+            c.insets = new Insets(1, 1, 1, 1);
+        //where to anchor the component if it is smaller than the display area
+            c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
+        //how to distribute space among columns (weightx) and rows (weighty) 
+        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
+        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
+        // puts any extra space between its grid of cells and the edges of the container.
+        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
+        // Larger numbers indicate that the component's row or column should get more space. 
+        //For each column, the weight is related to the highest weightx specified for a component within that column, 
+        // with each multicolumn component's weight being split somehow between the columns the component is in. 
+        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
+            c.weightx = 0.2;
+            c.weighty = 0.2;
+
+        return c;
+    }
+
+    private Object getPrimaryCCSLoginLabelConstraints() {
+        GridBagConstraints c = new GridBagConstraints();
+        //row & col at upper left of component
+            c.gridx = 1;
+            c.gridy = 1;
+        //number of cols and rows the component occupies
+            c.gridwidth = 1;
+            c.gridheight = 1;
+        //how to fill when the component is smaller than the available display area
+        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
+            c.fill = GridBagConstraints.BOTH;
+        //internal padding (space in pixels) around the component
+            c.ipadx = 0; // 0 is also the default
+            c.ipady = 0;
+        //external padding (in pixels) added around the top, left, bottom, and right of the component
+        //  (the default is "no inset")
+            c.insets = new Insets(1, 1, 1, 1);
+        //where to anchor the component if it is smaller than the display area
+            c.anchor = GridBagConstraints.CENTER; // CENTER is also the default
+        //how to distribute space among columns (weightx) and rows (weighty) 
+        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
+        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
+        // puts any extra space between its grid of cells and the edges of the container.
+        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
+        // Larger numbers indicate that the component's row or column should get more space. 
+        //For each column, the weight is related to the highest weightx specified for a component within that column, 
+        // with each multicolumn component's weight being split somehow between the columns the component is in. 
+        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
+            c.weightx = 0.1;
+            c.weighty = 0.1;
+
+        return c;
+    }
+
+    private Object getPrimaryCCSURLTextfieldConstraints() {
+        GridBagConstraints c = new GridBagConstraints();
+        //row & col at upper left of component
+            c.gridx = 2;
+            c.gridy = 0;
+        //number of cols and rows the component occupies
+            c.gridwidth = 1;
+            c.gridheight = 1;
+        //how to fill when the component is smaller than the available display area
+        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
+            c.fill = GridBagConstraints.HORIZONTAL;
+        //internal padding (space in pixels) around the component
+            c.ipadx = 0; // 0 is also the default
+            c.ipady = 0;
+        //external padding (in pixels) added around the top, left, bottom, and right of the component
+        //  (the default is "no inset")
+            c.insets = new Insets(1, 1, 1, 1);
+        //where to anchor the component if it is smaller than the display area
+            c.anchor = GridBagConstraints.CENTER; // CENTER is also the default
+        //how to distribute space among columns (weightx) and rows (weighty) 
+        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
+        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
+        // puts any extra space between its grid of cells and the edges of the container.
+        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
+        // Larger numbers indicate that the component's row or column should get more space. 
+        //For each column, the weight is related to the highest weightx specified for a component within that column, 
+        // with each multicolumn component's weight being split somehow between the columns the component is in. 
+        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
+            c.weightx = 0.6;
+            c.weighty = 0.6;
+
+        return c;
+    }
+
+    private GridBagConstraints getPrimaryCCSURLLabelConstraints() {
+        GridBagConstraints c = new GridBagConstraints();
+        //row & col at upper left of component
+            c.gridx = 1;
+            c.gridy = 0;
+        //number of cols and rows the component occupies
+            c.gridwidth = 1;
+            c.gridheight = 1;
+        //how to fill when the component is smaller than the available display area
+        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
+            c.fill = GridBagConstraints.BOTH;
+        //internal padding (space in pixels) around the component
+            c.ipadx = 0; // 0 is also the default
+            c.ipady = 0;
+        //external padding (in pixels) added around the top, left, bottom, and right of the component
+        //  (the default is "no inset")
+            c.insets = new Insets(1, 1, 1, 1);
+        //where to anchor the component if it is smaller than the display area
+            c.anchor = GridBagConstraints.CENTER; // CENTER is also the default
+        //how to distribute space among columns (weightx) and rows (weighty) 
+        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
+        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
+        // puts any extra space between its grid of cells and the edges of the container.
+        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
+        // Larger numbers indicate that the component's row or column should get more space. 
+        //For each column, the weight is related to the highest weightx specified for a component within that column, 
+        // with each multicolumn component's weight being split somehow between the columns the component is in. 
+        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
+            c.weightx = 0.1;
+            c.weighty = 0.1;
+
+        return c;
+    }
+
+    private GridBagConstraints getShadowModeCheckboxConstraints() {
+        GridBagConstraints c = new GridBagConstraints();
+        //row & col at upper left of component
+            c.gridx = 0;
+            c.gridy = 0;
+        //number of cols and rows the component occupies
+            c.gridwidth = 1;
+            c.gridheight = 1;
+        //how to fill when the component is smaller than the available display area
+        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
+            c.fill = GridBagConstraints.BOTH;
+        //internal padding (space in pixels) around the component
+            c.ipadx = 0; // 0 is also the default
+            c.ipady = 0;
+        //external padding (in pixels) added around the top, left, bottom, and right of the component
+        //  (the default is "no inset")
+            c.insets = new Insets(1, 1, 1, 1);
+        //where to anchor the component if it is smaller than the display area
+            c.anchor = GridBagConstraints.CENTER; // CENTER is also the default
+        //how to distribute space among columns (weightx) and rows (weighty) 
+        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
+        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
+        // puts any extra space between its grid of cells and the edges of the container.
+        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
+        // Larger numbers indicate that the component's row or column should get more space. 
+        //For each column, the weight is related to the highest weightx specified for a component within that column, 
+        // with each multicolumn component's weight being split somehow between the columns the component is in. 
+        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
+            c.weightx = 0.1;
+            c.weighty = 0.1;
+
+        return c;
+    }
 
     private JCheckBox getShadowModeCheckbox() {
         if(shadowModeCheckbox == null) {
@@ -620,7 +882,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField getPrimaryCCSURLTextfield() {
         if (textfieldPrimaryCCSURL == null) {
             textfieldPrimaryCCSURL = new JTextField();
-            textfieldPrimaryCCSURL.setBounds(270, 700, 243, 31);
+//            textfieldPrimaryCCSURL.setBounds(270, 700, 243, 31);
             textfieldPrimaryCCSURL.setColumns(40);
             textfieldPrimaryCCSURL.setEditable(true);
             textfieldPrimaryCCSURL.setToolTipText("The URL to the Primary CCS (when operating in 'Shadow Mode')");
@@ -633,6 +895,40 @@ public class ContestInformationPane extends JPanePlugin {
 
         }
         return textfieldPrimaryCCSURL ;
+    }
+
+    private JTextField getPrimaryCCSLoginTextfield() {
+        if (textfieldPrimaryCCSLogin == null) {
+            textfieldPrimaryCCSLogin = new JTextField();
+            textfieldPrimaryCCSLogin.setColumns(20);
+            textfieldPrimaryCCSLogin.setEditable(true);
+            textfieldPrimaryCCSLogin.setToolTipText("The account used to login to the Primary CCS (when operating in 'Shadow Mode')");
+            
+            textfieldPrimaryCCSLogin.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+
+        }
+        return textfieldPrimaryCCSLogin ;
+    }
+
+    private JTextField getPrimaryCCSPasswdTextfield() {
+        if (textfieldPrimaryCCSPasswd == null) {
+            textfieldPrimaryCCSPasswd = new JTextField();
+            textfieldPrimaryCCSPasswd.setColumns(20);
+            textfieldPrimaryCCSPasswd.setEditable(true);
+            textfieldPrimaryCCSPasswd.setToolTipText("The account used to login to the Primary CCS (when operating in 'Shadow Mode')");
+            
+            textfieldPrimaryCCSLogin.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+
+        }
+        return textfieldPrimaryCCSPasswd ;
     }
 
 
