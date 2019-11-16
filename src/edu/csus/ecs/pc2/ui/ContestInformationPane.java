@@ -146,10 +146,9 @@ public class ContestInformationPane extends JPanePlugin {
     private Component horizontalStrut_3;
 
     private JCheckBox shadowModeCheckbox;
-    private Component horizontalStrut_1;
 
     //set this true to display outlines around Contest Information Pane sections
-    private boolean showPaneOutlines = false;
+    private boolean showPaneOutlines = true;
 
     private JPanel contestTitlePane;
 
@@ -565,8 +564,6 @@ public class ContestInformationPane extends JPanePlugin {
             shadowModePane.add(labelPrimaryCCSPasswd, getPrimaryCCSPasswdLabelConstraints());
             shadowModePane.add(getPrimaryCCSPasswdTextfield(), getPrimaryCCSPasswdTextfieldConstraints()) ;
 
-            
-
         }
         return shadowModePane;
         
@@ -581,29 +578,11 @@ public class ContestInformationPane extends JPanePlugin {
         //number of cols and rows the component occupies
             c.gridwidth = 1;
             c.gridheight = 1;
-        //how to fill when the component is smaller than the available display area
-        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
-            c.fill = GridBagConstraints.NONE;
-        //internal padding (space in pixels) around the component
-            c.ipadx = 0; // 0 is also the default
-            c.ipady = 0;
         //external padding (in pixels) added around the top, left, bottom, and right of the component
         //  (the default is "no inset")
             c.insets = new Insets(1, 1, 1, 1);
         //where to anchor the component if it is smaller than the display area
             c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
-        //how to distribute space among columns (weightx) and rows (weighty) 
-        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
-        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
-        // puts any extra space between its grid of cells and the edges of the container.
-        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
-        // Larger numbers indicate that the component's row or column should get more space. 
-        //For each column, the weight is related to the highest weightx specified for a component within that column, 
-        // with each multicolumn component's weight being split somehow between the columns the component is in. 
-        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
-            c.weightx = 0.6;
-            c.weighty = 0.6;
-
         return c;
     }
 
@@ -618,26 +597,9 @@ public class ContestInformationPane extends JPanePlugin {
         //how to fill when the component is smaller than the available display area
         // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
             c.fill = GridBagConstraints.BOTH;
-        //internal padding (space in pixels) around the component
-            c.ipadx = 0; // 0 is also the default
-            c.ipady = 0;
         //external padding (in pixels) added around the top, left, bottom, and right of the component
         //  (the default is "no inset")
             c.insets = new Insets(1, 1, 1, 1);
-        //where to anchor the component if it is smaller than the display area
-            c.anchor = GridBagConstraints.CENTER; // CENTER is also the default
-        //how to distribute space among columns (weightx) and rows (weighty) 
-        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
-        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
-        // puts any extra space between its grid of cells and the edges of the container.
-        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
-        // Larger numbers indicate that the component's row or column should get more space. 
-        //For each column, the weight is related to the highest weightx specified for a component within that column, 
-        // with each multicolumn component's weight being split somehow between the columns the component is in. 
-        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
-            c.weightx = 0.1;
-            c.weighty = 0.1;
-
         return c;
     }
 
@@ -649,29 +611,11 @@ public class ContestInformationPane extends JPanePlugin {
         //number of cols and rows the component occupies
             c.gridwidth = 1;
             c.gridheight = 1;
-        //how to fill when the component is smaller than the available display area
-        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
-            c.fill = GridBagConstraints.NONE;
-        //internal padding (space in pixels) around the component
-            c.ipadx = 0; // 0 is also the default
-            c.ipady = 0;
         //external padding (in pixels) added around the top, left, bottom, and right of the component
         //  (the default is "no inset")
             c.insets = new Insets(1, 1, 1, 1);
         //where to anchor the component if it is smaller than the display area
             c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
-        //how to distribute space among columns (weightx) and rows (weighty) 
-        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
-        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
-        // puts any extra space between its grid of cells and the edges of the container.
-        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
-        // Larger numbers indicate that the component's row or column should get more space. 
-        //For each column, the weight is related to the highest weightx specified for a component within that column, 
-        // with each multicolumn component's weight being split somehow between the columns the component is in. 
-        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
-            c.weightx = 0.2;
-            c.weighty = 0.2;
-
         return c;
     }
 
@@ -686,26 +630,9 @@ public class ContestInformationPane extends JPanePlugin {
         //how to fill when the component is smaller than the available display area
         // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
             c.fill = GridBagConstraints.BOTH;
-        //internal padding (space in pixels) around the component
-            c.ipadx = 0; // 0 is also the default
-            c.ipady = 0;
         //external padding (in pixels) added around the top, left, bottom, and right of the component
         //  (the default is "no inset")
             c.insets = new Insets(1, 1, 1, 1);
-        //where to anchor the component if it is smaller than the display area
-            c.anchor = GridBagConstraints.CENTER; // CENTER is also the default
-        //how to distribute space among columns (weightx) and rows (weighty) 
-        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
-        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
-        // puts any extra space between its grid of cells and the edges of the container.
-        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
-        // Larger numbers indicate that the component's row or column should get more space. 
-        //For each column, the weight is related to the highest weightx specified for a component within that column, 
-        // with each multicolumn component's weight being split somehow between the columns the component is in. 
-        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
-            c.weightx = 0.1;
-            c.weighty = 0.1;
-
         return c;
     }
 
@@ -720,26 +647,9 @@ public class ContestInformationPane extends JPanePlugin {
         //how to fill when the component is smaller than the available display area
         // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
             c.fill = GridBagConstraints.HORIZONTAL;
-        //internal padding (space in pixels) around the component
-            c.ipadx = 0; // 0 is also the default
-            c.ipady = 0;
         //external padding (in pixels) added around the top, left, bottom, and right of the component
         //  (the default is "no inset")
             c.insets = new Insets(1, 1, 1, 1);
-        //where to anchor the component if it is smaller than the display area
-            c.anchor = GridBagConstraints.CENTER; // CENTER is also the default
-        //how to distribute space among columns (weightx) and rows (weighty) 
-        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
-        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
-        // puts any extra space between its grid of cells and the edges of the container.
-        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
-        // Larger numbers indicate that the component's row or column should get more space. 
-        //For each column, the weight is related to the highest weightx specified for a component within that column, 
-        // with each multicolumn component's weight being split somehow between the columns the component is in. 
-        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
-            c.weightx = 0.6;
-            c.weighty = 0.6;
-
         return c;
     }
 
@@ -754,26 +664,9 @@ public class ContestInformationPane extends JPanePlugin {
         //how to fill when the component is smaller than the available display area
         // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
             c.fill = GridBagConstraints.BOTH;
-        //internal padding (space in pixels) around the component
-            c.ipadx = 0; // 0 is also the default
-            c.ipady = 0;
         //external padding (in pixels) added around the top, left, bottom, and right of the component
         //  (the default is "no inset")
             c.insets = new Insets(1, 1, 1, 1);
-        //where to anchor the component if it is smaller than the display area
-            c.anchor = GridBagConstraints.CENTER; // CENTER is also the default
-        //how to distribute space among columns (weightx) and rows (weighty) 
-        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
-        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
-        // puts any extra space between its grid of cells and the edges of the container.
-        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
-        // Larger numbers indicate that the component's row or column should get more space. 
-        //For each column, the weight is related to the highest weightx specified for a component within that column, 
-        // with each multicolumn component's weight being split somehow between the columns the component is in. 
-        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
-            c.weightx = 0.1;
-            c.weighty = 0.1;
-
         return c;
     }
 
@@ -788,27 +681,13 @@ public class ContestInformationPane extends JPanePlugin {
         //how to fill when the component is smaller than the available display area
         // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
             c.fill = GridBagConstraints.BOTH;
-        //internal padding (space in pixels) around the component
-            c.ipadx = 0; // 0 is also the default
-            c.ipady = 0;
         //external padding (in pixels) added around the top, left, bottom, and right of the component
         //  (the default is "no inset")
             c.insets = new Insets(1, 1, 1, 1);
         //where to anchor the component if it is smaller than the display area
-            c.anchor = GridBagConstraints.CENTER; // CENTER is also the default
-        //how to distribute space among columns (weightx) and rows (weighty) 
-        //Unless you specify at least one non-zero value for weightx or weighty, all the components clump together 
-        // in the center of their container. This is because when the weight is 0.0 (the default), the GridBagLayout 
-        // puts any extra space between its grid of cells and the edges of the container.
-        //Generally weights are specified with 0.0 and 1.0 as the extremes: the numbers in between are used as necessary. 
-        // Larger numbers indicate that the component's row or column should get more space. 
-        //For each column, the weight is related to the highest weightx specified for a component within that column, 
-        // with each multicolumn component's weight being split somehow between the columns the component is in. 
-        // Similarly for rows. Extra space tends to go toward the rightmost column and bottom row.
-            c.weightx = 0.1;
-            c.weighty = 0.1;
+            c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
 
-        return c;
+            return c;
     }
 
     private JCheckBox getShadowModeCheckbox() {
@@ -1591,10 +1470,5 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return horizontalStrut_3;
     }
-    private Component getHorizontalStrut_1() {
-        if (horizontalStrut_1 == null) {
-        	horizontalStrut_1 = Box.createHorizontalStrut(20);
-        }
-        return horizontalStrut_1;
-    }
+
 }
