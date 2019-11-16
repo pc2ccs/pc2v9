@@ -624,6 +624,13 @@ public class ContestInformationPane extends JPanePlugin {
             textfieldPrimaryCCSURL.setColumns(40);
             textfieldPrimaryCCSURL.setEditable(true);
             textfieldPrimaryCCSURL.setToolTipText("The URL to the Primary CCS (when operating in 'Shadow Mode')");
+            
+            textfieldPrimaryCCSURL.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+
         }
         return textfieldPrimaryCCSURL ;
     }
@@ -802,19 +809,24 @@ public class ContestInformationPane extends JPanePlugin {
                 
                 getContestTitleTextField().setText(contestInformation.getContestTitle());
                 selectDisplayRadioButton();
+                
                 getJudgesDefaultAnswerTextField().setText(contestInformation.getJudgesDefaultAnswer());
                 getJCheckBoxShowPreliminaryOnBoard().setSelected(contestInformation.isPreliminaryJudgementsUsedByBoard());
                 getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
-                getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
-                getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
+                
                 getMaxOutputSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
                 getContestFreezeLengthtextField().setText(contestInformation.getFreezeTime());
+                
+                getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
                 getRunSubmissionInterfaceCommandTextField().setText(contestInformation.getRsiCommand());
                 if (contestInformation.getRsiCommand() == null || "".equals(contestInformation.getRsiCommand().trim())) {
                     String cmd = "# /usr/local/bin/sccsrs " + CommandVariableReplacer.OPTIONS + " " + CommandVariableReplacer.FILELIST;
                     getRunSubmissionInterfaceCommandTextField().setText(cmd);
                 }
+                
+                getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
+                getPrimaryCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL());
                 
                 //add the scheduled start time to the GUI
                 GregorianCalendar cal = contestInformation.getScheduledStartTime();
