@@ -34,6 +34,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
@@ -147,7 +148,8 @@ public class ContestInformationPane extends JPanePlugin {
     private JLabel labelPrimaryCCSPasswd;    
     private JTextField textfieldPrimaryCCSPasswd;
 
-    private Border lineBorderBlue2px = new LineBorder(Color.blue, 2);
+    private Border lineBorderBlue2px = new LineBorder(Color.blue, 2, true) ; //blue, 2-pixel line, rounded corners
+    private Border margin = new EmptyBorder(5,10,5,10); //top,left,bottom,right
 
     private JPanel judgeSettingsPane;
 
@@ -278,7 +280,8 @@ public class ContestInformationPane extends JPanePlugin {
                 
                 TitledBorder titleBorder = new TitledBorder("Remote CCS Settings ");
                 titleBorder.setBorder(lineBorderBlue2px);
-                remoteCCSSettingsPane.setBorder(titleBorder);
+
+                remoteCCSSettingsPane.setBorder(new CompoundBorder(margin,titleBorder));
                 
             } else {
                 remoteCCSSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
@@ -382,9 +385,9 @@ public class ContestInformationPane extends JPanePlugin {
         if (contestSettingsPane == null) {
             contestSettingsPane = new JPanel();
             contestSettingsPane.setLayout(new FlowLayout(FlowLayout.LEFT));
-            contestSettingsPane.setMinimumSize(new Dimension(700, 100));
-            contestSettingsPane.setMaximumSize(new Dimension(700, 100));
-            contestSettingsPane.setPreferredSize(new Dimension(700,100));
+            contestSettingsPane.setMinimumSize(new Dimension(700, 120));
+            contestSettingsPane.setMaximumSize(new Dimension(700, 120));
+            contestSettingsPane.setPreferredSize(new Dimension(700,120));
             contestSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
 
             if (showPaneOutlines) {
@@ -392,7 +395,7 @@ public class ContestInformationPane extends JPanePlugin {
                 TitledBorder titleBorder = new TitledBorder("Contest Settings");
                 titleBorder.setBorder(lineBorderBlue2px);
                 
-                contestSettingsPane.setBorder(titleBorder);
+                contestSettingsPane.setBorder(new CompoundBorder(margin,titleBorder));
                 
             } else {
                 contestSettingsPane.setBorder(new EmptyBorder(2, 2, 2, 2));
@@ -453,7 +456,8 @@ public class ContestInformationPane extends JPanePlugin {
                 
                 TitledBorder titleBorder = new TitledBorder("Judging Settings");
                 titleBorder.setBorder(lineBorderBlue2px);
-                judgeSettingsPane.setBorder(titleBorder);
+                
+                judgeSettingsPane.setBorder(new CompoundBorder(margin,titleBorder));
             } else {
                 judgeSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
             }
@@ -489,7 +493,9 @@ public class ContestInformationPane extends JPanePlugin {
                 
                 TitledBorder titleBorder = new TitledBorder("Team Settings");
                 titleBorder.setBorder(lineBorderBlue2px);
-                teamSettingsPane.setBorder(titleBorder);
+
+                teamSettingsPane.setBorder(new CompoundBorder(margin,titleBorder));
+
             } else {
                 teamSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
             }
