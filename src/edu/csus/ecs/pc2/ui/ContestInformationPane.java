@@ -29,6 +29,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -53,15 +54,16 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  * 
  * Developer Notes:
  *   This pane uses a vertical BoxLayout to display a collection of panes.  Each pane is a singleton which
- *   is constructed by a getter method.  Each getter returns a self-contained pane (including that the pane
+ *   is constructed by a getter method.  Each getter returns a self-contained pane (including that each pane
  *   has a layout manager controlling how things are laid out within that pane as well as size and alignment
  *   constraints defining how the components within the pane are managed by the layout manager for the pane).
- *   The panes are added to the top-level display (the ContestInformationPane class) by the method {@link #getCenterPane()}.
+ *   The panes are added to a scroll pane in the top-level display (the ContestInformationPane class) by the 
+ *   method {@link #getCenterPane()}.
  *   
  *   To add a new pane to the ContestInformationPane, define a getter method which returns the pane (as an instance of
  *   {@link JPanel}) and include a call to centerPane.add(getNewPane()) in method {@link #getCenterPane()}.
  *   
- *   To add a new {@link JComponent} to an existing pane, first create an accessor which creates the new component
+ *   To add a new {@link JComponent} to an *existing* pane, first create an accessor which creates the new component
  *   (for example, getNewComponent()), then go to the getter method for the pane to which the new component is to be added
  *   (for example, {@link #getCCSTestModePane()}) and add an "add" statement which calls the new getter to the body of that 
  *   method (for example, in the body of {@link #getCCSTestModePane()} you might add 
@@ -208,7 +210,11 @@ public class ContestInformationPane extends JPanePlugin {
     private void initialize() {
         this.setLayout(new BorderLayout());
         this.setSize(new Dimension(900, 700));
-        this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
+        
+        //put the center pane in a scrollpane so the user can access it without expanding the window
+        JScrollPane sp = new JScrollPane(getCenterPane());
+        this.add(sp,BorderLayout.CENTER);
+        
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
     }
 
