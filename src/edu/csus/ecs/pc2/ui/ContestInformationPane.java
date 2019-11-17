@@ -242,9 +242,9 @@ public class ContestInformationPane extends JPanePlugin {
             
             remoteCCSSettingsPane = new JPanel();
             remoteCCSSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
-            remoteCCSSettingsPane.setMaximumSize(new Dimension(1000,400));
-            remoteCCSSettingsPane.setMinimumSize(new Dimension(1000,400));
-            remoteCCSSettingsPane.setPreferredSize(new Dimension(1000,400));
+            remoteCCSSettingsPane.setMaximumSize(new Dimension(1000, 250));
+            remoteCCSSettingsPane.setMinimumSize(new Dimension(1000, 250));
+            remoteCCSSettingsPane.setPreferredSize(new Dimension(1000,250));
            
             
             if (showPaneOutlines) {
@@ -280,9 +280,9 @@ public class ContestInformationPane extends JPanePlugin {
             ccsTestModePane = new JPanel();
 
             ccsTestModePane.setLayout(new FlowLayout(FlowLayout.LEFT));
-            ccsTestModePane.setPreferredSize(new Dimension(700,100));
-            ccsTestModePane.setMaximumSize(new Dimension(700,100));
-            ccsTestModePane.setMinimumSize(new Dimension(700,100));
+            ccsTestModePane.setPreferredSize(new Dimension(700, 60));
+            ccsTestModePane.setMaximumSize(new Dimension(700, 60));
+            ccsTestModePane.setMinimumSize(new Dimension(700, 60));
             
             ccsTestModePane.setBorder (BorderFactory.createTitledBorder("CCS Test Mode"));
             ccsTestModePane.setAlignmentX(LEFT_ALIGNMENT); 
@@ -303,11 +303,12 @@ public class ContestInformationPane extends JPanePlugin {
     private JPanel getRunSubmissionCommandPane() {
         if (runSubmissionCommandPane == null) {
             runSubmissionCommandPane = new JPanel();
+            runSubmissionCommandPane.setMaximumSize(new Dimension(500, 20));
             
             runSubmissionInterfaceLabel = new JLabel();
             runSubmissionInterfaceLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
             runSubmissionInterfaceLabel.setText("Run Submission Command:  ");
-            runSubmissionInterfaceLabel.setToolTipText("CCS Run Submission Interface Command");
+            runSubmissionInterfaceLabel.setToolTipText("The command used to submit to a remote CCS");
             runSubmissionInterfaceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             
             //the contents of the pane:
@@ -561,9 +562,9 @@ public class ContestInformationPane extends JPanePlugin {
         if (shadowModePane == null) {
             shadowModePane = new JPanel();
             
-            shadowModePane.setMinimumSize(new Dimension(900,200));
-            shadowModePane.setMaximumSize(new Dimension(900,200));
-            shadowModePane.setPreferredSize(new Dimension(900,200));
+            shadowModePane.setMinimumSize(new Dimension(900, 100));
+            shadowModePane.setMaximumSize(new Dimension(900, 100));
+            shadowModePane.setPreferredSize(new Dimension(900, 100));
             shadowModePane.setAlignmentX(LEFT_ALIGNMENT);  
            
             shadowModePane.setLayout(new GridBagLayout());
@@ -1491,6 +1492,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField getRunSubmissionInterfaceCommandTextField() {
         if (runSubmissionInterfaceCommandTextField == null) {
             runSubmissionInterfaceCommandTextField = new JTextField();
+            runSubmissionInterfaceCommandTextField.setMaximumSize(new Dimension(2147483647, 20));
             runSubmissionInterfaceCommandTextField.setText("");
             runSubmissionInterfaceCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
@@ -1504,6 +1506,7 @@ public class ContestInformationPane extends JPanePlugin {
     private Component getHorizontalStrut_2() {
         if (horizontalStrut_2 == null) {
         	horizontalStrut_2 = Box.createHorizontalStrut(20);
+        	horizontalStrut_2.setMaximumSize(new Dimension(20, 0));
         }
         return horizontalStrut_2;
     }
