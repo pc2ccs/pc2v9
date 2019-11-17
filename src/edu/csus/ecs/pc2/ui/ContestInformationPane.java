@@ -276,9 +276,9 @@ public class ContestInformationPane extends JPanePlugin {
             
             remoteCCSSettingsPane = new JPanel();
             remoteCCSSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
-            remoteCCSSettingsPane.setMaximumSize(new Dimension(1000, 250));
-            remoteCCSSettingsPane.setMinimumSize(new Dimension(1000, 250));
-            remoteCCSSettingsPane.setPreferredSize(new Dimension(1000,250));
+            remoteCCSSettingsPane.setMaximumSize(new Dimension(900, 250));
+            remoteCCSSettingsPane.setMinimumSize(new Dimension(900, 250));
+            remoteCCSSettingsPane.setPreferredSize(new Dimension(900,250));
            
             
             if (showPaneOutlines) {
@@ -314,11 +314,12 @@ public class ContestInformationPane extends JPanePlugin {
             ccsTestModePane = new JPanel();
 
             ccsTestModePane.setLayout(new FlowLayout(FlowLayout.LEFT));
-            ccsTestModePane.setPreferredSize(new Dimension(700, 60));
-            ccsTestModePane.setMaximumSize(new Dimension(700, 60));
-            ccsTestModePane.setMinimumSize(new Dimension(700, 60));
+            ccsTestModePane.setPreferredSize(new Dimension(700, 80));
+            ccsTestModePane.setMaximumSize(new Dimension(700, 80));
+            ccsTestModePane.setMinimumSize(new Dimension(700, 80));
             
-            ccsTestModePane.setBorder (BorderFactory.createTitledBorder("CCS Test Mode"));
+            TitledBorder tb = BorderFactory.createTitledBorder("CCS Test Mode");
+            ccsTestModePane.setBorder(new CompoundBorder(margin,tb));
             ccsTestModePane.setAlignmentX(LEFT_ALIGNMENT); 
             
             //the contents of the pane:
@@ -453,9 +454,9 @@ public class ContestInformationPane extends JPanePlugin {
             judgeSettingsPane = new JPanel();
             
             judgeSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
-            judgeSettingsPane.setMaximumSize(new Dimension(800, 250));
-            judgeSettingsPane.setMinimumSize(new Dimension(800, 250));
-            judgeSettingsPane.setPreferredSize(new Dimension(800,250));
+            judgeSettingsPane.setMaximumSize(new Dimension(750, 250));
+            judgeSettingsPane.setMinimumSize(new Dimension(750, 250));
+            judgeSettingsPane.setPreferredSize(new Dimension(750,250));
 
             if (showPaneOutlines) {
                 
@@ -606,14 +607,16 @@ public class ContestInformationPane extends JPanePlugin {
         if (shadowModePane == null) {
             shadowModePane = new JPanel();
             
-            shadowModePane.setMinimumSize(new Dimension(900, 100));
-            shadowModePane.setMaximumSize(new Dimension(900, 100));
-            shadowModePane.setPreferredSize(new Dimension(900, 100));
+            shadowModePane.setMinimumSize(new Dimension(850, 100));
+            shadowModePane.setMaximumSize(new Dimension(850, 100));
+            shadowModePane.setPreferredSize(new Dimension(850, 100));
             shadowModePane.setAlignmentX(LEFT_ALIGNMENT);  
            
             shadowModePane.setLayout(new GridBagLayout());
                                
-            shadowModePane.setBorder(BorderFactory.createTitledBorder("Shadow Mode"));
+            TitledBorder tb = BorderFactory.createTitledBorder("Shadow Mode");
+            shadowModePane.setBorder(new CompoundBorder(margin,tb));
+
             
             labelPrimaryCCSURL = new JLabel();
             labelPrimaryCCSURL.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -847,10 +850,13 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField getPrimaryCCSURLTextfield() {
         if (textfieldPrimaryCCSURL == null) {
             textfieldPrimaryCCSURL = new JTextField();
-//            textfieldPrimaryCCSURL.setBounds(270, 700, 243, 31);
-            textfieldPrimaryCCSURL.setColumns(40);
+            textfieldPrimaryCCSURL.setColumns(50);
             textfieldPrimaryCCSURL.setEditable(true);
             textfieldPrimaryCCSURL.setToolTipText("The URL to the Primary CCS (when operating in 'Shadow Mode')");
+            
+            textfieldPrimaryCCSURL.setMaximumSize(new Dimension(400,20));
+            textfieldPrimaryCCSURL.setMinimumSize(new Dimension(400,20));
+            textfieldPrimaryCCSURL.setPreferredSize(new Dimension(400,20));
             
             textfieldPrimaryCCSURL.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
@@ -869,6 +875,10 @@ public class ContestInformationPane extends JPanePlugin {
             textfieldPrimaryCCSLogin.setEditable(true);
             textfieldPrimaryCCSLogin.setToolTipText("The account used to login to the Primary CCS (when operating in 'Shadow Mode')");
             
+            textfieldPrimaryCCSLogin.setMaximumSize(new Dimension(150,20));
+            textfieldPrimaryCCSLogin.setMinimumSize(new Dimension(150,20));
+            textfieldPrimaryCCSLogin.setPreferredSize(new Dimension(150,20));
+
             textfieldPrimaryCCSLogin.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -886,7 +896,11 @@ public class ContestInformationPane extends JPanePlugin {
             textfieldPrimaryCCSPasswd.setColumns(20);
             textfieldPrimaryCCSPasswd.setEditable(true);
             textfieldPrimaryCCSPasswd.setToolTipText("The Primary CCS account password");
-            
+
+            textfieldPrimaryCCSPasswd.setMaximumSize(new Dimension(150,20));
+            textfieldPrimaryCCSPasswd.setMinimumSize(new Dimension(150,20));
+            textfieldPrimaryCCSPasswd.setPreferredSize(new Dimension(150,20));
+
             textfieldPrimaryCCSPasswd.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
