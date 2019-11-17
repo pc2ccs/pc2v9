@@ -10,7 +10,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -24,9 +23,11 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -161,6 +162,8 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField textfieldPrimaryCCSLogin;
 
     private JTextField textfieldPrimaryCCSPasswd;
+
+    private JPanel runSubmissionCommandPane;
     
 
     /**
@@ -238,6 +241,11 @@ public class ContestInformationPane extends JPanePlugin {
         if (remoteCCSSettingsPane == null) {
             
             remoteCCSSettingsPane = new JPanel();
+            remoteCCSSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
+            remoteCCSSettingsPane.setMaximumSize(new Dimension(1000,400));
+            remoteCCSSettingsPane.setMinimumSize(new Dimension(1000,400));
+            remoteCCSSettingsPane.setPreferredSize(new Dimension(1000,400));
+           
             
             if (showPaneOutlines) {
                 
@@ -254,13 +262,12 @@ public class ContestInformationPane extends JPanePlugin {
 
             //the contents of the pane:
             
-            judgeSettingsPane.add(Box.createVerticalStrut(15));
+            remoteCCSSettingsPane.add(Box.createVerticalStrut(15));
             
-            remoteCCSSettingsPane.add(getCCSTestModePane());
-            judgeSettingsPane.add(Box.createVerticalStrut(15));
+            remoteCCSSettingsPane.add(getCCSTestModePane(),JComponent.LEFT_ALIGNMENT);
+            remoteCCSSettingsPane.add(Box.createVerticalStrut(15));
             
-            remoteCCSSettingsPane.add(getShadowModePane());
-            judgeSettingsPane.add(Box.createVerticalStrut(15));
+            remoteCCSSettingsPane.add(getShadowModePane(),JComponent.LEFT_ALIGNMENT);
 
         }
         return remoteCCSSettingsPane;
@@ -273,12 +280,29 @@ public class ContestInformationPane extends JPanePlugin {
             ccsTestModePane = new JPanel();
 
             ccsTestModePane.setLayout(new FlowLayout(FlowLayout.LEFT));
+            ccsTestModePane.setPreferredSize(new Dimension(700,100));
+            ccsTestModePane.setMaximumSize(new Dimension(700,100));
+            ccsTestModePane.setMinimumSize(new Dimension(700,100));
             
             ccsTestModePane.setBorder (BorderFactory.createTitledBorder("CCS Test Mode"));
+            ccsTestModePane.setAlignmentX(LEFT_ALIGNMENT); 
             
-            //the following line keeps the pane from expanding beyond the necessary size when the window is enlarged,
-            // but it causes BoxLayout to move the pane to the Center instead of being left-justified.  Don't know why...
-//            ccsTestModePane.setMaximumSize(new Dimension(600,100));
+            //the contents of the pane:
+            
+            ccsTestModePane.add(getCcsTestModeCheckbox(), null);
+            ccsTestModePane.add(getHorizontalStrut_2());
+            
+            ccsTestModePane.add(getRunSubmissionCommandPane(),null);
+            
+        }
+        return ccsTestModePane;
+        
+    }
+
+
+    private JPanel getRunSubmissionCommandPane() {
+        if (runSubmissionCommandPane == null) {
+            runSubmissionCommandPane = new JPanel();
             
             runSubmissionInterfaceLabel = new JLabel();
             runSubmissionInterfaceLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
@@ -288,17 +312,12 @@ public class ContestInformationPane extends JPanePlugin {
             
             //the contents of the pane:
             
-            ccsTestModePane.add(getCcsTestModeCheckbox(), null);
-            ccsTestModePane.add(getHorizontalStrut_2());
-            
-            ccsTestModePane.add(runSubmissionInterfaceLabel, null);
-            ccsTestModePane.add(getRunSubmissionInterfaceCommandTextField(), null);
+            runSubmissionCommandPane.add(runSubmissionInterfaceLabel, null);
+            runSubmissionCommandPane.add(getRunSubmissionInterfaceCommandTextField(), null);
 
         }
-        return ccsTestModePane;
-        
+        return runSubmissionCommandPane;
     }
-
 
     private Component getScoreboardFreezePane() {
         if (scoreboardFreezePane == null) {
@@ -325,7 +344,7 @@ public class ContestInformationPane extends JPanePlugin {
         if (contestFreezeLengthLabel == null) {
             
             contestFreezeLengthLabel = new JLabel();
-            contestFreezeLengthLabel.setText("Scoreboard Freeze Length (secs):  ");
+            contestFreezeLengthLabel.setText("Scoreboard Freeze Length (hh:mm:ss) ");
             contestFreezeLengthLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
             contestFreezeLengthLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         }
@@ -336,7 +355,10 @@ public class ContestInformationPane extends JPanePlugin {
         if (contestSettingsPane == null) {
             contestSettingsPane = new JPanel();
             contestSettingsPane.setLayout(new FlowLayout(FlowLayout.LEFT));
-            contestSettingsPane.setMinimumSize(new Dimension(300, 100));
+            contestSettingsPane.setMinimumSize(new Dimension(700, 100));
+            contestSettingsPane.setMaximumSize(new Dimension(700, 100));
+            contestSettingsPane.setPreferredSize(new Dimension(700,100));
+            contestSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
 
             if (showPaneOutlines) {
                 
@@ -431,7 +453,9 @@ public class ContestInformationPane extends JPanePlugin {
         if (teamSettingsPane == null ) {
             
             teamSettingsPane = new JPanel();
-            teamSettingsPane.setMaximumSize(new Dimension(32767, 200));
+            teamSettingsPane.setMaximumSize(new Dimension(500, 100));
+            teamSettingsPane.setPreferredSize(new Dimension(500,100));
+            teamSettingsPane.setAlignmentX(LEFT_ALIGNMENT); 
 
             if (showPaneOutlines) {
                 
@@ -460,7 +484,6 @@ public class ContestInformationPane extends JPanePlugin {
            labelMaxOutputSize.setHorizontalAlignment(SwingConstants.RIGHT);
            labelMaxOutputSize.setBorder(new EmptyBorder(0,10,5,5));
            labelMaxOutputSize.setText("Maximum output size (in KB): ");
-           teamSettingsPane.add(labelMaxOutputSize);
        }
         return labelMaxOutputSize ;
     }
@@ -501,7 +524,8 @@ public class ContestInformationPane extends JPanePlugin {
             
             judgingOptionsPane.setLayout(new BoxLayout(judgingOptionsPane,BoxLayout.Y_AXIS));
 
-            judgingOptionsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Judging Options", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+            judgingOptionsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Judging Options", 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             judgingOptionsPane.add(getJCheckBoxShowPreliminaryOnBoard(), LEFT_ALIGNMENT);
             judgingOptionsPane.add(getJCheckBoxShowPreliminaryOnNotifications(), LEFT_ALIGNMENT);
@@ -537,7 +561,11 @@ public class ContestInformationPane extends JPanePlugin {
         if (shadowModePane == null) {
             shadowModePane = new JPanel();
             
-//            shadowModePane.setLayout(new FlowLayout(FlowLayout.LEFT));
+            shadowModePane.setMinimumSize(new Dimension(900,200));
+            shadowModePane.setMaximumSize(new Dimension(900,200));
+            shadowModePane.setPreferredSize(new Dimension(900,200));
+            shadowModePane.setAlignmentX(LEFT_ALIGNMENT);  
+           
             shadowModePane.setLayout(new GridBagLayout());
                                
             shadowModePane.setBorder(BorderFactory.createTitledBorder("Shadow Mode"));
@@ -583,6 +611,9 @@ public class ContestInformationPane extends JPanePlugin {
             c.insets = new Insets(1, 1, 1, 1);
         //where to anchor the component if it is smaller than the display area
             c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
+        //specify relative weights of components
+            c.weightx = 0.8 ;
+            c.weighty = 0.0 ;
         return c;
     }
 
@@ -616,6 +647,9 @@ public class ContestInformationPane extends JPanePlugin {
             c.insets = new Insets(1, 1, 1, 1);
         //where to anchor the component if it is smaller than the display area
             c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
+        //specify relative weights of components
+            c.weightx = 0.8 ;
+            c.weighty = 0.0 ;
         return c;
     }
 
@@ -644,12 +678,14 @@ public class ContestInformationPane extends JPanePlugin {
         //number of cols and rows the component occupies
             c.gridwidth = 1;
             c.gridheight = 1;
-        //how to fill when the component is smaller than the available display area
-        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
-            c.fill = GridBagConstraints.HORIZONTAL;
         //external padding (in pixels) added around the top, left, bottom, and right of the component
         //  (the default is "no inset")
             c.insets = new Insets(1, 1, 1, 1);
+        //where to anchor the component if it is smaller than the display area
+            c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
+        //specify relative weights of components
+            c.weightx = 0.8 ;
+            c.weighty = 0.0 ;
         return c;
     }
 
@@ -667,6 +703,9 @@ public class ContestInformationPane extends JPanePlugin {
         //external padding (in pixels) added around the top, left, bottom, and right of the component
         //  (the default is "no inset")
             c.insets = new Insets(1, 1, 1, 1);
+            //specify relative weights of components
+            c.weightx = 0.1 ;
+            c.weighty = 0.0 ;
         return c;
     }
 
@@ -684,9 +723,11 @@ public class ContestInformationPane extends JPanePlugin {
         //external padding (in pixels) added around the top, left, bottom, and right of the component
         //  (the default is "no inset")
             c.insets = new Insets(1, 1, 1, 1);
-        //where to anchor the component if it is smaller than the display area
-            c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
-
+//        //where to anchor the component if it is smaller than the display area
+//            c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
+        //specify relative weights of components
+            c.weightx = 0.4 ;
+            c.weighty = 0.0 ;
             return c;
     }
 
@@ -795,7 +836,7 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JTextField getPrimaryCCSPasswdTextfield() {
         if (textfieldPrimaryCCSPasswd == null) {
-            textfieldPrimaryCCSPasswd = new JTextField();
+            textfieldPrimaryCCSPasswd = new JPasswordField();
             textfieldPrimaryCCSPasswd.setColumns(20);
             textfieldPrimaryCCSPasswd.setEditable(true);
             textfieldPrimaryCCSPasswd.setToolTipText("The account used to login to the Primary CCS (when operating in 'Shadow Mode')");
@@ -839,7 +880,7 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private JTextField getContestTitleTextField() {
         if (contestTitleTextField == null) {
-            contestTitleTextField = new JTextField(40);
+            contestTitleTextField = new JTextField(0); //'0' causes textfield to resize based on its data
             contestTitleTextField.setAlignmentX(LEFT_ALIGNMENT);
             contestTitleTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
@@ -1450,7 +1491,6 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField getRunSubmissionInterfaceCommandTextField() {
         if (runSubmissionInterfaceCommandTextField == null) {
             runSubmissionInterfaceCommandTextField = new JTextField();
-            runSubmissionInterfaceCommandTextField.setBounds(new Rectangle(208, 256, 404, 29));
             runSubmissionInterfaceCommandTextField.setText("");
             runSubmissionInterfaceCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
