@@ -186,6 +186,10 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField textfieldPrimaryCCSPasswd;
 
     private JPanel runSubmissionCommandPane;
+    private Component horizontalStrut;
+    private Component horizontalStrut_1;
+    private Component horizontalStrut_4;
+    private Component horizontalStrut_5;
     
 
     /**
@@ -441,6 +445,11 @@ public class ContestInformationPane extends JPanePlugin {
             
             judgeSettingsPane = new JPanel();
             
+            judgeSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
+            judgeSettingsPane.setMaximumSize(new Dimension(800, 250));
+            judgeSettingsPane.setMinimumSize(new Dimension(800, 250));
+            judgeSettingsPane.setPreferredSize(new Dimension(800,250));
+
             if (showPaneOutlines) {
                 
                 Border lineBorder2px = new LineBorder(Color.blue, 2);
@@ -451,21 +460,19 @@ public class ContestInformationPane extends JPanePlugin {
                 judgeSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
             }
             
-            judgeSettingsPane.setLayout(new BoxLayout(judgeSettingsPane, BoxLayout.Y_AXIS));
+            judgeSettingsPane.setLayout(new FlowLayout((FlowLayout.LEFT)));
             
             //the contents of the pane:
             
             judgeSettingsPane.add(Box.createVerticalStrut(15));
 
             judgeSettingsPane.add(getTeamInformationDisplaySettingsPane(), LEFT_ALIGNMENT);
-            judgeSettingsPane.add(Box.createVerticalStrut(15));
             
             judgeSettingsPane.add(getJudgesDefaultAnswerPane(),LEFT_ALIGNMENT);
-            judgeSettingsPane.add(Box.createVerticalStrut(15));
             
             judgeSettingsPane.add(getJudgingOptionsPane(),LEFT_ALIGNMENT);
-            judgeSettingsPane.add(Box.createVerticalStrut(15));  
             
+            judgeSettingsPane.add(Box.createHorizontalStrut(20));
             judgeSettingsPane.add(getScoringPropertiesButton(),LEFT_ALIGNMENT);
 
         }
@@ -520,7 +527,7 @@ public class ContestInformationPane extends JPanePlugin {
         if (teamInformationDisplaySettingsPane == null) {
             
             teamInformationDisplaySettingsPane = new JPanel();
-            teamInformationDisplaySettingsPane.setMaximumSize(new Dimension(32767, 200));
+            teamInformationDisplaySettingsPane.setMaximumSize(new Dimension(700, 200));
             teamInformationDisplaySettingsPane.setAlignmentX(Component.LEFT_ALIGNMENT);
             
             teamInformationDisplaySettingsPane.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -531,9 +538,13 @@ public class ContestInformationPane extends JPanePlugin {
             
             //contents of pane:
             teamInformationDisplaySettingsPane.add(getDisplayNoneRadioButton(), null);
+            teamInformationDisplaySettingsPane.add(getHorizontalStrut());
             teamInformationDisplaySettingsPane.add(getDisplayNumbersOnlyRadioButton(), null);
+            teamInformationDisplaySettingsPane.add(getHorizontalStrut_1());
             teamInformationDisplaySettingsPane.add(getDisplayNamesOnlyRadioButton(), null);
+            teamInformationDisplaySettingsPane.add(getHorizontalStrut_4());
             teamInformationDisplaySettingsPane.add(getDisplayNameAndNumberRadioButton(), null);
+            teamInformationDisplaySettingsPane.add(getHorizontalStrut_5());
             teamInformationDisplaySettingsPane.add(getDisplayAliasNameRadioButton(), null);
 
         }
@@ -560,15 +571,18 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JPanel getJudgesDefaultAnswerPane() {
         if (judgesDefaultAnswerPane == null) {
+            
             judgesDefaultAnswerPane = new JPanel();
-            judgesDefaultAnswerPane.setMaximumSize(new Dimension(32767, 200));
+            judgesDefaultAnswerPane.setMaximumSize(new Dimension(500, 200));
+            judgesDefaultAnswerPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+            
             judgesDefaultAnswerPane.setLayout(new FlowLayout(FlowLayout.LEFT));
-//            judgesDefaultAnswerPane.setBorder(new TitledBorder("Judge's Default Answer"));
             
             judgesDefaultAnswerPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Judge's Default Answer", 
                     javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
 
+            //the contents of the pane:
             
             judgesDefaultAnswerPane.add(getJudgesDefaultAnswerTextField(), null);
 
@@ -1540,4 +1554,28 @@ public class ContestInformationPane extends JPanePlugin {
         return horizontalStrut_3;
     }
 
+    private Component getHorizontalStrut() {
+        if (horizontalStrut == null) {
+        	horizontalStrut = Box.createHorizontalStrut(10);
+        }
+        return horizontalStrut;
+    }
+    private Component getHorizontalStrut_1() {
+        if (horizontalStrut_1 == null) {
+        	horizontalStrut_1 = Box.createHorizontalStrut(10);
+        }
+        return horizontalStrut_1;
+    }
+    private Component getHorizontalStrut_4() {
+        if (horizontalStrut_4 == null) {
+        	horizontalStrut_4 = Box.createHorizontalStrut(10);
+        }
+        return horizontalStrut_4;
+    }
+    private Component getHorizontalStrut_5() {
+        if (horizontalStrut_5 == null) {
+        	horizontalStrut_5 = Box.createHorizontalStrut(10);
+        }
+        return horizontalStrut_5;
+    }
 }
