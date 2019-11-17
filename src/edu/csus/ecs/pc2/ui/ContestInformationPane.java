@@ -246,7 +246,7 @@ public class ContestInformationPane extends JPanePlugin {
             centerPane.add(getContestSettingsPane()) ;
             centerPane.add(Box.createVerticalStrut(15));
             
-            centerPane.add(getJudgeSettingsPane(),null);
+            centerPane.add(getJudgingSettingsPane(),null);
             centerPane.add(Box.createVerticalStrut(15));
            
             centerPane.add(getTeamSettingsPane());
@@ -436,7 +436,7 @@ public class ContestInformationPane extends JPanePlugin {
      * related to judging.
      * @return a JPanel
      */
-    private JPanel getJudgeSettingsPane() {
+    private JPanel getJudgingSettingsPane() {
         if (judgeSettingsPane == null) {
             
             judgeSettingsPane = new JPanel();
