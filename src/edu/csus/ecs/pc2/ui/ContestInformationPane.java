@@ -881,12 +881,13 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JTextField getPrimaryCCSPasswdTextfield() {
         if (textfieldPrimaryCCSPasswd == null) {
+            
             textfieldPrimaryCCSPasswd = new JPasswordField();
             textfieldPrimaryCCSPasswd.setColumns(20);
             textfieldPrimaryCCSPasswd.setEditable(true);
-            textfieldPrimaryCCSPasswd.setToolTipText("The account used to login to the Primary CCS (when operating in 'Shadow Mode')");
+            textfieldPrimaryCCSPasswd.setToolTipText("The Primary CCS account password");
             
-            textfieldPrimaryCCSLogin.addKeyListener(new java.awt.event.KeyAdapter() {
+            textfieldPrimaryCCSPasswd.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
