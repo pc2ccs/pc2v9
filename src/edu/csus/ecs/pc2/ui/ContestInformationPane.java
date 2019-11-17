@@ -54,22 +54,27 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  * Update contest information.
  * 
  * Developer Notes:
- *   This pane uses a vertical BoxLayout to display a collection of panes.  Each pane is a singleton which
- *   is constructed by a getter method.  Each getter returns a self-contained pane (including that each pane
- *   has a layout manager controlling how things are laid out within that pane as well as size and alignment
- *   constraints defining how the components within the pane are managed by the layout manager for the pane).
- *   The panes are added to a scroll pane in the top-level display (the ContestInformationPane class) by the 
- *   method {@link #getCenterPane()}.
+ *   This pane uses a vertical BoxLayout to display a collection of settings sub-panes.  Each settings sub-pane is a singleton 
+ *   which is constructed by a getter method.  Each getter returns a self-contained pane (including that each returned pane
+ *   has a layout manager controlling how things are laid out within that pane and also has size and alignment
+ *   constraints defining how the components within that pane are managed by the layout manager for the pane).
+ *   Each sub-pane also has a CompoundBorder consisting of a {@link TitledBorder} compounded with a "margin border"
+ *   (an {@link EmptyBorder} with {@link Insets}); this provides an offset for each sub-pane within the outer pane.
  *   
- *   To add a new pane to the ContestInformationPane, define a getter method which returns the pane (as an instance of
- *   {@link JPanel}) and include a call to centerPane.add(getNewPane()) in method {@link #getCenterPane()}.
+ *   Method {@link #initialize()} adds two components to *this* pane:  a {@link JScrollPane} containing a "center pane"
+ *   (returned by {@link #getCenterPane()}), plus a button bar.  The sub-panes displaying the Contest Information
+ *   Settings are added to the center pane (within the scroll pane) in the method {@link #getCenterPane()}.
  *   
- *   To add a new {@link JComponent} to an *existing* pane, first create an accessor which creates the new component
- *   (for example, getNewComponent()), then go to the getter method for the pane to which the new component is to be added
- *   (for example, {@link #getCCSTestModePane()}) and add an "add" statement which calls the new getter to the body of that 
- *   method (for example, in the body of {@link #getCCSTestModePane()} you might add 
+ *   To add a new sub-pane to this ContestInformationPane, define a getter method (e.g. <code>getNewPane()</code>)
+ *   which returns the new pane as an instance of {@link JPanel}, and add a call <code>centerPane.add(getNewPane())</code>
+ *   in method {@link #getCenterPane()}.
+ *   
+ *   To add a new {@link JComponent} to an *existing* sub-pane, first create an accessor which creates the new component
+ *   (for example, <code>getNewComponent()</code>), then go to the getter method for the sub-pane to which the new component 
+ *   is to be added (for example, {@link #getCCSTestModePane()}) and add to the body of that 
+ *   method an "add" statement which calls the new getter  (for example, in the body of {@link #getCCSTestModePane()} you might add 
  *   <code>ccsTestModePane.add(getNewComponent()</code>).  Note that the new component could be either an individual component
- *   (such as a JLabel or JCheckBox) or a JPanel which itself contains sub-components.
+ *   (such as a JLabel or JCheckBox) or a {@link JPanel} which itself contains sub-components.
  *   
  *   Note that you may (probably will) have to adjust the maximum, minimum, and preferred sizes of the pane to which the
  *   new component is being added in order to accommodate the new component in the layout.  Note also that you must include
