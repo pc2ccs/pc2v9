@@ -51,6 +51,28 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  * 
  * Update contest information.
  * 
+ * Developer Notes:
+ *   This pane uses a vertical BoxLayout to display a collection of panes.  Each pane is a singleton which
+ *   is constructed by a getter method.  Each getter returns a self-contained pane (including that the pane
+ *   has a layout manager controlling how things are laid out within that pane as well as size and alignment
+ *   constraints defining how the components within the pane are managed by the layout manager for the pane).
+ *   The panes are added to the top-level display (the ContestInformationPane class) by the method {@link #getCenterPane()}.
+ *   
+ *   To add a new pane to the ContestInformationPane, define a getter method which returns the pane (as an instance of
+ *   {@link JPanel}) and include a call to centerPane.add(getNewPane()) in method {@link #getCenterPane()}.
+ *   
+ *   To add a new {@link JComponent} to an existing pane, first create an accessor which creates the new component
+ *   (for example, getNewComponent()), then go to the getter method for the pane to which the new component is to be added
+ *   (for example, {@link #getCCSTestModePane()}) and add an "add" statement which calls the new getter to the body of that 
+ *   method (for example, in the body of {@link #getCCSTestModePane()} you might add 
+ *   <code>ccsTestModePane.add(getNewComponent()</code>).  Note that the new component could be either an individual component
+ *   (such as a JLabel or JCheckBox) or a JPanel which itself contains sub-components.
+ *   
+ *   Note that you may (probably will) have to adjust the maximum, minimum, and preferred sizes of the pane to which the
+ *   new component is being added in order to accommodate the new component in the layout.  Note also that you must include
+ *   the necessary size and alignment attributes in any new component being added.
+ *   
+ * 
  * @author pc2@ecs.csus.edu
  */
 public class ContestInformationPane extends JPanePlugin {
