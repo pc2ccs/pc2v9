@@ -142,9 +142,12 @@ public class ContestInformationPane extends JPanePlugin {
     private JPanel shadowModePane;
     private JLabel labelPrimaryCCSURL;
     private JTextField textfieldPrimaryCCSURL;
-    //TODO: add textfields for user (login account) and password
-    
-    Border blackline = BorderFactory.createLineBorder(Color.black);
+    private JLabel labelPrimaryCCSLogin;
+    private JTextField textfieldPrimaryCCSLogin;
+    private JLabel labelPrimaryCCSPasswd;    
+    private JTextField textfieldPrimaryCCSPasswd;
+
+    private Border lineBorderBlue2px = new LineBorder(Color.blue, 2);
 
     private JPanel judgeSettingsPane;
 
@@ -178,14 +181,6 @@ public class ContestInformationPane extends JPanePlugin {
     private JPanel contestTitlePane;
 
     private JLabel contestTitleLabel;
-
-    private JLabel labelPrimaryCCSLogin;
-
-    private JLabel labelPrimaryCCSPasswd;
-
-    private JTextField textfieldPrimaryCCSLogin;
-
-    private JTextField textfieldPrimaryCCSPasswd;
 
     private JPanel runSubmissionCommandPane;
     private Component horizontalStrut;
@@ -281,9 +276,8 @@ public class ContestInformationPane extends JPanePlugin {
             
             if (showPaneOutlines) {
                 
-                Border lineBorder2px = new LineBorder(Color.blue, 2);
                 TitledBorder titleBorder = new TitledBorder("Remote CCS Settings ");
-                titleBorder.setBorder(lineBorder2px);
+                titleBorder.setBorder(lineBorderBlue2px);
                 remoteCCSSettingsPane.setBorder(titleBorder);
                 
             } else {
@@ -395,9 +389,8 @@ public class ContestInformationPane extends JPanePlugin {
 
             if (showPaneOutlines) {
                 
-                Border lineBorder2px = new LineBorder(Color.blue, 2);
                 TitledBorder titleBorder = new TitledBorder("Contest Settings");
-                titleBorder.setBorder(lineBorder2px);
+                titleBorder.setBorder(lineBorderBlue2px);
                 
                 contestSettingsPane.setBorder(titleBorder);
                 
@@ -458,9 +451,8 @@ public class ContestInformationPane extends JPanePlugin {
 
             if (showPaneOutlines) {
                 
-                Border lineBorder2px = new LineBorder(Color.blue, 2);
                 TitledBorder titleBorder = new TitledBorder("Judging Settings");
-                titleBorder.setBorder(lineBorder2px);
+                titleBorder.setBorder(lineBorderBlue2px);
                 judgeSettingsPane.setBorder(titleBorder);
             } else {
                 judgeSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
@@ -495,9 +487,8 @@ public class ContestInformationPane extends JPanePlugin {
 
             if (showPaneOutlines) {
                 
-                Border lineBorder2px = new LineBorder(Color.blue, 2);
                 TitledBorder titleBorder = new TitledBorder("Team Settings");
-                titleBorder.setBorder(lineBorder2px);
+                titleBorder.setBorder(lineBorderBlue2px);
                 teamSettingsPane.setBorder(titleBorder);
             } else {
                 teamSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
