@@ -51,20 +51,34 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 /**
  * Contest Information edit/update Pane.
  * 
- * Update contest information.
- * 
- * Developer Notes:
- *   This pane uses a vertical BoxLayout to display a collection of settings sub-panes.  Each settings sub-pane is a singleton 
+ * This pane displays and allows updating of Contest Information Settings.
+ *   The pane uses a vertical BoxLayout to display a collection of settings sub-panes.  Each settings sub-pane is a singleton 
  *   which is constructed by a getter method.  Each getter returns a self-contained pane (including that each returned pane
  *   has a layout manager controlling how things are laid out within that pane and also has size and alignment
  *   constraints defining how the components within that pane are managed by the layout manager for the pane).
  *   Each sub-pane also has a CompoundBorder consisting of a {@link TitledBorder} compounded with a "margin border"
  *   (an {@link EmptyBorder} with {@link Insets}); this provides an offset for each sub-pane within the outer pane.
  *   
- *   Method {@link #initialize()} adds two components to *this* pane:  a {@link JScrollPane} containing a "center pane"
+ *   Method {@link #initialize()}, which is invoked whenever this ContestInformationPane is instantiated, adds two 
+ *   components to *this* pane:  a {@link JScrollPane} containing a "center pane"
  *   (returned by {@link #getCenterPane()}), plus a button bar.  The sub-panes displaying the Contest Information
  *   Settings are added to the center pane (within the scroll pane) in the method {@link #getCenterPane()}.
  *   
+ *   Method {@link #initialize()} also invokes method {@link #populateGUI()}, which in turn invokes 
+ *   {@link IInternalController.getContest().getContestInformation()} to obtain the current contest information settings from
+ *   the server; it then uses the returned values to initialize the GUI display settings.
+ *   
+ *   Each active component in the pane (including its sub-panes) has a listener attached to it.  Whenever a component 
+ *   is changed (key typed/release, checkbox checked, button pushed, etc.) it invokes method {@link #enableUpdateButton()}.
+ *   This method (despite its name) doesn't actually necessarily *enable* the Update button; rather, it invokes {@link #getFromFields()}
+ *   to obtain the data currently displayed in the GUI fields and compares it with the current contest information settings. 
+ *   If they DIFFER then the Update and Cancel buttons are enabled. Subsequently pressing the Update button invokes 
+ *   {@link #updateContestInformation()}, which (again) invokes {@link #getFromFields()} to fetch the GUI settings and then 
+ *   invokes {@link IInternalController.updateContestInformation(contestInformation)} to save the new GUI information in the
+ *   local controller (which presumably responds by saving it on the server).
+ *    
+ * Developer's Notes:
+ * 
  *   To add a new sub-pane to this ContestInformationPane, define a getter method (e.g. <code>getNewPane()</code>)
  *   which returns the new pane as an instance of {@link JPanel}, and add a call <code>centerPane.add(getNewPane())</code>
  *   in method {@link #getCenterPane()}.
@@ -79,6 +93,10 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  *   Note that you may (probably will) have to adjust the maximum, minimum, and preferred sizes of the pane to which the
  *   new component is being added in order to accommodate the new component in the layout.  Note also that you must include
  *   the necessary size and alignment attributes in any new component being added.
+ *   
+ *   Note also that if you add new information to the GUI, you must update {@link #getFromFields()} to fetch the new information from
+ *   the GUI fields and save it, and you must update method  {@link ContestInformation#isSameAs(ContestInformation)} to include
+ *   a check of the new information.
  *   
  * 
  * @author pc2@ecs.csus.edu
