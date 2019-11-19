@@ -313,6 +313,10 @@ public class Permission implements Serializable {
          * View event feed
          */
         VIEW_EVENT_FEED,
+        /**
+         * Act as proxy team in shadow mode
+         */
+        SHADOW_PROXY_TEAM,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -415,6 +419,7 @@ public class Permission implements Serializable {
         
         hash.put(Type.EDIT_EVENT_FEED,"Edit Event Feeds");
         hash.put(Type.VIEW_EVENT_FEED,"View Event Feeds");
+        hash.put(Type.SHADOW_PROXY_TEAM,"Shadow Proxy Team");
     }
 
     /**
