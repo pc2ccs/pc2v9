@@ -1558,30 +1558,29 @@ public class PacketHandler {
             }
         }
         
-        
-        ClientId source = packet.getSourceId();
-        boolean proxySubmission = ! source.equals(contest.getClientId());
+        ClientId submitter = submittedRun.getSubmitter();
+        boolean proxySubmission = ! submitter.equals(fromId);
         
         if (!isServer(fromId)){
 
             if (proxySubmission){
                 
                 if (! contest.getContestInformation().isCcsTestMode()){
-                    controller.getLog().log(Log.INFO, fromId + "Shadow mode off (false) Client "+source+" attempted to submit run for team "+submittedRun.getSubmitter());
-                    throw new ContestSecurityException(fromId, connectionHandlerID, "Shadow mode off (false) Client "+source+" attempted to submit run for team "+submittedRun.getSubmitter());
+                    controller.getLog().log(Log.INFO, fromId + "Shadow mode off (false) Client "+fromId+" attempted to submit run for team "+submitter);
+                    throw new ContestSecurityException(fromId, connectionHandlerID, "Shadow mode off (false) Client "+fromId+" attempted to submit run for team "+submitter);
                 }
 
                 /**
                  * Not from a team, check for shadow proxy.
                  */
 
-                Account account = contest.getAccount(source);
+                Account account = contest.getAccount(submitter);
                 if (!account.isAllowed(Permission.Type.SHADOW_PROXY_TEAM)){
                     // Not allowed, error error
-                    controller.getLog().log(Log.INFO, fromId + " Client "+source+" attempted to submit run for team "+submittedRun.getSubmitter());
-                    throw new ContestSecurityException(fromId, connectionHandlerID, "Client "+source+" attempted to submit run for team "+submittedRun.getSubmitter());
+                    controller.getLog().log(Log.INFO, fromId + " Client "+fromId+" attempted to submit run for team "+submitter);
+                    throw new ContestSecurityException(fromId, connectionHandlerID, "Client "+fromId+" attempted to submit run for team "+submitter);
                 }
-                controller.getLog().log(Log.INFO, fromId + " Proxy submit run for for team "+submittedRun.getSubmitter());
+                controller.getLog().log(Log.INFO, fromId + " Proxy submit run for for team "+submitter);
             }
 
         }

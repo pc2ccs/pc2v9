@@ -127,7 +127,8 @@ public class PacketHandlerTest extends AbstractTestCase {
 
         contest.startContest(contest.getSiteNumber());
         Run run = contest.getRuns()[1];
-        packetHandleRun(run, contest, controller, teamId, connectionHandlerID);
+        ClientId id = run.getSubmitter();
+        packetHandleRun(run, contest, controller, id, connectionHandlerID);
 
         Run newRun = contest.getRun(run.getElementId());
         assertFalse("Run should NOT be deleted", newRun.isDeleted());
@@ -137,6 +138,7 @@ public class PacketHandlerTest extends AbstractTestCase {
          */
         contest.stopContest(contest.getSiteNumber());
         run = contest.getRuns()[3];
+        teamId = run.getSubmitter();
         packetHandleRun(run, contest, controller, teamId, connectionHandlerID);
 
         newRun = contest.getRun(run.getElementId());
@@ -154,6 +156,7 @@ public class PacketHandlerTest extends AbstractTestCase {
         contestTime.setRemainingSecs(0);
         run = contest.getRuns()[5];
         setCcsTestMode(contest, true);
+        teamId = run.getSubmitter();
         packetHandleRun(run, contest, controller, teamId, connectionHandlerID, overrideTime);
         setCcsTestMode(contest, true);
 
@@ -195,7 +198,6 @@ public class PacketHandlerTest extends AbstractTestCase {
 
         PacketHandler packetHandler = new PacketHandler(controller, contest);
         packetHandler.handlePacket(packet, connectionHandlerID);
-
     }
 
     protected IInternalContest createContest (String methodName) throws IOException, ClassNotFoundException, FileSecurityException {
