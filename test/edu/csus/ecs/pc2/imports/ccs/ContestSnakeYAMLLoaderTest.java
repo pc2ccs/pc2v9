@@ -787,6 +787,56 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
 
     }
+    
+    public void testCCSLanguageLoad() throws Exception {
+        
+        String sampleContestDirName = "ccs1";
+        String dirname = getContestSampleCDPConfigDirname(sampleContestDirName);
+        
+        IInternalContest contest = snake.fromYaml(null, dirname, false);
+
+//        from ccs 1:
+//        languages:
+//            - name: C++
+//              compiler: /usr/bin/g++  
+//              compiler-args: -O2 -Wall -o a.out -static {files} 
+//
+//            - name: C
+//              compiler: /usr/bin/gcc
+//              compiler-args: -O2 -Wall -std=gnu99 -o a.out -static {files} -lm
+//            
+//            - name: Java
+//              compiler: /usr/bin/javac
+//              compiler-args: -O {files}
+//              runner: /usr/bin/java
+//              runner-args:
+        
+        Language[] languages = contest.getLanguages();
+        assertEquals("Expected 3 languages", 3, languages.length);
+        
+        for (Language language : languages) {
+            System.out.println("lang "+language);
+            System.out.println("lang compile "+language);
+            switch (language.getDisplayName()){
+                case "Java":
+                    assertEquals(language.getCompileCommandLine(), "/usr/bin/javac -O {files}");
+                    assertEquals(language.getProgramExecuteCommandLine(), "/usr/bin/java");
+                    break;
+                case "C":
+                    assertEquals(language.getCompileCommandLine(), "/usr/bin/gcc -O2 -Wall -std=gnu99 -o a.out -static {files} -lm");
+                    assertEquals(language.getProgramExecuteCommandLine(), "a.out");
+                    break;
+                case "C++":
+                    assertEquals(language.getCompileCommandLine(), "/usr/bin/g++ -O2 -Wall -o a.out -static {files}");
+                    assertEquals(language.getProgramExecuteCommandLine(), "a.out");
+                    break;
+                default:
+                    fail ("Unknown language "+language);
+                    break;
+            }
+        }
+    }
+
 
     public void testLoadSites() throws Exception {
 
@@ -2738,14 +2788,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      */
     protected String qs(String string) {
         return "\"" + string + "\", // ";
-    }
-
-    private String getTestSampleContestDirectory(String dirname) {
-        return getSampleContestsDirectory() + File.separator + dirname;
-    }
-
-    private String getSampleContestsDirectory() {
-        return "samps" + File.separator + "contests";
     }
 
     private String toUnixFS(String path) {

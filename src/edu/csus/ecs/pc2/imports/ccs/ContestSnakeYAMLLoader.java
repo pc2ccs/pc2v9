@@ -147,7 +147,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 contents = concat(contents, lines);
             }
         } catch (IOException e) {
-            throw new YamlLoadException(e.getMessage(), e, contetYamlFilename);
+            throw new YamlLoadException("Problem loading " + e.getMessage(), e, contetYamlFilename);
         }
         return fromYaml(contest, contents, directoryName, loadDataFileContents);
     }
@@ -594,7 +594,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
              */
 
             generateOSPasswords(passfilename, updatedAccounts.length, passwordType, length, prefix);
-            System.out.println("Wrote OS Passwords to: "+passfilename);
 
             String mergefilename = fetchValueDefault(passwordYamlMap, "mergefile", targetDirectory + File.separator + MailMergeFile.DEFAULT_MERGE_OUTPUT_FILENAME);
 
@@ -603,8 +602,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                  * Write mail merge file
                  */
                 MailMergeFile.writeFile(mergefilename, passfilename, Arrays.asList(updatedAccounts));
-                
-                System.out.println("Wrote Merge File to: "+mergefilename);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -1463,7 +1460,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     Language language = new Language(name);
 
                     Language lookedupLanguage = LanguageAutoFill.languageLookup(name);
-                    String compilerName = fetchValue(map, "compilerCmd");
+//                    String compilerName = fetchValue(map, "compilerCmd");
+                    String compilerName = fetchValue(map, "compiler");
 
                     if (compilerName == null && lookedupLanguage != null) {
                         language = lookedupLanguage;
