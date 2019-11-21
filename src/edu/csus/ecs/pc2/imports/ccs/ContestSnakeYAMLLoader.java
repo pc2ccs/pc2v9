@@ -147,7 +147,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 contents = concat(contents, lines);
             }
         } catch (IOException e) {
-            throw new YamlLoadException(e.getMessage(), e, contetYamlFilename);
+            throw new YamlLoadException("Problem loading " + e.getMessage(), e, contetYamlFilename);
         }
         return fromYaml(contest, contents, directoryName, loadDataFileContents);
     }
@@ -594,7 +594,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
              */
 
             generateOSPasswords(passfilename, updatedAccounts.length, passwordType, length, prefix);
-            System.out.println("Wrote OS Passwords to: "+passfilename);
 
             String mergefilename = fetchValueDefault(passwordYamlMap, "mergefile", targetDirectory + File.separator + MailMergeFile.DEFAULT_MERGE_OUTPUT_FILENAME);
 
@@ -603,8 +602,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                  * Write mail merge file
                  */
                 MailMergeFile.writeFile(mergefilename, passfilename, Arrays.asList(updatedAccounts));
-                
-                System.out.println("Wrote Merge File to: "+mergefilename);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -1463,47 +1460,69 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     Language language = new Language(name);
 
                     Language lookedupLanguage = LanguageAutoFill.languageLookup(name);
-                    String compilerName = fetchValue(map, "compilerCmd");
+                    String compilerName = fetchValue(map, "compiler");
+                    String pc2CompilerCommandLine = fetchValue(map, PC2_COMPILER_CMD);
 
-                    if (compilerName == null && lookedupLanguage != null) {
-                        language = lookedupLanguage;
-                        compilerName = language.getCompileCommandLine();
-                        language.setDisplayName(name);
-                    } else {
+                    language.setDisplayName(name);
+                    
+                    if (compilerName != null) {
 
-                        if (compilerName == null) {
-                            compilerName = fetchValue(map, "compiler");
-                        }
+                        // CLICS Language 
+                        compilerName = fetchValue(map, "compiler");
                         String compilerArgs = fetchValue(map, "compiler-args");
-                        String interpreter = fetchValue(map, "runner");
-                        String interpreterArgs = fetchValue(map, "runner-args");
-                        String exeMask = fetchValue(map, "exemask");
-                        // runner + runner-args, so what is execCmd for ?
-                        // String execCmd = getSequenceValue(sequenceLines, "execCmd");
+                        String runner = fetchValue(map, "runner");
+                        String runnerArgs = fetchValue(map, "runner-args");
+
+                        checkField(compilerName, "Language \"" + name + "\" missing compiler key/value");
 
                         if (compilerArgs == null) {
                             language.setCompileCommandLine(compilerName);
                         } else {
                             language.setCompileCommandLine(compilerName + " " + compilerArgs);
                         }
-                        language.setExecutableIdentifierMask(exeMask);
 
                         String programExecuteCommandLine = null;
-                        if (interpreter == null) {
-                            programExecuteCommandLine = "a.out";
-                        } else {
-                            if (interpreterArgs == null) {
-                                programExecuteCommandLine = interpreter;
-                            } else {
-                                programExecuteCommandLine = interpreter + " " + interpreterArgs;
-                            }
+                        if (runner == null) {
+                            /**
+                             * Assume a.out if no runner
+                             */
+                            runner = "a.out";
                         }
+                        
+                        if (runnerArgs == null) {
+                            programExecuteCommandLine = runner;
+                        } else {
+                            programExecuteCommandLine = runner + " " + runnerArgs;
+                        }
+
                         language.setProgramExecuteCommandLine(programExecuteCommandLine);
+
+                    } else if (pc2CompilerCommandLine != null) {
+
+                        //    - name: 'Java'
+                        //        active: true
+                        //        compilerCmd: 'javac -encoding UTF-8 -sourcepath . -d . {:mainfile}'
+                        //        exemask: '{:basename}.class'
+                        //        execCmd: 'java {:basename}'
+                        //        use-judge-cmd: true
+                        //        judge-exec-cmd:  'java {:basename}'
+
+                        language.setCompileCommandLine(pc2CompilerCommandLine);
+
+                        String programExecuteCommandLine = fetchValue(map, PC2_EXEC_CMD);
+                        language.setProgramExecuteCommandLine(programExecuteCommandLine);
+
+                        String exeMask = fetchValue(map, "exemask");
+                        language.setExecutableIdentifierMask(exeMask);
+
+                    } else if (lookedupLanguage != null) {
+                        language = lookedupLanguage;
+                    } else {
+                        syntaxError("Language \"" + name + "\" missing language definition (compiler command line and program execution command line)");
                     }
 
-                    if (compilerName == null) {
-                        throw new YamlLoadException("Language \"" + name + "\" missing compiler command line");
-                    }
+                    checkField(language.getCompileCommandLine(), "Language \"" + name + "\" missing compiler command line");
+                    checkField(language.getProgramExecuteCommandLine(), "Language \"" + name + "\" missing programm execution command line");
 
                     boolean active = fetchBooleanValue(map, "active", true);
                     language.setActive(active);
@@ -1522,8 +1541,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     }
 
                     // SOMEDAY handle interpreted languages, seems it should be in the export
-
-                    // boolean
 
                     if (valid(language, name)) {
                         languageList.add(language);
@@ -1963,7 +1980,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     private void syntaxError(String string) {
         YamlLoadException exception = new YamlLoadException("Syntax error: " + string);
-        exception.printStackTrace();
         throw exception;
     }
 
@@ -2305,6 +2321,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return true;
     }
 
+    /**
+     * Check for field, if value missing throw exception
+     * @param value
+     * @param fieldName
+     */
     private void checkField(String value, String fieldName) {
         if (value == null) {
             syntaxError("Missing " + fieldName);

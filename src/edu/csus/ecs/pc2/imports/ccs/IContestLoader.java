@@ -161,6 +161,10 @@ public interface IContestLoader {
     String USING_CUSTOM_VALIDATOR = "use-custom-validator";
     
     String USE_CLICS_CUSTOM_VALIDATOR_INTERFACE = "use-clics-custom-validator-interface";
+    
+    String PC2_EXEC_CMD = "execCmd";
+    
+    String PC2_COMPILER_CMD = "compilerCmd";
 
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 
