@@ -117,8 +117,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     public void testLoaderMethods() throws Exception {
 
-
         String yamlFilename= getTestFilename("contest.jt.yaml");
+        
+//        editFile(yamlFilename);
 
         String[] contents = Utilities.loadFile(yamlFilename);
 
@@ -815,8 +816,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Expected 3 languages", 3, languages.length);
         
         for (Language language : languages) {
-            System.out.println("lang "+language);
-            System.out.println("lang compile "+language);
             switch (language.getDisplayName()){
                 case "Java":
                     assertEquals(language.getCompileCommandLine(), "/usr/bin/javac -O {files}");
@@ -1183,11 +1182,11 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         // Load data files
         try {
             
-        contest = loader.fromYaml(null, dirname, true);
+            contest = loader.fromYaml(null, dirname, true);
         
         } catch (YamlLoadException e) {
-            System.out.println("failed loading in file "+e.getFilename());
-            editFile(e.getFilename());
+//            System.out.println("failed loading in file "+e.getFilename());
+//            editFile(e.getFilename());
             throw e;
         }
 
