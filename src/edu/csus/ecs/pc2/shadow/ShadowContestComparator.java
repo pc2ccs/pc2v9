@@ -7,11 +7,11 @@ import java.util.List;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
-public class ShadowContestComparer {
+public class ShadowContestComparator {
     
-    private ShadowData data;
+    private RemoteContestConfiguration data;
 
-    ShadowContestComparer (ShadowData data){
+    ShadowContestComparator (RemoteContestConfiguration data){
         this.data = data;
     }
     
@@ -21,7 +21,7 @@ public class ShadowContestComparer {
         throw new NotImplementedException();
     }
     
-    public static ShadowData getRemoteContest(URL restURL, String login, String password) {
+    public static RemoteContestConfiguration getRemoteContest(URL restURL, String login, String password) {
         throw new NotImplementedException();
     }
     

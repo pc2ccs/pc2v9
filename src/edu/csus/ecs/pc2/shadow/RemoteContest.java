@@ -2,19 +2,21 @@
 package edu.csus.ecs.pc2.shadow;
 
 /**
- * Responsible for starting and controlling Remote Event Feed (processor)
+ * This class encapsulates the configuration obtained from a remote CLICS Contest API.
+ * 
+ * It is used to hold a representation of a remote contest configuration during Shadow CCS operations.
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-public class RestContest {
+public class RemoteContest {
     
-    ShadowData data;
+    String data;
     
-    RestContest(ShadowData data){
+    RemoteContest(String data){
         this.data = data;
     }
     
-    ShadowData fetchContestModel() {
+    String getContestModel() {
         return data;
     }
     
