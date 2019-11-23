@@ -2,7 +2,6 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -111,7 +110,7 @@ public class ShadowControlPane extends JPanePlugin {
     private JButton getUpdateButton() {
         if (updateButton == null) {
             updateButton = new JButton();
-            updateButton.setText("Start Shadowing");
+            updateButton.setText("Update");
             updateButton.setMnemonic(KeyEvent.VK_S);
             updateButton.setToolTipText("Save the updated Remote CCS settings");
             updateButton.addActionListener(new java.awt.event.ActionListener() {
@@ -160,17 +159,18 @@ public class ShadowControlPane extends JPanePlugin {
 //
 //        getWebServer().startWebServer(getContest(), getController(), properties);
         
-        //// new shadowing code
-        boolean okToStartShadowing = verifyShadowControls();
+
+        boolean shadowCheckboxEnabled = getShadowSettingsPane().getShadowModeCheckbox().isSelected();
+        boolean shadowDataComplete = verifyShadowControls();
         
-        if (okToStartShadowing) {
+        if (shadowCheckboxEnabled && shadowDataComplete) {
             shadowController = new ShadowController(this.getContest(),this.getController()) ;
             shadowController.start();
             currentlyShadowing = true;
             shadowingStatusLabel.setText("ON");
 
         } else {
-            showErrorMessage("Shadow parameters not complete", "Cannot start Shadowing");
+            showErrorMessage("Shadowing not enabled, or shadowing parameters not complete", "Cannot start Shadowing");
         }
         updateGUI();
     }
@@ -265,7 +265,7 @@ public class ShadowControlPane extends JPanePlugin {
      * 
      * @return a ShadowSettingsPane with listeners attached
      */
-    private Component getShadowSettingsPane() {
+    private ShadowSettingsPane getShadowSettingsPane() {
         if (shadowSettingsPane==null) {
             shadowSettingsPane = new ShadowSettingsPane();
             
@@ -286,7 +286,7 @@ public class ShadowControlPane extends JPanePlugin {
             shadowSettingsPane.getShadowModeCheckbox().addActionListener(actionListener);
 
         }
-        return null;
+        return shadowSettingsPane;
     }
 
     /**
