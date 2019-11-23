@@ -172,6 +172,7 @@ public class PacketHandlerTest extends AbstractTestCase {
          */
         contestTime.setRemainingSecs(0);
         run = contest.getRuns()[7];
+        teamId = run.getSubmitter();
         packetHandleRun(run, contest, controller, teamId, connectionHandlerID);
 
         newRun = contest.getRun(run.getElementId());
