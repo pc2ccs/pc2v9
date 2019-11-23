@@ -17,18 +17,12 @@ public class RemoteEventFeedListener implements Runnable {
     private String password;
     private RemoteRunSubmitter submitter;
 
-    public RemoteEventFeedListener(URL remoteURL, String login, String password, Runnable submitter) {
+    public RemoteEventFeedListener(URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
         // TODO code (see bug 1626)
         this.remoteURL = remoteURL;
         this.login = login;
         this.password = password;
-        if (submitter instanceof RemoteRunSubmitter) {
-            this.submitter = (RemoteRunSubmitter) submitter;            
-        } else {
-            //there probably is a better exception to throw than this?
-            throw new ClassCastException("RemoteEventFeedListener received something other than a RemoteRunSubmitter");
-        }
-
+        this.submitter = submitter;            
     }
 
     @Override

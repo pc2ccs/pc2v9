@@ -95,7 +95,7 @@ public class ShadowController {
         
         RemoteRunSubmitter submitter = new RemoteRunSubmitter(localController);
 
-        monitor = new RemoteRunMonitor(remoteCCSURL, remoteCCSLogin, remoteCCSPassword, (Runnable) submitter);
+        monitor = new RemoteRunMonitor(remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter);
 
         monitor.startListening();
     }

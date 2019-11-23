@@ -14,7 +14,7 @@ public class RemoteRunMonitor {
     URL remoteURL;
     String login;
     String password;
-    Runnable submitter;
+    RemoteRunSubmitter submitter;
     
     Thread listenerThread = null;
     
@@ -29,7 +29,7 @@ public class RemoteRunMonitor {
      * @param password the password to the remote CCS account
      * @param submitter a {@link Runnable} which knows how to submit a receive remote run to PC2
      */
-    public RemoteRunMonitor(URL remoteURL, String login, String password, Runnable submitter) {
+    public RemoteRunMonitor(URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
 
         this.remoteURL = remoteURL;
         this.login = login;
