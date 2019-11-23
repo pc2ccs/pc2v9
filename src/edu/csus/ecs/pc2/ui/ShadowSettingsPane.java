@@ -20,6 +20,20 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 /**
+ * This class defines a {@link JPanel} containing Shadow Mode Settings.
+ * The shadow mode settings include the Remote CCS URL, Login account, and Password,
+ * along with a checkbox used to enable/disable shadow mode.
+ * 
+ * Note that the active components (including {@link JTextField}s for the Remote CCS URL,
+ * login, and password, along with the checkbox indicating whether shadow mode is to be enabled or not),
+ * do not by default have any listeners attached (because this pane cannot know what an arbitrary 
+ * encapsulating client might want for listener operations.
+ * If a client wishes to have the active components of this pane invoke listeners, it is the client's 
+ * responsibility to invoke the corresponding "getters" ({@link #getPrimaryCCSURLTextfield()},
+ * {@link #getPrimaryCCSLoginTextfield()}, {@link #getPrimaryCCSPasswdTextfield()}, and 
+ * {@link #getShadowModeCheckbox()}) and call their <I>addKeyListener()</i> and/or <I>addActionListener()</i>
+ * methods as appropriate.
+ * 
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  *
  */
