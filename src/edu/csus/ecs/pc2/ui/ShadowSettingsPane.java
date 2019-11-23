@@ -29,8 +29,8 @@ import javax.swing.border.TitledBorder;
  * do not by default have any listeners attached (because this pane cannot know what an arbitrary 
  * encapsulating client might want for listener operations.
  * If a client wishes to have the active components of this pane invoke listeners, it is the client's 
- * responsibility to invoke the corresponding "getters" ({@link #getPrimaryCCSURLTextfield()},
- * {@link #getPrimaryCCSLoginTextfield()}, {@link #getPrimaryCCSPasswdTextfield()}, and 
+ * responsibility to invoke the corresponding "getters" ({@link #getRemoteCCSURLTextfield()},
+ * {@link #getRemoteCCSLoginTextfield()}, {@link #getRemoteCCSPasswdTextfield()}, and 
  * {@link #getShadowModeCheckbox()}) and call their <I>addKeyListener()</i> and/or <I>addActionListener()</i>
  * methods as appropriate.
  * 
@@ -78,12 +78,12 @@ public class ShadowSettingsPane extends JPanel {
         // the content of the pane:
 
         this.add(getShadowModeCheckbox(), getShadowModeCheckboxConstraints());
-        this.add(labelPrimaryCCSURL, getPrimaryCCSURLLabelConstraints());
-        this.add(getPrimaryCCSURLTextfield(), getPrimaryCCSURLTextfieldConstraints());
-        this.add(labelPrimaryCCSLogin, getPrimaryCCSLoginLabelConstraints());
-        this.add(getPrimaryCCSLoginTextfield(), getPrimaryCCSLoginTextfieldConstraints());
-        this.add(labelPrimaryCCSPasswd, getPrimaryCCSPasswdLabelConstraints());
-        this.add(getPrimaryCCSPasswdTextfield(), getPrimaryCCSPasswdTextfieldConstraints());
+        this.add(labelPrimaryCCSURL, getRemoteCCSURLLabelConstraints());
+        this.add(getRemoteCCSURLTextfield(), getRemoteCCSURLTextfieldConstraints());
+        this.add(labelPrimaryCCSLogin, getRemoteCCSLoginLabelConstraints());
+        this.add(getRemoteCCSLoginTextfield(), getRemoteCCSLoginTextfieldConstraints());
+        this.add(labelPrimaryCCSPasswd, getRemoteCCSPasswdLabelConstraints());
+        this.add(getRemoteCCSPasswdTextfield(), getRemoteCCSPasswdTextfieldConstraints());
     }
     
     /**
@@ -96,7 +96,7 @@ public class ShadowSettingsPane extends JPanel {
      * 
      * @return a JTextField holding the Primary (Remote) CCS login (account name)
      */
-    public JTextField getPrimaryCCSLoginTextfield() {
+    public JTextField getRemoteCCSLoginTextfield() {
         if (textfieldPrimaryCCSLogin == null) {
             textfieldPrimaryCCSLogin = new JTextField();
             textfieldPrimaryCCSLogin.setColumns(20);
@@ -121,7 +121,7 @@ public class ShadowSettingsPane extends JPanel {
      * 
      * @return a JTextField holding the Primary (Remote) CCS password
      */
-    public JTextField getPrimaryCCSPasswdTextfield() {
+    public JTextField getRemoteCCSPasswdTextfield() {
         if (textfieldPrimaryCCSPasswd == null) {
             
             textfieldPrimaryCCSPasswd = new JPasswordField();
@@ -147,7 +147,7 @@ public class ShadowSettingsPane extends JPanel {
      * 
      * @return a JTextField holding the Primary (Remote) CCS URL
      */
-    public JTextField getPrimaryCCSURLTextfield() {
+    public JTextField getRemoteCCSURLTextfield() {
         if (textfieldPrimaryCCSURL == null) {
             textfieldPrimaryCCSURL = new JTextField();
             textfieldPrimaryCCSURL.setColumns(50);
@@ -165,7 +165,7 @@ public class ShadowSettingsPane extends JPanel {
     }
     
 
-    private Object getPrimaryCCSPasswdTextfieldConstraints() {
+    private Object getRemoteCCSPasswdTextfieldConstraints() {
         GridBagConstraints c = new GridBagConstraints();
         //row & col at upper left of component
             c.gridx = 2;
@@ -184,7 +184,7 @@ public class ShadowSettingsPane extends JPanel {
         return c;
     }
 
-    private Object getPrimaryCCSPasswdLabelConstraints() {
+    private Object getRemoteCCSPasswdLabelConstraints() {
         GridBagConstraints c = new GridBagConstraints();
         //row & col at upper left of component
             c.gridx = 1;
@@ -201,7 +201,7 @@ public class ShadowSettingsPane extends JPanel {
         return c;
     }
 
-    private Object getPrimaryCCSLoginTextfieldConstraints() {
+    private Object getRemoteCCSLoginTextfieldConstraints() {
         GridBagConstraints c = new GridBagConstraints();
         //row & col at upper left of component
             c.gridx = 2;
@@ -220,7 +220,7 @@ public class ShadowSettingsPane extends JPanel {
         return c;
     }
 
-    private Object getPrimaryCCSLoginLabelConstraints() {
+    private Object getRemoteCCSLoginLabelConstraints() {
         GridBagConstraints c = new GridBagConstraints();
         //row & col at upper left of component
             c.gridx = 1;
@@ -237,7 +237,7 @@ public class ShadowSettingsPane extends JPanel {
         return c;
     }
 
-    private Object getPrimaryCCSURLTextfieldConstraints() {
+    private Object getRemoteCCSURLTextfieldConstraints() {
         GridBagConstraints c = new GridBagConstraints();
         //row & col at upper left of component
             c.gridx = 2;
@@ -256,7 +256,7 @@ public class ShadowSettingsPane extends JPanel {
         return c;
     }
 
-    private GridBagConstraints getPrimaryCCSURLLabelConstraints() {
+    private GridBagConstraints getRemoteCCSURLLabelConstraints() {
         GridBagConstraints c = new GridBagConstraints();
         //row & col at upper left of component
             c.gridx = 1;
