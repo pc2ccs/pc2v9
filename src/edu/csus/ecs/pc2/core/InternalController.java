@@ -4183,13 +4183,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles, long overrideSubmissionTime, long overrideRunId) {
 
         SerializedFile serializedFile = new SerializedFile(filename);
-
-        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-        Run run = new Run(contest.getClientId(), language, problem);
-        RunFiles runFiles = new RunFiles(run, serializedFile, otherFiles);
-
-        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTime, overrideRunId);
-        sendToLocalServer(packet);
+        submitRun(contest.getClientId(), problem, language, serializedFile, otherFiles, overrideSubmissionTime, overrideRunId);
     }
 
     public void sendRunToSubmissionInterface(Run run, RunFiles runFiles) {
@@ -4351,6 +4345,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     @Override
     public IInternalContest getContest() {
         return contest;
+    }
+
+    @Override
+    public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
+        
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Run run = new Run(submitter, language, problem);
+        RunFiles runFiles = new RunFiles(run, mainSubmissionFile, additionalFiles);
+
+        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideRunId);
+        sendToLocalServer(packet);
+        
     }
     
 }

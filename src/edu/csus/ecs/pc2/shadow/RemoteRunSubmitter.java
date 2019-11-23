@@ -40,56 +40,58 @@ public class RemoteRunSubmitter {
         this.thisSiteNumber = contest.getSiteNumber();
     }
 
-    public void submitRun (String clientIdString, String problemName, String languageName, IFile mainFile, List<IFile> auxFiles, int overrideTimeMS, int overrideRunId){
+    public void submitRun(String clientIdString, String problemName, String languageName, IFile mainFile, List<IFile> auxFiles, long overrideTimeMS, long overrideRunId) {
 
-        isEmptyString (clientIdString, "ClientId parameter is null");
+        isEmptyString(clientIdString, "ClientId parameter is null");
         isEmptyString(problemName, "Parameter problemName is null or empty");
         isEmptyString(languageName, "Parameter languageName is null or empty");
         isEmpty(mainFile, "Parameter mainFile is null");
-        
+
         if (mainFile == null)
         {
             throw new InvalidParameterException("Parameter mainFile is null");
         }
-        
+
+        if (overrideRunId <= 0)
+        {
+            throw new InvalidParameterException("Parameter overrideRunId has invalid id.  " + overrideRunId + " <= 0");
+        }
+
         /**
          * Verify input fields
          */
-        
-        if (contest == null){
+
+        if (contest == null) {
             throw new RuntimeException("contest field is null");
         }
-        
-        Account account =  getSubmitterId(contest, clientIdString.trim());
-        if (account == null){
-            throw new InvalidParameterException("Parameter clientIdString does not match any pc2 account: '"+clientIdString+"'");
+
+        Account account = getSubmitterId(contest, clientIdString.trim());
+        if (account == null) {
+            throw new InvalidParameterException("Parameter clientIdString does not match any pc2 account: '" + clientIdString + "'");
         }
         ClientId submitter = account.getClientId();
-        
-        
+
         Problem problem = getProblemByName(contest, problemName);
-        
-        isEmpty(problem, "Parameter problemName does not match any pc2 problem: '"+problemName+"'");
+
+        isEmpty(problem, "Parameter problemName does not match any pc2 problem: '" + problemName + "'");
 
         Language language = getLanguageByName(contest, languageName);
-        
-        isEmpty(language, "Parameter languageName does not match any pc2 language: '"+languageName+"'");
-        
+
+        isEmpty(language, "Parameter languageName does not match any pc2 language: '" + languageName + "'");
+
         SerializedFile mainSubmissionFile = new SerializedFile(mainFile);
-        
-        SerializedFile [] additionalFiles = new SerializedFile[0];
-        
-        if (auxFiles != null){
+
+        SerializedFile[] additionalFiles = new SerializedFile[0];
+
+        if (auxFiles != null) {
             additionalFiles = new SerializedFile[auxFiles.size()];
-            int i = 0;
-            for (IFile iFile : auxFiles) {
-                isEmpty(auxFiles.get(i),"Aux file in list is empty, index = "+i);
+            for (int i = 0; i < auxFiles.size(); i++) {
+                isEmpty(auxFiles.get(i), "Aux file in list is empty, index = " + i);
                 additionalFiles[i] = new SerializedFile(auxFiles.get(i));
-                i++;
             }
         }
-        
-//        controller.submitRun(problem, language, mainFileName, auxFileList, overrideSubmissionTimeMS, overrideRunId);
+
+        controller.submitRun(submitter, problem, language, mainSubmissionFile, additionalFiles, overrideTimeMS, overrideRunId);
     }
 
     private Language getLanguageByName(IInternalContest contest2, String languageName) {
@@ -154,7 +156,6 @@ public class RemoteRunSubmitter {
         }
         return null;
     }
-    
 
     private void isEmpty(Object obj, String message) {
         if (obj == null)
@@ -169,5 +170,4 @@ public class RemoteRunSubmitter {
             throw new InvalidParameterException(message);
         }
     }
-
 }

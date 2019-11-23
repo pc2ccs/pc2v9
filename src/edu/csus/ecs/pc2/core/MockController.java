@@ -11,6 +11,7 @@ import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
@@ -30,6 +31,7 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
+import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.core.transport.ITransportManager;
@@ -38,23 +40,26 @@ import edu.csus.ecs.pc2.ui.ILogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
- * Null Controller, does nothing, nada, zip.
+ * Mock Controller.
  * 
- * A skeleton implementation of the IInternalController.
+ * Some data is mock data some methods implement the controller/contest.
  * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
-public class NullController implements IInternalController {
+public class MockController implements IInternalController {
+
+    private IInternalContest contest;
+    
+    private PacketHandler handler = null;
+    
+    private Log log;
 
     public void addNewAccount(Account account) {
-
+        contest.addAccount(account);
     }
 
-    public void addNewAccounts(Account[] account) {
-
+    public void addNewAccounts(Account[] accounts) {
+        contest.addAccounts(accounts);
     }
 
     public void addNewBalloonSettings(BalloonSettings newBalloonSettings) {
@@ -66,31 +71,33 @@ public class NullController implements IInternalController {
     }
 
     public void addNewClientSettings(ClientSettings newClientSettings) {
-
+        contest.addClientSettings(newClientSettings);
     }
 
     public void addNewGroup(Group group) {
-
+        contest.addGroup(group);
     }
 
     public void addNewJudgement(Judgement judgement) {
-
+        contest.addJudgement(judgement);
     }
 
     public void addNewLanguage(Language language) {
-
+        contest.addLanguage(language);
     }
 
     public void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles) {
-
+        contest.addProblem(problem, problemDataFiles);
     }
 
     public void addNewProblem(Problem[] problem, ProblemDataFiles[] problemDataFiles) {
-
+        for (int i = 0; i < problemDataFiles.length; i++) {
+            contest.addProblem(problem[i], problemDataFiles[i]);
+        }
     }
 
     public void addNewSite(Site site) {
-
+        contest.addSite(site);
     }
 
     public void addPacketListener(IPacketListener packetListener) {
@@ -98,7 +105,7 @@ public class NullController implements IInternalController {
     }
 
     public void addProblem(Problem problem) {
-
+        contest.addProblem(problem);
     }
 
     public void autoRegister(String teamInformation) {
@@ -154,7 +161,7 @@ public class NullController implements IInternalController {
     }
 
     public Log getLog() {
-        return null;
+        return log;
     }
 
     public UIPlugin[] getPluginList() {
@@ -178,7 +185,8 @@ public class NullController implements IInternalController {
     }
 
     public void initializeServer(IInternalContest contest) throws IOException, ClassNotFoundException, FileSecurityException {
-
+        
+        setContest(contest);
     }
 
     public void initializeStorage(IStorage storage) {
@@ -318,11 +326,17 @@ public class NullController implements IInternalController {
     }
 
     public void setContest(IInternalContest newContest) {
+        this.contest = newContest;
+        log = new Log("log", getLogName(contest.getClientId()));
+        handler = new PacketHandler(this, contest);
+    }
 
+    private String getLogName(ClientId clientId) {
+        return "mock." + stripChar(clientId.toString(), ' ');
     }
 
     public void setContestTime(ContestTime contestTime) {
-
+        
     }
 
     public void setJudgementList(Judgement[] judgementList) {
@@ -534,13 +548,44 @@ public class NullController implements IInternalController {
 
     @Override
     public IInternalContest getContest() {
-        // TODO Auto-generated method stub
-        return null;
+       return contest;
     }
 
     @Override
     public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
-        // TODO Auto-generated method stub
+        System.out.println("submitRun "+submitter+" "+problem+" "+language+" " +mainSubmissionFile.getName()+" aux file count "+additionalFiles.length+" time ="+overrideTimeMS+" run id ="+overrideRunId);
         
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Run run = new Run(submitter, language, problem);
+
+        try {
+        
+            RunFiles runFiles = new RunFiles(run, mainSubmissionFile, additionalFiles);
+            Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideRunId);
+            handler.handlePacket(packet, null);
+
+        } catch (Exception e) {
+            rethrow (e);
+        }
+//          sendToLocalServer(packet);
+        
+    }
+
+    private void rethrow(Exception e) {
+        throw new RuntimeException(e);
+    }
+    
+    protected String stripChar(String s, char ch) {
+        int idx = s.indexOf(ch);
+        while (idx > -1) {
+            StringBuffer sb = new StringBuffer(s);
+            idx = sb.indexOf(ch + "");
+            while (idx > -1) {
+                sb.deleteCharAt(idx);
+                idx = sb.indexOf(ch + "");
+            }
+            return sb.toString();
+        }
+        return s;
     }
 }

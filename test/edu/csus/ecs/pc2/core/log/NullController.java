@@ -647,4 +647,10 @@ public class NullController implements IInternalController{
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
+        // TODO Auto-generated method stub
+        
+    }
 }
