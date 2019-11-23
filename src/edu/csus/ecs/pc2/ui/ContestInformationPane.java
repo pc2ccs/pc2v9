@@ -641,9 +641,9 @@ public class ContestInformationPane extends JPanePlugin {
                     enableUpdateButton();
                 }
             };
-            shadowSettingsPane.getPrimaryCCSURLTextfield().addKeyListener(keyListener);
-            shadowSettingsPane.getPrimaryCCSLoginTextfield().addKeyListener(keyListener);
-            shadowSettingsPane.getPrimaryCCSPasswdTextfield().addKeyListener(keyListener);
+            shadowSettingsPane.getRemoteCCSURLTextfield().addKeyListener(keyListener);
+            shadowSettingsPane.getRemoteCCSLoginTextfield().addKeyListener(keyListener);
+            shadowSettingsPane.getRemoteCCSPasswdTextfield().addKeyListener(keyListener);
 
             ActionListener actionListener = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -720,7 +720,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField getPrimaryCCSURLTextfield() {
         
         if (primaryCCSURLTextfield==null) {
-            primaryCCSURLTextfield = getShadowSettingsPane().getPrimaryCCSURLTextfield() ;
+            primaryCCSURLTextfield = getShadowSettingsPane().getRemoteCCSURLTextfield() ;
         }
         return primaryCCSURLTextfield; 
     }
@@ -728,7 +728,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField getPrimaryCCSLoginTextfield() {
 
         if (primaryCCSLoginTextfield == null) {
-            primaryCCSLoginTextfield = getShadowSettingsPane().getPrimaryCCSLoginTextfield();
+            primaryCCSLoginTextfield = getShadowSettingsPane().getRemoteCCSLoginTextfield();
         }
         return primaryCCSLoginTextfield;
     }
@@ -736,7 +736,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField getPrimaryCCSPasswdTextfield() {
         
         if (primaryCCSPasswdTextfield==null) {
-            primaryCCSPasswdTextfield = getShadowSettingsPane().getPrimaryCCSPasswdTextfield() ;
+            primaryCCSPasswdTextfield = getShadowSettingsPane().getRemoteCCSPasswdTextfield() ;
         }
         return primaryCCSPasswdTextfield ;
     }
