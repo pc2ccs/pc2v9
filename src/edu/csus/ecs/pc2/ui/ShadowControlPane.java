@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -15,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import edu.csus.ecs.pc2.shadow.ShadowController;
 
@@ -54,7 +56,7 @@ public class ShadowControlPane extends JPanePlugin {
 
     private JPanel shadowingOnOffStatusPane;
 
-    private JLabel shadowingStatusLabel;
+    private JLabel shadowingStatusValueLabel;
 
     /**
      * Constructs a new ShadowControlPane, <I>relying on the caller to also call method 
@@ -167,10 +169,10 @@ public class ShadowControlPane extends JPanePlugin {
             shadowController = new ShadowController(this.getContest(),this.getController()) ;
             shadowController.start();
             currentlyShadowing = true;
-            shadowingStatusLabel.setText("ON");
+            shadowingStatusValueLabel.setText("ON");
 
         } else {
-            showErrorMessage("Shadowing not enabled, or shadowing parameters not complete", "Cannot start Shadowing");
+            showErrorMessage("Shadow Mode not enabled, or shadowing parameters not valid", "Cannot start Shadowing");
         }
         updateGUI();
     }
@@ -232,7 +234,7 @@ public class ShadowControlPane extends JPanePlugin {
         if (shadowController!=null) {
             shadowController.stop();
             currentlyShadowing = false;
-            shadowingStatusLabel.setText("OFF");
+            shadowingStatusValueLabel.setText("OFF");
 
         }
         updateGUI();
@@ -249,9 +251,10 @@ public class ShadowControlPane extends JPanePlugin {
             
             centerPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
             
+            centerPanel.add(getShadowingOnOffStatusPane());
             centerPanel.add(getShadowSettingsPane());
             centerPanel.add(getLastEventIDPane());
-            centerPanel.add(getShadowingOnOffStatusPane());
+
             
         }
         return centerPanel;
@@ -317,9 +320,18 @@ public class ShadowControlPane extends JPanePlugin {
             
             shadowingOnOffStatusPane.setLayout(new FlowLayout(FlowLayout.CENTER));
             
-            shadowingOnOffStatusPane.add(new JLabel("Shadowing is currently: "));
-            shadowingStatusLabel = new JLabel("UNDEFINED");
+            JLabel shadowingStatusLabel = new JLabel();
+            shadowingStatusLabel.setFont(new Font("Dialog", Font.BOLD, 14));
+            shadowingStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            shadowingStatusLabel.setText("Shadowing is currently: ");
             shadowingOnOffStatusPane.add(shadowingStatusLabel);
+            
+            shadowingStatusValueLabel = new JLabel();
+            shadowingStatusValueLabel.setFont(new Font("Dialog", Font.BOLD, 14));
+            shadowingStatusValueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            shadowingStatusValueLabel.setText("UNDEFINED");  
+            shadowingOnOffStatusPane.add(shadowingStatusValueLabel);
+
         }
         return shadowingOnOffStatusPane;
     }
@@ -340,9 +352,9 @@ public class ShadowControlPane extends JPanePlugin {
         getStopButton().setEnabled(currentlyShadowing);
 
         if (currentlyShadowing) {
-            shadowingStatusLabel.setText("ON...");
+            shadowingStatusValueLabel.setText("ON");
         } else {
-            shadowingStatusLabel.setText("OFF...");
+            shadowingStatusValueLabel.setText("OFF");
         }
         
         updateShadowSettingsPaneSettings(currentlyShadowing);
