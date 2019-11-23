@@ -181,12 +181,31 @@ public class ShadowControlPane extends JPanePlugin {
      * Checks all the components on the ShadowModePane, returns true if they all have sane values
      * (meaning, they all have values which will work for starting shadowing); false otherwise.
      * 
+     * Specifically, this means that in order for "true" to be returned, ALL of the following must be true:
+     * <pre>
+     *   - the "Enable Shadow Mode" checkbox is checked (selected)
+     *   - the RemoteCCS textfields for URL, Login, and Password are ALL non-null and not the empty string
+     * </pre>
+     * 
      * @return an indication of whether the GUI controls are set for shadowing to start
      */
     private boolean verifyShadowControls() {
-        // TODO Auto-generated method stub
-        System.out.println("verifyShadowControls() invoked but currently empty!");
-        return false;
+        
+        ShadowSettingsPane shadowPane = getShadowSettingsPane();
+        if (!shadowPane.getShadowModeCheckbox().isSelected()) {
+            return false;
+        }
+        if (shadowPane.getRemoteCCSURLTextfield()==null || "".equals(shadowPane.getRemoteCCSURLTextfield().getText())) {
+            return false;
+        }
+        if (shadowPane.getRemoteCCSLoginTextfield()==null || "".equals(shadowPane.getRemoteCCSLoginTextfield().getText())) {
+            return false;
+        }
+        if (shadowPane.getRemoteCCSPasswdTextfield()==null || "".equals(shadowPane.getRemoteCCSPasswdTextfield().getText())) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
