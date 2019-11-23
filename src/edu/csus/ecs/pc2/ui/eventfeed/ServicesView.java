@@ -31,6 +31,7 @@ import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
+import edu.csus.ecs.pc2.ui.ShadowControlPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import edu.csus.ecs.pc2.ui.WebServerPane;
 
@@ -169,7 +170,19 @@ public class ServicesView extends JFrame implements UIPlugin {
                     }
                 }
                 
+                try {
+                    ShadowControlPane shadowPane = new ShadowControlPane();
+                    addUIPlugin(getMainTabbedPane(), "Shadow Mode", shadowPane);
+                } catch (Exception e) {
+                    if (StaticLog.getLog() != null) {
+                        StaticLog.getLog().log(Log.WARNING, "Exception", e);
+                        e.printStackTrace(System.err);
+                    } else {
+                        e.printStackTrace(System.err);
+                    }
+                }
                 
+               
                if (Utilities.isDebugMode()) {
                     
                     try {
