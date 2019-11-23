@@ -688,5 +688,11 @@ public interface IInternalController {
      *            - the Controller to which this request applies
      */
     void updateAutoStartInformation(IInternalContest aContest, IInternalController aController) ;
+    
+    /**
+     * Get contest model.
+     * @return
+     */
+    IInternalContest getContest();
 
 }

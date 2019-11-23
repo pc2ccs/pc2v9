@@ -641,4 +641,10 @@ public class NullController implements IInternalController{
         // TODO Auto-generated method stub
         
     }
+
+    @Override
+    public IInternalContest getContest() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

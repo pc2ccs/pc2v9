@@ -4348,4 +4348,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
+    public IInternalContest getContest() {
+        return contest;
+    }
+    
 }

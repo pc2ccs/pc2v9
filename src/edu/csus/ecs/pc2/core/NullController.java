@@ -531,4 +531,10 @@ public class NullController implements IInternalController {
     public void updateAutoStartInformation(IInternalContest aContest, IInternalController aController) {
 
     }
+
+    @Override
+    public IInternalContest getContest() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
