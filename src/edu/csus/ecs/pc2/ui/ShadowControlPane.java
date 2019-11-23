@@ -58,6 +58,8 @@ public class ShadowControlPane extends JPanePlugin {
 
     private JLabel shadowingStatusValueLabel;
 
+    private JTextField lastEventTextfield;
+
     /**
      * Constructs a new ShadowControlPane, <I>relying on the caller to also call method 
      * {@link #setContestAndController(edu.csus.ecs.pc2.core.model.IInternalContest, edu.csus.ecs.pc2.core.IInternalController)}
@@ -192,29 +194,32 @@ public class ShadowControlPane extends JPanePlugin {
     private boolean verifyShadowControls() {
         
         ShadowSettingsPane shadowPane = getShadowSettingsPane();
+        if (shadowPane==null) {
+            return false;
+        }
         if (!shadowPane.getShadowModeCheckbox().isSelected()) {
             return false;
         }
-        if (shadowPane.getRemoteCCSURLTextfield()==null || "".equals(shadowPane.getRemoteCCSURLTextfield().getText())) {
+        if (shadowPane.getRemoteCCSURLTextfield()==null || "".equals(shadowPane.getRemoteCCSURLTextfield().getText().trim())) {
             return false;
         }
-        if (shadowPane.getRemoteCCSLoginTextfield()==null || "".equals(shadowPane.getRemoteCCSLoginTextfield().getText())) {
+        if (shadowPane.getRemoteCCSLoginTextfield()==null || "".equals(shadowPane.getRemoteCCSLoginTextfield().getText().trim())) {
             return false;
         }
-        if (shadowPane.getRemoteCCSPasswdTextfield()==null || "".equals(shadowPane.getRemoteCCSPasswdTextfield().getText())) {
+        if (shadowPane.getRemoteCCSPasswdTextfield()==null || "".equals(shadowPane.getRemoteCCSPasswdTextfield().getText().trim())) {
             return false;
         }
 
         return true;
     }
 
-    /**
-     * Displays a message in a simple dialog format.
-     * @param string the message to be displayed
-     */
-    private void showMessage(String string) {
-        JOptionPane.showMessageDialog(this, string);
-    }
+//    /**
+//     * Displays a message in a simple dialog format.
+//     * @param string the message to be displayed
+//     */
+//    private void showMessage(String string) {
+//        JOptionPane.showMessageDialog(this, string);
+//    }
     
     /**
      * Displays an error message dialog.
@@ -285,7 +290,7 @@ public class ShadowControlPane extends JPanePlugin {
      * Construction includes adding keylisteners and actionlisteners to the ShadowSettingsPane
      * components.
      * 
-     * @return a ShadowSettingsPane with listeners attached
+     * @return a ShadowSettingsPane with listeners attached to its active components
      */
     private ShadowSettingsPane getShadowSettingsPane() {
         if (shadowSettingsPane==null) {
@@ -317,9 +322,14 @@ public class ShadowControlPane extends JPanePlugin {
     private JPanel getLastEventIDPane() {
         if (lastEventIDPane==null) {
             lastEventIDPane = new JPanel();
+            
             lastEventIDPane.setLayout(new FlowLayout(FlowLayout.CENTER));
-            lastEventIDPane.add(new JLabel("Last Event ID:"));
-            JTextField lastEventTextfield = new JTextField(10);
+            
+            JLabel lastEventIDLabel = new JLabel("Last Event ID:");
+            lastEventIDLabel.setToolTipText("The ID of the last event already received; i.e., the \"since_id\" for events being requested");
+            lastEventIDPane.add(lastEventIDLabel);
+            
+            lastEventTextfield = new JTextField(10);
             lastEventTextfield.addKeyListener(new KeyAdapter() {
                 public void keyReleased(KeyEvent e) {
                     enableUpdateButton();
@@ -384,6 +394,7 @@ public class ShadowControlPane extends JPanePlugin {
         shadowSettingsPane.getRemoteCCSURLTextfield().setEditable(!currentlyShadowing);
         shadowSettingsPane.getRemoteCCSLoginTextfield().setEditable(!currentlyShadowing);
         shadowSettingsPane.getRemoteCCSPasswdTextfield().setEditable(!currentlyShadowing);
+        lastEventTextfield.setEditable(!currentlyShadowing);
     }
 
 
