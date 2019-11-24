@@ -171,7 +171,7 @@ public class ServicesView extends JFrame implements UIPlugin {
                 }
                 
                 try {
-                    ShadowControlPane shadowPane = new ShadowControlPane();
+                    ShadowControlPane shadowPane = new ShadowControlPane(inContest, inController);
                     addUIPlugin(getMainTabbedPane(), "Shadow Mode", shadowPane);
                 } catch (Exception e) {
                     if (StaticLog.getLog() != null) {
