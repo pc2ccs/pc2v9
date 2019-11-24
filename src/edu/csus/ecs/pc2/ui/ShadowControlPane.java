@@ -169,9 +169,13 @@ public class ShadowControlPane extends JPanePlugin {
         
         if (shadowCheckboxEnabled && shadowDataComplete) {
             shadowController = new ShadowController(this.getContest(),this.getController()) ;
-            shadowController.start();
-            currentlyShadowing = true;
-            shadowingStatusValueLabel.setText("ON");
+            boolean started = shadowController.start();
+            if (started) {
+                currentlyShadowing = true;
+                shadowingStatusValueLabel.setText("ON");
+            } else {
+                showErrorMessage("Failed to start shadowing; check logs (bad URL?)", "Cannot start Shadowing");
+            }
 
         } else {
             showErrorMessage("Shadow Mode not enabled, or shadowing parameters not valid", "Cannot start Shadowing");
@@ -372,7 +376,7 @@ public class ShadowControlPane extends JPanePlugin {
 
 
     /**
-     * Updates the state of the web server status label and Start/Stop buttons to correspond to the state of the Jetty Server.
+     * Updates the state of the GUI to correspond to the saved state.
      */
     private void updateGUI() {
 
