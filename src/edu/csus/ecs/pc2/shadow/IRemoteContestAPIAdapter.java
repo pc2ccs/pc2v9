@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
+import java.io.InputStream;
+
 /**
  * This interface defines the facilities which implementations of adapters to be used in Shadow Mode for connecting to
  * Remote CCS Contest API endpoints must implement.
@@ -17,7 +19,8 @@ interface IRemoteContestAPIAdapter {
     //TODO: define required interface methods here
     
     /**
-     * Returns a JSON string containing the elements of the remote contest configuration, including:
+     * Returns a JSON string containing an array whose elements are the components comprising
+     * the remote contest configuration:
      * <pre>
      *   - judgement types
      *   - languages
@@ -30,5 +33,7 @@ interface IRemoteContestAPIAdapter {
      * @return
      */
     public String getRemoteContestConfiguration();
+    
+    public InputStream getRemoteContestEventFeed();
 
 }
