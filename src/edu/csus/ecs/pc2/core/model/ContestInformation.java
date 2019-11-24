@@ -2,7 +2,6 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
-import java.net.URL;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
@@ -56,7 +55,7 @@ public class ContestInformation implements Serializable{
     
     //Shadow Mode settings
     private boolean shadowMode = false;
-    private URL primaryCCS_URL = null;
+    private String primaryCCS_URL = null;
     private String primaryCCS_user_login = "";
     private String primaryCCS_user_pw = "";
     
@@ -252,20 +251,9 @@ public class ContestInformation implements Serializable{
             if (! StringUtilities.stringSame(rsiCommand, contestInformation.rsiCommand)) {
                 return false;
             }
-            //check if the Primary (Remote) CCS URLs are equal
-            
-            // "^" is XOR; if the XOR is true then one or the other (BUT NOT BOTH) are null; hence not equal
-            if ( primaryCCS_URL==null ^ contestInformation.primaryCCS_URL==null) {
+            if (! StringUtilities.stringSame(primaryCCS_URL, contestInformation.primaryCCS_URL)) {
                 return false;
-            }
-            //if we get here then either both are null or both are non-null; if both null then skip
-            if (primaryCCS_URL!=null) {
-                //both must be non-null
-                if (!primaryCCS_URL.equals(contestInformation.primaryCCS_URL) ) {
-                    return false;            
-                }
-            }
-            
+            }            
             if (! StringUtilities.stringSame(primaryCCS_user_login, contestInformation.primaryCCS_user_login)) {
                 return false;
             }
@@ -434,20 +422,20 @@ public class ContestInformation implements Serializable{
     }
     
     /**
-     * Returns the URL to a "Primary CCS"; only relevant when operating this
-     * instance of the PC2 CCS as a "Shadow CCS".
+     * Returns the String representation for a "Primary CCS" URL (that is, the URL of a Remote CCS being shadowed); 
+     * only relevant when operating this instance of the PC2 CCS as a "Shadow CCS".
      * @return a String containing the URL of the Primary CCS which we're shadowing
      */
-    public URL getPrimaryCCS_URL() {
+    public String getPrimaryCCS_URL() {
         return primaryCCS_URL;
     }
 
     /**
-     * Sets the value of the URL used to access the Primary CCS (used only when
-     * operating this instance of PC2 as a "Shadow CCS").
-     * @param primaryCCS_URL a String giving the URL of the Primary CCS (the CCS being shadowed)
+     * Sets the String representation for a "Primary CCS" URL (that is, the URL of a Remote CCS being shadowed); 
+     * only relevant when operating this instance of the PC2 CCS as a "Shadow CCS".
+     * @param primaryCCS_URL a String giving the URL of the Primary (remote) CCS (the CCS being shadowed)
      */
-    public void setPrimaryCCS_URL(URL primaryCCS_URL) {
+    public void setPrimaryCCS_URL(String primaryCCS_URL) {
         this.primaryCCS_URL = primaryCCS_URL;
     }
 
