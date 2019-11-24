@@ -934,11 +934,8 @@ public class ContestInformationPane extends JPanePlugin {
                 }
                 
                 getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
-                if (contestInformation.getPrimaryCCS_URL()==null) {
-                    getPrimaryCCSURLTextfield().setText("");
-                } else {
-                    getPrimaryCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL().toString());
-                }
+
+                getPrimaryCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL());
                 getPrimaryCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
                 getPrimaryCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
                 
