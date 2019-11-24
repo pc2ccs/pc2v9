@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -847,8 +848,7 @@ public class ContestInformationPane extends JPanePlugin {
         try {
             newContestInformation.setPrimaryCCS_URL(new URL(getPrimaryCCSURLTextfield().getText()));
         } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-        	getController().getLog().warning("Error constructing URL from String");
+        	getController().getLog().log(Level.WARNING, "Error constructing URL from String", e);
             e.printStackTrace();
         }
         newContestInformation.setPrimaryCCS_user_login(getPrimaryCCSLoginTextfield().getText());
@@ -942,7 +942,11 @@ public class ContestInformationPane extends JPanePlugin {
                 }
                 
                 getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
-                getPrimaryCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL().toString());
+                if (contestInformation.getPrimaryCCS_URL()==null) {
+                    getPrimaryCCSURLTextfield().setText("");
+                } else {
+                    getPrimaryCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL().toString());
+                }
                 getPrimaryCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
                 getPrimaryCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
                 
