@@ -6,8 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 /**
  * This class provides a "mock" implementation of connections to a Remote CCS CLICS Contest API.
  * It returns data as if it were connected to an actual remote CCS.
@@ -104,7 +102,14 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
     }
 
     public InputStream readRemoteCCSEventFeed(){
+        
+        /**
+         * Test JSON event feed.   From CSUS Fall 2019 (real) contest.
+         */
+        String filename = "testdata/PacedFileInputStreamTest/csus-f2019.eventfeed.json";
+        return readRemoteCCSEventFeed(new File(filename));
+        
         // todo read or pass through from REST end point
-        throw new NotImplementedException();
+//        throw new NotImplementedException();
     }
 }

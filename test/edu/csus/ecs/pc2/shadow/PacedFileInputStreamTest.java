@@ -13,9 +13,15 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 public class PacedFileInputStreamTest extends AbstractTestCase {
 
     public void testZeroSecondPaced() throws Exception {
-
-        String filename = getSamplesSourceFilename(SUMIT_SOURCE_FILENAME);
+        
+        String datadir = getDataDirectory();
+        
+//        ensureDirectory(datadir);
+//        startExplorer(datadir);
+        
+        String filename = datadir + File.separator + "csus-f2019.eventfeed.json";
 //        editFile(filename);
+        
         File infile = new File(filename);
 
         int secondsPause = 0;
@@ -34,7 +40,7 @@ public class PacedFileInputStreamTest extends AbstractTestCase {
 
         long elapsedtime = new Date().getTime() - startTime;
 
-        assertEquals("Expecting number of pauses in stream ", 39, pc);
+        assertEquals("Expecting number of pauses in stream ", 1264, pc);
         
         if (isDebugMode()){
             System.out.println("File: " + filename + " size " + infile.length());
@@ -49,6 +55,7 @@ public class PacedFileInputStreamTest extends AbstractTestCase {
         if (isFastJUnitTesting()) {
             return;
         }
+
 
         String filename = getSamplesSourceFilename(SUMIT_SOURCE_FILENAME);
 //        editFile(filename);
