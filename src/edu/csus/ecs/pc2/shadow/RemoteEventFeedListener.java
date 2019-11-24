@@ -41,6 +41,7 @@ public class RemoteEventFeedListener implements Runnable {
                             + "' using login '" + login + "' and password '" + password + "'");
         
         System.out.println ("Would have started listening to remote event feed...");
+        System.out.println ("Would have submitted any remote runs to the local PC2 system using submitter " + submitter);
         while (keepRunning) {
             
             //read next event object
