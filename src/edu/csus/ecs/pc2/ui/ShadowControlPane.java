@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.shadow.ShadowController;
 
 /**
@@ -376,10 +377,9 @@ public class ShadowControlPane extends JPanePlugin {
 
 
     /**
-     * Updates the state of the GUI to correspond to the saved state.
+     * Updates the GUI to correspond to the current state.
      */
     private void updateGUI() {
-
 
         getStartButton().setEnabled(!currentlyShadowing);
         getStopButton().setEnabled(currentlyShadowing);
@@ -394,10 +394,17 @@ public class ShadowControlPane extends JPanePlugin {
     }
 
     private void updateShadowSettingsPaneSettings(boolean currentlyShadowing) {
+        
+        ContestInformation contestInformation = getContest().getContestInformation();
+
+        getShadowSettingsPane().getRemoteCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL());
+        getShadowSettingsPane().getRemoteCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
+        getShadowSettingsPane().getRemoteCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
+
         // if Shadowing is currently on, do not allow these settings to be changed
-        shadowSettingsPane.getRemoteCCSURLTextfield().setEditable(!currentlyShadowing);
-        shadowSettingsPane.getRemoteCCSLoginTextfield().setEditable(!currentlyShadowing);
-        shadowSettingsPane.getRemoteCCSPasswdTextfield().setEditable(!currentlyShadowing);
+        getShadowSettingsPane().getRemoteCCSURLTextfield().setEditable(!currentlyShadowing);
+        getShadowSettingsPane().getRemoteCCSLoginTextfield().setEditable(!currentlyShadowing);
+        getShadowSettingsPane().getRemoteCCSPasswdTextfield().setEditable(!currentlyShadowing);
         lastEventTextfield.setEditable(!currentlyShadowing);
     }
 
