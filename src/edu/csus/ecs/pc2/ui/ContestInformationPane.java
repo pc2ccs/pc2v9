@@ -12,6 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
@@ -842,7 +844,13 @@ public class ContestInformationPane extends JPanePlugin {
         
         //fill in Shadow Mode information
         newContestInformation.setShadowMode(getShadowSettingsPane().getShadowModeCheckbox().isSelected());
-        newContestInformation.setPrimaryCCS_URL(getPrimaryCCSURLTextfield().getText());
+        try {
+            newContestInformation.setPrimaryCCS_URL(new URL(getPrimaryCCSURLTextfield().getText()));
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+        	getController().getLog().warning("Error constructing URL from String");
+            e.printStackTrace();
+        }
         newContestInformation.setPrimaryCCS_user_login(getPrimaryCCSLoginTextfield().getText());
         newContestInformation.setPrimaryCCS_user_pw(getPrimaryCCSPasswdTextfield().getText());
         
@@ -934,7 +942,7 @@ public class ContestInformationPane extends JPanePlugin {
                 }
                 
                 getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
-                getPrimaryCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL());
+                getPrimaryCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL().toString());
                 getPrimaryCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
                 getPrimaryCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
                 

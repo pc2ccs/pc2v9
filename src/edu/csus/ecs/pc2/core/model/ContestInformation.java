@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
@@ -55,7 +56,7 @@ public class ContestInformation implements Serializable{
     
     //Shadow Mode settings
     private boolean shadowMode = false;
-    private String primaryCCS_URL = "";
+    private URL primaryCCS_URL = null;
     private String primaryCCS_user_login = "";
     private String primaryCCS_user_pw = "";
     
@@ -251,9 +252,20 @@ public class ContestInformation implements Serializable{
             if (! StringUtilities.stringSame(rsiCommand, contestInformation.rsiCommand)) {
                 return false;
             }
-            if (! StringUtilities.stringSame(primaryCCS_URL, contestInformation.primaryCCS_URL)) {
+            //check if the Primary (Remote) CCS URLs are equal
+            
+            // "^" is XOR; if the XOR is true then one or the other (BUT NOT BOTH) are null; hence not equal
+            if ( primaryCCS_URL==null ^ contestInformation.primaryCCS_URL==null) {
                 return false;
             }
+            //if we get here then either both are null or both are non-null; if both null then skip
+            if (primaryCCS_URL!=null) {
+                //both must be non-null
+                if (!primaryCCS_URL.equals(contestInformation.primaryCCS_URL) ) {
+                    return false;            
+                }
+            }
+            
             if (! StringUtilities.stringSame(primaryCCS_user_login, contestInformation.primaryCCS_user_login)) {
                 return false;
             }
@@ -426,7 +438,7 @@ public class ContestInformation implements Serializable{
      * instance of the PC2 CCS as a "Shadow CCS".
      * @return a String containing the URL of the Primary CCS which we're shadowing
      */
-    public String getPrimaryCCS_URL() {
+    public URL getPrimaryCCS_URL() {
         return primaryCCS_URL;
     }
 
@@ -435,7 +447,7 @@ public class ContestInformation implements Serializable{
      * operating this instance of PC2 as a "Shadow CCS").
      * @param primaryCCS_URL a String giving the URL of the Primary CCS (the CCS being shadowed)
      */
-    public void setPrimaryCCS_URL(String primaryCCS_URL) {
+    public void setPrimaryCCS_URL(URL primaryCCS_URL) {
         this.primaryCCS_URL = primaryCCS_URL;
     }
 
