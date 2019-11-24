@@ -18,7 +18,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.shadow.ShadowController;
 
 /**
@@ -62,13 +64,20 @@ public class ShadowControlPane extends JPanePlugin {
     private JTextField lastEventTextfield;
 
     /**
-     * Constructs a new ShadowControlPane, <I>relying on the caller to also call method 
-     * {@link #setContestAndController(edu.csus.ecs.pc2.core.model.IInternalContest, edu.csus.ecs.pc2.core.IInternalController)}
-     * prior to doing any shadowing operations</i>.
+     * Constructs a new ShadowControlPane using the specified Contest and Controller.
+     * 
+     * This constructor invokes the superclass ({@link JPanePlugin}) method
+     * {@link JPanePlugin#setContestAndController(IInternalContest, IInternalController)} passing to it
+     * the received {@link IInternalContest} and {@link IInternalController}, making it unnecessary for
+     * the caller to explicitly invoke that method.
+     * 
+     * @param inContest the PC2 IInternalContest representing the local contest acting as the shadow
+     * @param inController the PC2 IInternalController for the local contest acting as the shadow
      * 
      */
-    public ShadowControlPane() {
+    public ShadowControlPane(IInternalContest inContest, IInternalController inController) {
         super();
+        super.setContestAndController(inContest, inController);
         initialize();
     }
 
