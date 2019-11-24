@@ -11,38 +11,42 @@ import java.net.URL;
  */
 public class RemoteRunMonitor {
 
-    URL remoteURL;
-    String login;
-    String password;
-    RemoteRunSubmitter submitter;
+    private IRemoteContestAPIAdapter remoteContestAPIAdapter;
+    private URL remoteURL;
+    private String login;
+    private String password;
+    private RemoteRunSubmitter submitter;
     
     Thread listenerThread = null;
     
     boolean listening;
     private RemoteEventFeedListener listener;
 
+
     /**
-     * constructs a RemoteRunMonitor with the specified values.
+     * Constructs a RemoteRunMonitor with the specified values.
      * 
+     * @param remoteContestAPIAdapter an adapter for accessing the remote contest API
      * @param remoteURL the URL to the remote CCS
      * @param login the login (account) on the remote CCS
      * @param password the password to the remote CCS account
      * @param submitter a {@link Runnable} which knows how to submit a receive remote run to PC2
      */
-    public RemoteRunMonitor(URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
+    public RemoteRunMonitor(IRemoteContestAPIAdapter remoteContestAPIAdapter, URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
 
+        this.remoteContestAPIAdapter = remoteContestAPIAdapter;
         this.remoteURL = remoteURL;
         this.login = login;
         this.password = password;
         this.submitter = submitter;
     }
 
-    public void startListening() {
+    public boolean startListening() {
         // TODO Bug 1625 startRunEventFeeder
         
         try {
             //construct a listener for the remote API
-            listener = new RemoteEventFeedListener(remoteURL,login,password,submitter);
+            listener = new RemoteEventFeedListener(remoteContestAPIAdapter, remoteURL, login, password, submitter);
   
             //start the listener running as a thread
             listenerThread = new Thread(listener);
@@ -51,7 +55,10 @@ public class RemoteRunMonitor {
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            return false;
         }
+        
+        return true;
     }
 
     public void stopListening() {
