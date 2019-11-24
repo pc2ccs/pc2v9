@@ -1,7 +1,12 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URL;
+
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * This class provides a "mock" implementation of connections to a Remote CCS CLICS Contest API.
@@ -86,5 +91,20 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
                + "]";
         return retStr;
     }
+  
+    public InputStream readRemoteCCSEventFeed(File file) {
+        PacedFileInputStream efEventStreamReader;
+        try {
+            int secondsPauseForEAchLine = 2;
+            efEventStreamReader = new PacedFileInputStream(file,secondsPauseForEAchLine);
+            return efEventStreamReader;
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    public InputStream readRemoteCCSEventFeed(){
+        // todo read or pass through from REST end point
+        throw new NotImplementedException();
+    }
 }
