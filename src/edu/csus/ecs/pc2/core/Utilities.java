@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.security.InvalidParameterException;
 import java.text.CharacterIterator;
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -1654,7 +1655,49 @@ public final class Utilities {
         System.out.println("End "+message + " dumpProblemGroups "+new Date());
     }
 
+    /**
+     * If object is empty/null throw InvalidParameterException
+     * @param obj
+     * @param message
+     */
+    public static void isEmpty(Object obj, String message) {
+        if (obj == null)
+        {
+            throw new InvalidParameterException(message);
+        }
+    }
 
+    /**
+     * If string is empty/null throw InvalidParameterException
+     * @param s
+     * @param message
+     */
+    public static void isEmptyString(String s, String message) {
+        if (s == null || s.trim().length() == 0)
+        {
+            throw new InvalidParameterException(message);
+        }
+    }
+    
+    /**
+     * Convert String to int.
+     * @param string
+     * @param defaultNumber used if invalid or null string
+     * @return int from string, if any error will return defaultNumber
+     */
+    public static int nullSafeToInt(String string, int defaultNumber) {
 
+        try {
+
+            if (string != null && string.length() > 0) {
+                return Integer.parseInt(string.trim());
+            }
+        } catch (Exception e) {
+            // ignore, will return default if a parsing error
+        }
+
+        return defaultNumber;
+
+    }
 
 }
