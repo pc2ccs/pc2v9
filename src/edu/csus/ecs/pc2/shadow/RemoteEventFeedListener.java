@@ -12,23 +12,20 @@ import java.net.URL;
 public class RemoteEventFeedListener implements Runnable {
     
     private boolean keepRunning ;
+    private IRemoteContestAPIAdapter remoteContestAPIAdapter;
     private URL remoteURL;
     private String login;
     private String password;
     private RemoteRunSubmitter submitter;
 
-    public RemoteEventFeedListener(URL remoteURL, String login, String password, Runnable submitter) {
+
+    public RemoteEventFeedListener(IRemoteContestAPIAdapter remoteContestAPIAdapter, URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
         // TODO code (see bug 1626)
+        this.remoteContestAPIAdapter = remoteContestAPIAdapter;
         this.remoteURL = remoteURL;
         this.login = login;
         this.password = password;
-        if (submitter instanceof RemoteRunSubmitter) {
-            this.submitter = (RemoteRunSubmitter) submitter;            
-        } else {
-            //there probably is a better exception to throw than this?
-            throw new ClassCastException("RemoteEventFeedListener received something other than a RemoteRunSubmitter");
-        }
-
+        this.submitter = submitter;            
     }
 
     @Override
@@ -39,12 +36,29 @@ public class RemoteEventFeedListener implements Runnable {
         
         //open connection to remoteURL event-feed endpoint
         
+        System.out.println("RemoteEventFeedListner: would have attempted to connect to Remote CCS through adapter " + remoteContestAPIAdapter 
+                            + " at URL '" + remoteURL 
+                            + "' using login '" + login + "' and password '" + password + "'");
+        
+        System.out.println ("Would have started listening to remote event feed...");
+        System.out.println ("Would have submitted any remote runs to the local PC2 system using submitter " + submitter);
         while (keepRunning) {
+            
             //read next event object
             // if (event-type == submission) {
             //   extract data from submission object (the entire submission will be in the event);
             //   invoke RemoteRunSubmitter.submitRun(team,prob,lang,files,time,id);
             // }
+            
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            System.out.println ("Still 'listening'...");
+
         }
 
 

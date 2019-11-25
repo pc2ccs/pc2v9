@@ -842,9 +842,9 @@ public class ContestInformationPane extends JPanePlugin {
         
         //fill in Shadow Mode information
         newContestInformation.setShadowMode(getShadowSettingsPane().getShadowModeCheckbox().isSelected());
-        newContestInformation.setPrimaryCCS_URL(getPrimaryCCSURLTextfield().getText());
-        newContestInformation.setPrimaryCCS_user_login(getPrimaryCCSLoginTextfield().getText());
-        newContestInformation.setPrimaryCCS_user_pw(getPrimaryCCSPasswdTextfield().getText());
+        newContestInformation.setPrimaryCCS_URL(getShadowSettingsPane().getRemoteCCSURLTextfield().getText());
+        newContestInformation.setPrimaryCCS_user_login(getShadowSettingsPane().getRemoteCCSLoginTextfield().getText());
+        newContestInformation.setPrimaryCCS_user_pw(getShadowSettingsPane().getRemoteCCSPasswdTextfield().getText());
         
         //fill in additional field values
         String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();
@@ -934,6 +934,7 @@ public class ContestInformationPane extends JPanePlugin {
                 }
                 
                 getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
+
                 getPrimaryCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL());
                 getPrimaryCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
                 getPrimaryCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
@@ -973,6 +974,7 @@ public class ContestInformationPane extends JPanePlugin {
 
     private void updateContestInformation() {
         ContestInformation contestInformation = getFromFields();
+                
         getController().updateContestInformation(contestInformation);
     }
 

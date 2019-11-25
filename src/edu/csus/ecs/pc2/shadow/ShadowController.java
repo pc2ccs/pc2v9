@@ -1,7 +1,9 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -30,7 +32,7 @@ public class ShadowController {
     private IInternalContest localContest;
     private IInternalController localController;
 
-    private URL remoteCCSURL;
+    private String remoteCCSURLString;
 
     private String remoteCCSLogin;
 
@@ -39,15 +41,18 @@ public class ShadowController {
     private RemoteRunMonitor monitor;
 
     /**
-     * Constructs a new ShadowController for the remote CCS specified by the input parameters. ??? 
+     * Constructs a new ShadowController for the remote CCS specified by the data in the 
+     * specified {@link IInternalContest}. 
      * 
      * @param localContest a PC2 Contest to be used by the Shadow Controller
      * @param localController a PC2 Controller to be used by the Shadow Controller
      */
     public ShadowController(IInternalContest localContest, IInternalController localController) {
 
-        //TODO: figure out how to get the Remote CCS info out of the local contest/server
-//        this(localContest, localController, localContest.getRemoteCCSURL(), localContest.getRemoteCCSLogin(), getRemoteCCSPasswd);
+        this(localContest, localController, 
+                localContest.getContestInformation().getPrimaryCCS_URL(),
+                localContest.getContestInformation().getPrimaryCCS_user_login(),
+                localContest.getContestInformation().getPrimaryCCS_user_pw());
 
     }
 
@@ -61,29 +66,48 @@ public class ShadowController {
      * @param remoteCCSPassword
      */
     public ShadowController(IInternalContest localContest, IInternalController localController, 
-                            URL remoteURL, String remoteCCSLogin, String remoteCCSPassword) {
+                            String remoteURL, String remoteCCSLogin, String remoteCCSPassword) {
 
         this.localContest = localContest;
         this.localController = localController;
-        this.remoteCCSURL = remoteURL;
+        this.remoteCCSURLString = remoteURL;
         this.remoteCCSLogin = remoteCCSLogin;
         this.remoteCCSPassword = remoteCCSPassword;
     }
 
     /**
-     * This method starts Shadow Mode operations running.  It obtains an adapter with which to access
+     * This method starts Shadow Mode operations running.  
+     * 
+     * It first checks the validity of the URL string which was passed to the Shadow Controller when it was constructed;
+     * if the URL is invalid then it logs a warning and returns false.
+     * If the URL string is valid then it obtains an adapter with which to access
      * a remote CCS, then uses the adapter to fetch the remote contest configuration.   
      * It then compares the obtained (remote) contest configuration with the local contest configuration,
      * and if they match then it creates and starts a {@link RemoteRunMonitor} listening to the remote contest
      * specified by the remote contest URL provided when the class is constructed.
+     * 
+     * @return true if remote shadowing operations were started successfully; false if not
      */
-    public void start() {
+    public boolean start() {
 
-        IRemoteContestAPIAdapter adapter = new MockContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
+        System.out.println ("ShadowController: starting shadowing for URL '" + remoteCCSURLString 
+                            + "' using login '" + remoteCCSLogin + "' and password '" + remoteCCSPassword + "'");
+        
+        //verify that the current "URL string" is a valid URL
+        URL remoteCCSURL = null;
+        try {
+            remoteCCSURL = new URL(remoteCCSURLString);
+        } catch (MalformedURLException e) {
+            localController.getLog().log(Level.WARNING, "Malformed Remote CCS URL: \"" + remoteCCSURLString + "\" ", e);
+            e.printStackTrace();
+            return false;
+        }
+        
+        IRemoteContestAPIAdapter remoteContestAPIAdapter = new MockContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
         
         //TODO: figure out the relationship between "RemoteContest" and the data returned by "getRemoteContestConfiguration()"
 //        RemoteContest remoteContest = new RemoteContest(ShadowContestComparer.getRemoteContest(remoteURL, login, password));
-        RemoteContest remoteContest = new RemoteContest(adapter.getRemoteContestConfiguration());
+        RemoteContest remoteContest = new RemoteContest(remoteContestAPIAdapter.getRemoteContestConfiguration());
         
         //TODO: figure out how this comparison should work 
 //        ShadowContestComparator comp = new ShadowContestComparator(remoteContest.getContestModel());
@@ -95,9 +119,11 @@ public class ShadowController {
         
         RemoteRunSubmitter submitter = new RemoteRunSubmitter(localController);
 
-        monitor = new RemoteRunMonitor(remoteCCSURL, remoteCCSLogin, remoteCCSPassword, (Runnable) submitter);
+        monitor = new RemoteRunMonitor(remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter);
 
-        monitor.startListening();
+        boolean monitorStarted = monitor.startListening();
+        
+        return monitorStarted;
     }
     
     /**

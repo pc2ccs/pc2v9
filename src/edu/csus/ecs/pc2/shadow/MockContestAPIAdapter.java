@@ -78,17 +78,72 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
                "   \"finalized\": null,\r\n" + 
                "   \"end_of_updates\": null\r\n" + 
                " }";
-       String retStr = "["
-               + judgementTypes + ","
-               + languages + ","
-               + problems + ","
-               + groups + ","
-               + organizations + ","
-               + teams + ","
-               + contestState
-               + "]";
+       
+       String retStr = getJSONConfigurationString(judgementTypes,languages,problems,groups,organizations,teams,contestState);
+       
         return retStr;
     }
+
+
+    @Override
+    public InputStream getRemoteContestEventFeed() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    /** Returns a JSON string defining an array whose elements are made up of the specified CLICS Contest API endpoint values.
+     * 
+     * For example, the element in the array corresponding to the received value "problems" is a JSON string with the key "problems"
+     * and a value defined by the received parameter "problems".
+     * 
+     * @param judgementTypes
+     * @param languages
+     * @param problems
+     * @param groups
+     * @param organizations
+     * @param teams
+     * @param contestState
+     * @return
+     */
+    private String getJSONConfigurationString(String judgementTypes, String languages, String problems, String groups, String organizations, String teams, String contestState) {
+
+        String retStr = "[";
+        retStr += getArrayElement("judgementTypes",judgementTypes);
+        retStr += ",\r\n";
+        retStr += getArrayElement("languages",languages);
+        retStr += ",\r\n";
+        retStr += getArrayElement("problems",problems);
+        retStr += ",\r\n";
+        retStr += getArrayElement("groups",groups);
+        retStr += ",\r\n";
+        retStr += getArrayElement("organizations",organizations);
+        retStr += ",\r\n";
+        retStr += getArrayElement("teams",teams);
+        retStr += ",\r\n";
+        retStr += getArrayElement("contestState",contestState);
+        retStr += "]";
+        
+        return retStr;
+    }
+    
+    /**
+     * Returns a JSON array element (surrounded by square brackets) consisting of the specified keyword
+     * and with a value defined by the received value parameter.
+     * 
+     * @param retStr the String to which a JSON array element is to be added
+     * @param keyword the JSON keyword for the element to be added
+     * @param value a JSON string defining the value of the added element
+     */
+    private String getArrayElement(String keyword, String value) {
+
+        String newStr = "[";
+        newStr += "\"" + keyword + "\":" + "\"" + value + "\"";
+        newStr += "]";
+        
+        return newStr ;
+        
+    }
+
   
     public InputStream readRemoteCCSEventFeed(File file) {
         PacedFileInputStream efEventStreamReader;
@@ -112,4 +167,11 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
         // todo read or pass through from REST end point
 //        throw new NotImplementedException();
     }
+    
+    public static void main (String [] args) {
+        System.out.println ("MockContestAPIAdapter:");
+        System.out.println ("   Mock contest configuration:");
+        System.out.println (new MockContestAPIAdapter(null, null, null).getRemoteContestConfiguration());
+    }
+
 }

@@ -18,6 +18,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.ShadowInformation;
 import edu.csus.ecs.pc2.shadow.ShadowController;
 
 /**
@@ -59,15 +65,25 @@ public class ShadowControlPane extends JPanePlugin {
     private JLabel shadowingStatusValueLabel;
 
     private JTextField lastEventTextfield;
+    
+    private ContestInformation savedContestInformation;
 
     /**
-     * Constructs a new ShadowControlPane, <I>relying on the caller to also call method 
-     * {@link #setContestAndController(edu.csus.ecs.pc2.core.model.IInternalContest, edu.csus.ecs.pc2.core.IInternalController)}
-     * prior to doing any shadowing operations</i>.
+     * Constructs a new ShadowControlPane using the specified Contest and Controller.
+     * 
+     * This constructor invokes the superclass ({@link JPanePlugin}) method
+     * {@link JPanePlugin#setContestAndController(IInternalContest, IInternalController)} passing to it
+     * the received {@link IInternalContest} and {@link IInternalController}, making it unnecessary for
+     * the caller to explicitly invoke that method.
+     * 
+     * @param inContest the PC2 IInternalContest representing the local contest acting as the shadow
+     * @param inController the PC2 IInternalController for the local contest acting as the shadow
      * 
      */
-    public ShadowControlPane() {
+    public ShadowControlPane(IInternalContest inContest, IInternalController inController) {
         super();
+        super.setContestAndController(inContest, inController);
+        this.getContest().addContestInformationListener(new ContestInformationListenerImplementation());
         initialize();
     }
 
@@ -119,7 +135,8 @@ public class ShadowControlPane extends JPanePlugin {
             updateButton.setToolTipText("Save the updated Remote CCS settings");
             updateButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("Update pressed...");
+//                    System.out.println("Update pressed...");
+                    updateContestInformation();
                 }
             });
         }
@@ -169,9 +186,13 @@ public class ShadowControlPane extends JPanePlugin {
         
         if (shadowCheckboxEnabled && shadowDataComplete) {
             shadowController = new ShadowController(this.getContest(),this.getController()) ;
-            shadowController.start();
-            currentlyShadowing = true;
-            shadowingStatusValueLabel.setText("ON");
+            boolean started = shadowController.start();
+            if (started) {
+                currentlyShadowing = true;
+                shadowingStatusValueLabel.setText("ON");
+            } else {
+                showErrorMessage("Failed to start shadowing; check logs (bad URL?)", "Cannot start Shadowing");
+            }
 
         } else {
             showErrorMessage("Shadow Mode not enabled, or shadowing parameters not valid", "Cannot start Shadowing");
@@ -298,7 +319,7 @@ public class ShadowControlPane extends JPanePlugin {
             
             KeyListener keyListener = new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
-                    enableUpdateButton();
+                    enableButtons();
                 }
             };
             shadowSettingsPane.getRemoteCCSURLTextfield().addKeyListener(keyListener);
@@ -307,7 +328,7 @@ public class ShadowControlPane extends JPanePlugin {
 
             ActionListener actionListener = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    enableUpdateButton();
+                    enableButtons();
                 }
             };
             shadowSettingsPane.getShadowModeCheckbox().addActionListener(actionListener);
@@ -332,7 +353,7 @@ public class ShadowControlPane extends JPanePlugin {
             lastEventTextfield = new JTextField(10);
             lastEventTextfield.addKeyListener(new KeyAdapter() {
                 public void keyReleased(KeyEvent e) {
-                    enableUpdateButton();
+                    enableButtons();
                 }
             });
             lastEventIDPane.add(lastEventTextfield);
@@ -365,20 +386,59 @@ public class ShadowControlPane extends JPanePlugin {
         return shadowingOnOffStatusPane;
     }
 
-    private void enableUpdateButton() {
-        System.out.println ("EnableUpdateButton() called; needs to check for changes and save them");
-        
+    private void enableButtons() {
+//        System.out.println ("EnableButtons() called");
+
+        ShadowInformation newChoice = getFromFields();
+
+        if (getCurrentShadowInformation(getContest().getContestInformation()).isSameAs(newChoice)) {
+            getUpdateButton().setEnabled(false);
+            getStartButton().setEnabled(!currentlyShadowing);
+            getStopButton().setEnabled(currentlyShadowing);
+            
+        } else {
+            getUpdateButton().setEnabled(true);
+            getStartButton().setEnabled(false);
+            getStopButton().setEnabled(false);
+        }
+
     }
 
 
     /**
-     * Updates the state of the web server status label and Start/Stop buttons to correspond to the state of the Jetty Server.
+     * @param contestInformation
+     * @return
+     */
+    private ShadowInformation getCurrentShadowInformation(ContestInformation contestInformation) {
+        
+        ShadowInformation newShadowInfo = new ShadowInformation();
+        
+        newShadowInfo.setShadowModeEnabled(contestInformation.isShadowMode());
+        newShadowInfo.setRemoteCCSURL(contestInformation.getPrimaryCCS_URL());
+        newShadowInfo.setRemoteCCSLogin(contestInformation.getPrimaryCCS_user_login());
+        newShadowInfo.setRemoteCCSPassword(contestInformation.getPrimaryCCS_user_pw());
+        newShadowInfo.setLastEventID(contestInformation.getLastShadowEventID());
+        return newShadowInfo;
+    }
+
+    /**
+     * Updates the GUI to correspond to the current state.
      */
     private void updateGUI() {
 
+        ContestInformation contestInformation = getContest().getContestInformation();
+
+//        System.out.println ("UpdateGUI(): got the following shadow info:");
+//        System.out.println ("   Shadow Enabled: " + contestInformation.isShadowMode() 
+//                          + "\n              URL: " + contestInformation.getPrimaryCCS_URL()
+//                          + "\n            login: " + contestInformation.getPrimaryCCS_user_login()
+//                          + "\n           passwd: " + contestInformation.getPrimaryCCS_user_pw()
+//                          + "\n        lastEvent: " + contestInformation.getLastShadowEventID() );
+//        
 
         getStartButton().setEnabled(!currentlyShadowing);
         getStopButton().setEnabled(currentlyShadowing);
+        getUpdateButton().setEnabled(false);
 
         if (currentlyShadowing) {
             shadowingStatusValueLabel.setText("ON");
@@ -386,16 +446,106 @@ public class ShadowControlPane extends JPanePlugin {
             shadowingStatusValueLabel.setText("OFF");
         }
         
-        updateShadowSettingsPaneSettings(currentlyShadowing);
+        updateShadowSettingsPane(currentlyShadowing);
+        lastEventTextfield.setText(contestInformation.getLastShadowEventID());
     }
 
-    private void updateShadowSettingsPaneSettings(boolean currentlyShadowing) {
+    private void updateShadowSettingsPane(boolean currentlyShadowing) {
+        
+        ContestInformation contestInformation = getContest().getContestInformation();
+
+        getShadowSettingsPane().getRemoteCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL());
+        getShadowSettingsPane().getRemoteCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
+        getShadowSettingsPane().getRemoteCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
+
         // if Shadowing is currently on, do not allow these settings to be changed
-        shadowSettingsPane.getRemoteCCSURLTextfield().setEditable(!currentlyShadowing);
-        shadowSettingsPane.getRemoteCCSLoginTextfield().setEditable(!currentlyShadowing);
-        shadowSettingsPane.getRemoteCCSPasswdTextfield().setEditable(!currentlyShadowing);
+        getShadowSettingsPane().getRemoteCCSURLTextfield().setEditable(!currentlyShadowing);
+        getShadowSettingsPane().getRemoteCCSLoginTextfield().setEditable(!currentlyShadowing);
+        getShadowSettingsPane().getRemoteCCSPasswdTextfield().setEditable(!currentlyShadowing);
         lastEventTextfield.setEditable(!currentlyShadowing);
     }
 
+    /**
+     * Returns a new ShadowInformation object containing data fetched from this pane's fields.
+     * @return a ShadowInformation object
+     */
+    protected ShadowInformation getFromFields() {
+        
+        ShadowInformation newShadowInformation = new ShadowInformation();                
+        
+        //fill in Shadow Mode information from this pane
+        newShadowInformation.setShadowModeEnabled(getShadowSettingsPane().getShadowModeCheckbox().isSelected());
+        newShadowInformation.setRemoteCCSURL(getShadowSettingsPane().getRemoteCCSURLTextfield().getText());
+        newShadowInformation.setRemoteCCSLogin(getShadowSettingsPane().getRemoteCCSLoginTextfield().getText());
+        newShadowInformation.setRemoteCCSPassword(getShadowSettingsPane().getRemoteCCSPasswdTextfield().getText());
+        newShadowInformation.setLastEventID(lastEventTextfield.getText());
+   
+        return (newShadowInformation);
+    }
+
+    /**
+     * Updates the current {@link ContestInformation} on the server with the current shadow settings
+     * in this GUI pane.
+     * 
+     */
+    private void updateContestInformation() {
+        ShadowInformation shadowInfo = getFromFields();
+        
+//        System.out.println ("UpdateContestInformation(): got the following shadow info:");
+//        System.out.println ("   Shadow Enabled: " + shadowInfo.isShadowModeEnabled()
+//                          + "\n              URL: " + shadowInfo.getRemoteCCSURL()
+//                          + "\n            login: " + shadowInfo.getRemoteCCSLogin()
+//                          + "\n           passwd: " + shadowInfo.getRemoteCCSPassword()
+//                          + "\n        lastEvent: " + shadowInfo.getLastEventID());
+//        
+//        System.out.println ("UpdateContestInformation(): savedContestInformation contains the following shadow info:");
+//        System.out.println ("   Shadow Enabled: " + savedContestInformation.isShadowMode()
+//                          + "\n              URL: " + shadowInfo.getRemoteCCSURL()
+//                          + "\n            login: " + shadowInfo.getRemoteCCSLogin()
+//                          + "\n           passwd: " + shadowInfo.getRemoteCCSPassword()
+//                          + "\n        lastEvent: " + shadowInfo.getLastEventID());
+        
+        ContestInformation contestInfo = getContest().getContestInformation();
+        
+        contestInfo.setShadowMode(shadowInfo.isShadowModeEnabled());
+        contestInfo.setPrimaryCCS_URL(shadowInfo.getRemoteCCSURL());
+        contestInfo.setPrimaryCCS_user_login(shadowInfo.getRemoteCCSLogin());
+        contestInfo.setPrimaryCCS_user_pw(shadowInfo.getRemoteCCSPassword());
+        contestInfo.setLastShadowEventID(shadowInfo.getLastEventID());
+        
+        getController().updateContestInformation(contestInfo);
+    }
+
+    class ContestInformationListenerImplementation implements IContestInformationListener {
+
+
+
+        public void contestInformationAdded(ContestInformationEvent event) {
+//            System.out.println ("contestInformationAdded listener: event = " + event);
+            savedContestInformation = event.getContestInformation();
+            updateGUI();
+        }
+
+        public void contestInformationChanged(ContestInformationEvent event) {
+//            System.out.println ("contestInformationChanged listener: event = " + event);
+           savedContestInformation = event.getContestInformation();
+            updateGUI();
+        }
+
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            // TODO Auto-generated method stub
+        }
+
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+//            System.out.println ("contestInformationRefreshAll listener: event = " + contestInformationEvent);
+            savedContestInformation = contestInformationEvent.getContestInformation();
+            updateGUI();
+        }
+        
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            // Not used
+        }
+
+    }
 
 }
