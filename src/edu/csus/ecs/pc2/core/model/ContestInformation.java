@@ -58,6 +58,7 @@ public class ContestInformation implements Serializable{
     private String primaryCCS_URL = null;
     private String primaryCCS_user_login = "";
     private String primaryCCS_user_pw = "";
+    private String lastShadowEventID = "";
     
     /**
      * Max output file size.
@@ -476,6 +477,28 @@ public class ContestInformation implements Serializable{
     public void setPrimaryCCS_user_pw(String primaryCCS_user_pw) {
         this.primaryCCS_user_pw = primaryCCS_user_pw;
     }
+
+    /**
+     * Returns a String containing the "CLICS ID" for the last event retrieved from
+     * a remote CCS being shadowed (only useful when operating this instance of PC2 as a
+     * "Shadow CCS").
+     * @return a String containing a remote event id
+     */
+    public String getLastShadowEventID() {
+        return lastShadowEventID;
+    }
+
+    /**
+     * Sets the value of the String containing the "CLICS since_id" for the last event retrieved from
+     * a remote CCS being shadowed; that is, the id from which reconnections to the remote CCS event
+     * feed should proceed (only useful when operating this instance of PC2 as a
+     * "Shadow CCS").
+     * @param lastShadowEventID a String identifying the last event from the remote CCS
+     */
+     public void setLastShadowEventID(String lastShadowEventID) {
+        this.lastShadowEventID = lastShadowEventID;
+    }
+
 
     /**
      * Get the Run Submission Interface (RSI) command.
