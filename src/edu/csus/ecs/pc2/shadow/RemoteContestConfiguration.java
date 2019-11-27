@@ -1,12 +1,25 @@
+// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 /**
- * This is the "data" from the whiteboard - a representation of the CCS REST contest data.
+ * This class encapsulates the configuration obtained from a remote CLICS Contest API.
  * 
- * This class contains a representation of the configuration of a remote contest.
+ * It is used to hold a representation of a remote contest configuration during Shadow CCS operations.
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class RemoteContestConfiguration {
-
+    
+    String data;
+    
+    RemoteContestConfiguration(String data){
+        this.data = data;
+    }
+    
+    String getContestModel() {
+        return data;
+    }
+    
+ 
+    
 }

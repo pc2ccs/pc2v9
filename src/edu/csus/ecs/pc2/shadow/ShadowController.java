@@ -1,12 +1,15 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
+import java.util.List;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * This class is essentially a <A href="https://en.wikipedia.org/wiki/Facade_pattern"><I>facade</i></a> for the
@@ -103,17 +106,40 @@ public class ShadowController {
             return false;
         }
         
+        //get an adapter which connects to the remote Contest API
         IRemoteContestAPIAdapter remoteContestAPIAdapter = new MockContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
         
-        //TODO: figure out the relationship between "RemoteContest" and the data returned by "getRemoteContestConfiguration()"
-//        RemoteContest remoteContest = new RemoteContest(ShadowContestComparer.getRemoteContest(remoteURL, login, password));
-        RemoteContest remoteContest = new RemoteContest(remoteContestAPIAdapter.getRemoteContestConfiguration());
+        //get a string representation of the remote contest from the adapter
+        String remoteConfigString  = remoteContestAPIAdapter.getRemoteContestConfiguration();
         
-        //TODO: figure out how this comparison should work 
-//        ShadowContestComparator comp = new ShadowContestComparator(remoteContest.getContestModel());
-//        if (!comp.isSameAs(controller.getContest())) {
-//            throw new ContestsDoNotMatchException();
-//        }
+        //construct a remote contest configuration object from the string obtained from the remote adapter
+        RemoteContestConfiguration remoteContestConfig = new RemoteContestConfiguration(remoteConfigString);
+        
+        //construct a comparator for comparing the remote contest with the local contest
+        ShadowContestComparator comp = new ShadowContestComparator(remoteContestConfig);
+        
+        //check if the local contest has the same config as the remote contest (the one being shadowed)
+        if (!comp.isSameAs(localContest)) {
+            
+            //get the configuration differences
+            List<String> diffs = comp.diff(localContest);
+            
+            //log the differences
+            Log log = localController.getLog();
+            log.log(Level.WARNING, "Local contest configuration does not match configuration of remote CCS; cannot proceed with shadowing");
+            logDiffs(log,diffs);
+          
+            //TODO: find a way to pass back to the invoker more than just "start() failed". For example, it would be nice for the invoker
+            // to know that the REASON start() returned false is specifically that that configurations didn't match (note that there are
+            // places above that also return false and have nothing to do with the configuration).  It would also be nice for the invoker
+            // to be able to obtain a list of the differences which caused the configuration comparison to fail.
+            // Perhaps there needs to be a "getReason()" method in this class, along with a "getConfigurationDifferences()" method?
+            
+            // Or perhaps "throw new ContestsDoNotMatchException" instead of returning false?
+            
+            return false;
+            
+        }
         
         //if we get here we know the remote contest configuration matches the local contest configuration
         
@@ -126,6 +152,16 @@ public class ShadowController {
         return monitorStarted;
     }
     
+    /**
+     * This method writes the given list of differences between the local and remote contest configurations into the specified log.
+     * 
+     * @param diffs a List<String> giving the configuration differences
+     */
+    private void logDiffs(Log log, List<String> diffs) {
+        // TODO Auto-generated method stub
+        throw new NotImplementedException();
+    }
+
     /**
      * This method stops Shadow Mode operations.  
      */
