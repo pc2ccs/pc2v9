@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.shadow;
 
 import java.util.Map;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This class encapsulates the configuration obtained from a remote CLICS Contest API.
@@ -49,12 +49,18 @@ public class RemoteContestConfiguration {
      * 
      * @return a Map of the key:value pairs in the remote contest configuration string
      */
-    public Map<String,String> getRemoteContestConfiguration() {
+    public Map<String,String> getRemoteContestConfigurationMap() {
         
         if (remoteJSONConfiguation==null || remoteJSONConfiguation.trim().equals("")) {
             return null;
         }
         
-        throw new NotImplementedException();
+        
+        ObjectMapper mapper = new ObjectMapper();
+        
+        //TODO: use the mapper to pull problems, languages, teams, etc. from the remoteJSONConfiguration string
+        // and return them in a map.
+        
+        return null;
     }
 }
