@@ -143,10 +143,13 @@ public class ShadowController {
         
         //if we get here we know the remote contest configuration matches the local contest configuration
         
+        //construct a RunSubmitter that can be used to submit runs (received from the remote contest) to the local PC2 contest
         RemoteRunSubmitter submitter = new RemoteRunSubmitter(localController);
 
+        //construct a RunMonitor for keeping track of the remote CCS
         monitor = new RemoteRunMonitor(remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter);
 
+        //start the RunMonitor listening for runs from the remote CCS
         boolean monitorStarted = monitor.startListening();
         
         return monitorStarted;
