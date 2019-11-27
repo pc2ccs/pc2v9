@@ -191,7 +191,7 @@ public class ShadowControlPane extends JPanePlugin {
                 currentlyShadowing = true;
                 shadowingStatusValueLabel.setText("ON");
             } else {
-                showErrorMessage("Failed to start shadowing; check logs (bad URL?)", "Cannot start Shadowing");
+                showErrorMessage("Failed to start shadowing; check logs (bad URL or credentials? mismatched configs?)", "Cannot start Shadowing");
             }
 
         } else {
