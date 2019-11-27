@@ -1,6 +1,10 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
+import java.util.Map;
+
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 /**
  * This class encapsulates the configuration obtained from a remote CLICS Contest API.
  * 
@@ -10,16 +14,47 @@ package edu.csus.ecs.pc2.shadow;
  */
 public class RemoteContestConfiguration {
     
-    String data;
+    private String remoteJSONConfiguation;
     
-    RemoteContestConfiguration(String data){
-        this.data = data;
+    /**
+     * Constructs a RemoteContestConfiguration characterized by the given input data string.
+     * 
+     * The input data string is assumed to be a JSON representation of the configuration of
+     * a remote contest, such as that obtained by invoking an implementation of
+     * {@link IRemoteContestAPIAdapter#getRemoteContestConfiguration()}.
+     * 
+     * The class stores the JSON remote configuration representation, and supports obtaining
+     * a 
+     * 
+     * @param jsonConfigruationString a JSON String giving the contest configuration obtained from a remote CCS 
+     */
+    public RemoteContestConfiguration(String jsonConfigruationString){
+        this.remoteJSONConfiguation = jsonConfigruationString;
     }
     
-    String getContestModel() {
-        return data;
+    /**
+     * Returns the JSON string giving the remote contest configuration.
+     * The returned string is exactly the confiuration string which was used to construct this
+     * RemoteContestConfiguration object.
+     * 
+     * @return a JSON string giving the remote contest configuration
+     */
+    public String getRemoteContestConfigurationString() {
+        return remoteJSONConfiguation;
     }
     
- 
-    
+    /**
+     * Returns a Map<String><String> containing the keywords and corresponding values
+     * found in the JSON string which was used to construct this RemoteContestConfiguration.
+     * 
+     * @return a Map of the key:value pairs in the remote contest configuration string
+     */
+    public Map<String,String> getRemoteContestConfiguration() {
+        
+        if (remoteJSONConfiguation==null || remoteJSONConfiguation.trim().equals("")) {
+            return null;
+        }
+        
+        throw new NotImplementedException();
+    }
 }
