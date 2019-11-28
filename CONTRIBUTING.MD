@@ -102,12 +102,16 @@ issues labeled `beginner` and `help-wanted`.
 * `Beginner` issues should only require a few lines of code, and a test or two.
 * `Help-wanted` issues are items which are likely to be a bit more involved than `beginner` issues.
 
-Regardless of what issue you choose to work on, the overall process is the same:
+You can also learn a lot about how to contribute to PC2 by spending some time looking through the [PC2V9 Wiki](https://github.com/pc2ccs/pc2v9/wiki).
+
+Regardless of what issue you choose to work on, the overall process is the same.  To understand the process, you should
+start by reading about the [PC2 Development Environment](https://github.com/pc2ccs/pc2v9/wiki/Development-Environment) and then take a look at the [PC2 Development Flow](https://github.com/pc2ccs/pc2v9/wiki/Development-Flow) details. The process can be summarized as:
 
 * Create your own [fork](https://help.github.com/en/articles/fork-a-repo) of the pc2v9 repository.
-* Optionally, clone your fork onto your own machine (it's usually easier to work on a clone on your own machine,
+* [Sync your fork](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/syncing-a-fork) with the upstream (PC2V9) repository.
+* Clone your fork onto your own machine (it's usually easier to work on a clone on your own machine,
     using your own IDE/Tools).
-* Create a Git Branch (called a _topic branch_) for the work, following the _Branch Naming Guidelines_ in the PC2v9 [Development Environment](https://github.com/pc2ccs/pc2v9/wiki/Development-Environment) page.
+* Create a Git Branch (called a _topic branch_ or _feature branch_) for the work, following the _Branch Naming Guidelines_ in the PC2v9 [Development Environment](https://github.com/pc2ccs/pc2v9/wiki/Development-Environment) page.
 * Develop the code to implement your bug fix or feature.
 * Create automated tests (e.g. Java JUnits) to demonstrate that your code works as intended.
 * If the branch work was done on a clone of your fork, push the branch code from your local clone to your PC2v9 fork on GitHub.
@@ -135,5 +139,4 @@ To submit a PR, follow the steps in the GitHub [Creating a Pull Request](https:/
     enter "Fixes #1234").
   * Environment (describe the environment in which your Pull Request code was created and tested).
 * Click the **Create pull request** button.
-
 
