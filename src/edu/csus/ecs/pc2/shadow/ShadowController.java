@@ -1,12 +1,15 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
+import java.util.List;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * This class is essentially a <A href="https://en.wikipedia.org/wiki/Facade_pattern"><I>facade</i></a> for the
@@ -14,9 +17,10 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * monitor the remote CCS by obtaining runs from it and computing standings in parallel for purposes of verification
  * of the remote system.
  * 
- * The class is instantiated with an {@link IInternalController} (a PC2 Controller for a local instance of a contest).
+ * The class is instantiated with an {@link IInternalController} (a PC2 Controller for a local instance of a contest)
+ * along with an {@link IInternalContest} (a PC2 Contest model).
  * It obtains, from the local PC2 Server, information on the remote system to be shadowed, and uses classes behind (comprising) 
- * the facade to obtain team submissions from the remote sytem.
+ * the facade to obtain team submissions from the remote system.
  * It uses the provided PC2 controller to perform local operations as if teams on the remote CCS were submitting to the local PC2
  * CCS.
  * 
@@ -39,10 +43,18 @@ public class ShadowController {
     private String remoteCCSPassword;
 
     private RemoteRunMonitor monitor;
+    
+    private ShadowContestComparator comparator; 
+
+    
+    public enum SHADOW_CONTROLLER_STATUS {SC_NEVER_STARTED, SC_STARTING, SC_RUNNING, SC_STOPPING, SC_STOPPED, 
+                                            SC_CONNECTION_FAILED, SC_CONTEST_CONFIG_MISMATCH, SC_MONITOR_STARTUP_FAILED};
+    
+    private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
 
     /**
      * Constructs a new ShadowController for the remote CCS specified by the data in the 
-     * specified {@link IInternalContest}. 
+     * specified {@link IInternalContest} and {@link IInternalContest}. 
      * 
      * @param localContest a PC2 Contest to be used by the Shadow Controller
      * @param localController a PC2 Controller to be used by the Shadow Controller
@@ -73,6 +85,7 @@ public class ShadowController {
         this.remoteCCSURLString = remoteURL;
         this.remoteCCSLogin = remoteCCSLogin;
         this.remoteCCSPassword = remoteCCSPassword;
+        this.setStatus(SHADOW_CONTROLLER_STATUS.SC_NEVER_STARTED);
     }
 
     /**
@@ -93,6 +106,8 @@ public class ShadowController {
         System.out.println ("ShadowController: starting shadowing for URL '" + remoteCCSURLString 
                             + "' using login '" + remoteCCSLogin + "' and password '" + remoteCCSPassword + "'");
         
+        setStatus(SHADOW_CONTROLLER_STATUS.SC_STARTING);
+        
         //verify that the current "URL string" is a valid URL
         URL remoteCCSURL = null;
         try {
@@ -100,36 +115,90 @@ public class ShadowController {
         } catch (MalformedURLException e) {
             localController.getLog().log(Level.WARNING, "Malformed Remote CCS URL: \"" + remoteCCSURLString + "\" ", e);
             e.printStackTrace();
+            controllerStatus = SHADOW_CONTROLLER_STATUS.SC_CONNECTION_FAILED ;
             return false;
         }
         
+        //get an adapter which connects to the remote Contest API
         IRemoteContestAPIAdapter remoteContestAPIAdapter = new MockContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
         
-        //TODO: figure out the relationship between "RemoteContest" and the data returned by "getRemoteContestConfiguration()"
-//        RemoteContest remoteContest = new RemoteContest(ShadowContestComparer.getRemoteContest(remoteURL, login, password));
-        RemoteContest remoteContest = new RemoteContest(remoteContestAPIAdapter.getRemoteContestConfiguration());
+        //get a remote contest configuration from the adapter
+        RemoteContestConfiguration remoteContestConfig  = remoteContestAPIAdapter.getRemoteContestConfiguration();
+                
+        //construct a comparator for comparing the remote contest with the local contest
+        comparator = new ShadowContestComparator(remoteContestConfig);
         
-        //TODO: figure out how this comparison should work 
-//        ShadowContestComparator comp = new ShadowContestComparator(remoteContest.getContestModel());
-//        if (!comp.isSameAs(controller.getContest())) {
-//            throw new ContestsDoNotMatchException();
-//        }
+        //check if the local contest has the same config as the remote contest (the one being shadowed)
+        if (!comparator.isSameAs(localContest)) {
+            
+            //get the configuration differences
+            List<String> diffs = comparator.diff(localContest);
+            
+            //log the differences
+            Log log = localController.getLog();
+            log.log(Level.WARNING, "Local contest configuration does not match configuration of remote CCS; cannot proceed with shadowing");
+            logDiffs(log,diffs);
+            
+            setStatus(SHADOW_CONTROLLER_STATUS.SC_CONTEST_CONFIG_MISMATCH) ;  
+          
+            //TODO: It would  be nice for the invoker
+            // to be able to obtain a list of the differences which caused the configuration comparison to fail.
+            // Perhaps there needs to be a "getReason()" method in this class, along with a "getConfigurationDifferences()" method?
+            
+            // Or perhaps "throw new ContestsDoNotMatchException" instead of returning false?
+            
+            return false;
+            
+        }
         
         //if we get here we know the remote contest configuration matches the local contest configuration
         
+        //construct a RunSubmitter that can be used to submit runs (received from the remote contest) to the local PC2 contest
         RemoteRunSubmitter submitter = new RemoteRunSubmitter(localController);
 
+        //construct a RunMonitor for keeping track of the remote CCS
         monitor = new RemoteRunMonitor(remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter);
 
+        //start the RunMonitor listening for runs from the remote CCS
         boolean monitorStarted = monitor.startListening();
         
-        return monitorStarted;
+        if (monitorStarted) {
+            setStatus(SHADOW_CONTROLLER_STATUS.SC_RUNNING);
+            return true;
+        } else {
+            setStatus(SHADOW_CONTROLLER_STATUS.SC_MONITOR_STARTUP_FAILED);
+            return false;
+        }
     }
     
+    /**
+     * Returns a list of differences between the currrently-configured remote contest
+     * and the configuration of the local PC2 contest.
+     * 
+     * @return a List<String> of contest configuration differences
+     */
+    public List<String> getDiffs() {
+        
+        return (comparator.diff(localContest)) ;
+    }
+    
+    /**
+     * This method writes the given list of differences between the local and remote contest configurations 
+     * into the specified log.
+     * 
+     * @param diffs a List<String> giving the configuration differences
+     */
+    private void logDiffs(Log log, List<String> diffs) {
+        // TODO Auto-generated method stub
+        throw new NotImplementedException();
+    }
+
     /**
      * This method stops Shadow Mode operations.  
      */
     public void stop() {
+        
+        setStatus(SHADOW_CONTROLLER_STATUS.SC_STOPPING) ;
         
         if (monitor!=null) {
             
@@ -138,5 +207,25 @@ public class ShadowController {
             //garbage-collect the monitor
             monitor = null;        
         }
+        
+        setStatus(SHADOW_CONTROLLER_STATUS.SC_STOPPED) ;
+    }
+
+    /**
+     * Returns the current status of this ShadowController.
+     * 
+     * @return a SHADOW_CONTROLLER_STATUS enum element giving the controller status
+     */
+    public SHADOW_CONTROLLER_STATUS getStatus() {
+        return controllerStatus;
+    }
+
+    /**
+     * Updates the ShadowController status.
+     * 
+     * @param controllerStatus the controllerStatus to set
+     */
+    protected void setStatus(SHADOW_CONTROLLER_STATUS controllerStatus) {
+        this.controllerStatus = controllerStatus;
     }
 }

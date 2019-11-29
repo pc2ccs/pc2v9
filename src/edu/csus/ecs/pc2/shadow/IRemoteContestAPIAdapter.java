@@ -14,6 +14,9 @@ package edu.csus.ecs.pc2.shadow;
  */
 interface IRemoteContestAPIAdapter {
     
+    public enum REMOTE_CONFIGURATION_ELEMENT {CONFIG_PROBLEMS, CONFIG_LANGUAGES, CONFIG_JUDGEMENT_TYPES, CONFIG_GROUPS,
+                                        CONFIG_ORGANIZATIONS, CONFIG_TEAMS, CONFIG_CONTEST_STATE} 
+
     /**
      * Returns a remote contest configuration object that contains:
      * <pre>
