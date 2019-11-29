@@ -47,9 +47,11 @@ public class ShadowController {
     private ShadowContestComparator comparator; 
 
     
-    public enum SHADOW_CONTROLLER_STATUS {SC_NOT_STARTED, SC_STARTING, SC_RUNNING, SC_CONNECTION_FAILED, SC_CONTEST_CONFIG_MISMATCH};
+    public enum SHADOW_CONTROLLER_STATUS {SC_NEVER_STARTED, SC_STARTING, SC_RUNNING, SC_STOPPING, SC_STOPPED, 
+                                            SC_CONNECTION_FAILED, SC_CONTEST_CONFIG_MISMATCH, SC_MONITOR_STARTUP_FAILED};
     
-    private SHADOW_CONTROLLER_STATUS controllerStatus = SHADOW_CONTROLLER_STATUS.SC_NOT_STARTED ;
+    private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
+    private RemoteContestConfiguration remoteContestConfig;
 
     /**
      * Constructs a new ShadowController for the remote CCS specified by the data in the 
@@ -84,6 +86,7 @@ public class ShadowController {
         this.remoteCCSURLString = remoteURL;
         this.remoteCCSLogin = remoteCCSLogin;
         this.remoteCCSPassword = remoteCCSPassword;
+        this.setStatus(SHADOW_CONTROLLER_STATUS.SC_NEVER_STARTED);
     }
 
     /**
@@ -104,7 +107,7 @@ public class ShadowController {
         System.out.println ("ShadowController: starting shadowing for URL '" + remoteCCSURLString 
                             + "' using login '" + remoteCCSLogin + "' and password '" + remoteCCSPassword + "'");
         
-        controllerStatus = SHADOW_CONTROLLER_STATUS.SC_STARTING;
+        setStatus(SHADOW_CONTROLLER_STATUS.SC_STARTING);
         
         //verify that the current "URL string" is a valid URL
         URL remoteCCSURL = null;
@@ -124,10 +127,10 @@ public class ShadowController {
         String remoteConfigString  = remoteContestAPIAdapter.getRemoteContestConfiguration();
         
         //construct a remote contest configuration object from the string obtained from the remote adapter
-        RemoteContestConfiguration remoteContestConfig = new RemoteContestConfiguration(remoteConfigString);
+        remoteContestConfig = new RemoteContestConfiguration(remoteConfigString);
         
         //construct a comparator for comparing the remote contest with the local contest
-        comparator = getComparator(remoteContestConfig);
+        comparator = new ShadowContestComparator(remoteContestConfig);
         
         //check if the local contest has the same config as the remote contest (the one being shadowed)
         if (!comparator.isSameAs(localContest)) {
@@ -140,7 +143,7 @@ public class ShadowController {
             log.log(Level.WARNING, "Local contest configuration does not match configuration of remote CCS; cannot proceed with shadowing");
             logDiffs(log,diffs);
             
-            controllerStatus = SHADOW_CONTROLLER_STATUS.SC_CONTEST_CONFIG_MISMATCH ;  
+            setStatus(SHADOW_CONTROLLER_STATUS.SC_CONTEST_CONFIG_MISMATCH) ;  
           
             //TODO: It would  be nice for the invoker
             // to be able to obtain a list of the differences which caused the configuration comparison to fail.
@@ -163,27 +166,29 @@ public class ShadowController {
         //start the RunMonitor listening for runs from the remote CCS
         boolean monitorStarted = monitor.startListening();
         
-        return monitorStarted;
+        if (monitorStarted) {
+            setStatus(SHADOW_CONTROLLER_STATUS.SC_RUNNING);
+            return true;
+        } else {
+            setStatus(SHADOW_CONTROLLER_STATUS.SC_MONITOR_STARTUP_FAILED);
+            return false;
+        }
     }
     
     /**
-     * Returns a singleton instance of a ShadowContestComparator configured with the specified 
-     * {@link RemoteContestConfiguration}.
+     * Returns a list of differences between the currrently-configured remote contest
+     * and the configuration of the local PC2 contest.
      * 
-     * @param remoteContestConfig the remote contest used by the comparator
-     * 
-     * @return a ShadowContestComparator configured with the specified remote contest configuration
+     * @return a List<String> of contest configuration differences
      */
-    private ShadowContestComparator getComparator(RemoteContestConfiguration remoteContestConfig) {
-        if (comparator==null) {
-            comparator =  new ShadowContestComparator(remoteContestConfig);
-        }
+    public List<String> getDiffs() {
         
-        return comparator;
+        return (comparator.diff(localContest)) ;
     }
-
+    
     /**
-     * This method writes the given list of differences between the local and remote contest configurations into the specified log.
+     * This method writes the given list of differences between the local and remote contest configurations 
+     * into the specified log.
      * 
      * @param diffs a List<String> giving the configuration differences
      */
@@ -197,6 +202,8 @@ public class ShadowController {
      */
     public void stop() {
         
+        setStatus(SHADOW_CONTROLLER_STATUS.SC_STOPPING) ;
+        
         if (monitor!=null) {
             
             monitor.stopListening();
@@ -204,12 +211,16 @@ public class ShadowController {
             //garbage-collect the monitor
             monitor = null;        
         }
+        
+        setStatus(SHADOW_CONTROLLER_STATUS.SC_STOPPED) ;
     }
 
     /**
-     * @return the controllerStatus
+     * Returns the current status of this ShadowController.
+     * 
+     * @return a SHADOW_CONTROLLER_STATUS enum element giving the controller status
      */
-    public SHADOW_CONTROLLER_STATUS getControllerStatus() {
+    public SHADOW_CONTROLLER_STATUS getStatus() {
         return controllerStatus;
     }
 
@@ -218,7 +229,7 @@ public class ShadowController {
      * 
      * @param controllerStatus the controllerStatus to set
      */
-    protected void setControllerStatus(SHADOW_CONTROLLER_STATUS controllerStatus) {
+    protected void setStatus(SHADOW_CONTROLLER_STATUS controllerStatus) {
         this.controllerStatus = controllerStatus;
     }
 }
