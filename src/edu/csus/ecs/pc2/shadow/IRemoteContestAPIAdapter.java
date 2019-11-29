@@ -14,10 +14,8 @@ package edu.csus.ecs.pc2.shadow;
  */
 interface IRemoteContestAPIAdapter {
     
-    //TODO: define required interface methods here
-    
     /**
-     * Returns a JSON string containing the elements of the remote contest configuration, including:
+     * Returns a remote contest configuration object that contains:
      * <pre>
      *   - judgement types
      *   - languages
@@ -29,6 +27,15 @@ interface IRemoteContestAPIAdapter {
      * </pre>
      * @return
      */
-    public String getRemoteContestConfiguration();
+    public RemoteContestConfiguration getRemoteContestConfiguration();
+    
+    /**
+     * Test connection to remote CCS API.
+     * @return true if could connect, otherwise fale;
+     */
+    boolean testConnection();
+    
+    
+    String getRemoteJSON(String endpoint);
 
 }
