@@ -172,6 +172,12 @@ public class ExportYAML {
             contestWriter.println(IContestLoader.JUDGE_CONFIG_PATH_KEY +": "+judgeCDPBasePath);
         }
         
+        contestWriter.println(IContestLoader.SHADOW_MODE_KEY + ": " + (new Boolean(info.isShadowMode()).toString()));
+        contestWriter.println(IContestLoader.CCS_URL_KEY + ": " + (info.getPrimaryCCS_URL()));
+        contestWriter.println(IContestLoader.CCS_LOGIN_KEY + ": " + (info.getPrimaryCCS_user_login()));
+        contestWriter.println(IContestLoader.CCS_PASSWORD_KEY + ": " + (info.getPrimaryCCS_user_pw()));
+        contestWriter.println(IContestLoader.CCS_LAST_EVENT_ID_KEY + ": " + (info.getLastShadowEventID()));
+
         contestWriter.println();
 
         // TODO CCS write default clar
