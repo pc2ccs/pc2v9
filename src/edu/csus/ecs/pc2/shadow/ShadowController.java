@@ -17,9 +17,10 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  * monitor the remote CCS by obtaining runs from it and computing standings in parallel for purposes of verification
  * of the remote system.
  * 
- * The class is instantiated with an {@link IInternalController} (a PC2 Controller for a local instance of a contest).
+ * The class is instantiated with an {@link IInternalController} (a PC2 Controller for a local instance of a contest)
+ * along with an {@link IInternalContest} (a PC2 Contest model).
  * It obtains, from the local PC2 Server, information on the remote system to be shadowed, and uses classes behind (comprising) 
- * the facade to obtain team submissions from the remote sytem.
+ * the facade to obtain team submissions from the remote system.
  * It uses the provided PC2 controller to perform local operations as if teams on the remote CCS were submitting to the local PC2
  * CCS.
  * 
@@ -42,10 +43,17 @@ public class ShadowController {
     private String remoteCCSPassword;
 
     private RemoteRunMonitor monitor;
+    
+    private ShadowContestComparator comparator; 
+
+    
+    public enum SHADOW_CONTROLLER_STATUS {SC_NOT_STARTED, SC_STARTING, SC_RUNNING, SC_CONNECTION_FAILED, SC_CONTEST_CONFIG_MISMATCH};
+    
+    private SHADOW_CONTROLLER_STATUS controllerStatus = SHADOW_CONTROLLER_STATUS.SC_NOT_STARTED ;
 
     /**
      * Constructs a new ShadowController for the remote CCS specified by the data in the 
-     * specified {@link IInternalContest}. 
+     * specified {@link IInternalContest} and {@link IInternalContest}. 
      * 
      * @param localContest a PC2 Contest to be used by the Shadow Controller
      * @param localController a PC2 Controller to be used by the Shadow Controller
@@ -96,6 +104,8 @@ public class ShadowController {
         System.out.println ("ShadowController: starting shadowing for URL '" + remoteCCSURLString 
                             + "' using login '" + remoteCCSLogin + "' and password '" + remoteCCSPassword + "'");
         
+        controllerStatus = SHADOW_CONTROLLER_STATUS.SC_STARTING;
+        
         //verify that the current "URL string" is a valid URL
         URL remoteCCSURL = null;
         try {
@@ -103,6 +113,7 @@ public class ShadowController {
         } catch (MalformedURLException e) {
             localController.getLog().log(Level.WARNING, "Malformed Remote CCS URL: \"" + remoteCCSURLString + "\" ", e);
             e.printStackTrace();
+            controllerStatus = SHADOW_CONTROLLER_STATUS.SC_CONNECTION_FAILED ;
             return false;
         }
         
@@ -116,22 +127,22 @@ public class ShadowController {
         RemoteContestConfiguration remoteContestConfig = new RemoteContestConfiguration(remoteConfigString);
         
         //construct a comparator for comparing the remote contest with the local contest
-        ShadowContestComparator comp = new ShadowContestComparator(remoteContestConfig);
+        comparator = getComparator(remoteContestConfig);
         
         //check if the local contest has the same config as the remote contest (the one being shadowed)
-        if (!comp.isSameAs(localContest)) {
+        if (!comparator.isSameAs(localContest)) {
             
             //get the configuration differences
-            List<String> diffs = comp.diff(localContest);
+            List<String> diffs = comparator.diff(localContest);
             
             //log the differences
             Log log = localController.getLog();
             log.log(Level.WARNING, "Local contest configuration does not match configuration of remote CCS; cannot proceed with shadowing");
             logDiffs(log,diffs);
+            
+            controllerStatus = SHADOW_CONTROLLER_STATUS.SC_CONTEST_CONFIG_MISMATCH ;  
           
-            //TODO: find a way to pass back to the invoker more than just "start() failed". For example, it would be nice for the invoker
-            // to know that the REASON start() returned false is specifically that that configurations didn't match (note that there are
-            // places above that also return false and have nothing to do with the configuration).  It would also be nice for the invoker
+            //TODO: It would  be nice for the invoker
             // to be able to obtain a list of the differences which caused the configuration comparison to fail.
             // Perhaps there needs to be a "getReason()" method in this class, along with a "getConfigurationDifferences()" method?
             
@@ -156,6 +167,22 @@ public class ShadowController {
     }
     
     /**
+     * Returns a singleton instance of a ShadowContestComparator configured with the specified 
+     * {@link RemoteContestConfiguration}.
+     * 
+     * @param remoteContestConfig the remote contest used by the comparator
+     * 
+     * @return a ShadowContestComparator configured with the specified remote contest configuration
+     */
+    private ShadowContestComparator getComparator(RemoteContestConfiguration remoteContestConfig) {
+        if (comparator==null) {
+            comparator =  new ShadowContestComparator(remoteContestConfig);
+        }
+        
+        return comparator;
+    }
+
+    /**
      * This method writes the given list of differences between the local and remote contest configurations into the specified log.
      * 
      * @param diffs a List<String> giving the configuration differences
@@ -177,5 +204,21 @@ public class ShadowController {
             //garbage-collect the monitor
             monitor = null;        
         }
+    }
+
+    /**
+     * @return the controllerStatus
+     */
+    public SHADOW_CONTROLLER_STATUS getControllerStatus() {
+        return controllerStatus;
+    }
+
+    /**
+     * Updates the ShadowController status.
+     * 
+     * @param controllerStatus the controllerStatus to set
+     */
+    protected void setControllerStatus(SHADOW_CONTROLLER_STATUS controllerStatus) {
+        this.controllerStatus = controllerStatus;
     }
 }
