@@ -51,7 +51,6 @@ public class ShadowController {
                                             SC_CONNECTION_FAILED, SC_CONTEST_CONFIG_MISMATCH, SC_MONITOR_STARTUP_FAILED};
     
     private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
-    private RemoteContestConfiguration remoteContestConfig;
 
     /**
      * Constructs a new ShadowController for the remote CCS specified by the data in the 
@@ -123,12 +122,9 @@ public class ShadowController {
         //get an adapter which connects to the remote Contest API
         IRemoteContestAPIAdapter remoteContestAPIAdapter = new MockContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
         
-        //get a string representation of the remote contest from the adapter
-        String remoteConfigString  = remoteContestAPIAdapter.getRemoteContestConfiguration();
-        
-        //construct a remote contest configuration object from the string obtained from the remote adapter
-        remoteContestConfig = new RemoteContestConfiguration(remoteConfigString);
-        
+        //get a remote contest configuration from the adapter
+        RemoteContestConfiguration remoteContestConfig  = remoteContestAPIAdapter.getRemoteContestConfiguration();
+                
         //construct a comparator for comparing the remote contest with the local contest
         comparator = new ShadowContestComparator(remoteContestConfig);
         
