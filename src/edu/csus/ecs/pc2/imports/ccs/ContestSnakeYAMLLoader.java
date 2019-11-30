@@ -67,6 +67,8 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
  */
 public class ContestSnakeYAMLLoader implements IContestLoader {
 
+
+
     /**
      * Full content of yaml file.
      */
@@ -375,6 +377,36 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (ccsTestMode) {
             setCcsTestMode(contest, ccsTestMode);
         }
+        
+        /**
+         * assign shadow values
+         */
+        
+        ContestInformation contestInformation = getContestInformation(contest);
+        
+        // enable shadow mode
+        boolean shadowMode = fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
+        contestInformation.setShadowMode(shadowMode);
+        
+        // base URL for CCS REST service
+        String  ccsUrl= fetchValue(content, CCS_URL_KEY, contestInformation.getPrimaryCCS_URL());
+        contestInformation.setPrimaryCCS_URL(ccsUrl);
+        
+        // CCS REST login
+        String ccsLogin = fetchValue(content, CCS_LOGIN_KEY, contestInformation.getPrimaryCCS_user_login());
+        contestInformation.setPrimaryCCS_user_login(ccsLogin);
+        
+        // CCS REST password
+        String ccsPassoword = fetchValue(content, CCS_PASSWORD_KEY, contestInformation.getPrimaryCCS_user_pw());
+        contestInformation.setPrimaryCCS_user_pw(ccsPassoword);
+        
+
+        String lastEventId = fetchValue(content, CCS_LAST_EVENT_ID_KEY, contestInformation.getLastShadowEventID());
+        contestInformation.setLastShadowEventID(lastEventId);
+
+        // save ContesInformation to model
+        contest.updateContestInformation(contestInformation);
+        
 
         String judgeCDPath = fetchValue(content, JUDGE_CONFIG_PATH_KEY);
         if (judgeCDPath != null) {
@@ -787,6 +819,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Date date = cal.getTime();
         return date;
     }
+  
+    protected ContestInformation getContestInformation(IInternalContest contest){
+        ContestInformation contestInformation = contest.getContestInformation();
+        return contestInformation;
+    }
 
     private void setScoreboardFreezeTime(IInternalContest contest, String scoreboardFreezeTime) {
         ContestInformation contestInformation = contest.getContestInformation();
@@ -957,6 +994,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             return content.get(key).toString();
         }
     }
+    
+    private String fetchValue(Map<String, Object> content, String key, String defaultValue) {
+        if (content == null) {
+            return null;
+        }
+        Object value = content.get(key);
+        if (value == null) {
+            return defaultValue;
+        } else if (value instanceof String) {
+            return (String) content.get(key);
+        } else {
+            return content.get(key).toString();
+        }
+    }
+
 
     private boolean isValuePresent(Map<String, Object> content, String key) {
         if (content == null) {
