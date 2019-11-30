@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ShadowInformation;
 import edu.csus.ecs.pc2.shadow.ShadowController;
+import edu.csus.ecs.pc2.shadow.ShadowController.SHADOW_CONTROLLER_STATUS;
 
 /**
  * This class provides a GUI for configuring and starting Shadowing operations on a remote CCS.
@@ -186,11 +187,12 @@ public class ShadowControlPane extends JPanePlugin {
         
         if (shadowCheckboxEnabled && shadowDataComplete) {
             shadowController = new ShadowController(this.getContest(),this.getController()) ;
-            boolean started = shadowController.start();
-            if (started) {
+            boolean success = shadowController.start();
+            if (success) {
                 currentlyShadowing = true;
                 shadowingStatusValueLabel.setText("ON");
             } else {
+                handleStartFailure();
                 showErrorMessage("Failed to start shadowing; check logs (bad URL or credentials? mismatched configs?)", "Cannot start Shadowing");
             }
 
@@ -198,6 +200,20 @@ public class ShadowControlPane extends JPanePlugin {
             showErrorMessage("Shadow Mode not enabled, or shadowing parameters not valid", "Cannot start Shadowing");
         }
         updateGUI();
+    }
+
+    /**
+     * This method is invoked when a call to ShadowController.start() returns false (failure in starting shadowing).
+     * 
+     */
+    private void handleStartFailure() {
+        
+        SHADOW_CONTROLLER_STATUS failureStatus = shadowController.getStatus();
+        
+        String failureReason = failureStatus.getLabel();
+        
+        showErrorMessage(failureReason, "Shadow Controller Failed To Start");
+        
     }
 
     /**
@@ -234,13 +250,13 @@ public class ShadowControlPane extends JPanePlugin {
         return true;
     }
 
-//    /**
-//     * Displays a message in a simple dialog format.
-//     * @param string the message to be displayed
-//     */
-//    private void showMessage(String string) {
-//        JOptionPane.showMessageDialog(this, string);
-//    }
+    /**
+     * Displays a message in a simple dialog format.
+     * @param string the message to be displayed
+     */
+    private void showMessage(String string) {
+        JOptionPane.showMessageDialog(this, string);
+    }
     
     /**
      * Displays an error message dialog.
