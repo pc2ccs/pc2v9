@@ -45,9 +45,26 @@ public class ShadowController {
     private RemoteRunMonitor monitor;
 
     
-    public enum SHADOW_CONTROLLER_STATUS {SC_NEVER_STARTED, SC_STARTING, SC_RUNNING, SC_STOPPING, SC_STOPPED, 
-                                            SC_CONNECTION_FAILED, SC_INVALID_REMOTE_CONFIG, SC_CONTEST_CONFIG_MISMATCH, 
-                                            SC_MONITOR_STARTUP_FAILED};
+    public enum SHADOW_CONTROLLER_STATUS {
+        
+        SC_NEVER_STARTED("Shadow Controller has never been started"), 
+        SC_STARTING("Shadow Controller is starting"), 
+        SC_RUNNING("Shadow Controller is running"), 
+        SC_STOPPING("Shadow Controller is stopping"), 
+        SC_STOPPED("Shadow Controller is stopped"), 
+        SC_CONNECTION_FAILED("Shadow Controller failes to connect to remote CCS"),
+        SC_INVALID_REMOTE_CONFIG("Shadow Controller received an invalid or null configuration from the remote CCS"),
+        SC_CONTEST_CONFIG_MISMATCH("Contest configuration received from remote CCS does not match local PC2 contest configuration"),
+        SC_MONITOR_STARTUP_FAILED("Shadow Controller was unable to start a Remote CCS Monitor");
+        
+        private final String label;
+        private SHADOW_CONTROLLER_STATUS(String label) {
+            this.label=label;
+        }
+        public String getLabel() {
+            return this.label;
+        }
+    }
     
     private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
     private RemoteContestConfiguration remoteContestConfig;
