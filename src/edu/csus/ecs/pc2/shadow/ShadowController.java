@@ -43,14 +43,14 @@ public class ShadowController {
     private String remoteCCSPassword;
 
     private RemoteRunMonitor monitor;
-    
-    private ShadowContestComparator comparator; 
 
     
     public enum SHADOW_CONTROLLER_STATUS {SC_NEVER_STARTED, SC_STARTING, SC_RUNNING, SC_STOPPING, SC_STOPPED, 
-                                            SC_CONNECTION_FAILED, SC_CONTEST_CONFIG_MISMATCH, SC_MONITOR_STARTUP_FAILED};
+                                            SC_CONNECTION_FAILED, SC_INVALID_REMOTE_CONFIG, SC_CONTEST_CONFIG_MISMATCH, 
+                                            SC_MONITOR_STARTUP_FAILED};
     
     private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
+    private RemoteContestConfiguration remoteContestConfig;
 
     /**
      * Constructs a new ShadowController for the remote CCS specified by the data in the 
@@ -123,33 +123,37 @@ public class ShadowController {
         IRemoteContestAPIAdapter remoteContestAPIAdapter = new MockContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
         
         //get a remote contest configuration from the adapter
-        RemoteContestConfiguration remoteContestConfig  = remoteContestAPIAdapter.getRemoteContestConfiguration();
-                
-        //construct a comparator for comparing the remote contest with the local contest
-        comparator = new ShadowContestComparator(remoteContestConfig);
-        
-        //check if the local contest has the same config as the remote contest (the one being shadowed)
-        if (!comparator.isSameAs(localContest)) {
+        remoteContestConfig  = remoteContestAPIAdapter.getRemoteContestConfiguration();
+                        
+        //make sure we got a remote config
+        if (remoteContestConfig != null) {
             
-            //get the configuration differences
-            List<String> diffs = comparator.diff(localContest);
-            
-            //log the differences
+            //check if the local contest has the same config as the remote contest (the one being shadowed)
+            if (!remoteContestConfig.isSameAs(localContest)) {
+
+                //get the configuration differences
+                List<String> diffs = remoteContestConfig.diff(localContest);
+
+                //log the differences
+                Log log = localController.getLog();
+                log.log(Level.WARNING, "Local contest configuration does not match configuration of remote CCS; cannot proceed with shadowing");
+                logDiffs(log, diffs);
+
+                setStatus(SHADOW_CONTROLLER_STATUS.SC_CONTEST_CONFIG_MISMATCH);
+
+                return false;
+
+            }
+        } else {
+            //we didn't get a remote config
             Log log = localController.getLog();
-            log.log(Level.WARNING, "Local contest configuration does not match configuration of remote CCS; cannot proceed with shadowing");
-            logDiffs(log,diffs);
-            
-            setStatus(SHADOW_CONTROLLER_STATUS.SC_CONTEST_CONFIG_MISMATCH) ;  
-          
-            //TODO: It would  be nice for the invoker
-            // to be able to obtain a list of the differences which caused the configuration comparison to fail.
-            // Perhaps there needs to be a "getReason()" method in this class, along with a "getConfigurationDifferences()" method?
-            
-            // Or perhaps "throw new ContestsDoNotMatchException" instead of returning false?
+            log.log(Level.WARNING, "Contest configuration from remote CCS is null; cannot proceed with shadowing");
+ 
+            setStatus(SHADOW_CONTROLLER_STATUS.SC_INVALID_REMOTE_CONFIG);
             
             return false;
-            
         }
+        
         
         //if we get here we know the remote contest configuration matches the local contest configuration
         
@@ -172,14 +176,19 @@ public class ShadowController {
     }
     
     /**
-     * Returns a list of differences between the currrently-configured remote contest
-     * and the configuration of the local PC2 contest.
+     * Returns a list of differences between the currently-configured remote contest
+     * and the configuration of the local PC2 contest, or null if no remote contest configuration
+     * has been obtained.
      * 
-     * @return a List<String> of contest configuration differences
+     * @return a List<String> of contest configuration differences, or null if no remote configuration is available
      */
     public List<String> getDiffs() {
         
-        return (comparator.diff(localContest)) ;
+        List<String> diffs = null;
+        if (remoteContestConfig != null) {
+            diffs = remoteContestConfig.diff(localContest);
+        }
+        return diffs ;
     }
     
     /**
