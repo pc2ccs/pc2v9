@@ -140,7 +140,7 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
     }
 
     @Override
-    public List<IFile> getRemoteSubmissionFiles(int submissionID) {
+    public List<IFile> getRemoteSubmissionFiles(String submissionID) {
         // TODO Auto-generated method stub
         return null;
     }
