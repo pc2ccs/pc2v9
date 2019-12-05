@@ -9,7 +9,7 @@ import java.net.URL;
  * @author pc2@ecs.csus.edu
  *
  */
-public class RemoteRunMonitor {
+public class RemoteRunMonitorObsolete {
 
     private IRemoteContestAPIAdapter remoteContestAPIAdapter;
     private URL remoteURL;
@@ -32,7 +32,7 @@ public class RemoteRunMonitor {
      * @param password the password to the remote CCS account
      * @param submitter a {@link Runnable} which knows how to submit a receive remote run to PC2
      */
-    public RemoteRunMonitor(IRemoteContestAPIAdapter remoteContestAPIAdapter, URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
+    public RemoteRunMonitorObsolete(IRemoteContestAPIAdapter remoteContestAPIAdapter, URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
 
         this.remoteContestAPIAdapter = remoteContestAPIAdapter;
         this.remoteURL = remoteURL;

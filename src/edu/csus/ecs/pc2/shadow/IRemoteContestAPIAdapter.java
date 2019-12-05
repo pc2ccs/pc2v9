@@ -42,12 +42,29 @@ interface IRemoteContestAPIAdapter {
      * 
      * @return the remote system event feed input stream
      */
-    InputStream getRemoteEventFeedInputStream() ;
+    public InputStream getRemoteEventFeedInputStream() ;
+    
+    /**
+     * Returns a {@link List} of PC2 {@link IFile} objects associated with the specified
+     * submission on the remote CCS.
+     * 
+     * The submission files are obtained by doing a GET operation on the URL defined
+     * by concatenating the remote system base URL with the String "/submissions/<id>/files",
+     * where <id> is the specified submissionID.
+     * 
+     * @param the submission ID whose files are to be fetched from the remote system
+     * 
+     * @return a List of IFile objects containing the files from the submission in 
+     *          the remote system
+     * 
+     */
+    public List<IFile> getRemoteSubmissionFiles(int submissionID) ;
+
     
     /**
      * Test connection to remote CCS API.
      * @return true if could connect, otherwise false;
-     */
+     */    
     public boolean testConnection();
     
     
@@ -68,19 +85,4 @@ interface IRemoteContestAPIAdapter {
      */
     public String getRemoteJSON(String endpoint);
     
-    /**
-     * Returns a {@link List} of PC2 {@link IFile} objects associated with the specified
-     * submission on the remote CCS.
-     * 
-     * The submission files are obtained by doing a GET operation on the URL defined
-     * by concatenating the remote system base URL with the String "/submissions/<id>/files",
-     * where <id> is the specified submissionID.
-     * 
-     * @param the submission ID whose files are to be fetched from the remote system
-     * 
-     * @return a List of IFile objects containing the files from the submission in 
-     *          the remote system
-     * 
-     */
-    List<IFile> getRemoteSubmissionFiles(int submissionID) ;
 }
