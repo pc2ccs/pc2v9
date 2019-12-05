@@ -41,6 +41,7 @@ interface IRemoteContestAPIAdapter {
      * contest can be read.
      * 
      * @return the remote system event feed input stream, or null if no input stream could be acquired
+     * 
      */
     public InputStream getRemoteEventFeedInputStream() ;
     
@@ -58,7 +59,7 @@ interface IRemoteContestAPIAdapter {
      *          the remote system
      * 
      */
-    public List<IFile> getRemoteSubmissionFiles(int submissionID) ;
+    public List<IFile> getRemoteSubmissionFiles(String endpoint) ;
 
     
     /**
@@ -66,7 +67,6 @@ interface IRemoteContestAPIAdapter {
      * @return true if could connect, otherwise false;
      */    
     public boolean testConnection();
-    
     
     /**
      * Returns the JSON string obtained by doing a GET on the specified URL endpoint.
