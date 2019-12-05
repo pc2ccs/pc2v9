@@ -4,8 +4,6 @@ package edu.csus.ecs.pc2.shadow;
 
 import java.util.Map;
 
-import edu.csus.ecs.pc2.shadow.IRemoteContestAPIAdapter.REMOTE_CONFIGURATION_ELEMENT;
-
 /**
  * This class is the parent class (base class) for concrete representations of remote contest
  * configuation elements such as Problems, Languages, etc.
@@ -15,6 +13,10 @@ import edu.csus.ecs.pc2.shadow.IRemoteContestAPIAdapter.REMOTE_CONFIGURATION_ELE
  *
  */
 public class AbstractRemoteConfigurationObject {
+    
+    public enum REMOTE_CONFIGURATION_ELEMENT {CONFIG_PROBLEMS, CONFIG_LANGUAGES, CONFIG_JUDGEMENT_TYPES, CONFIG_GROUPS,
+        CONFIG_ORGANIZATIONS, CONFIG_TEAMS, CONFIG_CONTEST_STATE} 
+
 
     private REMOTE_CONFIGURATION_ELEMENT elementType;
     private Map<String, String> map;
@@ -23,7 +25,7 @@ public class AbstractRemoteConfigurationObject {
     /**
      * Contructs a Remote Configuration Object of the specified type and with the specified map (values).
      */
-    public AbstractRemoteConfigurationObject(IRemoteContestAPIAdapter.REMOTE_CONFIGURATION_ELEMENT configElementType, 
+    public AbstractRemoteConfigurationObject(REMOTE_CONFIGURATION_ELEMENT configElementType, 
                                             Map<String,String> configurationValue) {
         this.elementType = configElementType;
         this.map = configurationValue ;
@@ -35,7 +37,7 @@ public class AbstractRemoteConfigurationObject {
      * 
      * @return the REMOTE_CONFIGURATION_ELEMENT type for this object
      */
-    IRemoteContestAPIAdapter.REMOTE_CONFIGURATION_ELEMENT getConfigurationType(){
+    REMOTE_CONFIGURATION_ELEMENT getConfigurationType(){
         return elementType ;
     }
     

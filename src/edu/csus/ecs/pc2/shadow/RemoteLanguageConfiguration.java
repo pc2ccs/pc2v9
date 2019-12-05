@@ -26,7 +26,7 @@ public class RemoteLanguageConfiguration extends AbstractRemoteConfigurationObje
      * @param configurationValues a Map mapping the language element keywords to corresponding values
      */
     public RemoteLanguageConfiguration(Map<String, String> configurationValues) {
-        super(IRemoteContestAPIAdapter.REMOTE_CONFIGURATION_ELEMENT.CONFIG_LANGUAGES, configurationValues);
+        super(REMOTE_CONFIGURATION_ELEMENT.CONFIG_LANGUAGES, configurationValues);
     }
 
 }

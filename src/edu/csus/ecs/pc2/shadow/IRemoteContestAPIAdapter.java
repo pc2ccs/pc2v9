@@ -19,9 +19,6 @@ import edu.csus.ecs.pc2.core.model.IFile;
  */
 interface IRemoteContestAPIAdapter {
     
-    public enum REMOTE_CONFIGURATION_ELEMENT {CONFIG_PROBLEMS, CONFIG_LANGUAGES, CONFIG_JUDGEMENT_TYPES, CONFIG_GROUPS,
-                                        CONFIG_ORGANIZATIONS, CONFIG_TEAMS, CONFIG_CONTEST_STATE} 
-
     /**
      * Returns a {@link RemoteContestConfiguration} object containing the configuration of a contest in a
      * remote CCS, including:
