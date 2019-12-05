@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
- 
-
-
+import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.util.HTTPSSecurity;
 
 public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
@@ -18,7 +17,7 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     String password;
     
     /**
-     * constructs a RemoteRunMonitor with the specified values.
+     * Constructs a RemoteRunMonitor with the specified values.
      * 
      * @param remoteURL the URL to the remote CCS
      * @param login the login (account) on the remote CCS
@@ -38,8 +37,8 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         return false;
     }
     
-    private static InputStream getHTTPInputStream(String url, String user, String password) throws IOException {
-        HttpURLConnection conn = HTTPSSecurity.createConnection(new URL(url), user, password);
+    private InputStream getHTTPInputStream(URL url, String user, String password) throws IOException {
+        HttpURLConnection conn = HTTPSSecurity.createConnection(url, user, password);
         conn.setReadTimeout(15 * 1000); // 15s timeout
         return new BufferedInputStream(conn.getInputStream());
     }
@@ -52,6 +51,27 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
 
     @Override
     public String getRemoteJSON(String endpoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    /**
+     * {@inheritDoc}
+     */
+    public InputStream getRemoteEventFeedInputStream() {
+        InputStream stream = null;
+        try {
+            stream = getHTTPInputStream(remoteURL, login, password);
+        } catch (IOException e) {
+            // TODO Need to decide how to handle this exception
+            e.printStackTrace();
+        }
+        return stream ;
+    }
+
+    @Override
+    public List<IFile> getRemoteSubmissionFiles(int submissionID) {
         // TODO Auto-generated method stub
         return null;
     }
