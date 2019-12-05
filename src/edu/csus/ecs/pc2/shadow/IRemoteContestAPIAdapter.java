@@ -40,7 +40,7 @@ interface IRemoteContestAPIAdapter {
      * Returns an {@link InputStream} from which CLICS events from a remote
      * contest can be read.
      * 
-     * @return the remote system event feed input stream
+     * @return the remote system event feed input stream, or null if no input stream could be acquired
      */
     public InputStream getRemoteEventFeedInputStream() ;
     
