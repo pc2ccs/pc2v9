@@ -20,7 +20,7 @@ public class RemoteRunMonitorObsolete {
     Thread listenerThread = null;
     
     boolean listening;
-    private RemoteEventFeedListener listener;
+    private RemoteEventFeedListenerObsolete listener;
 
 
     /**
@@ -46,7 +46,7 @@ public class RemoteRunMonitorObsolete {
         
         try {
             //construct a listener for the remote API
-            listener = new RemoteEventFeedListener(remoteContestAPIAdapter, remoteURL, login, password, submitter);
+            listener = new RemoteEventFeedListenerObsolete(remoteContestAPIAdapter, remoteURL, login, password, submitter);
   
             //start the listener running as a thread
             listenerThread = new Thread(listener);

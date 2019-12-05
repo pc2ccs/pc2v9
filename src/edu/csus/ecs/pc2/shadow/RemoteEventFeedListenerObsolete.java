@@ -9,7 +9,7 @@ import java.net.URL;
  * @author pc2@ecs.csus.edu
  *
  */
-public class RemoteEventFeedListener implements Runnable {
+public class RemoteEventFeedListenerObsolete implements Runnable {
     
     private boolean keepRunning ;
     private IRemoteContestAPIAdapter remoteContestAPIAdapter;
@@ -19,7 +19,7 @@ public class RemoteEventFeedListener implements Runnable {
     private RemoteRunSubmitter submitter;
 
 
-    public RemoteEventFeedListener(IRemoteContestAPIAdapter remoteContestAPIAdapter, URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
+    public RemoteEventFeedListenerObsolete(IRemoteContestAPIAdapter remoteContestAPIAdapter, URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
         // TODO code (see bug 1626)
         this.remoteContestAPIAdapter = remoteContestAPIAdapter;
         this.remoteURL = remoteURL;
