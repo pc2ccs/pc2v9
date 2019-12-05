@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
+
+import edu.csus.ecs.pc2.core.model.IFile;
 
 /**
  * This class provides a "mock" implementation of connections to a Remote CCS CLICS Contest API.
@@ -126,6 +129,18 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
 
     @Override
     public String getRemoteJSON(String endpoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public InputStream getRemoteEventFeedInputStream() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<IFile> getRemoteSubmissionFiles(int submissionID) {
         // TODO Auto-generated method stub
         return null;
     }
