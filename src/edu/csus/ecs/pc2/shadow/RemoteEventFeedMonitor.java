@@ -133,38 +133,4 @@ public class RemoteEventFeedMonitor implements Runnable {
         keepRunning = false;
     }
 
-
-//    public boolean startListening() {
-//        // TODO Bug 1625 startRunEventFeeder
-//        
-//        try {
-//            //construct a listener for the remote API
-//            listener = new RemoteEventFeedListener(remoteContestAPIAdapter, remoteURL, login, password, submitter);
-//  
-//            //start the listener running as a thread
-//            listenerThread = new Thread(listener);
-//            listenerThread.start();
-//            listening = true;
-//        } catch (Exception e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//            return false;
-//        }
-//        
-//        return true;
-//    }
-
-//    public void stopListening() {
-//        // TODO Bug 1625 stop RunEventFeeder
-//        
-//        if (listener != null && listenerThread != null) {
-//            listener.stop();
-//            listenerThread = null;
-//        }
-//        listening = false;
-//    }
-//
-//    public boolean isListening() {
-//        return listening;
-//    }
 }
