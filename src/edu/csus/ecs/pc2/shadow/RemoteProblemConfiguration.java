@@ -26,7 +26,7 @@ public class RemoteProblemConfiguration extends AbstractRemoteConfigurationObjec
      * @param configurationValues a Map mapping the problem element keywords to corresponding values
      */
     public RemoteProblemConfiguration(Map<String, String> configurationValues) {
-        super(IRemoteContestAPIAdapter.REMOTE_CONFIGURATION_ELEMENT.CONFIG_PROBLEMS, configurationValues);
+        super(REMOTE_CONFIGURATION_ELEMENT.CONFIG_PROBLEMS, configurationValues);
     }
 
 }

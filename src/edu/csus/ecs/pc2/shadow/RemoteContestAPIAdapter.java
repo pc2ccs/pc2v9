@@ -8,7 +8,9 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
+import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.util.HTTPSSecurity;
 
 public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
@@ -18,7 +20,7 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     String password;
     
     /**
-     * constructs a RemoteRunMonitor with the specified values.
+     * Constructs a RemoteRunMonitor with the specified values.
      * 
      * @param remoteURL the URL to the remote CCS
      * @param login the login (account) on the remote CCS
@@ -113,14 +115,14 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     /**
      * Open input stream for event feed.
      * 
-     * @param url
+     * @param remoteURL2
      * @param user
      * @param password
      * @return
      * @throws IOException
      */
-    private InputStream getHTTPInputStream(String url, String user, String password) throws IOException {
-        HttpURLConnection conn = HTTPSSecurity.createConnection(new URL(url), user, password);
+    private InputStream getHTTPInputStream(URL remoteURL2, String user, String password) throws IOException {
+        HttpURLConnection conn = HTTPSSecurity.createConnection(remoteURL2, user, password);
         conn.setReadTimeout(15 * 1000); // 15s timeout
         return new BufferedInputStream(conn.getInputStream());
     }
@@ -156,6 +158,26 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         return byteArrayOutputStream.toString();
     }
 
+    @Override
+    /**
+     * {@inheritDoc}
+     */
+    public InputStream getRemoteEventFeedInputStream() {
+        InputStream stream = null;
+        try {
+            stream = getHTTPInputStream(remoteURL, login, password);
+        } catch (IOException e) {
+            // TODO Need to decide how to handle this exception
+            e.printStackTrace();
+        }
+        return stream ;
+    }
+
+    @Override
+    public List<IFile> getRemoteSubmissionFiles(String submissionID) {
+        // TODO Auto-generated method stub
+        return null;
+    }
     public static void main(String[] args) throws MalformedURLException {
     
         String addr = "Https://localhost:50443/submission_files?id=1";

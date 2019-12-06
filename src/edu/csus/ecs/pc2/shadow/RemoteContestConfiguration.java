@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.shadow.IRemoteContestAPIAdapter.REMOTE_CONFIGURATION_ELEMENT;
+import edu.csus.ecs.pc2.shadow.AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT;
 
 /**
  * This class encapsulates a configuration obtained from a remote CLICS Contest API; in other words
@@ -20,8 +20,9 @@ import edu.csus.ecs.pc2.shadow.IRemoteContestAPIAdapter.REMOTE_CONFIGURATION_ELE
  * @author John Clevenger, PC^2 Team, pc2@ecs.csus.edu
  */
 public class RemoteContestConfiguration {
-    
-    private Map<IRemoteContestAPIAdapter.REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>> map;
+
+
+    private Map<REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>> map;
     
     /**
      * Constructs a RemoteContestConfiguration characterized by the given input map.
@@ -32,7 +33,7 @@ public class RemoteContestConfiguration {
      * 
      * @param remoteConfigMap a Map giving the contest configuration obtained from a remote CCS 
      */
-    public RemoteContestConfiguration(Map<IRemoteContestAPIAdapter.REMOTE_CONFIGURATION_ELEMENT, 
+    public RemoteContestConfiguration(Map<REMOTE_CONFIGURATION_ELEMENT, 
                                             List<AbstractRemoteConfigurationObject>> remoteConfigMap){
         this.map = remoteConfigMap;
     }
@@ -43,7 +44,7 @@ public class RemoteContestConfiguration {
      * 
      * @return a Map of the key:value pairs in the remote contest configuration
      */
-    public Map<IRemoteContestAPIAdapter.REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>> 
+    public Map<REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>> 
                     getRemoteContestConfigurationMap() {
         return map;
 

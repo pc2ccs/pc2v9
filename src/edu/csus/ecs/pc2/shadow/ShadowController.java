@@ -42,7 +42,7 @@ public class ShadowController {
 
     private String remoteCCSPassword;
 
-    private RemoteRunMonitor monitor;
+    private RemoteEventFeedMonitor monitor;
 
     
     public enum SHADOW_CONTROLLER_STATUS {
@@ -68,6 +68,8 @@ public class ShadowController {
     
     private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
     private RemoteContestConfiguration remoteContestConfig;
+    private Thread monitorThread;
+    private boolean listening;
 
     /**
      * Constructs a new ShadowController for the remote CCS specified by the data in the 
@@ -177,19 +179,30 @@ public class ShadowController {
         //construct a RunSubmitter that can be used to submit runs (received from the remote contest) to the local PC2 contest
         RemoteRunSubmitter submitter = new RemoteRunSubmitter(localController);
 
-        //construct a RunMonitor for keeping track of the remote CCS
-        monitor = new RemoteRunMonitor(remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter);
-
-        //start the RunMonitor listening for runs from the remote CCS
-        boolean monitorStarted = monitor.startListening();
-        
-        if (monitorStarted) {
+        try {
+            
+            //construct an EventFeedMonitor for keeping track of the remote CCS events
+            monitor = new RemoteEventFeedMonitor(localController, remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter);
+ 
+            //start the monitor running as a thread listening for submissions from the remote CCS
+            monitorThread = new Thread(monitor);
+            monitorThread.start();
+            
+            listening = true;
+            
             setStatus(SHADOW_CONTROLLER_STATUS.SC_RUNNING);
             return true;
-        } else {
+           
+            
+        } catch (Exception e) {
+            // TODO figure out how to return the exception to the caller cleanly
+
             setStatus(SHADOW_CONTROLLER_STATUS.SC_MONITOR_STARTUP_FAILED);
+
+            e.printStackTrace();
             return false;
         }
+                
     }
     
     /**
@@ -220,7 +233,7 @@ public class ShadowController {
     }
 
     /**
-     * This method stops Shadow Mode operations.  
+     * This method stops the Shadow Mode listener thread.  
      */
     public void stop() {
         
@@ -228,7 +241,7 @@ public class ShadowController {
         
         if (monitor!=null) {
             
-            monitor.stopListening();
+            monitor.stop();
             
             //garbage-collect the monitor
             monitor = null;        
