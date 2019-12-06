@@ -86,6 +86,8 @@ public class RemoteEventFeedMonitor implements Runnable {
                      * Add code here to:
                      * 
                      *    parse JSON event and see if it is a "submission" event
+                     *      (keep in mind that it could instead be eithe another type of event - e.g. "update" -
+                     *       or could be a simple "keep-alive" empty-line)
                      *    
                      *    if (event.getType() == submissionEvent) {
                      *      
