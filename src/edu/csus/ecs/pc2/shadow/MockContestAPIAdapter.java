@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.List;
 
 import edu.csus.ecs.pc2.core.model.IFile;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * This class provides a "mock" implementation of connections to a Remote CCS CLICS Contest API.
@@ -94,12 +95,16 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
 //    }
   
     @Override
+    /**
+     * {@inheritDoc}
+     * 
+     */
     public RemoteContestConfiguration getRemoteContestConfiguration() {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO implement me
+        throw new NotImplementedException();
     }
     
-    public InputStream readRemoteCCSEventFeed(File file) {
+    public InputStream readRemoteCCSEventFeedFromFile(File file) {
         PacedFileInputStream efEventStreamReader;
         try {
             int secondsPauseForEAchLine = 2;
@@ -110,39 +115,50 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
         }
     }
 
-    public InputStream readRemoteCCSEventFeed(){
+    @Override
+    /**
+     * {@inheritDoc}
+     * 
+     * This implementation returns local data taken from a file.
+     */
+    public InputStream getRemoteEventFeedInputStream(){
         
         /**
          * Test JSON event feed.   From CSUS Fall 2019 (real) contest.
          */
         String filename = "testdata/PacedFileInputStreamTest/csus-f2019.eventfeed.json";
-        return readRemoteCCSEventFeed(new File(filename));
-        
-        // todo read or pass through from REST end point
-//        throw new NotImplementedException();
+        return readRemoteCCSEventFeedFromFile(new File(filename));
+   
     }
 
     @Override
+    /**
+     * {@inheritDoc}
+     * 
+     */
     public boolean testConnection() {
-        return true;
+        // TODO implement me
+        throw new NotImplementedException();
     }
 
     @Override
+    /**
+     * {@inheritDoc}
+     * 
+     */
     public String getRemoteJSON(String endpoint) {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO implement me
+        throw new NotImplementedException();
     }
 
     @Override
-    public InputStream getRemoteEventFeedInputStream() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
+    /**
+     * {@inheritDoc}
+     * 
+     */
     public List<IFile> getRemoteSubmissionFiles(String submissionID) {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO implement me
+        throw new NotImplementedException();
     }
     
 }
