@@ -6,11 +6,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.time.Instant;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IFile;
 
 /**
@@ -33,7 +35,6 @@ public class RemoteEventFeedMonitor implements Runnable {
     private boolean listening;
     private IInternalController pc2Controller;
     private InputStream remoteInputStream;
-
 
     /**
      * Constructs a RemoteEventFeedMonitor with the specified values.  The RemoteEventFeedMonitor
@@ -66,67 +67,171 @@ public class RemoteEventFeedMonitor implements Runnable {
 
         if (remoteInputStream == null) {
             
-//            TODO: deal with this case
+            //  TODO: design error handling (loggin?)
+            System.err.println("Error opening event feed stream");
             
         } else {
-            
+
             //wrap the event stream (which consists of newline-delimited character strings representing events)
             // in a BufferedReader
-            BufferedReader reader = new BufferedReader(new InputStreamReader(remoteInputStream));
-            
             try {
-                //keep reading event strings as long as the input stream is open and we haven't been told to stop
-                String event = "";
-                while( ((event = reader.readLine()) != null) && keepRunning) {                    
 
-                    
-                    System.out.println ("Got event: " + event);
-                    
-                    /*
-                     * Add code here to:
-                     * 
-                     *    parse JSON event and see if it is a "submission" event
-                     *      (keep in mind that it could instead be eithe another type of event - e.g. "update" -
-                     *       or could be a simple "keep-alive" empty-line)
-                     *    
-                     *    if (event.getType() == submissionEvent) {
-                     *      
-                     *      String teamID = event.getTeamID();
-                     *      String problemID = event.getProblemID();
-                     *      String languageID = event.getLanguageID();
-                     *      String submissionID = event.getSubmissionID();
-                     *      String time = event.getTime();
-                     *      String entry_point = event.getEntryPoint();
-                     *      
-                     */
-                    //hard-coded replacement examples (temporary)
-                    String teamID = "team2";
-                    String problemID = "sumit";
-                    String languageID = "java";
-                    String submissionID = "5";
+                BufferedReader reader = new BufferedReader(new InputStreamReader(remoteInputStream));
 
-                    Long overrideSubmissionID = Long.parseLong(submissionID);
+                String event = reader.readLine();
 
-                    String time = "2019-04-01T09:08:11.687+01:00" ;                        
-//                    DateTimeFormatter formatter = DateTimeFormatter.BASIC_ISO_DATE;
-                    Date date = Date.from( Instant.parse(time));
-                    Long overrideTimeMS = date.getTime();
+                while ((event != null) && keepRunning) {
 
-                    List<IFile> files = remoteContestAPIAdapter.getRemoteSubmissionFiles(submissionID);
+                    System.out.println("Got event string: " + event);
 
-                    List<IFile> auxFiles = files.subList(1, files.size()-2);
+                    try {
+                        
+                        /*
+                         * Add code here to:
+                         * 
+                         *    parse JSON event and see if it is a "submission" event
+                         *      (keep in mind that it could instead be eithe another type of event - e.g. "update" -
+                         *       or could be a simple "keep-alive" empty-line)
+                         *    
+                         *    if (event.getType() == submissionEvent) {
+                         *      
+                         *      String teamID = event.getTeamID();
+                         *      String problemID = event.getProblemID();
+                         *      String languageID = event.getLanguageID();
+                         *      String submissionID = event.getSubmissionID();
+                         *      String time = event.getTime();
+                         *      String entry_point = event.getEntryPoint();
+                         *      
+                         */
+                        /**
+                         *
+Sample submissions JSON from finals 2019 dom judge event feed.
+{"id":"279029","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.162+01:00","contest_time":"-17:02:04.837","id":"10547","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10547/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.191+01:00"}
+{"id":"279030","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.209+01:00","contest_time":"-17:02:04.790","id":"10548","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10548/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.216+01:00"}
+{"id":"279031","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.228+01:00","contest_time":"-17:02:04.771","id":"10549","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10549/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.235+01:00"}
+{"id":"279032","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.244+01:00","contest_time":"-17:02:04.755","id":"10550","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10550/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.251+01:00"}
+                         */
 
-                    submitter.submitRun(teamID, problemID, languageID, files.get(0), auxFiles, 
-                            overrideTimeMS, overrideSubmissionID);
-                }
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
+                        Map<String, String> map = getMap(event);
+                        if (map == null) {
+                            // could not parse.
+                            System.out.println("Could not parse event: " + event);
+
+                        } else {
+
+                            // find event type
+                            String eventType = map.get("type");
+                            System.out.print("\nfound event: " + eventType + ":" + event); // TODO log this.
+
+                            if ("submissions".equals(eventType)) {
+                                System.out.println("debug 22 found submission event");
+
+                                try {
+                                    Object obj = map.get("data");
+
+                                    Map<String, String> eventDataMap = (Map<String, String>) obj;
+                                    /**
+                                     * Convert metadata into ShadowRunSubmission
+                                     */
+                                    ShadowRunSubmission runSubmission = createRunSubmission(eventDataMap);
+
+                                    if (runSubmission == null) {
+                                        throw new Exception("Error parsing submission data " + event);
+                                    } else {
+                                        System.out.println("Found run " + runSubmission.getId() + " from " + runSubmission.getTeam_id());
+
+                                        long overrideTimeMS = Utilities.stringToLong(runSubmission.getTime());
+                                        long overrideSubmissionID = Utilities.stringToLong(runSubmission.getId());
+
+                                        List<IFile> files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
+
+                                        IFile mainFile = files.get(0);
+
+                                        List<IFile> auxFiles = files.subList(1, files.size() - 2);
+
+                                        try {
+                                            submitter.submitRun("team" + runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(),
+                                                    mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
+                                        } catch (Exception e) {
+                                            // TODO design error handling reporting
+                                            System.err.println("Exception submitting run for: " + event);
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    // TODO design error handling reporting (logging?)
+                                    System.err.println("Exception parsing event: " + event);
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                System.out.println("debug 22 - ignoring event "+eventType);
+                            }
+                        } // else
+                    } catch (Exception e) {
+                        // TODO design error handling reporting (logging?)
+                        System.err.println("Exception processing event: " + event);
+                        e.printStackTrace();
+                    }
+
+                    event = reader.readLine();
+
+                } // while
+            } catch (Exception e) {
+                // TODO design error handling reporting (logging?)
+                System.err.println("Exception reading event from stream ");
                 e.printStackTrace();
             }
-        }
-
-
+        } // else
     }
+    
+    @SuppressWarnings("unchecked")
+    protected static Map<String, String> getMap(String jsonString) {
+        
+        if (jsonString == null){
+            return null;
+        }
+        
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            Map<String, String> map = mapper.readValue(jsonString, Map.class);
+            return map;
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+            return null;
+        }
+    }
+    
+    ShadowRunSubmission createRunSubmission2(String jsonString){
+        
+        Map<String, String> map = getMap(jsonString);
+        if (map == null) {
+            // could not parse.
+            System.out.println("Could not parse event: " + jsonString);
+
+        } else {
+            String eventType = map.get("type");
+
+            System.out.print("\nfound event: " + eventType + ":" + jsonString);
+
+            // found event: submissions:{"type":"submissions", "id":"pc2-165", "op":"update", "data": {"id":"3","language_id":"java","problem_id":"a","team_id":"3","time":"2019-11-30T20:41:36.809+02","contest_time":"00:20:00.000","entry_point":"ISumitWA","files":[{"href":"https://localhost:50443/contest/submissions/3/files"}]}}
+
+            if ("submissions".equals(eventType)) {
+                System.out.println("found submission event");
+
+                Object obj = map.get("data");
+
+                Map<String, String> eventDataMap = ( Map<String, String> ) obj;
+                ShadowRunSubmission runSubmission = createRunSubmission(eventDataMap);
+                return runSubmission;
+            }
+        }
+        return null;
+    }
+
+    protected static ShadowRunSubmission createRunSubmission(Map<String, String> eventDataMap) {
+        return new ObjectMapper().convertValue(eventDataMap, ShadowRunSubmission.class);
+    }
+ 
     
     /**
      * This method is used to terminate the RemoteEventFeedListener thread.
