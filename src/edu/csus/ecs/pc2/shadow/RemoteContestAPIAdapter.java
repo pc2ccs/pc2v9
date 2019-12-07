@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,9 +9,18 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
 import edu.csus.ecs.pc2.core.model.IFile;
+import edu.csus.ecs.pc2.core.model.IFileImpl;
 import edu.csus.ecs.pc2.util.HTTPSSecurity;
 
 public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
@@ -130,7 +140,8 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     @Override
     public RemoteContestConfiguration getRemoteContestConfiguration() {
         // TODO write code
-        return null;
+//        RemoteContestConfiguration configuration = new RemoteContestConfiguration(remoteConfigMap);
+        throw new NotImplementedException(); 
     }
 
     @Override
@@ -157,6 +168,18 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         }
         return byteArrayOutputStream.toString();
     }
+    
+    private byte[] toByteArray(InputStream inputStream) throws IOException {
+        
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        int result = bufferedInputStream.read();
+        while(result != -1) {
+            byteArrayOutputStream.write((byte) result);
+            result = bufferedInputStream.read();
+        }
+        return byteArrayOutputStream.toByteArray();
+    }
 
     @Override
     /**
@@ -175,9 +198,95 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
 
     @Override
     public List<IFile> getRemoteSubmissionFiles(String submissionID) {
-        // TODO Auto-generated method stub
-        return null;
+        
+        String endpoint = "/submissions/" + submissionID + "/files";
+        String url = remoteURL.toString() + endpoint;
+        try {
+            HttpURLConnection conn = createConnection(url);
+            /**
+             * Bytes fetched from endpoint
+             */
+            byte[] bytes = toByteArray(conn.getInputStream());
+
+            /**
+             * Convert bytes/zipfile into individual IFiles.
+             */
+            List<IFile> files = getIFiles (bytes);
+            return files;
+            
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
+    
+    /**
+     * Get files from a zipfile's bytes.
+     * 
+     * @param bytes bytes from a zip file.
+     * @return list of IFiles from input bytes 
+     */
+    private List<IFile> getIFiles(byte[] bytes) {
+        
+        List<IFile> files = new ArrayList<IFile>();
+        
+        ZipInputStream zipStream = null;
+        
+        try {
+            zipStream = new ZipInputStream(new ByteArrayInputStream(bytes));
+            ZipEntry entry = null;
+            /**
+             * Read each zip entry, add IFile.
+             */
+            while ((entry = zipStream.getNextEntry()) != null) {
+                
+                String entryName = entry.getName();
+                
+                ByteOutputStream byteOutputStream = new ByteOutputStream();
+                
+                byte[] buffer = new byte[8096];
+                int bytesRead = 0;
+                while ((bytesRead = zipStream.read(buffer)) != -1)
+                {
+                    byteOutputStream.write(buffer, 0, bytesRead);
+                }
+
+                String base64Data = getBase64Data(byteOutputStream.getBytes());
+                IFile iFile = new IFileImpl(entryName, base64Data);
+                files.add(iFile);
+                
+                byteOutputStream.close();
+                
+                zipStream.closeEntry();
+            }
+            zipStream.close(); 
+            
+        } catch (Exception e) {
+            if (zipStream != null){
+                try {
+                    zipStream.close();
+                } catch (Exception ze) {
+                    ; // problem closing stream, ignore.
+                }
+            }
+            throw new RuntimeException(e);
+        }
+        
+        return files;
+        
+    }
+    
+    /**
+     * Encode bytes into BASE64.
+     * @param data
+     * @return
+     */
+    public String getBase64Data( byte [] bytes) {
+        // TODO REFACTOR move to FileUtilities
+        Base64.Encoder encoder = Base64.getEncoder();
+        String base64String = encoder.encodeToString(bytes);
+        return base64String;
+    }
+
     public static void main(String[] args) throws MalformedURLException {
     
         String addr = "Https://localhost:50443/submission_files?id=1";
