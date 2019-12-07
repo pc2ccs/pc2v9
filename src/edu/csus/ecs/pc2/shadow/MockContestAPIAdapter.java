@@ -5,10 +5,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IFile;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import edu.csus.ecs.pc2.core.model.IFileImpl;
+import edu.csus.ecs.pc2.shadow.AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT;
 
 /**
  * This class provides a "mock" implementation of connections to a Remote CCS CLICS Contest API.
@@ -22,6 +28,9 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
     private URL remoteURL;
     private String login;
     private String password;
+    
+    // TODO TODAY use sample contest CDP that has event feed and submissions
+    // TODO use remoteURL to find CDP.
 
     /**
      * @param remoteURL
@@ -100,8 +109,13 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
      * 
      */
     public RemoteContestConfiguration getRemoteContestConfiguration() {
-        // TODO implement me
-        throw new NotImplementedException();
+
+
+        Map<REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>> remoteConfigMap = new HashMap<AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>>();
+
+        // TODO TODAY implement me - add mock data into RemoteContestConfiguration
+
+        return new RemoteContestConfiguration(remoteConfigMap);
     }
     
     public InputStream readRemoteCCSEventFeedFromFile(File file) {
@@ -127,6 +141,9 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
          * Test JSON event feed.   From CSUS Fall 2019 (real) contest.
          */
         String filename = "testdata/PacedFileInputStreamTest/csus-f2019.eventfeed.json";
+        if (! Utilities.fileExists(filename)){
+            throw new RuntimeException(new FileNotFoundException(filename));
+        }
         return readRemoteCCSEventFeedFromFile(new File(filename));
    
     }
@@ -137,8 +154,7 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
      * 
      */
     public boolean testConnection() {
-        // TODO implement me
-        throw new NotImplementedException();
+        return true;
     }
 
     @Override
@@ -147,8 +163,13 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
      * 
      */
     public String getRemoteJSON(String endpoint) {
-        // TODO implement me
-        throw new NotImplementedException();
+
+        // TODO Add more data per end point.
+        
+        // return /contests JSON for now.
+        
+        return "{\"id\":\"Default--7119618407729322012\",\"name\":\"Sumit8\",\"formal_name\":\"Sumit Eight Problems\"," +
+                "\"start_time\":\"2019-12-01T05:49:29.785-08\",\"duration\":\"5:00:00\",\"scoreboard_freeze_duration\":\"01:00:00\",\"penalty_time\":20}";
     }
 
     @Override
@@ -157,8 +178,46 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
      * 
      */
     public List<IFile> getRemoteSubmissionFiles(String submissionID) {
-        // TODO implement me
-        throw new NotImplementedException();
+        
+        List<IFile> files = new ArrayList<IFile>();
+        
+        try {
+            String filename = "ISumit.java";
+            String[] src_lines = Utilities.loadFile(getSamplesSourceFilename(filename));
+            String source = String.join("", src_lines);
+            
+            String base64String = Base64.getEncoder().encodeToString(source.getBytes());
+            IFile mainFile = new IFileImpl(filename, base64String);
+            
+            files.add(mainFile);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return files;
+    }
+    
+    /**
+     * Get sample source or data filename.
+     * 
+     * Examples.
+     * <pre>
+     * String filename = getSamplesSourceFilename("Sumit.java");
+     * 
+     * String filename = getSamplesSourceFilename(HELLO_SOURCE_FILENAME);
+     * 
+     * </pre>
+     *  
+     * @param filename the name of a file
+     * @return the full path name to the specified file
+     */
+    public String getSamplesSourceFilename(String filename) {
+
+        String name = getTestSamplesSourceDirectory() + File.separator + filename;
+        return name;
+    }
+ 
+    public String getTestSamplesSourceDirectory() {
+        return "samps" + File.separator + "src";
     }
     
 }
