@@ -281,4 +281,13 @@ public class Ini {
     public void setIniFileURL(java.net.URL newIniFileURL) {
         iniFileURL = newIniFileURL;
     }
+
+    /**
+     * Returns the current hasmap.
+     * @return hashmap
+     */
+    public Hashtable<String, String> getHashmap() {
+        return nameValueHash;
+    }
+
 }

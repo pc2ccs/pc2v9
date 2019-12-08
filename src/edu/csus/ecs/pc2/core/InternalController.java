@@ -2761,7 +2761,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     System.err.println("Unable to load INI from " + iniName);
                     getLog().log(Log.WARNING, "Unable to read ini URL " + iniName);
                     exception = new Exception("Unable to read ini file " + iniName);
-                }
+                } 
             } catch (Exception e) {
                 System.err.println("Unable to load INI from " + iniName);
                 getLog().log(Log.WARNING, "Unable to read ini URL " + iniName, e);
@@ -2771,6 +2771,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             if (exception != null) {
                 fatalError("Cannot start PC^2, " + iniName + " cannot be read (" + exception.getMessage() + ")", exception);
             }
+            IniFile.setHashtable(ini.getHashmap());
         }
 
         contest.setSiteNumber(0);
