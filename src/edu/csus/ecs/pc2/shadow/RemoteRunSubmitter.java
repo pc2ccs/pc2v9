@@ -98,7 +98,7 @@ public class RemoteRunSubmitter {
         Language outLang = null;
         Language[] languages = contest.getLanguages();
         for (Language language : languages) {
-            if (language.getDisplayName().equals(languageName.trim())) {
+            if (language.getID().trim().equals(languageName.trim())) {
                 outLang = language;
             }
         }
@@ -109,7 +109,7 @@ public class RemoteRunSubmitter {
         Problem outProblem = null;
         Problem[] problems = contest.getProblems();
         for (Problem problem : problems) {
-            if (problem.getDisplayName().equals(problemName.trim())) {
+            if (problem.getShortName().trim().equals(problemName.trim())) {
                 outProblem = problem;
             }
         }
