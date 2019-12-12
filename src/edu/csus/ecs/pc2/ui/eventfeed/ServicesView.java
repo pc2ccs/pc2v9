@@ -123,7 +123,7 @@ public class ServicesView extends JFrame implements UIPlugin {
         }
     }
 
-    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+    public void setContestAndController(final IInternalContest inContest, final IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 

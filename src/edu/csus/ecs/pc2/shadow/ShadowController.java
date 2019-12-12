@@ -1,14 +1,21 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
-import java.util.List;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Run;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
@@ -206,13 +213,85 @@ public class ShadowController {
     }
     
     /**
+     * Returns a Map with keys that are submission ID Strings and values that are {@link ShadowJudgementPair}s 
+     * giving the judgements assigned to the specified submission by PC2 and the remote CCS respectively.
+     * 
+     * This method is only operative while Shadow operations are running; if shadowing is not running
+     * then the method returns null.  Null is also returned if there is a mismatch between the count or id's
+     * of the submissions received from the remote CCS and the local PC2 shadow system.
+     * 
+     * @return a Map mapping submissions to shadow judgement pairs, or null
+     */
+    public Map<String,ShadowJudgementPair> getJudgementComparison() {
+        
+        if (getStatus()!= SHADOW_CONTROLLER_STATUS.SC_RUNNING) {
+            //TODO: log this situation
+            return null;
+        } else {
+            //get a Map of the judgements assigned by the remote CCS; note that this map uses "remote event id"
+            // as the key and combines the submission ID with the Judgement acronym, separated by a colon, as the value
+            Map<String,String> remoteJudgementsMap = RemoteEventFeedMonitor.getRemoteJudgementsMap();
+            
+            //convert the Map to one with submission ID as key and acronym (judgement) as value
+            Map<String,String> remoteSubmissionsJudgementMap = new HashMap<String,String>();
+            for (String key : remoteJudgementsMap.keySet()) {
+                String value = remoteJudgementsMap.get(key) ;
+                String submissionID = value.substring(0, value.lastIndexOf(':'));
+                String judgementAcronym = value.substring(value.lastIndexOf(':'));
+                remoteSubmissionsJudgementMap.put(submissionID, judgementAcronym);
+            }
+            
+            //create a Map of the judgements assigned by PC2
+            Run[] runs = localContest.getRuns();
+            Map<String,String> pc2JudgementsMap = new HashMap<String,String>();
+            for (Run run : runs) {
+                JudgementRecord jr = run.getJudgementRecord();
+                ElementId judgementId = jr.getJudgementId();
+                Judgement judgement = localContest.getJudgement(judgementId) ;
+                String acronym = judgement.getAcronym() ;
+                String submissionID = String.valueOf(run.getNumber());
+                pc2JudgementsMap.put(submissionID, acronym);
+            }
+            
+            //verify that we have corresponding maps (from the remote vs. the local systems)
+            Set<String> remoteKeys = remoteSubmissionsJudgementMap.keySet();
+            Set<String> localKeys = pc2JudgementsMap.keySet();
+            if (!remoteKeys.equals(localKeys)) {
+                //TODO log this error, figure out what to return
+                System.err.println("Remote judgements map does not match local PC2 judgements map");
+            }
+            
+            //construct a single map combining the two sets of judgements
+            Map<String,ShadowJudgementPair> judgementsMap = new HashMap<String,ShadowJudgementPair>();
+            //first put into the combined map the judgements from the remote system, with the corresponding PC2 value
+            //   (which could be null if PC2 doesn't have a judgement for the corresponding submission)
+            for (String key : remoteKeys) {
+                ShadowJudgementPair pair = new ShadowJudgementPair(key, pc2JudgementsMap.get(key), 
+                                                    remoteSubmissionsJudgementMap.get(key));
+                judgementsMap.put(key, pair);
+            }
+            //now add judgements from the PC2 map that might not have existed in the remote map
+            for (String key : localKeys) {
+                if (!remoteSubmissionsJudgementMap.containsKey(key)) {
+                    ShadowJudgementPair pair = new ShadowJudgementPair(key, pc2JudgementsMap.get(key), 
+                            remoteSubmissionsJudgementMap.get(key));
+                    judgementsMap.put(key, pair);
+                }
+            }
+            
+            return judgementsMap;
+        }
+        
+    }
+    
+    /**
      * Returns a list of differences between the currently-configured remote contest
      * and the configuration of the local PC2 contest, or null if no remote contest configuration
      * has been obtained.
      * 
      * @return a List<String> of contest configuration differences, or null if no remote configuration is available
      */
-    public List<String> getDiffs() {
+    public List<String> getConfigurationDiffs() {
         
         List<String> diffs = null;
         if (remoteContestConfig != null) {
