@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -68,6 +69,7 @@ public class ShadowControlPane extends JPanePlugin {
     private JTextField lastEventTextfield;
     
     private ContestInformation savedContestInformation;
+    private JButton compareButton;
 
     /**
      * Constructs a new ShadowControlPane using the specified Contest and Controller.
@@ -120,6 +122,7 @@ public class ShadowControlPane extends JPanePlugin {
             buttonPanel.setPreferredSize(new Dimension(35, 35));
             buttonPanel.add(getUpdateButton(), null);
             buttonPanel.add(getStartButton(), null);
+            buttonPanel.add(getCompareButton());
             buttonPanel.add(getStopButton(), null);
         }
         return buttonPanel;
@@ -564,4 +567,28 @@ public class ShadowControlPane extends JPanePlugin {
 
     }
 
+    private JButton getCompareButton() {
+        if (compareButton == null) {
+        	compareButton = new JButton("Compare");
+        	compareButton.setMnemonic(KeyEvent.VK_C);
+        	compareButton.setToolTipText("Display comparison results");
+        	compareButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    if (shadowController==null) {
+                        showErrorMessage("No shadow controller available; cannot show comparison", "Missing Controller"); 
+                    } else {
+                        JFrame shadowCompareFrame = new ShadowCompareFrame(shadowController.getJudgementComparison());
+                        shadowCompareFrame.setLocationRelativeTo(null); // centers frame
+                        shadowCompareFrame.setSize(400,500);
+                        shadowCompareFrame.setTitle("Shadow Comparison");
+                        shadowCompareFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        shadowCompareFrame.setVisible(true);
+                    }
+                    
+                }
+            });
+
+        }
+        return compareButton;
+    }
 }
