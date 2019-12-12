@@ -438,14 +438,14 @@ public class ParseArguments {
         inStream.close();
         Set<Object> s = fileProps.keySet();
         for (Object key : s) {
-            String argKey = (String) key;
+            String argKey = ((String) key).trim();
             /**
              * only overwrite it not already present, so if they specify
              * a command line argument it has higher precedence than these
              * in the property file  
              */
             if (!isOptPresent(argKey)) {
-                argHash.put(argKey, fileProps.getProperty(argKey));
+                argHash.put(argKey, fileProps.getProperty(argKey).trim());
             }
         }
     }
