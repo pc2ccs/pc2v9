@@ -94,7 +94,7 @@ public class RemoteRunSubmitterTest extends AbstractTestCase{
                 
         List<IFile> auxFiles = new ArrayList<IFile>();
         
-        sub.submitRun(submitter.getName().toLowerCase(), prob.getDisplayName(), lang.getDisplayName(), mainFile, auxFiles, overrideTimeMS, overrideRunId);
+        sub.submitRun(submitter.getName().toLowerCase(), prob.getShortName(), lang.getID(), mainFile, auxFiles, overrideTimeMS, overrideRunId);
         
         assertEquals("Expecting number of runs ", 2,         contest.getRuns().length);
         
