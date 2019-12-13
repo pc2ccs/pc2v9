@@ -127,7 +127,7 @@ Sample submissions JSON from finals 2019 dom judge event feed.
                                     } else {
                                         System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
 
-                                        long overrideTimeMS = Utilities.stringToLong(runSubmission.getTime());
+                                        long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
                                         long overrideSubmissionID = Utilities.stringToLong(runSubmission.getId());
 
                                         List<IFile> files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
