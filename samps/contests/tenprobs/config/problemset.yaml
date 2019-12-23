@@ -1,0 +1,67 @@
+#
+# problemset.yaml - list of CCS problem definitions
+#
+# created on: Mon Dec 23 08:50:29 PST 2019
+# created by: $Id: mkprobset,v 1.8 2017/04/29 00:19:22 laned Exp $
+#
+problems:
+  - letter:     A
+    short-name: a
+
+    color:      Black
+    rgb:        '#000000'
+
+  - letter:     B
+    short-name: b
+
+    color:      White
+    rgb:        '#fbfbfb'
+
+  - letter:     C
+    short-name: c
+
+    color:      Red
+    rgb:        '#df1328'
+
+  - letter:     D
+    short-name: d
+
+    color:      Dark blue
+    rgb:        '#0967db'
+
+  - letter:     E
+    short-name: e
+
+    color:      Dark green
+    rgb:        '#399956'
+
+  - letter:     F
+    short-name: f
+
+    color:      Orange
+    rgb:        '#e38c3e'
+
+  - letter:     G
+    short-name: g
+
+    color:      Yellow
+    rgb:        '#f3eb4b'
+
+  - letter:     H
+    short-name: h
+
+    color:      Pink
+    rgb:        '#fb86d8'
+
+  - letter:     I
+    short-name: i
+
+    color:      Gold
+    rgb:        '#dfbd75'
+
+  - letter:     J
+    short-name: j
+
+    color:      Purple
+    rgb:        '#825eaa'
+
