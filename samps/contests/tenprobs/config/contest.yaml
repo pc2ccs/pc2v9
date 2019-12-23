@@ -1,0 +1,60 @@
+#
+#
+--- 
+
+name: Sumit Ten Problems  
+short-name: Sumit10
+
+ccs-test-mode : true
+
+duration:  5:00:00
+
+# freeze time before end of contest
+scoreboard-freeze: 01:00:00
+scoreboard-freeze-length: 01:00:00
+
+# pc2 specific settings
+# elapsed: 0:00:00
+# remaining: 5:00:00
+running: true
+
+# Halt contest clock at end of contest
+# auto-stop-clock-at-end: true
+
+# Do not halt contest clock at end of contest, default setting
+# auto-stop-clock-at-end: false
+
+
+# default pc2 judging types
+computer-judged: true
+manual-review: false
+send-prelim-judgement: false
+
+languages:
+  - name: 'Java'
+
+accounts:
+  - account: TEAM
+    site: 1
+    count: 80
+
+  - account: JUDGE
+    site: 1
+    count: 12
+
+  - account: SCOREBOARD
+    site: 1
+    count: 1
+
+  - account: FEEDER
+    site: 1
+    count: 1
+
+auto-judging:
+  - account: JUDGE
+    site: 1
+    number: 6,7,8,9
+    letters: All
+    enabled: yes
+
+# EOF Contest Configuration
