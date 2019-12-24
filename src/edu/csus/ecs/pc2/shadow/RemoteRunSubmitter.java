@@ -40,6 +40,17 @@ public class RemoteRunSubmitter {
         this.thisSiteNumber = contest.getSiteNumber();
     }
 
+    /**
+     * Submit a run to the server.
+     * 
+     * @param clientIdString - "teamN" client name
+     * @param problemName - problem name
+     * @param languageName - language name
+     * @param mainFile - main file name
+     * @param auxFiles - other submittted files 
+     * @param overrideTimeMS - override submission time in MS
+     * @param overrideRunId - override run id
+     */
     public void submitRun(String clientIdString, String problemName, String languageName, IFile mainFile, List<IFile> auxFiles, long overrideTimeMS, long overrideRunId) {
 
         isEmptyString(clientIdString, "ClientId parameter is null");
@@ -98,7 +109,7 @@ public class RemoteRunSubmitter {
         Language outLang = null;
         Language[] languages = contest.getLanguages();
         for (Language language : languages) {
-            if (language.getID().trim().equals(languageName.trim())) {
+            if (language.getDisplayName().trim().equals(languageName.trim())) {
                 outLang = language;
             }
         }
