@@ -60,11 +60,14 @@ public class RemoteRunSubmitterTest extends AbstractTestCase{
 
         assertEquals("Number of teams", 120, teams.length);
         
+        assertEquals("Expected languages in contest ", 6, contest.getLanguages().length);
         Account account = getRandomAccount(contest, Type.TEAM);
         ClientId team = account.getClientId();
-        Language lang = getRandomLanguage(contest);
-        Problem prob = getRandomProblem(contest);
+        Language language = getRandomLanguage(contest);
+        Problem problem = getRandomProblem(contest);
         
+        assertNotNull("Language should not be null ",language);
+        assertNotNull("Language name should not be null ",language.getDisplayName());
         
         assertNotNull(feeder);
         contest.setClientId(feeder.getClientId());
@@ -74,8 +77,6 @@ public class RemoteRunSubmitterTest extends AbstractTestCase{
 //        sub.submitRun(account.getClientId(), problemName, languageName, mainFile, auxFiles, overrideTimeMS, overrideRunId);
         
         ClientId submitter = team;
-        Problem problem = prob;
-        Language language = lang;
         SerializedFile mainSubmissionFile = new SerializedFile(getSamplesSourceFilename(SUMIT_SOURCE_FILENAME));
         SerializedFile[] additionalFiles = new SerializedFile[0];
         
@@ -94,7 +95,7 @@ public class RemoteRunSubmitterTest extends AbstractTestCase{
                 
         List<IFile> auxFiles = new ArrayList<IFile>();
         
-        sub.submitRun(submitter.getName().toLowerCase(), prob.getShortName(), lang.getID(), mainFile, auxFiles, overrideTimeMS, overrideRunId);
+        sub.submitRun(submitter.getName().toLowerCase(), problem.getShortName(), language.getDisplayName(), mainFile, auxFiles, overrideTimeMS, overrideRunId);
         
         assertEquals("Expecting number of runs ", 2,         contest.getRuns().length);
         
