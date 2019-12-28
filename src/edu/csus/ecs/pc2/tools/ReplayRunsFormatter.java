@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -388,26 +387,6 @@ public class ReplayRunsFormatter {
 
 
     /**
-     * Examines the specified actionMap containing PC2 Extract Replay Runs actions and updates the events
-     * in the specified eventMap accordingly.
-     * 
-     * @param eventMap a Map of PC2 events
-     * @param actionMap a map of PC2 Extract Replay Runs actions
-     */
-    private static void updateEventsFromActions(Map<String, Object> eventMap, Map<String, String> actionMap) {
-        
-        Set<String> keys = actionMap.keySet();
-        for (String key : keys) {
-            if (key.equals("RUN_SUBMIT")){
-                
-            }
-            
-        }
-        
-    }
-
-
-    /**
      * Parses a String containing a PC2 Extract Replay Runs "action" and returns a Map of the elements in the action.
      * 
      * As an example, the action
@@ -454,32 +433,17 @@ public class ReplayRunsFormatter {
 
 
     /**
-     * Returns a JSON string in CLICS "submission" format, corresponding to the PC2 "Extract Replay Runs Action"
-     * given in the specified String.
+     * Reads the given JSON string and returns a corresponding Map.
+     * Each "key" in the JSON string becomes a key in the returned map; the "value"
+     * stored under the key in the Map is the corresponding JSON value.  
+     * Operates recursively; each "value" in the returned Map is an Object and any
+     * JSON arrays or multi-data elements are returned as sub-Map Objects in the
+     * returned Map.
      * 
-     * If the given String cannot be parsed as a valid PC2 Extract Reply Runs Action, null is returned instead.
+     * @param jsonString the JSON string to be converted to a Map; must be legal JSON
      * 
-     * @param action a String containing a "RUN_SUBMIT" action from a PC2 Extract Replay Runs report
-     * 
-     * @return a String containing the CLICS JSON representation of the PC2 action, or null
+     * @return a Map of the JSON keys and corresponding Object values
      */
-    private static String getSubmissionJSON(String action) {
-        
-        String retVal = null; 
-        if (action!=null && action.trim().length()>0) {
-            retVal = "";
-            String [] fields = action.split("|");
-            for (String item : fields) {
-                if (item.contains("=")) {
-                    String value = item.substring(item.lastIndexOf('=')+1);
-                }
-            }
-        }
-
-        return retVal;
-    }
-
-
     @SuppressWarnings("unchecked")
     protected static Map<String, Object> getEventMap(String jsonString) {
         
