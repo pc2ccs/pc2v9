@@ -16,6 +16,7 @@ import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.report.EventFeedJSONReport;
 import edu.csus.ecs.pc2.core.report.ExtractPlaybackLoadFilesReport;
@@ -37,6 +38,9 @@ import edu.csus.ecs.pc2.core.report.ExtractPlaybackLoadFilesReport;
  *
  */
 public class ReplayRunsFormatter {
+
+    //a map to hold global judgement types defined by "judgement-types" events in the event feed
+    static Map<String,CLICSJudgementType> judgementTypes = new HashMap<String,CLICSJudgementType>();
 
     /**
      * Run the ReplayRunsFormatter.  Reads the specified input files and produces a merged
@@ -119,7 +123,7 @@ public class ReplayRunsFormatter {
                                //we've already seen such an action; put this one in the duplicates list
                                duplicateJudgementActions.add(singleActionMap);
                            } else {
-                               //save the action in the allJudgementActions map under the submission ID
+                               //save the action in the allJudgementActions map under the judgement ID
                                judgementActions.put(judgementID, singleActionMap);
                            }
                            break;
@@ -162,9 +166,11 @@ public class ReplayRunsFormatter {
         int submissionEventCount = 0;
         int updatedSubmissionCount = 0;
         int judgementEventCount = 0;
-        int updatedJudgementCount = 0;
+        int verifiedJudgementCount = 0;
         int otherEventCount = 0;
         int errorCount = 0;
+        
+
         while (scanner.hasNextLine()) {
            String line = scanner.nextLine();
            
@@ -179,8 +185,15 @@ public class ReplayRunsFormatter {
                //get the type of event
                String eventType = (String) eventMap.get("type");
                
-               //check if this is an event we may want to update
-               if (eventType!=null && (eventType.equals("submissions")||eventType.equals("judgements"))) {
+               //check if this is an event we want to process
+               if (eventType!=null && 
+                       (eventType.equals("submissions")
+                        ||eventType.equals("judgements")
+                        || eventType.equals("judgement-types")
+                       ) 
+                   ) {
+                   
+                   String eventSubmissionID ;
                    
                    switch (eventType) {
                        case "submissions":
@@ -188,10 +201,10 @@ public class ReplayRunsFormatter {
                            submissionEventCount++ ;
                            
                            //get the event data out of the submission event
-                           Map<String,Object> data = (Map<String,Object>) eventMap.get("data");
+                           Map<String,Object> submissionData = (Map<String,Object>) eventMap.get("data");
                            
                            //get the submission ID out of the event data
-                           String eventSubmissionID = (String) data.get("id");
+                           eventSubmissionID = (String) submissionData.get("id");
                            
                            //see if we have a valid string for the submission ID from the event feed data
                             if (eventSubmissionID != null && !eventSubmissionID.equals("")) {
@@ -218,7 +231,7 @@ public class ReplayRunsFormatter {
 
                             } else {
                                 //we have a bad submission ID from the event map data
-                                System.err.println ("Found bad submission ID in event file data: '" + eventSubmissionID + "'");
+                                System.err.println ("Found bad submission ID in submission event in event file data: '" + eventSubmissionID + "'");
                                 // throw ??;   errorCount++ ; ???
                             }
                             
@@ -227,8 +240,77 @@ public class ReplayRunsFormatter {
                        case "judgements":
                            
                            judgementEventCount++ ;
-                           updatedJudgementCount++ ;
-                           break;
+
+                           //get the event data out of the judgement event
+                           Map<String,Object> judgementData = (Map<String,Object>) eventMap.get("data");
+                           
+                           //get the judgement ID out of the event data
+                           String eventJudgementID = (String) judgementData.get("id");
+                           
+                           //get the submission ID out of the event data
+                           eventSubmissionID = (String) judgementData.get("submission_id");
+                           
+                           //see if we have a valid string for both the submissionID and the judgementID from the event feed data
+                            if (eventSubmissionID != null && !eventSubmissionID.equals("")
+                                    && eventJudgementID!=null && !eventJudgementID.equals("")) {
+
+                                // see if we have a run_judgement action in the actions map for this judgement event
+                                String actionJudgementID = judgementActions.get(eventJudgementID).get("id");
+                                
+                                if (actionJudgementID!=null && !actionJudgementID.equals("")) {
+
+                                    // we found a judgement in the action map that corresponds to an event feed judgement;
+                                    // verify that all corresponding fields match between the action and the event
+                                    boolean ok = verifyJudgementEventData(eventMap, judgementActions.get(actionJudgementID));
+
+                                    if (ok) {
+                                        verifiedJudgementCount++;
+                                    } else {
+                                        errorCount++;
+                                    }
+
+                                } else {
+                                    // we have a submission event with no corresponding action -- does this make sense???
+                                    System.err.println("Found judgement event in event feed with no corresponding action in ExtractedRuns file!?!");
+//                                throw ??? ;  errorCount++ ; ???
+                                }
+
+                            } else {
+                                //we have a bad submission ID from the event map data
+                                System.err.println ("Found bad submission ID or judgement ID in judgement event in event file data: " 
+                                            + " submissionID = '"+ eventSubmissionID + "';"
+                                            + " judgementID = '" + eventJudgementID + "'");
+                                // throw ??;   errorCount++ ; ???
+                            }   
+                           
+                           break;  //end of case "judgements"
+                           
+                       case "judgement-types" :
+                           
+                           //check whether we're adding a judgement type, or deleting one
+                           String operation = (String) eventMap.get("op");
+                           
+                           //get the event data out of the judgement-types event
+                           Map<String,Object> judgementTypesData = (Map<String,Object>) eventMap.get("data");
+
+                           //get the id (acronym) out of the data
+                           String acronym = (String) judgementTypesData.get("id");
+                           
+                           if (operation!=null) {
+                               if (operation.equals("delete")) {
+                                   judgementTypes.remove(acronym);
+                               } else {
+                                   //add a new judgement type to the Map of known judgements
+                                   String name = (String) judgementTypesData.get("name");
+                                   boolean penalty = (boolean) judgementTypesData.get("penalty");
+                                   boolean solved = (boolean) judgementTypesData.get("solved");
+                                   CLICSJudgementType newJudgement = new CLICSJudgementType(acronym,name,penalty,solved);
+                                   judgementTypes.put(acronym, newJudgement);
+                               }
+                               
+                           }
+                           
+                           break;  //end of case "judgement types"
                            
                        default:
                            System.err.println ("Unexplained condition in main regarding event type " + eventType);
@@ -260,12 +342,52 @@ public class ReplayRunsFormatter {
         System.out.println ("  including " + submissionEventCount + " submission events, " 
                                 + judgementEventCount + " judgement events, and " + otherEventCount + " other events");
         System.out.println ("Updated " + updatedSubmissionCount + " submission events");
-        System.out.println ("Would have updated " + updatedJudgementCount + " judgement events");
+        System.out.println ("Verified " + verifiedJudgementCount + " judgement events");
         System.out.println ("Found " + errorCount + " errors during updating");
                 
     }
 
     
+    /**
+     * Compares the data in the specified eventMap (which was created from a "submissions" event line in the pc2 
+     * event feed file) with the data in the specified actionMap 
+     * (which was created from a RUN_JUDGEMENT line in the PC2 Extract Replay Runs action file).
+     *  
+     * @param eventMap a map of event feed element names ("type", "id", "op", or "data") to Objects containing the 
+     *                  corresponding value
+     * @param actionMap a map of PC2 Extract Replay Runs "RUN_JUDGEMENT action element names 
+     *                  ("action", "id", "site", "solved", "preliminary", "judgeclient", "judgeclientsite",
+     *                   "judged_elapsed_time", "computer_judged", "judgement", or "senttoteams")
+     *                   to Strings containing the corresponding value
+     *                  
+     * @return true if all the data in the actionMap is consistent with that in the eventMap; 
+     *          false if one or more data values is inconsistent
+     * 
+     */
+    private static boolean verifyJudgementEventData(Map<String, Object> eventMap, Map<String, String> actionMap) {
+        
+        //get the data out of the event map
+        Map<String,String> eventData = (Map<String,String>) eventMap.get("data");
+        
+        //verify the ids are valid and that at least one of the IDs in the event matches the action ID
+        String eventID = eventData.get("id");
+        String eventSubmissionID = eventData.get("submission_id");
+        String actionID = actionMap.get("id");
+        if ( (eventID==null || eventSubmissionID==null || actionID==null)
+             ||  (!eventID.equals(actionID) && (!eventSubmissionID.equals(actionID)) ) ) {
+            return false ;
+        }
+        
+        //verify that the "solved" field in the action is consistent with the judgement_type_id in the event
+        boolean actionIndicatesSolved = Boolean.parseBoolean(actionMap.get("solved"));
+        boolean eventIndicatesSolved  = judgementTypes.get(eventData.get("judgement_type_id")).isSolved();
+        if (eventIndicatesSolved!=actionIndicatesSolved) {
+            return false;
+        }
+        
+        return true;
+    }
+
     /**
      * Returns a JSON string representing the contents of the specified Map.
      * This method uses the Jackson {@link ObjectMapper#writeValueAsString(Object)} method
@@ -284,8 +406,7 @@ public class ReplayRunsFormatter {
         String jsonString;
         
         ObjectMapper mapper = new ObjectMapper();
-//        mapper.configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, false);
-//        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+
         try {
             jsonString = mapper.writeValueAsString(eventMap);
         } catch (IOException e) {
@@ -308,13 +429,15 @@ public class ReplayRunsFormatter {
 
 
     /**
-     * Updates the submission data in the specified eventMap (which was created from a line in the pc2 event feed file)
-     * from the data in the specified actionMap (which was created from a line in the PC2 Extract Replay Runs action file).
+     * Updates the submission data in the specified eventMap (which was created from a "submissions" event 
+     * line in the pc2 event feed file) from the data in the specified actionMap 
+     * (which was created from a RUN_SUBMIT line in the PC2 Extract Replay Runs action file).
      *  
-     * @param eventMap a map of event feed element names (e.g. "type", "id", "op", or "data") to Objects containing the 
+     * @param eventMap a map of event feed element names ("type", "id", "op", or "data") to Objects containing the 
      *                  corresponding value
-     * @param actionMap a map of PC2 Extract Replay Runs action element names (e.g. "action", "id", "elapsed", "language",
-     *                  "problem", "site", "submitclient", or "mainfile") to Strings containing the corresponding value
+     * @param actionMap a map of PC2 Extract Replay Runs RUN_SUBMIT action element names 
+     *                  ("action", "id", "elapsed", "language", "problem", "site", "submitclient", or "mainfile") 
+     *                  to Strings containing the corresponding value
      *                  
      * @return true if updating the eventMap was successful; false if an error occurred during updating
      */
