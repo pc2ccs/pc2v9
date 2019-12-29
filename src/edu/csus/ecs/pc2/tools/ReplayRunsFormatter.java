@@ -350,7 +350,7 @@ public class ReplayRunsFormatter {
         
         System.out.println ("Found " + totalEventCount + " events in PC2 Event Feed file '" + pc2ef.getName() + "'");
         System.out.println ("  including " + submissionEventCount + " submission events, " 
-                                + judgementEventCount + " judgement events,"
+                                + judgementEventCount + " judgement events, "
                                 + judgementTypeEventCount + " judgement-types events, and " 
                                 + otherEventCount + " other events");
         System.out.println ("Updated " + updatedSubmissionCount + " submission events");
