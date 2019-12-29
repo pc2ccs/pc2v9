@@ -167,6 +167,8 @@ public class ReplayRunsFormatter {
         int updatedSubmissionCount = 0;
         int judgementEventCount = 0;
         int verifiedJudgementCount = 0;
+        int judgementTypeEventCount = 0;
+        int processedJudgementTypeCount = 0;
         int otherEventCount = 0;
         int errorCount = 0;
         
@@ -226,13 +228,13 @@ public class ReplayRunsFormatter {
                                 } else {
                                     // we have a submission event with no corresponding action -- does this make sense???
                                     System.err.println("Found submission event in event feed with no corresponding action in ExtractedRuns file!?!");
-//                                throw ??? ;  errorCount++ ; ???
+                                    errorCount++ ; 
                                 }
 
                             } else {
                                 //we have a bad submission ID from the event map data
                                 System.err.println ("Found bad submission ID in submission event in event file data: '" + eventSubmissionID + "'");
-                                // throw ??;   errorCount++ ; ???
+                                errorCount++ ;
                             }
                             
                             break; //end of case "submissions"    
@@ -272,7 +274,7 @@ public class ReplayRunsFormatter {
                                 } else {
                                     // we have a submission event with no corresponding action -- does this make sense???
                                     System.err.println("Found judgement event in event feed with no corresponding action in ExtractedRuns file!?!");
-//                                throw ??? ;  errorCount++ ; ???
+                                    errorCount++ ;
                                 }
 
                             } else {
@@ -280,12 +282,14 @@ public class ReplayRunsFormatter {
                                 System.err.println ("Found bad submission ID or judgement ID in judgement event in event file data: " 
                                             + " submissionID = '"+ eventSubmissionID + "';"
                                             + " judgementID = '" + eventJudgementID + "'");
-                                // throw ??;   errorCount++ ; ???
+                                errorCount++ ; 
                             }   
                            
                            break;  //end of case "judgements"
                            
                        case "judgement-types" :
+                           
+                           judgementTypeEventCount++ ;
                            
                            //check whether we're adding a judgement type, or deleting one
                            String operation = (String) eventMap.get("op");
@@ -308,12 +312,18 @@ public class ReplayRunsFormatter {
                                    judgementTypes.put(acronym, newJudgement);
                                }
                                
+                               processedJudgementTypeCount++ ;  
+                               
+                           } else {
+                               System.err.println ("Found null operation in event feed");
+                               errorCount++ ;
                            }
                            
-                           break;  //end of case "judgement types"
+                           break;  //end of case "judgement-types"
                            
                        default:
                            System.err.println ("Unexplained condition in main regarding event type " + eventType);
+                           errorCount++ ;
                    }
                } else {
                    otherEventCount++ ;
@@ -340,10 +350,13 @@ public class ReplayRunsFormatter {
         
         System.out.println ("Found " + totalEventCount + " events in PC2 Event Feed file '" + pc2ef.getName() + "'");
         System.out.println ("  including " + submissionEventCount + " submission events, " 
-                                + judgementEventCount + " judgement events, and " + otherEventCount + " other events");
+                                + judgementEventCount + " judgement events,"
+                                + judgementTypeEventCount + " judgement-types events, and " 
+                                + otherEventCount + " other events");
         System.out.println ("Updated " + updatedSubmissionCount + " submission events");
         System.out.println ("Verified " + verifiedJudgementCount + " judgement events");
-        System.out.println ("Found " + errorCount + " errors during updating");
+        System.out.println ("Processed " + processedJudgementTypeCount + " judgement-types events");
+        System.out.println ("Found " + errorCount + " errors during processing");
                 
     }
 
