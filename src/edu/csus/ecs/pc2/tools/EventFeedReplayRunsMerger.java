@@ -257,7 +257,8 @@ public class EventFeedReplayRunsMerger {
                                     && eventJudgementID!=null && !eventJudgementID.equals("")) {
 
                                 // see if we have a run_judgement action in the actions map for this judgement event
-                                String actionJudgementID = judgementActions.get(eventJudgementID).get("id");
+//                                String actionJudgementID = judgementActions.get(eventJudgementID).get("id");
+                                String actionJudgementID = judgementActions.get(eventSubmissionID).get("id");
                                 
                                 if (actionJudgementID!=null && !actionJudgementID.equals("")) {
 
