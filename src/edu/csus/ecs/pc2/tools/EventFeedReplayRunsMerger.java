@@ -169,6 +169,8 @@ public class EventFeedReplayRunsMerger {
         int verifiedJudgementCount = 0;
         int judgementTypeEventCount = 0;
         int processedJudgementTypeCount = 0;
+        int clarEventCount = 0;
+        int clarReplacementCount = 0;
         int otherEventCount = 0;
         int errorCount = 0;
         
@@ -188,12 +190,7 @@ public class EventFeedReplayRunsMerger {
                String eventType = (String) eventMap.get("type");
                
                //check if this is an event we want to process
-               if (eventType!=null && 
-                       (eventType.equals("submissions")
-                        ||eventType.equals("judgements")
-                        || eventType.equals("judgement-types")
-                       ) 
-                   ) {
+               if (eventType!=null) {
                    
                    String eventSubmissionID ;
                    
@@ -322,12 +319,38 @@ public class EventFeedReplayRunsMerger {
                            
                            break;  //end of case "judgement-types"
                            
+                       case "clarifications" :
+                           
+                           clarEventCount++ ;
+                           
+                           //need to escape any double-quotes in the clar text
+                           
+                           //get the event data out of the clarification event
+                           Map<String,Object> clarData = (Map<String,Object>) eventMap.get("data");
+                           
+                           //get the clar text out of the data
+                           String clarText = (String) clarData.get("text");
+                           
+                           if (clarText.contains("\"")) {
+                               
+                               System.out.println("Found clar text: [" + clarText + "]");
+                               clarText = clarText.replaceAll("\"", "\\\\\"");
+                               System.out.println("Replacing with : [" + clarText + "'");
+                               
+                               clarData.put("text", clarText);
+                               
+                               clarReplacementCount++;
+                           }
+                           
+                           break;  //end of case "clarifications"
+                           
                        default:
-                           System.err.println ("Unexplained condition in main regarding event type " + eventType);
-                           errorCount++ ;
+                           otherEventCount++ ;
+                           
                    }
                } else {
-                   otherEventCount++ ;
+                   System.err.println ("Found null event in input");
+                   errorCount++ ;
                }
                
                //get the JSON representation of the (possibly updated) event in the eventMap
@@ -352,11 +375,15 @@ public class EventFeedReplayRunsMerger {
         System.out.println ("Found " + totalEventCount + " events in PC2 Event Feed file '" + pc2ef.getName() + "'");
         System.out.println ("  including " + submissionEventCount + " submission events, " 
                                 + judgementEventCount + " judgement events, "
-                                + judgementTypeEventCount + " judgement-types events, and " 
+                                + judgementTypeEventCount + " judgement-types events, " 
+                                + clarEventCount + " clarification events, and "
                                 + otherEventCount + " other events");
-        System.out.println ("Updated " + updatedSubmissionCount + " submission events");
-        System.out.println ("Verified " + verifiedJudgementCount + " judgement events");
-        System.out.println ("Processed " + processedJudgementTypeCount + " judgement-types events");
+        int total = submissionEventCount + judgementEventCount + judgementTypeEventCount + clarEventCount + otherEventCount ;
+        System.out.println ("Processed " + total + " events, including: ");
+        System.out.println ("  Updated " + updatedSubmissionCount + " submission events");
+        System.out.println ("  Verified " + verifiedJudgementCount + " judgement events");
+        System.out.println ("  Saved " + processedJudgementTypeCount + " judgement-types events");
+        System.out.println ("  Edited " + clarReplacementCount + " clarification events");
         System.out.println ("Found " + errorCount + " errors during processing");
                 
     }
