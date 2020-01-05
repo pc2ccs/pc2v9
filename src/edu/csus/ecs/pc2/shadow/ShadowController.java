@@ -237,7 +237,7 @@ public class ShadowController {
             for (String key : remoteJudgementsMap.keySet()) {
                 String value = remoteJudgementsMap.get(key) ;
                 String submissionID = value.substring(0, value.lastIndexOf(':'));
-                String judgementAcronym = value.substring(value.lastIndexOf(':'));
+                String judgementAcronym = value.substring(value.lastIndexOf(':')+1);
                 remoteSubmissionsJudgementMap.put(submissionID, judgementAcronym);
             }
             
@@ -245,12 +245,25 @@ public class ShadowController {
             Run[] runs = localContest.getRuns();
             Map<String,String> pc2JudgementsMap = new HashMap<String,String>();
             for (Run run : runs) {
+                boolean error = false ;
                 JudgementRecord jr = run.getJudgementRecord();
-                ElementId judgementId = jr.getJudgementId();
-                Judgement judgement = localContest.getJudgement(judgementId) ;
-                String acronym = judgement.getAcronym() ;
-                String submissionID = String.valueOf(run.getNumber());
-                pc2JudgementsMap.put(submissionID, acronym);
+                if (jr!=null) {
+                    ElementId judgementId = jr.getJudgementId();
+                    Judgement judgement = localContest.getJudgement(judgementId);
+                    if (judgement!=null) {
+                        String acronym = judgement.getAcronym();
+                        String submissionID = String.valueOf(run.getNumber());
+                        pc2JudgementsMap.put(submissionID, acronym);
+                    } else {
+                        error = true;
+                    }
+                } else {
+                    error = true;
+                }
+                if (error) {
+                    System.err.println ("Error in getJudgementComparison(): either run has no JudgementRecord "
+                                        + "or cannot find corresponding judgement value");
+                }
             }
             
             //verify that we have corresponding maps (from the remote vs. the local systems)
