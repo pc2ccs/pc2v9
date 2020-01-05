@@ -186,6 +186,11 @@ public class EventFeedReplayRunsMerger {
                //convert the pc2 event into a map
                Map<String,Object> eventMap = getEventMap(line);
                
+//               System.out.println("Elements in eventMap:");
+//               for (String key : eventMap.keySet()) {
+//                   System.out.println(key + "  " + eventMap.get(key));
+//               }
+               
                //get the type of event
                String eventType = (String) eventMap.get("type");
                
@@ -202,6 +207,11 @@ public class EventFeedReplayRunsMerger {
                            //get the event data out of the submission event
                            Map<String,Object> submissionData = (Map<String,Object>) eventMap.get("data");
                            
+//                           System.out.println("submissionData map contains:");
+//                           for (String key : submissionData.keySet()) {
+//                               System.out.println (" " + key + " " + submissionData.get(key));
+//                           }
+                           
                            //get the submission ID out of the event data
                            eventSubmissionID = (String) submissionData.get("id");
                            
@@ -216,6 +226,8 @@ public class EventFeedReplayRunsMerger {
                                     // update the submission in the event map
                                     boolean ok = updateSubmissionEventData(eventMap, submissionActions.get(actionSubmissionID));
 
+//                                    System.out.println ("Retrieved from eventMap:");
+//                                    System.out.println (((Map<String,Object>)eventMap.get("data")).get("files"));
                                     if (ok) {
                                         updatedSubmissionCount++;
                                     } else {
@@ -333,9 +345,10 @@ public class EventFeedReplayRunsMerger {
                            
                            if (clarText.contains("\"")) {
                                
-                               System.out.println("Found clar text: [" + clarText + "]");
+                               //send diagnostics to stderr because stdout may have been redirected (per above)
+//                               System.err.println("Found clar text: [" + clarText + "]");
                                clarText = clarText.replaceAll("\"", "\\\\\"");
-                               System.out.println("Replacing with : [" + clarText + "'");
+//                               System.err.println("Replacing with : [" + clarText + "'");
                                
                                clarData.put("text", clarText);
                                
@@ -355,6 +368,23 @@ public class EventFeedReplayRunsMerger {
                
                //get the JSON representation of the (possibly updated) event in the eventMap
                String eventOutputString = getJSON(eventMap);
+               
+//               System.out.println ("JSON from eventMap:");
+//               System.out.println (eventOutputString);
+               
+               //post-process JSON to work around Jackson ObjectMapper's inability to avoid quoting the "files" element
+               if (eventType.equals("submissions")) {
+                   int index = eventOutputString.indexOf("\"files\":\"");
+                   if (index != -1) {
+                       eventOutputString = eventOutputString.replaceFirst("\"files\":\"", "\"files\":");
+                       eventOutputString = eventOutputString.replaceFirst("]\"", "]");
+                   } else {
+                       System.err.println ("\"files\":\"" + " not found in eventOutputString");
+                   }
+               }
+               
+//               System.out.println("JSON after post-processing:");
+//               System.out.println(eventOutputString);
 
                if (eventOutputString!=null) {
                 //output the JSON event to the output channel
@@ -362,6 +392,11 @@ public class EventFeedReplayRunsMerger {
                } else {
                    System.err.println ("Error: converting event to JSON resulted in null");
                }
+               
+//               String type = (String) eventMap.get("type");
+//               if (type.equals("submissions")) {
+//                   System.exit(1);
+//               }
                
                
            } //if (ef file input line matches event pattern)
@@ -446,23 +481,38 @@ public class EventFeedReplayRunsMerger {
     private static String getJSON(Map<String, Object> eventMap) {
         String jsonString;
         
+        Map<String,Object> data = (Map<String,Object>) eventMap.get("data");
+        String fileList = (String) data.get("files");
+        
+//        System.out.println ("files data from eventMap.data:");
+//        System.out.println (fileList);
+        
         ObjectMapper mapper = new ObjectMapper();
 
         try {
             jsonString = mapper.writeValueAsString(eventMap);
+            
+//            System.out.println ("JSON eventMap string from mapper:");
+//            System.out.println (jsonString);
+            
+//            String jsonString2 = mapper.writeValueAsString(((Map<String,Object>)eventMap.get("data")).get("files"));
+//            System.out.println("JSON dataMap string from mapper:");
+//            System.out.println(jsonString2);
+                        
+            
         } catch (IOException e) {
             e.printStackTrace(System.err);
             return null;
         }
         
-//      System.out.println ("Before replacement: \n" + eventOutputString);
+//      System.out.println ("Before replacement: \n" + jsonString);
         
       //replace "backslash-quote" (\") added by Jackson ObjectMapper with just a double-quote (")
         jsonString = jsonString.replaceAll("\\\\\"", "\"");  
       
       //replace double-backslashes (\\) added by Jackson ObjectMapper with just a single backslash (\)
         jsonString = jsonString.replaceAll("\\\\\\\\", "\\\\");   
-//      System.out.println ("After replacement: \n" + eventOutputString);
+//      System.out.println ("After replacement: \n" + jsonString);
 
 
         return jsonString ;
@@ -485,7 +535,8 @@ public class EventFeedReplayRunsMerger {
     private static boolean updateSubmissionEventData(Map<String, Object> eventMap, Map<String,String> actionMap) {
 
         //get the data out of the event map
-        Map<String,String> eventData = (Map<String,String>) eventMap.get("data");
+//        Map<String,String> eventData = (Map<String,String>) eventMap.get("data");
+        Map<String,Object> eventData = (Map<String,Object>) eventMap.get("data");
         
         //verify the event and the action are for the same submission
         if (!eventData.get("id").equals(actionMap.get("id"))) {
@@ -495,7 +546,7 @@ public class EventFeedReplayRunsMerger {
         //verify the elapsed time in the action map is consistent with the contest time in the event (action map times
         //  are truncated to whole minutes)
         String actionElapsedTime = actionMap.get("elapsed");
-        String eventContestTime = eventData.get("contest_time");
+        String eventContestTime = (String) eventData.get("contest_time");
         
         Long fullTime = Utilities.convertCLICSContestTimeToMS(eventContestTime);
         if (fullTime!=Long.MIN_VALUE) {
@@ -516,7 +567,7 @@ public class EventFeedReplayRunsMerger {
         
         //verify the team id in the action map is consistent with the team id in the event
         String actionTeam = actionMap.get("submitclient");
-        String eventTeam = eventData.get("team_id");
+        String eventTeam = (String) eventData.get("team_id");
         
         //strip the leading "team" off the action id
         int actionTeamNum = Integer.parseInt(actionTeam.substring(4)) ;
@@ -532,14 +583,24 @@ public class EventFeedReplayRunsMerger {
         
         //hack to circumvent the problem that the Extract Replay Runs report fails to include a drive spec on Windows
         if (!actionFileName.startsWith("/") && !actionFileName.matches("^(A-Za-z):\\.*$")) {
-            //the file doesn't start with either a "/" or a driveLetter:\ pattern; let's add a default drive letter
+            //the file doesn't start with either a "/" or a "driveLetter:\" pattern; let's add a default drive letter
             // TODO:  NOTE THAT THIS MAKES THIS CODE ASSUME DRIVE "c:";   THIS NEEDS TO BE FIXED!!!
             actionFileName = "C:\\" + actionFileName ;   
         }
         
+        //force all Windows file path "\" characters to be escaped (convert "\" to "\\")
+        actionFileName = escapeBackslashes(actionFileName);
+        
         //put the filename from the action into the event
-        String updatedFileRef = "[{\"href\":\"" + actionFileName + "\",\"mime\":\"application/zip\"}]" ;
-        eventData.put("files", updatedFileRef);
+        Object updatedFileRef = "[{\"href\":\"" + actionFileName + "\",\"mime\":\"application/zip\"}]" ;
+        
+//        System.out.println ("Inserting into eventData: ");
+//        System.out.println (updatedFileRef.toString());
+        
+        eventData.put("files", (Object)updatedFileRef);
+        
+//        System.out.println ("Retrieved from eventData:");
+//        System.out.println (eventData.get("files"));
         
         //TODO: *** compare language ids between Action and Event???
         
@@ -547,6 +608,27 @@ public class EventFeedReplayRunsMerger {
         
         
         return true ;
+    }
+
+
+    /**
+     * Converts all occurrences of "\" in the input String to "\\" (escaped backslashes).
+     * 
+     * @param actionFileName a String possibly containing backslash character
+     * 
+     * @return a new String with every backslash character replaced by a double-backslash
+     */
+    private static String escapeBackslashes(String actionFileName) {
+        
+//        System.err.println ("Original string:");
+//        System.err.println (actionFileName);
+        
+        String retStr = actionFileName.replaceAll("\\\\", "\\\\\\\\");
+        
+//        System.err.println ("Escaped string:");
+//        System.err.println (retStr);
+        
+        return retStr ;
     }
 
 
@@ -614,6 +696,9 @@ public class EventFeedReplayRunsMerger {
         if (jsonString == null){
             return null;
         }
+        
+//        System.out.println ("JSON being converted to Event Map: ");
+//        System.out.println (jsonString);
         
         ObjectMapper mapper = new ObjectMapper();
         try {
