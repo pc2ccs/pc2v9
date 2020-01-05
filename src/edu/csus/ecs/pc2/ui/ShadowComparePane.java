@@ -37,16 +37,18 @@ public class ShadowComparePane extends JPanePlugin {
         
         if (map != null && !map.keySet().isEmpty()) {
             
-            String[] columnNames = { "Submission ID", "PC2", "Remote CCS" };
-            Object[][] data = new Object[map.size()][3];
+            String[] columnNames = { "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
+            Object[][] data = new Object[map.size()][4];
             int row = 0;
             for (String key : map.keySet()) {
                 data[row][0] = key;
                 data[row][1] = map.get(key).getPc2Judgement();
                 data[row][2] = map.get(key).getRemoteCCSJudgement();
+                data[row][3] = ((String)data[row][1]).equalsIgnoreCase((String)data[row][2]) ? "Y" : "N" ;
                 row++;
             }
             JTable results = new JTable(data, columnNames);
+            results.setAutoCreateRowSorter(true);
             
             DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
             centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
