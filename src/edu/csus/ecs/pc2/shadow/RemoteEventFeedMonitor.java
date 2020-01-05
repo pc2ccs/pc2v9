@@ -62,6 +62,8 @@ public class RemoteEventFeedMonitor implements Runnable {
     
     @Override
     public void run() {
+        
+        Thread.currentThread().setName("RemoteEventFeedMonitorThread");
 
         keepRunning = true;
         
