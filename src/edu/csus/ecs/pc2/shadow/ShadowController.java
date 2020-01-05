@@ -283,11 +283,13 @@ public class ShadowController {
                                                     remoteSubmissionsJudgementMap.get(key));
                 judgementsMap.put(key, pair);
             }
+            
+            //why is this block necessary?  The above check for remoteKey.equals(localKeys) should make it a no-op...
             //now add judgements from the PC2 map that might not have existed in the remote map
             for (String key : localKeys) {
                 if (!remoteSubmissionsJudgementMap.containsKey(key)) {
                     ShadowJudgementPair pair = new ShadowJudgementPair(key, pc2JudgementsMap.get(key), 
-                            remoteSubmissionsJudgementMap.get(key));
+                            remoteSubmissionsJudgementMap.get(key));  //this will always return null!
                     judgementsMap.put(key, pair);
                 }
             }
