@@ -77,13 +77,14 @@ public class EventFeedReplayRunsMerger {
         Scanner scanner ;
         
         int actionCount = 0;
+        int skippedPreliminaryJudgementActionCount = 0;
         //a map to hold submission actions
         Map<String,Map<String,String>> submissionActions = new HashMap<String,Map<String,String>>();
         //a list to hold duplicated submission actions
         List<Map<String,String>> duplicateSubmissionActions = new ArrayList<Map<String,String>>();
         //a map to hold judgement actions
         Map<String,Map<String,String>> judgementActions = new HashMap<String,Map<String,String>>();
-        //a map to hold duplicated judgement actions
+        //a list to hold duplicated judgement actions (because we can't store multiple things under the same id in a map)
         List<Map<String,String>> duplicateJudgementActions = new ArrayList<Map<String,String>>();
         
         //read all replay actions into a map, checking for duplicates and saving them separately
@@ -104,6 +105,7 @@ public class EventFeedReplayRunsMerger {
                
                if (actionType!=null && !actionType.equals("")) {
                    switch (actionType) {
+                       
                        case "RUN_SUBMIT":
                            //check if we already have a submission action with this ID
                            String submissionID = singleActionMap.get("id");
@@ -117,14 +119,23 @@ public class EventFeedReplayRunsMerger {
                            break;
                            
                        case "RUN_JUDGEMENT":
-                           //check if we already have a judgement action with this ID
-                           String judgementID = singleActionMap.get("id");
-                           if (judgementActions.containsKey(judgementID)) {
-                               //we've already seen such an action; put this one in the duplicates list
-                               duplicateJudgementActions.add(singleActionMap);
+                           //see if this is a "preliminary" judgement
+                           String isPrelim = singleActionMap.get("preliminary");
+                           
+                           //process only if not prelim judgement
+                           if (!(isPrelim==null) && !isPrelim.trim().equalsIgnoreCase("true")) {
+                               
+                               //check if we already have a judgement action with this ID
+                               String judgementID = singleActionMap.get("id");
+                               if (!judgementActions.containsKey(judgementID)) {
+                                   //save the action in the allJudgementActions map under the judgement ID
+                                   judgementActions.put(judgementID, singleActionMap);
+                               } else {
+                                   //we've already seen such an action; put this one in the duplicates list for later
+                                   duplicateJudgementActions.add(singleActionMap);
+                               }
                            } else {
-                               //save the action in the allJudgementActions map under the judgement ID
-                               judgementActions.put(judgementID, singleActionMap);
+                               skippedPreliminaryJudgementActionCount++ ;
                            }
                            break;
                        default: 
@@ -142,16 +153,27 @@ public class EventFeedReplayRunsMerger {
         System.out.println ("Put " + submissionActions.keySet().size() + " actions in the submission actions map" );
         System.out.println ("Put " + duplicateSubmissionActions.size() + " actions in the duplicate submission actions list" );
         System.out.println ("Put " + judgementActions.keySet().size() + " actions in the judgement actions map" );
-        System.out.println ("Put " + duplicateJudgementActions.size() + " actions in the duplicate judgement actions list" );
+        System.out.println ("Found (and ignored) " + skippedPreliminaryJudgementActionCount + " preliminary judgement actions");
+        System.out.println ("Put " + duplicateJudgementActions.size() + " action(s) in the duplicate judgement actions list" );
+        if (duplicateJudgementActions.size()>0) {
+            System.out.println ("  Duplicate actions:");
+            for (Map<String,String> action : duplicateJudgementActions) {
+                System.out.print("    ");
+                for (String key : action.keySet()) {
+                    System.out.print (key + ":" + action.get(key) + " | ");
+                }
+                System.out.println();
+            }
+        }
         int totalActions = submissionActions.keySet().size() + duplicateSubmissionActions.size() 
                     + judgementActions.keySet().size() + duplicateJudgementActions.size() ;
         System.out.println ("Total actions put in maps/lists = " + totalActions);
 
         
         if (outputFileName==null) {
-            System.out.println ("Sending merged event feed to stdout");
+            System.out.println ("\nSending merged event feed to stdout");
         } else {
-            System.out.println ("Sending merged event feed output to file '" + outputFileName + "'");
+            System.out.println ("\nSending merged event feed output to file '" + outputFileName + "'");
             //redirect stdout to the file specified by args[2]
             PrintStream outStream = new PrintStream(new BufferedOutputStream(new FileOutputStream(outputFileName)), true);
             System.setOut(outStream);
@@ -162,6 +184,7 @@ public class EventFeedReplayRunsMerger {
         
         //read each event from the pc2ef file
         scanner = new Scanner(pc2ef);
+        
         int totalEventCount = 0;
         int submissionEventCount = 0;
         int updatedSubmissionCount = 0;
@@ -174,7 +197,21 @@ public class EventFeedReplayRunsMerger {
         int otherEventCount = 0;
         int errorCount = 0;
         
-
+        /* TODO:
+         * *** how to deal with duplicate actions??? 
+         * The ExtractReplayRuns report will contain one "RUN_JUDGEMENT" action for EACH JUDGEMENT applied to a submission 
+         * (so there may be multiple judgements for the same submission -- e.g. if it was rejudged).
+         * The above code adds any such judgements (that is, additional ExtractReplyRuns judgements for which a previous
+         * judgement for the same submission has already been received) to the "duplicateJudgementActions" list, thus saving them.
+         * 
+         * However, the EventFeed.json output appears to contain only ONE judgement (the FINAL one) for each submission.
+         * This means we'll only receive ONE judgement for each submission while reading the pc2ef file 
+         * (which is what the following loop does).
+         * 
+         * Should we just ignore duplicate RUN_JUDGEMENT Actions in the ExtractReplayRuns file?
+         * (Can we ignore them? Don't they represent "updates" to run judgements??)
+         */
+        
         while (scanner.hasNextLine()) {
            String line = scanner.nextLine();
            
