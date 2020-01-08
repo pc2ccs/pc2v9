@@ -28,6 +28,15 @@ public class ShadowComparePane extends JPanePlugin {
         return "Shadow_Compare_Pane";
     }
     
+    /**
+     * Accepts a Mapping from Strings (which are submission IDs) to pairs of Judgements for that submission --
+     * one judgement from the PC2 Shadow system, one taken from the CLICS event feed from the remote CCS --
+     * and displays a table of those submissions and the corresponding judgements.
+     * 
+     * The received map is originally constructed (and passed to here) by {@link ShadowController#getJudgementComparison()).
+     * 
+     * @param map a Mapping of submission IDs to pairs of judgements
+     */
     public ShadowComparePane(Map<String,ShadowJudgementPair> map) {
         
         //temporary hack to display some data
@@ -61,13 +70,6 @@ public class ShadowComparePane extends JPanePlugin {
             this.add(new JScrollPane(results, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                                             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER));
 
-//            for (String submission : map.keySet()) {
-//                ShadowJudgementPair pair = map.get(submission);
-//                String pc2Judgement = pair.getPc2Judgement();
-//                String remoteJudgement = pair.getRemoteCCSJudgement();
-//                JLabel label = new JLabel("Submission: " + submission + "   PC2: " + pc2Judgement + "   Remote: " + remoteJudgement);
-//                this.add(label);
-//            }
         } else {
             JLabel label = new JLabel("Comparison map is null or empty");
             this.add(label);
