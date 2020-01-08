@@ -44,7 +44,11 @@ public class ShadowComparePane extends JPanePlugin {
                 data[row][0] = key;
                 data[row][1] = map.get(key).getPc2Judgement();
                 data[row][2] = map.get(key).getRemoteCCSJudgement();
-                data[row][3] = ((String)data[row][1]).equalsIgnoreCase((String)data[row][2]) ? "Y" : "N" ;
+                if (data[row][1]!=null && data[row][2]!=null) {
+                    data[row][3] = ((String)data[row][1]).equalsIgnoreCase((String)data[row][2]) ? "Y" : "N" ;
+                } else {
+                    data[row][3] = "---" ;                    
+                }
                 row++;
             }
             JTable results = new JTable(data, columnNames);
