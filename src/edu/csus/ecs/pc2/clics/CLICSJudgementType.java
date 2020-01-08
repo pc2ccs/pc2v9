@@ -136,8 +136,8 @@ public class CLICSJudgementType {
     /**
      * Constructs a new CLICSJudgementType containing the specified CLICS judgement type values.
      * 
-     * @param id the identifier (acronym) for the judgement
-     * @param name the text string name associated with the judgement
+     * @param id the identifier (acronym) for the judgement (for example, "TLE")
+     * @param name the text string name associated with the judgement (for example, "No - Time Limit Exceeded")
      * @param penalty whether or not this judgement causes a penalty during scoring
      * @param solved whether or not this judgement represents a correct solution to a problem
      */
