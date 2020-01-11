@@ -53,13 +53,13 @@ interface IRemoteContestAPIAdapter {
      * by concatenating the remote system base URL with the String "/submissions/<id>/files",
      * where <id> is the specified submissionID.
      * 
-     * @param the submission ID whose files are to be fetched from the remote system
+     * @param submissionID the ID of the submission whose files are to be fetched from the remote system
      * 
-     * @return a List of IFile objects containing the files from the submission in 
+     * @return a List of IFile objects containing the files from the specified submission in 
      *          the remote system
      * 
      */
-    public List<IFile> getRemoteSubmissionFiles(String endpoint) ;
+    public List<IFile> getRemoteSubmissionFiles(String submissionID) ;
 
     
     /**

@@ -62,6 +62,8 @@ public class RemoteEventFeedMonitor implements Runnable {
     
     @Override
     public void run() {
+        
+        Thread.currentThread().setName("RemoteEventFeedMonitorThread");
 
         keepRunning = true;
         
@@ -85,132 +87,135 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                 while ((event != null) && keepRunning) {
 
-                    System.out.println("Got event string: " + event);
-
-                    try {
+                    //skip blank lines and any that do not start/end with "{...}"
+                    if ( event.length()>0 && event.startsWith("{") && event.endsWith("}") ) {
                         
-                        /**
-                         *
-Sample submissions JSON from finals 2019 dom judge event feed.
-{"id":"279029","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.162+01:00","contest_time":"-17:02:04.837","id":"10547","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10547/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.191+01:00"}
-{"id":"279030","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.209+01:00","contest_time":"-17:02:04.790","id":"10548","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10548/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.216+01:00"}
-{"id":"279031","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.228+01:00","contest_time":"-17:02:04.771","id":"10549","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10549/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.235+01:00"}
-{"id":"279032","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.244+01:00","contest_time":"-17:02:04.755","id":"10550","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10550/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.251+01:00"}
-                         */
+                        System.out.println("Got event string: " + event);
+                        try {
 
-                        // extract the event into a map of event element names/values
-                        Map<String, Object> eventMap = getMap(event);
-                        
-                        if (eventMap == null) {
-                            // could not parse event
-                            System.out.println("Could not parse event: " + event);
+                            /**
+                             *
+                            Sample submissions JSON from finals 2019 dom judge event feed.
+                            {"id":"279029","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.162+01:00","contest_time":"-17:02:04.837","id":"10547","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10547/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.191+01:00"}
+                            {"id":"279030","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.209+01:00","contest_time":"-17:02:04.790","id":"10548","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10548/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.216+01:00"}
+                            {"id":"279031","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.228+01:00","contest_time":"-17:02:04.771","id":"10549","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10549/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.235+01:00"}
+                            {"id":"279032","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.244+01:00","contest_time":"-17:02:04.755","id":"10550","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10550/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.251+01:00"}
+                             */
 
-                        } else {
+                            // extract the event into a map of event element names/values
+                            Map<String, Object> eventMap = getMap(event);
 
-                            // find event type
-                            String eventType = (String) eventMap.get("type");
-                            System.out.println("\nfound event: " + eventType + ":" + event); // TODO log this.
+                            if (eventMap == null) {
+                                // could not parse event
+                                System.out.println("Could not parse event: " + event);
 
-                            if ("submissions".equals(eventType)) {
-                                System.out.println("debug 22 found submission event");
-
-                                //process a submission event
-                                try {
-                                    //get a map of the data comprising the submission
-                                    Map<String,Object> submissionEventDataMap = (Map<String,Object>) eventMap.get("data");
-                                    
-                                    //convert metadata into ShadowRunSubmission
-                                    ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
-
-                                    if (runSubmission == null) {
-                                        throw new Exception("Error parsing submission data " + event);
-                                    } else {
-                                        System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
-
-                                        long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
-                                        long overrideSubmissionID = Utilities.stringToLong(runSubmission.getId());
-
-                                        List<IFile> files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
-
-                                        IFile mainFile = null;
-                                        if (files.size()<=0) {
-                                            //TODO: deal with this error -- how to propagate it back to the invoker
-                                            System.err.println ("Error: submitted files list is empty");
-                                            pc2Controller.getLog().log(Level.WARNING, "Received a submssion with empty files list");
-                                        } else {
-                                            mainFile = files.get(0);                                            
-                                        }
-
-                                        List<IFile> auxFiles = null;
-                                        if (files.size()>1) {
-                                            auxFiles = files.subList(1, files.size());
-                                        }
-
-                                        try {
-                                            submitter.submitRun("team" + runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(),
-                                                    mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
-                                        } catch (Exception e) {
-                                            // TODO design error handling reporting
-                                            System.err.println("Exception submitting run for: " + event);
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                    
-                                } catch (Exception e) {
-                                    // TODO design error handling reporting (logging?)
-                                    System.err.println("Exception parsing event: " + event);
-                                    e.printStackTrace();
-                                }
-                                
-                            } else if ("judgements".equals(eventType)) {
-                                System.out.println("debug 22 found judgement event");
-
-                                //process a judgement event
-                                try {
-                                    //get a map of the data elements for the judgement
-                                    Map<String,Object> judgementEventDataMap = (Map<String,Object>) eventMap.get("data");
-                                    
-                                    // check if this is a "delete" event
-                                    String operation = (String) eventMap.get("op");
-                                    if (operation != null && operation.equals("delete")) {
-                                        //it is a delete; remove from the global map the judgement whose ID is specified
-                                        String idToDelete = (String) judgementEventDataMap.get("id");
-                                        getRemoteJudgementsMap().remove(idToDelete);
-                                        
-                                        //TODO: how do we notify the local PC2 system that this judgement should be deleted??
-                                        
-                                    } else {
-                                        //it's not a delete; see if there is an actual judgement (acronym) in the event data
-                                        // (there might not be such an element; "create" operations do not always have a judgement)
-                                        String judgement = (String) judgementEventDataMap.get("judgement_type_id");
-                                        if (judgement != null && !judgement.equals("")) {
-
-                                            // there is a judgement; save it in the global judgements map under a key of
-                                            // the judgement ID with value "submissionID:judgement"
-                                            String judgementID = (String) judgementEventDataMap.get("id");
-                                            String submissionID = (String) judgementEventDataMap.get("submission_id");
-
-                                            getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
-                                        }
-                                    }
-
-                                } catch (Exception e) {
-                                    // TODO design error handling reporting (logging?)
-                                    System.err.println("Exception parsing event: " + event);
-                                    e.printStackTrace();
-                                }
-                                
                             } else {
-                                System.out.println("debug 22 - ignoring event "+eventType);
-                            }
 
-                        } // else
-                    } catch (Exception e) {
-                        // TODO design error handling reporting (logging?)
-                        System.err.println("Exception processing event: " + event);
-                        e.printStackTrace();
+                                // find event type
+                                String eventType = (String) eventMap.get("type");
+                                System.out.println("\nfound event: " + eventType + ":" + event); // TODO log this.
+
+                                if ("submissions".equals(eventType)) {
+                                    System.out.println("debug 22 found submission event");
+
+                                    //process a submission event
+                                    try {
+                                        //get a map of the data comprising the submission
+                                        Map<String, Object> submissionEventDataMap = (Map<String, Object>) eventMap.get("data");
+
+                                        //convert metadata into ShadowRunSubmission
+                                        ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
+
+                                        if (runSubmission == null) {
+                                            throw new Exception("Error parsing submission data " + event);
+                                        } else {
+                                            System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
+
+                                            long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
+                                            long overrideSubmissionID = Utilities.stringToLong(runSubmission.getId());
+
+                                            List<IFile> files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
+
+                                            IFile mainFile = null;
+                                            if (files.size() <= 0) {
+                                                //TODO: deal with this error -- how to propagate it back to the invoker
+                                                System.err.println("Error: submitted files list is empty");
+                                                pc2Controller.getLog().log(Level.WARNING, "Received a submssion with empty files list");
+                                            } else {
+                                                mainFile = files.get(0);
+                                            }
+
+                                            List<IFile> auxFiles = null;
+                                            if (files.size() > 1) {
+                                                auxFiles = files.subList(1, files.size());
+                                            }
+
+                                            try {
+                                                submitter.submitRun("team" + runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(), mainFile, auxFiles,
+                                                        overrideTimeMS, overrideSubmissionID);
+                                            } catch (Exception e) {
+                                                // TODO design error handling reporting
+                                                System.err.println("Exception submitting run for: " + event);
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                    } catch (Exception e) {
+                                        // TODO design error handling reporting (logging?)
+                                        System.err.println("Exception parsing event: " + event);
+                                        e.printStackTrace();
+                                    }
+
+                                } else if ("judgements".equals(eventType)) {
+                                    System.out.println("debug 22 found judgement event");
+
+                                    //process a judgement event
+                                    try {
+                                        //get a map of the data elements for the judgement
+                                        Map<String, Object> judgementEventDataMap = (Map<String, Object>) eventMap.get("data");
+
+                                        // check if this is a "delete" event
+                                        String operation = (String) eventMap.get("op");
+                                        if (operation != null && operation.equals("delete")) {
+                                            //it is a delete; remove from the global map the judgement whose ID is specified
+                                            String idToDelete = (String) judgementEventDataMap.get("id");
+                                            getRemoteJudgementsMap().remove(idToDelete);
+
+                                            //TODO: how do we notify the local PC2 system that this judgement should be deleted??
+
+                                        } else {
+                                            //it's not a delete; see if there is an actual judgement (acronym) in the event data
+                                            // (there might not be such an element; "create" operations do not always have a judgement)
+                                            String judgement = (String) judgementEventDataMap.get("judgement_type_id");
+                                            if (judgement != null && !judgement.equals("")) {
+
+                                                // there is a judgement; save it in the global judgements map under a key of
+                                                // the judgement ID with value "submissionID:judgement"
+                                                String judgementID = (String) judgementEventDataMap.get("id");
+                                                String submissionID = (String) judgementEventDataMap.get("submission_id");
+
+                                                getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
+                                            }
+                                        }
+
+                                    } catch (Exception e) {
+                                        // TODO design error handling reporting (logging?)
+                                        System.err.println("Exception parsing event: " + event);
+                                        e.printStackTrace();
+                                    }
+
+                                } else {
+                                    System.out.println("debug 22 - ignoring event " + eventType);
+                                }
+
+                            } // else
+                        } catch (Exception e) {
+                            // TODO design error handling reporting (logging?)
+                            System.err.println("Exception processing event: " + event);
+                            e.printStackTrace();
+                        } 
                     }
-
+                    
                     event = reader.readLine();
 
                 } // while
