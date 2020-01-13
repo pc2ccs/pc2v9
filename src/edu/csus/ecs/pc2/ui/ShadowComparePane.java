@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.util.Map;
 
 import javax.swing.BoxLayout;
@@ -10,6 +12,10 @@ import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import edu.csus.ecs.pc2.shadow.ShadowJudgementPair;
 
@@ -50,7 +56,7 @@ public class ShadowComparePane extends JPanePlugin {
             Object[][] data = new Object[map.size()][4];
             int row = 0;
             for (String key : map.keySet()) {
-                data[row][0] = key;
+                data[row][0] = new Integer(key);
                 data[row][1] = map.get(key).getPc2Judgement();
                 data[row][2] = map.get(key).getRemoteCCSJudgement();
                 if (data[row][1]!=null && data[row][2]!=null) {
@@ -60,12 +66,52 @@ public class ShadowComparePane extends JPanePlugin {
                 }
                 row++;
             }
-            JTable results = new JTable(data, columnNames);
-            results.setAutoCreateRowSorter(true);
+            JTable results = new JTable() {
+                    //override JTable's default renderer to set the background color based on the "Match?" value
+                    public Component prepareRenderer(TableCellRenderer renderer, int row, int column)
+                    {
+                        Component c = super.prepareRenderer(renderer, row, column);
+
+                        //  Color row based on a cell value
+
+                            c.setBackground(getBackground());
+                            int modelRow = convertRowIndexToModel(row);
+                            String matches = (String)getModel().getValueAt(modelRow, 3);
+                            if ("Y".equalsIgnoreCase(matches)) c.setBackground(new Color(153,255,153));
+                            if ("N".equalsIgnoreCase(matches)) c.setBackground(new Color(255,153,153));
+
+                        return c;
+                    }
+
+            };
+
+            
+            results.setModel(new DefaultTableModel(data, columnNames){
+                static final long serialVersionUID = 1;
+                Class[] types = { Integer.class, String.class, String.class, String.class };
+
+                @Override
+                public Class getColumnClass(int columnIndex) {
+                    return this.types[columnIndex];
+                }
+                
+//                @Override
+//                public void setValueAt(Object obj, int row, int col) {
+//                    if (col==0) {
+//                        super.setValueAt(new Integer(obj.toString()), row, col);
+//                    } else {
+//                        super.setValueAt(obj, row, col);
+//                    }
+//                }
+            });
+            
+            TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(results.getModel());
+            results.setRowSorter(sorter);
             
             DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
             centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
             results.setDefaultRenderer(String.class, centerRenderer);
+            results.setDefaultRenderer(Integer.class, centerRenderer);
 
             this.add(new JScrollPane(results, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                                             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER));
