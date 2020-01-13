@@ -493,7 +493,13 @@ public class EventFeedReplayRunsMerger {
         
         //verify that the "solved" field in the action is consistent with the judgement_type_id in the event
         boolean actionIndicatesSolved = Boolean.parseBoolean(actionMap.get("solved"));
-        boolean eventIndicatesSolved  = judgementTypes.get(eventData.get("judgement_type_id")).isSolved();
+        
+//        boolean eventIndicatesSolved  = judgementTypes.get(eventData.get("judgement_type_id")).isSolved();
+        //the above was replaced by the below to allow stepping through the debugger
+        String judgementTypeID = eventData.get("judgement_type_id");
+        CLICSJudgementType judgement = judgementTypes.get(judgementTypeID);
+        boolean eventIndicatesSolved = judgement.isSolved();
+        
         if (eventIndicatesSolved!=actionIndicatesSolved) {
             return false;
         }
