@@ -13,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType;
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -286,7 +288,8 @@ public class JSONTool {
         } else {
             name = name.substring(5, name.length());
             Properties scoringProperties = model.getContestInformation().getScoringProperties();
-            if (judgement.getAcronym().equalsIgnoreCase("ce") || name.toLowerCase().contains("compilation error")) {
+            if (judgement.getAcronym().equalsIgnoreCase("ce") || name.toLowerCase().contains("compilation error")
+                    || name.toLowerCase().contains("compile error")) {
                 Object result = scoringProperties.getProperty(DefaultScoringAlgorithm.POINTS_PER_NO_COMPILATION_ERROR, "0");
                 if (result.equals("0")) {
                     penalty = false;
@@ -444,11 +447,59 @@ public class JSONTool {
         element.put("start_time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
         element.put("start_contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
         if (submission.isJudged()) {
+
             JudgementRecord judgementRecord = submission.getJudgementRecord();
-            Judgement judgement = model.getJudgement(judgementRecord.getJudgementId());
-            // only print it's judgement and end times if this is the final judgement
+            
+            //commented out; only fetch the judgement if it's needed (see below)
+//            Judgement judgement = model.getJudgement(judgementRecord.getJudgementId());
+            
+            // only output its judgement and end times if this is the final judgement
             if (!judgementRecord.isPreliminaryJudgement()) {
-                element.put("judgement_type_id", getJudgementType(judgement));
+
+                //****************
+                //new code, copied from RunsPane.getJudgementResultString().  
+                //This code has the effect of attempting to use the Validator Result String, 
+                // if it exists, to determine what judgement type (acronym) to put into the JSON Event Feed
+                // rather than defaulting to using the JudgementType out of the Judgement Record directly.  
+                // This was added because PC2 assigns a default judgement type
+                // of "RTE" to any run which is neither a Yes nor a CE.  See Bug xxx.
+                //
+                //Note that this change does not take into account the possibility that a judge changed the judgement
+                //  manually but didn't cause the validator judgement to change.  If there is a validator
+                //  result in the judgementRecord, this code will put into the returned JSON the judgement type corresponding to 
+                //  the validator (not that from the current judgement result).
+                
+                String resultString = null;
+                boolean usingValidator = false;
+                
+                //check if there's a validator result
+                if (judgementRecord.isUsedValidator() && judgementRecord.getValidatorResultString() != null) {
+                    
+                    resultString = judgementRecord.getValidatorResultString();
+                    if (resultString!=null) {
+                        //try to convert the validator string to a known acronym
+                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronym(resultString);
+                        //check if we got back a judgement acronym
+                        if (acronym!=null) {
+                            resultString = acronym.name();
+                            usingValidator = true;
+                        }
+                    }
+                } 
+                
+                if (!usingValidator) {
+                    //no validator result; get the string representation of the judgement itself
+                    Judgement judgement = model.getJudgement(judgementRecord.getJudgementId());
+                    if (judgement != null) {
+                        resultString = judgement.getAcronym();
+                    }
+                }
+                //***************
+                
+                
+//                element.put("judgement_type_id", getJudgementType(judgement));
+                element.put("judgement_type_id", resultString);
+                
                 Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime() * 60000);
                 if (wallElapsed != null) {
                     element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
@@ -457,6 +508,7 @@ public class JSONTool {
                 element.put("end_contest_time", ContestTime.formatTimeMS(judgementRecord.getWhenJudgedTime() * 60000));
             }
         }
+        
         return element;
     }
 
