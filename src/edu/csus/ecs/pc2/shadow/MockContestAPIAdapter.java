@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.shadow;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -42,66 +43,6 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
         this.login = login;
         this.password = password;
     }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    public String getRemoteContestConfiguration() {
-//       String judgementTypes = "[{\r\n" + 
-//               "    \"id\": \"CE\",\r\n" + 
-//               "    \"name\": \"Compiler Error\",\r\n" + 
-//               "    \"penalty\": false,\r\n" + 
-//               "    \"solved\": false\r\n" + 
-//               "}, {\r\n" + 
-//               "    \"id\": \"AC\",\r\n" + 
-//               "    \"name\": \"Accepted\",\r\n" + 
-//               "    \"penalty\": false,\r\n" + 
-//               "    \"solved\": true\r\n" + 
-//               "}]" ;
-//       String languages = "[{\r\n" + 
-//               "    \"id\": \"java\",\r\n" + 
-//               "    \"name\": \"Java\"\r\n" + 
-//               "}, {\r\n" + 
-//               "    \"id\": \"cpp\",\r\n" + 
-//               "    \"name\": \"GNU C++\"\r\n" + 
-//               "}, {\r\n" + 
-//               "    \"id\": \"python2\",\r\n" + 
-//               "    \"name\": \"Python 2\"\r\n" + 
-//               "}]";
-//       String problems = "[{\"id\":\"asteroids\",\"label\":\"A\",\"name\":\"Asteroid Rangers\",\"ordinal\":1,\"color\":\"blue\",\"rgb\":\"#00f\",\"time_limit\":2,\"test_data_count\":10},\r\n" + 
-//               "  {\"id\":\"bottles\",\"label\":\"B\",\"name\":\"Curvy Little Bottles\",\"ordinal\":2,\"color\":\"gray\",\"rgb\":\"#808080\",\"time_limit\":3.5,\"test_data_count\":15}\r\n" + 
-//               " ]";
-//       String groups = "[{\"id\":\"asia-74324325532\",\"icpc_id\":\"7593\",\"name\":\"Asia\"}\r\n" + 
-//               " ]";
-//       String organizations = "[{\"id\":\"inst123\",\"icpc_id\":\"433\",\"name\":\"Shanghai Jiao Tong U.\",\"formal_name\":\"Shanghai Jiao Tong University\"},\r\n" + 
-//               "  {\"id\":\"inst105\",\"name\":\"Carnegie Mellon University\",\"country\":\"USA\",\r\n" + 
-//               "   \"logo\":[{\"href\":\"http://example.com/api/contests/wf14/organizations/inst105/logo/56px\",\"width\":56,\"height\":56},\r\n" + 
-//               "           {\"href\":\"http://example.com/api/contests/wf14/organizations/inst105/logo/160px\",\"width\":160,\"height\":160}]\r\n" + 
-//               "  }\r\n" + 
-//               " ]";
-//       String teams = "[{\"id\":\"11\",\"icpc_id\":\"201433\",\"name\":\"Shanghai Tigers\",\"organization_id\":\"inst123\",\"group_ids\":[\"asia-74324325532\"]},\r\n" + 
-//               "  {\"id\":\"123\",\"name\":\"CMU1\",\"organization_id\":\"inst105\",\"group_ids\":[\"8\",\"11\"]}\r\n" + 
-//               " ]";
-//       String contestState = "{\r\n" + 
-//               "   \"started\": \"2014-06-25T10:00:00+01\",\r\n" + 
-//               "   \"ended\": null,\r\n" + 
-//               "   \"frozen\": \"2014-06-25T14:00:00+01\",\r\n" + 
-//               "   \"thawed\": null,\r\n" + 
-//               "   \"finalized\": null,\r\n" + 
-//               "   \"end_of_updates\": null\r\n" + 
-//               " }";
-//       String retStr = "["
-//               + judgementTypes + ","
-//               + languages + ","
-//               + problems + ","
-//               + groups + ","
-//               + organizations + ","
-//               + teams + ","
-//               + contestState
-//               + "]";
-//        return retStr;
-//    }
   
     @Override
     /**
@@ -121,7 +62,7 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
     public InputStream readRemoteCCSEventFeedFromFile(File file) {
         PacedFileInputStream efEventStreamReader;
         try {
-            int secondsPauseForEAchLine = 2;
+            int secondsPauseForEAchLine = 1;
             efEventStreamReader = new PacedFileInputStream(file,secondsPauseForEAchLine);
             return efEventStreamReader;
         } catch (FileNotFoundException e) {
@@ -138,12 +79,16 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
     public InputStream getRemoteEventFeedInputStream(){
         
         /**
-         * Test JSON event feed.   From CSUS Fall 2019 (real) contest.
+         * Test JSON event feed.
          */
-        String filename = "testdata/PacedFileInputStreamTest/csus-f2019.eventfeed.json";
-        if (! Utilities.fileExists(filename)){
-            throw new RuntimeException(new FileNotFoundException(filename));
-        }
+//        String filename = "testdata/PacedFileInputStreamTest/csus-f2019.eventfeed.json";
+//        String filename = "testdata/PacedFileInputStreamTest/ACPC2019.EventFeed.ReplayEnhanced.json";
+        String filename = "testdata/PacedFileInputStreamTest/csus-f2019.clicsMergedEventFeed.json";
+
+    	
+//        if (! Utilities.fileExists(filename)){
+//            throw new RuntimeException(new FileNotFoundException(filename));
+//        }
         return readRemoteCCSEventFeedFromFile(new File(filename));
    
     }
@@ -176,24 +121,98 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
     /**
      * {@inheritDoc}
      * 
+     * This Mock implementation method checks the currently-defined "remoteURL"; if it starts with "file://" then the rest of the URL
+     * is assumed to be a path to a folder containing "PC2 ExtractReplyRuns" files, and the specified submissionID is assumed to
+     * identify a subfolder beneath that path which contains the file(s) to be returned.
+     * If the current remoteURL does NOT start with "file://", this method returns the source code for the ISumit.java sample
+     * program.
+     * 
+     * Note: when fetching submissions from a PC2 Extract Reply Runs folder, this Mock implementation method assumes that the
+     * specified submissionID is actually (just) the numeric part of the submission ID (e.g. "10001").  However, the 
+     * EventFeedReplayRunsMerger tool, used to create an Event Feed and corresponding Extract Replay Runs for use with this Mock
+     * Adapter, actually stores all runs under folders named like "site1run10001".  This method therefore adds the string "site1run"
+     * to the given submissionID.  This means that it assumes that all runs come from "Site 1", even if the original contest was
+     * a multi-site contest.   This works fine as long as the original contest adhered to the requirement to use "baseRunNumber"
+     * at each site to insure that run (submission) numbers are unique. If the specified (assumed unique) submissionID cannot
+     * be found under "site1runXXX" then the method tries to locate it under "site2runXXX".  If the submission cannot be found
+     * in either place then an empty files list is returned.
+     * 
      */
     public List<IFile> getRemoteSubmissionFiles(String submissionID) {
         
         List<IFile> files = new ArrayList<IFile>();
         
-        try {
-            String filename = "ISumit.java";
-            String[] src_lines = Utilities.loadFile(getSamplesSourceFilename(filename));
-            String source = String.join("", src_lines);
+        //check the current URL
+        if (remoteURL!=null && remoteURL.toString().startsWith("file://")) {
             
-            String base64String = Base64.getEncoder().encodeToString(source.getBytes());
-            IFile mainFile = new IFileImpl(filename, base64String);
+            //we're sending mock data from a PC2 Extract Replay Runs contest;
+            //get the path to the submission folder
+            String pathToSourceFiles = remoteURL.toString().substring(7) + "/site1run" + submissionID + "/";
             
-            files.add(mainFile);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            System.out.println("getRemoteSubmissionFiles() looking for files for submission " + submissionID
+                                + " in folder '" + pathToSourceFiles + "'");
+            
+            File folder = new File(pathToSourceFiles);
+            File[] listOfFiles = folder.listFiles();
+            
+            if (listOfFiles==null) {
+                //try site 2
+                pathToSourceFiles = remoteURL.toString().substring(7) + "/site2run" + submissionID + "/";
+                
+                System.out.println("no files found; looking instead in folder '" + pathToSourceFiles + "'");
+
+                folder = new File(pathToSourceFiles);
+                listOfFiles = folder.listFiles();
+            }
+            
+            //see if we found any files
+            if (listOfFiles!=null && listOfFiles.length>0) {
+                
+                //we found some files; walk the source folder fetching each file and adding it to the list of IFiles to return
+                for (File file : listOfFiles) {
+                    
+                    if (file.isFile()) {
+                        String filename = file.getName();
+                        System.out.println("  Adding file: " + filename);
+                        
+                        try {
+                            //read the source file
+                            String[] src_lines = Utilities.loadFile(pathToSourceFiles + File.separator + filename);
+                            String source = String.join(System.lineSeparator(), src_lines);
+                            //convert the source to Base64
+                            String base64String = Base64.getEncoder().encodeToString(source.getBytes());
+                            //construct an IFile containing the source (in Base64)
+                            IFile currentFile = new IFileImpl(filename, base64String);
+                            //add the file to the list
+                            files.add(currentFile);
+                        } catch (IOException e) {
+                            // TODO log this error
+                            e.printStackTrace();
+                        }
+                    }//end isFile()
+                }//end for file:listOfFiles
+            } else {
+                System.out.println ("No files found for submission " + submissionID + " !?!");
+            }
+            
+            return files ;
+            
+        } else {
+            //we don't know how to use the URL; just return some sample source code
+            try {
+                String filename = "ISumit.java";
+                String[] src_lines = Utilities.loadFile(getSamplesSourceFilename(filename));
+                String source = String.join("", src_lines);
+                
+                String base64String = Base64.getEncoder().encodeToString(source.getBytes());
+                IFile mainFile = new IFileImpl(filename, base64String);
+                
+                files.add(mainFile);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return files;
         }
-        return files;
     }
     
     /**

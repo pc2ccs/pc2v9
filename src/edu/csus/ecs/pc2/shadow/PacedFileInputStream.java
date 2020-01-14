@@ -158,7 +158,8 @@ public class PacedFileInputStream extends InputStream {
             pauseCount++;
             // if a end of line, ASCII 10 sleep for a second
             try {
-                Thread.sleep(sleepSeconds * 1000);
+//                Thread.sleep(sleepSeconds * 1000);
+                Thread.sleep(sleepSeconds * 20);
             } catch (InterruptedException e) {
                 // very unlikely, but possible.
                 e.printStackTrace();
