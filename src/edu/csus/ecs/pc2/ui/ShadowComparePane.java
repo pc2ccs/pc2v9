@@ -79,6 +79,12 @@ public class ShadowComparePane extends JPanePlugin {
                             String matches = (String)getModel().getValueAt(modelRow, 3);
                             if ("Y".equalsIgnoreCase(matches)) c.setBackground(new Color(153,255,153));
                             if ("N".equalsIgnoreCase(matches)) c.setBackground(new Color(255,153,153));
+                            
+                            //override color with yellow if PC2 judgement is pending
+                            String pc2Judgement = (String)getModel().getValueAt(modelRow, 1);
+                            if (pc2Judgement!=null && pc2Judgement.contains("pending")) {
+                                c.setBackground(new Color(255,255,153));
+                            }
 
                         return c;
                     }
