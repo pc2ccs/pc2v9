@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.BufferedInputStream;
@@ -7,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -287,14 +287,6 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         return base64String;
     }
 
-    public static void main(String[] args) throws MalformedURLException {
-    
-        String addr = "Https://localhost:50443/submission_files?id=1";
-        URL url = new URL(addr);
-        RemoteContestAPIAdapter ad = new RemoteContestAPIAdapter(url, "admin", "admin");
 
-        String s = ad.getRemoteJSON("");
-        System.out.println("s = " + s);
-    }
     
 }

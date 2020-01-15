@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
@@ -416,11 +416,16 @@ public class MockController implements IInternalController {
     }
 
     public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
-
+        submitRun(problem, language, filename, otherFiles, 0, 0);
     }
 
     public void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
-
+        
+        Run submittedRun = new Run(contest.getClientId(), language, problem);
+        submittedRun.setOverRideElapsedTimeMS(overrideSubmissionTimeMS);
+        submittedRun.setOverRideNumber(new Long(overrideRunId).intValue());
+        RunFiles runFiles = new RunFiles(submittedRun, mainFileName);
+        contest.acceptRun(submittedRun, runFiles);
     }
 
     public void submitRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
