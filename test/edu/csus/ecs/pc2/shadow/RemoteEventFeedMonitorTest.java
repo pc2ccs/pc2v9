@@ -29,14 +29,14 @@ public class RemoteEventFeedMonitorTest extends AbstractTestCase {
      * true = yes, contact server at {@link #LOCALHOST_CONTEST_EVENT_FEED}
      * false = no, skip test.
      */
-    boolean serverRunning = false;
-
-    //        boolean serverRunning = true;
+//    boolean serverRunning = false;
+            boolean serverRunning = true;
 
     /**
      * URL to contact for event feed, etc.
      */
-    private static final String LOCALHOST_CONTEST_EVENT_FEED = "https://localhost:50443/contest/event-feed";
+    private static final String LOCALHOST_CONTEST_API = "https://localhost:50443/contest";
+    private static final String LOCALHOST_CONTEST_EVENT_FEED = LOCALHOST_CONTEST_API + "/event-feed";
 
     /**
      * Tests RemoteEventFeedMonitor using running pc2 server with feeder login.
@@ -72,6 +72,7 @@ public class RemoteEventFeedMonitorTest extends AbstractTestCase {
             InputStream str = remoteContestAPIAdapter.getRemoteEventFeedInputStream();
             assertNotNull("Expecting non-null EF stream for " + remoteURL, str);
         } catch (Exception e) {
+//            e.printStackTrace(System.err);
             fail("Unable to get stream for URL " + remoteURL + " " + e.getMessage());
         }
 

@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IFile;
 
@@ -116,7 +117,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                 System.out.println("\nfound event: " + eventType + ":" + event); // TODO log this.
 
                                 if ("submissions".equals(eventType)) {
-                                    System.out.println("debug 22 found submission event");
+                                    System.out.println("debug 22 processing submission event ");
 
                                     //process a submission event
                                     try {
@@ -133,8 +134,53 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                             long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
                                             long overrideSubmissionID = Utilities.stringToLong(runSubmission.getId());
+                                            
+                                            String defaultSubmissionFilesURL = "/submissions/" + runSubmission.getId() + "/files";
+                                            
+                                            String submissionFilesURL = null;
+                                            
+                                            List<Map<String, String>> filesList = runSubmission.getFiles();
+                                            
+                                            if (filesList.size() == 1){
+                                                Map<String, String> fileMap = filesList.get(0);
+                                                if (fileMap.size() == 1){
+                                                    String filesPath = fileMap.get(fileMap.keySet().iterator().next());
+                                                    if (!StringUtilities.isEmpty(filesPath)){
+                                                        submissionFilesURL = filesPath;
+                                                        System.out.println("debug 22  chanky = "+filesPath);
+                                                    }
+                                                }
+                                            }
 
-                                            List<IFile> files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
+                                            if (StringUtilities.isEmpty(submissionFilesURL)) {
+
+                                                submissionFilesURL = defaultSubmissionFilesURL;
+                                                System.err.println("Warning: could not find submission file URL for id = " + runSubmission.getId() + //
+                                                        "using '" + submissionFilesURL + "' " + //
+                                                        "event=" + event);
+                                            }
+
+                                            List<IFile> files = null;
+                                            
+                                            if ( remoteContestAPIAdapter instanceof RemoteContestAPIAdapter){
+                                                
+                                                String baseURL = remoteURL.getPath();
+                                                System.out.println("debug 22 baseURL = "+baseURL);
+                                                String s = baseURL.replaceAll("/event-feed", "") + "/" + submissionFilesURL;
+                                                
+                                                System.out.println("debug 22 get files using "+s);
+                                                
+                                                files = ((RemoteContestAPIAdapter)remoteContestAPIAdapter).getRemoteSubmissionFilesURL(s);
+                                                
+                                                if (files == null){
+                                                    System.err.println("No files retrieved using "+submissionFilesURL);
+                                                }
+                                                
+                                            } else {
+                                                System.out.println("debug 22 get files using id "+overrideSubmissionID);
+                                                files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
+                                            }
+                                            
 
                                             IFile mainFile = null;
                                             if (files.size() <= 0) {
@@ -205,7 +251,8 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     }
 
                                 } else {
-                                    System.out.println("debug 22 - ignoring event " + eventType);
+                                    // TODO log as debug level message
+                                    System.out.println("INFO ignoring event " + eventType);
                                 }
 
                             } // else

@@ -198,9 +198,13 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
 
     @Override
     public List<IFile> getRemoteSubmissionFiles(String submissionID) {
-        
         String endpoint = "/submissions/" + submissionID + "/files";
         String url = remoteURL.toString() + endpoint;
+        return getRemoteSubmissionFilesURL(url);
+    }
+
+
+    public List<IFile> getRemoteSubmissionFilesURL(String url) {
         try {
             HttpURLConnection conn = createConnection(url);
             /**
@@ -211,9 +215,9 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
             /**
              * Convert bytes/zipfile into individual IFiles.
              */
-            List<IFile> files = getIFiles (bytes);
+            List<IFile> files = getIFiles(bytes);
             return files;
-            
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -286,6 +290,7 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         String base64String = encoder.encodeToString(bytes);
         return base64String;
     }
+
 
 
     

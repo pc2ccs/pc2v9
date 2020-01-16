@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.logging.Level;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.SecurityContext;
@@ -14,7 +15,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
@@ -37,6 +40,12 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  * @author Troy Boudreau <boudreat@ecs.csus.edu>
  */
 public class JSONTool {
+    
+    /**
+     * A default localhost location.
+     */
+    private static final String LOCALHOST_CONTEST_API_URL = "https://localhost:50443/contest";
+
     private ObjectMapper mapper = new ObjectMapper();
 
     private IInternalContest model;
@@ -70,33 +79,59 @@ public class JSONTool {
         if (submission.getEntryPoint() != null) {
             element.put("entry_point", new String(submission.getEntryPoint()));
         }
+        
+        
+        
         // FIXME we need separate event feeds for public and admin/analyst
         // FIXME perhaps change sc to a boolean for public or not?
         // if (servletRequest != null && (sc != null && sc.isUserInRole("admin") || sc.isUserInRole("analyst"))) {
-        if (servletRequest != null) {
-            StringBuffer requestURL = servletRequest.getRequestURL();
-            int lastIndexOf = requestURL.lastIndexOf("/event-feed");
-            if (lastIndexOf != -1) {
-                // we need to replace event-feed
-                requestURL.replace(lastIndexOf, requestURL.length(), "/submissions/" + getSubmissionId(submission));
+        
+        
+        // TODO shadow add time and mime elements to submission
+//        element.put("mime","application/zip");
+        
+        String baseURL = getAPIURL();
+        if (! StringUtilities.isEmpty(baseURL)){
+            if (! baseURL.endsWith("/")){
+                baseURL += "/";
             }
-            String reqString = requestURL.toString();
-            if (reqString.endsWith("/submissions")) {
-                requestURL.append("/" + getSubmissionId(submission));
-            }
-            if (reqString.endsWith("/submissions/")) {
-                requestURL.append(getSubmissionId(submission));
-            }
-            requestURL.append("/files");
-            ObjectMapper mymapper = new ObjectMapper();
-            ArrayNode arrayNode = mymapper.createArrayNode();
-            ObjectNode objectNode = mymapper.createObjectNode();
-            objectNode.put("href", requestURL.toString());
-            arrayNode.add(objectNode);
-            element.set("files", arrayNode);
         }
 
+        System.out.println("debug 22 FF baseURL = "+baseURL);
+        String pathValue = baseURL + "/submissions/" + submission.getNumber() + "/files";
+        ObjectMapper mymapper = new ObjectMapper();
+        ArrayNode arrayNode = mymapper.createArrayNode();
+        ObjectNode objectNode = mymapper.createObjectNode();
+        objectNode.put("href", pathValue);
+        arrayNode.add(objectNode);
+        element.set("files", arrayNode);
+
         return element;
+    }
+
+    /**
+     * Return Primary CCS URL pc2 setting.
+     * @return empty string if settings is null or empty string, otherwise API base url
+     */
+    private String getAPIURL() {
+        
+        String url = "";
+        ContestInformation contestInformation = model.getContestInformation();
+        String primaryCCS_URL = contestInformation.getPrimaryCCS_URL();
+        if (! StringUtilities.isEmpty(primaryCCS_URL)){
+            url = primaryCCS_URL.trim();
+        }
+        
+        return url;
+    }
+
+    private void logWarn(String string, Exception e) {
+        
+        System.err.println(string);
+        e.printStackTrace(System.err);
+        
+        Log log = controller.getLog();
+        log.log(Level.WARNING, string, e);
     }
 
     public ObjectNode convertToJSON(Group group) {
