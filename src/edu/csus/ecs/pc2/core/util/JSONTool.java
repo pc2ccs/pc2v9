@@ -44,8 +44,6 @@ public class JSONTool {
     /**
      * A default localhost location.
      */
-    private static final String LOCALHOST_CONTEST_API_URL = "https://localhost:50443/contest";
-
     private ObjectMapper mapper = new ObjectMapper();
 
     private IInternalContest model;
@@ -90,15 +88,8 @@ public class JSONTool {
         // TODO shadow add time and mime elements to submission
 //        element.put("mime","application/zip");
         
-        String baseURL = getAPIURL();
-        if (! StringUtilities.isEmpty(baseURL)){
-            if (! baseURL.endsWith("/")){
-                baseURL += "/";
-            }
-        }
-
-        System.out.println("debug 22 FF baseURL = "+baseURL);
-        String pathValue = baseURL + "/submissions/" + submission.getNumber() + "/files";
+        String pathValue = "/submissions/" + submission.getNumber() + "/files";
+        
         ObjectMapper mymapper = new ObjectMapper();
         ArrayNode arrayNode = mymapper.createArrayNode();
         ObjectNode objectNode = mymapper.createObjectNode();
