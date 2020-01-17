@@ -116,12 +116,13 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
          * Test JSON event feed.
          */
 //        String filename = "testdata/PacedFileInputStreamTest/csus-f2019.eventfeed.json";
-        String filename = "testdata/PacedFileInputStreamTest/ACPC2019.EventFeed.ReplayEnhanced.json";
+//        String filename = "testdata/PacedFileInputStreamTest/ACPC2019.EventFeed.ReplayEnhanced.json";
+        String filename = "testdata/PacedFileInputStreamTest/csus-f2019.clicsMergedEventFeed.json";
 
     	
-        if (! Utilities.fileExists(filename)){
-            throw new RuntimeException(new FileNotFoundException(filename));
-        }
+//        if (! Utilities.fileExists(filename)){
+//            throw new RuntimeException(new FileNotFoundException(filename));
+//        }
         return readRemoteCCSEventFeedFromFile(new File(filename));
    
     }

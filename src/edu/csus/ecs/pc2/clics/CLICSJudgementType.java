@@ -1,6 +1,7 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +28,10 @@ import java.util.Map;
  * defined by an instance of the class is one of the CLICS "Big 5" judgement types and for mapping the instance judgement type
  * into a recommended "Big 5" judgement.
  * 
+ * The class also provides method {@link #getCLICSAcronym(String)} which accepts an arbitrary judgement string (for example,
+ * "Incorrect Output Format") and returns the corresponding CLICS acronym if such an acronym has been defined (see the CLICS
+ * Contest API for all currently-defined strings and their corresponding acronyms).
+ * 
  * For a complete description of CLICS judgement types, including an extensive list of known acronyms used by various
  * Contest Control Systems, see https://clics.ecs.baylor.edu/index.php?title=Contest_API#Judgement_Types.
  * 
@@ -45,8 +50,6 @@ public class CLICSJudgementType {
      * (https://clics.ecs.baylor.edu/index.php?title=Contest_API#Judgement_Types).
      * Each element (judgement) defined by the enumeration has a "value" that is the string representation
      * (the acronym) for that judgement.
-     * 
-     * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
      *
      */
     public static enum CLICS_BIG5 {
@@ -68,7 +71,7 @@ public class CLICSJudgementType {
      * judgement types.   Each of these types is defined in the CLICS specification to map to a certain "Big 5" judgement
      * in the event the system is using only Big 5 judgements.
      * 
-     * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
+     * The "value" of each enum element indicates to what CLICS "Big 5" judgement the acronym element should map.
      *
      */
     public static enum CLICS_NON_BIG5 {
@@ -77,6 +80,7 @@ public class CLICSJudgementType {
         PE   ("PE:WA"),  //Presentation Error              [Maps to WA]
         EO   ("EO:WA"),  //Excessive Output                [Maps to WA]
         IO   ("IO:WA"),  //Incomplete Output               [Maps to WA]
+        IOF  ("IOF:WA"), //Incorrect Output Format         [Maps to WA]
         NO   ("NO:WA"),  //No Output                       [Maps to WA]
         WTL  ("WTL:TLE"), //Wallclock TimeLimit Exceeded    [Maps to TLE]
         ILE  ("ILE:TLE"), //Idleness Limit Exceeded (no CPU time used for too long)                         [Maps to TLE]
@@ -112,14 +116,228 @@ public class CLICSJudgementType {
 
     }
 
+    /**
+     * An enumeration of the judgement acronyms defined by the CLICS Contest API specification (their "ID" in CLICS terminology)
+     * together with their common string values (their "name" in CLICS terminology).
+     * The string name (text) of each judgement (including case, spacing, and syntax) is based on the "Name" 
+     * given in the CLICS specification (see the URL above).
+     * 
+     *
+     */
+    public static enum CLICS_JUDGEMENT_ACRONYM {
+        AC  ("Accepted"),
+        ACY ("Yes"),
+        ACC ("Correct"),
+        RE  ("Rejected"),
+        WA  ("Wrong Answer"),  
+        TLE ("Time Limit Exceeded"),
+        RTE ("Run-Time Error"),
+        CE  ("Compile Error"),     
+        APE  ("Accepted - Presentation Error"),
+        OLE  ("Output Limit Exceeded"),
+        PE   ("Presentation Error"),
+        EO   ("Excessive Output"),
+        IO   ("Incomplete Output"),
+        IOF  ("Incorrect Output Format"),
+        NO   ("No Output"),
+        WTL  ("Wallclock Time Limit Exceeded"),
+        ILE  ("Idleness Limit Exceeded"),
+        TCO  ("Time Limit Exceeded - Correct Output"),
+        TWA  ("Time Limit Exceeded - Wrong Answer"),
+        TPE  ("Time Limit Exceeded - Presentation Error"),
+        TEO  ("Time Limit Exceeded - Excessive Output"),
+        TIO  ("Time Limit Exceeded - Incomplete Output"),
+        TNO  ("Time Limit Exceeded - No Output"),
+        MLE  ("Memory Limit Exceeded"),
+        SV   ("Security Violation"),
+        IF   ("Illegal Function"),
+        RCO  ("Run-Time Error - Correct Output"),
+        RWA  ("Run-Time Error - Wrong Answer"),
+        RPE  ("Run-Time Error - Presentation Error"),
+        REO  ("Run-Time Error - Excessive Output"),
+        RIO  ("Run-Time Error - Incomplete Output"),
+        RNO  ("Run-Time Error - No Output"),
+        CTL  ("Compile Time Limit Exceeded"),
+        JE   ("Judging Error"),
+        SE   ("Submission Error"),
+        CS   ("Contact Staff") ;
+        
+        private final String name;
+
+        private CLICS_JUDGEMENT_ACRONYM(String name) {
+            this.name   = name;
+        }
+        
+        public String getValue() {
+            return name;
+        }
+
+    }
+
+    /**
+     * This List defines the mappings between all currently-known forms of CCS judgement messages
+     * and the corresponding CLICS judgement acronym.
+     * In particular, it provides a way to map between different "versions" of a judgement message
+     * (for example, "Time Limit Exceeded" vs. "Time-limit Exceeded") and corresponding CLICS judgement acronyms.
+     * 
+     * To add support for a new judgement string, simply add a new element to this List giving the judgement
+     * text string and the CLICS_JUDGEMENT_ACRONYM to which that text string should map. 
+     */
+    private static ArrayList<JudgementMapping> judgementStringMappings = new ArrayList<JudgementMapping>() {
+ 
+        {
+            add(new JudgementMapping("Accepted",CLICS_JUDGEMENT_ACRONYM.AC));
+            
+            add(new JudgementMapping("Yes",CLICS_JUDGEMENT_ACRONYM.AC));
+            add(new JudgementMapping("Correct",CLICS_JUDGEMENT_ACRONYM.AC));
+
+            add(new JudgementMapping("Rejected",CLICS_JUDGEMENT_ACRONYM.RE));
+            add(new JudgementMapping("Incorrect",CLICS_JUDGEMENT_ACRONYM.RE));
+            add(new JudgementMapping("No",CLICS_JUDGEMENT_ACRONYM.RE));
+            
+            
+            add(new JudgementMapping("Wrong Answer",CLICS_JUDGEMENT_ACRONYM.WA));
+            add(new JudgementMapping("No - Wrong Answer",CLICS_JUDGEMENT_ACRONYM.WA));
+            
+            add(new JudgementMapping("Time Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.TLE));
+            add(new JudgementMapping("Time-Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.TLE));
+            add(new JudgementMapping("No - Time Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.TLE));
+            add(new JudgementMapping("No - Time-Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.TLE));
+            
+            add(new JudgementMapping("Run Time Error",CLICS_JUDGEMENT_ACRONYM.RTE));
+            add(new JudgementMapping("Runtime Error",CLICS_JUDGEMENT_ACRONYM.RTE));
+            add(new JudgementMapping("Run-Time Error",CLICS_JUDGEMENT_ACRONYM.RTE));
+            add(new JudgementMapping("No - Run Time Error",CLICS_JUDGEMENT_ACRONYM.RTE));
+            add(new JudgementMapping("No - Runtime Error",CLICS_JUDGEMENT_ACRONYM.RTE));
+            add(new JudgementMapping("No - Run-Time Error",CLICS_JUDGEMENT_ACRONYM.RTE));
+           
+            add(new JudgementMapping("Compile Error",CLICS_JUDGEMENT_ACRONYM.CE));
+            add(new JudgementMapping("Compiler Error",CLICS_JUDGEMENT_ACRONYM.CE));
+            add(new JudgementMapping("Compilation Error",CLICS_JUDGEMENT_ACRONYM.CE));
+            add(new JudgementMapping("No - Compile Error",CLICS_JUDGEMENT_ACRONYM.CE));
+            add(new JudgementMapping("No - Compiler Error",CLICS_JUDGEMENT_ACRONYM.CE));
+            add(new JudgementMapping("No - Compilation Error",CLICS_JUDGEMENT_ACRONYM.CE));
+           
+            add(new JudgementMapping("Accepted - Presentation Error",CLICS_JUDGEMENT_ACRONYM.APE));
+            add(new JudgementMapping("Output Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.OLE));
+            add(new JudgementMapping("No - Output Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.OLE));
+            
+            add(new JudgementMapping("Presentation Error",CLICS_JUDGEMENT_ACRONYM.PE));
+            add(new JudgementMapping("Output Format Error",CLICS_JUDGEMENT_ACRONYM.PE));
+            add(new JudgementMapping("Incorrect Output Format",CLICS_JUDGEMENT_ACRONYM.IOF));
+            add(new JudgementMapping("No - Presentation Error",CLICS_JUDGEMENT_ACRONYM.PE));
+            add(new JudgementMapping("No - Output Format Error",CLICS_JUDGEMENT_ACRONYM.PE));
+            add(new JudgementMapping("No - Incorrect Output Format",CLICS_JUDGEMENT_ACRONYM.IOF));
+            
+            add(new JudgementMapping("Excessive Output",CLICS_JUDGEMENT_ACRONYM.EO));
+            add(new JudgementMapping("Incomplete Output",CLICS_JUDGEMENT_ACRONYM.IO));
+            add(new JudgementMapping("No Output",CLICS_JUDGEMENT_ACRONYM.NO));
+            add(new JudgementMapping("Presentation Error",CLICS_JUDGEMENT_ACRONYM.PE));
+            add(new JudgementMapping("No - Excessive Output",CLICS_JUDGEMENT_ACRONYM.EO));
+            add(new JudgementMapping("No - Incomplete Output",CLICS_JUDGEMENT_ACRONYM.IO));
+            add(new JudgementMapping("No - No Output",CLICS_JUDGEMENT_ACRONYM.NO));
+            add(new JudgementMapping("No - Presentation Error",CLICS_JUDGEMENT_ACRONYM.PE));
+
+            add(new JudgementMapping("Wallclock Time Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.WTL));
+            add(new JudgementMapping("Wall-clock Time Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.WTL));
+            add(new JudgementMapping("Wall Clock Time Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.WTL));
+            add(new JudgementMapping("No - Wallclock Time Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.WTL));
+            add(new JudgementMapping("No - Wall-clock Time Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.WTL));
+            add(new JudgementMapping("No - Wall Clock Time Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.WTL));
+
+            add(new JudgementMapping("Idleness Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.ILE));
+            add(new JudgementMapping("Idle Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.ILE));
+            add(new JudgementMapping("No - Idleness Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.ILE));
+            add(new JudgementMapping("No - Idle Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.ILE));
+
+            add(new JudgementMapping("Time Limit Exceeded - Correct Output",CLICS_JUDGEMENT_ACRONYM.TCO));
+            add(new JudgementMapping("Time-Limit Exceeded - Correct Output",CLICS_JUDGEMENT_ACRONYM.TCO));
+            add(new JudgementMapping("Time Limit Exceeded - Wrong Answer",CLICS_JUDGEMENT_ACRONYM.TWA));
+            add(new JudgementMapping("Time-Limit Exceeded - Wrong Answer",CLICS_JUDGEMENT_ACRONYM.TWA));
+            add(new JudgementMapping("Time Limit Exceeded - Presentation Error",CLICS_JUDGEMENT_ACRONYM.TPE));
+            add(new JudgementMapping("Time-Limit Exceeded - Presentation Error",CLICS_JUDGEMENT_ACRONYM.TPE));
+            add(new JudgementMapping("Time Limit Exceeded - Excessive Output",CLICS_JUDGEMENT_ACRONYM.TEO));
+            add(new JudgementMapping("Time-Limit Exceeded - Excessive Output",CLICS_JUDGEMENT_ACRONYM.TEO));
+            add(new JudgementMapping("Time Limit Exceeded - Incomplete Output",CLICS_JUDGEMENT_ACRONYM.TIO));
+            add(new JudgementMapping("Time-Limit Exceeded - Incomplete Output",CLICS_JUDGEMENT_ACRONYM.TIO));
+            add(new JudgementMapping("Time Limit Exceeded - No Output",CLICS_JUDGEMENT_ACRONYM.TNO));
+            add(new JudgementMapping("Time-Limit Exceeded - No Output",CLICS_JUDGEMENT_ACRONYM.TNO));
+
+            add(new JudgementMapping("Memory Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.MLE));
+            add(new JudgementMapping("Memory-Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.MLE));
+            add(new JudgementMapping("No - Memory Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.MLE));
+            add(new JudgementMapping("No - Memory-Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.MLE));
+
+            add(new JudgementMapping("Runtime Error - Correct Output",CLICS_JUDGEMENT_ACRONYM.RCO));
+            add(new JudgementMapping("Run-time Error - Correct Output",CLICS_JUDGEMENT_ACRONYM.RCO));
+            add(new JudgementMapping("Run Time Error - Correct Output",CLICS_JUDGEMENT_ACRONYM.RCO));
+            
+            add(new JudgementMapping("Runtime Error - Wrong Answer",CLICS_JUDGEMENT_ACRONYM.RWA));
+            add(new JudgementMapping("Run-time Error - Wrong Answer",CLICS_JUDGEMENT_ACRONYM.RWA));
+            add(new JudgementMapping("Run Time Error - Wrong Answer",CLICS_JUDGEMENT_ACRONYM.RWA));
+            
+            add(new JudgementMapping("Runtime Error - Presentation Error",CLICS_JUDGEMENT_ACRONYM.RPE));
+            add(new JudgementMapping("Run-time Error - Presentation Error",CLICS_JUDGEMENT_ACRONYM.RPE));
+            add(new JudgementMapping("Run Time Error - Presentation Error",CLICS_JUDGEMENT_ACRONYM.RPE));
+            
+            add(new JudgementMapping("Runtime Error - Excessive Output",CLICS_JUDGEMENT_ACRONYM.REO));
+            add(new JudgementMapping("Run-time Error - Excessive Output",CLICS_JUDGEMENT_ACRONYM.REO));
+            add(new JudgementMapping("Run Time Error - Excessive Output",CLICS_JUDGEMENT_ACRONYM.REO));
+
+            add(new JudgementMapping("Runtime Error - Incomplete Output",CLICS_JUDGEMENT_ACRONYM.RIO));
+            add(new JudgementMapping("Run-time Error - Incomplete Output",CLICS_JUDGEMENT_ACRONYM.RIO));
+            add(new JudgementMapping("Run Time Error - Incomplete Output",CLICS_JUDGEMENT_ACRONYM.RIO));
+
+            add(new JudgementMapping("Runtime Error - No Output",CLICS_JUDGEMENT_ACRONYM.RNO));
+            add(new JudgementMapping("Run-time Error - No Output",CLICS_JUDGEMENT_ACRONYM.RNO));
+            add(new JudgementMapping("Run Time Error - No Output",CLICS_JUDGEMENT_ACRONYM.RNO));
+
+            add(new JudgementMapping("Compile Time Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.CTL));
+            add(new JudgementMapping("Compile Time-Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.CTL));
+            add(new JudgementMapping("No - Compile Time Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.CTL));
+            add(new JudgementMapping("No - Compile Time-Limit Exceeded",CLICS_JUDGEMENT_ACRONYM.CTL));
+
+            add(new JudgementMapping("Security Violation",CLICS_JUDGEMENT_ACRONYM.SV));
+            add(new JudgementMapping("Illegal Function",CLICS_JUDGEMENT_ACRONYM.IF));
+            add(new JudgementMapping("Judging Error",CLICS_JUDGEMENT_ACRONYM.JE));
+            add(new JudgementMapping("Submission Error",CLICS_JUDGEMENT_ACRONYM.SE));
+
+            add(new JudgementMapping("Contact Staff",CLICS_JUDGEMENT_ACRONYM.CS));
+            add(new JudgementMapping("Other Contact Staff",CLICS_JUDGEMENT_ACRONYM.CS));
+            add(new JudgementMapping("Other - Contact Staff",CLICS_JUDGEMENT_ACRONYM.CS));
+        }
+    } ;
+
+    static class JudgementMapping {
+        private String text ;
+        private CLICS_JUDGEMENT_ACRONYM acronym ;
+        
+        protected JudgementMapping(String text, CLICS_JUDGEMENT_ACRONYM acronym) {
+            this.text = text;
+            this.acronym = acronym;
+        }
+        
+        public String getText() {
+            return text;
+        }
+
+        public CLICS_JUDGEMENT_ACRONYM getAcronym() {
+            return acronym;
+        }
+
+    }
+    
+    
+
     private static Map<String,String> big5Mapping = new HashMap<String,String>();
+    
     static {
         //put the big-5 acronyms in the mapping table (so that requests to map a big5 judgement return that judgement acronym)
         for (CLICS_BIG5 judgement : CLICS_BIG5.values()) {
             big5Mapping.put(judgement.name(), judgement.acronym);
         }
         //put each non-big5 judgement in the table, such that its key is the actual acronym (e.g. "OFE") and its value is 
-        // the corresponding Big5 acronym (as specified in the enumeration definition)
+        // the corresponding Big5 acronym (as specified in the CLICS_NON_BIG5 enumeration definition)
         for (CLICS_NON_BIG5 judgement : CLICS_NON_BIG5.values()) {
             String value = judgement.getValue();
 //            System.out.println ("judgement value = '" + value + "'");
@@ -131,13 +349,15 @@ public class CLICSJudgementType {
 //        for (String key : big5Mapping.keySet()) {
 //            System.out.println (" " + key + "=" + big5Mapping.get(key));
 //        }
+        
+        
     };
     
     /**
      * Constructs a new CLICSJudgementType containing the specified CLICS judgement type values.
      * 
-     * @param id the identifier (acronym) for the judgement
-     * @param name the text string name associated with the judgement
+     * @param id the identifier (acronym) for the judgement (for example, "TLE")
+     * @param name the text string name associated with the judgement (for example, "No - Time Limit Exceeded")
      * @param penalty whether or not this judgement causes a penalty during scoring
      * @param solved whether or not this judgement represents a correct solution to a problem
      */
@@ -197,6 +417,29 @@ public class CLICSJudgementType {
      */
     public String getBig5EquivalentAcronym() {
         return big5Mapping.get(this.id);
+    }
+    
+    /**
+     * Returns the {@link CLICS_JUDGEMENT_ACRONYM} element which corresponds to the specified text string, or null
+     * ff there is no CLICS_JUDGEMENT_ACRONYM whose text string matches the specified text.
+     * 
+     * @param text a String giving a judgement message; for example "Wrong Answer"
+     * 
+     * @return the CLICS_JUDGEMENT_ACRONYM element corresponding to the received text (e.g. CLICS_JUDGEMENT_ACRONYM.WA), or null 
+     */
+    public static CLICS_JUDGEMENT_ACRONYM getCLICSAcronym (String text) {
+          
+        for (JudgementMapping mapping : judgementStringMappings) {
+            
+            String mappingText = mapping.getText();
+            
+            if (mappingText.equalsIgnoreCase(text)) {
+                return mapping.getAcronym();
+            }
+        }
+        
+        //Text string not found
+        return null;
     }
     
     /**
