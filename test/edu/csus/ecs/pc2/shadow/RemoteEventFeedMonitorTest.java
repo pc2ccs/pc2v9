@@ -29,8 +29,8 @@ public class RemoteEventFeedMonitorTest extends AbstractTestCase {
      * true = yes, contact server at {@link #LOCALHOST_CONTEST_EVENT_FEED}
      * false = no, skip test.
      */
-//    boolean serverRunning = false;
-            boolean serverRunning = true;
+    boolean serverRunning = false;
+//    boolean serverRunning = true;
 
     /**
      * URL to contact for event feed, etc.
@@ -42,7 +42,7 @@ public class RemoteEventFeedMonitorTest extends AbstractTestCase {
      * 
      * @throws Exception
      */
-    public void testMontor() throws Exception {
+    public void testSubmmissonsLive() throws Exception {
 
         if (!serverRunning) {
             return;
@@ -125,7 +125,8 @@ public class RemoteEventFeedMonitorTest extends AbstractTestCase {
         /**
          * Test getRemoteJSON
          */
-        String addr = "Https://localhost:50443/submission_files?id=1";
+//        String addr = LOCALHOST_CONTEST_API + "/submission_files?id=1";
+        String addr = LOCALHOST_CONTEST_API + "/submissions/1/files";
         URL url = new URL(addr);
         RemoteContestAPIAdapter ad = new RemoteContestAPIAdapter(url, "admin", "admin");
 

@@ -29,9 +29,6 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     String login;
     String password;
     
-    private static final String LOCALHOST_CONTEST_API = "https://localhost:50443/contest";
-    private static final String LOCALHOST_CONTEST_EVENT_FEED = LOCALHOST_CONTEST_API + "/event-feed";
-    
     /**
      * Constructs a RemoteRunMonitor with the specified values.
      * 
@@ -215,12 +212,21 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     public List<IFile> getRemoteSubmissionFiles(String submissionID) {
         String endpoint = "/submissions/" + submissionID + "/files";
         String url = remoteURL.toString() + endpoint;
-        return getRemoteSubmissionFilesURL(url);
+        return getRemoteSubmissionFilesNew(url);
     }
 
+    // TODO shadow rename this method to getRemoteSubmissionFiles 
+    public List<IFile> getRemoteSubmissionFilesNew(String submissionPath) {
 
-    public List<IFile> getRemoteSubmissionFilesURL(String url) {
+        String fullSubmissionURL = remoteURL.toString() + submissionPath;
+        if (-1 != submissionPath.indexOf(':')) {
+            // has full URL with protocol
+            fullSubmissionURL = submissionPath;
+        }
+
         try {
+            URL url = new URL(fullSubmissionURL);
+
             HttpURLConnection conn = createConnection(url);
             /**
              * Bytes fetched from endpoint

@@ -117,8 +117,6 @@ public class RemoteEventFeedMonitor implements Runnable {
                                 System.out.println("\nfound event: " + eventType + ":" + event); // TODO log this.
 
                                 if ("submissions".equals(eventType)) {
-                                    System.out.println("debug 22 processing submission event ");
-
                                     //process a submission event
                                     try {
                                         //get a map of the data comprising the submission
@@ -147,7 +145,6 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                     String filesPath = fileMap.get(fileMap.keySet().iterator().next());
                                                     if (!StringUtilities.isEmpty(filesPath)){
                                                         submissionFilesURL = filesPath;
-                                                        System.out.println("debug 22  chanky = "+filesPath);
                                                     }
                                                 }
                                             }
@@ -164,16 +161,15 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             
                                             if ( remoteContestAPIAdapter instanceof RemoteContestAPIAdapter){
                                                 
-                                                String baseURL = remoteURL.getPath();
-                                                System.out.println("debug 22 baseURL = "+baseURL);
-                                                String s = baseURL.replaceAll("/event-feed", "") + "/" + submissionFilesURL;
+                                                System.out.println("debug 22 fetching file from URL "+submissionFilesURL);
                                                 
-                                                System.out.println("debug 22 get files using "+s);
-                                                
-                                                files = ((RemoteContestAPIAdapter)remoteContestAPIAdapter).getRemoteSubmissionFilesURL(s);
+                                                files = ((RemoteContestAPIAdapter)remoteContestAPIAdapter).getRemoteSubmissionFilesNew(submissionFilesURL);
                                                 
                                                 if (files == null){
                                                     System.err.println("No files retrieved using "+submissionFilesURL);
+                                                } else {
+                                                    
+                                                    System.out.println("debug 22 getRemoteSubmissionFilesNew GOT "+files.size()+" files");
                                                 }
                                                 
                                             } else {
