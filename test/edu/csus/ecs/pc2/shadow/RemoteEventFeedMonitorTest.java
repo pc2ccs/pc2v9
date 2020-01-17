@@ -36,7 +36,6 @@ public class RemoteEventFeedMonitorTest extends AbstractTestCase {
      * URL to contact for event feed, etc.
      */
     private static final String LOCALHOST_CONTEST_API = "https://localhost:50443/contest";
-    private static final String LOCALHOST_CONTEST_EVENT_FEED = LOCALHOST_CONTEST_API + "/event-feed";
 
     /**
      * Tests RemoteEventFeedMonitor using running pc2 server with feeder login.
@@ -60,7 +59,7 @@ public class RemoteEventFeedMonitorTest extends AbstractTestCase {
         assertNotNull("Expeting " + login + " to be logged in, not null ", plugin);
         assertNotNull("Expeting " + login + " to be logged in ", plugin.getController());
 
-        URL remoteURL = new URL(LOCALHOST_CONTEST_EVENT_FEED);
+        URL remoteURL = new URL(LOCALHOST_CONTEST_API);
 
         String weblogin = "admin";
         String webpassword = "admin";
@@ -81,7 +80,7 @@ public class RemoteEventFeedMonitorTest extends AbstractTestCase {
 
         RemoteEventFeedMonitor mon = new RemoteEventFeedMonitor(plugin.getController(), remoteContestAPIAdapter, remoteURL, weblogin, webpassword, submitter);
 
-        System.out.println("debug 22 contacting " + LOCALHOST_CONTEST_EVENT_FEED);
+        System.out.println("debug 22 contacting " + LOCALHOST_CONTEST_API);
         Thread runnyBaby = new Thread(mon);
         runnyBaby.start();
 

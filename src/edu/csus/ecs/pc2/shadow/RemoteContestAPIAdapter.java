@@ -29,6 +29,9 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     String login;
     String password;
     
+    private static final String LOCALHOST_CONTEST_API = "https://localhost:50443/contest";
+    private static final String LOCALHOST_CONTEST_EVENT_FEED = LOCALHOST_CONTEST_API + "/event-feed";
+    
     /**
      * Constructs a RemoteRunMonitor with the specified values.
      * 
@@ -186,14 +189,26 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
      * {@inheritDoc}
      */
     public InputStream getRemoteEventFeedInputStream() {
+        
+        String eventFeedURLString = remoteURL.toString();
+        eventFeedURLString = appendIfMissing(eventFeedURLString, "/") +"event-feed";
+        
         InputStream stream = null;
         try {
-            stream = getHTTPInputStream(remoteURL, login, password);
+            URL url = new URL(eventFeedURLString);
+            stream = getHTTPInputStream(url, login, password);
         } catch (IOException e) {
-            // TODO Need to decide how to handle this exception
+            // TODO shadow Need to decide how to handle this exception/error
             e.printStackTrace();
         }
         return stream ;
+    }
+
+    private String appendIfMissing(String s, String appendString) {
+        if (!s.endsWith(appendString)){
+            s += appendString;
+        }
+        return s;
     }
 
     @Override
