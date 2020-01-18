@@ -3,10 +3,15 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Map;
 
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
@@ -28,6 +33,8 @@ import edu.csus.ecs.pc2.shadow.ShadowJudgementPair;
 public class ShadowComparePane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
+    
+    private Map<String,ShadowJudgementPair> currentJudgementMap ;
 
     @Override
     public String getPluginTitle() {
@@ -44,6 +51,8 @@ public class ShadowComparePane extends JPanePlugin {
      * @param map a Mapping of submission IDs to pairs of judgements
      */
     public ShadowComparePane(Map<String,ShadowJudgementPair> map) {
+        
+        currentJudgementMap = map;
         
         //temporary hack to display some data
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -127,6 +136,25 @@ public class ShadowComparePane extends JPanePlugin {
             this.add(label);
         }
         
+        this.add(getButtonPanel());
+        
+    }
+    
+    private JComponent getButtonPanel() {
+        JPanel buttonPanel = new JPanel();
+        JButton saveButton = new JButton("Save");
+        saveButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println ("Save button pushed");
+                System.out.println (currentJudgementMap);
+            };
+        });
+        
+        buttonPanel.add(saveButton);
+        
+        return buttonPanel ;
     }
 
 }
