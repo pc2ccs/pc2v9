@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.net.MalformedURLException;
@@ -12,6 +12,8 @@ import java.util.logging.Level;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -147,40 +149,39 @@ public class ShadowController {
         }
         
         //get an adapter which connects to the remote Contest API
-        IRemoteContestAPIAdapter remoteContestAPIAdapter = new MockContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
+        IRemoteContestAPIAdapter remoteContestAPIAdapter = createRemoteContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
         
         //get a remote contest configuration from the adapter
         remoteContestConfig  = remoteContestAPIAdapter.getRemoteContestConfiguration();
                         
-        //make sure we got a remote config
-        if (remoteContestConfig != null) {
-            
-            //check if the local contest has the same config as the remote contest (the one being shadowed)
-            if (!remoteContestConfig.isSameAs(localContest)) {
-
-                //get the configuration differences
-                List<String> diffs = remoteContestConfig.diff(localContest);
-
-                //log the differences
-                Log log = localController.getLog();
-                log.log(Level.WARNING, "Local contest configuration does not match configuration of remote CCS; cannot proceed with shadowing");
-                logDiffs(log, diffs);
-
-                setStatus(SHADOW_CONTROLLER_STATUS.SC_CONTEST_CONFIG_MISMATCH);
-
-                return false;
-
-            }
-        } else {
-            //we didn't get a remote config
-            Log log = localController.getLog();
-            log.log(Level.WARNING, "Contest configuration from remote CCS is null; cannot proceed with shadowing");
- 
-            setStatus(SHADOW_CONTROLLER_STATUS.SC_INVALID_REMOTE_CONFIG);
-            
-            return false;
-        }
-        
+//        //make sure we got a remote config
+//        if (remoteContestConfig != null) {
+//            
+//            //check if the local contest has the same config as the remote contest (the one being shadowed)
+//            if (!remoteContestConfig.isSameAs(localContest)) {
+//
+//                //get the configuration differences
+//                List<String> diffs = remoteContestConfig.diff(localContest);
+//
+//                //log the differences
+//                Log log = localController.getLog();
+//                log.log(Level.WARNING, "Local contest configuration does not match configuration of remote CCS; cannot proceed with shadowing");
+//                logDiffs(log, diffs);
+//
+//                setStatus(SHADOW_CONTROLLER_STATUS.SC_CONTEST_CONFIG_MISMATCH);
+//
+//                return false;
+//
+//            }
+//        } else {
+//            //we didn't get a remote config
+//            Log log = localController.getLog();
+//            log.log(Level.WARNING, "Contest configuration from remote CCS is null; cannot proceed with shadowing");
+// 
+//            setStatus(SHADOW_CONTROLLER_STATUS.SC_INVALID_REMOTE_CONFIG);
+//            
+//            return false;
+//        }
         
         //if we get here we know the remote contest configuration matches the local contest configuration
         
@@ -210,7 +211,18 @@ public class ShadowController {
         }
                 
     }
-    
+
+    private IRemoteContestAPIAdapter createRemoteContestAPIAdapter(URL url, String login, String password) {
+
+        boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow", "useMockContestAdapter"), false);
+        if (useMockAdapter)
+        {
+            return new MockContestAPIAdapter(url, login, password);
+        } else {
+            return new RemoteContestAPIAdapter(url, login, password);
+        }
+    }
+
     private boolean convertJudgementsToBig5 = true;
     
     /**

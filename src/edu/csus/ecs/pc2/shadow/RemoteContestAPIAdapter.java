@@ -11,16 +11,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.IFileImpl;
+import edu.csus.ecs.pc2.shadow.AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT;
 import edu.csus.ecs.pc2.util.HTTPSSecurity;
 
 public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
@@ -139,9 +140,13 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
 
     @Override
     public RemoteContestConfiguration getRemoteContestConfiguration() {
-        // TODO write code
-//        RemoteContestConfiguration configuration = new RemoteContestConfiguration(remoteConfigMap);
-        throw new NotImplementedException(); 
+        
+        Map<REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>> remoteConfigMap = new HashMap<AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>>();
+
+        // TODO TODAY implement me - add mock data into RemoteContestConfiguration
+        System.err.println("Write getRemoteContestConfiguration()");
+
+        return new RemoteContestConfiguration(remoteConfigMap);
     }
 
     @Override
