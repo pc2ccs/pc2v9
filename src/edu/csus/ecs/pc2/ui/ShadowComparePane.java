@@ -3,14 +3,21 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -35,6 +42,9 @@ public class ShadowComparePane extends JPanePlugin {
     private static final long serialVersionUID = 1L;
     
     private Map<String,ShadowJudgementPair> currentJudgementMap ;
+    
+    private String lastDirectory = ".";
+
 
     @Override
     public String getPluginTitle() {
@@ -141,20 +151,113 @@ public class ShadowComparePane extends JPanePlugin {
     }
     
     private JComponent getButtonPanel() {
+        
         JPanel buttonPanel = new JPanel();
-        JButton saveButton = new JButton("Save");
+        buttonPanel.setMaximumSize(new Dimension(500,40));
+        JButton saveButton = new JButton("Save As .csv");
         saveButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                System.out.println ("Save button pushed");
-                System.out.println (currentJudgementMap);
-            };
+                saveCSVFile();
+            }
         });
-        
+                
         buttonPanel.add(saveButton);
         
         return buttonPanel ;
     }
+    
+    /**
+     * Saves the current judgement comparisons in a CSV (comma-separate-values) file.
+     */
+    private void saveCSVFile() {
+        
+        JFileChooser chooser = new JFileChooser(lastDirectory);
+        int action = chooser.showSaveDialog(null);
+        
+        if (action == JFileChooser.APPROVE_OPTION) {
+            
+            File saveFile = chooser.getSelectedFile();
+            lastDirectory = chooser.getCurrentDirectory().toString();
 
+            if (saveFile != null) {
+                
+                //see if we're about to overwrite an existing file
+                if (saveFile.isFile()){
+                    //yes; get confirmation ok
+                    int result = FrameUtilities.yesNoCancelDialog(null, "Overwrite "+saveFile.getName()+" ?", "Overwrite File?");
+                    if (result != JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                } else {
+                    try {
+                        saveFile.createNewFile();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+
+                BufferedWriter bw = null;
+                try {
+                    
+                    bw = new BufferedWriter(new FileWriter(saveFile));
+                    
+                    //write CSV header to file
+                    String data = "SUBMISSION_ID,PC2_SHADOW,REMOTE_CCS,MATCH?" ;
+                    bw.write(data);
+                    bw.newLine();
+                    
+                    //write CSV for each judgement to file
+                    for (String submissionID : currentJudgementMap.keySet()) {
+                        data = getCSVString(currentJudgementMap.get(submissionID));
+                        bw.write(data);
+                        bw.newLine();
+                    }
+                    System.out.println ("Wrote Shadow Comparison data to file '" + saveFile.getName() + "'");
+
+               } catch (IOException ioe) {
+                   ioe.printStackTrace();
+               }
+               finally { 
+                  try{
+                     if(bw!=null) {
+                         bw.close();
+                     }
+                  }catch(Exception ex){
+                      System.err.println("Error in closing the BufferedWriter"+ex);
+                  }
+              }
+            }
+        };
+    }
+        
+    /**
+     * Returns a comma-separate-value string containing the values found in the specified {@link ShadowJudgementPair}.
+     * 
+     * @param pair a ShadowJudgementPair
+     * 
+     * @return a comma-separated-values string for the pair
+     */
+    private String getCSVString(ShadowJudgementPair pair) {
+        
+        String subID = pair.getSubmissionID() ;
+        String pc2Result = pair.getPc2Judgement() ;
+        String remoteResult = pair.getRemoteCCSJudgement();
+        
+        //TODO:  need to escape any commas in either the pc2Result or the remoteResult
+        String retStr = subID + "," + pc2Result + "," + remoteResult + ",";
+        
+        String match ;
+        if (pc2Result!=null && remoteResult!=null) {
+            match = pc2Result.trim().equalsIgnoreCase(remoteResult) ? "Y" : "N";
+        } else {
+            match = "---";
+        }
+        retStr += match ;
+
+        return retStr;
+    }
+    
 }
