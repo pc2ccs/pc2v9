@@ -135,7 +135,7 @@ public class PacedFileInputStream extends InputStream {
         if (maxCharsInBuffer == -1)
         {
             // at EOF
-            return 0;
+            return -1;
         }
         else
         {
