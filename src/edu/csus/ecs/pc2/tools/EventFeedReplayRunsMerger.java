@@ -78,16 +78,15 @@ public class EventFeedReplayRunsMerger {
         
         int actionCount = 0;
         int skippedPreliminaryJudgementActionCount = 0;
+        int overwrittenJudgements = 0;
         //a map to hold submission actions
         Map<String,Map<String,String>> submissionActions = new HashMap<String,Map<String,String>>();
         //a list to hold duplicated submission actions
         List<Map<String,String>> duplicateSubmissionActions = new ArrayList<Map<String,String>>();
         //a map to hold judgement actions
         Map<String,Map<String,String>> judgementActions = new HashMap<String,Map<String,String>>();
-        //a list to hold duplicated judgement actions (because we can't store multiple things under the same id in a map)
-        List<Map<String,String>> duplicateJudgementActions = new ArrayList<Map<String,String>>();
         
-        //read all replay actions into a map, checking for duplicates and saving them separately
+        //read all replay actions into a map, checking for duplicate submissions (which would be an error) and saving them separately
         scanner = new Scanner(pc2Runs);
 
         while (scanner.hasNextLine()) {
@@ -125,19 +124,23 @@ public class EventFeedReplayRunsMerger {
                            //process only if not prelim judgement
                            if (!(isPrelim==null) && !isPrelim.trim().equalsIgnoreCase("true")) {
                                
-                               //check if we already have a judgement action with this ID
-                               String judgementID = singleActionMap.get("id");
-                               if (!judgementActions.containsKey(judgementID)) {
-                                   //save the action in the allJudgementActions map under the judgement ID
-                                   judgementActions.put(judgementID, singleActionMap);
-                               } else {
-                                   //we've already seen such an action; put this one in the duplicates list for later
-                                   duplicateJudgementActions.add(singleActionMap);
+                               //see what submission this judgement applies to
+                               String submissionIdForJudgement = singleActionMap.get("id");   
+                               
+                               //check if the judgements map already contains a judgement for this submission
+                               // (which means that the current judgement is a later one which will overwrite the earlier one)
+                               if (judgementActions.keySet().contains(submissionIdForJudgement)) {
+                                   overwrittenJudgements++ ;
                                }
+                               
+                               //save the judgement under the submissionID in the map, overwriting any earlier 
+                               // judgement for the same submission 
+                               judgementActions.put(submissionIdForJudgement, singleActionMap);
                            } else {
                                skippedPreliminaryJudgementActionCount++ ;
                            }
                            break;
+                           
                        default: 
                            //we have an action we don't know about
                            System.err.println ("Unknown action in Extract Replay Runs file '" + pc2Runs.getName() + "': "
@@ -152,22 +155,20 @@ public class EventFeedReplayRunsMerger {
         System.out.println ("Found " + actionCount + " actions in PC2 Extract Replay Runs file '" + pc2Runs.getName() + "'");
         System.out.println ("Put " + submissionActions.keySet().size() + " actions in the submission actions map" );
         System.out.println ("Put " + duplicateSubmissionActions.size() + " actions in the duplicate submission actions list" );
-        System.out.println ("Put " + judgementActions.keySet().size() + " actions in the judgement actions map" );
-        System.out.println ("Found (and ignored) " + skippedPreliminaryJudgementActionCount + " preliminary judgement actions");
-        System.out.println ("Put " + duplicateJudgementActions.size() + " action(s) in the duplicate judgement actions list" );
-        if (duplicateJudgementActions.size()>0) {
-            System.out.println ("  Duplicate actions:");
-            for (Map<String,String> action : duplicateJudgementActions) {
-                System.out.print("    ");
-                for (String key : action.keySet()) {
-                    System.out.print (key + ":" + action.get(key) + " | ");
-                }
-                System.out.println();
+        if (duplicateSubmissionActions.size()>0) {
+            System.out.println ("   Duplicate submissions indicates an error -- multiple submissions with the same ID:");
+            for (Map<String,String> action : duplicateSubmissionActions) {
+                String submissionID = action.get("id");
+                System.out.println ("      " + submissionID);
             }
         }
+        
+        System.out.println ("Put " + judgementActions.keySet().size() + " actions in the judgement actions map" );
+        System.out.println ("Found (and ignored) " + skippedPreliminaryJudgementActionCount + " preliminary judgement actions");
+        System.out.println ("Overwrote " + overwrittenJudgements + " judgement action(s) with later judgements" );
         int totalActions = submissionActions.keySet().size() + duplicateSubmissionActions.size() 
-                    + judgementActions.keySet().size() + duplicateJudgementActions.size() ;
-        System.out.println ("Total actions put in maps/lists = " + totalActions);
+                    + judgementActions.keySet().size() + overwrittenJudgements ;
+        System.out.println ("Total actions processed = " + totalActions);
 
         
         if (outputFileName==null) {
@@ -524,9 +525,8 @@ public class EventFeedReplayRunsMerger {
     private static String getJSON(Map<String, Object> eventMap) {
         String jsonString;
         
-        Map<String,Object> data = (Map<String,Object>) eventMap.get("data");
-        String fileList = (String) data.get("files");
-        
+//        Map<String,Object> data = (Map<String,Object>) eventMap.get("data");
+//        String fileList = (String) data.get("files");
 //        System.out.println ("files data from eventMap.data:");
 //        System.out.println (fileList);
         
