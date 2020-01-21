@@ -44,18 +44,18 @@ public class RemoteRunSubmitter {
      * Submit a run to the server.
      * 
      * @param clientIdString - "teamN" client name
-     * @param problemName - problem name
-     * @param languageName - language name
+     * @param problemID - problem id
+     * @param languageID - CLICS language id
      * @param mainFile - main file name
      * @param auxFiles - other submittted files 
      * @param overrideTimeMS - override submission time in MS
      * @param overrideRunId - override run id
      */
-    public void submitRun(String clientIdString, String problemName, String languageName, IFile mainFile, List<IFile> auxFiles, long overrideTimeMS, long overrideRunId) {
+    public void submitRun(String clientIdString, String problemID, String languageID, IFile mainFile, List<IFile> auxFiles, long overrideTimeMS, long overrideRunId) {
 
         isEmptyString(clientIdString, "ClientId parameter is null");
-        isEmptyString(problemName, "Parameter problemName is null or empty");
-        isEmptyString(languageName, "Parameter languageName is null or empty");
+        isEmptyString(problemID, "Parameter problemID is null or empty");
+        isEmptyString(languageID, "Parameter languageID is null or empty");
         isEmpty(mainFile, "Parameter mainFile is null");
 
         if (mainFile == null)
@@ -82,13 +82,14 @@ public class RemoteRunSubmitter {
         }
         ClientId submitter = account.getClientId();
 
-        Problem problem = getProblemByName(contest, problemName);
+        Problem problem = getProblemByName(contest, problemID);
 
-        isEmpty(problem, "Parameter problemName does not match any pc2 problem: '" + problemName + "'");
+        isEmpty(problem, "Parameter problemID does not match any pc2 problem: '" + problemID + "'");
 
-        Language language = getLanguageByName(contest, languageName);
+//        Language language = getLanguageByName(contest, languageID);
+        Language language = getLanguageByID(contest, languageID);
 
-        isEmpty(language, "Parameter languageName does not match any pc2 language: '" + languageName + "'");
+        isEmpty(language, "Parameter languageID does not match any pc2 language: '" + languageID + "'");
 
         SerializedFile mainSubmissionFile = new SerializedFile(mainFile);
 
@@ -110,6 +111,17 @@ public class RemoteRunSubmitter {
         Language[] languages = contest.getLanguages();
         for (Language language : languages) {
             if (language.getDisplayName().trim().equals(languageName.trim())) {
+                outLang = language;
+            }
+        }
+        return outLang;
+    }
+
+    private Language getLanguageByID(IInternalContest contest2, String languageID) {
+        Language outLang = null;
+        Language[] languages = contest.getLanguages();
+        for (Language language : languages) {
+            if (language.getID().trim().equals(languageID.trim())) {
                 outLang = language;
             }
         }
