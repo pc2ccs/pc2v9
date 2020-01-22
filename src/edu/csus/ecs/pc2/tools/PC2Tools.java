@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.tools;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.ParseArguments;
+import edu.csus.ecs.pc2.ui.team.SubmitterFromEF;
 
 /**
  * PC2 Tools - pc2 utilities front end.
@@ -20,9 +21,11 @@ public class PC2Tools {
         String[] usage = { //
         //
                 "Usage: PC2Tools [--help] --login LOGIN [--password PASSWORD] --mer | --gen --startnow | --shutdown | --startat DATETIME | --startin TIMESTR ", //
+                "Usage: PC2Tools [--help] --sr --login LOGIN [--password PASSWORD] filename ", //
                 "", //
                 "--gen   - generate passwords to stdout, use --help --gen for usage", //
                 "--mer   - prints mail merge file to stdtout, use --help --mer for usage", //
+                "--sr   -  submit runs from CLICS JSON EF, use --help --sr for usage", //
                 "",
                 
                 "--login LOGIN ", //
@@ -56,7 +59,11 @@ public class PC2Tools {
         if (parseArguments.isOptPresent("--gen")) {
 
             PasswordGenerator.main(args);
-            
+
+        } else if (parseArguments.isOptPresent("--sr")) {
+
+            SubmitterFromEF.main(args);
+
         } else if (parseArguments.isOptPresent("--mer")) {
 
             PrintMergeFile.main(args);
