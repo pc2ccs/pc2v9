@@ -229,6 +229,11 @@ public class ExportYAML {
             contestWriter.println(PAD4 + "compilerCmd: " + quote(language.getCompileCommandLine()));
             contestWriter.println(PAD4 + "exemask: " + quote(language.getExecutableIdentifierMask()));
             contestWriter.println(PAD4 + "execCmd: " + quote(language.getProgramExecuteCommandLine()));
+            
+            String clicsId = language.getID();
+            if ( clicsId != null && clicsId.trim().length() > 0){
+                contestWriter.println(PAD4 + "clics-id: " + quote(clicsId));
+            }
 
             String runner = getRunner(language.getProgramExecuteCommandLine());
             String runnerArguments = getRunnerArguments(language.getProgramExecuteCommandLine());

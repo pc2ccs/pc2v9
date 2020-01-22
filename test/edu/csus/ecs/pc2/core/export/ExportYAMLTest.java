@@ -247,32 +247,8 @@ public class ExportYAMLTest extends AbstractTestCase {
         IInternalContest contest2 = loader.fromYaml(null, outDir);
         ContestInformation info = contest2.getContestInformation();
         assertEquals(expectedFreezeTime, info.getFreezeTime());
-        
-        // REFACTOR move this file length check into its own unit test method.
-        
-        /**
-         * Instructions to create a new expected file for this unit test.
-         * 
-         * 1 - uncomment the copyFileOverwrite call
-         * 2 - run the unit test method
-         * 3 - comment the copyFileOverwrite call
-         * 4 - be sure to git commit new expected file 
-         */
-//        copyFileOverwrite(actualContestYamlFile, expectedContestYamlFile);          
-
-        /**
-         * "Expecting expected file length to match new/actual file length" 
-         */
-        // REFACTOR - add String message as first paraamter to assertFileContentsEquals
-        assertFileContentsEquals(
-                // If this assert fails and Export YAML is outputting different contest,
-                // follow the instructions above.
-                new File(outExpectedContestYamlfile), new File(actualContestYamlFile), 4, getOverrideStringCompare());
 
         exportYAML = null;
-
-
-
     }
 
 
