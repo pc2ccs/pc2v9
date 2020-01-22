@@ -1514,6 +1514,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     Language lookedupLanguage = LanguageAutoFill.languageLookup(name);
                     String compilerName = fetchValue(map, "compiler");
                     String pc2CompilerCommandLine = fetchValue(map, PC2_COMPILER_CMD);
+                    
+         
 
                     language.setDisplayName(name);
                     
@@ -1590,6 +1592,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                         language.setJudgeProgramExecuteCommandLine(judgeExecuteCommandLine);
                     } else {
                         language.setUsingJudgeProgramExecuteCommandLine(false);
+                    }
+                    
+                    String clicsLanguageId = fetchValue(map, "clics-id");
+                    if (clicsLanguageId != null){
+                        language.setID(clicsLanguageId);
                     }
 
                     // SOMEDAY handle interpreted languages, seems it should be in the export
