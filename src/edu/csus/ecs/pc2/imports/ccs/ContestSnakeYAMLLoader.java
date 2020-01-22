@@ -443,6 +443,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (contestLength != null) {
             setContestLength(contest, contestLength);
         }
+        
+        boolean isRunning  = fetchBooleanValue(content, "running", false);
+        if (isRunning){
+            ContestTime time = contest.getContestTime();
+            if (time == null) {
+                time = new ContestTime();
+                time.setSiteNumber(contest.getSiteNumber());
+            }
+            time.startContestClock();
+            contest.updateContestTime(time);
+        }
 
         // Old yaml name
         String scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_KEY);
