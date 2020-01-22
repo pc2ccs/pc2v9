@@ -473,6 +473,7 @@ public class ShadowControlPane extends JPanePlugin {
         
         ContestInformation contestInformation = getContest().getContestInformation();
 
+        getShadowSettingsPane().getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
         getShadowSettingsPane().getRemoteCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL());
         getShadowSettingsPane().getRemoteCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
         getShadowSettingsPane().getRemoteCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
