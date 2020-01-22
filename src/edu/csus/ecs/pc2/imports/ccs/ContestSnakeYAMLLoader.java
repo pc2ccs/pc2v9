@@ -54,6 +54,7 @@ import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.tools.PasswordGenerator;
 import edu.csus.ecs.pc2.tools.PasswordType2;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
@@ -658,6 +659,23 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         for (AutoJudgeSetting auto : autoJudgeSettings) {
             addAutoJudgeSetting(contest, auto);
+        }
+        
+        ClientId[] proxyClientIds = getShadowProxyClientIds(yamlLines);
+        System.out.println("debug 22 There are "+proxyClientIds.length+" in yaml in dir "+directoryName);
+        
+        if (proxyClientIds.length > 0) {
+            for (ClientId clientId : proxyClientIds) {
+                Account account = contest.getAccount(clientId);
+                if (account != null) {
+                    account.addPermission(Type.SHADOW_PROXY_TEAM);
+                    contest.updateAccount(account);
+                    System.out.println("debug 22 Added proxy account "+account.getClientId().toString());
+                } else {
+                    syntaxError("No such account for proxy of " + clientId.getClientType().toString() + " " + clientId.getClientNumber() + " at site " + clientId.getSiteNumber());
+                    ;
+                }
+            }
         }
 
         PlaybackInfo playbackInfo = getReplaySettings(yamlLines);
@@ -1487,6 +1505,37 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @SuppressWarnings("rawtypes")
     private ArrayList fetchList(Map<String, Object> content, String key) {
         return (ArrayList) content.get(key);
+    }
+    
+    public ClientId [] getShadowProxyClientIds(String[] yamlLines) {
+        ArrayList<ClientId> clientIdList = new ArrayList<ClientId>();
+        Map<String, Object> yamlContent = loadYaml(null, yamlLines);
+        ArrayList<Map<String, Object>> list = fetchList(yamlContent, "team-proxy-accounts");
+
+        if (list != null) {
+            for (Object object : list) {
+
+                Map<String, Object> map = (Map<String, Object>) object;
+
+                String accountType = fetchValue(map, "account");
+                checkField(accountType, "Account Type");
+
+                ClientType.Type type = ClientType.Type.valueOf(accountType.trim());
+                Integer siteNumber = fetchIntValue(map, "site", 1);
+                String numberString = fetchValue(map, "number");
+                
+                int[] clientNumbers = getNumberList(numberString.trim());
+                
+
+                for (int i = 0; i < clientNumbers.length; i++) {
+
+                    int clientNumber = clientNumbers[i];
+                    ClientId newId = new ClientId(siteNumber, type, clientNumber);
+                    clientIdList.add(newId);
+                }
+            }
+        }
+        return (ClientId[]) clientIdList.toArray(new ClientId[clientIdList.size()]);
     }
 
     @SuppressWarnings("unchecked")
