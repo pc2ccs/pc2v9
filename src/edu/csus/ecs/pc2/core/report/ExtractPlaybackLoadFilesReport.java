@@ -10,11 +10,14 @@ import java.util.Date;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.clics.CLICSJudgementType;
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -102,7 +105,34 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
         writeValues(printWriter, PlaybackManager.JUDGED_ELAPSED_TIME, judgementRecord.getWhenJudgedTime());
         writeValues(printWriter, PlaybackManager.IS_COMPUTER_JUDGED, judgementRecord.isComputerJudgement());
         
-        writeValues(printWriter, PlaybackManager.JUDGEMENT_TEXT, contest.getJudgement(judgementRecord.getJudgementId()).getDisplayName());
+        //find the appropriate judgement value for output
+        String result = "";
+        if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
+            
+            //there is a judgement record; see if it has a Validator-defined judgement
+            if (judgementRecord.isUsedValidator() && judgementRecord.getValidatorResultString() != null) {
+                //yes, a validator was used; get the validator result
+                result = judgementRecord.getValidatorResultString();
+            } else {
+                
+                //no validator was used; choose the judgement in the actual judgement record
+                Judgement judgement = contest.getJudgement(judgementRecord.getJudgementId());
+                if (judgement != null) {
+                    result = judgement.toString();
+                }
+            }
+        }
+        
+        //if we found a judgement string, try to convert it to a corresponding CLICS acronym
+        if (result!=null && result.length()>0) {
+            CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronym(result);
+            if (acronym!=null) {
+                result = acronym.name();
+            }
+        }
+
+        writeValues(printWriter, PlaybackManager.JUDGEMENT_TEXT, result);
+        
         writeValues(printWriter, PlaybackManager.IS_SEND_TO_TEAMS, judgementRecord.isSendToTeam());
         printWriter.println();
         
