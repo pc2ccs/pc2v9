@@ -283,7 +283,7 @@ public class ExtractReplayRunsReportSplitter {
         private static void usage() {
             System.out.println("Usage:  java ExtractReplayRunsReportSplitter pc2ExtractReplayRunsFile {div1 | div2} [splitOutputFile]");
             System.out.println ("  where");
-            System.out.println ("    pc2ExtractReplayRunsFile is a file containing the output of a PC2 ExtractReplayRuns report");
+            System.out.println ("    pc2ExtractReplayRunsFile is a file containing the output of a PC2 *SERVER* ExtractReplayRuns report");
             System.out.println ("    {div1 | div2} is either the string \"div1\" or \"div2\"");
             System.out.println ("    splitOutputFile is an optional file where the actions for the specified division will be written (defaults to stdout)");   
         }
