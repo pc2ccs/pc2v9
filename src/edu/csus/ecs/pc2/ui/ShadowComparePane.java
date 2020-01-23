@@ -64,7 +64,6 @@ public class ShadowComparePane extends JPanePlugin {
         
         currentJudgementMap = map;
         
-        //temporary hack to display some data
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         JLabel header = new JLabel("Comparison of PC2 vs. Remote Judgements");
         this.add(header);
@@ -146,9 +145,51 @@ public class ShadowComparePane extends JPanePlugin {
             this.add(label);
         }
         
+        this.add(getSummaryPanel());
+        
         this.add(getButtonPanel());
         
     }
+    
+    private JComponent getSummaryPanel() {
+        
+        JPanel summaryPanel = new JPanel();
+        
+        int submissionCount = currentJudgementMap.keySet().size();
+        
+        JLabel subCountLabel = new JLabel();
+        subCountLabel.setText("Count=" + new Integer(submissionCount).toString());
+        summaryPanel.add(subCountLabel);
+        
+        JLabel shadowYesCountLabel = new JLabel();
+        int shadowYesCount = 0 ;
+        for (String key : currentJudgementMap.keySet()) {
+            ShadowJudgementPair pair = currentJudgementMap.get(key);
+            String pc2Judgment = pair.getPc2Judgement();
+            if (pc2Judgment!=null && (pc2Judgment.equalsIgnoreCase("AC")||pc2Judgment.equalsIgnoreCase("Yes")) ){
+                shadowYesCount++;
+            }
+        }
+        shadowYesCountLabel.setText("AC = " + new Integer(shadowYesCount).toString());
+        summaryPanel.add(shadowYesCountLabel);
+        
+        JLabel remoteYesCountLabel = new JLabel();
+        int remoteYesCount = 0 ;
+        for (String key : currentJudgementMap.keySet()) {
+            ShadowJudgementPair pair = currentJudgementMap.get(key);
+            String remoteJudgment = pair.getRemoteCCSJudgement();
+            if (remoteJudgment!=null && (remoteJudgment.equalsIgnoreCase("AC")||remoteJudgment.equalsIgnoreCase("Yes")) ){
+                remoteYesCount++;
+            }
+        }
+        remoteYesCountLabel.setText("AC = " + new Integer(remoteYesCount).toString());
+        summaryPanel.add(remoteYesCountLabel);
+        
+       
+        
+       return summaryPanel ;
+    }
+    
     
     private JComponent getButtonPanel() {
         
