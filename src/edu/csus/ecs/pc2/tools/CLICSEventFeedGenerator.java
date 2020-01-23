@@ -37,7 +37,7 @@ import edu.csus.ecs.pc2.core.report.ExtractPlaybackLoadFilesReport;
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  *
  */
-public class EventFeedReplayRunsMerger {
+public class CLICSEventFeedGenerator {
 
     //a map to hold global judgement types defined by "judgement-types" events in the event feed
     static Map<String,CLICSJudgementType> judgementTypes = new HashMap<String,CLICSJudgementType>();
@@ -757,7 +757,7 @@ public class EventFeedReplayRunsMerger {
      * Prints the expected command-line usage of the class.
      */
     private static void usage() {
-        System.out.println("Usage:  java EventFeedReplayRunsMerger pc2eventFeedFile pc2ExtractReplayRunsFile [mergedEventFeedOutputFile]");
+        System.out.println("Usage:  java CLICSEventFeedGenerator pc2eventFeedFile pc2ExtractReplayRunsFile [mergedEventFeedOutputFile]");
         System.out.println ("  where");
         System.out.println ("    pc2eventFeedFile is a JSON event feed from PC2");
         System.out.println ("    pc2ExtractReplayRunsFile is a file containing the output of a PC2 ExtractReplayRuns report");
