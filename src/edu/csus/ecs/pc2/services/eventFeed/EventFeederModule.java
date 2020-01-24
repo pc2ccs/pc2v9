@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -41,6 +42,8 @@ public class EventFeederModule implements UIPlugin {
     private Log log;
 
     private EventFeedServer eventFeedServer = new EventFeedServer();
+
+    private ShadowController shadowController;
 
     public String getPluginTitle() {
         return "Event Feed Server (non-GUI)";
@@ -89,6 +92,15 @@ public class EventFeederModule implements UIPlugin {
             }
         } else {
             showMessage("Note: no web services will be started ");
+        }
+        try {
+            if (contest.getContestInformation().isShadowMode()) {
+                showMessage("Starting shadow controller");
+                shadowController = new ShadowController(contest, controller);
+                shadowController.start();
+            }
+        } catch (Exception e) {
+            showMessage("Unable to start shadow controller " + e.getMessage(), e);
         }
     }
 
