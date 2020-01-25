@@ -30,6 +30,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import edu.csus.ecs.pc2.shadow.ShadowJudgementPair;
+import javax.swing.Box;
 
 /**
  * A plug-in pane which displays Shadow comparison results.
@@ -66,6 +67,7 @@ public class ShadowComparePane extends JPanePlugin {
         
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         JLabel header = new JLabel("Comparison of PC2 vs. Remote Judgements");
+        header.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.add(header);
         
         if (map != null && !map.keySet().isEmpty()) {
@@ -154,11 +156,12 @@ public class ShadowComparePane extends JPanePlugin {
     private JComponent getSummaryPanel() {
         
         JPanel summaryPanel = new JPanel();
-        
+        summaryPanel.setMaximumSize(new Dimension(500,40));
+
         int submissionCount = currentJudgementMap.keySet().size();
         
         JLabel subCountLabel = new JLabel();
-        subCountLabel.setText("Count=" + new Integer(submissionCount).toString());
+        subCountLabel.setText("Total Submissions = " + new Integer(submissionCount).toString());
         summaryPanel.add(subCountLabel);
         
         JLabel shadowYesCountLabel = new JLabel();
@@ -170,7 +173,10 @@ public class ShadowComparePane extends JPanePlugin {
                 shadowYesCount++;
             }
         }
-        shadowYesCountLabel.setText("AC = " + new Integer(shadowYesCount).toString());
+        
+        Component horizontalGlue = Box.createHorizontalGlue();
+        summaryPanel.add(horizontalGlue);
+        shadowYesCountLabel.setText("Shadow AC = " + new Integer(shadowYesCount).toString());
         summaryPanel.add(shadowYesCountLabel);
         
         JLabel remoteYesCountLabel = new JLabel();
@@ -182,10 +188,30 @@ public class ShadowComparePane extends JPanePlugin {
                 remoteYesCount++;
             }
         }
-        remoteYesCountLabel.setText("AC = " + new Integer(remoteYesCount).toString());
+        
+        Component horizontalGlue_1 = Box.createHorizontalGlue();
+        summaryPanel.add(horizontalGlue_1);
+        remoteYesCountLabel.setText("Remote AC = " + new Integer(remoteYesCount).toString());
         summaryPanel.add(remoteYesCountLabel);
         
-       
+        JLabel matchCounts = new JLabel();
+        int match = 0;
+        int noMatch = 0;
+        for (String key : currentJudgementMap.keySet()) {
+
+            String pc2Judgement = currentJudgementMap.get(key).getPc2Judgement();
+            String remoteJudgement = currentJudgementMap.get(key).getRemoteCCSJudgement();
+            if (pc2Judgement!=null && remoteJudgement!=null && (pc2Judgement.equalsIgnoreCase(remoteJudgement))) {
+                match++ ;
+            } else {
+                noMatch++ ;                    
+            }
+        }
+        
+        Component horizontalGlue_2 = Box.createHorizontalGlue();
+        summaryPanel.add(horizontalGlue_2);
+        matchCounts.setText("Y=" + match + "; Other=" + noMatch);
+        summaryPanel.add(matchCounts);
         
        return summaryPanel ;
     }
