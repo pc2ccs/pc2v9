@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IFile;
 
 /**
@@ -67,12 +68,15 @@ public class RemoteEventFeedMonitor implements Runnable {
 
         keepRunning = true;
         
+        Log log = pc2Controller.getLog();
+        
         //open connection to remoteURL event-feed endpoint
         remoteInputStream = remoteContestAPIAdapter.getRemoteEventFeedInputStream();
 
         if (remoteInputStream == null) {
             
-            //  TODO: design error handling (loggin?)
+            //  TODO: design error handling (logging?)
+            log.log(Level.SEVERE, "Error opening event feed stream");
             System.err.println("Error opening event feed stream");
             
         } else {
@@ -90,7 +94,8 @@ public class RemoteEventFeedMonitor implements Runnable {
                     //skip blank lines and any that do not start/end with "{...}"
                     if ( event.length()>0 && event.startsWith("{") && event.endsWith("}") ) {
                         
-                        System.out.println("Got event string: " + event);
+//                        System.out.println("Got event string: " + event);
+                        log.log(Level.INFO, "Got event string: " + event);
                         try {
 
                             /**
@@ -107,19 +112,22 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                             if (eventMap == null) {
                                 // could not parse event
+                                log.log(Level.WARNING, "Could not parse event: " + event);
                                 System.out.println("Could not parse event: " + event);
 
                             } else {
 
                                 // find event type
                                 String eventType = (String) eventMap.get("type");
-                                System.out.println("\nfound event: " + eventType + ":" + event); // TODO log this.
+//                                System.out.println("\nfound event: " + eventType + ":" + event); // TODO log this.
 
                                 if ("submissions".equals(eventType)) {
-                                    System.out.println("debug 22 found submission event");
+//                                    System.out.println("debug 22 found submission event");
 
                                     //process a submission event
                                     try {
+                                        log.log(Level.INFO, "Processing " + eventType + " event");
+                                        
                                         //get a map of the data comprising the submission
                                         Map<String, Object> submissionEventDataMap = (Map<String, Object>) eventMap.get("data");
 
@@ -127,8 +135,11 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
 
                                         if (runSubmission == null) {
+                                            log.log(Level.SEVERE, "Error parsing submission data: " + event);
                                             throw new Exception("Error parsing submission data " + event);
                                         } else {
+                                            
+                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
                                             System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
 
                                             long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
@@ -138,9 +149,9 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                             IFile mainFile = null;
                                             if (files.size() <= 0) {
-                                                //TODO: deal with this error -- how to propagate it back to the invoker
+                                                //TODO: deal with this error -- how to propagate it back to the invoker?
                                                 System.err.println("Error: submitted files list is empty");
-                                                pc2Controller.getLog().log(Level.WARNING, "Received a submssion with empty files list");
+                                                log.log(Level.WARNING, "Received a submssion with empty files list");
                                             } else {
                                                 mainFile = files.get(0);
                                             }
@@ -167,7 +178,8 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     }
 
                                 } else if ("judgements".equals(eventType)) {
-                                    System.out.println("debug 22 found judgement event");
+//                                    System.out.println("debug 22 found judgement event");
+                                    log.log(Level.INFO, "Found " + eventType + " event");
 
                                     //process a judgement event
                                     try {
@@ -201,17 +213,20 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     } catch (Exception e) {
                                         // TODO design error handling reporting (logging?)
                                         System.err.println("Exception parsing event: " + event);
+                                        log.log(Level.SEVERE, "Exception parsing event: " + event);
                                         e.printStackTrace();
                                     }
 
                                 } else {
-                                    System.out.println("debug 22 - ignoring event " + eventType);
+//                                    System.out.println("debug 22 - ignoring event " + eventType);
+                                    log.log (Level.INFO, "Ignoring " + eventType + " event");
                                 }
 
                             } // else
                         } catch (Exception e) {
                             // TODO design error handling reporting (logging?)
                             System.err.println("Exception processing event: " + event);
+                            log.log(Level.SEVERE, "Exception processing event: " + event);
                             e.printStackTrace();
                         } 
                     }
@@ -222,9 +237,10 @@ public class RemoteEventFeedMonitor implements Runnable {
             } catch (Exception e) {
                 // TODO design error handling reporting (logging?)
                 System.err.println("Exception reading event from stream ");
+                log.log(Level.SEVERE, "Exception reading event from stream: " + e.toString());
                 e.printStackTrace();
             }
-        } // else
+        } // end else
     }
     
     /**
@@ -288,17 +304,19 @@ public class RemoteEventFeedMonitor implements Runnable {
         Map<String, Object> map = getMap(jsonString);
         if (map == null) {
             // could not parse.
-            System.out.println("Could not parse event: " + jsonString);
+            pc2Controller.getLog().log(Level.SEVERE, "Could not parse event: " + jsonString);
+            System.err.println("Could not parse event: " + jsonString);
 
         } else {
             String eventType = (String) map.get("type");
 
-            System.out.print("\nfound event: " + eventType + ":" + jsonString);
+//            System.out.print("\nfound event: " + eventType + ":" + jsonString);
 
             // found event: submissions:{"type":"submissions", "id":"pc2-165", "op":"update", "data": {"id":"3","language_id":"java","problem_id":"a","team_id":"3","time":"2019-11-30T20:41:36.809+02","contest_time":"00:20:00.000","entry_point":"ISumitWA","files":[{"href":"https://localhost:50443/contest/submissions/3/files"}]}}
 
             if ("submissions".equals(eventType)) {
-                System.out.println("found submission event");
+                pc2Controller.getLog().log(Level.INFO, "Found submission event");
+//                System.out.println("found submission event");
 
                 Object obj = map.get("data");
 
