@@ -64,7 +64,9 @@ public class CLICSEventFeedGenerator {
         File pc2Runs = new File(args[1]);
         
         if (!pc2ef.exists() || !pc2Runs.exists()) {
-            System.out.println ("Cannot find required input files");
+            System.out.println ("Cannot find required input files:");
+            System.out.println ("  Event Feed input file: " + args[0]);
+            System.out.println ("  Extracted Replay Runs file: " + args[1]);
             usage();
             System.exit(2);
         }
