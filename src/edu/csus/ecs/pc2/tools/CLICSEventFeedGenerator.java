@@ -198,23 +198,10 @@ public class CLICSEventFeedGenerator {
         int otherEventCount = 0;
         int errorCount = 0;
         
-        /* TODO:
-         * *** how to deal with duplicate actions??? 
-         * The ExtractReplayRuns report will contain one "RUN_JUDGEMENT" action for EACH JUDGEMENT applied to a submission 
-         * (so there may be multiple judgements for the same submission -- e.g. if it was rejudged).
-         * The above code adds any such judgements (that is, additional ExtractReplyRuns judgements for which a previous
-         * judgement for the same submission has already been received) to the "duplicateJudgementActions" list, thus saving them.
-         * 
-         * However, the EventFeed.json output appears to contain only ONE judgement (the FINAL one) for each submission.
-         * This means we'll only receive ONE judgement for each submission while reading the pc2ef file 
-         * (which is what the following loop does).
-         * 
-         * Should we just ignore duplicate RUN_JUDGEMENT Actions in the ExtractReplayRuns file?
-         * (Can we ignore them? Don't they represent "updates" to run judgements??)
-         */
-        
+        //read each line from the PC2 JSON event feed; output the corresponding CLICS event if appropriate
         while (scanner.hasNextLine()) {
            String line = scanner.nextLine();
+           boolean shouldOutput = false ;
            
            //see if the line matches the structure for events (disregard header lines and comments in the event feed file)
            if (line.trim().startsWith("{") && line.trim().endsWith("}")) {
@@ -257,26 +244,38 @@ public class CLICSEventFeedGenerator {
                             if (eventSubmissionID != null && !eventSubmissionID.equals("")) {
 
                                 // see if we have an update for this submission in the actions
-                                String actionSubmissionID = submissionActions.get(eventSubmissionID).get("id");
-                                if (actionSubmissionID!=null && !actionSubmissionID.equals("")) {
+                                Map<String,String> actionMap = submissionActions.get(eventSubmissionID);
+                                
+                                if (actionMap!=null) {
+                                    
+                                    String actionSubmissionID = actionMap.get("id");
+                                    
+                                    if (actionSubmissionID != null && !actionSubmissionID.equals("")) {
 
-                                    // we found a submission in the event feed with a corresponding action;
-                                    // update the submission in the event map
-                                    boolean ok = updateSubmissionEventData(eventMap, submissionActions.get(actionSubmissionID));
+                                        // we found a submission in the event feed with a corresponding action;
+                                        // update the submission in the event map
+                                        boolean ok = updateSubmissionEventData(eventMap, submissionActions.get(actionSubmissionID));
 
-//                                    System.out.println ("Retrieved from eventMap:");
-//                                    System.out.println (((Map<String,Object>)eventMap.get("data")).get("files"));
-                                    if (ok) {
-                                        updatedSubmissionCount++;
+                                        if (ok) {
+                                            updatedSubmissionCount++;
+                                            shouldOutput = true ;
+                                        } else {
+                                            errorCount++;
+                                        }
+
                                     } else {
+                                        // we have a submission event with no corresponding action in the action map -- this is an error
+                                        System.err.println("Found submission event in event feed with no corresponding action in ExtractedRuns file:");
+                                        System.err.println(line);
                                         errorCount++;
-                                    }
-
+                                    } 
+                                    
                                 } else {
-                                    // we have a submission event with no corresponding action -- does this make sense???
-                                    System.err.println("Found submission event in event feed with no corresponding action in ExtractedRuns file!?!");
-                                    errorCount++ ; 
-                                }
+                                    // we have a submission event with no corresponding action map -- this is an error
+                                    System.err.println("Found submission event in event feed with no corresponding action in ExtractedRuns file:");
+                                    System.err.println(line);
+                                    errorCount++;
+                                } 
 
                             } else {
                                 //we have a bad submission ID from the event map data
@@ -304,26 +303,37 @@ public class CLICSEventFeedGenerator {
                                     && eventJudgementID!=null && !eventJudgementID.equals("")) {
 
                                 // see if we have a run_judgement action in the actions map for this judgement event
-//                                String actionJudgementID = judgementActions.get(eventJudgementID).get("id");
-                                String actionJudgementID = judgementActions.get(eventSubmissionID).get("id");
+                                // see if we have an update for this submission in the actions
+                                Map<String,String> actionMap = judgementActions.get(eventSubmissionID);
                                 
-                                if (actionJudgementID!=null && !actionJudgementID.equals("")) {
+                                if (actionMap!=null) {
+                                    
+                                    String actionJudgementID = actionMap.get("id");
+                                    if (actionJudgementID != null && !actionJudgementID.equals("")) {
 
-                                    // we found a judgement in the action map that corresponds to an event feed judgement;
-                                    // verify that all corresponding fields match between the action and the event
-                                    boolean ok = verifyJudgementEventData(eventMap, judgementActions.get(actionJudgementID));
+                                        // we found a judgement in the action map that corresponds to an event feed judgement;
+                                        // verify that all corresponding fields match between the action and the event
+                                        boolean ok = verifyJudgementEventData(eventMap, judgementActions.get(actionJudgementID));
 
-                                    if (ok) {
-                                        verifiedJudgementCount++;
+                                        if (ok) {
+                                            verifiedJudgementCount++;
+                                            shouldOutput = true;
+                                        } else {
+                                            errorCount++;
+                                        }
+
                                     } else {
+                                        // we have a judgement event with no corresponding action -- this is an error
+                                        System.err.println("Found judgement event in event feed with no corresponding action in ExtractedRuns file:");
+                                        System.err.println(line);
                                         errorCount++;
-                                    }
-
+                                    } 
                                 } else {
-                                    // we have a submission event with no corresponding action -- does this make sense???
-                                    System.err.println("Found judgement event in event feed with no corresponding action in ExtractedRuns file!?!");
-                                    errorCount++ ;
-                                }
+                                    // we have a judgement event with no corresponding action map -- this is an error
+                                    System.err.println("Found judgement event in event feed with no corresponding action in ExtractedRuns file:");
+                                    System.err.println(line);
+                                    errorCount++;
+                                } 
 
                             } else {
                                 //we have a bad submission ID from the event map data
@@ -358,6 +368,7 @@ public class CLICSEventFeedGenerator {
                                    boolean solved = (boolean) judgementTypesData.get("solved");
                                    CLICSJudgementType newJudgement = new CLICSJudgementType(acronym,name,penalty,solved);
                                    judgementTypes.put(acronym, newJudgement);
+                                   shouldOutput = true;
                                }
                                
                                processedJudgementTypeCount++ ;  
@@ -393,10 +404,13 @@ public class CLICSEventFeedGenerator {
                                clarReplacementCount++;
                            }
                            
+                           shouldOutput = true;
+                           
                            break;  //end of case "clarifications"
                            
                        default:
                            otherEventCount++ ;
+                           shouldOutput = true;
                            
                    }
                } else {
@@ -424,7 +438,7 @@ public class CLICSEventFeedGenerator {
 //               System.out.println("JSON after post-processing:");
 //               System.out.println(eventOutputString);
 
-               if (eventOutputString!=null) {
+               if (eventOutputString!=null && shouldOutput) {
                 //output the JSON event to the output channel
                 System.out.println(eventOutputString);
                } else {
@@ -480,14 +494,26 @@ public class CLICSEventFeedGenerator {
      */
     private static boolean verifyJudgementEventData(Map<String, Object> eventMap, Map<String, String> actionMap) {
         
+        //sanity-check the input
+        if (eventMap==null || actionMap==null) {
+            return false;
+        }
+        
         //get the data out of the event map
         Map<String,String> eventData = (Map<String,String>) eventMap.get("data");
+        if (eventData==null) {
+            return false;
+        }
         
         //verify the ids are valid and that at least one of the IDs in the event matches the action ID
         String eventID = eventData.get("id");
+        if (eventID==null || eventID.equals("")) {
+            return false;
+        }
+        
         String eventSubmissionID = eventData.get("submission_id");
         String actionID = actionMap.get("id");
-        if ( (eventID==null || eventSubmissionID==null || actionID==null)
+        if ( (eventSubmissionID==null || actionID==null)
              ||  (!eventID.equals(actionID) && (!eventSubmissionID.equals(actionID)) ) ) {
             return false ;
         }
@@ -497,14 +523,23 @@ public class CLICSEventFeedGenerator {
         
 //        boolean eventIndicatesSolved  = judgementTypes.get(eventData.get("judgement_type_id")).isSolved();
         //the above was replaced by the below to allow stepping through the debugger
-        String judgementTypeID = eventData.get("judgement_type_id");
-        CLICSJudgementType judgement = judgementTypes.get(judgementTypeID);
-        boolean eventIndicatesSolved = judgement.isSolved();
         
+        String judgementTypeID = eventData.get("judgement_type_id");
+        if (judgementTypeID==null || judgementTypeID.equals("")) {
+            return false ;
+        } 
+            
+        CLICSJudgementType judgement = judgementTypes.get(judgementTypeID);
+        if (judgement==null) {
+            return false ;
+        }
+            
+        boolean eventIndicatesSolved = judgement.isSolved();
         if (eventIndicatesSolved!=actionIndicatesSolved) {
             return false;
         }
         
+        //the event and action match
         return true;
     }
 
