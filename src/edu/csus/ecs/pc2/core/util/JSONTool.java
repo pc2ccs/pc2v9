@@ -357,7 +357,7 @@ public class JSONTool {
         if (notEmpty(account.getExternalId())) {
             element.put("icpc_id", account.getExternalId());
         }
-        element.put("name", account.getTeamName());
+        element.put("name", account.getDisplayName());
         if (notEmpty(account.getInstitutionCode()) && !account.getInstitutionCode().equals("undefined")) {
             element.put("organization_id", getOrganizationId(account));
         }
