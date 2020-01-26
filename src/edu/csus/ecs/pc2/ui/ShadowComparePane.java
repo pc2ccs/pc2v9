@@ -164,35 +164,35 @@ public class ShadowComparePane extends JPanePlugin {
         subCountLabel.setText("Total Submissions = " + new Integer(submissionCount).toString());
         summaryPanel.add(subCountLabel);
         
-        JLabel shadowYesCountLabel = new JLabel();
-        int shadowYesCount = 0 ;
-        for (String key : currentJudgementMap.keySet()) {
-            ShadowJudgementPair pair = currentJudgementMap.get(key);
-            String pc2Judgment = pair.getPc2Judgement();
-            if (pc2Judgment!=null && (pc2Judgment.equalsIgnoreCase("AC")||pc2Judgment.equalsIgnoreCase("Yes")) ){
-                shadowYesCount++;
-            }
-        }
-        
-        Component horizontalGlue = Box.createHorizontalGlue();
-        summaryPanel.add(horizontalGlue);
-        shadowYesCountLabel.setText("Shadow AC = " + new Integer(shadowYesCount).toString());
-        summaryPanel.add(shadowYesCountLabel);
-        
-        JLabel remoteYesCountLabel = new JLabel();
-        int remoteYesCount = 0 ;
-        for (String key : currentJudgementMap.keySet()) {
-            ShadowJudgementPair pair = currentJudgementMap.get(key);
-            String remoteJudgment = pair.getRemoteCCSJudgement();
-            if (remoteJudgment!=null && (remoteJudgment.equalsIgnoreCase("AC")||remoteJudgment.equalsIgnoreCase("Yes")) ){
-                remoteYesCount++;
-            }
-        }
-        
-        Component horizontalGlue_1 = Box.createHorizontalGlue();
-        summaryPanel.add(horizontalGlue_1);
-        remoteYesCountLabel.setText("Remote AC = " + new Integer(remoteYesCount).toString());
-        summaryPanel.add(remoteYesCountLabel);
+//        JLabel shadowYesCountLabel = new JLabel();
+//        int shadowYesCount = 0 ;
+//        for (String key : currentJudgementMap.keySet()) {
+//            ShadowJudgementPair pair = currentJudgementMap.get(key);
+//            String pc2Judgment = pair.getPc2Judgement();
+//            if (pc2Judgment!=null && (pc2Judgment.equalsIgnoreCase("AC")||pc2Judgment.equalsIgnoreCase("Yes")) ){
+//                shadowYesCount++;
+//            }
+//        }
+//        
+//        Component horizontalGlue = Box.createHorizontalGlue();
+//        summaryPanel.add(horizontalGlue);
+//        shadowYesCountLabel.setText("Shadow AC = " + new Integer(shadowYesCount).toString());
+//        summaryPanel.add(shadowYesCountLabel);
+//        
+//        JLabel remoteYesCountLabel = new JLabel();
+//        int remoteYesCount = 0 ;
+//        for (String key : currentJudgementMap.keySet()) {
+//            ShadowJudgementPair pair = currentJudgementMap.get(key);
+//            String remoteJudgment = pair.getRemoteCCSJudgement();
+//            if (remoteJudgment!=null && (remoteJudgment.equalsIgnoreCase("AC")||remoteJudgment.equalsIgnoreCase("Yes")) ){
+//                remoteYesCount++;
+//            }
+//        }
+//        
+//        Component horizontalGlue_1 = Box.createHorizontalGlue();
+//        summaryPanel.add(horizontalGlue_1);
+//        remoteYesCountLabel.setText("Remote AC = " + new Integer(remoteYesCount).toString());
+//        summaryPanel.add(remoteYesCountLabel);
         
         JLabel matchCounts = new JLabel();
         int match = 0;
@@ -210,7 +210,7 @@ public class ShadowComparePane extends JPanePlugin {
         
         Component horizontalGlue_2 = Box.createHorizontalGlue();
         summaryPanel.add(horizontalGlue_2);
-        matchCounts.setText("Y=" + match + "; Other=" + noMatch);
+        matchCounts.setText("Matches: " + match + "Non-matches: " + noMatch);
         summaryPanel.add(matchCounts);
         
        return summaryPanel ;
