@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.shadow;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,10 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -46,6 +50,7 @@ public class ShadowController {
 
     private IInternalContest localContest;
     private IInternalController localController;
+    private Log log;
 
     private String remoteCCSURLString;
 
@@ -82,6 +87,44 @@ public class ShadowController {
     private Thread monitorThread;
 
     /**
+     * a ContestInformation Listener
+     * 
+     * @author ICPC
+     *
+     */
+    class ContestInformationListenerImplementation implements IContestInformationListener {
+
+        @Override
+        public void contestInformationAdded(ContestInformationEvent event) {
+            ContestInformation ci = event.getContestInformation();
+            restartShadowIfNeeded(ci);
+        }
+
+        @Override
+        public void contestInformationChanged(ContestInformationEvent event) {
+            ContestInformation ci = event.getContestInformation();
+            restartShadowIfNeeded(ci);
+        }
+
+        @Override
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            restartShadowIfNeeded(null);
+        }
+
+        @Override
+        public void contestInformationRefreshAll(ContestInformationEvent event) {
+            ContestInformation ci = event.getContestInformation();
+            restartShadowIfNeeded(ci);
+        }
+
+        @Override
+        public void finalizeDataChanged(ContestInformationEvent event) {
+            ContestInformation ci = event.getContestInformation();
+            restartShadowIfNeeded(ci);
+        }
+    }
+
+    /**
      * Constructs a new ShadowController for the remote CCS specified by the data in the 
      * specified {@link IInternalContest} and {@link IInternalContest}. 
      * 
@@ -114,6 +157,7 @@ public class ShadowController {
         this.remoteCCSURLString = remoteURL;
         this.remoteCCSLogin = remoteCCSLogin;
         this.remoteCCSPassword = remoteCCSPassword;
+        this.localContest.addContestInformationListener(new ContestInformationListenerImplementation());
         this.setStatus(SHADOW_CONTROLLER_STATUS.SC_NEVER_STARTED);
     }
 
@@ -224,6 +268,7 @@ public class ShadowController {
     }
 
     private boolean convertJudgementsToBig5 = true;
+    private boolean shadowModeEnabled = false;
     
     /**
      * Returns a Map with keys that are submission ID Strings and values that are {@link ShadowJudgementPair}s 
@@ -485,5 +530,81 @@ public class ShadowController {
             }
         }
 
+    }
+
+    public Log getLog() {
+        if (log == null) {
+            log = localController.getLog();
+        }
+        return log;
+    }
+
+    private void showMessage(String message) {
+        System.out.println(new Date() + " " +message);
+        getLog().info(message);
+    }
+
+    private void updateCached(ContestInformation ci) {
+        if (ci != null) {
+            shadowModeEnabled  = ci.isShadowMode();
+            remoteCCSURLString = ci.getPrimaryCCS_URL();
+            remoteCCSLogin = ci.getPrimaryCCS_user_login();
+            remoteCCSPassword = ci.getPrimaryCCS_user_pw();
+        } else {
+            // there is no ContestInformation, reset to defaults
+            shadowModeEnabled = false;
+            remoteCCSURLString = "";
+            remoteCCSLogin = "";
+            remoteCCSPassword = "";
+        }
+    }
+
+    /**
+     * 
+     * @param ci
+     * @return True if shadow server is started (including restarted), else False.
+     */
+    private boolean restartShadowIfNeeded(ContestInformation ci) {
+        boolean result = false;
+        if (ci != null && ci.isShadowMode()) {
+            if (shadowModeEnabled) {
+                // we are suppose to be running, and we were running
+                // check for differences
+                String message = "";
+                if (ci.getPrimaryCCS_URL() != remoteCCSURLString) {
+                    message = "shadowRemoteURL changed from " + remoteCCSURLString + " to " + ci.getPrimaryCCS_URL() + "\n";
+                }
+                if (ci.getPrimaryCCS_user_login() != remoteCCSLogin) {
+                    message = message + "shadowLogin changed from " + remoteCCSLogin + " to " + ci.getPrimaryCCS_user_login() + "\n";
+                }
+                if (ci.getPrimaryCCS_user_pw() != remoteCCSPassword) {
+                    message = message + "shadow_user_password changed from " + remoteCCSPassword + " to " + ci.getPrimaryCCS_user_pw() + "\n";
+                }
+                if (message != "") {
+                    message = message + "Restarting shadow controller";
+                    showMessage(message);
+                    stop();
+                    updateCached(ci);
+                    start();
+                }
+            } else {
+                // we are not running, but we are suppose to be running
+                if (!getStatus().equals(SHADOW_CONTROLLER_STATUS.SC_RUNNING)) {
+                    showMessage("Starting shadow controller");
+                    updateCached(ci);
+                    start();
+                    result = true;
+                }
+            }
+        } else {
+            // check if we were running (but we should not be)
+            if (!ci.isShadowMode() && getStatus().equals(SHADOW_CONTROLLER_STATUS.SC_RUNNING)) {
+                // stop it
+                showMessage("Stopping shadow controller");
+                updateCached(ci);
+                stop();
+            }
+        }
+        return (result);
     }
 }
