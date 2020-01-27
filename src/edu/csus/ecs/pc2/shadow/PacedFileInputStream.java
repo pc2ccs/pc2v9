@@ -90,7 +90,7 @@ public class PacedFileInputStream extends InputStream {
         
 //        System.out.println("Secs = "+sleepSeconds+" file="+inputFile.getName());
         
-        if (file == null || !file.isFile()) {
+        if (inputFile == null || !inputFile.isFile()) {
             throw new InvalidParameterException("No such file " + file);
         }
         inputReader = new FileReader(inputFile);
