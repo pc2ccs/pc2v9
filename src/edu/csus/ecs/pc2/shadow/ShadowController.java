@@ -78,6 +78,7 @@ public class ShadowController {
     private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
     private RemoteContestConfiguration remoteContestConfig;
     private Thread monitorThread;
+    private Log log;
 
     /**
      * Constructs a new ShadowController for the remote CCS specified by the data in the 
@@ -135,12 +136,14 @@ public class ShadowController {
         
         setStatus(SHADOW_CONTROLLER_STATUS.SC_STARTING);
         
+        log = localController.getLog();
+        
         //verify that the current "URL string" is a valid URL
         URL remoteCCSURL = null;
         try {
             remoteCCSURL = new URL(remoteCCSURLString);
         } catch (MalformedURLException e) {
-            localController.getLog().log(Level.WARNING, "Malformed Remote CCS URL: \"" + remoteCCSURLString + "\" ", e);
+            log.log(Level.WARNING, "Malformed Remote CCS URL: \"" + remoteCCSURLString + "\" ", e);
             e.printStackTrace();
             controllerStatus = SHADOW_CONTROLLER_STATUS.SC_CONNECTION_FAILED ;
             return false;
@@ -162,7 +165,6 @@ public class ShadowController {
                 List<String> diffs = remoteContestConfig.diff(localContest);
 
                 //log the differences
-                Log log = localController.getLog();
                 log.log(Level.WARNING, "Local contest configuration does not match configuration of remote CCS; cannot proceed with shadowing");
                 logDiffs(log, diffs);
 
@@ -173,7 +175,6 @@ public class ShadowController {
             }
         } else {
             //we didn't get a remote config
-            Log log = localController.getLog();
             log.log(Level.WARNING, "Contest configuration from remote CCS is null; cannot proceed with shadowing");
  
             setStatus(SHADOW_CONTROLLER_STATUS.SC_INVALID_REMOTE_CONFIG);
@@ -190,19 +191,21 @@ public class ShadowController {
         try {
             
             //construct an EventFeedMonitor for keeping track of the remote CCS events
+            log.info("Constructing new RemoteEventFeedMonitor");
             monitor = new RemoteEventFeedMonitor(localController, remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter);
  
             //start the monitor running as a thread listening for submissions from the remote CCS
             monitorThread = new Thread(monitor);
             monitorThread.start();
             
+            log.info("RemoteEventFeedMonitor started");
             setStatus(SHADOW_CONTROLLER_STATUS.SC_RUNNING);
             return true;
            
             
         } catch (Exception e) {
             // TODO figure out how to return the exception to the caller cleanly
-
+            log.severe("Exception starting RemoteEventFeedMonitor: " + e);
             setStatus(SHADOW_CONTROLLER_STATUS.SC_MONITOR_STARTUP_FAILED);
 
             e.printStackTrace();
@@ -214,8 +217,12 @@ public class ShadowController {
     private boolean convertJudgementsToBig5 = true;
     
     /**
-     * Returns a Map with keys that are submission ID Strings and values that are {@link ShadowJudgementPair}s 
-     * giving the judgements assigned to the specified submission by PC2 and the remote CCS respectively.
+     * Returns a Map which maps submissionIDs to {@link ShadowJudgementInfo}s
+     * containing information on the comparison of a specific submission by PC2 and 
+     * the remote CCS.
+     * 
+     * Each {@link ShadowJudgementInfo} in the returned map contains the SubmissionID, TeamID, LanguageID, ProblemID, and
+     * a {@link ShadowJudgementPair} map giving the PC2 Shadow and Remote CCS judgements.
      * 
      * If the property "convertJudgementsToBig5" is true, this method attempts to convert all judgements
      * to one of the so-called "CLICS Big-5" (the five judgement values defined for ICPC World Finals by the
@@ -227,15 +234,17 @@ public class ShadowController {
      * This method is only operative while Shadow operations are running; if shadowing is not running
      * then the method returns null.
      * 
-     * @return a Map mapping submissions to shadow judgement pairs, or null if shadowing isn't running
+     * @return a Map mapping submissions to shadow judgement information, or null if shadowing isn't running
      */
-    public Map<String,ShadowJudgementPair> getJudgementComparison() {
+    public Map<String, ShadowJudgementInfo> getJudgementComparisonInfo() {
         
         if (getStatus()!= SHADOW_CONTROLLER_STATUS.SC_RUNNING) {
-            //TODO: log this situation
+            log.warning("Shadow Controller 'getJudgementComparisonInfo()' called when Shadow controller is not running"); 
             return null;
         } else {
-            //get a Map of the judgements assigned by the remote CCS; note that this map uses "remote event id"
+            log.info("Constructing Shadow Judgement comparisons");
+            
+            //get a Map of the judgements assigned by the remote CCS to each submission; note that this map uses "remote event id"
             // as the key and combines the submission ID with the Judgement acronym, separated by a colon, as the value
             Map<String,String> remoteJudgementsMap = RemoteEventFeedMonitor.getRemoteJudgementsMap();
             
@@ -250,20 +259,23 @@ public class ShadowController {
             
             //if specified, convert remote judgements to "Big 5"
             if (isConvertJudgementsToBig5()) {
+                log.info("Converting remote judgements to CLICS 'Big 5'");
                 convertMapToBig5(remoteSubmissionsJudgementMap);
             }
             
             //create a Map of the judgements assigned by PC2
             Run[] runs = localContest.getRuns();
             
-            //debug loop
-            for (Run run : runs) {
-                if (!run.isJudged()) {
-                    System.out.println ("Debug: found unjudged run: ");
-                    System.out.println ("  " + run);
-                }
-            }
+//            //debug loop
+//            for (Run run : runs) {
+//                if (!run.isJudged()) {
+//                    log.warning("Found unjudged run in PC2 Shadow system: " + run);
+//                    System.err.println ("Found unjudged run in PC2 Shadow system: ");
+//                    System.err.println ("  " + run);
+//                }
+//            }
             
+            //build a map of PC2 Shadow judgements, mapping submissionID to judgement acronym for each submission
             Map<String,String> pc2JudgementsMap = new HashMap<String,String>();
             for (Run run : runs) {
                 
@@ -289,8 +301,8 @@ public class ShadowController {
                         }
 
                         if (judgementString==null) {
-                            //TODO: log this error
-                            System.err.println ("null judgement string in ShadowController.getJudgementComparison() for run " + run.getNumber());
+                            log.warning("null judgement string for run " + run.getNumber());
+                            System.err.println ("null judgement string in ShadowController.getJudgementComparisonInfo() for run " + run.getNumber());
                         }
                         
                         //at this point we have the judgement string text; try to convert it to a corresponding acronym
@@ -317,14 +329,15 @@ public class ShadowController {
                             
                         } else { 
                             //we've exhausted methods of obtaining an acronym
-                            //TODO: log this error
+                            log.warning("null acronym for run " + run.getNumber() + ", judgement string " + judgementString);
                             System.err.println ("null acronym in ShadowController.getJudgementComparision() for "
                                     + "run " + run.getNumber() + ", judgement string " + judgementString);
                         }
 
                     } else {
                         //we got a null judgment record from the run, but it's supposedly been judged -- error!
-                        System.err.println ("Error in getJudgementComparison(): found a (supposedly) judged run with no JudgementRecord!");
+                        log.severe("Error: found a (supposedly) judged run with no JudgementRecord!");
+                        System.err.println ("Error in getJudgementComparisonInfo(): found a (supposedly) judged run with no JudgementRecord!");
                     }                    
                     
                 } else {
@@ -337,6 +350,7 @@ public class ShadowController {
 
             //if specified, convert PC2 judgements to "Big 5"
             if (isConvertJudgementsToBig5()) {
+                log.info("Converting PC2 judgements to 'CLICS Big 5'");
                 convertMapToBig5(pc2JudgementsMap);
             }
             
@@ -344,33 +358,95 @@ public class ShadowController {
             Set<String> remoteKeys = remoteSubmissionsJudgementMap.keySet();
             Set<String> localKeys = pc2JudgementsMap.keySet();
             if (!remoteKeys.equals(localKeys)) {
-                //TODO log this error, figure out what to return
-                System.err.println("Note: size of remote judgements map does not match size of local PC2 judgements map");
+                log.warning("Contents of remote judgements map does not match that of local PC2 judgements map"
+                        + " (this could happen if PC2 is not keeping up with remote submissions)");
+                System.err.println("Note: contents of remote judgements map does not match that of local PC2 judgements map"
+                        + " (this could happen if PC2 is not keeping up with remote submissions)");
             }
             
-            //construct a single map combining the two sets of judgements
-            Map<String,ShadowJudgementPair> judgementsMap = new HashMap<String,ShadowJudgementPair>();
+            //construct a single map containing the ShadowJudgementInfo for each submission ("run" in PC2 terms)
+            Map<String,ShadowJudgementInfo> judgementsMap = new HashMap<String,ShadowJudgementInfo>();
+            
             //first put into the combined map the judgements from the remote system, with the corresponding PC2 value
             //   (which could be null if PC2 doesn't have a judgement for the corresponding submission)
-            for (String key : remoteKeys) {
-                ShadowJudgementPair pair = new ShadowJudgementPair(key, pc2JudgementsMap.get(key), 
-                                                    remoteSubmissionsJudgementMap.get(key));
-                judgementsMap.put(key, pair);
+            String teamID;
+            String problemID;
+            String languageID;
+            
+            for (String submissionID : remoteKeys) {
+                
+                //get the run corresponding to the current submissionID
+                Run run = getRun(runs,submissionID);
+                
+                //get the team/problem/language info corresponding to the run
+                teamID = new Integer(run.getSubmitter().getClientNumber()).toString();
+                
+                ElementId probElementID = run.getProblemId();
+                problemID = localContest.getProblem(probElementID).getShortName();
+                
+                ElementId langElementID = run.getLanguageId();
+                languageID = localContest.getLanguage(langElementID).getID();
+
+                ShadowJudgementPair pair = new ShadowJudgementPair(submissionID, pc2JudgementsMap.get(submissionID), 
+                                                    remoteSubmissionsJudgementMap.get(submissionID));
+                
+                System.out.println("Debug: adding to judgementsMap: ") ;
+                System.out.println ("  submissionID=" + submissionID + " teamID=" + teamID + " problemID=" 
+                        + problemID + " languageID=" + languageID + " pc2Judgement=" + pc2JudgementsMap.get(submissionID)
+                        + " remoteJudgement=" + remoteSubmissionsJudgementMap.get(submissionID));
+                
+                ShadowJudgementInfo info = new ShadowJudgementInfo(submissionID, teamID, problemID, languageID, pair);
+                
+                judgementsMap.put(submissionID, info);
             }
             
-            //why is this block necessary?  The above check for remoteKey.equals(localKeys) should make it a no-op...
             //now add judgements from the PC2 map that might not have existed in the remote map
-            for (String key : localKeys) {
-                if (!remoteSubmissionsJudgementMap.containsKey(key)) {
-                    ShadowJudgementPair pair = new ShadowJudgementPair(key, pc2JudgementsMap.get(key), 
-                            remoteSubmissionsJudgementMap.get(key));  //this will always return null!
-                    judgementsMap.put(key, pair);
+            for (String submissionID : localKeys) {
+                if (!remoteSubmissionsJudgementMap.containsKey(submissionID)) {
+                    
+                    Run run = getRun(runs,submissionID);
+                    teamID = run.getSubmitter().toString();
+                    problemID = run.getProblemId().toString();
+                    languageID = run.getLanguageId().toString();
+                    ShadowJudgementPair pair = new ShadowJudgementPair(submissionID, pc2JudgementsMap.get(submissionID), 
+                                 remoteSubmissionsJudgementMap.get(submissionID)); //the remote map will always return null
+                    
+                    System.out.println("Debug: adding to judgementsMap: ") ;
+                    System.out.println ("  submissionID=" + submissionID + " teamID=" + teamID + " problemID=" 
+                            + problemID + " languageID=" + languageID + " pc2Judgement=" + pc2JudgementsMap.get(submissionID)
+                            + " remoteJudgement=" + remoteSubmissionsJudgementMap.get(submissionID));
+                    
+                    
+                    ShadowJudgementInfo info = new ShadowJudgementInfo(submissionID, teamID, problemID, languageID, pair);
+                                        
+                    judgementsMap.put(submissionID, info);
                 }
             }
+                        
             
             return judgementsMap;
         }
         
+    }
+    
+    /**
+     * Searches the given array of Runs and returns the run, if any, whose run number matches the specified
+     * submissionId; otherwise returns null.
+     * 
+     * @param runs an array of Runs to be searched
+     * @param submissionID the id of the desired run
+     * 
+     * @return the Run matching the specified submissionID, or null if no Run matches
+     */
+    private Run getRun(Run[] runs, String submissionID) {
+        
+        for (Run nextRun : runs) {
+            String runNumberString = new Integer(nextRun.getNumber()).toString();
+            if (runNumberString.equalsIgnoreCase(submissionID)) {
+                return nextRun;
+            }
+        }
+        return null;
     }
     
     /**

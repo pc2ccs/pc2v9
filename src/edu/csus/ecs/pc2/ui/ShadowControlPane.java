@@ -578,7 +578,7 @@ public class ShadowControlPane extends JPanePlugin {
                     if (shadowController==null) {
                         showErrorMessage("No shadow controller available; cannot show comparison", "Missing Controller"); 
                     } else {
-                        JFrame shadowCompareFrame = new ShadowCompareFrame(shadowController.getJudgementComparison());
+                        JFrame shadowCompareFrame = new ShadowCompareFrame(shadowController.getJudgementComparisonInfo());
                         shadowCompareFrame.setLocationRelativeTo(null); // centers frame
                         shadowCompareFrame.setSize(400,500);
                         shadowCompareFrame.setTitle("Shadow Comparison");

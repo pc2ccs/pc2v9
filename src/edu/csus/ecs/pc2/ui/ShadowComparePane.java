@@ -29,6 +29,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import edu.csus.ecs.pc2.shadow.ShadowJudgementInfo;
 import edu.csus.ecs.pc2.shadow.ShadowJudgementPair;
 import javax.swing.Box;
 
@@ -42,7 +43,7 @@ public class ShadowComparePane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
     
-    private Map<String,ShadowJudgementPair> currentJudgementMap ;
+    private Map<String, ShadowJudgementInfo> currentJudgementMap ;
     
     private String lastDirectory = ".";
 
@@ -53,15 +54,20 @@ public class ShadowComparePane extends JPanePlugin {
     }
     
     /**
-     * Accepts a Mapping from Strings (which are submission IDs) to pairs of Judgements for that submission --
-     * one judgement from the PC2 Shadow system, one taken from the CLICS event feed from the remote CCS --
+     * This GUI class accepts a Mapping from Strings (which are submission IDs) to a {@link ShadowJudgementInfo} for that submission,
+     * and displays the Shadow Judgement information in tabular form.
+     * Each {@link ShadowJudgmentInfo} object contains a submissionID, TeamID, ProblemID, LanguageID, and a
+     * {@link ShadowJudgementPair} containing the judgements from both the PC2 Shadow system and the Remote CCS,
      * and displays a table of those submissions and the corresponding judgements.
      * 
-     * The received map is originally constructed (and passed to here) by {@link ShadowController#getJudgementComparison()).
+     * The received map is originally constructed (and passed to here) by {@link ShadowController#getJudgementComparisonInfo()).
      * 
-     * @param map a Mapping of submission IDs to pairs of judgements
+     * @param map a Mapping of submission IDs to ShadowJudgementInfo objects
      */
-    public ShadowComparePane(Map<String,ShadowJudgementPair> map) {
+    public ShadowComparePane(Map<String,ShadowJudgementInfo> map) {
+        Dimension size = new Dimension(600,600);
+        this.setPreferredSize(size);
+        this.setMinimumSize(size);
         
         currentJudgementMap = map;
         
@@ -72,21 +78,33 @@ public class ShadowComparePane extends JPanePlugin {
         
         if (map != null && !map.keySet().isEmpty()) {
             
-            String[] columnNames = { "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
-            Object[][] data = new Object[map.size()][4];
+            String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
+            Object[][] data = new Object[map.size()][7];
             int row = 0;
             for (String key : map.keySet()) {
-                data[row][0] = new Integer(key);
-                data[row][1] = map.get(key).getPc2Judgement();
-                data[row][2] = map.get(key).getRemoteCCSJudgement();
-                if (data[row][1]!=null && data[row][2]!=null) {
-                    data[row][3] = ((String)data[row][1]).equalsIgnoreCase((String)data[row][2]) ? "Y" : "N" ;
+                ShadowJudgementInfo curJudgementInfo = map.get(key);
+                data[row][0] = curJudgementInfo.getTeamID();
+                data[row][1] = curJudgementInfo.getProblemID();
+                data[row][2] = curJudgementInfo.getLanguageID();
+                data[row][3] = new Integer(key);
+                ShadowJudgementPair curPair = curJudgementInfo.getShadowJudgementPair();
+                if (curPair!=null) {
+                    data[row][4] = curPair.getPc2Judgement();
+                    data[row][5] = curPair.getRemoteCCSJudgement();
+                }
+                if (data[row][4]!=null && data[row][5]!=null) {
+                    data[row][6] = ((String)data[row][4]).equalsIgnoreCase((String)data[row][5]) ? "Y" : "N" ;
                 } else {
-                    data[row][3] = "---" ;                    
+                    data[row][6] = "---" ;                    
                 }
                 row++;
             }
+            
             JTable results = new JTable() {
+                    private static final long serialVersionUID = 1L;
+
+//                    String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
+
                     //override JTable's default renderer to set the background color based on the "Match?" value
                     public Component prepareRenderer(TableCellRenderer renderer, int row, int column)
                     {
@@ -96,12 +114,12 @@ public class ShadowComparePane extends JPanePlugin {
 
                             c.setBackground(getBackground());
                             int modelRow = convertRowIndexToModel(row);
-                            String matches = (String)getModel().getValueAt(modelRow, 3);
+                            String matches = (String)getModel().getValueAt(modelRow, 6);
                             if ("Y".equalsIgnoreCase(matches)) c.setBackground(new Color(153,255,153));
                             if ("N".equalsIgnoreCase(matches)) c.setBackground(new Color(255,153,153));
                             
                             //override color with yellow if PC2 judgement is pending
-                            String pc2Judgement = (String)getModel().getValueAt(modelRow, 1);
+                            String pc2Judgement = (String)getModel().getValueAt(modelRow, 4);
                             if (pc2Judgement!=null && pc2Judgement.contains("pending")) {
                                 c.setBackground(new Color(255,255,153));
                             }
@@ -114,21 +132,16 @@ public class ShadowComparePane extends JPanePlugin {
             
             results.setModel(new DefaultTableModel(data, columnNames){
                 static final long serialVersionUID = 1;
-                Class[] types = { Integer.class, String.class, String.class, String.class };
+                
+//              String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
+
+                Class[] types = { Integer.class, String.class, String.class, Integer.class, String.class, String.class, String.class };
 
                 @Override
                 public Class getColumnClass(int columnIndex) {
                     return this.types[columnIndex];
                 }
                 
-//                @Override
-//                public void setValueAt(Object obj, int row, int col) {
-//                    if (col==0) {
-//                        super.setValueAt(new Integer(obj.toString()), row, col);
-//                    } else {
-//                        super.setValueAt(obj, row, col);
-//                    }
-//                }
             });
             
             TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(results.getModel());
@@ -197,10 +210,10 @@ public class ShadowComparePane extends JPanePlugin {
         JLabel matchCounts = new JLabel();
         int match = 0;
         int noMatch = 0;
-        for (String key : currentJudgementMap.keySet()) {
+        for (String submissionID : currentJudgementMap.keySet()) {
 
-            String pc2Judgement = currentJudgementMap.get(key).getPc2Judgement();
-            String remoteJudgement = currentJudgementMap.get(key).getRemoteCCSJudgement();
+            String pc2Judgement = currentJudgementMap.get(submissionID).getShadowJudgementPair().getPc2Judgement();
+            String remoteJudgement = currentJudgementMap.get(submissionID).getShadowJudgementPair().getRemoteCCSJudgement();
             if (pc2Judgement!=null && remoteJudgement!=null && (pc2Judgement.equalsIgnoreCase(remoteJudgement))) {
                 match++ ;
             } else {
@@ -210,7 +223,7 @@ public class ShadowComparePane extends JPanePlugin {
         
         Component horizontalGlue_2 = Box.createHorizontalGlue();
         summaryPanel.add(horizontalGlue_2);
-        matchCounts.setText("Matches: " + match + "Non-matches: " + noMatch);
+        matchCounts.setText("Matches: " + match + "   Non-matches: " + noMatch);
         summaryPanel.add(matchCounts);
         
        return summaryPanel ;
@@ -272,7 +285,9 @@ public class ShadowComparePane extends JPanePlugin {
                     bw = new BufferedWriter(new FileWriter(saveFile));
                     
                     //write CSV header to file
-                    String data = "SUBMISSION_ID,PC2_SHADOW,REMOTE_CCS,MATCH?" ;
+//                  String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
+
+                    String data = "TEAM,PROBLEM,LANGUAGE,SUBMISSION_ID,PC2_SHADOW,REMOTE_CCS,MATCH?" ;
                     bw.write(data);
                     bw.newLine();
                     
@@ -301,20 +316,34 @@ public class ShadowComparePane extends JPanePlugin {
     }
         
     /**
-     * Returns a comma-separate-value string containing the values found in the specified {@link ShadowJudgementPair}.
+     * Returns a comma-separate-value string containing the values found in the specified {@link ShadowJudgementInfo}.
      * 
-     * @param pair a ShadowJudgementPair
+     * @param info a ShadowJudgementInfo
      * 
-     * @return a comma-separated-values string for the pair
+     * @return a comma-separated-values string for the info
      */
-    private String getCSVString(ShadowJudgementPair pair) {
+    private String getCSVString(ShadowJudgementInfo info) {
         
-        String subID = pair.getSubmissionID() ;
-        String pc2Result = pair.getPc2Judgement() ;
-        String remoteResult = pair.getRemoteCCSJudgement();
+        String teamID = info.getTeamID();
+        String probID = info.getProblemID();
+        String langID = info.getLanguageID();
+        String submissionID = info.getSubmissionID() ;
+        ShadowJudgementPair judgementPair = info.getShadowJudgementPair();
+        String pc2Result = "";
+        String remoteResult = "";
+        if (judgementPair!=null) {
+            pc2Result = judgementPair.getPc2Judgement() ;
+            remoteResult = judgementPair.getRemoteCCSJudgement();
+        }
         
         //TODO:  need to escape any commas in either the pc2Result or the remoteResult
-        String retStr = subID + "," + pc2Result + "," + remoteResult + ",";
+        String retStr = "" ;
+        retStr += teamID + "," ;
+        retStr += probID + "," ;
+        retStr += langID + "," ;
+        retStr += submissionID + "," ;
+        retStr += pc2Result + "," ;
+        retStr += remoteResult + ",";
         
         String match ;
         if (pc2Result!=null && remoteResult!=null) {
