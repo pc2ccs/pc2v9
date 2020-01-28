@@ -87,7 +87,12 @@ public class RemoteRunSubmitter {
         isEmpty(problem, "Parameter problemID does not match any pc2 problem: '" + problemID + "'");
 
 //        Language language = getLanguageByName(contest, languageID);
-        Language language = getLanguageByID(contest, languageID);
+//        Language language = getLanguageByID(contest, languageID);
+        Language language = getLanguageByCLICSID(contest, languageID);
+        if (language == null){
+            language = getLanguageByName(contest, languageID);
+        }
+        
 
         isEmpty(language, "Parameter languageID does not match any pc2 language: '" + languageID + "'");
 
@@ -116,18 +121,19 @@ public class RemoteRunSubmitter {
         }
         return outLang;
     }
-
-    private Language getLanguageByID(IInternalContest contest2, String languageID) {
+    
+    
+    private Language getLanguageByCLICSID(IInternalContest contest2, String languageName) {
         Language outLang = null;
         Language[] languages = contest.getLanguages();
         for (Language language : languages) {
-            if (language.getID().trim().equals(languageID.trim())) {
+            if (language.getID().trim().equals(languageName.trim())) {
                 outLang = language;
             }
         }
         return outLang;
     }
-
+    
     private Problem getProblemByName(IInternalContest contest2, String problemName) {
         Problem outProblem = null;
         Problem[] problems = contest.getProblems();

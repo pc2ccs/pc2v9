@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IFile;
@@ -144,8 +145,51 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                             long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
                                             long overrideSubmissionID = Utilities.stringToLong(runSubmission.getId());
+                                            
+                                            String defaultSubmissionFilesURL = "/submissions/" + runSubmission.getId() + "/files";
+                                            
+                                            String submissionFilesURL = null;
+                                            
+                                            List<Map<String, String>> filesList = runSubmission.getFiles();
+                                            
+                                            if (filesList.size() == 1){
+                                                Map<String, String> fileMap = filesList.get(0);
+                                                if (fileMap.size() == 1){
+                                                    String filesPath = fileMap.get(fileMap.keySet().iterator().next());
+                                                    if (!StringUtilities.isEmpty(filesPath)){
+                                                        submissionFilesURL = filesPath;
+                                                    }
+                                                }
+                                            }
 
-                                            List<IFile> files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
+                                            if (StringUtilities.isEmpty(submissionFilesURL)) {
+
+                                                submissionFilesURL = defaultSubmissionFilesURL;
+                                                System.err.println("Warning: could not find submission file URL for id = " + runSubmission.getId() + //
+                                                        "using '" + submissionFilesURL + "' " + //
+                                                        "event=" + event);
+                                            }
+
+                                            List<IFile> files = null;
+                                            
+                                            if ( remoteContestAPIAdapter instanceof RemoteContestAPIAdapter){
+                                                
+                                                System.out.println("debug 22 fetching file from URL "+submissionFilesURL);
+                                                
+                                                files = ((RemoteContestAPIAdapter)remoteContestAPIAdapter).getRemoteSubmissionFilesNew(submissionFilesURL);
+                                                
+                                                if (files == null){
+                                                    System.err.println("No files retrieved using "+submissionFilesURL);
+                                                } else {
+                                                    
+                                                    System.out.println("debug 22 getRemoteSubmissionFilesNew GOT "+files.size()+" files");
+                                                }
+                                                
+                                            } else {
+                                                System.out.println("debug 22 get files using id "+overrideSubmissionID);
+                                                files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
+                                            }
+                                            
 
                                             IFile mainFile = null;
                                             if (files.size() <= 0) {

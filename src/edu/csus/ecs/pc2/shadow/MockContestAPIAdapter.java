@@ -15,7 +15,10 @@ import java.util.Map;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.IFileImpl;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.shadow.AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT;
+import edu.csus.ecs.pc2.util.ContestConverter;
 
 /**
  * This class provides a "mock" implementation of connections to a Remote CCS CLICS Contest API.
@@ -29,11 +32,17 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
     private URL remoteURL;
     private String login;
     private String password;
+    /**
+     * The location of a CDP.  If the remoteURL can be used to
+     * find a CDP, use data from that CDP.
+     */
+    private File cdpConfigDirectory = null;
     
     // TODO TODAY use sample contest CDP that has event feed and submissions
     // TODO use remoteURL to find CDP.
 
     /**
+
      * @param remoteURL
      * @param login
      * @param password
@@ -42,6 +51,11 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
         this.remoteURL = remoteURL;
         this.login = login;
         this.password = password;
+        
+        if ("file".equals(remoteURL.getProtocol())) {
+            // CDP on local disk
+            cdpConfigDirectory = new File(remoteURL.getFile());
+        }
     }
   
     @Override
@@ -51,14 +65,34 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
      */
     public RemoteContestConfiguration getRemoteContestConfiguration() {
 
-
         Map<REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>> remoteConfigMap = new HashMap<AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>>();
 
-        // TODO TODAY implement me - add mock data into RemoteContestConfiguration
+        if (cdpConfigDirectory != null){
+            // CDP on local disk
+            remoteConfigMap = loadFileCDPMap(cdpConfigDirectory, remoteConfigMap);
+        } else {
+            // TODO TODAY implement me - add mock data into RemoteContestConfiguration
+        }
 
         return new RemoteContestConfiguration(remoteConfigMap);
     }
     
+    /**
+     * 
+     * @param configDirectory config directory for CDP
+     * @param remoteConfigMap map to add to, if null creates a new Map
+     * @return
+     */
+    protected Map<REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>> loadFileCDPMap(File configDirectory, Map<REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>> remoteConfigMap) {
+
+     
+        ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
+        
+        IInternalContest contest = loader.fromYaml(null , configDirectory.getAbsolutePath(), false);
+        
+        return ContestConverter.createConfigMap(remoteConfigMap, contest);
+    }
+
     public InputStream readRemoteCCSEventFeedFromFile(File file) {
         PacedFileInputStream efEventStreamReader;
         try {
@@ -238,5 +272,10 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
     public String getTestSamplesSourceDirectory() {
         return "samps" + File.separator + "src";
     }
+    
+    public File getCdpConfigDirectory() {
+        return cdpConfigDirectory;
+    }
+    
     
 }

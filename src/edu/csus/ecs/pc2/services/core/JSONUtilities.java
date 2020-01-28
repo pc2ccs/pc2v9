@@ -330,6 +330,7 @@ public class JSONUtilities {
         stringBuilder.append(data);
 
         stringBuilder.append("}");
+        
     }
 
     public static String getLanguageIndexString(IInternalContest contest, ElementId elementId) {

@@ -28,6 +28,8 @@ public class ShadowRunSubmission {
     private String entry_point;
     @JsonProperty
     private List< Map<String,String>> files;
+    @JsonProperty
+    private String mime;
     
     public String getId() {
         return id;
@@ -53,5 +55,9 @@ public class ShadowRunSubmission {
     
     public List<Map<String, String>> getFiles() {
         return files;
+    }
+    
+    public String getMime() {
+        return mime;
     }
 }

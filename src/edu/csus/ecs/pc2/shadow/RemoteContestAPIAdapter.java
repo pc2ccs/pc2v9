@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.BufferedInputStream;
@@ -7,20 +8,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.IFileImpl;
+import edu.csus.ecs.pc2.shadow.AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT;
 import edu.csus.ecs.pc2.util.HTTPSSecurity;
 
 public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
@@ -139,9 +140,13 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
 
     @Override
     public RemoteContestConfiguration getRemoteContestConfiguration() {
-        // TODO write code
-//        RemoteContestConfiguration configuration = new RemoteContestConfiguration(remoteConfigMap);
-        throw new NotImplementedException(); 
+        
+        Map<REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>> remoteConfigMap = new HashMap<AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT, List<AbstractRemoteConfigurationObject>>();
+
+        // TODO TODAY implement me - add mock data into RemoteContestConfiguration
+        System.err.println("Write getRemoteContestConfiguration()");
+
+        return new RemoteContestConfiguration(remoteConfigMap);
     }
 
     @Override
@@ -186,22 +191,47 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
      * {@inheritDoc}
      */
     public InputStream getRemoteEventFeedInputStream() {
+        
+        String eventFeedURLString = remoteURL.toString();
+        eventFeedURLString = appendIfMissing(eventFeedURLString, "/") +"event-feed";
+        
         InputStream stream = null;
         try {
-            stream = getHTTPInputStream(remoteURL, login, password);
+            URL url = new URL(eventFeedURLString);
+            stream = getHTTPInputStream(url, login, password);
         } catch (IOException e) {
-            // TODO Need to decide how to handle this exception
+            // TODO shadow Need to decide how to handle this exception/error
             e.printStackTrace();
         }
         return stream ;
     }
 
+    private String appendIfMissing(String s, String appendString) {
+        if (!s.endsWith(appendString)){
+            s += appendString;
+        }
+        return s;
+    }
+
     @Override
     public List<IFile> getRemoteSubmissionFiles(String submissionID) {
-        
         String endpoint = "/submissions/" + submissionID + "/files";
         String url = remoteURL.toString() + endpoint;
+        return getRemoteSubmissionFilesNew(url);
+    }
+
+    // TODO shadow rename this method to getRemoteSubmissionFiles 
+    public List<IFile> getRemoteSubmissionFilesNew(String submissionPath) {
+
+        String fullSubmissionURL = remoteURL.toString() + submissionPath;
+        if (-1 != submissionPath.indexOf(':')) {
+            // has full URL with protocol
+            fullSubmissionURL = submissionPath;
+        }
+
         try {
+            URL url = new URL(fullSubmissionURL);
+
             HttpURLConnection conn = createConnection(url);
             /**
              * Bytes fetched from endpoint
@@ -211,9 +241,9 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
             /**
              * Convert bytes/zipfile into individual IFiles.
              */
-            List<IFile> files = getIFiles (bytes);
+            List<IFile> files = getIFiles(bytes);
             return files;
-            
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -287,14 +317,7 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         return base64String;
     }
 
-    public static void main(String[] args) throws MalformedURLException {
-    
-        String addr = "Https://localhost:50443/submission_files?id=1";
-        URL url = new URL(addr);
-        RemoteContestAPIAdapter ad = new RemoteContestAPIAdapter(url, "admin", "admin");
 
-        String s = ad.getRemoteJSON("");
-        System.out.println("s = " + s);
-    }
+
     
 }

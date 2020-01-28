@@ -12,6 +12,8 @@ import java.util.logging.Level;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -150,7 +152,7 @@ public class ShadowController {
         }
         
         //get an adapter which connects to the remote Contest API
-        IRemoteContestAPIAdapter remoteContestAPIAdapter = new MockContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
+        IRemoteContestAPIAdapter remoteContestAPIAdapter = createRemoteContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
         
         //get a remote contest configuration from the adapter
         remoteContestConfig  = remoteContestAPIAdapter.getRemoteContestConfiguration();
@@ -213,7 +215,18 @@ public class ShadowController {
         }
                 
     }
-    
+
+    private IRemoteContestAPIAdapter createRemoteContestAPIAdapter(URL url, String login, String password) {
+
+        boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow", "useMockContestAdapter"), false);
+        if (useMockAdapter)
+        {
+            return new MockContestAPIAdapter(url, login, password);
+        } else {
+            return new RemoteContestAPIAdapter(url, login, password);
+        }
+    }
+
     private boolean convertJudgementsToBig5 = true;
     
     /**
@@ -423,7 +436,6 @@ public class ShadowController {
                 }
             }
                         
-            
             return judgementsMap;
         }
         

@@ -30,8 +30,22 @@ computer-judged: true
 manual-review: false
 send-prelim-judgement: false
 
+# pc2 Shadow CCS settings
+# enable shadow mode
+shadow-mode: true
+# base URL for primary CCS REST service
+ccs-url: https://localhost:50443/contest
+# primary CCS REST login
+ccs-login: admin
+# primary CCS REST password
+ccs-password: admin
+
 languages:
   - name: 'Java'
+    clics-id : 'java'
+
+  - name: 'python'
+    clics-id : 'pythonCLICSId'
 
 accounts:
   - account: TEAM
@@ -48,7 +62,17 @@ accounts:
 
   - account: FEEDER
     site: 1
-    count: 1
+    count: 2
+
+  - account: ADMINISTRATOR
+    site: 1
+    count: 3
+    
+# set feeder1 as proxy
+team-proxy-accounts:
+  - account: FEEDER
+    number: 1
+
 
 auto-judging:
   - account: JUDGE
