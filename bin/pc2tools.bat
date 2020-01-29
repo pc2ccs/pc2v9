@@ -33,7 +33,7 @@ goto :end
 set CLASSNAME=edu.csus.ecs.pc2.tools.PC2Tools
 
 call %PC2BIN%\pc2env.bat
-java -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp %pc2_classpath% %CLASSNAME% %1 %2 %3 %4 %5 %6 %7 %8 %9
+java -Dfile.encoding=UTF-8 -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "%libdir%\*" %CLASSNAME% %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
 rem eof pc2tools.bat
