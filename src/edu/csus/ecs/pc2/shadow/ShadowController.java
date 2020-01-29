@@ -154,35 +154,35 @@ public class ShadowController {
         //get an adapter which connects to the remote Contest API
         IRemoteContestAPIAdapter remoteContestAPIAdapter = createRemoteContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
         
-        //get a remote contest configuration from the adapter
-        remoteContestConfig  = remoteContestAPIAdapter.getRemoteContestConfiguration();
-                        
-        //make sure we got a remote config
-        if (remoteContestConfig != null) {
-            
-            //check if the local contest has the same config as the remote contest (the one being shadowed)
-            if (!remoteContestConfig.isSameAs(localContest)) {
-
-                //get the configuration differences
-                List<String> diffs = remoteContestConfig.diff(localContest);
-
-                //log the differences
-                log.log(Level.WARNING, "Local contest configuration does not match configuration of remote CCS; cannot proceed with shadowing");
-                logDiffs(log, diffs);
-
-                setStatus(SHADOW_CONTROLLER_STATUS.SC_CONTEST_CONFIG_MISMATCH);
-
-                return false;
-
-            }
-        } else {
-            //we didn't get a remote config
-            log.log(Level.WARNING, "Contest configuration from remote CCS is null; cannot proceed with shadowing");
- 
-            setStatus(SHADOW_CONTROLLER_STATUS.SC_INVALID_REMOTE_CONFIG);
-            
-            return false;
-        }
+//        //get a remote contest configuration from the adapter
+//        remoteContestConfig  = remoteContestAPIAdapter.getRemoteContestConfiguration();
+//                        
+//        //make sure we got a remote config
+//        if (remoteContestConfig != null) {
+//            
+//            //check if the local contest has the same config as the remote contest (the one being shadowed)
+//            if (!remoteContestConfig.isSameAs(localContest)) {
+//
+//                //get the configuration differences
+//                List<String> diffs = remoteContestConfig.diff(localContest);
+//
+//                //log the differences
+//                log.log(Level.WARNING, "Local contest configuration does not match configuration of remote CCS; cannot proceed with shadowing");
+//                logDiffs(log, diffs);
+//
+//                setStatus(SHADOW_CONTROLLER_STATUS.SC_CONTEST_CONFIG_MISMATCH);
+//
+//                return false;
+//
+//            }
+//        } else {
+//            //we didn't get a remote config
+//            log.log(Level.WARNING, "Contest configuration from remote CCS is null; cannot proceed with shadowing");
+// 
+//            setStatus(SHADOW_CONTROLLER_STATUS.SC_INVALID_REMOTE_CONFIG);
+//            
+//            return false;
+//        }
         
         
         //if we get here we know the remote contest configuration matches the local contest configuration
@@ -218,7 +218,7 @@ public class ShadowController {
 
     private IRemoteContestAPIAdapter createRemoteContestAPIAdapter(URL url, String login, String password) {
 
-        boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow", "useMockContestAdapter"), false);
+        boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow.usemockcontestadapter"), false);
         if (useMockAdapter)
         {
             return new MockContestAPIAdapter(url, login, password);
