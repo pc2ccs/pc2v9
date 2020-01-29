@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -71,6 +72,8 @@ public class EventFeedJSON extends JSONUtilities {
     private String eventTypeList = null;
 
     private JSONTool jsonTool;
+
+    private Vector<ElementId> ignoreGroup;
 
     public String getContestJSON(IInternalContest contest) {
 
@@ -184,6 +187,8 @@ public class EventFeedJSON extends JSONUtilities {
             if (group.isDisplayOnScoreboard()) {
                 appendJSONEvent(stringBuilder, GROUPS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getGroupJSON(contest, group));
                 stringBuilder.append(NL);
+            } else {
+                ignoreGroup.add(group.getElementId());
             }
         }
 
@@ -239,7 +244,7 @@ public class EventFeedJSON extends JSONUtilities {
 
         for (Account account : accounts) {
 
-            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !ignoreGroup.contains(account.getGroupId())) {
                 appendJSONEvent(stringBuilder, TEAM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getTeamJSON(contest, account));
                 stringBuilder.append(NL);
             }
