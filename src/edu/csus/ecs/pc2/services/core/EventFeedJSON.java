@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -74,6 +75,8 @@ public class EventFeedJSON extends JSONUtilities {
     private JSONTool jsonTool;
 
     private Vector<ElementId> ignoreGroup;
+
+    private Vector<ClientId> ignoreTeam;
 
     public String getContestJSON(IInternalContest contest) {
 
@@ -247,6 +250,8 @@ public class EventFeedJSON extends JSONUtilities {
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !ignoreGroup.contains(account.getGroupId())) {
                 appendJSONEvent(stringBuilder, TEAM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getTeamJSON(contest, account));
                 stringBuilder.append(NL);
+            } else {
+                ignoreTeam.add(account.getClientId());
             }
         }
 
@@ -299,7 +304,7 @@ public class EventFeedJSON extends JSONUtilities {
 
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
-            if (!run.isDeleted()) {
+            if (!run.isDeleted() && !ignoreTeam.contains(run.getSubmitter())) {
                 appendJSONEvent(stringBuilder, SUBMISSION_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getSubmissionJSON(contest, run, servletRequest, sc));
                 stringBuilder.append(NL);
             }
@@ -326,7 +331,7 @@ public class EventFeedJSON extends JSONUtilities {
 
         for (Run run : runs) {
 
-            if (run.isJudged()) {
+            if (run.isJudged() && !ignoreTeam.contains(run.getSubmitter())) {
 
                 appendJSONEvent(stringBuilder, JUDGEMENT_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getJudgementJSON(contest, run));
                 stringBuilder.append(NL);
