@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.eventFeed;
 
 import java.io.File;
@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -41,6 +42,8 @@ public class EventFeederModule implements UIPlugin {
     private Log log;
 
     private EventFeedServer eventFeedServer = new EventFeedServer();
+
+    private ShadowController shadowController;
 
     public String getPluginTitle() {
         return "Event Feed Server (non-GUI)";
@@ -89,6 +92,16 @@ public class EventFeederModule implements UIPlugin {
             }
         } else {
             showMessage("Note: no web services will be started ");
+        }
+        try {
+            shadowController = new ShadowController(contest, controller);
+            if (contest.getContestInformation().isShadowMode()) {
+                showMessage("Starting shadow controller");
+                shadowController.start();
+                // the shadowController will autostart if the ContestInformation changes later
+            }
+        } catch (Exception e) {
+            showMessage("Unable to start shadow controller " + e.getMessage(), e);
         }
     }
 
