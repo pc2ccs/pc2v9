@@ -23,7 +23,6 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.shadow.ShadowRunSubmission;
@@ -133,6 +132,8 @@ public class SubmitterFromEF {
             System.exit(FAILURE_EXIT_CODE);
         }
 
+        System.out.println("File: " + effilename + " passes JSON submission validation.");
+
         submitAllRuns(file.getParent(), submissionList);
 
     }
@@ -214,6 +215,8 @@ public class SubmitterFromEF {
     }
 
     private void submitAllRuns(String parentDirectory, List<ShadowRunSubmission> submissionList) {
+        
+        int count = 0;
 
         for (ShadowRunSubmission runSubmission : submissionList) {
 
@@ -260,15 +263,16 @@ public class SubmitterFromEF {
                     Problem problem = matchProblem(runSubmission.getProblem_id());
                     Language language = matchLanguage(runSubmission.getLanguage_id());
 
-                    Run debugRun = new Run(submitter, language, problem);
+//                    Run debugRun = new Run(submitter, language, problem);
                     SerializedFile[] auxFiles = new SerializedFile[0];
 
                     getController().submitRun(submitter, problem, language, mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
-                    
+                    count++;
+                    System.out.println("Submission " + count + " run id = " + overrideSubmissionID);
+      
                 } catch (Exception e) {
-                    System.err.println("\nUnable to submit run "+overrideSubmissionID);
+                    System.err.println("\nUnable to submit run " + overrideSubmissionID);
                     Utilities.printStackTrace(System.err, e, "csus");
-                    
                 }
             }
 
