@@ -119,9 +119,98 @@ public class SubmitterFromEF {
             fatalError("Contest clock must be running.");
         }
 
+        List<String> errorList = validateSubmissions(submissionList);
+        if (!errorList.isEmpty()){
+
+            for (String string : errorList) {
+                System.out.println(string);
+                
+            }
+            
+            System.err.println("There are "+errorList.size()+" errors in "+effilename);
+            System.err.println("No runs submitted");
+            System.err.println("Exiting program (exit code "+FAILURE_EXIT_CODE+")");
+            System.exit(FAILURE_EXIT_CODE);
+        }
 
         submitAllRuns(file.getParent(), submissionList);
 
+    }
+
+    private List<String> errors = new ArrayList<>();
+    
+    /**
+     * Scan shadow submission  
+     * 
+     * @param submissionList
+     * @return empty list 
+     */
+    private List<String> validateSubmissions(List<ShadowRunSubmission> submissionList) {
+
+        int subCount= 0;
+
+        errors = new ArrayList<>();
+
+        for (ShadowRunSubmission runSubmission : submissionList) {
+
+            subCount++;
+
+            if (isEmpty(runSubmission.getLanguage_id())) {
+                addError("Submission:" + subCount + " Empty or missing language for run " + runSubmission.getId());
+            } else {
+                Language language = matchLanguage(runSubmission.getLanguage_id());
+
+                if (language == null) {
+                    addError("Submission:" + subCount + " No such language '" + runSubmission.getLanguage_id() + "' for run " + runSubmission.getId());
+                }
+            }
+
+            if (isEmpty(runSubmission.getProblem_id())) {
+                addError("Submission:" + subCount + " Empty or missing problem for run " + runSubmission.getId());
+            } else {
+                Problem problem = matchProblem(runSubmission.getProblem_id());
+                if (problem == null) {
+                    addError("Submission:" + subCount + " No such problem '" + runSubmission.getProblem_id() + "' for run " + runSubmission.getId());
+                }
+            }
+
+            if (isEmpty(runSubmission.getId())) {
+                addError("Submission:" + subCount + " Empty or missing id (dang!) for run " + runSubmission.getId());
+            } else {
+                //                shadowRunSubmission.getId();
+
+            }
+
+            if (isEmpty(runSubmission.getTeam_id())) {
+                addError("Submission:" + subCount + " Empty or missing team id for run " + runSubmission.getId());
+            } else {
+                try {
+                    Integer.parseInt(runSubmission.getTeam_id());
+                } catch (Exception e) {
+                    addError("Submission:" + subCount + " Invalid team id " + runSubmission.getTeam_id() + " for run " + runSubmission.getId() + " error = " + e.getMessage());
+                }
+            }
+
+            if (isEmpty(runSubmission.getFiles())) {
+                addError("Submission:" + subCount + " Empty or missing files for run " + runSubmission.getId());
+            } else {
+                //                runSubmission.getFiles();
+            }
+        }
+
+        return errors;
+    }
+
+    private boolean isEmpty(List<Map<String, String>> files) {
+        return (files == null) || (files.size() == 0);
+    }
+
+    private void addError(String string) {
+        errors.add(string);
+    }
+
+    private boolean isEmpty(String s) {
+        return StringUtilities.isEmpty(s);
     }
 
     private void submitAllRuns(String parentDirectory, List<ShadowRunSubmission> submissionList) {
@@ -157,8 +246,6 @@ public class SubmitterFromEF {
             // reports\\report.Extract_Replay_Runs.01.16.462.txt.files/site1run1464/c.py","mime":"application/zip"}]}}
             String mainFileName = parentDirectory + File.separator + submissionFilesURL.replaceFirst(".*txt.files.", "");
 
-//            System.out.println("debug 22 for run " + overrideSubmissionID + " file is '" + mainFileName + "'");
-
             SerializedFile mainFile = new SerializedFile(mainFileName);
 
             if (mainFile.getBuffer().length == 0) {
@@ -174,8 +261,6 @@ public class SubmitterFromEF {
                     Language language = matchLanguage(runSubmission.getLanguage_id());
 
                     Run debugRun = new Run(submitter, language, problem);
-                    System.out.println("debug 22 Run is " + debugRun);
-
                     SerializedFile[] auxFiles = new SerializedFile[0];
 
                     getController().submitRun(submitter, problem, language, mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
@@ -236,7 +321,6 @@ public class SubmitterFromEF {
                                 Map<String, Object> submissionEventDataMap = (Map<String, Object>) eventMap.get("data");
                                 //convert metadata into ShadowRunSubmission
                                 ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
-
                                 submissionList.add(runSubmission);
 
                             } catch (Exception e) {
