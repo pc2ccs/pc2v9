@@ -1,9 +1,11 @@
 @echo off
-REM Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+REM Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 
 rem Purpose: start pc2 command line submitter/lister
 rem Author : pc2@ecs.csus.edu
 rem $HeadURL$
+rem
+rem Sat Jan 18 13:52:43 PDT 2020 laned fixed classpath
 
 set params=
 
@@ -38,7 +40,8 @@ goto :loop
 call %PC2BIN%\pc2env.bat
 
 set CLASSNAME=edu.csus.ecs.pc2.ui.team.Submitter
-java -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "%libdir%\*" %CLASSNAME% %params%
+java -Dfile.encoding=UTF-8 -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "%libdir%\*" %CLASSNAME% %params%
+
 rem without the exit /b the errorlevel does not get returned properly
 exit /b %errorlevel%
 
