@@ -1,5 +1,5 @@
 @echo off
-REM Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+REM Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 
 rem Purpose: start the pc2tools program
 rem Author : Douglas A. Lane <pc2@ecs.csus.edu>
@@ -30,10 +30,10 @@ goto :end
 
 :continue
 
-set CLASSNAME=edu.csus.ecs.pc2.core.tools.PC2Tools
+set CLASSNAME=edu.csus.ecs.pc2.tools.PC2Tools
 
 call %PC2BIN%\pc2env.bat
-javaw -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp %pc2_classpath% %CLASSNAME% %1 %2 %3 %4 %5 %6 %7 %8 %9
+java -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp %pc2_classpath% %CLASSNAME% %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
 rem eof pc2tools.bat
