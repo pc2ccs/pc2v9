@@ -85,7 +85,6 @@ public class ShadowController {
     private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
     private RemoteContestConfiguration remoteContestConfig;
     private Thread monitorThread;
-    private Log log;
 
     /**
      * a ContestInformation Listener
@@ -528,6 +527,7 @@ public class ShadowController {
      * 
      * @param diffs a List<String> giving the configuration differences
      */
+    @SuppressWarnings("unused")
     private void logDiffs(Log log, List<String> diffs) {
         // TODO Auto-generated method stub
         throw new NotImplementedException();
