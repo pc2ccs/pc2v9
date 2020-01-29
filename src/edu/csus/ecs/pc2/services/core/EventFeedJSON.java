@@ -74,9 +74,9 @@ public class EventFeedJSON extends JSONUtilities {
 
     private JSONTool jsonTool;
 
-    private Vector<ElementId> ignoreGroup;
+    private Vector<ElementId> ignoreGroup = new Vector<ElementId>();
 
-    private Vector<ClientId> ignoreTeam;
+    private Vector<ClientId> ignoreTeam = new Vector<ClientId>();
 
     public String getContestJSON(IInternalContest contest) {
 

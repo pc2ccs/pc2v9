@@ -182,6 +182,10 @@ public class SampleContest {
             }
 
             language.setSiteNumber(siteNumber);
+            if (language.getID() == null || language.getID().trim().length() < 1){
+                // if no lang id set, assign a randome one.
+                language.setID("lang"+(contest.getLanguages().length+1));
+            }
             contest.addLanguage(language);
         }
         
