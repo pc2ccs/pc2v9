@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-public class PacedFileInputStreamTest extends AbstractTestCase {
+public class PacedFileInputStreamTester extends AbstractTestCase {
 
     public void testZeroSecondPaced() throws Exception {
         
