@@ -32,7 +32,7 @@ public class PacedFileInputStreamTest extends AbstractTestCase {
         int cnt = 0;
         @SuppressWarnings("unused")
         int inint;
-        while (0 != (inint = stream.read())) {
+        while (-1 != (inint = stream.read())) {
             cnt++;
         }
         int pc = stream.getPauseCount();
