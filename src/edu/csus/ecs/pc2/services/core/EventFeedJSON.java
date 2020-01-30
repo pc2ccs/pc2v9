@@ -357,6 +357,9 @@ public class EventFeedJSON extends JSONUtilities {
 
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
+            if (ignoreTeam.contains(run.getSubmitter())) {
+                continue;
+            }
             JudgementRecord judgementRecord = run.getJudgementRecord();
             if (run.isJudged() && !judgementRecord.isPreliminaryJudgement()) {
                 RunTestCase[] testCases = run.getRunTestCases();
@@ -386,6 +389,9 @@ public class EventFeedJSON extends JSONUtilities {
 
         Arrays.sort(clarifications, new ClarificationComparator());
         for (Clarification clarification : clarifications) {
+            if (ignoreTeam.contains(clarification.getSubmitter())) {
+                continue;
+            }
             appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getClarificationJSON(contest, clarification, null));
             stringBuilder.append(NL);
             if (clarification.isAnswered()) {
