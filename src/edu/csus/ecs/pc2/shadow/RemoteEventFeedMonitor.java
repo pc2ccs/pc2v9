@@ -39,7 +39,7 @@ public class RemoteEventFeedMonitor implements Runnable {
     private boolean keepRunning ;
     
     //set this to true to filter out all but those submissions/judgements listed in "submissionFilterIDs"
-    private boolean respectSubmissionFilter = true; 
+    private boolean respectSubmissionFilter = false; 
     
     //a list of submissions which are the only ones we are interested in if respectSubmissionFilter is true
     private String [] submissionFilterIDs = {
