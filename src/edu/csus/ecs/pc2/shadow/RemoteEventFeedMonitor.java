@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,37 @@ public class RemoteEventFeedMonitor implements Runnable {
     
     private boolean keepRunning ;
     
+    //set this to true to filter out all but those submissions/judgements listed in "submissionFilterIDs"
+    private boolean respectSubmissionFilter = true; 
+    
+    //a list of submissions which are the only ones we are interested in if respectSubmissionFilter is true
+    private String [] submissionFilterIDs = {
+
+            "125",   //C# AC
+            "",      //C# CE
+            "558",   //C# TLE
+            "1452",  //C# RTE
+            "1260",  //C# WA
+            "8",     //C++ AC
+            "1139",  //C++ CE
+            "414",   //C++ TLE
+            "717",   //C++ RTE
+            "429",   //C++ WA
+            "55",    //Java AC
+            "1189",  //Java CE
+            "435",   //Java TLE
+            "1085",  //Java RTE
+            "190",   //Java WA
+            "1058",  //Python AC
+            "286",   //Python CE (at least, it SHOULD be; PC2 isn't currently catching this)
+            "286",   //Python TLE (what happened with 286 in the PacNW) -- the Shadow is currently producing RTE)
+            "593",   //Python RTE
+            "195"    //Python WA
+            } ;
+    
+    //a list form of the above, created in the class constructor
+    private List<String> submissionFilterIDsList;
+    
     private boolean listening;
     private IInternalController pc2Controller;
     private InputStream remoteInputStream;
@@ -60,6 +93,11 @@ public class RemoteEventFeedMonitor implements Runnable {
         this.login = login;
         this.password = password;
         this.submitter = submitter;
+        
+        //create a filter for submissions (only used if respectSubmmissionFilter = true)
+        submissionFilterIDsList = new ArrayList<String>(submissionFilterIDs.length);
+        Collections.addAll( submissionFilterIDsList, submissionFilterIDs);
+
     }
     
     @Override
@@ -132,6 +170,15 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         //get a map of the data comprising the submission
                                         Map<String, Object> submissionEventDataMap = (Map<String, Object>) eventMap.get("data");
 
+                                        //check if the current submission is to be ignored due to filtering
+                                        String submissionID = (String) submissionEventDataMap.get("id");
+                                        if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
+                                            
+                                            log.info("Ignoring submission " + submissionID + " due to filter");
+                                            event = reader.readLine();
+                                            continue;
+                                        }
+                                        
                                         //convert metadata into ShadowRunSubmission
                                         ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
 
@@ -245,11 +292,22 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             String judgement = (String) judgementEventDataMap.get("judgement_type_id");
                                             if (judgement != null && !judgement.equals("")) {
 
-                                                // there is a judgement; save it in the global judgements map under a key of
-                                                // the judgement ID with value "submissionID:judgement"
+
+                                                // there is a judgement; get the relevant IDs
                                                 String judgementID = (String) judgementEventDataMap.get("id");
                                                 String submissionID = (String) judgementEventDataMap.get("submission_id");
 
+                                                //check if the submission for this judgement is to be ignored due to filtering
+                                                if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
+                                                    
+                                                    log.info("Ignoring judgement " + judgementID + 
+                                                            " for submission " + submissionID + " due to filter");
+                                                    event = reader.readLine();
+                                                    continue;
+                                                }
+     
+                                                // this is a judgement we want; save it in the global judgements map under a key of
+                                                // the judgement ID with value "submissionID:judgement"
                                                 getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
                                             }
                                         }
