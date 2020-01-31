@@ -461,10 +461,22 @@ public class ShadowController {
             for (String submissionID : localKeys) {
                 if (!remoteSubmissionsJudgementMap.containsKey(submissionID)) {
                     
+                    //get the run corresponding to the current submissionID
                     Run run = getRun(runs,submissionID);
-                    teamID = run.getSubmitter().toString();
-                    problemID = run.getProblemId().toString();
-                    languageID = run.getLanguageId().toString();
+                                       
+//                    teamID = run.getSubmitter().toString();
+//                    problemID = run.getProblemId().toString();
+//                    languageID = run.getLanguageId().toString();
+                    
+                    //get the team/problem/language info corresponding to the run
+                    teamID = new Integer(run.getSubmitter().getClientNumber()).toString();
+                    
+                    ElementId probElementID = run.getProblemId();
+                    problemID = localContest.getProblem(probElementID).getShortName();
+                    
+                    ElementId langElementID = run.getLanguageId();
+                    languageID = localContest.getLanguage(langElementID).getID();
+                    
                     ShadowJudgementPair pair = new ShadowJudgementPair(submissionID, pc2JudgementsMap.get(submissionID), 
                                  remoteSubmissionsJudgementMap.get(submissionID)); //the remote map will always return null
                     

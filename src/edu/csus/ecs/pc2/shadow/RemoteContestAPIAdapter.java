@@ -17,8 +17,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
-
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.IFileImpl;
 import edu.csus.ecs.pc2.shadow.AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT;
@@ -271,7 +269,8 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
                 
                 String entryName = entry.getName();
                 
-                ByteOutputStream byteOutputStream = new ByteOutputStream();
+//                ByteOutputStream byteOutputStream = new ByteOutputStream();
+                ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
                 
                 byte[] buffer = new byte[8096];
                 int bytesRead = 0;
@@ -280,7 +279,8 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
                     byteOutputStream.write(buffer, 0, bytesRead);
                 }
 
-                String base64Data = getBase64Data(byteOutputStream.getBytes());
+//                String base64Data = getBase64Data(byteOutputStream.getBytes());
+                String base64Data = getBase64Data(byteOutputStream.toByteArray());
                 IFile iFile = new IFileImpl(entryName, base64Data);
                 files.add(iFile);
                 
