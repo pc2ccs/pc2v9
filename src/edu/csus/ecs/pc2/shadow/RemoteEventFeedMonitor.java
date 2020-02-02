@@ -44,27 +44,17 @@ public class RemoteEventFeedMonitor implements Runnable {
     //a list of submissions which are the only ones we are interested in if respectSubmissionFilter is true
     private String [] submissionFilterIDs = {
 
-            "125",   //C# AC
-            "",      //C# CE
-            "558",   //C# TLE
-            "1452",  //C# RTE
-            "1260",  //C# WA
-            "8",     //C++ AC
-            "1139",  //C++ CE
-            "414",   //C++ TLE
-            "717",   //C++ RTE
-            "429",   //C++ WA
-            "55",    //Java AC
-            "1189",  //Java CE
-            "435",   //Java TLE
-            "1085",  //Java RTE
-            "190",   //Java WA
-            "1058",  //Python AC
-            "286",   //Python CE (at least, it SHOULD be; PC2 isn't currently catching this)
-            "286",   //Python TLE (what happened with 286 in the PacNW) -- the Shadow is currently producing RTE)
-            "593",   //Python RTE
-            "195"    //Python WA
-            } ;
+            "286",
+            "414",
+            "908",
+            "1414",
+            "1437",
+            "1460",
+            "1464",
+            "1481",
+            "1531",
+            "1611"
+        } ;
     
     //a list form of the above, created in the class constructor
     private List<String> submissionFilterIDsList;
