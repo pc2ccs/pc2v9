@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ShadowControlPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import edu.csus.ecs.pc2.ui.WebServerPane;
+import java.awt.Dimension;
 
 /**
  * This class presents a graphical user interface for controlling the services exposed to external clients.
@@ -89,7 +90,7 @@ public class ServicesView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(600, 430));
+        this.setSize(new Dimension(750, 430));
         this.setContentPane(getMainViewPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Services");
