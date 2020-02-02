@@ -17,7 +17,7 @@ import edu.csus.ecs.pc2.core.model.IFile;
  * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
  *
  */
-interface IRemoteContestAPIAdapter {
+public interface IRemoteContestAPIAdapter {
     
     /**
      * Returns a {@link RemoteContestConfiguration} object containing the configuration of a contest in a
