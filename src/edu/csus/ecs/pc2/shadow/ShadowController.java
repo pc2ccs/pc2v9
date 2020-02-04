@@ -176,12 +176,13 @@ public class ShadowController {
      */
     public boolean start() {
 
+        log = getLog();
+        
+        log.info("Starting shadowing for URL '"+ remoteCCSURLString + "' using login '" + remoteCCSLogin + "'");
         System.out.println ("ShadowController: starting shadowing for URL '" + remoteCCSURLString 
-                            + "' using login '" + remoteCCSLogin + "' and password '" + remoteCCSPassword + "'");
+                            + "' using login '" + remoteCCSLogin + "'");
         
         setStatus(SHADOW_CONTROLLER_STATUS.SC_STARTING);
-        
-        log = localController.getLog();
         
         //verify that the current "URL string" is a valid URL
         URL remoteCCSURL = null;
