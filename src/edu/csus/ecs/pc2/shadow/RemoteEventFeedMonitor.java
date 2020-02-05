@@ -124,7 +124,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                     if ( event.length()>0 && event.startsWith("{") && event.endsWith("}") ) {
                         
 //                        System.out.println("Got event string: " + event);
-                        log.log(Level.INFO, "Got event string: " + event);
+//                        log.log(Level.INFO, "Got event string: " + event);
                         try {
 
                             /**
@@ -155,7 +155,7 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                     //process a submission event
                                     try {
-                                        log.log(Level.INFO, "Processing " + eventType + " event");
+//                                        log.log(Level.INFO, "Processing " + eventType + " event");
                                         
                                         //get a map of the data comprising the submission
                                         Map<String, Object> submissionEventDataMap = (Map<String, Object>) eventMap.get("data");
@@ -177,7 +177,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             throw new Exception("Error parsing submission data " + event);
                                         } else {
                                             
-                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
+//                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
                                             System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
 
                                             long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
@@ -260,7 +260,7 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                 } else if ("judgements".equals(eventType)) {
 //                                    System.out.println("debug 22 found judgement event");
-                                    log.log(Level.INFO, "Found " + eventType + " event");
+//                                    log.log(Level.INFO, "Found " + eventType + " event");
 
                                     //process a judgement event
                                     try {
@@ -311,7 +311,7 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                 } else {
 //                                    System.out.println("debug 22 - ignoring event " + eventType);
-                                    log.log (Level.INFO, "Ignoring " + eventType + " event");
+//                                    log.log (Level.INFO, "Ignoring " + eventType + " event");
                                 }
 
                             } // else
@@ -407,7 +407,7 @@ public class RemoteEventFeedMonitor implements Runnable {
             // found event: submissions:{"type":"submissions", "id":"pc2-165", "op":"update", "data": {"id":"3","language_id":"java","problem_id":"a","team_id":"3","time":"2019-11-30T20:41:36.809+02","contest_time":"00:20:00.000","entry_point":"ISumitWA","files":[{"href":"https://localhost:50443/contest/submissions/3/files"}]}}
 
             if ("submissions".equals(eventType)) {
-                pc2Controller.getLog().log(Level.INFO, "Found submission event");
+//                pc2Controller.getLog().log(Level.INFO, "Found submission event");
 //                System.out.println("found submission event");
 
                 Object obj = map.get("data");

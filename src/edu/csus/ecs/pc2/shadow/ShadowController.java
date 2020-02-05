@@ -297,10 +297,10 @@ public class ShadowController {
     public Map<String, ShadowJudgementInfo> getJudgementComparisonInfo() {
         
         if (getStatus()!= SHADOW_CONTROLLER_STATUS.SC_RUNNING) {
-            log.warning("Shadow Controller 'getJudgementComparisonInfo()' called when Shadow controller is not running"); 
+//            log.warning("Shadow Controller 'getJudgementComparisonInfo()' called when Shadow controller is not running"); 
             return null;
         } else {
-            log.info("Constructing Shadow Judgement comparisons");
+//            log.info("Constructing Shadow Judgement comparisons");
             
             //get a Map of the judgements assigned by the remote CCS to each submission; note that this map uses "remote event id"
             // as the key and combines the submission ID with the Judgement acronym, separated by a colon, as the value
@@ -317,7 +317,7 @@ public class ShadowController {
             
             //if specified, convert remote judgements to "Big 5"
             if (isConvertJudgementsToBig5()) {
-                log.info("Converting remote judgements to CLICS 'Big 5'");
+//                log.info("Converting remote judgements to CLICS 'Big 5'");
                 convertMapToBig5(remoteSubmissionsJudgementMap);
             }
             
@@ -359,7 +359,7 @@ public class ShadowController {
                         }
 
                         if (judgementString==null) {
-                            log.warning("null judgement string for run " + run.getNumber());
+//                            log.warning("null judgement string for run " + run.getNumber());
                             System.err.println ("null judgement string in ShadowController.getJudgementComparisonInfo() for run " + run.getNumber());
                         }
                         
@@ -387,14 +387,14 @@ public class ShadowController {
                             
                         } else { 
                             //we've exhausted methods of obtaining an acronym
-                            log.warning("null acronym for run " + run.getNumber() + ", judgement string " + judgementString);
+//                            log.warning("null acronym for run " + run.getNumber() + ", judgement string " + judgementString);
                             System.err.println ("null acronym in ShadowController.getJudgementComparision() for "
                                     + "run " + run.getNumber() + ", judgement string " + judgementString);
                         }
 
                     } else {
                         //we got a null judgment record from the run, but it's supposedly been judged -- error!
-                        log.severe("Error: found a (supposedly) judged run with no JudgementRecord!");
+//                        log.severe("Error: found a (supposedly) judged run with no JudgementRecord!");
                         System.err.println ("Error in getJudgementComparisonInfo(): found a (supposedly) judged run with no JudgementRecord!");
                     }                    
                     
@@ -408,7 +408,7 @@ public class ShadowController {
 
             //if specified, convert PC2 judgements to "Big 5"
             if (isConvertJudgementsToBig5()) {
-                log.info("Converting PC2 judgements to 'CLICS Big 5'");
+//                log.info("Converting PC2 judgements to 'CLICS Big 5'");
                 convertMapToBig5(pc2JudgementsMap);
             }
             
@@ -416,8 +416,8 @@ public class ShadowController {
             Set<String> remoteKeys = remoteSubmissionsJudgementMap.keySet();
             Set<String> localKeys = pc2JudgementsMap.keySet();
             if (!remoteKeys.equals(localKeys)) {
-                log.warning("Contents of remote judgements map does not match that of local PC2 judgements map"
-                        + " (this could happen if PC2 is not keeping up with remote submissions)");
+//                log.warning("Contents of remote judgements map does not match that of local PC2 judgements map"
+//                        + " (this could happen if PC2 is not keeping up with remote submissions)");
                 System.err.println("Note: contents of remote judgements map does not match that of local PC2 judgements map"
                         + " (this could happen if PC2 is not keeping up with remote submissions)");
             }
@@ -630,7 +630,7 @@ public class ShadowController {
 
     private void showMessage(String message) {
         System.out.println(new Date() + " " +message);
-        getLog().info(message);
+//        getLog().info(message);
     }
 
     private void updateCached(ContestInformation ci) {
