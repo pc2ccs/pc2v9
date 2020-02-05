@@ -1988,7 +1988,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //        editFile(yamlFilename);
 //        System.out.println("cds config dir = "+cdpConfigDir);
         
-        assertAutoStart(contest, "2020-02-04 01:23", true);
+        assertAutoStart(contest, "2060-02-04 01:23", true);
         
         Language[] languages = contest.getLanguages();
         assertEquals("Number of languages", 3, languages.length);
