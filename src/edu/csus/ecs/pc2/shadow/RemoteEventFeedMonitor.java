@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -421,7 +422,9 @@ public class RemoteEventFeedMonitor implements Runnable {
     }
 
     protected static ShadowRunSubmission createRunSubmission(Map<String, Object> eventDataMap) {
-        return new ObjectMapper().convertValue(eventDataMap, ShadowRunSubmission.class);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+        return mapper.convertValue(eventDataMap, ShadowRunSubmission.class);
     }
  
     
