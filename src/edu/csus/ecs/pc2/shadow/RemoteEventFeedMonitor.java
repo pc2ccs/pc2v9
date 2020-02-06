@@ -45,16 +45,18 @@ public class RemoteEventFeedMonitor implements Runnable {
     //a list of submissions which are the only ones we are interested in if respectSubmissionFilter is true
     private String [] submissionFilterIDs = {
 
-            "286",
-            "414",
-            "908",
-            "1414",
-            "1437",
-            "1460",
-            "1464",
-            "1481",
-            "1531",
-            "1611"
+            /* PacNW submissions of interest
+             * "286", "414", "908", "1414", "1437", "1460", "1464", "1481", "1531", "1611"
+             */        
+            
+            /* DOMJudge SystestA submissions of interest
+             */
+            "248603", //cpp, first judgement (which is null)
+            "248610", //cpp, different team
+            "248611", //java
+            "248609", //py2
+            "249388"  //py3
+            
         } ;
     
     //a list form of the above, created in the class constructor
