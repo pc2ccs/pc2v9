@@ -97,6 +97,7 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         }
     }
     
+    //This method can be removed
     private InputStream connect(String path) throws IOException {
         try {
             HttpURLConnection conn = createConnection(path);
@@ -132,7 +133,7 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
      */
     private InputStream getHTTPInputStream(URL remoteURL2, String user, String password) throws IOException {
         HttpURLConnection conn = HTTPSSecurity.createConnection(remoteURL2, user, password);
-        conn.setReadTimeout(15 * 1000); // 15s timeout
+        conn.setReadTimeout(5 * 60 * 1000); // 5 min timeout
         return new BufferedInputStream(conn.getInputStream());
     }
 
