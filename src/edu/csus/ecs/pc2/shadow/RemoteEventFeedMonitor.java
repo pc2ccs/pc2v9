@@ -126,7 +126,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                     //skip blank lines and any that do not start/end with "{...}"
                     if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
                         
-//                        System.out.println("Got event string: " + event);
+                        System.out.println("Got event string: " + event);
 //                        log.log(Level.INFO, "Got event string: " + event);
                         try {
 
@@ -262,7 +262,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     }
 
                                 } else if ("judgements".equals(eventType)) {
-//                                    System.out.println("debug 22 found judgement event");
+                                    System.out.println("debug 22 recognized judgement event");
 //                                    log.log(Level.INFO, "Found " + eventType + " event");
 
                                     //process a judgement event
@@ -301,6 +301,7 @@ public class RemoteEventFeedMonitor implements Runnable {
      
                                                 // this is a judgement we want; save it in the global judgements map under a key of
                                                 // the judgement ID with value "submissionID:judgement"
+                                                System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");                                                
                                                 getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
                                             }
                                         }
