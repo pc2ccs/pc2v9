@@ -673,7 +673,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
         
         ClientId[] proxyClientIds = getShadowProxyClientIds(yamlLines);
-        System.out.println("debug 22 There are "+proxyClientIds.length+" in yaml in dir "+directoryName);
+        System.out.println("debug 22 There are "+proxyClientIds.length+" shadow proxy client definitions in yaml in dir "+directoryName);
         
         if (proxyClientIds.length > 0) {
             for (ClientId clientId : proxyClientIds) {
