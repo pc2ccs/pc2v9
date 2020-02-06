@@ -122,7 +122,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                 while ((event != null) && keepRunning) {
 
                     //skip blank lines and any that do not start/end with "{...}"
-                    if ( event.length()>0 && event.startsWith("{") && event.endsWith("}") ) {
+                    if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
                         
 //                        System.out.println("Got event string: " + event);
 //                        log.log(Level.INFO, "Got event string: " + event);
