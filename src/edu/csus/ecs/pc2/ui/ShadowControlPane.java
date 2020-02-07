@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.net.URL;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -18,13 +19,19 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ShadowInformation;
+import edu.csus.ecs.pc2.shadow.IRemoteContestAPIAdapter;
+import edu.csus.ecs.pc2.shadow.MockContestAPIAdapter;
+import edu.csus.ecs.pc2.shadow.RemoteContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.shadow.ShadowController.SHADOW_CONTROLLER_STATUS;
 
@@ -49,6 +56,8 @@ public class ShadowControlPane extends JPanePlugin {
     private JButton startButton = null;
 
     private JButton stopButton = null;
+    
+    private JButton testConnectionButton;
 
     private JPanel centerPanel = null;
 
@@ -96,7 +105,7 @@ public class ShadowControlPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(505, 250));
+        this.setSize(new Dimension(600, 250));
         this.add(getButtonPanel(), BorderLayout.SOUTH);
         this.add(getCenterPanel(), BorderLayout.CENTER);
 
@@ -121,6 +130,7 @@ public class ShadowControlPane extends JPanePlugin {
             buttonPanel.setLayout(flowLayout);
             buttonPanel.setPreferredSize(new Dimension(35, 35));
             buttonPanel.add(getUpdateButton(), null);
+            buttonPanel.add(getTestConnectionButton());
             buttonPanel.add(getStartButton(), null);
             buttonPanel.add(getCompareButton());
             buttonPanel.add(getStopButton(), null);
@@ -141,6 +151,7 @@ public class ShadowControlPane extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
 //                    System.out.println("Update pressed...");
                     updateContestInformation();
+                    enableButtons();
                 }
             });
         }
@@ -414,11 +425,13 @@ public class ShadowControlPane extends JPanePlugin {
             getUpdateButton().setEnabled(false);
             getStartButton().setEnabled(!currentlyShadowing);
             getStopButton().setEnabled(currentlyShadowing);
+            getTestConnectionButton().setEnabled(!currentlyShadowing);            
             
         } else {
             getUpdateButton().setEnabled(true);
             getStartButton().setEnabled(false);
             getStopButton().setEnabled(false);
+            getTestConnectionButton().setEnabled(false);
         }
 
     }
@@ -592,4 +605,58 @@ public class ShadowControlPane extends JPanePlugin {
         }
         return compareButton;
     }
+    
+    private JButton getTestConnectionButton() {
+        if (testConnectionButton == null) {
+            testConnectionButton = new JButton("Test Connection");
+            testConnectionButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent arg0) {
+                    
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            
+                               IRemoteContestAPIAdapter remoteContestAPIAdapter = null;
+                                try {
+                                    ShadowInformation shadowInfo = getCurrentShadowInformation(getContest().getContestInformation());
+                                    String remoteURLString = shadowInfo.getRemoteCCSURL();
+                                    URL remoteURL = new URL(remoteURLString);
+                                    String remoteLogin = shadowInfo.getRemoteCCSLogin();
+                                    String remotePW = shadowInfo.getRemoteCCSPassword();
+                                    remoteContestAPIAdapter = createRemoteContestAPIAdapter(remoteURL, remoteLogin, remotePW);
+                                    boolean isConnected = remoteContestAPIAdapter.testConnection();
+                                    if (isConnected) {
+                                        showMessage ("Connection to remote CCS is successful");
+                                    } else {
+                                        showErrorMessage("Connection to remote CCS failed", "Connection failed");
+                                    }
+
+                                } catch (Exception e) {
+                                    showErrorMessage("Exception attempting to connect to remote system:\n" + e, 
+                                                        "Exception in connecting");
+                                } finally {
+                                    if (remoteContestAPIAdapter != null) {
+                                        remoteContestAPIAdapter = null;
+                                    }
+                                }
+                        }
+                    });
+
+                    
+                }
+            });
+        }
+        return testConnectionButton;
+    }
+    
+    private IRemoteContestAPIAdapter createRemoteContestAPIAdapter(URL url, String login, String password) {
+
+        boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow.usemockcontestadapter"), false);
+        if (useMockAdapter)
+        {
+            return new MockContestAPIAdapter(url, login, password);
+        } else {
+            return new RemoteContestAPIAdapter(url, login, password);
+        }
+    }
+
 }
