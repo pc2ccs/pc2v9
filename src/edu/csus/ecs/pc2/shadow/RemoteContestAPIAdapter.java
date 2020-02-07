@@ -53,7 +53,7 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
                 return true;
             }
         } catch (Exception e) {
-            ; // ignore exception, return false
+            return false; // ignore exception, return false
         } 
         
         //if we get here, either the createConnection() returned null or else we got an exception 
