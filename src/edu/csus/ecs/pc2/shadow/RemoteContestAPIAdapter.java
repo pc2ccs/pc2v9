@@ -44,12 +44,20 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     @Override
     public boolean testConnection() {
         try {
+            //create a connection
             HttpURLConnection conn = createConnection(remoteURL);
-            return conn != null;
+            //if we got a connection object, try connecting (merely creating a connection doesn't actually "connect")
+            if (conn!=null) {
+                conn.connect();
+                //if we get here, the connection worked; otherwise, either an exception or a fall-through to return false occurs
+                return true;
+            }
         } catch (Exception e) {
             ; // ignore exception, return false
         } 
         
+        //if we get here, either the createConnection() returned null or else we got an exception 
+        // which fell through the catch block
         return false;
     }
     
