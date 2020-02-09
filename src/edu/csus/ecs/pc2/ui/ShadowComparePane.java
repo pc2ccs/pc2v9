@@ -88,15 +88,18 @@ public class ShadowComparePane extends JPanePlugin {
                 data[row][2] = curJudgementInfo.getLanguageID();
                 data[row][3] = new Integer(key);
                 ShadowJudgementPair curPair = curJudgementInfo.getShadowJudgementPair();
+                
                 if (curPair!=null) {
                     data[row][4] = curPair.getPc2Judgement();
                     data[row][5] = curPair.getRemoteCCSJudgement();
                 }
+                data[row][6] = "---";
                 if (data[row][4]!=null && data[row][5]!=null) {
-                    data[row][6] = ((String)data[row][4]).equalsIgnoreCase((String)data[row][5]) ? "Y" : "N" ;
-                } else {
-                    data[row][6] = "---" ;                    
+                    if (!((String)data[row][4]).toLowerCase().contains("pending")) {
+                        data[row][6] = ((String) data[row][4]).equalsIgnoreCase((String) data[row][5]) ? "Y" : "N";
+                    }
                 }
+
                 row++;
             }
             
@@ -120,7 +123,7 @@ public class ShadowComparePane extends JPanePlugin {
                             
                             //override color with yellow if PC2 judgement is pending
                             String pc2Judgement = (String)getModel().getValueAt(modelRow, 4);
-                            if (pc2Judgement!=null && pc2Judgement.contains("pending")) {
+                            if (pc2Judgement!=null && pc2Judgement.toLowerCase().contains("pending")) {
                                 c.setBackground(new Color(255,255,153));
                             }
 
