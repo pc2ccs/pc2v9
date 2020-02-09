@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -212,34 +213,57 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
         return s;
     }
 
+    /**
+     * Fetches the submission files corresponding to the specified submissionID.
+     * The fetch is done by constructing a URL consisting of the concatenation of
+     * the current "Primary CCS URL" (the "remote URL") with the string
+     * "/submissions/<submissionID>/files" and then invoking the method
+     * {@link #getRemoteSubmissionFiles(URL)} with that URL, returning the result
+     * of that method call.
+     * 
+     * @param submissionID a String representation of the submission ID from the remote system
+     * @return the result of calling {@link #getRemoteSubmissionFiles(URL)} with the constructed URL,
+     *         or null if an exception is thrown during URL construction
+     */
     @Override
     public List<IFile> getRemoteSubmissionFiles(String submissionID) {
         String endpoint = "/submissions/" + submissionID + "/files";
-        String url = remoteURL.toString() + endpoint;
-        return getRemoteSubmissionFilesNew(url);
+        String urlString = remoteURL.toString() + endpoint;
+        URL url;
+        try {
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
+        return getRemoteSubmissionFiles(url);
     }
 
-    // TODO shadow rename this method to getRemoteSubmissionFiles 
-    public List<IFile> getRemoteSubmissionFilesNew(String submissionPath) {
+    /**
+     * Fetches submission files from the specified URL.
+     * The URL is expected to reference an endpoint which returns a zip file
+     * containing the files comprising a contest submission.  
+     * 
+     * @param submissionFilesURL a URL where a zip file containing submitted files may be found
+     * @return a List of {@link IFile}s  containing the contents of the submission files obtained 
+     *          from the specified URL
+     * @throws {@link RuntimeException} if an {@link IOException} occurs while connecting to the
+     *          remote system at the specified URL or while reading bytes from the input stream
+     *          associated with the URL
+     */
 
-        String fullSubmissionURL = remoteURL.toString() + submissionPath;
-        if (-1 != submissionPath.indexOf(':')) {
-            // has full URL with protocol
-            fullSubmissionURL = submissionPath;
-        }
+    public List<IFile> getRemoteSubmissionFiles(URL submissionFilesURL) {
 
         try {
-            URL url = new URL(fullSubmissionURL);
 
-            HttpURLConnection conn = createConnection(url);
-            /**
-             * Bytes fetched from endpoint
-             */
+            //make a connection to the specified URL
+            HttpURLConnection conn = createConnection(submissionFilesURL);
+            
+            //get the bytes (comprising a zipfile) from the specified URL's input stream
             byte[] bytes = toByteArray(conn.getInputStream());
 
-            /**
-             * Convert bytes/zipfile into individual IFiles.
-             */
+            // Unzip the bytes/zipfile into individual IFiles
             List<IFile> files = getIFiles(bytes);
             return files;
 
@@ -251,8 +275,8 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     /**
      * Get files from a zipfile's bytes.
      * 
-     * @param bytes bytes from a zip file.
-     * @return list of IFiles from input bytes 
+     * @param bytes bytes comprising a zip file.
+     * @return list of IFiles extracted from the input bytes 
      */
     private List<IFile> getIFiles(byte[] bytes) {
         
