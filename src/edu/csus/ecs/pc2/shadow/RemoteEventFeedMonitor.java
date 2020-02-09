@@ -217,8 +217,8 @@ public class RemoteEventFeedMonitor implements Runnable {
     // for the following block of code to work.
 
 //                                            //define the path to where the remote zip file containing the submissions files can be found
-//                                            String defaultSubmissionFilesURL = "/submissions/" + runSubmission.getId() + "/files"; //our default path
-//                                            String submissionFilesURL = null;  //this one we hope to pull out of the submission event, below
+//                                            String defaultSubmissionFilesURLString = "/submissions/" + runSubmission.getId() + "/files"; //our default path
+//                                            String submissionFilesURLString = null;  //this one we hope to pull out of the submission event, below
 //                                            
 //                                            
 //                                            //Note about the next set of code: the CLICS ContestAPI spec says that a submission event has numerous fields, 
@@ -243,27 +243,28 @@ public class RemoteEventFeedMonitor implements Runnable {
 //                                                if (zipFileReferenceMap.size() == 2){
 //                                                    String filesPath = zipFileReferenceMap.get("href");
 //                                                    if (!StringUtilities.isEmpty(filesPath)){
-//                                                        Note: the following method getRemoteBaseURL() needs to be code -- after
+//                                                        Note: the following method getRemoteBaseURL() needs to be coded -- after
 //                                                        the split of Primary CCS URL into "BaseURL" and "ContestIDPath" has been done.
-//                                                        submissionFilesURL = getRemoteBaseURL() + "/" + filesPath;
+//                                                        submissionFilesURLString = getRemoteBaseURL() + "/" + filesPath;
 //                                                    }
 //                                                }
 //                                            }
 //
 //                                            //check if the above code was able to obtain a URL for the submission files zip
-//                                            if (StringUtilities.isEmpty(submissionFilesURL)) {
+//                                            if (StringUtilities.isEmpty(submissionFilesURLString)) {
 //
 //                                                //no, we couldn't get a URL from the event; use our default
-//                                                submissionFilesURL = defaultSubmissionFilesURL;
+//                                                submissionFilesURLString = defaultSubmissionFilesURLString;
 //                                                System.err.println("Warning: could not find submission file URL for id = " + runSubmission.getId() + //
-//                                                        " in submission event; using '" + submissionFilesURL + "' " + //
+//                                                        " in submission event; using '" + submissionFilesURLString + "' " + //
 //                                                        "(event=" + event + ")");
 //                                            }
 //
 //                                            List<IFile> files = null;
 //
-//                                            System.out.println("debug 22 fetching file from URL "+submissionFilesURL);
+//                                            System.out.println("debug 22 fetching file from URL "+submissionFilesURLString);
 //                                            //get the files from the remote URL
+//                                            URL submissionFilesURL = new URL(submissionFilesURLString);
 //                                            files = remoteContestAPIAdapter.getRemoteSubmissionFiles(submissionFilesURL);
 //
 //                                            if (files == null){
