@@ -177,8 +177,6 @@ public class APIReports extends BaseClient {
 
         boolean printAllReports = bcParseArguments.isOptPresent("--all");
 
-        System.out.println("debug 22 aww "+printAllReports);
-        
         if (! printAllReports){
             if (bcParseArguments.getArgCount() == 0) {
                 printDefaultInfo();
@@ -259,9 +257,16 @@ public class APIReports extends BaseClient {
         System.out.println(info.getSystemVersionInfo());
     }
 
-    public static void main(String[] args) throws LoginFailureException, NotLoggedInException {
+    public static void main(String[] args)  {
+        
         APIReports reports = new APIReports();
+        try {
             reports.login(args);
+        } catch (LoginFailureException e){
+            System.err.println("ERROR Unable to login "+e.getMessage());
+        } catch (NotLoggedInException e) {
+            System.err.println("ERROR producing reports "+e.getMessage());
+        }
     }
 
 }

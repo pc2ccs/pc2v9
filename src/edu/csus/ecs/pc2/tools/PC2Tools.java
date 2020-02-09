@@ -1,7 +1,10 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.tools;
 
+import java.util.Arrays;
+
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.api.reports.APIReports;
 import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.ui.team.SubmitterFromEF;
 
@@ -55,11 +58,20 @@ public class PC2Tools {
     public void run(String[] args) {
 
         ParseArguments parseArguments = new ParseArguments(args);
+        
+        /**
+         * Remove first option from command line options.  Shift right.
+         */
+        String[] options = Arrays.copyOfRange(args, 1, args.length);
 
         if (parseArguments.isOptPresent("--gen")) {
 
             PasswordGenerator.main(args);
+            
+        } else if (parseArguments.isOptPresent("--apir")) {
 
+            APIReports.main(options);
+            
         } else if (parseArguments.isOptPresent("--sr")) {
 
             SubmitterFromEF.main(args);
