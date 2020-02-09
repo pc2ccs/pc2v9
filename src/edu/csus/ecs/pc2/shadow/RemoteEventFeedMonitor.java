@@ -243,7 +243,9 @@ public class RemoteEventFeedMonitor implements Runnable {
 //                                                if (zipFileReferenceMap.size() == 2){
 //                                                    String filesPath = zipFileReferenceMap.get("href");
 //                                                    if (!StringUtilities.isEmpty(filesPath)){
-//                                                        submissionFilesURL = filesPath;
+//                                                        Note: the following method getRemoteBaseURL() needs to be code -- after
+//                                                        the split of Primary CCS URL into "BaseURL" and "ContestIDPath" has been done.
+//                                                        submissionFilesURL = getRemoteBaseURL() + "/" + filesPath;
 //                                                    }
 //                                                }
 //                                            }
