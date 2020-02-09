@@ -1358,23 +1358,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 incomingPacket(packet);
 
-                if (PacketType.Type.AUTO_REGISTRATION_LOGIN_REQUEST.equals(packet.getType())) {
 
-                    packetArchiver.writeNextPacket(packet);
-
-                    String loginName = PacketFactory.getStringValue(packet, PacketFactory.LOGIN);
-
-                    if (isEnableAutoRegistration()) {
-
-                        handleAutoRegistration(packet, connectionHandlerID);
-
-                    } else {
-                        info("Client attempted to auto register, auto registration not enabled, tried to use '" + loginName + "' " + connectionHandlerID);
-                        String message = "Auto Registration not allowed";
-                        sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
-                    }
-
-                } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
+                if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
                     
                     if (packetHandler.forwardedToProxy((packet))) {
                         
@@ -1596,54 +1581,54 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
     }
 
-    private String[] removeFirstElement(String[] stringArray) {
-        String[] newArray = new String[stringArray.length - 1];
-        System.arraycopy(stringArray, 1, newArray, 0, newArray.length);
-        return newArray;
-    }
+//    private String[] removeFirstElement(String[] stringArray) {
+//        String[] newArray = new String[stringArray.length - 1];
+//        System.arraycopy(stringArray, 1, newArray, 0, newArray.length);
+//        return newArray;
+//    }
 
-    /**
-     * Handle client attempt to auto register.
-     * 
-     * @param packet
-     * @param connectionHandlerID
-     */
-    private void handleAutoRegistration(Packet packet, ConnectionHandlerID connectionHandlerID) {
-
-        String autoLoginInformation = PacketFactory.getStringValue(packet, PacketFactory.AUTO_REG_REQUEST_INFO);
-
-        String delimit = PacketType.FIELD_DELIMIT;
-        String[] fields = autoLoginInformation.split(delimit);
-
-        String errorMessage = null;
-
-        if (fields.length == 0) {
-            errorMessage = "Missing team name, enter a team name";
-        } else if (fields.length == 1) {
-            errorMessage = "Missing team member name(s), enter team member name";
-        } else {
-            String teamName = fields[0];
-            String[] teamMemberNames = removeFirstElement(fields);
-            Account account = contest.autoRegisterTeam(teamName, teamMemberNames, null);
-
-            try {
-                Packet newAccountPacket = PacketFactory.createAutoRegReply(getServerClientId(), account.getClientId(), account);
-                sendToClient(connectionHandlerID, newAccountPacket);
-
-                contest.storeConfiguration(getLog());
-                Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, account);
-                sendToJudgesAndOthers(newAccountsPacket, true);
-            } catch (Exception e) {
-                logException(e);
-            }
-        }
-
-        if (errorMessage != null) {
-            info("Client attempted to auto register, auto registration not enabled, tried to use '" + autoLoginInformation + "' " + connectionHandlerID);
-            String message = "Auto Registration not allowed";
-            sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
-        }
-    }
+//    /**
+//     * Handle client attempt to auto register.
+//     * 
+//     * @param packet
+//     * @param connectionHandlerID
+//     */
+//    private void handleAutoRegistration(Packet packet, ConnectionHandlerID connectionHandlerID) {
+//
+//        String autoLoginInformation = PacketFactory.getStringValue(packet, PacketFactory.AUTO_REG_REQUEST_INFO);
+//
+//        String delimit = PacketType.FIELD_DELIMIT;
+//        String[] fields = autoLoginInformation.split(delimit);
+//
+//        String errorMessage = null;
+//
+//        if (fields.length == 0) {
+//            errorMessage = "Missing team name, enter a team name";
+//        } else if (fields.length == 1) {
+//            errorMessage = "Missing team member name(s), enter team member name";
+//        } else {
+//            String teamName = fields[0];
+//            String[] teamMemberNames = removeFirstElement(fields);
+//            Account account = contest.autoRegisterTeam(teamName, teamMemberNames, null);
+//
+//            try {
+//                Packet newAccountPacket = PacketFactory.createAutoRegReply(getServerClientId(), account.getClientId(), account);
+//                sendToClient(connectionHandlerID, newAccountPacket);
+//
+//                contest.storeConfiguration(getLog());
+//                Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, account);
+//                sendToJudgesAndOthers(newAccountsPacket, true);
+//            } catch (Exception e) {
+//                logException(e);
+//            }
+//        }
+//
+//        if (errorMessage != null) {
+//            info("Client attempted to auto register, auto registration not enabled, tried to use '" + autoLoginInformation + "' " + connectionHandlerID);
+//            String message = "Auto Registration not allowed";
+//            sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
+//        }
+//    }
 
     public void sendToJudgesAndOthers(Packet packet, boolean sendToServers) {
 
@@ -1664,14 +1649,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
-    private boolean isEnableAutoRegistration() {
-        try {
-            return contest.getContestInformation().isEnableAutoRegistration();
-        } catch (Exception e) {
-            getLog().log(Log.WARNING, "Unable to determine auto reg value", e);
-            return false;
-        }
-    }
 
     /**
      * Creates and saves a ClientSettings.
@@ -2784,7 +2761,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     System.err.println("Unable to load INI from " + iniName);
                     getLog().log(Log.WARNING, "Unable to read ini URL " + iniName);
                     exception = new Exception("Unable to read ini file " + iniName);
-                }
+                } 
             } catch (Exception e) {
                 System.err.println("Unable to load INI from " + iniName);
                 getLog().log(Log.WARNING, "Unable to read ini URL " + iniName, e);
@@ -2794,6 +2771,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             if (exception != null) {
                 fatalError("Cannot start PC^2, " + iniName + " cannot be read (" + exception.getMessage() + ")", exception);
             }
+            IniFile.setHashtable(ini.getHashmap());
         }
 
         contest.setSiteNumber(0);
@@ -4206,13 +4184,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles, long overrideSubmissionTime, long overrideRunId) {
 
         SerializedFile serializedFile = new SerializedFile(filename);
-
-        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-        Run run = new Run(contest.getClientId(), language, problem);
-        RunFiles runFiles = new RunFiles(run, serializedFile, otherFiles);
-
-        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTime, overrideRunId);
-        sendToLocalServer(packet);
+        submitRun(contest.getClientId(), problem, language, serializedFile, otherFiles, overrideSubmissionTime, overrideRunId);
     }
 
     public void sendRunToSubmissionInterface(Run run, RunFiles runFiles) {
@@ -4371,4 +4343,21 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
+    public IInternalContest getContest() {
+        return contest;
+    }
+
+    @Override
+    public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
+        
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Run run = new Run(submitter, language, problem);
+        RunFiles runFiles = new RunFiles(run, mainSubmissionFile, additionalFiles);
+
+        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideRunId);
+        sendToLocalServer(packet);
+        
+    }
+    
 }

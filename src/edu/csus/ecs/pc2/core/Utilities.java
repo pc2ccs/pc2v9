@@ -1,4 +1,3 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
@@ -11,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.security.InvalidParameterException;
 import java.text.CharacterIterator;
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -61,7 +61,7 @@ public final class Utilities {
     private static final String LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     public static final String DATE_TIME_FORMAT_STRING = "yyyyddMMhhmmss.SSS";
-    
+
     public static final String FORMAT_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss z";
 
     /**
@@ -99,16 +99,15 @@ public final class Utilities {
     /**
      * List of extensions for files considered to be executable.
      */
-    public static final String [] VALID_PROGRAM_EXTENSIONS = { //
-        //
-        ".bat", // Windows batch file
-        ".exe", // Windows executable
-        ".py", // Python
-        ".sh", // Shell
-        ".class", // Java
+    public static final String[] VALID_PROGRAM_EXTENSIONS = { //
+            //
+            ".bat", // Windows batch file
+            ".exe", // Windows executable
+            ".py", // Python
+            ".sh", // Shell
+            ".class", // Java
     };
 
-    
     /**
      * File Types.
      * 
@@ -148,7 +147,6 @@ public final class Utilities {
     public static SimpleDateFormat getIso8601formatterWithMS() {
         return iso8601formatterWithMS;
     }
-
 
     /**
      * Return CCS path for input data and answer file names.
@@ -242,6 +240,7 @@ public final class Utilities {
         formatter.parse(s, pos);
         return s.length() == pos.getIndex();
     }
+
     /**
      * Compares 2 char arrays for equality.
      * 
@@ -496,7 +495,11 @@ public final class Utilities {
     }
 
     public static String basename(String path) {
-        int lastIndex = path.lastIndexOf(File.separator);
+        return basename(path, File.separatorChar);
+    }
+
+    public static String basename(String path, char fileSeperator) {
+        int lastIndex = path.lastIndexOf(fileSeperator);
         if (lastIndex == -1) {
             return path;
         } else {
@@ -1192,10 +1195,10 @@ public final class Utilities {
     }
 
     /**
-     * If there is a freezeTime set, return the contestLength - freezeTime,
-     * else the contestLength.
+     * If there is a freezeTime set, return the contestLength - freezeTime, else the contestLength.
      * 
-     * @param model - contest to get info from
+     * @param model
+     *            - contest to get info from
      * @return The freeze time in seconds (counting up from contest Start)
      */
     public static long getFreezeTime(IInternalContest model) {
@@ -1210,7 +1213,6 @@ public final class Utilities {
         }
         return freezeTime;
     }
-
 
     public static SerializedFile[] createSerializedFiles(String dataFileBaseDirectory, String[] inputFileNames, boolean externalFilesFlag) {
 
@@ -1241,18 +1243,20 @@ public final class Utilities {
         return filePath;
     }
 
-/**
+    /**
      * Validate problem files.
      * 
      * Only checks for files on disk if {@link Problem#isUsingExternalDataFiles()} is true.
      * 
-     * Will throw a MultipleIssuesException if any directories or files are missing,
-     * use {@link MultipleIssuesException#getIssueList()) for list of missing files or errors.
+     * Will throw a MultipleIssuesException if any directories or files are missing, use {@link MultipleIssuesException#getIssueList()) for list of missing files or errors.
      * 
      * @param contest
-     * @param cdpPath - base path for CDP config directory
-     * @param problem problem to validate
-     * @param allProblemDCPFiles include problem.tex and problem.yaml files.
+     * @param cdpPath
+     *            - base path for CDP config directory
+     * @param problem
+     *            problem to validate
+     * @param allProblemDCPFiles
+     *            include problem.tex and problem.yaml files.
      * @return true if all files present
      * @throws MultipleIssuesException
      */
@@ -1456,14 +1460,11 @@ public final class Utilities {
         printWriter.close();
 
     }
-    
+
     /**
-     * Checks the specified {@link SerializedFile} for error messages and/or exceptions. 
-     * This method is provided because the SerializedFile class does not throw exceptions when errors occur (such as its
-     * constructor encountering a "File Not Found" condition). Rather, the SerializedFile class simply sets an "error message" 
-     * and records the "exception" within the SerializedFile object. This method throws any exception found in the specified 
-     * SerializedFile, or returns true if there is an error message (but no exception). It returns false if the specified
-     * Serialized
+     * Checks the specified {@link SerializedFile} for error messages and/or exceptions. This method is provided because the SerializedFile class does not throw exceptions when errors occur (such as
+     * its constructor encountering a "File Not Found" condition). Rather, the SerializedFile class simply sets an "error message" and records the "exception" within the SerializedFile object. This
+     * method throws any exception found in the specified SerializedFile, or returns true if there is an error message (but no exception). It returns false if the specified Serialized
      * 
      * @param serFile
      *            the SerializedFile to be checked
@@ -1475,33 +1476,32 @@ public final class Utilities {
      */
     public static boolean serializedFileError(SerializedFile serFile) throws Exception {
 
-        //if the SerializedFile is null then it cannot have errors or exceptions
+        // if the SerializedFile is null then it cannot have errors or exceptions
         if (serFile == null) {
             return false;
         }
 
-        //if the SerializedFile has an exception, throw it (which should have been done in the SerializedFile class in the first place...)
+        // if the SerializedFile has an exception, throw it (which should have been done in the SerializedFile class in the first place...)
         if (serFile.getException() != null) {
             Exception e = serFile.getException();
             throw e;
         }
 
-        //if the SerializedFile has a non-null, non-empty error message, there is an error with the file -- return true
+        // if the SerializedFile has a non-null, non-empty error message, there is an error with the file -- return true
         if (serFile.getErrorMessage() != null && !serFile.getErrorMessage().equals("")) {
             return true;
         }
 
-        //if we get here then the SerializedFile is not null and it has no exceptions or error messages
+        // if we get here then the SerializedFile is not null and it has no exceptions or error messages
         return false;
     }
 
-    
     /**
      * Return OS type.
      * 
      * Attempts to identify {@link OSType}.
      * 
-     * @return {@link OSType#UNCLASSIFIED} if cannot be determined else returns {@link OSType}  
+     * @return {@link OSType#UNCLASSIFIED} if cannot be determined else returns {@link OSType}
      */
     public static OSType getOSType() {
 
@@ -1518,22 +1518,16 @@ public final class Utilities {
 
             } else {
 
-                String archType = System.getProperty("os.arch");
-
                 if (osName.toLowerCase().contains("linux") || osName.toLowerCase().contains("unix")) {
 
                     // test for architecture type
+                    String archType = System.getProperty("os.arch");
+
                     if (archType != null) {
                         if (archType.toLowerCase().equals("i386")) {
                             type = OSType.I386;
                         } else if (archType.toLowerCase().equals("amd64")) {
                             type = OSType.AMD64;
-                        }
-                    }
-                } else if (osName.toLowerCase().contains("mac os x")) {
-                    if (archType != null) {
-                        if (archType.toLowerCase().equals("x86_64")) {
-                            type = OSType.MAC64;
                         }
                     }
                 }
@@ -1569,6 +1563,7 @@ public final class Utilities {
 
     /**
      * Convert from int array to list.
+     * 
      * @param proxySites
      * @return
      */
@@ -1584,6 +1579,7 @@ public final class Utilities {
 
     /**
      * return base name, strip path and extension.
+     * 
      * @param filename
      * @return
      */
@@ -1592,7 +1588,7 @@ public final class Utilities {
         String baseFileName = filename;
         int idx = baseFileName.lastIndexOf(File.separator);
         if (idx > -1) {
-            baseFileName = baseFileName.substring(idx+1, baseFileName.length());
+            baseFileName = baseFileName.substring(idx + 1, baseFileName.length());
         }
 
         idx = baseFileName.lastIndexOf(".");
@@ -1602,11 +1598,12 @@ public final class Utilities {
 
         return baseFileName;
     }
-    
+
     /**
      * Prints a stack trace, prints stack elements which only matches pattern.
      * 
      * Example to only print stack trace elements with csus:
+     * 
      * <pre>
      *    Utilities.printStackTrace(System.err,e,"csus");
      * 
@@ -1627,7 +1624,7 @@ public final class Utilities {
     public static void printStackTrace(PrintStream printStream, Exception e, String pattern) {
 
         printStream.println(e.toString());
-        printStream.println("   Matching: "+pattern);
+        printStream.println("   Matching: " + pattern);
         StackTraceElement[] st = e.getStackTrace();
         for (StackTraceElement stackTraceElement : st) {
 
@@ -1635,15 +1632,15 @@ public final class Utilities {
 
             if (className.indexOf(pattern) != -1) {
                 printStream.println("    at " + //
-                        className + "." + // 
-                        stackTraceElement.getMethodName()+ "(" + //
+                        className + "." + //
+                        stackTraceElement.getMethodName() + "(" + //
                         stackTraceElement.getFileName() + ":" + //
-                        stackTraceElement.getLineNumber()  + ")" //
+                        stackTraceElement.getLineNumber() + ")" //
                 );
             }
         }
     }
-    
+
     public static void dumpProblemGroups(String message, Problem problem) {
 
         System.out.println("Start " + message + " dumpProblemGroups ");
@@ -1654,8 +1651,144 @@ public final class Utilities {
             System.out.println(i + " group " + group.getGroupId() + " " + group.getDisplayName());
             i++;
         }
-        System.out.println("End "+message + " dumpProblemGroups "+new Date());
+        System.out.println("End " + message + " dumpProblemGroups " + new Date());
     }
 
+    /**
+     * If object is empty/null throw InvalidParameterException
+     * 
+     * @param obj
+     * @param message
+     */
+    public static void isEmpty(Object obj, String message) {
+        if (obj == null) {
+            throw new InvalidParameterException(message);
+        }
+    }
 
+    /**
+     * If string is empty/null throw InvalidParameterException
+     * 
+     * @param s
+     * @param message
+     */
+    public static void isEmptyString(String s, String message) {
+        if (s == null || s.trim().length() == 0) {
+            throw new InvalidParameterException(message);
+        }
+    }
+
+    /**
+     * Convert String to int.
+     * 
+     * @param string
+     * @param defaultNumber
+     *            used if invalid or null string
+     * @return int from string, if any error will return defaultNumber
+     */
+    public static int nullSafeToInt(String string, int defaultNumber) {
+
+        try {
+
+            if (string != null && string.length() > 0) {
+                return Integer.parseInt(string.trim());
+            }
+        } catch (Exception e) {
+            // ignore, will return default if a parsing error
+        }
+
+        return defaultNumber;
+
+    }
+
+    /**
+     * Converts a CLICS Contest API "RELTIME" (contest time) string to milliseconds.
+     * 
+     * The format for CLICS RELTIME values is:  (-)?(h)*h:mm:ss(.uuu)?
+     * Note that this differs from standard ISO 8601 times in that it allows more than two hour
+     * digits and in that the optional fractional seconds (.uuu), if specified, MUST have exactly
+     * three digits (the ISO 8601 spec doesn't require/restrict the number of digits in the fraction).
+     * 
+     * @param time a time string in CLICS Contest API format
+     * @return the number of milliseconds corresponding to the specified time string, or the most
+     *     negative long value possible (Long.MIN_VALUE) if the string could not be parsed correctly
+     */
+    public static long convertCLICSContestTimeToMS(String time) {
+        
+        final long MSECS_PER_HOUR = 1000 * 60 * 60 ;
+        final long MSECS_PER_MIN = 1000 * 60 ;
+        final long MSECS_PER_SEC = 1000 ;
+        
+        boolean isNegative = false ;
+        
+        long hoursMS;
+        long minsMS;
+        long secondsMS;
+        long msecs;
+        
+        try {
+            //strip off any optional minus sign
+            if (time.startsWith("-")) {
+                time = new String(time.substring(1,time.length()));
+                isNegative = true;
+            }
+            
+            String [] fields = time.split(":");
+            if (fields.length!=3) {
+                //missing one or more required fields
+                return Long.MIN_VALUE;
+            }
+            
+            //verify there are the required number of chars in each field (>=1 for hours, =2 for mins, either 2 or 6 secs)
+            if (fields[0].length()<1 || fields[1].length()!=2 || (fields[2].length()!=2 && fields[2].length()!=6) ) {
+                return Long.MIN_VALUE;
+            }
+            
+            //verify the minutes digits are legitmate time values
+            int mins = Integer.parseInt(fields[1]) ;
+            if (mins<0 || mins>59) {
+                return Long.MIN_VALUE;
+            }
+            
+            //split out any option fractional part in the seconds field
+            String [] secondsFields = fields[2].split("\\.");
+            
+            //verify the seconds digits are legitmate time values
+            int secs = Integer.parseInt(secondsFields[0]) ;
+            if (secs<0 || secs > 59) {
+                return Long.MIN_VALUE;
+            }
+            
+            
+            //process any optional fraction on the input
+            msecs = 0;
+            if (secondsFields.length>1) {
+                if (secondsFields.length>2) {
+                    //input had more than one decimal point in it
+                    return Long.MIN_VALUE;
+                } else if (secondsFields[1].length()!=3) {
+                    //input had a fraction that isn't exactly three digits, as required
+                    return Long.MIN_VALUE;
+                } else {
+                    msecs = Long.parseLong(secondsFields[1]);
+                }
+            }
+
+            hoursMS = Long.parseLong(fields[0]) * MSECS_PER_HOUR;
+            minsMS = Long.parseLong(fields[1]) * MSECS_PER_MIN;
+            secondsMS = Long.parseLong(secondsFields[0]) * MSECS_PER_SEC;
+        
+            long retVal = hoursMS + minsMS + secondsMS + msecs ;
+        
+            if (isNegative) {
+                retVal = -retVal ;
+            }
+
+            return retVal;
+
+        } catch (Exception e) {
+            //TODO: should log this error
+            return Long.MIN_VALUE;
+        }
+    }
 }

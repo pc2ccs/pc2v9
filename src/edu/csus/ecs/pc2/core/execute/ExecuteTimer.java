@@ -8,6 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import edu.csus.ecs.pc2.core.log.Log;
@@ -456,8 +457,12 @@ public class ExecuteTimer extends Thread implements
     public void stopTimer() {
         timer.stop();
         if (usingGUI) {
-            getExecuteTimerFrame().setVisible(false);
-            getExecuteTimerFrame().dispose();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    getExecuteTimerFrame().setVisible(false);
+                    getExecuteTimerFrame().dispose();
+                }
+            });
         }
     }
     

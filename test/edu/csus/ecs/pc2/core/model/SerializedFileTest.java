@@ -1,7 +1,7 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
+import java.util.Base64;
 
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -153,9 +153,64 @@ public class SerializedFileTest extends AbstractTestCase {
         actualSum = serializedFile.getSHA1sum();
         
         assertNotNull ("Expecting SHA",actualSum);
-        assertNotNull ("Expecting SHA string ",actualSum.length() > 0);
+        assertNotNull ("Expecting SHA string ",actualSum.length() > 0);  //?? does this make sense??
         
         assertEquals("Expecting same SHA",  expectedSum, actualSum);
+        
+    }
+    
+    /**
+     * Tests whether a SerializedFile can be properly constructed from an array of bytes (as opposed
+     * to being loaded from disk).
+     * @throws Exception
+     */
+    public void testNonDiskFile() throws Exception {
+        
+        //data = ASCII NUL, STX, H, e, l, l, o, !
+        byte [] data = {0x00, 0x02, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21};  //length=8
+        
+        SerializedFile serializedFile = new SerializedFile("HelloFileName", data);
+        
+   
+        
+        //check that the SerializedFile is not indicated as "on disk"
+        assertFalse("Not expecting SerializedFile to be external ", serializedFile.isExternalFile());
+        assertNull("Not expecting SerializedFile to be a disk file ", serializedFile.getFile());
+        
+        assertNotNull("Expecting non null buffer in SerializedFile", serializedFile.getBuffer());
+
+        String actualSum = serializedFile.getSHA1sum();
+        
+        assertNotNull ("Expecting non-null SHA string in SerializedFile ",actualSum);
+        assertTrue ("Expecting non-zero-length SHA string in SerializedFile ", actualSum.length() > 0); 
+   
+        assertEquals("Expecting SerializedFile buffer of length 8 ", 8, serializedFile.getBuffer().length);
+
+        String expectedSum = SerializedFile.generateSHA1(data);
+        assertEquals("Expecting same SHA",  expectedSum, actualSum);
+        
+        
+        String s = new String(serializedFile.getBuffer());
+        assertTrue("SerializedFile does not contain expected data", s.substring(2,8).equals("Hello!"));
+    }
+    
+
+    private String encodeString(String string) {
+        Base64.Encoder encoder = Base64.getEncoder();
+        String base64String = encoder.encodeToString(string.getBytes());
+        return base64String;
+    }
+    
+    public void testIFileConstructor() throws Exception {
+        
+        IFile ifile = new IFileImpl("Hello.java", encodeString("// very small file "));
+        SerializedFile serializedFile = new SerializedFile(ifile); 
+        
+        // check for file name populated
+        assertNotNull("Name should not be null", serializedFile.getName());
+        assertEquals("file name", "Hello.java", serializedFile.getName());
+        assertEquals("abs path ", "./Hello.java", serializedFile.getAbsolutePath());
+        assertEquals("buffer/bytes length ", 19, serializedFile.getBuffer().length);
         
     }
 }

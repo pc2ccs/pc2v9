@@ -8,7 +8,6 @@ import java.util.Properties;
 
 import edu.csus.ecs.pc2.core.DateUtilities;
 import edu.csus.ecs.pc2.core.StringUtilities;
-import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 
 /**
@@ -53,6 +52,13 @@ public class ContestInformation implements Serializable{
      * 
      */
     private boolean ccsTestMode = false;
+    
+    //Shadow Mode settings
+    private boolean shadowMode = false;
+    private String primaryCCS_URL = null;
+    private String primaryCCS_user_login = "";
+    private String primaryCCS_user_pw = "";
+    private String lastShadowEventID = "";
     
     /**
      * Max output file size.
@@ -103,16 +109,6 @@ public class ContestInformation implements Serializable{
     
     private Properties scoringProperties = new Properties();
     
-    /**
-     * Enable team auto registration.
-     * 
-     */
-    private boolean enableAutoRegistration = false;
-    
-    /**
-     * The password type for the new passwords.
-     */
-    private PasswordType autoRegistrationPasswordType = PasswordType.RANDOM;
 
 //    /** replaced with scheduledStartTime; see below
 //     * Contest Start/Date Time.
@@ -244,6 +240,9 @@ public class ContestInformation implements Serializable{
             if (ccsTestMode != contestInformation.isCcsTestMode()) {
                 return false;
             }
+            if (shadowMode != contestInformation.isShadowMode()) {
+                return false;
+            }
             if (! StringUtilities.stringSame(externalYamlPath, contestInformation.externalYamlPath)) {
                 return false;
             }
@@ -253,7 +252,13 @@ public class ContestInformation implements Serializable{
             if (! StringUtilities.stringSame(rsiCommand, contestInformation.rsiCommand)) {
                 return false;
             }
-            if (enableAutoRegistration != contestInformation.isEnableAutoRegistration()) {
+            if (! StringUtilities.stringSame(primaryCCS_URL, contestInformation.primaryCCS_URL)) {
+                return false;
+            }            
+            if (! StringUtilities.stringSame(primaryCCS_user_login, contestInformation.primaryCCS_user_login)) {
+                return false;
+            }
+            if (! StringUtilities.stringSame(primaryCCS_user_pw, contestInformation.primaryCCS_user_pw)) {
                 return false;
             }
             if ((thawed == null && contestInformation.getThawed() != null) || (thawed != null && !thawed.equals(contestInformation.getThawed()))) {
@@ -405,10 +410,96 @@ public class ContestInformation implements Serializable{
         this.ccsTestMode = ccsTestMode;
     }
     
+    public boolean isShadowMode() {
+        return shadowMode;
+    }
+
+    public void setShadowMode(boolean shadowMode) {
+        this.shadowMode = shadowMode;
+    }
+
     public void setRsiCommand(String rsiCommand) {
         this.rsiCommand = rsiCommand;
     }
     
+    /**
+     * Returns the String representation for a "Primary CCS" URL (that is, the URL of a Remote CCS being shadowed); 
+     * only relevant when operating this instance of the PC2 CCS as a "Shadow CCS".
+     * @return a String containing the URL of the Primary CCS which we're shadowing
+     */
+    public String getPrimaryCCS_URL() {
+        return primaryCCS_URL;
+    }
+
+    /**
+     * Sets the String representation for a "Primary CCS" URL (that is, the URL of a Remote CCS being shadowed); 
+     * only relevant when operating this instance of the PC2 CCS as a "Shadow CCS".
+     * @param primaryCCS_URL a String giving the URL of the Primary (remote) CCS (the CCS being shadowed)
+     */
+    public void setPrimaryCCS_URL(String primaryCCS_URL) {
+        this.primaryCCS_URL = primaryCCS_URL;
+    }
+
+    /**
+     * Returns a String containing the user login account to be used when connecting 
+     * to a Primary CCS (only useful when operating this instance of PC2 as a "Shadow CCS").
+     * @return a String containing the Primary CCS user account name
+     */
+    public String getPrimaryCCS_user_login() {
+        return primaryCCS_user_login;
+    }
+
+    /**
+     * Sets the value of the user login (account) for the Primary CCS (only useful
+     * when operating this instance of PC2 as a "Shadow CCS").
+     * @param primaryCCS_user_login the primary CCS login account name
+     */
+    public void setPrimaryCCS_user_login(String primaryCCS_user_login) {
+        this.primaryCCS_user_login = primaryCCS_user_login;
+    }
+
+    /**
+     * Returns a String containing the password used for logging in to the 
+     * Primary CCS (only useful when operating this instance of PC2 as a
+     * "Shadow CCS").
+     * @return a String containing a password
+     */
+    public String getPrimaryCCS_user_pw() {
+        //TODO: consider some method of encrypting the password
+        return primaryCCS_user_pw;
+    }
+
+    /**
+     * Sets the value of the password to be used when connecting to a Primary CCS
+     * (only useful when operating this instance of PC2 as a "Shadow CCS").
+     * @param primaryCCS_user_pw a String containing a password
+     */
+    public void setPrimaryCCS_user_pw(String primaryCCS_user_pw) {
+        this.primaryCCS_user_pw = primaryCCS_user_pw;
+    }
+
+    /**
+     * Returns a String containing the "CLICS ID" for the last event retrieved from
+     * a remote CCS being shadowed (only useful when operating this instance of PC2 as a
+     * "Shadow CCS").
+     * @return a String containing a remote event id
+     */
+    public String getLastShadowEventID() {
+        return lastShadowEventID;
+    }
+
+    /**
+     * Sets the value of the String containing the "CLICS since_id" for the last event retrieved from
+     * a remote CCS being shadowed; that is, the id from which reconnections to the remote CCS event
+     * feed should proceed (only useful when operating this instance of PC2 as a
+     * "Shadow CCS").
+     * @param lastShadowEventID a String identifying the last event from the remote CCS
+     */
+     public void setLastShadowEventID(String lastShadowEventID) {
+        this.lastShadowEventID = lastShadowEventID;
+    }
+
+
     /**
      * Get the Run Submission Interface (RSI) command.
      * 
@@ -442,22 +533,6 @@ public class ContestInformation implements Serializable{
      */
     public int getLastRunNumberSubmitted() {
         return lastRunNumberSubmitted;
-    }
-
-    public boolean isEnableAutoRegistration() {
-        return enableAutoRegistration;
-    }
-
-    public void setEnableAutoRegistration(boolean enableAutoRegistration) {
-        this.enableAutoRegistration = enableAutoRegistration;
-    }
-
-    public PasswordType getAutoRegistrationPasswordType() {
-        return autoRegistrationPasswordType;
-    }
-
-    public void setAutoRegistrationPasswordType(PasswordType autoRegistrationPasswordType) {
-        this.autoRegistrationPasswordType = autoRegistrationPasswordType;
     }
 
     /**

@@ -161,6 +161,20 @@ public interface IContestLoader {
     String USING_CUSTOM_VALIDATOR = "use-custom-validator";
     
     String USE_CLICS_CUSTOM_VALIDATOR_INTERFACE = "use-clics-custom-validator-interface";
+    
+    String PC2_EXEC_CMD = "execCmd";
+    
+    String PC2_COMPILER_CMD = "compilerCmd";
+    
+    String CCS_LAST_EVENT_ID_KEY = "ccs-last-event-id";
+
+    String CCS_PASSWORD_KEY = "ccs-password";
+
+    String CCS_LOGIN_KEY = "ccs-login";
+
+    String CCS_URL_KEY = "ccs-url";
+
+    String SHADOW_MODE_KEY = "shadow-mode";
 
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 

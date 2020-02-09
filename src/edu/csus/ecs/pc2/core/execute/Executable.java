@@ -2020,7 +2020,7 @@ public class Executable extends Plugin implements IExecutable {
      * TODO: this method needs to be updated to use the nanoTimer (see method {@link #executeProgram(int)}) 
      */
     protected boolean compileProgram() {
-
+        int exitCode = 0;
         try {
 
             if (isJudge()) {
@@ -2098,6 +2098,7 @@ public class Executable extends Plugin implements IExecutable {
 
             if (process != null) {
                 process.destroy();
+                exitCode = process.waitFor();
             }
 
             stdoutlog.close();
@@ -2114,7 +2115,7 @@ public class Executable extends Plugin implements IExecutable {
                 // under the packagePath
                 programWithPackage = new File(prefixExecuteDirname(packagePath)+File.separatorChar+programName);
             }
-            if (program.exists() || programWithPackage.exists()) {
+            if ((program.exists() || programWithPackage.exists()) && !language.isInterpreted()) {
                 // now check if the programWithPackage does not exist
                 if (!programWithPackage.exists()) {
                     // programWithPackage != programName we have a packagePath
@@ -2130,7 +2131,7 @@ public class Executable extends Plugin implements IExecutable {
                 return true;
 
             } else {
-                if (language.isInterpreted()) {
+                if (language.isInterpreted() && exitCode == 0) {
                     executionData.setCompileExeFileName(runFiles.getMainFile().getName());
                     executionData.setCompileSuccess(true);
                     executionData.setCompileResultCode(0);

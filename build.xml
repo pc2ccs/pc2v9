@@ -4,7 +4,7 @@
         v9 build file
     </description>
     <!-- set global properties for this build -->
-    <property name="lastECSbuild" value="5146" />
+    <property name="lastECSbuild" value="5999" />
     <property name="apt.build.javac.target" value="1.8" />
     <property name="apt.build.javac.source" value="1.8" />
     <property name="src.dir" location="src" />
@@ -118,6 +118,11 @@
             <isset property="env.GIT_COMMIT"/>
         </condition>
     </target>
+	
+	<target name="jarSkipTests">
+		 <property name="RUN_NO_TESTS" value="Yes"/>
+		<antcall target="jar"/>
+	</target>
 
     <target name="init" depends="properties, -execgit, -getenv">
         <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpathref="checkstyle.classpath"/>
@@ -259,7 +264,7 @@ TODO consider switching back to this at 9.7.0/9.8build
         </delete>
     </target>
 
-    <target name="checkstyle" description="Generates a report of code convention violations." depends="init">
+    <target name="checkstyle" unless="RUN_NO_TESTS" description="Generates a report of code convention violations." depends="init">
         <mkdir dir="${build.dir}"/>
         <checkstyle config="${basedir}/.pc2_checks.xml" failureProperty="checkstyle.failure" failOnViolation="false">
             <formatter type="xml" tofile="${build.dir}/checkstyle-result.xml" />
@@ -288,7 +293,8 @@ TODO consider switching back to this at 9.7.0/9.8build
         </javadoc>
     </target>
     
-	<target name="test" depends="compile-tests" description="run junit tests">
+	<!-- run test unless RUN_NO_TESTS defined -->
+	<target name="test" depends="compile-tests" unless="RUN_NO_TESTS" description="run junit tests">
 		<delete dir="${testresults.dir}"/>
 		<mkdir dir="${testresults.xml.dir}"/>
 		<junit errorProperty="test.failed" failureProperty="test.failed" fork="yes">
