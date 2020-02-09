@@ -403,6 +403,16 @@ public class RemoteEventFeedMonitor implements Runnable {
     }
 
  
+    /**
+     * Returns a Map containing the key/value elements in the specified JSON string.
+     * This method uses the Jackson {@link ObjectMapper} to perform the conversion from the JSON
+     * string to a Map.  Note that the ObjectMapper recurses for nested JSON elements, returning
+     * a appropriate Object in the Map under the corresponding key string.
+     * 
+     * @param jsonString a JSON string to be converted to a Map
+     * @return a Map mapping the keys in the JSON string to corresponding values, or null if the input
+     *          String is null or if an exception occurs while converting the JSON to a Map.
+     */
     @SuppressWarnings("unchecked")
     protected static Map<String, Object> getMap(String jsonString) {
         
