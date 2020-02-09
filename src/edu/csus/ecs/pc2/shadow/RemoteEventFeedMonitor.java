@@ -402,26 +402,6 @@ public class RemoteEventFeedMonitor implements Runnable {
         return remoteJudgements;
     }
 
-    //This method was replaced by the following method which returns a Map<String,Object>.
-    // This was done because the Jackson ObjectMapper recursively reads objects; if an element
-    // is comprised of a sub-element then it returns an object rather than a String representing that
-    // object. 
-//    @SuppressWarnings("unchecked")
-//    protected static Map<String, String> getMap(String jsonString) {
-//        
-//        if (jsonString == null){
-//            return null;
-//        }
-//        
-//        ObjectMapper mapper = new ObjectMapper();
-//        try {
-//            Map<String, String> map = mapper.readValue(jsonString, Map.class);
-//            return map;
-//        } catch (IOException e) {
-//            e.printStackTrace(System.err);
-//            return null;
-//        }
-//    }
  
     @SuppressWarnings("unchecked")
     protected static Map<String, Object> getMap(String jsonString) {
