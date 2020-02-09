@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Properties;
 import java.util.TimeZone;
 
 import javax.swing.BorderFactory;
@@ -34,6 +35,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
+import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -863,6 +865,12 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         // getManualRunResultsPanel().clear();
         setEnabledButtonStatus(false);
         executable.execute();
+        
+        // Dump execution results files to log
+        String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
+        Problem juProblem = getContest().getProblem(run.getProblemId());
+        ClientId clientId = getContest().getClientId();
+        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, juProblem, "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         if (executionData != null && executionData.getExecutionException() != null) {
