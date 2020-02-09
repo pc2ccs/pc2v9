@@ -75,9 +75,9 @@ public interface IRemoteContestAPIAdapter {
      * NOTE: the following is the eventual prototype to be used to extend the Interface once 
      * the "Primary CCS URL" is split into "BaseURL" and "ContestID" components.  Until then it
      * has been commented out so that the Interface spec doesn't change.
-    public List<IFile> getRemoteSubmissionFiles(URL submissionFilesURL) ;
      */
-   
+//    public List<IFile> getRemoteSubmissionFiles(URL submissionFilesURL) ;   
+    
     /**
      * Test connection to remote CCS API.
      * @return true if could connect, otherwise false;
