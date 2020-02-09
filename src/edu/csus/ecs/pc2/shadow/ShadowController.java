@@ -613,7 +613,14 @@ public class ShadowController {
                 String newAcronym = clicsJudgement.getBig5EquivalentAcronym();
                 //the above method returns null if there is no matching Big 5 acronym
                 if (newAcronym==null) {
-                    newAcronym = "<NoBig5:" + judgementAcronym + ">";
+                    //there's no Big5 for the judgement acronym; see if it's "pending"
+                    if (!judgementAcronym.toLowerCase().contains("pending")) {
+                        //not pending; replace with message
+                        newAcronym = "<NoBig5:" + judgementAcronym + ">";
+                    } else {
+                        //it does contain pending; keep the original acronym
+                        newAcronym = judgementAcronym ;
+                    }
                 }
                 map.put(submissionID, newAcronym);
             }
