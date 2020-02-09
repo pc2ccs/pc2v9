@@ -673,7 +673,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
         
         ClientId[] proxyClientIds = getShadowProxyClientIds(yamlLines);
-        System.out.println("debug 22 There are "+proxyClientIds.length+" shadow proxy client definitions in yaml in dir "+directoryName);
+//        System.out.println("debug  There are "+proxyClientIds.length+" shadow proxy client definitions in yaml in dir "+directoryName);
         
         if (proxyClientIds.length > 0) {
             for (ClientId clientId : proxyClientIds) {
@@ -681,7 +681,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 if (account != null) {
                     account.addPermission(Type.SHADOW_PROXY_TEAM);
                     contest.updateAccount(account);
-                    System.out.println("debug 22 Added proxy account "+account.getClientId().toString());
+//                    System.out.println("debug  Added proxy account "+account.getClientId().toString());
                 } else {
                     syntaxError("No such account for proxy of " + clientId.getClientType().toString() + " " + clientId.getClientNumber() + " at site " + clientId.getSiteNumber());
                     ;
