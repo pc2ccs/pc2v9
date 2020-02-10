@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.event.KeyAdapter;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
 import javax.swing.JButton;
@@ -706,7 +707,8 @@ public class EditRunPane extends JPanePlugin {
         String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
         Problem problem = getContest().getProblem(run.getProblemId());
         ClientId clientId = getContest().getClientId();
-        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, problem, executable.getExecutionData(), "", new Properties());
+        List<Judgement> judgements = JudgementUtilites.getLastTestCaseJudgementList(getContest(), run);
+        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
         
         fileViewer.setVisible(true);
     }

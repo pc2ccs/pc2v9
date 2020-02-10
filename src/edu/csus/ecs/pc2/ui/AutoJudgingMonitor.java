@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -430,7 +431,8 @@ public class AutoJudgingMonitor implements UIPlugin {
         String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
         Problem problem = getContest().getProblem(fetchedRun.getProblemId());
         ClientId clientId = getContest().getClientId();
-        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, fetchedRun, executeDirctoryName, problem, executable.getExecutionData(), "", new Properties());
+        List<Judgement> judgements = JudgementUtilites.getLastTestCaseJudgementList(contest, fetchedRun);
+        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, fetchedRun, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         

@@ -2,6 +2,8 @@
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -14,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 
 /**
  * Judgement utilities.
@@ -140,11 +143,26 @@ public final class JudgementUtilites {
         return null;
     }
 
-    public static void dumpJudgementResultsToLog(Log log, ClientId judgeId, Run run, String executeDirctoryName, Problem problem, ExecutionData executionData, String prefixString, Properties properties) {
+    /**
+     * 
+     * @param log
+     * @param judgeId
+     * @param run
+     * @param executeDirctoryName
+     * @param problem
+     * @param testCaseJudgements list of test case judgements for last execute run/test
+     * @param executionData
+     * @param prefixString
+     * @param properties
+     */
+    public static void dumpJudgementResultsToLog(Log log, ClientId judgeId, Run run, String executeDirctoryName, Problem problem, List<Judgement> testCaseJudgements, ExecutionData executionData,
+            String prefixString, Properties properties) {
 
         // TODO handle max number of AC/Yes test cases to dump
 
-        int maximumLinesToOutput = 20; // TODO assign max lines to dump from properties
+        int maximumLinesToOutput = 20; // SOMEDAY assign max lines to dump from properties
+
+        int maxYesJudgementsToOutput = 5; // SOMEDAY assign max lines to dump from properties
 
         // For reference, Sample file list from multiple test case problem
         //    cstderr.pc2
@@ -169,7 +187,7 @@ public final class JudgementUtilites {
             log.info(prefixString + " There are " + numberOfTestCases + " for problem " + problem.getDisplayName() + " '" + problem.getShortName() + "'");
 
             String[] otherFiles = { "cstderr.pc2", "cstdout.pc2", "estderr.pc2", "estdout.pc2" };
-            
+
             /**
              * Other Files
              */
@@ -185,12 +203,34 @@ public final class JudgementUtilites {
                     log.info(prefixString + " File does not exist " + fullName);
                 }
             }
-            
+
+            int totalTestCaseJudgements = testCaseJudgements.size();
+
+            int yesJudgementCount = 0;
+
             /*
              * Test case files.
              */
 
             for (int dataSetNumber = 0; dataSetNumber < numberOfTestCases; dataSetNumber++) {
+
+                boolean yesJudgement = false;
+
+                if (dataSetNumber < totalTestCaseJudgements) {
+                    Judgement judgement = testCaseJudgements.get(dataSetNumber);
+                    String judgementAcronym = judgement.getAcronym();
+
+                    yesJudgement = Judgement.ACRONYM_ACCEPTED.equals(judgementAcronym);
+                    if (yesJudgement) {
+                        yesJudgementCount++;
+                    }
+                }
+
+                if (yesJudgement && yesJudgementCount >= maxYesJudgementsToOutput) {
+
+                    // Skip dumping any yes judgements if beyond max amount of them to output
+                    continue;
+                }
 
                 String teamOutputFilename = "teamoutput." + dataSetNumber + ".txt";
                 String fullName = executeDirctoryName + File.separator + teamOutputFilename;
@@ -204,18 +244,17 @@ public final class JudgementUtilites {
                     log.info(prefixString + " File does not exist " + fullName);
                 }
             }
-            
+
             if (executionData != null)
             {
                 Exception ex = executionData.getExecutionException();
                 if (ex != null)
                 {
-                    log.log(Level.INFO, "Exception "+ex.getMessage(), ex);
+                    log.log(Level.INFO, "Exception " + ex.getMessage(), ex);
                 }
             }
-            
-            
-            log.info(prefixString + "end of dump, run id="+run.getNumber());
+
+            log.info(prefixString + "end of dump, run id=" + run.getNumber());
 
         } catch (Exception e) {
             log.log(Log.WARNING, prefixString + "Warning - while dumping result files " + e.getMessage(), e);
@@ -225,5 +264,44 @@ public final class JudgementUtilites {
     public static String getExecuteDirectoryName(ClientId id) {
         return "executesite" + id.getSiteNumber() + id.getName();
     }
+
+    /**
+     * Get judgements for last set of test cases.
+     * 
+     * @param contest
+     * @param run
+     * @return empty list if no test cases judgement in run, else the list of judgements
+     */
+    public static List<Judgement> getLastTestCaseJudgementList(IInternalContest contest, Run run) {
+
+        List<Judgement> list = new ArrayList<Judgement>();
+        
+        try {
+
+
+            if (null != run.getRunTestCases() && run.getRunTestCases().length > 0) {
+                RunTestCase[] testCases = run.getRunTestCases();
+                for (RunTestCase runTestCase : testCases) {
+
+                    if (runTestCase.getTestNumber() == 0) {
+                        // if new set of test cases, start list all over again.
+                        list = new ArrayList<Judgement>();
+                    }
+
+                    ElementId judgementId = runTestCase.getJudgementId();
+                    list.add(contest.getJudgement(judgementId));
+                }
+            }
+
+        } catch (Exception e) {
+            list = new ArrayList<Judgement>();
+            System.err.println("ERROR in getLastTestCaseJudgementList "+e.getMessage());
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+    
+    
 
 }
