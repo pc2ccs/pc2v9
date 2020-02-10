@@ -706,7 +706,7 @@ public class EditRunPane extends JPanePlugin {
         String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
         Problem problem = getContest().getProblem(run.getProblemId());
         ClientId clientId = getContest().getClientId();
-        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, problem, "", new Properties());
+        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, problem, executable.getExecutionData(), "", new Properties());
         
         fileViewer.setVisible(true);
     }

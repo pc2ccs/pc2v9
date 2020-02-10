@@ -430,7 +430,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
         Problem problem = getContest().getProblem(fetchedRun.getProblemId());
         ClientId clientId = getContest().getClientId();
-        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, fetchedRun, executeDirctoryName, problem, "", new Properties());
+        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, fetchedRun, executeDirctoryName, problem, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         

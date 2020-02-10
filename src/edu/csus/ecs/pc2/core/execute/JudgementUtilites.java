@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.LogUtilities;
@@ -139,7 +140,7 @@ public final class JudgementUtilites {
         return null;
     }
 
-    public static void dumpJudgementResultsToLog(Log log, ClientId judgeId, Run run, String executeDirctoryName, Problem problem, String prefixString, Properties properties) {
+    public static void dumpJudgementResultsToLog(Log log, ClientId judgeId, Run run, String executeDirctoryName, Problem problem, ExecutionData executionData, String prefixString, Properties properties) {
 
         // TODO handle max number of AC/Yes test cases to dump
 
@@ -203,6 +204,16 @@ public final class JudgementUtilites {
                     log.info(prefixString + " File does not exist " + fullName);
                 }
             }
+            
+            if (executionData != null)
+            {
+                Exception ex = executionData.getExecutionException();
+                if (ex != null)
+                {
+                    log.log(Level.INFO, "Exception "+ex.getMessage(), ex);
+                }
+            }
+            
             
             log.info(prefixString + "end of dump, run id="+run.getNumber());
 

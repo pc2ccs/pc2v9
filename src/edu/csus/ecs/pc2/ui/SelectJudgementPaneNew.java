@@ -870,7 +870,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
         Problem juProblem = getContest().getProblem(run.getProblemId());
         ClientId clientId = getContest().getClientId();
-        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, juProblem, "", new Properties());
+        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, juProblem, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         if (executionData != null && executionData.getExecutionException() != null) {
