@@ -27,7 +27,9 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Plugin;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -1952,7 +1954,7 @@ public class Executable extends Plugin implements IExecutable {
                     exitFile.delete();
                 }
             }
-            if (executionData.getExecuteStderr() != null) {
+            if (isAppendStderrToStdout() && executionData.getExecuteStderr() != null) {
                 byte[] errBuff = executionData.getExecuteStderr().getBuffer();
                 FileOutputStream outputStream = null;
                 try {
@@ -1978,6 +1980,16 @@ public class Executable extends Plugin implements IExecutable {
         }
 
         return passed;
+    }
+
+    private boolean isAppendStderrToStdout() {
+        String key = "judge.appendstderr";
+        try {
+            return StringUtilities.getBooleanValue(IniFile.getValue(key), false);
+        } catch (Exception e) {
+            System.err.println("Error fetching boolean value for " + key + " " + e.getMessage());
+        }
+        return false;
     }
 
     /**
