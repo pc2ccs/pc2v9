@@ -466,4 +466,23 @@ public class UtilitiesTest extends AbstractTestCase {
             assertEquals("Expected basename ", expected, actual);
         }
     }
+    
+    /**
+     * Test loadFile(String, long);
+     * 
+     * @throws Exception
+     */
+    public void testloadFileWithNum() throws Exception {
+        
+        String filename = "samps/pc2v9.ini";
+        
+        int num = 10;
+        
+        String[] lines = Utilities.loadFile(filename, num);
+        assertEquals("Expecting "+num+" lines", num, lines.length);
+        
+        num = 36;
+        lines = Utilities.loadFile(filename, num);
+        assertEquals("Expecting "+num+" lines", num, lines.length);
+    }
 }

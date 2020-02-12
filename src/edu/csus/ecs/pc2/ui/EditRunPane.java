@@ -6,6 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.event.KeyAdapter;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -22,6 +24,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
+import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -31,10 +34,10 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.ExtractRuns;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
@@ -699,6 +702,14 @@ public class EditRunPane extends JPanePlugin {
         executable = new Executable(getContest(), getController(), run, runFiles);
 
         IFileViewer fileViewer = executable.execute();
+        
+        // Dump execution results files to log
+        String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
+        Problem problem = getContest().getProblem(run.getProblemId());
+        ClientId clientId = getContest().getClientId();
+        List<Judgement> judgements = JudgementUtilites.getLastTestCaseJudgementList(getContest(), run);
+        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
+        
         fileViewer.setVisible(true);
     }
 
