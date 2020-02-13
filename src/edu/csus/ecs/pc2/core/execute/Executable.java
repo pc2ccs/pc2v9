@@ -116,6 +116,11 @@ public class Executable extends Plugin implements IExecutable {
      * Compile stderr filename.
      */
     public static final String COMPILER_STDERR_FILENAME = "cstderr.pc2";
+    
+    /**
+     * The default limit (in seconds) for compilation of a submission.
+     */
+    public static final int DEFAULT_COMPILATION_TIME_LIMIT_SECS = 60;
 
     /**
      * Execution stdout filename.
@@ -136,6 +141,11 @@ public class Executable extends Plugin implements IExecutable {
      * Validator stderr filename.
      */
     public static final String VALIDATOR_STDERR_FILENAME = "vstderr.pc2";
+    
+    /**
+     * The default limit (in seconds) for validation of a single run (test case) of a submission.
+     */
+    public static final int DEFAULT_VALIDATION_TIME_LIMIT_SECS = 60;
 
     /**
      * Interface - the file created with the process return.exit code.
@@ -901,10 +911,13 @@ public class Executable extends Plugin implements IExecutable {
                 msg = "Validating...";
             }
 
-            long startTime = System.currentTimeMillis();
-            process = runProgram(cmdLine, msg, false);
+            //added per bug 1668
+            executionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI());
 
-            if (process == null) {
+            long startTime = System.currentTimeMillis();
+            Process validatorProcess = runProgram(cmdLine, msg, false);
+
+            if (validatorProcess == null) {
                 executionTimer.stopTimer();
                 stderrlog.close();
                 stdoutlog.close();
@@ -912,15 +925,15 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             // This reads from the stdout of the child process
-            BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());
+            BufferedInputStream childOutput = new BufferedInputStream(validatorProcess.getInputStream());
             // The reads from the stderr of the child process
-            BufferedInputStream childError = new BufferedInputStream(process.getErrorStream());
+            BufferedInputStream childError = new BufferedInputStream(validatorProcess.getErrorStream());
 
             IOCollector stdoutCollector = new IOCollector(log, childOutput, stdoutlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
             IOCollector stderrCollector = new IOCollector(log, childError, stderrlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
 
             executionTimer.setIOCollectors(stdoutCollector, stderrCollector);
-            executionTimer.setProc(process);
+            executionTimer.setProc(validatorProcess);
 
             stdoutCollector.start();
             stderrCollector.start();
@@ -935,7 +948,7 @@ public class Executable extends Plugin implements IExecutable {
                 if (teamOutputFileName != null && new File(teamOutputFileName).exists()) {
                     log.info("Sending team output file '" + getTeamOutputFilename(dataSetNumber) + "' to Validator stdin");
 
-                    BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());
+                    BufferedOutputStream out = new BufferedOutputStream(validatorProcess.getOutputStream());
                     BufferedInputStream in = new BufferedInputStream(new FileInputStream(teamOutputFileName));
                     byte[] buf = new byte[32768];
                     int c;
@@ -944,7 +957,7 @@ public class Executable extends Plugin implements IExecutable {
                             out.write(buf, 0, c);
                         }
                     } catch (java.io.IOException e) {
-                        log.info("Caught a " + e.getMessage() + " do not be alarmed.");
+                        log.info("Caught a " + e.getMessage() + " while sending team output to validator; do not be alarmed.");
                     }
 
                     in.close();
@@ -963,11 +976,11 @@ public class Executable extends Plugin implements IExecutable {
                 log.config("validatorCall() executionTimer == null");
             }
 
-            if (process != null) {
-                exitcode = process.waitFor();
+            if (validatorProcess != null) {
+                exitcode = validatorProcess.waitFor();
                 log.info("validator process returned exit code " + exitcode);
                 executionData.setExecuteExitValue(exitcode);
-                process.destroy();
+                validatorProcess.destroy();
             }
 
             stdoutlog.close();
@@ -982,7 +995,7 @@ public class Executable extends Plugin implements IExecutable {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
             }
-            log.log(Log.WARNING, "Exception in validator ", ex);
+            log.log(Log.WARNING, "Exception running validator ", ex);
         }
 
         //When we get here the Validator external process has completed (one way or the other...)
@@ -1798,6 +1811,7 @@ public class Executable extends Plugin implements IExecutable {
             //create a TimerTask to kill the process if it exceeds the problem time limit
             TimerTask task = new TimerTask() {
                 public void run() {
+                    
                     //first step: stop the process from running further
                     if (executionTimer != null) {
                         executionTimer.stopIOCollectors();
@@ -1805,7 +1819,7 @@ public class Executable extends Plugin implements IExecutable {
                     //record stop information
                     Date now = new Date();
 //                    System.out.println("Timer task to kill process fired at " + now );
-                    log.info("Timer task to kill process fired at " + now );
+                    log.info("Timer task to kill submission execution process fired at " + now );
                     
                     //make sure the process is gone (the call to stopIOCollectors(), above, will call destroy() first --
                     // but only if the executionTimer is not null)
@@ -2064,8 +2078,8 @@ public class Executable extends Plugin implements IExecutable {
             BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false));
             BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDERR_FILENAME), false));
 
-            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
-            executionTimer.startTimer();    //TODO: why is this here, when method runProgram() invokes startTimer()?  (it should only be done in runProgram...)
+            executionTimer = new ExecuteTimer(log, getCompilationTimeLimit(), executorId, isUsingGUI());
+//            executionTimer.startTimer();    //TODO: why is this here, when method runProgram() invokes startTimer()?  (it should only be done in runProgram...)
 
             long startSecs = System.currentTimeMillis();
 
@@ -2074,7 +2088,7 @@ public class Executable extends Plugin implements IExecutable {
                 executionTimer.stopTimer();
                 stderrlog.close();
                 stdoutlog.close();
-                // errorString will be set by
+                // errorString will be set by  (?huh?)
                 executionData.setCompileExeFileName("");
                 executionData.setCompileSuccess(false);
                 executionData.setCompileResultCode(1);
@@ -2732,5 +2746,35 @@ public class Executable extends Plugin implements IExecutable {
      */
     public List<String> getValidatorErrFilenames() {
         return validatorStderrFilesnames;
+    }
+    
+    /**
+     * Returns the limit, in seconds, for the amount of time allowed for compilation of a submission.
+     * 
+     * TODO: currently the returned limit is the value defined by the constant DEFAULT_COMPILATION_TIME_LIMIT_SECS; 
+     * this should eventually be replaced by obtaining the problem-specified compilation time limit from a system 
+     * property settable either via the Admin GUI or from a problem.yaml file.  See bug 1669.
+     * 
+     * @return an integer giving the compilation time limit, in seconds
+     */
+    private int getCompilationTimeLimit() {
+        
+        return DEFAULT_COMPILATION_TIME_LIMIT_SECS ;
+    }
+    
+    
+    /**
+     * Returns the limit, in seconds, for the amount of time allowed for validation of the output of a single run 
+     * (test case) of a submission.
+     * 
+     * TODO: currently the returned limit is the value defined by the constant DEFAULT_VALIDATION_TIME_LIMIT_SECS; 
+     * this should eventually be replaced by obtaining the problem-specified compilation time limit from a system 
+     * property settable either via the Admin GUI or from a problem.yaml file. See bug 1669.
+     * 
+     * @return an integer giving the per-run (per-test-case) validation time limit, in seconds
+     */
+    private int getValidationTimeLimit() {
+        
+        return DEFAULT_VALIDATION_TIME_LIMIT_SECS ;
     }
 }
