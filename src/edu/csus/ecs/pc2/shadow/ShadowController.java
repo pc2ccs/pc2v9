@@ -271,7 +271,7 @@ public class ShadowController {
         }
     }
 
-    private boolean convertJudgementsToBig5 = true;
+    private boolean convertJudgementsToBig5 = false;
     private boolean shadowModeEnabled = false;
     
     /**
