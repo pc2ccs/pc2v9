@@ -901,6 +901,10 @@ public class Executable extends Plugin implements IExecutable {
 
         //execute the validator, as a separate process
         int exitcode = -1;
+        //the validation phase needs its own local timer, to avoid the possibility that the TLE-Timer task from the
+        // execute phase might wake up and kill the timer/IOCollectors referenced by the global "executionTimer" variable.
+        // See bug 1668 for details.
+        ExecuteTimer validatorExecutionTimer = null;
         try {
 
             BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME), false));
@@ -912,13 +916,13 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             //added per bug 1668
-            executionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI());
+            validatorExecutionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI());
 
             long startTime = System.currentTimeMillis();
             Process validatorProcess = runProgram(cmdLine, msg, false);
 
             if (validatorProcess == null) {
-                executionTimer.stopTimer();
+                validatorExecutionTimer.stopTimer();
                 stderrlog.close();
                 stdoutlog.close();
                 return false;
@@ -929,11 +933,11 @@ public class Executable extends Plugin implements IExecutable {
             // The reads from the stderr of the child process
             BufferedInputStream childError = new BufferedInputStream(validatorProcess.getErrorStream());
 
-            IOCollector stdoutCollector = new IOCollector(log, childOutput, stdoutlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
-            IOCollector stderrCollector = new IOCollector(log, childError, stderrlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
+            IOCollector stdoutCollector = new IOCollector(log, childOutput, stdoutlog, validatorExecutionTimer, getMaxFileSize() + ERRORLENGTH);
+            IOCollector stderrCollector = new IOCollector(log, childError, stderrlog, validatorExecutionTimer, getMaxFileSize() + ERRORLENGTH);
 
-            executionTimer.setIOCollectors(stdoutCollector, stderrCollector);
-            executionTimer.setProc(validatorProcess);
+            validatorExecutionTimer.setIOCollectors(stdoutCollector, stderrCollector);
+            validatorExecutionTimer.setProc(validatorProcess);
 
             stdoutCollector.start();
             stderrCollector.start();
@@ -969,11 +973,8 @@ public class Executable extends Plugin implements IExecutable {
             stderrCollector.join();
 
             // if(isJudge && executionTimer != null) {
-            if (executionTimer != null) {
-                executionTimer.stopTimer();
-            } else {
-                // SOMEDAY LOG - why are we logging this ?
-                log.config("validatorCall() executionTimer == null");
+            if (validatorExecutionTimer != null) {
+                validatorExecutionTimer.stopTimer();
             }
 
             if (validatorProcess != null) {
@@ -992,8 +993,8 @@ public class Executable extends Plugin implements IExecutable {
 
         } catch (Exception ex) {
             executionData.setExecutionException(ex);
-            if (executionTimer != null) {
-                executionTimer.stopTimer();
+            if (validatorExecutionTimer != null) {
+                validatorExecutionTimer.stopTimer();
             }
             log.log(Log.WARNING, "Exception running validator ", ex);
         }
