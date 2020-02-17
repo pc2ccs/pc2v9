@@ -600,9 +600,11 @@ public class Executable extends Plugin implements IExecutable {
         boolean passed = false;
         int testNumber = dataSetNumber + 1;
 
+        log.info(" "); //put space in the log for readability -- separate each test case
         log.info("  Test case " + testNumber + " execute, run " + run.getNumber());
 
         if (executeProgram(dataSetNumber) && isValidated()) {
+            log.info(" "); //space for readability in the log
             log.info("  Test case " + testNumber + " validate, run " + run.getNumber());
             passed = validateProgram(dataSetNumber);
 
@@ -731,6 +733,9 @@ public class Executable extends Plugin implements IExecutable {
         // SOMEDAY Handle the error messages better, log and put them before the user to
         // help with debugging
 
+        log.info(" ");
+        log.info("starting validation for test case " + dataSetNumber+1);
+        
         executionData.setValidationReturnCode(-1);
         executionData.setValidationSuccess(false);
 
@@ -762,7 +767,7 @@ public class Executable extends Plugin implements IExecutable {
 
                 // create the validator program file
                 if (!createFile(problemDataFiles.getOutputValidatorFile(), validatorUnpackName)) {
-                    log.info("Unable to create custom validator program " + validatorUnpackName);
+                    log.warning("Unable to create custom validator program " + validatorUnpackName);
                     setException("Unable to create custom validator program " + validatorUnpackName);
 
                     throw new SecurityException("Unable to create custom validator, check logs");
@@ -918,14 +923,18 @@ public class Executable extends Plugin implements IExecutable {
             //added per bug 1668
             validatorExecutionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI());
 
+            log.info("constructed new validator ExecuteTimer " + validatorExecutionTimer.toString());
             long startTime = System.currentTimeMillis();
-            Process validatorProcess = runProgram(cmdLine, msg, false);
+            Process validatorProcess = runProgram(cmdLine, msg, false, validatorExecutionTimer);
 
             if (validatorProcess == null) {
+                log.warning("validator process is null; stopping ExecuteTimer");
                 validatorExecutionTimer.stopTimer();
                 stderrlog.close();
                 stdoutlog.close();
                 return false;
+            } else {
+                log.info("created validator process " + getProcessID(validatorProcess));
             }
 
             // This reads from the stdout of the child process
@@ -939,6 +948,7 @@ public class Executable extends Plugin implements IExecutable {
             validatorExecutionTimer.setIOCollectors(stdoutCollector, stderrCollector);
             validatorExecutionTimer.setProc(validatorProcess);
 
+            log.info("starting validator IOCollectors");
             stdoutCollector.start();
             stderrCollector.start();
 
@@ -969,18 +979,22 @@ public class Executable extends Plugin implements IExecutable {
                 }
             }
 
+            log.info("waiting for validator IOCollectors to terminate...");
             stdoutCollector.join();
             stderrCollector.join();
 
             // if(isJudge && executionTimer != null) {
             if (validatorExecutionTimer != null) {
+                log.info("stopping validator ExecuteTimer");
                 validatorExecutionTimer.stopTimer();
             }
 
             if (validatorProcess != null) {
+                log.info("waiting for validator process to terminate...");
                 exitcode = validatorProcess.waitFor();
                 log.info("validator process returned exit code " + exitcode);
                 executionData.setExecuteExitValue(exitcode);
+                log.info("destroying validator process");
                 validatorProcess.destroy();
             }
 
@@ -1018,7 +1032,6 @@ public class Executable extends Plugin implements IExecutable {
 
         //check if the validator is using the "PC2 Validator Interface" Standard
         if (problem.isUsingPC2Validator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUsePC2ValidatorInterface())) {
-
 
             //it was using the PC2 Validator Interface, check the results file
             boolean fileThere = new File(prefixExecuteDirname(pc2InterfaceResultsFileName)).exists();
@@ -1619,6 +1632,7 @@ public class Executable extends Plugin implements IExecutable {
      * @return true if execution worked successfully.
      */
     protected boolean executeProgram(int dataSetNumber) {
+        
         boolean passed = false;
         String inputDataFileName = null;
 
@@ -1634,9 +1648,11 @@ public class Executable extends Plugin implements IExecutable {
                 log.log(Log.INFO, "Executing run " + run.getNumber() + " from " + run.getSubmitter().getTripletKey() + " test set " + testSetNumber);
             }
 
+            log.info("Constructing ExecuteTimer...");
             executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
 //            executionTimer.startTimer();    //TODO: why is this here?  method runProgram() (called below) starts the timer (which is where it should be done).
-
+            log.info("Created new ExecuteTimer: " + executionTimer.toString());
+            
             if (problem.getDataFileName() != null) {
                 if (problem.isReadInputDataFromSTDIN()) {
                     // we are using createTempFile just to get a temp name, not to avoid conflicts
@@ -1795,36 +1811,43 @@ public class Executable extends Plugin implements IExecutable {
 
             //start the program executing.  Note that runProgram() sets the "startTimeNanos" timestamp 
             /// immediately prior to actually "execing" the process.
-            process = runProgram(cmdline, "Executing...", autoStop);
+            log.info("starting team program...");
+            process = runProgram(cmdline, "Executing...", autoStop, executionTimer);
             
             //make sure we succeeded in getting the external process going
             if (process == null) {
+                log.warning("team program failed to start (runProgram() returned null process)");
+                log.info("stopping ExecuteTimer " + executionTimer.toString());
                 executionTimer.stopTimer();
                 stderrlog.close();
                 stdoutlog.close();
                 executionData.setExecuteSucess(false);
                 return false;
+            } else {
+                log.info("created new team process " + getProcessID(process));
             }
             
             //create a Timer to run the TLE kill task
+            log.info("constructing new TLE-Timer...");
             Timer timeLimitKillTimer = new Timer("TLE-Timer");
+            log.info("got new TLE-Timer: " + timeLimitKillTimer.toString());
             
             //create a TimerTask to kill the process if it exceeds the problem time limit
             TimerTask task = new TimerTask() {
                 public void run() {
                     
+                    log.info("running TLE-Timer kill task...");
+                    
                     //first step: stop the process from running further
                     if (executionTimer != null) {
+                        log.info("calling stopIOCollectors() in ExecuteTimer " + executionTimer.toString());
                         executionTimer.stopIOCollectors();
                     }
-                    //record stop information
-                    Date now = new Date();
-//                    System.out.println("Timer task to kill process fired at " + now );
-                    log.info("Timer task to kill submission execution process fired at " + now );
                     
                     //make sure the process is gone (the call to stopIOCollectors(), above, will call destroy() first --
                     // but only if the executionTimer is not null)
                     if (process != null) {
+                        log.info("calling process.destroy() for process " + getProcessID(process));
                         process.destroy();
                     }
                 }
@@ -1835,9 +1858,11 @@ public class Executable extends Plugin implements IExecutable {
             
             //schedule the TLE kill task with the Timer -- but only for judged runs (i.e., non-team runs)
             if (autoStop) {
+                log.info ("scheduling kill task with TLE-Timer with " + delay + " msec delay");
                 timeLimitKillTimer.schedule(task, delay);
             }
             
+            log.info("creating IOCollectors...");
             // Create a stream that reads from the stdout of the child process
             BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());
             // Create a stream that reads from the stderr of the child process
@@ -1848,9 +1873,12 @@ public class Executable extends Plugin implements IExecutable {
             IOCollector stderrCollector = new IOCollector(log, childError, stderrlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
 
             //store references to the collectors in the execution timer 
+            log.info("calling setIOCollectors() for ExecuteTimer " + executionTimer.toString());
             executionTimer.setIOCollectors(stdoutCollector, stderrCollector);
+            log.info("calling setProc(" + getProcessID(process) + ") in ExecuteTimer " + executionTimer.toString());
             executionTimer.setProc(process);
 
+            log.info("starting IOCollectors...");
             stdoutCollector.start();
             stderrCollector.start();
 
@@ -1885,6 +1913,7 @@ public class Executable extends Plugin implements IExecutable {
             //  (2) the collector is halted by the ExecuteTimer (either because the time limit was exceeded or the 
             //      operator presses the "Terminate" button), or
             //  (3) the collector collects maxFileSize input from the child process
+            log.info("waiting for IOCollectors to terminate...");
             stdoutCollector.join();
             stderrCollector.join();
 
@@ -1894,12 +1923,16 @@ public class Executable extends Plugin implements IExecutable {
             // output.  In all these cases we need to wait for the process to die.
             
             //wait for the process to finish
+            log.info("waiting for team process " + getProcessID(process) + " to exit...");
             int exitCode = process.waitFor();
             
             //timestamp the end of the process's execution
             endTimeNanos = System.nanoTime();
             
+            log.info("team process returned exit code " + exitCode);
+            
             //get rid of the TLE timer (whether the TLE-kill task has been fired or not)
+            log.info("cancelling TLE-Timer (note: this does not stop any already-running TLE-Timer tasks...)");
             timeLimitKillTimer.cancel();
             
 //            System.out.println("  Process run time was " + getExecutionTimeInMSecs() + "ms");
@@ -1911,18 +1944,19 @@ public class Executable extends Plugin implements IExecutable {
             boolean runTimeLimitWasExceeded = getExecutionTimeInMSecs() > problem.getTimeOutInSeconds()*1000 ;
             executionData.setRunTimeLimitExceeded(runTimeLimitWasExceeded);
  
-            log.info("Child process returned exit code " + exitCode);
             if (executionData.isRunTimeLimitExceeded()) {
                 log.info("Run exceeded problem time limit of " + problem.getTimeOutInSeconds() + " secs: actual run time = " + executionData.getExecuteTimeMS() + " msec;  Run = " + run);
             }
 
             boolean terminatedByOperator = false;
             if (executionTimer != null) {
+                log.info("stopping ExecuteTimer " + executionTimer.toString());
                 executionTimer.stopTimer();
                 terminatedByOperator = executionTimer.isTerminatedByOperator();
                 
             }
 
+            log.info("calling Process.destroy() on process " + getProcessID(process) );
             process.destroy();
 
             // if the process generated a Runtime Error and did NOT exceed time limit, add error msg to team output
@@ -2084,7 +2118,7 @@ public class Executable extends Plugin implements IExecutable {
 
             long startSecs = System.currentTimeMillis();
 
-            process = runProgram(cmdline, "Compiling...", false);
+            process = runProgram(cmdline, "Compiling...", false, executionTimer);
             if (process == null) {
                 executionTimer.stopTimer();
                 stderrlog.close();
@@ -2454,16 +2488,19 @@ public class Executable extends Plugin implements IExecutable {
      */
 
     /**
-     * Run a program with ExecutionTimer.
+     * This method accepts a String containing a command and exec's a new process running that command.
      * 
      * 
-     * @param cmdline
-     * @param msg
-     * @param autoStopExecution
-     * @return the process started.
+     * @param cmdline the command (program) to be executed as a new process
+     * @param msg a String to be displayed on the specified ExecuteTimer GUI (if the ExecuteTimer is not null)
+     * @param autoStopExecution a flag indicating whether the ExecuteTimer should stop (kill) the process when the timer expires
+     * @return the newly-started process.
      */
-    public Process runProgram(String cmdline, String msg, boolean autoStopExecution) {
-        process = null;
+    public Process runProgram(String cmdline, String msg, boolean autoStopExecution, ExecuteTimer myExecuteTimer) {
+        
+        log.info("entering runProgram() for command '" + cmdline + "'");
+        
+        Process newProcess = null;
         errorString = "";
 
         executeDirectoryName = getExecuteDirectoryName();
@@ -2475,18 +2512,26 @@ public class Executable extends Plugin implements IExecutable {
 
                 String[] env = null;
 
-                if (executionTimer != null) {
-                    executionTimer.setDoAutoStop(autoStopExecution);
-                    executionTimer.setTitle(msg);
+                if (myExecuteTimer != null) {
+                    log.info("Notifying ExecuteTimer " + myExecuteTimer.toString() + " to set doAutoStop " + autoStopExecution);
+                    myExecuteTimer.setDoAutoStop(autoStopExecution);
+                    myExecuteTimer.setTitle(msg);
                 }
 
                 startTimeNanos = System.nanoTime();
-                process = Runtime.getRuntime().exec(cmdline, env, runDir);
+                
+                log.info("Invoking Runtime.exec()");
+                newProcess = Runtime.getRuntime().exec(cmdline, env, runDir);
+                
+                log.info("Created new process with id " + getProcessID(newProcess));
+                
 
                 // if(isJudge && executionTimer != null) {
-                if (executionTimer != null) {
-                    executionTimer.setProc(process);
-                    executionTimer.startTimer();
+                if (myExecuteTimer != null) {
+                    log.info("Setting new process " + getProcessID(newProcess) + " in ExecuteTimer " + myExecuteTimer.toString());
+                    myExecuteTimer.setProc(newProcess);
+                    log.info("Starting ExecuteTimer");
+                    myExecuteTimer.startTimer();
                 }
                 
             } else {
@@ -2495,17 +2540,37 @@ public class Executable extends Plugin implements IExecutable {
             }
         } catch (IOException e) {
             errorString = e.getMessage();
-            log.config("Note: exec failed in RunProgram " + errorString);
+            log.config("Note: exec failed in runProgram() : " + errorString);
             executionData.setExecutionException(e);
             return null;
         } catch (Exception e) {
             errorString = e.getMessage();
-            log.log(Log.CONFIG, "Note: exec failed in RunProgram " + errorString, e);
+            log.log(Log.CONFIG, "Note: exec failed in runProgram() : " + errorString, e);
             executionData.setExecutionException(e);
             return null;
         }
 
-        return process;
+        return newProcess;
+    }
+
+    /**
+     * This method receives a {@link Process} object and returns the id of that Process.
+     * 
+     * TODO: currently the implementation of this method simply returns the toString() of the received
+     * Process object.  A future upgrade should use the Java 9 method Process.getProcessID() to obtain
+     * the actual platform-specific id of the Process.
+     *  
+     * @param theProcess the Process object who's ID is to be returned
+     * @return a String containing the id of the specified Process
+     */
+    private String getProcessID(Process theProcess) {
+        if (theProcess == null) {
+            return "null";
+        } else {
+
+            // TODO: return the actual process id instead of the toString()
+            return theProcess.toString();
+        }
     }
 
     /**

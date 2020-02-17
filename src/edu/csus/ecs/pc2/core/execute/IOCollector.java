@@ -61,6 +61,8 @@ public class IOCollector extends Thread {
      * Collects all output into outWriter
      */
     public void run() {
+        
+        log.info("starting IOCollector thread...");
         long offset = 0;
         int c;
         byte[] cbuf = new byte[32768];
@@ -105,6 +107,8 @@ public class IOCollector extends Thread {
         } catch (Exception ex) {
             log.log(Log.CONFIG, "ioCollector - Exception in run() ", ex);
         }
+        
+        log.info("IOCollector thread ended.");
     }
 
 }
