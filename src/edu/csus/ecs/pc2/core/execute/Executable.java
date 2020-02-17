@@ -600,9 +600,11 @@ public class Executable extends Plugin implements IExecutable {
         boolean passed = false;
         int testNumber = dataSetNumber + 1;
 
+        log.info(" "); //put space in the log for readability -- separate each test case
         log.info("  Test case " + testNumber + " execute, run " + run.getNumber());
 
         if (executeProgram(dataSetNumber) && isValidated()) {
+            log.info(" "); //space for readability in the log
             log.info("  Test case " + testNumber + " validate, run " + run.getNumber());
             passed = validateProgram(dataSetNumber);
 
