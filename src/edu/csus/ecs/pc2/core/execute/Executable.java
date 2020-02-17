@@ -919,7 +919,7 @@ public class Executable extends Plugin implements IExecutable {
             validatorExecutionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI());
 
             long startTime = System.currentTimeMillis();
-            Process validatorProcess = runProgram(cmdLine, msg, false);
+            Process validatorProcess = runProgram(cmdLine, msg, false, validatorExecutionTimer);
 
             if (validatorProcess == null) {
                 validatorExecutionTimer.stopTimer();
@@ -1795,7 +1795,7 @@ public class Executable extends Plugin implements IExecutable {
 
             //start the program executing.  Note that runProgram() sets the "startTimeNanos" timestamp 
             /// immediately prior to actually "execing" the process.
-            process = runProgram(cmdline, "Executing...", autoStop);
+            process = runProgram(cmdline, "Executing...", autoStop, executionTimer);
             
             //make sure we succeeded in getting the external process going
             if (process == null) {
@@ -2084,7 +2084,7 @@ public class Executable extends Plugin implements IExecutable {
 
             long startSecs = System.currentTimeMillis();
 
-            process = runProgram(cmdline, "Compiling...", false);
+            process = runProgram(cmdline, "Compiling...", false, executionTimer);
             if (process == null) {
                 executionTimer.stopTimer();
                 stderrlog.close();
@@ -2454,16 +2454,19 @@ public class Executable extends Plugin implements IExecutable {
      */
 
     /**
-     * Run a program with ExecutionTimer.
+     * This method accepts a String containing a command and exec's a new process running that command.
      * 
      * 
-     * @param cmdline
-     * @param msg
-     * @param autoStopExecution
-     * @return the process started.
+     * @param cmdline the command (program) to be executed as a new process
+     * @param msg a String to be displayed on the specified ExecuteTimer GUI (if the ExecuteTimer is not null)
+     * @param autoStopExecution a flag indicating whether the ExecuteTimer should stop (kill) the process when the timer expires
+     * @return the newly-started process.
      */
-    public Process runProgram(String cmdline, String msg, boolean autoStopExecution) {
-        process = null;
+    public Process runProgram(String cmdline, String msg, boolean autoStopExecution, ExecuteTimer myExecuteTimer) {
+        
+        log.info("entering runProgram() for command '" + cmdline + "'");
+        
+        Process newProcess = null;
         errorString = "";
 
         executeDirectoryName = getExecuteDirectoryName();
@@ -2475,18 +2478,26 @@ public class Executable extends Plugin implements IExecutable {
 
                 String[] env = null;
 
-                if (executionTimer != null) {
-                    executionTimer.setDoAutoStop(autoStopExecution);
-                    executionTimer.setTitle(msg);
+                if (myExecuteTimer != null) {
+                    log.info("Notifying ExecuteTimer " + myExecuteTimer.toString() + " to set doAutoStop " + autoStopExecution);
+                    myExecuteTimer.setDoAutoStop(autoStopExecution);
+                    myExecuteTimer.setTitle(msg);
                 }
 
                 startTimeNanos = System.nanoTime();
-                process = Runtime.getRuntime().exec(cmdline, env, runDir);
+                
+                log.info("Invoking Runtime.exec()");
+                newProcess = Runtime.getRuntime().exec(cmdline, env, runDir);
+                
+                log.info("Created new process with id " + getProcessID(newProcess));
+                
 
                 // if(isJudge && executionTimer != null) {
-                if (executionTimer != null) {
-                    executionTimer.setProc(process);
-                    executionTimer.startTimer();
+                if (myExecuteTimer != null) {
+                    log.info("Setting new process " + getProcessID(newProcess) + " in ExecuteTimer " + myExecuteTimer.toString());
+                    myExecuteTimer.setProc(newProcess);
+                    log.info("Starting ExecuteTimer");
+                    myExecuteTimer.startTimer();
                 }
                 
             } else {
@@ -2495,17 +2506,37 @@ public class Executable extends Plugin implements IExecutable {
             }
         } catch (IOException e) {
             errorString = e.getMessage();
-            log.config("Note: exec failed in RunProgram " + errorString);
+            log.config("Note: exec failed in runProgram() : " + errorString);
             executionData.setExecutionException(e);
             return null;
         } catch (Exception e) {
             errorString = e.getMessage();
-            log.log(Log.CONFIG, "Note: exec failed in RunProgram " + errorString, e);
+            log.log(Log.CONFIG, "Note: exec failed in runProgram() : " + errorString, e);
             executionData.setExecutionException(e);
             return null;
         }
 
-        return process;
+        return newProcess;
+    }
+
+    /**
+     * This method receives a {@link Process} object and returns the id of that Process.
+     * 
+     * TODO: currently the implementation of this method simply returns the toString() of the received
+     * Process object.  A future upgrade should use the Java 9 method Process.getProcessID() to obtain
+     * the actual platform-specific id of the Process.
+     *  
+     * @param theProcess the Process object who's ID is to be returned
+     * @return a String containing the id of the specified Process
+     */
+    private String getProcessID(Process theProcess) {
+        if (theProcess == null) {
+            return "null";
+        } else {
+
+            // TODO: return the actual process id instead of the toString()
+            return theProcess.toString();
+        }
     }
 
     /**
