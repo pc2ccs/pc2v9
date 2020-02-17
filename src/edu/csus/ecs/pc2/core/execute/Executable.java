@@ -733,6 +733,9 @@ public class Executable extends Plugin implements IExecutable {
         // SOMEDAY Handle the error messages better, log and put them before the user to
         // help with debugging
 
+        log.info(" ");
+        log.info("starting validation for test case " + dataSetNumber+1);
+        
         executionData.setValidationReturnCode(-1);
         executionData.setValidationSuccess(false);
 
@@ -764,7 +767,7 @@ public class Executable extends Plugin implements IExecutable {
 
                 // create the validator program file
                 if (!createFile(problemDataFiles.getOutputValidatorFile(), validatorUnpackName)) {
-                    log.info("Unable to create custom validator program " + validatorUnpackName);
+                    log.warning("Unable to create custom validator program " + validatorUnpackName);
                     setException("Unable to create custom validator program " + validatorUnpackName);
 
                     throw new SecurityException("Unable to create custom validator, check logs");
@@ -920,14 +923,18 @@ public class Executable extends Plugin implements IExecutable {
             //added per bug 1668
             validatorExecutionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI());
 
+            log.info("constructed new validator ExecuteTimer " + validatorExecutionTimer.toString());
             long startTime = System.currentTimeMillis();
             Process validatorProcess = runProgram(cmdLine, msg, false, validatorExecutionTimer);
 
             if (validatorProcess == null) {
+                log.warning("validator process is null; stopping ExecuteTimer");
                 validatorExecutionTimer.stopTimer();
                 stderrlog.close();
                 stdoutlog.close();
                 return false;
+            } else {
+                log.info("created validator process " + getProcessID(validatorProcess));
             }
 
             // This reads from the stdout of the child process
@@ -941,6 +948,7 @@ public class Executable extends Plugin implements IExecutable {
             validatorExecutionTimer.setIOCollectors(stdoutCollector, stderrCollector);
             validatorExecutionTimer.setProc(validatorProcess);
 
+            log.info("starting validator IOCollectors");
             stdoutCollector.start();
             stderrCollector.start();
 
@@ -971,18 +979,22 @@ public class Executable extends Plugin implements IExecutable {
                 }
             }
 
+            log.info("waiting for validator IOCollectors to terminate...");
             stdoutCollector.join();
             stderrCollector.join();
 
             // if(isJudge && executionTimer != null) {
             if (validatorExecutionTimer != null) {
+                log.info("stopping validator ExecuteTimer");
                 validatorExecutionTimer.stopTimer();
             }
 
             if (validatorProcess != null) {
+                log.info("waiting for validator process to terminate...");
                 exitcode = validatorProcess.waitFor();
                 log.info("validator process returned exit code " + exitcode);
                 executionData.setExecuteExitValue(exitcode);
+                log.info("destroying validator process");
                 validatorProcess.destroy();
             }
 
@@ -1020,7 +1032,6 @@ public class Executable extends Plugin implements IExecutable {
 
         //check if the validator is using the "PC2 Validator Interface" Standard
         if (problem.isUsingPC2Validator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUsePC2ValidatorInterface())) {
-
 
             //it was using the PC2 Validator Interface, check the results file
             boolean fileThere = new File(prefixExecuteDirname(pc2InterfaceResultsFileName)).exists();
@@ -1621,6 +1632,7 @@ public class Executable extends Plugin implements IExecutable {
      * @return true if execution worked successfully.
      */
     protected boolean executeProgram(int dataSetNumber) {
+        
         boolean passed = false;
         String inputDataFileName = null;
 
