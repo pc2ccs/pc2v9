@@ -1889,8 +1889,8 @@ public class Executable extends Plugin implements IExecutable {
                 log.info("Using STDIN from file " + inputDataFileName);
 
                 //create streams for input data file and stdin for the process
-                BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());
-                BufferedInputStream in = new BufferedInputStream(new FileInputStream(inputDataFileName));
+                BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());  //team's stdin stream
+                BufferedInputStream in = new BufferedInputStream(new FileInputStream(inputDataFileName));  //data file to read
                 
                 //copy bytes from input data file to process's stdin, 32K at a time
                 byte[] buf = new byte[32768];
@@ -1903,9 +1903,28 @@ public class Executable extends Plugin implements IExecutable {
                     log.info("Caught a " + e.getMessage() + " do not be alarmed.");
                 }
 
-                //close the input data file and process stdin streams
-                in.close();
-                out.close();
+                //close the input data file and process stdin streams if they're still open
+                // (note that they could have been implicitly closed because a timer killed the process to which they were connected,
+                // and that this in turn can throw IOException, at least in Java8; 
+                // see https://stackoverflow.com/questions/25175882/java-8-filteroutputstream-exception/)
+                try {
+                    if (in!=null) {  
+                        in.close();
+                    }
+                } catch (IOException e) {
+                    log.info("Caught (and ignoring) an IOException while closing the problem data file input stream "
+                            + " (this can happen if the team process was terminated by timer).");
+                }
+
+                try {
+                    if (out!=null) {
+                        out.close();
+                    }
+                } catch (IOException e) {
+                    log.info("Caught (and ignoring) an IOException while closing team stdin stream "
+                                    + " (this can happen if the team process was terminated by timer).");
+                }
+              
             }
 
             //wait (block this thread) until both IOCollectors terminate, which happens when either 
