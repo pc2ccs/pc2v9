@@ -733,8 +733,9 @@ public class Executable extends Plugin implements IExecutable {
         // SOMEDAY Handle the error messages better, log and put them before the user to
         // help with debugging
 
+        int testCase = dataSetNumber + 1;
         log.info(" ");
-        log.info("starting validation for test case " + dataSetNumber+1);
+        log.info("starting validation for test case " + testCase);
         
         executionData.setValidationReturnCode(-1);
         executionData.setValidationSuccess(false);
@@ -2517,7 +2518,7 @@ public class Executable extends Plugin implements IExecutable {
      */
     public Process runProgram(String cmdline, String msg, boolean autoStopExecution, ExecuteTimer myExecuteTimer) {
         
-        log.info("entering runProgram() for command '" + cmdline + "'");
+        log.info("entering runProgram() to execute command '" + cmdline + "'");
         
         Process newProcess = null;
         errorString = "";
@@ -2527,7 +2528,6 @@ public class Executable extends Plugin implements IExecutable {
         try {
             File runDir = new File(executeDirectoryName);
             if (runDir.isDirectory()) {
-                log.config("executing: '" + cmdline + "'");
 
                 String[] env = null;
 
@@ -2539,7 +2539,7 @@ public class Executable extends Plugin implements IExecutable {
 
                 startTimeNanos = System.nanoTime();
                 
-                log.info("Invoking Runtime.exec()");
+                log.info("Invoking Runtime.exec() to execute command '" + cmdline + "'");
                 newProcess = Runtime.getRuntime().exec(cmdline, env, runDir);
                 
                 log.info("Created new process with id " + getProcessID(newProcess));
