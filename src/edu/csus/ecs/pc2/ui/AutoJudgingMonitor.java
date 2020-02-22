@@ -454,10 +454,19 @@ public class AutoJudgingMonitor implements UIPlugin {
 
                 notifyMessager.updateStatusLabel("Run failed to compile");
 
-                ElementId elementId = contest.getJudgements()[1].getElementId();
+                Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "CE");
+                String judgementString = "No - Compilation Error"; // default
+                ElementId elementId = null;
+                if (judgement != null) {
+                    judgementString = judgement.getDisplayName();
+                    elementId = judgement.getElementId();
+                } else {
+                    // TODO: find judgement string by name (from somewhere other than the judgements list)
+                    elementId = contest.getJudgements()[1].getElementId();
+                }
+
                 judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true, true);
-                // TODO this needs to be flexible
-                judgementRecord.setValidatorResultString("No - Compilation Error");
+                judgementRecord.setValidatorResultString(judgementString);
 
             } else if (executionData.isValidationSuccess()) {
 

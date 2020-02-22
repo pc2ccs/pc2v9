@@ -36,6 +36,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -583,40 +584,52 @@ public class Executable extends Plugin implements IExecutable {
             return executionData.getExecutionException().getMessage();
         } else if (executionData.getValidationResults() != null) {
             return executionData.getValidationResults();
+        } else if (executionData.getExecuteExitValue()!=0) {
+            return "Runtime error; exit code " + executionData.getExecuteExitValue() ;
         }
 
         return "Undetermined, developer note need another condition in getFailureReason()";
     }
 
     /**
-     * Executes the current run against a specified data set, then if the problem is marked as being validated also invokes the appropriate validator to validate the program (run) output.
+     * Executes the current run against a specified data set, then if the problem is marked as being validated also invokes 
+     * the appropriate validator to validate (evaluate the correctness of) the program (run) output.  
+     * However, validation is not invoked if an error occurs during the execution phase or if executing the run results in 
+     * either a time limit exceeded or a runtime error.
      * 
      * @param dataSetNumber
      *            zero-based data set number
-     * @return true if the problem was to be validated and the validator indicates the problem was solved
+     * @return true if the current submission was successfully executed using the specified data set AND the validator indicates
+     *              that the output of the program was correct; returns false if any of the following happens:  there was an error
+     *              (such as an exception thrown) during execution of the submission; the submission either hit the time limit for 
+     *              the problem or generated a runtime error during execution; the validator indicates that the program output is
+     *              not correct, or if there was an error during the attempt to validate the program output.  
      */
     private boolean executeAndValidateDataSet(int dataSetNumber) {
 
-        boolean passed = false;
+        boolean submissionIsCorrect = false;
         int testNumber = dataSetNumber + 1;
 
         log.info(" "); //put space in the log for readability -- separate each test case
         log.info("  Test case " + testNumber + " execute, run " + run.getNumber());
 
-        if (executeProgram(dataSetNumber) && isValidated()) {
+        boolean proceedToValidation = executeProgram(dataSetNumber);
+        
+        if (proceedToValidation && isValidated()) {
             log.info(" "); //space for readability in the log
             log.info("  Test case " + testNumber + " validate, run " + run.getNumber());
-            passed = validateProgram(dataSetNumber);
+            submissionIsCorrect = validateProgram(dataSetNumber);
 
             if (!ExecuteUtilities.didTeamSolveProblem(executionData)) {
-                passed = false;
+                submissionIsCorrect = false;
             }
 
         } else {
-            passed = false;
+            //if we get here we are not going to validate so there's no way we can declare the submission is correct
+            submissionIsCorrect = false;
         }
         
-        //at this point, "passed" is true if: 
+        //at this point, "submisssionIsCorrect" is true if: 
         //  the submitted program was successfully executed 
         //  AND the problem has a validator 
         //  AND method validateProgram() returned true (indicating the problem was correctly solved for the specified test case) 
@@ -640,19 +653,19 @@ public class Executable extends Plugin implements IExecutable {
             reason = "; validator returns: " + reason;
         }
 
-        log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " " + reason);
+        log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(submissionIsCorrect) + " " + reason);
 
         JudgementRecord record = JudgementUtilites.createJudgementRecord(contest, run, executionData, executionData.getValidationResults());
 
         // Judgement judgement = getContest().getJudgement(record.getJudgementId());
         // log.info(" Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " judgement = " + judgement);
 
-        RunTestCase runTestCaseResult = new RunTestCase(run, record, testNumber, passed);
+        RunTestCase runTestCaseResult = new RunTestCase(run, record, testNumber, submissionIsCorrect);
         runTestCaseResult.setElapsedMS(executionData.getExecuteTimeMS());
         runTestCaseResult.setContestTimeMS(getContest().getContestTime().getElapsedMS());
         runTestCaseResult.setValidated(isValidated());
         run.addTestCase(runTestCaseResult);
-        return passed;
+        return submissionIsCorrect;
     }
 
     /**
@@ -901,7 +914,8 @@ public class Executable extends Plugin implements IExecutable {
 
         } catch (Exception e) {
             log.log(Log.INFO, "Exception while constructing validator command line ", e);
-            executionData.setExecutionException(e);
+            //TODO: this shouldn't be setting ExecutionException; it needs to set a (currently undefined) separate field such as "ValidationException"
+//            executionData.setExecutionException(e);
             throw new SecurityException(e);
         }
 
@@ -911,10 +925,12 @@ public class Executable extends Plugin implements IExecutable {
         // execute phase might wake up and kill the timer/IOCollectors referenced by the global "executionTimer" variable.
         // See bug 1668 for details.
         ExecuteTimer validatorExecutionTimer = null;
+        BufferedOutputStream stdoutlog = null;
+        BufferedOutputStream stderrlog = null;
         try {
 
-            BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME), false));
-            BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDERR_FILENAME), false));
+            stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME), false));
+            stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDERR_FILENAME), false));
 
             String msg = "Working...";
             if (problem.isShowValidationToJudges()) {
@@ -931,6 +947,8 @@ public class Executable extends Plugin implements IExecutable {
             if (validatorProcess == null) {
                 log.warning("validator process is null; stopping ExecuteTimer");
                 validatorExecutionTimer.stopTimer();
+                String errMsg = "Validator failed to run using command '" + cmdLine + "'\n";
+                stderrlog.write(errMsg.getBytes());
                 stderrlog.close();
                 stdoutlog.close();
                 return false;
@@ -956,7 +974,7 @@ public class Executable extends Plugin implements IExecutable {
             // // waiting for the process to finish execution...
             // executionData.setValidationReturnCode(process.waitFor());
 
-            // if CLICS validator interface, redirect team output to STDIN
+            // if CLICS-style validator interface, redirect team output to STDIN
             if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseClicsValidatorInterface())) {
 
                 String teamOutputFileName = getTeamOutputFilename(dataSetNumber);
@@ -994,24 +1012,32 @@ public class Executable extends Plugin implements IExecutable {
                 log.info("waiting for validator process to terminate...");
                 exitcode = validatorProcess.waitFor();
                 log.info("validator process returned exit code " + exitcode);
-                executionData.setExecuteExitValue(exitcode);
+                executionData.setValidationReturnCode(exitcode);
                 log.info("destroying validator process");
                 validatorProcess.destroy();
             }
 
-            stdoutlog.close();
-            stderrlog.close();
 
             executionData.setvalidateTimeMS(System.currentTimeMillis() - startTime);
             executionData.setValidationStdout(new SerializedFile(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME)));
             executionData.setValidationStderr(new SerializedFile(prefixExecuteDirname(VALIDATOR_STDERR_FILENAME)));
 
         } catch (Exception ex) {
-            executionData.setExecutionException(ex);
+            //TODO: this shouldn't be setting ExecutionException; it needs to set a (currently undefined) separate field such as "ValidationException"
+//            executionData.setExecutionException(ex);
             if (validatorExecutionTimer != null) {
                 validatorExecutionTimer.stopTimer();
             }
             log.log(Log.WARNING, "Exception running validator ", ex);
+            
+        } finally {
+            try {
+                stdoutlog.close();
+                stderrlog.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
         //When we get here the Validator external process has completed (one way or the other...)
@@ -1053,16 +1079,20 @@ public class Executable extends Plugin implements IExecutable {
                     // JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
                 }
             } catch (Exception ex) {
-                executionData.setExecutionException(ex);
+                //TODO: this shouldn't be setting ExecutionException; it needs to set a (currently undefined) separate field such as "ValidationException"
+//                executionData.setExecutionException(ex);
                 log.log(Log.WARNING, "Exception while reading results file '" + pc2InterfaceResultsFileName + "'", ex);
                 throw new SecurityException(ex);
-            } finally {
-
-                if (executionData.isRunTimeLimitExceeded()) {
-                    executionData.setValidationResults("No - Time Limit Exceeded");
-                    executionData.setValidationSuccess(true);
-                }
             }
+            
+            //the following code shouldn't be here -- the validateProgram method should never be called if there has already been a TLE
+//            } finally {
+//
+//                if (executionData.isRunTimeLimitExceeded()) {
+//                    executionData.setValidationResults("No - Time Limit Exceeded");
+//                    executionData.setValidationSuccess(true);
+//                }
+//            }
         } else if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseClicsValidatorInterface())) {
             //check if the Validator was using the "CLICS Validator Interface" Standard
 
@@ -1079,19 +1109,22 @@ public class Executable extends Plugin implements IExecutable {
                 }
 
             } catch (Exception e) {
-
-                executionData.setExecutionException(e);
+                //TODO: this shouldn't be setting ExecutionException; 
+                // it needs to set a (currently undefined) separate field such as "ValidationException"
+//                executionData.setExecutionException(e);
                 log.log(Log.WARNING, "Exception while reading validator results file '" + clicsInterfaceFeedbackDirName + "'", e);
                 throw new SecurityException(e);
 
-            } finally {
-
-                if (executionData.isRunTimeLimitExceeded()) {
-                    executionData.setValidationResults("No - Time Limit Exceeded"); //TODO: this string should NOT be hard-coded here!
-                    executionData.setValidationSuccess(true);
-                }
-
-            }
+            } 
+            //ditto above
+//            finally {
+//
+//                if (executionData.isRunTimeLimitExceeded()) {
+//                    executionData.setValidationResults("No - Time Limit Exceeded"); //TODO: this string should NOT be hard-coded here!
+//                    executionData.setValidationSuccess(true);
+//                }
+//
+//            }
         }
 
         return executionData.isValidationSuccess();
@@ -1634,7 +1667,7 @@ public class Executable extends Plugin implements IExecutable {
      */
     protected boolean executeProgram(int dataSetNumber) {
         
-        boolean passed = false;
+        boolean proceedToValidation = false;
         String inputDataFileName = null;
 
         // a one-based test data set number
@@ -2037,7 +2070,9 @@ public class Executable extends Plugin implements IExecutable {
                     log.log(Log.WARNING, "Unable to append to file " + teamsOutputFilename, e);
                 }
             }
-            passed = true;
+
+            proceedToValidation = true;
+            
         } catch (Exception e) {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
@@ -2048,7 +2083,33 @@ public class Executable extends Plugin implements IExecutable {
             throw new SecurityException(e);
         }
 
-        return passed;
+        if (executionData.isRunTimeLimitExceeded()) {
+
+            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "TLE");
+            String judgementString = "No - Time Limit Exceeded"; // default
+            if (judgement != null) {
+                judgementString = judgement.getDisplayName();
+            }
+
+            executionData.setValidationResults(judgementString);
+            executionData.setValidationSuccess(true);
+            proceedToValidation = false;
+        }
+
+        if (executionData.getExecuteExitValue() != 0) {
+            
+            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "RTE");
+            String judgementString = "No - Run-time Error"; // default
+            if (judgement != null) {
+                judgementString = judgement.getDisplayName();
+            }
+
+            executionData.setValidationResults(judgementString);
+            executionData.setValidationSuccess(true);
+            proceedToValidation = false;
+        }
+        
+        return proceedToValidation;
     }
 
     private boolean isAppendStderrToStdout() {

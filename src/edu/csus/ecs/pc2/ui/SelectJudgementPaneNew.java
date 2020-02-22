@@ -942,12 +942,25 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
         ExecutionData eData = executable.getExecutionData();
         if (eData != null && !eData.isCompileSuccess()) {
-            String results = "No - Compilation Error";
-            validatorAnswer.setText(results);
+     
             showValidatorControls(true);
-            ElementId elementId = getValidatorResultElementID(results);
-            judgementRecord = new JudgementRecord(elementId, run.getSubmitter(), false, true);
-            judgementRecord.setValidatorResultString(results);
+            
+            Judgement judgement = JudgementUtilites.findJudgementByAcronym(getContest(), "CE");
+            String judgementString = "No - Compilation Error"; // default
+            ElementId elementId = null;
+            if (judgement != null) {
+                judgementString = judgement.getDisplayName();
+                elementId = judgement.getElementId();
+            } else {
+                // TODO: find judgement string by name (from somewhere other than the judgements list)
+                elementId = getContest().getJudgements()[1].getElementId();
+            }
+
+            validatorAnswer.setText(judgementString);
+            
+            judgementRecord = new JudgementRecord(elementId, getContest().getClientId(), false, true, true);
+
+            judgementRecord.setValidatorResultString(judgementString);
 
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
         }
