@@ -86,6 +86,8 @@ public class Executable extends Plugin implements IExecutable {
     private ProblemDataFiles problemDataFiles = null;
 
     private ClientId executorId = null;
+    
+    private boolean killedByTimer ;
 
     /**
      * Directory where main file is found
@@ -1867,6 +1869,9 @@ public class Executable extends Plugin implements IExecutable {
             log.info("got new TLE-Timer: " + timeLimitKillTimer.toString());
             
             //create a TimerTask to kill the process if it exceeds the problem time limit
+            
+            killedByTimer = false ;
+            
             TimerTask task = new TimerTask() {
                 public void run() {
                     
@@ -1884,6 +1889,8 @@ public class Executable extends Plugin implements IExecutable {
                         log.info("calling process.destroy() for process " + getProcessID(process));
                         process.destroy();
                     }
+                    
+                    killedByTimer = true;
                 }
             };
             
@@ -2096,7 +2103,7 @@ public class Executable extends Plugin implements IExecutable {
             proceedToValidation = false;
         }
 
-        if (executionData.getExecuteExitValue() != 0) {
+        if (executionData.getExecuteExitValue() != 0  &&  !killedByTimer) {
             
             Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "RTE");
             String judgementString = "No - Run-time Error"; // default
