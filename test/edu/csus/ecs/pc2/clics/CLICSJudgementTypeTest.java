@@ -20,7 +20,7 @@ public class CLICSJudgementTypeTest extends AbstractTestCase{
         assertFalse("'No Output' should return isBig5() = false", jt2.isBig5());
         
         CLICSJudgementType jt3 = new CLICSJudgementType("JE", "Judging Error", true, false);
-        assertEquals("'Judging Error' does not map to Undefined: ", "UNDEFINED", jt3.getBig5EquivalentAcronym()) ;
+        assertEquals("'Judging Error' does not map to Undefined: ", "UNDEFINED (JE)", jt3.getBig5EquivalentAcronym()) ;
         assertFalse("'Judging Error' should return isBig5() = false", jt3.isBig5());
 
         CLICSJudgementType jt4 = new CLICSJudgementType("NEVER", "Never heard of it", true, false);
