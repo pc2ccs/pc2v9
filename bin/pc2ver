@@ -8,6 +8,6 @@
 
 . `dirname $0`/pc2env
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true -cp $libdir/* edu.csus.ecs.pc2.VersionInfo
+java -Djdk.crypto.KeyAgreement.legacyKDF=true -cp "$libdir/*" edu.csus.ecs.pc2.VersionInfo
 
 # eof pc2ver $Id$ 
