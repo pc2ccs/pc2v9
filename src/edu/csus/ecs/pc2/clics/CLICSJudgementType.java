@@ -100,9 +100,9 @@ public class CLICSJudgementType {
         RIO  ("RIO:RTE"), //Runtime error -- Incomplete Output (crashing and also incomplete output)        [Maps to RTE]
         RNO  ("RNO:RTE"), //Runtime error -- No Output (crashing and also no output)                        [Maps to RTE]
         CTL  ("CTL:CE"), //Compile Time Limit exceeded     [Maps to CE]
-        JE   ("JE:UNDEFINED"),  //Judging Error (something went wrong with the system)            [No defined mapping]
-        SE   ("SE:UNDEFINED"),  //Submission Error (something went wrong with the submission)     [No defined mapping]
-        CS   ("CS:UNDEFINED");  //Contact Staff (something went wrong)                            [No defined mapping]
+        JE   ("JE:UNDEFINED (JE)"),  //Judging Error (something went wrong with the system)            [No defined mapping]
+        SE   ("SE:UNDEFINED (SE)"),  //Submission Error (something went wrong with the submission)     [No defined mapping]
+        CS   ("CS:UNDEFINED (CS)");  //Contact Staff (something went wrong)                            [No defined mapping]
         
         private final String acronyms;
 

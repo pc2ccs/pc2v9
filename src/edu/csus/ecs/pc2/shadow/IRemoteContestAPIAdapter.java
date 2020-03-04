@@ -61,6 +61,22 @@ public interface IRemoteContestAPIAdapter {
      */
     public List<IFile> getRemoteSubmissionFiles(String submissionID) ;
 
+    /**
+     * Returns a {@link List} of PC2 {@link IFile} objects associated with 
+     * submission on the remote CCS found at the specified URL.
+     * 
+     * The submission files are obtained by doing a GET operation on the specified URL with no modification.
+     * 
+     * @param submissionFilesURL a URL from which files are to be fetched from the remote system
+     * 
+     * @return a List of IFile objects containing the files from the specified URL in 
+     *          the remote system
+     * 
+     * NOTE: the following is the eventual prototype to be used to extend the Interface once 
+     * the "Primary CCS URL" is split into "BaseURL" and "ContestID" components.  Until then it
+     * has been commented out so that the Interface spec doesn't change.
+     */
+//    public List<IFile> getRemoteSubmissionFiles(URL submissionFilesURL) ;   
     
     /**
      * Test connection to remote CCS API.

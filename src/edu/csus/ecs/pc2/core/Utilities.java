@@ -308,6 +308,40 @@ public final class Utilities {
         return out;
 
     }
+    
+
+    /**
+     * Load string array with file contents.
+     * 
+     * @param filename
+     * @param maximumLinesReturned minimum value is 1.
+     * @return lines from file
+     * @throws IOException
+     */
+    public static String[] loadFile(String filename, long maximumLinesReturned) throws IOException {
+        List<String> lines = new ArrayList<>();
+
+        if (filename == null) {
+            throw new IllegalArgumentException("filename is null");
+        }
+
+        if (new File(filename).exists()) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF8"));
+            
+            long lineCount = 0;
+            
+            String line = in.readLine();
+            while (lineCount < maximumLinesReturned && line != null) {
+                lines.add(line);
+                line = in.readLine();
+                lineCount ++;
+            }
+            in.close();
+            in = null;
+        }
+
+        return (String[]) lines.toArray(new String[lines.size()]);
+    }
 
     /**
      * Get Current Working Directory.
@@ -1791,4 +1825,5 @@ public final class Utilities {
             return Long.MIN_VALUE;
         }
     }
+  
 }

@@ -17,14 +17,21 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IFile;
+import edu.csus.ecs.pc2.core.model.RunUtilities;
+import edu.csus.ecs.pc2.ui.ShadowComparePane;
 
 /**
  * This class listens for submission events in the event feed input stream from a remote CCS CLICS Contest API Event Feed.
  * 
+ * Events of type "submissions" result in fetching the submission files from the remote CCS and submitting those files
+ * as a submission to the local (Shadow) PC2 system.
+ * 
+ * Events of type "judgements" result in updating a global map of judgements received from the remote system; this map
+ * is subsequently used by the {@link ShadowComparePane} class to display comparisons between local (shadow) judgements
+ * and the corresponding judgements from the remote CCS.
  * 
  * @author pc2@ecs.csus.edu
  *
@@ -45,16 +52,18 @@ public class RemoteEventFeedMonitor implements Runnable {
     //a list of submissions which are the only ones we are interested in if respectSubmissionFilter is true
     private String [] submissionFilterIDs = {
 
-            "286",
-            "414",
-            "908",
-            "1414",
-            "1437",
-            "1460",
-            "1464",
-            "1481",
-            "1531",
-            "1611"
+            /* PacNW submissions of interest
+             * "286", "414", "908", "1414", "1437", "1460", "1464", "1481", "1531", "1611"
+             */        
+            
+            /* DOMJudge SystestA submissions of interest
+             */
+            "248603", //cpp, first judgement (which is null)
+            "248610", //cpp, different team
+            "248611", //java
+            "248609", //py2
+            "249388"  //py3
+            
         } ;
     
     //a list form of the above, created in the class constructor
@@ -111,20 +120,21 @@ public class RemoteEventFeedMonitor implements Runnable {
             
         } else {
 
-            //wrap the event stream (which consists of newline-delimited character strings representing events)
-            // in a BufferedReader
             try {
 
+                //wrap the event stream (which consists of newline-delimited character strings representing events)
+                // in a BufferedReader
                 BufferedReader reader = new BufferedReader(new InputStreamReader(remoteInputStream));
 
+                //read the next event from the event feed stream
                 String event = reader.readLine();
 
                 while ((event != null) && keepRunning) {
 
                     //skip blank lines and any that do not start/end with "{...}"
-                    if ( event.length()>0 && event.startsWith("{") && event.endsWith("}") ) {
+                    if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
                         
-//                        System.out.println("Got event string: " + event);
+                        System.out.println("Got event string: " + event);
 //                        log.log(Level.INFO, "Got event string: " + event);
                         try {
 
@@ -157,77 +167,116 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     //process a submission event
                                     try {
 //                                        log.log(Level.INFO, "Processing " + eventType + " event");
-                                        
+
                                         //get a map of the data comprising the submission
                                         Map<String, Object> submissionEventDataMap = (Map<String, Object>) eventMap.get("data");
 
-                                        //check if the current submission is to be ignored due to filtering
+                                        //get the submission ID out of the submission event data map
                                         String submissionID = (String) submissionEventDataMap.get("id");
+                                        
+                                        //check if the current submission is to be ignored due to filtering
                                         if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
-                                            
+
                                             log.info("Ignoring submission " + submissionID + " due to filter");
                                             event = reader.readLine();
                                             continue;
                                         }
-                                        
-                                        //convert metadata into ShadowRunSubmission
+
+                                        //make sure we haven't seen this submission before (this could happen if
+                                        // we've done a restart but already processed this submission on a prior shadow run)
+                                        if (RunUtilities.isAlreadySubmitted(pc2Controller.getContest(),submissionID) ) {
+                                            
+                                            log.info("Ignoring submission " + submissionID + " due to it already having been submitted");
+                                            event = reader.readLine();
+                                            continue;
+                                        }
+
+                                        //convert submission data into a ShadowRunSubmission object
                                         ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
 
                                         if (runSubmission == null) {
                                             log.log(Level.SEVERE, "Error parsing submission data: " + event);
                                             throw new Exception("Error parsing submission data " + event);
                                         } else {
-                                            
+
 //                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
                                             System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
 
+                                            //construct the override values to be used for the shadow submission
                                             long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
                                             long overrideSubmissionID = Utilities.stringToLong(runSubmission.getId());
-                                            
-                                            String defaultSubmissionFilesURL = "/submissions/" + runSubmission.getId() + "/files";
-                                            
-                                            String submissionFilesURL = null;
-                                            
-                                            List<Map<String, String>> filesList = runSubmission.getFiles();
-                                            
-                                            if (filesList.size() == 1){
-                                                Map<String, String> fileMap = filesList.get(0);
-                                                if (fileMap.size() == 1){
-                                                    String filesPath = fileMap.get(fileMap.keySet().iterator().next());
-                                                    if (!StringUtilities.isEmpty(filesPath)){
-                                                        submissionFilesURL = filesPath;
-                                                    }
-                                                }
-                                            }
 
-                                            if (StringUtilities.isEmpty(submissionFilesURL)) {
+    //The entire following block of commented-out code is intended to be used to support fetching submission files from the remote system by using the
+    // "href" element found within the "files" element of a submission event.  However, the href element cannot be properly used
+    // until the "Primary CCS URL" property is split into "Primary CCS BaseURL" and "Primary CCS ContestID Path" elements.  
+    // Until that update is made throughout the code, the following block is commented out and we're using a default URL
+    // created by calling the RemoteContestAPIAdapter with just the submissionID; the RemoteContestAPIAdapter constructs the
+    // default URL by appending "/submissions/<submissionID>/files" to the current value of "Primary CCS URL" and then
+    // fetches the submission files from that URL.
+    // See also the comment in interface IRemoteContestAPIAdapter; the additional (commented-out) method there must be uncommented
+    // for the following block of code to work.
 
-                                                submissionFilesURL = defaultSubmissionFilesURL;
-                                                System.err.println("Warning: could not find submission file URL for id = " + runSubmission.getId() + //
-                                                        "using '" + submissionFilesURL + "' " + //
-                                                        "event=" + event);
-                                            }
+//                                            //define the path to where the remote zip file containing the submissions files can be found
+//                                            String defaultSubmissionFilesURLString = "/submissions/" + runSubmission.getId() + "/files"; //our default path
+//                                            String submissionFilesURLString = null;  //this one we hope to pull out of the submission event, below
+//                                            
+//                                            
+//                                            //Note about the next set of code: the CLICS ContestAPI spec says that a submission event has numerous fields, 
+//                                            // one of which is "files".  The value found in the "files" element is specified as an ARRAY of "zip file references",
+//                                            // where each "zip file reference" has the form  {href:path/to/zip,mime:application/zip}.  Thus there
+//                                            // can in principle be multiple zip files on the remote system, with each zip file containing multiple files.
+//                                            // In practice however there is no known implementation where there will be more than one such "zip file reference",
+//                                            // so what we do is fetch the array (as a List, where each list element is one "zip file reference" (consisting of
+//                                            // two parts:  href:path and mime:zip)), then pull the first element out of the array (List), pull the href
+//                                            // out of that Map, and use that to form the URL to fetch the zip file containing the submission files.  *whew*
+//                          
+//                                            //get from the ShadowRunSubmission object the list of references to zip files.
+//                                            List<Map<String, String>> filesList = runSubmission.getFiles();
+//                                            
+//                                            //make sure we got a valid list from the submission
+//                                            if (filesList.size() >= 1){
+//                                                
+//                                                //get out of the list the first zip file reference (which is a map containing "href:path" and "mime:zip" elements)
+//                                                Map<String, String> zipFileReferenceMap = filesList.get(0);
+//                                                
+//                                                //make sure we got a valid zip file reference map (the map should contain exactly "href" and "mime" keys)
+//                                                if (zipFileReferenceMap.size() == 2){
+//                                                    String filesPath = zipFileReferenceMap.get("href");
+//                                                    if (!StringUtilities.isEmpty(filesPath)){
+//                                                        Note: the following method getRemoteBaseURL() needs to be coded -- after
+//                                                        the split of Primary CCS URL into "BaseURL" and "ContestIDPath" has been done.
+//                                                        submissionFilesURLString = getRemoteBaseURL() + "/" + filesPath;
+//                                                    }
+//                                                }
+//                                            }
+//
+//                                            //check if the above code was able to obtain a URL for the submission files zip
+//                                            if (StringUtilities.isEmpty(submissionFilesURLString)) {
+//
+//                                                //no, we couldn't get a URL from the event; use our default
+//                                                submissionFilesURLString = defaultSubmissionFilesURLString;
+//                                                System.err.println("Warning: could not find submission file URL for id = " + runSubmission.getId() + //
+//                                                        " in submission event; using '" + submissionFilesURLString + "' " + //
+//                                                        "(event=" + event + ")");
+//                                            }
+//
+//                                            List<IFile> files = null;
+//
+//                                            System.out.println("debug 22 fetching file from URL "+submissionFilesURLString);
+//                                            //get the files from the remote URL
+//                                            URL submissionFilesURL = new URL(submissionFilesURLString);
+//                                            files = remoteContestAPIAdapter.getRemoteSubmissionFiles(submissionFilesURL);
+//
+//                                            if (files == null){
+//                                                System.err.println("Unable to retrieve submission files using "+submissionFilesURL);
+//                                            } else {
+//                                                System.out.println("debug 22 getRemoteSubmissionFiles GOT "+files.size()+" files");
+//                                            }
 
+                                            //this block is a temporary substitute for the above commented-out block
                                             List<IFile> files = null;
-                                            
-                                            if ( remoteContestAPIAdapter instanceof RemoteContestAPIAdapter){
-                                                
-                                                System.out.println("debug 22 fetching file from URL "+submissionFilesURL);
-                                                
-                                                files = ((RemoteContestAPIAdapter)remoteContestAPIAdapter).getRemoteSubmissionFilesNew(submissionFilesURL);
-                                                
-                                                if (files == null){
-                                                    System.err.println("No files retrieved using "+submissionFilesURL);
-                                                } else {
-                                                    
-                                                    System.out.println("debug 22 getRemoteSubmissionFilesNew GOT "+files.size()+" files");
-                                                }
-                                                
-                                            } else {
-                                                System.out.println("debug 22 get files using id "+overrideSubmissionID);
-                                                files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
-                                            }
-                                            
+                                            System.out.println("debug 22 get files using id "+overrideSubmissionID);
+                                            files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
 
                                             IFile mainFile = null;
                                             if (files.size() <= 0) {
@@ -260,7 +309,8 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     }
 
                                 } else if ("judgements".equals(eventType)) {
-//                                    System.out.println("debug 22 found judgement event");
+                                    
+                                    System.out.println("debug 22 recognized judgement event");
 //                                    log.log(Level.INFO, "Found " + eventType + " event");
 
                                     //process a judgement event
@@ -299,6 +349,7 @@ public class RemoteEventFeedMonitor implements Runnable {
      
                                                 // this is a judgement we want; save it in the global judgements map under a key of
                                                 // the judgement ID with value "submissionID:judgement"
+                                                System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");                                                
                                                 getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
                                             }
                                         }
@@ -354,27 +405,17 @@ public class RemoteEventFeedMonitor implements Runnable {
         return remoteJudgements;
     }
 
-    //This method was replaced by the following method which returns a Map<String,Object>.
-    // This was done because the Jackson ObjectMapper recursively reads objects; if an element
-    // is comprised of a sub-element then it returns an object rather than a String representing that
-    // object. 
-//    @SuppressWarnings("unchecked")
-//    protected static Map<String, String> getMap(String jsonString) {
-//        
-//        if (jsonString == null){
-//            return null;
-//        }
-//        
-//        ObjectMapper mapper = new ObjectMapper();
-//        try {
-//            Map<String, String> map = mapper.readValue(jsonString, Map.class);
-//            return map;
-//        } catch (IOException e) {
-//            e.printStackTrace(System.err);
-//            return null;
-//        }
-//    }
  
+    /**
+     * Returns a Map containing the key/value elements in the specified JSON string.
+     * This method uses the Jackson {@link ObjectMapper} to perform the conversion from the JSON
+     * string to a Map.  Note that the ObjectMapper recurses for nested JSON elements, returning
+     * a appropriate Object in the Map under the corresponding key string.
+     * 
+     * @param jsonString a JSON string to be converted to a Map
+     * @return a Map mapping the keys in the JSON string to corresponding values, or null if the input
+     *          String is null or if an exception occurs while converting the JSON to a Map.
+     */
     @SuppressWarnings("unchecked")
     protected static Map<String, Object> getMap(String jsonString) {
         

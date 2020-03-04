@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Properties;
 import java.util.TimeZone;
 
 import javax.swing.BorderFactory;
@@ -34,6 +35,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
+import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -863,6 +865,13 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         // getManualRunResultsPanel().clear();
         setEnabledButtonStatus(false);
         executable.execute();
+        
+        // Dump execution results files to log
+        String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
+        Problem juProblem = getContest().getProblem(run.getProblemId());
+        ClientId clientId = getContest().getClientId();
+        List<Judgement> judgements = JudgementUtilites.getLastTestCaseJudgementList(getContest(), run);
+        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, juProblem, judgements, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         if (executionData != null && executionData.getExecutionException() != null) {
@@ -933,12 +942,25 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
         ExecutionData eData = executable.getExecutionData();
         if (eData != null && !eData.isCompileSuccess()) {
-            String results = "No - Compilation Error";
-            validatorAnswer.setText(results);
+     
             showValidatorControls(true);
-            ElementId elementId = getValidatorResultElementID(results);
-            judgementRecord = new JudgementRecord(elementId, run.getSubmitter(), false, true);
-            judgementRecord.setValidatorResultString(results);
+            
+            Judgement judgement = JudgementUtilites.findJudgementByAcronym(getContest(), "CE");
+            String judgementString = "No - Compilation Error"; // default
+            ElementId elementId = null;
+            if (judgement != null) {
+                judgementString = judgement.getDisplayName();
+                elementId = judgement.getElementId();
+            } else {
+                // TODO: find judgement string by name (from somewhere other than the judgements list)
+                elementId = getContest().getJudgements()[1].getElementId();
+            }
+
+            validatorAnswer.setText(judgementString);
+            
+            judgementRecord = new JudgementRecord(elementId, getContest().getClientId(), false, true, true);
+
+            judgementRecord.setValidatorResultString(judgementString);
 
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
         }

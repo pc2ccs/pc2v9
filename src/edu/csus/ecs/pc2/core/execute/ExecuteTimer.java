@@ -442,7 +442,7 @@ public class ExecuteTimer extends Thread implements
 
         // stop the process
         if (proc != null) {
-            log.info("ExecuteTimer: attempting to destroy process");
+            log.info("ExecuteTimer: calling Process.destroy() on process " + getProcessID(proc));
             proc.destroy();
 //            proc.destroyForcibly();  //should use this, but it requires Java 8
         }
@@ -477,4 +477,25 @@ public class ExecuteTimer extends Thread implements
     public boolean isUsingGUI() {
         return usingGUI;
     }
+    
+    /**
+     * This method receives a {@link Process} object and returns the id of that Process.
+     * 
+     * TODO: currently the implementation of this method simply returns the toString() of the received
+     * Process object.  A future upgrade should use the Java 9 method Process.getProcessID() to obtain
+     * the actual platform-specific id of the Process.
+     *  
+     * @param theProcess the Process object who's ID is to be returned
+     * @return a String containing the id of the specified Process
+     */
+    private String getProcessID(Process theProcess) {
+        if (theProcess == null) {
+            return "null";
+        } else {
+
+            // TODO: return the actual process id instead of the toString()
+            return theProcess.toString();
+        }
+    }
+
 }

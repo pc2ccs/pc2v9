@@ -8,10 +8,8 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
  * Run Utilities.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public final class RunUtilities {
 
     private RunUtilities() {
@@ -142,4 +140,48 @@ public final class RunUtilities {
         // Fall through condition, do not suppress
         return false;
     }
+    
+    
+    /**
+     * Has run been submitted in a shadow contest?
+     * 
+     * @param contest
+     * @param runId
+     * @return true if override run number matches runId
+     */
+    public static boolean isAlreadySubmitted(IInternalContest contest, String runId) {
+
+        if (isDigits(runId)) {
+
+            long runNumber = Long.parseLong(runId.trim());
+            Run[] runs = contest.getRuns();
+            for (Run run : runs) {
+                if (run.getOverrideNumber() == runNumber) {
+                    return true;
+                }
+            }
+        } else {
+            System.err.println("Warning not code to match non-digit run is '" + runId + "'");
+        }
+
+        return false;
+    }
+
+    /**
+     * is string a set of digits
+     * 
+     * @param s
+     * @return true if digits, false otherwise
+     */
+    public static boolean isDigits(String s) {
+
+        try {
+            Long.parseLong(s.trim());
+            return true;
+        } catch (Exception e) {
+            return false;
+
+        }
+    }
+
 }
