@@ -29,6 +29,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.shadow.ShadowJudgementInfo;
 import edu.csus.ecs.pc2.shadow.ShadowJudgementPair;
 import javax.swing.Box;
@@ -42,6 +43,8 @@ import javax.swing.Box;
 public class ShadowComparePane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
+    
+    private ShadowController shadowController = null ;
     
     private Map<String, ShadowJudgementInfo> currentJudgementMap ;
     
@@ -64,25 +67,27 @@ public class ShadowComparePane extends JPanePlugin {
      * 
      * @param map a Mapping of submission IDs to ShadowJudgementInfo objects
      */
-    public ShadowComparePane(Map<String,ShadowJudgementInfo> map) {
+    public ShadowComparePane(ShadowController shadowController) {
         Dimension size = new Dimension(600,600);
         this.setPreferredSize(size);
         this.setMinimumSize(size);
         
-        currentJudgementMap = map;
+        this.shadowController = shadowController ;
+        
+        currentJudgementMap = shadowController.getJudgementComparisonInfo();
         
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         JLabel header = new JLabel("Comparison of PC2 vs. Remote Judgements");
         header.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.add(header);
         
-        if (map != null && !map.keySet().isEmpty()) {
+        if (currentJudgementMap != null && !currentJudgementMap.keySet().isEmpty()) {
             
             String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
-            Object[][] data = new Object[map.size()][7];
+            Object[][] data = new Object[currentJudgementMap.size()][7];
             int row = 0;
-            for (String key : map.keySet()) {
-                ShadowJudgementInfo curJudgementInfo = map.get(key);
+            for (String key : currentJudgementMap.keySet()) {
+                ShadowJudgementInfo curJudgementInfo = currentJudgementMap.get(key);
                 data[row][0] = curJudgementInfo.getTeamID();
                 data[row][1] = curJudgementInfo.getProblemID();
                 data[row][2] = curJudgementInfo.getLanguageID();
