@@ -14,9 +14,9 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
@@ -60,7 +60,13 @@ public class ContestSettingsReport implements IReport {
         printWriter.println("  Stop at end of contest                              : " + Utilities.yesNoString(contestInformation.isAutoStopContest()));
         printWriter.println();
 
-        printWriter.println("  Judges' Default Answer: '" + contestInformation.getJudgesDefaultAnswer() + "'");
+        printWriter.println("  Judges' Default Answer                               : '" + contestInformation.getJudgesDefaultAnswer() + "'");
+        
+        printWriter.println("Shadow mode                                            : " + Utilities.yesNoString(contestInformation.isShadowMode()));
+        printWriter.println("CCS URL                                                : " + contestInformation.getPrimaryCCS_URL());
+        printWriter.println("CCS Login                                              : " + contestInformation.getPrimaryCCS_user_login());
+        printWriter.println("CCS Password                                           : " + contestInformation.getPrimaryCCS_user_pw());
+        printWriter.println("CCS shadow event id                                    : " + contestInformation.getLastShadowEventID());
 
         if (contestInformation.getTeamDisplayMode() != null) {
             printWriter.println("  Judges see: " + contestInformation.getTeamDisplayMode());

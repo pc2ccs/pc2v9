@@ -1,10 +1,10 @@
 #!/bin/sh
-# Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+# Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 #
 # Purpose: start pc2 submitter
 # Author : pc2@ecs.csus.edu
-# $HeadURL$
 #
+# Sat Jan 18 13:58:12 PDT 2020 laned fixed classpath
 
 . `dirname $0`/pc2env
 
@@ -18,6 +18,6 @@ fi
 
 CLASSNAME=edu.csus.ecs.pc2.ui.team.Submitter
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp $pc2_classpath $CLASSNAME $*
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp "$libdir/*" $CLASSNAME $*
 
 # eof pc2submit $Id$ 

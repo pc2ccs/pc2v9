@@ -688,5 +688,24 @@ public interface IInternalController {
      *            - the Controller to which this request applies
      */
     void updateAutoStartInformation(IInternalContest aContest, IInternalController aController) ;
+    
+    /**
+     * Get contest model.
+     * @return
+     */
+    IInternalContest getContest();
+
+    /**
+     * Submit a run to the server for a different client.
+     * 
+     * @param submitter - override submitter, if used the logged in client must have  Permission.Type.SHADOW_PROXY_TEAM selected.
+     * @param problem
+     * @param language
+     * @param mainSubmissionFile
+     * @param additionalFiles
+     * @param overrideTimeMS
+     * @param overrideRunId
+     */
+    void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId);
 
 }

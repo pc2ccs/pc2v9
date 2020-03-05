@@ -55,9 +55,10 @@ public class ContestInformation implements Serializable{
     
     //Shadow Mode settings
     private boolean shadowMode = false;
-    private String primaryCCS_URL = "";
+    private String primaryCCS_URL = null;
     private String primaryCCS_user_login = "";
     private String primaryCCS_user_pw = "";
+    private String lastShadowEventID = "";
     
     /**
      * Max output file size.
@@ -253,7 +254,7 @@ public class ContestInformation implements Serializable{
             }
             if (! StringUtilities.stringSame(primaryCCS_URL, contestInformation.primaryCCS_URL)) {
                 return false;
-            }
+            }            
             if (! StringUtilities.stringSame(primaryCCS_user_login, contestInformation.primaryCCS_user_login)) {
                 return false;
             }
@@ -422,8 +423,8 @@ public class ContestInformation implements Serializable{
     }
     
     /**
-     * Returns the URL to a "Primary CCS"; only relevant when operating this
-     * instance of the PC2 CCS as a "Shadow CCS".
+     * Returns the String representation for a "Primary CCS" URL (that is, the URL of a Remote CCS being shadowed); 
+     * only relevant when operating this instance of the PC2 CCS as a "Shadow CCS".
      * @return a String containing the URL of the Primary CCS which we're shadowing
      */
     public String getPrimaryCCS_URL() {
@@ -431,9 +432,9 @@ public class ContestInformation implements Serializable{
     }
 
     /**
-     * Sets the value of the URL used to access the Primary CCS (used only when
-     * operating this instance of PC2 as a "Shadow CCS").
-     * @param primaryCCS_URL a String giving the URL of the Primary CCS (the CCS being shadowed)
+     * Sets the String representation for a "Primary CCS" URL (that is, the URL of a Remote CCS being shadowed); 
+     * only relevant when operating this instance of the PC2 CCS as a "Shadow CCS".
+     * @param primaryCCS_URL a String giving the URL of the Primary (remote) CCS (the CCS being shadowed)
      */
     public void setPrimaryCCS_URL(String primaryCCS_URL) {
         this.primaryCCS_URL = primaryCCS_URL;
@@ -476,6 +477,28 @@ public class ContestInformation implements Serializable{
     public void setPrimaryCCS_user_pw(String primaryCCS_user_pw) {
         this.primaryCCS_user_pw = primaryCCS_user_pw;
     }
+
+    /**
+     * Returns a String containing the "CLICS ID" for the last event retrieved from
+     * a remote CCS being shadowed (only useful when operating this instance of PC2 as a
+     * "Shadow CCS").
+     * @return a String containing a remote event id
+     */
+    public String getLastShadowEventID() {
+        return lastShadowEventID;
+    }
+
+    /**
+     * Sets the value of the String containing the "CLICS since_id" for the last event retrieved from
+     * a remote CCS being shadowed; that is, the id from which reconnections to the remote CCS event
+     * feed should proceed (only useful when operating this instance of PC2 as a
+     * "Shadow CCS").
+     * @param lastShadowEventID a String identifying the last event from the remote CCS
+     */
+     public void setLastShadowEventID(String lastShadowEventID) {
+        this.lastShadowEventID = lastShadowEventID;
+    }
+
 
     /**
      * Get the Run Submission Interface (RSI) command.

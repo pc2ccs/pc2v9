@@ -7,10 +7,11 @@ import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
@@ -27,7 +28,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -158,18 +158,11 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField startTimeTextField;
 
     private JLabel startTimeLabel;
-    private JTextField contestFreezeLengthtextField;
+    private JTextField contestFreezeLengthTextField;
 
     private JButton unfreezeScoreboardButton;
 
-    //shadow mode components
-    private JPanel shadowModePane;
-    private JLabel labelPrimaryCCSURL;
-    private JTextField textfieldPrimaryCCSURL;
-    private JLabel labelPrimaryCCSLogin;
-    private JTextField textfieldPrimaryCCSLogin;
-    private JLabel labelPrimaryCCSPasswd;    
-    private JTextField textfieldPrimaryCCSPasswd;
+    private ShadowSettingsPane shadowSettingsPane;
 
     private Border lineBorderBlue2px = new LineBorder(Color.blue, 2, true) ; //blue, 2-pixel line, rounded corners
     private Border margin = new EmptyBorder(5,10,5,10); //top,left,bottom,right
@@ -198,8 +191,6 @@ public class ContestInformationPane extends JPanePlugin {
     private JPanel ccsTestModePane;
     private Component horizontalStrut_3;
 
-    private JCheckBox shadowModeCheckbox;
-
     //set this true to display outlines around Contest Information Pane sections
     private boolean showPaneOutlines = true;
 
@@ -212,6 +203,20 @@ public class ContestInformationPane extends JPanePlugin {
     private Component horizontalStrut_1;
     private Component horizontalStrut_4;
     private Component horizontalStrut_5;
+
+    private JTextField primaryCCSURLTextfield;
+
+    private JTextField primaryCCSLoginTextfield;
+
+    private JTextField primaryCCSPasswdTextfield;
+
+    private JCheckBox shadowModeCheckbox;
+
+//    private JTextField textfieldPrimaryCCSURL;
+//
+//    private JTextField textfieldPrimaryCCSLogin;
+//
+//    private JTextField textfieldPrimaryCCSPasswd;
     
 
     /**
@@ -319,7 +324,7 @@ public class ContestInformationPane extends JPanePlugin {
             remoteCCSSettingsPane.add(getCCSTestModePane(),JComponent.LEFT_ALIGNMENT);
             remoteCCSSettingsPane.add(Box.createVerticalStrut(15));
             
-            remoteCCSSettingsPane.add(getShadowModePane(),JComponent.LEFT_ALIGNMENT);
+            remoteCCSSettingsPane.add(getShadowSettingsPane(),JComponent.LEFT_ALIGNMENT);
 
         }
         return remoteCCSSettingsPane;
@@ -618,201 +623,40 @@ public class ContestInformationPane extends JPanePlugin {
     }
 
     /**
-     * Returns a JPanel containing the components comprising Shadow Mode configuration options.
-     * @return a JPanel with Shadow Mode components
+     * Returns a ShadowSettingsPane containing the components comprising Shadow Mode configuration options.
+     * Because the ShadowSettingsPane class does not add any listeners to its components (because it can't
+     * know what listeners are desired by the surrounding class), this method adds a KeyListener to each
+     * {@link JTextField} component on the ShadowSettingsPane, and adds an ActionListener to the Shadow Mode
+     * checkbox on the ShadowSettingsPane.   All of these listeners do the same (one) thing: invoke
+     * {@link #enableUpdateButton()}.
+     * 
+     * @return a ShadowSettingsPane containing Shadow Mode Settings components with listeners attached to them
      */
-    private JPanel getShadowModePane() {
-        if (shadowModePane == null) {
-            shadowModePane = new JPanel();
+    private ShadowSettingsPane getShadowSettingsPane() {
+        if (shadowSettingsPane == null) {
+            shadowSettingsPane = new ShadowSettingsPane();
             
-            shadowModePane.setMinimumSize(new Dimension(850, 100));
-            shadowModePane.setMaximumSize(new Dimension(850, 100));
-            shadowModePane.setPreferredSize(new Dimension(850, 100));
-            shadowModePane.setAlignmentX(LEFT_ALIGNMENT);  
-           
-            shadowModePane.setLayout(new GridBagLayout());
-                               
-            TitledBorder tb = BorderFactory.createTitledBorder("Shadow Mode");
-            shadowModePane.setBorder(new CompoundBorder(margin,tb));
-
-            
-            labelPrimaryCCSURL = new JLabel();
-            labelPrimaryCCSURL.setHorizontalAlignment(SwingConstants.RIGHT);
-            labelPrimaryCCSURL.setText("Primary CCS URL:  ");
-            
-            labelPrimaryCCSLogin = new JLabel();
-            labelPrimaryCCSLogin.setHorizontalAlignment(SwingConstants.RIGHT);
-            labelPrimaryCCSLogin.setText("Primary CCS Login (account):  ");
-            
-            labelPrimaryCCSPasswd = new JLabel();
-            labelPrimaryCCSPasswd.setHorizontalAlignment(SwingConstants.RIGHT);
-            labelPrimaryCCSPasswd.setText("Primary CCS Password:  ");
-            
-            //the content of the pane:
-            
-            shadowModePane.add(getShadowModeCheckbox(), getShadowModeCheckboxConstraints());
-            shadowModePane.add(labelPrimaryCCSURL, getPrimaryCCSURLLabelConstraints());
-            shadowModePane.add(getPrimaryCCSURLTextfield(), getPrimaryCCSURLTextfieldConstraints()) ;
-            shadowModePane.add(labelPrimaryCCSLogin, getPrimaryCCSLoginLabelConstraints());
-            shadowModePane.add(getPrimaryCCSLoginTextfield(), getPrimaryCCSLoginTextfieldConstraints()) ;
-            shadowModePane.add(labelPrimaryCCSPasswd, getPrimaryCCSPasswdLabelConstraints());
-            shadowModePane.add(getPrimaryCCSPasswdTextfield(), getPrimaryCCSPasswdTextfieldConstraints()) ;
-
-        }
-        return shadowModePane;
-        
-    }
-
-
-    private Object getPrimaryCCSPasswdTextfieldConstraints() {
-        GridBagConstraints c = new GridBagConstraints();
-        //row & col at upper left of component
-            c.gridx = 2;
-            c.gridy = 2;
-        //number of cols and rows the component occupies
-            c.gridwidth = 1;
-            c.gridheight = 1;
-        //external padding (in pixels) added around the top, left, bottom, and right of the component
-        //  (the default is "no inset")
-            c.insets = new Insets(1, 1, 1, 1);
-        //where to anchor the component if it is smaller than the display area
-            c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
-        //specify relative weights of components
-            c.weightx = 0.8 ;
-            c.weighty = 0.0 ;
-        return c;
-    }
-
-    private Object getPrimaryCCSPasswdLabelConstraints() {
-        GridBagConstraints c = new GridBagConstraints();
-        //row & col at upper left of component
-            c.gridx = 1;
-            c.gridy = 2;
-        //number of cols and rows the component occupies
-            c.gridwidth = 1;
-            c.gridheight = 1;
-        //how to fill when the component is smaller than the available display area
-        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
-            c.fill = GridBagConstraints.BOTH;
-        //external padding (in pixels) added around the top, left, bottom, and right of the component
-        //  (the default is "no inset")
-            c.insets = new Insets(1, 1, 1, 1);
-        return c;
-    }
-
-    private Object getPrimaryCCSLoginTextfieldConstraints() {
-        GridBagConstraints c = new GridBagConstraints();
-        //row & col at upper left of component
-            c.gridx = 2;
-            c.gridy = 1;
-        //number of cols and rows the component occupies
-            c.gridwidth = 1;
-            c.gridheight = 1;
-        //external padding (in pixels) added around the top, left, bottom, and right of the component
-        //  (the default is "no inset")
-            c.insets = new Insets(1, 1, 1, 1);
-        //where to anchor the component if it is smaller than the display area
-            c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
-        //specify relative weights of components
-            c.weightx = 0.8 ;
-            c.weighty = 0.0 ;
-        return c;
-    }
-
-    private Object getPrimaryCCSLoginLabelConstraints() {
-        GridBagConstraints c = new GridBagConstraints();
-        //row & col at upper left of component
-            c.gridx = 1;
-            c.gridy = 1;
-        //number of cols and rows the component occupies
-            c.gridwidth = 1;
-            c.gridheight = 1;
-        //how to fill when the component is smaller than the available display area
-        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
-            c.fill = GridBagConstraints.BOTH;
-        //external padding (in pixels) added around the top, left, bottom, and right of the component
-        //  (the default is "no inset")
-            c.insets = new Insets(1, 1, 1, 1);
-        return c;
-    }
-
-    private Object getPrimaryCCSURLTextfieldConstraints() {
-        GridBagConstraints c = new GridBagConstraints();
-        //row & col at upper left of component
-            c.gridx = 2;
-            c.gridy = 0;
-        //number of cols and rows the component occupies
-            c.gridwidth = 1;
-            c.gridheight = 1;
-        //external padding (in pixels) added around the top, left, bottom, and right of the component
-        //  (the default is "no inset")
-            c.insets = new Insets(1, 1, 1, 1);
-        //where to anchor the component if it is smaller than the display area
-            c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
-        //specify relative weights of components
-            c.weightx = 0.8 ;
-            c.weighty = 0.0 ;
-        return c;
-    }
-
-    private GridBagConstraints getPrimaryCCSURLLabelConstraints() {
-        GridBagConstraints c = new GridBagConstraints();
-        //row & col at upper left of component
-            c.gridx = 1;
-            c.gridy = 0;
-        //number of cols and rows the component occupies
-            c.gridwidth = 1;
-            c.gridheight = 1;
-        //how to fill when the component is smaller than the available display area
-        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
-            c.fill = GridBagConstraints.BOTH;
-        //external padding (in pixels) added around the top, left, bottom, and right of the component
-        //  (the default is "no inset")
-            c.insets = new Insets(1, 1, 1, 1);
-            //specify relative weights of components
-            c.weightx = 0.1 ;
-            c.weighty = 0.0 ;
-        return c;
-    }
-
-    private GridBagConstraints getShadowModeCheckboxConstraints() {
-        GridBagConstraints c = new GridBagConstraints();
-        //row & col at upper left of component
-            c.gridx = 0;
-            c.gridy = 0;
-        //number of cols and rows the component occupies
-            c.gridwidth = 1;
-            c.gridheight = 1;
-        //how to fill when the component is smaller than the available display area
-        // (options are NONE (the default), HORIZONTAL, VERTICAL, BOTH)
-            c.fill = GridBagConstraints.BOTH;
-        //external padding (in pixels) added around the top, left, bottom, and right of the component
-        //  (the default is "no inset")
-            c.insets = new Insets(1, 1, 1, 1);
-//        //where to anchor the component if it is smaller than the display area
-//            c.anchor = GridBagConstraints.LINE_START; // CENTER is the default
-        //specify relative weights of components
-            c.weightx = 0.4 ;
-            c.weighty = 0.0 ;
-            return c;
-    }
-
-    private JCheckBox getShadowModeCheckbox() {
-        if(shadowModeCheckbox == null) {
-            
-            shadowModeCheckbox = new JCheckBox("Enable Shadow Mode", false);
-            shadowModeCheckbox.setToolTipText("Shadow Mode allows PC2 to fetch submissions from a remote Contest Control System "
-                    + "(called the 'Primary CCS')");
-            shadowModeCheckbox.setMnemonic(KeyEvent.VK_S);
-            shadowModeCheckbox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
+            KeyListener keyListener = new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
-            });
+            };
+            shadowSettingsPane.getRemoteCCSURLTextfield().addKeyListener(keyListener);
+            shadowSettingsPane.getRemoteCCSLoginTextfield().addKeyListener(keyListener);
+            shadowSettingsPane.getRemoteCCSPasswdTextfield().addKeyListener(keyListener);
+
+            ActionListener actionListener = new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    enableUpdateButton();
+                }
+            };
+            shadowSettingsPane.getShadowModeCheckbox().addActionListener(actionListener);
+            
         }
-        return shadowModeCheckbox;
-        
+        return shadowSettingsPane;
     }
+
+
 
     private JButton getUnfreezeScoreboardButton() {
         if (unfreezeScoreboardButton == null) {
@@ -836,15 +680,15 @@ public class ContestInformationPane extends JPanePlugin {
     }
 
     private JTextField getContestFreezeLengthtextField() {
-        if (contestFreezeLengthtextField == null) {
-            contestFreezeLengthtextField = new JTextField(8);
-            contestFreezeLengthtextField.addKeyListener(new java.awt.event.KeyAdapter() {
+        if (contestFreezeLengthTextField == null) {
+            contestFreezeLengthTextField = new JTextField(8);
+            contestFreezeLengthTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
         }
-        return contestFreezeLengthtextField;
+        return contestFreezeLengthTextField;
     }
 
     private JTextField getStartTimeTextField() {
@@ -865,68 +709,36 @@ public class ContestInformationPane extends JPanePlugin {
         return startTimeLabel ;
     }
 
-    private JTextField getPrimaryCCSURLTextfield() {
-        if (textfieldPrimaryCCSURL == null) {
-            textfieldPrimaryCCSURL = new JTextField();
-            textfieldPrimaryCCSURL.setColumns(50);
-            textfieldPrimaryCCSURL.setEditable(true);
-            textfieldPrimaryCCSURL.setToolTipText("The URL to the Primary CCS (when operating in 'Shadow Mode')");
-            
-            textfieldPrimaryCCSURL.setMaximumSize(new Dimension(400,20));
-            textfieldPrimaryCCSURL.setMinimumSize(new Dimension(400,20));
-            textfieldPrimaryCCSURL.setPreferredSize(new Dimension(400,20));
-            
-            textfieldPrimaryCCSURL.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyReleased(java.awt.event.KeyEvent e) {
-                    enableUpdateButton();
-                }
-            });
-
+    private JCheckBox getShadowModeCheckbox() {
+        
+        if (shadowModeCheckbox==null) {
+            shadowModeCheckbox = getShadowSettingsPane().getShadowModeCheckbox();
         }
-        return textfieldPrimaryCCSURL ;
+        return shadowModeCheckbox;
+    }
+
+    private JTextField getPrimaryCCSURLTextfield() {
+        
+        if (primaryCCSURLTextfield==null) {
+            primaryCCSURLTextfield = getShadowSettingsPane().getRemoteCCSURLTextfield() ;
+        }
+        return primaryCCSURLTextfield; 
     }
 
     private JTextField getPrimaryCCSLoginTextfield() {
-        if (textfieldPrimaryCCSLogin == null) {
-            textfieldPrimaryCCSLogin = new JTextField();
-            textfieldPrimaryCCSLogin.setColumns(20);
-            textfieldPrimaryCCSLogin.setEditable(true);
-            textfieldPrimaryCCSLogin.setToolTipText("The account used to login to the Primary CCS (when operating in 'Shadow Mode')");
-            
-            textfieldPrimaryCCSLogin.setMaximumSize(new Dimension(150,20));
-            textfieldPrimaryCCSLogin.setMinimumSize(new Dimension(150,20));
-            textfieldPrimaryCCSLogin.setPreferredSize(new Dimension(150,20));
 
-            textfieldPrimaryCCSLogin.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyReleased(java.awt.event.KeyEvent e) {
-                    enableUpdateButton();
-                }
-            });
-
+        if (primaryCCSLoginTextfield == null) {
+            primaryCCSLoginTextfield = getShadowSettingsPane().getRemoteCCSLoginTextfield();
         }
-        return textfieldPrimaryCCSLogin ;
+        return primaryCCSLoginTextfield;
     }
 
     private JTextField getPrimaryCCSPasswdTextfield() {
-        if (textfieldPrimaryCCSPasswd == null) {
-            
-            textfieldPrimaryCCSPasswd = new JPasswordField();
-            textfieldPrimaryCCSPasswd.setColumns(20);
-            textfieldPrimaryCCSPasswd.setEditable(true);
-            textfieldPrimaryCCSPasswd.setToolTipText("The Primary CCS account password");
-
-            textfieldPrimaryCCSPasswd.setMaximumSize(new Dimension(150,20));
-            textfieldPrimaryCCSPasswd.setMinimumSize(new Dimension(150,20));
-            textfieldPrimaryCCSPasswd.setPreferredSize(new Dimension(150,20));
-
-            textfieldPrimaryCCSPasswd.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyReleased(java.awt.event.KeyEvent e) {
-                    enableUpdateButton();
-                }
-            });
-
+        
+        if (primaryCCSPasswdTextfield==null) {
+            primaryCCSPasswdTextfield = getShadowSettingsPane().getRemoteCCSPasswdTextfield() ;
         }
-        return textfieldPrimaryCCSPasswd ;
+        return primaryCCSPasswdTextfield ;
     }
 
 
@@ -1029,10 +841,10 @@ public class ContestInformationPane extends JPanePlugin {
         newContestInformation.setCcsTestMode(getCcsTestModeCheckbox().isSelected());
         
         //fill in Shadow Mode information
-        newContestInformation.setShadowMode(getShadowModeCheckbox().isSelected());
-        newContestInformation.setPrimaryCCS_URL(getPrimaryCCSURLTextfield().getText());
-        newContestInformation.setPrimaryCCS_user_login(getPrimaryCCSLoginTextfield().getText());
-        newContestInformation.setPrimaryCCS_user_pw(getPrimaryCCSPasswdTextfield().getText());
+        newContestInformation.setShadowMode(getShadowSettingsPane().getShadowModeCheckbox().isSelected());
+        newContestInformation.setPrimaryCCS_URL(getShadowSettingsPane().getRemoteCCSURLTextfield().getText());
+        newContestInformation.setPrimaryCCS_user_login(getShadowSettingsPane().getRemoteCCSLoginTextfield().getText());
+        newContestInformation.setPrimaryCCS_user_pw(getShadowSettingsPane().getRemoteCCSPasswdTextfield().getText());
         
         //fill in additional field values
         String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();
@@ -1057,7 +869,7 @@ public class ContestInformationPane extends JPanePlugin {
 
         newContestInformation.setScoringProperties(changedScoringProperties);
         
-        newContestInformation.setFreezeTime(contestFreezeLengthtextField.getText());
+        newContestInformation.setFreezeTime(contestFreezeLengthTextField.getText());
 
         newContestInformation.setThawed(scoreboardHasBeenUnfrozen);
         
@@ -1122,6 +934,7 @@ public class ContestInformationPane extends JPanePlugin {
                 }
                 
                 getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
+
                 getPrimaryCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL());
                 getPrimaryCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
                 getPrimaryCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
@@ -1134,6 +947,7 @@ public class ContestInformationPane extends JPanePlugin {
                 setContestInformation(contestInformation);
                 setEnableButtons(false);
             }
+
         });
 
     }
@@ -1160,14 +974,11 @@ public class ContestInformationPane extends JPanePlugin {
 
     private void updateContestInformation() {
         ContestInformation contestInformation = getFromFields();
+                
         getController().updateContestInformation(contestInformation);
     }
 
-    /**
-     * 
-     * @author pc2@ecs.csus.edu
-     * 
-     */
+
     class ContestInformationListenerImplementation implements IContestInformationListener {
 
         public void contestInformationAdded(ContestInformationEvent event) {

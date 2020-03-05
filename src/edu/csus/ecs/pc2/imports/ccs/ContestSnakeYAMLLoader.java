@@ -54,6 +54,7 @@ import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.tools.PasswordGenerator;
 import edu.csus.ecs.pc2.tools.PasswordType2;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
@@ -66,6 +67,8 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class ContestSnakeYAMLLoader implements IContestLoader {
+
+
 
     /**
      * Full content of yaml file.
@@ -147,7 +150,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 contents = concat(contents, lines);
             }
         } catch (IOException e) {
-            throw new YamlLoadException(e.getMessage(), e, contetYamlFilename);
+            throw new YamlLoadException("Problem loading " + e.getMessage(), e, contetYamlFilename);
         }
         return fromYaml(contest, contents, directoryName, loadDataFileContents);
     }
@@ -375,6 +378,36 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (ccsTestMode) {
             setCcsTestMode(contest, ccsTestMode);
         }
+        
+        /**
+         * assign shadow values
+         */
+        
+        ContestInformation contestInformation = getContestInformation(contest);
+        
+        // enable shadow mode
+        boolean shadowMode = fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
+        contestInformation.setShadowMode(shadowMode);
+        
+        // base URL for CCS REST service
+        String  ccsUrl= fetchValue(content, CCS_URL_KEY, contestInformation.getPrimaryCCS_URL());
+        contestInformation.setPrimaryCCS_URL(ccsUrl);
+        
+        // CCS REST login
+        String ccsLogin = fetchValue(content, CCS_LOGIN_KEY, contestInformation.getPrimaryCCS_user_login());
+        contestInformation.setPrimaryCCS_user_login(ccsLogin);
+        
+        // CCS REST password
+        String ccsPassoword = fetchValue(content, CCS_PASSWORD_KEY, contestInformation.getPrimaryCCS_user_pw());
+        contestInformation.setPrimaryCCS_user_pw(ccsPassoword);
+        
+
+        String lastEventId = fetchValue(content, CCS_LAST_EVENT_ID_KEY, contestInformation.getLastShadowEventID());
+        contestInformation.setLastShadowEventID(lastEventId);
+
+        // save ContesInformation to model
+        contest.updateContestInformation(contestInformation);
+        
 
         String judgeCDPath = fetchValue(content, JUDGE_CONFIG_PATH_KEY);
         if (judgeCDPath != null) {
@@ -409,6 +442,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String contestLength = fetchValue(content, CONTEST_DURATION_KEY);
         if (contestLength != null) {
             setContestLength(contest, contestLength);
+        }
+        
+        boolean isRunning  = fetchBooleanValue(content, "running", false);
+        if (isRunning){
+            ContestTime time = contest.getContestTime();
+            if (time == null) {
+                time = new ContestTime();
+                time.setSiteNumber(contest.getSiteNumber());
+            }
+            time.startContestClock();
+            contest.updateContestTime(time);
         }
 
         // Old yaml name
@@ -594,7 +638,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
              */
 
             generateOSPasswords(passfilename, updatedAccounts.length, passwordType, length, prefix);
-            System.out.println("Wrote OS Passwords to: "+passfilename);
 
             String mergefilename = fetchValueDefault(passwordYamlMap, "mergefile", targetDirectory + File.separator + MailMergeFile.DEFAULT_MERGE_OUTPUT_FILENAME);
 
@@ -603,8 +646,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                  * Write mail merge file
                  */
                 MailMergeFile.writeFile(mergefilename, passfilename, Arrays.asList(updatedAccounts));
-                
-                System.out.println("Wrote Merge File to: "+mergefilename);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -629,6 +670,23 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         for (AutoJudgeSetting auto : autoJudgeSettings) {
             addAutoJudgeSetting(contest, auto);
+        }
+        
+        ClientId[] proxyClientIds = getShadowProxyClientIds(yamlLines);
+//        System.out.println("debug  There are "+proxyClientIds.length+" shadow proxy client definitions in yaml in dir "+directoryName);
+        
+        if (proxyClientIds.length > 0) {
+            for (ClientId clientId : proxyClientIds) {
+                Account account = contest.getAccount(clientId);
+                if (account != null) {
+                    account.addPermission(Type.SHADOW_PROXY_TEAM);
+                    contest.updateAccount(account);
+//                    System.out.println("debug  Added proxy account "+account.getClientId().toString());
+                } else {
+                    syntaxError("No such account for proxy of " + clientId.getClientType().toString() + " " + clientId.getClientNumber() + " at site " + clientId.getSiteNumber());
+                    ;
+                }
+            }
         }
 
         PlaybackInfo playbackInfo = getReplaySettings(yamlLines);
@@ -789,6 +847,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Calendar cal = DatatypeConverter.parseDateTime(startTime);
         Date date = cal.getTime();
         return date;
+    }
+  
+    protected ContestInformation getContestInformation(IInternalContest contest){
+        ContestInformation contestInformation = contest.getContestInformation();
+        return contestInformation;
     }
 
     private void setScoreboardFreezeTime(IInternalContest contest, String scoreboardFreezeTime) {
@@ -960,6 +1023,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             return content.get(key).toString();
         }
     }
+    
+    private String fetchValue(Map<String, Object> content, String key, String defaultValue) {
+        if (content == null) {
+            return null;
+        }
+        Object value = content.get(key);
+        if (value == null) {
+            return defaultValue;
+        } else if (value instanceof String) {
+            return (String) content.get(key);
+        } else {
+            return content.get(key).toString();
+        }
+    }
+
 
     private boolean isValuePresent(Map<String, Object> content, String key) {
         if (content == null) {
@@ -1439,6 +1517,37 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     private ArrayList fetchList(Map<String, Object> content, String key) {
         return (ArrayList) content.get(key);
     }
+    
+    public ClientId [] getShadowProxyClientIds(String[] yamlLines) {
+        ArrayList<ClientId> clientIdList = new ArrayList<ClientId>();
+        Map<String, Object> yamlContent = loadYaml(null, yamlLines);
+        ArrayList<Map<String, Object>> list = fetchList(yamlContent, "team-proxy-accounts");
+
+        if (list != null) {
+            for (Object object : list) {
+
+                Map<String, Object> map = (Map<String, Object>) object;
+
+                String accountType = fetchValue(map, "account");
+                checkField(accountType, "Account Type");
+
+                ClientType.Type type = ClientType.Type.valueOf(accountType.trim());
+                Integer siteNumber = fetchIntValue(map, "site", 1);
+                String numberString = fetchValue(map, "number");
+                
+                int[] clientNumbers = getNumberList(numberString.trim());
+                
+
+                for (int i = 0; i < clientNumbers.length; i++) {
+
+                    int clientNumber = clientNumbers[i];
+                    ClientId newId = new ClientId(siteNumber, type, clientNumber);
+                    clientIdList.add(newId);
+                }
+            }
+        }
+        return (ClientId[]) clientIdList.toArray(new ClientId[clientIdList.size()]);
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -1463,47 +1572,71 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     Language language = new Language(name);
 
                     Language lookedupLanguage = LanguageAutoFill.languageLookup(name);
-                    String compilerName = fetchValue(map, "compilerCmd");
+                    String compilerName = fetchValue(map, "compiler");
+                    String pc2CompilerCommandLine = fetchValue(map, PC2_COMPILER_CMD);
+                    
+         
 
-                    if (compilerName == null && lookedupLanguage != null) {
-                        language = lookedupLanguage;
-                        compilerName = language.getCompileCommandLine();
-                        language.setDisplayName(name);
-                    } else {
+                    language.setDisplayName(name);
+                    
+                    if (compilerName != null) {
 
-                        if (compilerName == null) {
-                            compilerName = fetchValue(map, "compiler");
-                        }
+                        // CLICS Language 
+                        compilerName = fetchValue(map, "compiler");
                         String compilerArgs = fetchValue(map, "compiler-args");
-                        String interpreter = fetchValue(map, "runner");
-                        String interpreterArgs = fetchValue(map, "runner-args");
-                        String exeMask = fetchValue(map, "exemask");
-                        // runner + runner-args, so what is execCmd for ?
-                        // String execCmd = getSequenceValue(sequenceLines, "execCmd");
+                        String runner = fetchValue(map, "runner");
+                        String runnerArgs = fetchValue(map, "runner-args");
+
+                        checkField(compilerName, "Language \"" + name + "\" missing compiler key/value");
 
                         if (compilerArgs == null) {
                             language.setCompileCommandLine(compilerName);
                         } else {
                             language.setCompileCommandLine(compilerName + " " + compilerArgs);
                         }
-                        language.setExecutableIdentifierMask(exeMask);
 
                         String programExecuteCommandLine = null;
-                        if (interpreter == null) {
-                            programExecuteCommandLine = "a.out";
-                        } else {
-                            if (interpreterArgs == null) {
-                                programExecuteCommandLine = interpreter;
-                            } else {
-                                programExecuteCommandLine = interpreter + " " + interpreterArgs;
-                            }
+                        if (runner == null) {
+                            /**
+                             * Assume a.out if no runner
+                             */
+                            runner = "a.out";
                         }
+                        
+                        if (runnerArgs == null) {
+                            programExecuteCommandLine = runner;
+                        } else {
+                            programExecuteCommandLine = runner + " " + runnerArgs;
+                        }
+
                         language.setProgramExecuteCommandLine(programExecuteCommandLine);
+
+                    } else if (pc2CompilerCommandLine != null) {
+
+                        //    - name: 'Java'
+                        //        active: true
+                        //        compilerCmd: 'javac -encoding UTF-8 -sourcepath . -d . {:mainfile}'
+                        //        exemask: '{:basename}.class'
+                        //        execCmd: 'java {:basename}'
+                        //        use-judge-cmd: true
+                        //        judge-exec-cmd:  'java {:basename}'
+
+                        language.setCompileCommandLine(pc2CompilerCommandLine);
+
+                        String programExecuteCommandLine = fetchValue(map, PC2_EXEC_CMD);
+                        language.setProgramExecuteCommandLine(programExecuteCommandLine);
+
+                        String exeMask = fetchValue(map, "exemask");
+                        language.setExecutableIdentifierMask(exeMask);
+
+                    } else if (lookedupLanguage != null) {
+                        language = lookedupLanguage;
+                    } else {
+                        syntaxError("Language \"" + name + "\" missing language definition (compiler command line and program execution command line)");
                     }
 
-                    if (compilerName == null) {
-                        throw new YamlLoadException("Language \"" + name + "\" missing compiler command line");
-                    }
+                    checkField(language.getCompileCommandLine(), "Language \"" + name + "\" missing compiler command line");
+                    checkField(language.getProgramExecuteCommandLine(), "Language \"" + name + "\" missing programm execution command line");
 
                     boolean active = fetchBooleanValue(map, "active", true);
                     language.setActive(active);
@@ -1520,10 +1653,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     } else {
                         language.setUsingJudgeProgramExecuteCommandLine(false);
                     }
+                    
+                    String clicsLanguageId = fetchValue(map, "clics-id");
+                    if (clicsLanguageId != null){
+                        language.setID(clicsLanguageId);
+                    }
 
                     // SOMEDAY handle interpreted languages, seems it should be in the export
-
-                    // boolean
 
                     if (valid(language, name)) {
                         languageList.add(language);
@@ -1963,7 +2099,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     private void syntaxError(String string) {
         YamlLoadException exception = new YamlLoadException("Syntax error: " + string);
-        exception.printStackTrace();
         throw exception;
     }
 
@@ -2305,6 +2440,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return true;
     }
 
+    /**
+     * Check for field, if value missing throw exception
+     * @param value
+     * @param fieldName
+     */
     private void checkField(String value, String fieldName) {
         if (value == null) {
             syntaxError("Missing " + fieldName);

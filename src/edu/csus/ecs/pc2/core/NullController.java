@@ -531,4 +531,16 @@ public class NullController implements IInternalController {
     public void updateAutoStartInformation(IInternalContest aContest, IInternalController aController) {
 
     }
+
+    @Override
+    public IInternalContest getContest() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
+        // TODO Auto-generated method stub
+        
+    }
 }

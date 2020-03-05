@@ -139,7 +139,7 @@ public class PacketHandler {
                 break;
             case RUN_SUBMISSION:
                 // RUN submitted by team to server
-                runSubmission(packet, fromId);
+                runSubmission(packet, fromId, connectionHandlerID);
                 break;
             case RUN_SUBMISSION_CONFIRM_SERVER:
                 // RUN send from one server to another 
@@ -1527,9 +1527,10 @@ public class PacketHandler {
         }
     }
 
-    private void runSubmission(Packet packet, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException {
+    private void runSubmission(Packet packet, ClientId fromId, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ContestSecurityException {
         Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
+        
         
         Long overrideElapsedTime = (Long) PacketFactory.getObjectValue(packet, PacketFactory.ELAPSED_TIME);
         if (overrideElapsedTime != null) {
@@ -1555,6 +1556,33 @@ public class PacketHandler {
                 controller.getLog().info("Note run id override not used, not in CCS test mode run=" + submittedRun);
                 throw new SecurityException("Attempted to use run id override in submit run when not in CCS Test Mode");
             }
+        }
+        
+        ClientId submitter = submittedRun.getSubmitter();
+        boolean proxySubmission = ! submitter.equals(fromId);
+        
+        if (!isServer(fromId)){
+
+            if (proxySubmission) {
+
+                if (!contest.getContestInformation().isCcsTestMode()) {
+                    controller.getLog().log(Log.INFO, fromId + "Shadow mode off (false) Client " + fromId + " attempted to submit run for team " + submitter);
+                    throw new ContestSecurityException(fromId, connectionHandlerID, "Shadow mode off (false) Client " + fromId + " attempted to submit run for team " + submitter);
+                }
+
+                /**
+                 * Not from a team, check for shadow proxy.
+                 */
+
+                Account account = contest.getAccount(fromId);
+                if (!account.isAllowed(Permission.Type.SHADOW_PROXY_TEAM)) {
+                    // Not allowed, error error
+                    controller.getLog().log(Log.INFO, fromId + " Client " + fromId + " attempted to submit run for team " + submitter);
+                    throw new ContestSecurityException(fromId, connectionHandlerID, "Client " + fromId + " attempted to submit run for team " + submitter);
+                }
+                controller.getLog().log(Log.INFO, fromId + " Proxy submit run for for team " + submitter);
+            }
+
         }
         
         Run run = contest.acceptRun(submittedRun, runFiles);

@@ -28,7 +28,7 @@ goto :end
 
 :continue
 call %PC2BIN%\pc2env.bat
-javaw -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "%libdir%\*" edu.csus.ecs.pc2.Starter %1 %2 %3 %4 %5 %6 %7 %8 %9
+javaw -Dfile.encoding=UTF-8 -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "%libdir%\*" edu.csus.ecs.pc2.Starter %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
 rem eof pc2admin.bat $Id$

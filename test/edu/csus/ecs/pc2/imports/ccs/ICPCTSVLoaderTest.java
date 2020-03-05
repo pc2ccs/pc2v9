@@ -92,11 +92,6 @@ public class ICPCTSVLoaderTest extends AbstractTestCase {
         assertEquals("Missing InstituionCode", "XXX", accounts[0].getInstitutionCode());
     }
 
-    private String getTestSampleContestDirectory(String contestDirName) {
-
-        return "samps" + File.separator + "contests" + File.separator + contestDirName;
-    }
-
     public void testNegativeTeamLoad() throws Exception {
 
         try {

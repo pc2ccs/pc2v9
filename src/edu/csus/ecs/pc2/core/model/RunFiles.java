@@ -51,6 +51,34 @@ public class RunFiles implements Serializable {
         this.mainFile = new SerializedFile(filename);
         this.submission = run;
     }
+    
+    /**
+     * @param run
+     * @param filename
+     */
+    public RunFiles(Run run, IFile iFile) {
+        super();
+        this.runId = run.getElementId();
+        this.mainFile = new SerializedFile(iFile);
+        this.submission = run;
+    }
+    
+    public RunFiles(Run run, IFile mainFile, IFile[] auxFiles) {
+        super();
+        this.runId = run.getElementId();
+        this.mainFile = new SerializedFile(mainFile);
+        this.otherFiles = createArray(auxFiles);
+        this.submission = run;
+    }
+
+    private SerializedFile[] createArray(IFile[] auxFiles) {
+        
+        SerializedFile[] outArray = new SerializedFile[auxFiles.length];
+        for (int i = 0; i < auxFiles.length; i++) {
+            outArray[i] = new SerializedFile(auxFiles[i]);
+        }
+        return outArray;
+    }
 
     /**
      * @param run

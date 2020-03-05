@@ -323,4 +323,15 @@ public class IniFile {
     public static void setIniFileURL(java.net.URL newIniFileURL) {
         iniFileURL = newIniFileURL;
     }
+
+    /**
+     * Load the name value pairs from the input file.
+     * 
+     * @see #getIniFileURL()
+     * @see #iniFileURL
+     */
+    public static void setHashtable(Hashtable<String, String> inHashTable) {
+        nameValueHash = inHashTable;
+    }
+
 }

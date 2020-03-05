@@ -1,10 +1,9 @@
 #!/bin/sh
-# Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+# Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 #
 # Purpose: run pc2tools program
 # Author : Douglas A. Lane <pc2@ecs.csus.edu>
 #
-# Tue Jan 01 06:06:51 2019 written 
 
 . `dirname $0`/pc2env
 
@@ -16,7 +15,7 @@ else
   PC2XOPS=""
 fi
 
-CLASS_NAME=edu.csus.ecs.pc2.core.tools.PC2Tools
+CLASS_NAME=edu.csus.ecs.pc2.tools.PC2Tools
 
 java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp $pc2_classpath $CLASS_NAME $*
 
