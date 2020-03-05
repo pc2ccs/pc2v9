@@ -2,7 +2,7 @@ First, thanks for contributing to the development of PC^2!  We're happy to have 
 
 Before submitting your Pull Request, please make sure you have done the following:
 
-- [ ] Read the [Guidelines for contributing to PC^2](../CONTRIBUTING.MD)
+- [ ] Read the [[Guidelines for contributing to PC^2|CONTRIBUTING.MD]]
 - [ ] Created JUnit (or similar) tests to demonstrate that your code works as intended
 - [ ] Verified that all existing JUnit tests continue to succeed
 - [ ] Provided appropriate *documentation* for your code
