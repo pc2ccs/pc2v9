@@ -184,18 +184,6 @@ public class ShadowControlPane extends JPanePlugin {
      */
     private void startShadowing() {
  
-        //the following was carried over from WebServerPane (from which this class was initially copied)
-
-//        Properties properties = new Properties();
-//
-//        properties.put(WebServer.PORT_NUMBER_KEY, portTextField.getText());
-//        properties.put(WebServer.CLICS_CONTEST_API_SERVICES_ENABLED_KEY, Boolean.toString(getChckbxClicsContestApi().isSelected()));
-//        properties.put(WebServer.STARTTIME_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxStarttime().isSelected()));
-//        properties.put(WebServer.FETCH_RUN_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxFetchRuns().isSelected()));
-//
-//        getWebServer().startWebServer(getContest(), getController(), properties);
-        
-
         boolean shadowCheckboxEnabled = getShadowSettingsPane().getShadowModeCheckbox().isSelected();
         boolean shadowDataComplete = verifyShadowControls();
         
@@ -205,6 +193,7 @@ public class ShadowControlPane extends JPanePlugin {
             if (success) {
                 currentlyShadowing = true;
                 shadowingStatusValueLabel.setText("ON");
+                getCompareButton().setEnabled(true);
             } else {
                 handleStartFailure();
                 showErrorMessage("Failed to start shadowing; check logs (bad URL or credentials? mismatched configs?)", "Cannot start Shadowing");
@@ -310,6 +299,7 @@ public class ShadowControlPane extends JPanePlugin {
             shadowController.stop();
             currentlyShadowing = false;
             shadowingStatusValueLabel.setText("OFF");
+            getCompareButton().setEnabled(false);
 
         }
         updateGUI();
@@ -586,6 +576,10 @@ public class ShadowControlPane extends JPanePlugin {
         	compareButton = new JButton("Compare");
         	compareButton.setMnemonic(KeyEvent.VK_C);
         	compareButton.setToolTipText("Display comparison results");
+        	
+        	//compare button should initially be disabled, and not enabled until shadowing has started
+        	compareButton.setEnabled(false);
+        	
         	compareButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (shadowController==null) {
