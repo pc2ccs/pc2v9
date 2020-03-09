@@ -16,7 +16,8 @@ after_script:
 # Jobs that don't specify a stage are assigned to the "test" stage.
 stages:
   - build
-  - test
+  # currently done in build stage, commenting to speed up pipeline
+  #  - test
   - deploy
 
 # TODO re-organize package.xml (along with build.xml) into building, testing, packaging.
@@ -41,13 +42,13 @@ job-build:
     - dist/*.gz
     expire_in: 1 month
 
-job-test:
-  stage: test
-  script:
-    - echo "Running test stage..."
-    - echo "Do a test here!"
+# job-test:
+#   stage: test
+#   script:
+#     - echo "Running test stage..."
+#     - echo "Do a test here!"
 
-job-deploy:
+push to ECS at CSUS:
   stage: deploy
   script:
     - echo "Running deploy stage"
@@ -55,3 +56,143 @@ job-deploy:
     - export BUILDNUMBER=`echo dist/pc2-*.zip | sed 's#^dist.*build-\([0-9]*\)[.~].*#\1#'`
     - BUILD_JOB_ID=$(cat dist/ci_job_id.txt)
     - curl "http://pc2.ecs.csus.edu/cgi-bin/grabgitlabartifacts.cgi?authkey=$AUTHKEY&url=https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/jobs/$BUILD_JOB_ID/artifacts&buildnumber=$BUILDNUMBER"
+
+
+push release to GitHub:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master"'
+      when: always
+    - when: never
+  before_script:
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+    - git config --global user.email "bot@pc2.ccs.icpc.global"
+    - git config --global user.name "PC2 bot"
+    - apt-get update -y
+    - apt-get install -y httpie jq
+  script:
+    - VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
+    - mkdir ~/builds
+    - cd ~/builds
+    - git clone git@github.com:pc2cccs/builds.git .
+    - git commit --allow-empty -m "Add build $VERSION"
+    - git push
+    - RELEASE_COMMIT=$(git rev-parse HEAD)
+    - |
+      http --ignore-stdin POST \
+        https://api.github.com/repos/pc2cccs/builds/releases \
+        "Authorization: token $GITHUB_TOKEN" \
+        "Accept: application/vnd.github.v3+json" \
+        tag_name=v$VERSION \
+        target_commitish=$RELEASE_COMMIT \
+        name=v$VERSION \
+        prerelease:=true | tee ~/new-release.txt
+    - RELEASE_ID=$(cat ~/new-release.txt | jq .id)
+    - RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2cccs/builds/releases/${RELEASE_ID}/assets
+    - cd $CI_PROJECT_DIR/dist
+    - echo "Uploading release $VERSION"
+    - |
+      for archive in *.zip *.gz
+      do
+        echo $archive...
+        case "$archive" in
+          *.zip)
+            cat $archive | http --timeout 300 POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive \
+              "Authorization: token $GITHUB_TOKEN" \
+              'Accept: application/vnd.github.v3+json' \
+              'Content-Type: application/zip' | jq .state
+            ;;
+            *.tar.gz)
+              cat $archive | http --timeout 300 POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive \
+                "Authorization: token $GITHUB_TOKEN" \
+                'Accept: application/vnd.github.v3+json' \
+                'Content-Type: application/gzip' | jq .state
+            ;;
+        esac
+        if [ -f $archive.sha256.txt ]; then
+          echo $archive.sha256.txt...
+          cat $archive.sha256.txt | http POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive.sha256.txt \
+            "Authorization: token $GITHUB_TOKEN" \
+            'Accept: application/vnd.github.v3+json' \
+            'Content-Type: text/plain' | jq .state
+          echo $archive.sha512.txt...
+          cat $archive.sha512.txt | http POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive.sha512.txt \
+            "Authorization: token $GITHUB_TOKEN" \
+            'Accept: application/vnd.github.v3+json' \
+            'Content-Type: text/plain' | jq .state
+          fi
+      done
+
+push nightly to GitHub:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "develop"'
+      when: always
+    - when: never
+  before_script:
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+    - git config --global user.email "bot@pc2.ccs.icpc.global"
+    - git config --global user.name "PC2 bot"
+    - apt-get update -y
+    - apt-get install -y httpie jq
+  script:
+    - VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
+    - TAG_NAME=`echo $VERSION |cut -d~ -f1`
+    - mkdir ~/builds
+    - cd ~/builds
+    - git clone git@github.com:pc2cccs/nightly-builds.git .
+    - git commit --allow-empty -m "Add build $VERSION"
+    - git push
+    - RELEASE_COMMIT=$(git rev-parse HEAD)
+    - |
+      http --ignore-stdin POST \
+        https://api.github.com/repos/pc2cccs/nightly-builds/releases \
+        "Authorization: token $GITHUB_TOKEN" \
+        "Accept: application/vnd.github.v3+json" \
+        tag_name=v$TAG_NAME \
+        target_commitish=$RELEASE_COMMIT \
+        name=v$VERSION \
+        prerelease:=true | tee ~/new-release.txt
+    - RELEASE_ID=$(cat ~/new-release.txt | jq .id)
+    - RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2cccs/nightly-builds/releases/${RELEASE_ID}/assets
+    - cd $CI_PROJECT_DIR/dist
+    - echo "Uploading release $VERSION"
+    - |
+      for archive in *.zip *.gz
+      do
+        echo $archive...
+        case "$archive" in
+          *.zip)
+            cat $archive | http --timeout 300 POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive \
+              "Authorization: token $GITHUB_TOKEN" \
+              'Accept: application/vnd.github.v3+json' \
+              'Content-Type: application/zip' | jq .state
+            ;;
+            *.gz)
+              cat $archive | http --timeout 300 POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive \
+                "Authorization: token $GITHUB_TOKEN" \
+                'Accept: application/vnd.github.v3+json' \
+                'Content-Type: application/gzip' | jq .state
+            ;;
+        esac
+        if [ -f $archive.sha256.txt ]; then
+          echo $archive.sha256.txt...
+          cat $archive.sha256.txt | http POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive.sha256.txt \
+            "Authorization: token $GITHUB_TOKEN" \
+            'Accept: application/vnd.github.v3+json' \
+            'Content-Type: text/plain' | jq .state
+          echo $archive.sha512.txt...
+          cat $archive.sha512.txt | http POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive.sha512.txt \
+            "Authorization: token $GITHUB_TOKEN" \
+            'Accept: application/vnd.github.v3+json' \
+            'Content-Type: text/plain' | jq .state
+        fi
+      done
