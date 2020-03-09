@@ -79,6 +79,8 @@ public class ShadowControlPane extends JPanePlugin {
     
     private ContestInformation savedContestInformation;
     private JButton compareButton;
+    
+    private ShadowCompareFrame shadowCompareFrame;
 
     /**
      * Constructs a new ShadowControlPane using the specified Contest and Controller.
@@ -193,7 +195,13 @@ public class ShadowControlPane extends JPanePlugin {
             if (success) {
                 currentlyShadowing = true;
                 shadowingStatusValueLabel.setText("ON");
-                getCompareButton().setEnabled(true);
+
+                //if there is a left over compareFrame (from a previous start), dispose of it
+                if (shadowCompareFrame!=null) {
+                    shadowCompareFrame.dispose();
+                    shadowCompareFrame = null;
+                }
+                
             } else {
                 handleStartFailure();
                 showErrorMessage("Failed to start shadowing; check logs (bad URL or credentials? mismatched configs?)", "Cannot start Shadowing");
@@ -299,8 +307,14 @@ public class ShadowControlPane extends JPanePlugin {
             shadowController.stop();
             currentlyShadowing = false;
             shadowingStatusValueLabel.setText("OFF");
-            getCompareButton().setEnabled(false);
-
+            
+            //if there is a compare frame, dispose of it (this is necessary because any subsequent "start shadowing" will construct a
+            // NEW shadow controller, so the reference to the controller in any existing compare frame won't be valid)
+            if (shadowCompareFrame!=null) {
+                shadowCompareFrame.dispose();
+                shadowCompareFrame = null;
+            }
+                
         }
         updateGUI();
     }
@@ -461,6 +475,7 @@ public class ShadowControlPane extends JPanePlugin {
         getStartButton().setEnabled(!currentlyShadowing);
         getStopButton().setEnabled(currentlyShadowing);
         getUpdateButton().setEnabled(false);
+        getCompareButton().setEnabled(currentlyShadowing);
 
         if (currentlyShadowing) {
             shadowingStatusValueLabel.setText("ON");
@@ -581,18 +596,24 @@ public class ShadowControlPane extends JPanePlugin {
         	compareButton.setEnabled(false);
         	
         	compareButton.addActionListener(new java.awt.event.ActionListener() {
+
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (shadowController==null) {
                         showErrorMessage("No shadow controller available; cannot show comparison", "Missing Controller"); 
                     } else {
-                        JFrame shadowCompareFrame = new ShadowCompareFrame(shadowController);
-                        shadowCompareFrame.setLocationRelativeTo(null); // centers frame
-                        shadowCompareFrame.setSize(600,700);
-                        shadowCompareFrame.setTitle("Shadow Comparison");
-                        shadowCompareFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        
+                        //construct a new compare frame if we don't already have one
+                        if (shadowCompareFrame==null) {
+                            shadowCompareFrame = new ShadowCompareFrame(shadowController);
+                            shadowCompareFrame.setLocationRelativeTo(null); // centers frame
+                            shadowCompareFrame.setSize(600, 700);
+                            shadowCompareFrame.setTitle("Shadow Comparison");
+                            shadowCompareFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                        }
+                        
+                        //make the compare frame (whether it previously existed or was just constructed above) visible
                         shadowCompareFrame.setVisible(true);
                     }
-                    
                 }
             });
 
