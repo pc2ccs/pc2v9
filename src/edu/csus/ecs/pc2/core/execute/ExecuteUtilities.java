@@ -160,6 +160,16 @@ public class ExecuteUtilities extends Plugin {
     }
     
     
+    public static String getAllSubmittedFilenames(RunFiles files){
+        String filelist = files.getMainFile().getName();
+        if (files.getOtherFiles() != null && files.getOtherFiles().length > 0){
+            for (SerializedFile file : files.getOtherFiles()) {
+                filelist += " " + file.getName();
+            }
+        }
+        return filelist;
+    }
+    
     /**
      * return string with all field variables filled with values.
      * 
@@ -197,7 +207,7 @@ public class ExecuteUtilities extends Plugin {
             return origString;
         }
         newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
-        newString = replaceString(newString, "{files}", runFiles.getMainFile().getName());
+        newString = replaceString(newString, "{files}", getAllSubmittedFilenames(runFiles));
         newString = replaceString(newString, "{:basename}", removeExtension(runFiles.getMainFile().getName()));
 
         if (problem != null){

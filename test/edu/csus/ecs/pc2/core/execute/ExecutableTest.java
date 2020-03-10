@@ -1895,4 +1895,45 @@ public class ExecutableTest extends AbstractTestCase {
 
         assertValidationFailure(run, executable, 0, 1, noJudgement);
     }
+    
+    public void testsubstituteFiles() throws Exception {
+        SampleContest sampleContest = new SampleContest();
+        IInternalContest contest = sampleContest.createContest(2, 2, 12, 12, true);
+
+        Account[] teams = SampleContest.getTeamAccounts(contest);
+
+        Problem[] problems = contest.getProblems();
+        Language[] languages = contest.getLanguages();
+
+        Problem problem = problems[problems.length - 1];
+        Language language = languages[languages.length - 1];
+
+        ClientId submitter = teams[teams.length - 1].getClientId();
+
+        Run run = new Run(submitter, language, problem);
+
+        SerializedFile mainFile = new SerializedFile(getSamplesSourceFilename("Sumit.java"));
+
+        /**
+         * Expected list of files
+         */
+        String expected = "Sumit.java";
+
+        String[] sampleNames = { "ISumitFloatOutputTenUnitsOff.java", "ISumitFloatOutputTenPercentOff.java", "ISumitWrongOutputCase.java", };
+
+        SerializedFile[] otherFiles = new SerializedFile[sampleNames.length];
+        for (int i = 0; i < otherFiles.length; i++) {
+            otherFiles[i] = new SerializedFile(sampleNames[i]);
+            expected += " " + sampleNames[i];
+        }
+        RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);
+
+        Executable executable = new Executable(contest, controller, run, runFiles);
+
+        String filelist = executable.substituteAllStrings(run, "{files}");
+
+        assertEquals("Expected file list ", expected, filelist);
+
+    }
+    
 }
