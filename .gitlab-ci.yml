@@ -70,8 +70,8 @@ push release to GitHub:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-    - git config --global user.email "bot@pc2.ccs.icpc.global"
-    - git config --global user.name "PC2 bot"
+    - git config --global user.email "pc2@ecs.csus.edu"
+    - git config --global user.name "PC2-bot"
     - apt-get update -y
     - apt-get install -y httpie jq
   script:
