@@ -78,7 +78,7 @@ push release to GitHub:
     - VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
     - mkdir ~/builds
     - cd ~/builds
-    - git clone git@github.com:pc2cccs/builds.git .
+    - git clone git@github.com:pc2ccs/builds.git .
     # a commit is needed to associate to a release
     - git commit --allow-empty -m "Add build $VERSION"
     - git push
@@ -86,7 +86,7 @@ push release to GitHub:
     # create the release
     - |
       http --ignore-stdin POST \
-        https://api.github.com/repos/pc2cccs/builds/releases \
+        https://api.github.com/repos/pc2ccs/builds/releases \
         "Authorization: token $GITHUB_TOKEN" \
         "Accept: application/vnd.github.v3+json" \
         tag_name=v$VERSION \
@@ -94,7 +94,7 @@ push release to GitHub:
         name=v$VERSION \
         prerelease:=true | tee ~/new-release.txt
     - RELEASE_ID=$(cat ~/new-release.txt | jq .id)
-    - RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2cccs/builds/releases/${RELEASE_ID}/assets
+    - RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2ccs/builds/releases/${RELEASE_ID}/assets
     - cd $CI_PROJECT_DIR/dist
     - echo "Uploading release $VERSION"
     - |
@@ -150,7 +150,7 @@ push nightly to GitHub:
     - TAG_NAME=`echo $VERSION |cut -d~ -f1`
     - mkdir ~/builds
     - cd ~/builds
-    - git clone git@github.com:pc2cccs/nightly-builds.git .
+    - git clone git@github.com:pc2ccs/nightly-builds.git .
     # a commit is needed to associate to a release
     - git commit --allow-empty -m "Add build $VERSION"
     - git push
@@ -158,7 +158,7 @@ push nightly to GitHub:
     # create the release
     - |
       http --ignore-stdin POST \
-        https://api.github.com/repos/pc2cccs/nightly-builds/releases \
+        https://api.github.com/repos/pc2ccs/nightly-builds/releases \
         "Authorization: token $GITHUB_TOKEN" \
         "Accept: application/vnd.github.v3+json" \
         tag_name=v$TAG_NAME \
@@ -166,7 +166,7 @@ push nightly to GitHub:
         name=v$VERSION \
         prerelease:=true | tee ~/new-release.txt
     - RELEASE_ID=$(cat ~/new-release.txt | jq .id)
-    - RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2cccs/nightly-builds/releases/${RELEASE_ID}/assets
+    - RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2ccs/nightly-builds/releases/${RELEASE_ID}/assets
     - cd $CI_PROJECT_DIR/dist
     - echo "Uploading release $VERSION"
     - |
