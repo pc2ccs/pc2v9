@@ -71,7 +71,7 @@ push release to GitHub:
     - chmod 700 ~/.ssh
     - ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
     - git config --global user.email "pc2@ecs.csus.edu"
-    - git config --global user.name "PC2-bot"
+    - git config --global user.name "PC2 bot"
     - apt-get update -y
     - apt-get install -y httpie jq
   script:
@@ -79,9 +79,11 @@ push release to GitHub:
     - mkdir ~/builds
     - cd ~/builds
     - git clone git@github.com:pc2cccs/builds.git .
+    # a commit is needed to associate to a release
     - git commit --allow-empty -m "Add build $VERSION"
     - git push
     - RELEASE_COMMIT=$(git rev-parse HEAD)
+    # create the release
     - |
       http --ignore-stdin POST \
         https://api.github.com/repos/pc2cccs/builds/releases \
@@ -149,9 +151,11 @@ push nightly to GitHub:
     - mkdir ~/builds
     - cd ~/builds
     - git clone git@github.com:pc2cccs/nightly-builds.git .
+    # a commit is needed to associate to a release
     - git commit --allow-empty -m "Add build $VERSION"
     - git push
     - RELEASE_COMMIT=$(git rev-parse HEAD)
+    # create the release
     - |
       http --ignore-stdin POST \
         https://api.github.com/repos/pc2cccs/nightly-builds/releases \
