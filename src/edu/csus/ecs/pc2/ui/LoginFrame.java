@@ -121,6 +121,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
      * 
      */
     private void initialize() {
+
         this.setSize(new java.awt.Dimension(INITIAL_FRAME_WIDTH,500));
         this.setPreferredSize(new java.awt.Dimension(INITIAL_FRAME_WIDTH,500));
         this.setMinimumSize(new java.awt.Dimension(INITIAL_FRAME_WIDTH,500));
@@ -1062,8 +1063,6 @@ public class LoginFrame extends JFrame implements ILoginUI {
 //        Border compound = BorderFactory.createCompoundBorder(orangeline, empty);
         mainLogoPanel.setBorder(empty);
 //        mainLogoPanel.setBorder(compund);
-
-
 
         mainLogoPanel.add(logoLabel);
         
