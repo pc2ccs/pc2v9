@@ -40,6 +40,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import java.awt.Insets;
 
 /**
  * Login frame for all clients.
@@ -228,14 +229,16 @@ public class LoginFrame extends JFrame implements ILoginUI {
             
             //login-name title label layout constraints
             GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-            gridBagConstraints2.insets = new java.awt.Insets(23,20,1,51);
+            gridBagConstraints2.fill = GridBagConstraints.HORIZONTAL;
+            gridBagConstraints2.insets = new Insets(23, 33, 1, 51);
             gridBagConstraints2.gridx = 0;
             gridBagConstraints2.gridy = 0;
             gridBagConstraints2.ipadx = 39;
 
             //password title label layout constraints
             GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
-            gridBagConstraints4.insets = new java.awt.Insets(12,20,1,60);
+            gridBagConstraints4.fill = GridBagConstraints.HORIZONTAL;
+            gridBagConstraints4.insets = new Insets(12, 33, 1, 60);
             gridBagConstraints4.gridx = 0;
             gridBagConstraints4.gridy = 2;
             gridBagConstraints4.ipadx = 39;
