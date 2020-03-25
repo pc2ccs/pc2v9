@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -17,6 +18,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -128,8 +131,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
         this.setBackground(new java.awt.Color(253, 255, 255));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("PC^2 Login");
-        ImageIcon imgIcon = new ImageIcon("images/" + PC2_LOGO_FILENAME);
-        this.setIconImage(imgIcon.getImage());
+        this.setIconImages(getImagesForPC2LogoIcons());
         this.setContentPane(getMainPanel());
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -156,6 +158,33 @@ public class LoginFrame extends JFrame implements ILoginUI {
         if (value != null && value.equalsIgnoreCase("native")) {
             FrameUtilities.setNativeLookAndFeel();
         }
+    }
+    
+    /**
+     * This method returns a list of Images which can be used as icon images for the JFrame.
+     * Providing a list of icon images allows the underlying OS to select the most appropriate
+     * size image for the purpose.  (For example, Windows uses a different size icon image in the title bar
+     * from what it uses in the System Tray when the frame is minimized.)
+     * 
+     * @return a List of IconImages
+     */
+    private List<? extends Image> getImagesForPC2LogoIcons() {
+        
+        //the sizes of Icon Images we're going to generate/return (NxN)
+        final int[] sizes = { 16, 20, 30, 32, 40, 64};
+
+        ArrayList<Image> icons = new ArrayList<Image>();
+        
+        ImageIcon pc2logo = getPC2LogoImageIcon();
+        
+        if (pc2logo!=null) {
+            for (int i=0; i< sizes.length; i++) {
+                //generate the next scaled version of the pc2logo
+                icons.add(pc2logo.getImage().getScaledInstance(sizes[i], sizes[i], Image.SCALE_SMOOTH));  
+            }
+        }
+        
+        return icons;
     }
 
     /**
@@ -228,14 +257,16 @@ public class LoginFrame extends JFrame implements ILoginUI {
             
             //login-name title label layout constraints
             GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-            gridBagConstraints2.insets = new java.awt.Insets(23,20,1,51);
+            gridBagConstraints2.fill = GridBagConstraints.HORIZONTAL;
+            gridBagConstraints2.insets = new Insets(23, 33, 1, 51);
             gridBagConstraints2.gridx = 0;
             gridBagConstraints2.gridy = 0;
             gridBagConstraints2.ipadx = 39;
 
             //password title label layout constraints
             GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
-            gridBagConstraints4.insets = new java.awt.Insets(12,20,1,60);
+            gridBagConstraints4.fill = GridBagConstraints.HORIZONTAL;
+            gridBagConstraints4.insets = new Insets(12, 33, 1, 60);
             gridBagConstraints4.gridx = 0;
             gridBagConstraints4.gridy = 2;
             gridBagConstraints4.ipadx = 39;
@@ -489,14 +520,24 @@ public class LoginFrame extends JFrame implements ILoginUI {
 
     /**
      * This method returns an ImageIcon containing the PC2 logo.
+     * The first time the method is called it will attempt to load the image icon
+     * from either the pc2.jar or from the file system by calling {@link #loadImageIconFromFile(String)},
+     * and will return the result of that attempt (which could be null if the file being loaded fails to satisfy 
+     * the checksum test).  On subsequent calls it returns whatever was returned
+     * from the first call (which could therefore be null as well).
      * 
-     * @return a PC2 Logo ImageIcon
+     * @return a PC2 Logo ImageIcon, or null if the image icon could not be properly loaded
      */
+    private ImageIcon pc2LogoImageIcon = null;
+    private boolean pc2LogoLoadAttempted = false;
     private ImageIcon getPC2LogoImageIcon() {
 
-        ImageIcon imageIcon = loadImageIconFromFile("images/" + PC2_LOGO_FILENAME);
+        if (pc2LogoImageIcon==null && !pc2LogoLoadAttempted) {
+            pc2LogoImageIcon = loadImageIconFromFile("images/" + PC2_LOGO_FILENAME);
+            pc2LogoLoadAttempted = true;
+        }
 
-        return imageIcon;
+        return pc2LogoImageIcon;
     }
     
     /*
@@ -532,37 +573,62 @@ public class LoginFrame extends JFrame implements ILoginUI {
         return icon;
     }
 
+    /**
+     * This method verifies that the file whose filename and corresponding URL are provided are legitimate --
+     * that is, that the files have the expected SHA checksum values. It first reads the file from the 
+     * specified URL, then uses the {@link MessageDigest} class to compute an SHA checksum for that file.
+     * It then uses the given String filename and uses that to select the "expected" checksum for the file,
+     * returning true if the checksums match, false otherwise.
+     * 
+     * @param inFileName the name of the file to be verified
+     * @param url a URL pointing to an ImageIcon for the file
+     * 
+     * @return true if the SHA checksum for the image at the URL matches the expected checksum; false if not
+     */
     private boolean verifyImage(String inFileName, URL url) {
-        // these are the real checksums
-        //images/csus_logo.png
+        // these are the real (correct) checksums for the specified files, generated on a variety of platforms
+        
+        //CSUS Logo (images/csus_logo.png) checksums:
+        
+        //generated under Win8.1 w/ java 1.8.0_201; 
+        // verified the same on Win10 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
         byte[] csusChecksum = { -78, -82, -33, 125, 3, 20, 3, -51, 53, -82, -66, -19, -96, 82, 39, -92, 16, 52, 17, 127};
-        // generated under Windows10 running java version "1.8.0_144" and ubuntu running "1.8.0_131"
-//        byte[] icpcChecksum = {-116, -88, -24, 46, 99, 102, -94, -64, -28, -61, 51, 4, -52, -116, -23, 92, 51, -78, -90, -107};
+
+        // generated under Windows10 running java version "1.8.0_144" and ubuntu running "1.8.0_131":
         byte[] csusChecksum2 = { 98, 105, -19, -31, -71, -121, 109, -34, 64, 83, -78, -31, 49, -57, 57, 8, 35, -79, 13, -49};
-        // old icpc_logo.png checksum
-//        byte[] icpcChecksum2 = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
+        
         // these are the ibm jre checksums
         byte[] csusChecksum3 = {-46, -84, -66, 55, 82, -78, 124, 88, 68, -83, -128, -110, -19, -26, 92, -3, 76, -26, 21, 30};
         
-        //images/ICPCWebMast_small.png
-        // old icpc_logo.png checksum
+        
+        //ICPC banner (images/ICPCWebMast_small.png) checksums:
+
+        // old icpc_logo.png checksums
+//      byte[] icpcChecksum = {-116, -88, -24, 46, 99, 102, -94, -64, -28, -61, 51, 4, -52, -116, -23, 92, 51, -78, -90, -107};
+//      byte[] icpcChecksum2 = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
+
         byte[] icpcChecksum3 = {41, 72, 104, 75, 73, 55, 55, 93, 32, 35, -6, -12, -96, -23, -3, -17, -119, 26, 81, -2};
         
         // this is the eclipse checksum
         byte[] icpcChecksum4 = {47, -56, 88, -115, 40, 20, 98, -6, 99, 49, -17, 37, 74, -77, 0, -74, 55, -100, 9, -118};
-
-        // new 20180924
-        // win10 java9
+      
+        // new 20180924 generated on win10 java9; 
+        //  verified the same on Win8.1 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
         byte[] icpcChecksum = {119, 107, 9, -52, 56, 121, 125, -115, -2, -40, 53, 86, 113, 4, 87, 42, 83, 118, 117, -2};
+        
         // mac java8
         byte[] icpcChecksum2 = {-20, -110, 63, 117, -52, 4, -125, 31, 47, 92, 13, 97, 91, -28, -55, -28, 65, -106, 106, -24};
         
-        byte[] verifyChecksum = { };
         
-        //pc2logo checksums
-        //images/PC2Logo.png
+        //PC2 Logo (images/PC2Logo.png) checksums:
+        
+        //generated on Win10 w/ java 1.8.0_201; 
+        // verified the same on Win8.1 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
         byte[] pc2Checksum = {-58, -108, 63, 33, 72, -127, -38, 75, 78, 104, -102, 119, -128, 96, 11, -86, 100, -74, -109, 9};
-
+        
+        
+        //an array to hold the checksum which is chosen from the above:
+        byte[] verifyChecksum = { };
         
         try {
             //compute the checksum for the ImageIcon whose URL was passed to us
