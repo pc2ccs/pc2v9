@@ -2,11 +2,9 @@
 package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 
 import javax.swing.ImageIcon;
@@ -19,7 +17,6 @@ import javax.swing.JTextPane;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.ClipboardUtilities;
-import edu.csus.ecs.pc2.core.log.StaticLog;
 
 /**
  * Show information about the pc2 version and run time environment.
@@ -37,7 +34,7 @@ public class AboutPane extends JPanePlugin {
         JPanel titleBarPanel = new JPanel();
         add(titleBarPanel, BorderLayout.NORTH);
         
-        JLabel lblAboutPc = new JLabel("About PC^2");
+        JLabel lblAboutPc = new JLabel("<html>About PC<sup>2</sup>");
         lblAboutPc.setFont(new Font("Tahoma", Font.BOLD, 16));
         titleBarPanel.add(lblAboutPc);
         
@@ -48,12 +45,19 @@ public class AboutPane extends JPanePlugin {
         //create a panel to hold the PC2 graphical logo
         JPanel logoPanel = new JPanel();
         
-        //create the logo image icon from the images folder
-        ImageIcon pc2LogoImageIcon = getImageIconFromFile("images/PC2Logo135x135.png");
+        //get the PC2 logo image icon (from either the .jar or the file system)
+        ImageIcon pc2LogoImageIcon = FrameUtilities.loadImageIconFromFile("images/" + FrameUtilities.PC2_LOGO_FILENAME);
+        
+        //scale the image to properly fit in the About pane
+        int width = pc2LogoImageIcon.getIconWidth();
+        int height = pc2LogoImageIcon.getIconHeight();
+        int targetWidth = 135;
+        int targetHeight = (int) ((double)targetWidth * height / width) ;
+        ImageIcon targetImageIcon = new ImageIcon(pc2LogoImageIcon.getImage().getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH));
 
-        if (pc2LogoImageIcon != null) {
+        if (targetImageIcon != null) {
             //add the logo image to the logo panel
-            JLabel logoLabel = new JLabel(pc2LogoImageIcon);
+            JLabel logoLabel = new JLabel(targetImageIcon);
             logoPanel.add(logoLabel);
         }
         
@@ -116,37 +120,6 @@ public class AboutPane extends JPanePlugin {
         };
         
         return String.join("\n", lines);
-    }
-
-    /**
-     * Returns an {@link ImageIcon} built from a specified file, or null if the file cannot be found.
-     * Attempts to find the file in the current jar (pc2.jar); otherwise falls back to file system.
-     * Based on code copied from {@link LoginFrame}.
-     * 
-     * @param inFileName the name of the file containing a graphical image
-     * @return an ImageIcon for the file, or null if the file can't be found
-     */
-    private ImageIcon getImageIconFromFile(String inFileName) {
-        File imgFile = new File(inFileName);
-        ImageIcon icon = null;
-        // attempt to locate in jar
-        URL iconURL = getClass().getResource("/"+inFileName);
-        if (iconURL == null) {
-            //didn't find the file in the jar; try the file system
-            if (imgFile.exists()) {
-                try {
-                    iconURL = imgFile.toURI().toURL();
-                } catch (MalformedURLException e) {
-                    iconURL = null;
-                    StaticLog.log("AboutPane.getImageIconFromFile("+inFileName+")", e);
-                }
-            }
-        }
-        if (iconURL != null) {
-            icon = new ImageIcon(iconURL);
-        }
-        
-        return icon;
     }
 
     /**

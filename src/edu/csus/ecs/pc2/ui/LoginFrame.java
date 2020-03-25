@@ -9,15 +9,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +36,6 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
-import java.awt.Insets;
 
 /**
  * Login frame for all clients.
@@ -61,13 +53,10 @@ public class LoginFrame extends JFrame implements ILoginUI {
 
     private static final String AUTO_REGISTRATION_LOGIN = "auto";
     
-    private final String PC2_LOGO_FILENAME = "PC2Logo.png";
-    private final String ICPC_BANNER_FILENAME = "ICPCWebMast_small.png";
-    private final String CSUS_LOGO_FILENAME = "csus_logo.png";
     private final String USER_PROVIDED_LOGO_FILENAME = "logo";
     private final String USER_PROVIDED_BANNER_FILENAME = "banner";
     
-    private final int INITIAL_FRAME_WIDTH = 800 ;
+    private final int DEFAULT_FRAME_WIDTH = 800 ;
 
     private IInternalContest contest;
 
@@ -97,8 +86,6 @@ public class LoginFrame extends JFrame implements ILoginUI {
 
     private JPanel westPanel;
 
-    private JLabel logoCSUS = null;
-
     private JPanel bottomPanel = null;
 
     private JPanel northPanel = null;
@@ -126,9 +113,9 @@ public class LoginFrame extends JFrame implements ILoginUI {
      */
     private void initialize() {
 
-        this.setSize(new java.awt.Dimension(INITIAL_FRAME_WIDTH,500));
-        this.setPreferredSize(new java.awt.Dimension(INITIAL_FRAME_WIDTH,500));
-        this.setMinimumSize(new java.awt.Dimension(INITIAL_FRAME_WIDTH,500));
+        this.setSize(new java.awt.Dimension(DEFAULT_FRAME_WIDTH,500));
+        this.setPreferredSize(new java.awt.Dimension(DEFAULT_FRAME_WIDTH,500));
+        this.setMinimumSize(new java.awt.Dimension(DEFAULT_FRAME_WIDTH,500));
         this.setBackground(new java.awt.Color(253, 255, 255));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("PC^2 Login");
@@ -504,27 +491,12 @@ public class LoginFrame extends JFrame implements ILoginUI {
     }
 
     /**
-     * This method returns a JLabel containing the CSUS logo
-     * 
-     * @return javax.swing.JLabel
-     */
-    private JLabel getLogoCSUS() {
-        if (logoCSUS == null) {
-            logoCSUS = new JLabel();
-
-            ImageIcon image = loadImageIconFromFile("images/" + CSUS_LOGO_FILENAME);
-            logoCSUS.setIcon(image);
-            logoCSUS.setBounds(new java.awt.Rectangle(-11, 48, 137, 127));
-        }
-        return logoCSUS;
-    }
-
-    /**
      * This method returns an ImageIcon containing the PC2 logo.
      * The first time the method is called it will attempt to load the image icon
      * from either the pc2.jar or from the file system by calling {@link #loadImageIconFromFile(String)},
-     * and will return the result of that attempt (which could be null if the file being loaded fails to satisfy 
-     * the checksum test).  On subsequent calls it returns whatever was returned
+     * and will return the result of that attempt (which could be null if the file being loaded either
+     * doesn't exist or fails to satisfy the checksum test).  
+     * On subsequent calls it returns whatever was returned
      * from the first call (which could therefore be null as well).
      * 
      * @return a PC2 Logo ImageIcon, or null if the image icon could not be properly loaded
@@ -534,264 +506,87 @@ public class LoginFrame extends JFrame implements ILoginUI {
     private ImageIcon getPC2LogoImageIcon() {
 
         if (pc2LogoImageIcon==null && !pc2LogoLoadAttempted) {
-            pc2LogoImageIcon = loadImageIconFromFile("images/" + PC2_LOGO_FILENAME);
+            pc2LogoImageIcon = FrameUtilities.loadImageIconFromFile("images/" + FrameUtilities.PC2_LOGO_FILENAME);
             pc2LogoLoadAttempted = true;
         }
 
         return pc2LogoImageIcon;
     }
     
-    /*
-     * Given a inFileName attempts to find file in jar, otherwise falls back to file system.
-     * 
-     * Will return null if file is not found in either location.
-     */
-    private ImageIcon loadImageIconFromFile(String inFileName) {
-        File imgFile = new File(inFileName);
-        ImageIcon icon = null;
-        // attempt to locate image file in jar
-        URL iconURL = getClass().getResource("/"+inFileName);
-        if (iconURL == null) {
-            //we didn't find the image file in the jar; look for it in the file system
-            if (imgFile.exists()) {
-                try {
-                    iconURL = imgFile.toURI().toURL();
-                } catch (MalformedURLException e) {
-                    iconURL = null;
-                    StaticLog.log("LoginFrame.loadImageIconFromFile("+inFileName+")", e);
-                }
-            }
-        }
-        if (iconURL != null) {
-            //we found a URL to the image; verify that it has the correct checksum
-            if (verifyImage(inFileName, iconURL)) {
-                //checksums match; return an ImageIcon for the image
-                icon = new ImageIcon(iconURL);
-            } else {
-                StaticLog.warning(inFileName+"("+iconURL.toString()+") checksum failed");
-            }
-        }
-        return icon;
-    }
 
     /**
-     * This method verifies that the file whose filename and corresponding URL are provided are legitimate --
-     * that is, that the files have the expected SHA checksum values. It first reads the file from the 
-     * specified URL, then uses the {@link MessageDigest} class to compute an SHA checksum for that file.
-     * It then uses the given String filename and uses that to select the "expected" checksum for the file,
-     * returning true if the checksums match, false otherwise.
+     * This method returns a JPanel containing a banner image from either a user-specified
+     * banner file (if found), or else from the default ICPC banner file (if found and if valid).
+     * The method first checks for the existence of either a "banner.png" or a "banner.jpg" file
+     * in the ./images folder; if present then it uses that file (favoring the PNG file if
+     * both are present).  If neither "banner.png" nor "banner.jpg" is found in "./images",
+     * the method delegates to {@link FrameUtilities#loadImageIconFromFile(String)} to 
+     * load the default ICPC banner image file.
      * 
-     * @param inFileName the name of the file to be verified
-     * @param url a URL pointing to an ImageIcon for the file
-     * 
-     * @return true if the SHA checksum for the image at the URL matches the expected checksum; false if not
-     */
-    private boolean verifyImage(String inFileName, URL url) {
-        // these are the real (correct) checksums for the specified files, generated on a variety of platforms
-        
-        //CSUS Logo (images/csus_logo.png) checksums:
-        
-        //generated under Win8.1 w/ java 1.8.0_201; 
-        // verified the same on Win10 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
-        byte[] csusChecksum = { -78, -82, -33, 125, 3, 20, 3, -51, 53, -82, -66, -19, -96, 82, 39, -92, 16, 52, 17, 127};
-
-        // generated under Windows10 running java version "1.8.0_144" and ubuntu running "1.8.0_131":
-        byte[] csusChecksum2 = { 98, 105, -19, -31, -71, -121, 109, -34, 64, 83, -78, -31, 49, -57, 57, 8, 35, -79, 13, -49};
-        
-        // these are the ibm jre checksums
-        byte[] csusChecksum3 = {-46, -84, -66, 55, 82, -78, 124, 88, 68, -83, -128, -110, -19, -26, 92, -3, 76, -26, 21, 30};
-        
-        
-        //ICPC banner (images/ICPCWebMast_small.png) checksums:
-
-        // old icpc_logo.png checksums
-//      byte[] icpcChecksum = {-116, -88, -24, 46, 99, 102, -94, -64, -28, -61, 51, 4, -52, -116, -23, 92, 51, -78, -90, -107};
-//      byte[] icpcChecksum2 = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
-
-        byte[] icpcChecksum3 = {41, 72, 104, 75, 73, 55, 55, 93, 32, 35, -6, -12, -96, -23, -3, -17, -119, 26, 81, -2};
-        
-        // this is the eclipse checksum
-        byte[] icpcChecksum4 = {47, -56, 88, -115, 40, 20, 98, -6, 99, 49, -17, 37, 74, -77, 0, -74, 55, -100, 9, -118};
-      
-        // new 20180924 generated on win10 java9; 
-        //  verified the same on Win8.1 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
-        byte[] icpcChecksum = {119, 107, 9, -52, 56, 121, 125, -115, -2, -40, 53, 86, 113, 4, 87, 42, 83, 118, 117, -2};
-        
-        // mac java8
-        byte[] icpcChecksum2 = {-20, -110, 63, 117, -52, 4, -125, 31, 47, 92, 13, 97, 91, -28, -55, -28, 65, -106, 106, -24};
-        
-        
-        //PC2 Logo (images/PC2Logo.png) checksums:
-        
-        //generated on Win10 w/ java 1.8.0_201; 
-        // verified the same on Win8.1 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
-        byte[] pc2Checksum = {-58, -108, 63, 33, 72, -127, -38, 75, 78, 104, -102, 119, -128, 96, 11, -86, 100, -74, -109, 9};
-        
-        
-        //an array to hold the checksum which is chosen from the above:
-        byte[] verifyChecksum = { };
-        
-        try {
-            //compute the checksum for the ImageIcon whose URL was passed to us
-            int matchedBytes = 0;
-            InputStream is = url.openStream();
-            MessageDigest md = MessageDigest.getInstance("SHA");
-            md.reset();
-            byte[] b = new byte[1024];
-            while(is.read(b) > 0) {
-                md.update(b);
-            }
-            byte[] digested = md.digest();  //"digested" now holds the image checksum
-            
-            //find the appropriate "verifyChecksum" for the current image file
-            if (inFileName.equals("images/" + CSUS_LOGO_FILENAME)) {
-                switch (digested[0]) {
-                    case 98:
-                        verifyChecksum = csusChecksum2;
-                        break;
-                    case -46:
-                        verifyChecksum = csusChecksum3;
-                        break;
-                    default:
-                        verifyChecksum = csusChecksum;
-                        break;
-                } 
-            } else if (inFileName.equalsIgnoreCase("images/" + PC2_LOGO_FILENAME)) {
-                switch (digested[0]) {
-                    case -58:
-                        verifyChecksum = pc2Checksum ;
-                        break;
-                    //TODO: add cases here for pc2checksums computed on other platforms
-                    default:
-                        verifyChecksum = pc2Checksum;
-                        break;
-                }
-            } else if (inFileName.equals("images/" + ICPC_BANNER_FILENAME)){
-                switch (digested[0]) {
-                    case -20:
-                        verifyChecksum = icpcChecksum2;
-                        break;
-                    case 41:
-                        verifyChecksum = icpcChecksum3;
-                        break;
-                    case 47:
-                        verifyChecksum = icpcChecksum4;
-                        break;
-                    default:
-                        verifyChecksum = icpcChecksum;
-                        break;
-                } 
-            } else {
-                //if we get here, the file we were given doesn't match any of the expected/known files we want to check; 
-                // default to the CSUS checksum, which should cause the checksum verification (below) to fail
-                verifyChecksum = csusChecksum;
-            }
-
-            //if in debug mode, print out the calculated checksum values for the specified image
-            if (edu.csus.ecs.pc2.core.Utilities.isDebugMode()) {
-                System.out.println ();
-                System.out.println (inFileName);
-                System.out.print ("byte[] ChecksumX = {");
-                 
-                for (int i = 0; i < digested.length; i++) {
-                    System.out.print(digested[i]);
-                    if (i < digested.length -1) {
-                        System.out.print(", ");
-                    }
-                }
-                System.out.println("};");
-            }
-            
-            //count the number of byte in the calculated checksum which match the expected checksum
-            for (int i = 0; i < digested.length; i++) {
-                if (digested[i] == verifyChecksum[i]) {
-                    matchedBytes++;
-                } else {
-                    break;
-                }
-            }
-            
-            return(matchedBytes == verifyChecksum.length);
-            
-        } catch (IOException e) {
-            StaticLog.log("verifyImage("+inFileName+")", e);
-        } catch (NoSuchAlgorithmException e) {
-            StaticLog.log("verifyImage("+inFileName+")", e);
-        }
-        
-        return false;
-    }
-
-    /**
-     * This method creates a JPanel containing a banner image -- either the default ICPC banner or (if provided) a user-specified banner.
-     * 
-     * @return a JPanel containing a banner image
+     * @return a JPanel containing a banner image, or an empty JPanel if no banner image file could be found
      */
     private JPanel getBottomBannerPanel() {
         if (bottomPanel == null) {
-            
+
             bottomPanel = new JPanel();
             bottomPanel.setBackground(java.awt.Color.white);
 
-           // the image to be placed on the panel
-           ImageIcon bannerImage;
-           boolean useICPCBanner = true;
+            // load the ICPC banner (we're going to need it, either to display it or to use it for scaling the user-provided banner)
+            ImageIcon icpcBannerImage;
+            icpcBannerImage = FrameUtilities.loadImageIconFromFile("images/" + FrameUtilities.ICPC_BANNER_FILENAME);
+            boolean useICPCBanner = true;
 
-           // check if user has provided a banner file
-           File bannerFilePNG = new File("images/" + USER_PROVIDED_BANNER_FILENAME + ".png");
-           File bannerFileJPG = new File("images/" + USER_PROVIDED_BANNER_FILENAME + ".jpg");
-           if (bannerFilePNG.exists() || bannerFileJPG.exists()) {
-               // yes, there is a user-provided banner file
-               if (bannerFilePNG.exists()) {
-                   bannerImage = new ImageIcon("images/" + USER_PROVIDED_BANNER_FILENAME + ".png");
-               } else {
-                   bannerImage = new ImageIcon("images/" + USER_PROVIDED_BANNER_FILENAME + ".jpg");
-               }
-               useICPCBanner = false;
-           } else {
-               // no user-provided banner file; use the ICPC banner
-               bannerImage = loadImageIconFromFile("images/" + ICPC_BANNER_FILENAME);
+            // check if user has provided a banner file
+            ImageIcon userBannerImage=null;
+            File bannerFilePNG = new File("images/" + USER_PROVIDED_BANNER_FILENAME + ".png");
+            File bannerFileJPG = new File("images/" + USER_PROVIDED_BANNER_FILENAME + ".jpg");
+            if (bannerFilePNG.exists() || bannerFileJPG.exists()) {
+                // yes, there is a user-provided banner file
+                if (bannerFilePNG.exists()) {
+                    userBannerImage = new ImageIcon("images/" + USER_PROVIDED_BANNER_FILENAME + ".png");
+                } else {
+                    userBannerImage = new ImageIcon("images/" + USER_PROVIDED_BANNER_FILENAME + ".jpg");
+                }
+                useICPCBanner = false;
+            }
 
-           }
+            // if not using ICPC banner, scale the user's banner Image to insure it fits
+            if (!useICPCBanner) {
+                
+                int width = userBannerImage.getIconWidth();
+                int height = userBannerImage.getIconHeight();
 
-           // if not using ICPC banner, scale the bannerImage to insure it fits
-           if (!useICPCBanner) {
-               int width = bannerImage.getIconWidth();
-               int height = bannerImage.getIconHeight();
-               
-               //make sure the user banner fits across the frame width
-               if (width > INITIAL_FRAME_WIDTH-20) {
-                   width = INITIAL_FRAME_WIDTH-20;
-               }
-               
-               //get the ICPC Banner, to use its height for max banner height if user banner exceeds that
-               ImageIcon icpcBanner = loadImageIconFromFile("images/" + ICPC_BANNER_FILENAME);
-               if (height > icpcBanner.getIconHeight()) {
-                   height = icpcBanner.getIconHeight();
-               }
-               
-               //scale the user's banner to match the available dimensions
-               bannerImage = new ImageIcon(bannerImage.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+                // make sure the user banner fits across the frame width
+                if (width > DEFAULT_FRAME_WIDTH - 20) {
+                    width = DEFAULT_FRAME_WIDTH - 20;
+                }
 
-           }
+                if (height > icpcBannerImage.getIconHeight()) {
+                    height = icpcBannerImage.getIconHeight();
+                }
+                // scale the user's banner to match the available dimensions
+                userBannerImage = new ImageIcon(userBannerImage.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
 
-           JLabel bannerLabel = new JLabel(bannerImage);
-           
-           
-           // TODO: delete border
-//           logoLabel.setBorder(new LineBorder(Color.black));
-           
-           // put some space around the banner
-           Border empty = new EmptyBorder(2, 5, 2, 5);
-           
-           // TODO: enable this border (and change the following statement to "setBorder(compound)") to see boundary around bottom panel
-//           Border orangeline = BorderFactory.createLineBorder(Color.ORANGE);
-//           Border compound = BorderFactory.createCompoundBorder(orangeline, empty);
+            }
 
-           bottomPanel.setBorder(empty);
-//           bottomPanel.setBorder(compound);
+            //choose which image to use
+            ImageIcon bannerImage = useICPCBanner ? icpcBannerImage : userBannerImage ;
+            JLabel bannerLabel = new JLabel(bannerImage);
 
-           bottomPanel.add(bannerLabel, null);
+            // TODO: delete border
+//            logoLabel.setBorder(new LineBorder(Color.black));
+
+            // put some space around the banner
+            Border empty = new EmptyBorder(2, 5, 2, 5);
+
+            // TODO: enable this border (and change the following statement to "setBorder(compound)") to see boundary around bottom panel
+//            Border orangeline = BorderFactory.createLineBorder(Color.ORANGE);
+//            Border compound = BorderFactory.createCompoundBorder(orangeline, empty);
+
+            bottomPanel.setBorder(empty);
+//            bottomPanel.setBorder(compound);
+
+            bottomPanel.add(bannerLabel, null);
         }
         return bottomPanel;
     }
@@ -1002,17 +797,17 @@ public class LoginFrame extends JFrame implements ILoginUI {
         File mainLogoFileJPG = new File ("images/logo.jpg");
         if (mainLogoFilePNG.exists() || mainLogoFileJPG.exists()) {
             //yes, there is a logo file for the main west panel; put the CSUS logo in the north west panel
-            JLabel csusLogoLabel = getLogoCSUS();
-            csusLogoLabel.setBounds(new Rectangle(0, 40, 80, 70));
-            ImageIcon originalImage = new ImageIcon("images/csus_logo.png");
-            ImageIcon scaledImage = new ImageIcon(
-                    originalImage.getImage().getScaledInstance(
-                            ((int) (originalImage.getIconWidth() * 0.6)), 
-                            ((int) (originalImage.getIconHeight() * 0.6)), 
-                            Image.SCALE_SMOOTH));
-            JLabel csusLabel = new JLabel(scaledImage);
             
-            //put some space around the logo
+            ImageIcon csusLogoImage = FrameUtilities.loadImageIconFromFile("images/" + FrameUtilities.CSUS_LOGO_FILENAME);
+            ImageIcon scaledImage = null;
+            if (csusLogoImage!=null) {
+                scaledImage = new ImageIcon(
+                    csusLogoImage.getImage().getScaledInstance(
+                            (int) (csusLogoImage.getIconWidth() * 0.6), (int) (csusLogoImage.getIconHeight() * 0.6), Image.SCALE_SMOOTH));
+            }
+            JLabel csusLogoLabel = new JLabel(scaledImage);
+            
+            //put some space around the logo in the panel
             Border empty = new EmptyBorder(10, 5, 10, 5);
             
             //TODO: enable this statement (together with one above and one below) to see the top left logo panel border
@@ -1025,9 +820,11 @@ public class LoginFrame extends JFrame implements ILoginUI {
             //TODO: enable this statement to see the border around the CSUS label in the top left
 //            csusLabel.setBorder(new LineBorder(Color.black));
 
-            northWestPanel.add(csusLabel);
+            northWestPanel.add(csusLogoLabel);
+            
         } else {
-            //we're leaving the logo empty (it'll go on the main panel); add some spacing
+            
+            //we're leaving the northwest panel empty (the CSUS logo will go on the main panel); add some spacing
             Border empty = new EmptyBorder(10, 20, 10, 20);
 //            Border compound = BorderFactory.createCompoundBorder(orangeline, empty);
             northWestPanel.setBorder(empty);
@@ -1073,8 +870,9 @@ public class LoginFrame extends JFrame implements ILoginUI {
     }
 
     /**
-     * This method returns a JPanel containing the primary contest sponsor logo. If the user has provided a "logo.png" or "logo.jpg" file, the image in that file is displayed on the JPanel; otherwise,
-     * the CSUS logo is displayed.
+     * This method returns a JPanel containing the logo of the primary contest sponsor (University, Club, etc). 
+     * If the user has provided a "logo.png" or "logo.jpg" file, the image in that file is displayed on the JPanel; 
+     * otherwise, the CSUS logo is displayed.
      * 
      * @return a JPanel containing the main contest logo
      */
@@ -1086,40 +884,35 @@ public class LoginFrame extends JFrame implements ILoginUI {
         // TODO: enable this statement (and ones below) to see the border around the main logo display panel
 //        Border orangeline = BorderFactory.createLineBorder(Color.ORANGE);
 
-        // the image to be placed on the panel
-        ImageIcon logoImage;
+        //load the CSUS logo (we're going to need it either because it goes on the panel or because it is used for scaling the user image)
+        ImageIcon csusLogoImage;
+        csusLogoImage = FrameUtilities.loadImageIconFromFile("images/" + FrameUtilities.CSUS_LOGO_FILENAME);
         boolean useCSUSLogo = true;
 
         // check if user has provided a main logo file
+        ImageIcon userLogoImage = null;
         File mainLogoFilePNG = new File("images/" + USER_PROVIDED_LOGO_FILENAME + ".png");
         File mainLogoFileJPG = new File("images/" + USER_PROVIDED_LOGO_FILENAME + ".jpg");
         if (mainLogoFilePNG.exists() || mainLogoFileJPG.exists()) {
             // yes, there is a user-provided logo file
             if (mainLogoFilePNG.exists()) {
-                logoImage = new ImageIcon("images/" + USER_PROVIDED_LOGO_FILENAME + ".png");
+                userLogoImage = new ImageIcon("images/" + USER_PROVIDED_LOGO_FILENAME + ".png");
             } else {
-                logoImage = new ImageIcon("images/" + USER_PROVIDED_LOGO_FILENAME + ".jpg");
+                userLogoImage = new ImageIcon("images/" + USER_PROVIDED_LOGO_FILENAME + ".jpg");
             }
             useCSUSLogo = false;
-        } else {
-            // no user-provided file; use the CSUS logo
-            logoImage = loadImageIconFromFile("images/" + CSUS_LOGO_FILENAME);
-
         }
 
-        // if not using CSUS logo, scale the logoImage to insure it fits; use the CSUS logo as the nominal correct size
+        // if not using CSUS logo, scale the userImage to insure it fits, using the CSUS logo as the nominal correct size
         if (!useCSUSLogo) {
-            // get the CSUS logo
-            ImageIcon csusLogo = loadImageIconFromFile("images/" + CSUS_LOGO_FILENAME);
-            int csusWidth = csusLogo.getIconWidth();
-            int csusHeight = csusLogo.getIconHeight();
-            
-            //scale the user's logo to match the CSUS logo dimensions
+            int csusWidth = csusLogoImage.getIconWidth();
+            int csusHeight = csusLogoImage.getIconHeight();
             int size = Math.max(csusWidth, csusHeight);
-            logoImage = new ImageIcon(logoImage.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH));
-
+            userLogoImage = new ImageIcon(userLogoImage.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH));
         }
 
+        //choose which image to use
+        ImageIcon logoImage = useCSUSLogo ? csusLogoImage : userLogoImage ;
         JLabel logoLabel = new JLabel(logoImage);
         
         // TODO: enable this statement (and ones below) to see the border around the image in the logo display panel
