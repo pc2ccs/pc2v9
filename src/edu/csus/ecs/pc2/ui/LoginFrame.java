@@ -549,7 +549,8 @@ public class LoginFrame extends JFrame implements ILoginUI {
         
         //CSUS Logo (images/csus_logo.png) checksums:
         
-        //generated under Win8.1 w/ java 1.8.0_201; verified the same on Win10 w/ java 1.8.0_201:
+        //generated under Win8.1 w/ java 1.8.0_201; 
+        // verified the same on Win10 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
         byte[] csusChecksum = { -78, -82, -33, 125, 3, 20, 3, -51, 53, -82, -66, -19, -96, 82, 39, -92, 16, 52, 17, 127};
 
         // generated under Windows10 running java version "1.8.0_144" and ubuntu running "1.8.0_131":
@@ -570,7 +571,8 @@ public class LoginFrame extends JFrame implements ILoginUI {
         // this is the eclipse checksum
         byte[] icpcChecksum4 = {47, -56, 88, -115, 40, 20, 98, -6, 99, 49, -17, 37, 74, -77, 0, -74, 55, -100, 9, -118};
       
-        // new 20180924 generated on win10 java9; verified the same on Win8.1 w/ java 1.8.0_201
+        // new 20180924 generated on win10 java9; 
+        //  verified the same on Win8.1 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
         byte[] icpcChecksum = {119, 107, 9, -52, 56, 121, 125, -115, -2, -40, 53, 86, 113, 4, 87, 42, 83, 118, 117, -2};
         
         // mac java8
@@ -579,9 +581,10 @@ public class LoginFrame extends JFrame implements ILoginUI {
         
         //PC2 Logo (images/PC2Logo.png) checksums:
         
-        //generated on Win10 w/ java 1.8.0_201; verified the same on Win8.1 w/ java 1.8.0_201:
+        //generated on Win10 w/ java 1.8.0_201; 
+        // verified the same on Win8.1 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
         byte[] pc2Checksum = {-58, -108, 63, 33, 72, -127, -38, 75, 78, 104, -102, 119, -128, 96, 11, -86, 100, -74, -109, 9};
-
+        
         
         //an array to hold the checksum which is chosen from the above:
         byte[] verifyChecksum = { };
