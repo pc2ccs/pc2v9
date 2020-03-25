@@ -43,6 +43,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import java.awt.Insets;
 
 /**
  * Login frame for all clients.
