@@ -32,6 +32,8 @@ import javax.swing.border.EmptyBorder;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
@@ -307,7 +309,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
             versionTitleLabel.setText("Version XX. XX YYYY vv 22");
             
             nameTitleLabel = new JLabel();
-            nameTitleLabel.setText("Team Login Name");
+            nameTitleLabel.setText("Login Name");
             nameTitleLabel.setPreferredSize(new java.awt.Dimension(65, 16));
             
             //TODO: enable this border to see login-name title boundary
@@ -493,7 +495,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
     /**
      * This method returns an ImageIcon containing the PC2 logo.
      * The first time the method is called it will attempt to load the image icon
-     * from either the pc2.jar or from the file system by calling {@link #loadImageIconFromFile(String)},
+     * from either the pc2.jar or from the file system by calling {@link #loadAndVerifyImageFile(String)},
      * and will return the result of that attempt (which could be null if the file being loaded either
      * doesn't exist or fails to satisfy the checksum test).  
      * On subsequent calls it returns whatever was returned
@@ -506,7 +508,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
     private ImageIcon getPC2LogoImageIcon() {
 
         if (pc2LogoImageIcon==null && !pc2LogoLoadAttempted) {
-            pc2LogoImageIcon = FrameUtilities.loadImageIconFromFile("images/" + FrameUtilities.PC2_LOGO_FILENAME);
+            pc2LogoImageIcon = FrameUtilities.loadAndVerifyImageFile("images/" + FrameUtilities.PC2_LOGO_FILENAME);
             pc2LogoLoadAttempted = true;
         }
 
@@ -520,7 +522,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
      * The method first checks for the existence of either a "banner.png" or a "banner.jpg" file
      * in the ./images folder; if present then it uses that file (favoring the PNG file if
      * both are present).  If neither "banner.png" nor "banner.jpg" is found in "./images",
-     * the method delegates to {@link FrameUtilities#loadImageIconFromFile(String)} to 
+     * the method delegates to {@link FrameUtilities#loadAndVerifyImageFile(String)} to 
      * load the default ICPC banner image file.
      * 
      * @return a JPanel containing a banner image, or an empty JPanel if no banner image file could be found
@@ -533,7 +535,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
 
             // load the ICPC banner (we're going to need it, either to display it or to use it for scaling the user-provided banner)
             ImageIcon icpcBannerImage;
-            icpcBannerImage = FrameUtilities.loadImageIconFromFile("images/" + FrameUtilities.ICPC_BANNER_FILENAME);
+            icpcBannerImage = FrameUtilities.loadAndVerifyImageFile("images/" + FrameUtilities.ICPC_BANNER_FILENAME);
             boolean useICPCBanner = true;
 
             // check if user has provided a banner file
@@ -626,6 +628,11 @@ public class LoginFrame extends JFrame implements ILoginUI {
     }
 
     public static void main(String[] args) {
+        //make sure we have a place to log to if we're running this frame stand-alone
+        Utilities.insureDir("./log");
+        Log log = new Log("./log", "LoginFrame.log");
+        StaticLog.setLog(log);
+
         new LoginFrame().setVisible(true);
     }
 
@@ -798,7 +805,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
         if (mainLogoFilePNG.exists() || mainLogoFileJPG.exists()) {
             //yes, there is a logo file for the main west panel; put the CSUS logo in the north west panel
             
-            ImageIcon csusLogoImage = FrameUtilities.loadImageIconFromFile("images/" + FrameUtilities.CSUS_LOGO_FILENAME);
+            ImageIcon csusLogoImage = FrameUtilities.loadAndVerifyImageFile("images/" + FrameUtilities.CSUS_LOGO_FILENAME);
             ImageIcon scaledImage = null;
             if (csusLogoImage!=null) {
                 scaledImage = new ImageIcon(
@@ -856,8 +863,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
 
         // add the PC2 logo to the north east panel
         ImageIcon pc2ImageIcon = getPC2LogoImageIcon();
-        ImageIcon scaledImage = new ImageIcon(
-                pc2ImageIcon.getImage().getScaledInstance(((int) (pc2ImageIcon.getIconWidth() * 0.1)), ((int) (pc2ImageIcon.getIconHeight() * 0.1)), Image.SCALE_SMOOTH));
+        ImageIcon scaledImage = new ImageIcon(pc2ImageIcon.getImage().getScaledInstance(66, 80, Image.SCALE_SMOOTH));
         JLabel pc2Label = new JLabel(scaledImage);
 
         // TODO: enable this statement to see the border around the PC2 logo
@@ -886,7 +892,7 @@ public class LoginFrame extends JFrame implements ILoginUI {
 
         //load the CSUS logo (we're going to need it either because it goes on the panel or because it is used for scaling the user image)
         ImageIcon csusLogoImage;
-        csusLogoImage = FrameUtilities.loadImageIconFromFile("images/" + FrameUtilities.CSUS_LOGO_FILENAME);
+        csusLogoImage = FrameUtilities.loadAndVerifyImageFile("images/" + FrameUtilities.CSUS_LOGO_FILENAME);
         boolean useCSUSLogo = true;
 
         // check if user has provided a main logo file

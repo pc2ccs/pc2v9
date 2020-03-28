@@ -42,6 +42,7 @@ public final class FrameUtilities {
     public static final String PC2_LOGO_FILENAME = "PC2Logo.png";
     public static final String ICPC_BANNER_FILENAME = "ICPCWebMast_small.png";
     public static final String CSUS_LOGO_FILENAME = "csus_logo.png";
+    public static final String ICPC_LOGO_FILENAME = "icpc-logo@1.5.png";
 
 
     /**
@@ -347,45 +348,55 @@ public final class FrameUtilities {
     }
     
     /**
-     * This method returns an {@link ImageIcon} for the image contained in the whose name is specified.
-     * It first attempts to find the file in the current jar; if not found there it falls back to looking
+     * This method returns an {@link ImageIcon} for the image contained in the file whose name is specified.
+     * It first attempts to find the file as a resource in the current jars; if not found there it falls back to looking
      * for the file in the file system.
+     * If the file is found (in either place) then its checksum is verified before returning a result.
      * 
-     * @return an ImageIcon for the file, or null if the file cannot be found in either location
+     * @param the name of the image file to be loaded
+     * 
+     * @return an ImageIcon for the image file, or null if the file cannot be found or if it fails checksum verification
      */
-    public static ImageIcon loadImageIconFromFile(String inFileName) {
+    public static ImageIcon loadAndVerifyImageFile(String inFileName) {
         File imgFile = new File(inFileName);
-        ImageIcon icon = null;
+        ImageIcon returnIcon = null;
         // attempt to locate image file in jar
+        StaticLog.info("FrameUtilities.loadAndVerifyImageFile(): searching for image file '" + inFileName + "' in jar files");
         URL iconURL = FrameUtilities.class.getResource("/"+inFileName);
         if (iconURL == null) {
             //we didn't find the image file in the jar; look for it in the file system
+            StaticLog.warning("FrameUtilities.loadAndVerifyImageFile(): didn't find image file '" + inFileName + "' in jar files; trying file system");
             if (imgFile.exists()) {
                 try {
                     iconURL = imgFile.toURI().toURL();
+                    StaticLog.info("FrameUtilities.loadAndVerifyImageFile(): found image file '" + imgFile.getName() + "' at URL '" + iconURL + "'");
                 } catch (MalformedURLException e) {
                     iconURL = null;
-                    StaticLog.log("LoginFrame.loadImageIconFromFile("+inFileName+")", e);
+                    StaticLog.log("FrameUtilities.loadAndVerifyImageFile("+inFileName+")", e);
                 }
             }
+        } else {
+            //we found the image in the jar file
+            StaticLog.info("FrameUtilities.loadAndVerifyImageFile(): found image file '" + inFileName + "' at URL '" + iconURL + "'");
         }
         if (iconURL != null) {
             //we found a URL to the image; verify that it has the correct checksum
+            StaticLog.info("FrameUtilities.loadAndVerifyImageFile(): found image file '" + inFileName + "'; verifying checksum");
             if (verifyImage(inFileName, iconURL)) {
                 //checksums match; return an ImageIcon for the image
-                icon = new ImageIcon(iconURL);
+                returnIcon = new ImageIcon(iconURL);
             } else {
-                StaticLog.warning(inFileName+"("+iconURL.toString()+") checksum failed");
+                StaticLog.warning("FrameUtilities.loadAndVerifyImageFile(): " + inFileName+"("+iconURL.toString()+") checksum failed");
             }
         }
-        return icon;
+        return returnIcon;
     }
 
     /**
      * This method verifies that the file whose filename and corresponding URL are provided are legitimate --
      * that is, that the files have the expected SHA checksum values. It first reads the file from the 
      * specified URL, then uses the {@link MessageDigest} class to compute an SHA checksum for that file.
-     * It then uses the given String filename and uses that to select the "expected" checksum for the file,
+     * It then uses the given String filename to select the "correct" checksum for the file,
      * returning true if the checksums match, false otherwise.
      * 
      * @param inFileName the name of the file to be verified
@@ -394,106 +405,61 @@ public final class FrameUtilities {
      * @return true if the SHA checksum for the image at the URL matches the expected checksum; false if not
      */
     private static boolean verifyImage(String inFileName, URL url) {
-        // these are the real (correct) checksums for the specified files, generated on a variety of platforms
         
-        //CSUS Logo (images/csus_logo.png) checksums:
+        // these are the real (correct) checksums for the specified files:
         
-        //generated under Win8.1 w/ java 1.8.0_201; 
-        // verified the same on Win10 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
-        byte[] csusChecksum = { -78, -82, -33, 125, 3, 20, 3, -51, 53, -82, -66, -19, -96, 82, 39, -92, 16, 52, 17, 127};
+        //csus_logo.png (SHA1 = 3E1762112204E9032C45D57D14BB299F9D9ECD42)
+        byte[] csuslogoChecksum =   {62, 23, 98, 17, 34, 4, -23, 3, 44, 69, -43, 125, 20, -69, 41, -97, -99, -98, -51, 66};
+        
+        //PC2Logo.png: (SHA1 = C0D5C36C310EC7092A74A651311FC9D7B987A27D)
+        byte[] pc2logoChecksum =    {-64, -43, -61, 108, 49, 14, -57, 9, 42, 116, -90, 81, 49, 31, -55, -41, -71, -121, -94, 125};
+        
+        //ICPCWebMast_small.png (SHA1 = D5047FE7093E1DB3281F53A83BC02B743A9DA7A4
+        byte[] icpcbannerChecksum = {-43, 4, 127, -25, 9, 62, 29, -77, 40, 31, 83, -88, 59, -64, 43, 116, 58, -99, -89, -92};
+        
+        //icpc_logo.png (SHA1 = 1BFEE495B8862445370FF2CB82884FD286D63C4B)
+        byte[] icpclogoChecksum =   {27, -2, -28, -107, -72, -122, 36, 69, 55, 15, -14, -53, -126, -120, 79, -46, -122, -42, 60, 75};
 
-        // generated under Windows10 running java version "1.8.0_144" and ubuntu running "1.8.0_131":
-        byte[] csusChecksum2 = { 98, 105, -19, -31, -71, -121, 109, -34, 64, 83, -78, -31, 49, -57, 57, 8, 35, -79, 13, -49};
-        
-        // these are the ibm jre checksums
-        byte[] csusChecksum3 = {-46, -84, -66, 55, 82, -78, 124, 88, 68, -83, -128, -110, -19, -26, 92, -3, 76, -26, 21, 30};
-        
-        
-        //ICPC banner (images/ICPCWebMast_small.png) checksums:
-
-        // old icpc_logo.png checksums
-//      byte[] icpcChecksum = {-116, -88, -24, 46, 99, 102, -94, -64, -28, -61, 51, 4, -52, -116, -23, 92, 51, -78, -90, -107};
-//      byte[] icpcChecksum2 = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
-
-        byte[] icpcChecksum3 = {41, 72, 104, 75, 73, 55, 55, 93, 32, 35, -6, -12, -96, -23, -3, -17, -119, 26, 81, -2};
-        
-        // this is the eclipse checksum
-        byte[] icpcChecksum4 = {47, -56, 88, -115, 40, 20, 98, -6, 99, 49, -17, 37, 74, -77, 0, -74, 55, -100, 9, -118};
-      
-        // new 20180924 generated on win10 java9; 
-        //  verified the same on Win8.1 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
-        byte[] icpcChecksum = {119, 107, 9, -52, 56, 121, 125, -115, -2, -40, 53, 86, 113, 4, 87, 42, 83, 118, 117, -2};
-        
-        // mac java8
-        byte[] icpcChecksum2 = {-20, -110, 63, 117, -52, 4, -125, 31, 47, 92, 13, 97, 91, -28, -55, -28, 65, -106, 106, -24};
-        
-        
-        //PC2 Logo (images/PC2Logo.png) checksums:
-        
-        //generated on Win10 w/ java 1.8.0_201; 
-        // verified the same on Win8.1 w/ java 1.8.0_201 and on Ubuntu 18.04 w/ Java openjdk 11.0.4 2019-07-16
-        byte[] pc2Checksum = {-58, -108, 63, 33, 72, -127, -38, 75, 78, 104, -102, 119, -128, 96, 11, -86, 100, -74, -109, 9};
-        
-        
-        //an array to hold the checksum which is chosen from the above:
-        byte[] verifyChecksum = { };
-        
         try {
-            //compute the checksum for the ImageIcon whose URL was passed to us
-            int matchedBytes = 0;
+            //compute the checksum for the image file whose URL was passed to us
             InputStream is = url.openStream();
             MessageDigest md = MessageDigest.getInstance("SHA");
             md.reset();
+            
+//            //old code:
+//            byte[] b = new byte[1024];
+//            while(is.read(b) > 0) {
+//                md.update(b);     <--this produces unpredictable results depending on timing of the read; this is why the old version needed multiple "SHA checksums"
+//            }
+            
+            //new code 27March2020 (from Tim deBoer):
             byte[] b = new byte[1024];
-            while(is.read(b) > 0) {
-                md.update(b);
+            int n = is.read(b);
+            while(n > 0) {
+                md.update(b, 0, n);   //<--this version updates the digest with exactly (and ONLY) the NEW bytes read... (thanks Tim)
+                n = is.read(b);
             }
+            
             byte[] digested = md.digest();  //"digested" now holds the image checksum
             
-            //find the appropriate "verifyChecksum" for the current image file
+            //find the appropriate "correctChecksum" for the current image file
+
+            byte[] correctChecksum = { -1 };  //default to a nonsensical value (must have at least one byte to avoid index-out-of-range, below)
+            
             if (inFileName.equals("images/" + CSUS_LOGO_FILENAME)) {
-                switch (digested[0]) {
-                    case 98:
-                        verifyChecksum = csusChecksum2;
-                        break;
-                    case -46:
-                        verifyChecksum = csusChecksum3;
-                        break;
-                    default:
-                        verifyChecksum = csusChecksum;
-                        break;
-                } 
+                correctChecksum = csuslogoChecksum;
             } else if (inFileName.equalsIgnoreCase("images/" + PC2_LOGO_FILENAME)) {
-                switch (digested[0]) {
-                    case -58:
-                        verifyChecksum = pc2Checksum ;
-                        break;
-                    //TODO: add cases here for pc2checksums computed on other platforms
-                    default:
-                        verifyChecksum = pc2Checksum;
-                        break;
-                }
+                correctChecksum = pc2logoChecksum;
             } else if (inFileName.equals("images/" + ICPC_BANNER_FILENAME)){
-                switch (digested[0]) {
-                    case -20:
-                        verifyChecksum = icpcChecksum2;
-                        break;
-                    case 41:
-                        verifyChecksum = icpcChecksum3;
-                        break;
-                    case 47:
-                        verifyChecksum = icpcChecksum4;
-                        break;
-                    default:
-                        verifyChecksum = icpcChecksum;
-                        break;
-                } 
+                correctChecksum = icpcbannerChecksum;
+            } else if (inFileName.equals("images/" + ICPC_LOGO_FILENAME)) {
+                correctChecksum = icpclogoChecksum;
             } else {
                 //if we get here, the file we were given doesn't match any of the expected/known files we want to check; 
-                // default to the CSUS checksum, which should cause the checksum verification (below) to fail
-                verifyChecksum = csusChecksum;
+                // use the (nonsensical) default (above) which should cause the checksum verification (below) to fail
+                StaticLog.warning("FrameUtilities.verifyImage(): unrecognized image file name: '" + inFileName +"'");
             }
-
+            
             //if in debug mode, print out the calculated checksum values for the specified image
             if (edu.csus.ecs.pc2.core.Utilities.isDebugMode()) {
                 System.out.println ();
@@ -510,15 +476,16 @@ public final class FrameUtilities {
             }
             
             //count the number of byte in the calculated checksum which match the expected checksum
+            int matchedBytes = 0;
             for (int i = 0; i < digested.length; i++) {
-                if (digested[i] == verifyChecksum[i]) {
+                if (digested[i] == correctChecksum[i]) {
                     matchedBytes++;
                 } else {
                     break;
                 }
             }
             
-            return(matchedBytes == verifyChecksum.length);
+            return(matchedBytes == correctChecksum.length);
             
         } catch (IOException e) {
             StaticLog.log("verifyImage("+inFileName+")", e);

@@ -46,7 +46,7 @@ public class AboutPane extends JPanePlugin {
         JPanel logoPanel = new JPanel();
         
         //get the PC2 logo image icon (from either the .jar or the file system)
-        ImageIcon pc2LogoImageIcon = FrameUtilities.loadImageIconFromFile("images/" + FrameUtilities.PC2_LOGO_FILENAME);
+        ImageIcon pc2LogoImageIcon = FrameUtilities.loadAndVerifyImageFile("images/" + FrameUtilities.PC2_LOGO_FILENAME);
         
         //scale the image to properly fit in the About pane
         int width = pc2LogoImageIcon.getIconWidth();
