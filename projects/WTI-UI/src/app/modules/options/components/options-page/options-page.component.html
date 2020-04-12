@@ -1,0 +1,27 @@
+<div class='options-container'>
+    <div>
+        <h2>Change Password</h2>
+        <p>Change your team login password. (Currently not implemented)</p>
+        <button type='button' class='warning' (click)='openChangePW()' [disabled]='true'>Change Password</button>
+    </div>
+    <div>
+        <h2>Notifications</h2>
+        <p>You can enable or disable pop-up alerts when clarifications and run judgements are received from the contest judges.</p>
+        <div class='not-container'>
+            <div>
+                <h4>Clarifications</h4>
+                <label><input type='radio' [(ngModel)]='clarsNotificationsEnabled' name='popupsEnabledClar' [value]='true'> Enable Pop-ups</label>
+                <br />
+                <label><input type='radio' [(ngModel)]='clarsNotificationsEnabled' name='popupsEnabledClar' [value]='false'> Disable Pop-ups</label>
+            </div>
+            <div>
+                <h4>Runs</h4>
+                <label><input type='radio' [(ngModel)]='runsNotificationsEnabled' name='popupsEnabledRun' [value]='true'> Enable Pop-ups</label>
+                <br />
+                <label><input type='radio' [(ngModel)]='runsNotificationsEnabled' name='popupsEnabledRun' [value]='false'> Disable Pop-ups</label>
+            </div>
+        </div>
+
+    </div>
+</div>
+<app-websocket-debug *ngIf='showWebsocketDebug()'></app-websocket-debug>

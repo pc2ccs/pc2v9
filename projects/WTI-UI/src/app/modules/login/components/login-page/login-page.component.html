@@ -1,0 +1,17 @@
+<div class='login-page-container'>
+    <div class='login-container'>
+        <form [formGroup]='formGroup' (ngSubmit)='onSubmit()'>
+            <h4 class='header'>PC^2 Team Login</h4>
+            <div>
+                <input type='text' placeholder='username' formControlName='username'>
+            </div>
+            <div>
+                <input type='password' placeholder='password' formControlName='password'>
+            </div>
+            <div *ngIf='invalidCreds' class='invalid'>Invalid Credentials!</div>
+            <button class='submit-btn warning' type='submit' [disabled]='!formGroup.valid || loginStarted'>
+                {{ loginStarted ? 'Logging in...' : 'Log In' }}
+            </button>
+        </form>
+    </div>
+</div>

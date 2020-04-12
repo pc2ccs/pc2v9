@@ -1,0 +1,12 @@
+<mat-form-field>
+    <mat-label>
+        Select Problem
+    </mat-label>
+    <mat-select [(ngModel)]='value' (ngModelChange)='onChange($event)'>
+            <mat-option [value]='undefined'>Select Problem</mat-option>
+        <mat-option *ngIf='allowGeneral' value='general'>
+            General
+        </mat-option>
+        <mat-option *ngFor='let problem of problems' [value]='problem.name'>{{ problem.name }}</mat-option>
+    </mat-select>
+</mat-form-field>
