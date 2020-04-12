@@ -1,0 +1,7 @@
+<mat-form-field>
+    <mat-label>Select Language</mat-label>
+    <mat-select [(ngModel)]='value' (ngModelChange)='onChange($event)'>
+        <mat-option [value]='undefined'>Select Language</mat-option>
+        <mat-option *ngFor='let language of languages' [value]='language.name'>{{ language.name }}</mat-option>
+    </mat-select>
+</mat-form-field>

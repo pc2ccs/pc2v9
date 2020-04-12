@@ -1,0 +1,7 @@
+<mat-form-field>
+    <mat-label>Select Judgement</mat-label>
+    <mat-select [(ngModel)]='value' (ngModelChange)='onChange($event)'>
+        <mat-option [value]='undefined'>Select Judgement</mat-option>
+        <mat-option *ngFor='let judgement of judgements' [value]='judgement'>{{ judgement }}</mat-option>
+    </mat-select>
+</mat-form-field>

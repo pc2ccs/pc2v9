@@ -1,0 +1,11 @@
+<h1 mat-dialog-title>Run Results Received</h1>
+<div mat-dialog-content>
+    <p>Type: {{ type }}</p>
+    <p>Problem: {{ problem }}</p>
+    <p>Judgement: {{ judgement }}</p>
+    <p *ngIf='isPreliminary' style="color:red">This is a preliminary judgement!</p>
+</div>
+<div mat-dialog-actions>
+    <button (click)='goToRuns()' type='button' class='warning'>Go to Runs</button>&nbsp;
+    <button (click)='close()' type='button' class='warning'>Close</button>
+</div>
