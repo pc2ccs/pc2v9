@@ -2,11 +2,10 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Dimension;
-import java.util.Map;
 
 import javax.swing.JFrame;
 
-import edu.csus.ecs.pc2.shadow.ShadowJudgementInfo;
+import edu.csus.ecs.pc2.shadow.ShadowController;
 
 /**
  * A JFrame which displays a Shadow comparison results pane.
@@ -18,11 +17,11 @@ public class ShadowCompareFrame extends JFrame {
 
     private static final long serialVersionUID = 1L;
     
-    public ShadowCompareFrame(Map<String, ShadowJudgementInfo> map) {
+    public ShadowCompareFrame(ShadowController shadowController) {
         Dimension size = new Dimension(600,600);
         this.setPreferredSize(size);
 //        this.setMinimumSize(size);
-        this.getContentPane().add(new ShadowComparePane(map));
+        this.getContentPane().add(new ShadowComparePane(shadowController));
     }
 
 }

@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -21,17 +22,20 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.RowSorter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.shadow.ShadowJudgementInfo;
 import edu.csus.ecs.pc2.shadow.ShadowJudgementPair;
-import javax.swing.Box;
 
 /**
  * A plug-in pane which displays Shadow comparison results.
@@ -43,10 +47,18 @@ public class ShadowComparePane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
     
-    private Map<String, ShadowJudgementInfo> currentJudgementMap ;
+    private ShadowController shadowController = null ;
     
-    private String lastDirectory = ".";
+    //the current judgement information from the shadow controller
+    private Map<String, ShadowJudgementInfo> currentJudgementMap = null;
+    
+    //the table displaying the current results
+    private JTable resultsTable = null ;
+    
+    //a pane displaying a summary of the current judgement comparison status
+    private ShadowCompareSummaryPane summaryPanel = null ;
 
+    private String lastDirectory = ".";
 
     @Override
     public String getPluginTitle() {
@@ -54,182 +66,183 @@ public class ShadowComparePane extends JPanePlugin {
     }
     
     /**
-     * This GUI class accepts a Mapping from Strings (which are submission IDs) to a {@link ShadowJudgementInfo} for that submission,
+     * This GUI class accepts a reference to a {@link ShadowController}, from which it obtains (by calling 
+     * {@link ShadowController#getJudgementComparisonInfo()}) a
+     * Mapping from Strings (which are submission IDs) to a {@link ShadowJudgementInfo} for that submission,
      * and displays the Shadow Judgement information in tabular form.
      * Each {@link ShadowJudgmentInfo} object contains a submissionID, TeamID, ProblemID, LanguageID, and a
      * {@link ShadowJudgementPair} containing the judgements from both the PC2 Shadow system and the Remote CCS,
      * and displays a table of those submissions and the corresponding judgements.
      * 
-     * The received map is originally constructed (and passed to here) by {@link ShadowController#getJudgementComparisonInfo()).
-     * 
-     * @param map a Mapping of submission IDs to ShadowJudgementInfo objects
+     * @param shadowController a ShadowController used to obtain a Mapping of submission IDs to ShadowJudgementInfo objects
      */
-    public ShadowComparePane(Map<String,ShadowJudgementInfo> map) {
+    public ShadowComparePane(ShadowController shadowController) {
         Dimension size = new Dimension(600,600);
         this.setPreferredSize(size);
         this.setMinimumSize(size);
         
-        currentJudgementMap = map;
+        this.shadowController = shadowController ;
         
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         JLabel header = new JLabel("Comparison of PC2 vs. Remote Judgements");
         header.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.add(header);
         
-        if (map != null && !map.keySet().isEmpty()) {
-            
-            String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
-            Object[][] data = new Object[map.size()][7];
-            int row = 0;
-            for (String key : map.keySet()) {
-                ShadowJudgementInfo curJudgementInfo = map.get(key);
-                data[row][0] = curJudgementInfo.getTeamID();
-                data[row][1] = curJudgementInfo.getProblemID();
-                data[row][2] = curJudgementInfo.getLanguageID();
-                data[row][3] = new Integer(key);
-                ShadowJudgementPair curPair = curJudgementInfo.getShadowJudgementPair();
-                
-                if (curPair!=null) {
-                    data[row][4] = curPair.getPc2Judgement();
-                    data[row][5] = curPair.getRemoteCCSJudgement();
-                }
-                data[row][6] = "---";
-                if (data[row][4]!=null && data[row][5]!=null) {
-                    if (!((String)data[row][4]).toLowerCase().contains("pending")) {
-                        data[row][6] = ((String) data[row][4]).equalsIgnoreCase((String) data[row][5]) ? "Y" : "N";
-                    }
-                }
-
-                row++;
-            }
-            
-            JTable results = new JTable() {
-                    private static final long serialVersionUID = 1L;
-
-//                    String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
-
-                    //override JTable's default renderer to set the background color based on the "Match?" value
-                    public Component prepareRenderer(TableCellRenderer renderer, int row, int column)
-                    {
-                        Component c = super.prepareRenderer(renderer, row, column);
-
-                        //  Color row based on a cell value
-
-                            c.setBackground(getBackground());
-                            int modelRow = convertRowIndexToModel(row);
-                            String matches = (String)getModel().getValueAt(modelRow, 6);
-                            if ("Y".equalsIgnoreCase(matches)) c.setBackground(new Color(153,255,153));
-                            if ("N".equalsIgnoreCase(matches)) c.setBackground(new Color(255,153,153));
-                            
-                            //override color with yellow if PC2 judgement is pending
-                            String pc2Judgement = (String)getModel().getValueAt(modelRow, 4);
-                            if (pc2Judgement!=null && pc2Judgement.toLowerCase().contains("pending")) {
-                                c.setBackground(new Color(255,255,153));
-                            }
-
-                        return c;
-                    }
-
-            };
-
-            
-            results.setModel(new DefaultTableModel(data, columnNames){
-                static final long serialVersionUID = 1;
-                
-//              String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
-
-                Class[] types = { Integer.class, String.class, String.class, Integer.class, String.class, String.class, String.class };
-
-                @Override
-                public Class getColumnClass(int columnIndex) {
-                    return this.types[columnIndex];
-                }
-                
-            });
-            
-            TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(results.getModel());
-            results.setRowSorter(sorter);
-            
-            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-            centerRenderer.setHorizontalAlignment( SwingConstants.CENTER );
-            results.setDefaultRenderer(String.class, centerRenderer);
-            results.setDefaultRenderer(Integer.class, centerRenderer);
-
-            this.add(new JScrollPane(results, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER));
-
-        } else {
-            JLabel label = new JLabel("Comparison map is null or empty");
-            this.add(label);
-        }
+        //get the framework for the table which will be used to display comparison results
+        resultsTable = getResultsTable();
         
+        //put the current comparison results into the table model
+        resultsTable.setModel(getUpdatedResultsTableModel());
+        
+        //support sorting the table by clicking on the column headers
+        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(resultsTable.getModel());
+        resultsTable.setRowSorter(sorter);
+        resultsTable.setAutoCreateRowSorter(true); //necessary to allow updated model to display and sort correctly
+                
+        //put the results table in a scrollpane on the GUI
+        JScrollPane scrollPane = new JScrollPane(resultsTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        this.add(scrollPane);
+
         this.add(getSummaryPanel());
         
         this.add(getButtonPanel());
+    }
         
+    /**
+     * Returns a JTable organized for containing a comparison, for each received submission, between the PC2 judgement
+     * for the submission and the judgement assigned by the Remote CCS.
+     * The returned JTable applies formatting to cell colors based on the status of the submission.
+     * 
+     * Note: this method does not actually fill in any table data; it is expected that external code will
+     * invoke {@link #getUpdatedResultsTableModel()} to create and load the current comparison results into the table.
+     * 
+     * @return a JTable organized for containing judgement comparisons
+     */
+    private JTable getResultsTable() {
+
+        JTable resultsTable = new JTable() {
+            private static final long serialVersionUID = 1L;
+
+//          String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
+
+            // override JTable's default renderer to set the background color based on the "Match?" value
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component c = super.prepareRenderer(renderer, row, column);
+
+                // Color the row based on the "Match?" cell value
+                c.setBackground(getBackground());
+                int modelRow = convertRowIndexToModel(row);
+                String matches = (String) getModel().getValueAt(modelRow, 6);
+                if ("Y".equalsIgnoreCase(matches))
+                    c.setBackground(new Color(153, 255, 153));
+                if ("N".equalsIgnoreCase(matches))
+                    c.setBackground(new Color(255, 153, 153));
+
+                // override color with yellow if PC2 judgement is pending
+                String pc2Judgement = (String) getModel().getValueAt(modelRow, 4);
+                if (pc2Judgement != null && pc2Judgement.toLowerCase().contains("pending")) {
+                    c.setBackground(new Color(255, 255, 153));
+                }
+
+                return c;
+            }
+            
+            //we don't want any of the results cells to be editable
+            public boolean isCellEditable(int nRow, int nCol) {
+                return false;
+            }
+        };
+
+        // set default "centering" renderers for strings and integers in the table
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        resultsTable.setDefaultRenderer(String.class, centerRenderer);
+        resultsTable.setDefaultRenderer(Integer.class, centerRenderer);
+        
+        resultsTable.setRowSelectionAllowed(true);
+        resultsTable.setColumnSelectionAllowed(false);
+        resultsTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+
+        return resultsTable;
+
     }
     
-    private JComponent getSummaryPanel() {
+    /**
+     * Returns a {@link TableModel} containing data for the current comparisons between the PC2 shadow and the Remote CCS.
+     * 
+     * @return
+     */
+    private TableModel getUpdatedResultsTableModel() {
         
-        JPanel summaryPanel = new JPanel();
-        summaryPanel.setMaximumSize(new Dimension(500,40));
+        //get the current judgement information from the shadow controller
+        currentJudgementMap = shadowController.getJudgementComparisonInfo();
 
-        int submissionCount = currentJudgementMap.keySet().size();
+        //define the columns for the table
+        String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
         
-        JLabel subCountLabel = new JLabel();
-        subCountLabel.setText("Total Submissions = " + new Integer(submissionCount).toString());
-        summaryPanel.add(subCountLabel);
+        //an array to hold the table data
+        Object[][] data = new Object[currentJudgementMap.size()][7];
         
-//        JLabel shadowYesCountLabel = new JLabel();
-//        int shadowYesCount = 0 ;
-//        for (String key : currentJudgementMap.keySet()) {
-//            ShadowJudgementPair pair = currentJudgementMap.get(key);
-//            String pc2Judgment = pair.getPc2Judgement();
-//            if (pc2Judgment!=null && (pc2Judgment.equalsIgnoreCase("AC")||pc2Judgment.equalsIgnoreCase("Yes")) ){
-//                shadowYesCount++;
-//            }
-//        }
-//        
-//        Component horizontalGlue = Box.createHorizontalGlue();
-//        summaryPanel.add(horizontalGlue);
-//        shadowYesCountLabel.setText("Shadow AC = " + new Integer(shadowYesCount).toString());
-//        summaryPanel.add(shadowYesCountLabel);
-//        
-//        JLabel remoteYesCountLabel = new JLabel();
-//        int remoteYesCount = 0 ;
-//        for (String key : currentJudgementMap.keySet()) {
-//            ShadowJudgementPair pair = currentJudgementMap.get(key);
-//            String remoteJudgment = pair.getRemoteCCSJudgement();
-//            if (remoteJudgment!=null && (remoteJudgment.equalsIgnoreCase("AC")||remoteJudgment.equalsIgnoreCase("Yes")) ){
-//                remoteYesCount++;
-//            }
-//        }
-//        
-//        Component horizontalGlue_1 = Box.createHorizontalGlue();
-//        summaryPanel.add(horizontalGlue_1);
-//        remoteYesCountLabel.setText("Remote AC = " + new Integer(remoteYesCount).toString());
-//        summaryPanel.add(remoteYesCountLabel);
-        
-        JLabel matchCounts = new JLabel();
-        int match = 0;
-        int noMatch = 0;
-        for (String submissionID : currentJudgementMap.keySet()) {
-
-            String pc2Judgement = currentJudgementMap.get(submissionID).getShadowJudgementPair().getPc2Judgement();
-            String remoteJudgement = currentJudgementMap.get(submissionID).getShadowJudgementPair().getRemoteCCSJudgement();
-            if (pc2Judgement!=null && remoteJudgement!=null && (pc2Judgement.equalsIgnoreCase(remoteJudgement))) {
-                match++ ;
-            } else {
-                noMatch++ ;                    
+        //fill in each data row with info from the shadow controller's judgement map
+        int row = 0;
+        for (String key : currentJudgementMap.keySet()) {
+            ShadowJudgementInfo curJudgementInfo = currentJudgementMap.get(key);
+            data[row][0] = curJudgementInfo.getTeamID();
+            data[row][1] = curJudgementInfo.getProblemID();
+            data[row][2] = curJudgementInfo.getLanguageID();
+            data[row][3] = new Integer(key);
+            ShadowJudgementPair curPair = curJudgementInfo.getShadowJudgementPair();
+            
+            if (curPair!=null) {
+                data[row][4] = curPair.getPc2Judgement();
+                data[row][5] = curPair.getRemoteCCSJudgement();
             }
+            data[row][6] = "---";
+            if (data[row][4]!=null && data[row][5]!=null) {
+                if (!((String)data[row][4]).toLowerCase().contains("pending")) {
+                    data[row][6] = ((String) data[row][4]).equalsIgnoreCase((String) data[row][5]) ? "Y" : "N";
+                }
+            }
+
+            row++;
         }
         
-        Component horizontalGlue_2 = Box.createHorizontalGlue();
-        summaryPanel.add(horizontalGlue_2);
-        matchCounts.setText("Matches: " + match + "   Non-matches: " + noMatch);
-        summaryPanel.add(matchCounts);
+        //construct a TableModel from the data, also providing an overridden getColumnClass() method
+        TableModel tableModel = new DefaultTableModel(data, columnNames){
+            static final long serialVersionUID = 1;
+            
+//          String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
+            Class<?>[] types = { Integer.class, String.class, String.class, Integer.class, String.class, String.class, String.class };
+            
+            //return the appropriate class for the column so that correct cell renderer will be used
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                return this.types[columnIndex];
+            }
+            
+        };
         
-       return summaryPanel ;
+        return tableModel ;
+    }
+    
+    /**
+     * Returns a JPanel containing a summary of the comparison information most recently obtained
+     * from the {@link ShadowController}.  The global (field) variable "currentJudgementMap" is
+     * used as the indicator of the most recently obtained comparison information; this variable
+     * is set in {@link #getUpdatedResultsTableModel()}, which is called by this class's constructor
+     * (and may also have been subsequently called again by the actionListener() for the "Refresh" button). 
+     *  
+     * @return a JPanel containing a submission comparison summary
+     */
+    private ShadowCompareSummaryPane getSummaryPanel() {
+        
+        if (summaryPanel==null) {
+            summaryPanel = new ShadowCompareSummaryPane(currentJudgementMap);
+        }
+        
+        return summaryPanel;
+        
     }
     
     
@@ -237,6 +250,45 @@ public class ShadowComparePane extends JPanePlugin {
         
         JPanel buttonPanel = new JPanel();
         buttonPanel.setMaximumSize(new Dimension(500,40));
+        
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                
+                // refresh the results table
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+
+                        //save info on the current sort column/order for the resultsTable
+                        RowSorter<? extends TableModel> oldSorter = resultsTable.getRowSorter();
+                        
+                        //get a new model based on the current data
+                        TableModel newTableModel = getUpdatedResultsTableModel();
+                        
+                        //create a new sorter based on the updated model
+                        TableRowSorter<DefaultTableModel> newSorter = new TableRowSorter<DefaultTableModel>((DefaultTableModel) newTableModel);
+                        if (oldSorter != null) {
+                            newSorter.setSortKeys(oldSorter.getSortKeys());
+                        }
+
+                        //update the model and the row sorter in the table so the table remains sorted as before
+                        resultsTable.setModel(newTableModel);
+                        resultsTable.setRowSorter(newSorter);
+
+                        //update the summary panel to correspond to the new table data
+                        getSummaryPanel().updateSummary(currentJudgementMap);
+                        
+                    }
+                });
+            }
+        });
+        buttonPanel.add(refreshButton);
+        
+        Component horizontalStrut = Box.createHorizontalStrut(20);
+        buttonPanel.add(horizontalStrut);
+
         JButton saveButton = new JButton("Save As .csv");
         saveButton.addActionListener(new ActionListener() {
 
@@ -245,9 +297,9 @@ public class ShadowComparePane extends JPanePlugin {
                 saveCSVFile();
             }
         });
-                
         buttonPanel.add(saveButton);
         
+       
         return buttonPanel ;
     }
     
