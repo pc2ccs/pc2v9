@@ -1,0 +1,34 @@
+{{ $stableRelease := index $.Site.Data.releases.stable }}
+{{ $preRelease := index $.Site.Data.releases.prerelease }}
+{{ $nightly := index $.Site.Data.releases.nightly }}
+{{ $stableTool := index $stableRelease.downloads (.Get "toolname") }}
+{{ $prerelaseTool := index $preRelease.downloads (.Get "toolname") }}
+{{ $nightlyTool := index $nightly.downloads (.Get "toolname") }}
+
+<h2>Download</h2>
+<p>
+    The latest stable release {{ .Get "name" }} version is {{ $stableTool.version }}, released on {{ $stableRelease.date }}.
+</p>
+<p>
+    <a class="btn btn-primary" href="{{ $stableTool.urls.zip }}"><i class="fas fa-download"></i> Download stable <i>{{ .Get "name" }}</i> (version {{ $stableTool.version }})</a>
+</p>
+<p>
+    The latest release candidate {{ .Get "name" }} version is {{ $prerelaseTool.version }}, released on {{ $preRelease.date }}.
+</p>
+<p>
+    <a class="btn btn-danger" href="{{ $prerelaseTool.urls.zip }}"><i class="fas fa-download"></i> Download release candidate <i>{{ .Get "name" }}</i> (version {{ $prerelaseTool.version }})</a>
+</p>
+<p>
+    The latest nightly build {{ .Get "name" }} version is {{ $nightlyTool.version }}, released on {{ $nightly.date }}.
+</p>
+<p>
+    <a class="btn btn-danger" href="{{ $nightlyTool.urls.zip }}"><i class="fas fa-download"></i> Download nightly build <i>{{ .Get "name" }}</i> (version {{ $nightlyTool.version }})</a>
+</p>
+<h2>Documentation</h2>
+
+<p>
+    The {{ .Get "name" }} Administrator's Guide is contained in the <b>/doc</b> folder in all of the above downloads.  You can also download it directly by clicking on the following link:
+</p>
+<p>
+    <a class="btn btn-secondary" href="/docs/{{ .Get "doc" }}.pdf"><i class="fas fa-file-pdf"></i> Download / view documentation (PDF format)</a>
+</p>

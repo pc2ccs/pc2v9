@@ -1,0 +1,21 @@
+{{ $stableRelease := index $.Site.Data.releases.stable }}
+{{ $preRelease := index $.Site.Data.releases.prerelease }}
+{{ $nightly := index $.Site.Data.releases.nightly }}
+{{ $stableTool := index $stableRelease.downloads (.Get "toolname") }}
+{{ $prerelaseTool := index $preRelease.downloads (.Get "toolname") }}
+{{ $nightlyTool := index $nightly.downloads (.Get "toolname") }}
+<div class="col-md-6 mb-3">
+    <p>
+        {{ .Get "description" }}
+    </p>
+    <p>
+        Downloads: <br/> 
+        Stable Release: <a href="{{ $stableTool.urls.zip }}">{{ .Get "shortname" }} version {{ $stableTool.version }}</a><br />
+        Release Candidate: <a href="{{ $prerelaseTool.urls.zip }}">{{ .Get "shortname" }} version {{ $prerelaseTool.version }}</a><br />
+        Nightly Build: <a href="{{ $nightlyTool.urls.zip }}">{{ .Get "shortname" }} version {{ $nightlyTool.version }}</a><br />
+        Documentation: <a href="/docs/{{ .Get "doc" }}.pdf">Contest Administrator's Guide (PDF)</a><br />
+    </p>
+    <p>
+        <a href="{{ .Get "page" }}">More information</a>
+    </p>
+</div>

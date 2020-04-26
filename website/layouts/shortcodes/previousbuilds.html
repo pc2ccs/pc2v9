@@ -1,0 +1,33 @@
+{{ range $build := $.Site.Data.releases.prev_stable }}
+<table class="table table-hover table-striped">
+    <tbody>
+        <tr>
+            <td><b>Version {{ $build.version }}</b> &nbsp; &nbsp; (build date {{ $build.time }} on {{ $build.date }})</td>
+        </tr>
+    </tbody>
+    
+    <tr><td>
+    
+<table class="table table-hover table-striped">
+    <tbody>
+        {{ range $pc2 := $.Site.Data.pc2 }}
+            {{ if isset $build.downloads $pc2.tool }}
+            {{ $download := index $build.downloads $pc2.tool }}
+            <tr>
+                <th>{{ $pc2.name }}</th>
+                <td align="right">{{ $download.size }} MB</td>
+                <td>
+                    <a href="{{ $download.urls.zip }}">{{ $pc2.tool }}-{{ $download.version }}.zip</a>
+                    {{ if and (isset $download.urls "sha256") (isset $download.urls "sha512") }}
+                    (<a href="{{ $download.urls.sha256 }}">sha256</a>, <a href="{{ $download.urls.sha512 }}">sha512</a>)
+                    {{ end }}
+                </td>
+            </tr>
+            {{ end }}
+        {{ end }}
+    </tbody>
+</table>
+
+</td></tr></table>
+
+{{ end }}
