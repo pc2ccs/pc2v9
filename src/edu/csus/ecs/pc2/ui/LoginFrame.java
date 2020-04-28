@@ -3,18 +3,16 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.FlowLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -28,10 +26,14 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
@@ -52,6 +54,11 @@ public class LoginFrame extends JFrame implements ILoginUI {
     private static final long serialVersionUID = -6389607881992853161L;
 
     private static final String AUTO_REGISTRATION_LOGIN = "auto";
+    
+    private final String USER_PROVIDED_LOGO_FILENAME = "logo";
+    private final String USER_PROVIDED_BANNER_FILENAME = "banner";
+    
+    private final int DEFAULT_FRAME_WIDTH = 800 ;
 
     private IInternalContest contest;
 
@@ -67,8 +74,6 @@ public class LoginFrame extends JFrame implements ILoginUI {
 
     private JLabel versionTitleLabel = null;
 
-    private JLabel mainTitleTopLabel = null;
-
     private JLabel passwordTitleLabel = null;
 
     private JButton loginButton = null;
@@ -77,27 +82,20 @@ public class LoginFrame extends JFrame implements ILoginUI {
 
     private JLabel messageLabel = null;
 
-    private JLabel mainTitleBottomLabel = null;
-
     private LogWindow logWindow = null;
 
     private JPanel mainPanel;
 
     private JPanel westPanel;
 
-    private JLabel logoCSUS = null;
-
     private JPanel bottomPanel = null;
 
-    private JLabel logoICPC = null;
-
     private JPanel northPanel = null;
-
-    private JLabel spacerLabel = null;
 
     private Boolean bAlreadyLoggingIn = false;
     
     private AutoRegistrationFrame autoRegistrationFrame = null;
+
 
     /**
      * This method initializes
@@ -111,16 +109,19 @@ public class LoginFrame extends JFrame implements ILoginUI {
     }
 
     /**
-     * This method initializes this
+     * This method initializes this LoginFrame to contain a main panel containing a title display, image icons,
+     * and a set of account name/password login text fields.
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(628,450));
-        this.setPreferredSize(new java.awt.Dimension(628,450));
-        this.setMinimumSize(new java.awt.Dimension(628,450));
+
+        this.setSize(new java.awt.Dimension(DEFAULT_FRAME_WIDTH,500));
+        this.setPreferredSize(new java.awt.Dimension(DEFAULT_FRAME_WIDTH,500));
+        this.setMinimumSize(new java.awt.Dimension(DEFAULT_FRAME_WIDTH,500));
         this.setBackground(new java.awt.Color(253, 255, 255));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("PC^2 Login");
+        this.setIconImages(getImagesForPC2LogoIcons());
         this.setContentPane(getMainPanel());
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -148,16 +149,49 @@ public class LoginFrame extends JFrame implements ILoginUI {
             FrameUtilities.setNativeLookAndFeel();
         }
     }
+    
+    /**
+     * This method returns a list of Images which can be used as icon images for the JFrame.
+     * Providing a list of icon images allows the underlying OS to select the most appropriate
+     * size image for the purpose.  (For example, Windows uses a different size icon image in the title bar
+     * from what it uses in the System Tray when the frame is minimized.)
+     * 
+     * @return a List of IconImages
+     */
+    private List<? extends Image> getImagesForPC2LogoIcons() {
+        
+        //the sizes of Icon Images we're going to generate/return (NxN)
+        final int[] sizes = { 16, 20, 30, 32, 40, 64};
 
+        ArrayList<Image> icons = new ArrayList<Image>();
+        
+        ImageIcon pc2logo = getPC2LogoImageIcon();
+        
+        if (pc2logo!=null) {
+            for (int i=0; i< sizes.length; i++) {
+                //generate the next scaled version of the pc2logo
+                icons.add(pc2logo.getImage().getScaledInstance(sizes[i], sizes[i], Image.SCALE_SMOOTH));  
+            }
+        }
+        
+        return icons;
+    }
+
+    /**
+     * Returns a JPanel containing a north panel with title text and logos, a center panel with textfields for entering login information
+     * along with control buttons, a west panel containing an appropriate contest logo, and a south panel containing an approprate banner image.
+     * 
+     * @return a JPanel populated with appropriate login frame components
+     */
     private JPanel getMainPanel() {
         if (mainPanel == null) {
             mainPanel = new JPanel();
             mainPanel.setLayout(new BorderLayout());
 
-            mainPanel.add(getPasswordTitleLabel(), java.awt.BorderLayout.CENTER);
-            mainPanel.add(getWestPanel(), java.awt.BorderLayout.WEST);
-            mainPanel.add(getBottomPanel(), java.awt.BorderLayout.SOUTH);
             mainPanel.add(getNorthPanel(), java.awt.BorderLayout.NORTH);
+            mainPanel.add(getMainLoginInfoPanel(), java.awt.BorderLayout.CENTER);
+            mainPanel.add(getWestPanel(), java.awt.BorderLayout.WEST);
+            mainPanel.add(getBottomBannerPanel(), java.awt.BorderLayout.SOUTH);
         }
 
         return mainPanel;
@@ -165,27 +199,29 @@ public class LoginFrame extends JFrame implements ILoginUI {
 
     private JPanel getWestPanel() {
         if (westPanel == null) {
-            FlowLayout flowLayout = new FlowLayout();
-            flowLayout.setVgap(30);
-            flowLayout.setHgap(5);
+            
             westPanel = new JPanel();
-            westPanel.setLayout(flowLayout);
-            westPanel.setMinimumSize(new java.awt.Dimension(130, 132));
-            westPanel.setPreferredSize(new java.awt.Dimension(140, 132));
             westPanel.setBackground(java.awt.Color.white);
-            westPanel.add(getLogoCSUS(), null);
+            
+            westPanel.add(getMainLogoPanel(), null);            
+
+//            westPanel.setMinimumSize(new java.awt.Dimension(130, 132));
+//            westPanel.setPreferredSize(new java.awt.Dimension(140, 132));
         }
 
         return westPanel;
     }
 
     /**
-     * This method initializes jPanel
+     * This method returns a JPanel containing the main components used for logging in to PC2: textfields for name and password, Login and Exit buttons,
+     * and message area for displaying approprate status messages (initially empty).
      * 
-     * @return javax.swing.JPanel
+     * @return a JPanel with login components
      */
-    private JPanel getPasswordTitleLabel() {
+    private JPanel getMainLoginInfoPanel() {
         if (centerPane == null) {
+            
+            //message label layout constraints
             GridBagConstraints gridBagConstraints7 = new GridBagConstraints();
             gridBagConstraints7.insets = new java.awt.Insets(3,66,2,54);
             gridBagConstraints7.gridx = 0;
@@ -193,21 +229,39 @@ public class LoginFrame extends JFrame implements ILoginUI {
             gridBagConstraints7.ipadx = 360;
             gridBagConstraints7.ipady = 26;
             gridBagConstraints7.gridwidth = 2;
+            
+            //exit button layout constraints
             GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
+            gridBagConstraints6.anchor = GridBagConstraints.WEST;
             gridBagConstraints6.insets = new java.awt.Insets(7,52,3,130);
             gridBagConstraints6.gridy = 4;
             gridBagConstraints6.ipadx = 40;
             gridBagConstraints6.gridx = 1;
+            
+            //login button layout constraints
             GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
             gridBagConstraints5.insets = new java.awt.Insets(7,32,3,76);
             gridBagConstraints5.gridy = 4;
             gridBagConstraints5.ipadx = 30;
             gridBagConstraints5.gridx = 0;
+            
+            //login-name title label layout constraints
+            GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
+            gridBagConstraints2.fill = GridBagConstraints.HORIZONTAL;
+            gridBagConstraints2.insets = new Insets(23, 33, 1, 51);
+            gridBagConstraints2.gridx = 0;
+            gridBagConstraints2.gridy = 0;
+            gridBagConstraints2.ipadx = 39;
+
+            //password title label layout constraints
             GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
-            gridBagConstraints4.insets = new java.awt.Insets(12,32,1,51);
-            gridBagConstraints4.gridy = 2;
-            gridBagConstraints4.ipadx = 62;
+            gridBagConstraints4.fill = GridBagConstraints.HORIZONTAL;
+            gridBagConstraints4.insets = new Insets(12, 33, 1, 60);
             gridBagConstraints4.gridx = 0;
+            gridBagConstraints4.gridy = 2;
+            gridBagConstraints4.ipadx = 39;
+                        
+            //version title label layout constraints
             GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
             gridBagConstraints3.insets = new java.awt.Insets(2,99,11,75);
             gridBagConstraints3.gridx = 0;
@@ -215,41 +269,52 @@ public class LoginFrame extends JFrame implements ILoginUI {
             gridBagConstraints3.ipadx = 158;
             gridBagConstraints3.ipady = 7;
             gridBagConstraints3.gridwidth = 2;
-            GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-            gridBagConstraints2.insets = new java.awt.Insets(23,32,0,87);
-            gridBagConstraints2.gridy = 0;
-            gridBagConstraints2.ipadx = 39;
-            gridBagConstraints2.ipady = -1;
-            gridBagConstraints2.gridx = 0;
+            
+            //login textfield layout constraints
             GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-            gridBagConstraints1.fill = java.awt.GridBagConstraints.HORIZONTAL;
+            gridBagConstraints1.anchor = GridBagConstraints.WEST;
+            gridBagConstraints1.fill = java.awt.GridBagConstraints.NONE;
             gridBagConstraints1.gridwidth = 2;
             gridBagConstraints1.gridx = 0;
             gridBagConstraints1.gridy = 1;
             gridBagConstraints1.ipadx = 362;
             gridBagConstraints1.weightx = 1.0;
             gridBagConstraints1.insets = new java.awt.Insets(1,32,12,82);
+            
+            //password textfield layout constraints
             GridBagConstraints gridBagConstraints = new GridBagConstraints();
-            gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+            gridBagConstraints.anchor = GridBagConstraints.WEST;
+            gridBagConstraints.fill = java.awt.GridBagConstraints.NONE;
             gridBagConstraints.gridwidth = 2;
             gridBagConstraints.gridx = 0;
             gridBagConstraints.gridy = 3;
             gridBagConstraints.ipadx = 364;
             gridBagConstraints.weightx = 1.0;
             gridBagConstraints.insets = new java.awt.Insets(1,32,7,80);
+            
             messageLabel = new JLabel();
             messageLabel.setForeground(Color.red);
             messageLabel.setText("");
             messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            
             passwordTitleLabel = new JLabel();
             passwordTitleLabel.setText("Password");
+            
+            //TODO: enable this border to see password title boundary
+//            passwordTitleLabel.setBorder(new LineBorder(Color.green));
+            
             versionTitleLabel = new JLabel();
             versionTitleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             versionTitleLabel.setText("Version XX. XX YYYY vv 22");
+            
             nameTitleLabel = new JLabel();
-            nameTitleLabel.setText("Name");
-            nameTitleLabel.setPreferredSize(new java.awt.Dimension(45, 16));
+            nameTitleLabel.setText("Login Name");
+            nameTitleLabel.setPreferredSize(new java.awt.Dimension(65, 16));
+            
+            //TODO: enable this border to see login-name title boundary
+//            nameTitleLabel.setBorder(new LineBorder(Color.green));
+            
             centerPane = new JPanel();
             centerPane.setLayout(new GridBagLayout());
             centerPane.setBackground(java.awt.Color.white);
@@ -261,6 +326,9 @@ public class LoginFrame extends JFrame implements ILoginUI {
             centerPane.add(getLoginButton(), gridBagConstraints5);
             centerPane.add(getExitButton(), gridBagConstraints6);
             centerPane.add(messageLabel, gridBagConstraints7);
+            
+            //TODO: enable this statement to see the border around the main "login/password" screen panel
+//            centerPane.setBorder(new LineBorder(Color.red));
         }
         return centerPane;
     }
@@ -425,193 +493,146 @@ public class LoginFrame extends JFrame implements ILoginUI {
     }
 
     /**
-     * This method initializes logoCSUS
+     * This method returns an ImageIcon containing the PC2 logo.
+     * The first time the method is called it will attempt to load the image icon
+     * from either the pc2.jar or from the file system by calling {@link #loadAndVerifyImageFile(String)},
+     * and will return the result of that attempt (which could be null if the file being loaded either
+     * doesn't exist or fails to satisfy the checksum test).  
+     * On subsequent calls it returns whatever was returned
+     * from the first call (which could therefore be null as well).
      * 
-     * @return javax.swing.JLabel
+     * @return a PC2 Logo ImageIcon, or null if the image icon could not be properly loaded
      */
-    private JLabel getLogoCSUS() {
-        if (logoCSUS == null) {
-            logoCSUS = new JLabel();
+    private ImageIcon pc2LogoImageIcon = null;
+    private boolean pc2LogoLoadAttempted = false;
+    private ImageIcon getPC2LogoImageIcon() {
 
-            ImageIcon image = loadImageIconFromFile("images/csus_logo.png");
-            logoCSUS.setIcon(image);
-            logoCSUS.setBounds(new java.awt.Rectangle(-11, 48, 137, 127));
+        if (pc2LogoImageIcon==null && !pc2LogoLoadAttempted) {
+            pc2LogoImageIcon = FrameUtilities.loadAndVerifyImageFile("images/" + FrameUtilities.PC2_LOGO_FILENAME);
+            pc2LogoLoadAttempted = true;
         }
-        return logoCSUS;
+
+        return pc2LogoImageIcon;
     }
-
-    /*
-     * Given a inFileName attempts to find file in jar, otherwise falls back to file system.
-     * 
-     * Will return null if file is not found in either location.
-     */
-    private ImageIcon loadImageIconFromFile(String inFileName) {
-        File imgFile = new File(inFileName);
-        ImageIcon icon = null;
-        // attempt to locate in jar
-        URL iconURL = getClass().getResource("/"+inFileName);
-        if (iconURL == null) {
-            if (imgFile.exists()) {
-                try {
-                    iconURL = imgFile.toURI().toURL();
-                } catch (MalformedURLException e) {
-                    iconURL = null;
-                    StaticLog.log("LoginFrame.loadImageIconFromFile("+inFileName+")", e);
-                }
-            }
-        }
-        if (iconURL != null) {
-            if (verifyImage(inFileName, iconURL)) {
-                icon = new ImageIcon(iconURL);
-            } else {
-                StaticLog.warning(inFileName+"("+iconURL.toString()+") checksum failed");
-            }
-        }
-        return icon;
-    }
-
-    private boolean verifyImage(String inFileName, URL url) {
-        // these are the real checksums
-        byte[] csusChecksum = { -78, -82, -33, 125, 3, 20, 3, -51, 53, -82, -66, -19, -96, 82, 39, -92, 16, 52, 17, 127};
-        // generated under Windows10 running java version "1.8.0_144" and ubuntu running "1.8.0_131"
-//        byte[] icpcChecksum = {-116, -88, -24, 46, 99, 102, -94, -64, -28, -61, 51, 4, -52, -116, -23, 92, 51, -78, -90, -107};
-        byte[] csusChecksum2 = { 98, 105, -19, -31, -71, -121, 109, -34, 64, 83, -78, -31, 49, -57, 57, 8, 35, -79, 13, -49};
-        // old icpc_logo.png checksum
-//        byte[] icpcChecksum2 = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
-        // these are the ibm jre checksums
-        byte[] csusChecksum3 = {-46, -84, -66, 55, 82, -78, 124, 88, 68, -83, -128, -110, -19, -26, 92, -3, 76, -26, 21, 30};
-        // old icpc_logo.png checksum
-        byte[] icpcChecksum3 = {41, 72, 104, 75, 73, 55, 55, 93, 32, 35, -6, -12, -96, -23, -3, -17, -119, 26, 81, -2};
-        
-        // this is the eclipse checksum
-        byte[] icpcChecksum4 = {47, -56, 88, -115, 40, 20, 98, -6, 99, 49, -17, 37, 74, -77, 0, -74, 55, -100, 9, -118};
-
-        // new 20180924
-        // win10 java9
-        byte[] icpcChecksum = {119, 107, 9, -52, 56, 121, 125, -115, -2, -40, 53, 86, 113, 4, 87, 42, 83, 118, 117, -2};
-        // mac java8
-        byte[] icpcChecksum2 = {-20, -110, 63, 117, -52, 4, -125, 31, 47, 92, 13, 97, 91, -28, -55, -28, 65, -106, 106, -24};
-        byte[] verifyChecksum;
-        
-        try {
-            int matchedBytes = 0;
-            InputStream is = url.openStream();
-            MessageDigest md = MessageDigest.getInstance("SHA");
-            md.reset();
-            byte[] b = new byte[1024];
-            while(is.read(b) > 0) {
-                md.update(b);
-            }
-            byte[] digested = md.digest();
-            if (inFileName.equals("images/csus_logo.png")) {
-                switch (digested[0]) {
-                    case 98:
-                        verifyChecksum = csusChecksum2;
-                        break;
-                    case -46:
-                        verifyChecksum = csusChecksum3;
-                        break;
-                    default:
-                        verifyChecksum = csusChecksum;
-                        break;
-                } 
-            } else {
-                switch (digested[0]) {
-                    case -20:
-                        verifyChecksum = icpcChecksum2;
-                        break;
-                    case 41:
-                        verifyChecksum = icpcChecksum3;
-                        break;
-                    case 47:
-                        verifyChecksum = icpcChecksum4;
-                        break;
-                    default:
-                        verifyChecksum = icpcChecksum;
-                        break;
-                } 
-            }
-
-            if (edu.csus.ecs.pc2.core.Utilities.isDebugMode()) {
-                System.out.println ();
-                System.out.println (inFileName);
-                System.out.print ("byte[] ChecksumX = {");
-                 
-                for (int i = 0; i < digested.length; i++) {
-                    System.out.print(digested[i]);
-                    if (i < digested.length -1) {
-                        System.out.print(", ");
-                    }
-                }
-                System.out.println("};");
-            }
-            
-            for (int i = 0; i < digested.length; i++) {
-                if (digested[i] == verifyChecksum[i]) {
-                    matchedBytes++;
-                } else {
-                    break;
-                }
-            }
-            return(matchedBytes == verifyChecksum.length);
-        } catch (IOException e) {
-            StaticLog.log("verifyImage("+inFileName+")", e);
-        } catch (NoSuchAlgorithmException e) {
-            StaticLog.log("verifyImage("+inFileName+")", e);
-        }
-        
-        return false;
-    }
+    
 
     /**
-     * This method initializes bottomPanel
+     * This method returns a JPanel containing a banner image from either a user-specified
+     * banner file (if found), or else from the default ICPC banner file (if found and if valid).
+     * The method first checks for the existence of either a "banner.png" or a "banner.jpg" file
+     * in the ./images folder; if present then it uses that file (favoring the PNG file if
+     * both are present).  If neither "banner.png" nor "banner.jpg" is found in "./images",
+     * the method delegates to {@link FrameUtilities#loadAndVerifyImageFile(String)} to 
+     * load the default ICPC banner image file.
      * 
-     * @return javax.swing.JPanel
+     * @return a JPanel containing a banner image, or an empty JPanel if no banner image file could be found
      */
-    private JPanel getBottomPanel() {
+    private JPanel getBottomBannerPanel() {
         if (bottomPanel == null) {
-            logoICPC = new JLabel();
 
-            ImageIcon image = loadImageIconFromFile("images/ICPCWebMast_small.png");
-            logoICPC.setIcon(image);
             bottomPanel = new JPanel();
             bottomPanel.setBackground(java.awt.Color.white);
-            bottomPanel.add(logoICPC, null);
+
+            // load the ICPC banner (we're going to need it, either to display it or to use it for scaling the user-provided banner)
+            ImageIcon icpcBannerImage;
+            icpcBannerImage = FrameUtilities.loadAndVerifyImageFile("images/" + FrameUtilities.ICPC_BANNER_FILENAME);
+            boolean useICPCBanner = true;
+
+            // check if user has provided a banner file
+            ImageIcon userBannerImage=null;
+            File bannerFilePNG = new File("images/" + USER_PROVIDED_BANNER_FILENAME + ".png");
+            File bannerFileJPG = new File("images/" + USER_PROVIDED_BANNER_FILENAME + ".jpg");
+            if (bannerFilePNG.exists() || bannerFileJPG.exists()) {
+                // yes, there is a user-provided banner file
+                if (bannerFilePNG.exists()) {
+                    userBannerImage = new ImageIcon("images/" + USER_PROVIDED_BANNER_FILENAME + ".png");
+                } else {
+                    userBannerImage = new ImageIcon("images/" + USER_PROVIDED_BANNER_FILENAME + ".jpg");
+                }
+                useICPCBanner = false;
+            }
+
+            // if not using ICPC banner, scale the user's banner Image to insure it fits
+            if (!useICPCBanner) {
+                
+                int width = userBannerImage.getIconWidth();
+                int height = userBannerImage.getIconHeight();
+
+                // make sure the user banner fits across the frame width
+                if (width > DEFAULT_FRAME_WIDTH - 20) {
+                    width = DEFAULT_FRAME_WIDTH - 20;
+                }
+
+                if (height > icpcBannerImage.getIconHeight()) {
+                    height = icpcBannerImage.getIconHeight();
+                }
+                // scale the user's banner to match the available dimensions
+                userBannerImage = new ImageIcon(userBannerImage.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+
+            }
+
+            //choose which image to use
+            ImageIcon bannerImage = useICPCBanner ? icpcBannerImage : userBannerImage ;
+            JLabel bannerLabel = new JLabel(bannerImage);
+
+            // TODO: delete border
+//            logoLabel.setBorder(new LineBorder(Color.black));
+
+            // put some space around the banner
+            Border empty = new EmptyBorder(2, 5, 2, 5);
+
+            // TODO: enable this border (and change the following statement to "setBorder(compound)") to see boundary around bottom panel
+//            Border orangeline = BorderFactory.createLineBorder(Color.ORANGE);
+//            Border compound = BorderFactory.createCompoundBorder(orangeline, empty);
+
+            bottomPanel.setBorder(empty);
+//            bottomPanel.setBorder(compound);
+
+            bottomPanel.add(bannerLabel, null);
         }
         return bottomPanel;
     }
 
     /**
-     * This method initializes northPanel
+     * This method initializes northPanel, the panel at the top of the Login screen which contains the system title, 
+     * the PC2 Logo, and (if the user provided their own "logo" file) the 
      * 
      * @return javax.swing.JPanel
      */
     private JPanel getNorthPanel() {
         if (northPanel == null) {
-            spacerLabel = new JLabel();
-            spacerLabel.setText(" ");
+            
             northPanel = new JPanel();
             northPanel.setLayout(new BorderLayout());
             northPanel.setBackground(java.awt.Color.white);
-            mainTitleBottomLabel = new JLabel();
-            mainTitleBottomLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            mainTitleBottomLabel.setHorizontalTextPosition(SwingConstants.CENTER);
-            mainTitleBottomLabel.setText("Programming Contest Control System");
-            mainTitleBottomLabel.setBackground(java.awt.Color.white);
-            mainTitleBottomLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 26));
-            mainTitleTopLabel = new JLabel();
-            mainTitleTopLabel.setFont(new Font("Dialog", Font.BOLD, 22));
-            mainTitleTopLabel.setText("California State University, Sacramento");
-            mainTitleTopLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            northPanel.add(mainTitleTopLabel, java.awt.BorderLayout.CENTER);
-            northPanel.add(mainTitleBottomLabel, java.awt.BorderLayout.SOUTH);
+            
+            //put space at the top, below the title bar
+            JLabel spacerLabel = new JLabel();
+            spacerLabel.setText(" ");
             northPanel.add(spacerLabel, java.awt.BorderLayout.NORTH);
+            
+            //TODO: enable this statement to see border around top spacer area
+//            spacerLabel.setBorder (new LineBorder(Color.CYAN));
 
+            //add main title to center of North Panel
+            northPanel.add(getTitlePanel(),BorderLayout.CENTER);
+            
+            //add CSUS logo to west side of north panel (will be empty if the CSUS logo belongs on the main west panel)
+            northPanel.add(getNorthWestLogoPanel(),BorderLayout.WEST);
+            
+            //add PC2 logo to east side of north panel
+            northPanel.add(getNorthEastLogoPanel(),BorderLayout.EAST);
+            
         }
         return northPanel;
     }
 
     public static void main(String[] args) {
+        //make sure we have a place to log to if we're running this frame stand-alone
+        Utilities.insureDir("./log");
+        Log log = new Log("./log", "LoginFrame.log");
+        StaticLog.setLog(log);
+
         new LoginFrame().setVisible(true);
     }
 
@@ -722,5 +743,196 @@ public class LoginFrame extends JFrame implements ILoginUI {
     public void regularCursor() {
         FrameUtilities.regularCursor(this);
     }
+    
+    /**
+     * Returns a JPanel containing the PC2 Login Frame title sequence.
+     * 
+     * @return a JPanel with JLabels containing text
+     */
+    private JPanel getTitlePanel() {
+        
+        JPanel titlePanel = new JPanel();
+        titlePanel.setBackground(Color.white);
+        titlePanel.setPreferredSize(new Dimension(300,120));
+ 
+        //TODO: enable this statement to see the border around the top title panel
+//        titlePanel.setBorder(new LineBorder(Color.MAGENTA));
+        
+        JLabel mainTitleTopLabel = new JLabel();
+        mainTitleTopLabel.setFont(new Font("Dialog", Font.BOLD, 18));
+        mainTitleTopLabel.setText("California State University, Sacramento's");
+        mainTitleTopLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titlePanel.add(mainTitleTopLabel);
 
+        //TODO: enable this statement to see the border around the top label in the title
+//        mainTitleTopLabel.setBorder(new LineBorder(Color.RED));
+        
+        JLabel mainTitleBottomLabel = new JLabel();
+        mainTitleBottomLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        mainTitleBottomLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+        mainTitleBottomLabel.setText("<html>PC<sup>2</sup> <u>P</u>rogramming <u>C</u>ontest <u>C</u>ontrol System</html>");
+        mainTitleBottomLabel.setBackground(java.awt.Color.white);
+        mainTitleBottomLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 26));
+        titlePanel.add(mainTitleBottomLabel);        
+        
+        //TODO: enable this statement to see the border around the bottom label in the title
+//        mainTitleBottomLabel.setBorder(new LineBorder(Color.GREEN));
+        
+        return titlePanel;
+    }
+    
+    /**
+     * Returns a JPanel containing the CSUS Logo if the user has provided a separate "logo.png" or "logo.jpg" file, or an empty
+     * panel if no user-provided logo file is found.   The effect is that IF the user provided a logo, that user-provided logo will be displayed
+     * in the main logo area with the CSUS Logo displayed in smaller form in the NorthWest, whereas if the user did NOT provide a logo file
+     * then we'll leave the NorthWest panel blank and instead display the CSUS logo in the main logo display area (as it appeared in earlier
+     * versions of PC2).
+     * 
+     * @return a JPanel containing the CSUS logo if the user has provided a separate "main logo" file; otherwise returns an empty JPanel
+     */
+    private JPanel getNorthWestLogoPanel() {
+        
+        JPanel northWestPanel = new JPanel();
+        northWestPanel.setBackground(Color.white);
+        
+        //TODO: enable this statement, together with ones below, to see the border around the top left logo panel
+//        Border orangeline = BorderFactory.createLineBorder(Color.ORANGE);
+        
+        
+        //add CSUS logo to north west panel, but only if user has provided a main logo file (otherwise the CSUS Logo goes on the main west panel)
+        File mainLogoFilePNG = new File ("images/logo.png");
+        File mainLogoFileJPG = new File ("images/logo.jpg");
+        if (mainLogoFilePNG.exists() || mainLogoFileJPG.exists()) {
+            //yes, there is a logo file for the main west panel; put the CSUS logo in the north west panel
+            
+            ImageIcon csusLogoImage = FrameUtilities.loadAndVerifyImageFile("images/" + FrameUtilities.CSUS_LOGO_FILENAME);
+            ImageIcon scaledImage = null;
+            if (csusLogoImage!=null) {
+                scaledImage = new ImageIcon(
+                    csusLogoImage.getImage().getScaledInstance(
+                            (int) (csusLogoImage.getIconWidth() * 0.6), (int) (csusLogoImage.getIconHeight() * 0.6), Image.SCALE_SMOOTH));
+            }
+            JLabel csusLogoLabel = new JLabel(scaledImage);
+            
+            //put some space around the logo in the panel
+            Border empty = new EmptyBorder(10, 5, 10, 5);
+            
+            //TODO: enable this statement (together with one above and one below) to see the top left logo panel border
+//            Border compound = BorderFactory.createCompoundBorder(orangeline, empty);
+            
+            northWestPanel.setBorder(empty);
+//            northWestPanel.setBorder(compound);
+
+
+            //TODO: enable this statement to see the border around the CSUS label in the top left
+//            csusLabel.setBorder(new LineBorder(Color.black));
+
+            northWestPanel.add(csusLogoLabel);
+            
+        } else {
+            
+            //we're leaving the northwest panel empty (the CSUS logo will go on the main panel); add some spacing
+            Border empty = new EmptyBorder(10, 20, 10, 20);
+//            Border compound = BorderFactory.createCompoundBorder(orangeline, empty);
+            northWestPanel.setBorder(empty);
+//          northWestPanel.setBorder(compound);
+        }
+        
+        return northWestPanel;
+    }
+    
+    
+    /**
+     * Returns a JPanel containing the PC2 Logo.
+     * 
+     * @return a JPanel containing the PC2 logo
+     */
+    private JPanel getNorthEastLogoPanel() {
+
+        JPanel northEastPanel = new JPanel();
+        northEastPanel.setBackground(Color.white);
+
+        // TODO: enable this statement (and ones below) to see the border around the northeast (PC2Logo) panel
+//        Border blueline = BorderFactory.createLineBorder(Color.BLUE);
+
+        // put some space around the logo
+        Border empty = new EmptyBorder(7, 5, 10, 5);
+//        Border compound = BorderFactory.createCompoundBorder(blueline, empty);
+        northEastPanel.setBorder(empty);
+//        northEastPanel.setBorder(compound);
+
+        // add the PC2 logo to the north east panel
+        ImageIcon pc2ImageIcon = getPC2LogoImageIcon();
+        ImageIcon scaledImage = new ImageIcon(pc2ImageIcon.getImage().getScaledInstance(66, 80, Image.SCALE_SMOOTH));
+        JLabel pc2Label = new JLabel(scaledImage);
+
+        // TODO: enable this statement to see the border around the PC2 logo
+//        pc2Label.setBorder(new LineBorder(Color.BLUE));
+        
+        northEastPanel.add(pc2Label);
+
+        return northEastPanel;
+
+    }
+
+    /**
+     * This method returns a JPanel containing the logo of the primary contest sponsor (University, Club, etc). 
+     * If the user has provided a "logo.png" or "logo.jpg" file, the image in that file is displayed on the JPanel; 
+     * otherwise, the CSUS logo is displayed.
+     * 
+     * @return a JPanel containing the main contest logo
+     */
+    private JPanel getMainLogoPanel() {
+
+        JPanel mainLogoPanel = new JPanel();
+        mainLogoPanel.setBackground(Color.white);
+
+        // TODO: enable this statement (and ones below) to see the border around the main logo display panel
+//        Border orangeline = BorderFactory.createLineBorder(Color.ORANGE);
+
+        //load the CSUS logo (we're going to need it either because it goes on the panel or because it is used for scaling the user image)
+        ImageIcon csusLogoImage;
+        csusLogoImage = FrameUtilities.loadAndVerifyImageFile("images/" + FrameUtilities.CSUS_LOGO_FILENAME);
+        boolean useCSUSLogo = true;
+
+        // check if user has provided a main logo file
+        ImageIcon userLogoImage = null;
+        File mainLogoFilePNG = new File("images/" + USER_PROVIDED_LOGO_FILENAME + ".png");
+        File mainLogoFileJPG = new File("images/" + USER_PROVIDED_LOGO_FILENAME + ".jpg");
+        if (mainLogoFilePNG.exists() || mainLogoFileJPG.exists()) {
+            // yes, there is a user-provided logo file
+            if (mainLogoFilePNG.exists()) {
+                userLogoImage = new ImageIcon("images/" + USER_PROVIDED_LOGO_FILENAME + ".png");
+            } else {
+                userLogoImage = new ImageIcon("images/" + USER_PROVIDED_LOGO_FILENAME + ".jpg");
+            }
+            useCSUSLogo = false;
+        }
+
+        // if not using CSUS logo, scale the userImage to insure it fits, using the CSUS logo as the nominal correct size
+        if (!useCSUSLogo) {
+            int csusWidth = csusLogoImage.getIconWidth();
+            int csusHeight = csusLogoImage.getIconHeight();
+            int size = Math.max(csusWidth, csusHeight);
+            userLogoImage = new ImageIcon(userLogoImage.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH));
+        }
+
+        //choose which image to use
+        ImageIcon logoImage = useCSUSLogo ? csusLogoImage : userLogoImage ;
+        JLabel logoLabel = new JLabel(logoImage);
+        
+        // TODO: enable this statement (and ones below) to see the border around the image in the logo display panel
+//        logoLabel.setBorder(new LineBorder(Color.black));
+        
+        // put some space around the logo
+        Border empty = new EmptyBorder(30, 5, 10, 5);
+//        Border compound = BorderFactory.createCompoundBorder(orangeline, empty);
+        mainLogoPanel.setBorder(empty);
+//        mainLogoPanel.setBorder(compund);
+
+        mainLogoPanel.add(logoLabel);
+        
+        return mainLogoPanel;
+    }
+        
 } // @jve:decl-index=0:visual-constraint="10,10"
