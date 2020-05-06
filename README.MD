@@ -2,7 +2,7 @@
  
 **NOTICE**  This public repository for the PC&sup2; Contest Control System is still _under development_.  You're welcome to look around, 
 but until an official announcement is made (and this is notice removed), _we do not recommend relying on the code published here_.
-If you are interested in obtaining a copy of PC&sup2; for running a contest, please refer to the [PC&sup2; home page](http://pc2.ecs.csus.edu).
+If you are interested in obtaining a copy of PC&sup2; for running a contest, please refer to the [PC&sup2; home page](https://pc2.ecs.csus.edu).
 
 PC^ 2 (the **P**rogramming **C**ontest **C**ontrol system, pronounced "P-C-squared" or sometimes just "P-C-Two" for short) is a 
 software system designed to support programming contest operations in a variety of computing environments including MS Windows, Mac OS/X,
