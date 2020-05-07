@@ -3,6 +3,8 @@
 First, thanks for your interest in contributing to the PC^2 project -- we welcome new contributions!  
 
 The following is a set of guidelines for contributing to PC^2, which is hosted in the **PC2CCS** Organization on GitHub. 
+Substantial additional information can also be found on our GitHub Wiki, in particular 
+[here](https://github.com/pc2ccs/pc2v9/wiki) and [here](https://github.com/pc2ccs/pc2v9/wiki/Contents).
 
 #### Table of Contents
 
