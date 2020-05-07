@@ -97,12 +97,21 @@ public class EventFeederModule implements UIPlugin {
             shadowController = new ShadowController(contest, controller);
             if (contest.getContestInformation().isShadowMode()) {
                 showMessage("Starting shadow controller");
-                shadowController.start();
-                // the shadowController will autostart if the ContestInformation changes later
+
+                if (! shadowController.start()) {
+                    fatalError("Unable to start shadow controller (contact primary CCS?), check log", null);
+                }
             }
         } catch (Exception e) {
-            showMessage("Unable to start shadow controller " + e.getMessage(), e);
+            fatalError("Unable to start shadow controller", e);
         }
+    }
+
+    private void fatalError(String errorMessage, Exception e) {
+        String message = "Halting program.  " + errorMessage;
+        System.err.println(message);
+        getLog().log(Log.SEVERE, message, e);
+        System.exit(10);
     }
 
     protected String getL10nDateTime() {
