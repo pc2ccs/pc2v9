@@ -239,7 +239,12 @@ public class ShadowController {
             //construct an EventFeedMonitor for keeping track of the remote CCS events
             log.info("Constructing new RemoteEventFeedMonitor");
             monitor = new RemoteEventFeedMonitor(localController, remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter);
- 
+
+            if (! remoteContestAPIAdapter.testConnection()){
+                
+                return false;
+            }
+            
             //start the monitor running as a thread listening for submissions from the remote CCS
             monitorThread = new Thread(monitor);
             monitorThread.start();
