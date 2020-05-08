@@ -19,6 +19,7 @@ stages:
   # currently done in build stage, commenting to speed up pipeline
   #  - test
   - deploy
+  - website
 
 # TODO re-organize package.xml (along with build.xml) into building, testing, packaging.
 
@@ -70,7 +71,7 @@ push release to GitHub:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-    - git config --global user.email "pc2@ecs.csus.edu"
+    - git config --global user.email "pc2@troyspaws.com"
     - git config --global user.name "PC2 bot"
     - apt-get update -y
     - apt-get install -y httpie jq
@@ -141,7 +142,7 @@ push nightly to GitHub:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-    - git config --global user.email "bot@pc2.ccs.icpc.global"
+    - git config --global user.email "pc2@troyspaws.com"
     - git config --global user.name "PC2 bot"
     - apt-get update -y
     - apt-get install -y httpie jq
@@ -200,3 +201,36 @@ push nightly to GitHub:
             'Content-Type: text/plain' | jq .state
         fi
       done
+
+update website:
+  stage: website
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master"'
+      when: always
+    - if: '$CI_COMMIT_REF_NAME == "develop"'
+      when: always
+    - when: never
+  before_script:
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY_WEBSITE" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+    - git config --global user.email "pc2@troyspaws.com"
+    - git config --global user.name "PC2 bot"
+    # install brew
+    - /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    # install hugo
+    - brew install hugo
+  script:
+    - website/scripts/populate-releases.py
+    - mkdir ~/website
+    - git clone git@github.com:pc2ccs/pc2ccs.github.io.git ~/website
+    - ln -s ~/website $CI_PROJECT_DIR/website/public
+    - cd $CI_PROJECT_DIR/website
+    - hugo
+    - cd ~/website
+    - sed -i "" -e 's/&amp;/\&/' index.html current/index.html all-builds/index.html previous/index.html
+    - git add .
+    - git commit --allow-empty -m "Update website for pc2v9 commit $CI_COMMIT_SHA"
+    - git push

@@ -1,0 +1,9 @@
+name = "PC&sup2; CCS Theme"
+description = "Theme used for the PC2 CCS website"
+homepage = "https://pc2ccs.github.io"
+features = ["posts", "shortcodes", "related content"]
+min_version = "0.30.2"
+
+[author]
+name = "The PC&sup2; CCS authors"
+homepage = "https://github.com/pc2ccs"
