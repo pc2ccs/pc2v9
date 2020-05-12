@@ -203,6 +203,8 @@ push nightly to GitHub:
       done
 
 update website:
+  # an image with hugo preinstalled
+  image: icpctools/build:servlet4
   stage: website
   rules:
     - if: '$CI_COMMIT_REF_NAME == "master"'
@@ -212,16 +214,12 @@ update website:
     - when: never
   before_script:
     - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY_WEBSITE" | tr -d '\r' | ssh-add -
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
     - git config --global user.email "pc2@troyspaws.com"
     - git config --global user.name "PC2 bot"
-    # install brew
-    - /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-    # install hugo
-    - brew install hugo
   script:
     - website/scripts/populate-releases.py
     - mkdir ~/website
