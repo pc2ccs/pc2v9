@@ -73,7 +73,7 @@ def release_info(release):
     for asset in release["assets"]:
         match = assetPattern.search(asset['name'])
         if not match:
-           print(f"ERROR: {asset['name']} failed to match {assetPattern}\n")
+           print("ERROR: " + asset['name'] + " failed to match " + assetPattern + "\n")
            next
         tool = match.group('tool')
         version = match.group('version')
