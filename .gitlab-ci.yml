@@ -1,6 +1,6 @@
 # GitLab build configuration
 # this image includes openjdk-8-jdk, hugo, ant, curl, jq, httpie
-image: pc2fromecs:jdk8hugo
+image: pc2fromecs/jdk8hugo
 
 before_script:
   - echo "Running (empty) before_script cleanup..."
