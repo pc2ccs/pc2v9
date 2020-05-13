@@ -218,7 +218,7 @@ update website:
     - cd $CI_PROJECT_DIR/website
     - hugo
     - cd ~/website
-    - sed -e 's/&amp;/\&/' index.html current/index.html all-builds/index.html previous/index.html
+    - sed -i -e 's/&amp;/\&/' index.html current/index.html all-builds/index.html previous/index.html
     - git add .
     - git commit --allow-empty -m "Update website for pc2v9 commit $CI_COMMIT_SHA"
     - git push
