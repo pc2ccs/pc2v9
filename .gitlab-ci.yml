@@ -1,7 +1,6 @@
 # GitLab build configuration
-image: openjdk:8
-# if we wanted openconnect, use:
-#image: openjdk:8-slim-buster
+# this image includes openjdk-8-jdk, hugo, ant, curl, jq, httpie
+image: pc2fromecs:jdk8hugo
 
 before_script:
   - echo "Running (empty) before_script cleanup..."
@@ -30,8 +29,6 @@ stages:
 job-build:
   stage: build
   script:
-    - apt-get update
-    - apt-get install -y ant git
     - echo "Running ant on package.xml"
     - ant -file package.xml
     - echo $CI_JOB_ID > dist/ci_job_id.txt
@@ -53,7 +50,6 @@ push to ECS at CSUS:
   stage: deploy
   script:
     - echo "Running deploy stage"
-    - apt-get install -y curl
     - export BUILDNUMBER=`echo dist/pc2-*.zip | sed 's#^dist.*build-\([0-9]*\)[.~].*#\1#'`
     - BUILD_JOB_ID=$(cat dist/ci_job_id.txt)
     - curl "http://pc2.ecs.csus.edu/cgi-bin/grabgitlabartifacts.cgi?authkey=$AUTHKEY&url=https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/jobs/$BUILD_JOB_ID/artifacts&buildnumber=$BUILDNUMBER"
@@ -73,8 +69,6 @@ push release to GitHub:
     - ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
     - git config --global user.email "pc2@troyspaws.com"
     - git config --global user.name "PC2 bot"
-    - apt-get update -y
-    - apt-get install -y httpie jq
   script:
     - VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
     - mkdir ~/builds
@@ -144,8 +138,6 @@ push nightly to GitHub:
     - ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
     - git config --global user.email "pc2@troyspaws.com"
     - git config --global user.name "PC2 bot"
-    - apt-get update -y
-    - apt-get install -y httpie jq
   script:
     - VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
     - TAG_NAME=`echo $VERSION |cut -d~ -f1`
@@ -203,8 +195,6 @@ push nightly to GitHub:
       done
 
 update website:
-  # an image with hugo preinstalled
-  image: icpctools/build:servlet4
   stage: website
   rules:
     - if: '$CI_COMMIT_REF_NAME == "master"'
@@ -228,7 +218,7 @@ update website:
     - cd $CI_PROJECT_DIR/website
     - hugo
     - cd ~/website
-    - sed -i "" -e 's/&amp;/\&/' index.html current/index.html all-builds/index.html previous/index.html
+    - sed -e 's/&amp;/\&/' index.html current/index.html all-builds/index.html previous/index.html
     - git add .
     - git commit --allow-empty -m "Update website for pc2v9 commit $CI_COMMIT_SHA"
     - git push
