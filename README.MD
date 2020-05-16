@@ -34,7 +34,7 @@ guidelines for contributing.  Substantial additional information can also be fou
 [here](https://github.com/pc2ccs/pc2v9/wiki) and [here](https://github.com/pc2ccs/pc2v9/wiki/Contents).
 
 # Contact Information
-Website:  http://pc2.ecs.csus.edu/  
+Website:  https://pc2ccs.github.io/  
 mailto: pc2@ecs.csus.edu
 
 # How to report bugs or request new features
