@@ -1552,16 +1552,21 @@ public final class Utilities {
 
             } else {
 
+                // test for architecture type
+                String archType = System.getProperty("os.arch");
                 if (osName.toLowerCase().contains("linux") || osName.toLowerCase().contains("unix")) {
-
-                    // test for architecture type
-                    String archType = System.getProperty("os.arch");
 
                     if (archType != null) {
                         if (archType.toLowerCase().equals("i386")) {
                             type = OSType.I386;
                         } else if (archType.toLowerCase().equals("amd64")) {
                             type = OSType.AMD64;
+                        }
+                    }
+                } else if (osName.toLowerCase().contains("mac os x")) {
+                    if (archType != null) {
+                        if (archType.toLowerCase().equals("x86_64")) {
+                            type = OSType.MAC64;
                         }
                     }
                 }
