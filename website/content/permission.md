@@ -4,7 +4,7 @@ title: "Permission"
 description: "Information regarding use of PC2"
 date: 2020-05-17T01:09:41+00:00
 draft: false
-weight: 5
+weight: 30
 icon: fas fa-balance-scale-right
 ---
 

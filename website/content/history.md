@@ -4,7 +4,7 @@ title: "A Bit of History"
 description: "The (somewhat abridged) history of PC2"
 date: 2020-05-17T01:09:41+00:00
 draft: false
-weight: 4
+weight: 20
 icon: fas fa-highlighter
 ---
 
