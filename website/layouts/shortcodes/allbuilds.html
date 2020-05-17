@@ -15,14 +15,24 @@
             {{ $download := index $build.downloads $pc2.tool }}
             <tr>
                 <td><b>{{ $pc2.name }}</b></td>
-                <td align="right">{{ $download.size }} MB</td>
                 <td>
-                    <a href="{{ $download.urls.zip }}">{{ $pc2.tool }}-{{ $download.version }}.zip</a>
-                    {{ if and (isset $download.urls "sha256") (isset $download.urls "sha512") }}
-                    (<a href="{{ $download.urls.sha256 }}">sha256</a>, <a href="{{ $download.urls.sha512 }}">sha512</a>)
+                    <a href="{{ $download.urls.zip }}">{{ $pc2.tool }}-{{ $download.version }}.zip</a> ({{ $download.sizes.zip }} MB)
+                    {{ if and (isset $download.urls.sha256 "zip") (isset $download.urls.sha512 "zip") }}
+                    (<a href="{{ $download.urls.sha256.zip }}">sha256</a>, <a href="{{ $download.urls.sha512.zip }}">sha512</a>)
                     {{ end }}
                 </td>
             </tr>
+                {{ if isset $download.urls "tar_gz" }}
+            <tr>
+                <th>{{ $pc2.name }} in tar.gz form</th>
+                <td>
+                    <a href="{{ $download.urls.tar_gz }}">{{ $pc2.tool }}-{{ $download.version }}.tar.gz</a> ({{ $download.sizes.tar_gz }} MB)
+                    {{ if and (isset $download.urls.sha256 "tar_gz") (isset $download.urls.sha512 "tar_gz") }}
+                    (<a href="{{ $download.urls.sha256.tar_gz }}">sha256</a>, <a href="{{ $download.urls.sha512.tar_gz }}">sha512</a>)
+                    {{ end }}
+                </td>
+            </tr>
+                {{ end }}
             {{ end }}
         {{ end }}
     </tbody>

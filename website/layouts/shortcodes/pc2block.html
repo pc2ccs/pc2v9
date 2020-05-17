@@ -4,16 +4,16 @@
 {{ $stableTool := index $stableRelease.downloads (.Get "toolname") }}
 {{ $prerelaseTool := index $preRelease.downloads (.Get "toolname") }}
 {{ $nightlyTool := index $nightly.downloads (.Get "toolname") }}
-<div class="col-md-6 mb-3">
+<div class="col-md-9 mb-3">
     <p>
         {{ .Get "description" }}
     </p>
     <p>
         Downloads: <br/> 
-        Stable Release: <a href="{{ $stableTool.urls.zip }}">{{ .Get "shortname" }} version {{ $stableTool.version }}</a><br />
-        Release Candidate: <a href="{{ $prerelaseTool.urls.zip }}">{{ .Get "shortname" }} version {{ $prerelaseTool.version }}</a><br />
-        Nightly Build: <a href="{{ $nightlyTool.urls.zip }}">{{ .Get "shortname" }} version {{ $nightlyTool.version }}</a><br />
-        Documentation: <a href="/docs/{{ .Get "doc" }}.pdf">Contest Administrator's Guide (PDF)</a><br />
+        Stable Release: &nbsp;&nbsp;&nbsp;<a href="{{ $stableTool.urls.zip }}">{{ .Get "shortname" }} version {{ $stableTool.version }}.zip</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="{{ $stableTool.urls.tar_gz }}">{{ .Get "shortname" }} version {{ $stableTool.version }}.tar.gz</a><br />
+        Release Candidate: &nbsp;&nbsp;&nbsp;<a href="{{ $prerelaseTool.urls.zip }}">{{ .Get "shortname" }} version {{ $prerelaseTool.version }}.zip</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="{{ $prerelaseTool.urls.tar_gz }}">{{ .Get "shortname" }} version {{ $prerelaseTool.version }}.tar.gz</a><br />
+        Nightly Build: &nbsp;&nbsp;&nbsp;<a href="{{ $nightlyTool.urls.zip }}">{{ .Get "shortname" }} version {{ $nightlyTool.version }}.zip</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="{{ $nightlyTool.urls.tar_gz }}">{{ .Get "shortname" }} version {{ $nightlyTool.version }}.tar.gz</a><br />
+        Documentation: &nbsp;&nbsp;&nbsp;<a href="/docs/{{ .Get "doc" }}.pdf">Contest Administrator's Guide (PDF)</a><br />
     </p>
     <p>
         <a href="{{ .Get "page" }}">More information</a>
