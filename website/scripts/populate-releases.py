@@ -82,15 +82,23 @@ def release_info(release):
         if not tool in info['downloads']:
             info['downloads'][tool] = {
                 'version': version,
-                'urls': {}
+                'urls': {'sha256': {}, 'sha512': {}},
+                'sizes': {},
             }
         if check == "":
-            info['downloads'][tool]['urls']['zip'] = url
-            info['downloads'][tool]['size'] = round(asset['size'] / 1024 / 1024, 2)
+            if 'zip' in url:
+                info['downloads'][tool]['urls']['zip'] = url
+                info['downloads'][tool]['sizes']['zip'] = round(asset['size'] / 1024 / 1024, 2)
+            else:
+                info['downloads'][tool]['urls']['tar_gz'] = url
+                info['downloads'][tool]['sizes']['tar_gz'] = round(asset['size'] / 1024 / 1024, 2)
         else:
             if ".txt" in check:
                 check = check[:-4]
-            info['downloads'][tool]['urls'][check] = url
+            if 'zip' in url:
+                info['downloads'][tool]['urls'][check]['zip'] = url
+            else:
+                info['downloads'][tool]['urls'][check]['tar_gz'] = url
 
     return info
 

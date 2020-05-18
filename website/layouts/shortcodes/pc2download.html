@@ -10,19 +10,31 @@
     The latest stable release {{ .Get "name" }} version is {{ $stableTool.version }}, released on {{ $stableRelease.date }}.
 </p>
 <p>
-    <a class="btn btn-primary" href="{{ $stableTool.urls.zip }}"><i class="fas fa-download"></i> Download stable <i>{{ .Get "name" }}</i> (version {{ $stableTool.version }})</a>
+    <a class="btn btn-primary" href="{{ $stableTool.urls.zip }}"><i class="fas fa-download"></i> Download stable <i>{{ .Get "name" }}</i> (version {{ $stableTool.version }}) as zip</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a class="btn btn-primary" href="{{ $stableTool.urls.tar_gz }}"><i class="fas fa-download"></i> Download stable <i>{{ .Get "name" }}</i> (version {{ $stableTool.version }}) as tar.gz</a>
+    <br />
+    <br />
 </p>
 <p>
     The latest release candidate {{ .Get "name" }} version is {{ $prerelaseTool.version }}, released on {{ $preRelease.date }}.
 </p>
 <p>
-    <a class="btn btn-danger" href="{{ $prerelaseTool.urls.zip }}"><i class="fas fa-download"></i> Download release candidate <i>{{ .Get "name" }}</i> (version {{ $prerelaseTool.version }})</a>
+    <a class="btn btn-danger" href="{{ $prerelaseTool.urls.zip }}"><i class="fas fa-download"></i> Download release candidate <i>{{ .Get "name" }}</i> (version {{ $prerelaseTool.version }}) as zip</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a class="btn btn-danger" href="{{ $prerelaseTool.urls.tar_gz }}"><i class="fas fa-download"></i> Download release candidate <i>{{ .Get "name" }}</i> (version {{ $prerelaseTool.version }}) as tar.gz</a>
+    <br />
+    <br />
 </p>
 <p>
     The latest nightly build {{ .Get "name" }} version is {{ $nightlyTool.version }}, released on {{ $nightly.date }}.
 </p>
 <p>
-    <a class="btn btn-danger" href="{{ $nightlyTool.urls.zip }}"><i class="fas fa-download"></i> Download nightly build <i>{{ .Get "name" }}</i> (version {{ $nightlyTool.version }})</a>
+    <a class="btn btn-danger" href="{{ $nightlyTool.urls.zip }}"><i class="fas fa-download"></i> Download nightly build <i>{{ .Get "name" }}</i> (version {{ $nightlyTool.version }}) as zip</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a class="btn btn-danger" href="{{ $nightlyTool.urls.tar_gz }}"><i class="fas fa-download"></i> Download nightly build <i>{{ .Get "name" }}</i> (version {{ $nightlyTool.version }}) as tar.gz</a>
+    <br />
+    <br />
 </p>
 <h2>Documentation</h2>
 
