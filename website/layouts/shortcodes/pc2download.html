@@ -2,7 +2,7 @@
 {{ $preRelease := index $.Site.Data.releases.prerelease }}
 {{ $nightly := index $.Site.Data.releases.nightly }}
 {{ $stableTool := index $stableRelease.downloads (.Get "toolname") }}
-{{ $prerelaseTool := index $preRelease.downloads (.Get "toolname") }}
+{{ $prereleaseTool := index $preRelease.downloads (.Get "toolname") }}
 {{ $nightlyTool := index $nightly.downloads (.Get "toolname") }}
 
 <h2>Download</h2>
@@ -17,12 +17,17 @@
     <br />
 </p>
 <p>
-    The latest release candidate {{ .Get "name" }} version is {{ $prerelaseTool.version }}, released on {{ $preRelease.date }}.
+{{ if gt $prereleaseTool.published_at $stableTool.published_at }}
+        Release Candidate: &nbsp;&nbsp;&nbsp;<a href="{{ $prereleaseTool.urls.zip }}">{{ .Get "shortname" }} version {{ $prereleaseTool.version }}.zip</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="{{ $prereleaseTool.urls.tar_gz }}">{{ .Get "shortname" }} version {{ $prereleaseTool.version }}.tar.gz</a><br />
+    The latest release candidate {{ .Get "name" }} version is {{ $prereleaseTool.version }}, released on {{ $preRelease.date }}.
 </p>
 <p>
-    <a class="btn btn-danger" href="{{ $prerelaseTool.urls.zip }}"><i class="fas fa-download"></i> Download release candidate <i>{{ .Get "name" }}</i> (version {{ $prerelaseTool.version }}) as zip</a>
+    <a class="btn btn-danger" href="{{ $prereleaseTool.urls.zip }}"><i class="fas fa-download"></i> Download release candidate <i>{{ .Get "name" }}</i> (version {{ $prereleaseTool.version }}) as zip</a>
     &nbsp;&nbsp;&nbsp;&nbsp;
-    <a class="btn btn-danger" href="{{ $prerelaseTool.urls.tar_gz }}"><i class="fas fa-download"></i> Download release candidate <i>{{ .Get "name" }}</i> (version {{ $prerelaseTool.version }}) as tar.gz</a>
+    <a class="btn btn-danger" href="{{ $prereleaseTool.urls.tar_gz }}"><i class="fas fa-download"></i> Download release candidate <i>{{ .Get "name" }}</i> (version {{ $prereleaseTool.version }}) as tar.gz</a>
+{{ else }}
+        No release candidate at this time.
+{{ end }}
     <br />
     <br />
 </p>
