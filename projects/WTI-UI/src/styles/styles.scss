@@ -1,0 +1,76 @@
+@import url('fonts.css');
+@import 'variables';
+@import 'material';
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+html {
+  font-size: 16px;
+  font-family: $font-stack;
+}
+
+h1, h2, h3, h4, h5, h6 { margin: 0; }
+
+input, textarea, select {
+  background-color: #fff;
+  border: 1px solid #153860;
+  border-radius: 5px;
+  padding: $control-padding;
+  outline: none;
+  font-size: 1rem;
+  font-family: $font-stack;
+}
+
+input[type="text"], input[type="password"], select, .mat-form-field {
+  width: 15rem;
+}
+
+button {
+  border: none;
+  outline: none;
+  padding: $control-padding 2*$control-padding;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 5px;
+  box-shadow: $shadow2;
+}
+
+button:disabled, button.disabled {
+  cursor: not-allowed;
+  background-color: #b1b1b1;
+}
+
+button.primary {
+  background-color: $secondary;
+  color: white;
+  font-weight: bold;
+  min-width: 12rem;
+}
+
+button.warning { background-color: $warning; }
+button.outline { border: 3px solid $warning; }
+
+button.textLink {
+  color: $bg-accent;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: none;
+}
+
+.center { text-align: center; }
+
+a { cursor: pointer; }
+
+th {
+  text-align: left;
+}

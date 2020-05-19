@@ -1,0 +1,10 @@
+<h1 mat-dialog-title>Clarification Reply Received</h1>
+<div mat-dialog-content>
+    <p>Problem: {{ problem }}</p>
+    <p>Question: {{ question }}</p>
+    <p>Answer: {{ answer }}</p>
+</div>
+<div mat-dialog-actions>
+    <button (click)='goToClarifications()' type='button' class='warning'>Go to Clarifications</button>&nbsp;
+    <button (click)='close()' type='button' class='warning'>Close</button>
+</div>

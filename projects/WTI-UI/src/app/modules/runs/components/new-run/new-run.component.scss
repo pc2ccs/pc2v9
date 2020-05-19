@@ -1,0 +1,47 @@
+@import '../../../../../styles/variables';
+
+.file-uploads {
+  display: flex;
+  flex-direction: row;
+}
+
+.file {
+  min-height: 10rem;
+  min-width: 10rem;
+  flex: 1;
+  padding: 1rem;
+  margin-right: 1rem;
+  border: 1px dashed $bg-accent;
+  border-radius: ($border-radius + 1);
+  background-color: #f4f4f4;
+  color: $bg-accent;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+
+  &:last-of-type { margin-right: 0; }
+
+  .small {
+    font-size: 0.85rem;
+    overflow: hidden;
+  }
+
+  .label {
+    text-align: center;
+  }
+
+  .icon {
+    flex-grow: 1;
+    background-image: url('/assets/upload.png');
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  input {
+    height: 0.1px;
+    width: 0.1px;
+    overflow: hidden;
+    opacity: 0;
+    position: absolute;
+  }
+}

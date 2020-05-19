@@ -1,0 +1,61 @@
+<div class='filter-table-container'>
+    <div class='filter-container'>
+        <div class='buttons'>
+            <button type='button' class='warning' (click)='newClarification()'>New Clarification</button>
+        </div>
+        <form class='filters' [formGroup]='filterForm'>
+            <h3 class='center'>Filters</h3>
+            <div>
+                <h5 class='filter-label'>Recipient</h5>
+                <label>
+                    <input type='radio' name='receipient' formControlName='receipient' value='all'>
+                    All Teams
+                </label>
+                <br />
+                <label>
+                    <input type='radio' name='receipient' formControlName='receipient' value='team'>
+                    {{ teamName }}
+                </label>
+                <br />
+                <label>
+                    <input type='radio' name='receipient' formControlName='receipient' value=''>
+                    Both
+                </label>
+            </div>
+            <div>
+                <app-problem-selector formControlName='problem'></app-problem-selector>
+            </div>
+            <div>
+                <button class='outline' type='button' (click)='reset()'>Clear Filters</button>
+            </div>
+        </form>
+    </div>
+    <div class='table-container'>
+        <table>
+            <tr>
+                <th>Recipient</th>
+                <th>Problem</th>
+                <th>Question</th>
+                <th>Answer</th>
+                <th>Time</th>
+            </tr>
+            <tr *ngFor='let clarification of filteredClarifications' [class.pending]='!clarification.isAnswered'>
+                <td>{{ clarification.recipient }}</td>
+                <td>{{ clarification.problem }}</td>
+                <td>{{ clarification.question }}</td>
+                <td>
+                    <ng-container *ngIf='clarification.isAnswered'>
+                        {{ clarification.answer }}
+                    </ng-container>
+                    <ng-container *ngIf='!clarification.isAnswered'>
+                        <i>Answer Pending</i>
+                    </ng-container>
+                </td>
+                <td>{{ clarification.time }}</td>
+            </tr>
+        </table>
+        <div *ngIf='filteredClarifications.length == 0' class='table-message'>
+            <h3>No clarifications yet!</h3>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,37 @@
+<form [formGroup]='newSubmissionForm' (ngSubmit)='onSubmitProblem()'>
+    <h1 mat-dialog-title *ngIf="submitType === 'judged'">Submit a Problem</h1>
+    <h1 mat-dialog-title *ngIf="submitType === 'test'">Submit a Test Problem</h1>
+    <div mat-dialog-content>
+        <app-problem-selector formControlName='problem'></app-problem-selector>
+        <br />
+        <app-language-selector formControlName='language'></app-language-selector>
+        <br />
+        <div class='file-uploads'>
+            <label (drop)='onDrop($event)' (dragover)='dragOver($event)' class='file'>
+                <div class='label'>*Main File</div>
+                <div class='icon'></div>
+                <input #fileInput type='file' (change)="onFileChange('main', $event)" />
+                <div *ngIf='mainFile' class='small'>{{ mainFile.fileName }}</div>
+            </label>
+            <label class='file'>
+                <div class='label'>Additional File(s)</div>
+                <div class='icon'></div>
+                <input #fileInput type='file' multiple (change)="onFileChange('additional', $event)" />
+                <div *ngFor='let file of additionalFiles' class='small'>{{ file.fileName }}</div>
+            </label>
+            <ng-container *ngIf="submitType === 'test'">
+                <label class='file'>
+                    <div class='label'>*Test Data File(s)</div>
+                    <div class='icon'></div>
+                    <input #fileInput type='file' multiple (change)="onFileChange('testdata', $event)" />
+                    <div *ngFor='let file of testFiles' class='small'>{{ file.fileName }}</div>
+                </label>
+            </ng-container>
+        </div>
+    </div>
+    <div mat-dialog-actions>
+        <button type='button' class='warning' (click)='close()'>Cancel</button>&nbsp;
+        <button type='button' class='warning' (click)='clearFiles()'>Clear Files</button>&nbsp;
+        <button type='submit' class='warning' [disabled]='!isReadyToSubmit()'>Submit</button>
+    </div>
+</form>

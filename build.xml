@@ -242,11 +242,23 @@ TODO consider switching back to this at 9.7.0/9.8build
                 <attribute name="Main-Class" value="edu.csus.ecs.pc2.Starter"/>
             </manifest>
         </jar>
+    	
+    	<!-- Build the (old) EWTeam project and copy it (in zip/tar.gz form) to the "projects" folder -->
         <ant dir="projects/EWTeam" antfile="package.xml" useNativeBasedir="true" inheritAll="false"/>
         <copy todir="projects">
             <fileset dir="projects/EWTeam/dist" includes="EWTeam*.tar.gz"/>
             <fileset dir="projects/EWTeam/dist" includes="EWTeam*.zip"/>
         </copy>
+    	
+    	<!-- Build the WebTeamInterface (WTI) project (which also implicitly builds WTI-UI) and copy it to the "projects" folder. -->
+        <ant dir="projects/WTI-API" antfile="packageWTI.xml" useNativeBasedir="true" inheritAll="false"/>
+    	
+    	<!-- Copy the archive (zip and tar.gz) files of the WTI project to the projects folder -->
+        <copy todir="projects">
+            <fileset dir="projects/WTI-API/dist" includes="WebTeamInterface*.tar.gz"/>
+            <fileset dir="projects/WTI-API/dist" includes="WebTeamInterface*.zip"/>
+        </copy>
+   	
     </target>
 
     <target name="clean" description="clean up">
@@ -262,7 +274,8 @@ TODO consider switching back to this at 9.7.0/9.8build
         <delete file="profiles.properties" />
         <delete file="teams.output.txt" />
         <delete>
-           <fileset dir="projects" includes="EWTeam-*"/>
+            <fileset dir="projects" includes="EWTeam-*"/>
+        	<fileset dir="projects" includes="WebTeamInterface-*"/>
         </delete>
     </target>
 

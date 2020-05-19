@@ -1,0 +1,12 @@
+@import '../../../../../styles/variables';
+
+footer {
+  background-color: $bg-accent;
+  padding: 1rem;
+  color: white;
+
+  a {
+    font-weight: bold;
+    text-decoration: underline;
+  }
+}

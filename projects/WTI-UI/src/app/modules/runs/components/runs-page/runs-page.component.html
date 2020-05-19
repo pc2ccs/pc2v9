@@ -1,0 +1,76 @@
+<div class='filter-table-container'>
+    <div class='filter-container'>
+        <div class='buttons'>
+            <button type='button' class='warning' (click)='openNewJudged()'>Submit Problem</button>
+            <!-- <button type='button' class='warning' (click)='openNewTest()'>Submit Test Problem</button> -->
+        </div>
+        <form class='filters' [formGroup]='filterForm'>
+            <h3 class='center'>Filters</h3>
+            <div>
+                <h5 class='filter-label'>Run Type</h5>
+                <div>
+                    <label>
+                        <input type='radio' name='runType' value='judged' formControlName='runType'>
+                        Judged
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type='radio' name='runType' value='test' formControlName='runType'>
+                        Test
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type='radio' name='runType' value='both' formControlName='runType'>
+                        Both
+                    </label>
+                </div>
+            </div>
+            <div>
+                <app-language-selector formControlName='language'></app-language-selector>
+            </div>
+            <div>
+                <app-problem-selector formControlName='problem'></app-problem-selector>
+            </div>
+            <div>
+                <app-judgement-selector formControlName='judgement'></app-judgement-selector>
+            </div>
+            <div>
+                <button class='outline' type='button' (click)='reset()'>Clear Filters</button>
+            </div>
+        </form>
+    </div>
+    <div class='table-container'>
+        <table>
+            <tr>
+                <th>Run Type</th>
+                <th>Language</th>
+                <th>Problem</th>
+                <th>Judgement</th>
+                <th>Time</th>
+                <th></th>
+            </tr>
+            <tr *ngFor='let run of filteredRuns' [class.pending]='!run.judgement || run.isPreliminary'>
+                <td>{{ run.isTestRun ? 'Test' : 'Judged' }}</td>
+                <td>{{ run.language }}</td>
+                <td>{{ run.problem }}</td>
+                <td>
+                    {{ run.judgement }}
+                    <ng-container *ngIf='run.isPreliminary'>
+                        (Preliminary)
+                    </ng-container>
+                </td>
+                <td>{{ run.time }}</td>
+                <td>
+                    <ng-container *ngIf='run.results'>
+                        <button type='button' (click)='viewResults(run.problem, run.results)' class='textLink'>View Results</button>
+                    </ng-container>
+                </td>
+            </tr>
+        </table>
+        <div *ngIf='filteredRuns.length === 0' class='table-message'>
+            <h3>No run results to display!</h3>
+        </div>
+    </div>
+</div>

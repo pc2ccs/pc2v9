@@ -1,0 +1,61 @@
+@import 'variables';
+
+.filter-table-container {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+
+  & > div { margin: $container-padding; }
+
+  .filter-container {
+
+    .buttons button {
+      display: block;
+      margin-bottom: $control-padding;
+      width: 100%;
+
+      &:last-of-type { margin-bottom: none; }
+    }
+
+    .filters {
+      margin-top: $container-padding;
+      padding: 1rem;
+      background-color: $bg-light;
+      border-radius: 5px;
+      box-shadow: $shadow1;
+
+      .filter-label {
+        color: #999;
+        margin-bottom: 0.25rem;
+      }
+
+      & > div { padding: $control-padding; }
+    }
+  }
+
+  .table-container {
+    flex: 1;
+    background-color: $bg-light;
+    padding: 1rem;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    margin-left: 0;
+    box-shadow: $shadow1;
+
+    table {
+      width: 100%;
+      border-spacing: 0;
+      th, td {
+        border-bottom: 1px solid $border1;
+        padding: 1rem 0.5rem;
+      }
+    }
+
+    .table-message { margin: auto; }
+  }
+}
+
+.pending td {
+  color: #999;
+}

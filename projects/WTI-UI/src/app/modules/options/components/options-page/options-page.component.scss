@@ -1,0 +1,20 @@
+@import '../../../../../styles/variables';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.options-container {
+  & > div {
+    padding: $container-padding;
+  }
+
+  .not-container {
+    display: flex;
+    & > div {
+      margin-right: 1rem;
+    }
+  }
+}
