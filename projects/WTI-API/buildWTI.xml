@@ -33,7 +33,7 @@
 	<condition property="isBuildingOnWindows">
 		<os family="windows"/>
 	</condition>
-	<condition property="isBuildingOnLinux">
+	<condition property="isBuildingOnUnix">
 		<os family="unix"/>
 	</condition>
 				
