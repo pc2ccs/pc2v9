@@ -3,6 +3,7 @@
 #
 # Purpose: start the Web Team Interface (WTI) project Web Team Server
 # Author : pc2@ecs.csus.edu
+#
 
 # MacOS or not
 if [ -f /mach_kernel ]; then
@@ -14,4 +15,4 @@ fi
 
 java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx2048M -jar WebTeamInterface-1.1.jar
 
-# eof pc2webteamserver 
+# eof pc2wti 
