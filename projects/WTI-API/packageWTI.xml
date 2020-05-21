@@ -16,6 +16,10 @@
 	
 	<!-- the directory where the user documentation (user manual) can be found -->
 	<property name="doc.dir" location ="doc/User Manual" />
+	
+	<!-- the set of properties we want to add to the WTI pc2v9.ini file -->
+	<property name="wtiDefaultScoreboardInfo" 
+				value="wtiscoreboardaccount=scoreboard2${line.separator}wtiscoreboardpassword=scoreboard2${line.separator}" />
 
 	<!-- remove any files left over in the distribution directory -->
     <target name="cleandist" description="remove any previous dist files">
@@ -37,8 +41,15 @@
 		<!-- copy pc2v9.ini to staging -->
 		<copy file="pc2v9.ini" todir="${staging.dist.dir}"/> 
 		
-		<!-- add a default scoreboard2 password to the WTI's pc2v9.ini -->
-		<concat destfile="${staging.dist.dir}/pc2v9.ini" append="true">scoreboard2password=scoreboard2</concat>
+		<!-- add default scoreboard account/password properties to the WTI's pc2v9.ini, in front of the "# eof" line -->
+		<!--  NOTE: this will fail (i.e., do nothing) if somebody, someday, deletes the "# eof" line from the pc2v9/pc2v9.ini file.
+		      The ramification will be that an end user will have to manually add "wtiscoreboardaccount=xxx" and 
+		      "wtiscoreboardpassword=yyy" entries to their WTI pc2v9.ini file in order to connect to the PC2 server.
+		      -->
+		<replaceregexp file="${staging.dist.dir}/pc2v9.ini"
+		               match="# eof.*"
+		               replace="${wtiDefaultScoreboardInfo}${line.separator}# eof"
+		               byline="true"/>
 
 		<!-- copy scripts to staging /bin folder-->
 		<mkdir dir="${staging.dist.dir}/bin" />
