@@ -53,8 +53,11 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
  * of "NO" runs on solved problems by the PenaltyPoints value specified in the contest configuration, then finally according to earliest time of last solution (with ties at that level broken
  * alphabetically). This is the "standard" algorithm used in many ICPC Regional Contests.
  * 
+ * The primary use case for this class is to invoke method {@link #getStandings(IInternalContest, Properties, Log)}, which returns a properly-formatted 
+ * {@link https://www.tutorialspoint.com/xml/xml_documents.htm XML document} containing the current contest standings as determined by filter settings
+ * contained in the class instance.
+ * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 // $HeadURL$
 public class DefaultScoringAlgorithm implements IScoringAlgorithm {
@@ -277,8 +280,16 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         this.props = properties;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * This method returns an XML document containing the current contest standings.  The method automatically ignores:
+     * <ul>
+     *   <li> Contest problems which are marked as "hidden".
+     *   <li> Teams which are marked as "Do not display on scoreboard".
+     *   <li> Submissions (runs) which have been marked by the Contest Administrator as "deleted".
+     * </ul>
+     * In addition, if method {@link #setObeyFreeze(boolean)} has been invoked to set the "obeyFreeze" flag to true, the method
+     * will automatically show any submissions received during a configured "scoreboard freeze" period as "Pending" and will not
+     * consider any judgements applied to such runs in computing standings.
      * 
      * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
      */
