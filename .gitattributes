@@ -1,0 +1,13 @@
+*.java    text
+*.html    text
+*.php     text
+*.xml     text
+bin/pc2[a-z] text
+*.bat     text eol=crlf
+testdata/**  -text
+samps/**  -text
+projects/** -text
+
+*.doc     binary
+*.png     binary
+*.jepg    binary
