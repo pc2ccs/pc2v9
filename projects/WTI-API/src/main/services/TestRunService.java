@@ -3,7 +3,7 @@ package services;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import WebsocketEnums.WebsocketType;
+import WebsocketEnums.WebsocketMsgType;
 import communication.WTIWebsocket;
 import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.listener.ITestRunListener;
@@ -32,7 +32,7 @@ public class TestRunService implements ITestRunListener {
 	public void testRunTestingCompleted(IRun arg0) {
 		
 		JsonObject builder = Json.createObjectBuilder()
-				.add("type", WebsocketType.TEST.name().toLowerCase())
+				.add("type", WebsocketMsgType.TEST.name().toLowerCase())
 				.add("id", String.format("%s-%s", arg0.getSiteNumber(), arg0.getNumber()))
 				.add("teamId", this.teamId)
 				.build();

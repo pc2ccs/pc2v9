@@ -32,4 +32,8 @@ export class ContestService extends IContestService {
   getIsContestRunning(): Observable<boolean> {
     return this._httpClient.get<boolean>(`${environment.baseUrl}/contest/isRunning`);
   }
+  
+  getStandings(): Observable<String> {
+    return this._httpClient.get<String>(`${environment.baseUrl}/contest/scoreboard`);
+  }
 }

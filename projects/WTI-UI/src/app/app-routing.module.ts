@@ -6,6 +6,7 @@ import { OptionsPageComponent } from './modules/options/components/options-page/
 import { AuthGuard } from './modules/core/auth/auth.guard';
 import { LogoutComponent } from './modules/login/components/logout/logout.component';
 import { ClarificationsPageComponent } from './modules/clarifications/components/clarifications-page/clarifications-page.component';
+import { ScoreboardPageComponent } from './modules/scoreboard/components/scoreboard-page/scoreboard-page.component';
 
 const routes: Routes = [
   {
@@ -26,6 +27,10 @@ const routes: Routes = [
   }, {
     path: 'clarifications',
     component: ClarificationsPageComponent,
+    canActivate: [AuthGuard]
+  }, {
+    path: 'scoreboard',
+    component: ScoreboardPageComponent,
     canActivate: [AuthGuard]
   }, {
     path: '**',

@@ -77,12 +77,12 @@ public class TeamsController extends MainController {
 			teamsConnection.login(login.teamName,login.password);
 			subscription(teamsConnection.getContest(), key.toString());
 		} catch (LoginFailureException | NotLoggedInException e) {
-			logger.logInfo("Login failed for team " + login.teamName + ": "+  e.getMessage());
+			logger.info("Login failed for team " + login.teamName + ": "+  e.getMessage());
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
 					.type(MediaType.APPLICATION_JSON).build();
 		} catch(Exception e) {
-			logger.logError(String.format("TeamsController Login: ", e.getMessage()));
+			logger.severe(String.format("TeamsController Login: ", e.getMessage()));
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Server error"))
 					.type(MediaType.APPLICATION_JSON)
@@ -94,7 +94,7 @@ public class TeamsController extends MainController {
 		connections.put(key.toString(), teamsConnection);
 		LoginResponseModel response = new LoginResponseModel(login.teamName, key.toString());
 		
-		logger.logInfo("Logged in: " + login.teamName);
+		logger.info("Logged in: " + login.teamName);
 		return Response.ok()
 				.entity(response)
 				.type(MediaType.APPLICATION_JSON).build();
@@ -128,17 +128,17 @@ public class TeamsController extends MainController {
 			teamsConnection.logoff();
 
 		}catch(NullPointerException e) {
-			logger.logInfo("Null pointer exception trying to logoff team " + teamAccount + " from PC2 Server");
+			logger.info("Null pointer exception trying to logoff team " + teamAccount + " from PC2 Server");
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Null pointer exception"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}catch(NotLoggedInException e) {
-			logger.logWarning("NotLoggedIn exception trying to logoff team " + teamAccount + " from PC2 Server");
+			logger.warning("NotLoggedIn exception trying to logoff team " + teamAccount + " from PC2 Server");
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request.."))
 					.type(MediaType.APPLICATION_JSON).build();
 		}catch(Exception e) {
-			logger.logError(String.format(e.getMessage()));
+			logger.severe(String.format(e.getMessage()));
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Server error"))
 					.type(MediaType.APPLICATION_JSON)
@@ -150,7 +150,7 @@ public class TeamsController extends MainController {
 		
 		LogoutResponseModel response = new LogoutResponseModel(key.toString());
 		
-		logger.logInfo("Logged out team " + teamAccount);
+		logger.info("Logged out team " + teamAccount);
 		return Response.ok()
 				.entity(response)
 				.type(MediaType.APPLICATION_JSON).build();
@@ -186,7 +186,7 @@ public class TeamsController extends MainController {
 		ServerConnection teamsConn = connections.get(key);
 
 		if(teamsConn == null) {
-			logger.logWarning("Cannot find team connection to PC2 Server");
+			logger.warning("Cannot find team connection to PC2 Server");
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(Entity.json(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Bad Request")))
 					.type(MediaType.APPLICATION_JSON)
@@ -198,7 +198,7 @@ public class TeamsController extends MainController {
 		try {
 			teamAcct = teamsConn.getMyClient().getLoginName();
 		} catch (NotLoggedInException e) {
-			logger.logInfo("NotLoggedIn exception trying to submit run for team " + teamAcct);
+			logger.info("NotLoggedIn exception trying to submit run for team " + teamAcct);
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
 					.type(MediaType.APPLICATION_JSON).build();
@@ -206,12 +206,12 @@ public class TeamsController extends MainController {
 
 		if(!run.isTest()) {
 			Response submitRunResponse = this.submitRun(teamsConn, run);
-			logger.logInfo("Submitted judged run to PC2 server for team " +  teamAcct + ", response = " + submitRunResponse.getStatus());
+			logger.info("Submitted judged run to PC2 server for team " +  teamAcct + ", response = " + submitRunResponse.getStatus());
 			return submitRunResponse ;
 		}
 		else {
 			Response submitTestRunResponse = this.submitTestRun(teamsConn, run);
-			logger.logInfo("Submitted test run to PC2 server for team " +  teamAcct + ", response = " + submitTestRunResponse.getStatus());
+			logger.info("Submitted test run to PC2 server for team " +  teamAcct + ", response = " + submitTestRunResponse.getStatus());
 			return submitTestRunResponse;
 		}
 	}
@@ -308,15 +308,15 @@ public class TeamsController extends MainController {
 	}
 
 	/***
-	 *  Run gets all the judged and test runs submitted in the PC^2 contest.
+	 *  getTeamRuns() gets all the judged and test runs submitted in the PC^2 contest by a specified team.
 	 * 
-	 * @param key is a String that provides username
-	 * @return Response of either a unauthorized if user is not found or a 200 if ok and clarifications list returned.
+	 * @param key is a String that uniquely identifies the team
+	 * @return Response of either "unauthorized" if user is not found, or 200 (ok) and a list of runs submitted by the specified team.
 	 */
 	@Path("/run")
 	@GET
 	@ApiOperation(value = "Run",
-	notes = "Gets all runs submitted in PC^2 contest.")
+	notes = "Gets all runs submitted in PC^2 contest by a given team.")
 	@ApiResponses({
 		@ApiResponse(code = 200, message = "Returns list of runs.", response = RunModel.class), 
 		@ApiResponse(code = 401, message = "Returned if invalid credentials are supplied", response = ServerErrorResponseModel.class),
@@ -334,7 +334,7 @@ public class TeamsController extends MainController {
 		ServerConnection teamsConn = connections.get(key);
 
 		if(teamsConn == null) {
-			logger.logWarning("Cannot find team connection to PC2 Server");
+			logger.warning("Cannot find team connection to PC2 Server");
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
 					.type(MediaType.APPLICATION_JSON).build();
@@ -346,15 +346,15 @@ public class TeamsController extends MainController {
 			teamAccount = teamsConn.getMyClient().getLoginName();
 
 			List<IRun> allRuns = Arrays.asList(teamsConn.getContest().getRuns());
-			allRuns.addAll(Arrays.asList(teamsConn.getContest().getTestRuns()));
+//			allRuns.addAll(Arrays.asList(teamsConn.getContest().getTestRuns()));
 
 			for(IRun run : allRuns){	
 
 				if(run.getTeam().getLoginName().equals(teamsConn.getMyClient().getLoginName())) {
 
-					if(run.isTestRun()) {
-						result = FileService.convertFilesToModel(run.getTestRunResults().getStderrFiles(), run.getTestRunResults().getStdoutFiles());
-					}
+//					if(run.isTestRun()) {
+//						result = FileService.convertFilesToModel(run.getTestRunResults().getStderrFiles(), run.getTestRunResults().getStdoutFiles());
+//					}
 					
 					runs.add(new RunModel(
 							run.getTeam().getLoginName(),
@@ -363,7 +363,7 @@ public class TeamsController extends MainController {
 							run.getJudgementName(),
 							result,
 							run.getSubmissionTime(), 
-							run.isTestRun(),
+							false, //run.isTestRun(),
 							run.isPreliminaryJudged(),
 							run.isFinalJudged(),
 							String.format("%s-%s", run.getSiteNumber(), run.getNumber())));
@@ -372,19 +372,19 @@ public class TeamsController extends MainController {
 			}
 		}
 		catch(NotLoggedInException e) {
-			logger.logInfo("NotLoggedIn exception trying to get runs from PC2 Server for team " + teamAccount );
+			logger.info("NotLoggedIn exception trying to get runs from PC2 Server for team " + teamAccount );
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 		catch(NullPointerException e) {
-			logger.logError(e.getMessage());
+			logger.severe(e.getMessage());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "INTERNAL SERVER ERROR"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 		catch(Exception e) {
-			logger.logError(e.getMessage() + e.getStackTrace());
+			logger.severe(e.getMessage() + e.getStackTrace());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "INTERNAL SERVER ERROR"))
 					.type(MediaType.APPLICATION_JSON).build();
@@ -392,14 +392,16 @@ public class TeamsController extends MainController {
 		Response okResponse = Response.ok()
 				.entity(runs)
 				.type(MediaType.APPLICATION_JSON).build();
-		logger.logInfo("Returning 'OK' for team " + teamAccount );
+		logger.info("Returning 'OK' for team " + teamAccount );
 		return okResponse;
 	}
 
 	/**
-	 * Submit clarification allows logged in users to submit clarifications to pc^2. Endpoint only works if users have first logged into pc^2. 
+	 * submitClarification() allows logged in users to submit clarifications to pc^2. Endpoint only works if users have first logged into pc^2. 
 	 * 
-	 * @param team_id that is accessed from the header parameter. SubmitClarificationRequestModel
+	 * @param team_id a unique String token (key), obtained from the HTTP header parameters, which identifies the requesting team. 
+	 * @param clar a SubmitClarificationRequestModel, obtained from the HTTP header parameters, containing the clarification request to be submitted
+	 * 
 	 * @return Response of either an ok value, not authorized, or bad request
 	 */
 	@POST
@@ -418,7 +420,7 @@ public class TeamsController extends MainController {
 		ServerConnection teamsConn = connections.get(key);
 
 		if(teamsConn == null) {
-			logger.logWarning("Cannot find team connection to PC2 Server" );
+			logger.warning("Cannot find team connection to PC2 Server" );
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(Entity.json(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Bad Request")))
 					.type(MediaType.APPLICATION_JSON)
@@ -430,13 +432,13 @@ public class TeamsController extends MainController {
 		try {
 			teamAcct = teamsConn.getMyClient().getLoginName();
 		} catch (NotLoggedInException e) {
-			logger.logInfo("NotLoggedIn exception trying to submit clarification for team " + teamAcct);
+			logger.info("NotLoggedIn exception trying to submit clarification for team " + teamAcct);
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 		Response submitClarResponse = this.submitClarification(teamsConn, clar);
-		logger.logInfo("Submitted clarification to PC2 server for team " +  teamAcct + ", response = " + submitClarResponse.getStatus());
+		logger.info("Submitted clarification to PC2 server for team " +  teamAcct + ", response = " + submitClarResponse.getStatus());
 		return submitClarResponse;
 
 	}
@@ -529,14 +531,14 @@ public class TeamsController extends MainController {
 		ServerConnection teamsConn = connections.get(key);
 
 		if(teamsConn == null) {
-			logger.logWarning("Cannot find team connection to PC2 Server" );
+			logger.warning("Cannot find team connection to PC2 Server" );
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(Entity.json(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Bad Request")))
 					.type(MediaType.APPLICATION_JSON)
 					.build();
 		}
 
-		logger.logInfo("Returning 'Not Implemented' to client");
+		logger.info("Returning 'Not Implemented' to client");
 		return Response.status(Response.Status.NOT_IMPLEMENTED)
 				.entity(Entity.json(new ServerErrorResponseModel(Response.Status.NOT_IMPLEMENTED, "Not yet implemented")))
 				.type(MediaType.APPLICATION_JSON)

@@ -18,13 +18,14 @@ import javax.websocket.server.ServerEndpoint;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 
 import config.Logging;
+import edu.csus.ecs.pc2.core.log.Log;
 
 import javax.websocket.server.PathParam;
 
 @ServerEndpoint("/WTISocket/{team_id}")
 public class WTIWebsocketMediator {
 	private static Set<Session> sessions = Collections.synchronizedSet(new HashSet<Session>());
-	Logging logger = Logging.getLogger();
+	Log logger = Logging.getLogger();
 
 	@OnOpen
 	public void connect(Session session, @PathParam("team_id") String teamId) {
@@ -46,7 +47,7 @@ public class WTIWebsocketMediator {
 			if(s.getUserProperties().get("team_id").equals(tId))
 				s.getAsyncRemote().sendText(message);
 			}
-			catch(NullPointerException e) {e.printStackTrace(); this.logger.logError(e.getMessage());}
+			catch(NullPointerException e) {e.printStackTrace(); this.logger.severe(e.getMessage());}
 		}
 		return message;
 	}

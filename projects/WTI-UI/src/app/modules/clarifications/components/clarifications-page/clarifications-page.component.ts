@@ -26,12 +26,12 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.buildForm();
-    this.loadRuns();
+    this.loadClars();
 
     this._contestService.clarificationsUpdated
       .pipe(takeUntil(this._unsubscribe))
       .subscribe(_ => {
-        this.loadRuns();
+        this.loadClars();
       });
   }
 
@@ -66,7 +66,7 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
     this.filterForm.valueChanges.subscribe(_ => this.filterClarifications());
   }
 
-  private loadRuns(): void {
+  private loadClars(): void {
     this._contestService.getClarifications()
       .pipe(takeUntil(this._unsubscribe))
       .subscribe((data: Clarification[]) => {

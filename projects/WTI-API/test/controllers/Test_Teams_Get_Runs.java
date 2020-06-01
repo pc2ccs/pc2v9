@@ -1,6 +1,6 @@
 package controllers;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import javax.ws.rs.core.Response;
 
@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import edu.csus.ecs.pc2.api.IRun;
-import edu.csus.ecs.pc2.core.model.IFile;
 import utils.TeamsControllerInjection;
 
 public class Test_Teams_Get_Runs extends TeamsControllerInjection {
@@ -22,7 +21,7 @@ public class Test_Teams_Get_Runs extends TeamsControllerInjection {
 	public void setup() throws Exception {
 		this.mockedRun = Mockito.mock(IRun.class, Mockito.RETURNS_DEEP_STUBS);
 		Mockito.when(this.connection.getContest().getRuns()).thenReturn(new IRun[] {mockedRun});
-		Mockito.when(this.connection.getContest().getTestRuns()).thenReturn(new IRun[] {});
+//		Mockito.when(this.connection.getContest().getTestRuns()).thenReturn(new IRun[] {});
 		
 		this.teamsControllerInjection();
 		this.controller = new TeamsController();
@@ -38,7 +37,7 @@ public class Test_Teams_Get_Runs extends TeamsControllerInjection {
 		Mockito.when(this.mockedRun.getProblem().getName()).thenReturn("G");
 		Mockito.when(this.mockedRun.getJudgementName()).thenReturn("Accepted");
 		Mockito.when(this.mockedRun.getSubmissionTime()).thenReturn((long)9);
-		Mockito.when(this.mockedRun.isTestRun()).thenReturn(false);
+//		Mockito.when(this.mockedRun.isTestRun()).thenReturn(false);
 		Mockito.when(this.mockedRun.isPreliminaryJudged()).thenReturn(false);
 		Mockito.when(this.mockedRun.isFinalJudged()).thenReturn(true);
 		Mockito.when(this.mockedRun.getSiteNumber()).thenReturn(9);
@@ -59,9 +58,9 @@ public class Test_Teams_Get_Runs extends TeamsControllerInjection {
 		Mockito.when(this.mockedRun.getProblem().getName()).thenReturn("G");
 		Mockito.when(this.mockedRun.getJudgementName()).thenReturn("Accepted");
 		Mockito.when(this.mockedRun.getSubmissionTime()).thenReturn((long)9);
-		Mockito.when(this.mockedRun.isTestRun()).thenReturn(true);
-		Mockito.when(mockedRun.getTestRunResults().getStderrFiles()).thenReturn(new IFile[] {});
-		Mockito.when(mockedRun.getTestRunResults().getStdoutFiles()).thenReturn(new IFile[] {});
+//		Mockito.when(this.mockedRun.isTestRun()).thenReturn(true);
+//		Mockito.when(mockedRun.getTestRunResults().getStderrFiles()).thenReturn(new IFile[] {});
+//		Mockito.when(mockedRun.getTestRunResults().getStdoutFiles()).thenReturn(new IFile[] {});
 		Mockito.when(this.mockedRun.isPreliminaryJudged()).thenReturn(false);
 		Mockito.when(this.mockedRun.isFinalJudged()).thenReturn(true);
 		Mockito.when(this.mockedRun.getSiteNumber()).thenReturn(9);
@@ -82,9 +81,9 @@ public class Test_Teams_Get_Runs extends TeamsControllerInjection {
 		Mockito.when(this.mockedRun.getProblem().getName()).thenReturn("G");
 		Mockito.when(this.mockedRun.getJudgementName()).thenReturn("Accepted");
 		Mockito.when(this.mockedRun.getSubmissionTime()).thenReturn((long)9);
-		Mockito.when(this.mockedRun.isTestRun()).thenReturn(true);
-		Mockito.when(mockedRun.getTestRunResults().getStderrFiles()).thenReturn(null);
-		Mockito.when(mockedRun.getTestRunResults().getStdoutFiles()).thenReturn(new IFile[] {});
+//		Mockito.when(this.mockedRun.isTestRun()).thenReturn(true);
+//		Mockito.when(mockedRun.getTestRunResults().getStderrFiles()).thenReturn(null);
+//		Mockito.when(mockedRun.getTestRunResults().getStdoutFiles()).thenReturn(new IFile[] {});
 		Mockito.when(this.mockedRun.isPreliminaryJudged()).thenReturn(false);
 		Mockito.when(this.mockedRun.isFinalJudged()).thenReturn(true);
 		Mockito.when(this.mockedRun.getSiteNumber()).thenReturn(9);

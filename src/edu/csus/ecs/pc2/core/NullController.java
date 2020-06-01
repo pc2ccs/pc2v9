@@ -401,11 +401,11 @@ public class NullController implements IInternalController {
 
     }
 
-    public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
+    public void submitJudgeRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
 
     }
 
-    public void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
+    public void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
 
     }
 
@@ -540,6 +540,12 @@ public class NullController implements IInternalController {
 
     @Override
     public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void submitJudgeRun(Problem problem, Language language, SerializedFile mainFile, SerializedFile[] otherFiles, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
         // TODO Auto-generated method stub
         
     }

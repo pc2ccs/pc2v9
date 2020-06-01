@@ -1,7 +1,11 @@
 package controllers;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -10,13 +14,23 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.XML;
+
+import communication.WTIWebsocket;
+import config.ServerInit;
 import edu.csus.ecs.pc2.api.IClarification;
 import edu.csus.ecs.pc2.api.IClient;
+import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
-import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ServerConnection;
+import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -49,20 +63,95 @@ import models.ServerErrorResponseModel;
 		@Authorization(value="sampleoauth", scopes = {})
 })
 public class ContestController extends MainController {
+	
+	//this boolean is reset false whenever a standings-changing event is received by the WTI scoreboard ServerConnection;
+	// it is updated to true whenever an access to the /scoreboard REST API endpoint causes the current standings to be updated
+	private boolean wtiServerStandingsAreCurrent = false;
+			
+	//the current ("cached") copy of the scoreboard standings, converted to JSON from XML returned by {@link DefaultScoringAlgorithm#getStandings()}
+	private String currentJSONStandings ;
+	
+	// Static vars -- must be initialized as soon as the class is loaded so that Jetty startup fails if
+	// PC2 Scoreboard login fails
+	private final static String DEFAULT_PC2_SCOREBOARD_ACCOUNT = "scoreboard2";
+	private final static String DEFAULT_PC2_SCOREBOARD_PASSWORD = "scoreboard2";
+	//the ServerConnection used by the ContestController to connect to the PC2 server with a scoreboard account
+	private static ServerConnection scoreboardServerConn ;
+	//the DSA to be used by the /scoreboard endpoint for updating standings when requested
+	private static DefaultScoringAlgorithm dsa;
 
-	public ContestController() throws URISyntaxException {
+	//static init block, used to force PC2 scoreboard login before Jetty startup finishes
+	static {
+		
+		logger.fine("Initializing Contest Controller static block");
+		
+		//create a scoreboard account connection to the PC2 server
+		scoreboardServerConn = new ServerConnection();
+	
+		//get the credentials to be used to login to the PC2 server, either those given in the WTI pc2v9.ini file or the defaults defined above
+		String sbAccount = ini.getScoreboardAccount();
+		if (sbAccount==null || sbAccount.equals("")) {
+			sbAccount = DEFAULT_PC2_SCOREBOARD_ACCOUNT;
+		}
+		String sbPassword = ini.getScoreboardPassword();
+		if (sbPassword==null || sbPassword.equals("")) {
+			sbPassword = DEFAULT_PC2_SCOREBOARD_PASSWORD;
+		}
+		
+		//login to the PC2 server
+		try {
+			scoreboardServerConn.login(sbAccount, sbPassword);
+		} catch (LoginFailureException e) {
+			logger.info("WTI Login failed for scoreboard account " + sbAccount + ": " + e.getMessage());
+			throw new RuntimeException("WTI login failed for PC2 scoreboard account '" + sbAccount + "'" + e.getMessage()) ;
+		} 
+		
+		//create a DefaultScoringAlgorithm to be used for computing standings
+		logger.fine("Constructing DSA for Contest Controller");
+		dsa = new DefaultScoringAlgorithm() ;
+		
+		//insure that team clients only see FROZEN results when in a scoreboard freeze period
+		dsa.setObeyFreeze(true);
+
+	}
+	
+	/**
+	 * Constructs a ContestController for the WTI server. Construction includes
+	 * invoking the super-class {@link MainController}, constructor, which has the
+	 * following effects:
+	 * 
+	 * <pre>
+	 * <ol>
+	 *   <li>create an (initially empty) {@link HashMap} mapping team keys to {@link ServerConnection}s.
+	 *   <li>save the {@link ServerInit} object containing the WTI server initialization values loaded from the WTI pc2v9.ini file.
+	 *   <li>create a new {@link WTIWebsocket} to be used for communicating with team clients.
+	 * </ol>
+	 * <p> The objects created by the superclass constructor are all "protected", making them accessible to this ContestController
+	 * subclass.
+	 * </pre>
+	 * 
+	 * In addition, this constructor creates a {@link ServerConnection} to the PC2 server (which must be running), and it logs into
+	 * the PC2 server using the credentials specified in the WTI 
+	 * 
+	 * @throws URISyntaxException    if a valid websocket could not be constructed in the {@link MainController} super-class from
+	 *                               the initialization values specified in the WTI pc2v9.ini file
+	 * @throws LoginFailureException if the ContestController could not login to the PC2 server using the credentials specified in
+	 *                               the WTI pc2v9.ini file
+	 */
+	public ContestController() throws URISyntaxException, LoginFailureException {
 		super();
 	}
 
 	/***
 	 *  Languages gets all the languages in the PC^2 contest.
 	 *  
-	 * @param languages[] is a ArrayList of type LanguageModel containing language options for the contest
-	 * @return Response of 401 (unauthorized) if user's credentials are incorrect or 200 if languages were successfully returned
+	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
 	 * 
-	 * 
-	 * @param key is a String that provides username
-	 * @return Response of either a unauthorized if user is not found or a 200 if ok and languages list returned.
+	 * @return Response of:
+	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in);
+	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
+	 * 				otherwise 200 (OK) and a JSON string containing an array of {@link ILanguage}s is returned.
 	 */	
 	@Path("/languages")
 	@GET
@@ -100,11 +189,10 @@ public class ContestController extends MainController {
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 		catch(NullPointerException e) {
-			logger.logError(e.getMessage());
+			logger.severe(e.getMessage());
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "INTERNAL SERVER ERROR"))
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.languages()"))
 					.type(MediaType.APPLICATION_JSON).build();
-			
 		}
 		
 		return Response.ok()
@@ -113,11 +201,15 @@ public class ContestController extends MainController {
 	}
 
 	/**
-	 * Judgements gets all the possible judgments in the PC^2 contest.
+	 * Judgements gets all the possible judgments in the PC^2 contest -- that is, a list containing every judgement which could be assigned to a submission.
 	 * 
-	 * @param judgements[] is a ArrayList of type JudgementModel containing judgement options for the contest
-	 * @return Response of either a unauthorized if users credentials are incorrect or a 200 if languages were successfully returned
+	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
 	 * 
+	 * @return Response of:
+	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in);
+	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
+	 * 				otherwise 200 (OK) and a JSON string containing an array of {@link IJudgement}s is returned.
 	 */		
 	@Path("/judgements")
 	@GET
@@ -147,9 +239,15 @@ public class ContestController extends MainController {
 			for(IJudgement judgement : judgs)
 				judgements.add(judgement.getName());
 		}
-		catch(NullPointerException | NotLoggedInException e) {
+		catch(NotLoggedInException e) {
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
+					.type(MediaType.APPLICATION_JSON).build();
+		}
+		catch(NullPointerException e) {
+			logger.severe(e.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.judgements()"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 		
@@ -166,10 +264,13 @@ public class ContestController extends MainController {
 	 *  
 	 *  Note that only NON-HIDDEN problems are returned.
 	 * 
-	 * @param key is a String that identifies the user (team)
+	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
 	 * 
-	 * @return Response either 401 (unauthorized) if either the user (team) is not logged in or the contest is not running; 
-	 * 				otherwise a 200 (OK) and a list of problems is returned.
+	 * @return Response of:
+	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
+	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
+	 * 				otherwise 200 (OK) and a JSON string containing an array of {@link IProblem}s is returned.
 	 */
 	@Path("/problems")
 	@GET
@@ -212,16 +313,34 @@ public class ContestController extends MainController {
 			for(IProblem prob : probs)
 				problems.add(new ProblemModel(prob.getName(),prob.getShortName()));
 		}
-		catch(NullPointerException | NotLoggedInException e) {
+		catch(NotLoggedInException e) {
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
+		catch(NullPointerException e) {
+			logger.severe(e.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.problems()"))
+					.type(MediaType.APPLICATION_JSON).build();
+		}		
+		
 		return Response.ok()
 				.entity(problems)
 				.type(MediaType.APPLICATION_JSON).build();
 	}
 	
+	/***
+	 *  This method returns an indication of whether the contest clock is currently running.
+	 * 
+	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
+	 * 
+	 * @return Response of:
+	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
+	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
+	 * 				otherwise 200 (OK) and a JSON string containing a boolean value indicating whether (true) or not (false) the contest clock is running is returned.
+	 */
 	@Path("/isRunning")
 	@GET
 	@ApiOperation(value = "isRunning",
@@ -253,6 +372,7 @@ public class ContestController extends MainController {
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Unauthorized user request"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
+		
 		return Response.ok()
 				.entity(isRunning)
 				.type(MediaType.APPLICATION_JSON).build();
@@ -264,10 +384,13 @@ public class ContestController extends MainController {
 	 *  contest is running (contest clarifications are only allowed to be viewed when the contest is running). If so, the method
 	 *  returns the current team's clarifications, obtained from the PC2 {@link ServerConnection} for the team.
 	 * 
-	 * @param key a String that identifies the user (team)
+	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
 	 * 
-	 * @return Response either 401 (unauthorized) if either the user (team) is not logged in or the contest is not running; 
-	 * 				otherwise a 200 (OK) and a list of clarifications is returned.
+	 * @return Response of:
+	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
+	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
+	 * 				otherwise 200 (OK) and a JSON string containing a list of {@link IClarification}s is returned.
 	 */
 	@Path("/clarifications")
 	@GET
@@ -330,15 +453,156 @@ public class ContestController extends MainController {
 			}
 
 		}
-		catch(NullPointerException | NotLoggedInException e) {
-
+		catch(NotLoggedInException e) {
 			return Response.status(Response.Status.UNAUTHORIZED)
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
+		catch(NullPointerException e) {
+			logger.severe(e.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.clarifications()"))
+					.type(MediaType.APPLICATION_JSON).build();
+		}		
+		
 		return Response.ok()
 				.entity(clarifications)
 				.type(MediaType.APPLICATION_JSON).build();
 	}
+	
+	/***
+	 *  This method returns the current contest scoreboard standings as a JSON string.
+	 *  
+	 *  The returned JSON string is constructed by first making a call to 
+	 *  {@link DefaultScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.model.IInternalContest, Properties, edu.csus.ecs.pc2.core.log.Log)},
+	 *  which returns an XML document whose format is documented at 
+	 *  <a href="https://github.com/pc2ccs/pc2v9/wiki/Scoreboard-HTML-Configuration#xml-standings-format">this URL</a>.
+	 *  This XML string is then converted to JSON before being returned to the caller.
+	 *  
+	 *  The ContestController <I>caches</i> the scoreboard standings JSON each time they are updated; if standings have not changed
+	 *  since the last call to this endpoint then the cached copy is returned rather than making a new call to {@link DefaultScoringAlgorithm}.
+	 * 
+	 * @param key a String containing a key which uniquely identifies the team making the request.  
+	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
+	 *
+	 * @return Response of:
+	 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
+	 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs either within this ContestController or in fetching the requested data from the PC2 server;
+	 * 				otherwise 200 (OK) and a JSON string containing {@link edu.csus.ecs.pc2.core.scoring.Standings}s is returned.
+	 */	
+	@Path("/scoreboard")
+	@GET
+	@ApiOperation(value = "scoreboard",
+	notes = "Gets current scoreboard standings in the contest.")
+	@ApiResponses({
+		@ApiResponse(code = 200, message = "Returns XML standings.", response = String.class), 
+		@ApiResponse(code = 401, message = "Returned if invalid credentials are supplied", response = ServerErrorResponseModel.class),
+		@ApiResponse(code = 500, message = "Return if server is having trouble handling request", response = ServerErrorResponseModel.class)
+	})
+	public Response getStandings(
+			@ApiParam(value="token used by logged in users to access team information", required = true) @HeaderParam("team_id")String key) {
 
+		logger.fine("ContestController.getStandings(): looking up team login connection");
+		
+		ServerConnection userInformation = connections.get(key);
+
+		// make sure we have connection information for this user (i.e. that the user is logged in)
+		if (userInformation == null) {
+			logger.fine("ContestController failed to find team login connection");
+			return Response.status(Response.Status.UNAUTHORIZED)
+					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
+					.type(MediaType.APPLICATION_JSON).build();
+		}
+
+		//user is logged in; make sure we have a DSA to use
+		if (dsa==null) {
+			logger.severe("No DefaultScoringAlgorithm instance available");
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "DefaultScoringAlgorithm in null in ContestController"))
+					.type(MediaType.APPLICATION_JSON).build();
+		}
+		
+		//check if some event has occurred which could have changed the standings
+		if (!wtiServerStandingsAreCurrent) {
+			
+			logger.info("Standings are not current; invoking DSA to update");
+			
+			//yes, standings could have changed;  try to get the actual InternalContest so we can use it to get updated standings
+			IInternalContest internalContest = null;
+			try {
+				internalContest = scoreboardServerConn.getContest().getInternalContest();
+			} catch (NotLoggedInException e) {
+				return Response.status(Response.Status.UNAUTHORIZED)
+						.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
+						.type(MediaType.APPLICATION_JSON).build();
+			}
+			
+			if (internalContest==null) {
+				logger.severe("No InternalContest instance available for use with DefaultScoringAlgorithm");
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+						.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "InternalContest is null in ScoreboardServerConnection"))
+						.type(MediaType.APPLICATION_JSON).build();
+			}
+			
+			//we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
+			try {
+				String xmlStandings = dsa.getStandings(internalContest, null, logger);
+					logger.fine("Got the following XML from DSA:");
+					logger.fine(xmlStandings);
+					logger.info("Converting DSA XML to JSON");
+				currentJSONStandings = this.getJSONStandings(xmlStandings);
+					logger.fine("Got the following JSON:");
+					logger.fine(currentJSONStandings);
+			} catch (IllegalContestState e) {
+				logger.throwing(dsa.getClass().getName(), "getStandings()", e);
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+						.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "IllegalContestStateException in DefaultScoringAlgorithm"))
+						.type(MediaType.APPLICATION_JSON).build();
+			} 
+			catch (JSONException e) {
+				logger.throwing(this.getClass().getName(), "getJSONStandings()", e);
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+						.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
+						.type(MediaType.APPLICATION_JSON).build();
+			}
+			catch (IOException e) {
+				logger.throwing(this.getClass().getName(), "getJSONStandings()", e);
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+						.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
+						.type(MediaType.APPLICATION_JSON).build();
+			}
+			wtiServerStandingsAreCurrent = true;
+		}
+			
+		logger.info("Returning JSON standings in HTTP Response");
+		logger.fine(currentJSONStandings);
+		
+		//standings are (now) current; return them to requestor
+		return Response.ok()
+				.entity(currentJSONStandings)
+				.type(MediaType.APPLICATION_JSON).build();
+	}
+
+	
+	/**
+	 * Returns a JSON String containing the standings represented by the given XML Document String.
+	 * 
+	 * The JSON representation is created by first converting the given XML Document to a 
+	 * {@link Standings} object, then invoking {@link Standings#toJSON()} on that object.
+	 * 
+	 * @param xmlStandings a String containing an XML Document with contest standings in the XML format produced 
+	 * 					by {@link DefaultScoringAlgorithm#getStandings()}
+	 * 
+	 * @throws IOException if an error occurs in converting the Standings object to JSON form
+	 * @throws JSONException 
+	 * 
+	 */
+	private String getJSONStandings(String xmlStandings) throws IOException, JSONException {
+		
+		JSONObject jsonStandingsObject = XML.toJSONObject(xmlStandings);;
+		
+		return jsonStandingsObject.toString();
+
+	}
+	
 }

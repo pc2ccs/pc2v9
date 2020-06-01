@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.implementation.Contest;
+import edu.csus.ecs.pc2.core.log.Log;
 import emptyObjs.EmptyLanguage;
 import emptyObjs.EmptyProblem;
 import io.swagger.annotations.Api;
@@ -23,7 +24,6 @@ import io.swagger.annotations.Tag;
 import services.ClarificationService;
 import services.ConfigurationService;
 import services.RunsService;
-import services.TestRunService;
 
 @SwaggerDefinition(
 		info = @Info(
@@ -46,8 +46,9 @@ public abstract class MainController {
 	// this class were to be used in a contest running, say, over the Internet for days or weeks...
 	protected static HashMap<String, ServerConnection> connections = new HashMap<String, ServerConnection>();
 	
-	private ServerInit ini = ServerInit.createServerInit();
-	protected static Logging logger;
+	//the following two fields are "static" because they need to be referenced by the static initialization block in ContestController
+	protected static ServerInit ini = ServerInit.createServerInit();
+	protected static Log logger;
 	
 	private final String websocketUrl = String.format("ws://localhost:%s%s/WTISocket", ini.getPortNum(), ini.getWsName());
 	private static WTIWebsocket client;
@@ -74,7 +75,7 @@ public abstract class MainController {
 	
 	protected void subscription(Contest teamCon, String teamId) {
 		teamCon.addRunListener(new RunsService(teamId, client));
-		teamCon.addTestRunListener(new TestRunService(teamId, client));
+//		teamCon.addTestRunListener(new TestRunService(teamId, client));  //required implementing Test Run support in API
 		teamCon.addClarificationListener(new ClarificationService(teamId, client));
 		teamCon.addContestConfigurationUpdateListener(new ConfigurationService(teamId, client));
 	}

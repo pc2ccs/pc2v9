@@ -17,6 +17,7 @@
     <property name="liblocation" location="WebContent\WEB-INF\lib" />
 	<property name="frontendlocation" location="../WTI-UI" />
     <property name="websockets" location="websockets" />
+	<property name="pc2jarloc" location="../../dist" />
     <path id="libjars">
         <fileset dir="${liblocation}" includes="**/*.jar" />
     </path>
@@ -40,6 +41,8 @@
     <target name="init">
         <!-- Create the time stamp -->
         <tstamp />
+    	<!-- copy the new pc2.jar (if it exists) into this project -->
+    	<copy file="${pc2jarloc}/pc2.jar" todir="${liblocation}" failonerror="false"/>
     </target>
 	
     <!-- Compile the WTI-API java code from ${src} into ${bin} -->
@@ -133,7 +136,7 @@
     	<input if:true="${isInteractive}">Ready to run Collect; press Enter to continue...</input>
     	
         <move todir="${build.dir}/WebContent">
-        	<fileset dir="${frontendlocation}/dist">  <!-- ${frontend/dist} is populated (with WIT-UI) by ngbuild, above-->
+        	<fileset dir="${frontendlocation}/dist">  <!-- ${frontend/dist} is populated (with WTI-UI) by ngbuild, above-->
                 <include name="**/*" />
             </fileset>
         </move>
