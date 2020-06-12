@@ -16,7 +16,7 @@
 	
 	<!-- the directory where the user documentation (user manual) can be found -->
 	<property name="doc.dir" location ="doc/User Manual" />
-
+	
 	<!-- remove any files left over in the distribution directory -->
     <target name="cleandist" description="remove any previous dist files">
         <delete dir="${staging.dist.dir}" />
@@ -36,7 +36,7 @@
 		
 		<!-- copy pc2v9.ini to staging -->
 		<copy file="pc2v9.ini" todir="${staging.dist.dir}"/> 
-
+		
 		<!-- copy scripts to staging /bin folder-->
 		<mkdir dir="${staging.dist.dir}/bin" />
 		<copy todir="${staging.dist.dir}/bin">  <fileset dir="${scripts.src.dir}"/>  </copy>
