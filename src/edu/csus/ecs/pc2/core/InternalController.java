@@ -1002,6 +1002,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             
             handleCDPLoad(true);
             
+            loadDefaultJudgementsIfMissing();
+            
             dumpAutoStartInformation(contest.getContestInformation());
             
             try {
@@ -1058,22 +1060,57 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             new File(profileDirectory).mkdirs();
         }
     }
+    
+    /**
+     * Load judgements from reject.ini
+     * @param contest
+     * @param cdpConfigDirectory
+     * @return
+     * @throws Exception
+     */
+    protected boolean loadJudgements(IInternalContest contest, File cdpConfigDirectory) throws Exception {
 
+        String filename = getCdpConfigRejectIniFilename(cdpConfigDirectory);
+
+        if (new File(filename).exists()) {
+            return new JudgementLoader().loadedJudgementsFromIni(contest, filename);
+        }
+        return false;
+    }
+
+    private String getCdpConfigRejectIniFilename(File cdpConfigDirectory) {
+        return cdpConfigDirectory.getAbsolutePath() + File.separator + Constants.JUDGEMENT_INIT_FILENAME;
+    }
+
+    /**
+     * Load judgements from reject.ini if it exists.
+     */
     protected void loadJudgements() {
 
         if (!isContactingRemoteServer()) {
 
             if (contest.getJudgements().length == 0) {
-
                 if (loadedJudgementsFromIni(Constants.JUDGEMENT_INIT_FILENAME)) {
                     info("Loaded judgements from " + Constants.JUDGEMENT_INIT_FILENAME);
-                } else {
-                    info(Constants.JUDGEMENT_INIT_FILENAME + " not found.  Loading default judgements");
-                    loadDefaultJudgements();
-                }
+                } 
             }
         }
     }
+
+    /**
+     * Load default judgements.
+     */
+    protected void loadDefaultJudgementsIfMissing() {
+
+        if (!isContactingRemoteServer()) {
+
+            if (contest.getJudgements().length == 0) {
+                info(Constants.JUDGEMENT_INIT_FILENAME + " not found.  Loading default judgements");
+                loadDefaultJudgements();
+            }
+        }
+    }
+
 
     /**
      * Loads reject.ini file contents into Judgements.
@@ -2588,6 +2625,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     info("Loaded CDP/config values from " + entryLocation);
                     
                     File cdpConfigDir = loader.findCDPConfigDirectory(new File(entryLocation));
+                    
+                    if (contest.getJudgements().length == 0) {
+                        if (loadJudgements(contest, cdpConfigDir)){
+                            System.out.println("Loaded judgements from "+getCdpConfigRejectIniFilename(cdpConfigDir));
+                        }
+                    }
                     
                     if (saveCofigurationToDisk) {
                         // save newly merged profiles

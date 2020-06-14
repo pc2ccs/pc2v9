@@ -14,15 +14,14 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 
 /**
- * Print All Judgement Information.
+ * Print All Judgement Information including reject.ini file
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
-
 public class JudgementReport implements IReport {
+
+    public static final String NO_JUDGEMENT_PREFIX = "No - ";
 
     /**
      * 
@@ -67,6 +66,12 @@ public class JudgementReport implements IReport {
             printWriter.print(hiddenText+" id=" + judgement.getElementId());
             printWriter.println();
         }
+        
+        printWriter.println();
+        printWriter.println("# reject.ini");
+        printWriter.println("#");
+        printRejectINI(printWriter, contest);
+        printWriter.println();
     }
 
     public void printHeader(PrintWriter printWriter) {
@@ -75,6 +80,23 @@ public class JudgementReport implements IReport {
         printWriter.println(new VersionInfo().getSystemVersionInfo());
         printWriter.println();
         printWriter.println(getReportTitle() + " Report");
+    }
+    
+    public void printRejectINI(PrintWriter printWriter, IInternalContest inContest) {
+        
+        Judgement [] judgements = inContest.getJudgements();
+        for (Judgement judgement : judgements) {
+            
+//            Compilation Error|CE
+//            Run-time Error|RTE
+
+            String judgmentName = judgement.getDisplayName();
+            if  (judgmentName.startsWith(NO_JUDGEMENT_PREFIX)){
+                judgmentName = judgmentName.substring(5);
+            }
+            
+            printWriter.println(judgmentName + "|" + judgement.getAcronym());
+        }
     }
 
     public void printFooter(PrintWriter printWriter) {
