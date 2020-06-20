@@ -41,6 +41,7 @@ import models.ClarificationModel;
 import models.LanguageModel;
 import models.ProblemModel;
 import models.ServerErrorResponseModel;
+import services.ScoreboardChangeListener;
 
 /**
  * This class acts as the MVC "Controller" for all accesses to the WTI endpoints related to obtaining information about
@@ -64,6 +65,9 @@ import models.ServerErrorResponseModel;
 })
 public class ContestController extends MainController {
 	
+	private final static String DEFAULT_PC2_SCOREBOARD_ACCOUNT = "scoreboard2";
+	private final static String DEFAULT_PC2_SCOREBOARD_PASSWORD = "scoreboard2";
+	
 	//this boolean is reset false whenever a standings-changing event is received by the WTI scoreboard ServerConnection;
 	// it is updated to true whenever an access to the /scoreboard REST API endpoint causes the current standings to be updated
 	private boolean wtiServerStandingsAreCurrent = false;
@@ -73,10 +77,10 @@ public class ContestController extends MainController {
 	
 	// Static vars -- must be initialized as soon as the class is loaded so that Jetty startup fails if
 	// PC2 Scoreboard login fails
-	private final static String DEFAULT_PC2_SCOREBOARD_ACCOUNT = "scoreboard2";
-	private final static String DEFAULT_PC2_SCOREBOARD_PASSWORD = "scoreboard2";
+	
 	//the ServerConnection used by the ContestController to connect to the PC2 server with a scoreboard account
 	private static ServerConnection scoreboardServerConn ;
+	
 	//the DSA to be used by the /scoreboard endpoint for updating standings when requested
 	private static DefaultScoringAlgorithm dsa;
 
@@ -134,12 +138,27 @@ public class ContestController extends MainController {
 	 * the PC2 server using the credentials specified in the WTI 
 	 * 
 	 * @throws URISyntaxException    if a valid websocket could not be constructed in the {@link MainController} super-class from
-	 *                               the initialization values specified in the WTI pc2v9.ini file
+	 *                               the initialization values specified in the WTI pc2v9.ini file.
 	 * @throws LoginFailureException if the ContestController could not login to the PC2 server using the credentials specified in
-	 *                               the WTI pc2v9.ini file
+	 *                               the WTI pc2v9.ini file.
+	 * @throws NotLoggedInException if the ContestController initialization block somehow successfully logged in but a subsequent 
+	 * 								check returns "not logged in".
 	 */
-	public ContestController() throws URISyntaxException, LoginFailureException {
+	public ContestController() throws URISyntaxException, LoginFailureException, NotLoggedInException {
 		super();
+		
+		//add to the Scoreboard ServerConnection's contest a listener for each type of event which can change standings
+		try {
+			ScoreboardChangeListener sbListener = new ScoreboardChangeListener(this);
+			scoreboardServerConn.getContest().addRunListener(sbListener);
+			scoreboardServerConn.getContest().addContestConfigurationUpdateListener(sbListener);
+		} catch (NotLoggedInException e) {
+			//Cannot get here (theoretically) since a login failure should already have thrown a RuntimeException in the above static block.
+			//Theoretically.
+			logger.severe("Scoreboard not logged in to PC2 server in ContestController constructor -- should not be possible! " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	/***
@@ -547,11 +566,11 @@ public class ContestController extends MainController {
 			//we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
 			try {
 				String xmlStandings = dsa.getStandings(internalContest, null, logger);
-					logger.fine("Got the following XML from DSA:");
-					logger.fine(xmlStandings);
+//					logger.fine("Got the following XML from DSA:");
+//					logger.fine(xmlStandings);
 					logger.info("Converting DSA XML to JSON");
 				currentJSONStandings = this.getJSONStandings(xmlStandings);
-					logger.fine("Got the following JSON:");
+					logger.fine("Got the following JSON standings:");
 					logger.fine(currentJSONStandings);
 			} catch (IllegalContestState e) {
 				logger.throwing(dsa.getClass().getName(), "getStandings()", e);
@@ -603,6 +622,27 @@ public class ContestController extends MainController {
 		
 		return jsonStandingsObject.toString();
 
+	}
+
+	/**
+	 * Returns the flag indicating whether the cached copy of the contest standings are current (true),
+	 * or instead that some event has occured which potentially makes the standings out of date (false).
+	 * 
+	 * @return true if the cached contest standings are current; false if some event has occurred which means they MAY not be current.
+	 */
+	public boolean getWtiServerStandingsAreCurrent() {
+		return wtiServerStandingsAreCurrent;
+	}
+
+	/**
+	 * Sets the flag indicating that the cached copy of the contest standings should no longer be considered current.
+	 * This method is intended to be called by listeners which listen for contest state changes which could cause standings
+	 * to be invalid.
+	 * 
+	 * @param wtiServerStandingsAreCurrent the value to which the standings flag should be set.
+	 */
+	public void setWtiServerStandingsAreCurrent(boolean wtiServerStandingsAreCurrent) {
+		this.wtiServerStandingsAreCurrent = wtiServerStandingsAreCurrent;
 	}
 	
 }
