@@ -51,7 +51,7 @@ public abstract class MainController {
 	protected static Log logger;
 	
 	private final String websocketUrl = String.format("ws://localhost:%s%s/WTISocket", ini.getPortNum(), ini.getWsName());
-	private static WTIWebsocket client;
+	protected static WTIWebsocket client;
 
 	public MainController() throws URISyntaxException {
 

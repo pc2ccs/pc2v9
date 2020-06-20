@@ -149,7 +149,7 @@ public class ContestController extends MainController {
 		
 		//add to the Scoreboard ServerConnection's contest a listener for each type of event which can change standings
 		try {
-			ScoreboardChangeListener sbListener = new ScoreboardChangeListener(this);
+			ScoreboardChangeListener sbListener = new ScoreboardChangeListener(this, client);
 			scoreboardServerConn.getContest().addRunListener(sbListener);
 			scoreboardServerConn.getContest().addContestConfigurationUpdateListener(sbListener);
 		} catch (NotLoggedInException e) {
@@ -521,7 +521,7 @@ public class ContestController extends MainController {
 	public Response getStandings(
 			@ApiParam(value="token used by logged in users to access team information", required = true) @HeaderParam("team_id")String key) {
 
-		logger.fine("ContestController.getStandings(): looking up team login connection");
+		logger.fine("Looking up team login connection");
 		
 		ServerConnection userInformation = connections.get(key);
 
@@ -541,65 +541,68 @@ public class ContestController extends MainController {
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 		
-		//check if some event has occurred which could have changed the standings
-		if (!wtiServerStandingsAreCurrent) {
+		try {
+			logger.info("Standings requested by team " + userInformation.getMyClient().getLoginName());
 			
-			logger.info("Standings are not current; invoking DSA to update");
-			
-			//yes, standings could have changed;  try to get the actual InternalContest so we can use it to get updated standings
-			IInternalContest internalContest = null;
-			try {
-				internalContest = scoreboardServerConn.getContest().getInternalContest();
-			} catch (NotLoggedInException e) {
-				return Response.status(Response.Status.UNAUTHORIZED)
-						.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
-						.type(MediaType.APPLICATION_JSON).build();
-			}
-			
-			if (internalContest==null) {
-				logger.severe("No InternalContest instance available for use with DefaultScoringAlgorithm");
-				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-						.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "InternalContest is null in ScoreboardServerConnection"))
-						.type(MediaType.APPLICATION_JSON).build();
-			}
-			
-			//we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
-			try {
-				String xmlStandings = dsa.getStandings(internalContest, null, logger);
+			// check if some event has occurred which could have changed the standings
+			if (!wtiServerStandingsAreCurrent) {
+
+				logger.info("Standings are not current; invoking DSA to update");
+
+				// Standings could have changed; try to get the actual InternalContest so
+				// we can use it to get updated standings
+				IInternalContest internalContest = scoreboardServerConn.getContest().getInternalContest();
+
+				if (internalContest == null) {
+					logger.severe("No InternalContest instance available for use with DefaultScoringAlgorithm");
+					return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
+									"InternalContest is null in ScoreboardServerConnection"))
+							.type(MediaType.APPLICATION_JSON).build();
+				}
+
+				// we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
+				try {
+					String xmlStandings = dsa.getStandings(internalContest, null, logger);
 //					logger.fine("Got the following XML from DSA:");
 //					logger.fine(xmlStandings);
 					logger.info("Converting DSA XML to JSON");
-				currentJSONStandings = this.getJSONStandings(xmlStandings);
-					logger.fine("Got the following JSON standings:");
-					logger.fine(currentJSONStandings);
-			} catch (IllegalContestState e) {
-				logger.throwing(dsa.getClass().getName(), "getStandings()", e);
-				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-						.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "IllegalContestStateException in DefaultScoringAlgorithm"))
-						.type(MediaType.APPLICATION_JSON).build();
-			} 
-			catch (JSONException e) {
-				logger.throwing(this.getClass().getName(), "getJSONStandings()", e);
-				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-						.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
-						.type(MediaType.APPLICATION_JSON).build();
+					currentJSONStandings = this.getJSONStandings(xmlStandings);
+//					logger.fine("Got the following JSON standings:");
+//					logger.fine(currentJSONStandings);
+				} catch (IllegalContestState e) {
+					logger.throwing(dsa.getClass().getName(), "getStandings()", e);
+					return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
+									"IllegalContestStateException in DefaultScoringAlgorithm"))
+							.type(MediaType.APPLICATION_JSON).build();
+				} catch (JSONException e) {
+					logger.throwing(this.getClass().getName(), "getJSONStandings()", e);
+					return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
+									"IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
+							.type(MediaType.APPLICATION_JSON).build();
+				} catch (IOException e) {
+					logger.throwing(this.getClass().getName(), "getJSONStandings()", e);
+					return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
+									"IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
+							.type(MediaType.APPLICATION_JSON).build();
+				}
+				wtiServerStandingsAreCurrent = true;
 			}
-			catch (IOException e) {
-				logger.throwing(this.getClass().getName(), "getJSONStandings()", e);
-				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-						.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
-						.type(MediaType.APPLICATION_JSON).build();
-			}
-			wtiServerStandingsAreCurrent = true;
-		}
+
+			logger.info("Returning JSON standings in HTTP Response");
+//			logger.fine(currentJSONStandings);
+
+			// standings are (now) current; return them to requestor
+			return Response.ok().entity(currentJSONStandings).type(MediaType.APPLICATION_JSON).build();
 			
-		logger.info("Returning JSON standings in HTTP Response");
-		logger.fine(currentJSONStandings);
-		
-		//standings are (now) current; return them to requestor
-		return Response.ok()
-				.entity(currentJSONStandings)
-				.type(MediaType.APPLICATION_JSON).build();
+		} catch (NotLoggedInException e1) {
+			return Response.status(Response.Status.UNAUTHORIZED).entity(
+					new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request - not logged in"))
+					.type(MediaType.APPLICATION_JSON).build();
+		}
 	}
 
 	
@@ -643,6 +646,16 @@ public class ContestController extends MainController {
 	 */
 	public void setWtiServerStandingsAreCurrent(boolean wtiServerStandingsAreCurrent) {
 		this.wtiServerStandingsAreCurrent = wtiServerStandingsAreCurrent;
+	}
+	
+	/**
+	 * Returns a HashMap which maps current team keys to PC2 ServerConnections.
+	 * 
+	 * @return a HashMap of teams to PC2 ServerConnection objects.
+	 */
+	public HashMap<String, ServerConnection> getTeamConnections(){
+		
+		return connections;
 	}
 	
 }

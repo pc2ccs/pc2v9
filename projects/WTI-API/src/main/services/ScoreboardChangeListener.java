@@ -1,7 +1,15 @@
 package services;
 
+import java.util.HashMap;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+
+import WebsocketEnums.WebsocketMsgType;
+import communication.WTIWebsocket;
 import controllers.ContestController;
 import edu.csus.ecs.pc2.api.IRun;
+import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.listener.ContestEvent;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
@@ -9,6 +17,8 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 public class ScoreboardChangeListener implements IRunEventListener, IConfigurationUpdateListener {
 
 	private ContestController contestController ;
+	private WTIWebsocket socket ;
+	
 	/**
 	 * Constructs a new ScoreboardChangeListener which listens for changes in standings-related items 
 	 * in the specified contest.  When a change which MAY cause the contest standings to alter is detected,
@@ -18,8 +28,9 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 	 * @param contestController the ContestController which this ScoreboardChangeListener will update on detecting potential-scoreboard-changing 
 	 * events.  
 	 */
-	public ScoreboardChangeListener(ContestController contestController) {
+	public ScoreboardChangeListener(ContestController contestController, WTIWebsocket socket) {
 		this.contestController = contestController;
+		this.socket = socket;
 	}
 	
 	/**
@@ -29,7 +40,7 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 	 */
 	@Override
 	public void runSubmitted(IRun run) {
-		contestController.setWtiServerStandingsAreCurrent(false) ;
+		markStandingsNotCurrent();
 	}
 
 	/**
@@ -38,7 +49,7 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 	 */
 	@Override
 	public void runDeleted(IRun run) {
-		contestController.setWtiServerStandingsAreCurrent(false) ;
+		markStandingsNotCurrent();
 	}
 
 	/**
@@ -55,7 +66,7 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 	 */
 	@Override
 	public void runJudged(IRun run, boolean isFinal) {
-		contestController.setWtiServerStandingsAreCurrent(false) ;	
+		markStandingsNotCurrent();
 	}
 
 	/**
@@ -64,7 +75,7 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 	 */
 	@Override
 	public void runUpdated(IRun run, boolean isFinal) {
-		contestController.setWtiServerStandingsAreCurrent(false) ;
+		markStandingsNotCurrent();
 	}
 
 	/**
@@ -105,7 +116,7 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 	 */
 	@Override
 	public void configurationItemAdded(ContestEvent contestEvent) {
-		contestController.setWtiServerStandingsAreCurrent(false) ;
+		markStandingsNotCurrent();
 	}
 
 	/**
@@ -115,7 +126,7 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 	 */
 	@Override
 	public void configurationItemUpdated(ContestEvent contestEvent) {
-		contestController.setWtiServerStandingsAreCurrent(false) ;
+		markStandingsNotCurrent();
 	}
 
 	/**
@@ -124,7 +135,36 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 	 */
 	@Override
 	public void configurationItemRemoved(ContestEvent contestEvent) {
+		markStandingsNotCurrent();
+	}
+	
+	/**
+	 * Sets "wtiServerStandingsAreCurrent" in ContestController to false; 
+	 * sends a websocket message to each team client indicating standings are not current.
+	 */
+	private void markStandingsNotCurrent() {
+		
+		//tell the ContestController that its cached standings should no longer be considered current
 		contestController.setWtiServerStandingsAreCurrent(false) ;
+
+		//get the set of current team connections
+		HashMap<String, ServerConnection> teamConnections = contestController.getTeamConnections();
+		
+		//get each team out of the set
+		for (String teamkey : teamConnections.keySet()) {
+	
+			// build a message for the current team
+			JsonObject builder = Json.createObjectBuilder()
+				.add("type", WebsocketMsgType.STANDINGS.name().toLowerCase())
+				.add("id", "1-1") //id value was: String.format("%s-%s", arg0.getSiteNumber(), arg0.getNumber())), but id is basically useless here...
+				.add("teamId", teamkey)
+				.build();
+
+			//tell the current team (browser client) that its standings should no longer be considered current
+			socket.sendMessage(builder.toString());
+		
+		}
+
 	}
 
 }

@@ -33,6 +33,12 @@ export abstract class IWebsocketService {
           });
         break;
       }
+      case 'standings': {
+        console.log("got a Standings websocket message");
+        //need code here to process this "standings are not current" message
+        console.log("need code to make client-side use of this message...");
+        break;
+      }
       default:
         console.warn('unrecognized message on webscoket');
         console.warn(message);
