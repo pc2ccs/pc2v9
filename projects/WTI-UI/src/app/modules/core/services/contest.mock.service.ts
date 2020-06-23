@@ -87,4 +87,8 @@ export class ContestMockService extends IContestService {
     
   }
 
+	markStandingsOutOfDate() : void {
+		//do nothing
+	}
+
 }

@@ -3,7 +3,6 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-//import { Standing } from 'src/app/modules/core/models/standing';
 
 @Component({
 	templateUrl: './scoreboard-page.component.html',
@@ -11,11 +10,14 @@ import { Subject } from 'rxjs';
 })
 export class ScoreboardPageComponent implements OnInit, OnDestroy {
 	
-
+	
 	private _unsubscribe = new Subject<void>();
 	//filterForm: FormGroup;
 	//teamStandings: Standing[] = [];
 	teamStandings: any = [];
+	
+//	@ViewChild('map') m;
+//	private isVisible: boolean = false;
 
 	constructor(
 		//private _formBuilder: FormBuilder,
@@ -40,7 +42,21 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy {
 		this._unsubscribe.next();
 		this._unsubscribe.complete();
 	}
+	
+//	ngDoCheck(): void {
+//  		this.isVisible = this.element.nativeElement.offsetParent !== null;
+//		console.log("Scoreboard ngDoCheck(); isVisible = " + this.isVisible);
+//	}
 
+//	ngAfterContentChecked(): void {
+//      if (this.isVisible == false && this.m.nativeElement.offsetParent != null) {
+//          console.log('isVisible switched from false to true');
+//          this.isVisible = true;
+//      } else if (this.isVisible == true && this.m.nativeElement.offsetParent == null) {
+//          console.log('isVisible switched from true to false');
+//          this.isVisible = false;
+//      }
+//    }
 
 /*	private buildForm(): void {
 		this.filterForm = this._formBuilder.group({

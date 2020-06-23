@@ -20,4 +20,6 @@ export abstract class IContestService {
   abstract getIsContestRunning(): Observable<boolean>;
   
   abstract getStandings(): Observable<String>;
+
+  abstract markStandingsOutOfDate(): void;
 }

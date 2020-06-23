@@ -9,8 +9,13 @@ import { Clarification } from '../models/clarification';
 
 @Injectable()
 export class ContestService extends IContestService {
+	
+  standingsAreCurrent: boolean ;
+  cachedStandings: Observable<String> ;
+
   constructor(private _httpClient: HttpClient) {
     super();
+	    this.standingsAreCurrent = false;
   }
 
   getLanguages(): Observable<ContestLanguage[]> {
@@ -34,6 +39,19 @@ export class ContestService extends IContestService {
   }
   
   getStandings(): Observable<String> {
-    return this._httpClient.get<String>(`${environment.baseUrl}/contest/scoreboard`);
+	console.log("ContestService.getStandings():")
+	if (!this.standingsAreCurrent) {
+		console.log ("Standings are out of date; fetching new standings");
+		this.cachedStandings = this._httpClient.get<String>(`${environment.baseUrl}/contest/scoreboard`);
+		this.standingsAreCurrent = true ;
+	} else {
+		 console.log("Returning cached standings");
+	}
+	return this.cachedStandings ;
   }
+
+	markStandingsOutOfDate() : void {
+		this.standingsAreCurrent = false ;
+	}
+
 }
