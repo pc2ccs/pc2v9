@@ -83,6 +83,9 @@ public class ContestController extends MainController {
 	
 	//the DSA to be used by the /scoreboard endpoint for updating standings when requested
 	private static DefaultScoringAlgorithm dsa;
+	
+	//mutex to insure at most one browser client at a time can attempt to use the above DSA to update standings
+	private static Boolean updateStandingsMutex = new Boolean(false);
 
 	//static init block, used to force PC2 scoreboard login before Jetty startup finishes
 	static {
@@ -544,54 +547,58 @@ public class ContestController extends MainController {
 		try {
 			logger.info("Standings requested by team " + userInformation.getMyClient().getLoginName());
 			
-			// check if some event has occurred which could have changed the standings
-			if (!wtiServerStandingsAreCurrent) {
+			//insure that only one browser client at a time can attempt to use the DSA to update standings
+			synchronized (updateStandingsMutex) {
+				
+				// check if some event has occurred which could have changed the standings
+				if (!wtiServerStandingsAreCurrent) {
 
-				logger.info("Standings are not current; invoking DSA to update");
+					logger.info("Standings are not current; invoking DSA to update");
 
-				// Standings could have changed; try to get the actual InternalContest so
-				// we can use it to get updated standings
-				IInternalContest internalContest = scoreboardServerConn.getContest().getInternalContest();
+					// Standings could have changed; try to get the actual InternalContest so
+					// we can use it to get updated standings
+					IInternalContest internalContest = scoreboardServerConn.getContest().getInternalContest();
 
-				if (internalContest == null) {
-					logger.severe("No InternalContest instance available for use with DefaultScoringAlgorithm");
-					return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
-									"InternalContest is null in ScoreboardServerConnection"))
-							.type(MediaType.APPLICATION_JSON).build();
+					if (internalContest == null) {
+						logger.severe("No InternalContest instance available for use with DefaultScoringAlgorithm");
+						return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+								.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
+										"InternalContest is null in ScoreboardServerConnection"))
+								.type(MediaType.APPLICATION_JSON).build();
+					}
+
+					// we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
+					try {
+						String xmlStandings = dsa.getStandings(internalContest, null, logger);
+						//					logger.fine("Got the following XML from DSA:");
+						//					logger.fine(xmlStandings);
+						logger.info("Converting DSA XML to JSON");
+						currentJSONStandings = this.getJSONStandings(xmlStandings);
+						//					logger.fine("Got the following JSON standings:");
+						//					logger.fine(currentJSONStandings);
+					} catch (IllegalContestState e) {
+						logger.throwing(dsa.getClass().getName(), "getStandings()", e);
+						return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+								.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
+										"IllegalContestStateException in DefaultScoringAlgorithm"))
+								.type(MediaType.APPLICATION_JSON).build();
+					} catch (JSONException e) {
+						logger.throwing(this.getClass().getName(), "getJSONStandings()", e);
+						return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+								.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
+										"IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
+								.type(MediaType.APPLICATION_JSON).build();
+					} catch (IOException e) {
+						logger.throwing(this.getClass().getName(), "getJSONStandings()", e);
+						return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+								.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
+										"IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
+								.type(MediaType.APPLICATION_JSON).build();
+					}
+					wtiServerStandingsAreCurrent = true;
 				}
-
-				// we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
-				try {
-					String xmlStandings = dsa.getStandings(internalContest, null, logger);
-//					logger.fine("Got the following XML from DSA:");
-//					logger.fine(xmlStandings);
-					logger.info("Converting DSA XML to JSON");
-					currentJSONStandings = this.getJSONStandings(xmlStandings);
-//					logger.fine("Got the following JSON standings:");
-//					logger.fine(currentJSONStandings);
-				} catch (IllegalContestState e) {
-					logger.throwing(dsa.getClass().getName(), "getStandings()", e);
-					return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
-									"IllegalContestStateException in DefaultScoringAlgorithm"))
-							.type(MediaType.APPLICATION_JSON).build();
-				} catch (JSONException e) {
-					logger.throwing(this.getClass().getName(), "getJSONStandings()", e);
-					return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
-									"IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
-							.type(MediaType.APPLICATION_JSON).build();
-				} catch (IOException e) {
-					logger.throwing(this.getClass().getName(), "getJSONStandings()", e);
-					return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR,
-									"IOException (JsonProcessingException?) in ContestController.getJSONStandings()"))
-							.type(MediaType.APPLICATION_JSON).build();
-				}
-				wtiServerStandingsAreCurrent = true;
-			}
-
+			}//end synchronized block
+			
 			logger.info("Returning JSON standings in HTTP Response");
 //			logger.fine(currentJSONStandings);
 
