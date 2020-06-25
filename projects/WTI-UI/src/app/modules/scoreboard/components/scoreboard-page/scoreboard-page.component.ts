@@ -1,5 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { Component, OnInit, OnDestroy, DoCheck } from '@angular/core';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -8,27 +7,17 @@ import { Subject } from 'rxjs';
 	templateUrl: './scoreboard-page.component.html',
 	styleUrls: ['./scoreboard-page.component.scss', '../../../../../styles/filter_table.scss']
 })
-export class ScoreboardPageComponent implements OnInit, OnDestroy {
-	
+export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	
 	private _unsubscribe = new Subject<void>();
-	//filterForm: FormGroup;
-	//teamStandings: Standing[] = [];
 	teamStandings: any = [];
-	
-//	@ViewChild('map') m;
-//	private isVisible: boolean = false;
 
 	constructor(
-		//private _formBuilder: FormBuilder,
 		private _contestService: IContestService,
-		//private _matDialog: MatDialog
 	) { }
 
 	ngOnInit(): void {
-		//this.buildForm();
 		this.loadStandings();
-
 
 		// when standings are updated, trigger a reload
 		this._contestService.standingsUpdated
@@ -43,44 +32,29 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy {
 		this._unsubscribe.complete();
 	}
 	
-//	ngDoCheck(): void {
-//  		this.isVisible = this.element.nativeElement.offsetParent !== null;
-//		console.log("Scoreboard ngDoCheck(); isVisible = " + this.isVisible);
-//	}
-
-//	ngAfterContentChecked(): void {
-//      if (this.isVisible == false && this.m.nativeElement.offsetParent != null) {
-//          console.log('isVisible switched from false to true');
-//          this.isVisible = true;
-//      } else if (this.isVisible == true && this.m.nativeElement.offsetParent == null) {
-//          console.log('isVisible switched from true to false');
-//          this.isVisible = false;
-//      }
-//    }
-
-/*	private buildForm(): void {
-		this.filterForm = this._formBuilder.group({
-			runType: ['both'],
-			language: [],
-			problem: [],
-			judgement: []
-		});
-
+	//check for scoreboard changes on every cycle
+	// Note that even though this gets called frequently, it is lightweight; it only updates
+	// the scoreboard when it has changed
+	ngDoCheck(): void {
+        //console.log("Scoreboard ngDoCheck(): ")
+        if (!this._contestService.getStandingsAreCurrentFlag()) {
+	        //console.log("Standings have changed; updating...");
+	        this.loadStandings();
+        } else {
+	        //console.log("Standings have not changed");
+        }
 	}
-*/
+
 	private loadStandings(): void {
 		this._contestService.getStandings()
 			.pipe(takeUntil(this._unsubscribe))
 			.subscribe((standings: string) => {
-				console.log("standings string:");
-				console.log(standings);
+				//console.log("standings string:");
+				//console.log(standings);
 				this.teamStandings = this.getTeamStandingsArray(standings);
 			});
 	}
 
-	public reset(): void {
-		//this.buildForm();
-	}
 
 	/**
 	 * Pull each teamStanding node out of the received JSON, load it into an array,

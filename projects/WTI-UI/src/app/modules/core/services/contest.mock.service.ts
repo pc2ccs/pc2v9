@@ -90,5 +90,9 @@ export class ContestMockService extends IContestService {
 	markStandingsOutOfDate() : void {
 		//do nothing
 	}
+	
+	getStandingsAreCurrentFlag() : boolean {
+		return true ;
+	}
 
 }

@@ -22,4 +22,6 @@ export abstract class IContestService {
   abstract getStandings(): Observable<String>;
 
   abstract markStandingsOutOfDate(): void;
+
+  abstract getStandingsAreCurrentFlag() : boolean;
 }

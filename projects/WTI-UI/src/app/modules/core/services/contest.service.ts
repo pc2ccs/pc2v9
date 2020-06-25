@@ -53,5 +53,9 @@ export class ContestService extends IContestService {
 	markStandingsOutOfDate() : void {
 		this.standingsAreCurrent = false ;
 	}
+	
+	getStandingsAreCurrentFlag() : boolean {
+		return this.standingsAreCurrent ;
+	}
 
 }
