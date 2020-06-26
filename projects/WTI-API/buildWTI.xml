@@ -41,11 +41,31 @@
 		<os family="unix"/>
 	</condition>
 				
-    <target name="init">
+	<!-- set "pc2jarNeedsUpdating" true if the pc2v9 pc2.jar is newer than the one currently in the WTI lib location -->
+	<target name="checkPc2Jar">
+		<uptodate property="pc2JarNeedsUpdating"
+			srcfile="${liblocation}/pc2.jar" 
+			targetFile="${pc2jarloc}/pc2.jar"
+			/>
+	</target>
+	
+    <!-- copy the pc2v9 pc2.jar (if it is newer) into this WTI project -->	
+	<target name="copyPc2Jar" if="pc2JarNeedsUpdating">
+    	<copy file="${pc2jarloc}/pc2.jar" todir="${liblocation}" failonerror="false" />
+    	<input if:true="${isInteractive}">Completed copy operation; press Enter to continue...</input>
+	</target>
+	
+	<!-- create a timestamp, then copy the pc2v9 pc2.jar file to the WTI library if necessary -->
+    <target name="init" depends="checkPc2Jar">
         <!-- Create the time stamp -->
         <tstamp />
-    	<!-- copy the new pc2.jar (if it exists) into this project -->
-    	<copy file="${pc2jarloc}/pc2.jar" todir="${liblocation}" failonerror="false"/>
+
+    	<input if:true="${isInteractive}">
+    		message=Preparing to copy pc2.jar from pc2v9/dist to WTI (if newer); press Enter to continue..."
+    	</input>
+
+    	<antcall target="copyPc2Jar"/>
+
     </target>
 	
     <!-- Compile the WTI-API java code from ${src}, ${websockets}, and ${test} into ${bin} -->
