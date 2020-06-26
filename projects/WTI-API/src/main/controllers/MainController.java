@@ -48,7 +48,7 @@ public abstract class MainController {
 	
 	//the following two fields are "static" because they need to be referenced by the static initialization block in ContestController
 	protected static ServerInit ini = ServerInit.createServerInit();
-	protected static Log logger;
+	protected static Log logger = Logging.getLogger();
 	
 	private final String websocketUrl = String.format("ws://localhost:%s%s/WTISocket", ini.getPortNum(), ini.getWsName());
 	protected static WTIWebsocket client;
@@ -56,7 +56,6 @@ public abstract class MainController {
 	public MainController() throws URISyntaxException {
 
 		client = new WTIWebsocket(new URI(String.format("%s/%s", this.websocketUrl, "server")));
-		logger = Logging.getLogger();
 	}
 
 	protected IProblem findProblem(IProblem[] problems, String nameOfProblem) {

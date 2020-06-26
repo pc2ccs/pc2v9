@@ -10,6 +10,9 @@
     <property environment="env" />
     <property name="target" value="1.8" />
     <property name="src" location="src/main" />
+	
+	<property name="test.src" location="test" />
+	
     <property name="main-class" value="config.JettyConfig" />
     <property name="bin" location="bin" />
     <property name="build.dir" location="build" />
@@ -22,7 +25,7 @@
         <fileset dir="${liblocation}" includes="**/*.jar" />
     </path>
     <path id="project.classpath">
-        <fileset dir="${vendor.lib.dir}">
+        <fileset dir="${liblocation}">
             <include name="*.jar" />
         </fileset>
     </path>
@@ -45,12 +48,17 @@
     	<copy file="${pc2jarloc}/pc2.jar" todir="${liblocation}" failonerror="false"/>
     </target>
 	
-    <!-- Compile the WTI-API java code from ${src} into ${bin} -->
+    <!-- Compile the WTI-API java code from ${src}, ${websockets}, and ${test} into ${bin} -->
     <target name="compile" description="compile the source">
         <mkdir dir="${bin}" />
         <javac target="8" release="8" destdir="${bin}" classpathref="libjars">
             <src path="${src}" />
             <src path="${websockets}" />
+        	
+        	<src path="${test.src}" />
+            <classpath refid="project.classpath"/>
+
+        	
         </javac>
     	<input if:true="${isInteractive}">Compile completed; press Enter to continue...</input>
     </target>

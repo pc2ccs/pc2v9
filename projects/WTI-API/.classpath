@@ -10,7 +10,7 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/pc2v9"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
-	<classpathentry kind="output" path="classes"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/pc2v9"/>
+	<classpathentry kind="output" path=".classes"/>
 </classpath>
