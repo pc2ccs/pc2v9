@@ -13,16 +13,18 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	teamStandings: any = [];
 
 	constructor(
-		private _contestService: IContestService,
+		private _contestService: IContestService
 	) { }
 
 	ngOnInit(): void {
+		//console.log("Scoreboard OnInit executed.");
 		this.loadStandings();
 
 		// when standings are updated, trigger a reload
 		this._contestService.standingsUpdated
 			.pipe(takeUntil(this._unsubscribe))
 			.subscribe(_ => {
+				//console.log("Scoreboard: loading standings from standingsUpdated subscription");
 				this.loadStandings();
 			});
 	}
@@ -30,18 +32,21 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	ngOnDestroy(): void {
 		this._unsubscribe.next();
 		this._unsubscribe.complete();
+		//console.log("Scoreboard OnDestroy executed.")
 	}
 	
 	//check for scoreboard changes on every cycle
 	// Note that even though this gets called frequently, it is lightweight; it only updates
-	// the scoreboard when it has changed
+	// the scoreboard when the standings have changed -- and it is never called if the scoreboard
+	// is not visible because routing away from the Scoreboard destroys the current ScoreboardPage component.
+
 	ngDoCheck(): void {
-        //console.log("Scoreboard ngDoCheck(): ")
-        if (!this._contestService.getStandingsAreCurrentFlag()) {
+        //console.log("Scoreboard ngDoCheck(): ") ;
+        if (!this._contestService.getStandingsAreCurrentFlag() ) {
 	        //console.log("Standings have changed; updating...");
 	        this.loadStandings();
         } else {
-	        //console.log("Standings have not changed");
+	        //console.log("Standings have not changed; bypassing update.");
         }
 	}
 
@@ -63,12 +68,12 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	private getTeamStandingsArray(standings: any) {
 
 		const contest = standings.contestStandings ;
-		console.log("ContestStandings element:");
-		console.log(contest);
+		//console.log("ContestStandings element:");
+		//console.log(contest);
 		
 		const teams = contest.teamStanding ;
-		console.log("TeamStandings elements:");
-		console.log(teams);
+		//console.log("TeamStandings elements:");
+		//console.log(teams);
 		
 		let tempArray: any = [] ;
 		
@@ -76,8 +81,8 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 			tempArray.push(temp);
 		}
 		
-		console.log("Individual Team Standings:");
-		console.log(tempArray);
+		//console.log("Individual Team Standings:");
+		//console.log(tempArray);
 		
 		return tempArray;
 	}
