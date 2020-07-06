@@ -55,7 +55,7 @@ import services.ScoreboardChangeListener;
  * The class is marked as @Singleton to insure that the Jetty webserver creates just one instance of the class to service
  * all /contest requests (rather than having a new instance created for each incoming request).
  * 
- * @author EWU WebTeamClient project team, with updates by John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
+ * @author EWU WTI Student Project team, with updates by John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
  *
  */
 @Path("/contest")
@@ -65,8 +65,8 @@ import services.ScoreboardChangeListener;
 })
 public class ContestController extends MainController {
 	
-	private final static String DEFAULT_PC2_SCOREBOARD_ACCOUNT = "scoreboard2";
-	private final static String DEFAULT_PC2_SCOREBOARD_PASSWORD = "scoreboard2";
+	public final static String DEFAULT_PC2_SCOREBOARD_ACCOUNT = "scoreboard2";
+	public final static String DEFAULT_PC2_SCOREBOARD_PASSWORD = "scoreboard2";
 	
 	//this boolean is reset false whenever a standings-changing event is received by the WTI scoreboard ServerConnection;
 	// it is updated to true whenever an access to the /scoreboard REST API endpoint causes the current standings to be updated
@@ -86,11 +86,34 @@ public class ContestController extends MainController {
 	
 	//mutex to insure at most one browser client at a time can attempt to use the above DSA to update standings
 	private static Boolean updateStandingsMutex = new Boolean(false);
-
-	//static init block, used to force PC2 scoreboard login before Jetty startup finishes
-	static {
-		
-		logger.fine("Initializing Contest Controller static block");
+	
+	/**
+	 * Constructs a ContestController for the WTI server. Construction includes
+	 * invoking the super-class {@link MainController}, constructor, which has the
+	 * following effects:
+	 * 
+	 * <pre>
+	 * <ol>
+	 *   <li>create an (initially empty) {@link HashMap} mapping team keys to {@link ServerConnection}s.
+	 *   <li>save the {@link ServerInit} object containing the WTI server initialization values loaded from the WTI pc2v9.ini file.
+	 *   <li>create a new {@link WTIWebsocket} to be used for communicating with team clients.
+	 * </ol>
+	 * <p> The objects created by the superclass constructor are all "protected", making them accessible to this ContestController
+	 * subclass.
+	 * </pre>
+	 * 
+	 * In addition, this constructor creates a {@link ServerConnection} to the PC2 server (which must be running), and it logs into
+	 * the PC2 server using the scoreboard credentials specified in the WTI configuration (pc2v9.ini file).
+	 * 
+	 * @throws URISyntaxException    if a valid websocket could not be constructed in the {@link MainController} super-class from
+	 *                               the initialization values specified in the WTI pc2v9.ini file.
+	 * @throws LoginFailureException if the ContestController could not login to the PC2 server using the credentials specified in
+	 *                               the WTI pc2v9.ini file.
+	 * @throws NotLoggedInException if the ContestController initialization block somehow successfully logged in but a subsequent 
+	 * 								check returns "not logged in".
+	 */
+	public ContestController() throws URISyntaxException, LoginFailureException, NotLoggedInException {
+		super();
 		
 		//create a scoreboard account connection to the PC2 server
 		scoreboardServerConn = new ServerConnection();
@@ -109,8 +132,11 @@ public class ContestController extends MainController {
 		try {
 			scoreboardServerConn.login(sbAccount, sbPassword);
 		} catch (LoginFailureException e) {
-			logger.info("WTI Login failed for scoreboard account " + sbAccount + ": " + e.getMessage());
-			throw new RuntimeException("WTI login failed for PC2 scoreboard account '" + sbAccount + "'" + e.getMessage()) ;
+			//Note: theoretically this should never happen, because the WebServer.startServer() method verifies that the scoreboard
+			// account can be successfully logged in before ever starting the Jetty server -- so theoretically we can't get here.
+			// Theroretically.
+			logger.info("WTI Login failed for scoreboard account '" + sbAccount + "': " + e.getMessage());
+			throw new RuntimeException("WTI login failed for PC2 scoreboard account '" + sbAccount + "': " + e.getMessage()) ;
 		} 
 		
 		//create a DefaultScoringAlgorithm to be used for computing standings
@@ -119,36 +145,6 @@ public class ContestController extends MainController {
 		
 		//insure that team clients only see FROZEN results when in a scoreboard freeze period
 		dsa.setObeyFreeze(true);
-
-	}
-	
-	/**
-	 * Constructs a ContestController for the WTI server. Construction includes
-	 * invoking the super-class {@link MainController}, constructor, which has the
-	 * following effects:
-	 * 
-	 * <pre>
-	 * <ol>
-	 *   <li>create an (initially empty) {@link HashMap} mapping team keys to {@link ServerConnection}s.
-	 *   <li>save the {@link ServerInit} object containing the WTI server initialization values loaded from the WTI pc2v9.ini file.
-	 *   <li>create a new {@link WTIWebsocket} to be used for communicating with team clients.
-	 * </ol>
-	 * <p> The objects created by the superclass constructor are all "protected", making them accessible to this ContestController
-	 * subclass.
-	 * </pre>
-	 * 
-	 * In addition, this constructor creates a {@link ServerConnection} to the PC2 server (which must be running), and it logs into
-	 * the PC2 server using the credentials specified in the WTI 
-	 * 
-	 * @throws URISyntaxException    if a valid websocket could not be constructed in the {@link MainController} super-class from
-	 *                               the initialization values specified in the WTI pc2v9.ini file.
-	 * @throws LoginFailureException if the ContestController could not login to the PC2 server using the credentials specified in
-	 *                               the WTI pc2v9.ini file.
-	 * @throws NotLoggedInException if the ContestController initialization block somehow successfully logged in but a subsequent 
-	 * 								check returns "not logged in".
-	 */
-	public ContestController() throws URISyntaxException, LoginFailureException, NotLoggedInException {
-		super();
 		
 		//add to the Scoreboard ServerConnection's contest a listener for each type of event which can change standings
 		try {

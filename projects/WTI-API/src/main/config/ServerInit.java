@@ -170,4 +170,12 @@ public class ServerInit {
 		return null;
 	}
 
+	/** Returns the {@link pc2.core.log.Log} logger being used by this WTI server
+	 * 
+	 * @return a {@link pc2.core.log.Log} logger.
+	 */
+	public Log getLogger() {
+		return logger;
+	}
+
 }

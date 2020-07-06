@@ -24,7 +24,10 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import communication.WTIWebsocketMediator;
 import controllers.ContestController;
 import controllers.TeamsController;
+import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
+import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.core.log.Log;
 import io.swagger.jaxrs.config.DefaultJaxrsConfig;
 
 /**
@@ -43,31 +46,98 @@ public class WebServer {
 	/**
 	 * Starts a Jetty server using the initialization values specified in the received {@link ServerInit} object.
 	 * 
-	 * Initializes the Jetty server with resource handlers, starts it listening on the port specified in the 
+	 * Verifies that the {@link ContestController} which will be used by Jetty will be able to successfully login to
+	 * the PC2 scoreboard account specified in the configuration.  If so, 
+	 * initializes the Jetty server with resource handlers, starts it listening on the port specified in the 
 	 * received {@link ServerInit} object, and blocks (via a join()) waiting for the server to be shut down.
 	 * 
 	 * @param initServer a {@link ServerInit} object containing initialization values for the server being started
+	 * @throws LoginFailureException if a failure occurs when attempting to log in to the PC2 server using the
+	 * 								configured scoreboard account
+	 * @throws URISyntaxException if a valid websocket URI could not be constructed from the configured values
 	 */
-	public static void startServer(ServerInit initServer) {
+	public static void startServer(ServerInit initServer) throws LoginFailureException {
 		ini = initServer;
 		
-		HandlerList handlers = new HandlerList();
-		handlers.addHandler(getWebsocketHandler());
-		handlers.addHandler(getSwaggerHandler());
-		handlers.addHandler(getWebApp());
-		handlers.addHandler(getJerseyHandler());
-
+		Log logger = ini.getLogger();
+		
 		try {
+			//make sure the ContestController created by the server is going to be able to login using the configured PC2 scoreboard account
+			if (!verifyPC2ScoreboardLogin()) {
+				throw new LoginFailureException("PC2 Scoreboard login failed");
+			}
 
+			// get the endpoint handlers which will be installed in Jetty
+			logger.info("Constructing Jetty service handlers");
+			HandlerList handlers = new HandlerList();
+			handlers.addHandler(getWebsocketHandler());
+			handlers.addHandler(getSwaggerHandler());
+			handlers.addHandler(getWebApp());
+			handlers.addHandler(getJerseyHandler());
+
+			//create a new Jetty server
+			logger.info("Creating Jetty server");
 			Server server = new Server(ini.getPortNum());
 
+			//install the endpoint handlers in Jetty
+			logger.info("Installing service handlers in Jetty");
 			server.setHandler(handlers);
+			
+			//start Jetty listening for endpoint references
+			logger.info("Starting Jetty server");
 			server.start();
+			
+			//block until all server threads are done (which won't normally happen - so, wait forever)
 			server.join();
 
+		} catch (LoginFailureException ex) {
+			System.err.println("WTI failed to login with PC2 Scoreboard account: " + ex);
+			throw ex;
 		} catch (Exception ex) {
 			System.err.println(ex);
 		}
+	}
+
+	//verifies that the provided (or default) PC2 scoreboard login credentials work
+	private static boolean verifyPC2ScoreboardLogin() {
+		
+		ini.getLogger().fine("Verifying PC2 scoreboard account login...");
+		
+		//create a scoreboard account connection to the PC2 server
+		ServerConnection scoreboardServerConn = new ServerConnection();
+	
+		//get the credentials to be used to login to the PC2 server, either those given in the WTI pc2v9.ini file or the defaults
+		String sbAccount = ini.getScoreboardAccount();
+		if (sbAccount==null || sbAccount.equals("")) {
+			sbAccount = ContestController.DEFAULT_PC2_SCOREBOARD_ACCOUNT;
+		}
+		String sbPassword = ini.getScoreboardPassword();
+		if (sbPassword==null || sbPassword.equals("")) {
+			sbPassword = ContestController.DEFAULT_PC2_SCOREBOARD_PASSWORD;
+		}
+		
+		//try to login to the PC2 server
+		try {
+			ini.getLogger().fine("Attempting to login to PC2 scoreboard account '" + sbAccount + "'");
+			scoreboardServerConn.login(sbAccount, sbPassword);
+		} catch (LoginFailureException e) {
+			ini.getLogger().severe("WTI Login failed for scoreboard account '" + sbAccount + "': " + e.getMessage());
+			return false;
+		} 
+		
+		ini.getLogger().fine("Successfully logged in to PC2 scoreboard account");
+		
+		//log the scoreboard account back out so the ContestController can re-login
+		try {
+			scoreboardServerConn.logoff();
+		} catch (NotLoggedInException e) {
+			ini.getLogger().severe("Illegal state: got a NotLoggedInException during scoreboard logout after successful login");
+			System.err.println("Illegal state: got a NotLoggedInException during scoreboard logout after successful login");
+			e.printStackTrace();
+			return false;
+		}
+		
+		return true;
 	}
 
 	/**
