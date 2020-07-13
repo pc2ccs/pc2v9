@@ -193,12 +193,22 @@ public class InputValidatorPane extends JPanePlugin {
 
                 } else {
                     // determine why it's not ok to run the Input Validator and display an appropriate message
-                    if (!problemHasInputValidatorCommand()) {
-                        JOptionPane.showMessageDialog(null, "Missing Input Validator Command; cannot run Input Validator", "Missing Command", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        if (!problemHasInputDataFiles()) {
-                            JOptionPane.showMessageDialog(null, "No Judge's Data Files defined; cannot run Input Validator", "Missing Data Files", JOptionPane.INFORMATION_MESSAGE);
+                    boolean msgShown = false;
+                    if (!problemHasInputDataFiles()) {
+                        JOptionPane.showMessageDialog(null, "No Judge's Data Files defined; cannot run Input Validator", "Missing Data Files", JOptionPane.INFORMATION_MESSAGE);
+                        msgShown = true;
+                    } else if (getInputValidatorSelectionPane().getUseVivaInputValidatorRadioButton().isSelected()) {
+                        String vivaPatternText = getInputValidatorSelectionPane().getVivaPatternTextArea().getText() ;
+                        if (vivaPatternText==null || vivaPatternText.equals("")) {
+                            JOptionPane.showMessageDialog(null, "Missing VIVA pattern text; cannot run VIVA Input Validator", "Missing Pattern", JOptionPane.INFORMATION_MESSAGE);
+                            msgShown = true;
                         }
+                    } else if (getInputValidatorSelectionPane().getUseCustomInputValidatorRadioButton().isSelected() && !problemHasInputValidatorCommand()) {
+                        JOptionPane.showMessageDialog(null, "Missing Custom Input Validator Command; cannot run Input Validator", "Missing Command", JOptionPane.INFORMATION_MESSAGE);
+                        msgShown = true;
+                    }
+                    if (!msgShown) {
+                        JOptionPane.showMessageDialog(null, "Cannot run Input Validator (unknown reason)", "Cannot run Input Validator", JOptionPane.ERROR_MESSAGE);                        
                     }
 
                 }
@@ -207,13 +217,25 @@ public class InputValidatorPane extends JPanePlugin {
     }
 
     /**
-     * Verifies that all conditions necessary to run the Input Validator associated with this InputValidatorPane are true. These include that there is an Input Validator Command line and that there
-     * are Input Data Files on which the command can operate. If any condition exists which would stop the Input Validator from being run, a dialog is displayed to the user.
+     * Verifies that all conditions necessary to run the Input Validator associated with this InputValidatorPane are true. 
+     * If the "VIVA" Input Validator has been selected, the conditions include that there is a VIVA pattern in the text box
+     * and that there are input data files on which VIVA can operate.
+     * If "Custom" InputValidator has been selected, the conditions include that there is a Custom Input Validator Command line and that there
+     * are Input Data Files on which the command can operate. 
      * 
-     * @return true if it is ok to run the Input Validator; false if not
+     * @return true if it is ok to run the currently selected Input Validator; false if not
      */
     protected boolean okToRunInputValidator() {
-        return (problemHasInputValidatorCommand() && problemHasInputDataFiles());
+        boolean ok = false;
+        if (getInputValidatorSelectionPane().getUseVivaInputValidatorRadioButton().isSelected()) {
+            //make sure there is some text in the VIVA pattern area
+            String patternText = getInputValidatorSelectionPane().getVivaPatternTextArea().getText();
+            ok = patternText!=null && !patternText.equals("") && problemHasInputDataFiles();
+            
+        } else if (getInputValidatorSelectionPane().getUseCustomInputValidatorRadioButton().isSelected()) {
+            ok = problemHasInputValidatorCommand() && problemHasInputDataFiles();
+        }
+        return ok ;
     }
 
     /**

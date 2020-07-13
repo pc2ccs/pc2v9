@@ -134,7 +134,7 @@ public class InputValidatorSelectionPane extends JPanePlugin {
         return useVivaInputValidatorRadioButtonPanel ;
     }
     
-    private JRadioButton getUseVivaInputValidatorRadioButton() {
+    public JRadioButton getUseVivaInputValidatorRadioButton() {
         if (useVivaInputValidatorRadioButton==null) {
             useVivaInputValidatorRadioButton = new JRadioButton("Use VIVA Input Validator");
             useVivaInputValidatorRadioButton.setMargin(new Insets(2, 0, 2, 2));
@@ -234,7 +234,7 @@ public class InputValidatorSelectionPane extends JPanePlugin {
         }
         return patternTextScrollPane;
     }
-    private JTextArea getVivaPatternTextArea() {
+    public JTextArea getVivaPatternTextArea() {
         if (textArea == null) {
             textArea = new JTextArea(5,50);
         }
@@ -252,7 +252,7 @@ public class InputValidatorSelectionPane extends JPanePlugin {
         return customInputValidatorPane;
     }
 
-    private JRadioButton getUseCustomInputValidatorRadioButton() {
+    public JRadioButton getUseCustomInputValidatorRadioButton() {
         if (useCustomInputValidatorRadioButton == null) {
             useCustomInputValidatorRadioButton = new JRadioButton("Use Custom (User-supplied) Input Validator");
             useCustomInputValidatorRadioButton.setHorizontalAlignment(SwingConstants.LEFT);
