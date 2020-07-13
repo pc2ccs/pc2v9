@@ -163,7 +163,7 @@ public class InputValidatorPane extends JPanePlugin {
         return runInputValidatorButtonPane;
     }
     
-    private JButton getRunInputValidatorButton() {
+    public JButton getRunInputValidatorButton() {
         if (runInputValidatorButton == null) {
             runInputValidatorButton = new JButton("Run Input Validator");
             runInputValidatorButton.setEnabled(false);
@@ -176,6 +176,8 @@ public class InputValidatorPane extends JPanePlugin {
         }
         return runInputValidatorButton;
     }
+    
+
 
     protected void runInputValidator() {
 

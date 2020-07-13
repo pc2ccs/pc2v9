@@ -6,6 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -94,6 +96,16 @@ public class InputValidatorSelectionPane extends JPanePlugin {
             noInputValidatorRadioButton.setHorizontalAlignment(SwingConstants.LEFT);
             noInputValidatorRadioButton.setToolTipText("Choose this if the problem has no Input Validator");
             noInputValidatorRadioButton.setSelected(true);
+            noInputValidatorRadioButton.addActionListener( new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (noInputValidatorRadioButton.isSelected()) {
+                        if (parentPane!=null && parentPane instanceof InputValidatorPane) {
+                            ((InputValidatorPane) parentPane).getRunInputValidatorButton().setEnabled(false);
+                        }
+                    }
+                }
+            });
+
         }
         return noInputValidatorRadioButton;
     }
@@ -129,6 +141,16 @@ public class InputValidatorSelectionPane extends JPanePlugin {
             useVivaInputValidatorRadioButton.setHorizontalAlignment(SwingConstants.LEFT);
             useVivaInputValidatorRadioButton.setToolTipText("Choose this to use the VIVA Input Validator");
             useVivaInputValidatorRadioButton.setSelected(false);
+            
+            useVivaInputValidatorRadioButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (useVivaInputValidatorRadioButton.isSelected()) {
+                        if (parentPane!=null && parentPane instanceof InputValidatorPane) {
+                            ((InputValidatorPane) parentPane).getRunInputValidatorButton().setEnabled(true);
+                        }
+                    }
+                }
+            });
         }
         return useVivaInputValidatorRadioButton ;
     }
@@ -236,6 +258,16 @@ public class InputValidatorSelectionPane extends JPanePlugin {
             useCustomInputValidatorRadioButton.setHorizontalAlignment(SwingConstants.LEFT);
             useCustomInputValidatorRadioButton.setToolTipText("Choose this to use a Custom Input Validator (i.e., a program that you supply).");
             useCustomInputValidatorRadioButton.setSelected(false);
+            
+            useCustomInputValidatorRadioButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (useCustomInputValidatorRadioButton.isSelected()) {
+                        if (parentPane!=null && parentPane instanceof InputValidatorPane) {
+                            ((InputValidatorPane) parentPane).getRunInputValidatorButton().setEnabled(true);
+                        }
+                    }
+                }
+            });
         }
         return useCustomInputValidatorRadioButton ;
     }
