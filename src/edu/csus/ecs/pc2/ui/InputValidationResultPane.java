@@ -84,6 +84,7 @@ public class InputValidationResultPane extends JPanePlugin {
 
     public InputValidationResultPane() {
 
+        this.setAlignmentX(Component.LEFT_ALIGNMENT);
         this.setBorder(new TitledBorder(null, "Input Validation Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(getVerticalStrut_1());

@@ -323,7 +323,7 @@ public class EditProblemPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(776, 681));
+        this.setSize(new Dimension(800, 800));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -2579,10 +2579,10 @@ public class EditProblemPane extends JPanePlugin {
         // fill in the input validator program name
         String inputValidatorProg = prob.getInputValidatorProgramName();
         if (inputValidatorProg != null) {
-            getInputValidatorPane().setInputValidatorProgramName(inputValidatorProg);
+            getInputValidatorPane().getInputValidatorSelectionPane().getCustomInputValidatorOptionsPane().setInputValidatorProgramName(inputValidatorProg);
         } else {
-            getInputValidatorPane().setInputValidatorFile(null);
-            getInputValidatorPane().setInputValidatorProgramName("");
+            getInputValidatorPane().getInputValidatorSelectionPane().getCustomInputValidatorOptionsPane().setInputValidatorFile(null);
+            getInputValidatorPane().getInputValidatorSelectionPane().getCustomInputValidatorOptionsPane().setInputValidatorProgramName("");
             getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
         }
 
@@ -2704,7 +2704,7 @@ public class EditProblemPane extends JPanePlugin {
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
-            mainTabbedPane.setPreferredSize(new Dimension(500, 600));
+            mainTabbedPane.setPreferredSize(new Dimension(800, 800));
             mainTabbedPane.insertTab("Groups", null, getProblemGroupPane(), null, 0);
             mainTabbedPane.insertTab("Input Validator", null, getInputValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Test Data Files", null, getMultipleDataSetPane(), null, 0);
@@ -4070,7 +4070,7 @@ public class EditProblemPane extends JPanePlugin {
 
     private void initializeInputValidatorTabFields() {
 
-        getInputValidatorPane().setInputValidatorProgramName("");
+        getInputValidatorPane().getInputValidatorSelectionPane().getCustomInputValidatorOptionsPane().setInputValidatorProgramName("");
         getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
         getInputValidatorPane().setInputValidatorFile(null);
         getInputValidatorPane().setInputValidatorCommand("");
@@ -5392,4 +5392,15 @@ public class EditProblemPane extends JPanePlugin {
             
         }
     }
+    
+    //main() method for testing only
+    public static void main (String [] args) {
+        JFrame frame = new JFrame();
+        frame.getContentPane().add(new EditProblemPane());
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(900, 900);
+        frame.pack();
+        frame.setVisible(true);
+    }
+
 }

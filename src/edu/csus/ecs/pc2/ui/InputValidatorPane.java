@@ -7,23 +7,24 @@ import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
 
-import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteException;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.validator.inputValidator.InputValidatorRunner;
@@ -39,8 +40,7 @@ public class InputValidatorPane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
 
-    private DefineInputValidatorPane defineInputValidatorPane;
-
+    private InputValidatorSelectionPane inputValidatorSelectionPane;
     private InputValidationResultPane inputValidationResultPane;
 
     private boolean inputValidatorHasBeenRun;
@@ -49,83 +49,53 @@ public class InputValidatorPane extends JPanePlugin {
 
     private Component verticalStrut_1;
 
-    private Component verticalStrut_3;
-
-    private Component verticalStrut_4;
-
     private JPanePlugin parentPane;
 
     private JButton runInputValidatorButton;
 
-    private Component verticalStrut_5;
+    private Component verticalStrut_2;
 
     private InputValidationResult[] runResults;
 
     private InputValidationResult[] accumulatingResults;
 
+    private JPanel runInputValidatorButtonPane;
+
+    private Component verticalStrut_3;
+
+
     public InputValidatorPane() {
 
         this.setAlignmentX(Component.LEFT_ALIGNMENT);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        add(getVerticalStrut_4());
-
-        this.add(getDefineInputValidatorPane());
-        add(getVerticalStrut_5());
-        add(getRunInputValidatorButton());
         this.add(getVerticalStrut_1());
-        this.add(getInputValidationResultPane());
+        this.add(getInputValidatorSelectionPane());
+        this.add(getVerticalStrut_2());
+        this.add(getRunInputValidatorButtonPane());
         this.add(getVerticalStrut_3());
+        this.add(getInputValidationResultPane());
     }
 
-    @Override
-    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-        super.setContestAndController(inContest, inController);
-
-        getDefineInputValidatorPane().setContestAndController(inContest, inController);
-        getInputValidationResultPane().setContestAndController(inContest, inController);
+    public InputValidatorSelectionPane getInputValidatorSelectionPane() {
+        if (inputValidatorSelectionPane==null) {
+            inputValidatorSelectionPane = new InputValidatorSelectionPane();
+            inputValidatorSelectionPane.setContestAndController(this.getContest(), this.getController());
+            inputValidatorSelectionPane.setParentPane(this);
+        }
+        return inputValidatorSelectionPane;
     }
+
 
     /**
-     * Returns the Input Validator Program Name currently entered in this InputValidatorPane.
-     * 
-     * @return a String containing the Input Validator Program Name
-     * @deprecated use DefineInputValidatorPane#getInputValidatorFile
-     */
-    public String getInputValidatorProgramName() {
-        String progName = getDefineInputValidatorPane().getInputValidatorProgramName();
-        return progName;
-    }
-
-    /**
-     * Sets the Input Validator Program name displayed in this InputValidatorPane to the specified text.
-     * 
-     * @param inputValidatorProg
-     *            a String containing the Input Validator Program name
-     * @deprecated use DefineInputValidatorPane#setInputValidatorFile
-     */
-    public void setInputValidatorProgramName(String progName) {
-        getDefineInputValidatorPane().setInputValidatorProgramName(progName);
-
-    }
-
-    /**
-     * Returns the Input Validator Command currently entered into this InputValidatorPane.
+     * Returns the Custom Input Validator Command currently entered into the CustomInputValidatorPane.
      * 
      * @return a String containing the command to be used to invoke the Input Validator
      */
     public String getInputValidatorCommand() {
-        String command = getDefineInputValidatorPane().getInputValidatorCommand();
+        String command = getInputValidatorSelectionPane().getCustomInputValidatorOptionsPane().getInputValidatorCommand();
         return command;
     }
 
-    private DefineInputValidatorPane getDefineInputValidatorPane() {
-        if (defineInputValidatorPane == null) {
-            defineInputValidatorPane = new DefineInputValidatorPane();
-            defineInputValidatorPane.setContestAndController(this.getContest(), this.getController());
-            defineInputValidatorPane.setParentPane(this);
-        }
-        return defineInputValidatorPane;
-    }
 
     private InputValidationResultPane getInputValidationResultPane() {
         if (inputValidationResultPane == null) {
@@ -134,27 +104,6 @@ public class InputValidatorPane extends JPanePlugin {
             inputValidationResultPane.setParentPane(this);
         }
         return inputValidationResultPane;
-    }
-
-    private Component getVerticalStrut_1() {
-        if (verticalStrut_1 == null) {
-            verticalStrut_1 = Box.createVerticalStrut(20);
-        }
-        return verticalStrut_1;
-    }
-
-    private Component getVerticalStrut_3() {
-        if (verticalStrut_3 == null) {
-            verticalStrut_3 = Box.createVerticalStrut(20);
-        }
-        return verticalStrut_3;
-    }
-
-    private Component getVerticalStrut_4() {
-        if (verticalStrut_4 == null) {
-            verticalStrut_4 = Box.createVerticalStrut(20);
-        }
-        return verticalStrut_4;
     }
 
     @Override
@@ -178,7 +127,7 @@ public class InputValidatorPane extends JPanePlugin {
      *            the ToolTip text to set
      */
     public void setInputValidatorProgramNameToolTipText(String text) {
-        getDefineInputValidatorPane().setInputValidatorProgramNameToolTipText(text);
+        getInputValidatorSelectionPane().getCustomInputValidatorOptionsPane().setInputValidatorProgramNameToolTipText(text);
 
     }
 
@@ -189,7 +138,7 @@ public class InputValidatorPane extends JPanePlugin {
      *            a String containing the command used to invoke the Input Validator
      */
     public void setInputValidatorCommand(String command) {
-        getDefineInputValidatorPane().setInputValidatorCommand(command);
+        getInputValidatorSelectionPane().getCustomInputValidatorOptionsPane().setInputValidatorCommand(command);
 
     }
 
@@ -200,13 +149,24 @@ public class InputValidatorPane extends JPanePlugin {
      *            the ToolTip text to set
      */
     public void setInputValidatorCommandToolTipText(String text) {
-        getDefineInputValidatorPane().setInputValidatorCommandToolTipText(text);
+        getInputValidatorSelectionPane().getCustomInputValidatorOptionsPane().setInputValidatorCommandToolTipText(text);
 
     }
 
+    private JPanel getRunInputValidatorButtonPane() {
+        if (runInputValidatorButtonPane==null) {
+            runInputValidatorButtonPane = new JPanel();
+            runInputValidatorButtonPane.setAlignmentX(LEFT_ALIGNMENT);
+            runInputValidatorButtonPane.add(Box.createHorizontalStrut(20));
+            runInputValidatorButtonPane.add(getRunInputValidatorButton());
+        }
+        return runInputValidatorButtonPane;
+    }
+    
     private JButton getRunInputValidatorButton() {
         if (runInputValidatorButton == null) {
             runInputValidatorButton = new JButton("Run Input Validator");
+            runInputValidatorButton.setEnabled(false);
             runInputValidatorButton.addActionListener(new ActionListener() {
 
                 public void actionPerformed(ActionEvent e) {
@@ -629,13 +589,26 @@ public class InputValidatorPane extends JPanePlugin {
         return result;
     }
 
-    private Component getVerticalStrut_5() {
-        if (verticalStrut_5 == null) {
-            verticalStrut_5 = Box.createVerticalStrut(20);
+    private Component getVerticalStrut_2() {
+        if (verticalStrut_2 == null) {
+            verticalStrut_2 = Box.createVerticalStrut(20);
         }
-        return verticalStrut_5;
+        return verticalStrut_2;
+    }
+    
+    private Component getVerticalStrut_1() {
+        if (verticalStrut_1 == null) {
+            verticalStrut_1 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_1;
     }
 
+    private Component getVerticalStrut_3() {
+        if (verticalStrut_3==null) {
+            verticalStrut_3 = Box.createVerticalStrut(20);
+        }
+        return verticalStrut_3;
+    }
     /**
      * @return the inputValidatorHasBeenRun
      */
@@ -684,10 +657,20 @@ public class InputValidatorPane extends JPanePlugin {
     }
 
     public SerializedFile getInputValidatorFile() {
-        return getDefineInputValidatorPane().getInputValidatorFile();
+        return getInputValidatorSelectionPane().getCustomInputValidatorOptionsPane().getInputValidatorFile();
     }
     
     public void setInputValidatorFile(SerializedFile inputValidatorFile) {
-        getDefineInputValidatorPane().setInputValidatorFile(inputValidatorFile);
+        getInputValidatorSelectionPane().getCustomInputValidatorOptionsPane().setInputValidatorFile(inputValidatorFile);
     }
+    
+    //main() method for testing only
+    public static void main (String [] args) {
+        JFrame frame = new JFrame();
+        frame.getContentPane().add(new InputValidatorPane());
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
+    }
+
 }
