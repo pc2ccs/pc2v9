@@ -25,7 +25,6 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
@@ -85,7 +84,6 @@ public class InputValidationResultPane extends JPanePlugin {
     public InputValidationResultPane() {
 
         this.setAlignmentX(Component.LEFT_ALIGNMENT);
-        this.setBorder(new TitledBorder(null, "Input Validation Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(getVerticalStrut_1());
         this.add(getInputValidationResultSummaryPanel());
