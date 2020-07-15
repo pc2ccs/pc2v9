@@ -51,6 +51,7 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
     private SerializedFile inputValidatorFile;
     
     public DefineCustomInputValidatorPane() {
+        setPreferredSize(new Dimension(459, 100));
         
         GridBagLayout gbl_defineInputValidatorPanel = new GridBagLayout();
         gbl_defineInputValidatorPanel.columnWidths = new int[] {20, 60, 20};
@@ -150,9 +151,9 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
     private JTextField getInputValidatorProgramNameTextField() {
         if (inputValidatorProgramNameTextField == null) {
             inputValidatorProgramNameTextField = new JTextField();
-            inputValidatorProgramNameTextField.setPreferredSize(new Dimension(300, 25));
-            inputValidatorProgramNameTextField.setMinimumSize(new Dimension(300, 25));
-            inputValidatorProgramNameTextField.setColumns(50);
+            inputValidatorProgramNameTextField.setPreferredSize(new Dimension(200, 25));
+            inputValidatorProgramNameTextField.setMinimumSize(new Dimension(200, 25));
+            inputValidatorProgramNameTextField.setColumns(30);
             inputValidatorProgramNameTextField.setText("");
             inputValidatorProgramNameTextField.setToolTipText(null);
             inputValidatorProgramNameTextField.addKeyListener(new KeyAdapter() {
@@ -167,6 +168,7 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
     private JLabel getLblInputValidatorInvocation() {
         if (lblInputValidatorInvocation == null) {
             lblInputValidatorInvocation = new JLabel("Input Validator command:");
+            lblInputValidatorInvocation.setHorizontalAlignment(SwingConstants.RIGHT);
             lblInputValidatorInvocation.setAlignmentX(Component.RIGHT_ALIGNMENT);
             lblInputValidatorInvocation.setToolTipText("The command to be used to invoke the Input Validator");
             lblInputValidatorInvocation.setFont(new Font("Tahoma", Font.PLAIN, 11));
@@ -177,9 +179,9 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
     private JTextField getInputValidatorCommandTextField() {
         if (inputValidatorCommandTextField == null) {
             inputValidatorCommandTextField = new JTextField();
-            inputValidatorCommandTextField.setPreferredSize(new Dimension(300, 25));
-            inputValidatorCommandTextField.setMinimumSize(new Dimension(300, 25));
-            inputValidatorCommandTextField.setColumns(50);
+            inputValidatorCommandTextField.setPreferredSize(new Dimension(200, 25));
+            inputValidatorCommandTextField.setMinimumSize(new Dimension(200, 25));
+            inputValidatorCommandTextField.setColumns(30);
             inputValidatorCommandTextField.setText("");
             inputValidatorCommandTextField.setToolTipText(null);
             
