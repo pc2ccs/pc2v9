@@ -126,20 +126,20 @@ public class InputValidationResultPane extends JPanePlugin {
         if (inputValidationResultDetailsPanel == null) {
             inputValidationResultDetailsPanel = new JPanel();
             inputValidationResultDetailsPanel.setLayout(new BorderLayout(0, 0));
-            inputValidationResultDetailsPanel.add(getInputValidatorResultsScrollPane(), BorderLayout.CENTER);
+            inputValidationResultDetailsPanel.add(getInputValidationResultsScrollPane(), BorderLayout.CENTER);
         }
         return inputValidationResultDetailsPanel;
     }
 
-    private JScrollPane getInputValidatorResultsScrollPane() {
+    private JScrollPane getInputValidationResultsScrollPane() {
         if (resultsScrollPane == null) {
             resultsScrollPane = new JScrollPane();
-            resultsScrollPane.setViewportView(getInputValidatorResultsTable());
+            resultsScrollPane.setViewportView(getInputValidationResultsTable());
         }
         return resultsScrollPane;
     }
 
-    protected JTable getInputValidatorResultsTable() {
+    protected JTable getInputValidationResultsTable() {
         if (resultsTable == null) {
             resultsTable = new JTable(inputValidationResultsTableModel);
 
@@ -528,8 +528,8 @@ public class InputValidationResultPane extends JPanePlugin {
                                     }
 
                                     // put the updated results in the table model and redraw the table
-                                    ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).setResults(updatedResults);
-                                    ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+                                    ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).setResults(updatedResults);
+                                    ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).fireTableDataChanged();
 
                                 } else {
                                     getController().getLog().info("ShowOnlyFailedFiles checkbox selected but found no run results to display");
@@ -555,8 +555,8 @@ public class InputValidationResultPane extends JPanePlugin {
 
     public void updateResultsTable(InputValidationResult[] runResults) {
         // put the results in the table model and redraw the table
-        ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).setResults(runResults);
-        ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).setResults(runResults);
+        ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).fireTableDataChanged();
         updateInputValidationStatusMessage(runResults);
     }
 }
