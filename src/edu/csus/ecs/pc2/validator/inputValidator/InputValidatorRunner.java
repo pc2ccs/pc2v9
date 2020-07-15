@@ -52,10 +52,11 @@ public class InputValidatorRunner {
     
     /**
      * Runs the specified validator using the specified command, in the specified execution directory, feeding the 
-     * specified data file to the validator as input and returning an {@link InputValidationResult} containing the results of
+     * specified data file to the validator program's stdin and returning an {@link InputValidationResult} containing the results of
      * the validator execution.
-     * @param seqNum a sequence number used to give generated files unique names
      * 
+     * @param seqNum a sequence number used to give generated files unique names
+
      * @param problem the {@link Problem} associated with the validator program being run
      * @param validator a SerializedFile containing the validator program
      * @param validatorCommand a String (possibly containing PC2 substitution keywords) to be used to invoke the validator
