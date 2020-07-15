@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.validator.inputValidator.InputValidatorRunner;
+import java.awt.Dimension;
 
 /**
  * This class defines a plugin pane (a JPanel) containing components for (1) defining an Input Validator program name and Invocation Command, and (2) Viewing the results of an input validator
@@ -65,6 +66,7 @@ public class InputValidatorPane extends JPanePlugin {
 
 
     public InputValidatorPane() {
+        setPreferredSize(new Dimension(750, 700));
 
         this.setAlignmentX(Component.LEFT_ALIGNMENT);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -157,7 +159,6 @@ public class InputValidatorPane extends JPanePlugin {
         if (runInputValidatorButtonPane==null) {
             runInputValidatorButtonPane = new JPanel();
             runInputValidatorButtonPane.setAlignmentX(LEFT_ALIGNMENT);
-            runInputValidatorButtonPane.add(Box.createHorizontalStrut(20));
             runInputValidatorButtonPane.add(getRunInputValidatorButton());
         }
         return runInputValidatorButtonPane;

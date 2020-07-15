@@ -30,6 +30,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.Insets;
+import java.awt.Dimension;
 
 public class InputValidatorSelectionPane extends JPanePlugin {
 
@@ -57,6 +58,8 @@ public class InputValidatorSelectionPane extends JPanePlugin {
     private JLabel lblWhatsThisViva;
 
     public InputValidatorSelectionPane() {
+        setPreferredSize(new Dimension(700, 482));
+        setMinimumSize(new Dimension(10, 200));
         this.setAlignmentX(Component.LEFT_ALIGNMENT);
         this.setBorder(new TitledBorder(null, "Select Input Validator", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -113,6 +116,8 @@ public class InputValidatorSelectionPane extends JPanePlugin {
     private JPanel getVivaInputValidatorPane() {
         if (vivaInputValidatorPane == null) {
             vivaInputValidatorPane = new JPanel();
+            vivaInputValidatorPane.setPreferredSize(new Dimension(10, 150));
+            vivaInputValidatorPane.setMinimumSize(new Dimension(10, 100));
             vivaInputValidatorPane.setAlignmentX(Component.LEFT_ALIGNMENT);
             vivaInputValidatorPane.setLayout(new BoxLayout(vivaInputValidatorPane, BoxLayout.Y_AXIS));
             vivaInputValidatorPane.add(getUseVivaInputValidatorRadioButtonPanel());
@@ -201,6 +206,8 @@ public class InputValidatorSelectionPane extends JPanePlugin {
     private JPanel getVivaOptionsPane() {
         if (vivaOptionsPane == null) {
             vivaOptionsPane = new JPanel();
+            vivaOptionsPane.setMinimumSize(new Dimension(10, 200));
+            vivaOptionsPane.setPreferredSize(new Dimension(10, 200));
             vivaOptionsPane.setAlignmentY(Component.TOP_ALIGNMENT);
             vivaOptionsPane.setAlignmentX(Component.LEFT_ALIGNMENT);
             FlowLayout flowLayout = (FlowLayout) vivaOptionsPane.getLayout();
@@ -237,6 +244,7 @@ public class InputValidatorSelectionPane extends JPanePlugin {
     public JTextArea getVivaPatternTextArea() {
         if (textArea == null) {
             textArea = new JTextArea(5,50);
+            textArea.setPreferredSize(new Dimension(400, 100));
         }
         return textArea;
     }
@@ -244,6 +252,8 @@ public class InputValidatorSelectionPane extends JPanePlugin {
     public JPanel getCustomInputValidatorPane() {
         if (customInputValidatorPane == null) {
             customInputValidatorPane = new JPanel();
+            customInputValidatorPane.setMinimumSize(new Dimension(10, 100));
+            customInputValidatorPane.setPreferredSize(new Dimension(10, 100));
             customInputValidatorPane.setAlignmentX(Component.LEFT_ALIGNMENT);
             customInputValidatorPane.setLayout(new BoxLayout(customInputValidatorPane, BoxLayout.Y_AXIS));
             customInputValidatorPane.add(getUseCustomInputValidatorRadioButton());
@@ -275,6 +285,8 @@ public class InputValidatorSelectionPane extends JPanePlugin {
     public DefineCustomInputValidatorPane getCustomInputValidatorOptionsPane() {
         if (customInputValidatorOptionsPane==null) {
             customInputValidatorOptionsPane = new DefineCustomInputValidatorPane();
+            customInputValidatorOptionsPane.setPreferredSize(new Dimension(640, 50));
+            customInputValidatorOptionsPane.setMinimumSize(new Dimension(534, 50));
             customInputValidatorOptionsPane.setAlignmentX(Component.LEFT_ALIGNMENT);
             customInputValidatorOptionsPane.setContestAndController(this.getContest(), this.getController());
             customInputValidatorOptionsPane.setParentPane(this);
