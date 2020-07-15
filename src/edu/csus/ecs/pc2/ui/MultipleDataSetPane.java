@@ -486,11 +486,12 @@ public class MultipleDataSetPane extends JPanePlugin {
         getEditProblemPane().getInputValidatorPane().updateResultsTable();
         
         if (inputValidatorIsDefined()) {
-            String msg = "Do you want to run the Input Validator on the new input data files?"
-                    + "\n\n (If Yes, run results will appear on the Input Validator tab.)\n";
+            String msg = "Do you want to run the currently-selected Input Validator on the new input data files?";
             int result = JOptionPane.showConfirmDialog(this, msg, "Run Input Validator? ", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (result == JOptionPane.YES_OPTION) {
-                getEditProblemPane().getInputValidatorPane().runInputValidator();
+                
+                //TODO: this needs to be updated to discern between running a Custom Validator vs. a VIVA validator
+                getEditProblemPane().getInputValidatorPane().runCustomInputValidator();
             }
         }
         getEditProblemPane().enableUpdateButton();
