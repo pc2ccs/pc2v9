@@ -39,10 +39,11 @@ public class InputValidationResultFrame extends JFrame implements UIPlugin {
     private void initialize() {
         this.setSize(new Dimension(900, 800));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.setContentPane(getResultsPane());
+        this.setContentPane(getInputValidationResultPane());
         this.setTitle("Input Validation Results");
 
         FrameUtilities.centerFrame(this);
+        this.setVisible(true);
 
     }
 
@@ -50,7 +51,7 @@ public class InputValidationResultFrame extends JFrame implements UIPlugin {
         this.contest = inContest;
         this.controller = inController;
 
-        getResultsPane().setContestAndController(contest, controller);
+        getInputValidationResultPane().setContestAndController(contest, controller);
         resultsPane.setParentFrame(this);
 
     }
@@ -60,11 +61,11 @@ public class InputValidationResultFrame extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes resultsPane
+     * This method initializes resultsPane, and acts as a public accessor to the resultsPane.
      * 
      * @return edu.csus.ecs.pc2.ui.ProblemPane
      */
-    private InputValidationResultPane getResultsPane() {
+    public InputValidationResultPane getInputValidationResultPane() {
         if (resultsPane == null) {
             resultsPane = new InputValidationResultPane();
         }
