@@ -2491,12 +2491,10 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         // update the tooltip to reflect the name in the text field
-        // if (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals("")) {
         if (getInputValidatorPane().getInputValidatorFile() == null) {
             // set the tooltip as null (otherwise we get a little sliver of a empty-string tooltip)
             getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
         } else {
-            // getInputValidatorPane().setInputValidatorProgramNameToolTipText(getInputValidatorPane().getInputValidatorProgramName());
             getInputValidatorPane().setInputValidatorProgramNameToolTipText(getInputValidatorPane().getInputValidatorFile().getAbsolutePath());
         }
 
