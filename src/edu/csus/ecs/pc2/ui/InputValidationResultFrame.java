@@ -1,9 +1,14 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -23,6 +28,10 @@ public class InputValidationResultFrame extends JFrame implements UIPlugin {
 
     private InputValidationResultPane resultsPane = null;
 
+    private JPanel buttonPanel;
+
+    private JButton closeButton;
+
     /**
      * This method initializes
      * 
@@ -38,13 +47,12 @@ public class InputValidationResultFrame extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new Dimension(900, 800));
-        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.setContentPane(getInputValidationResultPane());
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        this.add(getInputValidationResultPane(),BorderLayout.CENTER);
+        this.add(getButtonPanel(),BorderLayout.SOUTH);
         this.setTitle("Input Validation Results");
 
         FrameUtilities.centerFrame(this);
-        this.setVisible(true);
-
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -72,6 +80,25 @@ public class InputValidationResultFrame extends JFrame implements UIPlugin {
         return resultsPane;
     }
     
+    JPanel getButtonPanel() {
+        if (buttonPanel==null) {
+            buttonPanel = new JPanel();
+            buttonPanel.add(getCloseButton()) ;
+        }
+        return buttonPanel;
+    }
+    
+    JButton getCloseButton() {
+        if (closeButton==null) {
+            closeButton = new JButton("Close");
+            closeButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    setVisible(false);
+                }
+            });
+        }
+        return closeButton;
+    }
     //main() method for testing only
     public static void main (String [] args) {
         InputValidationResultFrame frame = new InputValidationResultFrame();
