@@ -62,34 +62,36 @@ public class InputValidatorPane extends JPanePlugin {
     private static final long serialVersionUID = 1L;
 
     private boolean inputValidatorHasBeenRun;
-
+    
     private InputValidationStatus inputValidationStatus = InputValidationStatus.NOT_TESTED;
-
+    
     private JPanePlugin parentPane;
-
-    private JButton runInputValidatorButton;
-
+    
     private InputValidationResult[] runResults;
-
     private InputValidationResult[] accumulatingResults;
-
+    
+    protected InputValidationResultFrame resultFrame;
+    
+    private JButton runInputValidatorButton;
     private JPanel runInputValidatorButtonPane;
-
     private ButtonGroup validatorChoiceButtonGroup;
-
     private JPanel noInputValidatorPanel;
-
     private JRadioButton noInputValidatorRadioButton;
-
     private JPanel vivaInputValidatorPanel;
-
     private JRadioButton useVivaInputValidatorRadioButton;
-
     private JPanel vivaOptionsPanel;
-
     private JPanel vivaOptionButtonPanel;
-
     private JLabel lblWhatsThisViva;
+    private JLabel vivaPatternLabel;
+    private JButton loadVivaPatternButton;
+    private JScrollPane vivaPatternTextScrollPane;
+    private JTextArea vivaPatternTextArea;
+    private JPanel customInputValidatorPanel;
+    private JPanel customOptionButtonPanel;
+    private JRadioButton useCustomInputValidatorRadioButton;
+    private DefineCustomInputValidatorPane customOptionsPanel;
+
+
 
 
     public InputValidatorPane() {
@@ -107,7 +109,10 @@ public class InputValidatorPane extends JPanePlugin {
         this.add(getVerticalStrut_4());
         this.add(getRunInputValidatorButtonPanel());
         this.add(getVerticalStrut_5());
+        
         getValidatorChoiceButtonGroup().setSelected(getNoInputValidatorRadioButton().getModel(), true);
+        
+        resultFrame = new InputValidationResultFrame();
     }
     
     private ButtonGroup getValidatorChoiceButtonGroup() {
@@ -237,17 +242,6 @@ public class InputValidatorPane extends JPanePlugin {
             + "\n\nFor more information on VIVA patterns, see the VIVA User's Guide under the PC^2 \"docs\" folder."
             + "\nFor additional information, or to download a copy of VIVA, see the VIVA website at http://viva.vanb.org/.";
 
-    private JLabel vivaPatternLabel;
-    private JButton loadVivaPatternButton;
-    private JScrollPane vivaPatternTextScrollPane;
-    private JTextArea vivaPatternTextArea;
-    private JPanel customInputValidatorPanel;
-    private JPanel customOptionButtonPanel;
-    private JRadioButton useCustomInputValidatorRadioButton;
-
-    private DefineCustomInputValidatorPane customOptionsPanel;
-
-    protected InputValidationResultFrame resultFrame;
     
     private JPanel getVivaOptionsSubPanel() {
         if (vivaOptionsPanel == null) {
@@ -416,6 +410,7 @@ public class InputValidatorPane extends JPanePlugin {
             runInputValidatorButtonPane = new JPanel();
             runInputValidatorButtonPane.setAlignmentX(LEFT_ALIGNMENT);
             runInputValidatorButtonPane.add(getRunInputValidatorButton());
+            runInputValidatorButtonPane.add(getShowLastResultButton());
         }
         return runInputValidatorButtonPane;
     }
@@ -445,10 +440,8 @@ public class InputValidatorPane extends JPanePlugin {
                     getRunInputValidatorButton().setEnabled(false); // this is set back true when the spawner finishes, via a call to cleanup()
                     getShowOnlyFailedFilesCheckbox().setEnabled(false);
                     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-                    resultFrame = new InputValidationResultFrame();
                     
-                    spawnCustomInputValidatorRunnerThread(resultFrame);
+                    spawnCustomInputValidatorRunnerThread();
 
                 } else {
                     // determine why it's not ok to run the Input Validator and display an appropriate message
@@ -540,7 +533,7 @@ public class InputValidatorPane extends JPanePlugin {
      * 
      * See https://docs.oracle.com/javase/tutorial/uiswing/concurrency/interim.html for details on how SwingWorker threads publish results.
      */
-    private void spawnCustomInputValidatorRunnerThread(InputValidationResultFrame resultFrame) {
+    private void spawnCustomInputValidatorRunnerThread() {
 
         // define a SwingWorker thread to run the Input Validator in the background against each of the data files
         SwingWorker<InputValidationResult[], InputValidationResult> worker = new SwingWorker<InputValidationResult[], InputValidationResult>() {
@@ -933,6 +926,7 @@ public class InputValidatorPane extends JPanePlugin {
     private Component verticalStrut_3;
     private Component verticalStrut_4;
     private Component verticalStrut_5;
+    private JButton showLastResultButton;
 
     
     private Component getRigidArea_1() {
@@ -1000,4 +994,15 @@ public class InputValidatorPane extends JPanePlugin {
         frame.setVisible(true);
     }
 
+    private JButton getShowLastResultButton() {
+        if (showLastResultButton == null) {
+        	showLastResultButton = new JButton("Show Most Recent Result");
+        	showLastResultButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        resultFrame.setVisible(true);
+        	    }
+        	});
+        }
+        return showLastResultButton;
+    }
 }
