@@ -341,6 +341,7 @@ public class InputValidatorPane extends JPanePlugin {
     protected DefineCustomInputValidatorPane getCustomOptionsSubPanel() {
         if (customOptionsPanel == null) {
             customOptionsPanel = new DefineCustomInputValidatorPane();
+            getCustomOptionsSubPanel().setParentPane(this);
             customOptionsPanel.setMinimumSize(new Dimension(20, 200));
         }
         return customOptionsPanel;
