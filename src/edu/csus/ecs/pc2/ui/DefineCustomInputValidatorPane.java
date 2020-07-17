@@ -243,8 +243,8 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
                 getController().getLog().warning("No grandparent pane (EditProblemPane) accessible from  DefineInputValidatorPane; cannot enable Add/Update button");
             }
         } else {
-            System.err.println ("No parent pane in DefineInputValidatorPane; cannot enable Add/Update button");
-            getController().getLog().warning("No parent pane in DefineInputValidatorPane; cannot enable Add/Update button");
+            System.err.println ("No parent pane in DefineCustomInputValidatorPane; cannot enable Add/Update button");
+            getController().getLog().warning("No parent pane in DefineCustomInputValidatorPane; cannot enable Add/Update button");
         }
     }
     
