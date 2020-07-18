@@ -95,6 +95,7 @@ public class InputValidatorPane extends JPanePlugin {
 
 
     public InputValidatorPane() {
+        setPreferredSize(new Dimension(700, 600));
         setMaximumSize(new Dimension(500, 400));
         this.setAlignmentX(Component.LEFT_ALIGNMENT);
         this.setAlignmentY(Component.TOP_ALIGNMENT);
@@ -160,10 +161,12 @@ public class InputValidatorPane extends JPanePlugin {
     private JPanel getVivaInputValidatorPanel() {
         if (vivaInputValidatorPanel == null) {
             vivaInputValidatorPanel = new JPanel();
+            vivaInputValidatorPanel.setMaximumSize(new Dimension(700, 600));
+            vivaInputValidatorPanel.setMinimumSize(new Dimension(400, 200));
+            vivaInputValidatorPanel.setPreferredSize(new Dimension(500, 500));
             vivaInputValidatorPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             
-            vivaInputValidatorPanel.setLayout(new BorderLayout(0, 0));  //0,0 = hgap,vgap
-            vivaInputValidatorPanel.setMaximumSize(new Dimension(500, 200));
+            vivaInputValidatorPanel.setLayout(new BorderLayout(0, 0));
             vivaInputValidatorPanel.add(getVivaOptionRadioButtonPanel(), BorderLayout.NORTH);
             vivaInputValidatorPanel.add(getRigidArea_1(), BorderLayout.WEST);
             vivaInputValidatorPanel.add(getVivaOptionsSubPanel());
@@ -259,6 +262,7 @@ public class InputValidatorPane extends JPanePlugin {
             vivaOptionsPanel.add(getRigidArea_2());
             vivaOptionsPanel.add(getVivaPatternLabel());
             vivaOptionsPanel.add(getVivaPatternTextScrollPane());
+            vivaOptionsPanel.add(getRigidArea_4());
             vivaOptionsPanel.add(getLoadVivaPatternButton());
         }
         return vivaOptionsPanel;
@@ -283,6 +287,7 @@ public class InputValidatorPane extends JPanePlugin {
     private JScrollPane getVivaPatternTextScrollPane () {
         if (vivaPatternTextScrollPane==null) {
             vivaPatternTextScrollPane = new JScrollPane(getVivaPatternTextArea());
+            vivaPatternTextScrollPane.setPreferredSize(new Dimension(400, 200));
             vivaPatternTextScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             vivaPatternTextScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         }
@@ -292,6 +297,8 @@ public class InputValidatorPane extends JPanePlugin {
     public JTextArea getVivaPatternTextArea() {
         if (vivaPatternTextArea == null) {
             vivaPatternTextArea = new JTextArea(50,80);
+            vivaPatternTextArea.setMaximumSize(new Dimension(1000, 1000));
+            vivaPatternTextArea.setPreferredSize(new Dimension(500, 400));
 //            textArea.setPreferredSize(new Dimension(400, 100));
         }
         return vivaPatternTextArea;
@@ -965,6 +972,7 @@ public class InputValidatorPane extends JPanePlugin {
     private JButton showLastResultButton;
     private Component rigidArea;
     private Component glue;
+    private Component rigidArea_4;
 
     
     private Component getRigidArea_1() {
@@ -1057,5 +1065,11 @@ public class InputValidatorPane extends JPanePlugin {
         	glue.setPreferredSize(new Dimension(30, 0));
         }
         return glue;
+    }
+    private Component getRigidArea_4() {
+        if (rigidArea_4 == null) {
+        	rigidArea_4 = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea_4;
     }
 }
