@@ -941,7 +941,7 @@ public class InputValidatorPane extends JPanePlugin {
     private Component getRigidArea_1() {
         if (rigidArea_1 == null) {
             rigidArea_1 = Box.createRigidArea(new Dimension(20, 20));
-            rigidArea_1.setPreferredSize(new Dimension(30, 20));
+            rigidArea_1.setPreferredSize(new Dimension(35, 20));
         }
         return rigidArea_1;
     }
@@ -956,7 +956,7 @@ public class InputValidatorPane extends JPanePlugin {
     private Component getRigidArea_3() {
         if (rigidArea_3 == null) {
             rigidArea_3 = Box.createRigidArea(new Dimension(20, 20));
-            rigidArea_3.setPreferredSize(new Dimension(30, 20));
+            rigidArea_3.setPreferredSize(new Dimension(35, 20));
         }
         return rigidArea_3;
     }
