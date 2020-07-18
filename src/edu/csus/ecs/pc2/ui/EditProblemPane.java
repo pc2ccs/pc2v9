@@ -5195,6 +5195,7 @@ public class EditProblemPane extends JPanePlugin {
     private Component getHorizontalStrut_2() {
         if (horizontalStrut_2 == null) {
             horizontalStrut_2 = Box.createHorizontalStrut(20);
+            horizontalStrut_2.setPreferredSize(new Dimension(35, 0));
         }
         return horizontalStrut_2;
     }
