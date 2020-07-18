@@ -3212,6 +3212,8 @@ public class EditProblemPane extends JPanePlugin {
     private void enableInputValidatorTabComponents() {
         getInputValidatorPane().setInputValidatorHasBeenRun(false);
 
+        getInputValidatorPane().updateInputValidatorPaneComponents();
+        
         // TODO: this method should also disable the "Run Input Validator" button -- but the issue under what conditions
         // it should subsequently be ENABLED...
     }

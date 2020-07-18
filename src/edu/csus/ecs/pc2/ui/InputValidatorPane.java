@@ -149,6 +149,7 @@ public class InputValidatorPane extends JPanePlugin {
                 public void actionPerformed(ActionEvent e) {
                     if (noInputValidatorRadioButton.isSelected()) {
                         getRunInputValidatorButton().setEnabled(false);
+                        updateInputValidatorPaneComponents();
                     }
                 }
             });
@@ -193,6 +194,7 @@ public class InputValidatorPane extends JPanePlugin {
                 public void actionPerformed(ActionEvent e) {
                     if (useVivaInputValidatorRadioButton.isSelected()) {
                         getRunInputValidatorButton().setEnabled(true);
+                        updateInputValidatorPaneComponents();
                     }
                 }
             });
@@ -332,6 +334,7 @@ public class InputValidatorPane extends JPanePlugin {
                 public void actionPerformed(ActionEvent e) {
                     if (useCustomInputValidatorRadioButton.isSelected()) {
                         getRunInputValidatorButton().setEnabled(true);
+                        updateInputValidatorPaneComponents();
                     }
                 }
             });
@@ -433,7 +436,33 @@ public class InputValidatorPane extends JPanePlugin {
         return runInputValidatorButton;
     }
     
+    public void updateInputValidatorPaneComponents() {
+        if (getNoInputValidatorRadioButton().isSelected()) {
+            enableVivaValidatorComponents(false);
+            enableCustomValidatorComponents(false);
+        } else if (getUseVivaInputValidatorRadioButton().isSelected()) {
+            enableVivaValidatorComponents(true);
+            enableCustomValidatorComponents(false);
+        } else if (getUseCustomInputValidatorRadioButton().isSelected()) {
+            enableVivaValidatorComponents(false);
+            enableCustomValidatorComponents(true);
+        } 
+    }
 
+    private void enableVivaValidatorComponents(boolean enableComponents) {
+        getVivaOptionsSubPanel().setEnabled(enableComponents);
+        getVivaPatternLabel().setEnabled(enableComponents);
+        getVivaPatternTextScrollPane().setEnabled(enableComponents);
+        getVivaPatternTextArea().setEnabled(enableComponents);
+        getLoadVivaPatternButton().setEnabled(enableComponents);
+    }
+    
+    private void enableCustomValidatorComponents(boolean enableComponents) {
+        getCustomOptionsSubPanel().setEnabled(enableComponents);
+        getCustomOptionsSubPanel().enableCustomInputPaneComponents(enableComponents);
+        
+    }
+    
 
     protected void runCustomInputValidator() {
 

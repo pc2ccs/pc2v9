@@ -97,6 +97,14 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
 
     }
     
+    public void enableCustomInputPaneComponents (boolean enableComponents) {
+        getInputValidatorProgramNameLabel().setEnabled(enableComponents);
+        getInputValidatorProgramNameTextField().setEnabled(enableComponents);
+        getChooseInputValidatorProgramButton().setEnabled(enableComponents);
+        getLblInputValidatorInvocation().setEnabled(enableComponents);
+        getInputValidatorCommandTextField().setEnabled(enableComponents);
+    }
+    
     /**
      * Returns the Input Validator Program name contained in this DefineInputValidator panel.
      * 
