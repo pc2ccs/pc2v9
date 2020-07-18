@@ -106,6 +106,7 @@ public class InputValidatorPane extends JPanePlugin {
         this.add(getVivaInputValidatorPanel());
         this.add(getVerticalStrut_3());
         this.add(getCustomInputValidatorPanel());
+        add(getRigidArea());
         this.add(getVerticalStrut_4());
         this.add(getRunInputValidatorButtonPanel());
         this.add(getVerticalStrut_5());
@@ -140,7 +141,7 @@ public class InputValidatorPane extends JPanePlugin {
         return noInputValidatorPanel;
     }
     
-    private JRadioButton getNoInputValidatorRadioButton() {
+    public JRadioButton getNoInputValidatorRadioButton() {
         if (noInputValidatorRadioButton==null) {
             noInputValidatorRadioButton = new JRadioButton("Problem has no Input Validator");
             noInputValidatorRadioButton.setSelected(true);
@@ -176,7 +177,7 @@ public class InputValidatorPane extends JPanePlugin {
             vivaOptionButtonPanel.setBorder(null);
             vivaOptionButtonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             FlowLayout fl_vivaOptionButtonPanel = new FlowLayout(FlowLayout.LEFT);
-            fl_vivaOptionButtonPanel.setHgap(0);
+            fl_vivaOptionButtonPanel.setHgap(10);
             vivaOptionButtonPanel.setLayout(fl_vivaOptionButtonPanel);
             vivaOptionButtonPanel.add(getUseVivaInputValidatorRadioButton());
             vivaOptionButtonPanel.add(getLblWhatsThisViva());
@@ -246,9 +247,9 @@ public class InputValidatorPane extends JPanePlugin {
     private JPanel getVivaOptionsSubPanel() {
         if (vivaOptionsPanel == null) {
             vivaOptionsPanel = new JPanel();
-            vivaOptionsPanel.setBorder(new TitledBorder(null, "Viva Options Pane", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            vivaOptionsPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Viva Options", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
             vivaOptionsPanel.setMinimumSize(new Dimension(20, 200));
-            vivaOptionsPanel.setPreferredSize(new Dimension(20, 200));
+            vivaOptionsPanel.setPreferredSize(new Dimension(200, 200));
             vivaOptionsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
             vivaOptionsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             FlowLayout flowLayout = (FlowLayout) vivaOptionsPanel.getLayout();
@@ -264,7 +265,7 @@ public class InputValidatorPane extends JPanePlugin {
     
     private JLabel getVivaPatternLabel() {
         if (vivaPatternLabel == null) {
-            vivaPatternLabel = new JLabel("VIVA Pattern:  ");
+            vivaPatternLabel = new JLabel("Pattern:  ");
             vivaPatternLabel.setAlignmentY(Component.TOP_ALIGNMENT);
             vivaPatternLabel.setVerticalTextPosition(SwingConstants.TOP);
             vivaPatternLabel.setVerticalAlignment(SwingConstants.TOP);
@@ -316,7 +317,7 @@ public class InputValidatorPane extends JPanePlugin {
             customOptionButtonPanel.setBorder(null);
             customOptionButtonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             FlowLayout fl_customOptionButtonPanel = new FlowLayout(FlowLayout.LEFT);
-            fl_customOptionButtonPanel.setHgap(0);
+            fl_customOptionButtonPanel.setHgap(10);
             customOptionButtonPanel.setLayout(fl_customOptionButtonPanel);
             customOptionButtonPanel.add(getUseCustomInputValidatorRadioButton());
         }
@@ -341,6 +342,7 @@ public class InputValidatorPane extends JPanePlugin {
     protected DefineCustomInputValidatorPane getCustomOptionsSubPanel() {
         if (customOptionsPanel == null) {
             customOptionsPanel = new DefineCustomInputValidatorPane();
+            customOptionsPanel.setBorder(new TitledBorder(null, "Custom Validator Options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
             getCustomOptionsSubPanel().setParentPane(this);
             customOptionsPanel.setMinimumSize(new Dimension(20, 200));
         }
@@ -411,6 +413,7 @@ public class InputValidatorPane extends JPanePlugin {
             runInputValidatorButtonPane = new JPanel();
             runInputValidatorButtonPane.setAlignmentX(LEFT_ALIGNMENT);
             runInputValidatorButtonPane.add(getRunInputValidatorButton());
+            runInputValidatorButtonPane.add(getGlue());
             runInputValidatorButtonPane.add(getShowLastResultButton());
         }
         return runInputValidatorButtonPane;
@@ -722,7 +725,10 @@ public class InputValidatorPane extends JPanePlugin {
 
         // start the SwingWorker thread running the Custom Input Validator in the background against all data files
         worker.execute();
-
+        
+        //display the ResultFrame (to which the SwingWorker sends its results as they are generated)
+        resultFrame.setVisible(true);
+        
     } // end method spawnCustomInputValidatorRunnerThread()
 
     /**
@@ -928,11 +934,14 @@ public class InputValidatorPane extends JPanePlugin {
     private Component verticalStrut_4;
     private Component verticalStrut_5;
     private JButton showLastResultButton;
+    private Component rigidArea;
+    private Component glue;
 
     
     private Component getRigidArea_1() {
         if (rigidArea_1 == null) {
             rigidArea_1 = Box.createRigidArea(new Dimension(20, 20));
+            rigidArea_1.setPreferredSize(new Dimension(30, 20));
         }
         return rigidArea_1;
     }
@@ -947,6 +956,7 @@ public class InputValidatorPane extends JPanePlugin {
     private Component getRigidArea_3() {
         if (rigidArea_3 == null) {
             rigidArea_3 = Box.createRigidArea(new Dimension(20, 20));
+            rigidArea_3.setPreferredSize(new Dimension(30, 20));
         }
         return rigidArea_3;
     }
@@ -1005,5 +1015,18 @@ public class InputValidatorPane extends JPanePlugin {
         	});
         }
         return showLastResultButton;
+    }
+    private Component getRigidArea() {
+        if (rigidArea == null) {
+        	rigidArea = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea;
+    }
+    private Component getGlue() {
+        if (glue == null) {
+        	glue = Box.createGlue();
+        	glue.setPreferredSize(new Dimension(30, 0));
+        }
+        return glue;
     }
 }
