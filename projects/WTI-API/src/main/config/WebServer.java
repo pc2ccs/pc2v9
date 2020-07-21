@@ -52,11 +52,12 @@ public class WebServer {
 	 * received {@link ServerInit} object, and blocks (via a join()) waiting for the server to be shut down.
 	 * 
 	 * @param initServer a {@link ServerInit} object containing initialization values for the server being started
+	 * 
 	 * @throws LoginFailureException if a failure occurs when attempting to log in to the PC2 server using the
 	 * 								configured scoreboard account
-	 * @throws URISyntaxException if a valid websocket URI could not be constructed from the configured values
+	 * @throws Exception if any other Exception occurs during webserver startup
 	 */
-	public static void startServer(ServerInit initServer) throws LoginFailureException {
+	public static void startServer(ServerInit initServer) throws LoginFailureException, Exception {
 		ini = initServer;
 		
 		Log logger = ini.getLogger();
@@ -91,10 +92,14 @@ public class WebServer {
 			server.join();
 
 		} catch (LoginFailureException ex) {
-			System.err.println("WTI failed to login with PC2 Scoreboard account: " + ex);
+			System.err.println("WTI server failed to login with PC2 Scoreboard account: " + ex);
+			logger.severe("WTI server failed to login with PC2 Scoreboard account: " + ex);
 			throw ex;
 		} catch (Exception ex) {
 			System.err.println(ex);
+			logger.severe("Exception during WTI server startup: " + ex);
+			throw ex;
+
 		}
 	}
 
