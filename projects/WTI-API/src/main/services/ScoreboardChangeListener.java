@@ -160,9 +160,17 @@ public class ScoreboardChangeListener implements IRunEventListener, IConfigurati
 				.add("teamId", teamkey)
 				.build();
 
-			//tell the current team (browser client) that its standings should no longer be considered current
-			socket.sendMessage(builder.toString());
-		
+			//Send a websocket message telling the current team (browser client) that its standings should no longer be considered current
+			//Do this on a separate thread for each send so that timeouts on one send don't delay the other sends
+			Thread msgThread = new Thread (new Runnable() {
+
+				@Override
+				public void run() {
+					socket.sendMessage(builder.toString());
+				}
+				
+			});
+			msgThread.start();
 		}
 
 	}
