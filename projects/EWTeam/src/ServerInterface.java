@@ -2,8 +2,6 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
@@ -14,7 +12,6 @@ import java.util.jar.Manifest;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.api.IClarification;
 import edu.csus.ecs.pc2.api.IClarificationEventListener;
-import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
@@ -133,6 +130,7 @@ public class ServerInterface {
 			StaticLog.info("Found value for scoreboard2password in pc2v9.ini");
 			pc2Properties = null;
 		} catch (Exception e) {
+			StaticLog.unclassified("Error loading pc2v9.ini "+ e.getMessage(), e);
 			throw new RuntimeException("Error loading pc2v9.ini "
 					+ e.getMessage(), e);
 		}
@@ -406,6 +404,7 @@ public class ServerInterface {
 
 		} catch (Exception e) {
 
+			// no need to log exception, exception thrown.
 			if (file != null)
 				file.delete();
 			if (newFile != null)
@@ -435,8 +434,11 @@ public class ServerInterface {
 
 			getTeam(teamKey).submitClarification(problem, question);
 		} catch (Exception e) {
+			
 			// System.out.println("failed to submit clarification");
 			StaticLog.unclassified("Error in submitClarification teamKey=" + teamKey + " problemName=" + problemName + " " + e, e);
+			
+			// TODO SOMEDAY add a throw exception, if there is an error, this error is silently logged rather than handled.
 			return;
 		}
 
@@ -486,8 +488,6 @@ public class ServerInterface {
 
 	public IRun[] getRuns(String teamKey) {
 		try {
-			// TODO  why is k not used ??  Remove unused variable.
-			IClient currentClient = getTeam(teamKey).getMyClient();
 			IRun[] allRuns = getTeam(teamKey).getContest().getRuns();
 			return allRuns;
 
@@ -518,6 +518,7 @@ public class ServerInterface {
 		return standingsArray;
 	}// end getStandings
 
+	@SuppressWarnings("unused")
 	private String getScoreboardLogin() {
 		return "scoreboard2";
 	}
@@ -526,6 +527,7 @@ public class ServerInterface {
 		return scoreboardPassword;
 	}
 
+	@SuppressWarnings("unused")
 	private void addToClarBuffer(IClarification clar) {
 		clarBuffer.add(clar);
 	}
