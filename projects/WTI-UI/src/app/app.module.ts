@@ -9,6 +9,7 @@ import { RunsModule } from './modules/runs/runs.module';
 import { SharedModule } from './modules/shared/shared.module';
 import { OptionsModule } from './modules/options/options.module';
 import { ClarificationsModule } from './modules/clarifications/clarifications.module';
+import { ScoreboardModule } from './modules/scoreboard/scoreboard.module';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { ClarificationsModule } from './modules/clarifications/clarifications.mo
     RunsModule,
     OptionsModule,
     ClarificationsModule,
+    ScoreboardModule,
     BrowserAnimationsModule
   ],
   providers: [],

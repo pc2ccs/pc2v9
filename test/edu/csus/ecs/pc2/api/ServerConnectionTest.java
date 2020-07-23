@@ -141,7 +141,7 @@ public class ServerConnectionTest extends AbstractTestCase {
          */
         String mainFileName = getSamplesSourceFilename(HELLO_SOURCE_FILENAME);
         ILanguage apilanguage = iContest.getLanguages()[0];
-        serverConnection.submitRun(firstProblem, apilanguage, mainFileName, new String[0], 0, 0);
+        serverConnection.submitJudgeRun(firstProblem, apilanguage, mainFileName, new String[0], 0, 0);
 
         Problem problemFetched = fetchProblemFromController(testController, 3000);
 
@@ -199,18 +199,18 @@ public class ServerConnectionTest extends AbstractTestCase {
         private Problem saveProblem = null;
 
         @Override
-        public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
+        public void submitJudgeRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
             // super.submitRun(problem, language, filename, otherFiles);
             saveProblem = problem;
         }
 
         @Override
-        public void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS) throws Exception {
+        public void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS) throws Exception {
             saveProblem = problem;
         }
 
         @Override
-        public void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
+        public void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
             saveProblem = problem;
         }
 

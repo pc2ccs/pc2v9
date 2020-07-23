@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import edu.csus.ecs.pc2.core.DateUtilities;
 import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 
 /**
@@ -108,7 +109,18 @@ public class ContestInformation implements Serializable{
     }
     
     private Properties scoringProperties = new Properties();
+
+    /**
+     * Enable team auto registration.
+     * 
+     */
+    private boolean enableAutoRegistration = false;
     
+    /**
+     * The password type for the new passwords.
+     */
+    private PasswordType autoRegistrationPasswordType = PasswordType.RANDOM;
+
 
 //    /** replaced with scheduledStartTime; see below
 //     * Contest Start/Date Time.
@@ -252,6 +264,9 @@ public class ContestInformation implements Serializable{
             if (! StringUtilities.stringSame(rsiCommand, contestInformation.rsiCommand)) {
                 return false;
             }
+            if (enableAutoRegistration != contestInformation.isEnableAutoRegistration()) {
+                return false;
+            }            
             if (! StringUtilities.stringSame(primaryCCS_URL, contestInformation.primaryCCS_URL)) {
                 return false;
             }            
@@ -533,6 +548,22 @@ public class ContestInformation implements Serializable{
      */
     public int getLastRunNumberSubmitted() {
         return lastRunNumberSubmitted;
+    }
+    
+    public boolean isEnableAutoRegistration() {
+        return enableAutoRegistration;
+    }
+
+    public void setEnableAutoRegistration(boolean enableAutoRegistration) {
+        this.enableAutoRegistration = enableAutoRegistration;
+    }
+
+    public PasswordType getAutoRegistrationPasswordType() {
+        return autoRegistrationPasswordType;
+    }
+
+    public void setAutoRegistrationPasswordType(PasswordType autoRegistrationPasswordType) {
+        this.autoRegistrationPasswordType = autoRegistrationPasswordType;
     }
 
     /**

@@ -94,13 +94,15 @@ public class Test_Contest_Get_Clarifications extends ContestControllerInjection{
 	}
 	
 	/**
-	 * Test that when requesting clarifications while properly logged in and the contest is running, but the problem identified in
-	 * the clarification does not exist that "401" (Unauthorized) is returned.
+	 * Test that, while properly logged in and the contest is running, when requesting a list of the clarifications submitted by a team 
+	 * but there is a clarification that has no problem associated with it, 
+	 * "500" (INTERNAL_SERVER_ERROR) is returned -- because the server should never have accepted a
+	 * clarification that doesn't have a valid problem associated with it.
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
-	public void Test_Get_Clarifications_401_Problem_Does_Not_Exist() throws Exception {	
+	public void Test_Get_Clarifications_500_Clar_Has_No_Associated_Problem() throws Exception {	
 		
 		Mockito.when(connection.getContest().getClarifications()).thenReturn(new IClarification[] {mockedClarification});
 	
@@ -118,7 +120,7 @@ public class Test_Contest_Get_Clarifications extends ContestControllerInjection{
 		Mockito.when(connection.getContest().isContestClockRunning()).thenReturn(true);
 
 		this.response = this.controller.clarifications(testKey);
-		assertEquals(401, this.response.getStatus());
+		assertEquals(500, this.response.getStatus());
 	}
 	
 	/**

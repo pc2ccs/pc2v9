@@ -15,7 +15,7 @@ export class WebsocketService extends IWebsocketService {
     // Manually get UiHelperService from angular DI to pass to abstract class
     // This avoids having two references to UiHelperService
     super(_injector.get(UiHelperService), _injector.get(IContestService), _injector.get(ITeamsService));
-    console.log('firing construcitor in websocket');
+    console.log('firing constructor in WebsocketService');
   }
 
   startWebsocket(): void {

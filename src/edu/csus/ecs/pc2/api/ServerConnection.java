@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api;
 
 import java.io.File;
@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -45,12 +46,12 @@ import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
- * This class represents a connection to a PC<sup>2</sup> server. Instantiating the class creates a local {@link ServerConnection} object which can then be used to connect to the PC<sup>2</sup> server
- * via the {@link ServerConnection#login(String, String)} method. The PC<sup>2</sup> server must already be running, and the local client must have a <code>pc2v9.ini</code> file specifying valid
- * server connection information, prior to invoking {@link ServerConnection#login(String, String)} method.
- * 
- * <p>
- * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
+ * This class represents a connection to a PC<sup>2</sup> server. 
+ * Instantiating the class creates a local {@link ServerConnection} object which can then be used to connect 
+ * to the PC<sup>2</sup> server via the {@link ServerConnection#login(String, String)} method. 
+ * The PC<sup>2</sup> server must already be running, and the local client must have a <code>pc2v9.ini</code> 
+ * file specifying valid server connection information, prior to invoking {@link ServerConnection#login(String, String)} 
+ * method.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -73,7 +74,9 @@ public class ServerConnection {
     
     protected IInternalContest internalContest;
     
-    private Contest contest = null;
+    protected Contest contest = null;
+    
+//    protected MockTestRunImplementation mockTestRunImplementation = new MockTestRunImplementation();
     
     /**
      * Construct a local {@link ServerConnection} object which can subsequently be used to connect to a currently-running PC<sup>2</sup> server.
@@ -90,7 +93,7 @@ public class ServerConnection {
      * <P>
      * Note that invoking {@link ServerConnection#login(String, String)} causes an attempt to establish a network connection to a PC<sup>2</sup> server using the connection information specified in
      * the <code>pc2v9.ini</code> file in the current directory. The PC<sup>2</sup> server must <I>already be running</i> prior to invoking {@link ServerConnection#login(String, String)}, and the
-     * <code>pc2v9.ini</code> must specify legitmate server connection information; otherwise, {@link edu.csus.ecs.pc2.api.exceptions.LoginFailureException} is thrown. See the PC<sup>2</sup> Contest
+     * <code>pc2v9.ini</code> must specify legitimate server connection information; otherwise, {@link edu.csus.ecs.pc2.api.exceptions.LoginFailureException} is thrown. See the PC<sup>2</sup> Contest
      * Administrator's Guide for information regarding specifying server connection information in <code>pc2v9.ini</code> files.
      * <P>
      * The following code snippet shows typical usage for connecting to and logging in to a PC<sup>2</sup> server. <A NAME="loginsample"></A>
@@ -124,8 +127,8 @@ public class ServerConnection {
     public IContest login(String login, String password) throws LoginFailureException {
 
         /**
-         * Was contest overriden/set rather than having to login to
-         * instanciate the contest?
+         * Was contest overridden/set rather than having to login to
+         * instantiate the contest?
          */
         boolean overrideContestUsed = false;
         
@@ -156,6 +159,8 @@ public class ServerConnection {
             if (!overrideContestUsed){
                 internalContest = controller.clientLogin(internalContest, login, password);
             }
+            
+//            mockTestRunImplementation.setContestAndController(internalContest, controller);
 
             contest = new Contest(internalContest, controller, controller.getLog());
             contest.addConnectionListener(new ConnectionEventListener());
@@ -167,7 +172,7 @@ public class ServerConnection {
             throw new LoginFailureException(e.getMessage());
         }
     }
-
+    
 //    private Account getAccount(IInternalContest iContest, ClientId clientId) throws Exception {
 //
 //        Vector<Account> accountList = iContest.getAccounts(clientId.getClientType());
@@ -226,9 +231,10 @@ public class ServerConnection {
       * @param displayName title for account/team, if null will be login name
       * @param password password for account, must not be null or emptystring (string length==0)
       * 
-      * @exception IllegalArgumentException if the account type is invalid or the password is null or empty
-      * @exception SecurityException if the user allowed to perform this action.
-      * @throws Exception throws IllegalArgumentException
+      * @throws IllegalArgumentException if the account type is invalid or the password is null or empty
+      * @throws SecurityException if the user is not allowed to perform this action.
+      * @throws IllegalArgumentException if the accountTypeName does not specify a valid account type
+      * @throws Exception if an error occurs when calling the server to add the account
       */
     public void addAccount(String accountTypeName, String displayName, String password) throws Exception {
 
@@ -261,13 +267,12 @@ public class ServerConnection {
     }    
     
     /**
-     * Submit a clarification.
+     * Submit a clarification request to the PC2 Server.
      * 
      * @param problem  the Problem for which the clarification request is being submitted
      * @param question text of question
      * @throws NotLoggedInException if the client is not currently logged in to the server
-     * @exception SecurityException if the user allowed to perform this action.
-     * @exception NotLoggedInException if the user is not logged in.
+     * @throws SecurityException if the user allowed to perform this action.
      * @throws Exception if the specified Problem is null or the clarification request could not be submitted to the server
      */
     public void submitClarification(IProblem problem, String question) throws Exception {
@@ -294,20 +299,14 @@ public class ServerConnection {
         }
     }
 
-    private void checkWhetherLoggedIn() throws NotLoggedInException {
-        if (contest == null || internalContest == null){
-            throw new NotLoggedInException ("Not logged in");
-        }
-    }
-    
     /**
      * Submit run judgement for a run.
      * 
      * @param run The run to add a judgement to.
      * @param judgement the judgement to add to run.
      *
-     * @exception SecurityException if the user allowed to perform this action.
-     * @exception NotLoggedInException if the user is not logged in.
+     * @throws SecurityException if the user is not allowed to perform this action.
+     * @throws NotLoggedInException if the user is not logged in.
      * @throws Exception if unable to submit run.
      */
     public void submitRunJudgement(IRun run, IJudgement judgement) throws Exception {
@@ -335,39 +334,92 @@ public class ServerConnection {
             JudgementRecord judgementRecord = new JudgementRecord(internaljudgement.getElementId(), clientId, solved, true);
             
             runToUpdate.setStatus(Run.RunStates.JUDGED);
+            runToUpdate.addJudgement(judgementRecord);
             
-            RunResultFiles runFiles = null;
+            RunResultFiles runFiles = null;  // coded on master
+            // coded on branch RunResultFiles runFiles = new RunResultFiles(runToUpdate, runToUpdate.getProblemId(), judgementRecord, null);
+            // dal unsure why runFiles was ever populated when just adding a run judgement, seems like extra work
             controller.updateRun(runToUpdate, judgementRecord, runFiles);
             
         } catch (Exception e) {
             throw new Exception("Unable to submit run " + e.getLocalizedMessage(), e.getCause());
         }
-
     }
     
-    private boolean isYesJudgement(Judgement judgement) {
-        return Judgement.ACRONYM_ACCEPTED.equals(judgement.getAcronym()); 
-    }
-   
-
+    // **** SUBMIT JUDGE RUN methods **** //
+    
+    //   *** Submit Judge Runs using String file names *** //
     /**
-     * Submit a run.
+     * Submit a Judge Run (a run which the Judges are expected to evaluate and count for scoring)
+     *  using String filenames.
      * 
      * @param problem the Problem for which the run is being submitted
-     * @param language the language used for the Problem submission (Java, C++, etc.)
+     * @param language the Language used for the Problem submission (Java, C++, etc.)
      * @param mainFileName the name of the main source code file
-     * @param additionalFileNames an array of Strings giving the names of any additional files submitted
-     * @param overrideSubmissionTimeMS an override elapsed time in ms, only works if contest information CCS test mode is set true.
-     * @param overrideRunId an override RunId, only works if contest information CCS test mode is set true.
+     * 
+     * Calling this method is equivalent to calling {@link #submitJudgeRun(IProblem, ILanguage, String, String[])} 
+     * with String[0] as the last parameter (that is, not specifying any additional file names).
      * 
      * @throws NotLoggedInException if the client is not currently logged in to the server
-     *
-     * @exception SecurityException if the user allowed to perform this action.
-     * @exception NotLoggedInException if the user is not logged in.
+     * @throws SecurityException if the user is not allowed to perform this action.
      * @throws Exception if any of the specified files cannot be found, if the Problem or Language is null, 
      *          the contest is not running, or a failure occurred while submitting the run to the server
+     *          
+     * @see #submitJudgeRun(IProblem, ILanguage, String, String[])
      */
-    public void submitRun(IProblem problem, ILanguage language, String mainFileName, String[] additionalFileNames, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
+    public void submitJudgeRun(IProblem problem, ILanguage language, String mainFileName) throws Exception {
+        submitJudgeRun(problem, language, mainFileName, new String[0]);
+    }
+
+    /**
+     * Submit a Judge run (a run which the Judges are expected to evaluate and count for scoring)
+     * using String filenames.
+     * 
+     * @param problem the Problem for which the run is being submitted
+     * @param language the Language used for the Problem submission (Java, C++, etc.)
+     * @param mainFileName the name of the main source code file
+     * @param additionalFileNames an array of Strings giving the names of any additional files submitted
+     * 
+     * Calling this method is equivalent to calling {@link #submitJudgeRun(IProblem, ILanguage, String, String[], long, long)} 
+     * with zero as the last two parameters (that is, not specifying override time/runid values).
+     * 
+     * @throws NotLoggedInException if the client is not currently logged in to the server.
+     * @throws SecurityException if the user is not allowed to perform this action.
+     * @throws Exception if any of the specified files cannot be found, 
+     *          if the Problem or Language is null or cannot be found, 
+     *          if the contest is not running, 
+     *          or if a failure occurred while submitting the run to the server.
+     *          
+     * @see #submitJudgeRun(IProblem, ILanguage, String, String[], long, long)
+     */
+    public void submitJudgeRun(IProblem problem, ILanguage language, String mainFileName, String[] additionalFileNames) throws Exception {
+        submitJudgeRun(problem, language, mainFileName, additionalFileNames, 0, 0);
+    }
+
+    /**
+     * Submit a Judge run (a run which the Judges are expected to evaluate and count for scoring)
+     * using String filenames.
+     * 
+     * @param problem the Problem for which the run is being submitted
+     * @param language the Language used for the Problem submission (Java, C++, etc.)
+     * @param mainFileName the name of the main source code file
+     * @param additionalFileNames an array of Strings giving the names of any additional files submitted
+     * @param overrideSubmissionTimeMS the submission time which should be assigned to the run; if greater than zero,
+     *                  overrides the default (which is the current time).  
+     *                  Only has effect if contest information CCS test mode is set true.
+     * @param overrideRunId the Run ID which should be assigned to the run; if greater than zero, overrides the
+     *                  default (which is that the server assigns the next available RunID to the run).  
+     *                  Only has effect if contest information CCS test mode is set true.
+     * 
+     * @throws NotLoggedInException if the client is not currently logged in to the server
+     * @throws SecurityException if the user is not allowed to perform this action.
+     * @throws Exception if any of the specified files cannot be found, 
+     *          if the Problem or Language is null or cannot be found, 
+     *          if the contest is not running, 
+     *          or if a failure occurred while submitting the run to the server
+     */
+    public void submitJudgeRun(IProblem problem, ILanguage language, String mainFileName, String[] additionalFileNames, 
+                                long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
 
         checkWhetherLoggedIn();
         
@@ -392,23 +444,6 @@ public class ServerConnection {
         LanguageImplementation languageImplementation = (LanguageImplementation) language;
         Language submittedLanguage = internalContest.getLanguage(languageImplementation.getElementId());
         
-//        Problem submittedProblem = null;
-//        Language submittedLanguage = null;
-//
-//        Problem[] problems = internalContest.getProblems();
-//        for (Problem problem2 : problems) {
-//            if (problem2.getDisplayName().equals(problem.getName())) {
-//                submittedProblem = problem2;
-//            }
-//        }
-//
-//        Language[] languages = internalContest.getLanguages();
-//        for (Language language2 : languages) {
-//            if (language2.getDisplayName().equals(language.getName())) {
-//                submittedLanguage = language2;
-//            }
-//        }
-        
         if (submittedProblem == null) {
             throw new Exception("Could not find any problem matching: '" + problem.getName());
         }
@@ -422,14 +457,388 @@ public class ServerConnection {
         }
 
         try {
-            controller.submitRun(submittedProblem, submittedLanguage, mainFileName, list, overrideSubmissionTimeMS, overrideRunId);
+            controller.submitJudgeRun(submittedProblem, submittedLanguage, mainFileName, list, overrideSubmissionTimeMS, overrideRunId);
         } catch (Exception e) {
             throw new Exception("Unable to submit run " + e.getLocalizedMessage());
         }
     }
+    
+    
+    //   *** Submit Judge Runs using IFiles *** //
+    
+    /**
+     * Submit a Judge run (a run which the Judges are expected to evaluate and count for scoring)
+     * using {@link IFile}s.
+     * 
+     * Calling this method is exactly the same as calling {@link #submitJudgeRun(IProblem, ILanguage, IFile, IFile[])}
+     * with the same first three parameters and null as the last parameter.
+     * 
+     * @param problem the problem for which the Judge Run is being submitted
+     * @param language the Language used for the Judge Run
+     * @param mainFile an {@link IFile} object containing the main program for the Judge Run
+     * 
+     * @throws Exception if any of the specified files are invalid (have empty names or contain no data), 
+     *          if the Problem or Language is null or cannot be found, 
+     *          if the contest is not running, 
+     *          or if a failure occurred while submitting the run to the server
+     *          
+     * @see #submitJudgeRun(IProblem, ILanguage, IFile, IFile[])
+     */
+    public void submitJudgeRun(IProblem problem, ILanguage language, IFile mainFile) throws Exception {
+        submitJudgeRun(problem,language,mainFile,null);
+    }
+    
+    /**
+     * Submit a Judge run (a run which the Judges are expected to evaluate and count for scoring)
+     * using {@link IFile}s.
+     * 
+     * Calling this method is equivalent to calling {@link #submitJudgeRun(IProblem, ILanguage, IFile, IFile[], long, long)} 
+     * with zero as the last two parameters (that is, not specifying override time/runid values).
+     * 
+     * @param problem the problem for which the Judge Run is being submitted
+     * @param language the Language used for the Judge Run
+     * @param mainFile an {@link IFile} object containing the main program for the Judge Run
+     * @param additionalFiles an array of {@link IFile} objects with each element containing an 
+     *                  additional file being submitted as part of the Judge run
+     *                  
+     * @throws NotLoggedInException if the client is not currently logged in to the server
+     * @throws SecurityException if the user is not allowed to perform this action.
+     * @throws Exception if any of the specified files are invalid (have empty names or contain no data), 
+     *          if the Problem or Language is null or cannot be found, 
+     *          if the contest is not running, 
+     *          or if a failure occurred while submitting the run to the server
+     *          
+     * @see #submitJudgeRun(IProblem, ILanguage, IFile, IFile[], long, long)
+     */
+    public void submitJudgeRun(IProblem problem, ILanguage language, IFile mainFile, IFile [] additionalFiles) throws Exception {
+        submitJudgeRun(problem, language, mainFile, additionalFiles, 0, 0);
+    }
 
     /**
-     * Logoff/disconnect from the PC<sup>2</sup> server.
+     * Submit a Judge run (a run which the Judges are expected to evaluate and count for scoring)
+     * using {@link IFile}s.
+     * 
+     * @param problem the problem for which the Judge Run is being submitted
+     * @param language the Language used for the Judge Run
+     * @param mainFile an {@link IFile} object containing the main program for the Judge Run
+     * @param additionalFiles an array of {@link IFile} objects with each element containing an 
+     *                  additional file being submitted as part of the Judge run
+     * @param overrideSubmissionTimeMS a value of type long which, if non-zero, will be used as the submission time of
+     *                  the Judge Run, overriding the actual submission time; only has effect if Contest Information
+     *                  CCS Test Mode is true
+     * @param overrideRunId a value of type long which, if non-zero, will be used as the RunId of the Judge Run,
+     *                  overriding the default (internally-assigned) RunId; only has effect if Contest Information
+     *                  CCS Test Mode is true
+     *                  
+     * @throws NotLoggedInException if the client is not currently logged in to the server
+     * @throws SecurityException if the user is not allowed to perform this action.
+     * @throws Exception if any of the specified files are invalid (have empty names or contain no data), 
+     *          if the Problem or Language is null or cannot be found, 
+     *          if the contest is not running, 
+     *          or if a failure occurred while submitting the run to the server
+     */
+    public void submitJudgeRun(IProblem problem, ILanguage language, IFile mainFile, IFile [] additionalFiles,
+                                long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
+
+        checkWhetherLoggedIn();
+        
+        checkIsAllowed (Permission.Type.SUBMIT_RUN, "User not allowed to submit run");
+                
+        //validate mainFile param
+        if (!validIFile(mainFile)) {
+            throw new Exception("Invalid mainFile parameter"); 
+        }
+        // validate additionalSourceFiles param
+        if (additionalFiles != null && additionalFiles.length > 0) {
+            for (IFile nextFile : additionalFiles) {
+                if (!validIFile(nextFile)) {
+                    throw new Exception("Invalid IFile in additionalFiles array"); 
+                }
+            }
+        }
+
+        ProblemImplementation problemImplementation = (ProblemImplementation) problem;
+        Problem submittedProblem = internalContest.getProblem(problemImplementation.getElementId());
+        
+        LanguageImplementation languageImplementation = (LanguageImplementation) language;
+        Language submittedLanguage = internalContest.getLanguage(languageImplementation.getElementId());
+
+        if (submittedProblem == null) {
+            throw new Exception("Could not find any problem matching: '" + problem.getName());
+        }
+
+        if (submittedLanguage == null) {
+            throw new Exception("Could not find any language matching: '" + language.getName());
+        }
+        
+        if (! contest.isContestClockRunning()){
+            throw new Exception("Contest is STOPPED - no runs accepted.");
+        }
+
+        //convert main program IFile to SerializedFile for sending to Controller
+        SerializedFile serializedMainFile = new SerializedFile(mainFile);
+        //make sure no errors occurred during conversion
+        if (serializedMainFile.getErrorMessage()!=null || serializedMainFile.getException()!=null) {
+            throw new Exception("Error converting mainFile to SerializedFile: " + serializedMainFile.getErrorMessage(), 
+                    serializedMainFile.getException());
+        }
+        
+        //convert any "additionalFiles" IFiles to SerializedFiles for sending to Controller
+        SerializedFile [] serializedAdditionalFiles = null;
+        if (additionalFiles != null && additionalFiles.length>0) {
+            serializedAdditionalFiles = new SerializedFile [additionalFiles.length];
+            for (int i=0; i<additionalFiles.length; i++) {
+                serializedAdditionalFiles[i] = new SerializedFile(additionalFiles[i]);
+                //make sure no errors occurred during conversion
+                if (serializedAdditionalFiles[i].getErrorMessage()!=null || serializedAdditionalFiles[i].getException()!=null) {
+                    throw new Exception("Error converting additional file to SerializedFile: " + serializedAdditionalFiles[i].getErrorMessage(), 
+                            serializedAdditionalFiles[i].getException());
+                }
+            }
+        }
+
+        try {
+            controller.submitJudgeRun(submittedProblem, submittedLanguage, serializedMainFile, serializedAdditionalFiles, 
+                                        overrideSubmissionTimeMS, overrideRunId);
+        } catch (Exception e) {
+            throw new Exception("Unable to submit run " + e);
+        }
+    }
+
+
+    
+    // **** SUBMIT TEST RUN methods **** //
+    
+    /**
+     * Submit a Test run (a run which will be executed but will not affect a team's score)
+     * using {@link IFile}s.
+     * 
+     * The results of a submitted Test Run are returned in a {@link TestRunResults} object via a callback
+     * to a registered {@link ITestRunListener}.  It is the caller's responsibility to register an appropriate
+     * {@link ITestRunListener} prior to invoking this method.
+     * 
+     * Invoking this method is equivalent to invoking 
+     * {@link #submitTestRun(IProblem, ILanguage, IFile, IFile, IFile[], IFile[])}
+     * with null as the last two parameters.
+     * 
+     * @param problem the problem for which the Test Run is being submitted
+     * @param language the Language used for the Test Run
+     * @param mainFile an {@link IFile} object containing the main program for the Test Run
+     * @param testDataFile an {@link IFile} object containing the input data to be supplied to the Test Run
+     * 
+     * @throws Exception if an error occurs in submitting the Test Run
+     * 
+     * @see #submitTestRun(IProblem, ILanguage, IFile, IFile, IFile[], IFile[])
+     */
+    public void submitTestRun(IProblem problem, ILanguage language, IFile mainFile, IFile testDataFile) throws Exception {
+        submitTestRun(problem, language, mainFile, testDataFile, null, null);
+    }
+
+    /**
+     * Submit a Test run (a run which will be executed but will not affect a team's score)
+     * using {@link IFile}s.
+     * 
+     * NOTE: currently the PC2 Server does not support Test Runs; this method is guaranteed to throw either
+     * {@link Exception} (if the received parameters are invalid) or {@link UnsupportedOperationException}.
+     * 
+     * The results of a submitted Test Run are returned in a {@link TestRunResults} object via a callback
+     * to a registered {@link ITestRunListener}.  It is the caller's responsibility to register an appropriate
+     * {@link ITestRunListener} prior to invoking this method.
+     * 
+     * @param problem the problem for which the Test Run is being submitted
+     * @param language the Language used for the Test Run
+     * @param mainFile an {@link IFile} object containing the main program for the Test Run
+     * @param testDataFile an {@link IFile} object containing the file to be used as input data during execution of the Test Run
+     * @param additionalSourceFiles an array containing {@link IFile} objects, each representing an additional 
+     *                              source code file submitted as part of the Test Run
+     * @param additionalTestDataFiles an array containing {@link IFile} objects, each representing an additional
+     *                              test data file submitted as part of the Test Run
+     * @throws Exception if any of the specified IFiles are invalid (have no name or are zero length), 
+     *              if the specified Problem or Language is null,
+     *              if the contest clock is not running, 
+     *              or if an error occurred while submitting the Test Run to the server
+     * @throws UnsupportedOperationException if {@link Exception} is not thrown
+     */
+    public void submitTestRun(IProblem problem, ILanguage language, IFile mainFile, IFile testDataFile, 
+                        IFile [] additionalSourceFiles, IFile [] additionalTestDataFiles) throws Exception, UnsupportedOperationException {
+        
+        checkWhetherLoggedIn();
+        
+        checkIsAllowed (Permission.Type.SUBMIT_RUN, "User not allowed to submit test run");
+        
+        //validate mainFile param
+        if (!validIFile(mainFile)) {
+            throw new Exception("Invalid mainFile parameter"); 
+        }
+        // validate additionalSourceFiles param
+        if (additionalSourceFiles != null && additionalSourceFiles.length > 0) {
+            for (IFile nextFile : additionalSourceFiles) {
+                if (!validIFile(nextFile)) {
+                    throw new Exception("Invalid IFile in additionalSourceFiles array"); 
+                }
+            }
+        }
+        
+        // validate testDataFile param
+        if (!validIFile(testDataFile)) {
+            throw new Exception("Invalid testDataFile parameter"); 
+        }
+        
+        // validate additionalTestDataFiles param
+        if (additionalTestDataFiles != null && additionalTestDataFiles.length > 0) {
+            for (IFile nextFile : additionalTestDataFiles) {
+                if (!validIFile(nextFile)) {
+                    throw new Exception("Invalid IFile in additionalTestDataFiles array"); 
+                }
+            }
+        }
+        
+        ProblemImplementation problemImplementation = (ProblemImplementation) problem;
+        Problem submittedProblem = internalContest.getProblem(problemImplementation.getElementId());
+        
+        LanguageImplementation languageImplementation = (LanguageImplementation) language;
+        Language submittedLanguage = internalContest.getLanguage(languageImplementation.getElementId());
+        
+        if (submittedProblem == null) {
+            throw new Exception("Could not find any problem matching: '" + problem.getName());
+        }
+
+        if (submittedLanguage == null) {
+            throw new Exception("Could not find any language matching: '" + language.getName());
+        }
+        
+        if (! contest.isContestClockRunning()){
+            throw new Exception("Contest is STOPPED - no test runs accepted.");
+        }
+        
+        try {
+            throw new UnsupportedOperationException("Test Runs currently not supported");
+            
+            //TODO: MOCK TEST RUN Submission  
+//            mockTestRunImplementation.submitTestRun(internalContest, contest, submittedProblem, submittedLanguage, 
+//                    mainFile, testDataFile, additionalSourceFiles, additionalTestDataFiles);
+            
+//              controller.submitTestRun(submittedProblem, submittedLanguage, mainFile, additionalSourceFiles, 
+//                               testDataFile, additionalTestDataFiles);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("Unable to submit test run " + e);
+        }
+    }
+
+    /**
+     * Submit a Test run (a run which will be executed but will not affect a team's score)
+     * using String filenames.
+     * 
+     * The results of a submitted Test Run are returned in a {@link TestRunResults} object via a callback
+     * to a registered {@link ITestRunListener}.  It is the caller's responsibility to register an appropriate
+     * {@link ITestRunListener} prior to invoking this method.
+     * 
+     * Calling this method is equivalent to calling 
+     *      {@link #submitTestRun(IProblem, ILanguage, String, String, String[], String[])}
+     *      with null as the last two parameters.
+     * 
+     * @param problem the problem for which the Test Run is being submitted
+     * @param language the Language used for the Test Run
+     * @param mainFileName the name of the file containing the main program for the Test Run
+     * @param testDataFileName the data file to be used as input during execution of the Test Run
+     * 
+     * @throws Exception if an error occurs in submitting the Test Run
+     * 
+     * @see #submitTestRun(IProblem, ILanguage, String, String, String[], String[])
+     */
+    public void submitTestRun(IProblem problem, ILanguage language, String mainFileName, String testDataFileName) throws Exception {
+        submitTestRun(problem, language, mainFileName, testDataFileName, null, null);
+    }
+
+    /**
+     * Submit a Test run (a run which will be executed but will not affect a team's score)
+     * using String filenames.
+     * 
+     * NOTE: currently the PC2 Server does not support Test Runs; this method is guaranteed to throw either
+     * {@link Exception} (if the received parameters are invalid) or {@link UnsupportedOperationException}.
+     * 
+     * The results of a submitted Test Run are returned in a {@link TestRunResults} object via a callback
+     * to a registered {@link ITestRunListener}.  It is the caller's responsibility to register an appropriate
+     * {@link ITestRunListener} prior to invoking this method.
+     * 
+     * @param problem the problem for which the Test Run is being submitted
+     * @param language the Language used for the Test Run
+     * @param mainFileName the name of the file containing the main program for the Test Run
+     * @param testDataFileName the data file to be used as input during execution of the Test Run
+     * @param otherSourceFileNames an array containing the names of additional source code files to be submitted (currently unused)
+     * @param otherDataFileNames an array containing the names of other data files to be submitted (currently unused)
+     * 
+     * @throws NotLoggedInException is the client is not logged in to the server
+     * @throws SecurityException if the client is not allowed to perform this action
+     * @throws Exception if any of the specified files cannot be found, if the specified Problem or Language is null,
+     *              if the contest clock is not running, or if an error occurred while submitting the Test Run to 
+     *              the server
+     * @throws UnsupportedOperationException if {@link Exception} is not thrown
+     */
+    public void submitTestRun(IProblem problem, ILanguage language, String mainFileName, String testDataFileName, 
+                    String [] otherSourceFileNames, String [] otherDataFileNames) throws Exception, UnsupportedOperationException {
+        
+        checkWhetherLoggedIn();
+        
+        checkIsAllowed (Permission.Type.SUBMIT_RUN, "User not allowed to submit test run");
+        
+        if (! new File(mainFileName).isFile()){
+            throw new Exception("File '"+mainFileName+"' no such file (not found)"); 
+        }
+        
+        if (testDataFileName != null && ! new File(testDataFileName).isFile()){
+            throw new Exception("File '"+testDataFileName+"' no such file (not found)"); 
+        }
+        
+        ProblemImplementation problemImplementation = (ProblemImplementation) problem;
+        Problem submittedProblem = internalContest.getProblem(problemImplementation.getElementId());
+        
+        LanguageImplementation languageImplementation = (LanguageImplementation) language;
+        Language submittedLanguage = internalContest.getLanguage(languageImplementation.getElementId());
+                
+        if (submittedProblem == null) {
+            throw new Exception("Could not find any problem matching: '" + problem.getName());
+        }
+
+        if (submittedLanguage == null) {
+            throw new Exception("Could not find any language matching: '" + language.getName());
+        }
+        
+        if (! contest.isContestClockRunning()){
+            throw new Exception("Contest is STOPPED - no test runs accepted.");
+        }
+
+        try {
+            throw new UnsupportedOperationException("Test Runs currently not supported");
+            
+            //TODO: MOCK TEST RUN Submission             
+//            mockTestRunImplementation.submitTestRun(internalContest, contest, submittedProblem, submittedLanguage, 
+//                    mainFileName, testDataFileName, otherSourceFileNames, otherDataFileNames);
+            
+//            controller.submitTestRun(submittedProblem, submittedLanguage, mainFileName, testDataFileName);
+        } catch (Exception e) {
+            throw new Exception("Unable to submit test run: " + e.getLocalizedMessage());
+        }
+        
+    }
+
+    
+    // ****  MISCELLANEOUS/UTILITY methods **** //
+    
+    private void checkWhetherLoggedIn() throws NotLoggedInException {
+        if (contest == null || internalContest == null){
+            throw new NotLoggedInException ("Not logged in");
+        }
+    }
+    
+    private boolean isYesJudgement(Judgement judgement) {
+        return Judgement.ACRONYM_ACCEPTED.equals(judgement.getAcronym()); 
+    }
+
+    /**
+     * Logoff/disconnect from the PC<sup>2</sup> Server.
      * 
      * @return true if logged off, else false.
      * @throws NotLoggedInException
@@ -438,7 +847,7 @@ public class ServerConnection {
     public boolean logoff() throws NotLoggedInException {
 
         if (contest == null) {
-            throw new NotLoggedInException("Can not log off, not logged in");
+            throw new NotLoggedInException("Cannot log off, not logged in");
         }
 
         try {
@@ -492,7 +901,7 @@ public class ServerConnection {
     }
 
     /**
-     * A Connection Event used by ServerConnection.
+     * This class defines a Connection Event used by ServerConnection.
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
@@ -510,8 +919,8 @@ public class ServerConnection {
      * 
      * If the contest clock is already started this has no effect.
      *
-     * @exception SecurityException if the user allowed to perform this action.
-     * @exception NotLoggedInException if the user is not logged in.
+     * @throws SecurityException if the user is not allowed to perform this action.
+     * @throws NotLoggedInException if the user is not logged in.
      * @throws Exception if unable to start contest.
      */
     public void startContestClock() throws Exception {
@@ -527,13 +936,13 @@ public class ServerConnection {
         }
     }
     
-    /**
-     * Client side permission check.
-     * 
-     * @param permissionType
-     * @param message
-     * @throws Exception
-     */
+//    /**
+//     * Client side permission check.
+//     * 
+//     * @param permissionType
+//     * @param message
+//     * @throws Exception
+//     */
 //    protected void allowedTo(Type permissionType, String message) throws Exception {
 //        Account account = getAccount(internalContest, internalContest.getClientId());
 //
@@ -546,12 +955,11 @@ public class ServerConnection {
     /**
      * Stop the contest clock.
      * 
-     * Stops the contest clock, no elapsed time will accrue.  No
-     * new runs will be accepted.
+     * Stops the contest clock, meaning that no further elapsed contest time will accrue.  No
+     * new runs will be accepted when the contest clock is stopped.
      * 
-     * 
-     * @exception SecurityException if the user allowed to perform this action.
-     * @exception NotLoggedInException if the user is not logged in.
+     * @throws SecurityException if the user is not allowed to perform this action.
+     * @throws NotLoggedInException if the user is not logged in.
      * @throws Exception if unable to stop contest
      */
     public void stopContestClock() throws Exception {
@@ -755,9 +1163,9 @@ public class ServerConnection {
     }
 
     /**
-     * Return value for property.
+     * Return the value for a specified property.
      * 
-     * if problemProperties is null then will return null
+     * If problemProperties is null then will return null.
      * 
      * @param problemProperties the problem Propteries
      * @param key the key to look for
@@ -858,6 +1266,13 @@ public class ServerConnection {
         return problemPropertyNames;
     }
 
+    /**
+     * Returns an indication of whether the specified name matches one of the currently-defined languages
+     * for which "auto-fill" in the PC2 Admin GUI is supported.
+     *  
+     * @param name a String giving a language name
+     * @return true if the given String matches one of the currently-defined Auto-Fill languages.
+     */
     public boolean isValidAutoFillLangauageName(String name) {
         boolean valid = false;
         for (String langName : LanguageAutoFill.getLanguageList()) {
@@ -869,8 +1284,9 @@ public class ServerConnection {
     }
 
     /**
+     * Get a list of the currently-defined "Auto-fill" languages.
      * 
-     * @return a list of language names.
+     * @return an array of Strings containing language names.
      */
     public String[] getAutoFillLanguageList() {
         return LanguageAutoFill.getLanguageList();
@@ -1006,7 +1422,7 @@ public class ServerConnection {
     
     
     /**
-     * Shutdown the server.
+     * Shutdown the PC2 server.
      * 
      * @see #shutdownAllServers()
      */
@@ -1018,7 +1434,7 @@ public class ServerConnection {
     }
     
     /**
-     * Shutdown all servers.
+     * Shutdown all servers (that is, the PC2 Servers at all connected contest sites).
      * 
      *  Will shutdown all servers connected to the current server, then
      *  shutdown the current server.
@@ -1089,6 +1505,18 @@ public class ServerConnection {
 
     }
     
+    /**
+     * Main method for testing this class.  Constructs a ServerConnection object,
+     * logs in to a PC2 Server, and uses the command arguments to manipulate the contest clock.
+     *  
+     * @param args an array of Strings containing arguments as follows:
+     * <ul>
+     *   <li>--help             display a help message and exit</li>
+     *   <li>--login acct     the account with which to login</li>
+     *   <li>--password pass  the account password</li>
+     *   <li>--stop             stop the contest clock (if absent, "start clock" is assumed)</li>
+     * </ul>
+     */
     public static void main(String[] args) {
         
         
@@ -1138,11 +1566,42 @@ public class ServerConnection {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Returns an indication of whether the specified {@link IFile} is valid or not.
+     * An IFile is considered "valid" if it is not null, has a non-null, non-zero-length name,
+     * and has more than zero bytes of data.
+     * 
+     * @param file the IFile to be checked for validity
+     * 
+     * @return true if the IFile is not null, has a file name that is not null and not empty, 
+     *          and has greater than zero data bytes; false otherwise
+     */
+    private boolean validIFile(IFile file) {
+        if (file==null || file.getFileName()==null || file.getFileName().equals("")) {
+            return false;
+        }
+        if (file.getByteData().length<=0) {
+            return false;
+        }
+        return true;
+    }
 
     private static void fatalError(String string) {
         System.err.println(string);
         System.err.println("Program Halted");
         System.exit(43);
     }
+
+//    /**
+//     * Set the Contest and Controller to be used by the MockTestRunImplementation.
+//     * This method is temporary and should only be used in support of Mock Test Run operations.
+//     * 
+//     * @param inContest the contest model used by the the MockTestRunImplementation
+//     * @param inController the controller used by the MockTestRunImplementation
+//     */
+//    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+//        mockTestRunImplementation.setContestAndController(inContest, inController);
+//    }
     
 }

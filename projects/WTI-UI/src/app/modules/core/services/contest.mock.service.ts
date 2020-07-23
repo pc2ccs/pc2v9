@@ -4,10 +4,10 @@ import { Observable, of } from 'rxjs';
 import { ContestLanguage } from '../models/contest-language';
 import { ContestProblem } from '../models/contest-problem';
 import { Clarification } from '../models/clarification';
-import { NewClarification } from '../models/new-clarification';
 
 @Injectable()
 export class ContestMockService extends IContestService {
+
   getLanguages(): Observable<ContestLanguage[]> {
     return of<ContestLanguage[]>([
       { id: '1', name: 'Java' },
@@ -77,5 +77,22 @@ export class ContestMockService extends IContestService {
   getIsContestRunning(): Observable<boolean> {
     return of<boolean>(true);
   }
+  
+  getStandings(): Observable<String> {
+  
+	//TODO: this method needs to return a legitimate (mock) team standing array!
+	var json = "{\"teamStanding\":[]\"}";
+
+    return of<String>(json) ;
+    
+  }
+
+	markStandingsOutOfDate() : void {
+		//do nothing
+	}
+	
+	getStandingsAreCurrentFlag() : boolean {
+		return true ;
+	}
 
 }

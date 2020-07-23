@@ -415,11 +415,11 @@ public class MockController implements IInternalController {
 
     }
 
-    public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
-        submitRun(problem, language, filename, otherFiles, 0, 0);
+    public void submitJudgeRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
+        submitJudgeRun(problem, language, filename, otherFiles, 0, 0);
     }
 
-    public void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
+    public void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
         
         Run submittedRun = new Run(contest.getClientId(), language, problem);
         submittedRun.setOverRideElapsedTimeMS(overrideSubmissionTimeMS);
@@ -428,6 +428,12 @@ public class MockController implements IInternalController {
         contest.acceptRun(submittedRun, runFiles);
     }
 
+    @Override
+    public void submitJudgeRun(Problem problem, Language language, SerializedFile mainFile, SerializedFile[] otherFiles, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
+        String mainFileName = mainFile.getName();
+        submitJudgeRun(problem, language, mainFileName, otherFiles, overrideSubmissionTimeMS, overrideRunId);
+    }
+    
     public void submitRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
 
     }
@@ -593,4 +599,5 @@ public class MockController implements IInternalController {
         }
         return s;
     }
+
 }

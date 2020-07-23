@@ -39,6 +39,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
@@ -486,5 +487,19 @@ public class Contest implements IContest, UIPlugin {
         return getRun(contest.getSiteNumber(), runNumber);
     }
 
+    /**
+     * This method returns the underlying {@link IInternalContest} (that is, the actual underlying contest model)
+     * which this API {@link Contest} wraps.  This method should be used with caution; ordinarily, the methods 
+     * exposed by this {@link Contest}'s {@link IContest} implementation should provide access to most of the
+     * contest data which is needed.   (An example of when use of this method might be needed is when an API
+     * client, such as a Scoreboard, needs construct a {@link DefaultScoringAlgorithm} instance and subsequently
+     * needs to invoke a method in that instance which requires receiving an {@link IInternalContest} rather than
+     * an API {@link IContest}.)
+     * 
+     * @return the underlying IInternalContest wrapped by this IContest implementation
+     */
+    public IInternalContest getInternalContest() {
+        return contest ;
+    }
     
 }

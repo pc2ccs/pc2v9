@@ -3,7 +3,7 @@ package services;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import WebsocketEnums.WebsocketType;
+import WebsocketEnums.WebsocketMsgType;
 import communication.WTIWebsocket;
 import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
@@ -42,7 +42,7 @@ public class RunsService implements IRunEventListener {
 	@Override
 	public void runJudged(IRun arg0, boolean arg1) {
 		JsonObject builder = Json.createObjectBuilder()
-				.add("type", WebsocketType.JUDGED.name().toLowerCase())
+				.add("type", WebsocketMsgType.JUDGED.name().toLowerCase())
 				.add("id", String.format("%s-%s", arg0.getSiteNumber(), arg0.getNumber()))
 				.add("teamId", this.teamId)
 				.build();

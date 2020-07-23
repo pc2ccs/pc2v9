@@ -899,7 +899,7 @@ public class Submitter {
 
         } else {
 
-            serverConnection.submitRun(problem, language, mainFileName, additionalFilenames, timeStamp, overrideRunId);
+            serverConnection.submitJudgeRun(problem, language, mainFileName, additionalFilenames, timeStamp, overrideRunId);
 
             submittedProblem = problem;
             submittedLanguage = language;
