@@ -18,6 +18,7 @@ import java.util.Arrays;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -502,41 +503,50 @@ public class InputValidationResultPane extends JPanePlugin {
                 public void actionPerformed(ActionEvent e) {
                     SwingUtilities.invokeLater(new Runnable() {
                         public void run() {
-                            JPanePlugin parent = getParentPane();
-                            if (parent instanceof InputValidatorPane) {
+                            
+                            //get the frame which holds this result pane
+                            JFrame  resultFrame = getParentFrame();
+                            if (resultFrame instanceof InputValidationResultFrame) {
 
-                                // get the results of the latest run from the parent
-                                InputValidationResult[] results = ((InputValidatorPane) parent).getRunResults();
+                                //get the pane pointed to by the frame holding this pane which holds the Input Validation results 
+                                JPanePlugin resultHolder = ((InputValidationResultFrame)resultFrame).getParentPane();
+                                
+                                if (resultHolder instanceof InputValidatorPane) {
+                                    
+                                    // get the results of the latest run from the result-holding InputValidatorPane
+                                    InputValidationResult[] results = ((InputValidatorPane) resultHolder).getRunResults();
+                                    if (results != null && results.length > 0) {
 
-                                if (results != null && results.length > 0) {
+                                        // make a copy so we don't wipe out the parent's results
+                                        InputValidationResult[] updatedResults = Arrays.copyOf(results, results.length);
 
-                                    // make a copy so we don't wipe out the parent's results
-                                    InputValidationResult[] updatedResults = Arrays.copyOf(results, results.length);
-
-                                    // if we are only going to show failed results, make a new array containing only failed results
-                                    if (getShowOnlyFailedFilesCheckbox().isSelected()) {
-                                        ArrayList<InputValidationResult> failedResultsList = new ArrayList<InputValidationResult>();
-                                        for (int i = 0; i < updatedResults.length; i++) {
-                                            if (!updatedResults[i].isPassed()) {
-                                                failedResultsList.add(updatedResults[i]);
+                                        // if we are only going to show failed results, make a new array containing only failed results
+                                        if (getShowOnlyFailedFilesCheckbox().isSelected()) {
+                                            ArrayList<InputValidationResult> failedResultsList = new ArrayList<InputValidationResult>();
+                                            for (int i = 0; i < updatedResults.length; i++) {
+                                                if (!updatedResults[i].isPassed()) {
+                                                    failedResultsList.add(updatedResults[i]);
+                                                }
+                                            }
+                                            updatedResults = new InputValidationResult[failedResultsList.size()];
+                                            for (int i = 0; i < updatedResults.length; i++) {
+                                                updatedResults[i] = failedResultsList.get(i);
                                             }
                                         }
-                                        updatedResults = new InputValidationResult[failedResultsList.size()];
-                                        for (int i = 0; i < updatedResults.length; i++) {
-                                            updatedResults[i] = failedResultsList.get(i);
-                                        }
-                                    }
 
-                                    // put the updated results in the table model and redraw the table
-                                    ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).setResults(updatedResults);
-                                    ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).fireTableDataChanged();
+                                        // put the updated results in the table model and redraw the table
+                                        ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).setResults(updatedResults);
+                                        ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).fireTableDataChanged();
 
+                                    } else {
+                                        getController().getLog().info("ShowOnlyFailedFiles checkbox selected but found no run results to display");
+                                    } 
                                 } else {
-                                    getController().getLog().info("ShowOnlyFailedFiles checkbox selected but found no run results to display");
+                                    getController().getLog().warning("InputValidationResultFrame does not link to an InputValidatorPane; cannot fetch Input Validation results");
                                 }
 
                             } else {
-                                getController().getLog().warning("InputValidationResultPane parent not an InputValidatorPane; cannot obtain results to update table");
+                                getController().getLog().warning("InputValidationResultPane parent not an InputValidationResultFrame; cannot obtain results to update table");
                             }
                         }
                     });

@@ -15,6 +15,10 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * This class displays a frame holding the results of running an Input Validator on the problem data files.
+ * The result data displayed by this pane (actually, by the {@link InputValidationResultPane} contained
+ * within this frame) is fetched from the "parent pane" of this frame -- meaning that it is the responsibility
+ * of the class which instantiates this frame to call this frame's {@link #setParentPane()} method to set the
+ * reference back to the parent pane holding the Input Validation Results.
  * 
  * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
  */
@@ -31,6 +35,8 @@ public class InputValidationResultFrame extends JFrame implements UIPlugin {
     private JPanel buttonPanel;
 
     private JButton closeButton;
+    
+    private JPanePlugin parentPane;
 
     /**
      * This method initializes
@@ -55,12 +61,12 @@ public class InputValidationResultFrame extends JFrame implements UIPlugin {
         FrameUtilities.centerFrame(this);
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 
         getInputValidationResultPane().setContestAndController(contest, controller);
-        resultsPane.setParentFrame(this);
 
     }
 
@@ -76,6 +82,7 @@ public class InputValidationResultFrame extends JFrame implements UIPlugin {
     public InputValidationResultPane getInputValidationResultPane() {
         if (resultsPane == null) {
             resultsPane = new InputValidationResultPane();
+            resultsPane.setParentFrame(this);
         }
         return resultsPane;
     }
@@ -99,6 +106,27 @@ public class InputValidationResultFrame extends JFrame implements UIPlugin {
         }
         return closeButton;
     }
+    
+    /**
+     * Returns the pane which is the parent of this frame -- typically, an {@link InputValidatorPane} which 
+     * created this InputValidationResultFrame and which holds the results of executing an Input Validator.
+     * 
+     * @return the parent pane of this frame.
+     */
+    public JPanePlugin getParentPane() {
+        return parentPane;
+    }
+    
+    /**
+     * Sets the reference to the parent pane of this frame -- that is, a reference to the pane which
+     * created this frame and which holds the Input Validation results to be displayed by this frame.
+     * 
+     * @param parentPane a JPanePlugin containing the Input Validation results to be displayed by this frame.
+     */
+    public void setParentPane(JPanePlugin parentPane) {
+        this.parentPane = parentPane;
+    }
+    
     //main() method for testing only
     public static void main (String [] args) {
         InputValidationResultFrame frame = new InputValidationResultFrame();

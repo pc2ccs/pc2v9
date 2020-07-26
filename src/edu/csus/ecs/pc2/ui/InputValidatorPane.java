@@ -36,8 +36,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteException;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -115,6 +117,7 @@ public class InputValidatorPane extends JPanePlugin {
         getValidatorChoiceButtonGroup().setSelected(getNoInputValidatorRadioButton().getModel(), true);
         
         resultFrame = new InputValidationResultFrame();
+        resultFrame.setParentPane(this);
     }
     
     private ButtonGroup getValidatorChoiceButtonGroup() {
@@ -1071,5 +1074,11 @@ public class InputValidatorPane extends JPanePlugin {
         	rigidArea_4 = Box.createRigidArea(new Dimension(20, 20));
         }
         return rigidArea_4;
+    }
+    
+    @Override
+    public void setContestAndController(IInternalContest contest, IInternalController controller) {
+        super.setContestAndController(contest, controller);
+        resultFrame.setContestAndController(contest, controller);
     }
 }
