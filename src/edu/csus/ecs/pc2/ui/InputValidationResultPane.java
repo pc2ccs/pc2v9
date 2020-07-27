@@ -232,118 +232,126 @@ public class InputValidationResultPane extends JPanePlugin {
 
         // get the execution directory being used by the EditProblemPane
         String executeDir;
-        JPanePlugin parent = getParentPane();
-        if (parent instanceof InputValidatorPane) {
+        JFrame parentFrame = getParentFrame();
+        if (parentFrame instanceof InputValidationResultFrame) {
 
-            JPanePlugin grandParent = ((InputValidatorPane) parent).getParentPane();
-            if (grandParent instanceof EditProblemPane) {
+            JPanePlugin grandParent = ((InputValidationResultFrame) parentFrame).getParentPane();
+            
+            if (grandParent instanceof InputValidatorPane) {
+                
+                JPanePlugin greatGrandParent = ((InputValidatorPane) grandParent).getParentPane();
+                
+                if (greatGrandParent instanceof EditProblemPane) {
 
-                JPanePlugin epp = grandParent;
-                executeDir = ((EditProblemPane) epp).getExecuteDirectoryName();
+                    JPanePlugin epp = greatGrandParent;
+                    executeDir = ((EditProblemPane) epp).getExecuteDirectoryName();
 
-                Utilities.insureDir(executeDir);
-                MultipleFileViewer viewer = new MultipleFileViewer(getController().getLog(), "Input Validation Results " + "(row " + (row + 1) + ")");
-                String title;
+                    Utilities.insureDir(executeDir);
+                    MultipleFileViewer viewer = new MultipleFileViewer(getController().getLog(), "Input Validation Results " + "(row " + (row + 1) + ")");
+                    String title;
 
-                boolean outputPaneAdded = false;
+                    boolean outputPaneAdded = false;
 
-                if (stdErrFile != null) {
-                    // display the stderr file in a viewer pane
-                    String stdErrFileName = executeDir + File.separator + stdErrFile.getName();
-                    try {
-                        // write the stderr file to the execute directory
-                        stdErrFile.writeFile(stdErrFileName);
+                    if (stdErrFile != null) {
+                        // display the stderr file in a viewer pane
+                        String stdErrFileName = executeDir + File.separator + stdErrFile.getName();
+                        try {
+                            // write the stderr file to the execute directory
+                            stdErrFile.writeFile(stdErrFileName);
 
-                        // add the stderr file to the viewer frame
-                        if (new File(stdErrFileName).isFile()) {
-                            title = stdErrFile.getName();
-                            viewer.addFilePane(title, stdErrFileName);
-                        } else {
-                            title = "Error accessing file";
-                            viewer.addTextPane(title, "Could not access file ' " + stdErrFile.getName() + " '");
+                            // add the stderr file to the viewer frame
+                            if (new File(stdErrFileName).isFile()) {
+                                title = stdErrFile.getName();
+                                viewer.addFilePane(title, stdErrFileName);
+                            } else {
+                                title = "Error accessing file";
+                                viewer.addTextPane(title, "Could not access file ' " + stdErrFile.getName() + " '");
+                            }
+                        } catch (IOException e) {
+                            title = "Error during file access";
+                            viewer.addTextPane(title, "Could not create file " + stdErrFileName + "Exception " + e.getMessage());
                         }
-                    } catch (IOException e) {
-                        title = "Error during file access";
-                        viewer.addTextPane(title, "Could not create file " + stdErrFileName + "Exception " + e.getMessage());
+                        outputPaneAdded = true;
                     }
-                    outputPaneAdded = true;
-                }
 
-                if (stdOutFile != null) {
-                    // display the stdout file in a viewer pane
-                    String stdOutFileName = executeDir + File.separator + stdOutFile.getName();
-                    try {
-                        // write the stdout file to the execute directory
-                        stdOutFile.writeFile(stdOutFileName);
+                    if (stdOutFile != null) {
+                        // display the stdout file in a viewer pane
+                        String stdOutFileName = executeDir + File.separator + stdOutFile.getName();
+                        try {
+                            // write the stdout file to the execute directory
+                            stdOutFile.writeFile(stdOutFileName);
 
-                        // add the stdout file to the viewer frame
-                        if (new File(stdOutFileName).isFile()) {
-                            title = stdOutFile.getName();
-                            viewer.addFilePane(title, stdOutFileName);
-                        } else {
-                            title = "Error accessing file";
-                            viewer.addTextPane(title, "Could not access file ' " + stdOutFile.getName() + " '");
+                            // add the stdout file to the viewer frame
+                            if (new File(stdOutFileName).isFile()) {
+                                title = stdOutFile.getName();
+                                viewer.addFilePane(title, stdOutFileName);
+                            } else {
+                                title = "Error accessing file";
+                                viewer.addTextPane(title, "Could not access file ' " + stdOutFile.getName() + " '");
+                            }
+                        } catch (IOException e) {
+                            title = "Error during file access";
+                            viewer.addTextPane(title, "Could not create file " + stdOutFileName + "Exception " + e.getMessage());
                         }
-                    } catch (IOException e) {
-                        title = "Error during file access";
-                        viewer.addTextPane(title, "Could not create file " + stdOutFileName + "Exception " + e.getMessage());
+                        outputPaneAdded = true;
                     }
-                    outputPaneAdded = true;
-                }
 
-                if (dataFile != null) {
-                    // display the data file in a viewer pane
-                    String dataFileName = executeDir + File.separator + dataFile.getName();
-                    try {
-                        // write the data file to the execute directory
-                        dataFile.writeFile(dataFileName);
+                    if (dataFile != null) {
+                        // display the data file in a viewer pane
+                        String dataFileName = executeDir + File.separator + dataFile.getName();
+                        try {
+                            // write the data file to the execute directory
+                            dataFile.writeFile(dataFileName);
 
-                        // add the data file to the viewer frame
-                        if (new File(dataFileName).isFile()) {
-                            title = dataFile.getName();
-                            viewer.addFilePane(title, dataFileName);
-                        } else {
-                            title = "Error accessing file";
-                            viewer.addTextPane(title, "Could not access file ' " + dataFile.getName() + " '");
+                            // add the data file to the viewer frame
+                            if (new File(dataFileName).isFile()) {
+                                title = dataFile.getName();
+                                viewer.addFilePane(title, dataFileName);
+                            } else {
+                                title = "Error accessing file";
+                                viewer.addTextPane(title, "Could not access file ' " + dataFile.getName() + " '");
+                            }
+                        } catch (IOException e) {
+                            title = "Error during file access";
+                            viewer.addTextPane(title, "Could not create file " + dataFileName + "Exception " + e.getMessage());
                         }
-                    } catch (IOException e) {
-                        title = "Error during file access";
-                        viewer.addTextPane(title, "Could not create file " + dataFileName + "Exception " + e.getMessage());
+                        outputPaneAdded = true;
                     }
-                    outputPaneAdded = true;
-                }
 
-                // check if we actually added anything
-                if (outputPaneAdded) {
+                    // check if we actually added anything
+                    if (outputPaneAdded) {
 
-                    // yes we added something; decide which tab should be active
-                    int activeTab = 0;
-                    if (selectedColumn == COLUMN.FILE_NAME.ordinal()) {
-                        activeTab = 0;
-                    } else {
-                        if (selectedColumn == COLUMN.VALIDATOR_OUTPUT.ordinal()) {
-                            activeTab = 1;
+                        // yes we added something; decide which tab should be active
+                        int activeTab = 0;
+                        if (selectedColumn == COLUMN.FILE_NAME.ordinal()) {
+                            activeTab = 0;
                         } else {
-                            if (selectedColumn == COLUMN.VALIDATOR_ERR.ordinal()) {
-                                activeTab = 2;
+                            if (selectedColumn == COLUMN.VALIDATOR_OUTPUT.ordinal()) {
+                                activeTab = 1;
+                            } else {
+                                if (selectedColumn == COLUMN.VALIDATOR_ERR.ordinal()) {
+                                    activeTab = 2;
+                                }
                             }
                         }
-                    }
-                    viewer.setSelectedIndex(activeTab);
+                        viewer.setSelectedIndex(activeTab);
 
-                    // show the viewer containing the files
-                    viewer.setVisible(true);
+                        // show the viewer containing the files
+                        viewer.setVisible(true);
+
+                    } else {
+                        getController().getLog().warning("Found no Input Validation Result files to add to MultiFileViewer");
+                        System.err.println("Request to display results files but found no Input Validation Result files to add to MultiFileViewer");
+                    }
 
                 } else {
-                    getController().getLog().warning("Found no Input Validation Result files to add to MultiFileViewer");
-                    System.err.println("Request to display results files but found no Input Validation Result files to add to MultiFileViewer");
-                }
-
+                    getController().getLog().severe("GreatGrandParent of InputValidationResultPane is not an EditProblemPane; not supported");
+                } 
             } else {
-                getController().getLog().severe("Grandparent of InputValidationResultPane is not an EditProblemPane; not supported");
+                getController().getLog().severe("Grandparent of InputValidationResultPane is not an InputValidatorPane; not supported");
             }
         } else {
-            getController().getLog().severe("Parent of InputValidationResultPane is not an InputValidatorPane; not supported");
+            getController().getLog().severe("Parent of InputValidationResultPane is not an InputValidationResultFrame; not supported");
         }
     }
 
