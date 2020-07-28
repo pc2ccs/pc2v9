@@ -149,7 +149,7 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
                 break;
             case 5:
                 //"Input Validator" column
-                if (prob.isProblemHasInputValidator() && prob.getInputValidatorProgramName() != null) {
+                if (prob.isProblemHasCustomInputValidator() && prob.getInputValidatorProgramName() != null) {
                     obj = getBaseName(prob.getInputValidatorProgramName());
                 } else {
                     obj = "<none>";
@@ -157,8 +157,8 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
                 break;
             case 6: 
                 //"I.V. Command" column
-                if (prob.isProblemHasInputValidator() && prob.getInputValidatorCommandLine() != null) {
-                    obj = getBaseName(prob.getInputValidatorCommandLine());
+                if (prob.isProblemHasCustomInputValidator() && prob.getCustomInputValidatorCommandLine() != null) {
+                    obj = getBaseName(prob.getCustomInputValidatorCommandLine());
                 } else {
                     obj = "<none>";
                 }

@@ -872,25 +872,36 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
 
-                    // check for changes in Input Validator settings
+                    // check for changes in Custom Input Validator settings
                     if (!problem.getInputValidatorProgramName().equals(changedProblem.getInputValidatorProgramName())) {
                         enableButton = true;
                         if (updateToolTip.equals("")) {
-                            updateToolTip = "Input Validator";
+                            updateToolTip = "Custom Input Validator";
                         } else {
-                            updateToolTip += ", Input Validator";
+                            updateToolTip += ", Custom Input Validator";
                         }
                     }
 
-                    if (!problem.getInputValidatorCommandLine().equals(changedProblem.getInputValidatorCommandLine())) {
+                    if (!problem.getCustomInputValidatorCommandLine().equals(changedProblem.getCustomInputValidatorCommandLine())) {
                         enableButton = true;
                         if (updateToolTip.equals("")) {
-                            updateToolTip = "Input Validator Command";
+                            updateToolTip = "Custom Input Validator Command";
                         } else {
-                            updateToolTip += ", Input Validator Command";
+                            updateToolTip += ", Custom Input Validator Command";
                         }
                     }
-
+                    
+                    //check for changes in Viva Input Validator pattern
+                    if (!Arrays.equals(problem.getVivaInputValidatorPattern(),changedProblem.getVivaInputValidatorPattern())) {
+                        enableButton = true;
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Viva Input Validator pattern";
+                        } else {
+                            updateToolTip += ", Viva Input Validator pattern";
+                        }
+                    }
+                   
+                    //check for changes in the status of running an Input Validator
                     if (!(problem.getInputValidationStatus() == this.getInputValidationStatus())) {
                         enableButton = true;
                         if (updateToolTip.equals("")) {
@@ -1243,14 +1254,14 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
 
-        // update Input Validator Program settings from GUI
-        // start with a default assumption of no Input Validator
-        checkProblem.setProblemHasInputValidator(false);
+        // update Custom Input Validator Program settings from GUI
+        // start with a default assumption of no Custom Input Validator
+        checkProblem.setProblemHasCustomInputValidator(false);
         checkProblem.setInputValidatorProgramName("");
         checkProblem.setInputValidatorCommandLine("");
 
         /**
-         * The input validator serialized file from the inputvalidatorpane
+         * The custom input validator serialized file from the inputvalidatorpane
          */
         SerializedFile inputValidatorSF = getInputValidatorPane().getInputValidatorFile();
         if (inputValidatorSF != null) {
@@ -1259,13 +1270,13 @@ public class EditProblemPane extends JPanePlugin {
             newProblemDataFiles.setInputValidatorFile(inputValidatorSF);
 
             // mark the problem as having an input validator
-            checkProblem.setProblemHasInputValidator(true);
+            checkProblem.setProblemHasCustomInputValidator(true);
         } else {
             checkProblem.setInputValidatorProgramName(null);
             newProblemDataFiles.setInputValidatorFile(null);
 
             // mark the problem as having an input validator
-            checkProblem.setProblemHasInputValidator(false);
+            checkProblem.setProblemHasCustomInputValidator(false);
         }
 
         // update Input Validator Command from GUI
@@ -1274,9 +1285,13 @@ public class EditProblemPane extends JPanePlugin {
         String inputValCommand = getInputValidatorPane().getCustomInputValidatorCommand();
         if (inputValCommand != null && !inputValCommand.equals("")) {
             checkProblem.setInputValidatorCommandLine(inputValCommand);
-            checkProblem.setProblemHasInputValidator(true);
+            checkProblem.setProblemHasCustomInputValidator(true);
         }
 
+        //update the VIVA Input Validator pattern
+        String [] pattern = getInputValidatorPane().getVivaPatternTextArea().getText().split("\\r?\\n");
+        checkProblem.setVivaInputValidatorPattern(pattern);
+        
         // Status of running an Input Validator
         checkProblem.setInputValidationStatus(this.getInputValidationStatus());
 
@@ -2483,27 +2498,28 @@ public class EditProblemPane extends JPanePlugin {
         // fill in the input validator program name
         String inputValidatorProg = prob.getInputValidatorProgramName();
         if (inputValidatorProg != null) {
-            getInputValidatorPane().getCustomOptionsSubPanel().setInputValidatorProgramName(inputValidatorProg);
+            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramName(inputValidatorProg);
         } else {
-            getInputValidatorPane().getCustomOptionsSubPanel().setInputValidatorFile(null);
-            getInputValidatorPane().getCustomOptionsSubPanel().setInputValidatorProgramName("");
-            getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
+            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorFile(null);
+            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramName("");
+            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramNameToolTipText(null);
         }
 
         // update the tooltip to reflect the name in the text field
         if (getInputValidatorPane().getInputValidatorFile() == null) {
             // set the tooltip as null (otherwise we get a little sliver of a empty-string tooltip)
-            getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
+            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramNameToolTipText(null);
         } else {
-            getInputValidatorPane().setInputValidatorProgramNameToolTipText(getInputValidatorPane().getInputValidatorFile().getAbsolutePath());
+            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramNameToolTipText(
+                    getInputValidatorPane().getInputValidatorFile().getAbsolutePath());
         }
 
         // fill in the input validator command
-        String inputValidatorCmd = prob.getInputValidatorCommandLine();
+        String inputValidatorCmd = prob.getCustomInputValidatorCommandLine();
         if (inputValidatorCmd != null) {
-            getInputValidatorPane().setInputValidatorCommand(inputValidatorCmd);
+            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorCommand(inputValidatorCmd);
         } else {
-            getInputValidatorPane().setInputValidatorCommand("");
+            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorCommand("");
         }
 
         // update the tooltip to reflect the name in the command text field
@@ -2606,7 +2622,7 @@ public class EditProblemPane extends JPanePlugin {
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
-            mainTabbedPane.setPreferredSize(new Dimension(800, 800));
+            mainTabbedPane.setPreferredSize(new Dimension(900, 800));
             mainTabbedPane.insertTab("Groups", null, getProblemGroupPane(), null, 0);
             mainTabbedPane.insertTab("Input Validator", null, getInputValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Test Data Files", null, getMultipleDataSetPane(), null, 0);
@@ -3974,10 +3990,10 @@ public class EditProblemPane extends JPanePlugin {
 
     private void initializeInputValidatorTabFields() {
 
-        getInputValidatorPane().getCustomOptionsSubPanel().setInputValidatorProgramName("");
-        getInputValidatorPane().setInputValidatorProgramNameToolTipText(null);
+        getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramName("");
+        getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramNameToolTipText(null);
         getInputValidatorPane().setInputValidatorFile(null);
-        getInputValidatorPane().setInputValidatorCommand("");
+        getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorCommand("");
         getInputValidatorPane().setInputValidatorCommandToolTipText(null);
 
         getInputValidatorPane().setInputValidationSummaryMessageText("<No Input Validation test run yet>");

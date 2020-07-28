@@ -5,11 +5,17 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -20,6 +26,8 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -33,12 +41,14 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteException;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
@@ -46,11 +56,6 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
 import edu.csus.ecs.pc2.validator.inputValidator.InputValidatorRunner;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.RenderingHints;
 
 /**
  * This class defines a plugin pane (a JPanel) containing components for (1) defining an Input Validator program name and Invocation Command, and (2) Viewing the results of an input validator
@@ -75,7 +80,7 @@ public class InputValidatorPane extends JPanePlugin {
     protected InputValidationResultFrame resultFrame;
     
     private JButton runInputValidatorButton;
-    private JPanel runInputValidatorButtonPane;
+    private JPanel showInputValidatorResultButtonPane;
     private ButtonGroup validatorChoiceButtonGroup;
     private JPanel noInputValidatorPanel;
     private JRadioButton noInputValidatorRadioButton;
@@ -91,16 +96,24 @@ public class InputValidatorPane extends JPanePlugin {
     private JPanel customInputValidatorPanel;
     private JPanel customOptionButtonPanel;
     private JRadioButton useCustomInputValidatorRadioButton;
-    private DefineCustomInputValidatorPane customOptionsPanel;
-
+    private JPanel customOptionsPanel;
+    private JButton runVivaButton;
+    private JPanel vivaOptionsButtonPanel;
+    private JPanel customInputValidatorOptionsButtonPanel;
+    private JButton chooseCustomInputValidatorProgramButton;
+    private JButton runCustomInputValidatorButton;
+    private DefineCustomInputValidatorPane customInputValidatorProgramPanel;
+    
+    private String lastDirectory;   //last directory where we searched for files.
 
 
 
     public InputValidatorPane() {
-        setPreferredSize(new Dimension(700, 600));
-        setMaximumSize(new Dimension(500, 400));
+        setPreferredSize(new Dimension(800, 600));
+        setMaximumSize(new Dimension(800, 400));
         this.setAlignmentX(Component.LEFT_ALIGNMENT);
         this.setAlignmentY(Component.TOP_ALIGNMENT);
+//        this.setBorder (new LineBorder(Color.RED,1));
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         
         this.add(getVerticalStrut_1());
@@ -109,9 +122,9 @@ public class InputValidatorPane extends JPanePlugin {
         this.add(getVivaInputValidatorPanel());
         this.add(getVerticalStrut_3());
         this.add(getCustomInputValidatorPanel());
-        add(getRigidArea());
+        this.add(getRigidArea());
         this.add(getVerticalStrut_4());
-        this.add(getRunInputValidatorButtonPanel());
+        this.add(getShowInputValidatorResultButtonPanel());
         this.add(getVerticalStrut_5());
         
         getValidatorChoiceButtonGroup().setSelected(getNoInputValidatorRadioButton().getModel(), true);
@@ -135,7 +148,7 @@ public class InputValidatorPane extends JPanePlugin {
         if (noInputValidatorPanel == null) {
             noInputValidatorPanel = new JPanel();
             noInputValidatorPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            noInputValidatorPanel.setBorder(null);
+//            noInputValidatorPanel.setBorder(new LineBorder(Color.magenta,1));
             noInputValidatorPanel.setMaximumSize(new Dimension(500,100));
             FlowLayout flowLayout = (FlowLayout) noInputValidatorPanel.getLayout();
             flowLayout.setHgap(10);
@@ -168,11 +181,12 @@ public class InputValidatorPane extends JPanePlugin {
             vivaInputValidatorPanel.setMinimumSize(new Dimension(400, 200));
             vivaInputValidatorPanel.setPreferredSize(new Dimension(500, 500));
             vivaInputValidatorPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+//            vivaInputValidatorPanel.setBorder(new LineBorder(Color.green,1));
             
             vivaInputValidatorPanel.setLayout(new BorderLayout(0, 0));
             vivaInputValidatorPanel.add(getVivaOptionRadioButtonPanel(), BorderLayout.NORTH);
             vivaInputValidatorPanel.add(getRigidArea_1(), BorderLayout.WEST);
-            vivaInputValidatorPanel.add(getVivaOptionsSubPanel());
+            vivaInputValidatorPanel.add(getVivaOptionsSubPanel(), BorderLayout.CENTER);
         }
         return vivaInputValidatorPanel;
         
@@ -251,11 +265,11 @@ public class InputValidatorPane extends JPanePlugin {
             + "\n\nFor more information on VIVA patterns, see the VIVA User's Guide under the PC^2 \"docs\" folder."
             + "\nFor additional information, or to download a copy of VIVA, see the VIVA website at http://viva.vanb.org/.";
 
-    
+
     private JPanel getVivaOptionsSubPanel() {
         if (vivaOptionsPanel == null) {
             vivaOptionsPanel = new JPanel();
-            vivaOptionsPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Viva Options", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+            vivaOptionsPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Viva Options", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(255, 0, 0)));
             vivaOptionsPanel.setMinimumSize(new Dimension(20, 200));
             vivaOptionsPanel.setPreferredSize(new Dimension(200, 200));
             vivaOptionsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
@@ -266,7 +280,7 @@ public class InputValidatorPane extends JPanePlugin {
             vivaOptionsPanel.add(getVivaPatternLabel());
             vivaOptionsPanel.add(getVivaPatternTextScrollPane());
             vivaOptionsPanel.add(getRigidArea_4());
-            vivaOptionsPanel.add(getLoadVivaPatternButton());
+            vivaOptionsPanel.add(getVivaOptionsButtonPanel());
         }
         return vivaOptionsPanel;
         
@@ -281,27 +295,85 @@ public class InputValidatorPane extends JPanePlugin {
         }
         return vivaPatternLabel;
     }
+    
+    private JPanel getVivaOptionsButtonPanel() {
+        if (vivaOptionsButtonPanel==null) {
+            vivaOptionsButtonPanel = new JPanel();
+            vivaOptionsButtonPanel.setLayout(new BoxLayout(vivaOptionsButtonPanel,BoxLayout.Y_AXIS));
+            vivaOptionsButtonPanel.add(getLoadVivaPatternButton());
+            vivaOptionsButtonPanel.add(getRigidArea_5());
+            vivaOptionsButtonPanel.add(getRunVivaButton());
+    }
+        return vivaOptionsButtonPanel;
+    }
+    
     private JButton getLoadVivaPatternButton() {
         if (loadVivaPatternButton == null) {
             loadVivaPatternButton = new JButton("Load Pattern...");
+            loadVivaPatternButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (selectFile(getLoadVivaPatternButton(), "Choose VIVA pattern file")) {
+                        String selectedFile = getLoadVivaPatternButton().getToolTipText();
+                        String [] lines = null;
+                        try {
+                            lines = Utilities.loadFile(selectedFile);
+                            getVivaPatternTextArea().setText(null); //clear old text
+                            //add each line of new text
+                            for (String line : lines) {
+                                getVivaPatternTextArea().append(line + System.lineSeparator());
+                            }
+                            
+                            //pattern updated; enable Edit Problem "Update" button
+                            ((EditProblemPane)getParentPane()).enableUpdateButton();
+                            
+                        } catch (IOException e1) {
+                            getController().getLog().warning("IOException reading file '" + selectedFile + "': " + e1);
+                            JOptionPane.showConfirmDialog(null, "IOException reading file '"+selectedFile+"': "+e1, "Error Reading File", JOptionPane.OK_OPTION, JOptionPane.WARNING_MESSAGE);
+                        } catch (ClassCastException e2) {
+                            getController().getLog().severe("Parent of InputValidatorPane is not an EditProblemPane; not supported: " + e2); 
+                            JOptionPane.showMessageDialog(null, "Internal error; see logs and please report this to the PC2 Development team (pc2@ecs.csus.edu)",
+                                                    "Internal Error", JOptionPane.ERROR_MESSAGE); 
+                        }
+                        
+                    }
+                }
+            });
         }
         return loadVivaPatternButton;
     }
+
+    private JButton getRunVivaButton() {
+        if (runVivaButton == null) {
+            runVivaButton = new JButton("Run VIVA");
+            runVivaButton.setEnabled(false);
+            runVivaButton.addActionListener(new ActionListener() {
+                
+                public void actionPerformed(ActionEvent e) {
+                    runVivaInputValidator();
+                    getShowLastResultButton().setEnabled(true);
+                  JOptionPane.showMessageDialog(null, "Run VIVA not (yet) implemented", "Not Implemented", JOptionPane.INFORMATION_MESSAGE); 
+                }
+            });
+        }
+        return runVivaButton;
+    }
+
     private JScrollPane getVivaPatternTextScrollPane () {
         if (vivaPatternTextScrollPane==null) {
             vivaPatternTextScrollPane = new JScrollPane(getVivaPatternTextArea());
-            vivaPatternTextScrollPane.setPreferredSize(new Dimension(400, 200));
+            vivaPatternTextScrollPane.setPreferredSize(new Dimension(350, 150));
             vivaPatternTextScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             vivaPatternTextScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+            vivaPatternTextScrollPane.setViewportBorder(new LineBorder(Color.BLUE,1));
         }
         return vivaPatternTextScrollPane;
     }
     
     public JTextArea getVivaPatternTextArea() {
         if (vivaPatternTextArea == null) {
-            vivaPatternTextArea = new JTextArea(50,80);
-            vivaPatternTextArea.setMaximumSize(new Dimension(1000, 1000));
-            vivaPatternTextArea.setPreferredSize(new Dimension(500, 400));
+            vivaPatternTextArea = new JTextArea(8,30);
+//            vivaPatternTextArea.setMaximumSize(new Dimension(1000, 1000));
+//            vivaPatternTextArea.setPreferredSize(new Dimension(500, 400));
 //            textArea.setPreferredSize(new Dimension(400, 100));
         }
         return vivaPatternTextArea;
@@ -310,14 +382,18 @@ public class InputValidatorPane extends JPanePlugin {
     private JPanel getCustomInputValidatorPanel() {
         if (customInputValidatorPanel == null) {
             customInputValidatorPanel = new JPanel();
+            
+            customInputValidatorPanel.setMaximumSize(new Dimension(750, 600));
+            customInputValidatorPanel.setMinimumSize(new Dimension(750, 200));
+            customInputValidatorPanel.setPreferredSize(new Dimension(750, 500));
             customInputValidatorPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+//            customInputValidatorPanel.setBorder(new LineBorder(Color.CYAN,1));
 
-            customInputValidatorPanel.setLayout(new BorderLayout(0, 0));  //0,0 = hgap,vgap
-            customInputValidatorPanel.setMaximumSize(new Dimension(500, 200));    
+            customInputValidatorPanel.setLayout(new BorderLayout(0, 0));  //0,0 = hgap,vgap   
             
             customInputValidatorPanel.add(getCustomOptionRadioButtonPanel(),BorderLayout.NORTH);
             customInputValidatorPanel.add(getRigidArea_3(),BorderLayout.WEST);
-            customInputValidatorPanel.add(getCustomOptionsSubPanel());
+            customInputValidatorPanel.add(getCustomOptionsSubPanel(),BorderLayout.CENTER);
         }
         return customInputValidatorPanel;
 
@@ -351,25 +427,79 @@ public class InputValidatorPane extends JPanePlugin {
         }
         return useCustomInputValidatorRadioButton ;
     }
-
-    protected DefineCustomInputValidatorPane getCustomOptionsSubPanel() {
+    
+    protected JPanel getCustomOptionsSubPanel() {
         if (customOptionsPanel == null) {
-            customOptionsPanel = new DefineCustomInputValidatorPane();
-            customOptionsPanel.setBorder(new TitledBorder(null, "Custom Validator Options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            getCustomOptionsSubPanel().setParentPane(this);
-            customOptionsPanel.setMinimumSize(new Dimension(20, 200));
+            customOptionsPanel = new JPanel();
+            
+            customOptionsPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Custom Validator Options", 
+                                                            TitledBorder.LEADING, TitledBorder.TOP, null, new Color(255, 0, 0)));
+
+            customOptionsPanel.setMinimumSize(new Dimension(500, 200));
+            customOptionsPanel.setPreferredSize(new Dimension(500, 200));
+            customOptionsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
+            customOptionsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            
+            FlowLayout flowLayout = (FlowLayout) customOptionsPanel.getLayout();
+            flowLayout.setAlignment(FlowLayout.LEFT);
+            customOptionsPanel.add(getRigidArea_6());
+            customOptionsPanel.add(getCustomInputValidatorProgramPanel());
+            customOptionsPanel.add(getRigidArea_7());
+            customOptionsPanel.add(getCustomInputValidatorOptionsButtonPanel());
         }
         return customOptionsPanel;
     }
-    
-    
-    /**
+        
+    public DefineCustomInputValidatorPane getCustomInputValidatorProgramPanel() {
+        if (customInputValidatorProgramPanel==null) {
+            customInputValidatorProgramPanel = new DefineCustomInputValidatorPane();
+        }
+        return customInputValidatorProgramPanel;
+    }
+
+    private JPanel getCustomInputValidatorOptionsButtonPanel() {
+        if (customInputValidatorOptionsButtonPanel==null) {
+            customInputValidatorOptionsButtonPanel = new JPanel();
+//            customInputValidatorOptionsButtonPanel.setBorder(new LineBorder(Color.BLUE, 1));
+            customInputValidatorOptionsButtonPanel.setLayout(new BoxLayout(customInputValidatorOptionsButtonPanel,BoxLayout.Y_AXIS));
+            customInputValidatorOptionsButtonPanel.add(getChooseCustomInputValidatorProgramButton());
+            customInputValidatorOptionsButtonPanel.add(getRigidArea_8());
+            customInputValidatorOptionsButtonPanel.add(getRunCustomInputValidatorButton());
+        }
+        return customInputValidatorOptionsButtonPanel;
+    }
+
+    private JButton getChooseCustomInputValidatorProgramButton() {
+        if (chooseCustomInputValidatorProgramButton==null) {
+            chooseCustomInputValidatorProgramButton = new JButton("Choose Program...");
+            chooseCustomInputValidatorProgramButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    JOptionPane.showMessageDialog(null, "Not (yet) implemented", "Not Implemented", JOptionPane.INFORMATION_MESSAGE);
+                }
+            });
+        }
+        return chooseCustomInputValidatorProgramButton;
+    }
+
+    private JButton getRunCustomInputValidatorButton() {
+        if (runCustomInputValidatorButton==null) {
+            runCustomInputValidatorButton = new JButton("Run Custom Input Validator");
+            runCustomInputValidatorButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    JOptionPane.showMessageDialog(null, "Not (yet) implemented", "Not Implemented", JOptionPane.INFORMATION_MESSAGE);
+                }
+            });
+        }
+        return runCustomInputValidatorButton;
+    }
+
+   /**
      * Returns the Custom Input Validator Command currently entered into the CustomInputValidatorPane.
      * 
      * @return a String containing the command to be used to invoke a Custom Input Validator
      */
     public String getCustomInputValidatorCommand() {
-        String command = getCustomOptionsSubPanel().getInputValidatorCommand();
+        String command = getCustomInputValidatorProgramPanel().getInputValidatorCommand();
         return command;
     }
 
@@ -388,27 +518,27 @@ public class InputValidatorPane extends JPanePlugin {
         return this.parentPane;
     }
 
-    /**
-     * Sets the ToolTip text for the Custom Input Validator Program Name displayed in this InputValidatorPane.
-     * 
-     * @param text
-     *            the ToolTip text to set
-     */
-    public void setInputValidatorProgramNameToolTipText(String text) {
-        getCustomOptionsSubPanel().setInputValidatorProgramNameToolTipText(text);
-
-    }
-
-    /**
-     * Sets the Custom Input Validator Command displayed in this InputValidatorPane to the specified value.
-     * 
-     * @param command
-     *            a String containing the command used to invoke the Custom Input Validator
-     */
-    public void setInputValidatorCommand(String command) {
-        getCustomOptionsSubPanel().setInputValidatorCommand(command);
-
-    }
+//    /**
+//     * Sets the ToolTip text for the Custom Input Validator Program Name displayed in this InputValidatorPane.
+//     * 
+//     * @param text
+//     *            the ToolTip text to set
+//     */
+//    public void setInputValidatorProgramNameToolTipText(String text) {
+//        getCustomOptionsSubPanel().setInputValidatorProgramNameToolTipText(text);
+//
+//    }
+//
+//    /**
+//     * Sets the Custom Input Validator Command displayed in this InputValidatorPane to the specified value.
+//     * 
+//     * @param command
+//     *            a String containing the command used to invoke the Custom Input Validator
+//     */
+//    public void setInputValidatorCommand(String command) {
+//        getCustomOptionsSubPanel().setInputValidatorCommand(command);
+//
+//    }
 
     /**
      * Sets the ToolTip text for the Custom Input Validator Command displayed in this InputValidatorPane.
@@ -417,19 +547,17 @@ public class InputValidatorPane extends JPanePlugin {
      *            the ToolTip text to set
      */
     public void setInputValidatorCommandToolTipText(String text) {
-        getCustomOptionsSubPanel().setInputValidatorCommandToolTipText(text);
+        getCustomInputValidatorProgramPanel().setInputValidatorCommandToolTipText(text);
 
     }
 
-    private JPanel getRunInputValidatorButtonPanel() {
-        if (runInputValidatorButtonPane==null) {
-            runInputValidatorButtonPane = new JPanel();
-            runInputValidatorButtonPane.setAlignmentX(LEFT_ALIGNMENT);
-            runInputValidatorButtonPane.add(getRunInputValidatorButton());
-            runInputValidatorButtonPane.add(getGlue());
-            runInputValidatorButtonPane.add(getShowLastResultButton());
+    private JPanel getShowInputValidatorResultButtonPanel() {
+        if (showInputValidatorResultButtonPane==null) {
+            showInputValidatorResultButtonPane = new JPanel();
+            showInputValidatorResultButtonPane.setAlignmentX(LEFT_ALIGNMENT);
+            showInputValidatorResultButtonPane.add(getShowLastResultButton());
         }
-        return runInputValidatorButtonPane;
+        return showInputValidatorResultButtonPane;
     }
     
     private JButton getRunInputValidatorButton() {
@@ -440,6 +568,7 @@ public class InputValidatorPane extends JPanePlugin {
 
                 public void actionPerformed(ActionEvent e) {
                     runCustomInputValidator();
+                    getShowLastResultButton().setEnabled(true);
                 }
             });
         }
@@ -465,15 +594,20 @@ public class InputValidatorPane extends JPanePlugin {
         getVivaPatternTextScrollPane().setEnabled(enableComponents);
         getVivaPatternTextArea().setEnabled(enableComponents);
         getLoadVivaPatternButton().setEnabled(enableComponents);
+        getRunVivaButton().setEnabled(enableComponents);
     }
     
     private void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomOptionsSubPanel().setEnabled(enableComponents);
-        getCustomOptionsSubPanel().enableCustomInputPaneComponents(enableComponents);
-        
+        getCustomInputValidatorProgramPanel().setEnabled(enableComponents);
+        getCustomInputValidatorOptionsButtonPanel().setEnabled(enableComponents);
+        getChooseCustomInputValidatorProgramButton().setEnabled(enableComponents);
+        getRunCustomInputValidatorButton().setEnabled(enableComponents);
     }
     
-
+    private void runVivaInputValidator() {
+        
+    }
     protected void runCustomInputValidator() {
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -539,7 +673,7 @@ public class InputValidatorPane extends JPanePlugin {
      * @return true if the Custom Input Validator command is a non-null, non-empty String; false otherwise
      */
     private boolean problemHasCustomInputValidatorCommand() {
-        String customInputValidatorCommand = getCustomOptionsSubPanel().getInputValidatorCommand();
+        String customInputValidatorCommand = getCustomInputValidatorProgramPanel().getInputValidatorCommand();
         return (customInputValidatorCommand != null && !customInputValidatorCommand.equals(""));
     }
 
@@ -684,7 +818,7 @@ public class InputValidatorPane extends JPanePlugin {
                         // with the files which are being created therein (e.g. the stdout.pc2 and stderr.pc2 files)
                         try {
                             // run the input validator
-                            validationResults[fileNum] = runInputValidator(fileNum + 1, prob, validatorProg, getCustomInputValidatorCommand(), dataFile, executeDir);
+                            validationResults[fileNum] = runCustomInputValidator(fileNum + 1, prob, validatorProg, getCustomInputValidatorCommand(), dataFile, executeDir);
 
                             inputValidatorHasBeenRun = true;
                             epp.enableUpdateButton();
@@ -880,7 +1014,7 @@ public class InputValidatorPane extends JPanePlugin {
      * @throws ExecutionException if an ExecutionException occurs during execution of the Input Validator
      * @throws Exception if an Exception other than ExecutionException occurs during execution of the Input Validator
      */
-    private InputValidationResult runInputValidator(int seqNum, Problem problem, SerializedFile validatorProg, String validatorCommand, SerializedFile dataFile, String executeDir) throws Exception {
+    private InputValidationResult runCustomInputValidator(int seqNum, Problem problem, SerializedFile validatorProg, String validatorCommand, SerializedFile dataFile, String executeDir) throws Exception {
 
         InputValidatorRunner runner = new InputValidatorRunner(getContest(), getController());
         InputValidationResult result = null;
@@ -946,11 +1080,11 @@ public class InputValidatorPane extends JPanePlugin {
     }
 
     public SerializedFile getInputValidatorFile() {
-        return getCustomOptionsSubPanel().getInputValidatorFile();
+        return getCustomInputValidatorProgramPanel().getInputValidatorFile();
     }
     
     public void setInputValidatorFile(SerializedFile inputValidatorFile) {
-        getCustomOptionsSubPanel().setInputValidatorFile(inputValidatorFile);
+        getCustomInputValidatorProgramPanel().setInputValidatorFile(inputValidatorFile);
     }
   
     private Image getScaledImage(Image srcImg, int w, int h) {
@@ -976,6 +1110,10 @@ public class InputValidatorPane extends JPanePlugin {
     private Component rigidArea;
     private Component glue;
     private Component rigidArea_4;
+    private Component rigidArea_5;
+    private Component rigidArea_6;
+    private Component rigidArea_7;
+    private Component rigidArea_8;
 
     
     private Component getRigidArea_1() {
@@ -1045,9 +1183,10 @@ public class InputValidatorPane extends JPanePlugin {
         frame.setVisible(true);
     }
 
-    private JButton getShowLastResultButton() {
+    public JButton getShowLastResultButton() {
         if (showLastResultButton == null) {
         	showLastResultButton = new JButton("Show Most Recent Result");
+        	showLastResultButton.setEnabled(false);
         	showLastResultButton.addActionListener(new ActionListener() {
         	    public void actionPerformed(ActionEvent e) {
         	        resultFrame.setVisible(true);
@@ -1076,9 +1215,75 @@ public class InputValidatorPane extends JPanePlugin {
         return rigidArea_4;
     }
     
+    private Component getRigidArea_5() {
+        if (rigidArea_5 == null) {
+        	rigidArea_5 = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea_5;
+    }
+    
+    private Component getRigidArea_6() {
+        if (rigidArea_6 == null) {
+            rigidArea_6 = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea_6;
+    }
+    
+    private Component getRigidArea_7() {
+        if (rigidArea_7 == null) {
+            rigidArea_7 = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea_7;
+    }
+    
+    private Component getRigidArea_8() {
+        if (rigidArea_8 == null) {
+            rigidArea_8 = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea_8;
+    }
+    
     @Override
     public void setContestAndController(IInternalContest contest, IInternalController controller) {
         super.setContestAndController(contest, controller);
         resultFrame.setContestAndController(contest, controller);
     }
+    
+    /**
+     * Select file, if file picked updates the specified JComponent.
+     * 
+     * @param comp the JComponent to be updated if a file is picked
+     * @param dialogTitle title for file chooser
+     * @return True if a file was selected and label updated
+     */
+    private boolean selectFile(JComponent comp, String dialogTitle) {
+        boolean result = false;
+        // toolTip should always have the full path
+        String oldFile = comp.getToolTipText();
+        String startDir;
+        if (oldFile == null || oldFile.equalsIgnoreCase("")) {
+            startDir = lastDirectory;
+        } else {
+            startDir = oldFile;
+        }
+        JFileChooser chooser = new JFileChooser(startDir);
+        if (dialogTitle != null) {
+            chooser.setDialogTitle(dialogTitle);
+        }
+        try {
+            int returnVal = chooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                lastDirectory = chooser.getCurrentDirectory().toString();
+                comp.setToolTipText(chooser.getSelectedFile().getCanonicalFile().toString());
+                result = true;
+            }
+        } catch (Exception e) {
+            getLog().log(Log.INFO, "Error getting selected file, try again.", e);
+            JOptionPane.showMessageDialog(this, "Error getting selected file", "File Error", JOptionPane.WARNING_MESSAGE);
+            result = false;
+        }
+        chooser = null;
+        return result;
+    }
+
 }

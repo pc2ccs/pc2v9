@@ -2350,7 +2350,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             idx ++;
            
             assertEquals("Expected input validator name ", expectedInputValidatorName, problem2.getInputValidatorProgramName());
-            assertEquals("Expected input validator command ", expectedInputValidatorCommandLine, problem2.getInputValidatorCommandLine());
+            assertEquals("Expected input validator command ", expectedInputValidatorCommandLine, problem2.getCustomInputValidatorCommandLine());
         }
     }
     
@@ -2669,7 +2669,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertFileExists(ifvfilename);
 
         Problem p = problems[0];
-        assertEquals("InValCmdLine", "cmd /c valid.bat", p.getInputValidatorCommandLine());
+        assertEquals("InValCmdLine", "cmd /c valid.bat", p.getCustomInputValidatorCommandLine());
 
 //        String expProgFileName = unixifyPath(Utilities.getCurrentDirectory() + File.separator + ifvfilename);
         String expProgFileName = unixifyPath(valiatorFileName);

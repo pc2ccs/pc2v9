@@ -2152,7 +2152,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 // set validator name to short filename
                 problem.setInputValidatorProgramName(serializedFile.getName());
-                problem.setProblemHasInputValidator(true);
+                problem.setProblemHasCustomInputValidator(true);
             }
         } catch (Exception e) {
             throw new YamlLoadException("Unable to load input format validator for problem " + problem.getShortName() + ": " + inpuFormattValidatorName, e);

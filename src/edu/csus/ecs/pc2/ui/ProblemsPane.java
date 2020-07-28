@@ -273,7 +273,7 @@ public class ProblemsPane extends JPanePlugin {
         c[i++] = Integer.toString(problem.getTimeOutInSeconds());
 
         // input validation status
-        if (problem.isProblemHasInputValidator()) {
+        if (problem.isProblemHasCustomInputValidator()) {
             c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getInputValidationStatus());
         } else {
             // c[i++] = new MCLBCenteredStringCellRenderer("<none>");
@@ -282,8 +282,8 @@ public class ProblemsPane extends JPanePlugin {
 
         // input validator command line
         String inputValidatorCommandLine = "";
-        if (problem.isProblemHasInputValidator()) {
-            inputValidatorCommandLine = problem.getInputValidatorCommandLine();
+        if (problem.isProblemHasCustomInputValidator()) {
+            inputValidatorCommandLine = problem.getCustomInputValidatorCommandLine();
         }
         c[i++] = inputValidatorCommandLine;
 
@@ -330,13 +330,13 @@ public class ProblemsPane extends JPanePlugin {
 
         c[i++] = "<unknown>";
 
-        if (problem.isProblemHasInputValidator()) {
+        if (problem.isProblemHasCustomInputValidator()) {
             c[i++] = problem.getInputValidatorProgramName();
         } else {
             c[i++] = "<none>";
         }
 
-        c[i++] = problem.getInputValidatorCommandLine();
+        c[i++] = problem.getCustomInputValidatorCommandLine();
 
         return c;
     }

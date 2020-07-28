@@ -228,7 +228,7 @@ public class InputValidatorRunner {
             return null ;
         }
         
-        String validatorCommand = problem.getInputValidatorCommandLine();
+        String validatorCommand = problem.getCustomInputValidatorCommandLine();
         if (validatorCommand == null || validatorCommand.equals("")) {
             return null ;
         }

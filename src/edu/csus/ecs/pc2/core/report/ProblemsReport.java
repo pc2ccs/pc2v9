@@ -153,9 +153,9 @@ public class ProblemsReport implements IReport {
 
         //input validator settings
 
-        printWriter.println("    Has input validator : " + problem.isProblemHasInputValidator());
+        printWriter.println("    Has input validator : " + problem.isProblemHasCustomInputValidator());
         printWriter.println("        input validator : " + problem.getInputValidatorProgramName());
-        printWriter.println("    input validator cmd : " + problem.getInputValidatorCommandLine());
+        printWriter.println("    input validator cmd : " + problem.getCustomInputValidatorCommandLine());
         
         if (problemDataFiles == null) {
             printWriter.println("   input validator file: No file (contents saved) ");

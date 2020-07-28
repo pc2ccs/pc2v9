@@ -241,7 +241,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
         Vector<ProblemInputValidationResults> tableData = new Vector<ProblemInputValidationResults> ();
         
         for (int prob=0; prob<probs.length; prob++) {
-            if (probs[prob].isProblemHasInputValidator()) {
+            if (probs[prob].isProblemHasCustomInputValidator()) {
                 
                 ProblemInputValidationResults result = new ProblemInputValidationResults(probs[prob]);
                 

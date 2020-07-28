@@ -7,12 +7,9 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -41,8 +38,6 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
     private JLabel lblInputValidatorInvocation;
     
     private JTextField inputValidatorCommandTextField;
-    
-    private JButton chooseInputValidatorProgramButton;
 
     private JPanePlugin parentPane;
 
@@ -51,56 +46,29 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
     private SerializedFile inputValidatorFile;
     
     public DefineCustomInputValidatorPane() {
-        setPreferredSize(new Dimension(459, 100));
+        setAlignmentX(Component.LEFT_ALIGNMENT);
+//        setBorder(new LineBorder(new Color(0, 0, 0)));
+        setPreferredSize(new Dimension(400, 100));
         
         GridBagLayout gbl_defineInputValidatorPanel = new GridBagLayout();
-        gbl_defineInputValidatorPanel.columnWidths = new int[] {20, 60, 20};
+        gbl_defineInputValidatorPanel.columnWidths = new int[] {30, 30};
         gbl_defineInputValidatorPanel.rowHeights = new int[]{35, 35};
-        gbl_defineInputValidatorPanel.columnWeights = new double[]{0.0, 0.0, 0.0};
+        gbl_defineInputValidatorPanel.columnWeights = new double[]{0.0, 0.0};
         gbl_defineInputValidatorPanel.rowWeights = new double[]{0.0, 1.0};
         this.setLayout(gbl_defineInputValidatorPanel);
         
-        GridBagConstraints gbc_inputValidatorProgramNameLabel = new GridBagConstraints();
-        gbc_inputValidatorProgramNameLabel.anchor = GridBagConstraints.EAST;
-        gbc_inputValidatorProgramNameLabel.insets = new Insets(0, 20, 5, 0);
-        gbc_inputValidatorProgramNameLabel.gridx = 0;
-        gbc_inputValidatorProgramNameLabel.gridy = 0;
-        this.add(getInputValidatorProgramNameLabel(), gbc_inputValidatorProgramNameLabel);
-        
-        GridBagConstraints gbc_inputValidatorProgramNameTextField = new GridBagConstraints();
-        gbc_inputValidatorProgramNameTextField.anchor = GridBagConstraints.WEST;
-        gbc_inputValidatorProgramNameTextField.insets = new Insets(0, 0, 5, 5);
-        gbc_inputValidatorProgramNameTextField.gridx = 1;
-        gbc_inputValidatorProgramNameTextField.gridy = 0;
-        this.add(getInputValidatorProgramNameTextField(), gbc_inputValidatorProgramNameTextField);
-        
-        GridBagConstraints gbc_chooseInputValidatorProgramButton = new GridBagConstraints();
-        gbc_chooseInputValidatorProgramButton.anchor = GridBagConstraints.WEST;
-        gbc_chooseInputValidatorProgramButton.insets = new Insets(0, 0, 0, 5);
-        gbc_chooseInputValidatorProgramButton.gridx = 2;
-        gbc_chooseInputValidatorProgramButton.gridy = 0;
-        this.add(getChooseInputValidatorProgramButton(), gbc_chooseInputValidatorProgramButton);
-        
-        GridBagConstraints gbc_lblInputValidatorInvocation = new GridBagConstraints();
-        gbc_lblInputValidatorInvocation.anchor = GridBagConstraints.EAST;
-        gbc_lblInputValidatorInvocation.insets = new Insets(0, 20, 5, 0);
-        gbc_lblInputValidatorInvocation.gridx = 0;
-        gbc_lblInputValidatorInvocation.gridy = 1;
-        this.add(getLblInputValidatorInvocation(), gbc_lblInputValidatorInvocation);
-        
-        GridBagConstraints gbc_inputValidatorCommandTextField = new GridBagConstraints();
-        gbc_inputValidatorCommandTextField.insets = new Insets(0, 0, 5, 5);
-        gbc_inputValidatorCommandTextField.anchor = GridBagConstraints.WEST;
-        gbc_inputValidatorCommandTextField.gridx = 1;
-        gbc_inputValidatorCommandTextField.gridy = 1;
-        this.add(getInputValidatorCommandTextField(), gbc_inputValidatorCommandTextField);
+        this.add(getInputValidatorProgramNameLabel(), createGbc(0, 0));
+        this.add(getInputValidatorProgramNameTextField(), createGbc(1, 0));
+        this.add(getLblInputValidatorInvocation(), createGbc(0, 1));
+        this.add(getInputValidatorCommandTextField(), createGbc(1, 1));
 
     }
     
-    public void enableCustomInputPaneComponents (boolean enableComponents) {
+    @Override
+    public void setEnabled (boolean enableComponents) {
+        super.setEnabled(enableComponents);
         getInputValidatorProgramNameLabel().setEnabled(enableComponents);
         getInputValidatorProgramNameTextField().setEnabled(enableComponents);
-        getChooseInputValidatorProgramButton().setEnabled(enableComponents);
         getLblInputValidatorInvocation().setEnabled(enableComponents);
         getInputValidatorCommandTextField().setEnabled(enableComponents);
     }
@@ -148,7 +116,6 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
     private JLabel getInputValidatorProgramNameLabel() {
         if (inputValidatorProgramNameLabel == null) {
             inputValidatorProgramNameLabel = new JLabel("Input Validator Program: ");
-            inputValidatorProgramNameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
             inputValidatorProgramNameLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
             inputValidatorProgramNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             inputValidatorProgramNameLabel.setToolTipText("The name, including the full path to it, of the program to be used to validate input data");
@@ -161,7 +128,7 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
             inputValidatorProgramNameTextField = new JTextField();
             inputValidatorProgramNameTextField.setPreferredSize(new Dimension(200, 25));
             inputValidatorProgramNameTextField.setMinimumSize(new Dimension(200, 25));
-            inputValidatorProgramNameTextField.setColumns(30);
+            inputValidatorProgramNameTextField.setColumns(20);
             inputValidatorProgramNameTextField.setText("");
             inputValidatorProgramNameTextField.setToolTipText(null);
             inputValidatorProgramNameTextField.addKeyListener(new KeyAdapter() {
@@ -175,9 +142,8 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
     
     private JLabel getLblInputValidatorInvocation() {
         if (lblInputValidatorInvocation == null) {
-            lblInputValidatorInvocation = new JLabel("Input Validator command:");
+            lblInputValidatorInvocation = new JLabel("Input Validator command: ");
             lblInputValidatorInvocation.setHorizontalAlignment(SwingConstants.RIGHT);
-            lblInputValidatorInvocation.setAlignmentX(Component.RIGHT_ALIGNMENT);
             lblInputValidatorInvocation.setToolTipText("The command to be used to invoke the Input Validator");
             lblInputValidatorInvocation.setFont(new Font("Tahoma", Font.PLAIN, 11));
         }
@@ -189,7 +155,7 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
             inputValidatorCommandTextField = new JTextField();
             inputValidatorCommandTextField.setPreferredSize(new Dimension(200, 25));
             inputValidatorCommandTextField.setMinimumSize(new Dimension(200, 25));
-            inputValidatorCommandTextField.setColumns(30);
+            inputValidatorCommandTextField.setColumns(20);
             inputValidatorCommandTextField.setText("");
             inputValidatorCommandTextField.setToolTipText(null);
             
@@ -200,36 +166,6 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
             });
         }
         return inputValidatorCommandTextField;
-    }
-    
-    private JButton getChooseInputValidatorProgramButton() {
-        
-        if (chooseInputValidatorProgramButton == null) {
-            
-            chooseInputValidatorProgramButton = new JButton("Choose...");
-            
-            chooseInputValidatorProgramButton.addActionListener(new ActionListener() {
-                
-                public void actionPerformed(ActionEvent e) {
-                    if (selectFile(getInputValidatorProgramNameTextField(), "Select Input Validator")) {
-                        String fullFilePath = getInputValidatorProgramNameTextField().getText();
-                        try {
-                            getInputValidatorProgramNameTextField().setToolTipText((fullFilePath));
-                            if (getInputValidatorProgramNameTextField().getText() != null && getInputValidatorProgramNameTextField().getText().endsWith(".class")) {
-                                getInputValidatorCommandTextField().setText("java {:basename}");
-                            }
-                            enableUpdateButton();
-                        } catch (Exception e2) {
-                            showMessage(null, "Unable to load Input Validator file: " + fullFilePath, "Error loading " + fullFilePath + " " + e2.getMessage());
-                            e2.printStackTrace();
-                        }
-                        inputValidatorFile = new SerializedFile(fullFilePath);
-
-                    }
-                }
-            });
-        }
-        return chooseInputValidatorProgramButton;
     }
     
 
@@ -342,5 +278,25 @@ public class DefineCustomInputValidatorPane extends JPanePlugin {
         getInputValidatorCommandTextField().setToolTipText(text);
     }
 
+    //the following code is due to https://stackoverflow.com/users/522444/hovercraft-full-of-eels, 
+    // from https://stackoverflow.com/questions/9851688/how-to-align-left-or-right-inside-gridbaglayout-cell
+    private static final Insets WEST_INSETS = new Insets(5, 0, 5, 5);
+    private static final Insets EAST_INSETS = new Insets(5, 5, 5, 0);
+
+    private GridBagConstraints createGbc(int x, int y) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = x;
+        gbc.gridy = y;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+
+        gbc.anchor = (x == 0) ? GridBagConstraints.WEST : GridBagConstraints.EAST;
+        gbc.fill = (x == 0) ? GridBagConstraints.BOTH : GridBagConstraints.HORIZONTAL;
+
+        gbc.insets = (x == 0) ? WEST_INSETS : EAST_INSETS;
+        gbc.weightx = (x == 0) ? 0.1 : 1.0;
+        gbc.weighty = 1.0;
+        return gbc;
+     }
 
 }
