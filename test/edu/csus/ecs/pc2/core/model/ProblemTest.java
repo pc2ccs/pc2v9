@@ -35,7 +35,7 @@ public class ProblemTest extends AbstractTestCase {
         p2.getPC2ValidatorSettings().setWhichPC2Validator(3);
         p2.getPC2ValidatorSettings().setIgnoreCaseOnValidation(true);
 
-        p2.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() 
+        p2.setOutputValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() 
                 + " " + p2.getPC2ValidatorSettings().isIgnoreCaseOnValidation());
         p2.setOutputValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 

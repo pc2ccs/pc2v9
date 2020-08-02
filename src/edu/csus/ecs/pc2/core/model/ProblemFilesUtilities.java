@@ -89,10 +89,10 @@ public final class ProblemFilesUtilities {
 
         if (files.getOutputValidatorFile() == null) {
             return true;
-        } else if (problem.getValidatorProgramName() == null) {
+        } else if (problem.getOutputValidatorProgramName() == null) {
             // no validator name defined
             return false;
-        } else if (new File(problem.getValidatorProgramName()).isFile()) {
+        } else if (new File(problem.getOutputValidatorProgramName()).isFile()) {
             // external validator name
             return true;
         }

@@ -789,9 +789,9 @@ public class ServerConnectionTest extends AbstractTestCase {
         assertEquals("Data file name", "sumit.dat", problem.getDataFileName());
         assertEquals("Answer file name", "sumit.ans", problem.getAnswerFileName());
 
-        assertEquals("Validator prog name ", "/home/pc2/validdiff", problem.getValidatorProgramName());
+        assertEquals("Validator prog name ", "/home/pc2/validdiff", problem.getOutputValidatorProgramName());
         
-        assertEquals("Validator cmd line ", "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ", problem.getValidatorCommandLine());
+        assertEquals("Validator cmd line ", "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ", problem.getOutputValidatorCommandLine());
     }
     
     /**

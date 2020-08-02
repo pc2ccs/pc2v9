@@ -572,7 +572,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             for (Problem problem : problems) {
                 loadProblemInformationAndDataFiles(contest, directoryName, problem, overrideUsePc2Validator, manualReviewOverride);
                 if (overrideValidatorCommandLine != null) {
-                    problem.setValidatorCommandLine(overrideValidatorCommandLine);
+                    problem.setOutputValidatorCommandLine(overrideValidatorCommandLine);
                 }
             }
         }
@@ -1425,7 +1425,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
                 customSettings.setValidatorCommandLine(validatorCmd);
                 customSettings.setValidatorProgramName(validatorProg);
-                problem.setCustomValidatorSettings(customSettings);
+                problem.setCustomOutputValidatorSettings(customSettings);
             }
             // String usingInternal = fetchValue(map, "usingInternal");
 
@@ -1765,11 +1765,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     validatorCommandLine = overrideValidatorCommandLine;
                 }
                 problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
-                problem.setValidatorCommandLine(validatorCommandLine);
+                problem.setOutputValidatorCommandLine(validatorCommandLine);
 
                 String inputValidatorCommandLine = fetchValue(map, INPUT_VALIDATOR_COMMAND_LINE_KEY);
                 if (inputValidatorCommandLine != null) {
-                    problem.setInputValidatorCommandLine(inputValidatorCommandLine);
+                    problem.setCustomInputValidatorCommandLine(inputValidatorCommandLine);
                 }
 
                 problemList.addElement(problem);
@@ -2112,11 +2112,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         // if we use the internal Java CCS validator use this.
         // problem.setValidatorCommandLine("java -cp {:pc2jarpath} " + CCSConstants.DEFAULT_CCS_VALIDATOR_COMMAND);
-        if (problem.getValidatorCommandLine() == null) {
-            problem.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
+        if (problem.getOutputValidatorCommandLine() == null) {
+            problem.setOutputValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         }
 
-        String validatorName = baseDirectoryName + File.separator + problem.getValidatorProgramName();
+        String validatorName = baseDirectoryName + File.separator + problem.getOutputValidatorProgramName();
 
         try {
             /**
@@ -2141,17 +2141,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 problemDataFiles.setInputValidatorFile(serializedFile);
 
                 String basename = serializedFile.getName();
-                problem.setInputValidatorCommandLine(basename);
+                problem.setCustomInputValidatorCommandLine(basename);
                 if (basename.toLowerCase().endsWith(".bat") || basename.toLowerCase().endsWith(".cmd")) {
-                    problem.setInputValidatorCommandLine("cmd /c " + basename);
+                    problem.setCustomInputValidatorCommandLine("cmd /c " + basename);
                 }
                 if (basename.toLowerCase().endsWith(".class")) {
                     basename = basename.replaceFirst(".class", "");
-                    problem.setInputValidatorCommandLine("java " + basename);
+                    problem.setCustomInputValidatorCommandLine("java " + basename);
                 }
 
-                // set validator name to short filename
-                problem.setInputValidatorProgramName(serializedFile.getName());
+                //input validator program name now comes from the SerializedFile; there is no separate "name" field any more.
+//                // set validator name to short filename
+//                problem.setCustomInputValidatorProgramName(serializedFile.getName());
                 problem.setProblemHasCustomInputValidator(true);
             }
         } catch (Exception e) {

@@ -1299,7 +1299,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         String overrideMTSVCommand = "/usr/local/bin/mtsv {:problemletter} {:resfile} {:basename}";
         for (Problem problem : problems) {
-            assertEquals("Expect custom validator", overrideMTSVCommand, problem.getValidatorCommandLine());
+            assertEquals("Expect custom validator", overrideMTSVCommand, problem.getOutputValidatorCommandLine());
         }
     }
 
@@ -1704,8 +1704,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         problem = originalContest.getProblem(problemId);
 
-        assertEquals("Expected validator name ", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
-        assertEquals("Expected validator command ", Constants.DEFAULT_CLICS_VALIDATOR_COMMAND, problem.getValidatorCommandLine());
+        assertEquals("Expected validator name ", Constants.CLICS_VALIDATOR_NAME, problem.getOutputValidatorProgramName());
+        assertEquals("Expected validator command ", Constants.DEFAULT_CLICS_VALIDATOR_COMMAND, problem.getOutputValidatorCommandLine());
 
     }
     
@@ -2349,7 +2349,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             String expectedInputValidatorCommandLine = validatorCommandLine[idx];
             idx ++;
            
-            assertEquals("Expected input validator name ", expectedInputValidatorName, problem2.getInputValidatorProgramName());
+            assertEquals("Expected input validator name ", expectedInputValidatorName, problem2.getCustomInputValidatorProgramName());
             assertEquals("Expected input validator command ", expectedInputValidatorCommandLine, problem2.getCustomInputValidatorCommandLine());
         }
     }
@@ -2468,7 +2468,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         snake.assignValidatorSettings(content, problem);
         
         assertEquals("validator type",  VALIDATOR_TYPE.PC2VALIDATOR, problem.getValidatorType());
-        assertEquals("validator program name", Constants.PC2_VALIDATOR_NAME, problem.getValidatorProgramName());
+        assertEquals("validator program name", Constants.PC2_VALIDATOR_NAME, problem.getOutputValidatorProgramName());
     }
     
 
@@ -2488,7 +2488,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         snake.assignValidatorSettings(content, problem);
         
         assertEquals("validator type",  VALIDATOR_TYPE.CLICSVALIDATOR, problem.getValidatorType());
-        assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
+        assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getOutputValidatorProgramName());
         
         // huh
     }
@@ -2510,7 +2510,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         assertEquals("validator type",  VALIDATOR_TYPE.CLICSVALIDATOR, problem.getValidatorType());
 
-        assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
+        assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getOutputValidatorProgramName());
         
     }
     
@@ -2673,7 +2673,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
 //        String expProgFileName = unixifyPath(Utilities.getCurrentDirectory() + File.separator + ifvfilename);
         String expProgFileName = unixifyPath(valiatorFileName);
-        assertEquals("ProgName", expProgFileName, unixifyPath(p.getInputValidatorProgramName()));
+        assertEquals("ProgName", expProgFileName, unixifyPath(p.getCustomInputValidatorProgramName()));
 
 
         ProblemDataFiles pdf = con.getProblemDataFile(p);
@@ -2769,7 +2769,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             ProblemDataFiles pdf = contest.getProblemDataFile(problem);
             totalProblemFiles += pdf.getJudgesAnswerFiles().length + pdf.getJudgesDataFiles().length;
 
-            String validatorName = problem.getValidatorProgramName();
+            String validatorName = problem.getOutputValidatorProgramName();
             assertEquals("Expecting validator cmd line for "+problem.getDataFileName(), validatorNames[i], validatorName);
             i++;
         }

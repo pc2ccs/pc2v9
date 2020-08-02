@@ -872,7 +872,7 @@ public class Executable extends Plugin implements IExecutable {
         cmdLine = replaceString(cmdLine, "{:feedbackdir}", clicsInterfaceFeedbackDirName);
 
         //create the feedback directory for validators using the Clics Interface
-        if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseClicsValidatorInterface())) {
+        if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface())) {
 
             String feedbackDirPath = getExecuteDirectoryName() + File.separator + clicsInterfaceFeedbackDirName;
 
@@ -977,7 +977,7 @@ public class Executable extends Plugin implements IExecutable {
             // executionData.setValidationReturnCode(process.waitFor());
 
             // if CLICS-style validator interface, redirect team output to STDIN
-            if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseClicsValidatorInterface())) {
+            if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface())) {
 
                 String teamOutputFileName = getTeamOutputFilename(dataSetNumber);
                 if (teamOutputFileName != null && new File(teamOutputFileName).exists()) {
@@ -1060,7 +1060,7 @@ public class Executable extends Plugin implements IExecutable {
         validatorStderrFilesnames.add(validatorStderrFilename);
 
         //check if the validator is using the "PC2 Validator Interface" Standard
-        if (problem.isUsingPC2Validator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUsePC2ValidatorInterface())) {
+        if (problem.isUsingPC2Validator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUsePC2ValidatorInterface())) {
 
             //it was using the PC2 Validator Interface, check the results file
             boolean fileThere = new File(prefixExecuteDirname(pc2InterfaceResultsFileName)).exists();
@@ -1095,7 +1095,7 @@ public class Executable extends Plugin implements IExecutable {
 //                    executionData.setValidationSuccess(true);
 //                }
 //            }
-        } else if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomValidatorSettings().isUseClicsValidatorInterface())) {
+        } else if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface())) {
             //check if the Validator was using the "CLICS Validator Interface" Standard
 
             //it was using the CLICS Validator Interface, check the results file(s)
@@ -1229,13 +1229,13 @@ public class Executable extends Plugin implements IExecutable {
 
         String cmdPattern = null ;
 
-        if (problem != null && problem.getCustomValidatorSettings() != null) {
+        if (problem != null && problem.getCustomOutputValidatorSettings() != null) {
 
-            String validatorProgramName = problem.getCustomValidatorSettings().getCustomValidatorProgramName();
+            String validatorProgramName = problem.getCustomOutputValidatorSettings().getCustomValidatorProgramName();
             if (validatorProgramName.trim().toLowerCase().endsWith(".jar")) {
-                cmdPattern = "java -jar " + problem.getCustomValidatorSettings().getCustomValidatorCommandLine();
+                cmdPattern = "java -jar " + problem.getCustomOutputValidatorSettings().getCustomValidatorCommandLine();
             } else {
-                cmdPattern = "." + File.separator + problem.getCustomValidatorSettings().getCustomValidatorCommandLine();   
+                cmdPattern = "." + File.separator + problem.getCustomOutputValidatorSettings().getCustomValidatorCommandLine();   
             }
         }
 
@@ -2443,8 +2443,8 @@ public class Executable extends Plugin implements IExecutable {
 
             String validatorCommand = null;
 
-            if (problem.getValidatorProgramName() != null) {
-                validatorCommand = problem.getValidatorProgramName();
+            if (problem.getOutputValidatorProgramName() != null) {
+                validatorCommand = problem.getOutputValidatorProgramName();
             }
 
             if (problemDataFiles != null) {

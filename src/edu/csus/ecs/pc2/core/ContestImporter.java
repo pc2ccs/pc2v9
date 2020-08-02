@@ -385,7 +385,7 @@ public class ContestImporter {
         newProblem.setValidatorType(problem.getValidatorType());
         newProblem.setPC2ValidatorSettings(problem.getPC2ValidatorSettings().clone());
         newProblem.setCLICSValidatorSettings(problem.getClicsValidatorSettings().clone());
-        newProblem.setCustomValidatorSettings(problem.getCustomValidatorSettings().clone());
+        newProblem.setCustomOutputValidatorSettings(problem.getCustomOutputValidatorSettings().clone());
         
         newProblem.setInternationalJudgementReadMethod(problem.isInternationalJudgementReadMethod());
         newProblem.setManualReview(problem.isManualReview());
@@ -395,8 +395,8 @@ public class ContestImporter {
         newProblem.setShowCompareWindow(problem.isShowCompareWindow());
         newProblem.setShowValidationToJudges(problem.isShowValidationToJudges());
         newProblem.setTimeOutInSeconds(problem.getTimeOutInSeconds());
-        newProblem.setValidatorCommandLine(problem.getValidatorCommandLine());
-        newProblem.setOutputValidatorProgramName(problem.getValidatorProgramName());
+        newProblem.setOutputValidatorCommandLine(problem.getOutputValidatorCommandLine());
+        newProblem.setOutputValidatorProgramName(problem.getOutputValidatorProgramName());
     }
 
     /**

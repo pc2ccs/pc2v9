@@ -247,8 +247,8 @@ public class CommandVariableReplacer {
 
         Problem problem = contest.getProblem(run.getProblemId());
 
-        if (problem.getValidatorProgramName() != null) {
-            validatorCommand = problem.getValidatorProgramName();
+        if (problem.getOutputValidatorProgramName() != null) {
+            validatorCommand = problem.getOutputValidatorProgramName();
         }
 
         if (problemDataFiles != null) {

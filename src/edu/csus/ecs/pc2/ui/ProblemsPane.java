@@ -28,9 +28,11 @@ import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
+import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.cellRenderer.MCLBInputValidationStatusCellRenderer;
@@ -140,7 +142,8 @@ public class ProblemsPane extends JPanePlugin {
         if (problemListBox == null) {
             problemListBox = new MCLB();
 
-            Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", "Groups" };
+            Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", 
+                    "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
             problemListBox.addColumns(cols);
 
             problemListBox.getColumnInfo(1).setAlignment(Alignment.CENTER);
@@ -149,6 +152,10 @@ public class ProblemsPane extends JPanePlugin {
             problemListBox.getColumnInfo(4).setAlignment(Alignment.CENTER);
             problemListBox.getColumnInfo(5).setAlignment(Alignment.CENTER);
             problemListBox.getColumnInfo(6).setAlignment(Alignment.CENTER);
+            problemListBox.getColumnInfo(7).setAlignment(Alignment.CENTER);
+            problemListBox.getColumnInfo(8).setAlignment(Alignment.CENTER);
+            problemListBox.getColumnInfo(9).setAlignment(Alignment.CENTER);
+            problemListBox.getColumnInfo(10).setAlignment(Alignment.CENTER);
 
             /**
              * No sorting at this time, the only way to know what order the problems are is to NOT sort them. Later we can add a sorter per ProblemDisplayList somehow.
@@ -217,7 +224,9 @@ public class ProblemsPane extends JPanePlugin {
 
     protected Object[] buildProblemRow(Problem problem) {
         // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", };
-//        Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", "Groups" };
+        // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", "Groups" };
+        // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
+
 
         int numberColumns = problemListBox.getColumnCount();
         Object[] c = new Object[numberColumns];
@@ -272,32 +281,46 @@ public class ProblemsPane extends JPanePlugin {
         // c[i++] = new MCLBCenteredStringCellRenderer(Integer.toString(problem.getTimeOutInSeconds()));
         c[i++] = Integer.toString(problem.getTimeOutInSeconds());
 
+        //input validator type (NONE/VIVA/CUSTOM)
+        c[i++] = problem.getCurrentInputValidatorType();
+        
         // input validation status
-        if (problem.isProblemHasCustomInputValidator()) {
-            c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getInputValidationStatus());
-        } else {
-            // c[i++] = new MCLBCenteredStringCellRenderer("<none>");
-            c[i++] = "<none>";
+        INPUT_VALIDATOR_TYPE currentIV = problem.getCurrentInputValidatorType();
+        switch (currentIV) {
+            case VIVA:
+                c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getVivaInputValidationStatus());
+                break;
+            case CUSTOM:
+                c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getCustomInputValidationStatus());
+                break;
+            case NONE:
+                c[i++] = new MCLBInputValidationStatusCellRenderer(InputValidationStatus.NOT_TESTED);
+                break;
+            default:
+                String msg = "Internal error: current Input Validator is not an element of INPUT_VALIDATOR_TYPE enum.";
+                msg += "\nPlease report this error to the PC2 Development Team (pc2@ecs.csus.edu)";
+                msg += "\nSee logs for additional information";
+                System.err.println(msg);
+                getLog().severe("Error: current Input Validator Type is not an element of INPUT_VALIDATOR_TYPE enum.");
+                JOptionPane.showMessageDialog(null, msg, "Internal Error", JOptionPane.ERROR_MESSAGE);
         }
-
-        // input validator command line
-        String inputValidatorCommandLine = "";
-        if (problem.isProblemHasCustomInputValidator()) {
-            inputValidatorCommandLine = problem.getCustomInputValidatorCommandLine();
-        }
-        c[i++] = inputValidatorCommandLine;
 
         // output validator program
         String validatorProgramName = "<none>";
         if (problem.isValidatedProblem()) {
-            validatorProgramName = problem.getValidatorProgramName();
+            validatorProgramName = problem.getOutputValidatorProgramName();
+            //strip off package identifiers
+            if (validatorProgramName.contains(".")) {
+                validatorProgramName = validatorProgramName.substring(
+                        validatorProgramName.lastIndexOf('.')+1,validatorProgramName.length());
+            }
         }
         c[i++] = validatorProgramName;
 
         // output validator command line
         String validatorCommandLine = "";
         if (problem.isValidatedProblem()) {
-            validatorCommandLine = problem.getValidatorCommandLine();
+            validatorCommandLine = problem.getOutputValidatorCommandLine();
         }
         c[i++] = validatorCommandLine;
         
@@ -324,29 +347,79 @@ public class ProblemsPane extends JPanePlugin {
 
         c[i++] = problem.getShortName();
 
-        c[i++] = problem.getInputValidationStatus();
+        INPUT_VALIDATOR_TYPE currentIV = problem.getCurrentInputValidatorType();
+        switch (currentIV) {
+            case VIVA:
+                c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getVivaInputValidationStatus());
+                break;
+            case CUSTOM:
+                c[i++] = new MCLBInputValidationStatusCellRenderer(problem.getCustomInputValidationStatus());
+                break;
+            case NONE:
+                c[i++] = new MCLBInputValidationStatusCellRenderer(InputValidationStatus.NOT_TESTED);
+                break;
+            default:
+                String msg = "Internal error: current Input Validator is not an element of INPUT_VALIDATOR_TYPE enum.";
+                msg += "\nPlease report this error to the PC2 Development Team (pc2@ecs.csus.edu)";
+                msg += "\nSee logs for additional information";
+                System.err.println(msg);
+                getLog().severe("Error: current Input Validator Type is not an element of INPUT_VALIDATOR_TYPE enum.");
+                JOptionPane.showMessageDialog(null, msg, "Internal Error", JOptionPane.ERROR_MESSAGE);
+        }
 
         c[i++] = getPassFailCount(problem);
 
-        c[i++] = "<unknown>";
+        c[i++] = "<unknown>";  //TODO:  need to figure out how to display this "Failed Files..." data...
 
-        if (problem.isProblemHasCustomInputValidator()) {
-            c[i++] = problem.getInputValidatorProgramName();
+        c[i++] = problem.getCurrentInputValidatorType();
+
+        if (problem.getCurrentInputValidatorType()==INPUT_VALIDATOR_TYPE.CUSTOM) {
+            c[i++] = problem.getCustomInputValidatorCommandLine();
         } else {
-            c[i++] = "<none>";
+            c[i++] = "N/A";
         }
-
-        c[i++] = problem.getCustomInputValidatorCommandLine();
-
         return c;
     }
 
+    /**
+     * This method returns a String of the form "passCount/failCount" indicating the number of input test data files which passed 
+     * Input Validation, versus the number of input test data files which failed Input Validation, for the specified problem.
+     * The pass/fail count is based on the currently selected Input Validator for the Problem; if the problem has no Input Validator 
+     * currently associated with it then the empty string ("") is returned. If the problem has an associated Input Validator but
+     * the Input Validator has not been run, or if an error was generated when it was run, the String "N/A" is returned.
+     * 
+     * @param problem the Problem whose Pass/Fail count is to be returned.
+     * 
+     * @return a String of the form "passCount/failCount" for the specified problem.
+     */
     private String getPassFailCount(Problem problem) {
         String retStr = "";
-        if (problem.getInputValidationStatus() == InputValidationStatus.NOT_TESTED || problem.getInputValidationStatus() == InputValidationStatus.ERROR) {
-            retStr = "N/A";
-        } else {
-            retStr = "?/?";
+        Iterable<InputValidationResult> results = null;
+        if (problem.getCurrentInputValidatorType() == INPUT_VALIDATOR_TYPE.VIVA) {
+            if (problem.getVivaInputValidationStatus() == InputValidationStatus.NOT_TESTED || problem.getVivaInputValidationStatus() == InputValidationStatus.ERROR) {
+                retStr = "N/A";
+            } else {
+                results = problem.getVivaInputValidatorResults();
+            }
+        } else if (problem.getCurrentInputValidatorType() == INPUT_VALIDATOR_TYPE.CUSTOM) {
+            if (problem.getCustomInputValidationStatus() == InputValidationStatus.NOT_TESTED || problem.getCustomInputValidationStatus() == InputValidationStatus.ERROR) {
+                retStr = "N/A";
+            } else {
+                results = problem.getCustomInputValidatorResults();
+            }
+        }
+
+        if (results != null) {
+            int passCount = 0;
+            int failCount = 0;
+            for (InputValidationResult res : results) {
+                if (res.isPassed()) {
+                    passCount++;
+                } else {
+                    failCount++;
+                }
+            }
+            retStr = passCount + "/" + failCount;
         }
 
         return retStr;

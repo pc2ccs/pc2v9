@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -52,7 +53,7 @@ public class InputValidationResultPane extends JPanePlugin {
 
     private JLabel inputValidationResultsSummaryLabel;
 
-    private JLabel inputValidationResultSummaryTextLabel;
+    private JLabel inputValidationResultSummaryTextLabel; //the label containing the (variable) result summary text
 
     private Component verticalStrut_1;
 
@@ -82,6 +83,12 @@ public class InputValidationResultPane extends JPanePlugin {
 
     private Component horizontalStrut_1;
 
+    private JLabel inputValidationResultSourceLabel;
+
+    private JLabel inputValidationResultSourceTextLabel;    //the label containing the (variable) result source identifier
+
+    private Component rigidArea1;
+
     public InputValidationResultPane() {
 
         this.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -103,6 +110,9 @@ public class InputValidationResultPane extends JPanePlugin {
             inputValidationResultSummaryPanel.add(getInputValidationResultsSummaryLabel());
             inputValidationResultSummaryPanel.add(getInputValidationResultSummaryTextLabel());
             inputValidationResultSummaryPanel.add(getHorizontalStrut_1());
+            inputValidationResultSummaryPanel.add(getInputValidationResultSourceLabel());
+            inputValidationResultSummaryPanel.add(getInputValidationResultSourceTextLabel());
+            inputValidationResultSummaryPanel.add(getRigidArea1());
             inputValidationResultSummaryPanel.add(getShowOnlyFailedFilesCheckbox());
         }
         return inputValidationResultSummaryPanel;
@@ -122,7 +132,22 @@ public class InputValidationResultPane extends JPanePlugin {
         }
         return inputValidationResultSummaryTextLabel;
     }
+    
+    private JLabel getInputValidationResultSourceLabel() {
+        if (inputValidationResultSourceLabel==null) {
+            inputValidationResultSourceLabel = new JLabel("Validator: ");
+        }
+        return inputValidationResultSourceLabel;
+    }
 
+    private JLabel getInputValidationResultSourceTextLabel() {
+        if (inputValidationResultSourceTextLabel == null) {
+            inputValidationResultSourceTextLabel = new JLabel("Unknown");
+            inputValidationResultSourceTextLabel.setForeground(Color.black);
+        }
+        return inputValidationResultSourceTextLabel;
+    }
+    
     private JPanel getInputValidationResultDetailsPanel() {
         if (inputValidationResultDetailsPanel == null) {
             inputValidationResultDetailsPanel = new JPanel();
@@ -423,6 +448,10 @@ public class InputValidationResultPane extends JPanePlugin {
         getInputValidationResultSummaryTextLabel().setText(msg);
     }
 
+    public void setInputValidationResultSourceText(String msg) {
+        getInputValidationResultSourceTextLabel().setText(msg);
+    }
+
     public void setInputValidationSummaryMessageColor(Color color) {
         getInputValidationResultSummaryTextLabel().setForeground(color);
     }
@@ -522,7 +551,7 @@ public class InputValidationResultPane extends JPanePlugin {
                                 if (resultHolder instanceof InputValidatorPane) {
                                     
                                     // get the results of the latest run from the result-holding InputValidatorPane
-                                    InputValidationResult[] results = ((InputValidatorPane) resultHolder).getRunResults();
+                                    InputValidationResult[] results = ((InputValidatorPane) resultHolder).getCustomInputValidatorRunResults();
                                     if (results != null && results.length > 0) {
 
                                         // make a copy so we don't wipe out the parent's results
@@ -571,7 +600,22 @@ public class InputValidationResultPane extends JPanePlugin {
         return horizontalStrut_1;
     }
 
-    public void updateResultsTable(InputValidationResult[] runResults) {
+    private Component getRigidArea1() {
+        if (rigidArea1 == null) {
+            rigidArea1 = Box.createRigidArea(new Dimension(40, 20));
+        }
+        return rigidArea1;
+    }
+
+
+    /**
+     * This method uses the specified {@link InputValidationResult} array to update the Table Model in the 
+     * Input Validation Results JTable contained in this InputValidationResultPane, and then fires TableDataChanged
+     * on the Table Model.
+     * 
+     * @param runResults the new InputValidationResults to be displayed in the table.
+     */
+    protected void updateResultsTable(InputValidationResult[] runResults) {
         // put the results in the table model and redraw the table
         ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).setResults(runResults);
         ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).fireTableDataChanged();

@@ -31,8 +31,10 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -65,6 +67,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
@@ -91,72 +94,42 @@ public class EditProblemPane extends JPanePlugin {
 
     private static boolean debug22EditProblem = false;
 
-    /**
-     *  
-     */
     private static final long serialVersionUID = -1060536964672397704L;
 
     private JPanel messagePane = null;
-
     private JPanel buttonPane = null;
-
     private JButton addButton = null;
-
     private JButton updateButton = null;
-
     private JButton cancelButton = null;
-
     private JLabel messageLabel = null;
 
     /**
      * The original/input problem.
      */
-    private Problem problem = null; // @jve:decl-index=0:
-
-    private JTabbedPane mainTabbedPane = null;
-
-    private JPanel generalPane = null;
+    private Problem problem = null; 
     
+    private JTabbedPane mainTabbedPane = null;
+    private JPanel generalPane = null;
     private ProblemGroupPane problemGroupPane = null;
-
     private JPanel judgingTypePane = null;
-
     private JTextField problemNameTextField = null;
-
     private JTextField timeOutSecondTextField = null;
-
     private JTextField problemLetterTextField = null;
-
     private JCheckBox problemRequiresDataCheckBox = null;
-
     private JPanel dataProblemPane = null;
-
     private JPanel readsFromPane = null;
-
     private JPanel inputDataFilePane = null;
-
     private JRadioButton stdinRadioButton = null;
-
     private JRadioButton fileRadioButton = null;
-
     private JPanel fileNamePane = null;
-
     private JButton selectFileButton = null;
-
     private JCheckBox judgesHaveAnswerFiles = null;
-
     private JPanel answerFilePane = null;
-
     private JPanel answerFilenamePane = null;
-
     private JButton answerBrowseButton = null;
-
     protected JLabel inputDataFileLabel = null;
-
     private JLabel answerFileNameLabel = null;
-
     private JLabel problemNameLabel = null;
-
     private JLabel timeoutLabel = null;
 
     /**
@@ -167,7 +140,9 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * last directory where searched for files.
      */
-    private String lastDirectory; // @jve:decl-index=0:
+//    private String lastDirectory; 
+    //TODO: remove the following testing line; replace with the above line...
+    private String lastDirectory = "C:\\clevengr\\contest\\PC2\\v9\\TestContests\\sumithello2\\config\\sumit";
 
     @SuppressWarnings("unused")
     private String lastYamlLoadDirectory;
@@ -176,7 +151,6 @@ public class EditProblemPane extends JPanePlugin {
      * The current/original data files, used to compare with changes.
      */
     protected ProblemDataFiles originalProblemDataFiles;
-
     protected ProblemDataFiles newProblemDataFiles;
 
     private ButtonGroup teamReadsFrombuttonGroup = null; // @jve:decl-index=0:visual-constraint="586,61"
@@ -187,53 +161,31 @@ public class EditProblemPane extends JPanePlugin {
     private JPanel outputValidatorPane = null;
 
     private JRadioButton useNOValidatatorRadioButton = null;
-
     private JRadioButton usePC2ValidatorRadioButton = null;
-
     private JRadioButton useCLICSValidatorRadioButton = null;
-
     private JRadioButton useCustomValidatorRadioButton = null;
-
     private JCheckBox showValidatorToJudgesCheckBox = null;
-
     private JCheckBox isCLICSCaseSensitiveCheckBox = null;
-
     private JCheckBox isCLICSSpaceSensitiveCheckBox = null;
-
     private JCheckBox showCompareCheckBox = null;
-
     private JCheckBox doShowOutputWindowCheckBox = null;
-
     private ButtonGroup validatorChoiceButtonGroup = null; // @jve:decl-index=0:visual-constraint="595,128"
 
     private static final String NL = System.getProperty("line.separator");
 
     private JRadioButton computerJudgingRadioButton = null;
-
     private JRadioButton manualJudgingRadioButton = null;
-
     private JCheckBox manualReviewCheckBox = null;
-
     private JCheckBox prelimaryNotificationCheckBox = null;
-
     private JCheckBox deleteProblemCheckBox = null;
-
     private boolean listenersAdded = false;
-
     private JButton loadButton = null;
-
     private ContestSnakeYAMLLoader loader = null;
-
     private JButton exportButton = null;
-
     private JButton reportButton = null;
-
     private MultipleDataSetPane multipleDataSetPane = null;
-
     private JPanel judgeTypeInnerPane = null;
-
     private JTextField shortNameTextfield;
-
     private String fileNameOne;
 
     // the panel holding the "Do not use validator" radio button
@@ -241,72 +193,47 @@ public class EditProblemPane extends JPanePlugin {
 
     // the panel holding the "use CLICS default validator" radio button and the corresponding options panel
     private JPanel clicsValidatorPanel = null;
-
     private JPanel clicsValidatorOptionsSubPanel = null;
 
     private JCheckBox floatRelativeToleranceCheckBox;
-
     private JTextField floatRelativeToleranceTextField;
-
     private JCheckBox floatAbsoluteToleranceCheckBox;
-
     private JTextField floatAbsoluteToleranceTextField;
 
     // the panel holding the "use custom validator" radio button and the corresponding options panel
     private JPanel customValidatorPanel = null;
 
     private JPanel customValidatorOptionsSubPanel;
-
     private JLabel customValidatorProgramNameLabel;
-
     private JTextField customValidatorProgramNameTextField;
-
     private JButton chooseValidatorProgramButton = null;
-
     private JLabel customValidatorCommandLineLabel = null;
-
     private JTextField customValidatorCommandLineTextField = null;
-
     private Component horizontalStrut;
-
     private Component verticalStrut;
-
     private Component verticalStrut_1;
-
     private Component verticalStrut_2;
-
     private Component verticalStrut_3;
-
     private Component verticalStrut_4;
-
     private Component verticalStrut_5;
-
     private JPanel pc2ValidatorPanel;
-
     private JPanel pc2ValidatorOptionsSubPanel;
-
     private JLabel pc2ValidatorOptionComboBoxLabel;
-
     private JComboBox<String> pc2ValidatorOptionComboBox;
-
     private JCheckBox pc2ValidatorIgnoreCaseCheckBox;
-
     private JLabel lblWhatsThisCLICSValidator;
 
     // a temporary variables to track changes in the command line
     private String localPC2InterfaceCustomValidatorCommandLine;
-
     private String localClicsInterfaceCustomValidatorCommandLine;
 
     private boolean showMissingInputValidatorWarningOnAddProblem = true;
-
-    // private boolean showMissingInputValidatorWarningOnUpdateProblem = true;
-    //
-    // private boolean showMissingInputValidatorProgramNameOnUpdateProblem = true;
-
     private boolean showMissingInputValidatorProgramNameOnAddProblem = true;
+    private boolean showMissingInputValidatorWarningOnUpdateProblem = true;
+    private boolean showMissingInputValidatorProgramNameOnUpdateProblem = true;
 
     private Log log;
+
 
     /**
      * Constructs an EditProblemPane with default settings.
@@ -474,14 +401,21 @@ public class EditProblemPane extends JPanePlugin {
             return;
         }
 
-        // if (showMissingInputValidatorWarningOnAddProblem && (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals(""))
-        // && (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals("")) && (getProblemRequiresDataCheckBox().isSelected())) {
-
-        if (showMissingInputValidatorWarningOnAddProblem && (getInputValidatorPane().getInputValidatorFile() == null) && (getProblemRequiresDataCheckBox().isSelected())) {
+        //warn if the problem has input data files but no Input Validator, unless the user has previously disabled this warning
+        if (showMissingInputValidatorWarningOnAddProblem && getProblemRequiresDataCheckBox().isSelected()
+                && (getInputValidatorPane().getUseNoInputValidatorRadioButton().isSelected()  //the problem explicitly says "no IV"
+                    || (getInputValidatorPane().getCustomInputValidatorFile() == null
+                         && (getInputValidatorPane().getVivaPatternTextArea().getText()==null 
+                             || getInputValidatorPane().getVivaPatternTextArea().getText().equals("") )
+                        )
+                   )
+            ) {
 
             // no input validator defined; issue a warning
-            String msg = "You are attempting to add a Problem which has no Input Data Validator." + "\n\nThis is usually not good practice because it provides no way to insure that the"
-                    + "\nJudge's data files meet the Problem Specification." + "\n\nAre you sure you want to do this?" + "\n\n";
+            String msg = "You are attempting to add a Problem which requires Input Data files but has no Input Data Validator." 
+                    + "\n\nThis is usually not good practice because it provides no way to insure that the"
+                    + "\nJudge's data files meet the Problem Specification." 
+                    + "\n\nAre you sure you want to do this?" + "\n\n";
 
             JCheckBox checkbox = new JCheckBox("Do not show this message again.");
 
@@ -496,7 +430,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         // check for the condition "missing Input Validator Program name even though there is an Input Validator Command defined"
-        if (showMissingInputValidatorProgramNameOnAddProblem && (getInputValidatorPane().getInputValidatorFile() == null)
+        if (showMissingInputValidatorProgramNameOnAddProblem && (getInputValidatorPane().getCustomInputValidatorFile() == null)
                 && (getInputValidatorPane().getCustomInputValidatorCommand()!=null && !getInputValidatorPane().getCustomInputValidatorCommand().equals(""))) {
 
             // no input validator program defined; issue a warning
@@ -584,26 +518,6 @@ public class EditProblemPane extends JPanePlugin {
         int numberProblems = getContest().getProblems().length;
         String nextLetter = Utilities.getProblemLetter(numberProblems + 1);
         newProblem.setLetter(nextLetter);
-
-        // add the current input validation status to the problem (this field is not displayed in the GUI, except indirectly via
-        // the "Status message" text...)
-        newProblem.setInputValidationStatus(this.getInputValidationStatus());
-
-        // if an Input Validator was run, add the results to the problem
-        if (getInputValidatorPane().isInputValidatorHasBeenRun()) {
-            InputValidationResult[] runResults = getInputValidatorPane().getRunResults();
-            if (runResults != null) {
-                newProblem.clearInputValidationResults();
-                for (int i = 0; i < runResults.length; i++) {
-                    // update the Problem in the current result (it would not have been filled in when adding a problem; it was null)
-                    runResults[i].setProblem(newProblem);
-                    // put the updated result into the problem
-                    newProblem.addInputValidationResult(runResults[i]);
-                }
-            } else {
-                getController().getLog().log(Log.WARNING, "'Input Validator has been run' flag is set but results are null");
-            }
-        }
 
         // set the flag indicating whether execution of problem submissions should stop on the first failed test case
         newProblem.setStopOnFirstFailedTestCase(getMultipleDataSetPane().getChckbxStopOnFirstFailedTestCase().isSelected());
@@ -820,9 +734,9 @@ public class EditProblemPane extends JPanePlugin {
                     }
 
                     // see if the Custom Validator options have changed; enable the Update button and update the tooltip if so
-                    if (problem.getCustomValidatorSettings() != null && changedProblem.getCustomValidatorSettings() != null) {
-                        CustomValidatorSettings problemSettings = problem.getCustomValidatorSettings();
-                        CustomValidatorSettings changedProblemSettings = changedProblem.getCustomValidatorSettings();
+                    if (problem.getCustomOutputValidatorSettings() != null && changedProblem.getCustomOutputValidatorSettings() != null) {
+                        CustomValidatorSettings problemSettings = problem.getCustomOutputValidatorSettings();
+                        CustomValidatorSettings changedProblemSettings = changedProblem.getCustomOutputValidatorSettings();
                         boolean changed = false;
                         // check for changes in the command line
                         if ((problemSettings.getCustomValidatorCommandLine() == null ^ changedProblemSettings.getCustomValidatorCommandLine() == null)) {
@@ -872,13 +786,41 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
 
-                    // check for changes in Custom Input Validator settings
-                    if (!problem.getInputValidatorProgramName().equals(changedProblem.getInputValidatorProgramName())) {
+                    //check if Input Validator changed
+                    if (!problem.getCurrentInputValidatorType().equals(changedProblem.getCurrentInputValidatorType())) {
                         enableButton = true;
                         if (updateToolTip.equals("")) {
-                            updateToolTip = "Custom Input Validator";
+                            updateToolTip = "Input Validator Type";
                         } else {
-                            updateToolTip += ", Custom Input Validator";
+                            updateToolTip += ", Input Validator Type";
+                        }
+                    }
+
+                    // check for changes in Custom Input Validator settings
+                    if (!problem.isProblemHasCustomInputValidator()==changedProblem.isProblemHasCustomInputValidator()) {
+                        enableButton = true;
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Has Custom Input Validator";
+                        } else {
+                            updateToolTip += ", Has Custom Input Validator";
+                        }
+                    }
+                    
+                    if (!problem.getCustomInputValidationStatus().equals(changedProblem.getCustomInputValidationStatus())) {
+                        enableButton = true;
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Custom Input Validation Status";
+                        } else {
+                            updateToolTip += ", Custom Input Validation Status";
+                        }
+                    }
+
+                    if (!problem.getCustomInputValidatorProgramName().equals(changedProblem.getCustomInputValidatorProgramName())) {
+                        enableButton = true;
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Custom Input Validator Program";
+                        } else {
+                            updateToolTip += ", Custom Input Validator Program";
                         }
                     }
 
@@ -891,35 +833,72 @@ public class EditProblemPane extends JPanePlugin {
                         }
                     }
                     
-                    //check for changes in Viva Input Validator pattern
+                    if (!problem.isCustomInputValidatorHasBeenRun()==changedProblem.isCustomInputValidatorHasBeenRun()) {
+                        enableButton = true;
+                        //the original problem and the GUI differ as to whether the Custom Validator has been run.
+                        //This means either the problem originally had a Custom Validator which was run, and now a new Custom Validator
+                        // has been assigned but has not been run, or else the problem did NOT have a Custom Validator which was run
+                        // but now there has been a Custom Validator which has been run.  Update the tooltip to reflect which of 
+                        // these conditions is true.
+                        String msg ;
+                        if (!changedProblem.isCustomInputValidatorHasBeenRun()) {
+                            msg = "Custom Input Validator Has Not Been Run"; //
+                        } else {
+                            msg = "Custom Input Validator Has Been Run";
+                        }
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = msg;
+                        } else {
+                            updateToolTip += ", " + msg;
+                        }
+                    }
+
+                    //TODO: should the following Custom Input Validator settings also be checked?
+//                    private String customInputValidatorFilesOnDiskFolderName = "";   
+//                    private SerializedFile customInputValidatorSerializedFile = null;
+//                    private Vector<InputValidationResult> customInputValidationResults ;
+                    
+
+                    //check for changes in Viva Input Validator settings
+                    if (!problem.isProblemHasVivaInputValidatorPattern()==changedProblem.isProblemHasVivaInputValidatorPattern()) {
+                        enableButton = true;
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "Has VIVA Pattern";
+                        } else {
+                            updateToolTip += ", Has VIVA Pattern";
+                        }
+                    }
+
                     if (!Arrays.equals(problem.getVivaInputValidatorPattern(),changedProblem.getVivaInputValidatorPattern())) {
                         enableButton = true;
                         if (updateToolTip.equals("")) {
-                            updateToolTip = "Viva Input Validator pattern";
+                            updateToolTip = "VIVA Pattern";
                         } else {
-                            updateToolTip += ", Viva Input Validator pattern";
+                            updateToolTip += ", VIVA Pattern";
                         }
                     }
                    
-                    //check for changes in the status of running an Input Validator
-                    if (!(problem.getInputValidationStatus() == this.getInputValidationStatus())) {
+                    if (!problem.isVivaInputValidatorHasBeenRun()==changedProblem.isVivaInputValidatorHasBeenRun()) {
                         enableButton = true;
                         if (updateToolTip.equals("")) {
-                            updateToolTip = "Input Validator Results";
+                            updateToolTip = "VIVA Input Validator Run";
                         } else {
-                            updateToolTip += ", Input Validator Results";
+                            updateToolTip += ", VIVA Input Validator Run";
+                        }
+                    }
+
+                    if (!(problem.getVivaInputValidationStatus() == changedProblem.getVivaInputValidationStatus())) {
+                        enableButton = true;
+                        if (updateToolTip.equals("")) {
+                            updateToolTip = "VIVA Input Validation Status";
+                        } else {
+                            updateToolTip += ", VIVA Input Validation Status";
                         }
 
                     }
 
-                    if (getInputValidatorPane().isInputValidatorHasBeenRun()) {
-                        enableButton = true;
-                        if (updateToolTip.equals("")) {
-                            updateToolTip = "Input Validator Run";
-                        } else {
-                            updateToolTip += ", Input Validator Run";
-                        }
-                    }
+                    //TODO: should the folowing VIVA Input validator settings also be checked?
+//                    private Vector<InputValidationResult> vivaInputValidationResults ;
 
                     if (fileChanged > 0) {
                         if (fileChanged == 1) {
@@ -1019,8 +998,9 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Create a Problem from the fields in this GUI. This method assumes the data in the GUI fields has already been validated (i.e., the GUI values define a legitimate, complete Problem); while the
-     * method does do some sanity checking it should not be assumed to have completely verified the validity of the GUI data.
+     * Create a Problem from the fields in this GUI. This method assumes the data in the GUI fields has already been validated 
+     * (i.e., the GUI values define a legitimate, complete Problem); while the method does do some sanity checking 
+     * it should not be assumed to have completely verified the validity of the GUI data.
      * 
      * This method also populates newProblemDataFiles for the data files.
      * 
@@ -1193,7 +1173,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         checkProblem.setReadInputDataFromSTDIN(getStdinRadioButton().isSelected());
-
+        
         // set the flag indicating which output validator (if any) is being used in the Problem
         VALIDATOR_TYPE validatorType;
         validatorType = getValidatorTypeFromUI();
@@ -1202,9 +1182,9 @@ public class EditProblemPane extends JPanePlugin {
         // update settings in the Problem for each type of output validator:
         checkProblem.setPC2ValidatorSettings(getPC2ValidatorSettingsFromFields());
         checkProblem.setCLICSValidatorSettings(getCLICSValidatorSettingsFromFields());
-        checkProblem.setCustomValidatorSettings(getCustomValidatorSettingsFromFields());
+        checkProblem.setCustomOutputValidatorSettings(getCustomValidatorSettingsFromFields());
 
-        // if Custom Validator is selected, make sure we have a SerializedFile for the Validator
+        // if Custom Output Validator is selected, make sure we have a SerializedFile for the Validator
         // (the PC2 and CLICS Validators use internal PC2 classes and don't need a separate SerializedFile)
         if (getUseCustomValidatorRadioButton().isSelected()) {
             String guiOutputValidatorFileName = getCustomValidatorExecutableProgramTextField().getText();
@@ -1254,49 +1234,81 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
 
-        // update Custom Input Validator Program settings from GUI
-        // start with a default assumption of no Custom Input Validator
-        checkProblem.setProblemHasCustomInputValidator(false);
-        checkProblem.setInputValidatorProgramName("");
-        checkProblem.setInputValidatorCommandLine("");
+        //Update Input Validator settings in checkProblem from the InputValidatorPane GUI:
 
-        /**
-         * The custom input validator serialized file from the inputvalidatorpane
-         */
-        SerializedFile inputValidatorSF = getInputValidatorPane().getInputValidatorFile();
+        //update currently-selected Input Validator Type
+        checkProblem.setCurrentInputValidatorType(getInputValidatorPane().getCurrentInputValidatorType());
+        
+        //update Custom Input Validator serialized file
+        //Note: the serialized file is not displayed in the GUI, but it is a field in the InputValidatorPane
+        // (or more correctly, in the DefineCustomInputValidatorPane within the InputValidatorPane)
+        SerializedFile inputValidatorSF = getInputValidatorPane().getCustomInputValidatorFile();
         if (inputValidatorSF != null) {
 
-            checkProblem.setInputValidatorProgramName(inputValidatorSF.getName());
+            checkProblem.setCustomInputValidatorSerializedFile(inputValidatorSF);
             newProblemDataFiles.setInputValidatorFile(inputValidatorSF);
 
-            // mark the problem as having an input validator
+            // mark the problem as having a Custom input validator
             checkProblem.setProblemHasCustomInputValidator(true);
         } else {
-            checkProblem.setInputValidatorProgramName(null);
+            checkProblem.setCustomInputValidatorSerializedFile(null);
             newProblemDataFiles.setInputValidatorFile(null);
 
-            // mark the problem as having an input validator
+            // mark the problem as not having a Custom input validator
             checkProblem.setProblemHasCustomInputValidator(false);
         }
+                        
+        //update Custom Input Validator Command
+        String inputValidatorCommand = getInputValidatorPane().getCustomInputValidatorCommand();
+        checkProblem.setCustomInputValidatorCommandLine(inputValidatorCommand);
+        
+        //update Custom Input Validator has been run status
+        checkProblem.setCustomInputValidatorHasBeenRun(getInputValidatorPane().isCustomInputValidatorHasBeenRun());
 
-        // update Input Validator Command from GUI
-        // Note that a problem is deemed to "have an Input Validator" if it has EITHER an Input Validator Program name
-        // OR an Input Validator Command line (or both)
-        String inputValCommand = getInputValidatorPane().getCustomInputValidatorCommand();
-        if (inputValCommand != null && !inputValCommand.equals("")) {
-            checkProblem.setInputValidatorCommandLine(inputValCommand);
-            checkProblem.setProblemHasCustomInputValidator(true);
-        }
+        //update Custom Input Validator run result status
+        checkProblem.setCustomInputValidationStatus(getInputValidatorPane().getCustomInputValidationStatus());
 
-        //update the VIVA Input Validator pattern
-        String [] pattern = getInputValidatorPane().getVivaPatternTextArea().getText().split("\\r?\\n");
+        //update Custom Input Validation results
+        checkProblem.clearCustomInputValidationResults();
+        InputValidationResult [] currentCustomResults = getInputValidatorPane().getCustomInputValidatorResults();
+        if (currentCustomResults != null) {
+            for (int i = 0; i < currentCustomResults.length; i++) {
+                //TODO: the following code, setting the Problem in the run result, was from an older version; is this still necessary?
+//              // update the Problem in the current result (it would not have been filled in when adding a problem; it was null)
+//              runResults[i].setProblem(newProblem);
+                checkProblem.addCustomInputValidationResult(currentCustomResults[i]);
+            }
+        } 
+
+        //Update Viva Input Validator settings in checkProblem from GUI:
+        
+
+        //update Has Viva Pattern flag
+        checkProblem.setProblemHasVivaInputValidatorPattern(getInputValidatorPane().isProblemHasVivaInputValidatorPattern());
+        
+        //update Viva Input Validator pattern
+        String [] pattern = getInputValidatorPane().getVivaPatternText().split("\\r?\\n");
         checkProblem.setVivaInputValidatorPattern(pattern);
         
-        // Status of running an Input Validator
-        checkProblem.setInputValidationStatus(this.getInputValidationStatus());
+        //update Viva has been run flag
+        checkProblem.setVivaInputValidatorHasBeenRun(getInputValidatorPane().isVivaInputValidatorHasBeenRun());
+        
+        //update Viva run result status
+        checkProblem.setVivaInputValidationStatus(getInputValidatorPane().getVivaInputValidationStatus());
+        
+        //update Viva Input Validation results
+        checkProblem.clearVivaInputValidationResults();
+        InputValidationResult [] currentVivaResults = getInputValidatorPane().getVivaInputValidatorResults();
+        if (currentVivaResults != null) {
+            for (int i = 0; i < currentVivaResults.length; i++) {
+                //TODO: the following code, setting the Problem in the run result, was from an older version; is this still necessary?
+//              // update the Problem in the current result (it would not have been filled in when adding a problem; it was null)
+//              runResults[i].setProblem(newProblem);
+                checkProblem.addVivaInputValidationResult(currentVivaResults[i]);
+            }
+        } 
 
-        // TODO: save into checkProblem any Results from having run the input validator...
-
+        
         // update Judging Type settings from GUI
         // TODO: should be using accessors instead of hard references for these buttons and checkboxes...
         checkProblem.setComputerJudged(computerJudgingRadioButton.isSelected());
@@ -1494,10 +1506,12 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Updates an existing contest Problem with the values specified by the current GUI fields. This method is invoked by pushing the "Update" button on the EditProblemPane GUI after having entered
+     * Updates an existing contest Problem with the values specified by the current GUI fields. 
+     * This method is invoked by pushing the "Update" button on the EditProblemPane GUI after having entered
      * into the GUI the new (updated) values for the problem being edited.
      * 
-     * The method also gets invoked by making GUI changes to an existing problem definition, then pressing "Cancel" (which displays a message "Problem Modified - Save Changes?") and responding "Yes"
+     * The method also gets invoked by making GUI changes to an existing problem definition, 
+     * then pressing "Cancel" (which displays a message "Problem Modified - Save Changes?") and responding "Yes"
      * to the message.
      * 
      */
@@ -1511,47 +1525,55 @@ public class EditProblemPane extends JPanePlugin {
             return;
         }
 
-        // TODO must do - handle update conditions just like Add does
+        //warn if the problem has input data files but no Input Validator, unless the user has previously disabled this warning
+        if (showMissingInputValidatorWarningOnUpdateProblem  && getProblemRequiresDataCheckBox().isSelected()
+                && (getInputValidatorPane().getUseNoInputValidatorRadioButton().isSelected()  //the problem explicitly says "no IV"
+                    || (getInputValidatorPane().getCustomInputValidatorFile() == null
+                         && (getInputValidatorPane().getVivaPatternTextArea().getText()==null 
+                             || getInputValidatorPane().getVivaPatternTextArea().getText().equals("") )
+                        )
+                   )
+            ) {
 
-        // // check the condition of missing both Input Validator Program AND Input Validator Command
-        // if (showMissingInputValidatorWarningOnUpdateProblem && (getInputValidatorPane().getInputValidatorProgramName() == null || getInputValidatorPane().getInputValidatorProgramName().equals(""))
-        // && (getInputValidatorPane().getInputValidatorCommand() == null || getInputValidatorPane().getInputValidatorCommand().equals("")) && (getProblemRequiresDataCheckBox().isSelected())) {
-        // // no input validator entries defined; issue a warning
-        // String message = "You are attempting to update a Problem which has no Input Data Validator." + "\n\nThis is usually not good practice because it provides no way to insure that the"
-        // + "\nJudge's data files meet the Problem Specification." + "\n\nAre you sure you want to do this?" + "\n\n";
-        //
-        // JCheckBox checkbox = new JCheckBox("Do not show this message again.");
-        //
-        // int response = displayWarningDialogWithCheckbox(getParentFrame(), message, checkbox, "No Input Validator specified");
-        //
-        // if (checkbox.isSelected()) {
-        // showMissingInputValidatorWarningOnUpdateProblem = false;
-        // }
-        // if (!(response == JOptionPane.YES_OPTION)) {
-        // return;
-        // }
-        // }
-        //
-        // // check the condition of missing Input Validator Program name even though there is an Input Validator Command defined
-        // if (showMissingInputValidatorProgramNameOnUpdateProblem && (getInputValidatorPane().getInputValidatorProgramName() == null
-        // || getInputValidatorPane().getInputValidatorProgramName().equals(""))
-        // && (getInputValidatorPane().getInputValidatorCommand() != null && !getInputValidatorPane().getInputValidatorCommand().equals(""))) {
-        // // no input validator program defined; issue a warning
-        // String message = "You are attempting to update a problem with an Input Data Validator command but no Input Validator Program name." + "\n\nAre you sure this is what you intended to do?"
-        // + "\n\n";
-        //
-        // JCheckBox checkbox = new JCheckBox("Do not show this message again.");
-        //
-        // int response = displayWarningDialogWithCheckbox(getParentFrame(), message, checkbox, "No Input Validator Program Name specified");
-        //
-        // if (checkbox.isSelected()) {
-        // showMissingInputValidatorProgramNameOnUpdateProblem = false;
-        // }
-        // if (!(response == JOptionPane.YES_OPTION)) {
-        // return;
-        // }
-        // }
+            // no input validator defined; issue a warning
+            String msg = "You are attempting to update a Problem to a state where it requires Input Data files but has no Input Data Validator." 
+                    + "\n\nThis is usually not good practice because it provides no way to insure that the"
+                    + "\nJudge's data files meet the Problem Specification." 
+                    + "\n\nAre you sure you want to do this?" + "\n\n";
 
+            JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+
+            int response = displayWarningDialogWithCheckbox(getParentFrame(), msg, checkbox, "No Input Validator specified");
+
+            if (checkbox.isSelected()) {
+                showMissingInputValidatorWarningOnUpdateProblem = false;
+            }
+            if (!(response == JOptionPane.YES_OPTION)) {
+                return;
+            }
+        }
+
+        // check for the condition "missing Custom Input Validator Program name even though there is a Custom Input Validator Command defined"
+        if (showMissingInputValidatorProgramNameOnUpdateProblem 
+                && (getInputValidatorPane().getCustomInputValidatorProgramName()==null || getInputValidatorPane().getCustomInputValidatorProgramName().equals(""))
+                && (getInputValidatorPane().getCustomInputValidatorCommand()!=null && !getInputValidatorPane().getCustomInputValidatorCommand().equals(""))) {
+
+            // no input validator program defined; issue a warning
+            String message = "You are attempting to update a Problem to a state where it has an Input Data Validator command but no Input Validator Program name." 
+                        + "\n\nAre you sure this is what you intended to do?"
+                        + "\n\n";
+
+            JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+
+            int response = displayWarningDialogWithCheckbox(getParentFrame(), message, checkbox, "No Input Validator Program Name specified");
+
+            if (checkbox.isSelected()) {
+                showMissingInputValidatorProgramNameOnUpdateProblem = false;
+            }
+            if (!(response == JOptionPane.YES_OPTION)) {
+                return;
+            }
+        }
         // all the GUI fields are valid; create a new Problem from them
         Problem newProblem = null;
 
@@ -1642,22 +1664,6 @@ public class EditProblemPane extends JPanePlugin {
             newProblem.setLetter(letter);
         }
 
-        // add the status of Input Validation (note: validation status is not displayed in the GUI)
-        newProblem.setInputValidationStatus(this.getInputValidationStatus());
-
-        // if an Input Validator was run, add the results to the problem
-        if (getInputValidatorPane().isInputValidatorHasBeenRun()) {
-            InputValidationResult[] runResults = getInputValidatorPane().getRunResults();
-            if (runResults != null) {
-                newProblem.clearInputValidationResults();
-                for (int i = 0; i < runResults.length; i++) {
-                    newProblem.addInputValidationResult(runResults[i]);
-                }
-            } else {
-                getController().getLog().log(Log.WARNING, "'Input Validator has been run' flag is set but results are null");
-            }
-        }
-
         // set the flag indicating whether execution of problem submissions should stop on the first failed test case
         newProblem.setStopOnFirstFailedTestCase(getMultipleDataSetPane().getChckbxStopOnFirstFailedTestCase().isSelected());
 
@@ -1691,7 +1697,7 @@ public class EditProblemPane extends JPanePlugin {
         newProblemDataFiles = multipleDataSetPane.getProblemDataFiles();
 
         if (newProblemDataFiles != null) {
-            newProblemDataFiles.setInputValidatorFile(inputValidatorPane.getInputValidatorFile());
+            newProblemDataFiles.setInputValidatorFile(inputValidatorPane.getCustomInputValidatorFile());
         }
 
         if (debug22EditProblem) {
@@ -1773,7 +1779,7 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
-        // verify that if a Custom Validator has been selected, there is a Validator Program specified
+        // verify that if a Custom Output Validator has been selected, there is a Validator Program specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
             if (getCustomValidatorExecutableProgramTextField().getText() == null || getCustomValidatorExecutableProgramTextField().getText().trim().length() < 1) {
                 showMessage("\"Use Custom Validator\" is selected; you must specify Validator executable program (\"Output Validator\" tab)");
@@ -1781,7 +1787,7 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
-        // verify that if a Custom Validator has been selected, there is a Validator Command specified
+        // verify that if a Custom Output Validator has been selected, there is a Validator Command specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
             if (getCustomValidatorCommandLineTextField().getText() == null || getCustomValidatorCommandLineTextField().getText().trim().length() < 1) {
                 showMessage("\"Use Custom Validator\" is selected; you must specify Validator Command Line (\"Output Validator\" tab)");
@@ -1789,7 +1795,7 @@ public class EditProblemPane extends JPanePlugin {
             }
         }
 
-        // verify that if a Custom Validator has been selected, exactly one Validator Interface has been specified
+        // verify that if a Custom Output Validator has been selected, exactly one Validator Interface has been specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
             if (!(getUseClicsValStdRadioButton().isSelected() ^ getUsePC2ValStdRadioButton().isSelected())) { // ^ == XOR
                 showMessage("\"Use Custom Validator\" is selected; you must select exactly one Validator Interface (\"Output Validator\" tab)");
@@ -1849,20 +1855,34 @@ public class EditProblemPane extends JPanePlugin {
 
         }
 
-        // // verify that any Input Validator Program specified is a legitimate serializable file
-        // String inputValidatorProgName = getInputValidatorPane().getInputValidatorProgramName();
-        // if (!checkForInputValidatorProgramSerializationErrors(inputValidatorProgName)) {
-        // showMessage("Unable to access Input Validator Program ' " + inputValidatorProgName + " ' ; please enter a valid program file name");
-        // return false;
-        // }
+        //verify that if the Viva Input Validator has been selected then there is a Viva pattern provided
+        if (getInputValidatorPane().getUseVivaInputValidatorRadioButton().isSelected()) {
+            
+            String vivaPattern = getInputValidatorPane().getVivaPatternTextArea().getText();
+            if (vivaPattern==null || vivaPattern.trim().equals("")) {
+                showMessage ("The VIVA Input Validator has been selected; you must specify a VIVA pattern."); 
+                return false;
+            }
+        }
+        
+        //verify that if the Custom Input Validator button has been selected then there is a Custom Input Validator provided
+        if (getInputValidatorPane().getUseCustomInputValidatorRadioButton().isSelected()) {
+            
+            String customIVProgramName = getInputValidatorPane().getCustomInputValidatorProgramName();
+            if (customIVProgramName==null || customIVProgramName.equals("")) {
+                showMessage ("Custom Input Validator has been selected; you must choose a Custom Input Validator program."); 
+                return false;
+            }
+        }
+        
+       // verify that if a Custom Input Validator program has been specified, there is a command specified to invoke it.
+        // (Note that the reverse is NOT required; it would be legal to specify an Input Validator command with no 
+        // explicit program name -- for example, the command could contain the name of the program within the command)
+        if (getInputValidatorPane().getCustomInputValidatorFile() != null) {
 
-        // verify that if an Input Validator program has been specified, there is a command specified to invoke it.
-        // (Note that the reverse is NOT required; it would be legal to specify an Input Validator command with no explicit program name)
-        if (getInputValidatorPane().getInputValidatorFile() != null) {
-
-            if (getInputValidatorPane().getCustomInputValidatorCommand() == null || getInputValidatorPane().getCustomInputValidatorCommand().equals("")) {
-
-                showMessage("An Input Validator Program has been specified; you must also specify an Input Validator command line");
+            String customIVcommand = getInputValidatorPane().getCustomInputValidatorCommand();
+            if (customIVcommand == null || customIVcommand.equals("")) {
+                showMessage("A Custom Input Validator Program has been specified; you must also specify an Input Validator command line");
                 return false;
             }
         }
@@ -1973,7 +1993,7 @@ public class EditProblemPane extends JPanePlugin {
             public void run() {
 
                 try {
-                    getInputValidatorPane().setInputValidatorFile(problemDataFiles.getInputValidatorFile());
+                    getInputValidatorPane().setCustomInputValidatorFile(problemDataFiles.getInputValidatorFile());
                 } catch (Exception e) {
                     e.printStackTrace(System.err);
                     getLog().log(Log.INFO, "Could not load input validator file into Pane", e);
@@ -2168,7 +2188,6 @@ public class EditProblemPane extends JPanePlugin {
         } else {
             // we're populating for a new problem
             clearForm();
-            setInputValidationStatus(InputValidationStatus.NOT_TESTED);
         }
 
         enableOutputValidatorTabComponents();
@@ -2428,7 +2447,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         // update the Custom Validator settings in the GUI from the Problem
-        CustomValidatorSettings customSettings = inProblem.getCustomValidatorSettings().clone();
+        CustomValidatorSettings customSettings = inProblem.getCustomOutputValidatorSettings().clone();
         // System.out.println (customSettings);
         if (customSettings != null) {
 
@@ -2468,7 +2487,7 @@ public class EditProblemPane extends JPanePlugin {
             }
 
             // set the Command Line ToolTip to "same as Command Line"
-            getCustomValidatorCommandLineTextField().setToolTipText(inProblem.getCustomValidatorSettings().getCustomValidatorCommandLine());
+            getCustomValidatorCommandLineTextField().setToolTipText(inProblem.getCustomOutputValidatorSettings().getCustomValidatorCommandLine());
 
         } else {
             throw new InvalidFieldValue("EditProblemPane.initializeValidatorTabFields(): null Custom Validator Settings in received Problem");
@@ -2480,11 +2499,12 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * Sets the Input Validator pane fields from the specified Problem information.
+     * This method sets the fields on the Input Validator tab (whose contents are defined by class {@link InputValidatorPane})
+     * from the specified Problem information.
      * 
      * @param prob
-     *            - the problem used to set the pane data
-     * @param probDataFiles
+     *            - the problem used to set the InputValidatorPane data
+     * @param probDataFile
      *            - ProblemDataFiles associated with the specified Problem
      */
     private void initializeInputValidatorTabFields(Problem prob, ProblemDataFiles probDataFiles) {
@@ -2495,45 +2515,170 @@ public class EditProblemPane extends JPanePlugin {
             throw new RuntimeException("Attempt to initialize Input Validator tab fields from a null problem!");
         }
 
-        // fill in the input validator program name
-        String inputValidatorProg = prob.getInputValidatorProgramName();
-        if (inputValidatorProg != null) {
-            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramName(inputValidatorProg);
+        //initialize the current Input Validator type and radio buttons to correspond to the problem.
+        INPUT_VALIDATOR_TYPE currentInputValidatorType = prob.getCurrentInputValidatorType();
+        
+        if (currentInputValidatorType!=null) {
+            setCurrentInputValidatorType(currentInputValidatorType);
+
+            //enable (select) the Input Validator radio button corresponding to the current Input Validator type for the problem
+            //Note that since the radio buttons are in a ButtonGroup, setting any one of them automatically clears the others...           
+            switch (currentInputValidatorType) {
+                case NONE:
+                    getInputValidatorPane().getUseNoInputValidatorRadioButton().setSelected(true);
+                    break;
+                case VIVA:
+                    getInputValidatorPane().getUseVivaInputValidatorRadioButton().setSelected(true);
+                    break;
+                case CUSTOM:
+                    getInputValidatorPane().getUseCustomInputValidatorRadioButton().setSelected(true);
+                    break;
+                default:
+                    System.err.println("Internal error: currentInputValidatorType in problem is not an element of INPUT_VALIDATOR_TYPE enum."
+                            + "\nPlease report this issue to the PC2 Development Team (pc2@ecs.csus.edu)." + "\nSee log for additional information.");
+                    getController().getLog().severe("currentInputValidatorType in problem is not an element of INPUT_VALIDATOR_TYPE enum.");
+            }
+            
+            
         } else {
-            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorFile(null);
-            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramName("");
-            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramNameToolTipText(null);
+            //we should NEVER have a problem that has a null InputValidatorType - if no I.V. is defined, type should be "NONE"
+            String errMsg = "Internal error: currentInputValidatorType in problem is null."
+                    + "\nPlease report this issue to the PC2 Development Team (pc2@ecs.csus.edu)." 
+                    + "\nSee log for additional information." ;
+            System.err.println(errMsg);
+            JOptionPane.showMessageDialog(null, errMsg, "Internal Error", JOptionPane.ERROR_MESSAGE);
+            getController().getLog().severe("currentInputValidatorType in problem is null.");
+        }
+        
+        
+        //initialize the VIVA Input Validator GUI settings from the problem:
+        
+        //reset the Viva pattern text area
+        getInputValidatorPane().getVivaPatternTextArea().setText(null);
+        
+        //get the Viva pattern (if any) from the problem
+        String [] lines = prob.getVivaInputValidatorPattern();
+        
+        //copy the Viva pattern to the text area
+        if (lines != null) {
+            // add each line of new text to the text area
+            for (String line : lines) {
+                getInputValidatorPane().getVivaPatternTextArea().append(line + System.lineSeparator());
+            }
+        }
+        
+        //initialize the Viva-has-been-run flag
+        getInputValidatorPane().setVivaInputValidatorHasBeenRun(prob.isVivaInputValidatorHasBeenRun());
+        
+        //initialize the Viva validation status flag
+        setVivaInputValidationStatus(prob.getVivaInputValidationStatus()); // note: validation status variable is not displayed on the GUI
+
+        //initialize the Viva results
+        getInputValidatorPane().setVivaInputValidatorResults(prob.getVivaInputValidatorResults());
+
+
+        //initialize the Custom Input Validator GUI settings from the problem:
+        
+        //initialize the CustomInputValidator-has-been-run flag
+        getInputValidatorPane().setCustomInputValidatorHasBeenRun(prob.isCustomInputValidatorHasBeenRun());
+ 
+        //initialize the Custom validation status flag
+        setCustomInputValidationStatus(prob.getCustomInputValidationStatus()); // note: validation status variable is not displayed on the GUI
+
+        //initialize the Custom Input Validator results
+        getInputValidatorPane().setCustomInputValidatorResults(prob.getCustomInputValidatorResults());
+        
+        //clear Custom IV accumulating results (these are updated when the Custom IV is actually run)
+        getInputValidatorPane().resetCustomInputValidatorAccumulatingResults();
+
+        // fill in the custom input validator program name
+        String customInputValidatorProgName = prob.getCustomInputValidatorProgramName();
+        if (customInputValidatorProgName != null) {
+            getInputValidatorPane().setCustomInputValidatorProgramName(customInputValidatorProgName);
+        } else {
+            getInputValidatorPane().setCustomInputValidatorProgramName("");
         }
 
-        // update the tooltip to reflect the name in the text field
-        if (getInputValidatorPane().getInputValidatorFile() == null) {
+        //update the custom input validator serialized file and set the Program Name tooltip to its path
+        SerializedFile customValidatorFile = prob.getCustomInputValidatorSerializedFile();
+        getInputValidatorPane().setCustomInputValidatorFile(customValidatorFile);
+        
+        //the following is done by the call to method setCustomInputValidatorFile() (above); it does not need to be repeated
+//        if (customValidatorFile == null) {
+//            // set the tooltip as null (otherwise we get a little sliver of a empty-string tooltip)
+//            getInputValidatorPane().setCustomInputValidatorProgramNameToolTipText(null);
+//        } else {
+//            getInputValidatorPane().setCustomInputValidatorProgramNameToolTipText(customValidatorFile.getAbsolutePath());
+//        }
+
+        // fill in the Custom Input Validator command (that is, the command used to invoke the custom input validator program)
+        String customInputValidatorCmd = prob.getCustomInputValidatorCommandLine();
+        if (customInputValidatorCmd != null) {
+            getInputValidatorPane().setCustomInputValidatorCommand(customInputValidatorCmd);
+        } else {
+            getInputValidatorPane().setCustomInputValidatorCommand("");
+        }
+
+        // update the Input Validator Command text field tooltip to reflect the name in the command text field
+        // (Note: it's not really clear why we need to do this...)
+        if (customInputValidatorCmd == null || customInputValidatorCmd.equals("")) {
             // set the tooltip as null (otherwise we get a little sliver of a empty-string tooltip)
-            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramNameToolTipText(null);
+            getInputValidatorPane().setCustomInputValidatorCommandToolTipText(null);
         } else {
-            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramNameToolTipText(
-                    getInputValidatorPane().getInputValidatorFile().getAbsolutePath());
+            getInputValidatorPane().setCustomInputValidatorCommandToolTipText(customInputValidatorCmd);
         }
 
-        // fill in the input validator command
-        String inputValidatorCmd = prob.getCustomInputValidatorCommandLine();
-        if (inputValidatorCmd != null) {
-            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorCommand(inputValidatorCmd);
-        } else {
-            getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorCommand("");
+        // update the results table in the ResultsFrame:
+        INPUT_VALIDATOR_TYPE currentIVType = prob.getCurrentInputValidatorType();
+        switch (currentIVType) {
+            case VIVA:
+                updateIVResultsTable(prob.getVivaInputValidatorResults());
+                updateInputValidationStatusMessage(convertIterableInputValidationResultToArray(prob.getVivaInputValidatorResults()));
+                break;
+            case CUSTOM:
+                updateIVResultsTable(prob.getCustomInputValidatorResults());
+                updateInputValidationStatusMessage(convertIterableInputValidationResultToArray(prob.getCustomInputValidatorResults()));
+                break;
+            case NONE:
+                updateIVResultsTable(null);
+                updateInputValidationStatusMessage(null);
+                break;
+            default:
+                //we should NEVER have a problem that has an undefined inputValidatorType - if no I.V. is defined, type should be "NONE"
+                String errMsg = "Internal error: currentInputValidatorType in problem is not an element of INPUT_VALIDATOR_TYPE enum."
+                        + "\nPlease report this issue to the PC2 Development Team (pc2@ecs.csus.edu)." 
+                        + "\nSee log for additional information." ;
+                System.err.println(errMsg);
+                JOptionPane.showMessageDialog(null, errMsg, "Internal Error", JOptionPane.ERROR_MESSAGE);
+                getController().getLog().severe("currentInputValidatorType in problem is not an element of INPUT_VALIDATOR_TYPE enum.");
         }
+    }
 
-        // update the tooltip to reflect the name in the command text field
-        if (getInputValidatorPane().getCustomInputValidatorCommand() == null || getInputValidatorPane().getCustomInputValidatorCommand().equals("")) {
-            // set the tooltip as null (otherwise we get a little sliver of a empty-string tooltip)
-            getInputValidatorPane().setInputValidatorCommandToolTipText(null);
-        } else {
-            getInputValidatorPane().setInputValidatorCommandToolTipText(getInputValidatorPane().getCustomInputValidatorCommand());
+    /**
+     * This method updates the Input Validation Results JTable (contained in the ResultsFrame, referenced via the 
+     * {@link InputValidatorPane}) from the specified Iterable InputValidationResults.
+     * 
+     * @param results an Iterable containing the InputValidationResults to be displayed in the ResultsFrame JTable.
+     */
+    private void updateIVResultsTable(Iterable<InputValidationResult> results) {
+        
+        //null indicates there are no results because there is no Input Validator associated with the problem...
+        if (results==null) {
+            updateResultsTableModel(null);
+            return;
         }
-
-        // update the results table:
-        // get the number of results stored in the problem
-        int numResults = prob.getNumInputValidationResults();
-
+        
+        int numResults = 0;
+        
+        if (results instanceof Collection) {
+            numResults = ((Collection<?>) results).size();
+        } else {
+            System.err.println("Iterable<InputValidationResult> is not a Collection");
+            getController().getLog().severe("Iterable<InputValidationResult> is not a Collection");
+            updateResultsTableModel(null);
+            return;
+        }
+        
         // create an array with one element for each result
         InputValidationResult[] probInputValidationResults = new InputValidationResult[numResults];
 
@@ -2544,7 +2689,7 @@ public class EditProblemPane extends JPanePlugin {
 
         int i = 0;
         int j = 0;
-        for (InputValidationResult res : prob.getInputValidationResults()) {
+        for (InputValidationResult res : results) {
             if (!res.isPassed()) {
                 tmpProbInputValidationResultsFailed[i++] = res;
             }
@@ -2555,43 +2700,38 @@ public class EditProblemPane extends JPanePlugin {
         InputValidationResult[] probFailedInputValidationResults = new InputValidationResult[i];
         probFailedInputValidationResults = Arrays.copyOfRange(tmpProbInputValidationResultsFailed, 0, i);
 
-        // put the results into the GUI table
+        // put the results into the GUI table in the ResultsFrame
+        //TODO: why are we forcing the showOnlyFailedFiles checkbox true/false depending on the results? Shouldn't it be
+        // checked/not checked based on a Problem Setting?
         if (probFailedInputValidationResults.length == 0) {
             // there were no failed results; put the (all-successful) results into the GUI and un-select the show-only-failed checkbox
-            ((InputValidationResultsTableModel) getInputValidatorPane().getResultsTableModel()).setResults(probInputValidationResults);
+            updateResultsTableModel(probInputValidationResults);
             getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(false);
         } else {
             // put the failed results into the table and select the show-only-failed checkbox
-            ((InputValidationResultsTableModel) getInputValidatorPane().getResultsTableModel()).setResults(probFailedInputValidationResults);
+            updateResultsTableModel(probFailedInputValidationResults);
             getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(true);
         }
+    }
+    
+    /**
+     * Updates the {@link InputValidatorPane} results table with the specified results, and fires TableDataChanged.
+     * 
+     * @param results the Input Validation Results to be put into the results table.
+     */
+    private void updateResultsTableModel(InputValidationResult [] results) {
+        ((InputValidationResultsTableModel) getInputValidatorPane().getResultsTableModel()).setResults(results);
         ((InputValidationResultsTableModel) getInputValidatorPane().getResultsTableModel()).fireTableDataChanged();
-
-        // put results into global var used for updating the table
-        getInputValidatorPane().setRunResults(probInputValidationResults);
-
-        // set the Status message based on the status in the specified problem
-        updateInputValidationStatusMessage(probInputValidationResults);
-
-        if (prob.getNumInputValidationResults() > 0) {
-            getInputValidatorPane().setInputValidatorHasBeenRun(true);
-        } else {
-            getInputValidatorPane().setInputValidatorHasBeenRun(false);
-        }
-
-        setInputValidationStatus(prob.getInputValidationStatus()); // note: validation status variable is not displayed on the GUI
     }
 
     /**
-     * Sets the Input Validation Status message on the Input Validator pane.
+     * Sets the Input Validation Status message on the ResultFrame referenced by the Input Validator pane.
      * 
      * @param results
-     *            an array contain the Input Validation Result values which determine what the status message should display
+     *            an array containing the Input Validation Result values which determine what status message to display
      */
     protected void updateInputValidationStatusMessage(InputValidationResult[] results) {
-
         getInputValidatorPane().updateInputValidationStatusMessage(results);
-
     }
 
     /**
@@ -2820,6 +2960,7 @@ public class EditProblemPane extends JPanePlugin {
         getSelectFileButton().setEnabled(enableButtons);
         getInputDataFilePane().setEnabled(enableButtons);
         getFileNamePane().setEnabled(enableButtons);
+        //why are the following repeated?? jlc
         getInputDataFilePane().setEnabled(enableButtons);
         getFileNamePane().setEnabled(enableButtons);
     }
@@ -3226,12 +3367,9 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     private void enableInputValidatorTabComponents() {
-        getInputValidatorPane().setInputValidatorHasBeenRun(false);
-
+//        getInputValidatorPane().setCustomInputValidatorHasBeenRun(false);
+//        getInputValidatorPane().setVivaInputValidatorHasBeenRun(false);
         getInputValidatorPane().updateInputValidatorPaneComponents();
-        
-        // TODO: this method should also disable the "Run Input Validator" button -- but the issue under what conditions
-        // it should subsequently be ENABLED...
     }
 
     protected void enableOutputValidatorTabComponents() {
@@ -3988,24 +4126,40 @@ public class EditProblemPane extends JPanePlugin {
 
     }
 
+    /**
+     * This method initializes the "Input Validator tab" (whose contents are defined by class {@link InputValidatorPane})
+     * to the default initial settings in preparation for defining a new contest problem.
+     */
     private void initializeInputValidatorTabFields() {
 
-        getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramName("");
-        getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorProgramNameToolTipText(null);
-        getInputValidatorPane().setInputValidatorFile(null);
-        getInputValidatorPane().getCustomInputValidatorProgramPanel().setInputValidatorCommand("");
-        getInputValidatorPane().setInputValidatorCommandToolTipText(null);
+        //initialize to "No Input Validator"
+        getInputValidatorPane().getUseNoInputValidatorRadioButton().setSelected(true);
+        getInputValidatorPane().getUseVivaInputValidatorRadioButton().setSelected(false);
+        getInputValidatorPane().getUseCustomInputValidatorRadioButton().setSelected(false);
+        getInputValidatorPane().setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE.NONE);
+        
+        //initialize all Viva settings to defaults
+        getInputValidatorPane().setVivaInputValidatorHasBeenRun(false);
+        getInputValidatorPane().setVivaInputValidatorResults(new InputValidationResult[0]);
+        getInputValidatorPane().setVivaInputValidationStatus(InputValidationStatus.UNKNOWN);
+        getInputValidatorPane().getVivaPatternTextArea().setText("");
+        
+        //initialize all Custom IV settings to defaults
+        getInputValidatorPane().setCustomInputValidatorHasBeenRun(false);
+        getInputValidatorPane().setCustomInputValidatorResults(new InputValidationResult[0]);
+        getInputValidatorPane().setCustomInputValidationStatus(InputValidationStatus.UNKNOWN);
+        getInputValidatorPane().setCustomInputValidatorProgramName("");
+        getInputValidatorPane().setCustomInputValidatorProgramNameToolTipText(null);
+        getInputValidatorPane().setCustomInputValidatorFile(null);
+        getInputValidatorPane().setCustomInputValidatorCommand("");
+        getInputValidatorPane().setCustomInputValidatorCommandToolTipText(null);
 
+        //initialize Result Frame settings
         getInputValidatorPane().setInputValidationSummaryMessageText("<No Input Validation test run yet>");
         getInputValidatorPane().setInputValidationSummaryMessageColor(Color.BLACK);
         getInputValidatorPane().getShowOnlyFailedFilesCheckbox().setSelected(false);
         ((InputValidationResultsTableModel) getInputValidatorPane().getResultsTableModel()).setResults(null);
         ((InputValidationResultsTableModel) getInputValidatorPane().getResultsTableModel()).fireTableDataChanged();
-        // put results into global var used for updating the table
-        getInputValidatorPane().setRunResults(null);
-
-        getInputValidatorPane().setInputValidatorHasBeenRun(false);
-
     }
 
     private void initializeOutputValidatorTabFields() {
@@ -4967,11 +5121,11 @@ public class EditProblemPane extends JPanePlugin {
                 public void actionPerformed(ActionEvent e) {
                     // switching to Use PC2 Standard Interface for this Custom Validator;
                     // check to see if we are editing a problem which might already have a PC2 Interface Validator Command Line
-                    if (problem != null && problem.getCustomValidatorSettings() != null && problem.getCustomValidatorSettings().isUsePC2ValidatorInterface()
-                            && problem.getValidatorCommandLine() != null && problem.getValidatorCommandLine().trim().length() > 0) {
+                    if (problem != null && problem.getCustomOutputValidatorSettings() != null && problem.getCustomOutputValidatorSettings().isUsePC2ValidatorInterface()
+                            && problem.getOutputValidatorCommandLine() != null && problem.getOutputValidatorCommandLine().trim().length() > 0) {
                         // we are editing a problem which has a Custom Validator which is using the PC2 Interface Standard and has a
                         // Custom Validator Command Line which is not empty; put that command line in the GUI
-                        getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine().trim());
+                        getCustomValidatorCommandLineTextField().setText(problem.getOutputValidatorCommandLine().trim());
 
                     } else if (localPC2InterfaceCustomValidatorCommandLine != null) {
                         // we have a local version of the pc2 command line; fill that into the command line on the GUI
@@ -4998,11 +5152,11 @@ public class EditProblemPane extends JPanePlugin {
                 public void actionPerformed(ActionEvent e) {
                     // switching to Use Clics Standard Interface for this Custom Validator;
                     // check to see if we are editing a problem which might already have a Clics Interface Validator Command Line
-                    if (problem != null && problem.getCustomValidatorSettings() != null && problem.getCustomValidatorSettings().isUseClicsValidatorInterface()
-                            && problem.getValidatorCommandLine() != null && problem.getValidatorCommandLine().trim().length() > 0) {
+                    if (problem != null && problem.getCustomOutputValidatorSettings() != null && problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface()
+                            && problem.getOutputValidatorCommandLine() != null && problem.getOutputValidatorCommandLine().trim().length() > 0) {
                         // we are editing a problem which has a Custom Validator which is using the Clics Interface Standard and has a
                         // Custom Validator Command Line which is not empty; put that command line in the GUI
-                        getCustomValidatorCommandLineTextField().setText(problem.getValidatorCommandLine().trim());
+                        getCustomValidatorCommandLineTextField().setText(problem.getOutputValidatorCommandLine().trim());
 
                     } else if (localClicsInterfaceCustomValidatorCommandLine != null) {
                         // we have a local version of the Clics command line; fill that into the command line on the GUI
@@ -5081,14 +5235,18 @@ public class EditProblemPane extends JPanePlugin {
         return inputValidatorPane;
     }
 
-    private InputValidationStatus getInputValidationStatus() {
-        return getInputValidatorPane().getInputValidationStatus();
+    private void setVivaInputValidationStatus(InputValidationStatus status) {
+        getInputValidatorPane().setVivaInputValidationStatus(status);
     }
 
-    private void setInputValidationStatus(InputValidationStatus status) {
-        getInputValidatorPane().setInputValidationStatus(status);
+    private void setCustomInputValidationStatus(InputValidationStatus status) {
+        getInputValidatorPane().setCustomInputValidationStatus(status);
     }
 
+    private void setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE ivType) {
+        getInputValidatorPane().setCurrentInputValidatorType(ivType);
+    }
+    
     public String getExecuteDirectoryName() {
         return "inputValidate" + getContest().getClientId().getSiteNumber() + getContest().getClientId().getName();
     }
@@ -5218,88 +5376,87 @@ public class EditProblemPane extends JPanePlugin {
         return horizontalStrut_2;
     }
 
-    // ** THE FOLLOWING METHODS WERE PROTOTYPES AND MAY NOT BE USEFUL ANY MORE...
-    // ON THE OTHER HAND, THEY PROBABLY NEED TO BE CONSIDERING FOR BEING CALLED FROM addProblem()/updateProblem()...
-
-    /**
-     * Updates the Input Validation Status for the current problem to reflect the state of the specified result.
-     * 
-     * If the received result is null the problem Input Validation Status is set to "ERROR".
-     */
-    @SuppressWarnings("unused")
-    private void updateProblemValidationStatus(Problem prob, InputValidationResult result) {
-
-        if (prob == null) {
-            getController().getLog().warning("updateProblemValidationStatus() called with null problem");
-            return;
-        } else {
-            // verify we received a valid InputValidationResult
-            if (result == null) {
-
-                // an error must have occurred (that's the only reason we should be called with "null"
-                prob.setInputValidationStatus(InputValidationStatus.ERROR);
-                getController().getLog().info("Received null validation result; updating problem validation status to 'Error'");
-
-            } else {
-                // update the problem status based on combining the existing status with the new result status
-                InputValidationStatus currentProblemStatus = prob.getInputValidationStatus();
-                InputValidationStatus resultStatus = InputValidationStatus.FAILED;
-                if (result.isPassed()) {
-                    resultStatus = InputValidationStatus.PASSED;
-                }
-                InputValidationStatus newStatus = getNewStatus(currentProblemStatus, resultStatus);
-                getProblem().setInputValidationStatus(newStatus);
-            }
-        }
-    }
-
-    /**
-     * Returns a new InputValidationStatus for a problem based on combining the current problem Input Validation Status with the specified new status, assumed to be the result of having tested a new
-     * input data file by running an Input Validator on the input data file.
-     * 
-     * @param currentStatus
-     *            the Input Validation Status currently assigned to the problem
-     * @param newStatus
-     *            a new Input Validation Result status to be merged with the current status
-     * 
-     * @return the InputValidationStatus which should be assigned to the problem based on its current status and the received new Input Validator run status
-     */
-    private InputValidationStatus getNewStatus(InputValidationStatus currentStatus, InputValidationStatus newStatus) {
-
-        InputValidationStatus retStatus = null;
-
-        // verify the newStatus is a legit value
-        switch (newStatus) {
-            case NOT_TESTED:
-            case PASSED:
-            case FAILED:
-            case ERROR:
-                break;
-            default:
-                getController().getLog().severe("Unknown InputValidationStatus: " + newStatus);
-                System.err.println("This message ('Unknown Input Validation Status') should never appear - please notify the PC^2 Development Team: pc2@ecs.csus.edu");
-                return null;
-        }
-
-        // the new status is legit; check the current status
-        switch (currentStatus) {
-            // for both the Not_Tested and the (previously) Passed states, the new result is going to become the overall status
-            case NOT_TESTED:
-            case PASSED:
-                retStatus = newStatus;
-                break;
-            // if the CURRENT status is "Failed" or "Error", then the new result is not going to change that status
-            case FAILED:
-            case ERROR:
-                retStatus = currentStatus;
-                break;
-            default:
-                getController().getLog().severe("Unknown InputValidationStatus: " + currentStatus);
-                System.err.println("This message ('Unknown Input Validation Status') should never appear - please notify the PC^2 Development Team: pc2@ecs.csus.edu");
-        }
-
-        return retStatus;
-   }
+//    // ** THE FOLLOWING METHODS WERE PROTOTYPES AND MAY NOT BE USEFUL ANY MORE...
+//    // ON THE OTHER HAND, THEY PROBABLY NEED TO BE CONSIDERING FOR BEING CALLED FROM addProblem()/updateProblem()...
+//
+//    /**
+//     * Updates the Input Validation Status for the current problem to reflect the state of the specified result.
+//     * 
+//     * If the received result is null the problem Input Validation Status is set to "ERROR".
+//     */
+//    private void updateProblemValidationStatus(Problem prob, InputValidationResult result) {
+//
+//        if (prob == null) {
+//            getController().getLog().warning("updateProblemValidationStatus() called with null problem");
+//            return;
+//        } else {
+//            // verify we received a valid InputValidationResult
+//            if (result == null) {
+//
+//                // an error must have occurred (that's the only reason we should be called with "null"
+//                prob.setInputValidationStatus(InputValidationStatus.ERROR);
+//                getController().getLog().info("Received null validation result; updating problem validation status to 'Error'");
+//
+//            } else {
+//                // update the problem status based on combining the existing status with the new result status
+//                InputValidationStatus currentProblemStatus = prob.getInputValidationStatus();
+//                InputValidationStatus resultStatus = InputValidationStatus.FAILED;
+//                if (result.isPassed()) {
+//                    resultStatus = InputValidationStatus.PASSED;
+//                }
+//                InputValidationStatus newStatus = getNewStatus(currentProblemStatus, resultStatus);
+//                getProblem().setInputValidationStatus(newStatus);
+//            }
+//        }
+//    }
+//
+//    /**
+//     * Returns a new InputValidationStatus for a problem based on combining the current problem Input Validation Status with the specified new status, assumed to be the result of having tested a new
+//     * input data file by running an Input Validator on the input data file.
+//     * 
+//     * @param currentStatus
+//     *            the Input Validation Status currently assigned to the problem
+//     * @param newStatus
+//     *            a new Input Validation Result status to be merged with the current status
+//     * 
+//     * @return the InputValidationStatus which should be assigned to the problem based on its current status and the received new Input Validator run status
+//     */
+//    private InputValidationStatus getNewStatus(InputValidationStatus currentStatus, InputValidationStatus newStatus) {
+//
+//        InputValidationStatus retStatus = null;
+//
+//        // verify the newStatus is a legit value
+//        switch (newStatus) {
+//            case NOT_TESTED:
+//            case PASSED:
+//            case FAILED:
+//            case ERROR:
+//                break;
+//            default:
+//                getController().getLog().severe("Unknown InputValidationStatus: " + newStatus);
+//                System.err.println("This message ('Unknown Input Validation Status') should never appear - please notify the PC^2 Development Team: pc2@ecs.csus.edu");
+//                return null;
+//        }
+//
+//        // the new status is legit; check the current status
+//        switch (currentStatus) {
+//            // for both the Not_Tested and the (previously) Passed states, the new result is going to become the overall status
+//            case NOT_TESTED:
+//            case PASSED:
+//                retStatus = newStatus;
+//                break;
+//            // if the CURRENT status is "Failed" or "Error", then the new result is not going to change that status
+//            case FAILED:
+//            case ERROR:
+//                retStatus = currentStatus;
+//                break;
+//            default:
+//                getController().getLog().severe("Unknown InputValidationStatus: " + currentStatus);
+//                System.err.println("This message ('Unknown Input Validation Status') should never appear - please notify the PC^2 Development Team: pc2@ecs.csus.edu");
+//        }
+//
+//        return retStatus;
+//   }
     
     private void logWarning(String message, Exception e) {
         if (log != null){
@@ -5322,6 +5479,44 @@ public class EditProblemPane extends JPanePlugin {
         frame.setSize(900, 900);
         frame.pack();
         frame.setVisible(true);
+    }
+
+    /**
+     * Returns the name of the last directory from which a file was selected/loaded
+     * by a component of this EditProblemPane.
+     * 
+     * @return a String containing the last directory name
+     */
+    public String getLastDirectory() {
+        return lastDirectory;
+    }
+
+    /**
+     * Saves the name of the last directory from which a file was selected/loaded
+     * by a component of this EditProblemFrame.
+     * 
+     * @param directory the name of the last directory from which a file was selected/loaded.
+     */
+    public void setLastDirectory(String directory) {
+        lastDirectory = directory;
+        
+    }
+    
+    /**
+     * This method accepts an {@link Iterable} set of {@link InputValidationResult}s and returns an array
+     * containing those results.
+     * 
+     * @param results an Iterable collection of InputValidationResults.
+     * 
+     * @return an array containing the elements of the received Iterable.
+     */
+    private InputValidationResult[] convertIterableInputValidationResultToArray(Iterable<InputValidationResult> results) {
+        Vector<InputValidationResult> temp = new Vector<InputValidationResult>();
+        for (InputValidationResult res : results) {
+            temp.add(res);
+        }
+        InputValidationResult [] array = new InputValidationResult[temp.size()];
+        return array;
     }
 
 }

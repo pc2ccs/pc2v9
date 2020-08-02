@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
  * It provides methods for executing an Input Validator against a single input data file,
  * or against a set of multiple input data files.
  * 
- * @author John
+ * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
  *
  */
 public class InputValidatorRunner {

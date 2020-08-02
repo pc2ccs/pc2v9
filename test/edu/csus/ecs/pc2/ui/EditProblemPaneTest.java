@@ -111,10 +111,10 @@ public class EditProblemPaneTest extends AbstractTestCase {
             if (newProblem.getWhichPC2Validator() != problem.getWhichPC2Validator()) {
                 list.add(new InvalidFieldValue("if (whichPC2Validator != problem.getWhichPC2Validator()) {"));
             }
-            if (!StringUtilities.stringSame(newProblem.getValidatorProgramName(), problem.getValidatorProgramName())) {
+            if (!StringUtilities.stringSame(newProblem.getOutputValidatorProgramName(), problem.getOutputValidatorProgramName())) {
                 list.add(new InvalidFieldValue("if (!StringUtilities.stringSame(validatorProgramName, problem.getValidatorProgramName())) {"));
             }
-            if (!StringUtilities.stringSame(newProblem.getValidatorCommandLine(), problem.getValidatorCommandLine())) {
+            if (!StringUtilities.stringSame(newProblem.getOutputValidatorCommandLine(), problem.getOutputValidatorCommandLine())) {
                 list.add(new InvalidFieldValue("if (!StringUtilities.stringSame(validatorCommandLine, problem.getValidatorCommandLine())) {"));
             }
             if (!newProblem.getPC2ValidatorSettings().equals(problem.getPC2ValidatorSettings())) {
