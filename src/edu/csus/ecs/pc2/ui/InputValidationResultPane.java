@@ -32,6 +32,7 @@ import javax.swing.table.JTableHeader;
 
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
@@ -551,7 +552,14 @@ public class InputValidationResultPane extends JPanePlugin {
                                 if (resultHolder instanceof InputValidatorPane) {
                                     
                                     // get the results of the latest run from the result-holding InputValidatorPane
-                                    InputValidationResult[] results = ((InputValidatorPane) resultHolder).getCustomInputValidatorRunResults();
+                                    InputValidationResult[] results = null;
+                                    if (((InputValidatorPane) resultHolder).getMostRecentlyRunInputValidatorType()==INPUT_VALIDATOR_TYPE.CUSTOM) {
+                                        results = ((InputValidatorPane) resultHolder).getCustomInputValidatorResults();
+                                    } else if (((InputValidatorPane) resultHolder).getMostRecentlyRunInputValidatorType()==INPUT_VALIDATOR_TYPE.VIVA) {
+                                        results = ((InputValidatorPane) resultHolder).getVivaInputValidatorResults();
+                                    }
+                                    
+                                    //check to make sure we got some results
                                     if (results != null && results.length > 0) {
 
                                         // make a copy so we don't wipe out the parent's results

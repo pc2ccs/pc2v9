@@ -330,7 +330,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
 //        
 //        SerializedFile [] dataFiles = getDataFiles();
 //        
-//        InputValidatorRunner runner = new InputValidatorRunner(getContest(), getController());
+//        CustomInputValidatorRunner runner = new CustomInputValidatorRunner(getContest(), getController());
 //        
 //        results = null;
 //        try {

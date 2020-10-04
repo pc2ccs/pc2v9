@@ -13,7 +13,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
  * whether the validation passed or failed, and {@link SerializedFile}s holding the standard output and standard error results
  * when the Input Validator was run against the specified file.
  * 
- * @author John
+ * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
  *
  */
 public class InputValidationResult implements Serializable {

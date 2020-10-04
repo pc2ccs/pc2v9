@@ -80,6 +80,8 @@ import edu.csus.ecs.pc2.core.report.SingleProblemReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
+import edu.csus.ecs.pc2.validator.inputValidator.VivaAdapter;
+import edu.csus.ecs.pc2.validator.inputValidator.VivaPatternTestResult;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
@@ -1855,13 +1857,25 @@ public class EditProblemPane extends JPanePlugin {
 
         }
 
-        //verify that if the Viva Input Validator has been selected then there is a Viva pattern provided
+        //verify that if the Viva Input Validator has been selected then there is a valid Viva pattern provided
         if (getInputValidatorPane().getUseVivaInputValidatorRadioButton().isSelected()) {
             
             String vivaPattern = getInputValidatorPane().getVivaPatternTextArea().getText();
+            //check for an empty pattern
             if (vivaPattern==null || vivaPattern.trim().equals("")) {
                 showMessage ("The VIVA Input Validator has been selected; you must specify a VIVA pattern."); 
                 return false;
+            } else {
+                //pattern is not empty; check if invalid
+                VivaAdapter vivaAdapter = getInputValidatorPane().getVivaAdapter();
+                VivaPatternTestResult vivaPatternTestResult = vivaAdapter.checkPattern(vivaPattern);
+                if (!vivaPatternTestResult.isValidPattern()) {
+                    String vivaMsg = vivaPatternTestResult.getVivaResponseMessage();
+                    String errMsg = "The VIVA Input Validator has been selected but the specified VIVA pattern is invalid: " 
+                    + "\n" + vivaMsg ; 
+                    showMessage(errMsg);
+                    return false;
+                }
             }
         }
         

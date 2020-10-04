@@ -60,7 +60,9 @@ import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
-import edu.csus.ecs.pc2.validator.inputValidator.InputValidatorRunner;
+import edu.csus.ecs.pc2.validator.inputValidator.CustomInputValidatorRunner;
+import edu.csus.ecs.pc2.validator.inputValidator.VivaAdapter;
+import edu.csus.ecs.pc2.validator.inputValidator.VivaDataFileTestResult;
 
 /**
  * This class defines a plugin pane (a JPanel) containing components for defining Input Validator(s) to be used
@@ -79,7 +81,9 @@ public class InputValidatorPane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
 
-    private INPUT_VALIDATOR_TYPE currentInputValidatorType = INPUT_VALIDATOR_TYPE.NONE;
+    private INPUT_VALIDATOR_TYPE currentlySelectedInputValidatorType = INPUT_VALIDATOR_TYPE.NONE;
+    
+    private INPUT_VALIDATOR_TYPE mostRecentlyRunInputValidatorType = INPUT_VALIDATOR_TYPE.NONE;
     
     //Custom Input Validator status fields
     private boolean customInputValidatorHasBeenRun = false;
@@ -91,6 +95,7 @@ public class InputValidatorPane extends JPanePlugin {
     private boolean vivaInputValidatorHasBeenRun = false;
     private InputValidationStatus vivaInputValidationStatus = InputValidationStatus.NOT_TESTED;
     private InputValidationResult[] vivaInputValidatorResults = null;
+    private VivaAdapter vivaAdapter = null;
 
     private JPanePlugin parentPane;
     
@@ -279,9 +284,6 @@ public class InputValidatorPane extends JPanePlugin {
             + "\n\nFor more information on VIVA patterns, see the VIVA User's Guide under the PC^2 \"docs\" folder."
             + "\nFor additional information, or to download a copy of VIVA, see the VIVA website at http://viva.vanb.org/.";
 
-    protected INPUT_VALIDATOR_TYPE lastInputValidationSource;
-
-
     private JPanel getVivaOptionsSubPanel() {
         if (vivaOptionsPanel == null) {
             vivaOptionsPanel = new JPanel();
@@ -380,7 +382,7 @@ public class InputValidatorPane extends JPanePlugin {
                     runVivaInputValidator();
                     getShowMostRecentResultButton().setEnabled(true);
                     setInputValidationSourceText("VIVA");
-                    lastInputValidationSource = INPUT_VALIDATOR_TYPE.VIVA;
+                    mostRecentlyRunInputValidatorType = INPUT_VALIDATOR_TYPE.VIVA;
                 }
             });
         }
@@ -589,7 +591,7 @@ public class InputValidatorPane extends JPanePlugin {
                         source = "Unknown";
                     }
                     setInputValidationSourceText(source);
-                    lastInputValidationSource = INPUT_VALIDATOR_TYPE.CUSTOM;
+                    mostRecentlyRunInputValidatorType = INPUT_VALIDATOR_TYPE.CUSTOM;
                 }
             });
         }
@@ -777,42 +779,50 @@ public class InputValidatorPane extends JPanePlugin {
         }
     }
     
+    /**
+     * Spawns a separate thread to run the VIVA Input Validator against all the data files for the current Problem.
+     * 
+     */
     private void runVivaInputValidator() {
-//        JOptionPane.showMessageDialog(null, "Run VIVA not (yet) implemented", "Not Implemented", JOptionPane.INFORMATION_MESSAGE);
-        //TODO:
-        // - execute VIVA against all defined data files
-        // - call setVivaInputValidatorHasBeenRun(true);
-        // - call setVivaInputValidatorStatus() with the pass/fail results
-        Object [] options = {"Pass", "Fail", "Cancel"};
-        int choice = JOptionPane.showOptionDialog(null, "Choose simulated VIVA result", "Dummy VIVA Result", 
-                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
-        switch (choice) {
-            case 0:
-                System.out.println("'Pass' selected");
-                vivaInputValidatorResults = generateDummyVivaResults(true);
-                updateInputValidationSummaryText(vivaInputValidatorResults);
-                updateVivaInputValidationStatus(vivaInputValidatorResults);
-                setVivaInputValidatorHasBeenRun(true);
-                break;
-            case 1:
-                System.out.println("'Fail' selected");
-                vivaInputValidatorResults = generateDummyVivaResults(false);
-                updateInputValidationSummaryText(vivaInputValidatorResults);
-                updateVivaInputValidationStatus(vivaInputValidatorResults);
-                setVivaInputValidatorHasBeenRun(true);
-                break;
-            default:
-                System.out.println("Run Viva option cancelled");
-        }
-    }
-    
-    private InputValidationResult[] generateDummyVivaResults(boolean passed) {
-        InputValidationResult [] results = new InputValidationResult[1];
-        results[0] = new InputValidationResult(null, null, passed, new SerializedFile(), new SerializedFile());
-        return results;
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (okToRunInputValidator()) {
+
+                    getRunVivaButton().setEnabled(false); // this is set back true when the spawner finishes, via a call to cleanup()
+                    getShowOnlyFailedFilesCheckbox().setEnabled(false); //disallow changing during result production
+                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    
+                    spawnInputValidatorRunnerThread(Problem.INPUT_VALIDATOR_TYPE.VIVA);
+
+                } else {
+                    // determine why it's not ok to run the Input Validator and display an appropriate message
+                    boolean msgShown = false;
+                    if (!problemHasInputDataFiles()) {
+                        JOptionPane.showMessageDialog(null, "No Judge's Data Files defined; cannot run VIVA", "Missing Data Files", JOptionPane.INFORMATION_MESSAGE);
+                        msgShown = true;
+                    } else if (getUseVivaInputValidatorRadioButton().isSelected() && getVivaPatternTextArea().getText().trim().equals("")) {
+                        JOptionPane.showMessageDialog(null, "Missing VIVA pattern; cannot run VIVA", "Missing VIVA Pattern", JOptionPane.INFORMATION_MESSAGE);
+                        msgShown = true;
+                    }
+                    if (!msgShown) {
+                        JOptionPane.showMessageDialog(null, "Internal error: cannot run VIVA Input Validator (unknown reason)."
+                                + "\nPlease see logs and report this issue to the PC2 Development Team (pc2@ecs.csus.edu)", 
+                                "Cannot run VIVA Input Validator", JOptionPane.ERROR_MESSAGE);                        
+                        getLog().severe("Internal error: cannot run VIVA Input Validator even though Problem has data files and a VIVA pattern; reason unknown.");
+                    }
+
+                }
+            }
+        });
+
     }
 
-    protected void runCustomInputValidator() {
+    /**
+     * Spawns a separate thread to run the currently-specified Custom Input Validator against all the data files for the current Problem.
+     * 
+     */
+    private void runCustomInputValidator() {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -822,7 +832,7 @@ public class InputValidatorPane extends JPanePlugin {
                     getShowOnlyFailedFilesCheckbox().setEnabled(false); //disallow changing during result production
                     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     
-                    spawnCustomInputValidatorRunnerThread();
+                    spawnInputValidatorRunnerThread(Problem.INPUT_VALIDATOR_TYPE.CUSTOM);
 
                 } else {
                     // determine why it's not ok to run the Input Validator and display an appropriate message
@@ -835,7 +845,7 @@ public class InputValidatorPane extends JPanePlugin {
                         msgShown = true;
                     }
                     if (!msgShown) {
-                        JOptionPane.showMessageDialog(null, "Internal error: cannot run Input Validator (unknown reason)."
+                        JOptionPane.showMessageDialog(null, "Internal error: cannot run Custom Input Validator (unknown reason)."
                                 + "\nPlease see logs and report this issue to the PC2 Development Team (pc2@ecs.csus.edu)", 
                                 "Cannot run Input Validator", JOptionPane.ERROR_MESSAGE);                        
                         getLog().severe("Internal error: cannot run Custom Input Validator even though Problem has an Input Validator Command; reason unknown.");
@@ -903,7 +913,7 @@ public class InputValidatorPane extends JPanePlugin {
     }
 
     /**
-     * Spawns a separate {@link SwingWorker} thread to run the Input Validator.
+     * Spawns a separate {@link SwingWorker} thread to run the specified type of Input Validator.
      * 
      * The worker thread publishes each separate InputValidationResult as it is generated; each published result is automatically 
      * picked up and handled by the worker's process() method. Once the worker thread completes it assigns the results to a global 
@@ -911,7 +921,7 @@ public class InputValidatorPane extends JPanePlugin {
      * 
      * See https://docs.oracle.com/javase/tutorial/uiswing/concurrency/interim.html for details on how SwingWorker threads publish results.
      */
-    private void spawnCustomInputValidatorRunnerThread() {
+    private void spawnInputValidatorRunnerThread(Problem.INPUT_VALIDATOR_TYPE validatorType) {
 
         // define a SwingWorker thread to run the Input Validator in the background against each of the data files
         SwingWorker<InputValidationResult[], InputValidationResult> worker = new SwingWorker<InputValidationResult[], InputValidationResult>() {
@@ -986,14 +996,6 @@ public class InputValidatorPane extends JPanePlugin {
                     // create an array to hold the results as they are created
                     InputValidationResult[] validationResults = new InputValidationResult[dataFiles.length];
 
-                    // get the Custom Input Validator Program to be run
-                    SerializedFile validatorProg = epp.getInputValidatorPane().getCustomInputValidatorFile();
-                    if (validatorProg == null) {
-                        System.err.println("No input validator (SerializedFile) defined ");
-                        getController().getLog().warning("No input validator (SerializedFile) defined ");
-                        throw new Exception("No input validator (SerializedFile) defined ");
-                    }
-
                     // get the problem for which the data files apply
                     Problem prob = epp.getProblem();
 
@@ -1006,8 +1008,8 @@ public class InputValidatorPane extends JPanePlugin {
 
                     // clear the result accumulator
                     accumulatingCustomResults = null;
-
-                    // run the Input Validator on each data file
+                    
+                    // run the specified Input Validator on each data file
                     for (int fileNum = 0; fileNum < dataFiles.length; fileNum++) {
 
                         // get the next data file
@@ -1018,17 +1020,33 @@ public class InputValidatorPane extends JPanePlugin {
                         // One thing to worry about: each call to runInputValidator() uses the (same?) execute directory; that can cause collisions
                         // with the files which are being created therein (e.g. the stdout.pc2 and stderr.pc2 files)
                         try {
-                            // run the input validator
-                            validationResults[fileNum] = runCustomInputValidator(fileNum + 1, prob, validatorProg, getCustomInputValidatorCommand(), dataFile, executeDir);
-
-                            setCustomInputValidatorHasBeenRun(true);
+                            //run the appropriate Input Validator
+                            switch (validatorType) {
+                                case CUSTOM:
+                                    validationResults[fileNum] = runCustomInputValidator(fileNum + 1, prob, getCustomInputValidatorFile(), getCustomInputValidatorCommand(), dataFile, executeDir);
+                                    setCustomInputValidatorHasBeenRun(true);
+                                    break;
+                            
+                                case VIVA:
+                                    validationResults[fileNum] = runVivaInputValidator(fileNum + 1, prob, getVivaPatternText(), dataFile, executeDir);
+                                    setVivaInputValidatorHasBeenRun(true);
+                                    break;
+                               
+                                default:
+                                    String msg = "Internal error: SwingWorker.doInBackground() invoked with invalid validator type: " + validatorType ;
+                                    msg += "\nPlease see logs and report this error to the PC2 Development Team (pc2@ecs.csus.edu";
+                                    showMessage(epp, "Internal Error", msg);
+                                    getController().getLog().severe("SwingWorker.doInBackground() invoked with incorrect validator type: " + validatorType);
+                                    return null;
+                            }
                             epp.enableUpdateButton();
 
                             // publish the validator result for the current data file, to be picked up by the process() method (below)
                             publish(validationResults[fileNum]);
 
                         } catch (Exception e) {
-                            getController().getLog().warning("Exception running Input Validator ' " + validatorProg.getName() + " ' : " + e.getMessage());
+                            getController().getLog().warning("Exception running Input Validator of type '" + validatorType 
+                                                            + "' : " + e.getMessage());
                         }
                     }
 
@@ -1068,16 +1086,35 @@ public class InputValidatorPane extends JPanePlugin {
              * This method is invoked by the Worker thread when it is completely finished with its doInBackground task(s). 
              * Calling get() fetches the set of data returned by the Worker thread's doInBackground() method -- that is, 
              * an array of InputValidationResults. This method saves those results so they can be accessed by external code 
-             * via the {@link #getCustomInputValidatorRunResults()} method.
+             * via the {@link #getCustomInputValidatorResults()} or (@link getVivaInputValidatorResults()} methods.
              * The method also updates the GUI based on the results, and finally calls cleanup() to restore the GUI state.
              */
             @Override
             public void done() {
+
                 try {
-                    customInputValidatorResults = get();
-                    if (customInputValidatorResults != null && customInputValidatorResults.length > 0) {
-                        updateInputValidationSummaryText(customInputValidatorResults);
-                        updateCustomInputValidationStatus(customInputValidatorResults);
+                    switch (validatorType) {
+                        case CUSTOM:
+                            customInputValidatorResults = get();
+                            if (customInputValidatorResults != null && customInputValidatorResults.length > 0) {
+                                updateInputValidationSummaryText(customInputValidatorResults);
+                                updateCustomInputValidationStatus(customInputValidatorResults);
+                            }
+                            break;
+                        case VIVA:
+                            vivaInputValidatorResults = get();
+                            if (vivaInputValidatorResults != null && vivaInputValidatorResults.length > 0) {
+                                updateInputValidationSummaryText(vivaInputValidatorResults);
+                                updateVivaInputValidationStatus(vivaInputValidatorResults);
+                            }
+                            break;
+                        default:
+                            System.err.println("Internal error: SwingWorker.done(): unexpected validator type: " + validatorType);
+                            System.err.println("Please checks logs and report this error to the PC2 Development Team (pc2@ecs.csus.edu)");
+                            getController().getLog().severe("InputValidatorPane SwingWorker.done(): unexpected validator type: " + validatorType);
+                            JOptionPane.showMessageDialog(null, "Internal error: unexpected Input Validator type: " + validatorType 
+                                    + "\nPlease checks logs and report this error to the PC2 Development Team (pc2@ecs.csus.edu)", 
+                                    "Internal Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (InterruptedException e) {
                     getController().getLog().warning("Exception in SwingWorker.done(): " + e.getMessage());
@@ -1107,10 +1144,11 @@ public class InputValidatorPane extends JPanePlugin {
     } // end method spawnCustomInputValidatorRunnerThread()
 
     /**
-     * This method is called when spawnCustomInputValidatorRunnerThread() finishes. Its job is to restore the GUI state, 
-     * including resetting the cursor and reenabling the RunInputValidator button.
+     * This method is called when spawnInputValidatorRunnerThread() finishes. Its job is to restore the GUI state, 
+     * including resetting the cursor and reenabling the appropriate RunInputValidator button.
      */
     private void cleanup() {
+        //TODO: update to account for VIVA
         getRunCustomInputValidatorButton().setEnabled(true);
         getShowOnlyFailedFilesCheckbox().setEnabled(true); //note this is only ENABLING the checkbox, not changing its "checked state"
         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -1219,10 +1257,10 @@ public class InputValidatorPane extends JPanePlugin {
      */
     private InputValidationResult runCustomInputValidator(int seqNum, Problem problem, SerializedFile validatorProg, String validatorCommand, SerializedFile dataFile, String executeDir) throws Exception {
 
-        InputValidatorRunner runner = new InputValidatorRunner(getContest(), getController());
+        CustomInputValidatorRunner runner = new CustomInputValidatorRunner(getContest(), getController());
         InputValidationResult result = null;
         try {
-            result = runner.runInputValidator(seqNum, problem, validatorProg, validatorCommand, executeDir, dataFile);
+            result = runner.runCustomInputValidator(seqNum, problem, validatorProg, validatorCommand, executeDir, dataFile);
         } catch (ExecuteException e) {
             getController().getLog().warning("Exeception executing Input Validator: " + e.getMessage());
             throw e;
@@ -1232,6 +1270,40 @@ public class InputValidatorPane extends JPanePlugin {
         }
 
         return result;
+    }
+
+    /**
+     * Runs the VIVA Input Validator Program, passing it a VIVA pattern and a data file and and returning an 
+     * {@link InputValidationResult} giving indication of whether the 
+     * data file matches the VIVA pattern.
+     * 
+     * NOTE: TODO: this should be done on a separate thread. However, see the note in spawnCustomInputValidatorRunnerThread() 
+     * about collisions in folders...
+     * 
+     * @param seqNum a sequence number for associating with generated file names (although VIVA doesn't generate any such files...)
+     * @param prob the Contest Problem associated with the Input Validator
+     * @param vivaPatternText the VIVA pattern text which the specified data file must match
+     * @param dataFile the data file to be passed to the VIVA Input Validator as input to be validated
+     * @param executeDir the execution directory to be used (i.e. the folder in which to run the Input Validator Program - not used by VIVA)
+     * 
+     * @return an InputValidationResult
+     */
+    private InputValidationResult runVivaInputValidator(int seqNum, Problem prob, String vivaPatternText, SerializedFile dataFile, String executeDir) {
+        
+        //invoke VIVA to test the data file against the pattern
+        VivaDataFileTestResult vivaTestResult = getVivaAdapter().testFile(vivaPatternText, dataFile);
+        
+        //read the stdout from VIVA
+        SerializedFile vivaStdout = vivaTestResult.getVivaOutput();
+        
+        //construct an empty stderr file (Viva sends nothing to stderr, but the InputValidationResult constructed below needs a stderr file)
+        SerializedFile dummyStderr = new SerializedFile();
+
+        //construct a results object holding the Viva results
+        InputValidationResult result = new InputValidationResult(prob, dataFile.getAbsolutePath(), vivaTestResult.passFail(), vivaStdout, dummyStderr);
+        
+        return result;
+        
     }
 
 
@@ -1248,10 +1320,6 @@ public class InputValidatorPane extends JPanePlugin {
      */
     protected void setCustomInputValidatorHasBeenRun(boolean customInputValidatorHasBeenRun) {
         this.customInputValidatorHasBeenRun = customInputValidatorHasBeenRun;
-    }
-
-    public InputValidationResult[] getCustomInputValidatorRunResults() {
-        return this.customInputValidatorResults;
     }
 
     /**
@@ -1356,8 +1424,10 @@ public class InputValidatorPane extends JPanePlugin {
 
         if (runResultsArray != null && runResultsArray.length > 0) {
 
+            //TODO: need to make sure there is at least one "passed" result
             boolean foundFailure = false;
             for (InputValidationResult res : runResultsArray) {
+                //TODO: check to make sure res is not null
                 if (!res.isPassed()) {
                     foundFailure = true;
                     break;
@@ -1403,6 +1473,19 @@ public class InputValidatorPane extends JPanePlugin {
 
     public void updateInputValidationStatusMessage(InputValidationResult[] results) {
         resultFrame.getInputValidationResultPane().updateInputValidationStatusMessage(results);
+    }
+
+    /**
+     * Constructs a new singleton instance of the VivaAdapter class (if not already constructed)
+     * and returns that instance.
+     * 
+     * @return the vivaAdapter
+     */
+    public VivaAdapter getVivaAdapter() {
+        if (vivaAdapter==null) {
+            vivaAdapter = new VivaAdapter();
+        }
+        return vivaAdapter;
     }
 
     public InputValidationResultsTableModel getResultsTableModel() {
@@ -1752,7 +1835,7 @@ public class InputValidatorPane extends JPanePlugin {
      * @return an element of {@link INPUT_VALIDATOR_TYPE} indicating the currently-selected Input Valdator type.
      */
     protected INPUT_VALIDATOR_TYPE getCurrentInputValidatorType() {
-        return currentInputValidatorType;
+        return currentlySelectedInputValidatorType;
     }
 
     /**
@@ -1762,10 +1845,10 @@ public class InputValidatorPane extends JPanePlugin {
      * can be selected at any given time; the selected button defines the "current Input Validator type").
      * The current Input Validator type can also be set when this InputValidatorPane is initialized.
      * 
-     * @param currentInputValidatorType the currentInputValidatorType to set
+     * @param currentlySelectedInputValidatorType the currentlySelectedInputValidatorType to set
      */
     protected void setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE currentInputValidatorType) {
-        this.currentInputValidatorType = currentInputValidatorType;
+        this.currentlySelectedInputValidatorType = currentInputValidatorType;
     }
     
 
@@ -1834,6 +1917,13 @@ public class InputValidatorPane extends JPanePlugin {
             getLog().warning(msg);
             JOptionPane.showMessageDialog(null, msg, "Cannot run Input Validator", JOptionPane.WARNING_MESSAGE);
         }
+    }
+
+    /**
+     * @return the field defining the mostRecentlyRunInputValidatorType
+     */
+    protected INPUT_VALIDATOR_TYPE getMostRecentlyRunInputValidatorType() {
+        return mostRecentlyRunInputValidatorType;
     }
 
 }
