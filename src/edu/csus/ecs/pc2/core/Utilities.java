@@ -1496,9 +1496,12 @@ public final class Utilities {
     }
 
     /**
-     * Checks the specified {@link SerializedFile} for error messages and/or exceptions. This method is provided because the SerializedFile class does not throw exceptions when errors occur (such as
-     * its constructor encountering a "File Not Found" condition). Rather, the SerializedFile class simply sets an "error message" and records the "exception" within the SerializedFile object. This
-     * method throws any exception found in the specified SerializedFile, or returns true if there is an error message (but no exception). It returns false if the specified Serialized
+     * Checks the specified {@link SerializedFile} for error messages and/or exceptions. 
+     * This method is provided because the SerializedFile class does not throw exceptions when errors occur 
+     * (such as its constructor encountering a "File Not Found" condition). Rather, the SerializedFile class simply 
+     * sets an "error message" and records the "exception" within the SerializedFile object. 
+     * This method throws any exception found in the specified SerializedFile, or returns true if there is an error message (but no exception). 
+     * It returns false if the specified SerializedFile contains no error message or is null.
      * 
      * @param serFile
      *            the SerializedFile to be checked

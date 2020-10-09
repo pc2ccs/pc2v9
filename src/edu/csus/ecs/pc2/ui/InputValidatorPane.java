@@ -1483,7 +1483,7 @@ public class InputValidatorPane extends JPanePlugin {
      */
     public VivaAdapter getVivaAdapter() {
         if (vivaAdapter==null) {
-            vivaAdapter = new VivaAdapter();
+            vivaAdapter = new VivaAdapter(getContest(),getController());
         }
         return vivaAdapter;
     }

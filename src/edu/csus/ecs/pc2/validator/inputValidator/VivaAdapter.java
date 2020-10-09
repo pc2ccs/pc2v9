@@ -11,6 +11,9 @@ import javax.swing.JOptionPane;
 
 import org.vanb.viva.VIVA;
 
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
@@ -28,7 +31,21 @@ public class VivaAdapter {
     
     //a map which tracks previously-tested Viva patterns and the result of testing those patterns for validity
     private HashMap<String,VivaPatternTestResult> knownPatterns = new HashMap<String,VivaPatternTestResult>();
+
+    private IInternalContest contest;
+    private IInternalController controller;
         
+    /**
+     * Constructs a VivaAdapter -- a class which provides an interface to the external VIVA Input Validator.
+     * 
+     * @param contest - the {@link IInternalContest} which this VivaAdpater will operate on.
+     * @param controller - the {@link IInternalController} which this VivaAdapter will use.
+     */
+    public VivaAdapter (IInternalContest contest, IInternalController controller) {
+        this.contest = contest;
+        this.controller = controller;
+    }
+    
     /**
      * Checks the specified pattern to see if it is a valid VIVA pattern.
      * Clients can determine whether the specified pattern is valid by checking the value of
@@ -106,12 +123,31 @@ public class VivaAdapter {
         boolean passFail = vivaInstance.testInputFile(datafile.getAbsolutePath());
         
         //read VIVA output stream, convert it to a SerializedFile
-        SerializedFile vivaOutput = new SerializedFile("VivaOutput", baos.toByteArray());
+        SerializedFile vivaOutput = new SerializedFile("VivaStdout", baos.toByteArray());
+        
+        //make sure no errors/exceptions occurred during SerializedFile construction
+        try {
+            if (Utilities.serializedFileError(vivaOutput)) {
+                //if we get here, an error occurred while constructing the VIVA output SerializedFile
+                getController().getLog().severe("Internal error converting VIVA output to SerializedFile");
+                return null;
+            }
+        } catch (Exception e) {
+            //if we get here, an exception was thrown while constructing 
+            getController().getLog().severe("Exception while converting VIVA output to SerializedFile: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
         
         // construct new VivaDataFileTestResult containing the Serialized File and a boolean indicating pass/fail
         VivaDataFileTestResult result = new VivaDataFileTestResult(vivaOutput, passFail, pattern, datafile);
         
         return result;
     }
+
+    private IInternalController getController() {
+        return controller;
+    }
+
 
 }
