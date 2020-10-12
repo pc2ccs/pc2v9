@@ -1010,6 +1010,7 @@ public class InputValidatorPane extends JPanePlugin {
                     accumulatingCustomResults = null;
                     
                     // run the specified Input Validator on each data file
+                    int filesProcessed = 0;
                     for (int fileNum = 0; fileNum < dataFiles.length; fileNum++) {
 
                         // get the next data file
@@ -1048,10 +1049,29 @@ public class InputValidatorPane extends JPanePlugin {
                             getController().getLog().warning("Exception running Input Validator of type '" + validatorType 
                                                             + "' : " + e.getMessage());
                         }
+                        
+                        filesProcessed++;
+                        
+                        //short-circuit the testing loop if an error occurred during Input Validator execution
+                        // (note this does not mean "if a data file failed validation"; it means the Input Validator failed to execute properly.
+                        // In this case there's no point in continuing to try to execute it repeatedly...)
+                        if (validationResults[fileNum].getStatus()==InputValidationStatus.ERROR) {
+                            break;
+                        }
                     }
 
-                    return validationResults;
-
+                    //check if we actually processed all the data files
+                    if (filesProcessed<dataFiles.length) {
+                        //no (we must have short-circuited above); construct a smaller return array
+                        InputValidationResult [] shortResults = new InputValidationResult[filesProcessed];
+                        for (int i=0; i<filesProcessed; i++) {
+                            shortResults[i] = validationResults[i];
+                        }
+                        return shortResults;
+                    } else {
+                        return validationResults;
+                    }
+                    
                 } else {
                     // the parent is not an EditProblemPane; the current code doesn't support returning results to any other Type
                     getController().getLog().warning("Attempted to return Input Validator results to a " + parent.getClass() 
@@ -1072,13 +1092,15 @@ public class InputValidatorPane extends JPanePlugin {
                 // display the results (which may be partial) in the InputValidatorPane's InputValidationResults table
 
                 for (InputValidationResult result : resultList) {
-                    if (!resultFrame.getInputValidationResultPane().getShowOnlyFailedFilesCheckbox().isSelected() || !result.isPassed()) {
-                        addResultToTable(result);
+                    if (result!=null) {
+                        if (!resultFrame.getInputValidationResultPane().getShowOnlyFailedFilesCheckbox().isSelected() || !result.isPassed()) {
+                            addResultToTable(result);
+                        }
+                        addResultToAccumulatedList(result);
+                        updateInputValidationSummaryText(accumulatingCustomResults);
+                        // addResultToProblem(result); //we don't want to do this until Add/Update is pressed
+                        // updateProblemValidationStatus(result); // ditto ""
                     }
-                    addResultToAccumulatedList(result);
-                    updateInputValidationSummaryText(accumulatingCustomResults);
-                    // addResultToProblem(result); //we don't want to do this until Add/Update is pressed
-                    // updateProblemValidationStatus(result); // ditto ""
                 }
             }
 
@@ -1273,7 +1295,7 @@ public class InputValidatorPane extends JPanePlugin {
     }
 
     /**
-     * Runs the VIVA Input Validator Program, passing it a VIVA pattern and a data file and and returning an 
+     * Runs the VIVA Input Validator Program, passing it a VIVA pattern and a data file and returning an 
      * {@link InputValidationResult} giving indication of whether the 
      * data file matches the VIVA pattern.
      * 
@@ -1286,21 +1308,34 @@ public class InputValidatorPane extends JPanePlugin {
      * @param dataFile the data file to be passed to the VIVA Input Validator as input to be validated
      * @param executeDir the execution directory to be used (i.e. the folder in which to run the Input Validator Program - not used by VIVA)
      * 
-     * @return an InputValidationResult
+     * @return an InputValidationResult containing the result of running VIVA against the specified datafile using the specified pattern,
+     *              or null if the pattern is invalid or if an error occurred while running VIVA.
      */
     private InputValidationResult runVivaInputValidator(int seqNum, Problem prob, String vivaPatternText, SerializedFile dataFile, String executeDir) {
         
-        //invoke VIVA to test the data file against the pattern
+        //use the VivaAdapter to invoke VIVA to test the data file against the pattern
         VivaDataFileTestResult vivaTestResult = getVivaAdapter().testFile(vivaPatternText, dataFile);
+        
+        //check if Viva returned an error (which it will do, for example, if the pattern is invalid or if a processing error occurred)
+        InputValidationStatus vivaTestStatus = vivaTestResult.getStatus();
+        if (vivaTestStatus==InputValidationStatus.ERROR) {
+            //return an InputValidationResult error
+            SerializedFile dummyVivaStderr = new SerializedFile("VivaStderr"); //because Viva doesn't produce any stderr, but its needed for the following constructor
+            return new InputValidationResult(prob, dataFile.getAbsolutePath(), false, vivaTestStatus, vivaTestResult.getVivaOutput(), dummyVivaStderr);
+        }
+        
+        //we got back a result from VIVA; convert it to an InputValidationResult:
         
         //read the stdout from VIVA
         SerializedFile vivaStdout = vivaTestResult.getVivaOutput();
         
         //construct an empty stderr file (Viva sends nothing to stderr, but the InputValidationResult constructed below needs a stderr file)
-        SerializedFile dummyStderr = new SerializedFile();
+        SerializedFile dummyStderr = new SerializedFile("VivaStderr");
 
+        InputValidationStatus status = vivaTestResult.passed() ? Problem.InputValidationStatus.PASSED : Problem.InputValidationStatus.FAILED;
+        
         //construct a results object holding the Viva results
-        InputValidationResult result = new InputValidationResult(prob, dataFile.getAbsolutePath(), vivaTestResult.passFail(), vivaStdout, dummyStderr);
+        InputValidationResult result = new InputValidationResult(prob, dataFile.getAbsolutePath(), vivaTestResult.passed(), status, vivaStdout, dummyStderr);
         
         return result;
         
@@ -1427,8 +1462,7 @@ public class InputValidatorPane extends JPanePlugin {
             //TODO: need to make sure there is at least one "passed" result
             boolean foundFailure = false;
             for (InputValidationResult res : runResultsArray) {
-                //TODO: check to make sure res is not null
-                if (!res.isPassed()) {
+                if (res!=null && !res.isPassed()) {
                     foundFailure = true;
                     break;
                 }
@@ -1479,11 +1513,11 @@ public class InputValidatorPane extends JPanePlugin {
      * Constructs a new singleton instance of the VivaAdapter class (if not already constructed)
      * and returns that instance.
      * 
-     * @return the vivaAdapter
+     * @return a singleton VivaAdapter
      */
     public VivaAdapter getVivaAdapter() {
         if (vivaAdapter==null) {
-            vivaAdapter = new VivaAdapter(getContest(),getController());
+            vivaAdapter = new VivaAdapter(getController());
         }
         return vivaAdapter;
     }

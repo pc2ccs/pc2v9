@@ -95,6 +95,7 @@ public class CustomInputValidatorRunner {
             controller.getLog().info("Copied validator file '" + validatorProg.getName() + "' to '" + executeDir + "'");
         } catch (IOException e) {
             controller.getLog().severe("Exception creating input validator program '" + validatorProg.getName() + "' in execution folder: " + e.getMessage());
+            //TODO: return an InputValidationResult indicating an error
         }
 
         // copy the input data file to the execution directory
@@ -103,6 +104,7 @@ public class CustomInputValidatorRunner {
             controller.getLog().info("Copied data file '" + dataFile.getName() + "' to '" + executeDir + "'");
         } catch (IOException e) {
             controller.getLog().severe("Exception creating input data file '" + dataFile.getName() + "' in execution folder: " + e.getMessage());
+            //TODO: return an InputValidationResult indicating an error
         }
 
         ExecutionData executionData = new ExecutionData();
@@ -159,8 +161,10 @@ public class CustomInputValidatorRunner {
             throw e;
         }
 
+        //if we get here there were no errors during execution; return a result indicating either "pass" or "fail"
 //        return new InputValidationResult(problem, Utilities.basename(stdinFilename), passed, stdoutResults, stderrResults);
-        return new InputValidationResult(problem, dataFile.getAbsolutePath(), passed, stdoutResults, stderrResults);
+        Problem.InputValidationStatus status = passed ? Problem.InputValidationStatus.PASSED : Problem.InputValidationStatus.FAILED;
+        return new InputValidationResult(problem, dataFile.getAbsolutePath(), passed, status, stdoutResults, stderrResults);
 
     }
     
@@ -222,7 +226,7 @@ public class CustomInputValidatorRunner {
      */
     public InputValidationResult [] runInputValidator (Problem problem, ProblemDataFiles problemDataFiles) throws ExecuteException {
         
-        SerializedFile validator = problemDataFiles.getInputValidatorFile();
+        SerializedFile validator = problemDataFiles.getCustomInputValidatorFile();
         
         if (validator == null) {
             return null ;

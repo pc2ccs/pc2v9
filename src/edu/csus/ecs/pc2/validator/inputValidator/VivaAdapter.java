@@ -13,7 +13,7 @@ import org.vanb.viva.VIVA;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
@@ -32,17 +32,14 @@ public class VivaAdapter {
     //a map which tracks previously-tested Viva patterns and the result of testing those patterns for validity
     private HashMap<String,VivaPatternTestResult> knownPatterns = new HashMap<String,VivaPatternTestResult>();
 
-    private IInternalContest contest;
     private IInternalController controller;
         
     /**
      * Constructs a VivaAdapter -- a class which provides an interface to the external VIVA Input Validator.
      * 
-     * @param contest - the {@link IInternalContest} which this VivaAdpater will operate on.
-     * @param controller - the {@link IInternalController} which this VivaAdapter will use.
+     * @param controller - the {@link IInternalController} which this VivaAdapter will use for logging.
      */
-    public VivaAdapter (IInternalContest contest, IInternalController controller) {
-        this.contest = contest;
+    public VivaAdapter (IInternalController controller) {
         this.controller = controller;
     }
     
@@ -90,22 +87,32 @@ public class VivaAdapter {
     
     /**
      * Tests the specified {@link SerializedFile} to see if it is a valid data file according to the specified
-     * VIVA pattern string.  Clients can find the result of the test by checking method {@link VivaDataFileTestResult#passFail()}
+     * VIVA pattern string.  Clients can find the result of the test by checking method {@link VivaDataFileTestResult#passed()}
      * in the returned {@link VivaDataFileTestResult} object.
      * 
      * @param pattern a String containing a VIVA pattern.
      * @param datafile a SerializedFile to be tested for conformance with the specified VIVA pattern.
      * 
      * @return an {@link VivaDataFileTestResult} containing the result of testing the specified data file using
-     *              the specified VIVA pattern string.
+     *              the specified VIVA pattern string, or null if the pattern is not a valid VIVA pattern.
      *              
      * 
      */
     public VivaDataFileTestResult testFile (String pattern, SerializedFile datafile) {
-        if (!checkPattern(pattern).isValidPattern()) {
-            //TODO: fetch the reason for the failed pattern from Viva, add to JOptionPane dialog
-            JOptionPane.showMessageDialog(null, "Invalid VIVA pattern; cannot test data file", "Invalid Pattern", JOptionPane.WARNING_MESSAGE);
-            return null;
+        
+        //first, test the pattern to make sure it's valid
+        VivaPatternTestResult patternTestResult = checkPattern(pattern);
+        if (!patternTestResult.isValidPattern()) {
+            String msg = "Cannot test data files; VIVA reports the specified pattern is invalid:" 
+                    + "\n\n" + patternTestResult.getVivaResponseMessage();
+            JOptionPane.showMessageDialog(null, msg, "Invalid Pattern", JOptionPane.WARNING_MESSAGE);
+            
+            //return a VivaDataFileTestResult indicating that the test failed because of an error (the pattern was invalid)
+            String vivaMsg = "Invalid VIVA Pattern";
+            byte [] b = vivaMsg.getBytes();
+            SerializedFile vivaOutput = new SerializedFile("Viva Output", b);
+            VivaDataFileTestResult result = new VivaDataFileTestResult(vivaOutput, false, Problem.InputValidationStatus.ERROR, pattern, datafile);
+            return result;
         }
         
         //pattern is ok; test datafile using VIVA
@@ -120,7 +127,7 @@ public class VivaAdapter {
         vivaInstance.setPattern(patternAsInputStream);
         
         // tell VIVA to test the data file using the previously specified pattern
-        boolean passFail = vivaInstance.testInputFile(datafile.getAbsolutePath());
+        boolean passed = vivaInstance.testInputFile(datafile.getAbsolutePath());
         
         //read VIVA output stream, convert it to a SerializedFile
         SerializedFile vivaOutput = new SerializedFile("VivaStdout", baos.toByteArray());
@@ -129,18 +136,30 @@ public class VivaAdapter {
         try {
             if (Utilities.serializedFileError(vivaOutput)) {
                 //if we get here, an error occurred while constructing the VIVA output SerializedFile
-                getController().getLog().severe("Internal error converting VIVA output to SerializedFile");
-                return null;
+                getController().getLog().severe("Internal error converting VIVA output to SerializedFile: " + vivaOutput.getErrorMessage());
+                String msg = "Cannot test data files; internal error converting VIVA output to SerializedFile." 
+                        + "\nPlease check logs and report this error to the PC2 Development Team (pc2@ecs.csus.edu).";
+                JOptionPane.showMessageDialog(null, msg, "Internal Error", JOptionPane.ERROR_MESSAGE);
+                
+               //return a VivaDataFileTestResult indicating that the test failed because of an error
+                VivaDataFileTestResult result = new VivaDataFileTestResult(vivaOutput, false, Problem.InputValidationStatus.ERROR, pattern, datafile);
+                return result;
             }
         } catch (Exception e) {
-            //if we get here, an exception was thrown while constructing 
+            //if we get here, an exception was thrown while constructing the VIVA output SerializedFile (and re-thrown by Utilities.serializedFileError)
             getController().getLog().severe("Exception while converting VIVA output to SerializedFile: " + e.getMessage());
-            e.printStackTrace();
-            return null;
+            String msg = "Cannot test data files; exception while converting VIVA output to SerializedFile: " + e.getMessage()
+                    + "\nPlease check logs and report this error to the PC2 Development Team (pc2@ecs.csus.edu).";
+            JOptionPane.showMessageDialog(null, msg, "Internal Error", JOptionPane.ERROR_MESSAGE);
+            
+            //return a VivaDataFileTestResult indicating that the test failed because of an error
+            VivaDataFileTestResult result = new VivaDataFileTestResult(vivaOutput, false, Problem.InputValidationStatus.ERROR, pattern, datafile);
+            return result;
         }
         
-        // construct new VivaDataFileTestResult containing the Serialized File and a boolean indicating pass/fail
-        VivaDataFileTestResult result = new VivaDataFileTestResult(vivaOutput, passFail, pattern, datafile);
+        // construct new VivaDataFileTestResult containing the Serialized Files, pass/fail flag, and a non-error status
+        Problem.InputValidationStatus status = passed ? Problem.InputValidationStatus.PASSED : Problem.InputValidationStatus.FAILED;
+        VivaDataFileTestResult result = new VivaDataFileTestResult(vivaOutput, passed, status, pattern, datafile);
         
         return result;
     }

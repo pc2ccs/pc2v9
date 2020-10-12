@@ -487,10 +487,10 @@ public class EditProblemPane extends JPanePlugin {
             }
 
             // check the input validator
-            sFile = newProblemDataFiles.getInputValidatorFile();
+            sFile = newProblemDataFiles.getCustomInputValidatorFile();
             if (sFile != null) {
                 if (checkFileFormat(sFile)) {
-                    newProblemDataFiles.setInputValidatorFile(sFile);
+                    newProblemDataFiles.setCustomInputValidatorFile(sFile);
                 }
             }
         } catch (InvalidFieldValue e) {
@@ -508,7 +508,7 @@ public class EditProblemPane extends JPanePlugin {
             ProblemDataFiles clone = new ProblemDataFiles(newProblem);
             clone.setSiteNumber(newProblemDataFiles.getSiteNumber());
             clone.setOutputValidatorFile(newProblemDataFiles.getOutputValidatorFile());
-            clone.setInputValidatorFile(newProblemDataFiles.getInputValidatorFile());
+            clone.setCustomInputValidatorFile(newProblemDataFiles.getCustomInputValidatorFile());
             clone.setJudgesAnswerFiles(newProblemDataFiles.getJudgesAnswerFiles());
             clone.setJudgesDataFiles(newProblemDataFiles.getJudgesDataFiles());
 
@@ -1247,14 +1247,14 @@ public class EditProblemPane extends JPanePlugin {
         SerializedFile inputValidatorSF = getInputValidatorPane().getCustomInputValidatorFile();
         if (inputValidatorSF != null) {
 
-            checkProblem.setCustomInputValidatorSerializedFile(inputValidatorSF);
-            newProblemDataFiles.setInputValidatorFile(inputValidatorSF);
+            checkProblem.setCustomInputValidatorFile(inputValidatorSF);
+            newProblemDataFiles.setCustomInputValidatorFile(inputValidatorSF);
 
             // mark the problem as having a Custom input validator
             checkProblem.setProblemHasCustomInputValidator(true);
         } else {
-            checkProblem.setCustomInputValidatorSerializedFile(null);
-            newProblemDataFiles.setInputValidatorFile(null);
+            checkProblem.setCustomInputValidatorFile(null);
+            newProblemDataFiles.setCustomInputValidatorFile(null);
 
             // mark the problem as not having a Custom input validator
             checkProblem.setProblemHasCustomInputValidator(false);
@@ -1699,7 +1699,7 @@ public class EditProblemPane extends JPanePlugin {
         newProblemDataFiles = multipleDataSetPane.getProblemDataFiles();
 
         if (newProblemDataFiles != null) {
-            newProblemDataFiles.setInputValidatorFile(inputValidatorPane.getCustomInputValidatorFile());
+            newProblemDataFiles.setCustomInputValidatorFile(inputValidatorPane.getCustomInputValidatorFile());
         }
 
         if (debug22EditProblem) {
@@ -1871,8 +1871,8 @@ public class EditProblemPane extends JPanePlugin {
                 VivaPatternTestResult vivaPatternTestResult = vivaAdapter.checkPattern(vivaPattern);
                 if (!vivaPatternTestResult.isValidPattern()) {
                     String vivaMsg = vivaPatternTestResult.getVivaResponseMessage();
-                    String errMsg = "The VIVA Input Validator has been selected but the specified VIVA pattern is invalid: " 
-                    + "\n" + vivaMsg ; 
+                    String errMsg = "The VIVA Input Validator has been selected but VIVA reports that the specified pattern is invalid: " 
+                    + "\n\n" + vivaMsg ; 
                     showMessage(errMsg);
                     return false;
                 }
@@ -2007,7 +2007,7 @@ public class EditProblemPane extends JPanePlugin {
             public void run() {
 
                 try {
-                    getInputValidatorPane().setCustomInputValidatorFile(problemDataFiles.getInputValidatorFile());
+                    getInputValidatorPane().setCustomInputValidatorFile(problemDataFiles.getCustomInputValidatorFile());
                 } catch (Exception e) {
                     e.printStackTrace(System.err);
                     getLog().log(Log.INFO, "Could not load input validator file into Pane", e);
@@ -5525,11 +5525,14 @@ public class EditProblemPane extends JPanePlugin {
      * @return an array containing the elements of the received Iterable.
      */
     private InputValidationResult[] convertIterableInputValidationResultToArray(Iterable<InputValidationResult> results) {
+        //build a Vector containing the Iterable elements
         Vector<InputValidationResult> temp = new Vector<InputValidationResult>();
         for (InputValidationResult res : results) {
             temp.add(res);
         }
-        InputValidationResult [] array = new InputValidationResult[temp.size()];
+        //convert the Vector to an array
+        InputValidationResult [] array = temp.toArray(new InputValidationResult[temp.size()]); 
+
         return array;
     }
 

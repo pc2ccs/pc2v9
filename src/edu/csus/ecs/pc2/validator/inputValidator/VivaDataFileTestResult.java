@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.validator.inputValidator;
 
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
@@ -11,13 +12,16 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 public class VivaDataFileTestResult {
     
     private SerializedFile vivaOutput;
-    private boolean passFail;
+    private boolean passed;
+    private Problem.InputValidationStatus status;
     private String vivaPattern;
     private SerializedFile dataFile;
 
-    public VivaDataFileTestResult(SerializedFile vivaOutput, boolean passFail, String vivaPattern, SerializedFile dataFile) {
+    public VivaDataFileTestResult(SerializedFile vivaOutput, boolean passed, Problem.InputValidationStatus status, 
+                                        String vivaPattern, SerializedFile dataFile) {
         this.vivaOutput = vivaOutput;
-        this.passFail = passFail;
+        this.passed = passed;
+        this.status = status;
         this.vivaPattern = vivaPattern;
         this.dataFile = dataFile;
     }
@@ -30,10 +34,10 @@ public class VivaDataFileTestResult {
     }
 
     /**
-     * @return the passFail flag associated with this VivaDataFileTestResult.
+     * @return the passed flag associated with this VivaDataFileTestResult.
      */
-    public boolean passFail() {
-        return passFail;
+    public boolean passed() {
+        return passed;
     }
 
     /**
@@ -48,6 +52,13 @@ public class VivaDataFileTestResult {
      */
     public SerializedFile getDataFile() {
         return dataFile;
+    }
+
+    /**
+     * @return the {@link Problem.InputValidationStatus} associated with this VivaDataFileTestResult. 
+     */
+    public Problem.InputValidationStatus getStatus() {
+        return status;
     }
 
 }

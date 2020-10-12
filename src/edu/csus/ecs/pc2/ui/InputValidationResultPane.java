@@ -470,22 +470,30 @@ public class InputValidationResultPane extends JPanePlugin {
 
         if (runResults != null && runResults.length > 0) {
 
-            // there are some results; see if there were any failures
+            // there are some results; see if there were any failures or errors
             boolean foundFailure = false;
+            boolean foundError = false;
             for (InputValidationResult res : runResults) {
                 if (res == null) {
-                    //ignore null results, but log them
+                    // ignore null results, but log them
                     getController().getLog().warning("InputValidationPane SwingWorker thread returned null InputValidationResult");
                 } else {
-                    if (!res.isPassed()) {
-                        foundFailure = true;
+                    if (res.getStatus() == InputValidationStatus.ERROR) {
+                        foundError = true;
                         break;
+                    } else {
+                        if (!res.isPassed()) {
+                            foundFailure = true;
+                            break;
+                        }
                     }
                 }
             }
 
             InputValidationStatus overallStatus;
-            if (foundFailure) {
+            if (foundError) {
+                overallStatus = InputValidationStatus.ERROR;
+            } else if (foundFailure) {
                 overallStatus = InputValidationStatus.FAILED;
             } else {
                 overallStatus = InputValidationStatus.PASSED;
@@ -515,11 +523,15 @@ public class InputValidationResultPane extends JPanePlugin {
                     break;
 
                 case ERROR:
+                    msg = "" + "Error occured during Input Validator execution";
+                    color = Color.red;
+                    break;
+                    
                 case NOT_TESTED:
                     msg = "Error occurred during input validation result display; check logs";
                     color = Color.YELLOW;
                     getController().getLog()
-                            .severe("Unexpected error in computing Input Validation Status: found status '" + overallStatus + "' when " + "only 'PASSED' or 'FAILED' should be possible");
+                            .severe("Unexpected error in computing Input Validation Status: found status '" + overallStatus + "' when " + "only 'PASSED', 'FAILED' or 'ERROR' should be possible");
                     break;
                 default:
                     msg = "This message should never be displayed; please notify PC2 Developers: pc2@ecs.csus.edu";

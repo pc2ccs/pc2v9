@@ -50,6 +50,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -1279,7 +1280,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 // `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
 
-                addClicsValidator(problem, problemDataFiles, baseDirectoryName);
+                addClicsOutputValidator(problem, problemDataFiles, baseDirectoryName);
+                addClicsCustomInputValidator(problem, problemDataFiles, baseDirectoryName);
+                addVivaInputValidator(problem);
 
             } else {
                 addDefaultPC2Validator(problem, 1);
@@ -2102,7 +2105,22 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         throw exception;
     }
 
-    private Problem addClicsValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
+    /**
+     * Adds the CLICS output validator as the output validator for the specified problem.
+     * 
+     * Developer's note: this method at one time also had code which loaded a Clics INPUT Validator
+     * and added it to the specified problem.  Since this method is about loading the OUTPUT Validator,
+     * that code was moved to a separate method {@link #addClicsCustomInputValidator(Problem, ProblemDataFiles, String)}.
+     * 
+     * @param problem the {@link Problem} to which the CLICS output validator is to be added.
+     * @param problemDataFiles the {@link ProblemDataFiles} associated with the specified problem.
+     * @param baseDirectoryName the name of the directory where the problem configuration lies.
+     * 
+     * @return an updated Problem (the problem is also modified via the received reference parameter).
+     * 
+     * @see #addClicsCustomInputValidator(Problem, ProblemDataFiles, String)
+     */
+    private Problem addClicsOutputValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
 
         problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
 
@@ -2116,35 +2134,74 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problem.setOutputValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         }
 
-        String validatorName = baseDirectoryName + File.separator + problem.getOutputValidatorProgramName();
+        String outputValidatorName = baseDirectoryName + File.separator + problem.getOutputValidatorProgramName();
 
         try {
             /**
              * If file is there load it
              */
-            if (new File(validatorName).isFile()) {
-                problemDataFiles.setInputValidatorFile(new SerializedFile(validatorName));
+            if (new File(outputValidatorName).isFile()) {
+                //TODO:  Huh?  the following doesn't seem to make sense... the variable 'validatorName' has been assigned
+                // the value of the problem's OUTPUT validator (just above the "try"), but this statement is assigning
+                // that value to the problemDataFiles' INPUT validator.  Seems wrong...
+                problemDataFiles.setCustomInputValidatorFile(new SerializedFile(outputValidatorName));
             }
         } catch (Exception e) {
-            throw new YamlLoadException("Unable to load validator for problem " + problem.getShortName() + ": " + validatorName, e);
+            throw new YamlLoadException("Unable to load validator for problem " + problem.getShortName() + ": " + outputValidatorName, e);
         }
+        
+        return problem;
+    }
 
-        String inpuFormattValidatorName = findInputValidator(baseDirectoryName, problem);
+
+    /**
+     * Adds a Custom Input Validator (also called an Input Format Validator) to the specified {@link Problem} and
+     * its associated {@link ProblemDataFiles} if an appropriate Input Validator can be found.
+     * 
+     * This method is based on searching for Input Validators defined by the CLICS Problem Package Format specification
+     * (link).  CLICS Input Validators are Custom Input Validators (in PC2 terminology) which are found in the CLICS-defined
+     * Problem Package Format under the folder "<B><I>input_format_validators</i></b>".  This method searches for such a folder
+     * under the specified Problem definition folder; if found, it searches that folder for input validators and 
+     * assigns the first validator found, if any, to the specified Problem and its associated ProblemDataFiles.
+     * 
+     * Note that the CLICS problem package format specification defines that a problem may have MULTIPLE input format validators.
+     * If more than one input format validator is found in the <B><I>input_format_validators</i></b> folder, the FIRST such
+     * input validator is chosen, and a warning message is displayed on the standard output.
+     * 
+     * If no CLICS Custom Input Validator can be found, this method silently does nothing.
+     * 
+     * //TODO: update PC2 to support the ability to execute multiple CLICS input format validators.
+     *
+     * @param problem the Problem to which an Input Format Validator is to be assigned.
+     * @param problemDataFiles the ProblemDataFiles associated with the specified problem.
+     * @param baseDirectoryName the folder which should be searched for input validators.
+     */
+    private void addClicsCustomInputValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
+        
+        //search for an input validator beneath the specified folder
+        String inputValidatorName = findInputValidator(baseDirectoryName, problem);
 
         try {
             /**
              * If file is there load it
              */
-            if (inpuFormattValidatorName != null && new File(inpuFormattValidatorName).isFile()) {
-                SerializedFile serializedFile = new SerializedFile(inpuFormattValidatorName);
+            if (inputValidatorName != null && new File(inputValidatorName).isFile()) {
+                SerializedFile customInputValidatorFile = new SerializedFile(inputValidatorName);
 
-                problemDataFiles.setInputValidatorFile(serializedFile);
+                //insert the input validator file into the Problem and the ProblemDataFiles
+                problem.setCustomInputValidatorFile(customInputValidatorFile);
+                problemDataFiles.setCustomInputValidatorFile(customInputValidatorFile);
 
-                String basename = serializedFile.getName();
+                //set the custom input validator command line to the input validator file basename as a default
+                String basename = customInputValidatorFile.getName();
                 problem.setCustomInputValidatorCommandLine(basename);
+                
+                //if the input validator file is a DOS script, update the command line to properly invoke it
                 if (basename.toLowerCase().endsWith(".bat") || basename.toLowerCase().endsWith(".cmd")) {
                     problem.setCustomInputValidatorCommandLine("cmd /c " + basename);
                 }
+                
+                //if the input validator file is a Java ".class" file, update the command line to properly invoke it
                 if (basename.toLowerCase().endsWith(".class")) {
                     basename = basename.replaceFirst(".class", "");
                     problem.setCustomInputValidatorCommandLine("java " + basename);
@@ -2153,14 +2210,35 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 //input validator program name now comes from the SerializedFile; there is no separate "name" field any more.
 //                // set validator name to short filename
 //                problem.setCustomInputValidatorProgramName(serializedFile.getName());
+                
+                //update the problem's input validator state
                 problem.setProblemHasCustomInputValidator(true);
+                problem.setCustomInputValidationStatus(InputValidationStatus.NOT_TESTED);
+                problem.setCustomInputValidatorHasBeenRun(false);
             }
         } catch (Exception e) {
-            throw new YamlLoadException("Unable to load input format validator for problem " + problem.getShortName() + ": " + inpuFormattValidatorName, e);
+            throw new YamlLoadException("Unable to load input format validator for problem " + problem.getShortName() + ": " + inputValidatorName, e);
         }
 
-        return problem;
     }
+
+    /**
+     * Updates the specified {@link Problem} with valid VIVA Input validator settings.
+     * Note that the VIVA Input Validator is built-in to PC2; there is no external validator file code which needs to be
+     * loaded.  However, the problem being configured from YAML needs to have sane VIVA validator settings when it is created.
+     * 
+     * @param problem the Problem whose VIVA settings should be initialized. 
+     */
+    private void addVivaInputValidator(Problem problem) {
+        
+        //update the problem's VIVA input validator state
+        problem.setProblemHasVivaInputValidatorPattern(false);
+        problem.setVivaInputValidationStatus(InputValidationStatus.NOT_TESTED);
+        problem.setVivaInputValidatorHasBeenRun(false);
+        
+    }
+
+
 
     /**
      * Get file directory entries with relative dir path

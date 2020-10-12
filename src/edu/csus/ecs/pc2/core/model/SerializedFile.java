@@ -170,8 +170,10 @@ public class SerializedFile implements Serializable, IJsonizable {
     }
 
     /**
-     * Constructs a SerializedFile containing the specified file name and data bytes.
-     * The specified file name will be assigned as the "absolute file name" for the file.
+     * Constructs a SerializedFile containing the specified fileName and data bytes.
+     * The specified fileName will be assigned as the "absolute path" for the file.
+     * The "file base name" (the last component of the specified fileName, minus any file extension)
+     * will be assigned as the "name" of the file (also known as the "short name").
      * 
      * If an exception is thrown while constructing SerializedFile, an error message and a corresponding
      * exception are stored in the SerializedFile object; however, no additional action is taken -- 
@@ -181,6 +183,7 @@ public class SerializedFile implements Serializable, IJsonizable {
      * @param data an array of bytes containing the data to be stored in the SerializedFile
      * 
      * @see #getAbsolutePath()
+     * @see #getName()
      * @see #getErrorMessage()
      * @see #getException()
      */
@@ -189,6 +192,7 @@ public class SerializedFile implements Serializable, IJsonizable {
         try {
             buffer = data;
             absolutePath = fileName;
+            name = Utilities.getFileBaseName(fileName);
             generateSHA1();
             generateFileType(buffer);
 

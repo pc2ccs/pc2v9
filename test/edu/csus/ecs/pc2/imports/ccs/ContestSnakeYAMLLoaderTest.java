@@ -2677,7 +2677,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
 
         ProblemDataFiles pdf = con.getProblemDataFile(p);
-        SerializedFile file = pdf.getInputValidatorFile();
+        SerializedFile file = pdf.getCustomInputValidatorFile();
         assertNotNull(" getInputValidatorFile ", file);
 
     }

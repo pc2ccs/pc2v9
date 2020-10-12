@@ -374,7 +374,7 @@ public class Problem implements IElementObject {
         clone.setCustomInputValidatorHasBeenRun(this.isCustomInputValidatorHasBeenRun());
         clone.setCustomInputValidationStatus(this.getCustomInputValidationStatus());
         clone.setCustomInputValidatorCommandLine(StringUtilities.cloneString(this.getCustomInputValidatorCommandLine()));
-        clone.setCustomInputValidatorSerializedFile(this.getCustomInputValidatorSerializedFile());
+        clone.setCustomInputValidatorFile(this.getCustomInputValidatorSerializedFile());
 //        clone.setInputValidatorFilesOnDiskFolder(this.getInputValidatorFilesOnDiskFolder());
         
         clone.setProblemHasVivaInputValidatorPattern(this.isProblemHasVivaInputValidatorPattern());
@@ -1868,7 +1868,7 @@ public class Problem implements IElementObject {
      * 
      * @param inputValidatorFile a SerializedFile containing a Custom Input Validator program.
      */
-    public void setCustomInputValidatorSerializedFile(SerializedFile inputValidatorFile) {
+    public void setCustomInputValidatorFile(SerializedFile inputValidatorFile) {
         this.customInputValidatorSerializedFile = inputValidatorFile;
     }
 

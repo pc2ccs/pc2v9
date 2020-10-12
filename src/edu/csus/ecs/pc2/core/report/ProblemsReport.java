@@ -160,7 +160,7 @@ public class ProblemsReport implements IReport {
         if (problemDataFiles == null) {
             printWriter.println("   input validator file: No file (contents saved) ");
         } else {
-            SerializedFile inputFormatValidatorFile = problemDataFiles.getInputValidatorFile();
+            SerializedFile inputFormatValidatorFile = problemDataFiles.getCustomInputValidatorFile();
             if (inputFormatValidatorFile == null) {
                 printWriter.println("   input validator file: No file (contents saved) ");
             } else {
