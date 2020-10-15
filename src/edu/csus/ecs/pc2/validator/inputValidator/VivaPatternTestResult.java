@@ -47,5 +47,22 @@ public class VivaPatternTestResult {
     public String getVivaResponseMessage() {
         return vivaResponse;
     }
+    
+    public String toString() {
+        
+        String retStr = "";
+        
+        retStr += "VivaPatternTestResult[";
+        retStr += "pattern=" + getPattern();
+        retStr += ", isValidPattern=" + isValidPattern();
+        if (getVivaResponseMessage().trim().equals("")) {
+            retStr += ", vivaResponse=" + "<empty>";
+        } else {
+            retStr += ", vivaResponse=" + getVivaResponseMessage();
+        }
+        retStr += "]";
+        
+        return retStr;
+    }
 
 }

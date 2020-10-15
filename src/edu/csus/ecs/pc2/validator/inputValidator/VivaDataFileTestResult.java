@@ -60,5 +60,25 @@ public class VivaDataFileTestResult {
     public Problem.InputValidationStatus getStatus() {
         return status;
     }
+    
+    public String toString() {
+        
+        String retStr = "";
+        
+        retStr += "VivaDataFileTestResult[";
+        retStr += "pattern=" + getVivaPattern();
+        retStr += ", datafile=" + getDataFile().getName();
+        retStr += ", status=" + getStatus();
+        retStr += ", passed=" + passed();
+        
+        String vivaOutput = new String (getVivaOutput().getBuffer());
+        if (vivaOutput==null || vivaOutput.trim().equals("")) {
+            vivaOutput = "<empty>";
+        }
+        retStr += ", vivaOutput=" + vivaOutput;
+        retStr += "]";
+        
+        return retStr;
+    }
 
 }

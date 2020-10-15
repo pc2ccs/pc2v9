@@ -317,7 +317,7 @@ public class AbstractTestCase extends TestCase {
      */
     public String getDataDirectory() {
         String dirname = getRootInputTestDataDirectory() + File.separator + getShortClassName();
-        ensureDirectory(dirname);
+        ensureDirectory(dirname);  //TODO: this fails to check the boolean return value, thus silently failing if the dir couldn't be created
         return dirname;
     }
 
