@@ -142,9 +142,10 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * last directory where searched for files.
      */
-//    private String lastDirectory; 
-    //TODO: remove the following testing line; replace with the above line...
-    private String lastDirectory = "C:\\clevengr\\contest\\PC2\\v9\\TestContests\\sumithello2\\config\\sumit";
+    private String lastDirectory; 
+    
+    //John's local private testing directory
+//    private String lastDirectory = "C:\\clevengr\\contest\\PC2\\v9\\TestContests\\sumithello2\\config\\sumit";
 
     @SuppressWarnings("unused")
     private String lastYamlLoadDirectory;
@@ -3847,7 +3848,7 @@ public class EditProblemPane extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (selectFile(getCustomValidatorExecutableProgramTextField(), "Select Validator Program")) {
                         getCustomValidatorExecutableProgramTextField().setToolTipText((getCustomValidatorExecutableProgramTextField().getText()));
-                        // TODO set serializedFile
+                        // TODO set serializedFile?
 
                         enableUpdateButton();
                     }

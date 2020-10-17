@@ -160,6 +160,7 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
             case 5:
                 //"Input Validator" column
                 //TODO: this needs to be updated to reflect the possibility that Viva is the Input Validator...
+                //Note however that this method is only involved when "Run All Input Validators" is implemented (which it currently is not).
                 if (prob.isProblemHasCustomInputValidator() && prob.getCustomInputValidatorProgramName() != null) {
                     obj = getBaseName(prob.getCustomInputValidatorProgramName());
                 } else {

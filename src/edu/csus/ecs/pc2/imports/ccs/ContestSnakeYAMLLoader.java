@@ -50,6 +50,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
@@ -131,27 +132,27 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     @Override
     public IInternalContest fromYaml(IInternalContest contest, String directoryName, boolean loadDataFileContents) {
         String[] contents;
-        String contetYamlFilename = getContestYamlFilename(directoryName);
+        String contestYamlFilename = getContestYamlFilename(directoryName);
         try {
             // SOMEDAY would it be easier to load all yaml files instead?
-            contents = loadFileWithIncludes(directoryName, contetYamlFilename);
-            contetYamlFilename = DEFAULT_SYSTEM_YAML_FILENAME;
-            if (new File(directoryName + File.separator + contetYamlFilename).exists()) {
-                String[] lines = Utilities.loadFile(directoryName + File.separator + contetYamlFilename);
+            contents = loadFileWithIncludes(directoryName, contestYamlFilename);
+            contestYamlFilename = DEFAULT_SYSTEM_YAML_FILENAME;
+            if (new File(directoryName + File.separator + contestYamlFilename).exists()) {
+                String[] lines = Utilities.loadFile(directoryName + File.separator + contestYamlFilename);
                 contents = concat(contents, lines);
             }
-            contetYamlFilename = DEFAULT_PROBLEM_SET_YAML_FILENAME;
-            if (new File(directoryName + File.separator + contetYamlFilename).exists()) {
-                String[] lines = Utilities.loadFile(directoryName + File.separator + contetYamlFilename);
+            contestYamlFilename = DEFAULT_PROBLEM_SET_YAML_FILENAME;
+            if (new File(directoryName + File.separator + contestYamlFilename).exists()) {
+                String[] lines = Utilities.loadFile(directoryName + File.separator + contestYamlFilename);
                 contents = concat(contents, lines);
             }
-            contetYamlFilename = "system.pc2.yaml";
-            if (new File(directoryName + File.separator + contetYamlFilename).exists()) {
-                String[] lines = Utilities.loadFile(directoryName + File.separator + contetYamlFilename);
+            contestYamlFilename = "system.pc2.yaml";
+            if (new File(directoryName + File.separator + contestYamlFilename).exists()) {
+                String[] lines = Utilities.loadFile(directoryName + File.separator + contestYamlFilename);
                 contents = concat(contents, lines);
             }
         } catch (IOException e) {
-            throw new YamlLoadException("Problem loading " + e.getMessage(), e, contetYamlFilename);
+            throw new YamlLoadException("Problem loading " + e.getMessage(), e, contestYamlFilename);
         }
         return fromYaml(contest, contents, directoryName, loadDataFileContents);
     }
@@ -577,7 +578,19 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
             }
         }
-
+        
+        //update each of the problems with Input Validators as specified in the corresponding problem.yaml file, or if none is
+        // specified in problem.yaml then look for custom input validators in the "input_format_validators" folder.
+        //Note: ideally these calls to assignInputValidators() would be done inside method getProblems() as part of creating each Problem.
+        //However, that would require changing the interface signature for getProblems(), because assigning Input Validators requires 
+        // reading the problem.yaml file for each problem, which in turn requires knowing the base directory beneath which the problems are
+        // defined -- but that directory is not currently passed to any version of interface method getProblems().
+        // Since changing the interface signatures is a breaking change (not that there aren't already others under development),
+        // it was decided to assign the Input Validators separately in a method that gets passed the problem directory name.
+        for (Problem problem : problems) {
+            assignInputValidators(contest, problem, directoryName);
+        }
+        
         Site[] sites = getSites(yamlLines);
         for (Site site : sites) {
             Site existingSite = contest.getSite(site.getSiteNumber());
@@ -1281,25 +1294,23 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
 
                 addClicsOutputValidator(problem, problemDataFiles, baseDirectoryName);
-                addClicsCustomInputValidator(problem, problemDataFiles, baseDirectoryName);
-                addVivaInputValidator(problem);
-
+                
             } else {
                 addDefaultPC2Validator(problem, 1);
             }
         } else {
-            // usingCustomValidor
-            String validatorProg = fetchValue(validatorContent, "validatorProg");
-            if (validatorProg != null) {
+            // using Custom Output Validator
+            String outputValidatorProg = fetchValue(validatorContent, "validatorProg");
+            if (outputValidatorProg != null) {
                 Problem cleanProblem = contest.getProblem(problem.getElementId());
                 ProblemDataFiles problemDataFile = contest.getProblemDataFile(problem);
-                SerializedFile validatorFile = new SerializedFile(validatorProg);
-                if (validatorFile.getSHA1sum() != null) {
-                    problemDataFile.setOutputValidatorFile(validatorFile);
+                SerializedFile outputValidatorFile = new SerializedFile(outputValidatorProg);
+                if (outputValidatorFile.getSHA1sum() != null) {
+                    problemDataFile.setOutputValidatorFile(outputValidatorFile);
                     contest.updateProblem(cleanProblem, problemDataFile);
                 } else {
                     // Halt loading and throw YamlLoadException
-                    syntaxError("Error: problem " + problem.getLetter() + " - " + problem.getShortName() + " custom validator import failed: " + validatorFile.getErrorMessage());
+                    syntaxError("Error: problem " + problem.getLetter() + " - " + problem.getShortName() + " custom validator import failed: " + outputValidatorFile.getErrorMessage());
                 }
             }
         }
@@ -1692,14 +1703,19 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             list = fetchList(yamlContent, PROBLEMSET_PROBLEMS_KEY);
         }
 
+        //at this point if "list" is not null then it should contain an entry for each problem defined in 
+        //the "problemset" section of the contest.yaml file.  Each problem entry in "list" has four yaml-defined
+        // key/value pairs, with keys "letter", "short-name", "color", and "rgb".
         if (list != null) {
-
+            
+            //process each problem entry in list
             for (Object object : list) {
+                
+                //get a map of the problem key/value pairs (see comment above)
+                Map<String, Object> problemMap = (Map<String, Object>) object;
 
-                Map<String, Object> map = (Map<String, Object>) object;
-
-                String problemKeyName = fetchValue(map, SHORT_NAME_KEY);
-
+                //make sure the problem has a "short-name"
+                String problemKeyName = fetchValue(problemMap, SHORT_NAME_KEY);
                 if (problemKeyName == null) {
                     syntaxError("Missing " + SHORT_NAME_KEY + " in probset section");
                 }
@@ -1716,16 +1732,20 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                  * </pre>
                  */
 
-                String problemTitle = fetchValue(map, PROBLEM_NAME_KEY);
+                //get the problem name
+                String problemTitle = fetchValue(problemMap, PROBLEM_NAME_KEY);
                 if (problemTitle == null) {
                     problemTitle = problemKeyName;
                 }
-
+                //initialize a new problem with the specified name
                 Problem problem = new Problem(problemTitle);
 
+                //set newly-loaded problems to use computer judging by default (not sure why? jlc)
                 problem.setComputerJudged(true);
 
-                int actSeconds = fetchIntValue(map, TIMEOUT_KEY, seconds);
+                //set problem time limit.  If the problem.yaml file for the current problem (codified in the "problemMap")
+                // contains a "TIMEOUT_KEY", use the timeout value from the problem.yaml; otherwise use the passed-in default.
+                int actSeconds = fetchIntValue(problemMap, TIMEOUT_KEY, seconds);
                 problem.setTimeOutInSeconds(actSeconds);
 
                 problem.setShowCompareWindow(false);
@@ -1735,9 +1755,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     throw new YamlLoadException("Invalid short problem name '" + problemKeyName + "'");
                 }
 
-                String problemLetter = fetchValue(map, "letter");
-                String colorName = fetchValue(map, "color");
-                String colorRGB = fetchValue(map, "rgb");
+                String problemLetter = fetchValue(problemMap, "letter");
+                String colorName = fetchValue(problemMap, "color");
+                String colorRGB = fetchValue(problemMap, "rgb");
 
                 // SOMEDAY CCS assign Problem variables for color and letter
                 problem.setLetter(problemLetter);
@@ -1745,7 +1765,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 problem.setColorRGB(colorRGB);
 
                 /**
-                 * Assign each proble default values from contest.yaml level
+                 * Assign each problem default values from contest.yaml level
                  */
                 assignJudgingType(yamlContent, problem, manualReviewOverride);
 
@@ -1754,26 +1774,25 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     assignJudgingType(judgingTypeContent, problem, manualReviewOverride);
                 }
 
-                assignJudgingType(map, problem, manualReviewOverride);
+                assignJudgingType(problemMap, problem, manualReviewOverride);
 
-                boolean loadFilesFlag = fetchBooleanValue(map, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
+                //if the problem.yaml file for the current problem (codified in the "problemMap") has a "load-data-files"
+                // key, use that to set the "loadFilesFlag"; if not, use the passed-in default.
+                boolean loadFilesFlag = fetchBooleanValue(problemMap, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
                 problem.setUsingExternalDataFiles(!loadFilesFlag);
 
-                String validatorCommandLine = fetchValue(map, VALIDATOR_KEY);
+                //if the problem.yaml file for the current problem (codified in the "problemMap") has a VALIDATOR_KEY
+                // key, use that to obtain the "outputValidatorCommandLine"; if not, use the passed-in defaults.
+                String outputValidatorCommandLine = fetchValue(problemMap, VALIDATOR_KEY);
 
-                if (validatorCommandLine == null) {
-                    validatorCommandLine = defaultValidatorCommand;
+                if (outputValidatorCommandLine == null) {
+                    outputValidatorCommandLine = defaultValidatorCommand;
                 }
                 if (overrideValidatorCommandLine != null) {
-                    validatorCommandLine = overrideValidatorCommandLine;
+                    outputValidatorCommandLine = overrideValidatorCommandLine;
                 }
                 problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
-                problem.setOutputValidatorCommandLine(validatorCommandLine);
-
-                String inputValidatorCommandLine = fetchValue(map, INPUT_VALIDATOR_COMMAND_LINE_KEY);
-                if (inputValidatorCommandLine != null) {
-                    problem.setCustomInputValidatorCommandLine(inputValidatorCommandLine);
-                }
+                problem.setOutputValidatorCommandLine(outputValidatorCommandLine);                
 
                 problemList.addElement(problem);
             }
@@ -1781,6 +1800,230 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         return (Problem[]) problemList.toArray(new Problem[problemList.size()]);
     }
+
+    /**
+     * Assign individual problem input validator(s) to a problem.  This method 
+     * reads the "problem.yaml" file associated with the specified problem (as determined by the "problem short-name")
+     * and uses the settings in that problem.yaml file to determine what Input Validators to assign to the problem.
+     * The method always arranges that a Viva Input Validator is configured for the problem (although the Viva Pattern
+     * for the problem will be empty if no pattern is specified in the problem.yaml file).  
+     * If the problem.yaml file specifies a "custom input validator", that validator
+     * is configured into the problem; if not, the method searches the "input_format_validators" folder for an input validator
+     * and configures that into the problem.
+     * 
+     * @param contest the contest in which the specified problems are configured.
+     * @param problem the Problem which is to be updated with Input Validators.
+     * @param problemsBaseDir the name of the directory where Problems are stored under their short-name values.
+     * 
+     * @throws YamlLoadException 
+     *              if the specified problem has a null or empty-string short-name;
+     *              if the problem directory could not be found;
+     *              if an error or exception occurred loading a custom input validator program.
+     */
+    protected void assignInputValidators(IInternalContest contest, Problem problem, String problemsBaseDir) {
+        
+        String probName = problem.getShortName();
+        
+        if (probName==null || probName.equals("")) {
+            String errMsg = "Error during YAML loading: encountered contest problem with null/empty short name";
+            YamlLoadException exception = new YamlLoadException(errMsg);
+            throw exception;
+        }
+
+        String problemDir = problemsBaseDir + File.separator + probName;
+        File probDir = new File(problemDir);
+        if (probDir.exists() && probDir.isDirectory()) {
+
+            //get the entire problem.yaml file as a YAML map
+            String problemYamlFileName = probDir + File.separator + DEFAULT_PROBLEM_YAML_FILENAME;
+            Map<String, Object> problemYamlMap = loadYaml(problemYamlFileName);
+
+            //get the "input_validator" section from the problem.yaml file map
+            Map<String, Object> inputValidatorMap = fetchMap(problemYamlMap, INPUT_VALIDATOR_KEY);
+
+            //we haven't (yet) set the default Input Validator type
+            boolean defaultInputValidatorTypeHasBeenSet = false;
+            
+             //we haven't (yet) loaded a custom input validator into the problem
+            boolean customInputValidatorProgramHasBeenSet = false;
+            
+            //we haven't (yet) set a Viva pattern in the problem
+            boolean vivaPatternHasBeenSet = false;
+            
+            //check if there is an "input_validator" section in the problem.yaml file
+            if (inputValidatorMap != null) {
+
+                //yes; process the "input_validator" section settings, assigning defaults for unspecified settings
+                
+                // if there is a default Input Validator type (NONE, VIVA, or CUSTOM) specified, set that in the problem
+                String defaultIVType = fetchValue(inputValidatorMap, DEFAULT_INPUT_VALIDATOR_KEY);
+                if (defaultIVType != null) {
+                    String defaultIVTypeIgnoreCase = defaultIVType.toLowerCase();
+                    switch (defaultIVTypeIgnoreCase) {
+                        case "none":
+                            problem.setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE.NONE);
+                            break;
+                        case "viva":
+                            problem.setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE.VIVA);
+                            break;
+                        case "custom":
+                            problem.setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE.CUSTOM);
+                            break;
+                        default:
+                            syntaxError("Unknown value for " + DEFAULT_INPUT_VALIDATOR_KEY + ": " + defaultIVType);
+                    }
+                    defaultInputValidatorTypeHasBeenSet = true;
+                    
+                } 
+
+                // if there is a custom input validator command specified in the YAML map, set it in the problem
+                String customInputValidatorCommandLine = fetchValue(inputValidatorMap, CUSTOM_INPUT_VALIDATOR_COMMAND_LINE_KEY);
+                if (customInputValidatorCommandLine != null) {
+                    problem.setCustomInputValidatorCommandLine(customInputValidatorCommandLine);
+                } else {
+                    problem.setCustomInputValidatorCommandLine("");
+                }
+
+                // if there is a custom input validator program specified in the YAML map, attempt to read the file into a SerializedFile
+                String customInputValidatorProgName = fetchValue(inputValidatorMap, CUSTOM_INPUT_VALIDATOR_PROGRAM_NAME_KEY);
+                if (customInputValidatorProgName != null) {
+                    String pathToCustomProg = getInputValidatorDir(problemsBaseDir, problem) + File.separator 
+                            + customInputValidatorProgName;
+                    SerializedFile customIVProg = new SerializedFile(pathToCustomProg);
+                    // check for errors/exceptions during file loading
+                    try {
+                        if (Utilities.serializedFileError(customIVProg)) {
+                            String errMsg = "Unable to load custom input validator program '" + customInputValidatorProgName + "': " 
+                                            + customIVProg.getErrorMessage();
+                            YamlLoadException exception = new YamlLoadException(errMsg);
+                            throw exception;
+                        }
+                    } catch (Exception e) {
+                        String errMsg = "Exception loading custom input validator program '" + customInputValidatorProgName + "': " 
+                                        + e.getMessage();
+                        YamlLoadException exception = new YamlLoadException(errMsg);
+                        throw exception;
+                    }
+                    // the custom input validator was successfully loaded; add it to the problem
+                    problem.setCustomInputValidatorFile(customIVProg);
+                    problem.setProblemHasCustomInputValidator(true);
+                    problem.setCustomInputValidationStatus(InputValidationStatus.NOT_TESTED);
+                    problem.setCustomInputValidatorHasBeenRun(false);
+                    customInputValidatorProgramHasBeenSet = true;
+                    
+                } else {
+                    // no custom input validator was specified in the problem.yaml "input_validator" section
+                    problem.setCustomInputValidatorFile(null);
+                    problem.setProblemHasCustomInputValidator(false);
+                    problem.setCustomInputValidationStatus(InputValidationStatus.NOT_TESTED);
+                    problem.setCustomInputValidatorHasBeenRun(false);
+                }
+                
+                // if there is a VIVA pattern file specified in the YAML map, attempt to read the file into a SerializedFile
+
+                String vivaPatternFileName = fetchValue(inputValidatorMap, VIVA_PATTERN_FILE_KEY);
+                if (vivaPatternFileName != null) {
+                    SerializedFile vivaPatternSF = new SerializedFile(vivaPatternFileName);
+                    // check for errors/exceptions during file loading
+                    try {
+                        if (Utilities.serializedFileError(vivaPatternSF)) {
+                            syntaxError("Unable to load VIVA pattern file '" + vivaPatternFileName + "': " + vivaPatternSF.getErrorMessage());
+                        }
+                    } catch (Exception e) {
+                        syntaxError("Exception loading VIVA pattern file '" + vivaPatternFileName + "': " + e.getMessage());
+                    }
+                    // the Viva pattern file was successfully loaded; add it to the problem
+                    String[] patternLines = new String(vivaPatternSF.getBuffer()).split("\n");
+                    problem.setVivaInputValidatorPattern(patternLines);
+                    vivaPatternHasBeenSet = true;
+                } 
+
+                // if there is a VIVA pattern specified directly in the YAML map, add it to the problem.
+                // Note that this means a pattern directly specified in the YAML file supersedes any
+                // reference to a pattern FILE also in the YAML (since that would have been loaded above and
+                // this will override it).
+                String vivaPattern = fetchValue(inputValidatorMap, VIVA_PATTTERN_KEY);
+                if (vivaPattern != null) {
+                    // a Viva pattern was found in the YAML file; add it to the problem
+                    String[] patternLines = vivaPattern.split("\n");
+                    problem.setVivaInputValidatorPattern(patternLines);
+                    vivaPatternHasBeenSet = true;
+                }
+
+            }
+
+            // check if a custom input validator got set by the problem.yaml "input_validator" section
+            // (it can only have been set if there was such a section)
+            if (!customInputValidatorProgramHasBeenSet) {
+
+                // no custom IV has been set; try to load one from the "input_format_validators" folder
+                customInputValidatorProgramHasBeenSet = addCustomInputValidator(problem, contest.getProblemDataFile(problem), problemsBaseDir);
+                
+                //if addCustomInputValidator() loaded a custom Input Validator, it also set the problem's custom IV status.
+                // if not, do so here
+                if (!customInputValidatorProgramHasBeenSet) {
+                    
+                    // we didn't find a custom input validator anywhere
+                    problem.setProblemHasCustomInputValidator(false);
+                    problem.setCustomInputValidatorCommandLine(null);
+                    problem.setCustomInputValidatorFile(null);
+                    problem.setCustomInputValidationStatus(InputValidationStatus.NOT_TESTED);
+                    problem.setCustomInputValidatorHasBeenRun(false);
+                    
+                } 
+            }
+            
+            //if the user didn't set the default Input Validator type via the problem.yaml file, set it here
+            if (!defaultInputValidatorTypeHasBeenSet) {
+                if (vivaPatternHasBeenSet) {
+                    problem.setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE.VIVA);
+                } else if (customInputValidatorProgramHasBeenSet) {
+                    problem.setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE.CUSTOM);
+                } else {
+                    problem.setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE.NONE);
+                }
+            }
+                       
+            
+            // if the user set the Viva pattern via the problem.yaml file, mark the problem to so indicate
+            if (vivaPatternHasBeenSet) {
+                problem.setProblemHasVivaInputValidatorPattern(true);
+            } else {
+                // no Viva pattern was found (either because it wasn't explicitly specified in the problem.yaml
+                // "input_validator:" section, or because there was no such section in the problem.yaml file; 
+                // in either case, mark the problem as such
+                problem.setProblemHasVivaInputValidatorPattern(false);
+            }
+            //in either case, Viva has not been run and has not produced any validation status; mark the problem such
+            problem.setVivaInputValidationStatus(InputValidationStatus.NOT_TESTED);
+            problem.setVivaInputValidatorHasBeenRun(false);
+
+            
+        } else {
+            //the problem folder either doesn't exist or is not a directory
+            String errMsg = "Error during YAML loading: unable to locate problem folder '" + problemDir + "'";
+            YamlLoadException exception = new YamlLoadException(errMsg);
+            throw exception;
+        }
+
+    }
+
+//    /**
+//     * Returns a map containing the Input Validator settings from the problem.yaml file for the problem whose 
+//     * short-name is contained in the specified problemMap.  
+//     * 
+//     * @param problemMap a problemset map containing the short-name of the problem.
+//     * 
+//     * @return a map of input validator settings for the specified problem.
+//     */
+//    protected LinkedHashMap<String, Object> getInputValidatorMap(Map<String, Object> problemMap) {
+//        
+//        //get problem short-name out of the received map
+//            
+//        LinkedHashMap<String,Object> inputValidatorMap = (LinkedHashMap<String, Object>) yamlContent.get(JUDGING_TYPE_KEY);
+//            
+//        return inputValidatorMap ;
+//    }
 
     public String getInputValidatorDir(String baseDirectoryName, Problem problem) {
 
@@ -2110,7 +2353,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      * 
      * Developer's note: this method at one time also had code which loaded a Clics INPUT Validator
      * and added it to the specified problem.  Since this method is about loading the OUTPUT Validator,
-     * that code was moved to a separate method {@link #addClicsCustomInputValidator(Problem, ProblemDataFiles, String)}.
+     * that code was moved to a separate method {@link #addCustomInputValidator(Problem, ProblemDataFiles, String)}.
      * 
      * @param problem the {@link Problem} to which the CLICS output validator is to be added.
      * @param problemDataFiles the {@link ProblemDataFiles} associated with the specified problem.
@@ -2118,7 +2361,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      * 
      * @return an updated Problem (the problem is also modified via the received reference parameter).
      * 
-     * @see #addClicsCustomInputValidator(Problem, ProblemDataFiles, String)
+     * @see #addCustomInputValidator(Problem, ProblemDataFiles, String)
      */
     private Problem addClicsOutputValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
 
@@ -2143,7 +2386,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             if (new File(outputValidatorName).isFile()) {
                 //TODO:  Huh?  the following doesn't seem to make sense... the variable 'validatorName' has been assigned
                 // the value of the problem's OUTPUT validator (just above the "try"), but this statement is assigning
-                // that value to the problemDataFiles' INPUT validator.  Seems wrong...
+                // that value to the problemDataFiles' INPUT validator.  Seems wrong... jlc
                 problemDataFiles.setCustomInputValidatorFile(new SerializedFile(outputValidatorName));
             }
         } catch (Exception e) {
@@ -2159,7 +2402,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      * its associated {@link ProblemDataFiles} if an appropriate Input Validator can be found.
      * 
      * This method is based on searching for Input Validators defined by the CLICS Problem Package Format specification
-     * (link).  CLICS Input Validators are Custom Input Validators (in PC2 terminology) which are found in the CLICS-defined
+     * (https://icpc.io/problem-package-format/spec/problem_package_format).  CLICS Input Validators are Custom Input Validators (in PC2 terminology) which are found in the CLICS-defined
      * Problem Package Format under the folder "<B><I>input_format_validators</i></b>".  This method searches for such a folder
      * under the specified Problem definition folder; if found, it searches that folder for input validators and 
      * assigns the first validator found, if any, to the specified Problem and its associated ProblemDataFiles.
@@ -2174,12 +2417,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      *
      * @param problem the Problem to which an Input Format Validator is to be assigned.
      * @param problemDataFiles the ProblemDataFiles associated with the specified problem.
-     * @param baseDirectoryName the folder which should be searched for input validators.
+     * @param problemsBaseDir the folder under which problems are stored by their short-name.
+     * 
+     * @return true if the method found an input validator and loaded it into the problem; false otherwise.
+     * 
+     * @throws YamlLoadException if an error or exception occurs while loading an Input Validator file.
      */
-    private void addClicsCustomInputValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
+    private boolean addCustomInputValidator(Problem problem, ProblemDataFiles problemDataFiles, String problemsBaseDir) {
         
         //search for an input validator beneath the specified folder
-        String inputValidatorName = findInputValidator(baseDirectoryName, problem);
+        String inputValidatorName = findInputValidator(problemsBaseDir, problem);
 
         try {
             /**
@@ -2187,6 +2434,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
              */
             if (inputValidatorName != null && new File(inputValidatorName).isFile()) {
                 SerializedFile customInputValidatorFile = new SerializedFile(inputValidatorName);
+                
+                //make sure there were no errors constructing the SerializedFile
+                if (Utilities.serializedFileError(customInputValidatorFile)) {
+                    String msg = "Error loading Input Validator: " + customInputValidatorFile.getErrorMessage() ;
+                    YamlLoadException ex = new YamlLoadException(msg);
+                    throw ex;
+                }
 
                 //insert the input validator file into the Problem and the ProblemDataFiles
                 problem.setCustomInputValidatorFile(customInputValidatorFile);
@@ -2209,35 +2463,22 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 //input validator program name now comes from the SerializedFile; there is no separate "name" field any more.
 //                // set validator name to short filename
-//                problem.setCustomInputValidatorProgramName(serializedFile.getName());
+//                problem.setCustomInputValidatorProgramName(customInputValidatorFile.getName());
                 
                 //update the problem's input validator state
                 problem.setProblemHasCustomInputValidator(true);
                 problem.setCustomInputValidationStatus(InputValidationStatus.NOT_TESTED);
                 problem.setCustomInputValidatorHasBeenRun(false);
-            }
+                
+                return true;
+
+            } 
         } catch (Exception e) {
             throw new YamlLoadException("Unable to load input format validator for problem " + problem.getShortName() + ": " + inputValidatorName, e);
         }
 
+        return false;
     }
-
-    /**
-     * Updates the specified {@link Problem} with valid VIVA Input validator settings.
-     * Note that the VIVA Input Validator is built-in to PC2; there is no external validator file code which needs to be
-     * loaded.  However, the problem being configured from YAML needs to have sane VIVA validator settings when it is created.
-     * 
-     * @param problem the Problem whose VIVA settings should be initialized. 
-     */
-    private void addVivaInputValidator(Problem problem) {
-        
-        //update the problem's VIVA input validator state
-        problem.setProblemHasVivaInputValidatorPattern(false);
-        problem.setVivaInputValidationStatus(InputValidationStatus.NOT_TESTED);
-        problem.setVivaInputValidatorHasBeenRun(false);
-        
-    }
-
 
 
     /**

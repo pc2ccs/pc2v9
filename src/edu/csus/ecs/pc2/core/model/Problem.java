@@ -1593,6 +1593,7 @@ public class Problem implements IElementObject {
     }
 
     //TODO: these methods may have been useful before VIVA support was added; not sure if they are still needed... jlc
+    // It is also the case that they may only be useful if/when the "Run Input Validators" facility is fully implemented (currently, it's not).
 //    /**
 //     * Returns the name of the folder containing the input files for this Problem.
 //     * Note that is value is only meaningful if the user has run the Input Validator

@@ -44,6 +44,7 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
@@ -1286,7 +1287,254 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     }
 
-    // SOMEDAY get this JUnit working
+    /**
+     * Tests that the input_validator keys "defaultInputValidator", "vivaPattern", customInputValidatorProg", and
+     * "customInputValidatorCmd" correctly assign the values specified in the problem.yaml file to a problem.
+     * 
+    * @throws Exception if the value associated with any of the above keys is not properly loaded into the problem.
+     */
+    public void testInputValidatorKeys() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Default custom validator setting: ", INPUT_VALIDATOR_TYPE.CUSTOM, prob.getCurrentInputValidatorType());
+         
+         //check that the "vivaPattern" key worked
+         String expectedPattern = "{x;}";
+         String [] pattern = prob.getVivaInputValidatorPattern();
+         StringBuffer sb = new StringBuffer();
+         for(int i = 0; i < pattern.length; i++) {
+            sb.append(pattern[i]);
+         }
+         String actualPattern = sb.toString();
+         assertEquals("Viva Pattern: ", expectedPattern, actualPattern);
+         
+         //check that the "customInputValidatorProg" key worked
+         assertEquals("Custom Input Validator program: ", "SumitInputValidator.class", prob.getCustomInputValidatorProgramName());
+
+         //check that the "customInputValidatorCmd" key worked
+         assertEquals("Custom Input Validator command: ", "java {:basename}", prob.getCustomInputValidatorCommandLine());
+         
+         //extra checks:  that the Problem Name and Letter got assigned correctly
+         assertEquals("Problem letter: ", "S", prob.getLetter());
+         assertEquals("Problem name: ", "sumit", prob.getShortName());
+        
+    }
+    
+    /**
+     * Tests that if no "customInputValidatorProg" key is present in the problem.yaml file, but there is an "input_format_validators"
+     * folder in the problem description and it contains an Input Validator file, that a custom input validator is loaded from the 
+     * "input_format_validators" folder.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadInputValidatorFromInputFormatValidatorsFolder() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Default custom validator setting: ", INPUT_VALIDATOR_TYPE.CUSTOM, prob.getCurrentInputValidatorType());
+         
+         //check that no "vivaPattern" has been set
+         assertFalse("Problem has Viva Pattern: ", prob.isProblemHasVivaInputValidatorPattern());
+         
+         //check that the "valid.bat" file in the "input_format_validators" folder was loaded
+         assertEquals("Custom Input Validator program: ", "valid.bat", prob.getCustomInputValidatorProgramName());
+         
+         //extra checks:  that the Problem Name and Letter got assigned correctly
+         assertEquals("Problem letter: ", "S", prob.getLetter());
+         assertEquals("Problem name: ", "sumit", prob.getShortName());
+        
+    }
+    
+    /**
+     * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "NONE",
+     * the problem gets assigned IV type "NONE" even if there is a Viva pattern defined.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadDefaultInputValidatorTypeNONEOverridesVivaPattern() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "vivaPattern" was set properly
+        String expectedPattern = "{x;}";
+        String [] pattern = prob.getVivaInputValidatorPattern();
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < pattern.length; i++) {
+           sb.append(pattern[i]);
+        }
+        String actualPattern = sb.toString();
+        assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
+         
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
+                
+    }
+    
+    /**
+     * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "NONE",
+     * the problem gets assigned IV type "NONE" even if there is a Custom Input Validator defined.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadDefaultInputValidatorTypeNONEOverridesCustomIV() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
+         
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
+    }
+    
+    /**
+     * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "NONE",
+     * the problem gets assigned IV type "NONE" even if there is a Custom Input Validator and a Viva Pattern defined.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadDefaultInputValidatorTypeNONEOverridesVivaAndCustomIV() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "vivaPattern" was set properly
+        String expectedPattern = "{x;}";
+        String [] pattern = prob.getVivaInputValidatorPattern();
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < pattern.length; i++) {
+           sb.append(pattern[i]);
+        }
+        String actualPattern = sb.toString();
+        assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
+        
+        assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
+         
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
+    }
+    
+    /**
+     * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "VIVA",
+     * the problem gets assigned IV type "VIVA" even if there is a Custom Input Validator defined.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadDefaultInputValidatorTypeVIVAOverridesCustomIV() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "vivaPattern" was set properly
+        String expectedPattern = "{x;}";
+        String [] pattern = prob.getVivaInputValidatorPattern();
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < pattern.length; i++) {
+           sb.append(pattern[i]);
+        }
+        String actualPattern = sb.toString();
+        assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
+        
+        assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
+         
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.VIVA, prob.getCurrentInputValidatorType());
+    }
+    
+    /**
+     * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "CUSTOM",
+     * the problem gets assigned IV type "CUSTOM" even if there is a Viva Input Validator Pattern defined.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadDefaultInputValidatorTypeCUSTOMOverridesViva() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "vivaPattern" was set properly
+        String expectedPattern = "{x;}";
+        String [] pattern = prob.getVivaInputValidatorPattern();
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < pattern.length; i++) {
+           sb.append(pattern[i]);
+        }
+        String actualPattern = sb.toString();
+        assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
+        
+        assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
+         
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.CUSTOM, prob.getCurrentInputValidatorType());
+    }
+    
+    /**
+     * Tests that the proper Input Validator default settings are set if there is no "input_validator:" section in the problem.yaml 
+     * file and also there is no "input_format_validators" folder in the problem.  Specifically, this condition should result
+     * in no Viva pattern, no Custom Input Validator, and a default setting of "NONE" for the Input Validator.
+     * 
+     * @throws Exception if the correct default Input Validator settings are not loaded into the problem.
+     */
+    public void testInputValidatorDefaultSettingsWithNoIVSectionAndNoDefaultCustomValidator() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        assertFalse("Problem has Viva Pattern: ", prob.isProblemHasVivaInputValidatorPattern());
+        
+        assertFalse("Problem has Custom Input Validator: ", prob.isProblemHasCustomInputValidator());
+        
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
+    }
+    
+  // SOMEDAY get this JUnit working
     public void aTestOverRideValidator() throws Exception {
 
         String directoryName = getDataDirectory("testValidatorKeys");
@@ -2669,7 +2917,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertFileExists(ifvfilename);
 
         Problem p = problems[0];
-        assertEquals("InValCmdLine", "cmd /c valid.bat", p.getCustomInputValidatorCommandLine());
+        assertEquals("InputValidatorCmdLine", "cmd /c valid.bat", p.getCustomInputValidatorCommandLine());
 
 //        String expProgFileName = unixifyPath(Utilities.getCurrentDirectory() + File.separator + ifvfilename);
         String expProgFileName = unixifyPath(valiatorFileName);

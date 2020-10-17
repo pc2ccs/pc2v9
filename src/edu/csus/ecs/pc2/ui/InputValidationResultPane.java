@@ -72,11 +72,14 @@ public class InputValidationResultPane extends JPanePlugin {
      * list of columns
      */
     enum COLUMN {
-        FILE_NAME, RESULT, VALIDATOR_OUTPUT, VALIDATOR_ERR
+//        FILE_NAME, RESULT, VALIDATOR_OUTPUT, VALIDATOR_ERR
+        FILE_NAME, RESULT, SHOW_DETAILS
     };
 
     // define the column headers for the table of results
-    private String[] columnNames = { "File", "Result", "Validator StdOut", "Validator StdErr" };
+    //TODO: this list of column names is also defined in class InputValidatorResultsTableModel; the defintion should only
+    // appear in a single source location...
+    private String[] columnNames = { "File", "Result", "Details" };
 
     private JPanePlugin parentPane;
 
@@ -193,8 +196,9 @@ public class InputValidationResultPane extends JPanePlugin {
 
             // render file-name, std-out, and std-err file names as clickable links
             resultsTable.getColumn(columnNames[COLUMN.FILE_NAME.ordinal()]).setCellRenderer(new LinkCellRenderer());
-            resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).setCellRenderer(new LinkCellRenderer());
-            resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).setCellRenderer(new LinkCellRenderer());
+//            resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).setCellRenderer(new LinkCellRenderer());
+//            resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).setCellRenderer(new LinkCellRenderer());
+            resultsTable.getColumn(columnNames[COLUMN.SHOW_DETAILS.ordinal()]).setCellRenderer(new LinkCellRenderer());
 
             // add a listener to allow users to click an output or data file name and display it
             resultsTable.addMouseListener(new MouseAdapter() {
@@ -241,19 +245,23 @@ public class InputValidationResultPane extends JPanePlugin {
         }
 
         // get the stdout file from the table
-        int stdoutFileCol = table.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).getModelIndex();
-        SerializedFile stdOutFile = getFileForTableCell(table, row, stdoutFileCol);
+//        int stdoutFileCol = table.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).getModelIndex();
+//        SerializedFile stdOutFile = getFileForTableCell(table, row, stdoutFileCol);
+        InputValidationResult res = ((InputValidationResultsTableModel) table.getModel()).getResultAt(row);
+        SerializedFile stdOutFile = res.getValidatorStdOut();
         if (stdOutFile == null) {
-            System.err.println("Got a null SerializedFile for Input Validator Results stdout file (table cell (" + row + "," + stdoutFileCol + "))");
-            getController().getLog().warning("Got a null SerializedFile for InputValidatorResults stdout file  (table cell (" + row + "," + stdoutFileCol + "))");
+            System.err.println("Got a null SerializedFile for Input Validator Results stdout file for table row " + row);
+            getController().getLog().warning("Got a null SerializedFile for InputValidatorResults stdout file for table row " + row);
         }
 
         // get the stderr file from the table
-        int stdErrFileCol = table.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).getModelIndex();
-        SerializedFile stdErrFile = getFileForTableCell(table, row, stdErrFileCol);
+//        int stdErrFileCol = table.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).getModelIndex();
+//        SerializedFile stdErrFile = getFileForTableCell(table, row, stdErrFileCol);
+        res = ((InputValidationResultsTableModel) table.getModel()).getResultAt(row);
+        SerializedFile stdErrFile = res.getValidatorStdErr();
         if (stdErrFile == null) {
-            System.err.println("Got a null SerializedFile for Input Validator Results stderr file (table cell (" + row + "," + stdErrFileCol + "))");
-            getController().getLog().warning("Got a null SerializedFile for InputValidatorResults stderr file (table cell (" + row + "," + stdErrFileCol + "))");
+            System.err.println("Got a null SerializedFile for Input Validator Results stderr file for table row " + row);
+            getController().getLog().warning("Got a null SerializedFile for InputValidatorResults stderr file for table row " + row);
         }
 
         // get the execution directory being used by the EditProblemPane
@@ -346,19 +354,12 @@ public class InputValidationResultPane extends JPanePlugin {
 
                     // check if we actually added anything
                     if (outputPaneAdded) {
-
                         // yes we added something; decide which tab should be active
-                        int activeTab = 0;
-                        if (selectedColumn == COLUMN.FILE_NAME.ordinal()) {
-                            activeTab = 0;
-                        } else {
-                            if (selectedColumn == COLUMN.VALIDATOR_OUTPUT.ordinal()) {
-                                activeTab = 1;
-                            } else {
-                                if (selectedColumn == COLUMN.VALIDATOR_ERR.ordinal()) {
-                                    activeTab = 2;
-                                }
-                            }
+
+                        int activeTab = 0;  //default to the input data file tab being the active tab
+                        if (selectedColumn == COLUMN.SHOW_DETAILS.ordinal()) {
+                            //the "Show Details" link was clicked; make the stdout tab the active tab
+                            activeTab = 1;
                         }
                         viewer.setSelectedIndex(activeTab);
 
@@ -383,7 +384,7 @@ public class InputValidationResultPane extends JPanePlugin {
 
     private SerializedFile getFileForTableCell(JTable table, int row, int col) {
         InputValidationResult res = ((InputValidationResultsTableModel) table.getModel()).getResultAt(row);
-        SerializedFile file;
+        SerializedFile file = null;
         switch (col) {
             case 0:
                 file = new SerializedFile(res.getFullPathFilename());
@@ -402,16 +403,23 @@ public class InputValidationResultPane extends JPanePlugin {
             case 1:
                 getController().getLog().getLogger().log(Log.SEVERE, "Got a mouse click on an unclickable table cell!");
                 System.err.println("Internal error: got a mouse click on a cell that shouldn't be clickable");
+                System.err.println("Please report this error to the PC2 Development Team (pc2@ecs.csus.edu)");
                 file = null;
                 break;
+// columns 2 and 3 used to be clickable file links; they were replaced by a single "Show Details" button
+//            case 2:
+//                file = res.getValidatorStdOut();
+//                break;
+//            case 3:
+//                file = res.getValidatorStdErr();
+//                break;
             case 2:
-                file = res.getValidatorStdOut();
-                break;
-            case 3:
-                file = res.getValidatorStdErr();
+                //case 2 (col #2, the third column) now has a button with an actionPerformed() method; do nothing here
                 break;
             default:
                 getController().getLog().severe("Undefined JTable column");
+                System.err.println("Internal error: InputValidationResultPane.getFileForTableCell() received an undefined JTable column.");
+                System.err.println("Please report this error to the PC2 Development Team (pc2@ecs.csus.edu");
                 return null;
         }
         return file;

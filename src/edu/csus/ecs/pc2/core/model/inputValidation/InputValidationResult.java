@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model.inputValidation;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -36,7 +37,7 @@ public class InputValidationResult implements Serializable {
     
     /**
      * Constructs an InputValidationResult containing the specified data.
-     * The validatorStdOut and validatorStdErr strings are converted to {@link SerializedFile}s before being saved.
+     * The validatorStdOut and validatorStdErr strings are used to construct corresponding {@link SerializedFile}s.
      * 
      * @param problem the {@link Problem} for which this result applies
      * @param dataFilePathName the full path name of the data file on which the Input Validator was run
@@ -50,13 +51,31 @@ public class InputValidationResult implements Serializable {
         this.fullPathFilename = dataFilePathName;
         this.passed = passed;
         this.status = status;
+        
+        //construct a SerializedFile for the specified validator stdout
         this.validatorStdOut = new SerializedFile(validatorStdOutFilename);
+        //check if any errors occurred in constructing the SerializedFile
+        try {
+            if (Utilities.serializedFileError(validatorStdOut)) {
+                throw new RuntimeException("InputValidationResult: error constructing SerializedFile for file "  
+                                            + validatorStdOutFilename + ": " + validatorStdOut.getErrorMessage()); 
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("InputValidationResult: exception constructing SerializedFile for file "  
+                    + validatorStdOutFilename + ": " + e.getMessage()); 
+        }
+        
+        //construct a SerializedFile for the specified validator stderr
         this.validatorStdErr = new SerializedFile(validatorStdErrFilename);
-        //TODO: deal better with the fact that the SerializedFile constructor might fail due to the files not being found,
-        //  but SerializedFile fails to throw exceptions -- you have to call its getErrorMessage() and getException() methods!
-        if (this.validatorStdErr.getErrorMessage() != null || this.validatorStdErr.getException() != null 
-                || this.validatorStdOut.getErrorMessage() != null || this.validatorStdOut.getException() != null ) {
-            throw new RuntimeException("InputValidationResult: specified file not found");
+        //check if any errors occurred in constructing the SerializedFile
+        try {
+            if (Utilities.serializedFileError(validatorStdErr)) {
+                throw new RuntimeException("InputValidationResult: error constructing SerializedFile for file "  
+                                            + validatorStdErrFilename + ": " + validatorStdErr.getErrorMessage()); 
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("InputValidationResult: exception constructing SerializedFile for file "  
+                    + validatorStdErrFilename + ": " + e.getMessage()); 
         }
     }
 

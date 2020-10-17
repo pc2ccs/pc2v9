@@ -97,9 +97,10 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     private final ButtonGroup inputStorageButtonGroup = new ButtonGroup();
 
-//    private String loadDirectory = null;
-    //TODO: remove the following temporary testing statement, uncomment the above actual statement.
-    private String loadDirectory = "C:\\clevengr\\contest\\PC2\\v9\\TestContests\\sumithello2\\config\\sumit";
+    private String loadDirectory = null;
+    
+    //John's local machine testing directory
+//    private String loadDirectory = "C:\\clevengr\\contest\\PC2\\v9\\TestContests\\sumithello2\\config\\sumit";
 
     private Component verticalStrut;
 

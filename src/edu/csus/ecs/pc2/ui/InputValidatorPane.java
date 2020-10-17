@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
@@ -17,7 +18,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
@@ -125,6 +129,7 @@ public class InputValidatorPane extends JPanePlugin {
     private JButton runCustomInputValidatorButton;
     private JButton removeCustomInputValidatorButton;
     private DefineCustomInputValidatorPane customInputValidatorProgramPanel;
+    private JButton saveVivaPatternButton;
 
     public InputValidatorPane() {
         setPreferredSize(new Dimension(800, 600));
@@ -257,7 +262,44 @@ public class InputValidatorPane extends JPanePlugin {
             lblWhatsThisViva.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    JOptionPane.showMessageDialog(null, whatsThisVivaMessage, "VIVA Input Validator", JOptionPane.INFORMATION_MESSAGE, null);
+//                    JOptionPane.showMessageDialog(null, whatsThisVivaMessage, "VIVA Input Validator", JOptionPane.INFORMATION_MESSAGE, null);
+                    // display the above Viva explanatory message in a dialog that allows the user to open the Viva PDF (if the platform supports this)
+                    Object[] options = {"Open VIVA User's Guide", "Close dialog"};
+                    int selection = JOptionPane.showOptionDialog(null,
+                        whatsThisVivaMessage,
+                        "VIVA Input Validator",
+                        JOptionPane.YES_NO_CANCEL_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE,
+                        null, //icon
+                        options,
+                        options[1]);   
+                    switch (selection) {
+                        case 0: //"Open Viva User's Guide"
+                            //try to open the Viva PDF
+                            if (Desktop.isDesktopSupported()) {
+                                String vivaUserGuideFileName = "doc/VIVA User's Guide.pdf";
+                                try {
+                                    File myFile = new File(vivaUserGuideFileName);
+                                    Desktop.getDesktop().open(myFile);
+                                } catch (IOException ex) {
+                                    // no application registered for PDFs
+//                                    System.err.println("Exception opening Viva User's Guide: " + ex.getMessage());
+                                    showMessage("Exception occurred trying to open VIVA User's Guide: " + ex.getMessage());
+                                } catch (IllegalArgumentException ex) { //this is what Desktop.open(file) returns for file not found
+                                    showMessage("Unable to find file " + vivaUserGuideFileName);
+                                }
+                            } else {
+                                showMessage("Sorry, it appears your platform is not configured to support opening PDF's."
+                                        + "\nYou can find the VIVA User's Guide under the PC2 installation \"doc\" folder.");
+                            }
+                            break;
+                            
+                        case 1: //"Close dialog"
+//                            System.out.println ("Option 1 ('Close dialog') selected");
+                            break;
+                        default:
+                            System.err.println ("Unknown option '" + selection + "' chosen");
+                    }
                 }
             });
             lblWhatsThisViva.setBorder(new EmptyBorder(0, 15, 0, 0));
@@ -281,8 +323,10 @@ public class InputValidatorPane extends JPanePlugin {
             + "\nto verify that all data files currently loaded on the \"Test Data Files\" tab conform to the specified VIVA pattern."
             + "\n(The results of running VIVA against the Test Data Files will be displayed in the \"Input Validation Results\" pane)."
 
-            + "\n\nFor more information on VIVA patterns, see the VIVA User's Guide under the PC^2 \"docs\" folder."
-            + "\nFor additional information, or to download a copy of VIVA, see the VIVA website at http://viva.vanb.org/.";
+            + "\n\nFor more information on VIVA patterns, see the VIVA User's Guide under the PC^2 \"doc\" folder."
+            + "\nFor additional information, or to download a copy of VIVA, see the VIVA website at http://viva.vanb.org/."
+            + "\n\n";
+
 
     private JPanel getVivaOptionsSubPanel() {
         if (vivaOptionsPanel == null) {
@@ -321,6 +365,8 @@ public class InputValidatorPane extends JPanePlugin {
             vivaOptionsButtonPanel.add(getLoadVivaPatternButton());
             vivaOptionsButtonPanel.add(getRigidArea_5());
             vivaOptionsButtonPanel.add(getRunVivaButton());
+            vivaOptionsButtonPanel.add(getRigidArea_11());
+            vivaOptionsButtonPanel.add(getSaveVivaPatternButton());
     }
         return vivaOptionsButtonPanel;
     }
@@ -389,6 +435,58 @@ public class InputValidatorPane extends JPanePlugin {
         return runVivaButton;
     }
 
+    private File lastDir = null; 
+    private JButton getSaveVivaPatternButton() {
+        if (saveVivaPatternButton == null) {
+            saveVivaPatternButton = new JButton("Save Pattern...");
+            saveVivaPatternButton.setEnabled(false);
+            saveVivaPatternButton.addActionListener(new ActionListener() {
+                
+                public void actionPerformed(ActionEvent e) {
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setDialogTitle("Choose File");   
+                    fileChooser.setCurrentDirectory(lastDir);
+                     
+                    int userSelection = fileChooser.showSaveDialog(null);
+                     
+                    if (userSelection == JFileChooser.APPROVE_OPTION) {
+                        File fileToSave = fileChooser.getSelectedFile();
+                        boolean okToSaveFile = true;
+                        if (fileToSave.exists()) {
+                            String msg = "File '" + fileToSave.getName() + "' already exists; do you want to overwrite it?";
+                            int response = JOptionPane.showConfirmDialog(null, msg, "Confirm File Overwrite", JOptionPane.YES_NO_CANCEL_OPTION);
+                            if (response != JOptionPane.OK_OPTION) {
+                                okToSaveFile = false;
+                            }
+                        }
+                        if (okToSaveFile) {
+                            saveVivaPatternToFile(fileToSave);
+                            lastDir = fileChooser.getCurrentDirectory();
+                        }
+                    }
+                }
+            });
+        }
+        return saveVivaPatternButton;
+    }
+    
+    private void saveVivaPatternToFile(File outFile) {
+//        System.out.println("Saving Viva pattern '" + getVivaPatternText() + "' to file '" + outFile.getName() + "'");
+        
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(outFile.getAbsolutePath());
+            String pattern = getVivaPatternText();
+            out.println(pattern);
+            
+        } catch (FileNotFoundException e) {
+            // We should never get a FileNotFound, because the file was selected by the JFileChooser (above)...
+            e.printStackTrace();
+        } finally {
+            out.close();
+        }
+    }
+    
     private JScrollPane getVivaPatternTextScrollPane () {
         if (vivaPatternTextScrollPane==null) {
             vivaPatternTextScrollPane = new JScrollPane(getVivaPatternTextArea());
@@ -740,9 +838,10 @@ public class InputValidatorPane extends JPanePlugin {
         getVivaPatternTextArea().setEnabled(enableComponents);
         getLoadVivaPatternButton().setEnabled(enableComponents);
         
-        //enable the Run Viva button, but only if there is some kind of text in the Viva pattern
+        //enable the Run Viva and Save Pattern buttons, but only if there is some kind of text in the Viva pattern text box
         String vivaPattern = getVivaPatternTextArea().getText();
         getRunVivaButton().setEnabled(enableComponents && vivaPattern!=null && !vivaPattern.equals(""));
+        getSaveVivaPatternButton().setEnabled(enableComponents && vivaPattern!=null && !vivaPattern.equals(""));
     }
     
     private void enableCustomValidatorComponents(boolean enableComponents) {
@@ -1170,8 +1269,6 @@ public class InputValidatorPane extends JPanePlugin {
      * including resetting the cursor and reenabling the appropriate RunInputValidator button.
      */
     private void cleanup() {
-        //TODO: update to account for VIVA
-        getRunCustomInputValidatorButton().setEnabled(true);
         getShowOnlyFailedFilesCheckbox().setEnabled(true); //note this is only ENABLING the checkbox, not changing its "checked state"
         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         updateInputValidatorPaneComponents();
@@ -1448,7 +1545,8 @@ public class InputValidatorPane extends JPanePlugin {
      * just the local status flag. The Problem only gets updated when Add or Update
      * is pressed on the EditProblemPane.
      * 
-     * If the received InputValidationResult array is null or empty, no change is made in the current status. 
+     * If the received InputValidationResult array is null or empty, or if it is non-empty but contains only null results,
+     * no change is made in the current status. 
      * Otherwise, if all the results in the array are "Passed" then the status is set to Passed;
      * if one or more results in the array are "Failed" then the status is set to Failed.
      * 
@@ -1459,19 +1557,27 @@ public class InputValidatorPane extends JPanePlugin {
 
         if (runResultsArray != null && runResultsArray.length > 0) {
 
-            //TODO: need to make sure there is at least one "passed" result
-            boolean foundFailure = false;
+            int failureCount = 0;
+            int passedCount = 0;
             for (InputValidationResult res : runResultsArray) {
-                if (res!=null && !res.isPassed()) {
-                    foundFailure = true;
-                    break;
+                if (res != null) {
+                    if (res.isPassed()) {
+                        passedCount++;
+                    } else {
+                        failureCount++;
+                    }
                 }
             }
 
-            if (foundFailure) {
+            if (failureCount>0) {
+                //one or more failures means the status is "FAILED"
                 setVivaInputValidationStatus(InputValidationStatus.FAILED);
-            } else {
+            } else if (passedCount>0){
+                //zero failures PLUS at least one passed means the status is "PASSED"
                 setVivaInputValidationStatus(InputValidationStatus.PASSED);
+            } else {
+                //we found no failures AND no passes -- i.e., all the results were null --
+                // so make no change to the status (i.e. do nothing)
             }
         }
     }
@@ -1575,6 +1681,7 @@ public class InputValidatorPane extends JPanePlugin {
     private Component rigidArea_8;
     private Component rigidArea_9;
     private Component rigidArea_10;
+    private Component rigidArea_11;
 
     
     private Component getRigidArea_1() {
@@ -1717,6 +1824,13 @@ public class InputValidatorPane extends JPanePlugin {
             rigidArea_10 = Box.createRigidArea(new Dimension(20, 20));
         }
         return rigidArea_10;
+    }
+    
+    private Component getRigidArea_11() {
+        if (rigidArea_11 == null) {
+            rigidArea_11 = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea_11;
     }
     
     @Override

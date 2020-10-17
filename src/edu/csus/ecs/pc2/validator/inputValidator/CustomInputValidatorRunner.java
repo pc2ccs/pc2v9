@@ -56,12 +56,11 @@ public class CustomInputValidatorRunner {
      * the validator execution.
      * 
      * @param seqNum a sequence number used to give generated files unique names
-
      * @param problem the {@link Problem} associated with the validator program being run
-     * @param validator a SerializedFile containing the validator program
+     * @param validatorProg a SerializedFile containing the validator program
      * @param validatorCommand a String (possibly containing PC2 substitution keywords) to be used to invoke the validator
      * @param executeDir the directory in which the execution is to take place (this is created if necessary, and it is cleared before execution)
-     * @param dataFile the judge's input data file to be validated
+     * @param dataFile a SerializedFile containing the judge's input data file to be validated
      * 
      * @return an InputValidationResult containing the results of the validator execution
      * 
