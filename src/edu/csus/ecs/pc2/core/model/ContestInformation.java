@@ -155,6 +155,8 @@ public class ContestInformation implements Serializable{
      */
     private Date thawed = null;
 
+    private boolean allowMultipleLoginsPerTeam;
+
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
      * This value is null if no scheduled start time has been set,
@@ -328,6 +330,10 @@ public class ContestInformation implements Serializable{
                 return false;
             }
             if (autoStopContest != contestInformation.isAutoStopContest()) {
+                return false;
+            }
+            
+            if (allowMultipleLoginsPerTeam != contestInformation.isAllowMultipleLoginsPerTeam()) {
                 return false;
             }
             
@@ -697,5 +703,27 @@ public class ContestInformation implements Serializable{
         } else {
             this.thawed = null;
         }
+    }
+
+    /**
+     * Sets the boolean flag indicating whether or not teams are allowed to have multiple simultaneous logins.
+     * Note that this is a GLOBAL setting, configured on the Admin's "Configure Contest>Settings" screen (or via YAML); 
+     * either ALL teams are allowed to have multiple simultaneous logins, or NO team is allowed to have multiple simultaneous logins.
+     * 
+     * @param allowMultipleLoginsPerTeam whether or not a team is allowed to have multiple simultaneous login sessions.
+     */
+    public void setAllowMultipleLoginsPerTeam(boolean allowMultipleLoginsPerTeam) {
+        this.allowMultipleLoginsPerTeam = allowMultipleLoginsPerTeam;
+    }
+    
+    /**
+     * Returns a boolean indicating whether or not the Contest Settings allow teams to have multiple simultaneous logins.
+     * Note that this is a GLOBAL setting, configured on the Admin's "Configure Contest>Settings" screen; either ALL teams
+     * are allowed to have multiple simultaneous logins, or NO team is allowed to have multiple simultaneous logins.
+     * 
+     * @return a boolean indicating the current "allow multiple simultaneous logins" setting for teams.
+     */
+    public boolean isAllowMultipleLoginsPerTeam() {
+        return this.allowMultipleLoginsPerTeam;
     }
 }

@@ -212,6 +212,11 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JCheckBox shadowModeCheckbox;
 
+    private JCheckBox allowMultipleTeamLoginsCheckbox;
+    private boolean allowMultipleLoginsPerTeam = true;
+
+    private Component rigidArea1;
+    
 //    private JTextField textfieldPrimaryCCSURL;
 //
 //    private JTextField textfieldPrimaryCCSLogin;
@@ -535,6 +540,8 @@ public class ContestInformationPane extends JPanePlugin {
              
             teamSettingsPane.add(getMaxOutputSizeLabel(), null);
             teamSettingsPane.add(getMaxOutputSizeInKTextField(), null);
+            teamSettingsPane.add(getRigidArea1());
+            teamSettingsPane.add(getAllowMultipleTeamLoginsCheckbox(), null);
         }
         return teamSettingsPane;
     }
@@ -850,6 +857,7 @@ public class ContestInformationPane extends JPanePlugin {
         String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();
         long maximumFileSize = Long.parseLong(maxFileSizeString);
         newContestInformation.setMaxFileSize(maximumFileSize * 1000);
+        newContestInformation.setAllowMultipleLoginsPerTeam(allowMultipleLoginsPerTeam);
 
         //fill in values already saved, if any
         if (savedContestInformation != null) {
@@ -924,6 +932,7 @@ public class ContestInformationPane extends JPanePlugin {
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
                 
                 getMaxOutputSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
+                getAllowMultipleTeamLoginsCheckbox().setSelected(contestInformation.isAllowMultipleLoginsPerTeam());
                 getContestFreezeLengthtextField().setText(contestInformation.getFreezeTime());
                 
                 getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
@@ -1299,6 +1308,21 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return textfieldMaxOutputSizeInK;
     }
+    
+    private JCheckBox getAllowMultipleTeamLoginsCheckbox() {
+        if (allowMultipleTeamLoginsCheckbox==null) {
+            allowMultipleTeamLoginsCheckbox = new JCheckBox("Allow multiple logins per team", true);
+            allowMultipleTeamLoginsCheckbox.addActionListener (new ActionListener() {
+                
+                public void actionPerformed(ActionEvent e) {
+                    allowMultipleLoginsPerTeam = getAllowMultipleTeamLoginsCheckbox().isSelected();
+                    enableUpdateButton();
+                }
+            });
+            
+        }
+        return allowMultipleTeamLoginsCheckbox ;
+    }
 
     /**
      * This method initializes scoringPropertiesButton
@@ -1429,5 +1453,11 @@ public class ContestInformationPane extends JPanePlugin {
         	horizontalStrut_5 = Box.createHorizontalStrut(10);
         }
         return horizontalStrut_5;
+    }
+    private Component getRigidArea1( ) {
+        if (rigidArea1==null) {
+            rigidArea1 = Box.createRigidArea(new Dimension(20,20));
+        }
+        return rigidArea1;
     }
 }
