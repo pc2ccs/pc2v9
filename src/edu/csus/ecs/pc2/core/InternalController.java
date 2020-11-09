@@ -364,7 +364,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void sendToLocalServer(Packet packet) {
 
         if (isThisServer(packet.getSourceId()) && isServer()) {
-            ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(contest.getClientId());
+            ConnectionHandlerID connectionHandlerID = contest.getClientId().getConnectionHandlerID();
             processPacket(packet, connectionHandlerID);
             log.info("Loopback send packet to server " + packet);
             return;
@@ -425,7 +425,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         ClientId clientId = new ClientId(siteNumber, Type.SERVER, 0);
         
-        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
+        ConnectionHandlerID connectionHandlerID = contest.getClientId().getConnectionHandlerID();
         info("sendToRemoteServer " + clientId + " at "+siteNumber+" " + packet + " " + connectionHandlerID);
 
         Type type = packet.getSourceId().getClientType();
@@ -454,12 +454,25 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         ClientId toClientId = packet.getDestinationId();
 
+        //this method should never be called with a packet containing a destination ClientId containing a null ConnectionHandlerID; 
+        // however, the addition of "multiple login" support may have left some place where this is inadvertently true.
+        //The following can be considered an effort to catch/identify such situations.
+        if (toClientId.getConnectionHandlerID()==null) {
+            RuntimeException e = new RuntimeException("InternalController.sendToClient() called with packet containing null ConnectionHandlerID in destination ClientId " + toClientId);
+            e.printStackTrace();
+            logException("InternalController.sendToClient() called with packet containing null ConnectionHandlerID in destination ClientId " + toClientId, e);
+            throw e;
+        }
+
         if (isThisSite(toClientId.getSiteNumber())) {
 
             if (contest.isLocalLoggedIn(toClientId)) {
-                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(toClientId);
-                info("sendToClient " + packet.getSourceId() + " " + connectionHandlerID);
+                
+                //TODO: expand the following code to send to ALL logged in clients (i.e., connections) with ClientIds matching "toClientId"
+                ConnectionHandlerID connectionHandlerID = toClientId.getConnectionHandlerID();
+                info("sendToClient " + packet.getDestinationId() + " @ " + connectionHandlerID);
                 sendToClient(connectionHandlerID, packet);
+                
             } else {
                 try {
                     packetArchiver.writeNextPacket(packet);
@@ -1392,6 +1405,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 Packet packet = (Packet) object;
                 ClientId clientId = packet.getSourceId();
+                
+                clientId.setConnectionHandlerID(connectionHandlerID);
 
                 info("receiveObject " + packet);
 
@@ -1440,7 +1455,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                             
                             info("LOGIN_REQUEST packet contains clientId object with site number of " + ClientId.UNSET + "; replacing with my site number (" + contest.getSiteNumber() + ")");
                             
+                            ConnectionHandlerID connHID = clientId.getConnectionHandlerID();
                             clientId = new ClientId(contest.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
+                            clientId.setConnectionHandlerID(connHID);
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
                         
@@ -1493,7 +1510,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                             default:
                                 /**
-                                 * Non-matching contest Ids - do not process packet
+                                 * Non-matching contest Ids - do not process packet <-- Huh?  It looks like the code below DOES "process the packet"?  jlc
                                  */
 
                                 contest.addMessage(Area.INCOMING_PACKET, getServerClientId(), getServerClientId(), "Packet contestId does not match for " + packet + " local:" + localContestId
@@ -1771,7 +1788,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // SOMEDAY code throw an exception if the security fails.
         }
 
-        ConnectionHandlerID connectionHandlerIDAuthen = contest.getConnectionHandleID(packet.getSourceId());
+        ConnectionHandlerID connectionHandlerIDAuthen = packet.getSourceId().getConnectionHandlerID();
         if (!connectionHandlerID.equals(connectionHandlerIDAuthen)) {
             /**
              * Security Violation - their login does not match the connectionID
@@ -1931,20 +1948,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * 
      * If login fails will throw SecurityException.
      * 
-     * @param clientId
-     * @param password
-     * @param connectionHandlerID
+     * @param newClientId the new client attempting to log in.
+     * @param password the new client's password.
+     * @param connectionHandlerID the ConnectionHandlerID associated with the newly connecting client.
      */
-    private void attemptToLogin(ClientId clientId, String password, ConnectionHandlerID connectionHandlerID) {
+    private void attemptToLogin(ClientId newClientId, String password, ConnectionHandlerID connectionHandlerID) {
 
-        info("ClientID=" + clientId);
+        info("ClientID=" + newClientId);
         
-        if (clientId.getClientType().equals(Type.SERVER)) {
-            // Server login
+        if (newClientId.getClientType().equals(Type.SERVER)) {
+            // Server login request
 
-            int newSiteNumber = getServerSiteNumber(clientId.getSiteNumber(), password);
+            int newSiteNumber = getServerSiteNumber(newClientId.getSiteNumber(), password);
             
-            info("newSiteNumber = " + newSiteNumber);           
+            info("Logging in new server; newSiteNumber = " + newSiteNumber);           
             info("My site number = " + contest.getSiteNumber());
 
             if (newSiteNumber == contest.getSiteNumber()) {
@@ -1952,10 +1969,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 throw new SecurityException("Site " + newSiteNumber + " is already logged in (attempt from secondary site to login as same site a primary site)");
             }
 
-            if (newSiteNumber == clientId.getSiteNumber()) {
-                // matching password, ok.
+            if (newSiteNumber == newClientId.getSiteNumber()) {
+                // matching password, ok.   ??huh?  what does this comment mean?  jlc
 
-                loginServer(clientId, connectionHandlerID);
+                loginServer(newClientId, connectionHandlerID);
 
             } else {
 
@@ -1963,42 +1980,97 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             }
 
-        } else if (validAccountAndMatchOverride(clientId, password) || contest.isValidLoginAndPassword(clientId, password)) {
-            // Client login
+        } else {
+            // Client login request
+            
+            //check if the account and password are valid
+            if (validAccountAndMatchOverride(newClientId, password) || contest.isValidLoginAndPassword(newClientId, password)) {
 
-            if (contest.isLocalLoggedIn(clientId)) {
-
-                // Already logged in, log them off
-                ConnectionHandlerID connectionHandlerID2 = contest.getConnectionHandleID(clientId);
-                log.info("login - " + clientId + " already logged in, will logoff client at connection " + connectionHandlerID2);
-                // this updates the model contest-wide
-                contest.removeLogin(clientId);
-
-                if (canCheckoutRunsAndClars(clientId)) {
-                    try {
-                        cancellAll(clientId);
-                    } catch (ContestSecurityException e) {
-                        log.log(Log.WARNING, "Warning on canceling runs/clars for " + clientId, e);
+                //valid acct and pw; see if the account is already logged in
+                if (contest.isLocalLoggedIn(newClientId)) {
+                    
+                    //already logged in; see if the current login(s) should be forced off
+                    if (newClientId.getClientType()!=ClientType.Type.TEAM || (!contest.getContestInformation().isAllowMultipleLoginsPerTeam())) {
+                        
+                        //not a team, or is a team but multiple team logins not allowed; force off all clients matching the new client
+                        forceOffAllClientsMatching(newClientId);
                     }
                 }
-
-                // but this is the actual causes the connection to be dropped/disconnected
-                forceConnectionDrop(connectionHandlerID2);
-
-                // Send out security alert to all servers and admins
-                ContestSecurityException contestSecurityException = new ContestSecurityException(clientId, connectionHandlerID, clientId + ": duplicate login request; previous login forced off ");
-                sendSecurityMessageFromServer(contestSecurityException, connectionHandlerID, null);
+                
+                contest.addLocalLogin(newClientId, connectionHandlerID);
+                info("LOGIN logged in " + newClientId + " at " + connectionHandlerID);
+                
+            } else {
+                //invalid account or bad password
+                info("attemptToLogin FAILED logged on: " + newClientId);
+                // this code will never be executed, if invalid login
+                // isValidLogin will throw a SecurityException.
+                throw new SecurityException("Failed attempt to login");
             }
-            contest.addLocalLogin(clientId, connectionHandlerID);
-            info("LOGIN logged in " + clientId + " at " + connectionHandlerID);
-
-        } else {
-
-            info("attemptToLogin FAILED logged on: " + clientId);
-            // this code will never be executed, if invalid login
-            // isValidLogin will throw a SecurityException.
-            throw new SecurityException("Failed attempt to login");
         }
+    }
+    
+    /**
+     * Searches the list of currently logged-in clients and forces a logoff for any client matching 
+     * the specified ClientId (that is, any client of the same type, number, and site).
+     * 
+     * @param clientId the ClientId for which matching client logins are to be forced logged-off.
+     */
+    private void forceOffAllClientsMatching(ClientId clientId) {
+
+        // get a list of all logged in clients of the same type as the specified client
+        ClientId[] loggedInClientsOfSameType = contest.getLocalLoggedInClients(clientId.getClientType());
+        
+        //check every logged in client in the list
+        for (ClientId nextLoggedInClientId : loggedInClientsOfSameType) {
+            
+            //see if the next logged in client "matches" the specified incoming client.
+            //(note that ClientId.equals() compares type, number, and site (only))
+            if (nextLoggedInClientId.equals(clientId)) {
+                
+                //yes, matches; force the existing client to logoff
+                forceLogoff(nextLoggedInClientId);
+            }
+        }
+    }
+
+    
+    /**
+     * This method forces a logoff of the specified Client.
+     * 
+     * @param clientId the client that is to be forced logged off.
+     */
+    private void forceLogoff(ClientId clientId) {
+        
+        // Already logged in, log them off
+        log.info("login - " + clientId + " already logged in at connection " + clientId.getConnectionHandlerID() + "; forcing logoff " );
+ 
+//        old code: only removes login from local contest but doesn't notify Admins or Servers
+//        // this updates the model contest-wide
+//        contest.removeLogin(clientId);
+        
+        //new code: calls contest.removeLogin(clientId) as above, but also calls forceConnectionDrop() and sends LOGOFF packets to Admins and Servers
+        logoffUser(clientId);
+
+        //this removes any runs/clars checked out by a judge (if we are forcing off a judge client)
+        if (canCheckoutRunsAndClars(clientId)) {
+            try {
+                cancellAll(clientId);
+            } catch (ContestSecurityException e) {
+                log.log(Log.WARNING, "Exception on canceling runs/clars for " + clientId, e);
+            }
+        }
+        
+//      old code; not needed now because the call to logoffUser() (above) calls forceConnectionDrop()
+//        //this is what actually causes the connection to be dropped/disconnected
+//        forceConnectionDrop(connHandlerID);
+
+        // Send out security alert to all servers and admins
+        //TODO: make this conditional on a ContestInformation setting so users don't have to see this exception if they don't want to
+      ConnectionHandlerID connHandlerID = clientId.getConnectionHandlerID();
+        ContestSecurityException contestSecurityException = new ContestSecurityException(clientId, connHandlerID, clientId + ": duplicate login request; previous login forced off ");
+        sendSecurityMessageFromServer(contestSecurityException, connHandlerID, null);
+
     }
 
     /**
@@ -2220,7 +2292,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
              * This is a condition where the ServerView, for instance, logs off a user, there is no need to send a packet to the local server, just log them off locally and send out a logoff packet.
              */
 
-            ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
+            ConnectionHandlerID connectionHandlerID = clientId.getConnectionHandlerID();
+
+            //this method should never be called with a clientId having a null ConnectionHandlerID; however, the addition of 
+            // "multiple login" support may have left some place where this is inadvertently true.
+            //The following is an effort to catch/identify such situations.
+            if (connectionHandlerID==null) {
+                RuntimeException e = new RuntimeException("InternalController.logoffUser() called with null ConnectionHandlerID in ClientId " + clientId);
+                e.printStackTrace();
+                logException("InternalController.logoffUser() called null ConnectionHandlerID in ClientId " + clientId, e);
+                throw e;
+            }
+            
 
             contest.removeLogin(clientId);
 
@@ -2449,7 +2532,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     /**
-     * Send packet to all clients  logged into this site that are a particular clienttype
+     * Send packet to all clients logged into this site that are a particular clienttype.
      * 
      * @param packet
      * @param type client type
@@ -2460,7 +2543,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         for (ClientId clientId : clientIds) {
             if (isThisSite(clientId.getSiteNumber())) {
-                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
+                ConnectionHandlerID connectionHandlerID = clientId.getConnectionHandlerID();
+                
+                //there should never be localLoggedInClients with null ConnectionHandlerIDs; however, the addition of 
+                // "multiple login" support may have left some place where this is inadvertently true.
+                //The following is an effort to catch/identify such situations.
+                if (connectionHandlerID==null) {
+                    RuntimeException e = new RuntimeException(
+                            "InternalController.sendPacketToClients(): contest.getLocalLoggedInClients() returned a ClientId with a null ConnectionHandlerID: "
+                            + clientId);
+                    e.printStackTrace();
+                    throw e;
+                }
+                
                 sendToClient(connectionHandlerID, packet);
             }
         }
@@ -3318,7 +3413,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 // remoteSite may have changed from inSiteNumber, check to see if we
                 // already know the connectionHandlerID for the server.
                 ClientId clientId = new ClientId(remoteSite.getSiteNumber(), ClientType.Type.SERVER, 0);
-                connectionHandlerID = contest.getConnectionHandleID(clientId);
+                connectionHandlerID = contest.getConnectionHandlerIDs(clientId).nextElement(); //ClientIds of type SERVER should have one, and only one, ConnectionHandlerID
                 // do not exist, or is a fake handle
                 if (connectionHandlerID == null || connectionHandlerID.toString().startsWith("FauxSite")) {
                     // connect to the server directly
@@ -3502,6 +3597,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void forceConnectionDrop(ConnectionHandlerID connectionHandlerID) {
 
+        //this method should never be called with a null ConnectionHandlerID; however, the addition of 
+        // "multiple login" support may have left some place where this is inadvertently true.
+        //The following is an effort to catch/identify such situations.
+        if (connectionHandlerID==null) {
+            RuntimeException e = new RuntimeException("InternalController.forceConnectionDrop() called with null ConnectionHandlerID");
+            e.printStackTrace();
+            logException("InternalController.forceConnectionDrop() called with null ConnectionHandlerID", e);
+            throw e;
+        }
+        
         if (isServer()) {
 
             if (contest.isConnected(connectionHandlerID)) {
@@ -4170,7 +4275,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             for (ClientId clientId : clientIds) {
                 Packet shutdownPacket = PacketFactory.createShutdownPacket(requestor, clientId, clientId.getSiteNumber());
-                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
+                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandlerIDs(clientId).nextElement(); //SERVER ClientIds should have exactly one ConnectionHandlerID
                 sendToClient(connectionHandlerID, shutdownPacket);
             }
         } else {
@@ -4188,7 +4293,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             } else {
                 ClientId serverId = getServerClientId(siteNumber);
                 Packet shutdownPacket = PacketFactory.createShutdownPacket(requestor, serverId, siteNumber);
-                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(serverId);
+                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandlerIDs(serverId).nextElement();  //SERVER ClientIds should have exactly one ConnectionHandlerID
                 sendToClient(connectionHandlerID, shutdownPacket);
             }
         } else {
@@ -4210,7 +4315,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 int siteNumber = site.getSiteNumber();
                 ClientId serverId = getServerClientId(siteNumber);
                 Packet shutdownPacket = PacketFactory.createShutdownPacket(requestor, serverId, siteNumber);
-                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(serverId);
+                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandlerIDs(serverId).nextElement(); //SERVER ClientIds should have exactly one ConnectionHandlerID
                 sendToClient(connectionHandlerID, shutdownPacket);
             }
         }

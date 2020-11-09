@@ -4,7 +4,9 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -30,18 +32,16 @@ import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
- * View Logins.
+ * This pane displays a table of currently logged-in clients.
+ * If multiple simultaneous logins are currently allowed then if there are currently
+ * multiple logins for a given client (e.g. multiple simultaneous TEAMx logins) then the table
+ * will contain a separate entry (row) for each such login.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$ 
  */
 
-// $HeadURL${date}
 public class LoginsPane extends JPanePlugin {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -3609625972816987570L;
 
     private JPanel loginButtonPane = null;
@@ -57,10 +57,20 @@ public class LoginsPane extends JPanePlugin {
     private JButton reportButton = null;
     
     private JLabel rowCountLabel = null;
+    
+
+     //list of columns in the LoginPane.  The order in this enum defines the column ordinal number.
+    private enum COLUMN {
+        SITE, TYPE, CLIENT_NUMBER, CONNECTION_ID, SINCE
+    };
+
+    // define the column headers.  The order of these names should correspond to the COLUMN enum, above.
+    private String[] columnNames = { "Site", "Type", "Number", "Connection Id", "Since" };
+
 
     /**
-     * This method initializes
-     * 
+     * Constructs a LoginsPane and initializes it with an empty logins table
+     * and a button panel containing "Logoff" and "Report" buttons.
      */
     public LoginsPane() {
         super();
@@ -68,8 +78,8 @@ public class LoginsPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes this
-     * 
+     * This method initializes this LoginsPane with an empty logins table
+     * containing headers with Sorters attached, along with a button panel.
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -85,9 +95,9 @@ public class LoginsPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes loginButtonPane
+     * This method initializes loginButtonPane.
      * 
-     * @return javax.swing.JPanel
+     * @return javax.swing.JPanel containing "Logoff" and "Report" buttons.
      */
     private JPanel getLoginButtonPanel() {
         if (loginButtonPane == null) {
@@ -104,38 +114,42 @@ public class LoginsPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes loginListBox
+     * This method returns a loginListBox (an instance of {@link MCLB}, a MultiColumnListBox),
+     * with headers with Sorters attached.  The listbox is initially empty.
      * 
-     * @return edu.csus.ecs.pc2.core.log.MCLB
+     * @return an (initially empty) edu.csus.ecs.pc2.ui.MCLB.
+     * 
+     * @see #updateLoginRow(ClientId, ConnectionHandlerID)
      */
     private MCLB getLoginListBox() {
         if (loginListBox == null) {
             loginListBox = new MCLB();
 
             loginListBox.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
-            Object[] cols = { "Site", "Type", "Number", "Connection Id", "Since" };
+//            Object[] cols = { "Site", "Type", "Number", "Connection Id", "Since" };
+//            loginListBox.addColumns(cols);
 
-            loginListBox.addColumns(cols);
-
+            loginListBox.addColumns(columnNames);
+            
             // Sorters
             HeapSorter sorter = new HeapSorter();
             HeapSorter numericStringSorter = new HeapSorter();
             numericStringSorter.setComparator(new NumericStringComparator());
 
             // Site
-            loginListBox.setColumnSorter(0, sorter, 1);
+            loginListBox.setColumnSorter(COLUMN.SITE.ordinal(), sorter, 1);
 
             // Type
-            loginListBox.setColumnSorter(1, sorter, 2);
+            loginListBox.setColumnSorter(COLUMN.TYPE.ordinal(), sorter, 2);
 
             // Id
-            loginListBox.setColumnSorter(2, numericStringSorter, 3);
+            loginListBox.setColumnSorter(COLUMN.CLIENT_NUMBER.ordinal(), numericStringSorter, 3);
 
             // Connection Handler Id
-            loginListBox.setColumnSorter(3, sorter, 4);
+            loginListBox.setColumnSorter(COLUMN.CONNECTION_ID.ordinal(), sorter, 4);
 
             // Since
-            loginListBox.setColumnSorter(4, sorter, 5);
+            loginListBox.setColumnSorter(COLUMN.SINCE.ordinal(), sorter, 5);
 
             loginListBox.autoSizeAllColumns();
 
@@ -143,27 +157,38 @@ public class LoginsPane extends JPanePlugin {
         return loginListBox;
     }
 
+    /**
+     * Returns an array of Objects intended to comprise a row in the logins table.
+     * 
+     * @param clientId a ClientId containing the Site, Client Type, and Client Number for the row.
+     * @param connectionHandlerID the ConnectionHandlerID for the row.
+     * 
+     * @return an array of Objects representing a table row.
+     */
     private Object[] buildLoginRow(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
 
         // Object[] cols = { "Site", "Type", "Number", "Connection Id", "Since" };
 
         Object[] obj = new Object[loginListBox.getColumnCount()];
 
-        obj[0] = "Site " + clientId.getSiteNumber();
-        obj[1] = clientId.getClientType().toString().toLowerCase();
-        obj[2] = "" + clientId.getClientNumber();
+        obj[COLUMN.SITE.ordinal()] = "Site " + clientId.getSiteNumber();
+        obj[COLUMN.TYPE.ordinal()] = clientId.getClientType().toString().toLowerCase();
+        obj[COLUMN.CLIENT_NUMBER.ordinal()] = "" + clientId.getClientNumber();
         if (connectionHandlerID != null) {
-            obj[3] = connectionHandlerID.toString();
+            obj[COLUMN.CONNECTION_ID.ordinal()] = connectionHandlerID.toString();
+//            obj[COLUMN.CONNECTION_ID.ordinal()] = connectionHandlerID;
         } else {
-            obj[3] = "Undefined";
+            obj[COLUMN.CONNECTION_ID.ordinal()] = "Undefined";
         }
-        obj[4] = new Date().toString();
+        obj[COLUMN.SINCE.ordinal()] = new Date().toString();
 
         return obj;
     }
 
     /**
      * Return array of all logged in users.
+     * The returned array may be empty (that is, have size=0, i.e., no elements)
+     * but will never be null.
      */
     private ClientId[] getAllLoggedInUsers() {
 
@@ -184,27 +209,56 @@ public class LoginsPane extends JPanePlugin {
         }
     }
 
+    /**
+     * This method removes all entries from the logins listbox (GUI table), then reloads the table
+     * with all the currently logged-in clients.  
+     * It is invoked when this LoginsPane is first created (more specifically, when the creator
+     * calls {@link #setContestAndController(IInternalContest, IInternalController)}), and
+     * again whenever the registered {@link LoginListenerImplementation} receives a
+     * {@link LoginEvent.Action#REFRESH_ALL} login event.
+     */
     private void reloadListBox() {
         loginListBox.removeAllRows();
 
+        //get the clientIds for every currently logged-in client
         ClientId[] clientList = getAllLoggedInUsers();
 
+        //process each client
         for (ClientId clientId : clientList) {
-            ConnectionHandlerID connectionHandlerID = getContest().getConnectionHandleID(clientId);
-            updateLoginList(clientId, connectionHandlerID);
+            
+            //get a list of all the ConnectionHandlerIDs associated with the current clientId
+            List<ConnectionHandlerID> connList = Collections.list(getContest().getConnectionHandlerIDs(clientId));
+            
+            //add a row for each clientId/ConnectionHandlerID pair (note that a given client might have multiple connections)
+            for (ConnectionHandlerID connHID : connList) {
+                updateLoginList(clientId, connHID);
+            }
         }
     }
 
     /**
-     * Add or update a login row
+     * Add or update a row in the GUI logins table.
+     * If the current logins table already contains a row for the specified clientId/connectionHandlerID pair,
+     * this method replaces that row with a new row built from the specified information; 
+     * if not, the method adds a new row to the table for the specified clientId.
      * 
-     * @param login
+     * Note: in an earlier implementation, "clientId" was used as the key for rows in the table.  With the
+     * addition of the possibility of multiple logins for a single client (e.g. more than one simultaneous login for Team1), 
+     * "clientId" is no longer a sufficiently unique key; it was replaced with a key constructed from the combination
+     * of clientid and connectionHandlerID.
+     * 
+     * @param clientId the Id of the client for which a row is to be added.
+     * @param connectionHandlerID the {@link ConnectionHandlerID} associated with the specified clientId.
+     * 
      */
     private void updateLoginRow(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
-        int row = loginListBox.getIndexByKey(clientId);
+        
+        String key = clientId.toString() + connectionHandlerID.toString();
+        
+        int row = loginListBox.getIndexByKey(key);
         if (row == -1) {
             Object[] objects = buildLoginRow(clientId, connectionHandlerID);
-            loginListBox.addRow(objects, clientId);
+            loginListBox.addRow(objects, key);
         } else {
             Object[] objects = buildLoginRow(clientId, connectionHandlerID);
             loginListBox.replaceRow(objects, row);
@@ -213,8 +267,19 @@ public class LoginsPane extends JPanePlugin {
         updateRowCount();
     }
 
+    /**
+     * Removes a row from the GUI logins table.
+     * 
+     * See "Note" at {@link #updateLoginRow(ClientId, ConnectionHandlerID)}.
+     * 
+     * @param clientId the ClientId to be used in determining the row to be removed.
+     * @param connectionHandlerID the ConnectionHandlerID to be used in determining the row to be removed.
+     */
     private void removeLoginRow(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
-        int row = loginListBox.getIndexByKey(clientId);
+
+        String key = clientId.toString() + connectionHandlerID.toString();
+        
+        int row = loginListBox.getIndexByKey(key);
         if (row != -1) {
             loginListBox.removeRow(row);
         }
@@ -222,6 +287,12 @@ public class LoginsPane extends JPanePlugin {
         updateRowCount();
     }
 
+    /**
+     * This method saves the specified contest and controller for later reference by the
+     * methods in this class.  The method also registers a {@link LoginListenerImplementation} with the 
+     * contest so that this class will receive callbacks when any login-related events occur, and also
+     * initializes the login listbox (table) with all currently logged-in clients.
+     */
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
@@ -295,7 +366,7 @@ public class LoginsPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes logoffButton
+     * This method initializes logoffButton.
      * 
      * @return javax.swing.JButton
      */
@@ -314,6 +385,11 @@ public class LoginsPane extends JPanePlugin {
         return logoffButton;
     }
 
+    /**
+     * This method is invoked when the LoginsPane "Logoff" button is clicked;
+     * it finds the currently selected row in the Logins table and then 
+     * invokes the Controller to force-logoff the client represented in that row.
+     */
     protected void logoffSelectedClient() {
         
         int selected = getLoginListBox().getSelectedIndex();
@@ -322,8 +398,32 @@ public class LoginsPane extends JPanePlugin {
             showMessage("Please Select Client to logoff");
         }
         
+        //TODO: shouldn't the following block only be executed if the above showMessage() is NOT executed?  jlc
+        
+        //FIXME: login table keys are no longer simply ClientIds; they are Strings which are the concatenation of
+        // clientId.toString() + connectionHandlerID.toString() -- meaning the following statement should throw a ClassCastException...
         ClientId clientId = (ClientId) getLoginListBox().getKeys()[selected];
-        ConnectionHandlerID connectionHandlerID = getContest().getConnectionHandleID(clientId);
+        
+        //if the ClientId doesn't already contain a ConnectionHandlerID, find the ConnectionHandlerID object 
+        // that matches the string in the table (note that this depends on the 
+        // string having been put into the table using ConnectionHandlerID.toString() -- see {@link #buildLoginRow(ClientId, ConnectionHandlerID)}
+        ConnectionHandlerID connectionHandlerID = null;
+        if (clientId.getConnectionHandlerID()==null) {
+            
+            //get the ConnectionHandlerID string out of the table
+            Object [] rowData = getLoginListBox().getRowByKey(clientId);
+            String connHIDString = (String) rowData[COLUMN.CONNECTION_ID.ordinal()];
+            
+            //search for a ConnectionHandlerID in the list of ConnectionHIDs for the current client
+            List<ConnectionHandlerID> connList = Collections.list(getContest().getConnectionHandlerIDs(clientId));
+            for (ConnectionHandlerID connHID : connList) {
+                if (connHID.toString().equals(connHIDString)) {
+                    clientId.setConnectionHandlerID(connHID);
+                    connectionHandlerID = connHID;
+                    break;
+                }
+            } 
+        }
         getController().getLog().info("Send Force logoff "+clientId+" "+connectionHandlerID);
         getController().logoffUser(clientId);
     }
