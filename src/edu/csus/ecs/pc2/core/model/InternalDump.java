@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
@@ -205,8 +207,10 @@ public class InternalDump {
                     log.println("Logged in " + ctype.toString());
 
                     for (ClientId clientId : clientIds) {
-                        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
-                        log.println("   " + clientId + " on " + connectionHandlerID);
+                        List<ConnectionHandlerID> connectionList = Collections.list(contest.getConnectionHandlerIDs(clientId));
+                        for (ConnectionHandlerID connHID : connectionList) {
+                            log.println("   " + clientId + " on " + connHID);
+                        }
                     }
                 }
             }

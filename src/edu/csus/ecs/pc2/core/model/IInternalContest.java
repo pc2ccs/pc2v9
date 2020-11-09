@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IStorage;
@@ -487,12 +488,12 @@ public interface IInternalContest {
     boolean isLoggedIn();
 
     /**
-     * Lookup ConnectionHandlerID for all sites.
+     * Lookup ConnectionHandlerIDs for the specified ClientId.
      * 
      * @param clientId
-     * @return ClientId or null if not found.
+     * @return an Enumeration of all CollectionHandlerIDs for the specified client, or null if not found.
      */
-    ConnectionHandlerID getConnectionHandleID(ClientId clientId);
+    Enumeration<ConnectionHandlerID> getConnectionHandlerIDs(ClientId clientId);
 
     ClientId getClientId(ConnectionHandlerID connectionHandlerID);
 
@@ -549,18 +550,18 @@ public interface IInternalContest {
     boolean isAllowed(ClientId clientId, Permission.Type type);
 
     /**
-     * Get all logins in contest.
+     * Get all logins in contest matching the specified {@link ClientType}.
      * 
-     * @param type
-     * @return array of all logged in clients
+     * @param type the type of client for which logins are sought.
+     * @return array of all logged in clients of the specified type.
      */
     ClientId[] getAllLoggedInClients(Type type);
 
     /**
-     * Get all locally logged in clients.
+     * Get all locally logged in clients of a given {@link ClientType.Type}.
      * 
-     * @param type
-     * @return array of all local logged in clients
+     * @param type the type of clients to search for.
+     * @return array of all local logged in clients of the specified type.
      */
     ClientId[] getLocalLoggedInClients(Type type);
 

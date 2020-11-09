@@ -4,6 +4,8 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.List;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -52,8 +54,11 @@ public class LoginReport implements IReport {
 
                 for (ClientId clientId : clientIds) {
                     try {
-                        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
-                        printWriter.println("   " + clientId + " on " + connectionHandlerID);
+                        //get the list of all ConnectionHandlerIDs for the current local client and print them
+                        List<ConnectionHandlerID> connList = Collections.list(contest.getConnectionHandlerIDs(clientId));
+                        for (ConnectionHandlerID connHID : connList) {
+                            printWriter.println("   " + clientId + " on " + connHID);
+                        }
                     } catch (Exception e) {
                         printWriter.println("Exception in report: " + e.getMessage());
                         e.printStackTrace(printWriter);
@@ -74,8 +79,11 @@ public class LoginReport implements IReport {
 
                 for (ClientId clientId : clientIds) {
                     try {
-                        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
-                        printWriter.println("   " + clientId + " on " + connectionHandlerID);
+                        //get the list of all ConnectionHandlerIDs for the current remote client and print them
+                        List<ConnectionHandlerID> connList = Collections.list(contest.getConnectionHandlerIDs(clientId));
+                        for (ConnectionHandlerID connHID : connList) {
+                            printWriter.println("   " + clientId + " on " + connHID);
+                        }
                     } catch (Exception e) {
                         printWriter.println("Exception in report: " + e.getMessage());
                         e.printStackTrace(printWriter);

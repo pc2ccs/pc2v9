@@ -3,25 +3,26 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.packet.Packet;
+import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
  * Client Identification Information (site, type, and number).
  *
  * Contains site number, {@link ClientType.Type}, clientNumber, active.
+ * 
+ * Also contains support for external code to set/get the {@link ConnectionHandlerID}
+ * associated with this ClientId (which is null by default).
  *
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
 // TODO doc complete javadoc for methods.
 
-// $HeadURL$
 public class ClientId implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -3481561733498755619L;
 
     public static final int UNSET = 0;
@@ -31,6 +32,8 @@ public class ClientId implements Serializable {
     private int clientNumber = 0;
 
     private ClientType.Type clientType = ClientType.Type.UNKNOWN;
+    
+    private ConnectionHandlerID connectionHandlerID = null;
 
     public ClientId(int siteNumber, ClientType.Type type, int clientNumber) {
         this.siteNumber = siteNumber;
@@ -41,9 +44,9 @@ public class ClientId implements Serializable {
     private boolean active = true;
 
     /**
-     * Prints the type, number and site.
+     * Returns a String containing the type, number and site associated with this ClientId.
      * 
-     * Example for team 4 site 3, will return "TEAM4 @ site 3".
+     * Example: for team 4 site 3, will return "TEAM4 @ site 3".
      * 
      */
     public String toString() {
@@ -85,7 +88,6 @@ public class ClientId implements Serializable {
      *
      * Note that admin 0 returns root.
      *
-     *
      * @return short version of name (team1, admin1)
      */
     public String getName() {
@@ -97,9 +99,6 @@ public class ClientId implements Serializable {
     }
 
     /**
-     * 
-     * 
-     * 
      * 
      * @return true if client is marked as active.
      */
@@ -133,7 +132,7 @@ public class ClientId implements Serializable {
     /**
      * Get Triplet Key (SiteNumber and ClientType and ClientNumber).
      * 
-     * For team 5 site 12 will return "12TEAM5"
+     * For team 5 site 12 will return "12TEAM5".
      * 
      * @return a string that is composed of site number and client type name and client number.
      */
@@ -143,6 +142,30 @@ public class ClientId implements Serializable {
 
     public void setSiteNumber(int siteNumber) {
         this.siteNumber = siteNumber;
+    }
+
+    /**
+     * Returns the {@link ConnectionHandlerID} associated with this ClientId.
+     * Note that when a ClientId is first constructed it has a ConnectionHandlerID of null;
+     * it is the responsibility of external users of this class to set the ConnectionHandlerID
+     * if needed.  Typically this is done when a ClientId is passed to a Server as part of
+     * a PC2 Transport {@link Packet}.
+     * 
+     * @return the connectionHandlerID associated with this ClientId, which may be null.
+     * 
+     * @see {@link InternalController#receiveObject(Serializable, ConnectionHandlerID)}
+     */
+    public ConnectionHandlerID getConnectionHandlerID() {
+        return connectionHandlerID;
+    }
+
+    /**
+     * Sets the {@link ConnectionHandlerID} associated with this ClientId.
+     * 
+     * @param connectionHandlerID the connectionHandlerID value to set in this CientId.
+     */
+    public void setConnectionHandlerID(ConnectionHandlerID connectionHandlerID) {
+        this.connectionHandlerID = connectionHandlerID;
     }
 
 }
