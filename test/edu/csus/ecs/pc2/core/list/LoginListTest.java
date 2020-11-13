@@ -2,6 +2,10 @@
 package edu.csus.ecs.pc2.core.list;
 
 import junit.framework.TestCase;
+
+import java.util.Collections;
+import java.util.List;
+
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
@@ -10,11 +14,9 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * Test for loginlist 
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  * 
  */
 
-// $HeadURL$
 public class LoginListTest extends TestCase {
 
     private LoginList loginList = new LoginList();
@@ -23,16 +25,22 @@ public class LoginListTest extends TestCase {
 
     private boolean debugMode = false;
 
+    /**
+     * Tests that when a client and connectionHandler is added to a LoginList, method getConnectionHandlerIDS 
+     * returns a list containing the client and connectionHandler (and nothing else).
+     */
     public void testSimple() {
         ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("id1");
         ClientId clientId = new ClientId(siteNumber, Type.TEAM, 12);
 
         loginList.add(clientId, connectionHandlerID);
 
-        ConnectionHandlerID connectionHandlerID2 = loginList.getConnectionHandleID(clientId);
-
-        assertTrue("Failed getConnectionHandleID lookup ", connectionHandlerID.equals(connectionHandlerID2));
-        assertTrue("Failed getConnectionHandleID lookup 2 ", connectionHandlerID.toString().equals(connectionHandlerID2.toString()));
+        List<ConnectionHandlerID> connectionList = Collections.list(loginList.getConnectionHandlerIDs(clientId));
+        
+        assertTrue("Failed getConnectionHandlerID lookup ", connectionList.contains(connectionHandlerID));
+        assertTrue("Failed getConnectionHandlerID lookup 2 ", connectionHandlerID.toString().equals(connectionList.get(0).toString()));
+        
+        assertTrue("Incorect number of connectionHandlerIDs in LoginList ", connectionList.size()==1);
 
     }
 
@@ -43,7 +51,8 @@ public class LoginListTest extends TestCase {
 
         loginList.add(clientId, connectionHandlerID);
 
-        ConnectionHandlerID connectionHandlerID2 = loginList.getConnectionHandleID(clientId);
+        List<ConnectionHandlerID> connectionList = Collections.list(loginList.getConnectionHandlerIDs(clientId));
+        ConnectionHandlerID connectionHandlerID2 = connectionList.get(0);
 
         if (debugMode){
             System.err.println("debug " + connectionHandlerID);
@@ -63,9 +72,12 @@ public class LoginListTest extends TestCase {
         }
         assertTrue("Failed getClientId lookup ", clientId.equals(clientId2));
 
-        connectionHandlerID2 = loginList.getConnectionHandleID(clientId55);
-        assertTrue("Failed getClientId lookup ", connectionHandlerID2 == null);
+        //test attempting to fetch connectionHandlerIDs for a client that has never been added to the LoginList
+        List<ConnectionHandlerID> connectionList2 = Collections.list(loginList.getConnectionHandlerIDs(clientId55));
+        assertFalse ("LoginList.getConnectionHandlerIDs() returned null ", connectionList2==null);
+        assertTrue("Failed getClientId lookup for non-logged in client", connectionList2.isEmpty());
 
+        
         ConnectionHandlerID nextConnectionHandlerID = new ConnectionHandlerID("id1");
         loginList.add(clientId55, nextConnectionHandlerID);
         ClientId clientId3 = loginList.getClientId(nextConnectionHandlerID);
