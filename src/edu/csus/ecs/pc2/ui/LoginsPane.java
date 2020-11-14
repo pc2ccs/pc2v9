@@ -396,36 +396,93 @@ public class LoginsPane extends JPanePlugin {
         
         if (selected == -1){
             showMessage("Please Select Client to logoff");
+            return;
         }
         
-        //TODO: shouldn't the following block only be executed if the above showMessage() is NOT executed?  jlc
+        //login table keys are no longer simply ClientIds; they are now Strings which are the concatenation of
+        // clientId.toString() + connectionHandlerID.toString() -- meaning the following statement throws a ClassCastException...
+//        ClientId clientId = (ClientId) getLoginListBox().getKeys()[selected];
         
-        //FIXME: login table keys are no longer simply ClientIds; they are Strings which are the concatenation of
-        // clientId.toString() + connectionHandlerID.toString() -- meaning the following statement should throw a ClassCastException...
-        ClientId clientId = (ClientId) getLoginListBox().getKeys()[selected];
+        String key = (String) getLoginListBox().getKeys()[selected];
+        Object [] rowData = getLoginListBox().getRowByKey(key);
+        ClientId clientId = getClientIdFromRow(rowData);
+       
+        ConnectionHandlerID connectionHandlerID;
         
-        //if the ClientId doesn't already contain a ConnectionHandlerID, find the ConnectionHandlerID object 
-        // that matches the string in the table (note that this depends on the 
-        // string having been put into the table using ConnectionHandlerID.toString() -- see {@link #buildLoginRow(ClientId, ConnectionHandlerID)}
-        ConnectionHandlerID connectionHandlerID = null;
-        if (clientId.getConnectionHandlerID()==null) {
+        //make sure we got a valid clientId from the table
+        if (clientId != null) {
             
-            //get the ConnectionHandlerID string out of the table
-            Object [] rowData = getLoginListBox().getRowByKey(clientId);
-            String connHIDString = (String) rowData[COLUMN.CONNECTION_ID.ordinal()];
-            
-            //search for a ConnectionHandlerID in the list of ConnectionHIDs for the current client
-            List<ConnectionHandlerID> connList = Collections.list(getContest().getConnectionHandlerIDs(clientId));
-            for (ConnectionHandlerID connHID : connList) {
-                if (connHID.toString().equals(connHIDString)) {
-                    clientId.setConnectionHandlerID(connHID);
-                    connectionHandlerID = connHID;
-                    break;
+            //if the ClientId doesn't already contain a ConnectionHandlerID, find the ConnectionHandlerID object 
+            // that matches the string in the table (note that this depends on the 
+            // string having been put into the table using ConnectionHandlerID.toString() -- see {@link #buildLoginRow(ClientId, ConnectionHandlerID)}
+            connectionHandlerID = null;
+            if (clientId.getConnectionHandlerID() == null) {
+
+                //get the ConnectionHandlerID string out of the table row
+                String connHIDString = (String) rowData[COLUMN.CONNECTION_ID.ordinal()];
+
+                //search for a ConnectionHandlerID in the list of ConnectionHIDs for the current client
+                List<ConnectionHandlerID> connList = Collections.list(getContest().getConnectionHandlerIDs(clientId));
+                for (ConnectionHandlerID connHID : connList) {
+                    if (connHID.toString().equals(connHIDString)) {
+                        clientId.setConnectionHandlerID(connHID);
+                        connectionHandlerID = connHID;
+                        break;
+                    }
                 }
+            }
+            //make sure we found a ConnectionHandlerID for the selected client
+            if (connectionHandlerID == null) {
+                showMessage("Error: unable to find a ConnectionHandlerID for the selected client.");
+                getController().getLog().severe("Unable to find ConnectionHandlerID for client " + clientId);
+                return;
             } 
+        } else {
+            //we didn't get a valid clientId
+            showMessage("Error: unable to obtain a valid ClientId from the LoginsPane table.");
+            getController().getLog().severe("Unable to obtain ClientId from LoginsPane table.");
+            return;
         }
-        getController().getLog().info("Send Force logoff "+clientId+" "+connectionHandlerID);
+        
+        getController().getLog().info("Sending Force logoff to " + clientId  +" @ " + connectionHandlerID);
         getController().logoffUser(clientId);
+    }
+    
+    /**
+     * Extracts a ClientId from the specified rowData, which is expected to be an array of Objects matching
+     * the content of the LoginsPane display table.
+     * 
+     * @param rowdata an array of Objects containing the elements of a login row.
+     * 
+     * @return a ClientId corresponding to the given rowdata, or null if the method is unable to extract a valid ClientId.
+     */
+    private ClientId getClientIdFromRow(Object [] rowdata) {
+        
+        ClientId clientId = null ;
+        
+//        private enum COLUMN {SITE, TYPE, CLIENT_NUMBER, CONNECTION_ID, SINCE};
+
+        try {
+            //get the site number out of the table
+            int site = Integer.parseInt(((String) rowdata[COLUMN.SITE.ordinal()]).substring(4).trim()); //first four chars of the string are "Site"
+            
+            //get the client "type" out of the table
+            String clientTypeStr = ((String) rowdata[COLUMN.TYPE.ordinal()]).trim().toUpperCase();
+            ClientType.Type type = ClientType.Type.valueOf(clientTypeStr);
+            
+            //get the client "number" out of the table (e.g. for "Team 3" the client number is "3")
+            int clientNumber = Integer.parseInt((String) rowdata[COLUMN.CLIENT_NUMBER.ordinal()]);
+            
+            //construct a ClientId object from the values extracted from the table
+            clientId = new ClientId(site, type, clientNumber);
+            
+        } catch (NumberFormatException e) {
+            getController().getLog().severe("NumberFormatException while attempting to retrieve ClientId from LoginsPane table: " + e.getMessage());
+        } catch (Exception e) {
+            getController().getLog().severe("Exception while attempting to retrieve ClientId from LoginsPane table: " + e.getMessage());            
+        }
+        
+        return clientId;
     }
 
     /**

@@ -134,12 +134,19 @@ public class WebServer {
 		
 		//log the scoreboard account back out so the ContestController can re-login
 		try {
+			ini.getLogger().fine("Logging back out of PC2 scoreboard account pending team connections");
 			scoreboardServerConn.logoff();
 		} catch (NotLoggedInException e) {
-			ini.getLogger().severe("Illegal state: got a NotLoggedInException during scoreboard logout after successful login");
-			System.err.println("Illegal state: got a NotLoggedInException during scoreboard logout after successful login");
+			ini.getLogger().severe("Illegal state: got a NotLoggedInException during scoreboard logout after successful login:" + e.getMessage());
+			System.err.println("Illegal state: got a NotLoggedInException during scoreboard logout after successful login: " + e.getMessage());
 			e.printStackTrace();
 			return false;
+		} catch (Exception e) {
+            ini.getLogger().severe("Exception during scoreboard logout after successful login: " + e.getMessage());
+            System.err.println("Exception during scoreboard logout after successful login: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+		    
 		}
 		
 		return true;

@@ -2378,7 +2378,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendToAdministrators(packet);
 
         } else {
-            // Send packet to my sever
+            // Send packet to my server
             Packet packet = PacketFactory.createLogoff(contest.getClientId(), getServerClientId(), clientId);
             sendToLocalServer(packet);
         }

@@ -840,7 +840,7 @@ public class ServerConnection {
     /**
      * Logoff/disconnect from the PC<sup>2</sup> Server.
      * 
-     * @return true if logged off, else false.
+     * @return true if logged off, else false. <-- there appears to be no circumstance under which this method can return false (jlc)
      * @throws NotLoggedInException
      *             if attempt to logoff without being logged in
      */
