@@ -10,6 +10,7 @@ import java.lang.management.ManagementFactory;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -355,6 +356,25 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private AutoStarter autoStarter;
     
     private AutoStopContestClockThread autoStopContestClockThread = null;
+    
+    /**
+     * Packets which should be sent to multiple instances of logins (for example, a "RUN_SUBMSSION_CONFIRMATION"
+     * packet should be sent to every instance of a given team client login when multiple team logins are allowed).
+     * Listing an element of {@link PacketType.Type} in this EnumSet causes packets of that type to be duplicated
+     * and sent to every login instance for the destination client specified in the packet.
+     * 
+     * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
+     *
+     */
+    private static EnumSet<PacketType.Type> DuplicatePacketTypes = EnumSet.of(
+            PacketType.Type.RUN_SUBMISSION_CONFIRM,
+            PacketType.Type.RUN_JUDGEMENT,
+//            PacketType.Type.RUN_JUDGEMENT_UPDATE,     //this seems to only be sent to judges/admins/boards to update run status, but not teams
+            PacketType.Type.CLARIFICATION_SUBMISSION_CONFIRM, 
+            PacketType.Type.CLARIFICATION_UPDATE, 
+            PacketType.Type.CLARIFICATION_ANSWER,
+            PacketType.Type.CLARIFICATION_ANSWER_UPDATE
+        );
 
     public InternalController(IInternalContest contest) {
         super();
@@ -456,7 +476,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         //this method should never be called with a packet containing a destination ClientId containing a null ConnectionHandlerID; 
         // however, the addition of "multiple login" support may have left some place where this is inadvertently true.
-        //The following can be considered an effort to catch/identify such situations.
+        //The following is an effort to catch/identify such situations.
         if (toClientId.getConnectionHandlerID()==null) {
             RuntimeException e = new RuntimeException("InternalController.sendToClient() called with packet containing null ConnectionHandlerID in destination ClientId " + toClientId);
             e.printStackTrace();
@@ -468,10 +488,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             if (contest.isLocalLoggedIn(toClientId)) {
                 
-                //TODO: expand the following code to send to ALL logged in clients (i.e., connections) with ClientIds matching "toClientId"
                 ConnectionHandlerID connectionHandlerID = toClientId.getConnectionHandlerID();
                 info("sendToClient " + packet.getDestinationId() + " @ " + connectionHandlerID);
                 sendToClient(connectionHandlerID, packet);
+                
+                //certain packets should also be sent to any other logged in clients (e.g. logins for the same team)
+                sendToDuplicateClients(packet);
                 
             } else {
                 try {
@@ -502,6 +524,47 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         // }
 
         info("sendToClient af to " + packet.getDestinationId() + " " + packet);
+    }
+    
+    /**
+     * Examines the specified packet to determine if there duplicate client logins to which the packet should be sent
+     * (for example, in the case where multiple team clients for the same team have been allowed to login); sends the
+     * specified packet to any duplicate login clients.
+     * 
+     * @param packet the packet to be sent to any duplicate login clients.
+     */
+    private void sendToDuplicateClients(Packet packet) {
+
+        //determine what client the packet was initially sent to (it is assumed that the caller took care of the initial send)
+        ClientId toClientId = packet.getDestinationId();
+        
+        //see if the packet is one of the types that should be duplicated (sent to all logins for the client)
+        if (DuplicatePacketTypes.contains(packet.getType()) ) {
+            
+            //see if the destination for the packet is a team
+            if (toClientId.getClientType()==ClientType.Type.TEAM) {
+                
+                //get a list of all logged-in team clients
+                ClientId[] clientList = contest.getAllLoggedInClients(ClientType.Type.TEAM);
+                
+                //check every logged-in team client
+                for (ClientId clientId : clientList) {
+                    
+                    //see if the current logged-in team client is the same team as the original intended destination
+                    if (clientId.equals(toClientId)) {
+                        
+                        //same team; make sure it's a DIFFERENT connection (we assume the caller already sent the packet to the original dest)
+                        if (!clientId.getConnectionHandlerID().equals(toClientId.getConnectionHandlerID())) {
+                            
+                            //it's a different connection for the same team; send a duplicate of the packet
+                            ConnectionHandlerID connectionHandlerID = clientId.getConnectionHandlerID();
+                            info("sendToClient " + packet.getDestinationId() + " @ " + connectionHandlerID);
+                            sendToClient(connectionHandlerID, packet);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void sendMessage(Area area, String message) {
