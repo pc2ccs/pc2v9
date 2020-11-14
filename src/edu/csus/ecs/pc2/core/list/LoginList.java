@@ -69,7 +69,6 @@ public class LoginList implements Serializable {
      *      login date.  Need to decide whether this makes an importance difference anywhere...
      */
     private Hashtable<ClientId, Date> clientDateHash = new Hashtable<ClientId, Date>();
-    
 
     /**
      * Add or update a clientId in the list.
@@ -101,16 +100,23 @@ public class LoginList implements Serializable {
             handlerClientHash.put(connectionHandlerID, clientId);
             clientDateHash.put(clientId, new Date());
         }
-        
     }
 
     /**
-     * Remove client from loginlist.  This method removes <I>all</i> login references to the specified
-     * client, including removing multiple logins if such are present.
+     * Remove client from loginlist.  
+     * This method searches the list of currently logged-in clients for a client matching the
+     * specified {@link ClientId} in client type, client number, client site number, and
+     * client {@link ConnectionHandlerID}, and removes that client from the list if found.
      * 
-     * @param clientId the ClientId whose login(s) are to be removed.
+     * Note that if multiple client logins are being allowed, there may be <I>more than one</i>
+     * logged in client with the same client type, client number, and client site -- but there
+     * should be at most one logged in client matching all those fields AND matching the 
+     * ConnectionHandlerID of the specified client.  If more than one logged-in client with the
+     * same client type, number, and site exists, only the one with the matching ConnectionHandlerID is removed.
      * 
-     * @return true if all logins for the specified client were successfully removed, false otherwise.
+     * @param clientId the ClientId whose login is to be removed.
+     * 
+     * @return true if the specified client was found and successfully removed, false otherwise.
      * 
      * @throws IllegalArgumentException if the specified clientId is null.
      * @throws RuntimeException if the specified clientId contains a null ConnectionHandlerID.
@@ -123,43 +129,68 @@ public class LoginList implements Serializable {
         //this method should never be called with a ClientId containing a null ConnectionHandlerID; however, the addition of 
         // "multiple login" support may have left some place where this is inadvertently true.
         //The following is an effort to catch/identify such situations.
-        ConnectionHandlerID connectionHandlerID = clientId.getConnectionHandlerID();
-        if (connectionHandlerID==null) {
+        ConnectionHandlerID clientConnection = clientId.getConnectionHandlerID();
+        if (clientConnection==null) {
             RuntimeException e = new RuntimeException("InternalContest.removeLogin() called with null ConnectionHandlerID in ClientId " + clientId);
             e.printStackTrace();
             throw e;
         }
-        
-        boolean found ;
+
+        boolean returnFlag ;
         
         synchronized (clientToConnectionHandlerList) {
 
             // get a list of all the connectionHandlerIDs associated with this client
             // (for all clients except TEAMs this list will have at most one element; for Teams it
-            //  could have more if multiple team logins are being allowed)
-            List<ConnectionHandlerID> connectionHandlerIDs = clientToConnectionHandlerList.get(clientId);
+            // could have more if multiple team logins are being allowed)
+            List<ConnectionHandlerID> connectionHandlerList = clientToConnectionHandlerList.get(clientId);
 
-            found = connectionHandlerIDs!=null;
-            
-            if (connectionHandlerIDs!=null) {
-                // remove each connectionHandlerID from the table mapping connectionHandlerIDs to clientIDs
-                for (ConnectionHandlerID connHID : connectionHandlerIDs) {
+            // if we didn't even get a valid list, we know we've failed to find the specified client
+            returnFlag = connectionHandlerList != null;
+
+            if (connectionHandlerList != null) {
+
+                boolean foundConnection = false;
+                // search the list of connectionHandlers
+                for (ConnectionHandlerID connHID : connectionHandlerList) {
                     if (connHID != null) {
-                        found = found && (handlerClientHash.remove(connHID) != null);
+                        // check if the current connHID matches the client
+                        if (clientConnection.equals(connHID)) {
+                            // match; remove it from the mapping of connectionHandlers to clientIds
+                            foundConnection = true;
+                            ClientId removedClient = handlerClientHash.remove(connHID);
+                            // update the "found" flag based on whether removal was successful (i.e. connHID was found in the table and removed)
+                            returnFlag = returnFlag && (removedClient != null);
+                        }
                     }
-                } 
-            }
-            // remove the client from the maps of clients to connectionHandlers and their connection dates
-            found = found && clientToConnectionHandlerList.remove(clientId)!=null;
-            found = found && clientDateHash.remove(clientId)!=null;
+                }
+                
+                //we're only going to be successful if we found the client's connection
+                returnFlag = returnFlag && foundConnection;
 
+                // try to remove the connection from the list of connections for the specified client
+                boolean connectionRemovalWasSuccessful = connectionHandlerList.remove(clientConnection);
+                // update the return flag to include whether we were successful in removing the connection from the client's list of connections
+                returnFlag = returnFlag && connectionRemovalWasSuccessful;
+
+                // if the client has no more connections, remove the client from the map of clients to connections and update the return flag
+                if (connectionHandlerList.size() == 0) {
+                    // remove the client from the list, but only if it was mapped to the same ConnectionHandlerList we've been using
+                    boolean clientRemovalWasSuccessful = clientToConnectionHandlerList.remove(clientId, connectionHandlerList);
+                    returnFlag = returnFlag && clientRemovalWasSuccessful;
+                }
+
+                // remove the client from the map of clientIds to connection dates and update the return flag
+                returnFlag = returnFlag && clientDateHash.remove(clientId) != null;
+            }
         }
 
         //at this point "found" will only be true if there was a non-null list of connectionHandlerIDs for the client
-        // AND every non-null connectionHandlerID in the list was successfully removed from the 
-        // connectionHandler-to-client map AND the clientId was successfully removed from the
-        // client-to-connectionHandlers map AND the clientId was successfully removed from the client-to-date map.
-        return found;
+        // AND the client's connectionHandlerID was found and successfully removed from the map of connectionHandlers to clientIds
+        // AND the client's connection was successfully removed from the list of client connections
+        // AND if the client's connection was the last connection for this client then the clientId was successfully removed from the map of clients to connections
+        // AND the clientId was successfully removed from the client-to-date map.
+        return returnFlag;
     }
 
     /**

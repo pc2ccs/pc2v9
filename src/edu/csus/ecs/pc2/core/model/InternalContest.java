@@ -11,6 +11,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.ParseArguments;
@@ -1213,23 +1214,34 @@ public class InternalContest implements IInternalContest {
     }
 
     
-    public void removeRemoteLogin(ClientId sourceId) {
-        if (isRemoteLoggedIn(sourceId)) {
-            remoteLoginList.remove(sourceId);
-        }
-        ConnectionHandlerID connectionHandlerID = sourceId.getConnectionHandlerID();
+    public void removeRemoteLogin(ClientId clientIdToRemove) {
+        ConnectionHandlerID connectionHandlerID = clientIdToRemove.getConnectionHandlerID();
         
         //this method should never be called with a ClientId containing a null ConnectionHandlerID; however, the addition of 
         // "multiple login" support may have left some place where this is inadvertently true.
         //The following is an effort to catch/identify such situations.
         if (connectionHandlerID==null) {
-            RuntimeException e = new RuntimeException("InternalController.removeRemoteLogin() called with null ConnectionHandlerID in ClientId " + sourceId);
+            RuntimeException e = new RuntimeException("InternalController.removeRemoteLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove);
             e.printStackTrace();
-            logException("InternalController.removeRemoteLogin() called with null ConnectionHandlerID in ClientId " + sourceId, e);
+            logException("InternalController.removeRemoteLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove, e);
             throw e;
         }
 
-        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGOFF, sourceId, connectionHandlerID, "Remote Logoff");
+        boolean removeWasSuccessful ;
+        if (isRemoteLoggedIn(clientIdToRemove)) {
+            removeWasSuccessful = remoteLoginList.remove(clientIdToRemove);
+        } else {
+            removeWasSuccessful = false;
+        }
+                
+        //check the return value from remove() and log the results
+        if (removeWasSuccessful) {
+            logMessage(Level.INFO, "removed " + clientIdToRemove + " from remote login list");
+        } else {
+            logMessage(Level.WARNING, "attempt to remove " + clientIdToRemove + " from remote login list failed");
+        }
+
+        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGOFF, clientIdToRemove, connectionHandlerID, "Remote Logoff");
         fireLoginListener(loginEvent);
     }
 
@@ -1246,10 +1258,21 @@ public class InternalContest implements IInternalContest {
             throw e;
         }
         
-        if (isLocalLoggedIn(clientIdToRemove)){
-            localLoginList.remove(clientIdToRemove);
+        boolean clientToRemoveIsLocal = isLocalLoggedIn(clientIdToRemove) ;
+        String removalTargetList = clientToRemoveIsLocal ? "local" : "remote";
+        boolean removeWasSuccessful ;
+
+        if (clientToRemoveIsLocal){
+            removeWasSuccessful = localLoginList.remove(clientIdToRemove);
         } else {
-            remoteLoginList.remove(clientIdToRemove);
+            removeWasSuccessful = remoteLoginList.remove(clientIdToRemove);
+        }
+        
+        //check the return value from remove() and log the results
+        if (removeWasSuccessful) {
+            logMessage(Level.INFO, "removed " + clientIdToRemove + " from " + removalTargetList + " login list");
+        } else {
+            logMessage(Level.WARNING, "attempt to remove " + clientIdToRemove + " from " + removalTargetList + " login list failed");
         }
 
         LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGOFF, clientIdToRemove, connectionHandlerID, "Logoff");
@@ -2809,6 +2832,15 @@ public class InternalContest implements IInternalContest {
         } else {
             e.printStackTrace(System.err);
         }
+    }
+    
+    private void logMessage(java.util.logging.Level level, String message) {
+        if (StaticLog.getLog() != null) {
+            StaticLog.getLog().log(level, message);
+        } else {
+            System.err.println(message);
+        }
+        
     }
 
     public void removeAllListeners() {
