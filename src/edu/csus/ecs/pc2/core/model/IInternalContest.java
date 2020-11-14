@@ -552,12 +552,9 @@ public interface IInternalContest {
     /**
      * Get all logins in contest matching the specified {@link ClientType}.
      * 
-<<<<<<< HEAD
      * Note that if multiple simultaneous logins are allowed for the specified ClientType and there are currently
      * multiple logins for a given clientId, the returned array will contain one element for each such login.
      * 
-=======
->>>>>>> a80afde9b... i122: squash of 11 commits allowing multiple team logins.  Includes:
      * @param type the type of client for which logins are sought.
      * @return array of all logged in clients of the specified type.
      */
