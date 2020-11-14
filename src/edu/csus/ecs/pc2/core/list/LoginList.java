@@ -69,7 +69,6 @@ public class LoginList implements Serializable {
      *      login date.  Need to decide whether this makes an importance difference anywhere...
      */
     private Hashtable<ClientId, Date> clientDateHash = new Hashtable<ClientId, Date>();
-    
 
     /**
      * Add or update a clientId in the list.
@@ -101,7 +100,6 @@ public class LoginList implements Serializable {
             handlerClientHash.put(connectionHandlerID, clientId);
             clientDateHash.put(clientId, new Date());
         }
-        
     }
 
     /**
@@ -133,12 +131,10 @@ public class LoginList implements Serializable {
         //The following is an effort to catch/identify such situations.
         ConnectionHandlerID clientConnection = clientId.getConnectionHandlerID();
         if (clientConnection==null) {
-
             RuntimeException e = new RuntimeException("InternalContest.removeLogin() called with null ConnectionHandlerID in ClientId " + clientId);
             e.printStackTrace();
             throw e;
         }
-
 
         boolean returnFlag ;
         

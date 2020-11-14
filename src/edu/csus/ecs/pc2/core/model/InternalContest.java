@@ -1242,7 +1242,6 @@ public class InternalContest implements IInternalContest {
         }
 
         LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGOFF, clientIdToRemove, connectionHandlerID, "Remote Logoff");
-
         fireLoginListener(loginEvent);
     }
 
