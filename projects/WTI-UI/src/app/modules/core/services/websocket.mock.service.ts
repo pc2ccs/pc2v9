@@ -3,13 +3,14 @@ import { IWebsocketService } from '../abstract-services/i-websocket.service';
 import { UiHelperService } from './ui-helper.service';
 import { IContestService } from '../abstract-services/i-contest.service';
 import { ITeamsService } from '../abstract-services/i-teams.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class WebsocketMockService extends IWebsocketService {
   constructor(private _injector: Injector) {
     // Manually get UiHelperService from angular DI to pass to abstract class
     // This avoids having two references to UiHelperService
-    super(_injector.get(UiHelperService), _injector.get(IContestService), _injector.get(ITeamsService));
+    super(_injector.get(UiHelperService), _injector.get(IContestService), _injector.get(ITeamsService), _injector.get(AuthService));
     console.log('firing construcitor in websocket MOCK');
   }
 

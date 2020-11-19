@@ -33,4 +33,10 @@ export class UiHelperService {
       duration: 4000
     });
   }
+
+  indefinitelyDisplayedAlert(message: string): void {
+	this._matSnackBar.open(message, 'Close', {
+	  duration: undefined
+	});
+  }
 }

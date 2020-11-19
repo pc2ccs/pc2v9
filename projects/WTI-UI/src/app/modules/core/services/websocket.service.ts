@@ -11,10 +11,10 @@ import { ITeamsService } from '../abstract-services/i-teams.service';
 export class WebsocketService extends IWebsocketService {
   socket: WebSocket;
 
-  constructor(private _injector: Injector, private _authService: AuthService) {
+  constructor(private _injector: Injector, _authService: AuthService) {
     // Manually get UiHelperService from angular DI to pass to abstract class
     // This avoids having two references to UiHelperService
-    super(_injector.get(UiHelperService), _injector.get(IContestService), _injector.get(ITeamsService));
+    super(_injector.get(UiHelperService), _injector.get(IContestService), _injector.get(ITeamsService), _injector.get(AuthService));
     console.log('firing constructor in WebsocketService');
   }
 

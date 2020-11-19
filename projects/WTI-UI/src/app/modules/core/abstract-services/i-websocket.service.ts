@@ -2,11 +2,13 @@ import { UiHelperService } from '../services/ui-helper.service';
 import { WebsocketMessage } from '../models/websocket-message';
 import { IContestService } from './i-contest.service';
 import { ITeamsService } from './i-teams.service';
+import { AuthService } from '../auth/auth.service';
 
 export abstract class IWebsocketService {
   constructor(private _uiHelperService: UiHelperService,
               private _contestService: IContestService,
-              private _teamsService: ITeamsService) { }
+              private _teamsService: ITeamsService,
+              public _authService: AuthService) { }
 
   abstract startWebsocket(): void;
 
@@ -38,8 +40,16 @@ export abstract class IWebsocketService {
 		this._contestService.markStandingsOutOfDate();
         break;
       }
+      case 'connection_dropped': {
+        console.log("Got a connection_dropped websocket message:");
+        console.log(message);
+        this._uiHelperService.indefinitelyDisplayedAlert("PC2 Server connection lost");
+        this._authService.logout();  			//invokes teamsService.logout();
+        this._authService.completeLogout();		//navigates to login page
+        break;
+      }
       default:
-        console.warn('unrecognized message on websocket');
+        console.warn('unrecognized message on websocket:');
         console.warn(message);
     }
   }
