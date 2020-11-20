@@ -387,6 +387,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         
         ContestInformation contestInformation = getContestInformation(contest);
         
+        //set allow-multiple-team-logins mode
+        boolean allowMultipleTeamLogins = fetchBooleanValue(content, ALLOW_MULTIPLE_TEAM_LOGINS_KEY, contestInformation.isAllowMultipleLoginsPerTeam());
+        contestInformation.setAllowMultipleLoginsPerTeam(allowMultipleTeamLogins);
+        
         // enable shadow mode
         boolean shadowMode = fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
         contestInformation.setShadowMode(shadowMode);
