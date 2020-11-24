@@ -38,8 +38,12 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
+import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
+
 import javax.swing.JCheckBox;
 
 /**
@@ -93,7 +97,10 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     private final ButtonGroup inputStorageButtonGroup = new ButtonGroup();
 
-    private String loadDirectory;
+    private String loadDirectory = null;
+    
+    //John's local machine testing directory
+//    private String loadDirectory = "C:\\clevengr\\contest\\PC2\\v9\\TestContests\\sumithello2\\config\\sumit";
 
     private Component verticalStrut;
 
@@ -164,6 +171,10 @@ public class MultipleDataSetPane extends JPanePlugin {
         getRdBtnKeepDataFilesExternal().setEnabled(enable);
     }
 
+    /**
+     * This method updates the MultipleDataSetPane UI with the data currently specified in the 
+     * tableModel, problem, and problemDataFiles fields (variables within this class).
+     */
     protected void populateUI() {
 
         tableModel.setFiles(problemDataFiles);
@@ -415,9 +426,9 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     private String selectDirectory(String dialogTitle) {
 
-        String directory = null;
+        String directory = loadDirectory;
 
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = new JFileChooser(directory);
 
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if (dialogTitle != null) {
@@ -476,27 +487,41 @@ public class MultipleDataSetPane extends JPanePlugin {
             dump(problemDataFiles, "debug after load");
         }
 
+        //Populate the MultipleDataSetPane 
         populateUI();
 
-        // Populate general data and answer files too
+        // Populate General Pane data and answer files too
         editProblemPane.setJudgingTestSetOne(tableModel.getFiles());
         
-        //update the Input Validator status
-        getEditProblemPane().getInputValidatorPane().setRunResults(null);
-        getEditProblemPane().getInputValidatorPane().updateResultsTable();
+        //update the Input Validator status: since we're loading new data files, any prior "I.V. Run Results" are invalid
+        getEditProblemPane().getInputValidatorPane().setCustomInputValidatorResults(new InputValidationResult[0]);
+        getEditProblemPane().getInputValidatorPane().setCustomInputValidationStatus(InputValidationStatus.NOT_TESTED);
+        getEditProblemPane().getInputValidatorPane().setCustomInputValidatorHasBeenRun(false);
         
-        if (inputValidatorIsDefined()) {
-            String msg = "Do you want to run the Input Validator on the new input data files?"
-                    + "\n\n (If Yes, run results will appear on the Input Validator tab.)\n";
+        getEditProblemPane().getInputValidatorPane().setVivaInputValidatorResults(new InputValidationResult[0]);
+        getEditProblemPane().getInputValidatorPane().setVivaInputValidationStatus(InputValidationStatus.NOT_TESTED);
+        getEditProblemPane().getInputValidatorPane().setVivaInputValidatorHasBeenRun(false);
+        
+        //update the Results table: since we're loading new data files, any prior results are invalid
+        getEditProblemPane().getInputValidatorPane().updateResultsTable(new InputValidationResult[0]);
+        
+        //ask the user if they want to run the currently-selected Input Validator (if any)
+        if (okToRunInputValidator()) {
+            INPUT_VALIDATOR_TYPE currentIV = getEditProblemPane().getInputValidatorPane().getCurrentInputValidatorType();
+            String msg = "The currently selected Input Validator type is " + currentIV;
+            msg += "\nDo you want to run the currently-selected Input Validator on the new input data files?";
             int result = JOptionPane.showConfirmDialog(this, msg, "Run Input Validator? ", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (result == JOptionPane.YES_OPTION) {
-                getEditProblemPane().getInputValidatorPane().runInputValidator();
+                
+                //attempt to run the currently-selected Input Validator.  Note that this method will fail with an error msg/
+                // dialog if there is no selected and properly configured Input Validator.
+                getEditProblemPane().getInputValidatorPane().runCurrentlySelectedInputValidator();
             }
         }
         getEditProblemPane().enableUpdateButton();
     }
     
-    private boolean inputValidatorIsDefined() {
+    private boolean okToRunInputValidator() {
         return (getEditProblemPane().getInputValidatorPane().okToRunInputValidator());
     }
 

@@ -145,7 +145,13 @@ public interface IContestLoader {
 
     String READ_FROM_STDIN_KEY = "readFromSTDIN";
     
-    String INPUT_VALIDATOR_COMMAND_LINE_KEY = "inputValidatorCommandLine";
+    //keys for YAML entries specifying data for Input Validators:
+    String INPUT_VALIDATOR_KEY = "input_validator"; //the section header for Input Validator info
+    String DEFAULT_INPUT_VALIDATOR_KEY = "defaultInputValidator"; //the key for specifying the type of Input Validator selected by default
+    String CUSTOM_INPUT_VALIDATOR_PROGRAM_NAME_KEY = "customInputValidatorProg";    //custom input validator program name
+    String CUSTOM_INPUT_VALIDATOR_COMMAND_LINE_KEY = "customInputValidatorCmd"; //command to invoke custom input validator
+    String VIVA_PATTTERN_KEY = "vivaPattern";   //the key for specifying a VIVA pattern in YAML
+    String VIVA_PATTERN_FILE_KEY = "vivaPatternFile";   //the key for specifying a file containing a VIVA pattern
 
     // per problem problem.yaml settings
     String SHOW_OUTPUT_WINDOW = "showOutputWindow";

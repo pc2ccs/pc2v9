@@ -61,7 +61,7 @@ public class ProblemImplementation implements IProblem {
         }
         judgesDataFileName = problem.getDataFileName();
         judgesAnswerFileName = problem.getAnswerFileName();
-        validatorFileName = problem.getValidatorProgramName();
+        validatorFileName = problem.getOutputValidatorProgramName();
         
         if (problem.isValidatedProblem()){
             if (! problem.isUsingCLICSValidator()){

@@ -214,8 +214,8 @@ public class ExecuteUtilities extends Plugin {
             
             String validatorCommand = null;
 
-            if (problem.getValidatorProgramName() != null) {
-                validatorCommand = problem.getValidatorProgramName();
+            if (problem.getOutputValidatorProgramName() != null) {
+                validatorCommand = problem.getOutputValidatorProgramName();
             }
             
             if (problemDataFiles != null) {

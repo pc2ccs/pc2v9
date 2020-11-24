@@ -23,27 +23,27 @@ import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
  * It provides methods for executing an Input Validator against a single input data file,
  * or against a set of multiple input data files.
  * 
- * @author John
+ * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
  *
  */
-public class InputValidatorRunner {
+public class CustomInputValidatorRunner {
     
     private IInternalContest contest;
     private IInternalController controller;
 
     /**
-     * Constructs an InputValidatorRunner for running Input Validators based on the specified contest (model) and controller.
+     * Constructs an CustomInputValidatorRunner for running Input Validators based on the specified contest (model) and controller.
      * 
      * Throws a null pointer exception if either constructor parameter is null.
      * 
-     * @param contest - the contest model holding the data to be used by this InputValidatorRunner
+     * @param contest - the contest model holding the data to be used by this CustomInputValidatorRunner
      * @param controller - the controller for the contest
      * 
      * @throws NullPointerException if a null parameter is received
      */
-    public InputValidatorRunner (IInternalContest contest, IInternalController controller) {
+    public CustomInputValidatorRunner (IInternalContest contest, IInternalController controller) {
         if (contest == null || controller == null) {
-            throw new NullPointerException("null passed to InputValidatorRunner constructor") ;
+            throw new NullPointerException("null passed to CustomInputValidatorRunner constructor") ;
         }
         
         this.contest = contest;
@@ -52,15 +52,15 @@ public class InputValidatorRunner {
     
     /**
      * Runs the specified validator using the specified command, in the specified execution directory, feeding the 
-     * specified data file to the validator as input and returning an {@link InputValidationResult} containing the results of
+     * specified data file to the validator program's stdin and returning an {@link InputValidationResult} containing the results of
      * the validator execution.
-     * @param seqNum a sequence number used to give generated files unique names
      * 
+     * @param seqNum a sequence number used to give generated files unique names
      * @param problem the {@link Problem} associated with the validator program being run
-     * @param validator a SerializedFile containing the validator program
+     * @param validatorProg a SerializedFile containing the validator program
      * @param validatorCommand a String (possibly containing PC2 substitution keywords) to be used to invoke the validator
      * @param executeDir the directory in which the execution is to take place (this is created if necessary, and it is cleared before execution)
-     * @param dataFile the judge's input data file to be validated
+     * @param dataFile a SerializedFile containing the judge's input data file to be validated
      * 
      * @return an InputValidationResult containing the results of the validator execution
      * 
@@ -68,7 +68,7 @@ public class InputValidatorRunner {
      * @throws {@link ExecuteException} if an exception occurs running the specified validator command 
      * @throws Exception if an exception occurs in serializing the validator execution stdout or stderr output
      */
-    public InputValidationResult runInputValidator(int seqNum, Problem problem, SerializedFile validatorProg, String validatorCommand,
+    public InputValidationResult runCustomInputValidator(int seqNum, Problem problem, SerializedFile validatorProg, String validatorCommand,
             String executeDir, SerializedFile dataFile) throws ExecuteException, Exception {
 
         if (validatorProg == null || validatorCommand == null || executeDir == null || dataFile == null) {
@@ -94,6 +94,7 @@ public class InputValidatorRunner {
             controller.getLog().info("Copied validator file '" + validatorProg.getName() + "' to '" + executeDir + "'");
         } catch (IOException e) {
             controller.getLog().severe("Exception creating input validator program '" + validatorProg.getName() + "' in execution folder: " + e.getMessage());
+            //TODO: return an InputValidationResult indicating an error
         }
 
         // copy the input data file to the execution directory
@@ -102,6 +103,7 @@ public class InputValidatorRunner {
             controller.getLog().info("Copied data file '" + dataFile.getName() + "' to '" + executeDir + "'");
         } catch (IOException e) {
             controller.getLog().severe("Exception creating input data file '" + dataFile.getName() + "' in execution folder: " + e.getMessage());
+            //TODO: return an InputValidationResult indicating an error
         }
 
         ExecutionData executionData = new ExecutionData();
@@ -158,8 +160,10 @@ public class InputValidatorRunner {
             throw e;
         }
 
+        //if we get here there were no errors during execution; return a result indicating either "pass" or "fail"
 //        return new InputValidationResult(problem, Utilities.basename(stdinFilename), passed, stdoutResults, stderrResults);
-        return new InputValidationResult(problem, dataFile.getAbsolutePath(), passed, stdoutResults, stderrResults);
+        Problem.InputValidationStatus status = passed ? Problem.InputValidationStatus.PASSED : Problem.InputValidationStatus.FAILED;
+        return new InputValidationResult(problem, dataFile.getAbsolutePath(), passed, status, stdoutResults, stderrResults);
 
     }
     
@@ -193,7 +197,7 @@ public class InputValidatorRunner {
         for (int i=0; i<dataFiles.length; i++) {
             
             try {
-                results[i] = runInputValidator(i, problem, validator, validatorCommand, executeDir, dataFiles[i]);
+                results[i] = runCustomInputValidator(i, problem, validator, validatorCommand, executeDir, dataFiles[i]);
             } catch (ExecuteException e) {
 //                System.err.println("ExecuteException running input validator: " + e.getMessage());
                 throw e;
@@ -221,13 +225,13 @@ public class InputValidatorRunner {
      */
     public InputValidationResult [] runInputValidator (Problem problem, ProblemDataFiles problemDataFiles) throws ExecuteException {
         
-        SerializedFile validator = problemDataFiles.getInputValidatorFile();
+        SerializedFile validator = problemDataFiles.getCustomInputValidatorFile();
         
         if (validator == null) {
             return null ;
         }
         
-        String validatorCommand = problem.getInputValidatorCommandLine();
+        String validatorCommand = problem.getCustomInputValidatorCommandLine();
         if (validatorCommand == null || validatorCommand.equals("")) {
             return null ;
         }

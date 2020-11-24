@@ -1,0 +1,7 @@
+
+name: Sumit
+
+input_validator: 
+   defaultInputValidator: CUSTOM
+   vivaPattern: '{x;}'
+

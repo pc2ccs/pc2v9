@@ -74,7 +74,7 @@ public abstract class MainController {
 	
 	protected void subscription(Contest teamCon, String teamId) {
 		teamCon.addRunListener(new RunsService(teamId, client));
-//		teamCon.addTestRunListener(new TestRunService(teamId, client));  //required implementing Test Run support in API
+//		teamCon.addTestRunListener(new TestRunService(teamId, client));  //this was commented-out because it requires implementing Test Run support in PC2 API
 		teamCon.addClarificationListener(new ClarificationService(teamId, client));
 		teamCon.addContestConfigurationUpdateListener(new ConfigurationService(teamId, client));
 	}

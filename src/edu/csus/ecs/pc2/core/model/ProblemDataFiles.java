@@ -81,7 +81,7 @@ public class ProblemDataFiles implements IElementObject {
 //        clone.problemId = getProblemId();
 
         clone.setOutputValidatorFile(cloneSerializedFile(getOutputValidatorFile()));
-        clone.setInputValidatorFile(cloneSerializedFile(getInputValidatorFile()));
+        clone.setCustomInputValidatorFile(cloneSerializedFile(getCustomInputValidatorFile()));
 
         clone.setJudgesAnswerFiles(cloneSFArray(getJudgesAnswerFiles()));
         clone.setJudgesDataFiles(cloneSFArray(getJudgesDataFiles()));
@@ -240,15 +240,20 @@ public class ProblemDataFiles implements IElementObject {
     }
     
     /**
-     * Returns the input validator program file.
+     * Returns the custom input validator program file associated with this ProblemDataFiles object.
      * 
-     * @return a SerializedFile containing the input validator code, or null if no input validator has been specified
+     * @return a SerializedFile containing the input validator code, or null if no custom input validator has been specified.
      */
-    public SerializedFile getInputValidatorFile() {
+    public SerializedFile getCustomInputValidatorFile() {
         return inputValidatorFile;
     }
 
-    public void setInputValidatorFile(SerializedFile validatorFile) {
+    /**
+     * Sets the custom input validator program file associated with this ProblemDataFiles object.
+     * 
+     * @param validatorFile a SerializedFile containing the custom input validator program to be associated with this ProblemDataFiles.
+     */
+    public void setCustomInputValidatorFile(SerializedFile validatorFile) {
         this.inputValidatorFile = validatorFile;
     }
     
@@ -325,7 +330,7 @@ public class ProblemDataFiles implements IElementObject {
             if (!compareSerializedFiles(this.getOutputValidatorFile(), newProblemDataFiles.getOutputValidatorFile())) {
                 return false;
             }
-            if (!compareSerializedFiles(this.getInputValidatorFile(), newProblemDataFiles.getInputValidatorFile())) {
+            if (!compareSerializedFiles(this.getCustomInputValidatorFile(), newProblemDataFiles.getCustomInputValidatorFile())) {
                 return false;
             }
             

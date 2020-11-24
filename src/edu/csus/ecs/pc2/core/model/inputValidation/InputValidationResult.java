@@ -3,17 +3,25 @@ package edu.csus.ecs.pc2.core.model.inputValidation;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * This class holds the result of performing Input Validation on a single Judge's Input Data file.
  * 
  * The contents of the class include the full path/name of the file which was validated, a boolean indicating
- * whether the validation passed or failed, and {@link SerializedFile}s holding the standard output and standard error results
+ * whether the validation passed or failed, an {@link Problem.InputValidationStatus} indicating the status of 
+ * the result, and {@link SerializedFile}s holding the standard output and standard error results
  * when the Input Validator was run against the specified file.
  * 
- * @author John
+ * Note that the reason the class holds both a boolean "pass/fail" value and an {@link Problem.InputValidationStatus}
+ * is so that clients can determine additional state information about an Input Validation test which failed.
+ * For example, if {@link #isPassed()} returns false, clients can query {@link #getStatus()} to determine
+ * whether an error occurred.
+ * 
+ * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
  *
  */
 public class InputValidationResult implements Serializable {
@@ -23,12 +31,13 @@ public class InputValidationResult implements Serializable {
     private Problem problem ;
     private String fullPathFilename ;
     private boolean passed ;
+    private InputValidationStatus status ;
     private SerializedFile validatorStdOut ;
     private SerializedFile validatorStdErr ;
     
     /**
      * Constructs an InputValidationResult containing the specified data.
-     * The validatorStdOut and validatorStdErr strings are converted to {@link SerializedFile}s before being saved.
+     * The validatorStdOut and validatorStdErr strings are used to construct corresponding {@link SerializedFile}s.
      * 
      * @param problem the {@link Problem} for which this result applies
      * @param dataFilePathName the full path name of the data file on which the Input Validator was run
@@ -36,17 +45,37 @@ public class InputValidationResult implements Serializable {
      * @param validatorStdOutFilename a String containing the standard output of the Input Validator (this is stored as a SerializedFile)
      * @param validatorStdErrFilename a String containing the standard error output of the Input Validator (this is stored as a SerializedFile)
      */
-    public InputValidationResult(Problem problem, String dataFilePathName, boolean passed, String validatorStdOutFilename, String validatorStdErrFilename)  {
+    public InputValidationResult(Problem problem, String dataFilePathName, boolean passed, Problem.InputValidationStatus status,
+                                    String validatorStdOutFilename, String validatorStdErrFilename)  {
         this.problem = problem;
         this.fullPathFilename = dataFilePathName;
         this.passed = passed;
+        this.status = status;
+        
+        //construct a SerializedFile for the specified validator stdout
         this.validatorStdOut = new SerializedFile(validatorStdOutFilename);
+        //check if any errors occurred in constructing the SerializedFile
+        try {
+            if (Utilities.serializedFileError(validatorStdOut)) {
+                throw new RuntimeException("InputValidationResult: error constructing SerializedFile for file "  
+                                            + validatorStdOutFilename + ": " + validatorStdOut.getErrorMessage()); 
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("InputValidationResult: exception constructing SerializedFile for file "  
+                    + validatorStdOutFilename + ": " + e.getMessage()); 
+        }
+        
+        //construct a SerializedFile for the specified validator stderr
         this.validatorStdErr = new SerializedFile(validatorStdErrFilename);
-        //TODO: deal better with the fact that the SerializedFile constructor might fail due to the files not being found,
-        //  but SerializedFile fails to throw exceptions -- you have to call its getErrorMessage() and getException() methods!
-        if (this.validatorStdErr.getErrorMessage() != null || this.validatorStdErr.getException() != null 
-                || this.validatorStdOut.getErrorMessage() != null || this.validatorStdOut.getException() != null ) {
-            throw new RuntimeException("InputValidationResult: specified file not found");
+        //check if any errors occurred in constructing the SerializedFile
+        try {
+            if (Utilities.serializedFileError(validatorStdErr)) {
+                throw new RuntimeException("InputValidationResult: error constructing SerializedFile for file "  
+                                            + validatorStdErrFilename + ": " + validatorStdErr.getErrorMessage()); 
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("InputValidationResult: exception constructing SerializedFile for file "  
+                    + validatorStdErrFilename + ": " + e.getMessage()); 
         }
     }
 
@@ -59,9 +88,11 @@ public class InputValidationResult implements Serializable {
      * @param validatorStdOutFile a {@link SerializedFile} containing the standard output of the Input Validator
      * @param validatorStdErrFile a {@link SerializedFile} containing the standard error output of the Input Validator
      */
-    public InputValidationResult(Problem problem, String dataFilePathName, boolean passed, SerializedFile validatorStdOutFile, SerializedFile validatorStdErrFile) {
+    public InputValidationResult(Problem problem, String dataFilePathName, boolean passed, Problem.InputValidationStatus status,
+                                    SerializedFile validatorStdOutFile, SerializedFile validatorStdErrFile) {
         this.problem = problem;
         this.passed = passed;
+        this.status = status;
         this.fullPathFilename = dataFilePathName;
         this.validatorStdOut = validatorStdOutFile;
         this.validatorStdErr = validatorStdErrFile;
@@ -168,6 +199,15 @@ public class InputValidationResult implements Serializable {
         retStr += "]";
         
         return retStr;
+    }
+
+    /**
+     * Return the status of this InputValidationResult.
+     * 
+     * @return the {@link Problem.InputValidationStatus} for this InputValidationResult.
+     */
+    public InputValidationStatus getStatus() {
+        return status;
     }
 
 }

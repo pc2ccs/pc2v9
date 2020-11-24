@@ -1403,9 +1403,9 @@ public class SampleContest {
         problem.setReadInputDataFromSTDIN(true);
 
         if (validatorParameters == null) {
-            problem.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
+            problem.setOutputValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         } else {
-            problem.setValidatorCommandLine(Constants.CLICS_VALIDATOR_NAME +" " +validatorParameters);
+            problem.setOutputValidatorCommandLine(Constants.CLICS_VALIDATOR_NAME +" " +validatorParameters);
         }
     }
 

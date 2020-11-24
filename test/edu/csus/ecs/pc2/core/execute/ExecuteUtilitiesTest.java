@@ -61,7 +61,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         // TODO Promote to AbstractTestCase
 
         problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
-        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
+        problem.setOutputValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
         problem.setOutputValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
         
         PC2ValidatorSettings settings = new PC2ValidatorSettings();

@@ -416,12 +416,12 @@ public class ContestXML {
         if (problem.isUsingPC2Validator()) {
             memento.putBoolean("useInternalValidator", true);
             memento.putInteger("internalValidatorOption", problem.getWhichPC2Validator());
-            memento.putString("validatorCommand", problem.getValidatorCommandLine());
-            memento.putString("validatorProgram", problem.getValidatorProgramName());
+            memento.putString("validatorCommand", problem.getOutputValidatorCommandLine());
+            memento.putString("validatorProgram", problem.getOutputValidatorProgramName());
             memento.putBoolean("ignoreCase", problem.getPC2ValidatorSettings().isIgnoreCaseOnValidation());
         } else if (problem.isValidatedProblem()) {
-            memento.putString("validatorCommand", problem.getValidatorCommandLine());
-            memento.putString("validatorProgram", problem.getValidatorProgramName());
+            memento.putString("validatorCommand", problem.getOutputValidatorCommandLine());
+            memento.putString("validatorProgram", problem.getOutputValidatorProgramName());
         }
 
         if (problem.getDataFileName() != null) {
