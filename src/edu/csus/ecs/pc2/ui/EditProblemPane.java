@@ -1286,8 +1286,12 @@ public class EditProblemPane extends JPanePlugin {
         //Update Viva Input Validator settings in checkProblem from GUI:
         
 
-        //update Has Viva Pattern flag
-        checkProblem.setProblemHasVivaInputValidatorPattern(getInputValidatorPane().isProblemHasVivaInputValidatorPattern());
+        //This statement is commented out because there is no longer a separate "problemHasVivaInputValidatorPattern" flag in the Problem class;
+        // having a Viva pattern (or not) is determined by the value in the Pattern field in the (VivaInputValidatorSettings for the) Problem.
+        // This was done to avoid the possibility of an "invalid state" where a user sets "problemHasInputValidator" to (say) false after having 
+        // set a non-zero-length pattern in the Problem.
+//        //update Has Viva Pattern flag
+//        checkProblem.setProblemHasVivaInputValidatorPattern(getInputValidatorPane().isProblemHasVivaInputValidatorPattern());
         
         //update Viva Input Validator pattern
         String [] pattern = getInputValidatorPane().getVivaPatternText().split("\\r?\\n");

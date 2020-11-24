@@ -1984,16 +1984,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
             }
                        
-            
-            // if the user set the Viva pattern via the problem.yaml file, mark the problem to so indicate
-            if (vivaPatternHasBeenSet) {
-                problem.setProblemHasVivaInputValidatorPattern(true);
-            } else {
-                // no Viva pattern was found (either because it wasn't explicitly specified in the problem.yaml
-                // "input_validator:" section, or because there was no such section in the problem.yaml file; 
-                // in either case, mark the problem as such
-                problem.setProblemHasVivaInputValidatorPattern(false);
-            }
+            //This block of code is commented out because whether or not the problem has a Viva pattern is now determined by whether it has a non-zero-length pattern field;
+            // a separate variable "problemHasVivaInputValidatorPattern" in the Problem class is not warranted (and is actually dangerous; it allows the problem 
+            // to enter an invalid state where the boolean variable is set to one indication but the actual pattern indicates the opposite).
+//            // if the user set the Viva pattern via the problem.yaml file, mark the problem to so indicate
+//            if (vivaPatternHasBeenSet) {
+//                problem.setProblemHasVivaInputValidatorPattern(true);
+//            } else {
+//                // no Viva pattern was found (either because it wasn't explicitly specified in the problem.yaml
+//                // "input_validator:" section, or because there was no such section in the problem.yaml file; 
+//                // in either case, mark the problem as such
+//                problem.setProblemHasVivaInputValidatorPattern(false);
+//            }
             //in either case, Viva has not been run and has not produced any validation status; mark the problem such
             problem.setVivaInputValidationStatus(InputValidationStatus.NOT_TESTED);
             problem.setVivaInputValidatorHasBeenRun(false);

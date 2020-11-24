@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
+import edu.csus.ecs.pc2.core.model.inputValidation.VivaInputValidatorSettings;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
@@ -205,11 +206,9 @@ public class Problem implements IElementObject {
     private Vector<InputValidationResult> customInputValidationResults = null;
 
     //VIVA Input validator settings - only relevant if the problem was saved with Viva Input Validator Settings
-    private boolean problemHasVivaInputValidatorPattern = false;
-    private boolean vivaInputValidatorHasBeenRun = false;
-    private String [] vivaInputValidatorPattern = null;
-    private InputValidationStatus vivaInputValidationStatus = InputValidationStatus.UNKNOWN;
-    private Vector<InputValidationResult> vivaInputValidationResults = null;
+    private VivaInputValidatorSettings vivaSettings = null;
+
+
     
 
     /**
@@ -328,8 +327,7 @@ public class Problem implements IElementObject {
         this.customValidatorSettings = new CustomValidatorSettings();
         this.customInputValidationStatus = InputValidationStatus.UNKNOWN;
         this.customInputValidationResults = new Vector<InputValidationResult>();
-        this.vivaInputValidationStatus = InputValidationStatus.UNKNOWN;
-        this.vivaInputValidationResults = new Vector<InputValidationResult>();
+        this.vivaSettings = new VivaInputValidatorSettings();
     }
 
     public Problem copy(String newDisplayName) {
@@ -377,7 +375,11 @@ public class Problem implements IElementObject {
         clone.setCustomInputValidatorFile(this.getCustomInputValidatorSerializedFile());
 //        clone.setInputValidatorFilesOnDiskFolder(this.getInputValidatorFilesOnDiskFolder());
         
-        clone.setProblemHasVivaInputValidatorPattern(this.isProblemHasVivaInputValidatorPattern());
+        //This statement is commented out because there is no longer a separate "problemHasVivaInputValidatorPattern" flag in the Problem class;
+        // having a Viva pattern (or not) is determined by the value in the Pattern field in the (VivaInputValidatorSettings for the) Problem.
+        // This was done to avoid the possibility of an "invalid state" where a user sets "problemHasVivaInputValidator" to (say) false after 
+        // having set a non-zero-length pattern in the Problem.
+        //        clone.setProblemHasVivaInputValidatorPattern(this.isProblemHasVivaInputValidatorPattern());
         clone.setVivaInputValidatorHasBeenRun(this.isVivaInputValidatorHasBeenRun());
         clone.setVivaInputValidationStatus(this.getVivaInputValidationStatus());
         clone.setVivaInputValidatorPattern(this.getVivaInputValidatorPattern());
@@ -1674,17 +1676,29 @@ public class Problem implements IElementObject {
      * @return true if the problem has a Viva Input validator pattern.
      */
     public boolean isProblemHasVivaInputValidatorPattern() {
-        return problemHasVivaInputValidatorPattern;
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        return vivaSettings.isProblemHasVivaInputValidatorPattern();
     }
 
-    /**
-     * Sets the flag indicating whether or not the Problem has a Viva Input Validator pattern.
-     * 
-     * @param hasVivaPattern the value to which the flag should be set.
-     */
-    public void setProblemHasVivaInputValidatorPattern(boolean hasVivaPattern) {
-        this.problemHasVivaInputValidatorPattern = hasVivaPattern;
-    }
+    //This method is commented out because there is no longer a separate "problemHasVivaInputValidatorPattern" flag in the Problem class; 
+    // having a Viva pattern (or not) is determined by the value in the Pattern field in the (VivaInputValidatorSettings for the) Problem.
+    // This was done to avoid the possibility of an "invalid state" where a user sets "problemHasInputValidator" to (say) false after having 
+    // set a non-zero-length pattern in the Problem.
+
+//    /**
+//     * Sets the flag indicating whether or not the Problem has a Viva Input Validator pattern.
+//     * 
+//     * @param hasVivaPattern the value to which the flag should be set.
+//     */
+//    public void setProblemHasVivaInputValidatorPattern(boolean hasVivaPattern) {
+//        if (vivaSettings==null) {
+//            vivaSettings = new VivaInputValidatorSettings();
+//        }
+//        vivaSettings.setProblemHasVivaInputValidatorPattern(hasVivaPattern);
+//    }
+    
     /**
      * Returns the Input Validation status of the problem with respect to running the VIVA Input Validator.
      * Note that a problem may have more than one Input Validator applied to it (e.g., a Custom Input Validator
@@ -1701,7 +1715,10 @@ public class Problem implements IElementObject {
      *
      */
     public InputValidationStatus getVivaInputValidationStatus() {
-        return vivaInputValidationStatus;
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        return vivaSettings.getVivaInputValidationStatus();
     }
 
     /**
@@ -1710,7 +1727,10 @@ public class Problem implements IElementObject {
      * @param status the value to which the VIVA Input Validation status for the problem should be set.
      */
     public void setVivaInputValidationStatus (InputValidationStatus status) {
-        this.vivaInputValidationStatus = status;
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        vivaSettings.setVivaInputValidationStatus(status);
     }
 
 
@@ -1722,23 +1742,23 @@ public class Problem implements IElementObject {
      * Input Validator; however, the results returned by this method will always be those generated by the 
      * most recent execution of the VIVA Input Validator. 
      * 
-     * @return an {@link Iterable} containing VIVA InputValidationResults, or null if no such results exist.
+     * @return an {@link Iterable} containing VIVA InputValidationResults.
      */
     public Iterable<InputValidationResult> getVivaInputValidatorResults() {
-        if (this.vivaInputValidationResults == null) {
-            this.vivaInputValidationResults = new Vector<InputValidationResult>() ;
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
         }
-        return this.vivaInputValidationResults;
+        return vivaSettings.getVivaInputValidationResults();
     }
     
     /**
      * Returns the number of VIVA Input Validator {@link InputValidationResult}s currently stored in this Problem.
      */
     public int getNumVivaInputValidationResults() {
-        if (this.vivaInputValidationResults == null) {
-            this.vivaInputValidationResults = new Vector<InputValidationResult>();
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
         }
-        return this.vivaInputValidationResults.size();
+        return vivaSettings.getNumVivaInputValidationResults();  
     }
     
     /**
@@ -1746,13 +1766,12 @@ public class Problem implements IElementObject {
      * for the Problem.
      * 
      * @param result the InputValidationResult to be added.
-     * 
      */
     public void addVivaInputValidationResult(InputValidationResult result) {
-        if (getVivaInputValidatorResults() == null) {
-            this.vivaInputValidationResults = new Vector<InputValidationResult>();
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
         }
-        vivaInputValidationResults.add(result);
+        vivaSettings.addVivaInputValidationResult(result);
     }
     
     /**
@@ -1762,7 +1781,10 @@ public class Problem implements IElementObject {
      * @see #clearCustomInputValidationResults()
      */
     public void clearVivaInputValidationResults() {
-        this.vivaInputValidationResults = null;
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        vivaSettings.clearVivaInputValidationResults();
     }
 
     /**
@@ -1843,15 +1865,20 @@ public class Problem implements IElementObject {
      * @return a String [] containing the Viva pattern, or null.
      */
     public String [] getVivaInputValidatorPattern() {
-        return this.vivaInputValidatorPattern;
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        return vivaSettings.getVivaInputValidatorPattern();
     }
     
     /**
      * Sets the Viva Input Validator pattern for this problem to the specified String array.
-     * 
      */
     public void setVivaInputValidatorPattern(String [] pattern) {
-        this.vivaInputValidatorPattern = pattern ;
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        vivaSettings.setVivaInputValidatorPattern(pattern) ;
     }
     
     /**
@@ -1918,16 +1945,22 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * @return the vivaInputValidatorHasBeenRun flag
+     * @return the vivaInputValidatorHasBeenRun flag for this Problem.
      */
     public boolean isVivaInputValidatorHasBeenRun() {
-        return vivaInputValidatorHasBeenRun;
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        return vivaSettings.isVivaInputValidatorHasBeenRun();
     }
 
     /**
      * @param vivaInputValidatorHasBeenRun the value to which the vivaInputValidatorHasBeenRun flag should be set
      */
     public void setVivaInputValidatorHasBeenRun(boolean vivaInputValidatorHasBeenRun) {
-        this.vivaInputValidatorHasBeenRun = vivaInputValidatorHasBeenRun;
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        vivaSettings.setVivaInputValidatorHasBeenRun(vivaInputValidatorHasBeenRun);
     }
 }
