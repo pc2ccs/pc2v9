@@ -138,7 +138,7 @@ public class SampleContest {
 
         String contestPassword = "Password 101";
         Profile profile = new Profile("Default.");
-        return createContest(siteNumber, numSites, numTeams, numJudges, initAsServer, profile, contestPassword);
+        return createContest(siteNumber, numSites, numTeams, numJudges, initAsServer, profile, contestPassword, true);
     }
 
     /**
@@ -153,7 +153,7 @@ public class SampleContest {
      * @param contestPassword
      * @return
      */
-    public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer, Profile profile, String contestPassword) {
+    public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer, Profile profile, String contestPassword, boolean assignColors) {
 
         String[] languages = { LanguageAutoFill.JAVATITLE, LanguageAutoFill.DEFAULTTITLE, LanguageAutoFill.GNUCPPTITLE, LanguageAutoFill.PERLTITLE, LanguageAutoFill.MSCTITLE, "APL" };
         String[] problemsNames = { "Sumit", "Quadrangles", "Routing", "Faulty Towers", "London Bridge", "Finnigans Bluff" };
@@ -231,7 +231,9 @@ public class SampleContest {
         contest.setProfile(profile);
         contest.setContestPassword(contestPassword);
 
-        assignColors(contest);
+        if (assignColors) {
+            assignColors(contest);
+        }
 
         return contest;
     }
