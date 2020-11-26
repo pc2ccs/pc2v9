@@ -74,11 +74,23 @@ public class LoginList implements Serializable {
      * Add or update a clientId in the list.
      * Specifically, what this method does is add the specified ConnectionHandlerID to the
      * list of ConnectionHandlerIDs associated with the specified ClientId.  
+     * 
      * Note that a given ClientId may have multiple ConnectionHandlerIDs associated with it
      * if multiple simultaneous logins are allowed for the ClientType of the specified client.
      * 
+     * Note also that this method was originally created before the advent of support for "multiple 
+     * simultaneous logins".  At that time, ClientIds did not contain a ConnectionHandlerID, so this
+     * method required two parameters -- the ClientId to be added and the ConnectionHandlerID associated with
+     * that ClientId. Now, the ClientId should already contain the proper ConnectionHandlerID (and this method
+     * checks for that condition and throws an exception if not); the two-parameter version was retained for
+     * backwards-compatibility with other code.
+     * 
      * @param clientId
      * @param connectionHandlerID
+     * 
+     * @throws IllegalArgumentException if the specified ClientId or ConnectionHandlerID is null,
+     *              if the ClientId has a null ConnectionHandlerID, or
+     *              if the specified ConnectionHandlerID does not match the ConnectionHandlerID in the ClientId.
      */
     public void add(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
         if (clientId == null) {
@@ -87,6 +99,27 @@ public class LoginList implements Serializable {
         if (connectionHandlerID == null) {
             throw new IllegalArgumentException("connection Id is null, clientId="+clientId);
         }
+        
+        //this method should never be called with a ClientId containing a null ConnectionHandlerID; however, the addition of 
+        // "multiple login" support may have left some place where this is inadvertently true.
+        //The following is an effort to catch/identify such situations.
+        ConnectionHandlerID clientConnection = clientId.getConnectionHandlerID();
+        if (clientConnection==null) {
+            IllegalArgumentException e = new IllegalArgumentException("LoginList.add() called with null ConnectionHandlerID in ClientId " + clientId);
+            e.printStackTrace();
+            throw e;
+        }
+        
+        //this method should never be called with a ClientId containing a ConnectionHandlerID which doesn't match the ConnectionID specified by the 
+        // second method parameter; however, the addition of  "multiple login" support may have left some place where this is inadvertently true.
+        //The following is an effort to catch/identify such situations.
+        if (!clientId.getConnectionHandlerID().equals(connectionHandlerID)) {
+            IllegalArgumentException e = new IllegalArgumentException("LoginList.add() called with ConnectionHandlerID not matching that in the ClientId: " 
+                    + "ClientId.ConnectionHandler = " + clientId.getConnectionHandlerID() + "; specified ConnectionHandlerID = " + connectionHandlerID);
+            e.printStackTrace();
+            throw e;            
+        }
+
         synchronized (clientToConnectionHandlerList) {
             
             //see if this client already has an entry in the list of clientToConnectionHandlers
@@ -118,8 +151,7 @@ public class LoginList implements Serializable {
      * 
      * @return true if the specified client was found and successfully removed, false otherwise.
      * 
-     * @throws IllegalArgumentException if the specified clientId is null.
-     * @throws RuntimeException if the specified clientId contains a null ConnectionHandlerID.
+     * @throws IllegalArgumentException if the specified clientId is null or if the specified clientId contains a null ConnectionHandlerID.
      */
     public boolean remove(ClientId clientId) {
         if (clientId == null) {
@@ -131,7 +163,7 @@ public class LoginList implements Serializable {
         //The following is an effort to catch/identify such situations.
         ConnectionHandlerID clientConnection = clientId.getConnectionHandlerID();
         if (clientConnection==null) {
-            RuntimeException e = new RuntimeException("InternalContest.removeLogin() called with null ConnectionHandlerID in ClientId " + clientId);
+            IllegalArgumentException e = new IllegalArgumentException("InternalContest.removeLogin() called with null ConnectionHandlerID in ClientId " + clientId);
             e.printStackTrace();
             throw e;
         }
