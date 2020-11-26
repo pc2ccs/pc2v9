@@ -1213,7 +1213,9 @@ public class InternalContest implements IInternalContest {
         }
     }
 
-    
+    /**
+     * @throws IllegalArgumentException if the specified ClientId has a null ConnectionHandlerID.
+     */
     public void removeRemoteLogin(ClientId clientIdToRemove) {
         ConnectionHandlerID connectionHandlerID = clientIdToRemove.getConnectionHandlerID();
         
@@ -1221,7 +1223,7 @@ public class InternalContest implements IInternalContest {
         // "multiple login" support may have left some place where this is inadvertently true.
         //The following is an effort to catch/identify such situations.
         if (connectionHandlerID==null) {
-            RuntimeException e = new RuntimeException("InternalController.removeRemoteLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove);
+            IllegalArgumentException e = new IllegalArgumentException("InternalController.removeRemoteLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove);
             e.printStackTrace();
             logException("InternalController.removeRemoteLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove, e);
             throw e;
@@ -1245,6 +1247,9 @@ public class InternalContest implements IInternalContest {
         fireLoginListener(loginEvent);
     }
 
+    /**
+     * @throws IllegalArgumentException if the specified ClientId has a null ConnectionHandlerID.
+     */
     public void removeLogin(ClientId clientIdToRemove) {
         ConnectionHandlerID connectionHandlerID = clientIdToRemove.getConnectionHandlerID();
 
@@ -1252,7 +1257,7 @@ public class InternalContest implements IInternalContest {
         // "multiple login" support may have left some place where this is inadvertently true.
         //The following is an effort to catch/identify such situations.
         if (connectionHandlerID==null) {
-            RuntimeException e = new RuntimeException("InternalContest.removeLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove);
+            IllegalArgumentException e = new IllegalArgumentException("InternalContest.removeLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove);
             e.printStackTrace();
             logException("InternalContest.removeLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove, e);
             throw e;

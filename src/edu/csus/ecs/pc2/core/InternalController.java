@@ -478,7 +478,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         // however, the addition of "multiple login" support may have left some place where this is inadvertently true.
         //The following is an effort to catch/identify such situations.
         if (toClientId.getConnectionHandlerID()==null) {
-            RuntimeException e = new RuntimeException("InternalController.sendToClient() called with packet containing null ConnectionHandlerID in destination ClientId " + toClientId);
+            IllegalArgumentException e = new IllegalArgumentException("InternalController.sendToClient() called with packet containing null ConnectionHandlerID in destination ClientId " + toClientId);
             e.printStackTrace();
             logException("InternalController.sendToClient() called with packet containing null ConnectionHandlerID in destination ClientId " + toClientId, e);
             throw e;
@@ -2346,6 +2346,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    /**
+     * @throws IllegalArgumentException if the specified ClientId contains a null ConnectionHandlerID.
+     */
     public void logoffUser(ClientId clientId) {
 
         if (isServer() && contest.isLocalLoggedIn(clientId)) {
@@ -2361,7 +2364,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // "multiple login" support may have left some place where this is inadvertently true.
             //The following is an effort to catch/identify such situations.
             if (connectionHandlerID==null) {
-                RuntimeException e = new RuntimeException("InternalController.logoffUser() called with null ConnectionHandlerID in ClientId " + clientId);
+                IllegalArgumentException e = new IllegalArgumentException("InternalController.logoffUser() called with null ConnectionHandlerID in ClientId " + clientId);
                 e.printStackTrace();
                 logException("InternalController.logoffUser() called null ConnectionHandlerID in ClientId " + clientId, e);
                 throw e;
