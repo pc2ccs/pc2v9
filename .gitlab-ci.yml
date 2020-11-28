@@ -30,6 +30,14 @@ job-build:
   stage: build
   script:
     - echo "Running ant on package.xml"
+    # we were running node/npm v8.10/3.5.2 which started failing in Nov of 2020
+    # install "n" the Node/npm version manager/updater
+    - npm install -g n
+    # Install the latest stable version of nodejs/npm
+    - n stable
+    - export PATH="/usr/local/bin:$PATH"
+    - npm --version
+    - node --version
     - ant -file package.xml
     - echo $CI_JOB_ID > dist/ci_job_id.txt
   artifacts:
