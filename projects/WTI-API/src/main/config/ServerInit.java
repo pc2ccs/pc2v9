@@ -166,20 +166,18 @@ public class ServerInit {
 	 * @return a String containing an IP address, or null if an exception occurs while fetching the local IP address.
 	 */
 	public static String getLocalIp() {
-		// Source: https://stackoverflow.com/questions/9481865/getting-the-ip-address-of-the-current-machine-using-java
-		try (final DatagramSocket socket = new DatagramSocket()) {
-			socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-			String myIP = socket.getLocalAddress().getHostAddress();
-			if (publicIPOverride!=null) {
-			    myIP = publicIPOverride;
+		if (publicIPOverride != null) {
+			return publicIPOverride;
+		} else {
+			// Source: https://stackoverflow.com/questions/9481865/getting-the-ip-address-of-the-current-machine-using-java
+			try (final DatagramSocket socket = new DatagramSocket()) {
+				socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+				return socket.getLocalAddress().getHostAddress();
+			} catch (Exception ex) {
+				Logging.getLogger().log(Log.SEVERE, "Exception getting local IP address: " + ex.getMessage());
 			}
-			return myIP ;
+			return null;
 		}
-		catch (Exception ex) {
-		    Logging.getLogger().log(Log.SEVERE, "Exception getting local IP address: " + ex.getMessage());
-		}
-		
-		return null;
 	}
 
 	/** Returns the {@link pc2.core.log.Log} logger being used by this WTI server
