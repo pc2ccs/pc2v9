@@ -29,11 +29,15 @@ import edu.csus.ecs.pc2.core.log.Log;
  */
 public class ServerInit {
 
+    private final String WTI_PUBLIC_IP_OVERRIDE_KEY = "wtiOverridePublicIP";
+    
 	private static ServerInit init = null;
+	private static String publicIPOverride;
 	private int portNum;
 	private String socketSource;
 	private String scoreboardAccount;
 	private String scoreboardPassword;
+
 	private Log logger;
 	
 	private ServerInit() {
@@ -57,6 +61,7 @@ public class ServerInit {
 		      this.socketSource = p.getProperty("wtiwsName");
 		      this.scoreboardAccount = p.getProperty("wtiscoreboardaccount", "scoreboard2");
 		      this.scoreboardPassword = p.getProperty("wtiscoreboardpassword", "scoreboard2");
+		      publicIPOverride = p.getProperty(WTI_PUBLIC_IP_OVERRIDE_KEY);
 		} catch(FileNotFoundException e) {
 			this.logger.info("pc2v9.ini File missing; reverting to default WTI port/socket/scoreboard values");
 			setDefaults();
@@ -154,18 +159,25 @@ public class ServerInit {
 	
 	/**
 	 * Returns a String containing the local IP address of the machine on which the WTI server is running.
-	 * The returned address is obtained by calling {@link InetAddress#getHostAddress()} on the address
-	 * returned by {@link DatagramSocket#getLocalAddress()}.
+	 * The returned address is initially obtained by calling {@link InetAddress#getHostAddress()} on the address
+	 * returned by {@link DatagramSocket#getLocalAddress()}. This is the address returned unless the pc2v9.ini
+	 * file contains an entry "wtiOverridePublicIP", in which case the value of that entry is returned instead.
 	 * 
-	 * @return a String containing an IP address
+	 * @return a String containing an IP address, or null if an exception occurs while fetching the local IP address.
 	 */
 	public static String getLocalIp() {
 		// Source: https://stackoverflow.com/questions/9481865/getting-the-ip-address-of-the-current-machine-using-java
 		try (final DatagramSocket socket = new DatagramSocket()) {
 			socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-			return socket.getLocalAddress().getHostAddress();
+			String myIP = socket.getLocalAddress().getHostAddress();
+			if (publicIPOverride!=null) {
+			    myIP = publicIPOverride;
+			}
+			return myIP ;
 		}
-		catch (Exception ex) { }
+		catch (Exception ex) {
+		    Logging.getLogger().log(Log.SEVERE, "Exception getting local IP address: " + ex.getMessage());
+		}
 		
 		return null;
 	}
