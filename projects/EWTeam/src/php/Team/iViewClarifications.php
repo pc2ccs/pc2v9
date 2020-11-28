@@ -35,7 +35,7 @@
 ?>
 
 <html>
-<script src="JQuery/jquery-1.9.1.js"></script>
+<script src="JQuery/jquery-1.9.1.min.js"></script>
 <script src="JQuery/jquery-ui.js"></script>
 
 <link href="table_sorter/css/theme.default.css" rel="stylesheet">
