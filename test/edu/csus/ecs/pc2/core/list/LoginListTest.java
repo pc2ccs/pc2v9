@@ -33,6 +33,7 @@ public class LoginListTest extends TestCase {
         ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("id1");
         ClientId clientId = new ClientId(siteNumber, Type.TEAM, 12);
 
+        clientId.setConnectionHandlerID(connectionHandlerID);
         loginList.add(clientId, connectionHandlerID);
 
         List<ConnectionHandlerID> connectionList = Collections.list(loginList.getConnectionHandlerIDs(clientId));
@@ -49,6 +50,7 @@ public class LoginListTest extends TestCase {
         ClientId clientId = new ClientId(siteNumber, Type.TEAM, 12);
         ClientId clientId55 = new ClientId(siteNumber, Type.TEAM, 22);
 
+        clientId.setConnectionHandlerID(connectionHandlerID);
         loginList.add(clientId, connectionHandlerID);
 
         List<ConnectionHandlerID> connectionList = Collections.list(loginList.getConnectionHandlerIDs(clientId));
@@ -79,6 +81,7 @@ public class LoginListTest extends TestCase {
 
         
         ConnectionHandlerID nextConnectionHandlerID = new ConnectionHandlerID("id1");
+        clientId55.setConnectionHandlerID(nextConnectionHandlerID);
         loginList.add(clientId55, nextConnectionHandlerID);
         ClientId clientId3 = loginList.getClientId(nextConnectionHandlerID);
 
@@ -95,6 +98,7 @@ public class LoginListTest extends TestCase {
 
         connectionHandlerID2 = new ConnectionHandlerID("id3");
 
+        clientId.setConnectionHandlerID(connectionHandlerID2);
         loginList.add(clientId, connectionHandlerID2);
         ClientId clientId4 = loginList.getClientId(connectionHandlerID2);
         
