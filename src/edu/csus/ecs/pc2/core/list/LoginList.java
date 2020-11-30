@@ -113,11 +113,16 @@ public class LoginList implements Serializable {
         //this method should never be called with a ClientId containing a ConnectionHandlerID which doesn't match the ConnectionID specified by the 
         // second method parameter; however, the addition of  "multiple login" support may have left some place where this is inadvertently true.
         //The following is an effort to catch/identify such situations.
+        //Note: one exception to the rule about ConnectionHandlerIDs being required to match is if one of the ConnectionHandlerIDs is a "Faux" id...
         if (!clientId.getConnectionHandlerID().equals(connectionHandlerID)) {
-            IllegalArgumentException e = new IllegalArgumentException("LoginList.add() called with ConnectionHandlerID not matching that in the ClientId: " 
-                    + "ClientId.ConnectionHandler = " + clientId.getConnectionHandlerID() + "; specified ConnectionHandlerID = " + connectionHandlerID);
-            e.printStackTrace();
-            throw e;            
+            //check for a match that discounts "FauxSite" connections
+            boolean fauxMatch = connectionHandlerID.toString().startsWith("FauxSite") || clientId.getConnectionHandlerID().toString().startsWith("FauxSite") ;
+            if (!fauxMatch) {
+                IllegalArgumentException e = new IllegalArgumentException("LoginList.add() called with ConnectionHandlerID not matching that in the ClientId: " + "ClientId.ConnectionHandler = "
+                        + clientId.getConnectionHandlerID() + "; specified ConnectionHandlerID = " + connectionHandlerID);
+                e.printStackTrace();
+                throw e;
+            }            
         }
 
         synchronized (clientToConnectionHandlerList) {
