@@ -158,6 +158,18 @@ public class LoginListMultipleLoginsTest extends AbstractTestCase {
         assertEquals("Incorrect number of connections in LoginList after logging out one duplicate team: ", 1, remainingConnections.size());
         ConnectionHandlerID remainingConnection = remainingConnections.get(0);
         assertTrue("Incorrect remaining connection for Client2 after logging out Client1.", remainingConnection.equals(connectionHandlerID2));
+        
+        //verify we can add "FauxSite" logins without getting exceptions due to mismatch between ClientId ConnectionHandler and FauxConnectionHandler
+        ClientId clientId3 = new ClientId(3, Type.TEAM, 14);
+        ConnectionHandlerID connectionHandlerID3 = new ConnectionHandlerID("id3");
+        clientId3.setConnectionHandlerID(connectionHandlerID3);
+        ConnectionHandlerID fauxConnID = new ConnectionHandlerID("FauxSite" + clientId3.getSiteNumber() + clientId3);
+        try {
+            loginList.add(clientId3, fauxConnID);
+        } catch (IllegalArgumentException e) {
+            failTest("Failed to add 'FauxSite' ConnectionID to LoginList", e);
+        }
+
     }
 
 }
