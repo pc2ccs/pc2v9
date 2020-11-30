@@ -445,7 +445,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         ClientId clientId = new ClientId(siteNumber, Type.SERVER, 0);
         
-        ConnectionHandlerID connectionHandlerID = contest.getClientId().getConnectionHandlerID();
+        ConnectionHandlerID connectionHandlerID = getConnectionHandleID(clientId);
         info("sendToRemoteServer " + clientId + " at "+siteNumber+" " + packet + " " + connectionHandlerID);
 
         Type type = packet.getSourceId().getClientType();
@@ -467,6 +467,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else {
             log.log(Log.SEVERE, "Unable to send packet to site " + siteNumber + " (" + clientId + ")" + packet);
         }
+    }
+
+    protected ConnectionHandlerID getConnectionHandleID(ClientId clientId) {
+        
+        ClientId[] ids = contest.getLocalLoggedInClients(clientId.getClientType());
+        for (ClientId id : ids) {
+            if (id.equals(clientId)){
+                return id.getConnectionHandlerID();
+            }
+        }
+        return null;
     }
 
     public void sendToClient(Packet packet) {
