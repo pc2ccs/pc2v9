@@ -491,7 +491,7 @@ public interface IInternalContest {
      * Lookup ConnectionHandlerIDs for the specified ClientId.
      * 
      * @param clientId
-     * @return an Enumeration of all CollectionHandlerIDs for the specified client, or null if not found.
+     * @return a (possibly empty, but never null) Enumeration of all CollectionHandlerIDs for the specified client.
      */
     Enumeration<ConnectionHandlerID> getConnectionHandlerIDs(ClientId clientId);
 
