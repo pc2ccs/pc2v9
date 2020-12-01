@@ -181,6 +181,8 @@ public interface IContestLoader {
     String CCS_URL_KEY = "ccs-url";
 
     String SHADOW_MODE_KEY = "shadow-mode";
+    
+    String ALLOW_MULTIPLE_TEAM_LOGINS_KEY = "allow-multiple-team-logins";
 
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 

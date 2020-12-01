@@ -23,6 +23,7 @@ import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import services.ClarificationService;
 import services.ConfigurationService;
+import services.DroppedConnectionListener;
 import services.RunsService;
 
 @SwaggerDefinition(
@@ -77,11 +78,13 @@ public abstract class MainController {
 //		teamCon.addTestRunListener(new TestRunService(teamId, client));  //this was commented-out because it requires implementing Test Run support in PC2 API
 		teamCon.addClarificationListener(new ClarificationService(teamId, client));
 		teamCon.addContestConfigurationUpdateListener(new ConfigurationService(teamId, client));
+		
+		//listen for a connectionDropped so we can notify the UI that a forced logout has happened
+        teamCon.addConnectionListener(new DroppedConnectionListener(teamId, client));
 	}
 	
 	protected ServerConnection createNewServerConnection() {
 		return new ServerConnection();
 	}
-
 }
 

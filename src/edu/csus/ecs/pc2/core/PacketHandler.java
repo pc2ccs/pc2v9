@@ -3997,18 +3997,29 @@ public class PacketHandler {
             problems = inContest.getProblems();
         }
 
+
         ContestLoginSuccessData contestLoginSuccessData = new ContestLoginSuccessData();
         contestLoginSuccessData.setAccounts(accounts);
         contestLoginSuccessData.setBalloonSettingsArray(inContest.getBalloonSettings());
         contestLoginSuccessData.setClarifications(clarifications);
         contestLoginSuccessData.setClientSettings(clientSettings);
-        contestLoginSuccessData.setConnectionHandlerIDs(inContest.getConnectionHandleIDs());
         contestLoginSuccessData.setContestTimes(inContest.getContestTimes());
         contestLoginSuccessData.setGroups(inContest.getGroups());
         contestLoginSuccessData.setJudgements(inContest.getJudgements());
         contestLoginSuccessData.setLanguages(inContest.getLanguages());
-        contestLoginSuccessData.setRemoteLoggedInUsers(getAllRemoteLoggedInUsers());
-        contestLoginSuccessData.setLocalLoggedInUsers(getAllLocalLoggedInUsers());
+       
+        if (ClientType.Type.ADMINISTRATOR.equals(clientId.getClientType()) ||
+                ClientType.Type.SERVER.equals(clientId.getClientType())
+                ) {
+            contestLoginSuccessData.setRemoteLoggedInUsers(getAllRemoteLoggedInUsers());
+            contestLoginSuccessData.setLocalLoggedInUsers(getAllLocalLoggedInUsers());
+            contestLoginSuccessData.setConnectionHandlerIDs(inContest.getConnectionHandleIDs());
+        } else {
+            contestLoginSuccessData.setRemoteLoggedInUsers(new ClientId[0]);
+            contestLoginSuccessData.setLocalLoggedInUsers(new ClientId[0]);
+            contestLoginSuccessData.setConnectionHandlerIDs(new ConnectionHandlerID[0]);
+        }
+
         contestLoginSuccessData.setProblemDataFiles(problemDataFiles);
         contestLoginSuccessData.setProblems(problems);
         contestLoginSuccessData.setRuns(runs);

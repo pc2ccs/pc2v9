@@ -57,6 +57,7 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  * Unit tests.
  *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+ * @author John Clevenger, PC^2 Team (pc2@ecs.csus.edu)
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
@@ -3412,6 +3413,51 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //# bad group id 334 for groups: 312544,312545,312546,312547, 334
 //# groups: 312544,312545,312546,312547
 //# groups: 312544;312545;312546;312547
+        
+    }
+    
+    /**
+     * Tests that YAML files correctly support allowing multiple logins by a given team using {@link IContestLoader#ALLOW_MULTIPLE_TEAM_LOGINS_KEY}. 
+     */
+    public void testMultipleLoginSupport() throws Exception {
+        
+        // make sure we have a valid data directory for this test
+        String dataDirName = getDataDirectory(getName());
+        Utilities.insureDir(dataDirName);
+        assertDirectoryExists(dataDirName);
+
+        // test that if the contest.yaml file doesn't specify any "allow-multiple-team-logins" value, the default is "no multiple logins allowed"
+        String yamlFilename = getTestFilename(getName() + File.separator + "contest.noAllowMultipleFlag.yaml");
+        String[] contents = Utilities.loadFile(yamlFilename);
+        assertFalse("Cannot find file " + yamlFilename, contents.length == 0);
+
+        IInternalContest contest = loader.fromYaml(null, contents, dataDirName);
+        assertNotNull(contest);
+        
+        boolean defaultAllow = contest.getContestInformation().isAllowMultipleLoginsPerTeam();
+        assertFalse("Loading YAML file with no 'allow-multiple-logins' flag failed to default to 'do not allow'", defaultAllow);
+
+        //test that if the contest.yaml file specifies "allow-multiple-team-logins: false", multiple logins are not allowed
+        yamlFilename = getTestFilename(getName() + File.separator + "contest.allowMultipleFlagFalse.yaml");
+        contents = Utilities.loadFile(yamlFilename);
+        assertFalse("Cannot find file " + yamlFilename, contents.length == 0);
+
+        contest = loader.fromYaml(null, contents, dataDirName);
+        assertNotNull(contest);
+        
+        boolean explicitlySetFalse = contest.getContestInformation().isAllowMultipleLoginsPerTeam();
+        assertFalse("Loading YAML file with explicit 'allow-multiple-logins: false' flag failed to set 'do not allow multiple logins'", explicitlySetFalse);
+        
+        //test that if the contest.yaml file specifies "allow-multiple-team-logins: true", multiple logins are allowed
+        yamlFilename = getTestFilename(getName() + File.separator + "contest.allowMultipleFlagTrue.yaml");
+        contents = Utilities.loadFile(yamlFilename);
+        assertFalse("Cannot find file " + yamlFilename, contents.length == 0);
+
+        contest = loader.fromYaml(null, contents, dataDirName);
+        assertNotNull(contest);
+        
+        boolean explicitlySetTrue = contest.getContestInformation().isAllowMultipleLoginsPerTeam();
+        assertTrue("Loading YAML file with explicit 'allow-multiple-logins: true' flag failed to set 'allow multiple logins'", explicitlySetTrue);
         
     }
 }

@@ -85,6 +85,7 @@ public class PacketHandlerTest extends AbstractTestCase {
         try {
 
             ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Client " + teamId.toString());
+            teamId.setConnectionHandlerID(connectionHandlerID);
             contest.addLogin(teamId, connectionHandlerID);
 
             PacketHandler packetHandler = new PacketHandler(controller, contest);
