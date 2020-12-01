@@ -213,7 +213,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox shadowModeCheckbox;
 
     private JCheckBox allowMultipleTeamLoginsCheckbox;
-    private boolean allowMultipleLoginsPerTeam = true;
+    private boolean allowMultipleLoginsPerTeam = false;
 
     private Component rigidArea1;
     
