@@ -8,6 +8,7 @@ import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
@@ -2618,6 +2619,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         ClientId[] clientIds = contest.getLocalLoggedInClients(type);
         
+        List<ClientId> badClients = new ArrayList<ClientId>();
+        
         for (ClientId clientId : clientIds) {
             if (isThisSite(clientId.getSiteNumber())) {
                 ConnectionHandlerID connectionHandlerID = clientId.getConnectionHandlerID();
@@ -2626,14 +2629,30 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 // "multiple login" support may have left some place where this is inadvertently true.
                 //The following is an effort to catch/identify such situations.
                 if (connectionHandlerID==null) {
+                    //add the bad clientId to the badList
+                    badClients.add(clientId);
+                } else {
+                    //good clientId; send the packet to the client
+                    sendToClient(connectionHandlerID, packet); 
+                }
+                
+                //check if we got any bad clientIds
+                if (badClients.size()>0) {
+                    //yes, build a comma-separated list of bad clientIds
+                    String badClientListStr = "";
+                    for (ClientId client : badClients) {
+                        if (!badClientListStr.equals("")) {
+                            badClientListStr += ", ";
+                        }
+                        badClientListStr += client.toString();
+                    }
                     RuntimeException e = new RuntimeException(
-                            "InternalController.sendPacketToClients(): contest.getLocalLoggedInClients() returned a ClientId with a null ConnectionHandlerID: "
-                            + clientId);
+                            "InternalController.sendPacketToClients(): contest.getLocalLoggedInClients() returned the following ClientId(s) with a null ConnectionHandlerID: "
+                            + badClientListStr);
                     e.printStackTrace();
                     throw e;
                 }
                 
-                sendToClient(connectionHandlerID, packet);
             }
         }
     }
