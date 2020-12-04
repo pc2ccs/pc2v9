@@ -35,7 +35,6 @@ samps/**  -text
 
 *.JPG     binary
 *.doc     binary
-*.doc     binary
 *.docx    binary
 *.eot     binary
 *.exe     binary
