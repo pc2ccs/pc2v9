@@ -1,0 +1,9 @@
+
+name: Sumit
+
+input_validator: 
+   defaultInputValidator: custom
+   vivaPattern: '{x;}'
+   customInputValidatorProg: 'SumitInputValidator.class'
+   customInputValidatorCmd: 'java {:basename}'
+

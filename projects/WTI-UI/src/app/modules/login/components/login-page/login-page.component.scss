@@ -1,0 +1,33 @@
+@import '../../../../../styles/variables';
+
+:host {
+  display: flex;
+  flex: 1;
+}
+
+.login-page-container {
+  background-image: url('/assets/login-bg.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  flex: 1;
+}
+
+.login-container {
+  max-width: 35rem;
+  margin: auto;
+  background-color: rgba(255,255,255,0.7);
+  padding: 2rem;
+  border-radius: $border-radius;
+
+  form > div { margin-bottom: $control-padding; }
+  form > div:last-of-type { margin-bottom: 0; }
+  .header { margin-bottom: 1.5rem; }
+  .invalid { color: $danger; }
+
+  .submit-btn {
+    margin-top: 1.5rem;
+    margin-left: auto;
+    display: block;
+  }
+}

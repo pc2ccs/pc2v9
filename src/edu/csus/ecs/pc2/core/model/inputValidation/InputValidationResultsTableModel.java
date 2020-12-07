@@ -7,6 +7,8 @@ import java.util.Vector;
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
 
+import com.ibm.webrunner.j2mclb.util.TableModel;
+
 import edu.csus.ecs.pc2.core.Utilities;
 
 /**
@@ -17,8 +19,9 @@ import edu.csus.ecs.pc2.core.Utilities;
  */
 public class InputValidationResultsTableModel extends DefaultTableModel {
 
-    private static String[] colNames = { "File", "Result", "Validator StdOut", "Validator StdErr" };
-
+//    private static String[] colNames = { "File", "Result", "Validator StdOut", "Validator StdErr" };
+    private static String[] colNames = { "File", "Result", "Details" };
+ 
     private static Vector<String> columnNames = new Vector<String>(Arrays.asList(colNames));
     
     private Vector<InputValidationResult> results ;
@@ -62,17 +65,23 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
                 case 1:
                     obj = results.get(row).isPassed();
                     break;
-                case 2:
-//                    obj = results.get(row).getValidatorStdOut();
-                    obj = (new JLabel(results.get(row).getValidatorStdOut().getName()));
-                    break;
-                case 3:
-//                    obj = results.get(row).getValidatorStdErr();
-                    obj = (new JLabel(results.get(row).getValidatorStdErr().getName()));
+// cases 2 and 3 (the third and fourth columns) used to have file name links; these were replaced by a single clickable label 
+// named "Show" that opens a MultiFileViewer showing the input data file along with the Input Validator stdout and stderr.
+// Note that the "clickable label" is implemented by the addition of a MouseListener on the JTable cells, in class
+// InputValidationResultPane.
+//                case 2:
+////                    obj = results.get(row).getValidatorStdOut();
+//                    obj = (new JLabel(results.get(row).getValidatorStdOut().getName()));
+//                    break;
+//                case 3:
+////                    obj = results.get(row).getValidatorStdErr();
+//                    obj = (new JLabel(results.get(row).getValidatorStdErr().getName()));
+//                    break;
+                case 2: 
+                    obj = new JLabel("Show");
                     break;
                 default:
                     break;
-
             }
         }
         
@@ -102,6 +111,13 @@ public class InputValidationResultsTableModel extends DefaultTableModel {
         return results;
     }
 
+    /**
+     * Returns the InputValidationResult at the specified row in this InputValidationResultsTableModel.  
+     * Note that the first row is row zero!
+     * 
+     * @param row the zero-based row number of the row containing the desired InputValidationResult.
+     * @return the InputValidationResult stored in the specified table model row.
+     */
     public InputValidationResult getResultAt(int row) {
         return results.get(row);
     }

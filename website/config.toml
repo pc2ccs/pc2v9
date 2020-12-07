@@ -1,0 +1,9 @@
+baseURL = "https://pc2ccs.github.io/"
+languageCode = "en-us"
+title = "The PC&sup2; CCS"
+description = "The PC^2 CCS is implemented by the pc2@ecs.csus.edu for use at ICPC World Finals and other programming contests"
+theme = "pc2"
+# googleAnalytics = "UA-65166360-1"
+disableKinds = ["taxonomy", "taxonomyTerm"]
+[markup.goldmark.renderer]
+unsafe= true

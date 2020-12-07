@@ -1,0 +1,14 @@
+<header>
+    <div class='logo-container'>
+        <img src='/assets/PC2Logo.png' alt='PC^2 Logo'>
+        <img src='/assets/VerticalBar.png' alt='VerticalBar'>
+        <img src='/assets/icpc-banner.png' alt='ICPC Programming Contest Logo'>
+    </div>
+    <nav *ngIf='showLinks'>
+        <a routerLink='/runs' routerLinkActive='active'>Runs</a>
+        <a routerLink='/clarifications' routerLinkActive='active'>Clarifications</a>
+        <a routerLink='/options' routerLinkActive='active'>Options</a>
+        <a routerLink='/scoreboard' routerLinkActive='active'>Scoreboard</a>
+        <a routerLink='/logout'>Logout</a>
+    </nav>
+</header>

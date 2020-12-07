@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.eventFeed;
 
 import java.io.File;
@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -41,6 +42,8 @@ public class EventFeederModule implements UIPlugin {
     private Log log;
 
     private EventFeedServer eventFeedServer = new EventFeedServer();
+
+    private ShadowController shadowController;
 
     public String getPluginTitle() {
         return "Event Feed Server (non-GUI)";
@@ -90,6 +93,25 @@ public class EventFeederModule implements UIPlugin {
         } else {
             showMessage("Note: no web services will be started ");
         }
+        try {
+            shadowController = new ShadowController(contest, controller);
+            if (contest.getContestInformation().isShadowMode()) {
+                showMessage("Starting shadow controller");
+
+                if (! shadowController.start()) {
+                    fatalError("Unable to start shadow controller (contact primary CCS?), check log", null);
+                }
+            }
+        } catch (Exception e) {
+            fatalError("Unable to start shadow controller", e);
+        }
+    }
+
+    private void fatalError(String errorMessage, Exception e) {
+        String message = "Halting program.  " + errorMessage;
+        System.err.println(message);
+        getLog().log(Log.SEVERE, message, e);
+        System.exit(10);
     }
 
     protected String getL10nDateTime() {

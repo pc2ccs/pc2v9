@@ -1,9 +1,9 @@
 @echo off
 REM Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-
+rem
 rem Purpose: start pc2
 rem Author : pc2@ecs.csus.edu
-rem $HeadURL$
+rem
 
 rem Windows 2000 and beyond syntax
 set PC2BIN=%~dp0
@@ -28,7 +28,8 @@ goto :end
 
 :continue
 call %PC2BIN%\pc2env.bat
-java -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp %libdir%\pc2.jar;%mclbdir%\mclb.jar edu.csus.ecs.pc2.Starter --nogui %1 %2 %3 %4 %5 %6 %7 %8 %9
+java -Dfile.encoding=UTF-8 -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "%libdir%\*" edu.csus.ecs.pc2.Starter --nogui %1 %2 %3 %4 %5 %6 %7 %8 %9
+
 
 :end
 rem eof pc2judge.bat $Id$

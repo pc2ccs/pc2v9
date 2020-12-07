@@ -61,7 +61,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         // TODO Promote to AbstractTestCase
 
         problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
-        problem.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
+        problem.setOutputValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND);
         problem.setOutputValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
         
         PC2ValidatorSettings settings = new PC2ValidatorSettings();
@@ -411,6 +411,54 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
          * If this fails then no pc2.jar could be found
          */
         assertNotEquals("pc2.jar (path to) not found", path, ExecuteUtilities.DEFAULT_PC2_JAR_PATH);
+    }
+    
+    /**
+     * Test {files} substitution
+     * 
+     * @throws Exception
+     */
+    public void testgetAllSubmittedFilenames() throws Exception {
+        
+        SampleContest sampleContest = new SampleContest();
+        IInternalContest contest = sampleContest.createContest(2, 2, 12, 12, true);
+        
+        Account[] teams = SampleContest.getTeamAccounts(contest);
+
+        Problem[] problems = contest.getProblems();
+        Language[] languages = contest.getLanguages();
+
+        Problem problem = problems[problems.length-1];
+        Language language = languages[languages.length-1];
+        
+        ClientId submitter = teams[teams.length-1].getClientId();
+
+        Run run = new Run(submitter, language, problem);
+                
+        SerializedFile mainFile = new SerializedFile(getSamplesSourceFilename("Sumit.java"));
+        
+        /**
+         * Expected list of files
+         */
+        String expected = "Sumit.java";
+        
+        String [] sampleNames = {
+                "ISumitFloatOutputTenUnitsOff.java",
+                "ISumitFloatOutputTenPercentOff.java",
+                "ISumitWrongOutputCase.java",
+        };
+        
+        SerializedFile[] otherFiles = new SerializedFile[sampleNames.length];
+        for (int i = 0; i < otherFiles.length; i++) {
+            otherFiles[i] = new SerializedFile(sampleNames[i]);
+            expected += " " + sampleNames[i];
+        }
+        RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);
+        
+        String filelist = ExecuteUtilities.getAllSubmittedFilenames(runFiles);
+        
+        assertEquals("Expected file list ", expected, filelist);
+        
     }
     
 }

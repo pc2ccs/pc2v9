@@ -2,26 +2,42 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 
 import edu.csus.ecs.pc2.core.CommandVariableReplacer;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -35,7 +51,53 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 /**
  * Contest Information edit/update Pane.
  * 
- * Update contest information.
+ * This pane displays and allows updating of Contest Information Settings.
+ *   The pane uses a vertical BoxLayout to display a collection of settings sub-panes.  Each settings sub-pane is a singleton 
+ *   which is constructed by a getter method.  Each getter returns a self-contained pane (including that each returned pane
+ *   has a layout manager controlling how things are laid out within that pane and also has size and alignment
+ *   constraints defining how the components within that pane are managed by the layout manager for the pane).
+ *   Each sub-pane also has a CompoundBorder consisting of a {@link TitledBorder} compounded with a "margin border"
+ *   (an {@link EmptyBorder} with {@link Insets}); this provides an offset for each sub-pane within the outer pane.
+ *   
+ *   Method {@link #initialize()}, which is invoked whenever this ContestInformationPane is instantiated, adds two 
+ *   components to *this* pane:  a {@link JScrollPane} containing a "center pane"
+ *   (returned by {@link #getCenterPane()}), plus a button bar.  The sub-panes displaying the Contest Information
+ *   Settings are added to the center pane (within the scroll pane) in the method {@link #getCenterPane()}.
+ *   
+ *   Method {@link #initialize()} also invokes method {@link #populateGUI()}, which in turn invokes 
+ *   {@link IInternalController.getContest().getContestInformation()} to obtain the current contest information settings from
+ *   the server; it then uses the returned values to initialize the GUI display settings.
+ *   
+ *   Each active component in the pane (including its sub-panes) has a listener attached to it.  Whenever a component 
+ *   is changed (key typed/release, checkbox checked, button pushed, etc.) it invokes method {@link #enableUpdateButton()}.
+ *   This method (despite its name) doesn't actually necessarily *enable* the Update button; rather, it invokes {@link #getFromFields()}
+ *   to obtain the data currently displayed in the GUI fields and compares it with the current contest information settings. 
+ *   If they DIFFER then the Update and Cancel buttons are enabled. Subsequently pressing the Update button invokes 
+ *   {@link #updateContestInformation()}, which (again) invokes {@link #getFromFields()} to fetch the GUI settings and then 
+ *   invokes {@link IInternalController.updateContestInformation(contestInformation)} to save the new GUI information in the
+ *   local controller (which presumably responds by saving it on the server).
+ *    
+ * Developer's Notes:
+ * 
+ *   To add a new sub-pane to this ContestInformationPane, define a getter method (e.g. <code>getNewPane()</code>)
+ *   which returns the new pane as an instance of {@link JPanel}, and add a call <code>centerPane.add(getNewPane())</code>
+ *   in method {@link #getCenterPane()}.
+ *   
+ *   To add a new {@link JComponent} to an *existing* sub-pane, first create an accessor which creates the new component
+ *   (for example, <code>getNewComponent()</code>), then go to the getter method for the sub-pane to which the new component 
+ *   is to be added (for example, {@link #getCCSTestModePane()}) and add to the body of that 
+ *   method an "add" statement which calls the new getter  (for example, in the body of {@link #getCCSTestModePane()} you might add 
+ *   <code>ccsTestModePane.add(getNewComponent()</code>).  Note that the new component could be either an individual component
+ *   (such as a JLabel or JCheckBox) or a {@link JPanel} which itself contains sub-components.
+ *   
+ *   Note that you may (probably will) have to adjust the maximum, minimum, and preferred sizes of the pane to which the
+ *   new component is being added in order to accommodate the new component in the layout.  Note also that you must include
+ *   the necessary size and alignment attributes in any new component being added.
+ *   
+ *   Note also that if you add new information to the GUI, you must update {@link #getFromFields()} to fetch the new information from
+ *   the GUI fields and save it, and you must update method  {@link ContestInformation#isSameAs(ContestInformation)} to include
+ *   a check of the new information.
+ *   
  * 
  * @author pc2@ecs.csus.edu
  */
@@ -49,11 +111,9 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JButton updateButton = null;
 
-    private JLabel contestTitleLabel = null;
-
     private JTextField contestTitleTextField = null;
 
-    private JPanel teamDisplaySettingPane = null;
+    private JPanel teamInformationDisplaySettingsPane = null;
 
     private JRadioButton displayNoneRadioButton = null;
 
@@ -71,8 +131,6 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JTextField judgesDefaultAnswerTextField = null;
 
-    private JLabel judgesDefaultAnswerLabel = null;
-
     private JCheckBox jCheckBoxShowPreliminaryOnBoard = null;
 
     private JCheckBox jCheckBoxShowPreliminaryOnNotifications = null;
@@ -81,9 +139,9 @@ public class ContestInformationPane extends JPanePlugin {
 
     private ContestInformation savedContestInformation = null; // @jve:decl-index=0:
 
-    private JLabel labelMaxFileSize = null;
+    private JLabel labelMaxOutputSize = null;
 
-    private JTextField maxFieldSizeInKTextField = null;
+    private JTextField textfieldMaxOutputSizeInK = null;
 
     private JButton scoringPropertiesButton = null;
 
@@ -96,18 +154,78 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField runSubmissionInterfaceCommandTextField = null;
 
     private JLabel runSubmissionInterfaceLabel = null;
-
-    private JCheckBox autoRegistrationCheckbox = null;
     
     private JTextField startTimeTextField;
 
     private JLabel startTimeLabel;
-    private JTextField contestFreezeLengthtextField;
+    private JTextField contestFreezeLengthTextField;
 
-    private JCheckBox chckbxUnfrozen;
+    private JButton unfreezeScoreboardButton;
+
+    private ShadowSettingsPane shadowSettingsPane;
+
+    private Border lineBorderBlue2px = new LineBorder(Color.blue, 2, true) ; //blue, 2-pixel line, rounded corners
+    private Border margin = new EmptyBorder(5,10,5,10); //top,left,bottom,right
+
+    private JPanel judgeSettingsPane;
+
+    private JPanel contestSettingsPane;
+
+    private JPanel judgesDefaultAnswerPane;
+
+    private JPanel judgingOptionsPane;
+
+    private JPanel teamSettingsPane;
+
+    private JLabel contestFreezeLengthLabel;
+
+    private JPanel scheduledStartTimePane;
+
+    private JPanel scoreboardFreezePane;
+
+    private boolean scoreboardHasBeenUnfrozen = false;
+
+    private JPanel remoteCCSSettingsPane;
+    private Component horizontalStrut_2;
+
+    private JPanel ccsTestModePane;
+    private Component horizontalStrut_3;
+
+    //set this true to display outlines around Contest Information Pane sections
+    private boolean showPaneOutlines = true;
+
+    private JPanel contestTitlePane;
+
+    private JLabel contestTitleLabel;
+
+    private JPanel runSubmissionCommandPane;
+    private Component horizontalStrut;
+    private Component horizontalStrut_1;
+    private Component horizontalStrut_4;
+    private Component horizontalStrut_5;
+
+    private JTextField primaryCCSURLTextfield;
+
+    private JTextField primaryCCSLoginTextfield;
+
+    private JTextField primaryCCSPasswdTextfield;
+
+    private JCheckBox shadowModeCheckbox;
+
+    private JCheckBox allowMultipleTeamLoginsCheckbox;
+    private boolean allowMultipleLoginsPerTeam = false;
+
+    private Component rigidArea1;
+    
+//    private JTextField textfieldPrimaryCCSURL;
+//
+//    private JTextField textfieldPrimaryCCSLogin;
+//
+//    private JTextField textfieldPrimaryCCSPasswd;
+    
 
     /**
-     * This method initializes
+     * This method initializes this Contest Information Pane
      * 
      */
     public ContestInformationPane() {
@@ -121,8 +239,12 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(641, 570));
-        this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
+        this.setSize(new Dimension(900, 700));
+        
+        //put the center pane in a scrollpane so the user can access it without expanding the window
+        JScrollPane sp = new JScrollPane(getCenterPane());
+        this.add(sp,BorderLayout.CENTER);
+        
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
     }
 
@@ -144,97 +266,441 @@ public class ContestInformationPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes centerPane
+     * This method initializes centerPane - the central pane containing the Contest Information Settings
+     * and control components.
      * 
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
-            runSubmissionInterfaceLabel = new JLabel();
-            runSubmissionInterfaceLabel.setBounds(new Rectangle(21, 257, 175, 27));
-            runSubmissionInterfaceLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
-            runSubmissionInterfaceLabel.setText("Run Submission Command");
-            runSubmissionInterfaceLabel.setToolTipText("CCS Run Submission Interface Command");
-            runSubmissionInterfaceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-            labelMaxFileSize = new JLabel();
-            labelMaxFileSize.setBounds(new Rectangle(21, 173, 200, 27));
-            labelMaxFileSize.setHorizontalAlignment(SwingConstants.RIGHT);
-            labelMaxFileSize.setText("Maximum output size (in kB)");
-            contestTitleLabel = new JLabel();
-            contestTitleLabel.setBounds(new java.awt.Rectangle(55, 21, 134, 27));
-            contestTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            contestTitleLabel.setText("Contest Title");
+                        
             centerPane = new JPanel();
             centerPane.setToolTipText("");
-            centerPane.setLayout(null);
-            centerPane.add(contestTitleLabel, null);
-            centerPane.add(getContestTitleTextField(), null);
-            centerPane.add(getTeamDisplaySettingPane(), null);
-            centerPane.add(getJudgesDefaultAnswerLabel(), null);
-            centerPane.add(getJudgesDefaultAnswerTextField(), null);
-            centerPane.add(getJCheckBoxShowPreliminaryOnBoard(), null);
-            centerPane.add(getJCheckBoxShowPreliminaryOnNotifications(), null);
-            centerPane.add(getAdditionalRunStatusCheckBox(), null);
-            centerPane.add(labelMaxFileSize, null);
-            centerPane.add(getMaxFieldSizeInKTextField(), null);
-            centerPane.add(getScoringPropertiesButton(), null);
-            centerPane.add(getCcsTestModeCheckbox(), null);
-            centerPane.add(getRunSubmissionInterfaceCommandTextField(), null);
-            centerPane.add(runSubmissionInterfaceLabel, null);
-            centerPane.add(getAutoRegistrationCheckbox(), null);
-            centerPane.add(getStartTimeLabel(), null);
-            centerPane.add(getStartTimeTextField(), null);
+
+            centerPane.setLayout(new BoxLayout(centerPane,BoxLayout.Y_AXIS));
             
+            //contents of the pane:
             
-  
-            centerPane.add(getContestFreezeLengthtextField());
+            centerPane.add(Box.createVerticalStrut(15));
+
+            centerPane.add(getContestSettingsPane()) ;
+            centerPane.add(Box.createVerticalStrut(15));
             
-            JLabel contestFreezeTimeLabel = new JLabel();
-            contestFreezeTimeLabel.setText("Contest Freeze Length");
-            contestFreezeTimeLabel.setSize(new Dimension(175, 27));
-            contestFreezeTimeLabel.setLocation(new Point(21, 215));
-            contestFreezeTimeLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
-            contestFreezeTimeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-            contestFreezeTimeLabel.setBounds(78, 475, 175, 27);
-            centerPane.add(contestFreezeTimeLabel);
+            centerPane.add(getJudgingSettingsPane(),null);
+            centerPane.add(Box.createVerticalStrut(15));
+           
+            centerPane.add(getTeamSettingsPane());
+            centerPane.add(Box.createVerticalStrut(15));
             
-            centerPane.add(getChckbxUnfrozen());
+            centerPane.add(getRemoteCCSSettingsPane());
+            centerPane.add(Box.createVerticalStrut(15));
+            
         }
         return centerPane;
     }
 
-    private JCheckBox getChckbxUnfrozen() {
-        if (chckbxUnfrozen == null) {
-            chckbxUnfrozen = new JCheckBox("Unfrozen");
-            chckbxUnfrozen.setToolTipText("Unfreezing means the final results can be released to the public via the Contest API and public html");
-            chckbxUnfrozen.setBounds(431, 474, 139, 29);
-            chckbxUnfrozen.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
+    private Component getRemoteCCSSettingsPane() {
+        if (remoteCCSSettingsPane == null) {
+            
+            remoteCCSSettingsPane = new JPanel();
+            remoteCCSSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
+            remoteCCSSettingsPane.setMaximumSize(new Dimension(900, 250));
+            remoteCCSSettingsPane.setMinimumSize(new Dimension(900, 250));
+            remoteCCSSettingsPane.setPreferredSize(new Dimension(900,250));
+           
+            
+            if (showPaneOutlines) {
+                
+                TitledBorder titleBorder = new TitledBorder("Remote CCS Settings ");
+                titleBorder.setBorder(lineBorderBlue2px);
+
+                remoteCCSSettingsPane.setBorder(new CompoundBorder(margin,titleBorder));
+                
+            } else {
+                remoteCCSSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
+            }
+            
+            remoteCCSSettingsPane.setLayout(new BoxLayout(remoteCCSSettingsPane, BoxLayout.Y_AXIS));
+
+            //the contents of the pane:
+            
+            remoteCCSSettingsPane.add(Box.createVerticalStrut(15));
+            
+            remoteCCSSettingsPane.add(getCCSTestModePane(),JComponent.LEFT_ALIGNMENT);
+            remoteCCSSettingsPane.add(Box.createVerticalStrut(15));
+            
+            remoteCCSSettingsPane.add(getShadowSettingsPane(),JComponent.LEFT_ALIGNMENT);
+
+        }
+        return remoteCCSSettingsPane;
+        
+    }
+
+    private JPanel getCCSTestModePane() {
+        if (ccsTestModePane == null) {
+            
+            ccsTestModePane = new JPanel();
+
+            ccsTestModePane.setLayout(new FlowLayout(FlowLayout.LEFT));
+            ccsTestModePane.setPreferredSize(new Dimension(700, 80));
+            ccsTestModePane.setMaximumSize(new Dimension(700, 80));
+            ccsTestModePane.setMinimumSize(new Dimension(700, 80));
+            
+            TitledBorder tb = BorderFactory.createTitledBorder("CCS Test Mode");
+            ccsTestModePane.setBorder(new CompoundBorder(margin,tb));
+            ccsTestModePane.setAlignmentX(LEFT_ALIGNMENT); 
+            
+            //the contents of the pane:
+            
+            ccsTestModePane.add(getCcsTestModeCheckbox(), null);
+            ccsTestModePane.add(getHorizontalStrut_2());
+            
+            ccsTestModePane.add(getRunSubmissionCommandPane(),null);
+            
+        }
+        return ccsTestModePane;
+        
+    }
+
+
+    private JPanel getRunSubmissionCommandPane() {
+        if (runSubmissionCommandPane == null) {
+            runSubmissionCommandPane = new JPanel();
+            runSubmissionCommandPane.setMaximumSize(new Dimension(500, 20));
+            
+            runSubmissionInterfaceLabel = new JLabel();
+            runSubmissionInterfaceLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
+            runSubmissionInterfaceLabel.setText("Run Submission Command:  ");
+            runSubmissionInterfaceLabel.setToolTipText("The command used to submit to a remote CCS");
+            runSubmissionInterfaceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            
+            //the contents of the pane:
+            
+            runSubmissionCommandPane.add(runSubmissionInterfaceLabel, null);
+            runSubmissionCommandPane.add(getRunSubmissionInterfaceCommandTextField(), null);
+
+        }
+        return runSubmissionCommandPane;
+    }
+
+    private Component getScoreboardFreezePane() {
+        if (scoreboardFreezePane == null) {
+            
+            scoreboardFreezePane = new JPanel();
+            
+            scoreboardFreezePane.add(getContestFreezeLengthLabel(),null);
+            scoreboardFreezePane.add(getContestFreezeLengthtextField());
+
+        }
+        return scoreboardFreezePane;
+    }
+
+    private Component getScheduledStartTimePane() {
+        if (scheduledStartTimePane == null) {
+            scheduledStartTimePane = new JPanel();
+            scheduledStartTimePane.add(getStartTimeLabel(), null);
+            scheduledStartTimePane.add(getStartTimeTextField(), null);
+        }
+        return scheduledStartTimePane;
+    }
+
+    private JLabel getContestFreezeLengthLabel() {
+        if (contestFreezeLengthLabel == null) {
+            
+            contestFreezeLengthLabel = new JLabel();
+            contestFreezeLengthLabel.setText("Scoreboard Freeze Length (hh:mm:ss) ");
+            contestFreezeLengthLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
+            contestFreezeLengthLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        }
+        return contestFreezeLengthLabel;
+    }
+
+    private Component getContestSettingsPane() {
+        if (contestSettingsPane == null) {
+            contestSettingsPane = new JPanel();
+            contestSettingsPane.setLayout(new FlowLayout(FlowLayout.LEFT));
+            contestSettingsPane.setMinimumSize(new Dimension(700, 120));
+            contestSettingsPane.setMaximumSize(new Dimension(700, 120));
+            contestSettingsPane.setPreferredSize(new Dimension(700,120));
+            contestSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
+
+            if (showPaneOutlines) {
+                
+                TitledBorder titleBorder = new TitledBorder("Contest Settings");
+                titleBorder.setBorder(lineBorderBlue2px);
+                
+                contestSettingsPane.setBorder(new CompoundBorder(margin,titleBorder));
+                
+            } else {
+                contestSettingsPane.setBorder(new EmptyBorder(2, 2, 2, 2));
+            }
+
+            // contents of the pane:
+
+            contestSettingsPane.add(getContestTitlePane(), null);
+
+            contestSettingsPane.add(getScheduledStartTimePane());
+
+            contestSettingsPane.add(getScoreboardFreezePane());
+            contestSettingsPane.add(getHorizontalStrut_3());
+
+            contestSettingsPane.add(getUnfreezeScoreboardButton());
+
+        }
+        return contestSettingsPane;
+    }
+
+    private JPanel getContestTitlePane() {
+        if (contestTitlePane == null) {
+            
+            contestTitlePane = new JPanel();
+            
+            contestTitlePane.add(getContestTitleLabel());
+            contestTitlePane.add(getContestTitleTextField(), null);
+
+        }
+        return contestTitlePane;
+    }
+
+    private JLabel getContestTitleLabel() {
+        
+        if (contestTitleLabel == null) {
+            
+            contestTitleLabel = new JLabel("Contest title: ");
+        }
+        return contestTitleLabel;
+    }
+
+    /**
+     * This method returns a JPanel containing the Contest Information settings
+     * related to judging.
+     * @return a JPanel
+     */
+    private JPanel getJudgingSettingsPane() {
+        if (judgeSettingsPane == null) {
+            
+            judgeSettingsPane = new JPanel();
+            
+            judgeSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
+            judgeSettingsPane.setMaximumSize(new Dimension(750, 250));
+            judgeSettingsPane.setMinimumSize(new Dimension(750, 250));
+            judgeSettingsPane.setPreferredSize(new Dimension(750,250));
+
+            if (showPaneOutlines) {
+                
+                TitledBorder titleBorder = new TitledBorder("Judging Settings");
+                titleBorder.setBorder(lineBorderBlue2px);
+                
+                judgeSettingsPane.setBorder(new CompoundBorder(margin,titleBorder));
+            } else {
+                judgeSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
+            }
+            
+            judgeSettingsPane.setLayout(new FlowLayout((FlowLayout.LEFT)));
+            
+            //the contents of the pane:
+            
+            judgeSettingsPane.add(Box.createVerticalStrut(15));
+
+            judgeSettingsPane.add(getTeamInformationDisplaySettingsPane(), LEFT_ALIGNMENT);
+            
+            judgeSettingsPane.add(getJudgesDefaultAnswerPane(),LEFT_ALIGNMENT);
+            
+            judgeSettingsPane.add(getJudgingOptionsPane(),LEFT_ALIGNMENT);
+            
+            judgeSettingsPane.add(Box.createHorizontalStrut(20));
+            judgeSettingsPane.add(getScoringPropertiesButton(),LEFT_ALIGNMENT);
+
+        }
+        return judgeSettingsPane;
+    }
+
+    private Component getTeamSettingsPane() {
+        if (teamSettingsPane == null ) {
+            
+            teamSettingsPane = new JPanel();
+            teamSettingsPane.setMaximumSize(new Dimension(500, 100));
+            teamSettingsPane.setPreferredSize(new Dimension(500,100));
+            teamSettingsPane.setAlignmentX(LEFT_ALIGNMENT); 
+
+            if (showPaneOutlines) {
+                
+                TitledBorder titleBorder = new TitledBorder("Team Settings");
+                titleBorder.setBorder(lineBorderBlue2px);
+
+                teamSettingsPane.setBorder(new CompoundBorder(margin,titleBorder));
+
+            } else {
+                teamSettingsPane.setBorder(new EmptyBorder(2,2,2,2));
+            }
+            
+            teamSettingsPane.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+            //contents of the pane:
+             
+            teamSettingsPane.add(getMaxOutputSizeLabel(), null);
+            teamSettingsPane.add(getMaxOutputSizeInKTextField(), null);
+            teamSettingsPane.add(getRigidArea1());
+            teamSettingsPane.add(getAllowMultipleTeamLoginsCheckbox(), null);
+        }
+        return teamSettingsPane;
+    }
+
+    private JLabel getMaxOutputSizeLabel() {
+       if (labelMaxOutputSize == null) {
+           
+           labelMaxOutputSize = new JLabel();
+           labelMaxOutputSize.setHorizontalAlignment(SwingConstants.RIGHT);
+           labelMaxOutputSize.setBorder(new EmptyBorder(0,10,5,5));
+           labelMaxOutputSize.setText("Maximum output size (in KB): ");
+       }
+        return labelMaxOutputSize ;
+    }
+
+    /**
+     * This method initializes teamDisplaySettingPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getTeamInformationDisplaySettingsPane() {
+        if (teamInformationDisplaySettingsPane == null) {
+            
+            teamInformationDisplaySettingsPane = new JPanel();
+            teamInformationDisplaySettingsPane.setMaximumSize(new Dimension(700, 200));
+            teamInformationDisplaySettingsPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+            
+            teamInformationDisplaySettingsPane.setLayout(new FlowLayout(FlowLayout.LEFT));
+            
+            teamInformationDisplaySettingsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, 
+                    "Team Information Displayed to Judges", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            
+            //contents of pane:
+            teamInformationDisplaySettingsPane.add(getDisplayNoneRadioButton(), null);
+            teamInformationDisplaySettingsPane.add(getHorizontalStrut());
+            teamInformationDisplaySettingsPane.add(getDisplayNumbersOnlyRadioButton(), null);
+            teamInformationDisplaySettingsPane.add(getHorizontalStrut_1());
+            teamInformationDisplaySettingsPane.add(getDisplayNamesOnlyRadioButton(), null);
+            teamInformationDisplaySettingsPane.add(getHorizontalStrut_4());
+            teamInformationDisplaySettingsPane.add(getDisplayNameAndNumberRadioButton(), null);
+            teamInformationDisplaySettingsPane.add(getHorizontalStrut_5());
+            teamInformationDisplaySettingsPane.add(getDisplayAliasNameRadioButton(), null);
+
+        }
+        return teamInformationDisplaySettingsPane;
+    }
+
+    private JPanel getJudgingOptionsPane() {
+        if (judgingOptionsPane == null) {
+            
+            judgingOptionsPane = new JPanel();
+            
+            judgingOptionsPane.setLayout(new BoxLayout(judgingOptionsPane,BoxLayout.Y_AXIS));
+
+            judgingOptionsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Judging Options", 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            judgingOptionsPane.add(getJCheckBoxShowPreliminaryOnBoard(), LEFT_ALIGNMENT);
+            judgingOptionsPane.add(getJCheckBoxShowPreliminaryOnNotifications(), LEFT_ALIGNMENT);
+            judgingOptionsPane.add(getAdditionalRunStatusCheckBox(), LEFT_ALIGNMENT);
+
+        }
+        return judgingOptionsPane;
+    }
+
+    private JPanel getJudgesDefaultAnswerPane() {
+        if (judgesDefaultAnswerPane == null) {
+            
+            judgesDefaultAnswerPane = new JPanel();
+            judgesDefaultAnswerPane.setMaximumSize(new Dimension(500, 200));
+            judgesDefaultAnswerPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+            
+            judgesDefaultAnswerPane.setLayout(new FlowLayout(FlowLayout.LEFT));
+            
+            judgesDefaultAnswerPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Judge's Default Answer", 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+
+            //the contents of the pane:
+            
+            judgesDefaultAnswerPane.add(getJudgesDefaultAnswerTextField(), null);
+
+        }
+        return judgesDefaultAnswerPane;
+    }
+
+    /**
+     * Returns a ShadowSettingsPane containing the components comprising Shadow Mode configuration options.
+     * Because the ShadowSettingsPane class does not add any listeners to its components (because it can't
+     * know what listeners are desired by the surrounding class), this method adds a KeyListener to each
+     * {@link JTextField} component on the ShadowSettingsPane, and adds an ActionListener to the Shadow Mode
+     * checkbox on the ShadowSettingsPane.   All of these listeners do the same (one) thing: invoke
+     * {@link #enableUpdateButton()}.
+     * 
+     * @return a ShadowSettingsPane containing Shadow Mode Settings components with listeners attached to them
+     */
+    private ShadowSettingsPane getShadowSettingsPane() {
+        if (shadowSettingsPane == null) {
+            shadowSettingsPane = new ShadowSettingsPane();
+            
+            KeyListener keyListener = new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
+                }
+            };
+            shadowSettingsPane.getRemoteCCSURLTextfield().addKeyListener(keyListener);
+            shadowSettingsPane.getRemoteCCSLoginTextfield().addKeyListener(keyListener);
+            shadowSettingsPane.getRemoteCCSPasswdTextfield().addKeyListener(keyListener);
+
+            ActionListener actionListener = new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    enableUpdateButton();
+                }
+            };
+            shadowSettingsPane.getShadowModeCheckbox().addActionListener(actionListener);
+            
+        }
+        return shadowSettingsPane;
+    }
+
+
+
+    private JButton getUnfreezeScoreboardButton() {
+        if (unfreezeScoreboardButton == null) {
+            
+            unfreezeScoreboardButton = new JButton("Unfreeze Scoreboard");
+            unfreezeScoreboardButton.setToolTipText("Unfreezing means the final results can be released to the public via the Contest API and public html");
+            unfreezeScoreboardButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    String message = "Unfreezing the scoreboard is permanent (cannot be undone);"
+                            + "\nunfreezing means the final results are released for public viewing."
+                            + "\n\nIf you are SURE you want to do this, click 'OK' then click 'Update'.";
+                    int result = JOptionPane.showConfirmDialog(null, message, "Unfreezing Is Permanent", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                    if (result == JOptionPane.OK_OPTION) {
+                        scoreboardHasBeenUnfrozen = true;
+                        enableUpdateButton();
+                    }
                 }
             });
         }
-        return chckbxUnfrozen;
+        return unfreezeScoreboardButton;
     }
 
     private JTextField getContestFreezeLengthtextField() {
-        if (contestFreezeLengthtextField == null) {
-            contestFreezeLengthtextField = new JTextField();
-            contestFreezeLengthtextField.setBounds(new Rectangle(233, 172, 122, 29));
-            contestFreezeLengthtextField.setBounds(270, 474, 122, 29);
-            contestFreezeLengthtextField.addKeyListener(new java.awt.event.KeyAdapter() {
+        if (contestFreezeLengthTextField == null) {
+            contestFreezeLengthTextField = new JTextField(8);
+            contestFreezeLengthTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
         }
-        return contestFreezeLengthtextField;
+        return contestFreezeLengthTextField;
     }
 
     private JTextField getStartTimeTextField() {
         if (startTimeTextField == null) {
             startTimeTextField = new JTextField();
-            startTimeTextField.setBounds(270, 424, 243, 31);
             startTimeTextField.setColumns(25);
             startTimeTextField.setEditable(false);
             startTimeTextField.setToolTipText("Use Contest Times tab \"Edit Start Schedule\" button to edit Start Time");
@@ -244,12 +710,44 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JLabel getStartTimeLabel() {
         if (startTimeLabel == null) {
-            startTimeLabel = new JLabel("Scheduled Start Time");
+            startTimeLabel = new JLabel("Scheduled Start Time:  ");
             startTimeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-            startTimeLabel.setBounds(95, 428, 158, 27);
         }
         return startTimeLabel ;
     }
+
+    private JCheckBox getShadowModeCheckbox() {
+        
+        if (shadowModeCheckbox==null) {
+            shadowModeCheckbox = getShadowSettingsPane().getShadowModeCheckbox();
+        }
+        return shadowModeCheckbox;
+    }
+
+    private JTextField getPrimaryCCSURLTextfield() {
+        
+        if (primaryCCSURLTextfield==null) {
+            primaryCCSURLTextfield = getShadowSettingsPane().getRemoteCCSURLTextfield() ;
+        }
+        return primaryCCSURLTextfield; 
+    }
+
+    private JTextField getPrimaryCCSLoginTextfield() {
+
+        if (primaryCCSLoginTextfield == null) {
+            primaryCCSLoginTextfield = getShadowSettingsPane().getRemoteCCSLoginTextfield();
+        }
+        return primaryCCSLoginTextfield;
+    }
+
+    private JTextField getPrimaryCCSPasswdTextfield() {
+        
+        if (primaryCCSPasswdTextfield==null) {
+            primaryCCSPasswdTextfield = getShadowSettingsPane().getRemoteCCSPasswdTextfield() ;
+        }
+        return primaryCCSPasswdTextfield ;
+    }
+
 
     /**
      * This method initializes updateButton
@@ -265,7 +763,7 @@ public class ContestInformationPane extends JPanePlugin {
             updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
             updateButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    updateContestInformation();
+                     updateContestInformation();
                 }
             });
         }
@@ -279,8 +777,8 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private JTextField getContestTitleTextField() {
         if (contestTitleTextField == null) {
-            contestTitleTextField = new JTextField();
-            contestTitleTextField.setBounds(new java.awt.Rectangle(204, 21, 340, 27));
+            contestTitleTextField = new JTextField(0); //'0' causes textfield to resize based on its data
+            contestTitleTextField.setAlignmentX(LEFT_ALIGNMENT);
             contestTitleTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -307,61 +805,83 @@ public class ContestInformationPane extends JPanePlugin {
 
     }
 
+    /**
+     * Returns a new ContestInformation object containing data fetched from this pane's fields.
+     * @return a ContestInformation object
+     */
     protected ContestInformation getFromFields() {
-        ContestInformation contestInformation = new ContestInformation();
+        ContestInformation newContestInformation = new ContestInformation();
         ContestInformation currentContestInformation = getContest().getContestInformation();
+        
+        //fill in the Contest URL
         if (currentContestInformation.getContestURL() != null) {
-            contestInformation.setContestURL(new String(currentContestInformation.getContestURL()));
+            newContestInformation.setContestURL(new String(currentContestInformation.getContestURL()));
         }
-        contestInformation.setContestTitle(getContestTitleTextField().getText());
+        
+        //fill in the Contest Title
+        newContestInformation.setContestTitle(getContestTitleTextField().getText());
+        
+        //fill in the Team Display mode
         if (getDisplayNoneRadioButton().isSelected()) {
-            contestInformation.setTeamDisplayMode(TeamDisplayMask.NONE);
+            newContestInformation.setTeamDisplayMode(TeamDisplayMask.NONE);
         } else if (getDisplayNameAndNumberRadioButton().isSelected()) {
-            contestInformation.setTeamDisplayMode(TeamDisplayMask.NUMBERS_AND_NAME);
+            newContestInformation.setTeamDisplayMode(TeamDisplayMask.NUMBERS_AND_NAME);
         } else if (getDisplayNumbersOnlyRadioButton().isSelected()) {
-            contestInformation.setTeamDisplayMode(TeamDisplayMask.LOGIN_NAME_ONLY);
+            newContestInformation.setTeamDisplayMode(TeamDisplayMask.LOGIN_NAME_ONLY);
         } else if (getDisplayNamesOnlyRadioButton().isSelected()) {
-            contestInformation.setTeamDisplayMode(TeamDisplayMask.DISPLAY_NAME_ONLY);
+            newContestInformation.setTeamDisplayMode(TeamDisplayMask.DISPLAY_NAME_ONLY);
         } else if (getDisplayAliasNameRadioButton().isSelected()) {
-            contestInformation.setTeamDisplayMode(TeamDisplayMask.ALIAS);
+            newContestInformation.setTeamDisplayMode(TeamDisplayMask.ALIAS);
         } else {
             // DEFAULT
-            contestInformation.setTeamDisplayMode(TeamDisplayMask.LOGIN_NAME_ONLY);
+            newContestInformation.setTeamDisplayMode(TeamDisplayMask.LOGIN_NAME_ONLY);
         }
-        contestInformation.setJudgesDefaultAnswer(getJudgesDefaultAnswerTextField().getText());
-        contestInformation.setPreliminaryJudgementsTriggerNotifications(getJCheckBoxShowPreliminaryOnNotifications().isSelected());
-        contestInformation.setPreliminaryJudgementsUsedByBoard(getJCheckBoxShowPreliminaryOnBoard().isSelected());
-        contestInformation.setSendAdditionalRunStatusInformation(getAdditionalRunStatusCheckBox().isSelected());
         
-        contestInformation.setRsiCommand(getRunSubmissionInterfaceCommandTextField().getText());
-        contestInformation.setCcsTestMode(getCcsTestModeCheckbox().isSelected());
-        contestInformation.setEnableAutoRegistration(getAutoRegistrationCheckbox().isSelected());
-
-        String maxFileSizeString = "0" + getMaxFieldSizeInKTextField().getText();
+        //fill in judging information
+        newContestInformation.setJudgesDefaultAnswer(getJudgesDefaultAnswerTextField().getText());
+        newContestInformation.setPreliminaryJudgementsTriggerNotifications(getJCheckBoxShowPreliminaryOnNotifications().isSelected());
+        newContestInformation.setPreliminaryJudgementsUsedByBoard(getJCheckBoxShowPreliminaryOnBoard().isSelected());
+        newContestInformation.setSendAdditionalRunStatusInformation(getAdditionalRunStatusCheckBox().isSelected());
+        
+        //fill in older Run Submission Interface (RSI) data
+        newContestInformation.setRsiCommand(getRunSubmissionInterfaceCommandTextField().getText());
+        newContestInformation.setCcsTestMode(getCcsTestModeCheckbox().isSelected());
+        
+        //fill in Shadow Mode information
+        newContestInformation.setShadowMode(getShadowSettingsPane().getShadowModeCheckbox().isSelected());
+        newContestInformation.setPrimaryCCS_URL(getShadowSettingsPane().getRemoteCCSURLTextfield().getText());
+        newContestInformation.setPrimaryCCS_user_login(getShadowSettingsPane().getRemoteCCSLoginTextfield().getText());
+        newContestInformation.setPrimaryCCS_user_pw(getShadowSettingsPane().getRemoteCCSPasswdTextfield().getText());
+        
+        //fill in additional field values
+        String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();
         long maximumFileSize = Long.parseLong(maxFileSizeString);
-        contestInformation.setMaxFileSize(maximumFileSize * 1000);
+        newContestInformation.setMaxFileSize(maximumFileSize * 1000);
+        newContestInformation.setAllowMultipleLoginsPerTeam(allowMultipleLoginsPerTeam);
 
+        //fill in values already saved, if any
         if (savedContestInformation != null) {
-            contestInformation.setJudgementNotificationsList(savedContestInformation.getJudgementNotificationsList());
+            newContestInformation.setJudgementNotificationsList(savedContestInformation.getJudgementNotificationsList());
                 
-            contestInformation.setJudgeCDPBasePath(savedContestInformation.getJudgeCDPBasePath());
-            contestInformation.setScheduledStartDate(savedContestInformation.getScheduledStartDate());
+            newContestInformation.setJudgeCDPBasePath(savedContestInformation.getJudgeCDPBasePath());
+            newContestInformation.setScheduledStartDate(savedContestInformation.getScheduledStartDate());
             
-            contestInformation.setAdminCDPBasePath(savedContestInformation.getAdminCDPBasePath());
-            contestInformation.setContestShortName(savedContestInformation.getContestShortName());
-            contestInformation.setExternalYamlPath(savedContestInformation.getExternalYamlPath());
+            newContestInformation.setAdminCDPBasePath(savedContestInformation.getAdminCDPBasePath());
+            newContestInformation.setContestShortName(savedContestInformation.getContestShortName());
+            newContestInformation.setExternalYamlPath(savedContestInformation.getExternalYamlPath());
             
-            contestInformation.setFreezeTime(savedContestInformation.getFreezeTime());
-            contestInformation.setLastRunNumberSubmitted(savedContestInformation.getLastRunNumberSubmitted());
-            contestInformation.setAutoStartContest(savedContestInformation.isAutoStartContest());
+            newContestInformation.setFreezeTime(savedContestInformation.getFreezeTime());
+            newContestInformation.setLastRunNumberSubmitted(savedContestInformation.getLastRunNumberSubmitted());
+            newContestInformation.setAutoStartContest(savedContestInformation.isAutoStartContest());
         }
 
-        contestInformation.setScoringProperties(changedScoringProperties);
+        newContestInformation.setScoringProperties(changedScoringProperties);
         
-        contestInformation.setFreezeTime(contestFreezeLengthtextField.getText());
+        newContestInformation.setFreezeTime(contestFreezeLengthTextField.getText());
 
-        contestInformation.setThawed(getChckbxUnfrozen().isSelected());
-        return (contestInformation);
+        newContestInformation.setThawed(scoreboardHasBeenUnfrozen);
+        
+        return (newContestInformation);
     }
 
     protected void dumpProperties(String comment, Properties properties) {
@@ -402,30 +922,41 @@ public class ContestInformationPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 ContestInformation contestInformation = getContest().getContestInformation();
+                
                 getContestTitleTextField().setText(contestInformation.getContestTitle());
                 selectDisplayRadioButton();
+                
                 getJudgesDefaultAnswerTextField().setText(contestInformation.getJudgesDefaultAnswer());
                 getJCheckBoxShowPreliminaryOnBoard().setSelected(contestInformation.isPreliminaryJudgementsUsedByBoard());
                 getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
-                getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
-                getMaxFieldSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
+                
+                getMaxOutputSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
+                getAllowMultipleTeamLoginsCheckbox().setSelected(contestInformation.isAllowMultipleLoginsPerTeam());
                 getContestFreezeLengthtextField().setText(contestInformation.getFreezeTime());
+                
+                getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
                 getRunSubmissionInterfaceCommandTextField().setText(contestInformation.getRsiCommand());
                 if (contestInformation.getRsiCommand() == null || "".equals(contestInformation.getRsiCommand().trim())) {
                     String cmd = "# /usr/local/bin/sccsrs " + CommandVariableReplacer.OPTIONS + " " + CommandVariableReplacer.FILELIST;
                     getRunSubmissionInterfaceCommandTextField().setText(cmd);
                 }
-                getAutoRegistrationCheckbox().setSelected(contestInformation.isEnableAutoRegistration());
+                
+                getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
+
+                getPrimaryCCSURLTextfield().setText(contestInformation.getPrimaryCCS_URL());
+                getPrimaryCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
+                getPrimaryCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
                 
                 //add the scheduled start time to the GUI
                 GregorianCalendar cal = contestInformation.getScheduledStartTime();
                 getStartTimeTextField().setText(getScheduledStartTimeStr(cal));   
 
-                getChckbxUnfrozen().setSelected(contestInformation.isUnfrozen());
+                getUnfreezeScoreboardButton().setSelected(contestInformation.isUnfrozen());
                 setContestInformation(contestInformation);
                 setEnableButtons(false);
             }
+
         });
 
     }
@@ -452,18 +983,15 @@ public class ContestInformationPane extends JPanePlugin {
 
     private void updateContestInformation() {
         ContestInformation contestInformation = getFromFields();
+                
         getController().updateContestInformation(contestInformation);
     }
 
-    /**
-     * 
-     * @author pc2@ecs.csus.edu
-     * 
-     */
+
     class ContestInformationListenerImplementation implements IContestInformationListener {
 
         public void contestInformationAdded(ContestInformationEvent event) {
-            populateGUI();
+             populateGUI();
             savedContestInformation = event.getContestInformation();
         }
 
@@ -490,27 +1018,6 @@ public class ContestInformationPane extends JPanePlugin {
 
     }
 
-    /**
-     * This method initializes teamDisplaySettingPane
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getTeamDisplaySettingPane() {
-        if (teamDisplaySettingPane == null) {
-            teamDisplaySettingPane = new JPanel();
-            teamDisplaySettingPane.setLayout(new FlowLayout());
-            teamDisplaySettingPane.setBounds(new java.awt.Rectangle(111, 59, 381, 101));
-            teamDisplaySettingPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Team Information Displayed to Judges", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-            teamDisplaySettingPane.add(getDisplayNoneRadioButton(), null);
-            teamDisplaySettingPane.add(getDisplayNumbersOnlyRadioButton(), null);
-            teamDisplaySettingPane.add(getDisplayNamesOnlyRadioButton(), null);
-            teamDisplaySettingPane.add(getDisplayNameAndNumberRadioButton(), null);
-            teamDisplaySettingPane.add(getDisplayAliasNameRadioButton(), null);
-
-        }
-        return teamDisplaySettingPane;
-    }
 
     private void selectDisplayRadioButton() {
 
@@ -689,10 +1196,10 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private JTextField getJudgesDefaultAnswerTextField() {
         if (judgesDefaultAnswerTextField == null) {
-            judgesDefaultAnswerTextField = new JTextField();
+            judgesDefaultAnswerTextField = new JTextField(40);
             judgesDefaultAnswerTextField.setText("");
-            judgesDefaultAnswerTextField.setSize(new Dimension(280, 29));
-            judgesDefaultAnswerTextField.setLocation(new Point(208, 214));
+//            judgesDefaultAnswerTextField.setSize(new Dimension(280, 29));
+//            judgesDefaultAnswerTextField.setLocation(new Point(208, 214));
             judgesDefaultAnswerTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -703,23 +1210,6 @@ public class ContestInformationPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes judgesDefaultAnswerLabel
-     * 
-     * @return javax.swing.JLabel
-     */
-    private JLabel getJudgesDefaultAnswerLabel() {
-        if (judgesDefaultAnswerLabel == null) {
-            judgesDefaultAnswerLabel = new JLabel();
-            judgesDefaultAnswerLabel.setText("Judges' Default Answer");
-            judgesDefaultAnswerLabel.setHorizontalTextPosition(javax.swing.SwingConstants.TRAILING);
-            judgesDefaultAnswerLabel.setLocation(new Point(21, 215));
-            judgesDefaultAnswerLabel.setSize(new java.awt.Dimension(175, 27));
-            judgesDefaultAnswerLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        }
-        return judgesDefaultAnswerLabel;
-    }
-
-    /**
      * This method initializes jCheckBoxShowPreliminaryOnBoard
      * 
      * @return javax.swing.JCheckBox
@@ -727,8 +1217,9 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getJCheckBoxShowPreliminaryOnBoard() {
         if (jCheckBoxShowPreliminaryOnBoard == null) {
             jCheckBoxShowPreliminaryOnBoard = new JCheckBox();
-            jCheckBoxShowPreliminaryOnBoard.setBounds(new Rectangle(57, 334, 392, 21));
             jCheckBoxShowPreliminaryOnBoard.setHorizontalAlignment(SwingConstants.LEFT);
+            jCheckBoxShowPreliminaryOnBoard.setAlignmentX( Component.LEFT_ALIGNMENT );
+            jCheckBoxShowPreliminaryOnBoard.setBorder(new EmptyBorder(0, 15, 0, 0));
             jCheckBoxShowPreliminaryOnBoard.setMnemonic(KeyEvent.VK_UNDEFINED);
             jCheckBoxShowPreliminaryOnBoard.setText("Include Preliminary Judgements in Scoring Algorithm");
             jCheckBoxShowPreliminaryOnBoard.addActionListener(new java.awt.event.ActionListener() {
@@ -748,8 +1239,10 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getJCheckBoxShowPreliminaryOnNotifications() {
         if (jCheckBoxShowPreliminaryOnNotifications == null) {
             jCheckBoxShowPreliminaryOnNotifications = new JCheckBox();
-            jCheckBoxShowPreliminaryOnNotifications.setBounds(new Rectangle(57, 364, 392, 21));
+//            jCheckBoxShowPreliminaryOnNotifications.setBounds(new Rectangle(57, 364, 392, 21));
             jCheckBoxShowPreliminaryOnNotifications.setHorizontalAlignment(SwingConstants.LEFT);
+            jCheckBoxShowPreliminaryOnNotifications.setBorder(new EmptyBorder(0, 15, 0, 0));
+
             jCheckBoxShowPreliminaryOnNotifications.setMnemonic(KeyEvent.VK_UNDEFINED);
             jCheckBoxShowPreliminaryOnNotifications.setText("Send Balloon Notifications for Preliminary Judgements");
             jCheckBoxShowPreliminaryOnNotifications.addActionListener(new java.awt.event.ActionListener() {
@@ -770,8 +1263,8 @@ public class ContestInformationPane extends JPanePlugin {
         if (additionalRunStatusCheckBox == null) {
             additionalRunStatusCheckBox = new JCheckBox();
             additionalRunStatusCheckBox.setHorizontalAlignment(SwingConstants.LEFT);
-            additionalRunStatusCheckBox.setSize(new Dimension(392, 21));
-            additionalRunStatusCheckBox.setLocation(new Point(57, 394));
+            additionalRunStatusCheckBox.setBorder(new EmptyBorder(0, 15, 0, 0));
+
             additionalRunStatusCheckBox.setText("Send Additional Run Status Information");
             additionalRunStatusCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -800,18 +1293,35 @@ public class ContestInformationPane extends JPanePlugin {
      * 
      * @return javax.swing.JTextField
      */
-    private JTextField getMaxFieldSizeInKTextField() {
-        if (maxFieldSizeInKTextField == null) {
-            maxFieldSizeInKTextField = new JTextField();
-            maxFieldSizeInKTextField.setDocument(new IntegerDocument());
-            maxFieldSizeInKTextField.setBounds(new Rectangle(233, 172, 122, 29));
-            maxFieldSizeInKTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+    private JTextField getMaxOutputSizeInKTextField() {
+        if (textfieldMaxOutputSizeInK == null) {
+            
+            textfieldMaxOutputSizeInK = new JTextField(5);
+            
+            textfieldMaxOutputSizeInK.setDocument(new IntegerDocument());
+
+            textfieldMaxOutputSizeInK.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
         }
-        return maxFieldSizeInKTextField;
+        return textfieldMaxOutputSizeInK;
+    }
+    
+    private JCheckBox getAllowMultipleTeamLoginsCheckbox() {
+        if (allowMultipleTeamLoginsCheckbox==null) {
+            allowMultipleTeamLoginsCheckbox = new JCheckBox("Allow multiple logins per team", true);
+            allowMultipleTeamLoginsCheckbox.addActionListener (new ActionListener() {
+                
+                public void actionPerformed(ActionEvent e) {
+                    allowMultipleLoginsPerTeam = getAllowMultipleTeamLoginsCheckbox().isSelected();
+                    enableUpdateButton();
+                }
+            });
+            
+        }
+        return allowMultipleTeamLoginsCheckbox ;
     }
 
     /**
@@ -821,8 +1331,12 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private JButton getScoringPropertiesButton() {
         if (scoringPropertiesButton == null) {
+            
             scoringPropertiesButton = new JButton();
-            scoringPropertiesButton.setBounds(new Rectangle(370, 173, 200, 30));
+            scoringPropertiesButton.setHorizontalAlignment(SwingConstants.LEFT);
+            scoringPropertiesButton.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+
+            scoringPropertiesButton.setAlignmentX(LEFT_ALIGNMENT);
             scoringPropertiesButton.setToolTipText("Edit Scoring Properties");
             scoringPropertiesButton.setMnemonic(KeyEvent.VK_S);
             scoringPropertiesButton.setText("Edit Scoring Properties");
@@ -866,10 +1380,12 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private JCheckBox getCcsTestModeCheckbox() {
         if (ccsTestModeCheckbox == null) {
+            
             ccsTestModeCheckbox = new JCheckBox();
-            ccsTestModeCheckbox.setBounds(new Rectangle(57, 298, 253, 24));
-            ccsTestModeCheckbox.setHorizontalAlignment(SwingConstants.LEFT);
-            ccsTestModeCheckbox.setText("C.C.S. Test Mode");
+            
+            ccsTestModeCheckbox.setText("Enable CCS Test Mode");
+            ccsTestModeCheckbox.setToolTipText("CCS Test Mode is used to allow PC2 to forward team submissions to a remote"
+                    + " Contest Control System via the CLICS 'Run Submission Interface'");
             ccsTestModeCheckbox.setMnemonic(KeyEvent.VK_T);
             ccsTestModeCheckbox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -888,7 +1404,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField getRunSubmissionInterfaceCommandTextField() {
         if (runSubmissionInterfaceCommandTextField == null) {
             runSubmissionInterfaceCommandTextField = new JTextField();
-            runSubmissionInterfaceCommandTextField.setBounds(new Rectangle(208, 256, 404, 29));
+            runSubmissionInterfaceCommandTextField.setMaximumSize(new Dimension(2147483647, 20));
             runSubmissionInterfaceCommandTextField.setText("");
             runSubmissionInterfaceCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
@@ -899,24 +1415,49 @@ public class ContestInformationPane extends JPanePlugin {
         return runSubmissionInterfaceCommandTextField;
     }
 
-    /**
-     * This method initializes autoRegistrationCheckbox
-     * 
-     * @return javax.swing.JCheckBox
-     */
-    private JCheckBox getAutoRegistrationCheckbox() {
-        if (autoRegistrationCheckbox == null) {
-            autoRegistrationCheckbox = new JCheckBox();
-            autoRegistrationCheckbox.setBounds(new Rectangle(372, 300, 243, 24));
-            autoRegistrationCheckbox.setHorizontalAlignment(SwingConstants.LEFT);
-            autoRegistrationCheckbox.setText("Auto Registration");
-            autoRegistrationCheckbox.setMnemonic(KeyEvent.VK_A);
-            autoRegistrationCheckbox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableUpdateButton();
-                }
-            });
+    private Component getHorizontalStrut_2() {
+        if (horizontalStrut_2 == null) {
+        	horizontalStrut_2 = Box.createHorizontalStrut(20);
+        	horizontalStrut_2.setMaximumSize(new Dimension(20, 0));
         }
-        return autoRegistrationCheckbox;
+        return horizontalStrut_2;
     }
-} // @jve:decl-index=0:visual-constraint="10,10"
+
+    private Component getHorizontalStrut_3() {
+        if (horizontalStrut_3 == null) {
+        	horizontalStrut_3 = Box.createHorizontalStrut(20);
+        }
+        return horizontalStrut_3;
+    }
+
+    private Component getHorizontalStrut() {
+        if (horizontalStrut == null) {
+        	horizontalStrut = Box.createHorizontalStrut(10);
+        }
+        return horizontalStrut;
+    }
+    private Component getHorizontalStrut_1() {
+        if (horizontalStrut_1 == null) {
+        	horizontalStrut_1 = Box.createHorizontalStrut(10);
+        }
+        return horizontalStrut_1;
+    }
+    private Component getHorizontalStrut_4() {
+        if (horizontalStrut_4 == null) {
+        	horizontalStrut_4 = Box.createHorizontalStrut(10);
+        }
+        return horizontalStrut_4;
+    }
+    private Component getHorizontalStrut_5() {
+        if (horizontalStrut_5 == null) {
+        	horizontalStrut_5 = Box.createHorizontalStrut(10);
+        }
+        return horizontalStrut_5;
+    }
+    private Component getRigidArea1( ) {
+        if (rigidArea1==null) {
+            rigidArea1 = Box.createRigidArea(new Dimension(20,20));
+        }
+        return rigidArea1;
+    }
+}

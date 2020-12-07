@@ -1106,6 +1106,45 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         scoreboardTest (6, runsData, rankData, true);
     }
 
+    public void testShortSchoolName() throws Exception {
+        
+        try {
+            InternalContest contest = new InternalContest();
+
+            initData(contest, 2, 5);
+            Vector<Account> accounts = contest.getAccounts(ClientType.Type.TEAM);
+            for (int i = 0; i < accounts.size(); i++) {
+               Account account = accounts.get(i);
+               if (i == 0) {
+                   account.setShortSchoolName("CSUS");
+                   account.setLongSchoolName("Calfifornia State University, Sacramento");
+               } else {
+                   account.setLongSchoolName("CSUS");
+               }
+            }
+            DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+            defaultScoringAlgorithm.setObeyFreeze(false);
+            String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
+          
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+            
+            // getStandings should always return a well-formed xml
+            NodeList byTagName = document.getElementsByTagName("teamStanding");
+            Node team1 = byTagName.item(0).getAttributes().getNamedItem("shortSchoolName");
+            assertNotNull("shortSchoolName missing", team1);
+            Node team2 = byTagName.item(1).getAttributes().getNamedItem("shortSchoolName");
+            assertNotNull("shortSchoolName missing", team2);
+            assertEquals("CSUS", team1.getNodeValue());
+            assertEquals("CSUS", team2.getNodeValue());
+
+        } catch (Exception e) {
+            assertTrue("Error in XML output " + e.getMessage(), true);
+            e.printStackTrace();
+        }
+
+    }
     public void testAltScoring() throws Exception {
         // RunID    TeamID  Prob    Time    Result
         

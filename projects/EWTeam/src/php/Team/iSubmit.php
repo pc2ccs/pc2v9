@@ -30,7 +30,7 @@
 
 <html>
 <link href="tab_style/sentStyle.css" rel="stylesheet" type="text/css" />
-<script src="JQuery/jquery-1.9.1.js"></script>
+<script src="JQuery/jquery-1.9.1.min.js"></script>
 <script src="JQuery/jquery-ui.js"></script>
 
 

@@ -138,6 +138,14 @@
         <checksum file="${gzip.path}" algorithm="SHA-256" fileext=".sha256.txt"/>
         <checksum file="${gzip.path}" algorithm="SHA-512" fileext=".sha512.txt"/>
     </target>
+    
+    
+   	<target name="archiveSkipTests">
+		 <property name="RUN_NO_TESTS" value="Yes"/>
+		<antcall target="archives"/>
+	</target>
+
+    
     <target name="archives" depends="init" description="public in dist, private in build">
 
         <property name="zip.name" value="${release}-${repo.version}.zip"/>

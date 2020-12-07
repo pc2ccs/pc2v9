@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+
+<project basedir="." default="build" name="WTI-API"  xmlns:if="ant:if" xmlns:unless="ant:unless">
+	
+	<!-- set whether to use interactive prompts during building (change to value="true" for interactive) -->
+	<property name="isInteractive" value="false"/>
+	
+	<property name="name" value="WebTeamInterface" />
+    <property environment="env"/>
+    <property environment="env" />
+    <property name="target" value="1.8" />
+    <property name="src" location="src/main" />
+	
+	<property name="test.src" location="test" />
+	
+    <property name="main-class" value="config.JettyConfig" />
+    <property name="bin" location="bin" />
+    <property name="build.dir" location="build" />
+    <property name="wtiversion" value="1.1" />
+    <property name="liblocation" location="WebContent\WEB-INF\lib" />
+	<property name="frontendlocation" location="../WTI-UI" />
+    <property name="websockets" location="websockets" />
+	<property name="pc2jarloc" location="../../dist" />
+    <path id="libjars">
+        <fileset dir="${liblocation}" includes="**/*.jar" />
+    </path>
+    <path id="project.classpath">
+        <fileset dir="${liblocation}">
+            <include name="*.jar" />
+        </fileset>
+    </path>
+	
+	<!-- define a task which can merge services from multiple unzipped jars without allowing one jar to overwrite another -->
+    <taskdef resource="org/pescuma/mergeservices/antlib.xml" classpath="${liblocation}/merge-services.jar" />
+	
+	<!-- set what OS we are building on (used in various targets, below) -->
+	<condition property="isBuildingOnWindows">
+		<os family="windows"/>
+	</condition>
+	<condition property="isBuildingOnUnix">
+		<os family="unix"/>
+	</condition>
+				
+	<!-- set "pc2jarNeedsUpdating" true if the pc2v9 pc2.jar is newer than the one currently in the WTI lib location -->
+	<target name="checkPc2Jar">
+		<uptodate property="pc2JarNeedsUpdating"
+			srcfile="${liblocation}/pc2.jar" 
+			targetFile="${pc2jarloc}/pc2.jar"
+			/>
+	</target>
+	
+    <!-- copy the pc2v9 pc2.jar (if it is newer) into this WTI project -->	
+	<target name="copyPc2Jar" if="pc2JarNeedsUpdating">
+    	<copy file="${pc2jarloc}/pc2.jar" todir="${liblocation}" failonerror="false" />
+    	<input if:true="${isInteractive}">Completed copy operation; press Enter to continue...</input>
+	</target>
+	
+	<!-- create a timestamp, then copy the pc2v9 pc2.jar file to the WTI library if necessary -->
+    <target name="init" depends="checkPc2Jar">
+        <!-- Create the time stamp -->
+        <tstamp />
+
+    	<input if:true="${isInteractive}">
+    		message=Preparing to copy pc2.jar from pc2v9/dist to WTI (if newer); press Enter to continue..."
+    	</input>
+
+    	<antcall target="copyPc2Jar"/>
+
+    </target>
+	
+    <!-- Compile the WTI-API java code from ${src}, ${websockets}, and ${test} into ${bin} -->
+    <target name="compile" description="compile the source">
+        <mkdir dir="${bin}" />
+        <javac target="8" release="8" destdir="${bin}" classpathref="libjars">
+            <src path="${src}" />
+            <src path="${websockets}" />
+        	
+        	<src path="${test.src}" />
+            <classpath refid="project.classpath"/>
+
+        	
+        </javac>
+    	<input if:true="${isInteractive}">Compile completed; press Enter to continue...</input>
+    </target>
+	
+	<!-- extract the classes from all the different library jars into a temp dir so they can be merged -->
+    <target name="unzip" description="unzip jars">
+        <unzip dest="${build.dir}\temp">
+            <fileset dir="${liblocation}">
+                <include name="**/*.jar" />
+                <exclude name="META-INF/services/*" />
+            </fileset>
+        </unzip>
+        <delete dir="${build.dir}\temp\META-INF\services" />
+    </target>
+	
+	<!-- use the "merge-services" task (defined above) to merge all the library services in build/temp into a single set in build/temp -->
+    <target name="mergelibs" depends="unzip" description="merge library jars into a single service set">
+        <merge-services dest="${build.dir}\temp">
+            <fileset dir="${liblocation}">
+                <include name="**/*.jar" />
+                <exclude name="**/*-source.jar" />
+            </fileset>
+        </merge-services>
+    	<input if:true="${isInteractive}">Mergelibs completed; press Enter to continue...</input>
+    </target>
+	
+	<!-- Build a jar of the WTI-API project containing the compiled Java files and the library services-->
+    <target name="build" depends="clean, init, compile, mergelibs, collect" description="generate the distribution and move files to application">
+        <buildnumber /> <!-- not used -->
+        <!-- Put everything in ${bin} (the compiled java files) and ${build.dir}/temp (the library services) into a jar in ${build.dir}-->
+        <jar destfile="${build.dir}/WebTeamInterface-${wtiversion}.jar" basedir="${bin}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}" />
+            </manifest>
+            <zipfileset dir="${build.dir}\temp" includes="**" />
+        </jar>
+    	<input if:true="${isInteractive}">Build completed; press Enter to continue...</input>
+        <delete dir="${build.dir}\temp" />
+    	<input if:true="${isInteractive}">Deleted "${build.dir}/temp"; press Enter to continue...</input> 
+    </target>
+	
+    <target name="clean" description="clean up">
+        <!-- Delete the ${bin} and ${build.dir} directory trees -->
+        <delete dir="${bin}" />
+        <delete dir="${build.dir}" />
+    	<input if:true="${isInteractive}">Finished "clean"; press Enter to continue</input>
+    </target>
+	
+    <!-- Install the Node modules needed for the WTI-UI Angular Application.  Requires running "npm install", which is done
+         differently on Windows vs. Unix. -->
+    <target name="npminstall" description="install Node modules">
+    	<input if:true="${isInteractive}">Ready to run "npm install" to install Node modules; press Enter to continue...</input>
+    	<echo if:set="isBuildingOnWindows"> Running Windows npm install </echo>
+    	<exec executable="cmd" dir="${frontendlocation}" failonerror="true" if:set="isBuildingOnWindows">
+        	<arg value="/c"/>
+        	<arg value="npm.cmd"/>
+            <arg value="install" />
+        </exec>
+    	<echo if:set="isBuildingOnUnix"> Running Unix npm install </echo>
+        <exec executable="npm" dir="${frontendlocation}" failonerror="true" if:set="isBuildingOnUnix">
+            <arg value="install" />
+        </exec>
+    </target>
+	
+	<!-- Build the WTI-UI Angular front-end Application.  Requires running "npm run-script build", which is done
+	     differently on Windows vs. Unix -->
+    <target name="ngbuild" depends="npminstall" description="build Angular application">
+		<input if:true="${isInteractive}">Ready to run "npm run-script build" to build Angular front-end ; press Enter to continue...</input>
+    	<exec executable="cmd" dir="${frontendlocation}" failonerror="true" if:set="isBuildingOnWindows">
+        	<arg value="/c"/>
+        	<arg value="npm.cmd"/>
+            <arg value="run-script"/>
+            <arg value="build" />
+        </exec>
+        <exec executable="npm" dir="${frontendlocation}" failonerror="true" if:set="isBuildingOnUnix">
+            <arg value="run-script"/>
+            <arg value="build" />
+        </exec>
+    </target>
+	
+	<!-- Collect the {$frontendlocation}/dist (WTI-UI) Angular files, WebContent/webapp files and pc2v9.ini together in ${build.dir}-->
+    <target name="collect" depends="ngbuild">
+    	<input if:true="${isInteractive}">Ready to run Collect; press Enter to continue...</input>
+    	
+        <move todir="${build.dir}/WebContent">
+        	<fileset dir="${frontendlocation}/dist">  <!-- ${frontend/dist} is populated (with WTI-UI) by ngbuild, above-->
+                <include name="**/*" />
+            </fileset>
+        </move>
+    	
+        <copy todir="${build.dir}/WebContent/webapp">
+            <fileset dir="WebContent/webapp" />
+        </copy>
+
+        <copy file="pc2v9.ini" todir="${build.dir}"></copy>
+    	
+    	<input if:true="${isInteractive}">Collect completed; press Enter to continue...</input>
+    </target>
+</project>

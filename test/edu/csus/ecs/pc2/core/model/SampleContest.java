@@ -138,7 +138,7 @@ public class SampleContest {
 
         String contestPassword = "Password 101";
         Profile profile = new Profile("Default.");
-        return createContest(siteNumber, numSites, numTeams, numJudges, initAsServer, profile, contestPassword);
+        return createContest(siteNumber, numSites, numTeams, numJudges, initAsServer, profile, contestPassword, true);
     }
 
     /**
@@ -153,7 +153,7 @@ public class SampleContest {
      * @param contestPassword
      * @return
      */
-    public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer, Profile profile, String contestPassword) {
+    public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer, Profile profile, String contestPassword, boolean assignColors) {
 
         String[] languages = { LanguageAutoFill.JAVATITLE, LanguageAutoFill.DEFAULTTITLE, LanguageAutoFill.GNUCPPTITLE, LanguageAutoFill.PERLTITLE, LanguageAutoFill.MSCTITLE, "APL" };
         String[] problemsNames = { "Sumit", "Quadrangles", "Routing", "Faulty Towers", "London Bridge", "Finnigans Bluff" };
@@ -182,6 +182,10 @@ public class SampleContest {
             }
 
             language.setSiteNumber(siteNumber);
+            if (language.getID() == null || language.getID().trim().length() < 1){
+                // if no lang id set, assign a randome one.
+                language.setID("lang"+(contest.getLanguages().length+1));
+            }
             contest.addLanguage(language);
         }
         
@@ -227,7 +231,9 @@ public class SampleContest {
         contest.setProfile(profile);
         contest.setContestPassword(contestPassword);
 
-        assignColors(contest);
+        if (assignColors) {
+            assignColors(contest);
+        }
 
         return contest;
     }
@@ -1399,9 +1405,9 @@ public class SampleContest {
         problem.setReadInputDataFromSTDIN(true);
 
         if (validatorParameters == null) {
-            problem.setValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
+            problem.setOutputValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         } else {
-            problem.setValidatorCommandLine(Constants.CLICS_VALIDATOR_NAME +" " +validatorParameters);
+            problem.setOutputValidatorCommandLine(Constants.CLICS_VALIDATOR_NAME +" " +validatorParameters);
         }
     }
 

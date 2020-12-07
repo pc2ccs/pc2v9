@@ -45,107 +45,106 @@ public class RunUtilitiesTest extends TestCase {
         /**
          * Add Preliminary Judgement Yes.
          */
-        
+
         JudgementRecord record = new JudgementRecord(yesJudgement.getElementId(), firstJudgeId, true, false);
         record.setPreliminaryJudgement(true);
         run.addJudgement(record);
 
         suppressed = RunUtilities.supppressJudgement(null, run, contestTime);
         assertFalse("Should be suppressed, no notifications defined", suppressed);
-        
+
         judgementNotificationsList = new JudgementNotificationsList();
         NotificationSetting notificationSetting = new NotificationSetting(run.getProblemId());
         judgementNotificationsList.add(notificationSetting);
-        
+
         NotificationSetting notificationSetting2 = (NotificationSetting) judgementNotificationsList.get(run.getProblemId());
         assertTrue("Notification not properly inserted into list", notificationSetting.isSameAs(notificationSetting2));
-        
+
         suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime);
         assertFalse("Should be suppressed, notifications defined but turned ON", suppressed);
-        
+
         JudgementNotification judgementNotification = new JudgementNotification(true, 30);
         notificationSetting.setPreliminaryNotificationYes(judgementNotification);
-        
+
         JudgementNotification judgementNotificationNo = new JudgementNotification(false, 30);
         notificationSetting.setPreliminaryNotificationNo(judgementNotificationNo);
-        
+
         run.setElapsedMins(minutesBeforeEnd(contest, 31));
         suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime);
         assertFalse("Should be NOT suppressed, run.elapsed = 31", suppressed);
-        
+
         run.setElapsedMins(minutesBeforeEnd(contest, 30));
         suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime);
         assertTrue("Should be suppressed, run.elapsed = 30", suppressed);
-        
+
         run.setElapsedMins(minutesBeforeEnd(contest, 29));
         suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime);
         assertTrue("Should be suppressed, run.elapsed = 29", suppressed);
-        
-        
+
         /**
          * Add Final Judgement Yes.
          */
-        
+
         record = new JudgementRecord(yesJudgement.getElementId(), firstJudgeId, true, false);
         // final judgement
-//        record.setPreliminaryJudgement(true);
+        //        record.setPreliminaryJudgement(true);
         run.addJudgement(record);
-        
+
         run.setElapsedMins(minutesBeforeEnd(contest, 31));
         suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime);
         assertFalse("Should be NOT suppressed, run.elapsed = 31", suppressed);
-        
+
         run.setElapsedMins(minutesBeforeEnd(contest, 30));
         suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime);
         assertFalse("Should be NOT suppressed, run.elapsed = 30", suppressed);
-        
+
         run.setElapsedMins(minutesBeforeEnd(contest, 29));
         suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime);
         assertFalse("Should be NOT suppressed, run.elapsed = 29", suppressed);
 
         // Add Final suppress for yes
-        
+
         judgementNotification = new JudgementNotification(true, 30);
         notificationSetting.setFinalNotificationYes(judgementNotification);
-        
+
         run.setElapsedMins(minutesBeforeEnd(contest, 31));
         suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime);
         assertFalse("Should be NOT suppressed, run.elapsed = 31", suppressed);
-        
+
         run.setElapsedMins(minutesBeforeEnd(contest, 30));
         suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime);
         assertTrue("Should be suppressed, run.elapsed = 30", suppressed);
-        
+
         run.setElapsedMins(minutesBeforeEnd(contest, 29));
         suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime);
-        assertTrue("Should be suppressed, run.elapsed = 29", suppressed);    
-        
+        assertTrue("Should be suppressed, run.elapsed = 29", suppressed);
+
         /**
          * Loop through all runs, set Final Judgmenet Yes for each run,
          * except the first one which is ignored.
          */
-        for (Run run2 : runs){
-            if (! run2.equals(run)){ 
+        for (Run run2 : runs) {
+            if (!run2.equals(run)) {
                 suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run2, contestTime);
-                assertFalse("Should be NOT suppressed, not judged "+run2, suppressed);   
-                
+                assertFalse("Should be NOT suppressed, not judged " + run2, suppressed);
+
                 // Add final judgement
                 record = new JudgementRecord(yesJudgement.getElementId(), firstJudgeId, true, false);
                 run2.addJudgement(record);
-                
+
                 suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run2, contestTime);
-                assertFalse("Should be NOT suppressed, judged "+run2, suppressed);
+                assertFalse("Should be NOT suppressed, judged " + run2, suppressed);
 
                 run2.setElapsedMins(minutesBeforeEnd(contest, 20));
                 suppressed = RunUtilities.supppressJudgement(judgementNotificationsList, run2, contestTime);
-                
-                if (run2.getProblemId().equals(run.getProblemId())){
+
+                if (run2.getProblemId().equals(run.getProblemId())) {
                     /**
                      * Same Problem as run, so the settings are to suppress the run.
                      */
-                    assertTrue("Should be suppressed, judged at 20 min "+run2, suppressed);
+                    assertTrue("Should be suppressed, judged at 20 min " + run2, suppressed);
                 } else {
-                    assertFalse("Should be NOT suppressed, judged at 20 min "+run2, suppressed);
+                    assertFalse("Should be NOT suppressed, judged at 20 min " + run2, suppressed);
                 }
 
             }
@@ -192,17 +191,17 @@ public class RunUtilitiesTest extends TestCase {
 
         assertEquals(run.getProblemId(), run2.getProblemId());
         assertEquals(run.getLanguageId(), run2.getLanguageId());
-        
-        assertFalse (run2.isJudged());
-        assertTrue (run.isJudged());
 
-        assertFalse (run2.isSendToTeams());
-        assertTrue (run.isSendToTeams());
+        assertFalse(run2.isJudged());
+        assertTrue(run.isJudged());
+
+        assertFalse(run2.isSendToTeams());
+        assertTrue(run.isSendToTeams());
 
         assertEquals(RunStates.NEW, run2.getStatus());
         assertNotSame(RunStates.NEW, run.getStatus());
-        
-        assertFalse (run.isSameAs(run2));
+
+        assertFalse(run.isSameAs(run2));
 
         assertNull(run2.getJudgementRecord());
         assertNotNull(run.getJudgementRecord());
@@ -218,4 +217,77 @@ public class RunUtilitiesTest extends TestCase {
         return contest.getContestTime().getContestLengthMins() - mins;
     }
 
+    /**
+     * Test isDigits, positiv and negative tests.
+     * @throws Exception
+     */
+    public void testisDigits() throws Exception {
+
+        String[] data = {
+                //
+                "1233", //
+                "0", //
+                "585849393", //
+        };
+
+        for (String inNum : data) {
+            assertTrue("Expecting isDigits for " + inNum, RunUtilities.isDigits(inNum));
+        }
+
+        String[] negativeData = {
+                //
+                "", //
+                "FE123", //
+                "ab", //
+                "", //
+                "FE123", //
+        };
+
+        for (String inNum : negativeData) {
+            assertFalse("Expecting not isDigits for " + inNum, RunUtilities.isDigits(inNum));
+        }
+    }
+
+    /**
+     * Test isAlreadySubmitted.
+     * 
+     * @throws Exception
+     */
+    public void testisAlreadySubmitted() throws Exception {
+
+        SampleContest sampleContest = new SampleContest();
+
+        IInternalContest contest = sampleContest.createContest(1, 3, 33, 12, true);
+
+        Run[] runs = sampleContest.createRandomRuns(contest, 12, true, true, false);
+
+        Run oRun = runs[5];
+        int overrideId = 55343;
+        oRun.setOverRideNumber(overrideId);
+
+        for (Run run : runs) {
+            contest.addRun(run);
+        }
+        Run foundRun = null;
+
+        int count = 0;
+        runs = contest.getRuns();
+        for (Run run : runs) {
+            if (run.getOverrideNumber() != 0) {
+                foundRun = run;
+                count++;
+            }
+        }
+
+        assertTrue("Expect already submitted ", RunUtilities.isAlreadySubmitted(contest, overrideId + ""));
+
+        assertEquals("Expecting 1 override run ", 1, count);
+
+        assertTrue("Missing override run ", foundRun != null);
+
+        assertEquals("Expecting override id ", overrideId, foundRun.getOverrideNumber());
+
+        // override id has precedence so getNumber should be the same.
+        assertEquals("Expecting override id ", overrideId, foundRun.getNumber());
+    }
 }

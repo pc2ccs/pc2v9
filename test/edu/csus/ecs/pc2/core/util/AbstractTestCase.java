@@ -58,6 +58,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Test utility methods.
@@ -316,7 +317,7 @@ public class AbstractTestCase extends TestCase {
      */
     public String getDataDirectory() {
         String dirname = getRootInputTestDataDirectory() + File.separator + getShortClassName();
-        ensureDirectory(dirname);
+        ensureDirectory(dirname);  //TODO: this fails to check the boolean return value, thus silently failing if the dir couldn't be created
         return dirname;
     }
 
@@ -1430,6 +1431,42 @@ public class AbstractTestCase extends TestCase {
         actualFile.delete();
         boolean result = newFile.renameTo(actualFile);
         assertTrue("rename Failed", result);
+    }
+    
+
+    public String getContestSampleYamlFilename(String dirname) {
+        String contestConfigDir = getContestSampleCDPConfigDirname(dirname);
+        return contestConfigDir +File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+    }
+    
+    public String getContestSampleCDPConfigDirname(String dirname) {
+        String contestConfigDir = getContestSampleCDPDirname(dirname) +File.separator + IContestLoader.CONFIG_DIRNAME;
+        return contestConfigDir;
+    }
+
+    /**
+     * Get Sample base CDP dirname.
+     * 
+     * Ex. samps/contests/ccs1
+     * 
+     * @param dirname
+     * @return
+     */
+    public String getContestSampleCDPDirname(String dirname) {
+        String cdpConfig = getSampleContestsDirectory() + File.separator + dirname;
+        return cdpConfig;
+    }
+    
+    public String getTestSampleContestDirectory(String dirname) {
+        return getSampleContestsDirectory() + File.separator + dirname;
+    }
+
+    public String getSampleContestsDirectory() {
+        return "samps" + File.separator + "contests";
+    }
+    
+    public String getSampleContesYaml(String dirname) {
+        return getContestSampleYamlFilename(dirname);
     }
 
     /**

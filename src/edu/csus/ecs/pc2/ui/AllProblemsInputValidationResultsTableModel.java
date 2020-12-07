@@ -9,6 +9,7 @@ import java.util.Vector;
 import javax.swing.table.DefaultTableModel;
 
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.ProblemInputValidationResults;
@@ -99,7 +100,16 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
                 break;
             case 2:
                 //"Overall Result" column
-                InputValidationStatus status = probResults.getProblem().getInputValidationStatus(); 
+                //check the type of Input Validator associated with the problem
+                INPUT_VALIDATOR_TYPE currentIVType = prob.getCurrentInputValidatorType();
+                InputValidationStatus status;
+                if (currentIVType==INPUT_VALIDATOR_TYPE.VIVA) {
+                    status = prob.getVivaInputValidationStatus();
+                } else if (currentIVType==INPUT_VALIDATOR_TYPE.CUSTOM) {
+                    status = prob.getCustomInputValidationStatus();
+                } else {
+                    status = InputValidationStatus.UNKNOWN;
+                }
                 switch (status) {
                     case FAILED:
                         obj = new Boolean(false);
@@ -149,16 +159,18 @@ public class AllProblemsInputValidationResultsTableModel extends DefaultTableMod
                 break;
             case 5:
                 //"Input Validator" column
-                if (prob.isProblemHasInputValidator() && prob.getInputValidatorProgramName() != null) {
-                    obj = getBaseName(prob.getInputValidatorProgramName());
+                //TODO: this needs to be updated to reflect the possibility that Viva is the Input Validator...
+                //Note however that this method is only involved when "Run All Input Validators" is implemented (which it currently is not).
+                if (prob.isProblemHasCustomInputValidator() && prob.getCustomInputValidatorProgramName() != null) {
+                    obj = getBaseName(prob.getCustomInputValidatorProgramName());
                 } else {
                     obj = "<none>";
                 }
                 break;
             case 6: 
                 //"I.V. Command" column
-                if (prob.isProblemHasInputValidator() && prob.getInputValidatorCommandLine() != null) {
-                    obj = getBaseName(prob.getInputValidatorCommandLine());
+                if (prob.isProblemHasCustomInputValidator() && prob.getCustomInputValidatorCommandLine() != null) {
+                    obj = getBaseName(prob.getCustomInputValidatorCommandLine());
                 } else {
                     obj = "<none>";
                 }

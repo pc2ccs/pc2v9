@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
@@ -42,25 +42,31 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * 
  * Provides the methods to start PC<sup>2</sup> clients and servers.
  * <P>
- * An example of starting a server:
- * 
+ * An example of starting a server: 
+ * <P>
+ * <code>
  * public static void main(String[] args) {<br>
- * <br>
- * <blockquote> IInternalContest contest = new InternalContest();<br>
- * IInternalController controller = new InternalController (contest);<br>
- * String serverArgs = "--server"; controller.start(serverArgs);<br>
- * </blockquote> } <br>
+ * <blockquote> 
+ *      IInternalContest contest = new InternalContest();<br>
+ *      IInternalController controller = new InternalController (contest);<br>
+ *      String serverArgs = "--server"; controller.start(serverArgs);<br>
+ * </blockquote> 
+ * } 
+ * </code>
  * <P>
  * 
- * To start a client: <code>
+ * To start a client: 
+ * <P>
+ * <code>
  * public static void main(String[] args) {<br>
  * <blockquote>
- *      <br>
  *      IInternalContest contest = new InternalContest();<br>
  *      IInternalController controller = new InternalController (contest);<br>
  *      controller.start(args);<br>
- * } <br>
  * </blockquote>
+ * } 
+ * </code>
+ * <P>
  * 
  * @see edu.csus.ecs.pc2.Starter
  * @author pc2@ecs.csus.edu
@@ -71,14 +77,51 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 public interface IInternalController {
 
     /**
-     * Submit a run to the server.
+     * Submit a Judge Run to the server.
      * 
-     * @param problem
-     * @param language
-     * @param filename
-     * @throws Exception
+     * @param problem the {@link Problem} for which the Submission applies
+     * @param language the {@link Language} used in the Submission
+     * @param mainFileName the name of the file containing the main program source code
+     * @param otherFiles an array of {@link SerializedFile}s containing additional source files being submitted with the Run
+     * 
+     * @throws Exception if an error occurs while attempting to send the Run to the Server
      */
-    void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception;
+    void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] otherFiles) throws Exception;
+
+    /**
+     * Submit a Judge Run to the server.
+     * 
+     * @param problem the {@link Problem} for which the Submission applies
+     * @param language the {@link Language} used in the Submission
+     * @param mainFileName the name of the file containing the main program source code
+     * @param otherFiles an array of {@link SerializedFile}s containing additional source files being submitted with the Run
+     * @param overrideSubmissionTimeMS a value which, if non-zero, is to be used as the submission time of the Judge Run; 
+     *              only has effect when Contest Information "CCS Test Mode" is true
+     * @param overrideRunId a value which, if non-zero, is to be used as the RunId for the submission instead of any
+     *              internally-assigned RunId; only has effect when Contest Information "CCS Test Mode" is true
+     *              
+     * @throws Exception if an error occurs while attempting to send the Run to the Server
+     */
+    void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] otherFiles, 
+                        long overrideSubmissionTimeMS, long overrideRunId) throws Exception;
+
+    /**
+     * Submit a Judge Run to the server.
+     * 
+     * @param problem the {@link Problem} for which the Submission applies
+     * @param language the {@link Language} used in the Submission
+     * @param mainFile a {@link SerializedFile} containing the main program source code
+     * @param otherFiles an array of {@link SerializedFile}s containing additional source files being submitted with the Run
+     * @param overrideSubmissionTimeMS a value which, if non-zero, is to be used as the submission time of the Judge Run; 
+     *              only has effect when Contest Information "CCS Test Mode" is true
+     * @param overrideRunId a value which, if non-zero, is to be used as the RunId for the submission instead of any
+     *              internally-assigned RunId; only has effect when Contest Information "CCS Test Mode" is true
+     *              
+     * @throws Exception if an error occurs while attempting to send the Run to the Server
+     */
+    void submitJudgeRun(Problem problem, Language language, SerializedFile mainFile, SerializedFile[] otherFiles, 
+                        long overrideSubmissionTimeMS, long overrideRunId) throws Exception;
+
 
     void setSiteNumber(int i);
 
@@ -644,9 +687,7 @@ public interface IInternalController {
     void addNewCategory(Category newCategory);
 
     void startPlayback(PlaybackInfo playbackInfo);
-    
-    void submitRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS, long overrideRunId) throws Exception;
-    
+        
     /**
      * Send submitted run to Run Submission Interface.
      * @param run
@@ -688,5 +729,24 @@ public interface IInternalController {
      *            - the Controller to which this request applies
      */
     void updateAutoStartInformation(IInternalContest aContest, IInternalController aController) ;
+
+    /**
+     * Get contest model.
+     * @return
+     */
+    IInternalContest getContest();
+
+    /**
+     * Submit a run to the server for a different client.
+     * 
+     * @param submitter - override submitter, if used the logged in client must have  Permission.Type.SHADOW_PROXY_TEAM selected.
+     * @param problem
+     * @param language
+     * @param mainSubmissionFile
+     * @param additionalFiles
+     * @param overrideTimeMS
+     * @param overrideRunId
+     */
+    void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId);
 
 }

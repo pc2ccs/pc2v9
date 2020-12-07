@@ -194,6 +194,7 @@ public final class PacketType implements Serializable {
          * <P>
          * From judge to server <br>
          * From server to server <br>
+         * From server to team who submitted the run <br>
          * Contents: Run and judgement
          */
         RUN_JUDGEMENT,

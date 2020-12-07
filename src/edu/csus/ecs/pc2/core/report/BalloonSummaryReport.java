@@ -119,7 +119,7 @@ public class BalloonSummaryReport implements IReport {
                         } else {
                             String name = problem.getDisplayName();
                             int truncIndex = Math.min(name.toString().length(), 12);
-                            printWriter.format(" " + name.toString().substring(0, truncIndex));
+                            printWriter.print(" " + name.toString().substring(0, truncIndex));
                         }
                         
                     }
@@ -140,7 +140,7 @@ public class BalloonSummaryReport implements IReport {
 
     private void truncPrint(PrintWriter printWriter, String name, int maxlen) {
         int truncIndex = Math.min(name.toString().length(), maxlen);
-        printWriter.format(name.toString().substring(0, truncIndex));
+        printWriter.print(name.toString().substring(0, truncIndex));
     }
 
     private void truncPrint(PrintWriter printWriter, Account account, int maxlen) {

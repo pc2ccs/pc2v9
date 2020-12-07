@@ -1,10 +1,16 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
+import java.util.List;
+
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -219,5 +225,101 @@ public class JudgementUtilitesTest extends AbstractTestCase {
         IInternalContest contest = sample.createStandardContest();
         return contest;
     }
+    
+    
+    public void testgetLastTestCaseJudgementList() throws Exception {
+
+        IInternalContest contest = createContest();
+        
+        Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
+        Run run = runs[0];
+        
+        Judgement noJudgement = contest.getJudgements()[4];
+        
+        Problem problem = contest.getProblem(run.getProblemId());
+        
+        for (int i = 0; i < 8; i++) {
+            problem.addTestCaseFilenames("sumit.dat", "sumit.ans");
+        }
+        
+        assertTrue("Expecting more than four test cases, got "+problem.getNumberTestCases(), problem.getNumberTestCases() > 4);
+        
+        // Add all Yes judgements
+        addAllTestCases(run, problem, sample.getYesJudgement(contest));
+        
+        /**
+         * Test case, base 1, to assign a NO judgement to.
+         */
+        
+        // add no judgement at test case 2
+        addTestCases(run, problem, 2, noJudgement, sample.getYesJudgement(contest));
+        
+        int noTestCaseNumber = 4;
+        // Add all yes, except a No at noTestCaseNumber
+        addTestCases(run, problem, noTestCaseNumber, noJudgement, sample.getYesJudgement(contest));
+
+        List<Judgement> jList = JudgementUtilites.getLastTestCaseJudgementList(contest, run);
+        assertNotNull (jList);
+        
+        int tcn = problem.getNumberTestCases();
+        assertEquals("test cases expected ", tcn, jList.size());
+        
+        Judgement expectedNo = jList.get(noTestCaseNumber-1);
+        assertEquals(noJudgement, expectedNo);
+        
+        int yesCount = 0;
+        for (Judgement judgement : jList) {
+            if (Judgement.ACRONYM_ACCEPTED.equals(judgement.getAcronym())){
+                yesCount++;
+            }
+        }
+        
+        assertEquals("Expected yes judgement count ", 7, yesCount);
+    }
+
+    /**
+     * For all test cases add judgement record.
+     * @param run
+     * @param problem
+     * @param judgement
+     */
+    private void addAllTestCases(Run run, Problem problem, Judgement judgement) {
+        
+        for (int i = 0; i < problem.getNumberTestCases(); i++) {
+            boolean passed = Judgement.ACRONYM_ACCEPTED.equals(judgement.getAcronym());
+            ClientId judgerClientId = new ClientId(1, Type.JUDGE, 1);
+            JudgementRecord record  = new JudgementRecord(judgement.getElementId(), judgerClientId, passed, true);
+            RunTestCase runTestCaseResult = new RunTestCase(run, record, i, passed);
+            run.addTestCase(runTestCaseResult);
+        }
+        
+    }
+
+    /**
+     * Add judgements to run, add single NO to list of judgements
+     * 
+     * @param run
+     * @param problem
+     * @param testCaseNumberForNoJudgement test case number to assign judgement, base 1.
+     * @param noJudgement
+     * @param yesJudgement
+     */
+    private void addTestCases(Run run, Problem problem, int testCaseNumberForNoJudgement, Judgement noJudgement, Judgement yesJudgement) {
+        for (int i = 0; i < problem.getNumberTestCases(); i++) {
+            
+            Judgement judgement = yesJudgement;
+            
+            if (i + 1 == testCaseNumberForNoJudgement){
+                judgement = noJudgement;
+            }
+            
+            boolean passed = Judgement.ACRONYM_ACCEPTED.equals(judgement.getAcronym());
+            ClientId judgerClientId = new ClientId(1, Type.JUDGE, 1);
+            JudgementRecord record  = new JudgementRecord(judgement.getElementId(), judgerClientId, passed, true);
+            RunTestCase runTestCaseResult = new RunTestCase(run, record, i, passed);
+            run.addTestCase(runTestCaseResult);
+        }
+    }
+    
 
 }

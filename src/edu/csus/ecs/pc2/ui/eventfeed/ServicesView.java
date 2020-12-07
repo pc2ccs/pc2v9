@@ -31,8 +31,10 @@ import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
+import edu.csus.ecs.pc2.ui.ShadowControlPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import edu.csus.ecs.pc2.ui.WebServerPane;
+import java.awt.Dimension;
 
 /**
  * This class presents a graphical user interface for controlling the services exposed to external clients.
@@ -88,7 +90,7 @@ public class ServicesView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(600, 430));
+        this.setSize(new Dimension(750, 430));
         this.setContentPane(getMainViewPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Services");
@@ -122,7 +124,7 @@ public class ServicesView extends JFrame implements UIPlugin {
         }
     }
 
-    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+    public void setContestAndController(final IInternalContest inContest, final IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 
@@ -169,7 +171,19 @@ public class ServicesView extends JFrame implements UIPlugin {
                     }
                 }
                 
+                try {
+                    ShadowControlPane shadowPane = new ShadowControlPane(inContest, inController);
+                    addUIPlugin(getMainTabbedPane(), "Shadow Mode", shadowPane);
+                } catch (Exception e) {
+                    if (StaticLog.getLog() != null) {
+                        StaticLog.getLog().log(Log.WARNING, "Exception", e);
+                        e.printStackTrace(System.err);
+                    } else {
+                        e.printStackTrace(System.err);
+                    }
+                }
                 
+               
                if (Utilities.isDebugMode()) {
                     
                     try {

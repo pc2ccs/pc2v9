@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.api.implementation.ScrollyFrame;
  * 
  * @author pc2@ecs.csus.edu
  */
-// TODO refactor rename APIAbstractTest to APIAbstractPrint
+// TODO refactor rename APIAbstractTest to APIAbstractReport
 public abstract class APIAbstractTest {
 
     /**
@@ -50,7 +50,11 @@ public abstract class APIAbstractTest {
             s = line + s;
             line = "";
         }
-        scrollyFrame.addLine(s);
+        if (scrollyFrame == null) {
+            System.out.println(s);
+        } else {
+            scrollyFrame.addLine(s);
+        }
     }
 
     public void print(String s) {
@@ -63,13 +67,33 @@ public abstract class APIAbstractTest {
             s = line + s;
             line = "";
         }
-        scrollyFrame.addLine(s);
+        
+        if (scrollyFrame == null) {
+            System.out.println(s);
+        } else {
+            scrollyFrame.addLine(s);
+        }
     }
 
+    /**
+     * Set contest and controller, print to ScrollyFrame/
+     * @param frame
+     * @param inContest
+     * @param inServerConnection
+     */
     public void setAPISettings(ScrollyFrame frame, IContest inContest, ServerConnection inServerConnection) {
         this.scrollyFrame = frame;
         this.contest = inContest;
         this.serverConnection = inServerConnection;
+    }
+    
+    /**
+     * Set contest and controller, print to system.out
+     * @param inContest
+     * @param inServerConnection
+     */
+    public void setAPISettings( IContest inContest, ServerConnection inServerConnection) {
+        setAPISettings(null, inContest, inServerConnection);
     }
 
     @Override

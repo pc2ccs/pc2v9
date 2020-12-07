@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.ProblemInputValidationResults;
 import edu.csus.ecs.pc2.ui.cellRenderer.CheckBoxCellRenderer;
@@ -235,23 +236,54 @@ public class RunInputValidatorsPane extends JPanePlugin  {
         
     }
 
-    
+    /**
+     * This method returns a Vector containing one {@link ProblemInputValidationResults} element for each problem in the 
+     * specified array of {@link Problem}s which has an Input Validator associated with the problem and for which the associated
+     * Input Validator has been run (executed).  Each {@link ProblemInputValidationResults} element contains the Input Validation
+     * results for the Input Validator (either a Custom Input Validator or the VIVA Input Validator) currently associated with 
+     * the corresponding Problem (if any).  If a Problem has no associated Input Validator then the returned Vector will contain
+     * no {@link ProblemInputValidationResults} entry for that problem.  (Note that each {@link ProblemInputValidationResults} 
+     * object contains a field identifying the Problem to which it applies.)
+     * 
+     * @param probs an Array of Problems
+     * 
+     * @return a Vector containing a {@link ProblemInputValidationResults} element for each Problem which has an Input Validator 
+     *          associated with the Problem.
+     *          
+     */
     private Vector<ProblemInputValidationResults> getInputValidationResultsTableData(Problem [] probs) {
         
         Vector<ProblemInputValidationResults> tableData = new Vector<ProblemInputValidationResults> ();
         
         for (int prob=0; prob<probs.length; prob++) {
-            if (probs[prob].isProblemHasInputValidator()) {
-                
-                ProblemInputValidationResults result = new ProblemInputValidationResults(probs[prob]);
-                
-                // add each result for the current problem to the current row
-                for (InputValidationResult res : probs[prob].getInputValidationResults()) {
+            //check if the problem has a Custom Input Validator
+            if (probs[prob].getCurrentInputValidatorType()==INPUT_VALIDATOR_TYPE.CUSTOM) {
+                //yes; check if the Custom Input Validator has been run
+                if (probs[prob].isCustomInputValidatorHasBeenRun()) {
+                    
+                    //yes; initialize an object to hold the Custom Input Validator results 
+                    ProblemInputValidationResults result = new ProblemInputValidationResults(probs[prob]);
 
-                    result.addResult(res); // do we need to clone the InputValidationResult?
+                    // add each Custom Input Validator result for the current problem to the current row
+                    for (InputValidationResult res : probs[prob].getCustomInputValidatorResults()) {
+                        result.addResult(res); // do we need to clone the InputValidationResult?
+                    }
+                    //add the collection of Custom Input Validator results to the table data which will be returned
+                    tableData.add(result);
+                } 
+            } else if (probs[prob].getCurrentInputValidatorType()==INPUT_VALIDATOR_TYPE.VIVA) {
+                //the problem has a VIVA Input Validator; check if Viva has been run
+                if (probs[prob].isVivaInputValidatorHasBeenRun()) {
+                    //yes; initialize an object to hold the Custom Input Validator results 
+                    ProblemInputValidationResults result = new ProblemInputValidationResults(probs[prob]);
+
+                    // add each Viva Input Validator result for the current problem to the current row
+                    for (InputValidationResult res : probs[prob].getVivaInputValidatorResults()) {
+                        result.addResult(res); // do we need to clone the InputValidationResult?
+                    }
+                    //add the collection of Viva Input Validator results to the table data which will be returned
+                    tableData.add(result);
                 }
-                
-                tableData.add(result);
             }
         }
         
@@ -298,7 +330,7 @@ public class RunInputValidatorsPane extends JPanePlugin  {
 //        
 //        SerializedFile [] dataFiles = getDataFiles();
 //        
-//        InputValidatorRunner runner = new InputValidatorRunner(getContest(), getController());
+//        CustomInputValidatorRunner runner = new CustomInputValidatorRunner(getContest(), getController());
 //        
 //        results = null;
 //        try {

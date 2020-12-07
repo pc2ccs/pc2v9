@@ -1,5 +1,9 @@
 # PC^2 Version 9
  
+**NOTICE**  This public repository for the PC&sup2; Contest Control System is still _under development_.  You're welcome to look around, 
+but until an official announcement is made (and this is notice removed), _we do not recommend relying on the code published here_.
+If you are interested in obtaining a copy of PC&sup2; for running a contest, please refer to the [PC&sup2; home page](https://pc2.ecs.csus.edu).
+
 PC^ 2 (the **P**rogramming **C**ontest **C**ontrol system, pronounced "P-C-squared" or sometimes just "P-C-Two" for short) is a 
 software system designed to support programming contest operations in a variety of computing environments including MS Windows, Mac OS/X,
 and virtually any flavor of Unix-like platform. 
@@ -26,22 +30,26 @@ See the file [LICENSE.TXT](./LICENSE.TXT)
 
 # Contributing to PC2
 We welcome contributions intended to help improve PC2!  See the file [CONTRIBUTING.MD](./CONTRIBUTING.MD) for further information and
-guidelines for contributing.
+guidelines for contributing.  Substantial additional information can also be found on our GitHub Wiki, in particular 
+[here](https://github.com/pc2ccs/pc2v9/wiki) and [here](https://github.com/pc2ccs/pc2v9/wiki/Contents).
 
 # Contact Information
-Website:  http://pc2.ecs.csus.edu/  
+Website:  https://pc2ccs.github.io/  
 mailto: pc2@ecs.csus.edu
 
 # How to report bugs or request new features
 We use [GitHub Issues](https://guides.github.com/features/issues/)
 to track bug reports and feature/enhancement requests.  
-Please see [this GitHub article](https://help.github.com/en/articles/creating-an-issue) for information on how to file bug reports
-or feature/enhancement requests.
+Please see [this GitHub article](https://help.github.com/en/articles/creating-an-issue) 
+for general information on how to file GitHub Issues.
+See the [PC2v9 GitHub Issues page](https://github.com/pc2ccs/pc2v9/issues) to file bug reports or feature/enhancement requests
+for PC2.
 
 # Sign up for the announcement list
 We maintain a mailing list of people who would like to receive announcements when new releases of PC2 occur, 
 or when significant issues with published systems are found. 
-We send mail to this list rarely and we **never** distribute our mailing list to anyone.
+Don't worry; we won't flood you with spam -- we only send announcements when there are significant issues or updates that
+we think our users will want to know about.  Also, we **never** distribute our mailing list to anyone.
 
 If you are a contest administrator setting up PC2, we recommend joining the PC2 announcement list so that you are notified 
 if significant issues which might affect the integrity of your contest are found.

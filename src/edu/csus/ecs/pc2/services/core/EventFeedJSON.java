@@ -18,7 +18,9 @@ import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -71,6 +73,10 @@ public class EventFeedJSON extends JSONUtilities {
     private String eventTypeList = null;
 
     private JSONTool jsonTool;
+
+    private Vector<ElementId> ignoreGroup = new Vector<ElementId>();
+
+    private Vector<ClientId> ignoreTeam = new Vector<ClientId>();
 
     public String getContestJSON(IInternalContest contest) {
 
@@ -184,6 +190,8 @@ public class EventFeedJSON extends JSONUtilities {
             if (group.isDisplayOnScoreboard()) {
                 appendJSONEvent(stringBuilder, GROUPS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getGroupJSON(contest, group));
                 stringBuilder.append(NL);
+            } else {
+                ignoreGroup.add(group.getElementId());
             }
         }
 
@@ -239,9 +247,11 @@ public class EventFeedJSON extends JSONUtilities {
 
         for (Account account : accounts) {
 
-            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !ignoreGroup.contains(account.getGroupId())) {
                 appendJSONEvent(stringBuilder, TEAM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getTeamJSON(contest, account));
                 stringBuilder.append(NL);
+            } else {
+                ignoreTeam.add(account.getClientId());
             }
         }
 
@@ -294,7 +304,7 @@ public class EventFeedJSON extends JSONUtilities {
 
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
-            if (!run.isDeleted()) {
+            if (!run.isDeleted() && !ignoreTeam.contains(run.getSubmitter())) {
                 appendJSONEvent(stringBuilder, SUBMISSION_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getSubmissionJSON(contest, run, servletRequest, sc));
                 stringBuilder.append(NL);
             }
@@ -321,7 +331,7 @@ public class EventFeedJSON extends JSONUtilities {
 
         for (Run run : runs) {
 
-            if (run.isJudged()) {
+            if (run.isJudged() && !ignoreTeam.contains(run.getSubmitter())) {
 
                 appendJSONEvent(stringBuilder, JUDGEMENT_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getJudgementJSON(contest, run));
                 stringBuilder.append(NL);
@@ -347,6 +357,9 @@ public class EventFeedJSON extends JSONUtilities {
 
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
+            if (ignoreTeam.contains(run.getSubmitter())) {
+                continue;
+            }
             JudgementRecord judgementRecord = run.getJudgementRecord();
             if (run.isJudged() && !judgementRecord.isPreliminaryJudgement()) {
                 RunTestCase[] testCases = run.getRunTestCases();
@@ -376,6 +389,9 @@ public class EventFeedJSON extends JSONUtilities {
 
         Arrays.sort(clarifications, new ClarificationComparator());
         for (Clarification clarification : clarifications) {
+            if (ignoreTeam.contains(clarification.getSubmitter())) {
+                continue;
+            }
             appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getClarificationJSON(contest, clarification, null));
             stringBuilder.append(NL);
             if (clarification.isAnswered()) {

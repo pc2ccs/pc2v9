@@ -1,6 +1,10 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.tools;
 
+import static edu.csus.ecs.pc2.AppConstants.DATETIME_PATTERN_LONG;
+import static edu.csus.ecs.pc2.AppConstants.LOGIN_OPTION_STRING;
+import static edu.csus.ecs.pc2.AppConstants.PASSWORD_OPTION_STRING;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,6 +18,7 @@ import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.Plugin;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -29,16 +34,7 @@ public class ContestControl {
 
 	private static final String START_IN_OPTION_STRING = "--startin";
 
-	// TODO move these general options to AppConstants
-	public static final String HELP_OPTION_STRING = "--help";
 
-	public static final String DEBUG_OPTION_STRING = "--debug";
-
-	public static final String LOGIN_OPTION_STRING = "--login";
-
-	public static final String PASSWORD_OPTION_STRING = "--password";
-
-	private static final String TIME_PATTERN = "E, dd MMM yyyy HH:mm:ss z";
 
 	private static void usage() {
 
@@ -275,7 +271,7 @@ public class ContestControl {
 				
 				contestInformation = contest.getContestInformation();
 
-				SimpleDateFormat format = new SimpleDateFormat(TIME_PATTERN);
+				SimpleDateFormat format = new SimpleDateFormat(DATETIME_PATTERN_LONG);
 				System.out.println("Contest will be automatically started at: " + //
 				format.format(contestInformation.getScheduledStartTime().getTime()));
 
@@ -385,10 +381,9 @@ public class ContestControl {
 	}
 
 	private static void fatalError(String message) {
-
-		// TODO output to log
-
+	    
 		System.err.println("Program halted: " + message);
+		StaticLog.getLog().severe("Program halted: " + message);
 		System.exit(12);
 	}
 

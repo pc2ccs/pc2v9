@@ -1,0 +1,51 @@
+{{ $stableRelease := index $.Site.Data.releases.stable }}
+{{ $preRelease := index $.Site.Data.releases.prerelease }}
+{{ $nightly := index $.Site.Data.releases.nightly }}
+{{ $stableTool := index $stableRelease.downloads (.Get "toolname") }}
+{{ $prereleaseTool := index $preRelease.downloads (.Get "toolname") }}
+{{ $nightlyTool := index $nightly.downloads (.Get "toolname") }}
+
+<h2>Download</h2>
+<p>
+    The latest stable release {{ .Get "name" }} version is {{ $stableTool.version }}, released on {{ $stableRelease.date }}.
+</p>
+<p>
+    <a class="btn btn-primary" href="{{ $stableTool.urls.zip }}"><i class="fas fa-download"></i> Download stable <i>{{ .Get "name" }}</i> (version {{ $stableTool.version }}) as zip</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a class="btn btn-primary" href="{{ $stableTool.urls.tar_gz }}"><i class="fas fa-download"></i> Download stable <i>{{ .Get "name" }}</i> (version {{ $stableTool.version }}) as tar.gz</a>
+    <br />
+    <br />
+</p>
+<p>
+{{ if gt $prereleaseTool.published_at $stableTool.published_at }}
+        Release Candidate: &nbsp;&nbsp;&nbsp;<a href="{{ $prereleaseTool.urls.zip }}">{{ .Get "shortname" }} version {{ $prereleaseTool.version }}.zip</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="{{ $prereleaseTool.urls.tar_gz }}">{{ .Get "shortname" }} version {{ $prereleaseTool.version }}.tar.gz</a><br />
+    The latest release candidate {{ .Get "name" }} version is {{ $prereleaseTool.version }}, released on {{ $preRelease.date }}.
+</p>
+<p>
+    <a class="btn btn-danger" href="{{ $prereleaseTool.urls.zip }}"><i class="fas fa-download"></i> Download release candidate <i>{{ .Get "name" }}</i> (version {{ $prereleaseTool.version }}) as zip</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a class="btn btn-danger" href="{{ $prereleaseTool.urls.tar_gz }}"><i class="fas fa-download"></i> Download release candidate <i>{{ .Get "name" }}</i> (version {{ $prereleaseTool.version }}) as tar.gz</a>
+{{ else }}
+        No release candidate at this time.
+{{ end }}
+    <br />
+    <br />
+</p>
+<p>
+    The latest nightly build {{ .Get "name" }} version is {{ $nightlyTool.version }}, released on {{ $nightly.date }}.
+</p>
+<p>
+    <a class="btn btn-danger" href="{{ $nightlyTool.urls.zip }}"><i class="fas fa-download"></i> Download nightly build <i>{{ .Get "name" }}</i> (version {{ $nightlyTool.version }}) as zip</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a class="btn btn-danger" href="{{ $nightlyTool.urls.tar_gz }}"><i class="fas fa-download"></i> Download nightly build <i>{{ .Get "name" }}</i> (version {{ $nightlyTool.version }}) as tar.gz</a>
+    <br />
+    <br />
+</p>
+<h2>Documentation</h2>
+
+<p>
+    The {{ .Get "name" }} Administrator's Guide is contained in the <b>/doc</b> folder in all of the above downloads.  You can also download it directly by clicking on the following link:
+</p>
+<p>
+    <a class="btn btn-secondary" href="/docs/{{ .Get "doc" }}.pdf"><i class="fas fa-file-pdf"></i> Download / view documentation (PDF format)</a>
+</p>

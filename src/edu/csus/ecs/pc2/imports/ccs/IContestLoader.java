@@ -145,7 +145,13 @@ public interface IContestLoader {
 
     String READ_FROM_STDIN_KEY = "readFromSTDIN";
     
-    String INPUT_VALIDATOR_COMMAND_LINE_KEY = "inputValidatorCommandLine";
+    //keys for YAML entries specifying data for Input Validators:
+    String INPUT_VALIDATOR_KEY = "input_validator"; //the section header for Input Validator info
+    String DEFAULT_INPUT_VALIDATOR_KEY = "defaultInputValidator"; //the key for specifying the type of Input Validator selected by default
+    String CUSTOM_INPUT_VALIDATOR_PROGRAM_NAME_KEY = "customInputValidatorProg";    //custom input validator program name
+    String CUSTOM_INPUT_VALIDATOR_COMMAND_LINE_KEY = "customInputValidatorCmd"; //command to invoke custom input validator
+    String VIVA_PATTTERN_KEY = "vivaPattern";   //the key for specifying a VIVA pattern in YAML
+    String VIVA_PATTERN_FILE_KEY = "vivaPatternFile";   //the key for specifying a file containing a VIVA pattern
 
     // per problem problem.yaml settings
     String SHOW_OUTPUT_WINDOW = "showOutputWindow";
@@ -161,6 +167,22 @@ public interface IContestLoader {
     String USING_CUSTOM_VALIDATOR = "use-custom-validator";
     
     String USE_CLICS_CUSTOM_VALIDATOR_INTERFACE = "use-clics-custom-validator-interface";
+    
+    String PC2_EXEC_CMD = "execCmd";
+    
+    String PC2_COMPILER_CMD = "compilerCmd";
+    
+    String CCS_LAST_EVENT_ID_KEY = "ccs-last-event-id";
+
+    String CCS_PASSWORD_KEY = "ccs-password";
+
+    String CCS_LOGIN_KEY = "ccs-login";
+
+    String CCS_URL_KEY = "ccs-url";
+
+    String SHADOW_MODE_KEY = "shadow-mode";
+    
+    String ALLOW_MULTIPLE_TEAM_LOGINS_KEY = "allow-multiple-team-logins";
 
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 

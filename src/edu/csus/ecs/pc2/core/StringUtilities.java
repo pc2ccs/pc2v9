@@ -242,5 +242,38 @@ public final class StringUtilities implements Serializable {
         
         return names;
     }
+
+    
+    /**
+     * Returns a boolean value for the input string.
+     * 
+     * <li> If string is null or empty returns defaultValue.
+     * <li> If string is yes or true (case insensitive) returns true
+     * <li> If string is no or false (case insensitive) returns false
+     * <li> If string not true or false, returns  defaultBoolean.
+     * 
+     * @param string a string containing a word
+     * @param defaultBoolean default value if stirng is null or does no
+     * @return true or false
+     */
+    public static boolean getBooleanValue(String string, boolean defaultBoolean) {
+
+        boolean value = defaultBoolean;
+
+        if (string != null && string.trim().length() > 0) {
+            string = string.trim();
+            if ("yes".equalsIgnoreCase(string)) {
+                value = true;
+            } else if ("no".equalsIgnoreCase(string)) {
+                value = false;
+            } else if ("true".equalsIgnoreCase(string)) {
+                value = true;
+            } else if ("false".equalsIgnoreCase(string)) {
+                value = false;
+            }
+        }
+
+        return value;
+    }
     
 }

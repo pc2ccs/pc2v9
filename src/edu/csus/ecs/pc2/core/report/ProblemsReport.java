@@ -128,14 +128,14 @@ public class ProblemsReport implements IReport {
         printWriter.println(" Using output validator : " + problem.isValidatedProblem());
         printWriter.println(" Using output validator : " + problem.getValidatorType().toString());
         
-        printWriter.println("         Validator name : " + problem.getValidatorProgramName());
+        printWriter.println("         Validator name : " + problem.getOutputValidatorProgramName());
 
-        printWriter.println("     Validator cmd line : " + problem.getValidatorCommandLine());
+        printWriter.println("     Validator cmd line : " + problem.getOutputValidatorCommandLine());
         printWriter.println("     Validator option # : " + problem.getWhichPC2Validator());
         printWriter.println("    Using pc2 validator : " + problem.isUsingPC2Validator());
         
 
-        printWriter.println("     Validator cmd line : " + problem.getValidatorCommandLine());
+        printWriter.println("     Validator cmd line : " + problem.getOutputValidatorCommandLine());
         printWriter.println("     Validator option # : " + problem.getWhichPC2Validator());
         printWriter.println("    Using pc2 validator : " + problem.isUsingPC2Validator());
 
@@ -147,20 +147,20 @@ public class ProblemsReport implements IReport {
         splitPad(printWriter, ";", "  ClicsValidatorSettings> ", nullSafeString(problem.getClicsValidatorSettings()),";");
 
         printWriter.print(" customValidatorSettings: ");
-        splitPad(printWriter, ";", " customValidatorSettings> ", nullSafeString(problem.getCustomValidatorSettings()),";");
+        splitPad(printWriter, ";", " customValidatorSettings> ", nullSafeString(problem.getCustomOutputValidatorSettings()),";");
     
         printWriter.println();
 
         //input validator settings
 
-        printWriter.println("    Has input validator : " + problem.isProblemHasInputValidator());
-        printWriter.println("        input validator : " + problem.getInputValidatorProgramName());
-        printWriter.println("    input validator cmd : " + problem.getInputValidatorCommandLine());
+        printWriter.println("    Has input validator : " + problem.isProblemHasCustomInputValidator());
+        printWriter.println("        input validator : " + problem.getCustomInputValidatorProgramName());
+        printWriter.println("    input validator cmd : " + problem.getCustomInputValidatorCommandLine());
         
         if (problemDataFiles == null) {
             printWriter.println("   input validator file: No file (contents saved) ");
         } else {
-            SerializedFile inputFormatValidatorFile = problemDataFiles.getInputValidatorFile();
+            SerializedFile inputFormatValidatorFile = problemDataFiles.getCustomInputValidatorFile();
             if (inputFormatValidatorFile == null) {
                 printWriter.println("   input validator file: No file (contents saved) ");
             } else {
@@ -175,12 +175,20 @@ public class ProblemsReport implements IReport {
         }
 
         // null safe print of enum
-        String validationStatus = "null";
-        InputValidationStatus status = problem.getInputValidationStatus();
-        if (status != null) {
-            validationStatus = status.toString();
+        String vivaValidationStatus = "null";
+        InputValidationStatus vivaStatus = problem.getVivaInputValidationStatus();
+        if (vivaStatus != null) {
+            vivaValidationStatus = vivaStatus.toString();
         }
-        printWriter.println(" input validator status : " + validationStatus);
+        printWriter.println(" Viva input validator status : " + vivaValidationStatus);
+        
+        // null safe print of enum
+        String customValidationStatus = "null";
+        InputValidationStatus customStatus = problem.getCustomInputValidationStatus();
+        if (customStatus != null) {
+            customValidationStatus = customStatus.toString();
+        }
+        printWriter.println(" Custom input validator status : " + customValidationStatus);
         
         printWriter.println();
 

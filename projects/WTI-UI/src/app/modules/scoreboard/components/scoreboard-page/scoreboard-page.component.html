@@ -1,0 +1,20 @@
+<div class='filter-table-container'>
+
+    <div class='table-container'>
+        <table>
+            <tr>
+                <th>Rank</th>
+                <th>Team</th>
+                <th>Solved</th>
+                <th>Score</th>
+                <th></th>
+            </tr>
+            <tr *ngFor= 'let team of teamStandings' >
+                <td>{{ team.rank }}</td>
+                <td>{{ team.teamName }}</td>
+                <td>{{ team.solved }}</td>
+                <td>{{ team.points }}</td>
+            </tr>
+        </table>
+    </div>
+</div>

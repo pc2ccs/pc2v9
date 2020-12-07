@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 import java.util.TimeZone;
 
 import javax.swing.SwingUtilities;
@@ -12,8 +14,10 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
+import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientSettingsEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -422,6 +426,13 @@ public class AutoJudgingMonitor implements UIPlugin {
         notifyMessager.updateMessage(getRunDescription(fetchedRun));
 
         executable.execute();
+        
+        // Dump execution results files to log
+        String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
+        Problem problem = getContest().getProblem(fetchedRun.getProblemId());
+        ClientId clientId = getContest().getClientId();
+        List<Judgement> judgements = JudgementUtilites.getLastTestCaseJudgementList(contest, fetchedRun);
+        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, fetchedRun, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         
@@ -443,10 +454,19 @@ public class AutoJudgingMonitor implements UIPlugin {
 
                 notifyMessager.updateStatusLabel("Run failed to compile");
 
-                ElementId elementId = contest.getJudgements()[1].getElementId();
+                Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "CE");
+                String judgementString = "No - Compilation Error"; // default
+                ElementId elementId = null;
+                if (judgement != null) {
+                    judgementString = judgement.getDisplayName();
+                    elementId = judgement.getElementId();
+                } else {
+                    // TODO: find judgement string by name (from somewhere other than the judgements list)
+                    elementId = contest.getJudgements()[1].getElementId();
+                }
+
                 judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true, true);
-                // TODO this needs to be flexible
-                judgementRecord.setValidatorResultString("No - Compilation Error");
+                judgementRecord.setValidatorResultString(judgementString);
 
             } else if (executionData.isValidationSuccess()) {
 
@@ -822,6 +842,10 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     public void setAutoJudgeDisabledLocally(boolean autoJudgeDisabledLocally) {
         this.autoJudgeDisabledLocally = autoJudgeDisabledLocally;
+    }
+   
+    public IInternalContest getContest() {
+        return contest;
     }
    
 }

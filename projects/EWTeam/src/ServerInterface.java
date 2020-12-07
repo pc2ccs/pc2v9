@@ -399,7 +399,7 @@ public class ServerInterface {
 
 			// submit file for judgment
 			currentTeam
-					.submitRun(prob, lang, mainFileName, new String[0], 0, 0);
+					.submitJudgeRun(prob, lang, mainFileName, new String[0], 0, 0);
 
 			// delete old file
 			newFile.delete();

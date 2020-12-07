@@ -232,7 +232,7 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
         settings.setValidatorProgramName(getValidatorProgramName());
         
         //put the Custom Validator Settings in the Problem
-        problem.setCustomValidatorSettings(settings);
+        problem.setCustomOutputValidatorSettings(settings);
         
         //put the SerializedFile version of the executable validator file into the problem (specifically, it goes in the "problem data files")
         String validatorFileName =  testDataDirectoryName + File.separator + validatorProgramName;
@@ -243,9 +243,9 @@ public class CustomCppClicsInterfaceValidatorTest extends AbstractTestCase {
         assertTrue("Expecting problem to be marked as isValidated, but failed", problem.isValidatedProblem());
         assertTrue("Expecting using Custom Validator, but failed", problem.isUsingCustomValidator());
         assertTrue("Expecting problem validator command line to be Clics Default Command Line, but failed", 
-                                problem.getValidatorCommandLine().equals("." + File.separator + Constants.DEFAULT_CLICS_VALIDATOR_COMMAND)); 
-        assertTrue("Expecting problem validator program name to be '" + getValidatorProgramName() + "' but it is '" + problem.getValidatorProgramName() + "' ", 
-                                problem.getValidatorProgramName().equals(getValidatorProgramName()));
+                                problem.getOutputValidatorCommandLine().equals("." + File.separator + Constants.DEFAULT_CLICS_VALIDATOR_COMMAND)); 
+        assertTrue("Expecting problem validator program name to be '" + getValidatorProgramName() + "' but it is '" + problem.getOutputValidatorProgramName() + "' ", 
+                                problem.getOutputValidatorProgramName().equals(getValidatorProgramName()));
         assertTrue("Expecting problem to have a serialized validator file but it has 'null' ", problemDataFiles.getOutputValidatorFile()!=null);
 
     }

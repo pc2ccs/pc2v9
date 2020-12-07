@@ -357,15 +357,6 @@ public class ReportsTest extends AbstractTestCase {
     }
     
 
-    private String getTestSampleContestDirectory(String dirname) {
-        return getSampleContestsDirectory() + File.separator + dirname;
-    }
-
-    private String getSampleContestsDirectory() {
-        return "samps" + File.separator + "contests";
-    }
-
-
     /**
      * Load groups from samps contest.
      * 

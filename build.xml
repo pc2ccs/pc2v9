@@ -118,6 +118,11 @@
             <isset property="env.GIT_COMMIT"/>
         </condition>
     </target>
+	
+	<target name="jarSkipTests">
+		 <property name="RUN_NO_TESTS" value="Yes"/>
+		<antcall target="jar"/>
+	</target>
 
     <target name="init" depends="properties, -execgit, -getenv">
         <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpathref="checkstyle.classpath"/>
@@ -221,7 +226,9 @@ TODO consider switching back to this at 9.7.0/9.8build
 		<!-- include the images in the jar -->
 		<copy file="images/csus_logo.png" todir="${build.prod.dir}/images"/>
 		<copy file="images/ICPCWebMast_small.png" todir="${build.prod.dir}/images"/>
-		<copy file="images/PC2Logo135x135.png" todir="${build.prod.dir}/images"/>
+		<copy file="images/icpc_logo.png" todir="${build.prod.dir}/images"/>
+		<copy file="images/PC2Logo.png" todir="${build.prod.dir}/images"/>
+		<copy file="images/PC2Logo.ico" todir="${build.prod.dir}/images"/>
 
 		<!-- consider doing the manifest in a separate target
              then the Version can be ommitted if not set -->
@@ -235,11 +242,23 @@ TODO consider switching back to this at 9.7.0/9.8build
                 <attribute name="Main-Class" value="edu.csus.ecs.pc2.Starter"/>
             </manifest>
         </jar>
+    	
+    	<!-- Build the (old) EWTeam project and copy it (in zip/tar.gz form) to the "projects" folder -->
         <ant dir="projects/EWTeam" antfile="package.xml" useNativeBasedir="true" inheritAll="false"/>
         <copy todir="projects">
             <fileset dir="projects/EWTeam/dist" includes="EWTeam*.tar.gz"/>
             <fileset dir="projects/EWTeam/dist" includes="EWTeam*.zip"/>
         </copy>
+    	
+    	<!-- Build the WebTeamInterface (WTI) project (which also implicitly builds WTI-UI) and copy it to the "projects" folder. -->
+        <ant dir="projects/WTI-API" antfile="packageWTI.xml" useNativeBasedir="true" inheritAll="false"/>
+    	
+    	<!-- Copy the archive (zip and tar.gz) files of the WTI project to the projects folder -->
+        <copy todir="projects">
+            <fileset dir="projects/WTI-API/dist" includes="WebTeamInterface*.tar.gz"/>
+            <fileset dir="projects/WTI-API/dist" includes="WebTeamInterface*.zip"/>
+        </copy>
+   	
     </target>
 
     <target name="clean" description="clean up">
@@ -255,11 +274,12 @@ TODO consider switching back to this at 9.7.0/9.8build
         <delete file="profiles.properties" />
         <delete file="teams.output.txt" />
         <delete>
-           <fileset dir="projects" includes="EWTeam-*"/>
+            <fileset dir="projects" includes="EWTeam-*"/>
+        	<fileset dir="projects" includes="WebTeamInterface-*"/>
         </delete>
     </target>
 
-    <target name="checkstyle" description="Generates a report of code convention violations." depends="init">
+    <target name="checkstyle" unless="RUN_NO_TESTS" description="Generates a report of code convention violations." depends="init">
         <mkdir dir="${build.dir}"/>
         <checkstyle config="${basedir}/.pc2_checks.xml" failureProperty="checkstyle.failure" failOnViolation="false">
             <formatter type="xml" tofile="${build.dir}/checkstyle-result.xml" />
@@ -288,7 +308,8 @@ TODO consider switching back to this at 9.7.0/9.8build
         </javadoc>
     </target>
     
-	<target name="test" depends="compile-tests" description="run junit tests">
+	<!-- run test unless RUN_NO_TESTS defined -->
+	<target name="test" depends="compile-tests" unless="RUN_NO_TESTS" description="run junit tests">
 		<delete dir="${testresults.dir}"/>
 		<mkdir dir="${testresults.xml.dir}"/>
 		<junit errorProperty="test.failed" failureProperty="test.failed" fork="yes">

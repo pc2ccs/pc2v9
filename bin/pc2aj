@@ -16,6 +16,6 @@ else
   PC2XOPS=""
 fi
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp $libdir/pc2.jar:$mclbdir/mclb.jar edu.csus.ecs.pc2.Starter --nogui $*
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp $libdir/*:$mclbdir/* edu.csus.ecs.pc2.Starter --nogui $*
 
 # eof pc2aj $Id$ 

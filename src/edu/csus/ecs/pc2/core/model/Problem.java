@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -11,6 +12,7 @@ import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
+import edu.csus.ecs.pc2.core.model.inputValidation.VivaInputValidatorSettings;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
@@ -90,11 +92,11 @@ public class Problem implements IElementObject {
     private int timeOutInSeconds = DEFAULT_TIMEOUT_SECONDS;
 
     /**
-     * This enum defines the types of Validators which a Problem can have.
+     * This enum defines the types of Output Validators which a Problem can have.
      */
     public enum VALIDATOR_TYPE {
         /**
-         * The Problem has no associated Validator; it is not a Validated Problem.
+         * The Problem has no associated Output Validator; it is not a Validated Problem.
          */
         NONE, 
         /**
@@ -106,7 +108,7 @@ public class Problem implements IElementObject {
          */
         CLICSVALIDATOR, 
         /**
-         * The Problem uses a Custom (user-provided) Validator.
+         * The Problem uses a Custom (user-provided) Output Validator.
          */
         CUSTOMVALIDATOR
         }
@@ -119,19 +121,60 @@ public class Problem implements IElementObject {
     private ClicsValidatorSettings clicsValidatorSettings ;
     private CustomValidatorSettings customValidatorSettings ;
     
-    
-    //input validator settings
-    private boolean problemHasInputValidator = false;
-    private String inputValidatorProgramName = "";
-    private String inputValidatorCommandLine = "";
-    private String inputValidatorFilesOnDiskFolderName = "";   
-
     /**
-     * enum of inputValidation Statuses
-     * @author ICPC
+     * This enum defines the types of Input Validators which a Problem can have.
+     * 
+     * Note that it is possible to use more than one Input Validator to check a problem's data files;
+     * however, each problem when it is saved on the PC2 server has a single "current Input Validator"
+     * type associated with it at that time - specifically, the most recently-selected Input Validator type.
+     * 
+     * Note also that it is possible to SELECT an Input Validator (thus making that Input Validator type
+     * the "currently selected Input Validator type") without actually RUNNING the selected Input Validator.
+     * Clients should use {@link #getCurrentInputValidatorType()} to determine the most recently selected
+     * Input Validator type.   Methods {@link #isProblemHasCustomInputValidator()} and
+     * {@link #isProblemHasVivaInputValidatorPattern()} can be used to determine whether the problem actually
+     * has the corresponding Input Validator type associated with it (independent of whether that is the currently
+     * SELECTED Input Validator).  Methods {@link #isVivaInputValidatorHasBeenRun()} and
+     * {@link #isCustomInputValidatorHasBeenRun()} can be used to determine whether the corresponding Input Validator
+     * has actually been executed.
+     * 
+     * @see #getCurrentInputValidatorType()
+     * @see #isProblemHasCustomInputValidator()
+     * @see #isProblemHasVivaInputValidatorPattern()
+     * @see #isVivaInputValidatorHasBeenRun()
+     * @see #isCustomInputValidatorHasBeenRun()
+     * 
+     * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
+     */
+    public enum INPUT_VALIDATOR_TYPE {
+        /**
+         * The Problem has no associated Input Validator.
+         */
+        NONE, 
+        /**
+         * The Problem uses the VIVA Input Validator.
+         */
+        VIVA, 
+        /**
+         * The Problem uses a Custom (user-provided) Input Validator.
+         */
+        CUSTOM
+        }
+    
+    /**
+     * This enum defines the possible Input Validation Status values which a problem may have.
+     * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
      *
      */
     public enum InputValidationStatus {
+        /**
+         * Nothing is known about the Input Validation Status for this problem.
+         */
+        UNKNOWN,
+        /**
+         * An Input Validator has been defined for the problem, but no Input Validator has been run on the data files in this problem.
+         */
+        NOT_TESTED,
         /**
          * An Input Validator has been run on the data files in this problem and they all passed.
          */
@@ -141,18 +184,31 @@ public class Problem implements IElementObject {
          */
         FAILED, 
         /**
-         * No Input Validator has been run on the data files in this problem.
-         */
-        NOT_TESTED,
-        /**
-         * An attempt was made to run an Input Validator but an internal error occurred.
+         * An internal error occurred. One reason for this could be that an attempt was made to run an Input Validator
+         * but it failed.
          */
         ERROR
     }
     
-    private InputValidationStatus inputValidationStatus;
+    /**
+     * The type of Input Validator currently associated with the problem.
+     */
+    private INPUT_VALIDATOR_TYPE currentInputValidatorType = INPUT_VALIDATOR_TYPE.NONE;
     
-    private Vector<InputValidationResult> inputValidationResults ;
+    //custom input validator settings - only relevant if the problem was saved with a Custom Input Validator
+    private boolean problemHasCustomInputValidator = false;
+    private boolean customInputValidatorHasBeenRun = false;
+//    private String customInputValidatorProgramName = "";  //program name should be determined by the Custom Input Validator Serialized File
+    private String customInputValidatorCommandLine = "";
+//    private String customInputValidatorFilesOnDiskFolderName = "";   
+    private SerializedFile customInputValidatorSerializedFile = null;
+    private InputValidationStatus customInputValidationStatus = InputValidationStatus.UNKNOWN;
+    private Vector<InputValidationResult> customInputValidationResults = null;
+
+    //VIVA Input validator settings - only relevant if the problem was saved with Viva Input Validator Settings
+    private VivaInputValidatorSettings vivaSettings = null;
+
+
     
 
     /**
@@ -269,8 +325,9 @@ public class Problem implements IElementObject {
         this.pc2ValidatorSettings = new PC2ValidatorSettings();
         this.clicsValidatorSettings = new ClicsValidatorSettings();
         this.customValidatorSettings = new CustomValidatorSettings();
-        this.inputValidationStatus = InputValidationStatus.NOT_TESTED;
-        this.inputValidationResults = new Vector<InputValidationResult>();
+        this.customInputValidationStatus = InputValidationStatus.UNKNOWN;
+        this.customInputValidationResults = new Vector<InputValidationResult>();
+        this.vivaSettings = new VivaInputValidatorSettings();
     }
 
     public Problem copy(String newDisplayName) {
@@ -302,25 +359,41 @@ public class Problem implements IElementObject {
         } else {
             clone.setCLICSValidatorSettings(null);
         }
-        if (this.getCustomValidatorSettings()!=null) {
-            clone.setCustomValidatorSettings(this.getCustomValidatorSettings().clone());
+        if (this.getCustomOutputValidatorSettings()!=null) {
+            clone.setCustomOutputValidatorSettings(this.getCustomOutputValidatorSettings().clone());
         } else {
-            clone.setCustomValidatorSettings(null);
+            clone.setCustomOutputValidatorSettings(null);
         }
         
         //input validator settings
-        clone.setProblemHasInputValidator(this.isProblemHasInputValidator());
-        clone.setInputValidationStatus(this.getInputValidationStatus());
-        clone.setInputValidatorCommandLine(StringUtilities.cloneString(this.getInputValidatorCommandLine()));
-        clone.setInputValidatorProgramName(StringUtilities.cloneString(this.getInputValidatorProgramName()));
-        clone.setInputValidatorFilesOnDiskFolder(this.getInputValidatorFilesOnDiskFolder());
+        clone.setCurrentInputValidatorType(this.getCurrentInputValidatorType());
+        
+        clone.setProblemHasCustomInputValidator(this.isProblemHasCustomInputValidator());
+        clone.setCustomInputValidatorHasBeenRun(this.isCustomInputValidatorHasBeenRun());
+        clone.setCustomInputValidationStatus(this.getCustomInputValidationStatus());
+        clone.setCustomInputValidatorCommandLine(StringUtilities.cloneString(this.getCustomInputValidatorCommandLine()));
+        clone.setCustomInputValidatorFile(this.getCustomInputValidatorSerializedFile());
+//        clone.setInputValidatorFilesOnDiskFolder(this.getInputValidatorFilesOnDiskFolder());
+        
+        //This statement is commented out because there is no longer a separate "problemHasVivaInputValidatorPattern" flag in the Problem class;
+        // having a Viva pattern (or not) is determined by the value in the Pattern field in the (VivaInputValidatorSettings for the) Problem.
+        // This was done to avoid the possibility of an "invalid state" where a user sets "problemHasVivaInputValidator" to (say) false after 
+        // having set a non-zero-length pattern in the Problem.
+        //        clone.setProblemHasVivaInputValidatorPattern(this.isProblemHasVivaInputValidatorPattern());
+        clone.setVivaInputValidatorHasBeenRun(this.isVivaInputValidatorHasBeenRun());
+        clone.setVivaInputValidationStatus(this.getVivaInputValidationStatus());
+        clone.setVivaInputValidatorPattern(this.getVivaInputValidatorPattern());
         
         //input validator results (which might be empty)
-        Iterable <InputValidationResult> inputVResults = this.getInputValidationResults();
+        Iterable <InputValidationResult> inputVResults = this.getVivaInputValidatorResults();
         for (InputValidationResult ivr : inputVResults) {
-            clone.addInputValidationResult(ivr);
+            clone.addVivaInputValidationResult(ivr);
         }
-        
+        inputVResults = this.getCustomInputValidatorResults();
+        for (InputValidationResult ivr : inputVResults) {
+            clone.addCustomInputValidationResult(ivr);
+        }
+       
         clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
 
         // TODO Implement Commands to be executed before a problem is run
@@ -390,6 +463,7 @@ public class Problem implements IElementObject {
     public String toStringDetails() {
         String retStr = "Problem[";
         
+        //basic configuration settings
         retStr += "displayName=" + displayName;
         retStr += "; elementId=" + elementId;
         retStr += "; number=" + number;
@@ -401,23 +475,33 @@ public class Problem implements IElementObject {
         retStr += "; readInputDataFromSTDIN=" + readInputDataFromSTDIN;
         retStr += "; timeOutInSeconds=" + timeOutInSeconds;
         
+        //output validator settings
         boolean validatedProblem = getValidatorType()==VALIDATOR_TYPE.NONE;
         retStr += "; validatedProblem=" + validatedProblem;
         retStr += "; validatorType=" + getValidatorType();
         retStr += "; pc2ValidatorSettings=" + getPC2ValidatorSettings();
         retStr += "; clicsValidatorSettings=" + getClicsValidatorSettings();
-        retStr += "; customValidatorSettings=" + getCustomValidatorSettings();
+        retStr += "; customValidatorSettings=" + getCustomOutputValidatorSettings();
         
-        retStr += "; problemHasInputValidator=" + isProblemHasInputValidator();
-        retStr += "; inputValidatorRunStatus=" + getInputValidationStatus();
+        //input validator settings
+        retStr += "; currentInputValidatorType=" + getCurrentInputValidatorType();
+        retStr += "; problemHasVivaInputValidatorPattern=" + isProblemHasVivaInputValidatorPattern();
+        retStr += "; vivaInputValidationStatus=" + getVivaInputValidationStatus();
+        retStr += "; problemHasCustomInputValidator=" + isProblemHasCustomInputValidator();
+        retStr += "; customInputValidationStatus=" + getCustomInputValidationStatus();
         
-        retStr += "; inputValidatorProgramName=" + inputValidatorProgramName;
-        retStr += "; inputValidatorCommandLine=" + inputValidatorCommandLine;
+        SerializedFile customInputValidatorFile = getCustomInputValidatorSerializedFile();
+        String customInputValidatorName = "";
+        if (customInputValidatorFile!=null) {
+            customInputValidatorName = customInputValidatorFile.getName();
+        }
+        retStr += "; customInputValidatorProgramName=" + customInputValidatorName;
         
-        
+        retStr += "; customInputValidatorCommandLine=" + customInputValidatorCommandLine;
+
+        //misc additional settings
         retStr += "; internationalJudgementReadMethod=" + internationalJudgementReadMethod;
         retStr += "; executionPrepCommand=" + executionPrepCommand;
-
         retStr += "; showValidationToJudges=" + showValidationToJudges;
         retStr += "; hideOutputWindow=" + hideOutputWindow;
         retStr += "; showCompareWindow=" + showCompareWindow;
@@ -593,15 +677,16 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Returns the Validator Command Line associated with this Problem, if the Problem is using a Validator;
+     * Returns the Output Validator Command Line associated with this Problem, if the Problem is using an Output Validator;
      * returns null otherwise.
      * 
-     * @return the validatorCommandLine for the Problem's validator, or null if the Problem is not using a Validator.
+     * @return the validatorCommandLine for the Problem's output validator, 
+     *                  or null if the Problem is not using an Output Validator.
      * 
-     * @throws {@link RuntimeException} if the Problem is marked as using a Validator but no corresponding Validator
+     * @throws {@link RuntimeException} if the Problem is marked as using an Output Validator but no corresponding Validator
      *              Settings could be found.
      */
-    public String getValidatorCommandLine() {
+    public String getOutputValidatorCommandLine() {
         if (!isValidatedProblem()) {
             return null;
         }
@@ -621,8 +706,8 @@ public class Problem implements IElementObject {
                 found = true;
             }
         } else if (isUsingCustomValidator()) {
-            if (getCustomValidatorSettings()!=null) {
-                validatorCommandLine = getCustomValidatorSettings().getCustomValidatorCommandLine();
+            if (getCustomOutputValidatorSettings()!=null) {
+                validatorCommandLine = getCustomOutputValidatorSettings().getCustomValidatorCommandLine();
                 found = true;
             }
         }
@@ -636,12 +721,12 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Sets the Validator Command Line associated with type of Validator configured for this Problem.
-     * Note that this Problem class does not maintain a separate "Validator Command Line" field;
-     * rather, the current Validator Command Line is always stored within a "Settings" object 
+     * Sets the Output Validator Command Line associated with the type of Output Validator configured for this Problem.
+     * Note that this Problem class does not maintain a separate "Output Validator Command Line" field;
+     * rather, the current Output Validator Command Line is always stored within a "Settings" object 
      * corresponding to the currently-assigned Validator type.
      * 
-     * @param commandLine the new command line for the currently-specified Validator type associated with the Problem
+     * @param commandLine the new command line for the currently-specified Output Validator type associated with the Problem
      * 
      * @see PC2ValidatorSettings
      * @see ClicsValidatorSettings
@@ -650,7 +735,7 @@ public class Problem implements IElementObject {
      * @throws {@link RuntimeException} if the Problem is not marked as using a Validator, or is marked as using a Validator
      *           but no corresponding Validator Settings object could be found.
      */
-    public void setValidatorCommandLine(String commandLine) {
+    public void setOutputValidatorCommandLine(String commandLine) {
         
         if (!isValidatedProblem()) {
             throw new RuntimeException("setValidatorCommandLine(): no Validator configured for Problem");                
@@ -670,8 +755,8 @@ public class Problem implements IElementObject {
                 found = true;
             }
         } else if (isUsingCustomValidator()) {
-            if (getCustomValidatorSettings()!=null) {
-                getCustomValidatorSettings().setValidatorCommandLine(commandLine);
+            if (getCustomOutputValidatorSettings()!=null) {
+                getCustomOutputValidatorSettings().setValidatorCommandLine(commandLine);
                 found = true;
             }
         }
@@ -761,13 +846,13 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * Returns the Validator Program Name if the Problem has a Validator attached; otherwise returns null.
+     * Returns the Output Validator Program Name if the Problem has an Output Validator attached; otherwise returns null.
      * 
-     * @return the validatorProgramName if there is a validator for the Problem, or null if not
+     * @return the validatorProgramName if there is an Output Validator for the Problem, or null if not
      * 
-     * @throws {@link RuntimeException} if the Problem is marked as having a Validator but no Validator Settings could be found
+     * @throws {@link RuntimeException} if the Problem is marked as having an Output Validator but no Validator Settings could be found
      */
-    public String getValidatorProgramName() {
+    public String getOutputValidatorProgramName() {
 
         if (!isValidatedProblem()) {
             return null;
@@ -788,8 +873,8 @@ public class Problem implements IElementObject {
                 found = true;
             }
         } else if (isUsingCustomValidator()) {
-            if (getCustomValidatorSettings() != null) {
-                validatorProgName = getCustomValidatorSettings().getCustomValidatorProgramName();
+            if (getCustomOutputValidatorSettings() != null) {
+                validatorProgName = getCustomOutputValidatorSettings().getCustomValidatorProgramName();
                 found = true;
             }
         }
@@ -837,8 +922,8 @@ public class Problem implements IElementObject {
                 found = true;
             }
         } else if (isUsingCustomValidator()) {
-            if (getCustomValidatorSettings() != null) {
-                getCustomValidatorSettings().setValidatorProgramName(validatorProgramName);
+            if (getCustomOutputValidatorSettings() != null) {
+                getCustomOutputValidatorSettings().setValidatorProgramName(validatorProgramName);
                 found = true;
             }
         }
@@ -911,124 +996,147 @@ public class Problem implements IElementObject {
         return getElementId().toString().hashCode();
     }
     
-    public boolean isSameAs(Problem problem) {
+    public boolean isSameAs(Problem otherProblem) {
 
         try {
-            if (problem == null){
+            if (otherProblem == null){
                 return false;
             }
-            if (! StringUtilities.stringSame(displayName, problem.getDisplayName())){
+            if (! StringUtilities.stringSame(displayName, otherProblem.getDisplayName())){
                 return false;
             }
-            if (isActive() != problem.isActive()) {
+            if (isActive() != otherProblem.isActive()) {
                 return false;
             }
-            if (timeOutInSeconds != problem.getTimeOutInSeconds()) {
+            if (timeOutInSeconds != otherProblem.getTimeOutInSeconds()) {
                 return false;
             }
 
-            if (! StringUtilities.stringSame(judgesInputDataFileName, problem.getDataFileName())) {
+            if (! StringUtilities.stringSame(judgesInputDataFileName, otherProblem.getDataFileName())) {
                 return false;
             }
-            if (! StringUtilities.stringSame(answerFileName, problem.getAnswerFileName())) {
+            if (! StringUtilities.stringSame(answerFileName, otherProblem.getAnswerFileName())) {
                 return false;
             }
-            if (!readInputDataFromSTDIN == problem.isReadInputDataFromSTDIN()) {
+            if (!readInputDataFromSTDIN == otherProblem.isReadInputDataFromSTDIN()) {
                 return false;
             }
             
-            if (this.isValidatedProblem() != problem.isValidatedProblem()) {
+            if (this.isValidatedProblem() != otherProblem.isValidatedProblem()) {
                 return false;
             }
 
-            if (this.getValidatorType() != problem.getValidatorType()) {
+            if (this.getValidatorType() != otherProblem.getValidatorType()) {
                 return false;
             }
 
             // check for one PC2ValidatorSettings being null while the other is not (i.e., XOR says they are different)
-            if (this.getPC2ValidatorSettings()==null ^ problem.getPC2ValidatorSettings()==null) {
+            if (this.getPC2ValidatorSettings()==null ^ otherProblem.getPC2ValidatorSettings()==null) {
                 return false;
             }
             // check that if both Settings are non-null, they are the same (if one is non-null, the other must also be, due to the XOR above)
             if (this.getPC2ValidatorSettings() != null) {
-                if (!this.getPC2ValidatorSettings().equals(problem.getPC2ValidatorSettings())) {
+                if (!this.getPC2ValidatorSettings().equals(otherProblem.getPC2ValidatorSettings())) {
                     return false;
                 }
             }
 
             // check for one ClicsValidatorSettings being null while the other is not (i.e., XOR says they are different)
-            if (this.getClicsValidatorSettings()==null ^ problem.getClicsValidatorSettings()==null) {
+            if (this.getClicsValidatorSettings()==null ^ otherProblem.getClicsValidatorSettings()==null) {
                 return false;
             }
             // check that if both Settings are non-null, they are the same (if one is non-null, the other must also be, due to the XOR above)
             if (this.getClicsValidatorSettings() != null) {
-                if (!this.getClicsValidatorSettings().equals(problem.getClicsValidatorSettings())) {
+                if (!this.getClicsValidatorSettings().equals(otherProblem.getClicsValidatorSettings())) {
                     return false;
                 }
             }
 
-            // check for one CustomValidatorSettings being null while the other is not (i.e., XOR says they are different)
-            if (this.getCustomValidatorSettings()==null ^ problem.getCustomValidatorSettings()==null) {
+            // check for one CustomOutputValidatorSettings being null while the other is not (i.e., XOR says they are different)
+            if (this.getCustomOutputValidatorSettings()==null ^ otherProblem.getCustomOutputValidatorSettings()==null) {
                 return false;
             }
             // check that if both Settings are non-null, they are the same (if one is non-null, the other must also be, due to the XOR above)
-            if (this.getCustomValidatorSettings() != null) {
-                if (!this.getCustomValidatorSettings().equals(problem.getCustomValidatorSettings())) {
+            if (this.getCustomOutputValidatorSettings() != null) {
+                if (!this.getCustomOutputValidatorSettings().equals(otherProblem.getCustomOutputValidatorSettings())) {
                     return false;
                 }
             }
             
-            //check for differences in Input Validator settings
-            if (this.isProblemHasInputValidator() != problem.isProblemHasInputValidator()) {
-                return false;
-            }
-            if (this.getInputValidationStatus() != problem.getInputValidationStatus()) {
-                return false;
-            }
-            if (!this.getInputValidatorProgramName().equals(problem.getInputValidatorProgramName())) {
-                return false;
-            }
-            if (!this.getInputValidatorCommandLine().equals(problem.getInputValidatorCommandLine())) {
+            //check general Input Validation settings
+            if (this.getVivaInputValidationStatus() != otherProblem.getVivaInputValidationStatus()) {
                 return false;
             }
             
-           if (showValidationToJudges != problem.isShowValidationToJudges()) {
+            if (this.getCustomInputValidationStatus() != otherProblem.getCustomInputValidationStatus()) {
                 return false;
             }
             
-            if (hideOutputWindow != problem.isHideOutputWindow()) {
-                return false;
-            }
-            if (showCompareWindow != problem.isShowCompareWindow()) {
-                return false;
-            }
-            if (computerJudged != problem.isComputerJudged()) {
-                return false;
-            }
-            if (manualReview != problem.isManualReview()) {
-                return false;
-            }
-            if (prelimaryNotification != problem.isPrelimaryNotification()) {
+            if (this.getCurrentInputValidatorType() != otherProblem.getCurrentInputValidatorType()) {
                 return false;
             }
             
-            if (getSiteNumber() != problem.getSiteNumber()){
+            //check for differences in Custom Input Validator settings
+            if (this.isProblemHasCustomInputValidator() != otherProblem.isProblemHasCustomInputValidator()) {
+                return false;
+            }
+            if (!this.getCustomInputValidatorProgramName().equals(otherProblem.getCustomInputValidatorProgramName())) {
+                return false;
+            }
+            if (!this.getCustomInputValidatorCommandLine().equals(otherProblem.getCustomInputValidatorCommandLine())) {
+                return false;
+            }
+            if (!this.isCustomInputValidatorHasBeenRun()==otherProblem.isCustomInputValidatorHasBeenRun()) {
                 return false;
             }
             
-            if (! StringUtilities.stringSame(shortName, problem.getShortName())){
+            //check for differences in Custom Input Validator results?
+            
+            //check for differences in Viva Input Validator settings
+            if (!Arrays.equals(this.getVivaInputValidatorPattern(), otherProblem.getVivaInputValidatorPattern())) {
+                return false;
+            }
+            if (!this.isVivaInputValidatorHasBeenRun()==otherProblem.isVivaInputValidatorHasBeenRun()) {
                 return false;
             }
             
-            if (! StringUtilities.stringSame(externalDataFileLocation, problem.getExternalDataFileLocation())){
+            if (showValidationToJudges != otherProblem.isShowValidationToJudges()) {
                 return false;
             }
             
-            if (usingExternalDataFiles != problem.usingExternalDataFiles) {
+            if (hideOutputWindow != otherProblem.isHideOutputWindow()) {
+                return false;
+            }
+            if (showCompareWindow != otherProblem.isShowCompareWindow()) {
+                return false;
+            }
+            if (computerJudged != otherProblem.isComputerJudged()) {
+                return false;
+            }
+            if (manualReview != otherProblem.isManualReview()) {
+                return false;
+            }
+            if (prelimaryNotification != otherProblem.isPrelimaryNotification()) {
+                return false;
+            }
+            
+            if (getSiteNumber() != otherProblem.getSiteNumber()){
+                return false;
+            }
+            
+            if (! StringUtilities.stringSame(shortName, otherProblem.getShortName())){
+                return false;
+            }
+            
+            if (! StringUtilities.stringSame(externalDataFileLocation, otherProblem.getExternalDataFileLocation())){
+                return false;
+            }
+            
+            if (usingExternalDataFiles != otherProblem.usingExternalDataFiles) {
                 return false;
             }
 
-            if (! StringUtilities.stringSame(shortName, problem.getShortName())){
+            if (! StringUtilities.stringSame(shortName, otherProblem.getShortName())){
                 return false;
             }
             // TODO 917 - do isameAs when test case filenames can be added.
@@ -1039,23 +1147,23 @@ public class Problem implements IElementObject {
 //                return false;
 //            }
             
-            if (!this.isStopOnFirstFailedTestCase() == problem.isStopOnFirstFailedTestCase()) {
+            if (!this.isStopOnFirstFailedTestCase() == otherProblem.isStopOnFirstFailedTestCase()) {
                 return false;
             }
             
-            if (! StringUtilities.stringSame(colorName, problem.getColorName())){
+            if (! StringUtilities.stringSame(colorName, otherProblem.getColorName())){
                 return false;
             }
             
-            if (! StringUtilities.stringSame(colorRGB, problem.getColorRGB())){
+            if (! StringUtilities.stringSame(colorRGB, otherProblem.getColorRGB())){
                 return false;
             }
             
-            if (! StringUtilities.stringSame(colorRGB, problem.getColorRGB())){
+            if (! StringUtilities.stringSame(colorRGB, otherProblem.getColorRGB())){
                 return false;
             }
             
-            if ( ! groups.equals(problem.getGroups())){
+            if ( ! groups.equals(otherProblem.getGroups())){
                 return false;
             }
             
@@ -1376,7 +1484,7 @@ public class Problem implements IElementObject {
      * settings associated with this problem (if any).
      * @return the customValidatorSettings for this problem
      */
-    public CustomValidatorSettings getCustomValidatorSettings() {
+    public CustomValidatorSettings getCustomOutputValidatorSettings() {
         return customValidatorSettings;
     }
 
@@ -1384,158 +1492,299 @@ public class Problem implements IElementObject {
      * Sets the {@link CustomValidatorSettings} for this problem to the specified value.
      * @param customValidatorSettings the customValidatorSettings to set
      */
-    public void setCustomValidatorSettings(CustomValidatorSettings settings) {
+    public void setCustomOutputValidatorSettings(CustomValidatorSettings settings) {
         this.customValidatorSettings = settings;
     }
 
+    //*** Methods associated with Custom Input Validators ***
+    
     /**
-     * Returns an indication of whether or not this Problem has an Input Validator attached.
+     * Returns an indication of whether or not this Problem has a Custom Input Validator attached.
      * 
-     * @return true if the problem has an input validator
+     * @return true if the problem has a Custom Input validator
      */
-    public boolean isProblemHasInputValidator() {
-        return problemHasInputValidator;
+    public boolean isProblemHasCustomInputValidator() {
+        return problemHasCustomInputValidator;
     }
 
     /**
-     * Sets the flag indicating whether or not the Problem has an Input Validator.
+     * Sets the flag indicating whether or not the Problem has a Custom Input Validator.
      * 
-     * @param problemHasInputValidator the value to which the flag should be set
+     * @param problemHasCustomInputValidator the value to which the flag should be set
      */
-    public void setProblemHasInputValidator(boolean problemHasInputValidator) {
-        this.problemHasInputValidator = problemHasInputValidator;
+    public void setProblemHasCustomInputValidator(boolean problemHasCustomInputValidator) {
+        this.problemHasCustomInputValidator = problemHasCustomInputValidator;
     }
 
     /**
-     * Returns an indication of the status of the problem with respect to running an Input Validator.
+     * Returns the Input Validation status of the problem with respect to running a Custom Input Validator.
+     * Note that a problem may have more than one Input Validator applied to it (e.g., a Custom Input Validator
+     * and/or the VIVA Input Validator); this method returns the Input Validation status determined by the 
+     * execution (if any) of a Custom Input Validator.
      * 
-     * Possible return status values are {@link InputValidationStatus#PASSED}, {@link InputValidationStatus#FAILED},
-     * or {@link InputValidationStatus#NOT_TESTED}.
+     * Use method {@link #getCurrentInputValidatorType()} to determine 
+     * the current type of Input Validator associated with the problem (that is, the most recently selected
+     * Input Validator type).
      * 
-     * @return an element of {@link InputValidationStatus} indicating the Input Validation status of the problem
+     * @return an element of {@link InputValidationStatus} indicating the Custom Input Validation status of the problem.
+     * 
+     * @see #getCurrentInputValidatorType()
+     * @see #getVivaInputValidationStatus()
      *
      */
-    public InputValidationStatus getInputValidationStatus() {
-        return inputValidationStatus;
+    public InputValidationStatus getCustomInputValidationStatus() {
+        return customInputValidationStatus;
+    }
+    
+    /**
+     * Sets the Custom Input Validation status of this problem to the specified value.
+     * 
+     * @param status the value to which the Custom Input Validation status for the problem should be set.
+     */
+    public void setCustomInputValidationStatus (InputValidationStatus status) {
+        this.customInputValidationStatus = status;
     }
 
     /**
-     * Sets the flag indicating the result of having run the problem's data files against the problem's input validator.
+     * Returns the name of the Custom Input Validator for the Problem, or the empty string if the Problem has no
+     * defined Custom Input Validator (that is, if the Custom Input Validator SerializedFile associated with the Problem is null).
      * 
-     * @param InputValidationStatus the value to which the flag should be set
+     * @return the Custom Input Validator Program Name for the Problem, or an empty string
      */
-    public void setInputValidationStatus(InputValidationStatus status) {
-        this.inputValidationStatus = status;
-    }
-
-    /**
-     * Returns the name of the Input Validator for the Problem, or the empty string if the Problem has no
-     * defined Input Validator (that is, if the Input Validator name is null or the empty string).
-     * 
-     * @return the Input Validator Program Name for the Problem, or an empty string
-     */
-    public String getInputValidatorProgramName() {
-        if (inputValidatorProgramName == null) {
+    public String getCustomInputValidatorProgramName() {
+        if (customInputValidatorSerializedFile == null) {
             return "";
         } else {
-            return inputValidatorProgramName;
+            return getCustomInputValidatorSerializedFile().getName();
+        }
+    }
+
+    //this method should not exist; the "Custom Input Validator Program Name" is defined by the name contained in the
+    // Custom Input Validator Serialized File and should not be able to be set independently of that file.
+//    /**
+//     * Sets the name of the Custom Input Validator program for this Problem.
+//     * 
+//     * @param customInputValidatorProgramName the name of the Custom Input Validator program
+//     */
+//    public void setCustomInputValidatorProgramName(String inputValidatorProgramName) {
+//        this.customInputValidatorProgramName = inputValidatorProgramName;
+//    }
+
+    /**
+     * Returns the Custom Input Validator command for the Problem (that is, the command used to
+     * invoke the Custom Input Validator), or the empty string if the Problem has no
+     * defined Custom Input Validator (that is, if the Custom Input Validator command is null or the empty string).
+     * 
+     * @return the Custom Input Validator Command Line
+     */
+    public String getCustomInputValidatorCommandLine() {
+        if (customInputValidatorCommandLine == null) {
+            return "";
+        } else {
+            return customInputValidatorCommandLine;
         }
     }
 
     /**
-     * Sets the name of the Input Validator program for this Problem.
+     * Sets the command line used to invoke a Custom Input Validator.
      * 
-     * @param inputValidatorProgramName the name of the Input Validator program
+     * @param customInputValidatorCommandLine the customInputValidatorCommandLine to set.
      */
-    public void setInputValidatorProgramName(String inputValidatorProgramName) {
-        this.inputValidatorProgramName = inputValidatorProgramName;
+    public void setCustomInputValidatorCommandLine(String inputValidatorCommandLine) {
+        this.customInputValidatorCommandLine = inputValidatorCommandLine;
     }
 
-    /**
-     * Returns the name of the Input Validator command for the Problem (that is, the command used to
-     * invoke the Input Validator), or the empty string if the Problem has no
-     * defined Input Validator (that is, if the Input Validator command is null or the empty string).
-     * 
-     * @return the Input Validator Command Line
-     */
-    public String getInputValidatorCommandLine() {
-        if (inputValidatorCommandLine == null) {
-            return "";
-        } else {
-            return inputValidatorCommandLine;
-        }
-    }
-
-    /**
-     * @param inputValidatorCommandLine the inputValidatorCommandLine to set
-     */
-    public void setInputValidatorCommandLine(String inputValidatorCommandLine) {
-        this.inputValidatorCommandLine = inputValidatorCommandLine;
-    }
-
-    /**
-     * Returns the name of the folder containing the input files for this Problem.
-     * Note that is value is only meaningful if the user has run the Input Validator
-     * and selected "Files on disk in folder" as the input file source.
-     * 
-     */
-    public String getInputValidatorFilesOnDiskFolder() {
-        return this.inputValidatorFilesOnDiskFolderName;
-    }
+    //TODO: these methods may have been useful before VIVA support was added; not sure if they are still needed... jlc
+    // It is also the case that they may only be useful if/when the "Run Input Validators" facility is fully implemented (currently, it's not).
+//    /**
+//     * Returns the name of the folder containing the input files for this Problem.
+//     * Note that is value is only meaningful if the user has run the Input Validator
+//     * and selected "Files on disk in folder" as the input file source.
+//     * 
+//     */
+//    public String getInputValidatorFilesOnDiskFolder() {
+//        return this.customInputValidatorFilesOnDiskFolderName;
+//    }
+//    
+//    /**
+//     * Sets the value of the InputFilesOnDiskFolder variable for this problem.
+//     * 
+//     * @param inputValFilesOnDiskFolder
+//     */
+//    public void setInputValidatorFilesOnDiskFolder(String inputValFilesOnDiskFolder) {
+//        this.customInputValidatorFilesOnDiskFolderName = inputValFilesOnDiskFolder;
+//        
+//    }
     
     /**
-     * Sets the value of the InputFilesOnDiskFolder variable for this problem.
-     * 
-     * @param inputValFilesOnDiskFolder
-     */
-    public void setInputValidatorFilesOnDiskFolder(String inputValFilesOnDiskFolder) {
-        this.inputValidatorFilesOnDiskFolderName = inputValFilesOnDiskFolder;
-        
-    }
-    
-    /**
-     * Returns an {@link Iterable} for the current {@link InputValidationResults} for this problem. 
+     * Returns an {@link Iterable} for the current Custom Input Validator {@link InputValidationResults} for this problem. 
      * The returned object may be empty (that it, the Iterable may have no elements) but will never be null.
      * 
-     * @return an {@link Iterable} containing InputValidationResults
+     * Note that a Problem may have been tested with both the VIVA Input Validator and a user-defined Custom
+     * Input Validator; however, the results returned by this method will always be those generated by the 
+     * most recent execution of the Custom Input Validator (if any). 
+     * 
+     * @return an {@link Iterable} containing Custom Input Validator InputValidationResults, or null if no such results exist.
      */
-    public Iterable<InputValidationResult> getInputValidationResults() {
-        if (this.inputValidationResults == null) {
-            this.inputValidationResults = new Vector<InputValidationResult>() ;
+    public Iterable<InputValidationResult> getCustomInputValidatorResults() {
+        if (this.customInputValidationResults == null) {
+            this.customInputValidationResults = new Vector<InputValidationResult>() ;
         }
-        return this.inputValidationResults;
+        return this.customInputValidationResults;
     }
     
     /**
-     * Returns the number of {@link InputValidationResult}s currently stored in this Problem;
+     * Returns the number of Custom Input Validator {@link InputValidationResult}s currently stored in this Problem.
      */
-    public int getNumInputValidationResults() {
-        if (this.inputValidationResults == null) {
-            this.inputValidationResults = new Vector<InputValidationResult>();
+    public int getNumCustomInputValidationResults() {
+        if (this.customInputValidationResults == null) {
+            this.customInputValidationResults = new Vector<InputValidationResult>();
         }
-        return this.inputValidationResults.size();
+        return this.customInputValidationResults.size();
     }
     
     /**
-     * Adds the specified {@link InputValidationResult} to the current set of Input Validation Results
+     * Adds the specified {@link InputValidationResult} to the current set of Custom Input Validation Results
      * for the Problem.
      * 
-     * @param result the InputValidationResult to be added
+     * @param result the InputValidationResult to be added.
      * 
      */
-    public void addInputValidationResult(InputValidationResult result) {
-        if (getInputValidationResults() == null) {
-            this.inputValidationResults = new Vector<InputValidationResult>();
+    public void addCustomInputValidationResult(InputValidationResult result) {
+        if (getCustomInputValidatorResults() == null) {
+            this.customInputValidationResults = new Vector<InputValidationResult>();
         }
-        inputValidationResults.add(result);
+        customInputValidationResults.add(result);
+    }
+
+    /**
+     * Clears (removes) all Custom Input Validator {@link InputValidationResults} currently stored in this Problem.
+     * Note that calling this method does not affect any VIVA Input Validation results stored in the Problem.
+     * 
+     * @see #clearVivaInputValidationResults()
+     */
+    public void clearCustomInputValidationResults() {
+        this.customInputValidationResults = null;
+    }
+    
+    
+    //*** Methods associated with the VIVA Input Validator ***
+    
+    /**
+     * Returns an indication of whether or not this Problem has a Viva Input Validator pattern attached.
+     * 
+     * @return true if the problem has a Viva Input validator pattern.
+     */
+    public boolean isProblemHasVivaInputValidatorPattern() {
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        return vivaSettings.isProblemHasVivaInputValidatorPattern();
+    }
+
+    //This method is commented out because there is no longer a separate "problemHasVivaInputValidatorPattern" flag in the Problem class; 
+    // having a Viva pattern (or not) is determined by the value in the Pattern field in the (VivaInputValidatorSettings for the) Problem.
+    // This was done to avoid the possibility of an "invalid state" where a user sets "problemHasInputValidator" to (say) false after having 
+    // set a non-zero-length pattern in the Problem.
+
+//    /**
+//     * Sets the flag indicating whether or not the Problem has a Viva Input Validator pattern.
+//     * 
+//     * @param hasVivaPattern the value to which the flag should be set.
+//     */
+//    public void setProblemHasVivaInputValidatorPattern(boolean hasVivaPattern) {
+//        if (vivaSettings==null) {
+//            vivaSettings = new VivaInputValidatorSettings();
+//        }
+//        vivaSettings.setProblemHasVivaInputValidatorPattern(hasVivaPattern);
+//    }
+    
+    /**
+     * Returns the Input Validation status of the problem with respect to running the VIVA Input Validator.
+     * Note that a problem may have more than one Input Validator applied to it (e.g., a Custom Input Validator
+     * and/or the VIVA Input Validator); this method returns the Input Validation status determined by the 
+     * execution (if any) of the VIVA Input Validator.
+     * 
+     * Use method {@link #getCurrentInputValidatorType()} to determine 
+     * the current type of Input Validator associated with the problem.
+     * 
+     * @return an element of {@link InputValidationStatus} indicating the VIVA Input Validation status of the problem.
+     * 
+     * @see #getCurrentInputValidatorType()
+     * @see #getCustomInputValidationStatus()
+     *
+     */
+    public InputValidationStatus getVivaInputValidationStatus() {
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        return vivaSettings.getVivaInputValidationStatus();
+    }
+
+    /**
+     * Sets the VIVA Input Validation status of this problem to the specified value.
+     * 
+     * @param status the value to which the VIVA Input Validation status for the problem should be set.
+     */
+    public void setVivaInputValidationStatus (InputValidationStatus status) {
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        vivaSettings.setVivaInputValidationStatus(status);
+    }
+
+
+    /**
+     * Returns an {@link Iterable} for the current VIVA {@link InputValidationResults} for this problem. 
+     * The returned object may be empty (that it, the Iterable may have no elements) but will never be null.
+     * 
+     * Note that a Problem may have been tested with both the VIVA Input Validator and a user-defined Custom
+     * Input Validator; however, the results returned by this method will always be those generated by the 
+     * most recent execution of the VIVA Input Validator. 
+     * 
+     * @return an {@link Iterable} containing VIVA InputValidationResults.
+     */
+    public Iterable<InputValidationResult> getVivaInputValidatorResults() {
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        return vivaSettings.getVivaInputValidationResults();
     }
     
     /**
-     * Clears (removes) all {@link InputValidationResults} currently stored in this Problem.
-     * 
+     * Returns the number of VIVA Input Validator {@link InputValidationResult}s currently stored in this Problem.
      */
-    public void clearInputValidationResults() {
-        this.inputValidationResults = null;
+    public int getNumVivaInputValidationResults() {
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        return vivaSettings.getNumVivaInputValidationResults();  
+    }
+    
+    /**
+     * Adds the specified {@link InputValidationResult} to the current set of VIVA Input Validation Results
+     * for the Problem.
+     * 
+     * @param result the InputValidationResult to be added.
+     */
+    public void addVivaInputValidationResult(InputValidationResult result) {
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        vivaSettings.addVivaInputValidationResult(result);
+    }
+    
+    /**
+     * Clears (removes) all VIVA {@link InputValidationResults} currently stored in this Problem.
+     * Note that calling this method does not affect any Custom Input Validation results stored in the Problem.
+     * 
+     * @see #clearCustomInputValidationResults()
+     */
+    public void clearVivaInputValidationResults() {
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        vivaSettings.clearVivaInputValidationResults();
     }
 
     /**
@@ -1607,5 +1856,111 @@ public class Problem implements IElementObject {
     public boolean isAllView(){
         return (groups.size() == 0);
     }
+
+    /**
+     * Returns a String array containing the VIVA Input Validator pattern associated with this problem,
+     * or null if no VIVA pattern has been assigned.
+     * Note that the VIVA pattern is an array of String, one pattern line per array element.
+     * 
+     * @return a String [] containing the Viva pattern, or null.
+     */
+    public String [] getVivaInputValidatorPattern() {
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        return vivaSettings.getVivaInputValidatorPattern();
+    }
     
+    /**
+     * Sets the Viva Input Validator pattern for this problem to the specified String array.
+     */
+    public void setVivaInputValidatorPattern(String [] pattern) {
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        vivaSettings.setVivaInputValidatorPattern(pattern) ;
+    }
+    
+    /**
+     * Returns the {@link SerializedFile} containing the Custom Input Validator assigned to this problem,
+     * or null if no Custom Input Validator has been assigned.
+     * 
+     * @return a SerializedFile containing the Custom Input Validator assigned to this problem, or null.
+     */
+    public SerializedFile getCustomInputValidatorSerializedFile() {
+        return customInputValidatorSerializedFile ;
+    }
+    
+    /**
+     * Sets the {@link SerializedFile} containing the Custom Input Validator assigned to this problem.
+     * 
+     * @param inputValidatorFile a SerializedFile containing a Custom Input Validator program.
+     */
+    public void setCustomInputValidatorFile(SerializedFile inputValidatorFile) {
+        this.customInputValidatorSerializedFile = inputValidatorFile;
+    }
+
+    /**
+     * Returns the {@link INPUT_VALIDATOR_TYPE} currently associated with this problem --
+     * that is, the most recently selected Input Validator type.
+     * 
+     * Note that it is possible to SELECT an Input Validator (thus making that Input Validator type
+     * the "currently selected Input Validator type") without actually RUNNING the selected Input Validator.
+     * Clients should use this method to determine the most recently selected
+     * Input Validator type; method {@link #isVivaInputValidatorHasBeenRun()} or
+     * {@link #isCustomInputValidatorHasBeenRun()} can be used to determine whether the current Input Validator
+     * (as returned by this method) has actually been executed.
+     * 
+     * @return the type of Input Validator associated with this problem.
+     * 
+     * @see #isVivaInputValidatorHasBeenRun()
+     * @see #isCustomInputValidatorHasBeenRun()
+     * 
+     */
+    public INPUT_VALIDATOR_TYPE getCurrentInputValidatorType() {
+        return currentInputValidatorType;
+    }
+
+    /**
+     * Sets the {@link INPUT_VALIDATOR_TYPE} associated with this problem.
+     * 
+     * @param currentInputValidatorType the type of Input Validator to be associated with this problem.
+     */
+    public void setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE currentInputValidatorType) {
+        this.currentInputValidatorType = currentInputValidatorType;
+    }
+
+    /**
+     * @return the customInputValidatorHasBeenRun flag
+     */
+    public boolean isCustomInputValidatorHasBeenRun() {
+        return customInputValidatorHasBeenRun;
+    }
+
+    /**
+     * @param customInputValidatorHasBeenRun the value to which the customInputValidatorHasBeenRun flag should be set
+     */
+    public void setCustomInputValidatorHasBeenRun(boolean customInputValidatorHasBeenRun) {
+        this.customInputValidatorHasBeenRun = customInputValidatorHasBeenRun;
+    }
+
+    /**
+     * @return the vivaInputValidatorHasBeenRun flag for this Problem.
+     */
+    public boolean isVivaInputValidatorHasBeenRun() {
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        return vivaSettings.isVivaInputValidatorHasBeenRun();
+    }
+
+    /**
+     * @param vivaInputValidatorHasBeenRun the value to which the vivaInputValidatorHasBeenRun flag should be set
+     */
+    public void setVivaInputValidatorHasBeenRun(boolean vivaInputValidatorHasBeenRun) {
+        if (vivaSettings==null) {
+            vivaSettings = new VivaInputValidatorSettings();
+        }
+        vivaSettings.setVivaInputValidatorHasBeenRun(vivaInputValidatorHasBeenRun);
+    }
 }

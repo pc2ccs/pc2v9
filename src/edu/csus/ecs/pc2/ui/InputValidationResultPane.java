@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -25,12 +27,12 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
@@ -52,7 +54,7 @@ public class InputValidationResultPane extends JPanePlugin {
 
     private JLabel inputValidationResultsSummaryLabel;
 
-    private JLabel inputValidationResultSummaryTextLabel;
+    private JLabel inputValidationResultSummaryTextLabel; //the label containing the (variable) result summary text
 
     private Component verticalStrut_1;
 
@@ -70,11 +72,14 @@ public class InputValidationResultPane extends JPanePlugin {
      * list of columns
      */
     enum COLUMN {
-        FILE_NAME, RESULT, VALIDATOR_OUTPUT, VALIDATOR_ERR
+//        FILE_NAME, RESULT, VALIDATOR_OUTPUT, VALIDATOR_ERR
+        FILE_NAME, RESULT, SHOW_DETAILS
     };
 
     // define the column headers for the table of results
-    private String[] columnNames = { "File", "Result", "Validator StdOut", "Validator StdErr" };
+    //TODO: this list of column names is also defined in class InputValidatorResultsTableModel; the defintion should only
+    // appear in a single source location...
+    private String[] columnNames = { "File", "Result", "Details" };
 
     private JPanePlugin parentPane;
 
@@ -82,9 +87,15 @@ public class InputValidationResultPane extends JPanePlugin {
 
     private Component horizontalStrut_1;
 
+    private JLabel inputValidationResultSourceLabel;
+
+    private JLabel inputValidationResultSourceTextLabel;    //the label containing the (variable) result source identifier
+
+    private Component rigidArea1;
+
     public InputValidationResultPane() {
 
-        this.setBorder(new TitledBorder(null, "Input Validation Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        this.setAlignmentX(Component.LEFT_ALIGNMENT);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(getVerticalStrut_1());
         this.add(getInputValidationResultSummaryPanel());
@@ -103,6 +114,9 @@ public class InputValidationResultPane extends JPanePlugin {
             inputValidationResultSummaryPanel.add(getInputValidationResultsSummaryLabel());
             inputValidationResultSummaryPanel.add(getInputValidationResultSummaryTextLabel());
             inputValidationResultSummaryPanel.add(getHorizontalStrut_1());
+            inputValidationResultSummaryPanel.add(getInputValidationResultSourceLabel());
+            inputValidationResultSummaryPanel.add(getInputValidationResultSourceTextLabel());
+            inputValidationResultSummaryPanel.add(getRigidArea1());
             inputValidationResultSummaryPanel.add(getShowOnlyFailedFilesCheckbox());
         }
         return inputValidationResultSummaryPanel;
@@ -122,25 +136,40 @@ public class InputValidationResultPane extends JPanePlugin {
         }
         return inputValidationResultSummaryTextLabel;
     }
+    
+    private JLabel getInputValidationResultSourceLabel() {
+        if (inputValidationResultSourceLabel==null) {
+            inputValidationResultSourceLabel = new JLabel("Validator: ");
+        }
+        return inputValidationResultSourceLabel;
+    }
 
+    private JLabel getInputValidationResultSourceTextLabel() {
+        if (inputValidationResultSourceTextLabel == null) {
+            inputValidationResultSourceTextLabel = new JLabel("Unknown");
+            inputValidationResultSourceTextLabel.setForeground(Color.black);
+        }
+        return inputValidationResultSourceTextLabel;
+    }
+    
     private JPanel getInputValidationResultDetailsPanel() {
         if (inputValidationResultDetailsPanel == null) {
             inputValidationResultDetailsPanel = new JPanel();
             inputValidationResultDetailsPanel.setLayout(new BorderLayout(0, 0));
-            inputValidationResultDetailsPanel.add(getInputValidatorResultsScrollPane(), BorderLayout.CENTER);
+            inputValidationResultDetailsPanel.add(getInputValidationResultsScrollPane(), BorderLayout.CENTER);
         }
         return inputValidationResultDetailsPanel;
     }
 
-    private JScrollPane getInputValidatorResultsScrollPane() {
+    private JScrollPane getInputValidationResultsScrollPane() {
         if (resultsScrollPane == null) {
             resultsScrollPane = new JScrollPane();
-            resultsScrollPane.setViewportView(getInputValidatorResultsTable());
+            resultsScrollPane.setViewportView(getInputValidationResultsTable());
         }
         return resultsScrollPane;
     }
 
-    protected JTable getInputValidatorResultsTable() {
+    protected JTable getInputValidationResultsTable() {
         if (resultsTable == null) {
             resultsTable = new JTable(inputValidationResultsTableModel);
 
@@ -167,8 +196,9 @@ public class InputValidationResultPane extends JPanePlugin {
 
             // render file-name, std-out, and std-err file names as clickable links
             resultsTable.getColumn(columnNames[COLUMN.FILE_NAME.ordinal()]).setCellRenderer(new LinkCellRenderer());
-            resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).setCellRenderer(new LinkCellRenderer());
-            resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).setCellRenderer(new LinkCellRenderer());
+//            resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).setCellRenderer(new LinkCellRenderer());
+//            resultsTable.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).setCellRenderer(new LinkCellRenderer());
+            resultsTable.getColumn(columnNames[COLUMN.SHOW_DETAILS.ordinal()]).setCellRenderer(new LinkCellRenderer());
 
             // add a listener to allow users to click an output or data file name and display it
             resultsTable.addMouseListener(new MouseAdapter() {
@@ -215,141 +245,146 @@ public class InputValidationResultPane extends JPanePlugin {
         }
 
         // get the stdout file from the table
-        int stdoutFileCol = table.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).getModelIndex();
-        SerializedFile stdOutFile = getFileForTableCell(table, row, stdoutFileCol);
+//        int stdoutFileCol = table.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).getModelIndex();
+//        SerializedFile stdOutFile = getFileForTableCell(table, row, stdoutFileCol);
+        InputValidationResult res = ((InputValidationResultsTableModel) table.getModel()).getResultAt(row);
+        SerializedFile stdOutFile = res.getValidatorStdOut();
         if (stdOutFile == null) {
-            System.err.println("Got a null SerializedFile for Input Validator Results stdout file (table cell (" + row + "," + stdoutFileCol + "))");
-            getController().getLog().warning("Got a null SerializedFile for InputValidatorResults stdout file  (table cell (" + row + "," + stdoutFileCol + "))");
+            System.err.println("Got a null SerializedFile for Input Validator Results stdout file for table row " + row);
+            getController().getLog().warning("Got a null SerializedFile for InputValidatorResults stdout file for table row " + row);
         }
 
         // get the stderr file from the table
-        int stdErrFileCol = table.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).getModelIndex();
-        SerializedFile stdErrFile = getFileForTableCell(table, row, stdErrFileCol);
+//        int stdErrFileCol = table.getColumn(columnNames[COLUMN.VALIDATOR_ERR.ordinal()]).getModelIndex();
+//        SerializedFile stdErrFile = getFileForTableCell(table, row, stdErrFileCol);
+        res = ((InputValidationResultsTableModel) table.getModel()).getResultAt(row);
+        SerializedFile stdErrFile = res.getValidatorStdErr();
         if (stdErrFile == null) {
-            System.err.println("Got a null SerializedFile for Input Validator Results stderr file (table cell (" + row + "," + stdErrFileCol + "))");
-            getController().getLog().warning("Got a null SerializedFile for InputValidatorResults stderr file (table cell (" + row + "," + stdErrFileCol + "))");
+            System.err.println("Got a null SerializedFile for Input Validator Results stderr file for table row " + row);
+            getController().getLog().warning("Got a null SerializedFile for InputValidatorResults stderr file for table row " + row);
         }
 
         // get the execution directory being used by the EditProblemPane
         String executeDir;
-        JPanePlugin parent = getParentPane();
-        if (parent instanceof InputValidatorPane) {
+        JFrame parentFrame = getParentFrame();
+        if (parentFrame instanceof InputValidationResultFrame) {
 
-            JPanePlugin grandParent = ((InputValidatorPane) parent).getParentPane();
-            if (grandParent instanceof EditProblemPane) {
+            JPanePlugin grandParent = ((InputValidationResultFrame) parentFrame).getParentPane();
+            
+            if (grandParent instanceof InputValidatorPane) {
+                
+                JPanePlugin greatGrandParent = ((InputValidatorPane) grandParent).getParentPane();
+                
+                if (greatGrandParent instanceof EditProblemPane) {
 
-                JPanePlugin epp = grandParent;
-                executeDir = ((EditProblemPane) epp).getExecuteDirectoryName();
+                    JPanePlugin epp = greatGrandParent;
+                    executeDir = ((EditProblemPane) epp).getExecuteDirectoryName();
 
-                Utilities.insureDir(executeDir);
-                MultipleFileViewer viewer = new MultipleFileViewer(getController().getLog(), "Input Validation Results " + "(row " + (row + 1) + ")");
-                String title;
+                    Utilities.insureDir(executeDir);
+                    MultipleFileViewer viewer = new MultipleFileViewer(getController().getLog(), "Input Validation Results " + "(row " + (row + 1) + ")");
+                    String title;
 
-                boolean outputPaneAdded = false;
+                    boolean outputPaneAdded = false;
 
-                if (stdErrFile != null) {
-                    // display the stderr file in a viewer pane
-                    String stdErrFileName = executeDir + File.separator + stdErrFile.getName();
-                    try {
-                        // write the stderr file to the execute directory
-                        stdErrFile.writeFile(stdErrFileName);
+                    if (stdErrFile != null) {
+                        // display the stderr file in a viewer pane
+                        String stdErrFileName = executeDir + File.separator + stdErrFile.getName();
+                        try {
+                            // write the stderr file to the execute directory
+                            stdErrFile.writeFile(stdErrFileName);
 
-                        // add the stderr file to the viewer frame
-                        if (new File(stdErrFileName).isFile()) {
-                            title = stdErrFile.getName();
-                            viewer.addFilePane(title, stdErrFileName);
-                        } else {
-                            title = "Error accessing file";
-                            viewer.addTextPane(title, "Could not access file ' " + stdErrFile.getName() + " '");
-                        }
-                    } catch (IOException e) {
-                        title = "Error during file access";
-                        viewer.addTextPane(title, "Could not create file " + stdErrFileName + "Exception " + e.getMessage());
-                    }
-                    outputPaneAdded = true;
-                }
-
-                if (stdOutFile != null) {
-                    // display the stdout file in a viewer pane
-                    String stdOutFileName = executeDir + File.separator + stdOutFile.getName();
-                    try {
-                        // write the stdout file to the execute directory
-                        stdOutFile.writeFile(stdOutFileName);
-
-                        // add the stdout file to the viewer frame
-                        if (new File(stdOutFileName).isFile()) {
-                            title = stdOutFile.getName();
-                            viewer.addFilePane(title, stdOutFileName);
-                        } else {
-                            title = "Error accessing file";
-                            viewer.addTextPane(title, "Could not access file ' " + stdOutFile.getName() + " '");
-                        }
-                    } catch (IOException e) {
-                        title = "Error during file access";
-                        viewer.addTextPane(title, "Could not create file " + stdOutFileName + "Exception " + e.getMessage());
-                    }
-                    outputPaneAdded = true;
-                }
-
-                if (dataFile != null) {
-                    // display the data file in a viewer pane
-                    String dataFileName = executeDir + File.separator + dataFile.getName();
-                    try {
-                        // write the data file to the execute directory
-                        dataFile.writeFile(dataFileName);
-
-                        // add the data file to the viewer frame
-                        if (new File(dataFileName).isFile()) {
-                            title = dataFile.getName();
-                            viewer.addFilePane(title, dataFileName);
-                        } else {
-                            title = "Error accessing file";
-                            viewer.addTextPane(title, "Could not access file ' " + dataFile.getName() + " '");
-                        }
-                    } catch (IOException e) {
-                        title = "Error during file access";
-                        viewer.addTextPane(title, "Could not create file " + dataFileName + "Exception " + e.getMessage());
-                    }
-                    outputPaneAdded = true;
-                }
-
-                // check if we actually added anything
-                if (outputPaneAdded) {
-
-                    // yes we added something; decide which tab should be active
-                    int activeTab = 0;
-                    if (selectedColumn == COLUMN.FILE_NAME.ordinal()) {
-                        activeTab = 0;
-                    } else {
-                        if (selectedColumn == COLUMN.VALIDATOR_OUTPUT.ordinal()) {
-                            activeTab = 1;
-                        } else {
-                            if (selectedColumn == COLUMN.VALIDATOR_ERR.ordinal()) {
-                                activeTab = 2;
+                            // add the stderr file to the viewer frame
+                            if (new File(stdErrFileName).isFile()) {
+                                title = stdErrFile.getName();
+                                viewer.addFilePane(title, stdErrFileName);
+                            } else {
+                                title = "Error accessing file";
+                                viewer.addTextPane(title, "Could not access file ' " + stdErrFile.getName() + " '");
                             }
+                        } catch (IOException e) {
+                            title = "Error during file access";
+                            viewer.addTextPane(title, "Could not create file " + stdErrFileName + "Exception " + e.getMessage());
                         }
+                        outputPaneAdded = true;
                     }
-                    viewer.setSelectedIndex(activeTab);
 
-                    // show the viewer containing the files
-                    viewer.setVisible(true);
+                    if (stdOutFile != null) {
+                        // display the stdout file in a viewer pane
+                        String stdOutFileName = executeDir + File.separator + stdOutFile.getName();
+                        try {
+                            // write the stdout file to the execute directory
+                            stdOutFile.writeFile(stdOutFileName);
+
+                            // add the stdout file to the viewer frame
+                            if (new File(stdOutFileName).isFile()) {
+                                title = stdOutFile.getName();
+                                viewer.addFilePane(title, stdOutFileName);
+                            } else {
+                                title = "Error accessing file";
+                                viewer.addTextPane(title, "Could not access file ' " + stdOutFile.getName() + " '");
+                            }
+                        } catch (IOException e) {
+                            title = "Error during file access";
+                            viewer.addTextPane(title, "Could not create file " + stdOutFileName + "Exception " + e.getMessage());
+                        }
+                        outputPaneAdded = true;
+                    }
+
+                    if (dataFile != null) {
+                        // display the data file in a viewer pane
+                        String dataFileName = executeDir + File.separator + dataFile.getName();
+                        try {
+                            // write the data file to the execute directory
+                            dataFile.writeFile(dataFileName);
+
+                            // add the data file to the viewer frame
+                            if (new File(dataFileName).isFile()) {
+                                title = dataFile.getName();
+                                viewer.addFilePane(title, dataFileName);
+                            } else {
+                                title = "Error accessing file";
+                                viewer.addTextPane(title, "Could not access file ' " + dataFile.getName() + " '");
+                            }
+                        } catch (IOException e) {
+                            title = "Error during file access";
+                            viewer.addTextPane(title, "Could not create file " + dataFileName + "Exception " + e.getMessage());
+                        }
+                        outputPaneAdded = true;
+                    }
+
+                    // check if we actually added anything
+                    if (outputPaneAdded) {
+                        // yes we added something; decide which tab should be active
+
+                        int activeTab = 0;  //default to the input data file tab being the active tab
+                        if (selectedColumn == COLUMN.SHOW_DETAILS.ordinal()) {
+                            //the "Show Details" link was clicked; make the stdout tab the active tab
+                            activeTab = 1;
+                        }
+                        viewer.setSelectedIndex(activeTab);
+
+                        // show the viewer containing the files
+                        viewer.setVisible(true);
+
+                    } else {
+                        getController().getLog().warning("Found no Input Validation Result files to add to MultiFileViewer");
+                        System.err.println("Request to display results files but found no Input Validation Result files to add to MultiFileViewer");
+                    }
 
                 } else {
-                    getController().getLog().warning("Found no Input Validation Result files to add to MultiFileViewer");
-                    System.err.println("Request to display results files but found no Input Validation Result files to add to MultiFileViewer");
-                }
-
+                    getController().getLog().severe("GreatGrandParent of InputValidationResultPane is not an EditProblemPane; not supported");
+                } 
             } else {
-                getController().getLog().severe("Grandparent of InputValidationResultPane is not an EditProblemPane; not supported");
+                getController().getLog().severe("Grandparent of InputValidationResultPane is not an InputValidatorPane; not supported");
             }
         } else {
-            getController().getLog().severe("Parent of InputValidationResultPane is not an InputValidatorPane; not supported");
+            getController().getLog().severe("Parent of InputValidationResultPane is not an InputValidationResultFrame; not supported");
         }
     }
 
     private SerializedFile getFileForTableCell(JTable table, int row, int col) {
         InputValidationResult res = ((InputValidationResultsTableModel) table.getModel()).getResultAt(row);
-        SerializedFile file;
+        SerializedFile file = null;
         switch (col) {
             case 0:
                 file = new SerializedFile(res.getFullPathFilename());
@@ -368,16 +403,23 @@ public class InputValidationResultPane extends JPanePlugin {
             case 1:
                 getController().getLog().getLogger().log(Log.SEVERE, "Got a mouse click on an unclickable table cell!");
                 System.err.println("Internal error: got a mouse click on a cell that shouldn't be clickable");
+                System.err.println("Please report this error to the PC2 Development Team (pc2@ecs.csus.edu)");
                 file = null;
                 break;
+// columns 2 and 3 used to be clickable file links; they were replaced by a single "Show Details" button
+//            case 2:
+//                file = res.getValidatorStdOut();
+//                break;
+//            case 3:
+//                file = res.getValidatorStdErr();
+//                break;
             case 2:
-                file = res.getValidatorStdOut();
-                break;
-            case 3:
-                file = res.getValidatorStdErr();
+                //case 2 (col #2, the third column) now has a button with an actionPerformed() method; do nothing here
                 break;
             default:
                 getController().getLog().severe("Undefined JTable column");
+                System.err.println("Internal error: InputValidationResultPane.getFileForTableCell() received an undefined JTable column.");
+                System.err.println("Please report this error to the PC2 Development Team (pc2@ecs.csus.edu");
                 return null;
         }
         return file;
@@ -415,6 +457,10 @@ public class InputValidationResultPane extends JPanePlugin {
         getInputValidationResultSummaryTextLabel().setText(msg);
     }
 
+    public void setInputValidationResultSourceText(String msg) {
+        getInputValidationResultSourceTextLabel().setText(msg);
+    }
+
     public void setInputValidationSummaryMessageColor(Color color) {
         getInputValidationResultSummaryTextLabel().setForeground(color);
     }
@@ -432,22 +478,30 @@ public class InputValidationResultPane extends JPanePlugin {
 
         if (runResults != null && runResults.length > 0) {
 
-            // there are some results; see if there were any failures
+            // there are some results; see if there were any failures or errors
             boolean foundFailure = false;
+            boolean foundError = false;
             for (InputValidationResult res : runResults) {
                 if (res == null) {
-                    //ignore null results, but log them
+                    // ignore null results, but log them
                     getController().getLog().warning("InputValidationPane SwingWorker thread returned null InputValidationResult");
                 } else {
-                    if (!res.isPassed()) {
-                        foundFailure = true;
+                    if (res.getStatus() == InputValidationStatus.ERROR) {
+                        foundError = true;
                         break;
+                    } else {
+                        if (!res.isPassed()) {
+                            foundFailure = true;
+                            break;
+                        }
                     }
                 }
             }
 
             InputValidationStatus overallStatus;
-            if (foundFailure) {
+            if (foundError) {
+                overallStatus = InputValidationStatus.ERROR;
+            } else if (foundFailure) {
                 overallStatus = InputValidationStatus.FAILED;
             } else {
                 overallStatus = InputValidationStatus.PASSED;
@@ -477,11 +531,15 @@ public class InputValidationResultPane extends JPanePlugin {
                     break;
 
                 case ERROR:
+                    msg = "" + "Error occured during Input Validator execution";
+                    color = Color.red;
+                    break;
+                    
                 case NOT_TESTED:
                     msg = "Error occurred during input validation result display; check logs";
                     color = Color.YELLOW;
                     getController().getLog()
-                            .severe("Unexpected error in computing Input Validation Status: found status '" + overallStatus + "' when " + "only 'PASSED' or 'FAILED' should be possible");
+                            .severe("Unexpected error in computing Input Validation Status: found status '" + overallStatus + "' when " + "only 'PASSED', 'FAILED' or 'ERROR' should be possible");
                     break;
                 default:
                     msg = "This message should never be displayed; please notify PC2 Developers: pc2@ecs.csus.edu";
@@ -503,41 +561,57 @@ public class InputValidationResultPane extends JPanePlugin {
                 public void actionPerformed(ActionEvent e) {
                     SwingUtilities.invokeLater(new Runnable() {
                         public void run() {
-                            JPanePlugin parent = getParentPane();
-                            if (parent instanceof InputValidatorPane) {
+                            
+                            //get the frame which holds this result pane
+                            JFrame  resultFrame = getParentFrame();
+                            if (resultFrame instanceof InputValidationResultFrame) {
 
-                                // get the results of the latest run from the parent
-                                InputValidationResult[] results = ((InputValidatorPane) parent).getRunResults();
+                                //get the pane pointed to by the frame holding this pane which holds the Input Validation results 
+                                JPanePlugin resultHolder = ((InputValidationResultFrame)resultFrame).getParentPane();
+                                
+                                if (resultHolder instanceof InputValidatorPane) {
+                                    
+                                    // get the results of the latest run from the result-holding InputValidatorPane
+                                    InputValidationResult[] results = null;
+                                    if (((InputValidatorPane) resultHolder).getMostRecentlyRunInputValidatorType()==INPUT_VALIDATOR_TYPE.CUSTOM) {
+                                        results = ((InputValidatorPane) resultHolder).getCustomInputValidatorResults();
+                                    } else if (((InputValidatorPane) resultHolder).getMostRecentlyRunInputValidatorType()==INPUT_VALIDATOR_TYPE.VIVA) {
+                                        results = ((InputValidatorPane) resultHolder).getVivaInputValidatorResults();
+                                    }
+                                    
+                                    //check to make sure we got some results
+                                    if (results != null && results.length > 0) {
 
-                                if (results != null && results.length > 0) {
+                                        // make a copy so we don't wipe out the parent's results
+                                        InputValidationResult[] updatedResults = Arrays.copyOf(results, results.length);
 
-                                    // make a copy so we don't wipe out the parent's results
-                                    InputValidationResult[] updatedResults = Arrays.copyOf(results, results.length);
-
-                                    // if we are only going to show failed results, make a new array containing only failed results
-                                    if (getShowOnlyFailedFilesCheckbox().isSelected()) {
-                                        ArrayList<InputValidationResult> failedResultsList = new ArrayList<InputValidationResult>();
-                                        for (int i = 0; i < updatedResults.length; i++) {
-                                            if (!updatedResults[i].isPassed()) {
-                                                failedResultsList.add(updatedResults[i]);
+                                        // if we are only going to show failed results, make a new array containing only failed results
+                                        if (getShowOnlyFailedFilesCheckbox().isSelected()) {
+                                            ArrayList<InputValidationResult> failedResultsList = new ArrayList<InputValidationResult>();
+                                            for (int i = 0; i < updatedResults.length; i++) {
+                                                if (!updatedResults[i].isPassed()) {
+                                                    failedResultsList.add(updatedResults[i]);
+                                                }
+                                            }
+                                            updatedResults = new InputValidationResult[failedResultsList.size()];
+                                            for (int i = 0; i < updatedResults.length; i++) {
+                                                updatedResults[i] = failedResultsList.get(i);
                                             }
                                         }
-                                        updatedResults = new InputValidationResult[failedResultsList.size()];
-                                        for (int i = 0; i < updatedResults.length; i++) {
-                                            updatedResults[i] = failedResultsList.get(i);
-                                        }
-                                    }
 
-                                    // put the updated results in the table model and redraw the table
-                                    ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).setResults(updatedResults);
-                                    ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+                                        // put the updated results in the table model and redraw the table
+                                        ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).setResults(updatedResults);
+                                        ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).fireTableDataChanged();
 
+                                    } else {
+                                        getController().getLog().info("ShowOnlyFailedFiles checkbox selected but found no run results to display");
+                                    } 
                                 } else {
-                                    getController().getLog().info("ShowOnlyFailedFiles checkbox selected but found no run results to display");
+                                    getController().getLog().warning("InputValidationResultFrame does not link to an InputValidatorPane; cannot fetch Input Validation results");
                                 }
 
                             } else {
-                                getController().getLog().warning("InputValidationResultPane parent not an InputValidatorPane; cannot obtain results to update table");
+                                getController().getLog().warning("InputValidationResultPane parent not an InputValidationResultFrame; cannot obtain results to update table");
                             }
                         }
                     });
@@ -554,10 +628,25 @@ public class InputValidationResultPane extends JPanePlugin {
         return horizontalStrut_1;
     }
 
-    public void updateResultsTable(InputValidationResult[] runResults) {
+    private Component getRigidArea1() {
+        if (rigidArea1 == null) {
+            rigidArea1 = Box.createRigidArea(new Dimension(40, 20));
+        }
+        return rigidArea1;
+    }
+
+
+    /**
+     * This method uses the specified {@link InputValidationResult} array to update the Table Model in the 
+     * Input Validation Results JTable contained in this InputValidationResultPane, and then fires TableDataChanged
+     * on the Table Model.
+     * 
+     * @param runResults the new InputValidationResults to be displayed in the table.
+     */
+    protected void updateResultsTable(InputValidationResult[] runResults) {
         // put the results in the table model and redraw the table
-        ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).setResults(runResults);
-        ((InputValidationResultsTableModel) getInputValidatorResultsTable().getModel()).fireTableDataChanged();
+        ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).setResults(runResults);
+        ((InputValidationResultsTableModel) getInputValidationResultsTable().getModel()).fireTableDataChanged();
         updateInputValidationStatusMessage(runResults);
     }
 }

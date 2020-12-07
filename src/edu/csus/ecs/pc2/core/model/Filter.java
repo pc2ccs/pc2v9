@@ -738,8 +738,8 @@ public class Filter implements Serializable {
      * @param site
      */
     public void removeSite(Site site) {
-        if (siteIdHash.containsKey(site.getElementId())) {
-            siteIdHash.remove(site.getElementId());
+        if (siteIdHash.containsKey(site.getSiteNumber())) {
+            siteIdHash.remove(site.getSiteNumber());
             // TODO add setUsingSitesFilter(false); 
         }
     }
@@ -776,17 +776,7 @@ public class Filter implements Serializable {
         }
     }
 
-    /**
-     * Remove permission from the permission filter.
-     * 
-     * @param permission
-     */
-    public void removePermission(Permission type) {
-        if (permissionsHash.containsKey(type)) {
-            permissionsHash.remove(type);
-        }
-    }
-    
+   
     /**
      * Get list of ElementIds for the judgement in the filter list.
      * 

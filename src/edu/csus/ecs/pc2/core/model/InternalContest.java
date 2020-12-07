@@ -4,11 +4,14 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.ParseArguments;
@@ -1167,12 +1170,16 @@ public class InternalContest implements IInternalContest {
         return localLoginList.getLoggedInDate(clientId);
     }
 
-    public ConnectionHandlerID getConnectionHandleID(ClientId sourceId) {
-        ConnectionHandlerID connectionHandlerID = localLoginList.getConnectionHandleID(sourceId);
-        if (connectionHandlerID == null) {
-            connectionHandlerID = remoteLoginList.getConnectionHandleID(sourceId);
+    public Enumeration<ConnectionHandlerID> getConnectionHandlerIDs(ClientId sourceId) {
+        Enumeration<ConnectionHandlerID> connectionHandlerIDs = localLoginList.getConnectionHandlerIDs(sourceId);
+        
+        //TODO: what is the logic behind returning REMOTE connections if and only if there aren't any LOCAL connections?
+        // It seems like either this method should return ALL connections (Local AND Remote), or should always only return Local...
+        
+        if (connectionHandlerIDs == null || !connectionHandlerIDs.hasMoreElements()) {
+            connectionHandlerIDs = remoteLoginList.getConnectionHandlerIDs(sourceId);
         }
-        return connectionHandlerID;
+        return connectionHandlerIDs;
     }
 
     public ClientId getClientId(ConnectionHandlerID connectionHandlerID){
@@ -1206,24 +1213,74 @@ public class InternalContest implements IInternalContest {
         }
     }
 
-    
-    public void removeRemoteLogin(ClientId sourceId) {
-        if (isRemoteLoggedIn(sourceId)) {
-            remoteLoginList.remove(sourceId);
+    /**
+     * @throws IllegalArgumentException if the specified ClientId has a null ConnectionHandlerID.
+     */
+    public void removeRemoteLogin(ClientId clientIdToRemove) {
+        ConnectionHandlerID connectionHandlerID = clientIdToRemove.getConnectionHandlerID();
+        
+        //this method should never be called with a ClientId containing a null ConnectionHandlerID; however, the addition of 
+        // "multiple login" support may have left some place where this is inadvertently true.
+        //The following is an effort to catch/identify such situations.
+        if (connectionHandlerID==null) {
+            IllegalArgumentException e = new IllegalArgumentException("InternalController.removeRemoteLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove);
+            e.printStackTrace();
+            logException("InternalController.removeRemoteLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove, e);
+            throw e;
         }
-        ConnectionHandlerID connectionHandlerID = getConnectionHandleID(sourceId);
-        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGOFF, sourceId, connectionHandlerID, "Remote Logoff");
+
+        boolean removeWasSuccessful ;
+        if (isRemoteLoggedIn(clientIdToRemove)) {
+            removeWasSuccessful = remoteLoginList.remove(clientIdToRemove);
+        } else {
+            removeWasSuccessful = false;
+        }
+                
+        //check the return value from remove() and log the results
+        if (removeWasSuccessful) {
+            logMessage(Level.INFO, "removed " + clientIdToRemove + " from remote login list");
+        } else {
+            logMessage(Level.WARNING, "attempt to remove " + clientIdToRemove + " from remote login list failed");
+        }
+
+        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGOFF, clientIdToRemove, connectionHandlerID, "Remote Logoff");
         fireLoginListener(loginEvent);
     }
 
-    public void removeLogin(ClientId sourceId) {
-        if (isLocalLoggedIn(sourceId)){
-            localLoginList.remove(sourceId);
-        } else {
-            remoteLoginList.remove(sourceId);
+    /**
+     * @throws IllegalArgumentException if the specified ClientId has a null ConnectionHandlerID.
+     */
+    public void removeLogin(ClientId clientIdToRemove) {
+        ConnectionHandlerID connectionHandlerID = clientIdToRemove.getConnectionHandlerID();
+
+        //this method should never be called with a ClientId containing a null ConnectionHandlerID; however, the addition of 
+        // "multiple login" support may have left some place where this is inadvertently true.
+        //The following is an effort to catch/identify such situations.
+        if (connectionHandlerID==null) {
+            IllegalArgumentException e = new IllegalArgumentException("InternalContest.removeLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove);
+            e.printStackTrace();
+            logException("InternalContest.removeLogin() called with null ConnectionHandlerID in ClientId " + clientIdToRemove, e);
+            throw e;
         }
-        ConnectionHandlerID connectionHandlerID = getConnectionHandleID(sourceId);
-        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGOFF, sourceId, connectionHandlerID, "Logoff");
+        
+        boolean clientToRemoveIsLocal = isLocalLoggedIn(clientIdToRemove) ;
+        String removalTargetList = clientToRemoveIsLocal ? "local" : "remote";
+        boolean removeWasSuccessful ;
+
+        if (clientToRemoveIsLocal){
+            removeWasSuccessful = localLoginList.remove(clientIdToRemove);
+        } else {
+            removeWasSuccessful = remoteLoginList.remove(clientIdToRemove);
+        }
+        
+        //check the return value from remove() and log the results
+        if (removeWasSuccessful) {
+            logMessage(Level.INFO, "removed " + clientIdToRemove + " from " + removalTargetList + " login list");
+        } else {
+            logMessage(Level.WARNING, "attempt to remove " + clientIdToRemove + " from " + removalTargetList + " login list failed");
+        }
+
+        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGOFF, clientIdToRemove, connectionHandlerID, "Logoff");
         fireLoginListener(loginEvent);
     }
 
@@ -1328,6 +1385,16 @@ public class InternalContest implements IInternalContest {
 
         return (ClientId[]) v.toArray(new ClientId[v.size()]);
     }
+
+    /**
+     * Returns an array containing all logins in this contest matching the specified {@link ClientType}.
+     * 
+     * Note that if multiple simultaneous logins are allowed for the specified ClientType and there are currently
+     * multiple logins for a given clientId, the returned array will contain one element for each such login.
+     * 
+     * @param type the type of client for which logins are sought.
+     * @return array of all logged in clients of the specified type.
+     */
 
     public ClientId[] getAllLoggedInClients(Type type) {
         Enumeration<ClientId> localClients = localLoginList.getClients(type);
@@ -2771,6 +2838,15 @@ public class InternalContest implements IInternalContest {
             e.printStackTrace(System.err);
         }
     }
+    
+    private void logMessage(java.util.logging.Level level, String message) {
+        if (StaticLog.getLog() != null) {
+            StaticLog.getLog().log(level, message);
+        } else {
+            System.err.println(message);
+        }
+        
+    }
 
     public void removeAllListeners() {
         accountListenerList.removeAllElements();
@@ -2854,6 +2930,12 @@ public class InternalContest implements IInternalContest {
 
     }
 
+    /**
+     * Copies all the current login and connectionHandler data, for both local and remote logins and connectionHandlers,
+     * from the this contest to the specified newContest.
+     * 
+     *  @param newContest the contest into which the login and connection information will be copied.
+     */
     public void cloneAllLoginAndConnections(IInternalContest newContest) throws CloneException {
         
         CloneException ex = null;
@@ -2864,7 +2946,13 @@ public class InternalContest implements IInternalContest {
 
         for (ClientId clientId : localLoginList.getClientIdList()) {
             try {
-                newContest.addLocalLogin(clientId, localLoginList.getConnectionHandleID(clientId));      
+                //get a list of (one or possibly more) ConnectionHandlerIDs associated with the current locally logged-in client in the current contest
+                List<ConnectionHandlerID> connectionList = Collections.list(localLoginList.getConnectionHandlerIDs(clientId));
+                
+                //add each of the ConnectionHandlerIDs for the current local client to the list of local connections for the specified client in the new contest
+                for (ConnectionHandlerID connHID : connectionList) {
+                    newContest.addLocalLogin(clientId, connHID);   
+                }
             } catch (Exception e) {
                 ex = new CloneException(e.getMessage(), e.getCause());
             }
@@ -2876,7 +2964,14 @@ public class InternalContest implements IInternalContest {
 
         for (ClientId clientId : remoteLoginList.getClientIdList()) {
             try {
-                newContest.addRemoteLogin(clientId, remoteLoginList.getConnectionHandleID(clientId));
+                
+                //get a list of (one or possibly more) ConnectionHandlerIDs associated with the current remotely-logged in client in the current contest
+                List<ConnectionHandlerID> connectionList = Collections.list(remoteLoginList.getConnectionHandlerIDs(clientId));
+                
+                //add each of the ConnectionHandlerIDs for the current remote client to the list of remote connections for the specified client in the new contest
+                for (ConnectionHandlerID connHID : connectionList) {
+                    newContest.addRemoteLogin(clientId, connHID);
+                }
             } catch (Exception e) {
                 ex = new CloneException(e.getMessage(), e.getCause());
             }

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Arrays;
@@ -12,11 +12,11 @@ import edu.csus.ecs.pc2.core.Utilities;
  * Contains the submitter, problem, language, files and other data for a run.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 // TODO Should judgementList be accessed with a synchronize ??
+// TODO handle override id/number to String
+
 public class Run extends Submission {
 
     /**
@@ -439,6 +439,10 @@ public class Run extends Submission {
 
     public void setOverRideNumber(int number) {
         overrideNumber = number;
+    }
+    
+    public int getOverrideNumber() {
+        return overrideNumber;
     }
 
     /**

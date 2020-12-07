@@ -566,9 +566,9 @@ public final class PacketFormatter {
             node.add(child);
             child = new DefaultMutableTreeNode("PrelimaryNotification " + problem.isPrelimaryNotification());
             node.add(child);
-            child = new DefaultMutableTreeNode("ValidatorCommandLine " + problem.getValidatorCommandLine());
+            child = new DefaultMutableTreeNode("OutputValidatorCommandLine " + problem.getOutputValidatorCommandLine());
             node.add(child);
-            child = new DefaultMutableTreeNode("ValidatorProgramName " + problem.getValidatorProgramName());
+            child = new DefaultMutableTreeNode("OutputValidatorProgramName " + problem.getOutputValidatorProgramName());
             node.add(child);
 
             // TODO code these

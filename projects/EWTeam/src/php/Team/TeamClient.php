@@ -41,8 +41,8 @@
 <meta charset="utf-8" />
 
 <link href="tab_style/style.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="tab_style/jquery-1.9.1.js"></script>
-<script type="text/javascript" src="tab_style/jquery-ui-1.10.2.js"></script>
+<script type="text/javascript" src="JQuery/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="JQuery/jquery-ui.js"></script>
 <script type="text/javascript">
 
 setInterval('timer()',1000);

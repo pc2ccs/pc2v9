@@ -1,4 +1,3 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -466,5 +465,24 @@ public class UtilitiesTest extends AbstractTestCase {
             // System.out.println("\""+fields[0]+","+actualSeconds+"\", //");
             assertEquals("Expected basename ", expected, actual);
         }
+    }
+    
+    /**
+     * Test loadFile(String, long);
+     * 
+     * @throws Exception
+     */
+    public void testloadFileWithNum() throws Exception {
+        
+        String filename = "samps/pc2v9.ini";
+        
+        int num = 10;
+        
+        String[] lines = Utilities.loadFile(filename, num);
+        assertEquals("Expecting "+num+" lines", num, lines.length);
+        
+        num = 36;
+        lines = Utilities.loadFile(filename, num);
+        assertEquals("Expecting "+num+" lines", num, lines.length);
     }
 }

@@ -1,4 +1,3 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
@@ -11,8 +10,14 @@ import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.Utilities;
 
 /**
  * A file that can be stored to disk or transported.
@@ -23,36 +28,51 @@ import edu.csus.ecs.pc2.core.StringUtilities;
  * @author pc2@ecs.csus.edu
  */
 // $HeadURL$
-public class SerializedFile implements Serializable {
+public class SerializedFile implements Serializable, IJsonizable {
 
     static final long serialVersionUID = -254619749606639287L;
 
-    private static File file;
+//    private static File file;
+    private File file;      //jlc 4/14/19  Makes no sense to have a static field for this
 
     /**
      * The file contents.
      */
+    @JsonProperty
     private byte[] buffer;
 
+    @JsonProperty
     private String name;
 
+    @JsonProperty
     private String absolutePath;
 
+    @JsonProperty
     private String sha1sum;
 
+    @JsonProperty
     private int fileType = Constants.FILETYPE_BINARY;
 
+    @JsonProperty
     private int newLineCount = 0;
 
     /**
      * Is this a file that is not stored in the buffer, stored on disk.
      */
+    @JsonProperty
     private boolean externalFile = false;
 
+    @JsonProperty
     private char [] errorMessage;
 
+    @JsonProperty
     private Exception exception;
 
+    /**
+     * Construct a SerializedFile with default values.
+     * The default values for name, buffer (data contents), and file are null;
+     * the default value for fileType is Constants.FILETYPE_BINARY.
+     */
     public SerializedFile() {
         name = null;
         buffer = null;
@@ -60,17 +80,24 @@ public class SerializedFile implements Serializable {
         fileType = Constants.FILETYPE_BINARY;
     }
     
-    
+    /**
+     * Construct a SerializedFile with the specified fileName.
+     * An invocation of this constructor has the same effect as invoking {@link #SerializedFile(String, boolean)}
+     * with the specified fileName and a boolean parameter false.
+     * 
+     * @param fileName the name to be associated with the SerializedFile
+     */
     public SerializedFile(String fileName) {
         this(fileName, false);
     }
 
     /**
-     *
+     * Construct a SerializedFile with the specified fileName.
+     * 
      * If externalFile true then will calculate SHA and
      * {@link #getBuffer()} returns null.
      *
-     * @param fileName
+     * @param fileName the name to be assigned to the SerializedFile
      * @param externalFile if true then no buffer/file loaded 
      */
     public SerializedFile(String fileName, boolean externalFile) {
@@ -104,14 +131,23 @@ public class SerializedFile implements Serializable {
     }
 
     /**
+     * Constructs a SerializedFile containing the specified filename and the data bytes 
+     * from the specified file, which must exist on disk.
+     * The SerializedFile will contain the absolute path to the specified file as the filename.
      * 
+     * If the specified file cannot be found on disk an error message is inserted into the SerializedFile object;
+     * if an exception is thrown while constructing SerializedFile, both an error message and a corresponding
+     * exception are stored in the SerializedFile object.  In either of these cases, no additional action is taken; 
+     * it is the caller's responsibility to check for errors/exceptions when constructing a SerializedFile.
      * 
-     * @see #getErrorMessage()
-     * @see #getException()
      * @param fileName
-     *            file to be read/loaded.
+     *            disk file to be read/loaded into the SerializedFile object.
      * @param limit -
      *            maximum file size in bytes.
+     *            
+     * @see #getAbsolutePath()
+     * @see #getErrorMessage()
+     * @see #getException()
      */
     public SerializedFile(String fileName, int limit) {
         file = new File(fileName);
@@ -132,8 +168,104 @@ public class SerializedFile implements Serializable {
             }
         }
     }
-    
-    @Override
+
+    /**
+     * Constructs a SerializedFile containing the specified fileName and data bytes.
+     * The specified fileName will be assigned as the "absolute path" for the file.
+     * The "file base name" (the last component of the specified fileName, minus any file extension)
+     * will be assigned as the "name" of the file (also known as the "short name").
+     * 
+     * If an exception is thrown while constructing SerializedFile, an error message and a corresponding
+     * exception are stored in the SerializedFile object; however, no additional action is taken -- 
+     * it is the caller's responsibility to check for errors/exceptions when constructing a SerializedFile.
+     * 
+     * @param fileName the file name to be associated with the new SerializedFile
+     * @param data an array of bytes containing the data to be stored in the SerializedFile
+     * 
+     * @see #getAbsolutePath()
+     * @see #getName()
+     * @see #getErrorMessage()
+     * @see #getException()
+     */
+    public SerializedFile(String fileName, byte[] data) {
+
+        try {
+            buffer = data;
+            absolutePath = fileName;
+            name = Utilities.getFileBaseName(fileName);
+            generateSHA1();
+            generateFileType(buffer);
+
+        } catch (Exception e) {
+            addMessage("Exception in SerializeFile for file " + fileName, e);
+        }
+    }
+
+    /**
+     * Constructs a SerializedFile containing the file name and data bytes from the specified {@link IFile}.
+     * The file name from the {@link IFile} object will be assigned as the "absolute file name" for the SerializedFile.
+     * 
+     * If an exception is thrown while constructing the SerializedFile, an error message and a corresponding
+     * exception are stored in the SerializedFile object; however, no additional action is taken -- 
+     * it is the caller's responsibility to check for errors/exceptions when constructing a SerializedFile.
+     * 
+     * @param file the IFile object containing a description of the SerializedFile to be constructed
+     * 
+     * @see #getAbsolutePath()
+     * @see #getErrorMessage()
+     * @see #getException()
+     */
+    public SerializedFile(IFile file) {
+
+        try {
+            buffer = file.getByteData();
+
+            // Assign name to basename for input file
+            name = Utilities.basename(file.getFileName(), '/');
+            name = Utilities.basename(name, '\\');
+            
+            absolutePath = file.getAbsolutePath();
+            generateSHA1();
+            generateFileType(buffer);
+
+        } catch (Exception e) {
+            addMessage("Exception in SerializeFile for file " + file, e);
+        }
+    }
+
+    /**
+     * Constructs a SerializedFile containing the information specified in the parameters.
+     * 
+     * This constructor was created to support JSON serialization (which is the reason it is private).
+     * 
+     * @param fileName the base name of the file
+     * @param absolutePath the full path to the file
+     * @param buffer a char [] containing the data in the file
+     * @param errorMessage a char [] containing any error message associated with creating the file
+     * @param exception any Exception associated with creating the file
+     * @param externalfile a boolean indicating whether the file is external (stored on disk)
+     * @param fileType a flag indicating the file type -- DOS, Mac, Unix, or binary
+     */
+   @JsonCreator
+   private SerializedFile(
+           @JsonProperty("fileName") String fileName, 
+           @JsonProperty("absolutePath") String absolutePath, 
+           @JsonProperty("buffer") byte [] buffer, 
+           @JsonProperty("errorMessage") char [] errorMessage, 
+           @JsonProperty("exception") Exception exception, 
+           @JsonProperty("externalfile") boolean externalfile, 
+           @JsonProperty("fileType") int fileType) {
+       
+       this.name = fileName;
+       this.absolutePath = absolutePath;
+       this.buffer = buffer;
+       this.errorMessage = errorMessage;
+       this.exception = exception;
+       this.externalFile = externalfile;
+       this.fileType = fileType;
+   }
+   
+   @Override
     public boolean equals(Object obj) {
         if (obj == null){
             return false;
@@ -470,7 +602,8 @@ public class SerializedFile implements Serializable {
     }
 
     public void setFile(File file) {
-        SerializedFile.file = file;
+//        SerializedFile.file = file;
+        this.file = file;           //jlc 4/14/19  changed because "static" was removed from field declaration
     }
 
     /**
@@ -488,7 +621,10 @@ public class SerializedFile implements Serializable {
     }
 
     /**
-     * Insert the method's description here. Creation date: (11/16/2003 9:14:19 PM)
+     * This method examines the bytes in the specified buffer and attempts to ascertain what type
+     * of file the data represents.
+     * The presence of CR/LF line terminators implies a DOS file; CR line terminators imply an (old-style)
+     * MacOS file; LF terminators imply a Unix file (which includes Mac OSX files).
      */
     public void generateFileType(byte [] buf) {
 
@@ -693,4 +829,46 @@ public class SerializedFile implements Serializable {
     public String toString() {
         return name + " " + absolutePath + " ext=" + externalFile + " SHA=" + sha1sum;
     }
+    /**
+     * Returns a JSON string representation of this SerializedFile object.
+     * 
+     * @return a String containing a JSON representation of this object, or null if an error occurs during creation of the JSON string
+     */
+    public String toJSON() {
+        
+        ObjectMapper om = JSONObjectMapper.getObjectMapper();
+
+        String jsonString ;
+        try {
+            jsonString = om.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return jsonString ;
+     }
+    
+    /**
+     * Returns a SerializedFile object constructed from the specified JSON String.
+     *  
+     * @param json a JSON string describing a SerializedFile object
+     * @return a SerializedFile object constructed from JSON, or null if an exception occurred while mapping the JSON to an object
+     */
+    public SerializedFile fromJSON(String json) {
+
+        ObjectMapper om = JSONObjectMapper.getObjectMapper();
+        try {
+            Object temp = om.readValue(json, SerializedFile.class);
+            if (temp instanceof SerializedFile) {
+                return (SerializedFile) temp;
+            } else {
+                // TODO REFACTOR when using a more modern Jackson jar use  JsonParseException
+                throw new RuntimeException("JSON input does not properly map to SerializedFile") ;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }

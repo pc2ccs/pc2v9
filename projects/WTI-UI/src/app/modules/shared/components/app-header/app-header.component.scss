@@ -1,0 +1,29 @@
+@import '../../../../../styles/variables';
+
+header {
+  background-color: $bg-accent;
+  padding: 0.75rem 2rem;
+  box-shadow: $shadow1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .logo-container img { height: 4rem; }
+
+  nav a {
+    display: inline-block;
+    padding: 0.75rem;
+    margin: 0.75rem;
+    min-width: 7rem;
+    text-align: center;
+    font-size: 1.15rem;
+    cursor: pointer;
+    color: white;
+    border-bottom: 3px solid transparent;
+    text-decoration: none;
+  }
+
+  nav a.active, nav a:hover {
+    border-bottom-color: $warning;
+  }
+}

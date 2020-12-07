@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+
+<project name="package-WTI" default="archives" basedir=".">
+	
+	<!-- import buildWTI.xml instead of duplicating properties -->
+    <import file="buildWTI.xml"/>
+
+    <!-- "wtiversion" is set in buildWTI.xml and can be overriden on ant cmdline w/ -Dwtiversion=x.y -->
+    <property name="release" value="${name}-${wtiversion}"/>
+	
+	<!-- the directory where staging of distribution files will take place -->
+	<property name="staging.dist.dir" value="dist" />
+	
+	<!-- the directory where source for scripts can be found -->
+	<property name="scripts.src.dir" location="scripts" />
+	
+	<!-- the directory where the user documentation (user manual) can be found -->
+	<property name="doc.dir" location ="doc/User Manual" />
+	
+	<!-- remove any files left over in the distribution directory -->
+    <target name="cleandist" description="remove any previous dist files">
+        <delete dir="${staging.dist.dir}" />
+    </target>
+
+	<!-- copy to ${staging.dist.dir} all the files comprising a WTI project distribution -->
+	<target name="stage_files" depends="cleandist, build" description="Stages project deliverables in distribution directory">
+		
+		<mkdir dir="${staging.dist.dir}" />
+		
+		<!-- copy core WTI project files to staging dir -->
+		<copy todir="${staging.dist.dir}"> 
+		    <fileset dir="${build.dir}"> 
+		       <include name="**/*"/>
+		    </fileset>
+		</copy>
+		
+		<!-- copy pc2v9.ini to staging -->
+		<copy file="pc2v9.ini" todir="${staging.dist.dir}"/> 
+		
+		<!-- copy scripts to staging /bin folder-->
+		<mkdir dir="${staging.dist.dir}/bin" />
+		<copy todir="${staging.dist.dir}/bin">  <fileset dir="${scripts.src.dir}"/>  </copy>
+    	<chmod perm="775">
+		  	<fileset dir="${staging.dist.dir}/bin"/>
+    	</chmod>
+
+		<!-- copy user doc to staging /doc folder -->
+		<mkdir dir="${staging.dist.dir}/doc" />
+		<copy file="${doc.dir}/WTI User Manual.pdf" todir="${staging.dist.dir}/doc" />
+
+		<!-- the following files were copied as part of the old EWTeam project (from which this packageWTI.xml file was cloned);
+		    the equivalents of these for the WTI project still need to be added. 
+			<copy file="${project.dir}/README.txt" todir="${staging.dir}"/>
+			<copy file="${project.dir}/SETUP.txt" todir="${staging.dir}"/>
+			<copy file="${project.dir}/LICENSE.txt" todir="${staging.dir}"/>
+			<copy file="${build.dir}/VERSION.EWTEAM" todir="${staging.dir}"/>
+		-->
+		
+		<echo message="Staged project files at ${staging.dist.dir}"/>
+	</target>
+
+	<!-- set the value of ${repo.version} --> 
+    <target name="gitversion">
+		<available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+    	
+    	<!-- set ${git-hash} to either to the value of GIT_COMMIT if it exists in the environment, or HEAD if it doesn't -->
+         <condition property="git_hash" value="${env.GIT_COMMIT}" else="HEAD">
+            <isset property="env.GIT_COMMIT"/>
+        </condition>
+    	
+    	<!-- call git to obtain the number (count) of the most recent version associated with the value of ${git-hash} -->
+        <exec executable="git" outputproperty="repo.version" failifexecutionfails="false" errorproperty="">
+            <arg value="rev-list"/>
+            <arg value="${git_hash}"/>
+            <arg value="--count"/>
+        </exec>
+    	
+        <!-- if above failed, set the repo.version to 0 -->
+        <condition property="repo.version" value="0">
+            <not>
+               <isset property="repo.version"/>
+            </not>
+        </condition>
+	</target>
+    	
+	<!-- zip all the staged files, and construct checksum files for the zip file -->
+   	<target name="zip">
+        <zip destfile="${zip.path}">
+        	<zipfileset dir="${staging.dist.dir}" prefix="${release}" />
+        </zip>
+        <checksum file="${zip.path}" algorithm="MD5" fileext=".md5.txt"/>
+        <checksum file="${zip.path}" algorithm="SHA" fileext=".sha1.txt"/>
+    </target>
+
+	<!-- tar.gzip all the staged files, and construct checksum files for the .tar.gz file -->
+    <target name="gzip" depends="zip">
+        <tar destfile="${gzip.path}" compression="gzip" >
+        	<tarfileset dir="${staging.dist.dir}" prefix="${release}">
+        	</tarfileset>
+        </tar>
+        <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>
+        <checksum file="${gzip.path}" algorithm="SHA" fileext=".sha1.txt"/>
+    </target>
+	
+	<!-- create zip and tar archives of the files found in ${staging.dir} -->
+    <target name="archives" depends="stage_files, gitversion" description="construct zip/tar archives">
+
+        <property name="zip.name" value="${release}-${repo.version}.zip"/>
+        <property name="zip.path" value="${staging.dist.dir}/${zip.name}"/>
+        <property name="gzip.name" value="${release}-${repo.version}.tar.gz"/>
+        <property name="gzip.path" value="${staging.dist.dir}/${gzip.name}"/>
+
+        <!-- Note that gzip depends on zip; do not call zip explicitly when gzip is being called -->
+        <antcall target="gzip"/> 
+    </target>
+</project>

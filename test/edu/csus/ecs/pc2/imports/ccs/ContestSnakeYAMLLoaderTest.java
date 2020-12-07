@@ -44,6 +44,7 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
@@ -56,6 +57,7 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  * Unit tests.
  *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+ * @author John Clevenger, PC^2 Team (pc2@ecs.csus.edu)
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
@@ -121,8 +123,9 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     public void testLoaderMethods() throws Exception {
 
-
         String yamlFilename= getTestFilename("contest.jt.yaml");
+        
+//        editFile(yamlFilename);
 
         String[] contents = Utilities.loadFile(yamlFilename);
 
@@ -803,6 +806,54 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
 
     }
+    
+    public void testCCSLanguageLoad() throws Exception {
+        
+        String sampleContestDirName = "ccs1";
+        String dirname = getContestSampleCDPConfigDirname(sampleContestDirName);
+        
+        IInternalContest contest = snake.fromYaml(null, dirname, false);
+
+//        from ccs 1:
+//        languages:
+//            - name: C++
+//              compiler: /usr/bin/g++  
+//              compiler-args: -O2 -Wall -o a.out -static {files} 
+//
+//            - name: C
+//              compiler: /usr/bin/gcc
+//              compiler-args: -O2 -Wall -std=gnu99 -o a.out -static {files} -lm
+//            
+//            - name: Java
+//              compiler: /usr/bin/javac
+//              compiler-args: -O {files}
+//              runner: /usr/bin/java
+//              runner-args:
+        
+        Language[] languages = contest.getLanguages();
+        assertEquals("Expected 3 languages", 3, languages.length);
+        
+        for (Language language : languages) {
+            switch (language.getDisplayName()){
+                case "Java":
+                    assertEquals(language.getCompileCommandLine(), "/usr/bin/javac -O {files}");
+                    assertEquals(language.getProgramExecuteCommandLine(), "/usr/bin/java");
+                    break;
+                case "C":
+                    assertEquals(language.getCompileCommandLine(), "/usr/bin/gcc -O2 -Wall -std=gnu99 -o a.out -static {files} -lm");
+                    assertEquals(language.getProgramExecuteCommandLine(), "a.out");
+                    break;
+                case "C++":
+                    assertEquals(language.getCompileCommandLine(), "/usr/bin/g++ -O2 -Wall -o a.out -static {files}");
+                    assertEquals(language.getProgramExecuteCommandLine(), "a.out");
+                    break;
+                default:
+                    fail ("Unknown language "+language);
+                    break;
+            }
+        }
+    }
+
 
     public void testLoadSites() throws Exception {
 
@@ -1149,11 +1200,11 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         // Load data files
         try {
             
-        contest = loader.fromYaml(null, dirname, true);
+            contest = loader.fromYaml(null, dirname, true);
         
         } catch (YamlLoadException e) {
-            System.out.println("failed loading in file "+e.getFilename());
-            editFile(e.getFilename());
+//            System.out.println("failed loading in file "+e.getFilename());
+//            editFile(e.getFilename());
             throw e;
         }
 
@@ -1237,7 +1288,254 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     }
 
-    // SOMEDAY get this JUnit working
+    /**
+     * Tests that the input_validator keys "defaultInputValidator", "vivaPattern", customInputValidatorProg", and
+     * "customInputValidatorCmd" correctly assign the values specified in the problem.yaml file to a problem.
+     * 
+    * @throws Exception if the value associated with any of the above keys is not properly loaded into the problem.
+     */
+    public void testInputValidatorKeys() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Default custom validator setting: ", INPUT_VALIDATOR_TYPE.CUSTOM, prob.getCurrentInputValidatorType());
+         
+         //check that the "vivaPattern" key worked
+         String expectedPattern = "{x;}";
+         String [] pattern = prob.getVivaInputValidatorPattern();
+         StringBuffer sb = new StringBuffer();
+         for(int i = 0; i < pattern.length; i++) {
+            sb.append(pattern[i]);
+         }
+         String actualPattern = sb.toString();
+         assertEquals("Viva Pattern: ", expectedPattern, actualPattern);
+         
+         //check that the "customInputValidatorProg" key worked
+         assertEquals("Custom Input Validator program: ", "SumitInputValidator.class", prob.getCustomInputValidatorProgramName());
+
+         //check that the "customInputValidatorCmd" key worked
+         assertEquals("Custom Input Validator command: ", "java {:basename}", prob.getCustomInputValidatorCommandLine());
+         
+         //extra checks:  that the Problem Name and Letter got assigned correctly
+         assertEquals("Problem letter: ", "S", prob.getLetter());
+         assertEquals("Problem name: ", "sumit", prob.getShortName());
+        
+    }
+    
+    /**
+     * Tests that if no "customInputValidatorProg" key is present in the problem.yaml file, but there is an "input_format_validators"
+     * folder in the problem description and it contains an Input Validator file, that a custom input validator is loaded from the 
+     * "input_format_validators" folder.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadInputValidatorFromInputFormatValidatorsFolder() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Default custom validator setting: ", INPUT_VALIDATOR_TYPE.CUSTOM, prob.getCurrentInputValidatorType());
+         
+         //check that no "vivaPattern" has been set
+         assertFalse("Problem has Viva Pattern: ", prob.isProblemHasVivaInputValidatorPattern());
+         
+         //check that the "valid.bat" file in the "input_format_validators" folder was loaded
+         assertEquals("Custom Input Validator program: ", "valid.bat", prob.getCustomInputValidatorProgramName());
+         
+         //extra checks:  that the Problem Name and Letter got assigned correctly
+         assertEquals("Problem letter: ", "S", prob.getLetter());
+         assertEquals("Problem name: ", "sumit", prob.getShortName());
+        
+    }
+    
+    /**
+     * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "NONE",
+     * the problem gets assigned IV type "NONE" even if there is a Viva pattern defined.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadDefaultInputValidatorTypeNONEOverridesVivaPattern() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "vivaPattern" was set properly
+        String expectedPattern = "{x;}";
+        String [] pattern = prob.getVivaInputValidatorPattern();
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < pattern.length; i++) {
+           sb.append(pattern[i]);
+        }
+        String actualPattern = sb.toString();
+        assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
+         
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
+                
+    }
+    
+    /**
+     * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "NONE",
+     * the problem gets assigned IV type "NONE" even if there is a Custom Input Validator defined.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadDefaultInputValidatorTypeNONEOverridesCustomIV() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
+         
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
+    }
+    
+    /**
+     * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "NONE",
+     * the problem gets assigned IV type "NONE" even if there is a Custom Input Validator and a Viva Pattern defined.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadDefaultInputValidatorTypeNONEOverridesVivaAndCustomIV() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "vivaPattern" was set properly
+        String expectedPattern = "{x;}";
+        String [] pattern = prob.getVivaInputValidatorPattern();
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < pattern.length; i++) {
+           sb.append(pattern[i]);
+        }
+        String actualPattern = sb.toString();
+        assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
+        
+        assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
+         
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
+    }
+    
+    /**
+     * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "VIVA",
+     * the problem gets assigned IV type "VIVA" even if there is a Custom Input Validator defined.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadDefaultInputValidatorTypeVIVAOverridesCustomIV() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "vivaPattern" was set properly
+        String expectedPattern = "{x;}";
+        String [] pattern = prob.getVivaInputValidatorPattern();
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < pattern.length; i++) {
+           sb.append(pattern[i]);
+        }
+        String actualPattern = sb.toString();
+        assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
+        
+        assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
+         
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.VIVA, prob.getCurrentInputValidatorType());
+    }
+    
+    /**
+     * Tests that if a "defaultInputValidator" key is present in the problem.yaml file and specifies "CUSTOM",
+     * the problem gets assigned IV type "CUSTOM" even if there is a Viva Input Validator Pattern defined.
+     * 
+     * @throws Exception if the input_validator specifications in the problem.yaml file are not properly loaded into the problem.
+     */
+    public void testLoadDefaultInputValidatorTypeCUSTOMOverridesViva() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        //check that the "vivaPattern" was set properly
+        String expectedPattern = "{x;}";
+        String [] pattern = prob.getVivaInputValidatorPattern();
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < pattern.length; i++) {
+           sb.append(pattern[i]);
+        }
+        String actualPattern = sb.toString();
+        assertEquals("Problem Viva Pattern: ", expectedPattern, actualPattern);
+        
+        assertEquals("Problem Custom Input Validator: ", "valid.bat", prob.getCustomInputValidatorProgramName());
+         
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.CUSTOM, prob.getCurrentInputValidatorType());
+    }
+    
+    /**
+     * Tests that the proper Input Validator default settings are set if there is no "input_validator:" section in the problem.yaml 
+     * file and also there is no "input_format_validators" folder in the problem.  Specifically, this condition should result
+     * in no Viva pattern, no Custom Input Validator, and a default setting of "NONE" for the Input Validator.
+     * 
+     * @throws Exception if the correct default Input Validator settings are not loaded into the problem.
+     */
+    public void testInputValidatorDefaultSettingsWithNoIVSectionAndNoDefaultCustomValidator() throws Exception {
+
+        String testDirectory = getDataDirectory(this.getName());
+        assertDirectoryExists(testDirectory);
+
+        IInternalContest contest = loader.fromYaml(null, testDirectory);
+
+        Problem[] problems = contest.getProblems();
+        Problem prob = problems[0];
+
+        assertFalse("Problem has Viva Pattern: ", prob.isProblemHasVivaInputValidatorPattern());
+        
+        assertFalse("Problem has Custom Input Validator: ", prob.isProblemHasCustomInputValidator());
+        
+        //check that the "defaultInputValidator" key worked
+         assertEquals("Input Validator type: ", INPUT_VALIDATOR_TYPE.NONE, prob.getCurrentInputValidatorType());
+    }
+    
+  // SOMEDAY get this JUnit working
     public void aTestOverRideValidator() throws Exception {
 
         String directoryName = getDataDirectory("testValidatorKeys");
@@ -1250,7 +1548,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         String overrideMTSVCommand = "/usr/local/bin/mtsv {:problemletter} {:resfile} {:basename}";
         for (Problem problem : problems) {
-            assertEquals("Expect custom validator", overrideMTSVCommand, problem.getValidatorCommandLine());
+            assertEquals("Expect custom validator", overrideMTSVCommand, problem.getOutputValidatorCommandLine());
         }
     }
 
@@ -1655,8 +1953,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
         problem = originalContest.getProblem(problemId);
 
-        assertEquals("Expected validator name ", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
-        assertEquals("Expected validator command ", Constants.DEFAULT_CLICS_VALIDATOR_COMMAND, problem.getValidatorCommandLine());
+        assertEquals("Expected validator name ", Constants.CLICS_VALIDATOR_NAME, problem.getOutputValidatorProgramName());
+        assertEquals("Expected validator command ", Constants.DEFAULT_CLICS_VALIDATOR_COMMAND, problem.getOutputValidatorCommandLine());
 
     }
     
@@ -1939,7 +2237,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //        editFile(yamlFilename);
 //        System.out.println("cds config dir = "+cdpConfigDir);
         
-        assertAutoStart(contest, "2020-02-04 01:23", true);
+        assertAutoStart(contest, "2060-02-04 01:23", true);
         
         Language[] languages = contest.getLanguages();
         assertEquals("Number of languages", 3, languages.length);
@@ -2300,8 +2598,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             String expectedInputValidatorCommandLine = validatorCommandLine[idx];
             idx ++;
            
-            assertEquals("Expected input validator name ", expectedInputValidatorName, problem2.getInputValidatorProgramName());
-            assertEquals("Expected input validator command ", expectedInputValidatorCommandLine, problem2.getInputValidatorCommandLine());
+            assertEquals("Expected input validator name ", expectedInputValidatorName, problem2.getCustomInputValidatorProgramName());
+            assertEquals("Expected input validator command ", expectedInputValidatorCommandLine, problem2.getCustomInputValidatorCommandLine());
         }
     }
     
@@ -2419,7 +2717,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         snake.assignValidatorSettings(content, problem);
         
         assertEquals("validator type",  VALIDATOR_TYPE.PC2VALIDATOR, problem.getValidatorType());
-        assertEquals("validator program name", Constants.PC2_VALIDATOR_NAME, problem.getValidatorProgramName());
+        assertEquals("validator program name", Constants.PC2_VALIDATOR_NAME, problem.getOutputValidatorProgramName());
     }
     
 
@@ -2439,7 +2737,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         snake.assignValidatorSettings(content, problem);
         
         assertEquals("validator type",  VALIDATOR_TYPE.CLICSVALIDATOR, problem.getValidatorType());
-        assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
+        assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getOutputValidatorProgramName());
         
         // huh
     }
@@ -2461,7 +2759,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         assertEquals("validator type",  VALIDATOR_TYPE.CLICSVALIDATOR, problem.getValidatorType());
 
-        assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getValidatorProgramName());
+        assertEquals("validator program name", Constants.CLICS_VALIDATOR_NAME, problem.getOutputValidatorProgramName());
         
     }
     
@@ -2620,15 +2918,15 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertFileExists(ifvfilename);
 
         Problem p = problems[0];
-        assertEquals("InValCmdLine", "cmd /c valid.bat", p.getInputValidatorCommandLine());
+        assertEquals("InputValidatorCmdLine", "cmd /c valid.bat", p.getCustomInputValidatorCommandLine());
 
 //        String expProgFileName = unixifyPath(Utilities.getCurrentDirectory() + File.separator + ifvfilename);
         String expProgFileName = unixifyPath(valiatorFileName);
-        assertEquals("ProgName", expProgFileName, unixifyPath(p.getInputValidatorProgramName()));
+        assertEquals("ProgName", expProgFileName, unixifyPath(p.getCustomInputValidatorProgramName()));
 
 
         ProblemDataFiles pdf = con.getProblemDataFile(p);
-        SerializedFile file = pdf.getInputValidatorFile();
+        SerializedFile file = pdf.getCustomInputValidatorFile();
         assertNotNull(" getInputValidatorFile ", file);
 
     }
@@ -2720,7 +3018,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             ProblemDataFiles pdf = contest.getProblemDataFile(problem);
             totalProblemFiles += pdf.getJudgesAnswerFiles().length + pdf.getJudgesDataFiles().length;
 
-            String validatorName = problem.getValidatorProgramName();
+            String validatorName = problem.getOutputValidatorProgramName();
             assertEquals("Expecting validator cmd line for "+problem.getDataFileName(), validatorNames[i], validatorName);
             i++;
         }
@@ -2755,14 +3053,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      */
     protected String qs(String string) {
         return "\"" + string + "\", // ";
-    }
-
-    private String getTestSampleContestDirectory(String dirname) {
-        return getSampleContestsDirectory() + File.separator + dirname;
-    }
-
-    private String getSampleContestsDirectory() {
-        return "samps" + File.separator + "contests";
     }
 
     private String toUnixFS(String path) {
@@ -3123,6 +3413,51 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //# bad group id 334 for groups: 312544,312545,312546,312547, 334
 //# groups: 312544,312545,312546,312547
 //# groups: 312544;312545;312546;312547
+        
+    }
+    
+    /**
+     * Tests that YAML files correctly support allowing multiple logins by a given team using {@link IContestLoader#ALLOW_MULTIPLE_TEAM_LOGINS_KEY}. 
+     */
+    public void testMultipleLoginSupport() throws Exception {
+        
+        // make sure we have a valid data directory for this test
+        String dataDirName = getDataDirectory(getName());
+        Utilities.insureDir(dataDirName);
+        assertDirectoryExists(dataDirName);
+
+        // test that if the contest.yaml file doesn't specify any "allow-multiple-team-logins" value, the default is "no multiple logins allowed"
+        String yamlFilename = getTestFilename(getName() + File.separator + "contest.noAllowMultipleFlag.yaml");
+        String[] contents = Utilities.loadFile(yamlFilename);
+        assertFalse("Cannot find file " + yamlFilename, contents.length == 0);
+
+        IInternalContest contest = loader.fromYaml(null, contents, dataDirName);
+        assertNotNull(contest);
+        
+        boolean defaultAllow = contest.getContestInformation().isAllowMultipleLoginsPerTeam();
+        assertFalse("Loading YAML file with no 'allow-multiple-logins' flag failed to default to 'do not allow'", defaultAllow);
+
+        //test that if the contest.yaml file specifies "allow-multiple-team-logins: false", multiple logins are not allowed
+        yamlFilename = getTestFilename(getName() + File.separator + "contest.allowMultipleFlagFalse.yaml");
+        contents = Utilities.loadFile(yamlFilename);
+        assertFalse("Cannot find file " + yamlFilename, contents.length == 0);
+
+        contest = loader.fromYaml(null, contents, dataDirName);
+        assertNotNull(contest);
+        
+        boolean explicitlySetFalse = contest.getContestInformation().isAllowMultipleLoginsPerTeam();
+        assertFalse("Loading YAML file with explicit 'allow-multiple-logins: false' flag failed to set 'do not allow multiple logins'", explicitlySetFalse);
+        
+        //test that if the contest.yaml file specifies "allow-multiple-team-logins: true", multiple logins are allowed
+        yamlFilename = getTestFilename(getName() + File.separator + "contest.allowMultipleFlagTrue.yaml");
+        contents = Utilities.loadFile(yamlFilename);
+        assertFalse("Cannot find file " + yamlFilename, contents.length == 0);
+
+        contest = loader.fromYaml(null, contents, dataDirName);
+        assertNotNull(contest);
+        
+        boolean explicitlySetTrue = contest.getContestInformation().isAllowMultipleLoginsPerTeam();
+        assertTrue("Loading YAML file with explicit 'allow-multiple-logins: true' flag failed to set 'allow multiple logins'", explicitlySetTrue);
         
     }
 }

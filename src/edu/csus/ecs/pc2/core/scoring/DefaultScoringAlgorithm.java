@@ -645,6 +645,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
             standingsRecordMemento.putString("teamKey", account.getClientId().getTripletKey());
             standingsRecordMemento.putString("teamExternalId", account.getExternalId());
+            String longSchoolName = account.getLongSchoolName();
+            String shortSchoolName = account.getShortSchoolName();
+            if (shortSchoolName != null && shortSchoolName.trim().isEmpty()) {
+                shortSchoolName = longSchoolName;
+            }
+            if (shortSchoolName != null) {
+                standingsRecordMemento.putString("shortSchoolName", shortSchoolName); 
+            }
             if (account.getAliasName().trim().equals("")) {
                 standingsRecordMemento.putString("teamAlias", account.getDisplayName()+" (not aliasesd)");
             } else {

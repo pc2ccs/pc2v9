@@ -504,7 +504,7 @@ public class SubmitRunPane extends JPanePlugin {
                 if (result == JOptionPane.YES_OPTION) {
 
                     log.info("submitRun for " + problem + " " + language + " file: " + filename);
-                    getController().submitRun(problem, language, filename, otherFiles);
+                    getController().submitJudgeRun(problem, language, filename, otherFiles);
                 }
 
             } catch (Exception e) {
