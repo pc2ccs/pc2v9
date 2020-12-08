@@ -125,7 +125,7 @@ all_stable = list(filter(lambda release: not release["prerelease"], releases))
 prev_stables = list(filter(filter_tag_name, all_stable))
 list_latest_prerelease = list(filter(lambda release: release["prerelease"], releases))
 if list_latest_prerelease:
-   latest_prerelease = list_latestreleases[0]
+   latest_prerelease = list_latest_prerelease[0]
 else:
    latest_prerelease = latest_stable
 latest_nightly = list(filter(lambda release: release["prerelease"], nightly_releases))[0]
