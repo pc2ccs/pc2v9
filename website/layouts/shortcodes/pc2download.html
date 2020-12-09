@@ -17,7 +17,7 @@
     <br />
 </p>
 <p>
-{{ if gt $prereleaseTool.published_at $stableTool.published_at }}
+{{ if gt $preRelease.published_at $stableRelease.published_at }}
         Release Candidate: &nbsp;&nbsp;&nbsp;<a href="{{ $prereleaseTool.urls.zip }}">{{ .Get "shortname" }} version {{ $prereleaseTool.version }}.zip</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="{{ $prereleaseTool.urls.tar_gz }}">{{ .Get "shortname" }} version {{ $prereleaseTool.version }}.tar.gz</a><br />
     The latest release candidate {{ .Get "name" }} version is {{ $prereleaseTool.version }}, released on {{ $preRelease.date }}.
 </p>
