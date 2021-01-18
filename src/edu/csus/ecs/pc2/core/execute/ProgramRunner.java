@@ -137,10 +137,10 @@ public class ProgramRunner {
                 returnValue = process.waitFor();
                 log.info("execution process returned exit code " + returnValue);
                 executionData.setExecuteExitValue(returnValue);
-                process.destroy();
-
                 stdoutCollector.join();
                 stderrCollector.join();
+
+                process.destroy();
 
                 if (executionTimer != null) {
                     executionTimer.stopTimer();
