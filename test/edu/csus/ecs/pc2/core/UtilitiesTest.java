@@ -318,11 +318,22 @@ public class UtilitiesTest extends AbstractTestCase {
         problemNumber = 26;
         actual = Utilities.getProblemLetter(problemNumber);
         assertEquals("Expect letter for " + problemNumber, "Z", actual);
-
-        problemNumber = 5;
+        
+        problemNumber = 27;
         actual = Utilities.getProblemLetter(problemNumber);
-        assertEquals("Expect letter for " + problemNumber, "E", actual);
+        assertEquals("Expect letter for " + problemNumber, "AA", actual);
+        
+        problemNumber = 28;
+        actual = Utilities.getProblemLetter(problemNumber);
+        assertEquals("Expect letter for " + problemNumber, "AB", actual);
+        
+        problemNumber = 55;
+        actual = Utilities.getProblemLetter(problemNumber);
+        assertEquals("Expect letter for " + problemNumber, "BC", actual);
 
+        problemNumber = 702;
+        actual = Utilities.getProblemLetter(problemNumber);
+        assertEquals("Expect letter for " + problemNumber, "ZZ", actual);
     }
 
     public void testgetProblemNumber() throws Exception {
