@@ -106,17 +106,26 @@ export class NewRunComponent implements OnInit, OnDestroy {
       model.additionalTestFiles = this.testFiles;
     }
     model.isTest = this.submitType === 'test';
-    this._teamService.submitRun(model)
-      .pipe(takeUntil(this._unsubscribe))
-      .subscribe(_ => {
-        this.clearNewSubmission();
-        this.close();
-        this._uiHelper.alert('Run has been submitted successfully!');
-        this._teamService.runsUpdated.next();
-      }, (error: any) => {
-        this._uiHelper.alert('Error submitting problem! Check console for details');
-        console.error(error);
-      });
+
+	//make sure no file names contain blanks (the PC2 server chokes on such filenames)
+	if (this.filenameContainsBlanks(this.mainFile, this.additionalFiles, this.testFiles)){
+		//pop up an error dialog
+	    this._uiHelper.alert('File names may not contain spaces');
+	    console.error('One or more submitted file contains a space in its filename');
+	} else {
+		//submit the run
+	    this._teamService.submitRun(model)
+	      .pipe(takeUntil(this._unsubscribe))
+	      .subscribe(_ => {
+	        this.clearNewSubmission();
+	        this.close();
+	        this._uiHelper.alert('Run has been submitted successfully!');
+	        this._teamService.runsUpdated.next();
+	      }, (error: any) => {
+	        this._uiHelper.alert('Error submitting problem! Check console for details');
+	        console.error(error);
+	      });
+	}
   }
 
   async buildFileSubmission(file: File) {
@@ -158,4 +167,23 @@ export class NewRunComponent implements OnInit, OnDestroy {
       testDataFiles: []
     });
   }
+
+  //returns true if any of the filenames of any of the specified FileSubmissions contain a blank (space); false if none do.
+  private filenameContainsBlanks(mainfile: FileSubmission, additionalFiles: FileSubmission [], testFiles: FileSubmission []): boolean {
+	if (mainfile.fileName.indexOf(" ") > -1) {
+		return true;
+	}
+	for (var file of additionalFiles) {
+		if (file.fileName.indexOf(" ") > -1){
+			return true;
+		}
+	}
+	for (var file of testFiles) {
+		if (file.fileName.indexOf(" ") > -1) {
+			return true;
+		}
+	}
+	//none of the specified FileSubmission files contains a space in its name
+	return false;
+	}
 }
