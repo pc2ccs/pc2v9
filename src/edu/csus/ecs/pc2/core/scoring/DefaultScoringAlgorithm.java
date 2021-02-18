@@ -69,8 +69,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     
     public static final String POINTS_PER_NO_SECURITY_VIOLATION = "Points per Security Violation";
     
+    /**
+     * Non-frozen scoreboard output directory key
+     */
     public static final String JUDGE_OUTPUT_DIR = "Output HTML dir for Judges";
 
+    /**
+     * Frozen scoreboard output directory key
+     */
     public static final String PUBLIC_OUTPUT_DIR = "Output Public HTML dir";
     
     /**
