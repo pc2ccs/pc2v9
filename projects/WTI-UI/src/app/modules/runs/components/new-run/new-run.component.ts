@@ -7,6 +7,8 @@ import { ITeamsService } from 'src/app/modules/core/abstract-services/i-teams.se
 import { Subject } from 'rxjs';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UiHelperService } from '../../../core/services/ui-helper.service';
+import * as os  from 'os';
+
 
 export interface DialogData {
   submitType: 'judged' | 'test';
@@ -106,6 +108,9 @@ export class NewRunComponent implements OnInit, OnDestroy {
       model.additionalTestFiles = this.testFiles;
     }
     model.isTest = this.submitType === 'test';
+    model.osName = this.getOSName();
+
+    console.log('getOSName() returned : ' + model.osName);
 
 	//make sure no file names contain blanks (the PC2 server chokes on such filenames)
 	if (this.filenameContainsBlanks(this.mainFile, this.additionalFiles, this.testFiles)){
@@ -185,5 +190,15 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	}
 	//none of the specified FileSubmission files contains a space in its name
 	return false;
+	}
+	
+	private getOSName() : string {
+		//these are commented-out until we can figure out how to get access to WebPack Node modules
+//		console.log("OS type = " + os.type()) ;
+//		console.log("OS release = " + os.release()) ;
+//		console.log("OS platform =" + os.platform());
+		
+		return "A HardCoded (fake) OS Name string";
+
 	}
 }
