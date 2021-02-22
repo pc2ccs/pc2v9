@@ -251,13 +251,14 @@ public class TeamsController extends MainController {
 				int siteNum = teamClient.getSiteNumber();
 				String probName = prob.getShortName();
 				String msg = "Team " + teamNum + " at Site " + siteNum + " appears to have sent a submission for problem "
-							+ probName + " from a not-authorized platform."
-							+ "\n OS used to send the submission: " + submittingOS ;
-				List<String> allowedOSNames = getAllowedOSNames();
-				msg += "\n Allowed OS names:";
-				for (String osName : allowedOSNames) {
-					msg += "\n    " + osName ;
-				}
+							+ probName + " from the following non-authorized platform:" + "\n   " + submittingOS ;
+				
+				//don't list the allowed names; this gets exposed on the team in the clar -- which might allow them to hack in an allowed name.
+//				List<String> allowedOSNames = getAllowedOSNames();
+//				msg += "\n Allowed OS names:";
+//				for (String osName : allowedOSNames) {
+//					msg += "\n    " + osName ;
+//				}
 				teamsConn.submitClarification(prob, msg);
 			}
 		} 
@@ -313,7 +314,7 @@ public class TeamsController extends MainController {
 		
 		//check the specified name against each element in the list
 		for (String name : allowedOSNames) {
-			if (osName.contentEquals(name)) {
+			if (osName.trim().contentEquals(name)) {
 				return true;
 			}
 		}
