@@ -8,4 +8,5 @@ export class Submission {
   testFile: FileSubmission = null;
   additionalTestFiles: FileSubmission[] = [];
   isTest: boolean;
+  osName: string;
 }
