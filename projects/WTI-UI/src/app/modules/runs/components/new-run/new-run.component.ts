@@ -7,7 +7,11 @@ import { ITeamsService } from 'src/app/modules/core/abstract-services/i-teams.se
 import { Subject } from 'rxjs';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UiHelperService } from '../../../core/services/ui-helper.service';
-import * as os  from 'os';
+
+//See the comments in method getOSName() regarding these services
+//import * as os  from 'os';
+//import { DeviceDetectorService } from 'ngx-device-detector';
+//import * as child_process from 'child_process' ;
 
 
 export interface DialogData {
@@ -108,6 +112,7 @@ export class NewRunComponent implements OnInit, OnDestroy {
       model.additionalTestFiles = this.testFiles;
     }
     model.isTest = this.submitType === 'test';
+    
     model.osName = this.getOSName();
 
     console.log('getOSName() returned : ' + model.osName);
@@ -192,13 +197,47 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	return false;
 	}
 	
+	//returns a string intended to identify the platform on which the browser is running
 	private getOSName() : string {
-		//these are commented-out until we can figure out how to get access to WebPack Node modules
+		
+		console.log(navigator.userAgent);
+		return navigator.userAgent.toString();
+		
+// The following were all attempts to get the Angular Typescript/Javascript code to invoke the underlying OS to obtain
+// platform information (instead of using the "userAgent", which can vary).  
+// All of these attempts failed, most commonly with the browser throwing a "xxx is not a function" error.
+// It's not even clear that it's *possible* to do this -- isn't Typescript/Javascript constrained to run inside the browser sandbox?
+
+// Try using the Node "os" module:
+//		os = new os();
 //		console.log("OS type = " + os.type()) ;
 //		console.log("OS release = " + os.release()) ;
 //		console.log("OS platform =" + os.platform());
-		
-		return "A HardCoded (fake) OS Name string";
+//		console.log("OS version = " + os.version());
+//		return os.version();
+	
+// Try using the  DeviceDetectorService from 'ngx-device-detector' (https://www.npmjs.com/package/ngx-device-detector)
+//		this.deviceInfo = this._deviceService.getDeviceInfo();
+//		console.log("OS name = " + this._deviceService.os);
+//		console.log("OS version = " + this._deviceService.os_version);
+//  	console.log("Browser = " + this._deviceService.browser);
+//		return this._deviceService.os_version;
+//
+// Try using the Node 'child_process' package to spawn a host-system process
+//		var spawn = require('child_process').spawn;
+//		var prc = spawn('java',  ['-jar', '-Xmx512M', '-Dfile.encoding=utf8', 'script/importlistings.jar']);
+//		//noinspection JSUnresolvedFunction
+//		prc.stdout.setEncoding('utf8');
+//		prc.stdout.on('data', function (data) {
+//  	var str = data.toString()
+//		var lines = str.split(/(\r?\n)/g);
+//		console.log(lines.join(""));
+//
+//		prc.on('close', function (code) {
+//    		console.log('process exit code ' + code);
+//		});
+//
+//		return this.deviceInfo;
 
 	}
 }
