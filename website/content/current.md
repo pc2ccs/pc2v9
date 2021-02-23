@@ -8,7 +8,7 @@ icon: fas fa-server
 ---
 
 **NOTICE**  This public repository for the PC&sup2; Contest Control System is still _under development_.  You're welcome to look around,
-but until an official announcement is made (and this is notice removed), _we do not recommend relying on the code published here_.
+but until an official announcement is made (and this notice is removed), _we do not recommend relying on the code published here_.
 If you are interested in obtaining a copy of PC&sup2; for running a contest, please refer to the [PC&sup2; home page](https://pc2.ecs.csus.edu).
 
 <ul>
