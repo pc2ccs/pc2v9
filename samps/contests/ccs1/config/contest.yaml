@@ -9,6 +9,9 @@ start-time:        2060-02-04 01:23Z
 duration:          5:00:00
 scoreboard-freeze: 4:00:00
 
+output-private-score-dir: super_secret
+output-public-score-dir: public_html_dir
+
 default-clars:
   - No comment, read problem statement.
   - This will be answered during the answers to questions session.

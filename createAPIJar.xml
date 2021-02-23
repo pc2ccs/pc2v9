@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="v9VersionAndJarBuild" default="jar" basedir=".">
+<project name="Create pc2apiTest.jar" default="jar" basedir=".">
 	<!-- $Id$ -->
 	<!-- $HeadURL$ -->
 	<!-- 
@@ -108,10 +108,6 @@ dal
 			<format property="millisecond" pattern="S" timezone="UTC" />
 		</tstamp>
 		<property name="build.number" value="${millisecond}" />
-
-		<!-- include the images in the jar -->
-		<copy file="images/csus_logo.png" todir="${build.prod.dir}/images"/>
-		<copy file="images/icpc_banner.png" todir="${build.prod.dir}/images"/>
 
 		<!-- consider doing the manifest in a separate target
              then the Version can be ommitted if not set -->

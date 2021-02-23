@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
@@ -50,6 +51,7 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 
@@ -3459,6 +3461,43 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         boolean explicitlySetTrue = contest.getContestInformation().isAllowMultipleLoginsPerTeam();
         assertTrue("Loading YAML file with explicit 'allow-multiple-logins: true' flag failed to set 'allow multiple logins'", explicitlySetTrue);
         
+    }
+    
+    public void testScoreboardHTMLLocations() throws Exception {
+
+        String dataDirName = getDataDirectory(getName());
+        Utilities.insureDir(dataDirName);
+        assertDirectoryExists(dataDirName);
+
+        String yamlFilename = getTestFilename(getName() + File.separator + "contest.testScoreboardHTMLLocations.yaml");
+
+//        startExplorer(dataDirName);
+//        editFile(yamlFilename);
+
+        String[] contents = Utilities.loadFile(yamlFilename);
+        assertFalse("Cannot find file " + yamlFilename, contents.length == 0);
+
+        IInternalContest contest = loader.fromYaml(null, contents, dataDirName);
+        assertNotNull(contest);
+
+        ContestInformation info = contest.getContestInformation();
+        assertNotNull("expecting info", info);
+        Properties props = info.getScoringProperties();
+        assertNotNull("expecting getScoringProperties", props);
+
+        String privateDir = props.getProperty(DefaultScoringAlgorithm.JUDGE_OUTPUT_DIR);
+        assertNotNull("expecting " + DefaultScoringAlgorithm.JUDGE_OUTPUT_DIR + " defined in " + yamlFilename, privateDir);
+
+        String publicDir = props.getProperty(DefaultScoringAlgorithm.PUBLIC_OUTPUT_DIR);
+        assertNotNull("expecting " + DefaultScoringAlgorithm.PUBLIC_OUTPUT_DIR + " defined in " + yamlFilename, publicDir);
+
+        // From yaml:
+//        output_private_score_dir: super_secret
+//        output_public_score_dir: public_html_dir
+
+        assertEquals("Private HTML Directory", "super_secret", privateDir);
+        assertEquals("Public HTML Directory", "public_html_dir", publicDir);
+
     }
 }
 
