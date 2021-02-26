@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.json.Json;
@@ -33,10 +35,13 @@ public class ServerInit {
     
 	private static ServerInit init = null;
 	private static String publicIPOverride;
+	private static List<String> allowedOSNames;
+	
 	private int portNum;
 	private String socketSource;
 	private String scoreboardAccount;
 	private String scoreboardPassword;
+
 
 	private Log logger;
 	
@@ -61,7 +66,12 @@ public class ServerInit {
 		      this.socketSource = p.getProperty("wtiwsName");
 		      this.scoreboardAccount = p.getProperty("wtiscoreboardaccount", "scoreboard2");
 		      this.scoreboardPassword = p.getProperty("wtiscoreboardpassword", "scoreboard2");
+		      
 		      publicIPOverride = p.getProperty(WTI_PUBLIC_IP_OVERRIDE_KEY);
+		      allowedOSNames = getAllowedOSNames(p);
+		      
+		      System.out.println ("Found the following properties in pc2v9.ini: " + p);
+
 		} catch(FileNotFoundException e) {
 			this.logger.info("pc2v9.ini File missing; reverting to default WTI port/socket/scoreboard values");
 			setDefaults();
@@ -74,6 +84,26 @@ public class ServerInit {
 		}
 	}
 	
+	/**
+	 * Returns a list of property values for every entry in the specified Properties object
+	 * whose key starts with the String "allowedOSName".
+	 * 
+	 * @param p a Properties object which potentially contains entries giving allowed OS names.
+	 * @return a List<String> containing the values for all entries in the specified Properties whose key starts with "allowedOSName".
+	 * 			The returned list may be empty but will never be null.
+	 */
+	private List<String> getAllowedOSNames(Properties p) {
+
+		List<String> allowedNames = new ArrayList<String>();
+		for (Object key : p.keySet()) {
+			String keyName = key.toString();
+			if (keyName.startsWith("allowedOSName")) {
+				allowedNames.add(p.getProperty(keyName)); 
+			}
+		}
+		return allowedNames;
+	}
+
 	private void setDefaults() {
 		this.portNum = 8080;
 		this.socketSource ="/websocket";
@@ -186,6 +216,15 @@ public class ServerInit {
 	 */
 	public Log getLogger() {
 		return logger;
+	}
+
+	/**
+	 * Returns a List<String> of the OS names which have been specified in the pc2v9 ini file with keys starting with
+	 * "allowedOSName" -- for example, "allowedOSName1=Windows", or "allowedOSName2=Linux".
+	 * @return a List<String> of allowed OS names.
+	 */
+	public static List<String> getAllowedOSNames() {
+		return allowedOSNames;
 	}
 
 }

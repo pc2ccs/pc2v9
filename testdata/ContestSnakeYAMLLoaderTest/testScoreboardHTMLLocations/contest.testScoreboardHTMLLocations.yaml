@@ -1,0 +1,89 @@
+# Contest configuration
+# 
+#
+# Wed Feb 17 12:59:37 PDT 2021
+#
+
+---
+name:              Unit Test 4
+short-name:        UT4
+start-time:        2011-02-04 01:23Z
+duration:          5:00:00
+scoreboard-freeze: 4:00:00
+
+# New scoreboard definitions
+
+output-private-score-dir: super_secret
+output-public-score-dir: public_html_dir
+
+timeout:  20
+
+default-validator: /bin/true
+
+default-clars:
+  - No comment, read problem statement.
+  - This will be answered during the answers to questions session.
+
+clar-categories:
+  - General
+  - SysOps
+  - Operations
+
+languages:
+  - name: C++
+    compiler: /usr/bin/g++
+    compiler-args: -O2 -Wall -o a.out -static {files}
+
+  - name: C
+    compiler: /usr/bin/gcc
+    compiler-args: -O2 -Wall -std=gnu99 -o a.out -static {files} -lm
+
+  - name: Java
+    compiler: /usr/bin/javac
+    compiler-args: -O {files}
+    runner: /usr/bin/java
+    runner-args:
+
+  - name: 'Python'
+    active: true
+    compilerCmd: 'python -m py_compile {:mainfile}'
+    exemask: ''
+    execCmd: 'python {:mainfile}'
+    runner: 'python'
+    runner-args: '{:mainfile}'
+    use-judge-cmd: false
+    judge-exec-cmd: 'python {:mainfile}'
+
+# no problems
+
+sites:
+ - number: 1
+   name: Uno Site Arcadia
+   IP: localhost
+   port: 50002
+
+accounts:
+  - account: TEAM
+    site: 1
+    count: 14
+
+  - account: JUDGE
+    site: 1
+    count: 12
+
+  - account: TEAM
+    site: 2
+    count: 21
+
+  - account: TEAM
+    site: 3
+    start: 300
+    count: 30
+
+  - account: JUDGE
+    site: 2
+    count: 8
+
+
+# eof $Id: contest.yaml 2704 2013-10-16 05:38:06Z laned $
+

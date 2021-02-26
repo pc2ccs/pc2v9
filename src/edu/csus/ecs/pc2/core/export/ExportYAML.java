@@ -35,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
@@ -163,6 +164,9 @@ public class ExportYAML {
 
 //        contestWriter.println("scoreboard-freeze: " + info.getFreezeTime());
         contestWriter.println("scoreboard-freeze-length: " + info.getFreezeTime());
+        
+        contestWriter.println(IContestLoader.OUTPUT_PRIVATE_SCORE_DIR_KEY+": " + info.getScoringProperties().getProperty(DefaultScoringAlgorithm.JUDGE_OUTPUT_DIR));
+        contestWriter.println(IContestLoader.OUTPUT_PUBLIC_SCORE_DIR_KEY+": " + info.getScoringProperties().getProperty(DefaultScoringAlgorithm.PUBLIC_OUTPUT_DIR));
 
         contestWriter.println("# " + IContestLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": false");
 

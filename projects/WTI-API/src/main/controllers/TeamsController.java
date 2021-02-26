@@ -9,12 +9,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import config.ServerInit;
+
 import javax.inject.Singleton;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.core.model.IFile;
+import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IRun;
@@ -238,6 +242,25 @@ public class TeamsController extends MainController {
 			else{
 				teamsConn.submitJudgeRun(prob, lang, main);
 			}
+			
+			//some systems (e.g. VCSS) want to be notified if the submission came from a not-allowed source
+			String submittingOS = run.getOSName();
+			if (!isAllowedOSName(submittingOS)) {
+				IClient teamClient = teamsConn.getMyClient();
+				int teamNum = teamClient.getAccountNumber();
+				int siteNum = teamClient.getSiteNumber();
+				String probName = prob.getShortName();
+				String msg = "Team " + teamNum + " at Site " + siteNum + " appears to have sent a submission for problem "
+							+ probName + " from the following non-authorized platform:" + "\n   " + submittingOS ;
+				
+				//don't list the allowed names; this gets exposed on the team in the clar -- which might allow them to hack in an allowed name.
+//				List<String> allowedOSNames = getAllowedOSNames();
+//				msg += "\n Allowed OS names:";
+//				for (String osName : allowedOSNames) {
+//					msg += "\n    " + osName ;
+//				}
+				teamsConn.submitClarification(prob, msg);
+			}
 		} 
 		catch(NullPointerException e) {
 			return Response.status(Response.Status.BAD_REQUEST)
@@ -258,6 +281,45 @@ public class TeamsController extends MainController {
 		}
 
 		return Response.ok().type(MediaType.APPLICATION_JSON).build();
+	}
+
+	private List<String> getAllowedOSNames() {
+
+		return ServerInit.getAllowedOSNames();
+
+	}
+
+	/**
+	 * Checks whether the specified osName String is the name of an OS/platform from which submissions are allowed to be sent.
+	 * An osName is an "allowed" OS name if either (a) the specified name appears in the list of allowed OS names returned by
+	 * {@link #getAllowedOSNames()}, or if the list returned by {@link #getAllowedOSNames()} is null or empty (which is frequently the case).
+	 * 
+	 * @param osName a String specifying the OS name to be checked.
+	 * @return true if the specified osName appears in the list of allowed OS names or if the list of allowed OS names is null or empty;
+	 * 			false if the list of allowed names is NOT null/empty but the the specified name does not appear in the list.
+	 */
+	private boolean isAllowedOSName(String osName) {
+		//get a list of allowed OS names
+		List<String> allowedOSNames = getAllowedOSNames();
+		
+		//if the list is empty, we default to "allowed"
+		if (allowedOSNames==null || allowedOSNames.size()==0) {
+			return true;
+		}
+		
+		//the list is not empty; make sure we were passed something to check
+		if (osName==null || osName.contentEquals("")) {
+			return false;
+		}
+		
+		//check the specified name against each element in the list
+		for (String name : allowedOSNames) {
+			if (osName.trim().contentEquals(name)) {
+				return true;
+			}
+		}
+		//the name we were given is not in the allowed list
+		return false;
 	}
 
 	/**

@@ -52,6 +52,9 @@ public class ExportYamlReportTest extends AbstractTestCase {
         String filename = testDirectory + File.separator + "exportYaml.txt";
         report.createReportFile(filename, new Filter());
 
+//        editFile(filename);
+//        startExplorer(testDirectory);
+
         if (debugMode) {
             System.out.println("Wrote to " + filename);
         }

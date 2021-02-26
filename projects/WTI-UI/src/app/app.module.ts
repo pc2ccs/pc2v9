@@ -10,6 +10,7 @@ import { SharedModule } from './modules/shared/shared.module';
 import { OptionsModule } from './modules/options/options.module';
 import { ClarificationsModule } from './modules/clarifications/clarifications.module';
 import { ScoreboardModule } from './modules/scoreboard/scoreboard.module';
+//import { DeviceDetectorModule } from 'ngx-device-detector';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import { ScoreboardModule } from './modules/scoreboard/scoreboard.module';
     OptionsModule,
     ClarificationsModule,
     ScoreboardModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+//	DeviceDetectorModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent]

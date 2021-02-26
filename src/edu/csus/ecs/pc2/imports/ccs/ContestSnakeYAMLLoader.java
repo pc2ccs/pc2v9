@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.MailMergeFile;
+import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
@@ -58,6 +59,7 @@ import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.tools.PasswordGenerator;
 import edu.csus.ecs.pc2.tools.PasswordType2;
@@ -339,6 +341,20 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return value;
     }
 
+    /**
+     * Set Scoring properties value.
+     * @param contest
+     * @param keyName key in Scoring Properties
+     * @param value value to be assigned
+     */
+    private void setScoringPropertyValue (IInternalContest contest, String keyName, String value)
+    {
+        ContestInformation contestInformation = contest.getContestInformation();
+        Properties props = contestInformation.getScoringProperties();
+        props.put(keyName, value);
+        contestInformation.setScoringProperties(props);
+    }
+
     private void setContestStartDateTime(IInternalContest contest, Date date) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setScheduledStartDate(date);
@@ -515,6 +531,25 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                         throw new YamlLoadException("Invalid start-time value '" + startTime + " expected ISO 8601 format, " + e.getMessage(), e, contestFileName);
                     }
                 }
+            }
+        }
+        
+        
+        Object privatehtmlOutputDirectory = fetchObjectValue(content, OUTPUT_PRIVATE_SCORE_DIR_KEY);
+        if (privatehtmlOutputDirectory != null) {
+            if (privatehtmlOutputDirectory instanceof String) {
+                setScoringPropertyValue(contest, DefaultScoringAlgorithm.JUDGE_OUTPUT_DIR, (String) privatehtmlOutputDirectory);
+            } else {
+                throw new YamlLoadException("Invalid value/type for " + OUTPUT_PRIVATE_SCORE_DIR_KEY + " <" + privatehtmlOutputDirectory + ">");
+            }
+        }
+
+        Object publichtmlOutputDirectory = fetchObjectValue(content, OUTPUT_PUBLIC_SCORE_DIR_KEY);
+        if (publichtmlOutputDirectory != null) {
+            if (publichtmlOutputDirectory instanceof String) {
+                setScoringPropertyValue(contest, DefaultScoringAlgorithm.PUBLIC_OUTPUT_DIR, (String) publichtmlOutputDirectory);
+            } else {
+                throw new YamlLoadException("Invalid value/type for " + OUTPUT_PUBLIC_SCORE_DIR_KEY + " <" + publichtmlOutputDirectory + ">");
             }
         }
 
@@ -1541,11 +1576,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     public ClientId [] getShadowProxyClientIds(String[] yamlLines) {
         ArrayList<ClientId> clientIdList = new ArrayList<ClientId>();
         Map<String, Object> yamlContent = loadYaml(null, yamlLines);
+        @SuppressWarnings("unchecked")
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, "team-proxy-accounts");
 
         if (list != null) {
             for (Object object : list) {
 
+                @SuppressWarnings("unchecked")
                 Map<String, Object> map = (Map<String, Object>) object;
 
                 String accountType = fetchValue(map, "account");
@@ -3032,6 +3069,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     StaticLog.info(result);
                 }
             }
+
         }
 
         return contest;

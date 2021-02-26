@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalTSVFormatException;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -15,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 
@@ -192,9 +194,30 @@ public class LoadAccounts {
         }
         return account;
     }
+    
+    /**
+     * Returns a list of accounts updated from the input load accounts file.
+     * 
+     * @see #fromTSVFile(String, Account[], Group[])
+     * 
+     * @param contest
+     * @param filename updates model accounts from file 
+     * @return a list of accounts to update.
+     * @throws Exception
+     */
+    public static Account[] updateAccountsFromFile(IInternalContest contest, String filename) throws Exception {
+
+        Account[] curAccounts = contest.getAccounts();
+        Group[] curGroups = contest.getGroups();
+
+        Account[] updatedAccounts = new LoadAccounts().fromTSVFile(filename, curAccounts, curGroups);
+        return updatedAccounts;
+    }
    
     /**
      * Read a tab-separated values from a file.
+     * 
+     * File must have a header of field names.  The fields can appear in any order.
      * 
      * Reads TSV file, updates existing accounts in model, returns only a list
      * of accounts that should be updated.
@@ -218,10 +241,11 @@ public class LoadAccounts {
      * permdisplay
      * permlogin
      * site (required)
+
      * </pre>
      * 
      * @param filename
-     * @param existingAccounts
+     * @param existingAccounts 
      * @param groupList
      * @return an array of accounts
      * @throws Exception
@@ -357,5 +381,20 @@ public class LoadAccounts {
         in.close();
         in = null;
         return accountMap.values().toArray(new Account[accountMap.size()]);
+    }
+
+    /**
+     * Update accounts from accounts load file.
+     * 
+     * @param loadFilename - accounts load filename.
+     * @throws Exception 
+     */
+    public static void updateAccountsFromLoadAccountsFile(IInternalContest contest, String loadAccountFilename) throws Exception {
+        if (Utilities.fileExists(loadAccountFilename)) {
+
+            Account[] updateAccounts = LoadAccounts.updateAccountsFromFile(contest, loadAccountFilename);
+            contest.updateAccounts(updateAccounts);
+            contest.storeConfiguration(StaticLog.getLog());
+        }
     }
 }
