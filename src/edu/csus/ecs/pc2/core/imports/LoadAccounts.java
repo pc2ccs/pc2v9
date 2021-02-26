@@ -228,11 +228,11 @@ public class LoadAccounts {
      * does not exist then a IllegalTSVFormatException will be thrown.
      * 
      * <P>
-     *      * 
+     * 
+     * 
      * 1st line should contain the column headers.   Columns can appear in any order.
      * Supported column headers are:
      * <pre>
-     * site (required)
      * account (required)
      * alias
      * displayname
@@ -240,6 +240,8 @@ public class LoadAccounts {
      * password
      * permdisplay
      * permlogin
+     * site (required)
+
      * </pre>
      * 
      * @param filename
@@ -351,7 +353,7 @@ public class LoadAccounts {
                     continue;
                 }
                 String[] values = TabSeparatedValueParser.parseLine(line);
-                // skip lines with no account too
+                
                 if (!values[accountColumn].equals("")) {
                     // No such account in contest model
                     Account account = getAccount(values);

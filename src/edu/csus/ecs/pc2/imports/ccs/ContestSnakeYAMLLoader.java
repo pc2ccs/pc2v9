@@ -27,6 +27,7 @@ import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
 
 import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.JudgementLoader;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
@@ -35,6 +36,7 @@ import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AutoJudgeSetting;
 import edu.csus.ecs.pc2.core.model.Category;
@@ -3057,9 +3059,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 Site site = createFirstSite(contest.getSiteNumber(), "localhost", Constants.DEFAULT_PC2_PORT);
                 contest.addSite(site);
             }
+            
+            if (contest.getJudgements().length == 0) {
+                // judgements not loaded from yaml
+                
+                String rejectIniFile = cdpConfigDirectory + File.separator + Constants.JUDGEMENT_INIT_FILENAME;
+                if (Utilities.fileExists(rejectIniFile)){
+                    String result = JudgementLoader.loadJudgements(contest, false, cdpConfigDirectory.getAbsolutePath());
+                    StaticLog.info(result);
+                }
+            }
 
-            String loadAccountFilename = cdpConfigDirectory.getAbsolutePath() + File.separator + Constants.ACCOUNTS_LOAD_FILENAME;
-            LoadAccounts.updateAccountsFromLoadAccountsFile(contest, loadAccountFilename);
         }
 
         return contest;

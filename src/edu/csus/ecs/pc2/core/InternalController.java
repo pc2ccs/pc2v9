@@ -1114,9 +1114,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             inContest.initializeStartupData(inContest.getSiteNumber());
 
             inContest.initializeSubmissions(inContest.getSiteNumber());
-
-            loadJudgements();
-
+            
             if (inContest.getGeneralProblem() == null) {
                 inContest.setGeneralProblem(new Problem("General"));
             }
@@ -1128,6 +1126,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             info("initialized controller Site " + inContest.getSiteNumber());
             
             handleCDPLoad(true);
+            
+            if (contest.getJudgements().length == 0) {
+                // judgements not loaded from yaml, cdp config - load from  ./reject.ini 
+                String result = JudgementLoader.loadJudgements(inContest, false, ".");
+                getLog().info(result);
+            }
+
+            
+            if (contest.getJudgements().length == 0) {
+                // judgements not loaded from cdp, yaml or ./reject.ini 
+                JudgementLoader.loadDefaultJudgements(contest);
+                getLog().info("Loaded default judgements");
+            }
             
             dumpAutoStartInformation(contest.getContestInformation());
             
@@ -1186,21 +1197,21 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
-    protected void loadJudgements() {
-
-        if (!isContactingRemoteServer()) {
-
-            if (contest.getJudgements().length == 0) {
-
-                if (loadedJudgementsFromIni(Constants.JUDGEMENT_INIT_FILENAME)) {
-                    info("Loaded judgements from " + Constants.JUDGEMENT_INIT_FILENAME);
-                } else {
-                    info(Constants.JUDGEMENT_INIT_FILENAME + " not found.  Loading default judgements");
-                    loadDefaultJudgements();
-                }
-            }
-        }
-    }
+//    protected void loadJudgements() {
+//
+//        if (!isContactingRemoteServer()) {
+//
+//            if (contest.getJudgements().length == 0) {
+//
+//                if (loadedJudgementsFromIni(Constants.JUDGEMENT_INIT_FILENAME)) {
+//                    info("Loaded judgements from " + Constants.JUDGEMENT_INIT_FILENAME);
+//                } else {
+//                    info(Constants.JUDGEMENT_INIT_FILENAME + " not found.  Loading default judgements");
+//                    loadDefaultJudgements();
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Loads reject.ini file contents into Judgements.
@@ -1217,7 +1228,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     protected boolean loadedJudgementsFromIni(String filename) {
 
         if (new File(filename).exists()) {
-            return new JudgementLoader().loadedJudgementsFromIni(contest, filename);
+            return JudgementLoader.loadJudgementsFromIni(contest, filename);
         }
         return false;
     }
@@ -2841,6 +2852,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     info("Loaded CDP/config values from " + entryLocation);
                     
                     File cdpConfigDir = loader.findCDPConfigDirectory(new File(entryLocation));
+                    
+                    if (contest.getJudgements().length == 0) {
+                        // judgements not loaded from yaml nor config/reject.ini
+                        // load from "."
+                        JudgementLoader.loadJudgements(contest, false, ".");
+                    }
+                    
+         
                     
                     if (saveCofigurationToDisk) {
                         // save newly merged profiles
