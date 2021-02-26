@@ -15,6 +15,8 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  */
 public class JudgementLoaderTest extends AbstractTestCase {
     
+    private static final String NATIVE_FILE_SEPERATOR = File.separator;
+
     /**
      * Test Load from list of lines. 
      * @throws Exception
@@ -226,7 +228,7 @@ public class JudgementLoaderTest extends AbstractTestCase {
 
         msg = JudgementLoader.loadJudgements(contest, false);
         judgements = contest.getJudgements();
-        assertEquals("Judgements not loaded, no judgement file found at .\\reject.ini", msg);
+        assertEquals("Judgements not loaded, no judgement file found at ." + NATIVE_FILE_SEPERATOR + "reject.ini", msg);
         assertEquals(0, judgements.length);
 
         // no reject.ini at ., default judgements loaded
@@ -234,7 +236,7 @@ public class JudgementLoaderTest extends AbstractTestCase {
         msg = JudgementLoader.loadJudgements(contest, false, ".");
         judgements = contest.getJudgements();
         assertEquals(0, judgements.length);
-        assertEquals("Judgements not loaded, no judgement file found at .\\reject.ini", msg);
+        assertEquals("Judgements not loaded, no judgement file found at ." + NATIVE_FILE_SEPERATOR + "reject.ini", msg);
 
         if (contest.getJudgements().length == 0) {
             JudgementLoader.loadDefaultJudgements(contest);
@@ -291,7 +293,7 @@ public class JudgementLoaderTest extends AbstractTestCase {
             InternalContest contest = new InternalContest();
             String msg = JudgementLoader.loadJudgements(contest, false);
             Judgement[] judgements = contest.getJudgements();
-            assertEquals("Loaded judgements from .\\reject.ini", msg);
+            assertEquals("Loaded judgements from ." + NATIVE_FILE_SEPERATOR + "reject.ini", msg);
             assertEquals(9, judgements.length);
         }
 
