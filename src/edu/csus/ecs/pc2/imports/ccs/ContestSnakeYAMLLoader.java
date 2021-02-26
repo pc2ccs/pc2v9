@@ -31,6 +31,7 @@ import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.MailMergeFile;
+import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
@@ -1573,11 +1574,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     public ClientId [] getShadowProxyClientIds(String[] yamlLines) {
         ArrayList<ClientId> clientIdList = new ArrayList<ClientId>();
         Map<String, Object> yamlContent = loadYaml(null, yamlLines);
+        @SuppressWarnings("unchecked")
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, "team-proxy-accounts");
 
         if (list != null) {
             for (Object object : list) {
 
+                @SuppressWarnings("unchecked")
                 Map<String, Object> map = (Map<String, Object>) object;
 
                 String accountType = fetchValue(map, "account");
@@ -3055,6 +3058,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 contest.addSite(site);
             }
 
+            String loadAccountFilename = cdpConfigDirectory.getAbsolutePath() + File.separator + Constants.ACCOUNTS_LOAD_FILENAME;
+            LoadAccounts.updateAccountsFromLoadAccountsFile(contest, loadAccountFilename);
         }
 
         return contest;
