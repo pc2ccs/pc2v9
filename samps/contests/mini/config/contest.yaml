@@ -117,10 +117,6 @@ problemset:
     rgb:        '#000000'
 
 accounts:
-  - account: TEAM
-    site: 1
-    count: 700
-
   - account: JUDGE
     site: 1
     count: 14

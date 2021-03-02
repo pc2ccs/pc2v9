@@ -43,9 +43,23 @@ public class ProblemImplementation implements IProblem {
     private String shortName;
 
     private boolean deleted = false;
+    
 
     public ProblemImplementation(ElementId problemId, IInternalContest internalContest) {
-        this(internalContest.getProblem(problemId), internalContest);
+            this(safeGetProblem(problemId, internalContest), internalContest);
+    }
+
+
+    private static Problem safeGetProblem( ElementId problemId, IInternalContest internalContest) {
+        Problem problem = internalContest.getProblem(problemId);
+        if (problem == null) {
+            String displayName = problemId.toString();  // Ex Sumit-4444
+            // TODO strip out "-" and beyond from displayName, last instance of "-"
+            problem = new Problem(displayName);
+            problem.setElementId(problemId);
+            problem.setActive(true);
+        }  // else
+        return problem;
     }
 
     public ProblemImplementation(Problem problem, IInternalContest internalContest) {
