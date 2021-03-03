@@ -12,10 +12,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
  * Implementation for IProblem.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class ProblemImplementation implements IProblem {
 
     private String name;
@@ -43,10 +40,35 @@ public class ProblemImplementation implements IProblem {
     private String shortName;
 
     private boolean deleted = false;
+    
 
-    public ProblemImplementation(ElementId problemId, IInternalContest internalContest) {
-        this(internalContest.getProblem(problemId), internalContest);
-    }
+        public ProblemImplementation(ElementId problemId, IInternalContest internalContest) {
+                this(safeGetProblem(problemId, internalContest), internalContest);
+        }
+        
+        
+        /**
+         * Get Problem name from elementId.
+         * 
+         * @param elementId
+         * @return problem name
+         */
+        public static String getProblemName (ElementId elementId) {
+            String name = elementId.toString();
+            String newName = name.substring(0, name.lastIndexOf("-")).replaceAll("_",  " ");
+            return newName;
+        }
+    
+        private static Problem safeGetProblem( ElementId problemId, IInternalContest internalContest) {
+            Problem problem = internalContest.getProblem(problemId);
+            if (problem == null) {
+                String displayName = getProblemName(problemId);
+                problem = new Problem(displayName);
+                problem.setElementId(problemId);
+                problem.setActive(true);
+            }  // else
+            return problem;
+        }
 
     public ProblemImplementation(Problem problem, IInternalContest internalContest) {
         elementId = problem.getElementId();
