@@ -663,4 +663,18 @@ public class ContestTest extends AbstractTestCase {
         assertNotNull(contest);
         
     }
+    
+    public void NOTtestGetProblemName(){
+        
+        IInternalContest contest = sampleContest.createStandardContest();
+        
+        Problem[] problems = contest.getProblems();
+        
+        for (Problem problem : problems) {
+            String stripped = ProblemImplementation. getProblemName(problem.getElementId());
+            println("Problem name = " + problem.getDisplayName() + " ele = " + problem.getElementId()+" newstr '"+stripped+"'");
+        }
+        
+    }
+        
 }
