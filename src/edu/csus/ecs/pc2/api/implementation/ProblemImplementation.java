@@ -55,13 +55,7 @@ public class ProblemImplementation implements IProblem {
          */
         public static String getProblemName (ElementId elementId) {
             String name = elementId.toString();
-            String newName;
-            if (name.lastIndexOf("--") != -1){
-                newName = name.substring(0, name.lastIndexOf("--")).replaceAll("_",  " ");
-                
-            } else {
-                newName = name.substring(0, name.lastIndexOf("-")).replaceAll("_",  " ");
-            }
+            String newName = name.substring(0, name.lastIndexOf("-")).replaceAll("_",  " ");
             return newName;
         }
     
