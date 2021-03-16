@@ -1,15 +1,11 @@
 ---
 title: "Current Downloads"
 description: "The PC^2 Contest Control System interconnects teams submissions with judging"
-date: 2020-03-26T18:36:38-07:00
+date: Tuesday, March 16, 2021 4:03:24 PM GMT-07:00
 draft: false
 weight: 2
 icon: fas fa-server
 ---
-
-**NOTICE**  This public repository for the PC&sup2; Contest Control System is still _under development_.  You're welcome to look around,
-but until an official announcement is made (and this notice is removed), _we do not recommend relying on the code published here_.
-If you are interested in obtaining a copy of PC&sup2; for running a contest, please refer to the [PC&sup2; home page](https://pc2.ecs.csus.edu).
 
 <ul>
 <li>    <b>Latest stable release</b>: the main public release. This release has been widely used around the world in many contests and is recommended for those who want the assurances of a stable, vetted system for running their contest.</li>

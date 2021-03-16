@@ -1,18 +1,13 @@
 ---
 title: "Home"
 description: "Programing Contest Control (PC^2) system implemented by the PC^2 Development Team for use at the ICPC World Finals and other programming contests"
-date: 2019-11-12T21:10:52+01:00
+date: Tuesday, March 16, 2021 4:03:24 PM GMT-07:00
 draft: false
 weight: 1
 icon: fas fa-home
 ---
 
 {{< figure src="/img/logo-full.png" alt="PC^2 logo" class="float-right" >}}
-
-**NOTICE**  This public repository for the PC&sup2; Contest Control System is still _under development_.  You're welcome to look around,
-but until an official announcement is made (and this notice is removed), _we do not recommend relying on the code published here_.
-If you are interested in obtaining a copy of PC&sup2; for running a contest, please refer to the [PC&sup2; home page](https://pc2.ecs.csus.edu).
-
 
 PC&sup2; (the **P**rogramming **C**ontest **C**ontrol system,
 pronounced "P-C-squared" or sometimes just "P-C-Two" for short) is a
@@ -64,7 +59,7 @@ See the <a href="https://github.com/pc2ccs/pc2v9/wiki">PC&sup2; Wiki</a> for mor
 
 ### Disclaimer
 
-The software available through this site is provided free and “as is”, with the usual disclaimers: lack of guarantee of suitability
+The software available through this site is provided free and "as is", with the usual disclaimers: lack of guarantee of suitability
 for any particular purpose, no stated or implied responsibility for the results of their use, etc.
 
 In other words, we find this system to be very useful for managing programming contest operations, and we think you will too; but we
