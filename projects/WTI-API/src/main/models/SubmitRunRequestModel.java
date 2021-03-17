@@ -9,6 +9,7 @@ public class SubmitRunRequestModel {
 	public File testFile;
 	public File[] additionalTestFiles;
 	public boolean isTest;
+	public String osName = "No OS name set";
 
 	public SubmitRunRequestModel(String probName, String language, File mainFile, File[] extraFiles, File testFile,
 			boolean isTest) {
@@ -93,6 +94,10 @@ public class SubmitRunRequestModel {
 
 	public void setTest(boolean isTest) {
 		this.isTest = isTest;
+	}
+	
+	public String getOSName() {
+		return osName;
 	}
 
 }

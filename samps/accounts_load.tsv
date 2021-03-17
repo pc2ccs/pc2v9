@@ -1,0 +1,54 @@
+#
+# Load account for for mini sample contest 
+#
+site	account	displayname	password	group	permdisplay	permlogin	externalid	alias	permpassword	longschoolname	shortschoolname	countrycode
+1	team1	TeamName One	pass1		true	true	1001		false			UK
+1	team2	TeamName 2	pass2		true	true	1002		false			USA
+1	team3	TeamName 3	pass3		true	true	1003		false			USA
+1	team4	TeamName Four	pass4		true	true	1004		false			UK
+1	team5	TeamName 5	pass5		true	true	1005		false			USA
+1	team6	TeamName 6	pass6		true	true	1006		false			USA
+1	team7	TeamName 7	pass7		true	true	1007		false			USA
+1	team8	TeamName 8	pass8		true	true	1008		false			USA
+1	team9	TeamName 9	pass9		true	true	1009		false			USA
+1	team10	TeamName 10	pass10		true	true	1010		false			USA
+1	team11	TeamName 11	pass11		true	true	1011		false			USA
+1	team12	TeamName 12	pass12		true	true	1012		false			USA
+1	team13	TeamName 13	pass13		true	true	1013		false			USA
+1	team14	TeamName 14	pass14		true	true	1014		false			USA
+1	team15	TeamName 15	pass15		true	true	1015		false			USA
+1	team16	TeamName 16	pass16		true	true	1016		false			USA
+1	team17	TeamName 17	pass17		true	true	1017		false			USA
+1	team18	TeamName 18	pass18		true	true	1018		false			USA
+1	team19	TeamName 19	pass19		true	true	1019		false			USA
+1	team20	TeamName 20	pass20		true	true	1020		false			USA
+1	team21	TeamName 21	pass21		true	true	1021		false			USA
+1	team22	TeamName 22	pass22		true	true	1022		false			USA
+1	team23	TeamName 23	pass23		true	true	1023		false			USA
+1	team24	TeamName 24	pass24		true	true	1024		false			USA
+1	team25	TeamName 25	pass25		true	true	1025		false			USA
+1	team26	TeamName 26	pass26		true	true	1026		false			USA
+1	team27	TeamName 27	pass27		true	true	1027		false			USA
+1	team28	TeamName 28	pass28		true	true	1028		false			USA
+1	team29	TeamName 29	pass29		true	true	1029		false			USA
+1	team30	TeamName 30	pass30		true	true	1030		false			USA
+1	team31	TeamName 31	pass31		true	true	1031		false			USA
+1	team32	TeamName 32	pass32		true	true	1032		false			USA
+1	team33	TeamName 33	pass33		true	true	1033		false			USA
+1	team34	TeamName 34	pass34		true	true	1034		false			USA
+1	team35	TeamName 35	pass35		true	true	1035		false			USA
+1	team36	TeamName 36	pass36		true	true	1036		false			USA
+1	team37	TeamName 37	pass37		true	true	1037		false			USA
+1	team38	TeamName 38	pass38		true	true	1038		false			USA
+1	team39	TeamName 39	pass39		true	true	1039		false			USA
+1	team40	TeamName 40	pass40		true	true	1040		false			USA
+1	team41	TeamName 41	pass41		true	true	1041		false			USA
+1	team42	TeamName 42	pass42		true	true	1042		false			USA
+1	team43	TeamName 43	pass43		true	true	1043		false			USA
+1	team44	TeamName 44	pass44		true	true	1044		false			USA
+1	team45	TeamName 45	pass45		true	true	1045		false			USA
+1	team46	TeamName 46	pass46		true	true	1046		false			USA
+1	team47	TeamName 47	pass47		true	true	1047		false			USA
+1	team48	TeamName 48	pass48		true	true	1048		false			USA
+1	team49	TeamName 49	pass49		true	true	1049		false			USA
+1	team50	TeamName 50	pass50		true	true	1050		false			USA

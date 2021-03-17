@@ -8,6 +8,12 @@ import { Subject } from 'rxjs';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UiHelperService } from '../../../core/services/ui-helper.service';
 
+//See the comments in method getOSName() regarding these services
+//import * as os  from 'os';
+//import { DeviceDetectorService } from 'ngx-device-detector';
+//import * as child_process from 'child_process' ;
+
+
 export interface DialogData {
   submitType: 'judged' | 'test';
 }
@@ -106,17 +112,30 @@ export class NewRunComponent implements OnInit, OnDestroy {
       model.additionalTestFiles = this.testFiles;
     }
     model.isTest = this.submitType === 'test';
-    this._teamService.submitRun(model)
-      .pipe(takeUntil(this._unsubscribe))
-      .subscribe(_ => {
-        this.clearNewSubmission();
-        this.close();
-        this._uiHelper.alert('Run has been submitted successfully!');
-        this._teamService.runsUpdated.next();
-      }, (error: any) => {
-        this._uiHelper.alert('Error submitting problem! Check console for details');
-        console.error(error);
-      });
+    
+    model.osName = this.getOSName();
+
+    console.log('getOSName() returned : ' + model.osName);
+
+	//make sure no file names contain blanks (the PC2 server chokes on such filenames)
+	if (this.filenameContainsBlanks(this.mainFile, this.additionalFiles, this.testFiles)){
+		//pop up an error dialog
+	    this._uiHelper.alert('File names may not contain spaces');
+	    console.error('One or more submitted file contains a space in its filename');
+	} else {
+		//submit the run
+	    this._teamService.submitRun(model)
+	      .pipe(takeUntil(this._unsubscribe))
+	      .subscribe(_ => {
+	        this.clearNewSubmission();
+	        this.close();
+	        this._uiHelper.alert('Run has been submitted successfully!');
+	        this._teamService.runsUpdated.next();
+	      }, (error: any) => {
+	        this._uiHelper.alert('Error submitting problem! Check console for details');
+	        console.error(error);
+	      });
+	}
   }
 
   async buildFileSubmission(file: File) {
@@ -158,4 +177,67 @@ export class NewRunComponent implements OnInit, OnDestroy {
       testDataFiles: []
     });
   }
+
+  //returns true if any of the filenames of any of the specified FileSubmissions contain a blank (space); false if none do.
+  private filenameContainsBlanks(mainfile: FileSubmission, additionalFiles: FileSubmission [], testFiles: FileSubmission []): boolean {
+	if (mainfile.fileName.indexOf(" ") > -1) {
+		return true;
+	}
+	for (var file of additionalFiles) {
+		if (file.fileName.indexOf(" ") > -1){
+			return true;
+		}
+	}
+	for (var file of testFiles) {
+		if (file.fileName.indexOf(" ") > -1) {
+			return true;
+		}
+	}
+	//none of the specified FileSubmission files contains a space in its name
+	return false;
+	}
+	
+	//returns a string intended to identify the platform on which the browser is running
+	private getOSName() : string {
+		
+		console.log(navigator.userAgent);
+		return navigator.userAgent.toString();
+		
+// The following were all attempts to get the Angular Typescript/Javascript code to invoke the underlying OS to obtain
+// platform information (instead of using the "userAgent", which can vary).  
+// All of these attempts failed, most commonly with the browser throwing a "xxx is not a function" error.
+// It's not even clear that it's *possible* to do this -- isn't Typescript/Javascript constrained to run inside the browser sandbox?
+
+// Try using the Node "os" module:
+//		os = new os();
+//		console.log("OS type = " + os.type()) ;
+//		console.log("OS release = " + os.release()) ;
+//		console.log("OS platform =" + os.platform());
+//		console.log("OS version = " + os.version());
+//		return os.version();
+	
+// Try using the  DeviceDetectorService from 'ngx-device-detector' (https://www.npmjs.com/package/ngx-device-detector)
+//		this.deviceInfo = this._deviceService.getDeviceInfo();
+//		console.log("OS name = " + this._deviceService.os);
+//		console.log("OS version = " + this._deviceService.os_version);
+//  	console.log("Browser = " + this._deviceService.browser);
+//		return this._deviceService.os_version;
+//
+// Try using the Node 'child_process' package to spawn a host-system process
+//		var spawn = require('child_process').spawn;
+//		var prc = spawn('java',  ['-jar', '-Xmx512M', '-Dfile.encoding=utf8', 'script/importlistings.jar']);
+//		//noinspection JSUnresolvedFunction
+//		prc.stdout.setEncoding('utf8');
+//		prc.stdout.on('data', function (data) {
+//  	var str = data.toString()
+//		var lines = str.split(/(\r?\n)/g);
+//		console.log(lines.join(""));
+//
+//		prc.on('close', function (code) {
+//    		console.log('process exit code ' + code);
+//		});
+//
+//		return this.deviceInfo;
+
+	}
 }

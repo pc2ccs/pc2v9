@@ -3,11 +3,13 @@
 # Created: 2017-08-07 20:11:15 PDT
 --- 
 
-name: 'I Sumit stdin Man clics'
+name: 'I Sumit stdin Man clics D2'
 source: 
 author: 
 license: 
 rights_owner: 
+
+groups: 'Canada - University of British Columbia D2;Puget Sound - University of Puget Sound D2; N. California - UC Berkeley D2; Hawaii - BYUH, Laie, Oahu D2; Northeast - EWU, Cheney/Spokane D2;'
 
 load-data-files: true
 

@@ -3,14 +3,14 @@
 # Created: 2017-08-07 20:11:15 PDT
 --- 
 
-name: 'Sumit file manual pc2 val'
+name: 'Sumit file manual pc2 val D1'
 source: 
 author: 
 license: 
 rights_owner: 
 
 # with commas, delimit ;
-groups: 'Canada - University of British Columbia D1;Puget Sound - University of Puget Sound D1; N. California - UC Berkeley D1; Hawaii - BYUH, Laie, Oahu D2; Northeast - EWU, Cheney/Spokane D2;'
+groups: 'Canada - University of British Columbia D1;Puget Sound - University of Puget Sound D1; N. California - UC Berkeley D1; Hawaii - BYUH, Laie, Oahu D1; Northeast - EWU, Cheney/Spokane D1;'
 
 # no commas, delimit ,
 # groups: 'Canada - University of British Columbia D1,Puget Sound - University of Puget Sound D1, N. California - UC Berkeley D1' 

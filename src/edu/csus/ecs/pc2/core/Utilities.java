@@ -1421,18 +1421,29 @@ public final class Utilities {
     }
 
     /**
-     * For the input number, returns an upper-case letter.
+     * For the input number, returns an upper-case letters.
      * 
-     * 1 = A, 2 = B, etc.
+     * 1 = A, 2 = B, ..., 27 = AA, ... 702 = ZZ
      * 
      * @param id
-     *            problem number, base one (not zero).
-     * @return single upper case letter.
+     *            problem number, base one (not zero), range 1 (A) through 702 (ZZ)
+     * @return uppercase letters
      */
     public static String getProblemLetter(int id) {
-        char let = 'A';
-        let += (id - 1);
-        return Character.toString(let);
+        if (id < 27) {
+            return Character.toString((char) (id + 65 - 1));
+        } else {
+
+            char firstLet = 'A';
+
+            for (int v26 = 53;; v26 += 26) {
+                if (id < v26) {
+                    String letter = firstLet + Character.toString((char) (id - v26 + 26 + 65));
+                    return letter;
+                }
+                firstLet++;
+            }
+        }
     }
 
     /**

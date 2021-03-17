@@ -60,6 +60,10 @@ public interface IContestLoader {
     String CONTEST_START_TIME_KEY = "start-time";
     
     String MAX_OUTPUT_SIZE_K_KEY = "max-output-size-K";
+    
+    final String OUTPUT_PRIVATE_SCORE_DIR_KEY = "output-private-score-dir";
+
+    final String OUTPUT_PUBLIC_SCORE_DIR_KEY = "output-public-score-dir";
 
     String CONTEST_DURATION_KEY = "duration";
     

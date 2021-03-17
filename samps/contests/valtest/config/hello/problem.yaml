@@ -3,13 +3,16 @@
 # Created: 2017-08-07 20:11:15 PDT
 --- 
 
-name: 'Hello no input comp + man pc2'
+name: 'Hello no input comp + man pc2 D1'
 source: 
 author: 
 license: 
 rights_owner: 
 
 load-data-files: true
+
+groups: 'Canada - University of British Columbia D1;Puget Sound - University of Puget Sound D1; N. California - UC Berkeley D1; Hawaii - BYUH, Laie, Oahu D1; Northeast - EWU, Cheney/Spokane D1;'
+
 
 # todo - bug datafile and answerfile are backwards during yaml parse
 # use-internal-validator: true

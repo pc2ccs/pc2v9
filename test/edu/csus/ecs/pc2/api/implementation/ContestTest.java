@@ -1,6 +1,10 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
 
+import java.io.File;
+import java.util.Vector;
+
+import edu.csus.ecs.pc2.api.IClarification;
 import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IClient.ClientType;
 import edu.csus.ecs.pc2.api.IContest;
@@ -11,15 +15,25 @@ import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.api.RunStates;
+import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * API Unit test.
@@ -431,4 +445,236 @@ public class ContestTest extends AbstractTestCase {
         assertTrue("isInterpreted ", lang.isInterpreted());
         
     }
+    
+    // TODO REFACTOR move to AbstractTestcase
+    private IInternalContest loadSampleContest(IInternalContest contest, String sampleName) throws Exception {
+
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        if (contest == null) {
+            contest = new InternalContest();
+        }
+
+        try {
+            String cdpDir = getTestSampleContestDirectory(sampleName);
+            loader.initializeContest(contest, new File( cdpDir));
+            return contest;
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw e;
+        }
+    }
+
+    public void testAPIBroadcastClars() throws Exception {
+
+        IInternalContest internal = loadSampleContest(null, "valtest");
+        assertNotNull(internal);
+
+        ensureOutputDirectory();
+        String storageDirectory = getOutputDataDirectory();
+
+        IInternalController controller = sampleContest.createController(internal, storageDirectory, true, false);
+        Log log = createLog("logfile." + getName());
+
+        Account team151 = internal.getAccount(new ClientId(1, Type.TEAM, 151));
+        assertNotNull(team151);
+        // 151 309101 312543 D2 Eagle White D2 Eagle White (EWU) EWU USA
+
+        assertEquals("Team 151 display name", "D2 Eagle White (EWU)", team151.getDisplayName());
+
+        Account team = getTeamAccounts(internal)[0];
+
+        assertNotNull("Team " + team.getClientId() + " not assigned a group", team.getGroupId());
+
+        int addedClarDcount = addClarification(internal, team, internal.getProblems(), "Which team is? ");
+        assertEquals("added clar count", 6, addedClarDcount);
+
+        internal.setClientId(team.getClientId());
+
+        Contest contest = new Contest(internal, controller, log);
+
+        Vector<Account> teams = internal.getAccounts(Type.TEAM);
+        assertEquals("Expecting team count ", 151, teams.size());
+
+        Group[] groups = internal.getGroups();
+        assertEquals("Expecting group count ", 12, groups.length);
+        
+        // Create Answered clar from Division 1
+        
+        Account div1team =  internal.getAccount(new ClientId(1, Type.TEAM, 301));
+        assertNotNull(div1team);
+        // 301  308430  12546   Lute Octothorpe Lute Octothorpe (PLU)   PLU USA
+        
+        assertEquals("Team 301 display name", "Lute Octothorpe (PLU)", div1team.getDisplayName());
+
+        Account judgeAccount = internal.getAccounts(Type.JUDGE).firstElement();
+        
+        Problem problem = internal.getProblems()[0];
+        
+        Clarification answerClar = createBroadcastClar(internal, div1team, problem, "Broadcast clar", "Answer is here!", judgeAccount.getClientId());
+      
+        IClarification[] clars = contest.getClarifications();
+        
+        assertEquals("Expected clars from API", 7, clars.length);
+
+        // Failes on getClarification if bug not fixed
+        IClarification[] allClars = contest.getClarifications();
+        assertNotNull(allClars);
+    }
+    
+    /**
+     * Created send to all clar.
+     * 
+     * @param internal
+     * @param team
+     * @param problem
+     * @param quetion
+     * @param answer
+     * @param whoAnsweredIt
+     * @return answered clarification
+     */
+    private Clarification createBroadcastClar(IInternalContest internal, Account team, Problem problem, String quetion, String answer, ClientId whoAnsweredIt) {
+        Clarification clarification = new Clarification(team.getClientId(), problem, quetion + " from " + team.getClientId() + " group " + team.getGroupId());
+        Clarification newClar = internal.acceptClarification(clarification);
+        internal.answerClarification(newClar, answer, whoAnsweredIt, true);
+        return internal.getClarification(newClar.getElementId());
+    }
+
+    public static void dumpTeamAccounts(String message, IInternalContest internal, int max) {
+        
+        Account[] teams = getTeamAccounts(internal);
+
+        System.out.println("dumpTeamAccounts " + message);
+        
+        int cnt = 0;
+        
+        for (Account account : teams) {
+            System.out.println(account.getClientId().getName()+" name="+ account.getDisplayName() + " " +//
+                    account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) + " " + //
+                    account.getGroupId() + " " + //
+                    account.getInstitutionCode() + " " + //
+                    account.getExternalId() + " " + //
+                    ""
+                    );
+            if ( cnt > max ) {
+                break;
+            }
+            cnt ++;
+            
+        }
+        System.out.println("dumpTeamAccounts " + message+ " end team count="+teams.length);
+
+    }
+    
+   public static void dumpTeamAccounts(String message, Account[] teams , int max) {
+        
+        System.out.println("dumpTeamAccounts " + message);
+        
+        int cnt = 0;
+        
+        for (Account account : teams) {
+            System.out.println(account.getClientId().getName()+" name="+ account.getDisplayName() + " " +//
+                    account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) + " " + //
+                    account.getGroupId() + " " + //
+                    account.getInstitutionCode() + " " + //
+                    account.getExternalId() + " " + //
+                    ""
+                    );
+            if ( cnt > max ) {
+                break;
+            }
+            cnt ++;
+            
+        }
+        System.out.println("dumpTeamAccounts " + message+ " end team count="+teams.length);
+
+    }
+
+    private int addClarification(IInternalContest internal, Account team, Problem[] problems, String content) {
+
+        for (Problem problem : problems) {
+            Clarification clarification = new Clarification(team.getClientId(), problem, content + " from " + team.getClientId() + " group " + team.getGroupId());
+            internal.acceptClarification(clarification);
+        }
+
+        return problems.length;
+
+    }
+    
+    /**
+     * 
+     * Unit test for: Issue Broadcast Clars "to all teams" don't show up in WTI
+     * https://github.com/pc2ccs/pc2v9/issues/186
+     * 
+     * @throws Exception
+     */
+    public void NONtestAPIGEtBroadcastClarLive() throws Exception {
+
+        //Test case Setup:
+        //Start server with teams from different divisions, like sample mini contest
+        //Submit clars from team 151 (D2)
+        //judge answers clars check send to all
+        //        
+        // 301  308430  12546   Lute Octothorpe Lute Octothorpe (PLU)   PLU USA
+        // 151 309101 312543 D2 Eagle White D2 Eagle White (EWU) EWU USA
+        
+        ServerConnection serverConnection = new ServerConnection();
+        String testId = "team301"; // D1 team
+//        testId = "team151"; // D2 team
+        
+
+        // If server not started will throw  LoginFailureException: Unable to contact server at localhost:50002 (server not started?)
+        IContest contest = serverConnection.login(testId, testId);
+        assertNotNull("Not logged in " + testId, contest);
+
+        IProblem[] probs = contest.getProblems();
+//        for (IProblem iProblem : probs) {
+//            System.out.println("Prob " + iProblem.getName());
+//        }
+        
+        assertEquals("number of problems D2",  4, probs.length); // D1
+//        assertEquals("number of problems D1",  2, probs.length); // D2
+
+        // Before fix Throws NPE in ProblemImplementation
+//        java.lang.NullPointerException
+//        at edu.csus.ecs.pc2.api.implementation.ProblemImplementation.<init>(ProblemImplementation.java:52)
+//        at edu.csus.ecs.pc2.api.implementation.ProblemImplementation.<init>(ProblemImplementation.java:48)
+        
+        IClarification[] clars = contest.getClarifications();
+
+        for (IClarification clar : clars) {
+            System.out.println("debug   Clar " + clar.getNumber() + " " + //
+                    clar.getTeam().getAccountNumber() + "  " + clar.getProblem().getName() + " " + clar.isSendToAll());
+        }
+
+    }
+    
+    /**
+     * Test login to server.
+     * @throws Exception
+     */
+    public void NOTtestLogin() throws Exception {
+        
+        ServerConnection serverConnection = new ServerConnection();
+        String testId = "team92";
+        testId = "team303";
+        IContest contest = serverConnection.login(testId, testId);
+        
+        assertNotNull(contest);
+        
+    }
+    
+    public void NOTtestGetProblemName(){
+        
+        IInternalContest contest = sampleContest.createStandardContest();
+        
+        Problem[] problems = contest.getProblems();
+        
+        for (Problem problem : problems) {
+            String stripped = ProblemImplementation. getProblemName(problem.getElementId());
+            println("Problem name = " + problem.getDisplayName() + " ele = " + problem.getElementId()+" newstr '"+stripped+"'");
+        }
+        
+    }
+        
 }

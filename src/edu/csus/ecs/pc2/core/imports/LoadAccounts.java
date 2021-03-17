@@ -1,12 +1,14 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Map;
 
 import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalTSVFormatException;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -14,19 +16,26 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 
 /**
- * 
+ * Methods that provide updated accounts for an input model and load account TSV file.
+ *  
  * @author Troy pc2@ecs.csus.edu
  */
 public class LoadAccounts {
     
-
-
-    private HashMap<ClientId, Account> accountMap = new HashMap<ClientId, Account>();
-    private HashMap<String,Group> groups = new HashMap<String,Group>();
+    /**
+     * List of existing groups
+     */
+    private Map<String,Group> groups = new HashMap<String,Group>();
+    
+    /**
+     * List of existing Accounts
+     */
+    private Map<ClientId, Account> existingAccountsMap = new HashMap<ClientId, Account>();
 
     private int siteColumn = -1;
 
@@ -57,17 +66,15 @@ public class LoadAccounts {
     private int teamNameColumn = -1;
     private int scoreAdjustmentColumn = -1;
     
-    private HashMap<ClientId, Account> existingAccountsMap = new HashMap<ClientId, Account>();
     
     /**
      * 
      */
     public LoadAccounts() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
-    Account getAccount(String[] values) {
+    protected Account getAccount(String[] values) {
         String accountString = values[accountColumn];
         String[] accountSplit = accountString.split("[0-9]+$");
         String accountName = accountString.substring(0, accountSplit[0].length());
@@ -81,7 +88,7 @@ public class LoadAccounts {
             // accountClean = new Account(clientId, password, clientId.getSiteNumber());
             return null;
         }
-        // TODO would be nice if Account had a deep clone
+        // TODO SOMEDAY would be nice if Account had a deep clone
         Account account = new Account(accountClean.getClientId(), accountClean.getPassword(), accountClean.getClientId().getSiteNumber());
         account.clearListAndLoadPermissions(accountClean.getPermissionList());
         account.setGroupId(accountClean.getGroupId());
@@ -187,11 +194,45 @@ public class LoadAccounts {
         }
         return account;
     }
+    
+    /**
+     * Returns a list of accounts updated from the input load accounts file.
+     * 
+     * @see #fromTSVFile(String, Account[], Group[])
+     * 
+     * @param contest
+     * @param filename updates model accounts from file 
+     * @return a list of accounts to update.
+     * @throws Exception
+     */
+    public static Account[] updateAccountsFromFile(IInternalContest contest, String filename) throws Exception {
+
+        Account[] curAccounts = contest.getAccounts();
+        Group[] curGroups = contest.getGroups();
+
+        Account[] updatedAccounts = new LoadAccounts().fromTSVFile(filename, curAccounts, curGroups);
+        return updatedAccounts;
+    }
    
     /**
      * Read a tab-separated values from a file.
-     * 1st line should contain the column headers.
+     * 
+     * File must have a header of field names.  The fields can appear in any order.
+     * 
+     * Reads TSV file, updates existing accounts in model, returns only a list
+     * of accounts that should be updated.
+     * 
+     * <P>
+     * 
+     * All accounts that are specified in the tsv file must exist, if an account
+     * does not exist then a IllegalTSVFormatException will be thrown.
+     * 
+     * <P>
+     * 
+     * 
+     * 1st line should contain the column headers.   Columns can appear in any order.
      * Supported column headers are:
+     * <pre>
      * account (required)
      * alias
      * displayname
@@ -200,14 +241,22 @@ public class LoadAccounts {
      * permdisplay
      * permlogin
      * site (required)
+
+     * </pre>
      * 
      * @param filename
-     * @param existingAccounts
+     * @param existingAccounts 
      * @param groupList
      * @return an array of accounts
      * @throws Exception
      */
-    public Account[] fromTSVFile(String filename, Account[] existingAccounts, Group[] groupList) throws Exception {
+    public Account[] fromTSVFile(String filename, Account[] existingAccounts, Group[] groupList) throws Exception  {
+        
+        /**
+         * Output accounts
+         */
+        Map<ClientId, Account> accountMap = new HashMap<ClientId, Account>();
+        
         if (existingAccounts != null && existingAccounts.length > 0) {
             for (int i = 0; i < existingAccounts.length; i++) {
                 existingAccountsMap.put(existingAccounts[i].getClientId(), existingAccounts[i]);
@@ -304,8 +353,9 @@ public class LoadAccounts {
                     continue;
                 }
                 String[] values = TabSeparatedValueParser.parseLine(line);
-                // skip lines with no account too
+                
                 if (!values[accountColumn].equals("")) {
+                    // No such account in contest model
                     Account account = getAccount(values);
                     if (account == null) {
                         String msg = filename + ":" + lineCount + ": " + " please create the account first (" + values[accountColumn] + ")";
@@ -319,7 +369,6 @@ public class LoadAccounts {
                 in.close();
                 throw e2;
             } catch (Exception e) {
-                e.printStackTrace();
                 String msg = "Error " + filename + ":" + lineCount + ": " + e.getMessage();
                 Exception sendException = new Exception(msg);
                 sendException.setStackTrace(e.getStackTrace());
@@ -332,5 +381,20 @@ public class LoadAccounts {
         in.close();
         in = null;
         return accountMap.values().toArray(new Account[accountMap.size()]);
+    }
+
+    /**
+     * Update accounts from accounts load file.
+     * 
+     * @param loadFilename - accounts load filename.
+     * @throws Exception 
+     */
+    public static void updateAccountsFromLoadAccountsFile(IInternalContest contest, String loadAccountFilename) throws Exception {
+        if (Utilities.fileExists(loadAccountFilename)) {
+
+            Account[] updateAccounts = LoadAccounts.updateAccountsFromFile(contest, loadAccountFilename);
+            contest.updateAccounts(updateAccounts);
+            contest.storeConfiguration(StaticLog.getLog());
+        }
     }
 }
