@@ -213,7 +213,6 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox shadowModeCheckbox;
 
     private JCheckBox allowMultipleTeamLoginsCheckbox;
-    private boolean allowMultipleLoginsPerTeam = false;
 
     private Component rigidArea1;
     
@@ -857,7 +856,7 @@ public class ContestInformationPane extends JPanePlugin {
         String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();
         long maximumFileSize = Long.parseLong(maxFileSizeString);
         newContestInformation.setMaxFileSize(maximumFileSize * 1000);
-        newContestInformation.setAllowMultipleLoginsPerTeam(allowMultipleLoginsPerTeam);
+        newContestInformation.setAllowMultipleLoginsPerTeam(getAllowMultipleTeamLoginsCheckbox().isSelected());
 
         //fill in values already saved, if any
         if (savedContestInformation != null) {
@@ -870,7 +869,9 @@ public class ContestInformationPane extends JPanePlugin {
             newContestInformation.setContestShortName(savedContestInformation.getContestShortName());
             newContestInformation.setExternalYamlPath(savedContestInformation.getExternalYamlPath());
             
+            //TODO: why is the following being done here when it is overridden below?
             newContestInformation.setFreezeTime(savedContestInformation.getFreezeTime());
+            
             newContestInformation.setLastRunNumberSubmitted(savedContestInformation.getLastRunNumberSubmitted());
             newContestInformation.setAutoStartContest(savedContestInformation.isAutoStartContest());
         }
@@ -1315,7 +1316,6 @@ public class ContestInformationPane extends JPanePlugin {
             allowMultipleTeamLoginsCheckbox.addActionListener (new ActionListener() {
                 
                 public void actionPerformed(ActionEvent e) {
-                    allowMultipleLoginsPerTeam = getAllowMultipleTeamLoginsCheckbox().isSelected();
                     enableUpdateButton();
                 }
             });
