@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.board;
 
 import java.awt.BorderLayout;
@@ -44,10 +44,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * This class is the default scoreboard view (frame).
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
@@ -77,8 +75,6 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     private JButton exitButton = null;
 
-    private String currentXMLString = "";
-    
     private JButton refreshButton = null;
 
     private ContestClockDisplay contestClockDisplay = null;
@@ -86,6 +82,8 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     private JPanel clockPanel = null;
 
     private ScoreboardCommon scoreboardCommon = new ScoreboardCommon();
+    
+    private DefaultScoringAlgorithm algo = new DefaultScoringAlgorithm();
     
     /*
      * We set setObeyFrozen = true on this one.
@@ -244,6 +242,18 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         plugin.setParentFrame(this);
         plugin.setContestAndController(contest, controller);
         tabbedPane.add(plugin, tabTitle);
+    }
+    
+    private void generateOutput() {
+
+        try {
+            log.info(" generateOutput() - create HTML ");
+            Properties scoringProperties = scoreboardCommon.getScoringProperties(contest.getContestInformation().getScoringProperties());
+            String saXML = algo.getStandings(contest, scoringProperties, log);
+            generateOutput(saXML);
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception generating scoreboard output " + e.getMessage(), e);
+        }
     }
 
     private void generateOutput(String xmlString) {
@@ -444,15 +454,11 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             refreshButton.setText("Refresh");
             refreshButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    if (currentXMLString.length() > 0) {
-                        new Thread(new Runnable() {
-                            public void run() {
-                                generateOutput(currentXMLString);
-                            }
-                        }).start();
-                    } else {
-                        JOptionPane.showMessageDialog(getParent(), "XML currently unavailable", "Please wait", JOptionPane.WARNING_MESSAGE);
-                    }
+                    new Thread(new Runnable() {
+                        public void run() {
+                            generateOutput();
+                        }
+                    }).start();
                 }
             });
         }
