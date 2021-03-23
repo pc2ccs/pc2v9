@@ -157,6 +157,8 @@ public final class Reports {
         
         reports.add(new ProblemsGroupReport());
         
+        reports.add(new ProblemGroupAssignmentReport());
+        
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }
