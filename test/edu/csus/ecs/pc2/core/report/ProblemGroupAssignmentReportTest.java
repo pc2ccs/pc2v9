@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
@@ -29,7 +30,7 @@ public class ProblemGroupAssignmentReportTest extends AbstractTestCase {
 
     public void testPrintreport() throws Exception {
 
-        String testDirectory = getOutputDataDirectory(this.getName());
+        String testDirectory = getOutputDataDirectory();
 
         StaticLog.setLog(new Log(testDirectory, "testPrintreport.log"));
 
@@ -53,8 +54,10 @@ public class ProblemGroupAssignmentReportTest extends AbstractTestCase {
         long ms = System.currentTimeMillis();
         String filename = testDirectory + File.separator + "ProblemGroupAssignmentReport." + ms + ".txt";
         report.createReportFile(filename, new Filter());
+        
+        assertFileExists(filename, "Expecting report file for ProblemGroupAssignmentReport");
 
-        editFile(filename);
+//        editFile(filename);
 //        catFile(filename);
     }
 

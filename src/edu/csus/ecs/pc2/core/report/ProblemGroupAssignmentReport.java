@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.FileOutputStream;
@@ -232,7 +233,7 @@ public class ProblemGroupAssignmentReport implements IReport {
 
     @Override
     public String getPluginTitle() {
-        return "Problem Group Assignment Report";
+        return "Problem Group Assignment";
     }
 
     @Override
