@@ -202,7 +202,7 @@ public class ProblemGroupAssignmentReport implements IReport {
 
     @Override
     public String getReportTitle() {
-        return "Problem Group Assignment Report";
+        return "Problem Group Assignment";
     }
 
     private void writeContestTime(PrintWriter printWriter) {
