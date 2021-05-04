@@ -491,9 +491,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         //The following is an effort to catch/identify such situations.
         if (toClientId.getConnectionHandlerID()==null) {
             IllegalArgumentException e = new IllegalArgumentException("InternalController.sendToClient() called with packet containing null ConnectionHandlerID in destination ClientId " + toClientId);
-            e.printStackTrace();
             logException("InternalController.sendToClient() called with packet containing null ConnectionHandlerID in destination ClientId " + toClientId, e);
-            throw e;
         }
 
         if (isThisSite(toClientId.getSiteNumber())) {
@@ -2609,13 +2607,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
         for (ClientId clientId : clientIds) {
-            boolean isThisServer = isThisSite(clientId.getSiteNumber());
-            // do not send to ourselves and
-            // do not send to the site we got the packet
-            if (!isThisServer && !(fromSite == clientId.getSiteNumber())) {
-                // Send to other servers, after cloning and modifying the dest
-                Packet packetClone = PacketFactory.clonePacket(packet.getSourceId(), clientId, packet);
-                sendToRemoteServer(clientId.getSiteNumber(), packetClone);
+            try {
+                boolean isThisServer = isThisSite(clientId.getSiteNumber());
+                // do not send to ourselves and
+                // do not send to the site we got the packet
+                if (!isThisServer && !(fromSite == clientId.getSiteNumber())) {
+                    // Send to other servers, after cloning and modifying the dest
+                    Packet packetClone = PacketFactory.clonePacket(packet.getSourceId(), clientId, packet);
+                    sendToRemoteServer(clientId.getSiteNumber(), packetClone);
+                }
+            } catch (Exception e) {
+                getLog().log(Level.WARNING, "Exception attempting to send packet to remote server " + clientId +  ": " + packet + ": "+ e.getMessage(), e);
             }
         }
     }
@@ -2633,18 +2635,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         List<ClientId> badClients = new ArrayList<ClientId>();
         
         for (ClientId clientId : clientIds) {
+            
             if (isThisSite(clientId.getSiteNumber())) {
-                ConnectionHandlerID connectionHandlerID = clientId.getConnectionHandlerID();
                 
-                //there should never be localLoggedInClients with null ConnectionHandlerIDs; however, the addition of 
-                // "multiple login" support may have left some place where this is inadvertently true.
-                //The following is an effort to catch/identify such situations.
-                if (connectionHandlerID==null) {
-                    //add the bad clientId to the badList
-                    badClients.add(clientId);
-                } else {
-                    //good clientId; send the packet to the client
-                    sendToClient(connectionHandlerID, packet); 
+                ConnectionHandlerID connectionHandlerID = null;
+                try {
+                    connectionHandlerID = clientId.getConnectionHandlerID();
+                    
+                    //there should never be localLoggedInClients with null ConnectionHandlerIDs; however, the addition of 
+                    // "multiple login" support may have left some place where this is inadvertently true.
+                    //The following is an effort to catch/identify such situations.
+                    if (connectionHandlerID==null) {
+                        //add the bad clientId to the badList
+                        badClients.add(clientId);
+                    } else {
+                        //good clientId; send the packet to the client
+                        sendToClient(connectionHandlerID, packet); 
+                    }
+                } catch (Exception e) {
+                    getLog().log(Level.WARNING, "Exception attempting to send packet to client " + clientId + "at connectionHandlerId " + connectionHandlerID
+                            + ": " + packet + ": "+ e.getMessage(), e);
                 }
                 
                 //check if we got any bad clientIds
