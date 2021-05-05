@@ -305,7 +305,7 @@ public class ShadowController {
 //            log.warning("Shadow Controller 'getJudgementComparisonInfo()' called when Shadow controller is not running"); 
             return null;
         } else {
-//            log.info("Constructing Shadow Judgement comparisons");
+            log.info("Constructing Shadow Judgement comparisons");
             
             //get a Map of the judgements assigned by the remote CCS to each submission; note that this map uses "remote event id"
             // as the key and combines the submission ID with the Judgement acronym, separated by a colon, as the value
@@ -342,71 +342,74 @@ public class ShadowController {
             Map<String,String> pc2JudgementsMap = new HashMap<String,String>();
             for (Run run : runs) {
                 
-                if (run.isJudged()) {
+                //avoid any "null" runs which might be returned in the RunList
+                if (run != null) {
                     
-                    JudgementRecord jr = run.getJudgementRecord();
-                    
-                    if (jr != null) {
+                    if (run.isJudged()) {
 
-                        String judgementString;
+                        JudgementRecord jr = run.getJudgementRecord();
 
-                        if (jr.isUsedValidator() && jr.getValidatorResultString() != null) {
-                            judgementString = jr.getValidatorResultString();
+                        if (jr != null) {
+
+                            String judgementString;
+
+                            if (jr.isUsedValidator() && jr.getValidatorResultString() != null) {
+                                judgementString = jr.getValidatorResultString();
+                            } else {
+                                //no validator result; fall back to using judgementId (remembering that this
+                                // defaults to "RTE" for all "no" judgements -- see V9 bug list)
+                                ElementId judgementId = jr.getJudgementId();
+                                Judgement judgement = localContest.getJudgement(judgementId);
+                                judgementString = judgement.getDisplayName();
+                                if (judgementString.startsWith("No - ")) {
+                                    judgementString = judgementString.substring(5); //strip off the "No - "
+                                }
+                            }
+
+                            if (judgementString == null) {
+                                log.warning("Null judgement string for run " + run.getNumber());
+                            }
+
+                            //at this point we have the judgement string text; try to convert it to a corresponding acronym
+                            CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronym(judgementString);
+
+                            if (acronym == null) {
+                                //we couldn't find a CLICS judgement matching the string; 
+                                //try to use the judgement record (which may be incorrect; see V9 bug list regarding defaulting to RTE)
+                                ElementId judgementId = jr.getJudgementId();
+                                Judgement judgement = localContest.getJudgement(judgementId);
+                                judgementString = judgement.getDisplayName();
+                                if (judgementString.startsWith("No - ")) {
+                                    judgementString = judgementString.substring(5); //strip off the "No - "
+                                }
+
+                                acronym = CLICSJudgementType.getCLICSAcronym(judgementString);
+
+                            }
+
+                            if (acronym != null) {
+                                //put the judgement acronym into the pc2Judgements map under the submissionID
+                                String submissionID = String.valueOf(run.getNumber());
+                                pc2JudgementsMap.put(submissionID, acronym.name());
+
+                            } else {
+                                //we've exhausted methods of obtaining an acronym
+                                log.warning("Null acronym for run " + run.getNumber() + ", judgement string " + judgementString);
+                            }
+
                         } else {
-                            //no validator result; fall back to using judgementId (remembering that this
-                            // defaults to "RTE" for all "no" judgements -- see V9 bug list)
-                            ElementId judgementId = jr.getJudgementId();
-                            Judgement judgement = localContest.getJudgement(judgementId);
-                            judgementString = judgement.getDisplayName();
-                            if (judgementString.startsWith("No - ")) {
-                                judgementString = judgementString.substring(5); //strip off the "No - "
-                            }
-                        }
-
-                        if (judgementString==null) {
-//                            log.warning("null judgement string for run " + run.getNumber());
-                            System.err.println ("null judgement string in ShadowController.getJudgementComparisonInfo() for run " + run.getNumber());
-                        }
-                        
-                        //at this point we have the judgement string text; try to convert it to a corresponding acronym
-                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronym(judgementString);
-                        
-                        if (acronym==null) {
-                            //we couldn't find a CLICS judgement matching the string; 
-                            //try to use the judgement record (which may be incorrect; see V9 bug list regarding defaulting to RTE)
-                            ElementId judgementId = jr.getJudgementId();
-                            Judgement judgement = localContest.getJudgement(judgementId);
-                            judgementString = judgement.getDisplayName();
-                            if (judgementString.startsWith("No - ")) {
-                                judgementString = judgementString.substring(5); //strip off the "No - "
-                            }
-                            
-                            acronym = CLICSJudgementType.getCLICSAcronym(judgementString);
-                            
-                        }
-
-                        if (acronym!=null) {
-                            //put the judgement acronym into the pc2Judgements map under the submissionID
-                            String submissionID = String.valueOf(run.getNumber());
-                            pc2JudgementsMap.put(submissionID, acronym.name());
-                            
-                        } else { 
-                            //we've exhausted methods of obtaining an acronym
-//                            log.warning("null acronym for run " + run.getNumber() + ", judgement string " + judgementString);
-                            System.err.println ("null acronym in ShadowController.getJudgementComparision() for "
-                                    + "run " + run.getNumber() + ", judgement string " + judgementString);
+                            //we got a null judgment record from the run, but it's supposedly been judged -- error!
+                            log.severe("Error: found a (supposedly) judged run with no JudgementRecord!");
                         }
 
                     } else {
-                        //we got a null judgment record from the run, but it's supposedly been judged -- error!
-//                        log.severe("Error: found a (supposedly) judged run with no JudgementRecord!");
-                        System.err.println ("Error in getJudgementComparisonInfo(): found a (supposedly) judged run with no JudgementRecord!");
-                    }                    
+                        //we have an as-yet unjudged run
+                        String submissionID = String.valueOf(run.getNumber());
+                        pc2JudgementsMap.put(submissionID, "<pending>");
+                    } 
                     
                 } else {
-                    //we have an as-yet unjudged run
-                    String submissionID = String.valueOf(run.getNumber());
-                    pc2JudgementsMap.put(submissionID, "<pending>");
+                    log.warning("Encountered null run in RunList; skipping"); 
                 }
                 
             }//end for each run
