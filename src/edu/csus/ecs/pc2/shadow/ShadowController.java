@@ -309,7 +309,7 @@ public class ShadowController {
             
             //get a Map of the judgements assigned by the remote CCS to each submission; note that this map uses "remote event id"
             // as the key and combines the submission ID with the Judgement acronym, separated by a colon, as the value
-            Map<String,String> remoteJudgementsMap = RemoteEventFeedMonitor.getRemoteJudgementsMap();
+            Map<String,String> remoteJudgementsMap = RemoteEventFeedMonitor.getRemoteJudgementsMapSnapshot();
             
             //convert the Map to one with submission ID as key and acronym (judgement) as value
             Map<String,String> remoteSubmissionsJudgementMap = new HashMap<String,String>();
@@ -322,12 +322,12 @@ public class ShadowController {
             
             //if specified, convert remote judgements to "Big 5"
             if (isConvertJudgementsToBig5()) {
-//                log.info("Converting remote judgements to CLICS 'Big 5'");
+                log.info("Converting remote judgements to CLICS 'Big 5'");
                 convertMapToBig5(remoteSubmissionsJudgementMap);
             }
             
-            //create a Map of the judgements assigned by PC2
-            Run[] runs = localContest.getRuns();
+            //get the runs (submissions) currently in PC2 (i.e. runs already obtained from the remote CCS and submitted to the PC2 server)
+            Run[] pc2Runs = localContest.getRuns();
             
 //            //debug loop
 //            for (Run run : runs) {
@@ -338,9 +338,9 @@ public class ShadowController {
 //                }
 //            }
             
-            //build a map of PC2 Shadow judgements, mapping submissionID to judgement acronym for each submission
+            //build a map of PC2 run judgements, mapping submissionID to judgement acronym for each submission
             Map<String,String> pc2JudgementsMap = new HashMap<String,String>();
-            for (Run run : runs) {
+            for (Run run : pc2Runs) {
                 
                 //avoid any "null" runs which might be returned in the RunList
                 if (run != null) {
@@ -416,7 +416,7 @@ public class ShadowController {
 
             //if specified, convert PC2 judgements to "Big 5"
             if (isConvertJudgementsToBig5()) {
-//                log.info("Converting PC2 judgements to 'CLICS Big 5'");
+                log.info("Converting PC2 judgements to 'CLICS Big 5'");
                 convertMapToBig5(pc2JudgementsMap);
             }
             
@@ -442,7 +442,7 @@ public class ShadowController {
             for (String submissionID : remoteKeys) {
                 
                 //get the run corresponding to the current submissionID
-                Run run = getRun(runs,submissionID);
+                Run run = getRun(pc2Runs,submissionID);
                 
                 //get the team/problem/language info corresponding to the run
                 teamID = new Integer(run.getSubmitter().getClientNumber()).toString();
@@ -471,7 +471,7 @@ public class ShadowController {
                 if (!remoteSubmissionsJudgementMap.containsKey(submissionID)) {
                     
                     //get the run corresponding to the current submissionID
-                    Run run = getRun(runs,submissionID);
+                    Run run = getRun(pc2Runs,submissionID);
                                        
 //                    teamID = run.getSubmitter().toString();
 //                    problemID = run.getProblemId().toString();

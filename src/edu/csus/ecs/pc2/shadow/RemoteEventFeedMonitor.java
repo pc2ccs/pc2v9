@@ -72,7 +72,16 @@ public class RemoteEventFeedMonitor implements Runnable {
     private boolean listening;
     private IInternalController pc2Controller;
     private InputStream remoteInputStream;
+    
+    /**
+     * A Map mapping remote judgement ids to corresponding submission ids and the judgement applied to that submission.
+     */
     private static Map<String,String> remoteJudgements;
+    
+    /**
+     * A lock for synchronizing access to the above map.
+     */
+    private static Object remoteJudgementsMapLock = new Object();
 
     /**
      * Constructs a RemoteEventFeedMonitor with the specified values.  The RemoteEventFeedMonitor
@@ -323,7 +332,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         if (operation != null && operation.equals("delete")) {
                                             //it is a delete; remove from the global map the judgement whose ID is specified
                                             String idToDelete = (String) judgementEventDataMap.get("id");
-                                            getRemoteJudgementsMap().remove(idToDelete);
+                                            synchronized (remoteJudgementsMapLock) {
+                                                getRemoteJudgementsMap().remove(idToDelete);
+                                            }
 
                                             //TODO: how do we notify the local PC2 system that this judgement should be deleted??
 
@@ -350,7 +361,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                 // this is a judgement we want; save it in the global judgements map under a key of
                                                 // the judgement ID with value "submissionID:judgement"
                                                 System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");                                                
-                                                getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
+                                                synchronized (remoteJudgementsMapLock) {
+                                                    getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
+                                                }
                                             }
                                         }
 
@@ -388,24 +401,57 @@ public class RemoteEventFeedMonitor implements Runnable {
     }
     
     /**
-     * Constructs a Map<String,String> to hold mappings of judgement id's to corresponding submissions and judgement
+     * Initializes the Map<String,String> which holds mappings of judgement id's to corresponding submissions and judgement
      * types (acronymns).
      * 
      * The keys to the map are Strings containing the numerical value of a judgement id as received from the remote CCS;
      * the values under each key are the concatenation of the submission id corresponding to the judgement with the
      * judgement type id (i.e., the judgement acronym), separated by a colon (":").
      * 
+     * Note that this method is PRIVATE; external clients wanting access to the remoteJudgementsMap should use method {@link #getRemoteJudgementsMapSnapshot()}.
+     * 
      * @return a Mapping of judgement id's to the corresponding submission and judgement type (value).
      *              If no remote judgements have yet been received the returned Map will be empty (but not null).
      */
-    public static Map<String,String> getRemoteJudgementsMap() {
-        if (remoteJudgements==null) {
-            remoteJudgements = new HashMap<String,String>();
+    private static Map<String,String> getRemoteJudgementsMap() {
+        synchronized (remoteJudgementsMapLock) {
+            if (remoteJudgements == null) {
+                remoteJudgements = new HashMap<String, String>();
+            }
+            return remoteJudgements;
         }
-        return remoteJudgements;
     }
 
  
+    /**
+     * Returns a snapshot of the current contents of the Map<String,String> which holds mappings of judgement id's to corresponding 
+     * submissions and judgement types (acronymns).
+     * 
+     * The keys to the map are Strings containing the numerical value of a judgement id as received from the remote CCS;
+     * the values under each key are the concatenation of the submission id corresponding to the judgement with the
+     * judgement type id (i.e., the judgement acronym), separated by a colon (":").
+     * 
+     * Note that this method returns a <I>copy</i> which is a <I>snapshot</i>; there is no guarantee that the map will not subsequently be 
+     * changed by other threads. However, the method does provide internal synchronization to insure that the map is not simultaneously 
+     * altered while the snapshot is being created.
+     * 
+     * @return a snapshot copy of the current Mapping of judgement id's to the corresponding submission and judgement type (value).
+     *              If no remote judgements have yet been received the returned Map will be empty (but not null).
+     */
+    public static Map<String,String> getRemoteJudgementsMapSnapshot() {
+        
+        synchronized (remoteJudgementsMapLock) {
+            Map<String, String> currentMap = getRemoteJudgementsMap();
+            
+            Map<String, String> copy = new HashMap<String,String>();
+            for (String key : currentMap.keySet()) {
+                copy.put(key, currentMap.get(key));
+            }
+           
+            return copy;
+        }
+    }
+
     /**
      * Returns a Map containing the key/value elements in the specified JSON string.
      * This method uses the Jackson {@link ObjectMapper} to perform the conversion from the JSON
