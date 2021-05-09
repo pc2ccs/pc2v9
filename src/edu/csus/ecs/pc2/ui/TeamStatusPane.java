@@ -7,6 +7,8 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -17,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.TeamStatus;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -50,10 +53,8 @@ import edu.csus.ecs.pc2.core.security.Permission;
  * If one hovers over a team name will display the number of clarifications and runs that the team has submitted.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class TeamStatusPane extends JPanePlugin {
 
     /**
@@ -117,6 +118,8 @@ public class TeamStatusPane extends JPanePlugin {
 
     private JCheckBox showTeamsCheckBox = null;
 
+    private Map<TeamStatus, Integer> teamStatusCount = new HashMap<TeamStatus, Integer>();
+    
     /**
      * This method initializes
      * 
@@ -235,6 +238,8 @@ public class TeamStatusPane extends JPanePlugin {
      */
     private void repopulateGrid(boolean populate) {
 
+        teamStatusCount = new HashMap<TeamStatus, Integer>();
+        
         boolean allSites = false;
 
         Site site = null;
@@ -321,7 +326,27 @@ public class TeamStatusPane extends JPanePlugin {
             teamLabel.setToolTipText(toolTipText);
             centerPane.add(teamName, teamLabel);
         }
+        
+        
+        /**
+         * Update counts for each status
+         */
+        
+        submittedClarsLabel.setText("Submitted Clar(s) (" + toInt( teamStatusCount.get(TeamStatus.TEAM_HAS_SUBMITTED_CLARS_ONLY), 0) + ")");
+        submittedRunsLabel.setText("Submitted Run(s) (" +toInt(  teamStatusCount.get(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_ONLY) , 0) + ")");
+        hasLoggedInLabel.setText("Has Logged In (" + toInt( teamStatusCount.get(TeamStatus.TEAM_HAS_LOGGED_IN), 0 ) + ")");
+        nocontactLabel.setText("No Contact (" + toInt( teamStatusCount.get(TeamStatus.NO_TEAM_CONTACT), 0) + ")");
+        readyLabel.setText("READY (" + toInt( teamStatusCount.get(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_AND_CLARS), -0) + ")");
+
         centerPane.repaint();
+    }
+
+    private int toInt(Integer integer, int defaultValue) {
+        if (integer == null) {
+            return defaultValue;
+        } else {
+            return integer.intValue();
+        }
     }
 
     private Color getStatusColor(ClientId clientId, Run[] runs, Clarification[] clarifications) {
@@ -329,15 +354,35 @@ public class TeamStatusPane extends JPanePlugin {
 
         if (runs.length > 0 && clarifications.length > 0) {
             outColor = HAS_SUBMITTED_RUNS_AND_CLARS_COLOR;
+            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_AND_CLARS);
         } else if (runs.length > 0) {
             outColor = HAS_SUBMITTED_RUNS_ONLY_COLOR;
+            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_ONLY);
         } else if (clarifications.length > 0) {
             outColor = HAS_SUBMITTED_CLARS_ONLY_COLOR;
+            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_CLARS_ONLY);
         } else if (hasLoggedIn(clientId)) {
             outColor = HAS_LOGGED_IN_COLOR;
+            incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
+        } else {
+            incrementStatusCount(TeamStatus.NO_TEAM_CONTACT);
         }
 
         return outColor;
+    }
+
+    private void incrementStatusCount(TeamStatus teamStatus) {
+        
+        Integer value = teamStatusCount.get(teamStatus);
+        if (value == null) {
+            
+            value = 0;
+        }
+        
+        value++;
+        
+        teamStatusCount.put(teamStatus,value);
+        
     }
 
     /**
