@@ -57,7 +57,7 @@ public class ScoreboardVariableReplacer {
      * <pre>
      * Client/Team number - {:clientnumber} = 514
      * Country Code - {:countrycode} = CAN
-     * CMD/External ID - {:externalid} = 309407
+     * CMS/External ID - {:externalid} = 309407
      * Group Id Number - {:groupid} = 12545
      * Group name - {:groupname} = Canada - University of British Columbia D1
      * Long School name - {:longschoolname} = UBC! (U British Columbia)

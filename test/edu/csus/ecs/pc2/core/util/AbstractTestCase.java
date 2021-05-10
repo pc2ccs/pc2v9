@@ -1483,19 +1483,17 @@ public class AbstractTestCase extends TestCase {
     public void setGUI(boolean useGUI) {
         this.usingGUI = useGUI;
     }
-    
 
     /**
-     * Load contest model from samples.
-     * 
-     * Loads groups.tsv, teams.tsv and all other data.
-     * 
+     * Load contest model from CDP
      * @param contest
-     * @param sampleName
+     * @param cdpDir CDP directory, Ex. sumithello
      * @return
      * @throws Exception
      */
-    public IInternalContest loadFullSampleContest(IInternalContest contest, String sampleName) throws Exception {
+    public IInternalContest loadFullSampleContest(IInternalContest contest, File cdpDir) throws Exception {
+        
+        String configDir = cdpDir.getAbsolutePath() + File.separator + IContestLoader.CONFIG_DIRNAME;
 
         if (contest == null) {
             contest = new InternalContest();
@@ -1504,19 +1502,31 @@ public class AbstractTestCase extends TestCase {
 
         IContestLoader loader = new ContestSnakeYAMLLoader();
 
-        String configDir = getTestSampleContestDirectory(sampleName) + File.separator + IContestLoader.CONFIG_DIRNAME;
-
         LoadICPCTSVData loadTSVData = new LoadICPCTSVData();
         loadTSVData.setContestAndController(contest, null);
         String teamsTSVFile = configDir + File.separator + LoadICPCTSVData.TEAMS_FILENAME;
         boolean loaded = loadTSVData.loadFiles(teamsTSVFile, false, false);
 
         if (!loaded) {
-            System.err.println("Expected to find file '" + teamsTSVFile + " for sample " + sampleName);
+            System.err.println("Expected to find file '" + teamsTSVFile + " from dir  " + configDir);
             return null;
         }
 
         return loader.fromYaml(contest, configDir);
+    }
+
+    /**
+     * Load contest model from samples.
+     * 
+     * Loads groups.tsv, teams.tsv and all other data.
+     * 
+     * @param contest
+     * @param sampleName name of pc2 sample, under samps/contests/<sampleName>
+     * @return
+     * @throws Exception
+     */
+    public IInternalContest loadFullSampleContest(IInternalContest contest, String sampleName) throws Exception {
+        return loadFullSampleContest (contest, new File(getTestSampleContestDirectory(sampleName)));
     }
     
 }

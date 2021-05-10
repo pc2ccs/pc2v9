@@ -408,6 +408,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         boolean allowMultipleTeamLogins = fetchBooleanValue(content, ALLOW_MULTIPLE_TEAM_LOGINS_KEY, contestInformation.isAllowMultipleLoginsPerTeam());
         contestInformation.setAllowMultipleLoginsPerTeam(allowMultipleTeamLogins);
         
+        // Load team scoreboard string (the one with variables)
+        String teamScoreboadDisplayString = fetchValue(content, TEAM_DISPLAY_ON_SCOREBOARD_STRING, contestInformation.getTeamDisplayOnScoreboard());
+        contestInformation.setTeamDisplayOnScoreboard(teamScoreboadDisplayString);
+        
         // enable shadow mode
         boolean shadowMode = fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
         contestInformation.setShadowMode(shadowMode);

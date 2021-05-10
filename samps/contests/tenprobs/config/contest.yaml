@@ -5,6 +5,10 @@
 name: Sumit Ten Problems  
 short-name: Sumit10
 
+# Test very long team subs
+
+team-display-on-scoreboard-string : 'Team {:clientnumber}  {:teamname} and login: {:teamloginname} {:groupid}:{:groupname} long: {:longschoolname} short: {:shortschoolname} cms id: {:externalid}'
+
 ccs-test-mode : true
 
 duration:  5:00:00
@@ -48,10 +52,6 @@ languages:
     clics-id : 'pythonCLICSId'
 
 accounts:
-  - account: TEAM
-    site: 1
-    count: 80
-
   - account: JUDGE
     site: 1
     count: 12
