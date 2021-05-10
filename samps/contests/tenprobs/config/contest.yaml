@@ -18,6 +18,9 @@ scoreboard-freeze-length: 01:00:00
 # remaining: 5:00:00
 running: true
 
+# default stop of first fail
+stop-on-first-failed-test-case: true
+
 # Halt contest clock at end of contest
 # auto-stop-clock-at-end: true
 

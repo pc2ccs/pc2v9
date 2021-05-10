@@ -73,8 +73,6 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
  */
 public class ContestSnakeYAMLLoader implements IContestLoader {
 
-
-
     /**
      * Full content of yaml file.
      */
@@ -264,8 +262,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setCcsTestMode(ccsTestMode);
         contest.updateContestInformation(contestInformation);
-
     }
+    
+    
+    private void setStopOnFirstFailedTestCase(IInternalContest contest, boolean stopOnFirstFail) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setStopOnFirstFailedtestCase(stopOnFirstFail);
+        contest.updateContestInformation(contestInformation);
+    }    
 
     /**
      * Parse and convert dateString to Date.
@@ -397,6 +401,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (ccsTestMode) {
             setCcsTestMode(contest, ccsTestMode);
         }
+        
+        boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
+        if (stopOnFirstFail) {
+            setStopOnFirstFailedTestCase (contest, stopOnFirstFail);
+        }
+        
+        System.out.println("debug 22 for stopOnFirstFail is " +contest.getContestInformation().isStopOnFirstFailedtestCase() + " "+directoryName );
         
         /**
          * assign shadow values
@@ -753,6 +764,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
+    
     /**
      * Generate and write OS password file.
      * @param passfilename
@@ -1354,8 +1366,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
             }
         }
+        
+        boolean globlStopOnFirstFail = contest.getContestInformation().isStopOnFirstFailedtestCase();
 
-        boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
+        boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, globlStopOnFirstFail);
         problem.setStopOnFirstFailedTestCase(stopOnFirstFail);
 
         assignJudgingType(content, problem, overrideManualReview);
