@@ -45,6 +45,7 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
+import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
  * Default Scoring Algorithm, implementation of the IScoringAlgorithm.
@@ -456,7 +457,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 treeMap.put(record, record);
             }
             
-            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, summaryMememento);
+            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest.getContestInformation(), summaryMememento);
             
         } // mutex
  
@@ -570,7 +571,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param summaryMememento
      */
     private void createStandingXML (TreeMap<StandingsRecord, StandingsRecord> treeMap, XMLMemento mementoRoot, 
-            AccountList accountList, Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, Group[] groups, IMemento summaryMememento) {
+            AccountList accountList, Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, Group[] groups,
+            ContestInformation contestInformation, IMemento summaryMememento) {
    
         // easy access
         Hashtable<ElementId, Group> groupHash = new Hashtable<ElementId, Group>();
@@ -585,6 +587,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             groupIndexHash.put(group, Integer.valueOf(groupCount));
             groupCount++;
         }
+        
+        String teamVarDisplayString = contestInformation.getTeamDisplayOnScoreboard();
+        
         StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
         
         Collection<StandingsRecord> coll = treeMap.values();
@@ -646,7 +651,13 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
             standingsRecordMemento.putInteger("index", index);
             Account account = accountList.getAccount(standingsRecord.getClientId());
-            standingsRecordMemento.putString("teamName", account.getDisplayName()); 
+            
+            Group group = null;
+            if (account.getGroupId() != null) {
+                group = groupHash.get(account.getGroupId());
+            }
+            
+            standingsRecordMemento.putString("teamName", ScoreboardVariableReplacer.substituteDisplayNameVariables(teamVarDisplayString, account, group)); 
             standingsRecordMemento.putInteger("teamId", account.getClientId().getClientNumber());
             standingsRecordMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
             standingsRecordMemento.putString("teamKey", account.getClientId().getTripletKey());
@@ -664,10 +675,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             } else {
                 standingsRecordMemento.putString("teamAlias", account.getAliasName().trim());
             }
-            Group group = null;
-            if (account.getGroupId() != null) {
-                group = groupHash.get(account.getGroupId());
-            }
+         
             if (group != null ) {
                 // the group was in groupHash, so must be in groupIndexHash
                 int groupIndex = groupIndexHash.get(group).intValue();

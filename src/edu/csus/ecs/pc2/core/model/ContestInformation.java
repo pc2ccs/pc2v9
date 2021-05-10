@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.core.DateUtilities;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
+import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
  * Contest-wide Information/settings.
@@ -77,6 +78,13 @@ public class ContestInformation implements Serializable{
     private String rsiCommand = null;
     
     private int lastRunNumberSubmitted = 0;
+    
+    /**
+     * Display string for team display on standings.
+     * 
+     * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, Account, Group)
+     */
+    private String teamDisplayOnScoreboard = ScoreboardVariableReplacer.TEAM_NAME;
 
     /**
      * 
@@ -725,5 +733,19 @@ public class ContestInformation implements Serializable{
      */
     public boolean isAllowMultipleLoginsPerTeam() {
         return this.allowMultipleLoginsPerTeam;
+    }
+    
+    /**
+     * Returns a string which defines which fields will be dispayed on the scoreboard.
+     * 
+     * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, Account, Group)
+     * @return
+     */
+    public String getTeamDisplayOnScoreboard() {
+        return teamDisplayOnScoreboard;
+    }
+    
+    public void setTeamDisplayOnScoreboard(String teamDisplayOnScoreboard) {
+        this.teamDisplayOnScoreboard = teamDisplayOnScoreboard;
     }
 }
