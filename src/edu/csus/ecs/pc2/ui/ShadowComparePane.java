@@ -139,9 +139,11 @@ public class ShadowComparePane extends JPanePlugin {
                 if ("N".equalsIgnoreCase(matches))
                     c.setBackground(new Color(255, 153, 153));
 
-                // override color with yellow if PC2 judgement is pending
+                // override color with yellow if either PC2 or Remote judgement is pending
                 String pc2Judgement = (String) getModel().getValueAt(modelRow, 4);
-                if (pc2Judgement != null && pc2Judgement.toLowerCase().contains("pending")) {
+                String remoteJudgement = (String) getModel().getValueAt(modelRow, 5);
+                if ( (pc2Judgement != null && pc2Judgement.toLowerCase().contains("pending")) || 
+                     (remoteJudgement != null && remoteJudgement.toLowerCase().contains("pending"))) {
                     c.setBackground(new Color(255, 255, 153));
                 }
 
@@ -200,7 +202,9 @@ public class ShadowComparePane extends JPanePlugin {
             }
             data[row][6] = "---";
             if (data[row][4]!=null && data[row][5]!=null) {
-                if (!((String)data[row][4]).toLowerCase().contains("pending")) {
+                if (!((String)data[row][4]).toLowerCase().contains("pending") &&
+                    !((String)data[row][5]).toLowerCase().contains("pending") ) {
+                    
                     data[row][6] = ((String) data[row][4]).equalsIgnoreCase((String) data[row][5]) ? "Y" : "N";
                 }
             }
