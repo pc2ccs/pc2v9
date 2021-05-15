@@ -143,8 +143,8 @@ public class RemoteEventFeedMonitor implements Runnable {
                     //skip blank lines and any that do not start/end with "{...}"
                     if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
                         
-                        System.out.println("Got event string: " + event);
-//                        log.log(Level.INFO, "Got event string: " + event);
+//                        System.out.println("Got event string: " + event);
+                        log.log(Level.INFO, "Got event string: " + event);
                         try {
 
                             /**
@@ -208,8 +208,8 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             throw new Exception("Error parsing submission data " + event);
                                         } else {
 
-//                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
-                                            System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
+                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
+//                                            System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
 
                                             //construct the override values to be used for the shadow submission
                                             long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
@@ -284,7 +284,7 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                             //this block is a temporary substitute for the above commented-out block
                                             List<IFile> files = null;
-                                            System.out.println("debug 22 get files using id "+overrideSubmissionID);
+//                                            System.out.println("debug 22 get files using id "+overrideSubmissionID);
                                             files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
 
                                             IFile mainFile = null;
@@ -319,8 +319,8 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                 } else if ("judgements".equals(eventType)) {
                                     
-                                    System.out.println("debug 22 recognized judgement event");
-//                                    log.log(Level.INFO, "Found " + eventType + " event");
+//                                    System.out.println("debug 22 recognized judgement event");
+                                    log.log(Level.INFO, "Found " + eventType + " event");
 
                                     //process a judgement event
                                     try {
@@ -360,7 +360,7 @@ public class RemoteEventFeedMonitor implements Runnable {
      
                                                 // this is a judgement we want; save it in the global judgements map under a key of
                                                 // the judgement ID with value "submissionID:judgement"
-                                                System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");                                                
+//                                                System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");                                                
                                                 synchronized (remoteJudgementsMapLock) {
                                                     getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
                                                 }
