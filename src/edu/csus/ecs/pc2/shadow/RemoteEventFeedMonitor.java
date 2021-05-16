@@ -138,8 +138,27 @@ public class RemoteEventFeedMonitor implements Runnable {
                 //read the next event from the event feed stream
                 String event = reader.readLine();
 
+                //process the next event
                 while ((event != null) && keepRunning) {
 
+                    //if the remote system feeds events too fast (which happens when testing with a completed contest/eventfeed, and could
+                    // in theory happen during a live contest), this RemoteEventFeedMonitor thread overwhelms the JVM scheduler, causing
+                    // things like AWT Dispatch thread GUI updates to become hung.
+                    //Let's sleep for a moment to allow other threads to run.
+                    //Note1: it might seem more logical to put this sleep at the END of the while-loop; however, there are multiple places
+                    // within the loop which invoke "continue", which would SKIP the sleep if it was at the end of the loop...
+                    //Note2:  the value "10ms" was experimentally determined using the NADC21 Kattis event feed, which contains over 53,300 
+                    // events (lines).  Any value below 10ms caused the GUI to freeze up.
+                    //Note3: an attempt was made to change the priority of this thread to a higher number (so, lower priority) than that 
+                    // assigned to the AWT Event Dispatch thread, and then to use Thread.yield() here instead of Thread.sleep().  In theory
+                    // this should have allowed the AWT thread to gain the CPU when it was ready to run, but in practice GUI lockups were 
+                    // still seen.  This could be because the AWT thread has multiple blocking conditions and each one of these allows this
+                    // Event Feed Monitor thread to get back to the CPU (and use it for a full scheduling timeslice).
+                    // So it was determined that the following was the best solution, at least in the short term...
+                    //See also GitHub Issue 267:  https://github.com/pc2ccs/pc2v9/issues/267
+                    Thread.sleep(10);
+
+                    
                     //skip blank lines and any that do not start/end with "{...}"
                     if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
                         
