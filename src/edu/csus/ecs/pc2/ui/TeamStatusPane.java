@@ -317,6 +317,7 @@ public class TeamStatusPane extends JPanePlugin {
                 }
 
                 teamStatusColor = getStatusColor(clientId, runs, clarifications);
+                updateStatusCounters(clientId, runs, clarifications);
             }
 
             toolTipText = toolTipText + " (" + account.getDisplayName() + ")";
@@ -327,6 +328,7 @@ public class TeamStatusPane extends JPanePlugin {
             centerPane.add(teamName, teamLabel);
         }
         
+        centerPane.repaint();
         
         /**
          * Update counts for each status
@@ -336,9 +338,7 @@ public class TeamStatusPane extends JPanePlugin {
         submittedRunsLabel.setText("Submitted Run(s) (" +toInt(  teamStatusCount.get(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_ONLY) , 0) + ")");
         hasLoggedInLabel.setText("Has Logged In (" + toInt( teamStatusCount.get(TeamStatus.TEAM_HAS_LOGGED_IN), 0 ) + ")");
         nocontactLabel.setText("No Contact (" + toInt( teamStatusCount.get(TeamStatus.NO_TEAM_CONTACT), 0) + ")");
-        readyLabel.setText("READY (" + toInt( teamStatusCount.get(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_AND_CLARS), -0) + ")");
-
-        centerPane.repaint();
+        readyLabel.setText("READY (" + toInt( teamStatusCount.get(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_AND_CLARS),0) + ")");
     }
 
     private int toInt(Integer integer, int defaultValue) {
@@ -348,24 +348,39 @@ public class TeamStatusPane extends JPanePlugin {
             return integer.intValue();
         }
     }
+    
+    /**
+     * Determine status and increment the count for the status.
+     * @param clientId
+     * @param runs
+     * @param clarifications
+     */
+    private void updateStatusCounters(ClientId clientId, Run[] runs, Clarification[] clarifications) {
 
+        if (runs.length > 0 && clarifications.length > 0) {
+            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_AND_CLARS);
+        } else if (runs.length > 0) {
+            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_ONLY);
+        } else if (clarifications.length > 0) {
+            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_CLARS_ONLY);
+        } else if (hasLoggedIn(clientId)) {
+            incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
+        } else {
+            incrementStatusCount(TeamStatus.NO_TEAM_CONTACT);
+        }
+    }
+    
     private Color getStatusColor(ClientId clientId, Run[] runs, Clarification[] clarifications) {
         Color outColor = NO_CONTACT_COLOR;
 
         if (runs.length > 0 && clarifications.length > 0) {
             outColor = HAS_SUBMITTED_RUNS_AND_CLARS_COLOR;
-            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_AND_CLARS);
         } else if (runs.length > 0) {
             outColor = HAS_SUBMITTED_RUNS_ONLY_COLOR;
-            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_ONLY);
         } else if (clarifications.length > 0) {
             outColor = HAS_SUBMITTED_CLARS_ONLY_COLOR;
-            incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_CLARS_ONLY);
         } else if (hasLoggedIn(clientId)) {
             outColor = HAS_LOGGED_IN_COLOR;
-            incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
-        } else {
-            incrementStatusCount(TeamStatus.NO_TEAM_CONTACT);
         }
 
         return outColor;
