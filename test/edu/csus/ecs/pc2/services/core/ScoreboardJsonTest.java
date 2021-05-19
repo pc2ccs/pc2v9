@@ -81,7 +81,7 @@ public class ScoreboardJsonTest extends AbstractTestCase {
         System.out.println("debug 22 FAUX "+json);
     }
     
-    public void testNacDCPrac2EF() throws Exception {
+    public void testNADC21Prac2EF() throws Exception {
         
         String outputDirectoryName = getOutputDataDirectory(getName());
         ensureDirectory(outputDirectoryName);
@@ -134,7 +134,7 @@ public class ScoreboardJsonTest extends AbstractTestCase {
         /**
          * pc2 Standings XML for NADC Practice 2.
          */
-        String xmlFilename = "testdata\\ScoreboardJSONTest\\testNacDCPrac2EF\\nadcPractice-event-feed.xml";
+        String xmlFilename = "testdata\\ScoreboardJSONTest\\testNADC21Prac2EF\\nadcPractice-event-feed.xml";
 
         ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(new File(xmlFilename));
 
