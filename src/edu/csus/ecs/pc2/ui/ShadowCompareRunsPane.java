@@ -43,7 +43,7 @@ import edu.csus.ecs.pc2.shadow.ShadowJudgementPair;
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  *
  */
-public class ShadowComparePane extends JPanePlugin {
+public class ShadowCompareRunsPane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
     
@@ -76,7 +76,7 @@ public class ShadowComparePane extends JPanePlugin {
      * 
      * @param shadowController a ShadowController used to obtain a Mapping of submission IDs to ShadowJudgementInfo objects
      */
-    public ShadowComparePane(ShadowController shadowController) {
+    public ShadowCompareRunsPane(ShadowController shadowController) {
         Dimension size = new Dimension(600,600);
         this.setPreferredSize(size);
         this.setMinimumSize(size);
