@@ -53,9 +53,7 @@ public class ShadowControlPane extends JPanePlugin {
 
     private JPanel buttonPanel = null;
 
-    private JButton startButton = null;
-
-    private JButton stopButton = null;
+    private JButton startStopButton = null;
     
     private JButton testConnectionButton;
 
@@ -78,7 +76,10 @@ public class ShadowControlPane extends JPanePlugin {
     private JTextField lastEventTextfield;
     
     private ContestInformation savedContestInformation;
-    private JButton compareButton;
+    
+    private JButton compareRunsButton;
+
+    private JButton compareScoreboardsButton;
 
     /**
      * Constructs a new ShadowControlPane using the specified Contest and Controller.
@@ -105,7 +106,7 @@ public class ShadowControlPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(600, 250));
+        this.setSize(new Dimension(800, 250));
         this.add(getButtonPanel(), BorderLayout.SOUTH);
         this.add(getCenterPanel(), BorderLayout.CENTER);
 
@@ -131,9 +132,9 @@ public class ShadowControlPane extends JPanePlugin {
             buttonPanel.setPreferredSize(new Dimension(35, 35));
             buttonPanel.add(getUpdateButton(), null);
             buttonPanel.add(getTestConnectionButton());
-            buttonPanel.add(getStartButton(), null);
-            buttonPanel.add(getCompareButton());
-            buttonPanel.add(getStopButton(), null);
+            buttonPanel.add(getStartStopButton(), null);
+            buttonPanel.add(getCompareRunsButton(), null);
+            buttonPanel.add(getCompareScoreboardsButton(), null);
         }
         return buttonPanel;
     }
@@ -159,27 +160,39 @@ public class ShadowControlPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes startButton
+     * This method initializes the startStopButton which starts or stops
+     * shadowing operations.
      * 
      * @return javax.swing.JButton
      */
-    private JButton getStartButton() {
-        if (startButton == null) {
-            startButton = new JButton();
-            startButton.setText("Start Shadowing");
-            startButton.setMnemonic(KeyEvent.VK_S);
-            startButton.setToolTipText("Start shadowing operations on the specified remote CCS");
-            startButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getStartStopButton() {
+        if (startStopButton == null) {
+            startStopButton = new JButton();
+            startStopButton.setText("Start Shadowing");
+            startStopButton.setMnemonic(KeyEvent.VK_S);
+            startStopButton.setToolTipText("Start shadowing operations on the specified remote CCS");
+            startStopButton.addActionListener(new java.awt.event.ActionListener() {
+            	
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            startShadowing();
-                        }
-                    });
+                    if (!currentlyShadowing) {
+                    	SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                startShadowing();
+                            }
+                        });
+
+                    } else {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                stopShadowing();
+                            }
+                        });
+
+                   }
                 }
             });
         }
-        return startButton;
+        return startStopButton;
     }
 
     /**
@@ -209,6 +222,8 @@ public class ShadowControlPane extends JPanePlugin {
             if (success) {
                 currentlyShadowing = true;
                 shadowingStatusValueLabel.setText("ON");
+                getStartStopButton().setText("Stop Shadowing");
+                getStartStopButton().setToolTipText("Stop shadowing operations");
             } else {
                 handleStartFailure();
                 showErrorMessage("Failed to start shadowing; check logs (bad URL or credentials? mismatched configs?)", "Cannot start Shadowing");
@@ -286,30 +301,6 @@ public class ShadowControlPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes stopButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getStopButton() {
-        if (stopButton == null) {
-            stopButton = new JButton();
-            stopButton.setText("Stop Shadowing");
-            stopButton.setMnemonic(KeyEvent.VK_T);
-            stopButton.setToolTipText("Stop shadowing operations");
-            stopButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            stopShadowing();
-                        }
-                    });
-                }
-            });
-        }
-        return stopButton;
-    }
-
-    /**
      * Stops shadowing operations if running. 
      */
     protected void stopShadowing() {
@@ -318,7 +309,8 @@ public class ShadowControlPane extends JPanePlugin {
             shadowController.stop();
             currentlyShadowing = false;
             shadowingStatusValueLabel.setText("OFF");
-
+            getStartStopButton().setText("Start Shadowing");
+            getStartStopButton().setToolTipText("Start shadowing operations on the specified remote CCS");
         }
         updateGUI();
     }
@@ -431,14 +423,12 @@ public class ShadowControlPane extends JPanePlugin {
 
         if (getCurrentShadowInformation(getContest().getContestInformation()).isSameAs(newChoice)) {
             getUpdateButton().setEnabled(false);
-            getStartButton().setEnabled(!currentlyShadowing);
-            getStopButton().setEnabled(currentlyShadowing);
+            getStartStopButton().setEnabled(true);
             getTestConnectionButton().setEnabled(!currentlyShadowing);            
             
         } else {
             getUpdateButton().setEnabled(true);
-            getStartButton().setEnabled(false);
-            getStopButton().setEnabled(false);
+            getStartStopButton().setEnabled(false);
             getTestConnectionButton().setEnabled(false);
         }
 
@@ -476,14 +466,17 @@ public class ShadowControlPane extends JPanePlugin {
 //                          + "\n        lastEvent: " + contestInformation.getLastShadowEventID() );
 //        
 
-        getStartButton().setEnabled(!currentlyShadowing);
-        getStopButton().setEnabled(currentlyShadowing);
+        getStartStopButton().setEnabled(true);
         getUpdateButton().setEnabled(false);
 
         if (currentlyShadowing) {
             shadowingStatusValueLabel.setText("ON");
+            getStartStopButton().setText("Stop shadowing");
+            getStartStopButton().setToolTipText("Stop the currently active shadowing of the remote CCS");
         } else {
             shadowingStatusValueLabel.setText("OFF");
+            getStartStopButton().setText("Start shadowing");
+            getStartStopButton().setToolTipText("Start shadowing the currently specified remote CCS");
         }
         
         updateShadowSettingsPane(currentlyShadowing);
@@ -589,43 +582,61 @@ public class ShadowControlPane extends JPanePlugin {
 
     }
 
-    /**
-     * Displays a new @link {@link ShadowCompareFrame} containing a {@link ShadowComparePane} with "Refresh" and "Save as .csv" buttons.
-     * The ShadowComparePane contains a scrollable table of rows where each row compares one remote CCS submission with the corresponding
-     * PC2 submission.
-     * 
-     * @return a "Compare" JButton with an ActionListener that does the above.  The operations of the ActionListener are spun off to the
-     *          AWT Event Queue thread using {@link SwingUtilities#invokeLater(Runnable)}.
-     */
-    private JButton getCompareButton() {
-        if (compareButton == null) {
-        	compareButton = new JButton("Compare");
-        	compareButton.setMnemonic(KeyEvent.VK_C);
-        	compareButton.setToolTipText("Display comparison results");
-        	compareButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getCompareRunsButton() {
+        if (compareRunsButton == null) {
+        	compareRunsButton = new JButton("Compare Runs");
+        	compareRunsButton.setMnemonic(KeyEvent.VK_R);
+        	compareRunsButton.setToolTipText("Display run comparison results");
+        	compareRunsButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    if (shadowController==null) {
+                        showErrorMessage("No shadow controller available; cannot show runs comparison", "Missing Controller"); 
+                    } else {
+                        JFrame shadowCompareRunsFrame = new ShadowCompareRunsFrame(shadowController);
+                        shadowCompareRunsFrame.setLocationRelativeTo(null); // centers frame
+                        shadowCompareRunsFrame.setSize(600,700);
+                        shadowCompareRunsFrame.setTitle("Shadow Run Comparison");
+                        shadowCompareRunsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        shadowCompareRunsFrame.setVisible(true);
+                    }
+                    
+                }
+            });
+
+        }
+        return compareRunsButton;
+    }
+    
+    private JButton getCompareScoreboardsButton() {
+        if (compareScoreboardsButton == null) {
+            compareScoreboardsButton = new JButton("Compare Scoreboards");
+            compareScoreboardsButton.setMnemonic(KeyEvent.VK_S);
+            compareScoreboardsButton.setToolTipText("Display scoreboard comparison results");
+            compareScoreboardsButton.addActionListener(new java.awt.event.ActionListener() {
         	    
                 public void actionPerformed(java.awt.event.ActionEvent e) {
 
-                    SwingUtilities.invokeLater(new Runnable() {
-                        
-                        public void run() {
-
+                	SwingUtilities.invokeLater(new Runnable() {
+                		
+                		public void run() {
+                		
                             if (shadowController==null) {
-                                showErrorMessage("No shadow controller available; cannot show comparison", "Missing Controller"); 
+                                showErrorMessage("No shadow controller available; cannot show scoreboard comparison", "Missing Controller"); 
                             } else {
-                                JFrame shadowCompareFrame = new ShadowCompareFrame(shadowController);
-                                shadowCompareFrame.setLocationRelativeTo(null); // centers frame
-                                shadowCompareFrame.setSize(600,700);
-                                shadowCompareFrame.setTitle("Shadow Comparison");
-                                shadowCompareFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                                shadowCompareFrame.setVisible(true);
+                                JFrame shadowCompareScoreboardFrame = new ShadowCompareScoreboardFrame(shadowController);
+                                shadowCompareScoreboardFrame.setLocationRelativeTo(null); // centers frame
+                                shadowCompareScoreboardFrame.setSize(600,700);
+                                shadowCompareScoreboardFrame.setTitle("Shadow Scoreboard Comparison");
+                                shadowCompareScoreboardFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                                shadowCompareScoreboardFrame.setVisible(true);
                             }
-                        }
-                    });
+                		}
+                	}); 
                 };
-        	});
+            });
+
         }
-        return compareButton;
+        return compareScoreboardsButton;
     }
     
     private JButton getTestConnectionButton() {

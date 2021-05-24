@@ -56,7 +56,7 @@ public class ShadowCompareSummaryPane extends JPanel {
      * If the specified map is null a message to that effect is instead displayed in the pane.
      * 
      * Note that this method is called from the class constructor, but may also be called from external code
-     * (typically, from a {@link ShadowComparePane} to invoke an update of the summary information being displayed.
+     * (typically, from a {@link ShadowCompareRunsPane} to invoke an update of the summary information being displayed.
      * 
      * @param currentJudgementMap a Map of ShadowJudgementInfo from which summary information to be displayed is extracted
      */

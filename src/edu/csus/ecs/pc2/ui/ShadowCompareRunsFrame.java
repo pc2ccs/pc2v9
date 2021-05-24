@@ -13,15 +13,15 @@ import edu.csus.ecs.pc2.shadow.ShadowController;
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  *
  */
-public class ShadowCompareFrame extends JFrame {
+public class ShadowCompareRunsFrame extends JFrame {
 
     private static final long serialVersionUID = 1L;
     
-    public ShadowCompareFrame(ShadowController shadowController) {
+    public ShadowCompareRunsFrame(ShadowController shadowController) {
         Dimension size = new Dimension(600,600);
         this.setPreferredSize(size);
 //        this.setMinimumSize(size);
-        this.getContentPane().add(new ShadowComparePane(shadowController));
+        this.getContentPane().add(new ShadowCompareRunsPane(shadowController));
     }
 
 }
