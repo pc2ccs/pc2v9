@@ -88,12 +88,14 @@ public class ShadowCompareSummaryPane extends JPanel {
 
                 String pc2Judgement = currentJudgementMap.get(submissionID).getShadowJudgementPair().getPc2Judgement();
                 String remoteJudgement = currentJudgementMap.get(submissionID).getShadowJudgementPair().getRemoteCCSJudgement();
-                if (pc2Judgement != null && remoteJudgement != null && (pc2Judgement.equalsIgnoreCase(remoteJudgement))) {
+                if (pc2Judgement != null && remoteJudgement != null && 
+                        !(pc2Judgement.contains("pending")) && !(remoteJudgement.contains("pending")) &&
+                         (pc2Judgement.equalsIgnoreCase(remoteJudgement))) {
                     match++;
                 } else {
-                    //it's not a match; separate out "pendings" and ones for which no remote judgement has yet been received
-                    if ( (pc2Judgement!=null && pc2Judgement.contains("pending")) 
-                            || (remoteJudgement==null || remoteJudgement.equals(""))) {
+                    //it's not a match; separate out "pendings"
+                    if (   (pc2Judgement!=null && pc2Judgement.contains("pending")) ||
+                           (remoteJudgement!=null && remoteJudgement.contains("pending")) ) {
                         pending++;
                     } else {
                         //it can't be counted "pending" either by virtue of the PC2 status or the Remote status; count as "noMatch"

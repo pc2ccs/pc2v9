@@ -171,7 +171,11 @@ public class ShadowControlPane extends JPanePlugin {
             startButton.setToolTipText("Start shadowing operations on the specified remote CCS");
             startButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    startShadowing();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            startShadowing();
+                        }
+                    });
                 }
             });
         }
@@ -294,7 +298,11 @@ public class ShadowControlPane extends JPanePlugin {
             stopButton.setToolTipText("Stop shadowing operations");
             stopButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    stopShadowing();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            stopShadowing();
+                        }
+                    });
                 }
             });
         }
@@ -581,27 +589,41 @@ public class ShadowControlPane extends JPanePlugin {
 
     }
 
+    /**
+     * Displays a new @link {@link ShadowCompareFrame} containing a {@link ShadowComparePane} with "Refresh" and "Save as .csv" buttons.
+     * The ShadowComparePane contains a scrollable table of rows where each row compares one remote CCS submission with the corresponding
+     * PC2 submission.
+     * 
+     * @return a "Compare" JButton with an ActionListener that does the above.  The operations of the ActionListener are spun off to the
+     *          AWT Event Queue thread using {@link SwingUtilities#invokeLater(Runnable)}.
+     */
     private JButton getCompareButton() {
         if (compareButton == null) {
         	compareButton = new JButton("Compare");
         	compareButton.setMnemonic(KeyEvent.VK_C);
         	compareButton.setToolTipText("Display comparison results");
         	compareButton.addActionListener(new java.awt.event.ActionListener() {
+        	    
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    if (shadowController==null) {
-                        showErrorMessage("No shadow controller available; cannot show comparison", "Missing Controller"); 
-                    } else {
-                        JFrame shadowCompareFrame = new ShadowCompareFrame(shadowController);
-                        shadowCompareFrame.setLocationRelativeTo(null); // centers frame
-                        shadowCompareFrame.setSize(600,700);
-                        shadowCompareFrame.setTitle("Shadow Comparison");
-                        shadowCompareFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                        shadowCompareFrame.setVisible(true);
-                    }
-                    
-                }
-            });
 
+                    SwingUtilities.invokeLater(new Runnable() {
+                        
+                        public void run() {
+
+                            if (shadowController==null) {
+                                showErrorMessage("No shadow controller available; cannot show comparison", "Missing Controller"); 
+                            } else {
+                                JFrame shadowCompareFrame = new ShadowCompareFrame(shadowController);
+                                shadowCompareFrame.setLocationRelativeTo(null); // centers frame
+                                shadowCompareFrame.setSize(600,700);
+                                shadowCompareFrame.setTitle("Shadow Comparison");
+                                shadowCompareFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                                shadowCompareFrame.setVisible(true);
+                            }
+                        }
+                    });
+                };
+        	});
         }
         return compareButton;
     }

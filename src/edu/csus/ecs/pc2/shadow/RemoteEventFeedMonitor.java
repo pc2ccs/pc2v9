@@ -72,7 +72,16 @@ public class RemoteEventFeedMonitor implements Runnable {
     private boolean listening;
     private IInternalController pc2Controller;
     private InputStream remoteInputStream;
+    
+    /**
+     * A Map mapping remote judgement ids to corresponding submission ids and the judgement applied to that submission.
+     */
     private static Map<String,String> remoteJudgements;
+    
+    /**
+     * A lock for synchronizing access to the above map.
+     */
+    private static Object remoteJudgementsMapLock = new Object();
 
     /**
      * Constructs a RemoteEventFeedMonitor with the specified values.  The RemoteEventFeedMonitor
@@ -129,13 +138,32 @@ public class RemoteEventFeedMonitor implements Runnable {
                 //read the next event from the event feed stream
                 String event = reader.readLine();
 
+                //process the next event
                 while ((event != null) && keepRunning) {
 
+                    //if the remote system feeds events too fast (which happens when testing with a completed contest/eventfeed, and could
+                    // in theory happen during a live contest), this RemoteEventFeedMonitor thread overwhelms the JVM scheduler, causing
+                    // things like AWT Dispatch thread GUI updates to become hung.
+                    //Let's sleep for a moment to allow other threads to run.
+                    //Note1: it might seem more logical to put this sleep at the END of the while-loop; however, there are multiple places
+                    // within the loop which invoke "continue", which would SKIP the sleep if it was at the end of the loop...
+                    //Note2:  the value "10ms" was experimentally determined using the NADC21 Kattis event feed, which contains over 53,300 
+                    // events (lines).  Any value below 10ms caused the GUI to freeze up.
+                    //Note3: an attempt was made to change the priority of this thread to a higher number (so, lower priority) than that 
+                    // assigned to the AWT Event Dispatch thread, and then to use Thread.yield() here instead of Thread.sleep().  In theory
+                    // this should have allowed the AWT thread to gain the CPU when it was ready to run, but in practice GUI lockups were 
+                    // still seen.  This could be because the AWT thread has multiple blocking conditions and each one of these allows this
+                    // Event Feed Monitor thread to get back to the CPU (and use it for a full scheduling timeslice).
+                    // So it was determined that the following was the best solution, at least in the short term...
+                    //See also GitHub Issue 267:  https://github.com/pc2ccs/pc2v9/issues/267
+                    Thread.sleep(10);
+
+                    
                     //skip blank lines and any that do not start/end with "{...}"
                     if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
                         
-                        System.out.println("Got event string: " + event);
-//                        log.log(Level.INFO, "Got event string: " + event);
+//                        System.out.println("Got event string: " + event);
+                        log.log(Level.INFO, "Got event string: " + event);
                         try {
 
                             /**
@@ -199,8 +227,8 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             throw new Exception("Error parsing submission data " + event);
                                         } else {
 
-//                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
-                                            System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
+                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
+//                                            System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
 
                                             //construct the override values to be used for the shadow submission
                                             long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
@@ -275,7 +303,7 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                             //this block is a temporary substitute for the above commented-out block
                                             List<IFile> files = null;
-                                            System.out.println("debug 22 get files using id "+overrideSubmissionID);
+//                                            System.out.println("debug 22 get files using id "+overrideSubmissionID);
                                             files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
 
                                             IFile mainFile = null;
@@ -310,8 +338,8 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                 } else if ("judgements".equals(eventType)) {
                                     
-                                    System.out.println("debug 22 recognized judgement event");
-//                                    log.log(Level.INFO, "Found " + eventType + " event");
+//                                    System.out.println("debug 22 recognized judgement event");
+                                    log.log(Level.INFO, "Found " + eventType + " event");
 
                                     //process a judgement event
                                     try {
@@ -323,7 +351,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         if (operation != null && operation.equals("delete")) {
                                             //it is a delete; remove from the global map the judgement whose ID is specified
                                             String idToDelete = (String) judgementEventDataMap.get("id");
-                                            getRemoteJudgementsMap().remove(idToDelete);
+                                            synchronized (remoteJudgementsMapLock) {
+                                                getRemoteJudgementsMap().remove(idToDelete);
+                                            }
 
                                             //TODO: how do we notify the local PC2 system that this judgement should be deleted??
 
@@ -349,8 +379,10 @@ public class RemoteEventFeedMonitor implements Runnable {
      
                                                 // this is a judgement we want; save it in the global judgements map under a key of
                                                 // the judgement ID with value "submissionID:judgement"
-                                                System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");                                                
-                                                getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
+//                                                System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");                                                
+                                                synchronized (remoteJudgementsMapLock) {
+                                                    getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
+                                                }
                                             }
                                         }
 
@@ -388,24 +420,57 @@ public class RemoteEventFeedMonitor implements Runnable {
     }
     
     /**
-     * Constructs a Map<String,String> to hold mappings of judgement id's to corresponding submissions and judgement
+     * Initializes the Map<String,String> which holds mappings of judgement id's to corresponding submissions and judgement
      * types (acronymns).
      * 
      * The keys to the map are Strings containing the numerical value of a judgement id as received from the remote CCS;
      * the values under each key are the concatenation of the submission id corresponding to the judgement with the
      * judgement type id (i.e., the judgement acronym), separated by a colon (":").
      * 
+     * Note that this method is PRIVATE; external clients wanting access to the remoteJudgementsMap should use method {@link #getRemoteJudgementsMapSnapshot()}.
+     * 
      * @return a Mapping of judgement id's to the corresponding submission and judgement type (value).
      *              If no remote judgements have yet been received the returned Map will be empty (but not null).
      */
-    public static Map<String,String> getRemoteJudgementsMap() {
-        if (remoteJudgements==null) {
-            remoteJudgements = new HashMap<String,String>();
+    private static Map<String,String> getRemoteJudgementsMap() {
+        synchronized (remoteJudgementsMapLock) {
+            if (remoteJudgements == null) {
+                remoteJudgements = new HashMap<String, String>();
+            }
+            return remoteJudgements;
         }
-        return remoteJudgements;
     }
 
  
+    /**
+     * Returns a snapshot of the current contents of the Map<String,String> which holds mappings of judgement id's to corresponding 
+     * submissions and judgement types (acronymns).
+     * 
+     * The keys to the map are Strings containing the numerical value of a judgement id as received from the remote CCS;
+     * the values under each key are the concatenation of the submission id corresponding to the judgement with the
+     * judgement type id (i.e., the judgement acronym), separated by a colon (":").
+     * 
+     * Note that this method returns a <I>copy</i> which is a <I>snapshot</i>; there is no guarantee that the map will not subsequently be 
+     * changed by other threads. However, the method does provide internal synchronization to insure that the map is not simultaneously 
+     * altered while the snapshot is being created.
+     * 
+     * @return a snapshot copy of the current Mapping of judgement id's to the corresponding submission and judgement type (value).
+     *              If no remote judgements have yet been received the returned Map will be empty (but not null).
+     */
+    public static Map<String,String> getRemoteJudgementsMapSnapshot() {
+        
+        synchronized (remoteJudgementsMapLock) {
+            Map<String, String> currentMap = getRemoteJudgementsMap();
+            
+            Map<String, String> copy = new HashMap<String,String>();
+            for (String key : currentMap.keySet()) {
+                copy.put(key, currentMap.get(key));
+            }
+           
+            return copy;
+        }
+    }
+
     /**
      * Returns a Map containing the key/value elements in the specified JSON string.
      * This method uses the Jackson {@link ObjectMapper} to perform the conversion from the JSON

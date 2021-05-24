@@ -185,6 +185,8 @@ public class CLICSJudgementType {
      */
     private static ArrayList<JudgementMapping> judgementStringMappings = new ArrayList<JudgementMapping>() {
  
+        private static final long serialVersionUID = 1L;
+
         {
             add(new JudgementMapping("Accepted",CLICS_JUDGEMENT_ACRONYM.AC));
             
@@ -413,7 +415,7 @@ public class CLICSJudgementType {
      * specification at https://clics.ecs.baylor.edu/index.php?title=Contest_API#Judgement_Types), or null
      * if there is no recommended mapping for the acronym defined in this judgement type.
      * 
-     * @return the CLICS "Big 5" judgement 
+     * @return the CLICS "Big 5" judgement corresponding to this CLICS judgement, or null if there is no Big5 equivalent defined.
      */
     public String getBig5EquivalentAcronym() {
         return big5Mapping.get(this.id);
@@ -421,11 +423,11 @@ public class CLICSJudgementType {
     
     /**
      * Returns the {@link CLICS_JUDGEMENT_ACRONYM} element which corresponds to the specified text string, or null
-     * ff there is no CLICS_JUDGEMENT_ACRONYM whose text string matches the specified text.
+     * if there is no CLICS_JUDGEMENT_ACRONYM whose text string matches the specified text.
      * 
      * @param text a String giving a judgement message; for example "Wrong Answer"
      * 
-     * @return the CLICS_JUDGEMENT_ACRONYM element corresponding to the received text (e.g. CLICS_JUDGEMENT_ACRONYM.WA), or null 
+     * @return the CLICS_JUDGEMENT_ACRONYM element corresponding to the received text (e.g. CLICS_JUDGEMENT_ACRONYM.WA), or null. 
      */
     public static CLICS_JUDGEMENT_ACRONYM getCLICSAcronym (String text) {
           
