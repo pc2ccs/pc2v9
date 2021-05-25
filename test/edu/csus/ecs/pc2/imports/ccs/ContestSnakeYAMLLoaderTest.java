@@ -3516,14 +3516,14 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
     }
     
-    public void tesproblemflagtestStopOnFirstFailedTestCase() throws Exception {
+    public void testisStopOnFirstFailedTestCase() throws Exception {
         
-        String sampleName = "problemflagtest";
+        String sampleName = "problemflagtest"; // use CDP sample problemflagtest
         IInternalContest contest  = fullLoadSampleContest(sampleName);
         assertNotNull(contest);
 
         Problem[] problems = contest.getProblems();
-        assertEquals("Num problems ",10, problems.length);
+        assertEquals("Num problems ", 8, problems.length);
         
         for (Problem problem : problems) {
             assertTrue(problem.getShortName()+" stop on first ", problem.isStopOnFirstFailedTestCase());
@@ -3533,6 +3533,11 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     
     
     
+    /**
+     * Test load problem.yaml isStopOnFirstFailedTestCase.
+     * 
+     * @throws Exception
+     */
     public void testvaltesttStopOnFirstFailedTestCase() throws Exception {
         
         String sampleName = "valtest";

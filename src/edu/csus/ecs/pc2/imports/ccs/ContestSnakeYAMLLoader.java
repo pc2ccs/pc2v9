@@ -403,11 +403,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
         
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
-        if (stopOnFirstFail) {
-            setStopOnFirstFailedTestCase (contest, stopOnFirstFail);
-        }
-        
-        System.out.println("debug 22 for stopOnFirstFail is " +contest.getContestInformation().isStopOnFirstFailedtestCase() + " "+directoryName );
+        setStopOnFirstFailedTestCase (contest, stopOnFirstFail);
         
         /**
          * assign shadow values
