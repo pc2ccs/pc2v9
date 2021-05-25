@@ -42,6 +42,8 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * Team Status Pane.
@@ -119,6 +121,18 @@ public class TeamStatusPane extends JPanePlugin {
     private JCheckBox showTeamsCheckBox = null;
 
     private Map<TeamStatus, Integer> teamStatusCount = new HashMap<TeamStatus, Integer>();
+    
+    /**
+     * Use simple status counts.
+     * <br>
+     * 
+     * true - show counts based on only the team color.
+     * false - show counts based on "logical" counts.
+     * <br>
+     * See https://github.com/pc2ccs/pc2v9/pull/264 and https://github.com/pc2ccs/pc2v9/issues/253 for details.
+     * 
+     */
+    private boolean showSimpleStatusCounts = true;
     
     /**
      * This method initializes
@@ -339,6 +353,8 @@ public class TeamStatusPane extends JPanePlugin {
         hasLoggedInLabel.setText("Has Logged In (" + toInt( teamStatusCount.get(TeamStatus.TEAM_HAS_LOGGED_IN), 0 ) + ")");
         nocontactLabel.setText("No Contact (" + toInt( teamStatusCount.get(TeamStatus.NO_TEAM_CONTACT), 0) + ")");
         readyLabel.setText("READY (" + toInt( teamStatusCount.get(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_AND_CLARS),0) + ")");
+        
+        getController().getLog().log(Log.INFO, "Use simple team status counts "+showSimpleStatusCounts);
     }
 
     private int toInt(Integer integer, int defaultValue) {
@@ -359,10 +375,21 @@ public class TeamStatusPane extends JPanePlugin {
 
         if (runs.length > 0 && clarifications.length > 0) {
             incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_AND_CLARS);
+            if (! showSimpleStatusCounts) {
+                incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
+                incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_ONLY);
+                incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
+            }
         } else if (runs.length > 0) {
             incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_RUNS_ONLY);
+            if (! showSimpleStatusCounts) {
+                incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
+            }
         } else if (clarifications.length > 0) {
             incrementStatusCount(TeamStatus.TEAM_HAS_SUBMITTED_CLARS_ONLY);
+            if (! showSimpleStatusCounts) {
+                incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
+            }
         } else if (hasLoggedIn(clientId)) {
             incrementStatusCount(TeamStatus.TEAM_HAS_LOGGED_IN);
         } else {
@@ -675,6 +702,14 @@ public class TeamStatusPane extends JPanePlugin {
             nocontactLabel.setText("No Contact");
             nocontactLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             stateDescriptonPane = new JPanel();
+            stateDescriptonPane.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() > 0 && e.isControlDown()) {
+                        switchTeamStatusCounters();
+                    }
+                }
+            });
             stateDescriptonPane.setLayout(flowLayout);
             stateDescriptonPane.add(nocontactLabel, null);
             stateDescriptonPane.add(hasLoggedInLabel, null);
@@ -683,6 +718,17 @@ public class TeamStatusPane extends JPanePlugin {
             stateDescriptonPane.add(readyLabel, null);
         }
         return stateDescriptonPane;
+    }
+
+    protected void switchTeamStatusCounters() {
+        
+        /**
+         * Change state and repopulate status counts.
+         */
+        showSimpleStatusCounts = ! showSimpleStatusCounts;
+        populateGUI();
+
+        
     }
 
     /**
