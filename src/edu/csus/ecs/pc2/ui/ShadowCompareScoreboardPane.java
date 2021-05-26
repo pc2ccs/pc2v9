@@ -13,6 +13,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -60,6 +61,8 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
     private JScrollPane pc2ScrollPane;
     private Component rigidArea;
     private Component rigidArea_1;
+    private Component rigidArea_2;
+    private JButton helpButton;
 
     @Override
     public String getPluginTitle() {
@@ -426,6 +429,8 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
             }
         });
         buttonPanel.add(refreshButton);
+        buttonPanel.add(getRigidArea_2());
+        buttonPanel.add(getHelpButton());
 
         return buttonPanel ;
     }
@@ -441,5 +446,44 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
         	rigidArea_1 = Box.createRigidArea(new Dimension(20, 20));
         }
         return rigidArea_1;
+    }
+    private Component getRigidArea_2() {
+        if (rigidArea_2 == null) {
+        	rigidArea_2 = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea_2;
+    }
+    
+    private String infoMessage = "The Shadow Scoreboard Comparison screen displays the current PC2 Shadow and Remote Primary CCS scoreboards, side-by-side."
+            
+            + "\n\nThe comparison between scoreboards starts by considering each RANK (1, 2, 3...)."
+            + "\nFor each rank, all scoreboard rows holding that rank are displayed in each scoreboard."
+            + "\nIf there is a rank present in one scoreboard but not in the other scoreboard (for example, due to ties in earlier ranks),"
+            + "\nan empty row containing question marks is displayed in the scoreboard which does not have an entry for that rank."
+            
+            + "\n\nFor each rank which is present in both scoreboards, if the data for that rank matches in all corresponding fields of the two scoreboards"
+            + "\nthen the row is displayed in green; if any data values do not match then the row is displayed in red."
+            
+            + "\n\nThe effect of the above is that early in a contest when the PC2 Shadow system is still catching up to the Remote CCS, there will typically"
+            + "\nbe many rows where one scoreboard has data that the other does not (because of ties within ranks due to the submissions which that system"
+            + "\nhas/has not judged), and there will be many rows where there is a single rank in both scoreboards but the data values will not match"
+            + "\n(the rows will be red) because the PC2 Shadow system has not judged precisely the same number of submissions as the remote CCS."
+            
+            + "\n\nAt the end of the contest the Scoreboard Comparison screen will show the true comparison of scoreboards for the PC2 Shadow and the Remote CCS."
+            + "\n(If the scoreboards do not match at the end of the contest, the most likely reason is because the PC2 Shadow system has given a different"
+            + "\njudgement than the Remote CCS to one or more submissions; see the PC2 Shadow \"Compare Runs\" grid to find and resolve such differences.)"
+            + "";
+        
+    private JButton getHelpButton() {
+        if (helpButton == null) {
+        	helpButton = new JButton("Help?");
+        	helpButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent arg0) {
+        	        JOptionPane.showMessageDialog(null, infoMessage, "Scoreboard Information", JOptionPane.INFORMATION_MESSAGE);
+        	    }
+        	});
+        	helpButton.setToolTipText("Displays explanatory information about the content of the scoreboard comparison display");
+        }
+        return helpButton;
     }
 }
