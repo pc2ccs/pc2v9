@@ -18,9 +18,9 @@ public class ShadowCompareScoreboardFrame extends JFrame {
     private static final long serialVersionUID = 1L;
     
     public ShadowCompareScoreboardFrame(ShadowController shadowController) {
-        Dimension size = new Dimension(600,600);
+        Dimension size = new Dimension(1200,900);
         this.setPreferredSize(size);
-//        this.setMinimumSize(size);
+        this.setMinimumSize(size);
         this.getContentPane().add(new ShadowCompareScoreboardPane(shadowController));
     }
 
