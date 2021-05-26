@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 //The following annotation tells the Jackson ObjectMapper the order in which it should output fields when serializing 
 //objects of this class into JSON.
-@JsonPropertyOrder({"started", "ended", "frozen", "thawed", "finalized", "end_of_updates"})
+@JsonPropertyOrder({"started", "ended", "frozen", "unfrozen", "finalized", "end_of_updates"})
 
 public class ContestState {
     
@@ -30,7 +30,7 @@ public class ContestState {
     private String started;
 
     @JsonProperty
-    private String thawed;
+    private String unfrozen;
 
     @JsonProperty
     private String frozen;
@@ -58,11 +58,11 @@ public class ContestState {
     }
 
     public String getThawed() {
-        return thawed;
+        return unfrozen;
     }
 
     public void setThawed(String thawed) {
-        this.thawed = thawed;
+        this.unfrozen = thawed;
     }
 
     public String getFrozen() {
