@@ -89,6 +89,4 @@ public class ContestState {
         this.end_of_updates = end_of_updates;
     }
     
-    
-
 }

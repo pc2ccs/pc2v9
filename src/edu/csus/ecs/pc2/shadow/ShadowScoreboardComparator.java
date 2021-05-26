@@ -78,9 +78,6 @@ public class ShadowScoreboardComparator {
             //something went wrong creating the remote map from JSON
             log.warning("Error processing remote JSON scoreboard, resulting in null or empty row map");
             
-            //debug
-//            System.out.println ("Debug: Error processing remote JSON scoreboard, resulting in null or empty row map");
-            
             return new ShadowScoreboardRowComparison[0];
         }
         
@@ -189,9 +186,6 @@ public class ShadowScoreboardComparator {
     private Map<Integer, PriorityQueue<TeamScoreRow>> createRowMap(String scoreboardJson) {
         
         log.info("Creating scoreboard rank map from JSON scoreboard string");
-        
-        //debug:
-//        System.out.println ("Debug: Creating scoreboard rank map from JSON scoreboard string");
         
         //initialize the map we're going to return
         Map<Integer, PriorityQueue<TeamScoreRow>> retMap = new HashMap<Integer, PriorityQueue<TeamScoreRow>>() ;

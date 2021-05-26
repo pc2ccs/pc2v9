@@ -172,9 +172,10 @@ public class ShadowControlPane extends JPanePlugin {
             startStopButton.setMnemonic(KeyEvent.VK_S);
             startStopButton.setToolTipText("Start shadowing operations on the specified remote CCS");
             startStopButton.addActionListener(new java.awt.event.ActionListener() {
-            	
+
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (!currentlyShadowing) {
+
                     	SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
                                 startShadowing();
@@ -189,6 +190,7 @@ public class ShadowControlPane extends JPanePlugin {
                         });
 
                    }
+
                 }
             });
         }
@@ -633,6 +635,7 @@ public class ShadowControlPane extends JPanePlugin {
                 		}
                 	}); 
                 };
+
             });
 
         }

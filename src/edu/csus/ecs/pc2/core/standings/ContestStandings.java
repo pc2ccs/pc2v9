@@ -61,6 +61,4 @@ public class ContestStandings {
         
         return retStr;
     }
-
-
 }

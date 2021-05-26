@@ -486,4 +486,5 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
         }
         return helpButton;
     }
+
 }

@@ -20,6 +20,7 @@ public class ShadowCompareScoreboardSummaryPane extends JPanel {
     private static final long serialVersionUID = 1L;
     
     private JLabel scoreboardComparisonTextLabel = null;
+
     private final String COMPARISON_LABEL_TEXT = "Current status: " ;
 
     private JLabel scoreboardComparisonResultLabel;
