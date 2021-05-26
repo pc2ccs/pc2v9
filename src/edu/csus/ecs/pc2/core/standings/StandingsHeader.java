@@ -10,6 +10,9 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @XmlRootElement(name = "standingsHeader")
 @XmlAccessorType (XmlAccessType.FIELD)
 public class StandingsHeader implements Serializable {
@@ -199,5 +202,23 @@ public class StandingsHeader implements Serializable {
         this.problems = problems;
     }
 
+    /**
+     * Returns a JSON string representation of this StandingsHeader object.
+     */
+    @Override
+    public String toString() {
+        
+        String retStr = "Undefined";
+        ObjectMapper mapper = new ObjectMapper();
+        
+        try {
+            retStr = mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            // TODO pass a log into this class so we can do proper logging
+            e.printStackTrace();
+        }
+        
+        return retStr;
+    }
 
 }
