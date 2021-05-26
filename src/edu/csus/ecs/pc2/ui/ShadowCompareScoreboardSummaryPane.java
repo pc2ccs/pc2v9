@@ -20,9 +20,9 @@ public class ShadowCompareScoreboardSummaryPane extends JPanel {
     private static final long serialVersionUID = 1L;
     
     private JLabel scoreboardComparisonTextLabel = null;
-    private final String COMPARISON_LABEL_TEXT = "Scoreboard comparison results: " ;
+    private final String COMPARISON_LABEL_TEXT = "Current status: " ;
 
-    private JLabel scoreboardComparisonStatusValueLabel;
+    private JLabel scoreboardComparisonResultLabel;
     private final String DEFAULT_NO_COMPARISON_AVAILABLE_TEXT = "No comparison available";
     
     /**
@@ -30,11 +30,15 @@ public class ShadowCompareScoreboardSummaryPane extends JPanel {
      */
     public ShadowCompareScoreboardSummaryPane() {
         
-        this.setMaximumSize(new Dimension(300,40));
+        setMaximumSize(new Dimension(300,100));
+
+//        JLabel header = new JLabel("Comparison of PC2 vs. Remote Scoreboard");
+//        header.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        add(header);
+
+        add(getScoreboardComparisonLabel());
         
-        this.add(getScoreboardComparisonLabel());
-        
-        this.add(getScoreboardComparisonStatusValueLabel());
+        add(getScoreboardComparisonStatusValueLabel());
        
         updateSummary(null);
 
@@ -48,10 +52,10 @@ public class ShadowCompareScoreboardSummaryPane extends JPanel {
     }
 
     private JLabel getScoreboardComparisonStatusValueLabel() {
-        if (scoreboardComparisonStatusValueLabel==null) {
-            scoreboardComparisonStatusValueLabel = new JLabel(DEFAULT_NO_COMPARISON_AVAILABLE_TEXT);
+        if (scoreboardComparisonResultLabel==null) {
+            scoreboardComparisonResultLabel = new JLabel(DEFAULT_NO_COMPARISON_AVAILABLE_TEXT);
         }
-        return scoreboardComparisonStatusValueLabel;
+        return scoreboardComparisonResultLabel;
     }
 
     /**
