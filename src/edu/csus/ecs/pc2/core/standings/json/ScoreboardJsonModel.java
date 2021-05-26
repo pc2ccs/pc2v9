@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
@@ -91,6 +93,7 @@ public class ScoreboardJsonModel {
             TeamScoreRow row = new TeamScoreRow();
             
             row.setTeam_id(toInt(teamStanding.getTeamId()));
+            row.setRank(toInt(teamStanding.getRank()));
             
             StandingScore score = new StandingScore();
             score.setNum_solved(toInt(teamStanding.getSolved()));
@@ -140,7 +143,7 @@ public class ScoreboardJsonModel {
     }
 
     /**
-     * Null save convert to integer
+     * Null safe convert to integer
      * @param string
      * @return integer in string, or zero if there is an error
      */
@@ -177,6 +180,25 @@ public class ScoreboardJsonModel {
     }
     public void setTime(String time) {
         this.time = time;
+    }
+
+    /**
+     * Returns a JSON string representation of this ScoreboardJsonModel object.
+     */
+    @Override
+    public String toString() {
+        
+        String retStr = "Undefined";
+        ObjectMapper mapper = new ObjectMapper();
+        
+        try {
+            retStr = mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            // TODO pass a log into this class so we can do proper logging
+            e.printStackTrace();
+        }
+        
+        return retStr;
     }
 
 }
