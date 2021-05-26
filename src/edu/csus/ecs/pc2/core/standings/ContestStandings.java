@@ -8,6 +8,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Root for the Default Scoring Algorithm XML maraling from XML into POJOs. contestStanding element.
  * 
@@ -39,5 +42,25 @@ public class ContestStandings {
     public void setTeamStandings(List<TeamStanding> teamStandings) {
         this.teamStandings = teamStandings;
     }
+    
+    /**
+     * Returns a JSON string representation of this ContestStandings object.
+     */
+    @Override
+    public String toString() {
+        
+        String retStr = "Undefined";
+        ObjectMapper mapper = new ObjectMapper();
+        
+        try {
+            retStr = mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            // TODO pass a log into this class so we can do proper logging
+            e.printStackTrace();
+        }
+        
+        return retStr;
+    }
+
 
 }
