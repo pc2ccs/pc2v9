@@ -593,8 +593,8 @@ public class ShadowControlPane extends JPanePlugin {
                         showErrorMessage("No shadow controller available; cannot show runs comparison", "Missing Controller"); 
                     } else {
                         JFrame shadowCompareRunsFrame = new ShadowCompareRunsFrame(shadowController);
-                        shadowCompareRunsFrame.setLocationRelativeTo(null); // centers frame
                         shadowCompareRunsFrame.setSize(600,700);
+                        shadowCompareRunsFrame.setLocationRelativeTo(null); // centers frame
                         shadowCompareRunsFrame.setTitle("Shadow Run Comparison");
                         shadowCompareRunsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                         shadowCompareRunsFrame.setVisible(true);
@@ -624,8 +624,8 @@ public class ShadowControlPane extends JPanePlugin {
                                 showErrorMessage("No shadow controller available; cannot show scoreboard comparison", "Missing Controller"); 
                             } else {
                                 JFrame shadowCompareScoreboardFrame = new ShadowCompareScoreboardFrame(shadowController);
-                                shadowCompareScoreboardFrame.setLocationRelativeTo(null); // centers frame
                                 shadowCompareScoreboardFrame.setSize(600,700);
+                                shadowCompareScoreboardFrame.setLocationRelativeTo(null); // centers frame
                                 shadowCompareScoreboardFrame.setTitle("Shadow Scoreboard Comparison");
                                 shadowCompareScoreboardFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                                 shadowCompareScoreboardFrame.setVisible(true);
