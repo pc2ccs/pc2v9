@@ -33,8 +33,6 @@ public class TeamScoreRow implements Comparable<TeamScoreRow> {
     
     @JsonProperty 
     private List<ProblemScoreRow> problems;
-    
-    
 
     public int getRank() {
         return rank;
@@ -81,7 +79,7 @@ public class TeamScoreRow implements Comparable<TeamScoreRow> {
      * @return true if the rank, teamId, score, and total time for this TeamScoreRow matches the other TeamScoreRow; 
      *          false otherwise.
      */
-    public boolean scoreMatches(TeamScoreRow otherRow) {
+    public boolean matches(TeamScoreRow otherRow) {
         
         //ranks must be the same
         if (this.getRank() != otherRow.getRank()) {
@@ -111,7 +109,7 @@ public class TeamScoreRow implements Comparable<TeamScoreRow> {
             return false;
         }
         
-        //all values which this method is desigend to check are equal
+        //all values which this method is designed to check are equal
         return true;
     }
 
