@@ -1,5 +1,8 @@
 package edu.csus.ecs.pc2.shadow;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 
 /**
@@ -8,7 +11,7 @@ import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
  * match.  
  * 
  * Note that the definition of "match" is determined by first requiring that both contained
- * TeamScoreRows be non-null, and then by the value returned by {@link TeamScoreRow#scoreMatches(TeamScoreRow)}.
+ * TeamScoreRows be non-null, and then by the value returned by {@link TeamScoreRow#matches(TeamScoreRow)}.
  * 
  * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
  *
@@ -47,15 +50,36 @@ public class ShadowScoreboardRowComparison {
      * the two scoreboard rows in this ScoreboardRowComparison object match each other. 
      * 
      * Note that the definition of mathching is that both scoreboard row objects are non-null
-     * and then that {@link TeamScoreRow#scoreMatches(TeamScoreRow)} is true.
+     * and then that {@link TeamScoreRow#matches(TeamScoreRow)} is true.
      */
     private void updateMatch() {
         if (sb1Row!=null && sb2Row!=null) {
-            this.match = sb1Row.scoreMatches(sb2Row);
+            this.match = sb1Row.matches(sb2Row);
         } else {
             //one or both rows are null; define that as non-matching
             this.match = false;
         }
+    }
+    
+    /**
+     * Returns a JSON string representation of this ShadowScoreboardRowComparison object.
+     */
+    @Override
+    public String toString() {
+        
+        ObjectMapper mapper = new ObjectMapper();
+        
+        String retStr = "";
+        try {
+            retStr = mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            // TODO pass a Log object (or a Controller which provides access to a Log) into this class
+            // so we can log exceptions.
+            e.printStackTrace();
+        }
+        
+        return retStr ;
+        
     }
     
 }
