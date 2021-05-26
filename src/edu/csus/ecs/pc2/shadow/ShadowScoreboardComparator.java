@@ -64,11 +64,23 @@ public class ShadowScoreboardComparator {
         // a PriorityQueue of TeamScoreRow objects (each containing a rank, teamId, and StandingScore (which in turn contains
         // the number solved and the total time)). The ordering in the PriorityQueue is by increasing team number.
         Map<Integer,PriorityQueue<TeamScoreRow>> pc2RowMap = createRowMap(pc2ScoreboardJson);
+        
+        if (pc2RowMap==null || pc2RowMap.keySet().isEmpty()) {
+            //something went wrong creating the PC2 map from JSON
+            log.warning("Error processing PC2 JSON scoreboard, resulting in null or empty row map");
+            
+            return new ShadowScoreboardRowComparison[0];
+        }
+        
         Map<Integer,PriorityQueue<TeamScoreRow>> remoteRowMap = createRowMap(remoteScoreboardJson);
         
-        if (pc2RowMap==null || pc2RowMap.keySet().isEmpty() || remoteRowMap==null || remoteRowMap.keySet().isEmpty()) {
-            //something went wrong creating the necessary maps from JSON
-            log.warning("Error processing JSON input resulted in null or empty row map");
+        if (remoteRowMap==null || remoteRowMap.keySet().isEmpty()) {
+            //something went wrong creating the remote map from JSON
+            log.warning("Error processing remote JSON scoreboard, resulting in null or empty row map");
+            
+            //debug
+//            System.out.println ("Debug: Error processing remote JSON scoreboard, resulting in null or empty row map");
+            
             return new ShadowScoreboardRowComparison[0];
         }
         
@@ -179,7 +191,7 @@ public class ShadowScoreboardComparator {
         log.info("Creating scoreboard rank map from JSON scoreboard string");
         
         //debug:
-//        System.out.println ("Creating scoreboard rank map from JSON scoreboard string");
+//        System.out.println ("Debug: Creating scoreboard rank map from JSON scoreboard string");
         
         //initialize the map we're going to return
         Map<Integer, PriorityQueue<TeamScoreRow>> retMap = new HashMap<Integer, PriorityQueue<TeamScoreRow>>() ;
