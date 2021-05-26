@@ -587,9 +587,6 @@ public class ShadowController {
         //get scoreboard from remoteAPIAdaptor
         String remoteJson = remoteContestAPIAdapter.getRemoteJSON("/scoreboard");
         
-        System.out.println ("Got remote CCS scoreboard JSON: ");
-        System.out.println (remoteJson);
-        
         //return scoreboard
         return remoteJson;
         
