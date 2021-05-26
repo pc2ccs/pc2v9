@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -16,15 +17,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowSorter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 import edu.csus.ecs.pc2.shadow.ShadowController;
@@ -47,7 +47,19 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
 
     private JTable remoteScoreboardTable;
 
-    private ShadowCompareScoreboardSummaryPane shadowCompareScoreboardSummaryPane;
+    private ShadowCompareScoreboardSummaryPane statusPanel;
+
+    private JPanel scoreboardsPanel;
+
+    private JPanel scoreboardPanelHeader;
+
+    private JPanel scoreboardScrollPanesPanel;
+
+    private JScrollPane remoteCCSScrollPane;
+
+    private JScrollPane pc2ScrollPane;
+    private Component rigidArea;
+    private Component rigidArea_1;
 
     @Override
     public String getPluginTitle() {
@@ -62,7 +74,7 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
      * @param shadowController a ShadowController used to obtain scoreboard comparison information.
      */
     public ShadowCompareScoreboardPane(ShadowController shadowController) {
-        Dimension size = new Dimension(800,600);
+        Dimension size = new Dimension(1050,600);
         this.setPreferredSize(size);
         this.setMinimumSize(size);
         
@@ -73,85 +85,239 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
         }
         
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-        JLabel header = new JLabel("Comparison of PC2 vs. Remote Scoreboards");
-        header.setAlignmentX(Component.CENTER_ALIGNMENT);
-        this.add(header);
         
-        //get scoreboard comparison info from the shadow controller
-        ShadowScoreboardRowComparison [] comparedResults = shadowController.getScoreboardComparisonInfo();
-
-        //display equalness status in GUI
-        this.add(getShadowCompareScoreboardSummaryPane());
-        
-        //get the tables which will be used to display comparison results
-        pc2ScoreboardTable = getScoreboardTable();
-        remoteScoreboardTable = getScoreboardTable();
-        
-        //put the current comparison results into the table models
-        pc2ScoreboardTable.setModel(getUpdatedResultsTableModel(1,comparedResults));
-        remoteScoreboardTable.setModel(getUpdatedResultsTableModel(2,comparedResults));
-       
-        //support sorting the table by clicking on the column headers
-        TableRowSorter<TableModel> sorter1 = new TableRowSorter<TableModel>(pc2ScoreboardTable.getModel());
-        pc2ScoreboardTable.setRowSorter(sorter1);
-        pc2ScoreboardTable.setAutoCreateRowSorter(true); //necessary to allow updated model to display and sort correctly
-        TableRowSorter<TableModel> sorter2 = new TableRowSorter<TableModel>(remoteScoreboardTable.getModel());
-        remoteScoreboardTable.setRowSorter(sorter2);
-        remoteScoreboardTable.setAutoCreateRowSorter(true); //necessary to allow updated model to display and sort correctly
-               
-        //put the results table in a scrollpane on the GUI
-        JScrollPane pc2ScrollPane = new JScrollPane(pc2ScoreboardTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        this.add(pc2ScrollPane);
-        JScrollPane remoteScrollPane = new JScrollPane(pc2ScoreboardTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        this.add(remoteScrollPane);
-
+        this.add(getStatusPanel());
+        this.add(getScoreboardsPanel());
         this.add(getButtonPanel());
+        
+        populateGUI();
+        
     }
         
+    private void populateGUI() {
+        if (shadowController!=null) {
+            
+            // get scoreboard comparison info from the shadow controller
+            ShadowScoreboardRowComparison[] comparedResults = shadowController.getScoreboardComparisonInfo();
+            
+//            //debug
+//            System.out.println ("Comparison results from Shadow Controller (" + comparedResults.length + " rows):");
+//            int rowNum = 1;
+//            for (ShadowScoreboardRowComparison row : comparedResults) {
+//                System.out.println ("Row " + rowNum++ + ": " + row);
+//            }
+            
+            //update the summary status line
+            getStatusPanel().updateSummary(comparedResults);
+            
+            // put the current comparison results into the table models
+            getPC2ScoreboardTable().setModel(getUpdatedResultsTableModel(ScoreboardId.PC2, comparedResults));
+            getRemoteScoreboardTable().setModel(getUpdatedResultsTableModel(ScoreboardId.REMOTE, comparedResults));
+            
+            //remove the "match" column from the views (although not from the model; it needs to remain in the 
+            // model for access by the JTable CellRenderer)
+            TableColumnModel tcm = getPC2ScoreboardTable().getColumnModel();
+            tcm.removeColumn(tcm.getColumn(ScoreboardColumnId.MATCH.ordinal()));
+            tcm = getRemoteScoreboardTable().getColumnModel();
+            tcm.removeColumn(tcm.getColumn(ScoreboardColumnId.MATCH.ordinal()));
+
+        } else {
+            showMessage(this, "Missing Shadow Controller", "ShadowCompareScoreboardPane populateGUI() called with null Shadow Controller; cannot populate GUI."); 
+        }
+        
+    }
+    
+
+    private JTable getPC2ScoreboardTable() {
+        if (pc2ScoreboardTable==null) {
+            pc2ScoreboardTable = getScoreboardTable();
+        }
+        return pc2ScoreboardTable;
+    }
+    
+    private JTable getRemoteScoreboardTable() {
+        if (remoteScoreboardTable==null) {
+            remoteScoreboardTable = getScoreboardTable();
+        }
+        return remoteScoreboardTable;
+    }
+
+
+    private JPanel getScoreboardsPanel( ) {
+        
+        if (scoreboardsPanel == null) {
+
+            scoreboardsPanel = new JPanel();
+            scoreboardsPanel.setLayout(new BoxLayout(scoreboardsPanel, BoxLayout.PAGE_AXIS));
+            
+            scoreboardsPanel.add(getScoreboardPanelHeader());
+            scoreboardsPanel.add(getScoreboardScrollPanesPanel());
+        }
+
+        return scoreboardsPanel;
+    }
+    
+    private JPanel getScoreboardPanelHeader() {
+
+        if (scoreboardPanelHeader==null) {
+            scoreboardPanelHeader = new JPanel();
+            scoreboardPanelHeader.setMaximumSize(new Dimension(600, 30));
+            scoreboardPanelHeader.setMinimumSize(new Dimension(100, 20));
+            JLabel pc2Header = new JLabel("PC2 Scoreboard");
+            JLabel remoteHeader = new JLabel("Remote CCS Scoreboard");
+            scoreboardPanelHeader.add(pc2Header);
+            scoreboardPanelHeader.add(getRigidArea());
+            scoreboardPanelHeader.add(remoteHeader);
+        }
+        return scoreboardPanelHeader;
+    }
+        
+    
+    private JPanel getScoreboardScrollPanesPanel() {
+        
+        if (scoreboardScrollPanesPanel==null) {
+            scoreboardScrollPanesPanel = new JPanel();
+            scoreboardScrollPanesPanel.setLayout(new BoxLayout(scoreboardScrollPanesPanel, BoxLayout.LINE_AXIS));
+            scoreboardScrollPanesPanel.add(getPC2ScoreboardScrollPane());
+            scoreboardScrollPanesPanel.add(getRigidArea_1());
+            scoreboardScrollPanesPanel.add(getRemoteCCSScrollPane());
+        }
+        
+        return scoreboardScrollPanesPanel;
+    }
+    
+    
+    private JScrollPane getRemoteCCSScrollPane() {
+        
+        if (remoteCCSScrollPane == null) {
+
+            // get the table which will be used to display scoreboard results
+            remoteScoreboardTable = getScoreboardTable();
+
+            // put the results table into a scrollpane 
+            remoteCCSScrollPane = new JScrollPane(remoteScoreboardTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            remoteCCSScrollPane.setPreferredSize(new Dimension(500, 419));
+            remoteCCSScrollPane.setMinimumSize(new Dimension(500, 23));
+            remoteCCSScrollPane.setMaximumSize(new Dimension(500, 32767));
+            
+            //debugging help:
+            remoteCCSScrollPane.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Color.red),
+                    remoteCCSScrollPane.getBorder()));
+        }
+        return remoteCCSScrollPane;
+    }
+
+    private Component getPC2ScoreboardScrollPane() {
+        
+        if (pc2ScrollPane==null) {
+            
+            // get the table which will be used to display comparison results
+            pc2ScoreboardTable = getScoreboardTable();
+                        
+            // put the results table in a scrollpane
+            pc2ScrollPane = new JScrollPane(pc2ScoreboardTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            pc2ScrollPane.setPreferredSize(new Dimension(500, 419));
+            pc2ScrollPane.setMinimumSize(new Dimension(500, 23));
+            pc2ScrollPane.setMaximumSize(new Dimension(500, 32767));
+            
+            //debugging help:
+            pc2ScrollPane.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Color.green),
+                    pc2ScrollPane.getBorder()));
+        }
+        
+        return pc2ScrollPane;
+    }
+
     /**
-     * Returns a JTable organized for containing a comparison, for each received submission, between the PC2 judgement
-     * for the submission and the judgement assigned by the Remote CCS.
-     * The returned JTable applies formatting to cell colors based on the status of the submission.
+     * Returns a {@link ShadowCompareScoreboardSummaryPane} containing a summary of the comparison information most 
+     * recently obtained from the {@link ShadowController}.  
+     *  
+     * @return a ShadowCompareScoreboardSummaryPane containing a comparison summary (scoreboards do/do not match)
+     */
+    private ShadowCompareScoreboardSummaryPane getStatusPanel() {
+        if (statusPanel==null) {
+            statusPanel = new ShadowCompareScoreboardSummaryPane();
+       }
+        return statusPanel;
+    }
+
+    /**
+     * Returns a JTable organized for containing Scoreboard representations, either for a PC2 scoreboard or 
+     * for a Remote CSS scoreboard.
+     * The returned JTable applies formatting to row cell colors based on the status of the row comparisons
+     * (that is, whether the row matched its corresponding row in the other scoreboard type).
      * 
      * Note: this method does not actually fill in any table data; it is expected that external code will
      * invoke {@link #getUpdatedResultsTableModel()} to create and load the current comparison results into the table.
      * 
-     * @param comparedResults 
-     * @param i 
-     * 
-     * @return a JTable organized for containing judgement comparisons
+     * @return a JTable organized for containing scoreboard comparisons.
      */
     private JTable getScoreboardTable() {
 
         JTable resultsTable = new JTable() {
             private static final long serialVersionUID = 1L;
 
-//          String[] columnNames = { "Rank", "Team Id", "Num Solved", "Total Time" };
-
-            //TODO: update this to match Scoreboard row renderings...
+//          String[] columnNames = { "Rank", "Team Id", "Num Solved", "Total Time", "Match" };
             
             // override JTable's default renderer to set the background color based on the "Match?" value
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
                 Component c = super.prepareRenderer(renderer, row, column);
 
-                // Color the row based on the "Match?" cell value
+                //default to normal background
                 c.setBackground(getBackground());
+                
+                //map the specified row index number to the corresponding model row (index numbers can change due
+                // to sorting; model row numbers never changed).
                 int modelRow = convertRowIndexToModel(row);
-                String matches = (String) getModel().getValueAt(modelRow, 6);
-                if ("Y".equalsIgnoreCase(matches))
-                    c.setBackground(new Color(153, 255, 153));
-                if ("N".equalsIgnoreCase(matches))
-                    c.setBackground(new Color(255, 153, 153));
+                
+                //check if this is a row which had no corresponding row in the other scoreboard table (such rows 
+                // have "?" in all data fields in this table)
+                if (hasCorrespondingRow(modelRow)) {
 
-                // override color with yellow if PC2 judgement is pending
-                String pc2Judgement = (String) getModel().getValueAt(modelRow, 4);
-                if (pc2Judgement != null && pc2Judgement.toLowerCase().contains("pending")) {
-                    c.setBackground(new Color(255, 255, 153));
+                    // Color the row based on the "Match?" cell value, which indicates whether this row matches its
+                    //  corresponding row in the other scoreboard table
+                    boolean matches = (boolean) getModel().getValueAt(modelRow, ScoreboardColumnId.MATCH.ordinal());
+                    if (matches) {
+                        c.setBackground(new Color(153, 255, 153)); // light green for all cells in this row
+                    } else {
+                        c.setBackground(new Color(255, 153, 153)); // light red for all celss in this row
+                    }
                 }
-
+                
                 return c;
+            }
+            
+            /**
+             * Returns an indication of whether or not the specified row in the model has a non-null corresponding row
+             * in the other scoreboard table.  Rows in a scoreboard table which have no corresponding row in the other
+             * scoreboard table have all their data values set to "?" by method getUpdatedResultsTableModel().
+             * 
+             * @param modelRow the row in this table's model to be checked.
+             * 
+             * @return true if the specified model row has a non-null corresponding row in the other scoreboard table; 
+             *          false if not.
+             */
+            private boolean hasCorrespondingRow(int modelRow) {
+                //get the data values out of the specified model row
+                String rank = getModel().getValueAt(modelRow, ScoreboardColumnId.RANK.ordinal()).toString();
+                String team = getModel().getValueAt(modelRow, ScoreboardColumnId.TEAM_ID.ordinal()).toString();
+                String numSolved = getModel().getValueAt(modelRow, ScoreboardColumnId.NUM_SOLVED.ordinal()).toString();
+                String time = getModel().getValueAt(modelRow, ScoreboardColumnId.TOTAL_TIME.ordinal()).toString();
+                
+                //assume there IS a corresponding row in the other scoreboard table
+                boolean hasCorrespondingRow = true;
+                
+                //check whether the specified row has all data values set to the string "?" -- if so, there's no corresponding
+                // row in the other table.  (See {@link ShadowCompareScoreboardPane#getUpdatedResultsTableModel()} for further details.)
+                if (rank.contentEquals("?") && team.contentEquals("?") && numSolved.contentEquals("?") && time.contentEquals("?")) {
+                    hasCorrespondingRow = false;
+                }
+               
+                return hasCorrespondingRow;
             }
             
             //we don't want any of the results cells to be editable
@@ -169,52 +335,55 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
         resultsTable.setRowSelectionAllowed(true);
         resultsTable.setColumnSelectionAllowed(false);
         resultsTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-
+        
         return resultsTable;
 
     }
     
+    private enum ScoreboardId {PC2, REMOTE} ;
+    
+    private enum ScoreboardColumnId {RANK, TEAM_ID, NUM_SOLVED, TOTAL_TIME, MATCH} ;
+    
     /**
      * Returns a {@link TableModel} containing data for the current comparisons between the PC2 shadow and the Remote CCS.
-     * @param comparedResults 
-     * @param i 
      * 
-     * @return
+     * @param scoreboardId the scoreboard (PC2 or Remote) for which data should be extracted from the 
+     *                  specified {@link ShadowScoreboardRowComparison} array and used to populate the returned TableModel.
+     * @param comparedResults an array of ShadowScoreboardRowComparisons containing comparisons of corresponding rows of the
+     *          pc2 and remote scoreboards.
+     * 
+     * @return a {@link TableModel} populated with table information for the specified scoreboard.
      */
-    private TableModel getUpdatedResultsTableModel(int scoreboardNum, ShadowScoreboardRowComparison[] comparedResults) {
-        
-        final int RANK_COLUMN = 0;
-        final int TEAM_ID_COLUMN = 1;
-        final int NUM_SOLVED_COLUMN = 2; 
-        final int TOTAL_TIME_COLUMN = 3;
-        
-        //get the current scoreboard information from the compared results based on the scoreboard number (1=pc2, 2=remote)
+    private TableModel getUpdatedResultsTableModel(ScoreboardId scoreboardId, ShadowScoreboardRowComparison[] comparedResults) {
 
         //define the columns for the table
-        String[] columnNames = { "Rank", "Team Id", "Num Solved", "Total Time" };
+        //TODO: use Enum name/values instead of hard-coded strings for columnNames
+        String[] columnNames = { "Rank", "Team Id", "Num Solved", "Total Time", "Match" };
        
         //an array to hold the table data
-        Object[][] data = new Object[comparedResults.length][4];
+        Object[][] data = new Object[comparedResults.length][ScoreboardColumnId.values().length];
         
         //fill in each data row with info for the specified scoreboard from the compared results
         for (int row=0; row<comparedResults.length; row++) {
             ShadowScoreboardRowComparison curSB = comparedResults[row];
             TeamScoreRow curRow ;
-            if (scoreboardNum==1) {
+            if (scoreboardId==ScoreboardId.PC2) {
                 curRow = curSB.getSb1Row();
             } else {
                 curRow = curSB.getSb2Row();
             }
             if (curRow!=null) {
-                data[row][RANK_COLUMN] = curRow.getRank();
-                data[row][TEAM_ID_COLUMN] = curRow.getTeam_id();
-                data[row][NUM_SOLVED_COLUMN] = curRow.getScore().getNum_solved();
-                data[row][TOTAL_TIME_COLUMN] = curRow.getScore().getTotal_time();
+                data[row][ScoreboardColumnId.RANK.ordinal()] = curRow.getRank();
+                data[row][ScoreboardColumnId.TEAM_ID.ordinal()] = curRow.getTeam_id();
+                data[row][ScoreboardColumnId.NUM_SOLVED.ordinal()] = curRow.getScore().getNum_solved();
+                data[row][ScoreboardColumnId.TOTAL_TIME.ordinal()] = curRow.getScore().getTotal_time();
+                data[row][ScoreboardColumnId.MATCH.ordinal()] = curSB.isMatch();
             } else {
-                data[row][RANK_COLUMN] = "?";
-                data[row][TEAM_ID_COLUMN] = "?";
-                data[row][NUM_SOLVED_COLUMN] = "?";
-                data[row][TOTAL_TIME_COLUMN] = "?";               
+                data[row][ScoreboardColumnId.RANK.ordinal()] = "?";
+                data[row][ScoreboardColumnId.TEAM_ID.ordinal()] = "?";
+                data[row][ScoreboardColumnId.NUM_SOLVED.ordinal()] = "?";
+                data[row][ScoreboardColumnId.TOTAL_TIME.ordinal()] = "?";               
+                data[row][ScoreboardColumnId.MATCH.ordinal()] = false;
             }
         }
         
@@ -236,26 +405,7 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
         return tableModel ;
     }
     
-    /**
-     * Returns a JPanel containing a summary of the comparison information most recently obtained
-     * from the {@link ShadowController}.  The global (field) variable "currentJudgementMap" is
-     * used as the indicator of the most recently obtained comparison information; this variable
-     * is set in {@link #getUpdatedResultsTableModel()}, which is called by this class's constructor
-     * (and may also have been subsequently called again by the actionListener() for the "Refresh" button). 
-     *  
-     * @return a JPanel containing a submission comparison summary
-     */
-    public ShadowCompareScoreboardSummaryPane getShadowCompareScoreboardSummaryPane() {
-        
-        if (shadowCompareScoreboardSummaryPane==null) {
-            shadowCompareScoreboardSummaryPane = new ShadowCompareScoreboardSummaryPane();
-        }
-        
-        return shadowCompareScoreboardSummaryPane;
-        
-    }
-    
-    
+   
     private JComponent getButtonPanel() {
         
         JPanel buttonPanel = new JPanel();
@@ -270,47 +420,26 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
                 // refresh the results table
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-
-                        //save info on the current sort column/order for the resultsTables
-                        RowSorter<? extends TableModel> oldPC2Sorter = pc2ScoreboardTable.getRowSorter();
-                        RowSorter<? extends TableModel> oldRemoteCCSSorter = remoteScoreboardTable.getRowSorter();
-                        
-                        //get the current comparison info
-                        ShadowScoreboardRowComparison[] currentComparison = shadowController.getScoreboardComparisonInfo();
-                       
-                        //get a new model based on the current data
-                        TableModel newPC2TableModel = getUpdatedResultsTableModel(1,currentComparison);
-                        TableModel newRemoteTableModel = getUpdatedResultsTableModel(2,currentComparison);
-                                                
-                        //create new sorters based on the updated models
-                        TableRowSorter<DefaultTableModel> newPC2Sorter = new TableRowSorter<DefaultTableModel>((DefaultTableModel) newPC2TableModel);
-                        if (oldPC2Sorter != null) {
-                            newPC2Sorter.setSortKeys(oldPC2Sorter.getSortKeys());
-                        }
-                        TableRowSorter<DefaultTableModel> newRemoteCCSSorter = new TableRowSorter<DefaultTableModel>((DefaultTableModel) newRemoteTableModel);
-                        if (oldRemoteCCSSorter != null) {
-                            newRemoteCCSSorter.setSortKeys(oldRemoteCCSSorter.getSortKeys());
-                        }
-
-                        //update the models and the row sorters in the tables so the tables remain sorted as before
-                        pc2ScoreboardTable.setModel(newPC2TableModel);
-                        pc2ScoreboardTable.setRowSorter(newPC2Sorter);
-                        remoteScoreboardTable.setModel(newRemoteTableModel);
-                        remoteScoreboardTable.setRowSorter(newRemoteCCSSorter);
-
-                        //update the summary panel to correspond to the new table data
-                        shadowCompareScoreboardSummaryPane.updateSummary(currentComparison);
-                        
+                        populateGUI();
                     }
                 });
             }
         });
         buttonPanel.add(refreshButton);
-        
-        Component horizontalStrut = Box.createHorizontalStrut(20);
-        buttonPanel.add(horizontalStrut);
 
         return buttonPanel ;
     }
     
+    private Component getRigidArea() {
+        if (rigidArea == null) {
+        	rigidArea = Box.createRigidArea(new Dimension(300, 20));
+        }
+        return rigidArea;
+    }
+    private Component getRigidArea_1() {
+        if (rigidArea_1 == null) {
+        	rigidArea_1 = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea_1;
+    }
 }
