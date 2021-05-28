@@ -396,7 +396,7 @@ public class ShadowController {
         }
 
         // construct a comparator to compare the two JSON strings
-        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(log);
+        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(this);
 
         //use the comparator to obtain a row-by-row comparison of the two JSON scoreboards
         ShadowScoreboardRowComparison[] results = comparator.compare(pc2Json, remoteJson);
@@ -441,6 +441,40 @@ public class ShadowController {
     }
 
     /**
+     * This method returns a String containing the current remote CCS team list as obtained from the
+     * remote CCS Contest API "/teams" endpoint. 
+     * 
+     * @return a String containing the remote CCS team list JSON.
+     */
+    public String getPC2TeamsJSON() {
+        
+        throw new UnsupportedOperationException("getPC2TeamsJSON() is not currently implemented");
+        
+        //get the PC2 account list from the InternalContest model
+        
+        //convert PC2 accounts into CLICS JSON format (see https://ccs-specs.icpc.io/contest_api#teams)
+        
+        //return the PC2 teams JSON
+    }
+
+
+    /**
+     * This method returns a String containing the current remote CCS team list as obtained from the
+     * remote CCS Contest API "/teams" endpoint. 
+     * 
+     * @return a String containing the remote CCS team list JSON.
+     */
+    public String getRemoteTeamsJSON() {
+        
+        //get team list from remoteAPIAdaptor
+        String remoteJson = remoteContestAPIAdapter.getRemoteJSON("/team");
+        
+        //return team list
+        return remoteJson;
+        
+    }
+
+   /**
      * Returns a Map which maps remote CCS submissionIds to a judgement acronym.
      * 
      * Any judgements from the Remote CCS which are null, which have values which are null or empty, which 
