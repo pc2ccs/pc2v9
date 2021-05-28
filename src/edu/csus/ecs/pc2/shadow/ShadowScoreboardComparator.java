@@ -74,11 +74,16 @@ public class ShadowScoreboardComparator {
             return new ShadowScoreboardRowComparison[0];
             
         } else {
-            //add team names to the map rows (they do not get added during map creation because they are not
-            // present in the CLICS scoreboard JSON)
-            updateMapWithPC2TeamNames(pc2RowMap);
+           
+            //get the CLICS JSON describing the PC2 teams 
+            String pc2TeamsJson = shadowController.getPC2TeamsJSON();
+         
+            //put the PC2 team names into the TeamScoreRows in the PC2 RowMap (they do not get added 
+            //during map creation because they are not present in the CLICS scoreboard JSON)
+            addTeamNamesToRowMap(pc2RowMap, pc2TeamsJson);
         }
         
+        //repeat the above for the remote scoreboard
         Map<Integer,PriorityQueue<TeamScoreRow>> remoteRowMap = createRowMap(remoteScoreboardJson);
         
         if (remoteRowMap==null || remoteRowMap.keySet().isEmpty()) {
@@ -88,9 +93,12 @@ public class ShadowScoreboardComparator {
             return new ShadowScoreboardRowComparison[0];
             
         } else {
-            //add team names to the map rows (they do not get added during map creation because they are not
-            // present in the CLICS scoreboard JSON)
-            updateMapWithRemoteTeamNames(remoteRowMap);
+            //get the CLICS JSON describing the PC2 teams 
+            String remoteTeamsJson = shadowController.getRemoteTeamsJSON();
+            
+            //put the remote team names into the TeamScoreRows in the remote RowMap (they do not get added 
+            //during map creation because they are not present in the CLICS scoreboard JSON)
+            addTeamNamesToRowMap(pc2RowMap, remoteTeamsJson);
         }
         
         //find the highest rank in either map
@@ -152,90 +160,45 @@ public class ShadowScoreboardComparator {
 
     /**
      * Processes the TeamScoreRows in the specified map by adding the team name to each TeamScoreRow object.
-     * @param pc2RowMap
+     * @param rowMap a Map of TeamScoreRows to which team names are to be added.
      */
-    private void updateMapWithPC2TeamNames(Map<Integer, PriorityQueue<TeamScoreRow>> pc2RowMap) {
-        
-        // TODO consider whether this method can be merged with updateMapWithRemoteTeamNames
-        
-        //get the CLICS JSON describing the PC2 teams 
-        String pc2TeamsJson = shadowController.getPC2TeamsJSON();
-        
+    private void addTeamNamesToRowMap(Map<Integer, PriorityQueue<TeamScoreRow>> rowMap, String teamsJson) {
+                
         //create a Map which maps team ids to team names
-        Map<String,String> pc2TeamNameMap = createPC2TeamNameMap(pc2TeamsJson);
+        Map<String,String> teamNameMap = createTeamNameMap(teamsJson);
         
         //process every rank in the received map (which maps ranks to PriorityQueues containing TeamScoreRows holding that rank)
-        for (int rank : pc2RowMap.keySet()) {
+        for (int rank : rowMap.keySet()) {
             
-            PriorityQueue<TeamScoreRow> pq = pc2RowMap.get(rank);
+            PriorityQueue<TeamScoreRow> pq = rowMap.get(rank);
             
             for (TeamScoreRow row : pq) {  //iterates over all TeamScoreRows for the current rank, although not necessarily in priority order
                 
                 String teamIdAsString = new Integer(row.getTeam_id()).toString();
                 
-                row.setTeamName(pc2TeamNameMap.get(teamIdAsString));
+                row.setTeamName(teamNameMap.get(teamIdAsString));
                 
             }
         }
         
     }
 
-    private void updateMapWithRemoteTeamNames(Map<Integer, PriorityQueue<TeamScoreRow>> remoteRowMap) {
-       
-        // TODO consider whether this method can be merged with updateMapWithPC2TeamNames
-        
-        //create a Map which maps remote teamIds to corresponding team names
-        String remoteTeamsJson = shadowController.getRemoteTeamsJSON();
-        
-        //create a Map which maps team ids to team names
-        Map<String,String> remoteTeamNameMap = createRemoteTeamNameMap(remoteTeamsJson);
-        
-        //process every rank in the received map (which maps ranks to PriorityQueues containing TeamScoreRows holding that rank)
-        for (int rank : remoteRowMap.keySet()) {
-            
-            PriorityQueue<TeamScoreRow> pq = remoteRowMap.get(rank);
-            
-            for (TeamScoreRow row : pq) {  //iterates over all TeamScoreRows, although not necessarily in priority order
-                
-                String teamIdAsString = new Integer(row.getTeam_id()).toString();
-                
-                row.setTeamName(remoteTeamNameMap.get(teamIdAsString));
-                
-            }
-        }
-       
-    }
 
     /**
      * Converts the specified Teams JSON string to a map which maps teamId to team name.
      * 
-     * @param pc2TeamsJson
+     * @param teamsJson
      * @return
      */
-    private Map<String, String> createPC2TeamNameMap(String pc2TeamsJson) {
+    private Map<String, String> createTeamNameMap(String teamsJson) {
         
-        throw new UnsupportedOperationException("createPC2TeamNameMap() is not implemented");
+        throw new UnsupportedOperationException("createTeamNameMap() is not implemented");
         
-        // TODO implement this method; consider whether it can be merged with createRemoteTeamNameMap
+        // TODO implement this method
 
     }
 
-    /**
-     * Converts the specified Teams JSON string to a map which maps teamId to team name.
-     * 
-     * @param remoteTeamsJson
-     * @return
-     */
-    private Map<String, String> createRemoteTeamNameMap(String remoteTeamsJson) {
-        
-        throw new UnsupportedOperationException("createRemoteTeamNameMap() is not implemented");
-        
-        // TODO implement this method; consider whether it can be merged with createPC2TeamNameMap
-
-    }
-
-
-    
+   
     /**
      * Returns a {@link ShadowScoreboardRowComarison} object containing comparison information for the
      * two specified {@link TeamScoreRow}s.   
