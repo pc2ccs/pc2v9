@@ -22,6 +22,11 @@ public class TeamScoreRow implements Comparable<TeamScoreRow> {
     @JsonProperty
     private int team_id;
     
+    //note that the following is NOT a JSON Property; the CLICS spec defining the JSON for a TeamScoreRow
+    // does not include the team name (clients are required to use the teamId and make an external access to
+    // determine the team name)
+    private String team_name;
+    
     //     "score":
     // {"num_solved":12,     
     // "total_time":145},
@@ -65,7 +70,16 @@ public class TeamScoreRow implements Comparable<TeamScoreRow> {
     public void setProblems(List<ProblemScoreRow> problems) {
         this.problems = problems;
     }
-
+    
+    public String getTeamName() {
+        return this.team_name;
+    }
+    
+    public void setTeamName(String teamName) {
+        this.team_name = teamName;
+    }
+    
+    
     /**
      * Returns an indication of whether the significant scoreboard values in this TeamScoreRow match
      * the corresponding values in a specified other TeamScoreRow.
@@ -89,6 +103,22 @@ public class TeamScoreRow implements Comparable<TeamScoreRow> {
         //team Id's must be the same
         if (this.getTeam_id() != otherRow.getTeam_id()) {
             return false;
+        }
+        
+        //team names must be the same
+        String thisName = this.getTeamName();
+        String otherName = otherRow.getTeamName();
+        if (thisName==null ^ otherName==null) { //XOR 
+            //one is null while the other is not; they aren't equal
+            return false ;
+        } else {
+            //if we get here, the XOR above means either both names are null, or neither is null
+            if (thisName!=null && otherName!=null) {
+                //both are non-null; verify they are the same name
+                if (!thisName.contentEquals(otherName)) {
+                    return false;
+                }
+            }
         }
         
         //StandingScores must not be null
