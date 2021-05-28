@@ -1,8 +1,11 @@
 // Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -21,8 +24,14 @@ public class ShadowScoreboardComparatorTest extends AbstractTestCase {
         
         Log log = new Log(outputDirectoryName, getName()+".log");
         StaticLog.setLog(log);
-                
-        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(log);
+        
+        SampleContest sampleContest = new SampleContest();
+        IInternalContest contest = sampleContest.createStandardContest();
+        
+        IInternalController controller = sampleContest.createController(contest, true, false);
+
+        ShadowController shadowController = new ShadowController(contest, controller);
+        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(shadowController);
         
         String pc2Json = 
                 "{\"event_id\":\"5a97a37f-fb6a-4823-99bc-a4ecca321dc2\","
@@ -96,8 +105,15 @@ public class ShadowScoreboardComparatorTest extends AbstractTestCase {
         
         Log log = new Log(outputDirectoryName, getName()+".log");
         StaticLog.setLog(log);
-                
-        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(log);
+            
+        SampleContest sampleContest = new SampleContest();
+        IInternalContest contest = sampleContest.createStandardContest();
+        
+        IInternalController controller = sampleContest.createController(contest, true, false);
+
+        ShadowController shadowController = new ShadowController(contest, controller);
+  
+        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(shadowController);
         
         String pc2Json = 
                 "{\"event_id\":\"5a97a37f-fb6a-4823-99bc-a4ecca321dc2\","
@@ -232,8 +248,14 @@ public class ShadowScoreboardComparatorTest extends AbstractTestCase {
         
         Log log = new Log(outputDirectoryName, getName()+".log");
         StaticLog.setLog(log);
-                
-        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(log);
+                        
+        SampleContest sampleContest = new SampleContest();
+        IInternalContest contest = sampleContest.createStandardContest();
+        
+        IInternalController controller = sampleContest.createController(contest, true, false);
+
+        ShadowController shadowController = new ShadowController(contest, controller);
+        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(shadowController);
         
         String pc2Json = 
                 "{\"event_id\":\"5a97a37f-fb6a-4823-99bc-a4ecca321dc2\","
@@ -360,7 +382,14 @@ public class ShadowScoreboardComparatorTest extends AbstractTestCase {
         Log log = new Log(outputDirectoryName, getName()+".log");
         StaticLog.setLog(log);
                 
-        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(log);
+        SampleContest sampleContest = new SampleContest();
+        IInternalContest contest = sampleContest.createStandardContest();
+        
+        IInternalController controller = sampleContest.createController(contest, true, false);
+
+        ShadowController shadowController = new ShadowController(contest, controller);
+
+        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(shadowController);
         
         String pc2Json = 
                 "{\"event_id\":\"5a97a37f-fb6a-4823-99bc-a4ecca321dc2\","
