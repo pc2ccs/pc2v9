@@ -1,12 +1,14 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import edu.csus.ecs.pc2.shadow.ShadowScoreboardRowComparison;
+import java.awt.Font;
 
 /**
  * This class defines a {@link JPanel} containing a summary of current shadow scoreboard comparisons
@@ -31,7 +33,7 @@ public class ShadowCompareScoreboardSummaryPane extends JPanel {
      */
     public ShadowCompareScoreboardSummaryPane() {
         
-        setMaximumSize(new Dimension(300,100));
+        setMaximumSize(new Dimension(500, 100));
 
 //        JLabel header = new JLabel("Comparison of PC2 vs. Remote Scoreboard");
 //        header.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -48,6 +50,7 @@ public class ShadowCompareScoreboardSummaryPane extends JPanel {
     private JLabel getScoreboardComparisonLabel() {
         if (scoreboardComparisonTextLabel==null) {
             scoreboardComparisonTextLabel = new JLabel(COMPARISON_LABEL_TEXT);
+            scoreboardComparisonTextLabel.setFont(new Font("Arial", Font.BOLD, 12));
         }
         return scoreboardComparisonTextLabel;
     }
@@ -55,6 +58,7 @@ public class ShadowCompareScoreboardSummaryPane extends JPanel {
     private JLabel getScoreboardComparisonStatusValueLabel() {
         if (scoreboardComparisonResultLabel==null) {
             scoreboardComparisonResultLabel = new JLabel(DEFAULT_NO_COMPARISON_AVAILABLE_TEXT);
+            scoreboardComparisonResultLabel.setFont(new Font("Arial", Font.BOLD, 12));
         }
         return scoreboardComparisonResultLabel;
     }
@@ -75,12 +79,23 @@ public class ShadowCompareScoreboardSummaryPane extends JPanel {
         } else {
             
             String newValue = "Scoreboards Match";
+            getScoreboardComparisonStatusValueLabel().setForeground(new Color(51,204,51));
+            
+            int totalCount = 0;
+            int nonMatchCount = 0;
             for (ShadowScoreboardRowComparison row : currentStatus) {
+                totalCount++ ;
                 if (!row.isMatch()) {
-                    newValue = "Scoreboards DO NOT match";
-                    break;
+                    nonMatchCount++;
                 }
             }
+            
+            if (nonMatchCount>0) {
+                newValue = "Scoreboards DO NOT match  ";
+                newValue += "(" + nonMatchCount + " of " + totalCount + " rows mismatched)";
+                getScoreboardComparisonStatusValueLabel().setForeground(Color.red);     
+            }
+            
             getScoreboardComparisonStatusValueLabel().setText(newValue);
         }
             

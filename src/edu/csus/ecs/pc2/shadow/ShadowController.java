@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.logging.Level;
 
 import javax.xml.bind.JAXBException;
@@ -20,6 +21,9 @@ import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -441,20 +445,53 @@ public class ShadowController {
     }
 
     /**
-     * This method returns a String containing the current remote CCS team list as obtained from the
-     * remote CCS Contest API "/teams" endpoint. 
+     * This method returns a String containing the current PC2 team list as obtained from the
+     * PC2 server, converted into CLICS Contest API "/teams" endpoint format 
+     * (see https://ccs-specs.icpc.io/contest_api#teams). 
      * 
-     * @return a String containing the remote CCS team list JSON.
+     * @return a String containing the PC2 team list JSON.
      */
     public String getPC2TeamsJSON() {
         
-        throw new UnsupportedOperationException("getPC2TeamsJSON() is not currently implemented");
+        log.info("Fetching PC2 team JSON");
         
-        //get the PC2 account list from the InternalContest model
+        //get the PC2 team account list from the InternalContest model
+        Vector<Account> teamAccounts = localContest.getAccounts(Type.TEAM);
         
-        //convert PC2 accounts into CLICS JSON format (see https://ccs-specs.icpc.io/contest_api#teams)
+        //open the return string as an array of teams
+        String retJson = "["; 
+        
+        //convert PC2 team accounts into CLICS JSON format (see https://ccs-specs.icpc.io/contest_api#teams)
+        boolean first = true;
+        for (Account teamAcct : teamAccounts) {
+            
+            //get the required values out of the team account
+            ClientId clientId = teamAcct.getClientId();
+            String teamId = "" + clientId.getClientNumber();
+            String teamName = teamAcct.getDisplayName();
+            
+            //add this team element to the return JSON, preceded by a comma if it's not the first element
+            if (!first) {
+                retJson += ",";
+            }
+            retJson += "{" ;
+            retJson += "\"id\":\"" + teamId + "\"";
+            retJson += ",";
+            retJson += "\"name\":\"" + teamName + "\"";
+            retJson += "}";
+            
+            first = false ;
+        }
+        
+        //close the array of teams
+        retJson += "]";
+        
+        //debug
+        System.out.println ("PC2 team json: ");
+        System.out.println (retJson);
         
         //return the PC2 teams JSON
+        return retJson;
     }
 
 
@@ -466,8 +503,14 @@ public class ShadowController {
      */
     public String getRemoteTeamsJSON() {
         
+        log.info("Fetching Remote CCS team JSON");
+        
         //get team list from remoteAPIAdaptor
-        String remoteJson = remoteContestAPIAdapter.getRemoteJSON("/team");
+        String remoteJson = remoteContestAPIAdapter.getRemoteJSON("/teams");
+        
+        //debug
+        System.out.println ("Remote CCS team json: ");
+        System.out.println (remoteJson);
         
         //return team list
         return remoteJson;

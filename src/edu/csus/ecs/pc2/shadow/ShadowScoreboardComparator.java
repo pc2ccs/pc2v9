@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.standings.json.ScoreboardJsonModel;
+import edu.csus.ecs.pc2.core.standings.json.Team;
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
+import edu.csus.ecs.pc2.ui.ShadowCompareScoreboardPane.ScoreboardType;
 
 public class ShadowScoreboardComparator {
     
@@ -76,7 +79,7 @@ public class ShadowScoreboardComparator {
         } else {
             //add team names to the map rows (they do not get added during map creation because they are not
             // present in the CLICS scoreboard JSON)
-            updateMapWithPC2TeamNames(pc2RowMap);
+            updateMapWithTeamNames(ScoreboardType.PC2, pc2RowMap);
         }
         
         Map<Integer,PriorityQueue<TeamScoreRow>> remoteRowMap = createRowMap(remoteScoreboardJson);
@@ -90,7 +93,7 @@ public class ShadowScoreboardComparator {
         } else {
             //add team names to the map rows (they do not get added during map creation because they are not
             // present in the CLICS scoreboard JSON)
-            updateMapWithRemoteTeamNames(remoteRowMap);
+            updateMapWithTeamNames(ScoreboardType.REMOTE, remoteRowMap);
         }
         
         //find the highest rank in either map
@@ -151,89 +154,100 @@ public class ShadowScoreboardComparator {
     }
 
     /**
-     * Processes the TeamScoreRows in the specified map by adding the team name to each TeamScoreRow object.
-     * @param pc2RowMap
+     * Processes the {@link TeamScoreRows} in the specified map by adding the team name from the specified scoreboard type
+     * (either PC2 or Remote CCS) to each TeamScoreRow object.
+     * 
+     * @param scoreboardType the type of scoreboard being processed; an element of {@link ScoreboardType}.
+     * @param rowMap a Map which maps integer ranks to all TeamScoreRows for teams holding that rank.
      */
-    private void updateMapWithPC2TeamNames(Map<Integer, PriorityQueue<TeamScoreRow>> pc2RowMap) {
+    private void updateMapWithTeamNames(ScoreboardType scoreboardType, Map<Integer, PriorityQueue<TeamScoreRow>> rowMap) {
         
-        // TODO consider whether this method can be merged with updateMapWithRemoteTeamNames
+        String teamsJson = "";
+        Map<String,String> teamNameMap ;
         
-        //get the CLICS JSON describing the PC2 teams 
-        String pc2TeamsJson = shadowController.getPC2TeamsJSON();
+        switch (scoreboardType) {
+            
+            case PC2:
+                //get the CLICS JSON describing the PC2 teams 
+                teamsJson = shadowController.getPC2TeamsJSON();
+                
+                break;
+                
+            case REMOTE:
+                //get the CLICS JSON describing the remote teams 
+                teamsJson = shadowController.getRemoteTeamsJSON();
+                
+                break;
+                
+            default:
+                log.severe("Unknown scoreboard type: " + scoreboardType);
+                return;
+        }
+        
         
         //create a Map which maps team ids to team names
-        Map<String,String> pc2TeamNameMap = createPC2TeamNameMap(pc2TeamsJson);
+        teamNameMap = createTeamNameMap(teamsJson);
         
         //process every rank in the received map (which maps ranks to PriorityQueues containing TeamScoreRows holding that rank)
-        for (int rank : pc2RowMap.keySet()) {
+        for (int rank : rowMap.keySet()) {
             
-            PriorityQueue<TeamScoreRow> pq = pc2RowMap.get(rank);
+            PriorityQueue<TeamScoreRow> pq = rowMap.get(rank);
             
             for (TeamScoreRow row : pq) {  //iterates over all TeamScoreRows for the current rank, although not necessarily in priority order
                 
                 String teamIdAsString = new Integer(row.getTeam_id()).toString();
                 
-                row.setTeamName(pc2TeamNameMap.get(teamIdAsString));
+                row.setTeamName(teamNameMap.get(teamIdAsString));
                 
             }
         }
         
     }
 
-    private void updateMapWithRemoteTeamNames(Map<Integer, PriorityQueue<TeamScoreRow>> remoteRowMap) {
-       
-        // TODO consider whether this method can be merged with updateMapWithPC2TeamNames
+
+    /**
+     * Converts the specified Teams JSON string to a map which maps teamId to team name.
+     * 
+     * @param teamsJson a JSON string representing teams, in CLICS format
+     * 
+     * @return a Map which maps team numbers (Ids) to corresponding team names.
+     *          The returned map may be empty (if for example the received teamsJson string
+     *          is null or empty, or if an exception occurs while processing the teamsJson string),
+     *          but the returned map will never be null.
+     */
+    private Map<String, String> createTeamNameMap(String teamsJson) {
         
-        //create a Map which maps remote teamIds to corresponding team names
-        String remoteTeamsJson = shadowController.getRemoteTeamsJSON();
+        Map<String,String> retMap = new HashMap<String,String>();
         
-        //create a Map which maps team ids to team names
-        Map<String,String> remoteTeamNameMap = createRemoteTeamNameMap(remoteTeamsJson);
-        
-        //process every rank in the received map (which maps ranks to PriorityQueues containing TeamScoreRows holding that rank)
-        for (int rank : remoteRowMap.keySet()) {
-            
-            PriorityQueue<TeamScoreRow> pq = remoteRowMap.get(rank);
-            
-            for (TeamScoreRow row : pq) {  //iterates over all TeamScoreRows, although not necessarily in priority order
-                
-                String teamIdAsString = new Integer(row.getTeam_id()).toString();
-                
-                row.setTeamName(remoteTeamNameMap.get(teamIdAsString));
-                
-            }
+        //insure we have potentially reasonable input
+        if (teamsJson==null || teamsJson.contentEquals("")) {
+            log.severe("Null or empty teams JSON");
+            return retMap;
         }
-       
+        
+        //convert the provided teamsJson, assumed to be a CLICS teams description, into a POJO
+        // containing a list of teams
+        ObjectMapper mapper = new ObjectMapper();
+        
+        List<Team> teamList = null;
+        try {
+            teamList = mapper.readValue(teamsJson, new TypeReference<List<Team>>() {});
+        } catch (IOException e) {
+            log.severe("Exception converting teams JSON description to TeamList class: " + e.getMessage());
+            
+            //debug
+            System.out.println ("Exception converting teams JSON description to TeamList class: " + e.getMessage());
+            
+            return retMap;
+        }
+        
+        //add each team to the return map, which maps team ids to team names
+        for (Team team : teamList) {
+            retMap.put(team.getId(), team.getName());
+        }
+        
+        return retMap;
     }
-
-    /**
-     * Converts the specified Teams JSON string to a map which maps teamId to team name.
-     * 
-     * @param pc2TeamsJson
-     * @return
-     */
-    private Map<String, String> createPC2TeamNameMap(String pc2TeamsJson) {
-        
-        throw new UnsupportedOperationException("createPC2TeamNameMap() is not implemented");
-        
-        // TODO implement this method; consider whether it can be merged with createRemoteTeamNameMap
-
-    }
-
-    /**
-     * Converts the specified Teams JSON string to a map which maps teamId to team name.
-     * 
-     * @param remoteTeamsJson
-     * @return
-     */
-    private Map<String, String> createRemoteTeamNameMap(String remoteTeamsJson) {
-        
-        throw new UnsupportedOperationException("createRemoteTeamNameMap() is not implemented");
-        
-        // TODO implement this method; consider whether it can be merged with createPC2TeamNameMap
-
-    }
-
 
     
     /**
