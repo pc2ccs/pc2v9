@@ -77,11 +77,22 @@ public class ShadowScoreboardComparator {
             return new ShadowScoreboardRowComparison[0];
             
         } else {
+<<<<<<< HEAD
             //add team names to the map rows (they do not get added during map creation because they are not
             // present in the CLICS scoreboard JSON)
             updateMapWithTeamNames(ScoreboardType.PC2, pc2RowMap);
+=======
+           
+            //get the CLICS JSON describing the PC2 teams 
+            String pc2TeamsJson = shadowController.getPC2TeamsJSON();
+         
+            //put the PC2 team names into the TeamScoreRows in the PC2 RowMap (they do not get added 
+            //during map creation because they are not present in the CLICS scoreboard JSON)
+            addTeamNamesToRowMap(pc2RowMap, pc2TeamsJson);
+>>>>>>> branch 'i239_ShadowScoreboardComparison' of https://github.com/clevengr/pc2v9.git
         }
         
+        //repeat the above for the remote scoreboard
         Map<Integer,PriorityQueue<TeamScoreRow>> remoteRowMap = createRowMap(remoteScoreboardJson);
         
         if (remoteRowMap==null || remoteRowMap.keySet().isEmpty()) {
@@ -91,9 +102,18 @@ public class ShadowScoreboardComparator {
             return new ShadowScoreboardRowComparison[0];
             
         } else {
+<<<<<<< HEAD
             //add team names to the map rows (they do not get added during map creation because they are not
             // present in the CLICS scoreboard JSON)
             updateMapWithTeamNames(ScoreboardType.REMOTE, remoteRowMap);
+=======
+            //get the CLICS JSON describing the PC2 teams 
+            String remoteTeamsJson = shadowController.getRemoteTeamsJSON();
+            
+            //put the remote team names into the TeamScoreRows in the remote RowMap (they do not get added 
+            //during map creation because they are not present in the CLICS scoreboard JSON)
+            addTeamNamesToRowMap(pc2RowMap, remoteTeamsJson);
+>>>>>>> branch 'i239_ShadowScoreboardComparison' of https://github.com/clevengr/pc2v9.git
         }
         
         //find the highest rank in either map
@@ -154,12 +174,18 @@ public class ShadowScoreboardComparator {
     }
 
     /**
+<<<<<<< HEAD
      * Processes the {@link TeamScoreRows} in the specified map by adding the team name from the specified scoreboard type
      * (either PC2 or Remote CCS) to each TeamScoreRow object.
      * 
      * @param scoreboardType the type of scoreboard being processed; an element of {@link ScoreboardType}.
      * @param rowMap a Map which maps integer ranks to all TeamScoreRows for teams holding that rank.
+=======
+     * Processes the TeamScoreRows in the specified map by adding the team name to each TeamScoreRow object.
+     * @param rowMap a Map of TeamScoreRows to which team names are to be added.
+>>>>>>> branch 'i239_ShadowScoreboardComparison' of https://github.com/clevengr/pc2v9.git
      */
+<<<<<<< HEAD
     private void updateMapWithTeamNames(ScoreboardType scoreboardType, Map<Integer, PriorityQueue<TeamScoreRow>> rowMap) {
         
         String teamsJson = "";
@@ -185,8 +211,16 @@ public class ShadowScoreboardComparator {
         }
         
         
+=======
+    private void addTeamNamesToRowMap(Map<Integer, PriorityQueue<TeamScoreRow>> rowMap, String teamsJson) {
+                
+>>>>>>> branch 'i239_ShadowScoreboardComparison' of https://github.com/clevengr/pc2v9.git
         //create a Map which maps team ids to team names
+<<<<<<< HEAD
         teamNameMap = createTeamNameMap(teamsJson);
+=======
+        Map<String,String> teamNameMap = createTeamNameMap(teamsJson);
+>>>>>>> branch 'i239_ShadowScoreboardComparison' of https://github.com/clevengr/pc2v9.git
         
         //process every rank in the received map (which maps ranks to PriorityQueues containing TeamScoreRows holding that rank)
         for (int rank : rowMap.keySet()) {
@@ -204,6 +238,7 @@ public class ShadowScoreboardComparator {
         
     }
 
+<<<<<<< HEAD
 
     /**
      * Converts the specified Teams JSON string to a map which maps teamId to team name.
@@ -248,8 +283,28 @@ public class ShadowScoreboardComparator {
         
         return retMap;
     }
+=======
+>>>>>>> branch 'i239_ShadowScoreboardComparison' of https://github.com/clevengr/pc2v9.git
 
+<<<<<<< HEAD
     
+=======
+    /**
+     * Converts the specified Teams JSON string to a map which maps teamId to team name.
+     * 
+     * @param teamsJson
+     * @return
+     */
+    private Map<String, String> createTeamNameMap(String teamsJson) {
+        
+        throw new UnsupportedOperationException("createTeamNameMap() is not implemented");
+        
+        // TODO implement this method
+
+    }
+
+   
+>>>>>>> branch 'i239_ShadowScoreboardComparison' of https://github.com/clevengr/pc2v9.git
     /**
      * Returns a {@link ShadowScoreboardRowComarison} object containing comparison information for the
      * two specified {@link TeamScoreRow}s.   
