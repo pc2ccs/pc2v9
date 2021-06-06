@@ -241,6 +241,9 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
             remoteCCSScrollPane.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(Color.black, 3),
                     remoteCCSScrollPane.getBorder()));
+            
+            //set so that a single scrollbar scrolls both scoreboards together
+            remoteCCSScrollPane.setVerticalScrollBar(((JScrollPane) getPC2ScoreboardScrollPane()).getVerticalScrollBar());
         }
         return remoteCCSScrollPane;
     }
