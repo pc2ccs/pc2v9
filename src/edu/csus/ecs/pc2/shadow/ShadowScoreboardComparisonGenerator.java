@@ -233,11 +233,8 @@ public class ShadowScoreboardComparisonGenerator {
         List<Team> teamList = null;
         try {
             teamList = mapper.readValue(teamsJson, new TypeReference<List<Team>>() {});
-        } catch (IOException e) {
-            log.severe("Exception converting teams JSON description to TeamList class: " + e.getMessage());
-            
-            //debug
-            System.out.println ("Exception converting teams JSON description to TeamList class: " + e.getMessage());
+        } catch (IOException e) {      
+            log.log(Log.SEVERE, "Exception converting teams JSON description to TeamList class: " + e.getMessage(), e);
             
             return retMap;
         }
