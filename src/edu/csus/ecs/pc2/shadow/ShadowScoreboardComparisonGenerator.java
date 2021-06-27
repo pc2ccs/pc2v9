@@ -18,20 +18,20 @@ import edu.csus.ecs.pc2.core.standings.json.Team;
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 import edu.csus.ecs.pc2.ui.ShadowCompareScoreboardPane.ScoreboardType;
 
-public class ShadowScoreboardComparator {
+public class ShadowScoreboardComparisonGenerator {
     
     private Log log ;
     private ShadowController shadowController;
     
     /**
-     * Constructs a ShadowScoreboardComparator which can be used to generate comparison information for two
+     * Constructs a ShadowScoreboardComparisonGenerator which can be used to generate comparison information for two
      * scoreboards -- typically, a PC2 Shadow scoreboard and a Remote CCS scoreboard.
      * 
      * @param shadowController the {@link ShadowController} used by methods of this class; must not be null.
      */
-    public ShadowScoreboardComparator (ShadowController shadowController) {
+    public ShadowScoreboardComparisonGenerator (ShadowController shadowController) {
         if (shadowController==null) {
-            throw new RuntimeException ("ShadowScoreboardComparator constructor called with null ShadowController");
+            throw new RuntimeException ("ShadowScoreboardComparisonGenerator constructor called with null ShadowController");
         }
         this.shadowController = shadowController;
         this.log = shadowController.getLog();

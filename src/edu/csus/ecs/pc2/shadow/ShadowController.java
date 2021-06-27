@@ -400,7 +400,7 @@ public class ShadowController {
         }
 
         // construct a comparator to compare the two JSON strings
-        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(this);
+        ShadowScoreboardComparisonGenerator comparator = new ShadowScoreboardComparisonGenerator(this);
 
         //use the comparator to obtain a row-by-row comparison of the two JSON scoreboards
         ShadowScoreboardRowComparison[] results = comparator.compare(pc2Json, remoteJson);

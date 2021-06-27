@@ -31,7 +31,7 @@ public class ShadowScoreboardComparatorTest extends AbstractTestCase {
 //        IInternalController controller = sampleContest.createController(contest, true, false);
 //
 //        ShadowController shadowController = new ShadowController(contest, controller);
-//        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(shadowController);
+//        ShadowScoreboardComparisonGenerator comparator = new ShadowScoreboardComparisonGenerator(shadowController);
 //        
 //        String pc2Json = 
 //                "{\"event_id\":\"5a97a37f-fb6a-4823-99bc-a4ecca321dc2\","
@@ -113,7 +113,7 @@ public class ShadowScoreboardComparatorTest extends AbstractTestCase {
 //
 //        ShadowController shadowController = new ShadowController(contest, controller);
 //  
-//        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(shadowController);
+//        ShadowScoreboardComparisonGenerator comparator = new ShadowScoreboardComparisonGenerator(shadowController);
 //        
 //        String pc2Json = 
 //                "{\"event_id\":\"5a97a37f-fb6a-4823-99bc-a4ecca321dc2\","
@@ -255,7 +255,7 @@ public class ShadowScoreboardComparatorTest extends AbstractTestCase {
 //        IInternalController controller = sampleContest.createController(contest, true, false);
 //
 //        ShadowController shadowController = new ShadowController(contest, controller);
-//        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(shadowController);
+//        ShadowScoreboardComparisonGenerator comparator = new ShadowScoreboardComparisonGenerator(shadowController);
 //        
 //        String pc2Json = 
 //                "{\"event_id\":\"5a97a37f-fb6a-4823-99bc-a4ecca321dc2\","
@@ -389,7 +389,7 @@ public class ShadowScoreboardComparatorTest extends AbstractTestCase {
 
         ShadowController shadowController = new ShadowController(contest, controller);
 
-        ShadowScoreboardComparator comparator = new ShadowScoreboardComparator(shadowController);
+        ShadowScoreboardComparisonGenerator comparator = new ShadowScoreboardComparisonGenerator(shadowController);
         
         String pc2Json = 
                 "{\"event_id\":\"5a97a37f-fb6a-4823-99bc-a4ecca321dc2\","
