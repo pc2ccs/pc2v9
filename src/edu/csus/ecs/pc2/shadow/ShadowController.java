@@ -485,11 +485,7 @@ public class ShadowController {
         
         //close the array of teams
         retJson += "]";
-        
-        //debug
-        System.out.println ("PC2 team json: ");
-        System.out.println (retJson);
-        
+                
         //return the PC2 teams JSON
         return retJson;
     }
@@ -507,11 +503,7 @@ public class ShadowController {
         
         //get team list from remoteAPIAdaptor
         String remoteJson = remoteContestAPIAdapter.getRemoteJSON("/teams");
-        
-        //debug
-        System.out.println ("Remote CCS team json: ");
-        System.out.println (remoteJson);
-        
+                
         //return team list
         return remoteJson;
         
