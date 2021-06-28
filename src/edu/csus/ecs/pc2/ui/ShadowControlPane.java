@@ -24,6 +24,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
@@ -226,6 +227,7 @@ public class ShadowControlPane extends JPanePlugin {
                 shadowingStatusValueLabel.setText("ON");
                 getStartStopButton().setText("Stop Shadowing");
                 getStartStopButton().setToolTipText("Stop shadowing operations");
+                getController().getLog().info("Shadowing started");
             } else {
                 handleStartFailure();
                 showErrorMessage("Failed to start shadowing; check logs (bad URL or credentials? mismatched configs?)", "Cannot start Shadowing");
@@ -294,12 +296,13 @@ public class ShadowControlPane extends JPanePlugin {
     }
     
     /**
-     * Displays an error message dialog.
-     * @param message the message to be displayed
+     * Displays an error message dialog; also logs the Error Message.
+     * @param message the message to be displayed and logged.
      * @param title the title to be put at the top of the error message dialog
      */
     private void showErrorMessage(String message, String title) {
         JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
+        getController().getLog().log(Log.WARNING, message);
     }
 
     /**
@@ -313,6 +316,7 @@ public class ShadowControlPane extends JPanePlugin {
             shadowingStatusValueLabel.setText("OFF");
             getStartStopButton().setText("Start Shadowing");
             getStartStopButton().setToolTipText("Start shadowing operations on the specified remote CCS");
+            getController().getLog().info("Shadowing stopped");
         }
         updateGUI();
     }
@@ -667,8 +671,9 @@ public class ShadowControlPane extends JPanePlugin {
                                     }
 
                                 } catch (Exception e) {
-                                    showErrorMessage("Exception attempting to connect to remote system:\n" + e, 
-                                                        "Exception in connecting");
+                                    showErrorMessage("Exception attempting to connect to remote system:\n" + e, "Exception in connecting");
+                                    getController().getLog().log(Log.SEVERE, "Exception attempting to connect to remote system: " + e.getMessage(), e);
+                                    
                                 } finally {
                                     if (remoteContestAPIAdapter != null) {
                                         remoteContestAPIAdapter = null;
