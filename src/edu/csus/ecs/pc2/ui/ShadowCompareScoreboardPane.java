@@ -492,7 +492,8 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
     private Component getRigidArea_2() {
         if (rigidArea_2 == null) {
         	rigidArea_2 = Box.createRigidArea(new Dimension(20, 20));
-        }	rigidArea_2.setPreferredSize(new Dimension(20, 40));
+        }
+        rigidArea_2.setPreferredSize(new Dimension(20, 40));
         
         return rigidArea_2;
     }
@@ -527,7 +528,7 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
             + "\n\nAt the end of the contest the Scoreboard Comparison screen will show the true comparison of scoreboards for the PC2 Shadow and the Remote CCS."
             + "\n(If the scoreboards do not match at the end of the contest, the most likely reason is because the PC2 Shadow system has given a different"
             + "\njudgement than the Remote CCS to one or more submissions; see the PC2 Shadow \"Compare Runs\" grid to find and resolve such differences.)"
-            + "";
+            ;
         
     private JButton getHelpButton() {
         if (helpButton == null) {
