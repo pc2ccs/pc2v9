@@ -28,6 +28,10 @@ import javax.swing.RowSorter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -125,6 +129,11 @@ public class ShadowCompareRunsPane extends JPanePlugin {
 
         JTable resultsTable = new JTable() {
             private static final long serialVersionUID = 1L;
+            
+            private Border outside = new MatteBorder(1, 0, 1, 0, Color.RED);
+            private Border inside = new EmptyBorder(0, 1, 0, 1);
+            private Border highlight = new CompoundBorder(outside, inside);
+
 
 //          String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
 
@@ -152,6 +161,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 // update font to bold & italic if row is selected
                 if (isRowSelected(row)) {
                     c.setFont(new Font("Arial Bold", Font.ITALIC, 14));
+                    ((JComponent)c).setBorder(highlight);
                 }
 
                 return c;
@@ -311,6 +321,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 });
             }
         });
+        resolveButton.setToolTipText("Updates PC2 so that the PC2 judgement in all selected table rows matches the Remote CCS judgement");
         buttonPanel.add(resolveButton);
         
         
@@ -376,7 +387,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         int response = JOptionPane.showConfirmDialog(this, warningMsg, "Confirm intent to change PC2 Judgement(s)", JOptionPane.YES_NO_CANCEL_OPTION);
         
         if (response==JOptionPane.YES_OPTION) {
-            processSelectedRuns();
+            updateSelectedRuns();
             return true;
         } else {
             return false;
@@ -422,9 +433,10 @@ public class ShadowCompareRunsPane extends JPanePlugin {
      * 
      * 
      */
-    private void processSelectedRuns() {
+    private void updateSelectedRuns() {
 
-        System.out.println ("Would have updated the following " + getCountOfSelectedRuns() + " runs in PC2:");
+        //debug:
+        System.out.println ("Updating the following " + getCountOfSelectedRuns() + " runs in PC2:");
         
         //get JTable (view) row indices
         int [] viewRowIndices = resultsTable.getSelectedRows();
@@ -436,9 +448,76 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         }
         
         for (int modelRow : modelRowIndices) {
-            Integer submissionID = (Integer) resultsTable.getModel().getValueAt(modelRow, 3); //TODO: use an Enum for columns (3=SubmissionID)
-            System.out.println ("   Submision ID: " + submissionID);
+            Integer submissionId = (Integer) resultsTable.getModel().getValueAt(modelRow, 3); //TODO: use an Enum for columns (3=SubmissionID)
+            
+            //debug:
+            System.out.println ("   Submision ID: " + submissionId);
+            
+            //add code here to update PC2 (see EditRunPane)
+            updateRun(submissionId);
         }
+        
+    }
+
+    //use the following (from EditRunPane) as a guide for invoking the server to update the run
+    protected void updateRun(Integer submissionId) {
+
+//        Run newRun = getRunFromFields();
+//
+//        JudgementRecord judgementRecord = null;
+//        RunResultFiles runResultFiles = null;
+//
+//        if (judgementChanged()) {
+//            newRun.setStatus(RunStates.JUDGED);
+//
+//            boolean solved = getJudgementComboBox().getSelectedIndex() == 0;
+//            Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
+//
+//            judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
+//            judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
+//        }
+//
+//        newRun.setDeleted(deleteCheckBox.isSelected());
+//        
+//        int elapsed = getIntegerValue(getElapsedTimeTextField().getText());
+//        newRun.setElapsedMins(elapsed);
+//
+//        ElementId problemId = ((Problem) getProblemComboBox().getSelectedItem()).getElementId();
+//        if (problemId != null) {
+//            newRun.setProblemId(problemId);
+//        }
+//        ElementId languageId = ((Language) getLanguageComboBox().getSelectedItem()).getElementId();
+//        if (languageId != null) {
+//            newRun.setLanguageId(languageId);
+//        }
+//
+//        if (isStatusChanged()) {
+//
+//            RunStates prevState = run.getStatus();
+//            RunStates newRunState = (Run.RunStates) runStatusComboBox.getSelectedItem();
+//
+//            int result = FrameUtilities.yesNoCancelDialog(this, "Are you sure you want to change status from " + //
+//                    prevState.toString() + " to " + newRunState.toString() + "?", "Update/Change run status?");
+//
+//            if (result != JOptionPane.YES_OPTION) {
+//                enableUpdateButton(); // required to re-enable Update button
+//                return;
+//            }
+//
+//            newRun.setStatus(newRunState);
+//        }
+//
+//        ExecutionData executionData = null;
+//        if (executable != null) {
+//            executionData = executable.getExecutionData();
+//        }
+// 
+//        runResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
+//        getController().updateRun(newRun, judgementRecord, runResultFiles);
+//
+//        if (getParentFrame() != null) {
+//            getParentFrame().setVisible(false);
+//        }
         
     }
 
