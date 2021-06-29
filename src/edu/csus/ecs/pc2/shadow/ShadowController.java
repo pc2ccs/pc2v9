@@ -7,14 +7,23 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.logging.Level;
+
+import javax.xml.bind.JAXBException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -23,6 +32,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
+import edu.csus.ecs.pc2.services.core.ScoreboardJson;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
@@ -34,13 +45,13 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  * The class is instantiated with an {@link IInternalController} (a PC2 Controller for a local instance of a contest)
  * along with an {@link IInternalContest} (a PC2 Contest model).
  * It obtains, from the local PC2 Server, information on the remote system to be shadowed, and uses classes behind (comprising) 
- * the facade to obtain team submissions from the remote system.
+ * the facade to obtain team submissions as well as scoreboard information from the remote system.
  * It uses the provided PC2 controller to perform local operations as if teams on the remote CCS were submitting to the local PC2
  * CCS.
  * 
  * The class (facade) presumes that the remote system implements the 
  * <A href="https://clics.ecs.baylor.edu/index.php?title=Contest_API">CLICS Contest API</a>; 
- * this is how it communicates with the remote system to obtain team submissions. 
+ * this is how it communicates with the remote system to obtain team submissions and remote scoreboard information. 
  * 
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  *
@@ -84,6 +95,7 @@ public class ShadowController {
     private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
     private RemoteContestConfiguration remoteContestConfig;
     private Thread monitorThread;
+    private IRemoteContestAPIAdapter remoteContestAPIAdapter;
 
     /**
      * a ContestInformation Listener
@@ -195,7 +207,7 @@ public class ShadowController {
         }
         
         //get an adapter which connects to the remote Contest API
-        IRemoteContestAPIAdapter remoteContestAPIAdapter = createRemoteContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
+        remoteContestAPIAdapter = createRemoteContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
         
 //        //get a remote contest configuration from the adapter
 //        remoteContestConfig  = remoteContestAPIAdapter.getRemoteContestConfiguration();
@@ -345,9 +357,160 @@ public class ShadowController {
     
  
     /**
-     * Returns a Map which maps submissionIds to the acronym assigned to that submission by the Remote CCS.
-     * Note that the returned map does NOT necessarily contain entries for all known submissions; it contains
-     * only entries for submissions for which a judgement has been received from the Remote CCS.
+     * Returns an array of {@link ShadowScoreboardRowComparison}s, each element of which contains a comparison of
+     * corresponding rows of the current PC2 and remote CCS scoreboards.
+     * 
+     * Each ShadowScoreboardRowComparison contains a pair of {@link TeamScoreRow}s, one each from the PC2 and remote CCS
+     * scoreboards, along with a boolean flag indicating whether the rows are equal or not (that is, whether or not the rows
+     * contain the same rank, teamId, number of problems solved, and total (penalty) points).  If for some reason a row exists
+     * in one of the scoreboards but not the other, the corresponding entry in the ShadowScoreboardRowComparison will be null 
+     * (an indication of scoreboards which inherently are not equal).
+     * 
+     * This method is only operative while Shadow operations are running; if shadowing is not running
+     * then the method returns an empty array (that is, an array of size zero).
+     * 
+     * The method also returns an empty array if an error occurs when fetching either the PC2 or the remote CCS 
+     * JSON scoreboard  strings, or when parsing those strings.
+     * 
+     * @return an array of ShadowScoreboardRowComparison information, or an empty array if shadowing isn't running
+     *          or an error occurs during processing either of the JSON strings representing the two scoreboards.
+     */
+    public ShadowScoreboardRowComparison[] getScoreboardComparisonInfo() {
+
+        //initialize return to empty
+        ShadowScoreboardRowComparison[] emptyArray = new ShadowScoreboardRowComparison[0];
+
+        if (getStatus() != SHADOW_CONTROLLER_STATUS.SC_RUNNING) {
+            log.warning("Shadow Controller 'getScoreboardComparisonInfo()' called when Shadow controller is not running");
+            return emptyArray;
+        }
+
+        // get the PC2 scoreboard JSON
+        String pc2Json = getPC2ScoreboardJSON();
+        if (pc2Json==null) {
+            log.warning("Got empty or null JSON scoreboard from PC2");
+            return emptyArray;
+        }
+
+        // get the remote CCS scoreboard JSON
+        String remoteJson = getRemoteScoreboardJSON();
+        if (remoteJson==null) {
+            log.warning("Got empty or null JSON scoreboard from remote CCS");
+            return emptyArray;
+        }
+
+        // construct a comparator to compare the two JSON strings
+        ShadowScoreboardComparisonGenerator comparator = new ShadowScoreboardComparisonGenerator(this);
+
+        //use the comparator to obtain a row-by-row comparison of the two JSON scoreboards
+        ShadowScoreboardRowComparison[] results = comparator.compare(pc2Json, remoteJson);
+
+        return results;
+    }
+
+   /**
+     * This method constructs a PC2 {@link ScoreboardJson} object and uses it to return a String
+     * containing the current PC2 scoreboard in CLICS Contest API format. 
+     * 
+     * @return a String containing the PC2 scoreboard JSON.
+     */
+    private String getPC2ScoreboardJSON() {
+        
+        ScoreboardJson sbJsonObject = new ScoreboardJson();
+        String pc2Json ;
+        try {
+            pc2Json = sbJsonObject.createJSON(localContest, log);
+        } catch (JsonProcessingException | IllegalContestState | JAXBException e) {
+            log.warning("Exception creating PC2 scoreboard JSON: " + e.getMessage());
+            return null;
+        }
+        
+        return pc2Json;
+    }
+
+    /**
+     * This method returns a String containing the current remote CCS scoreboard as obtained from the
+     * remote CCS Contest API "/scoreboard" endpoint. 
+     * 
+     * @return a String containing the remote CCS scoreboard JSON.
+     */
+    private String getRemoteScoreboardJSON() {
+        
+        //get scoreboard from remoteAPIAdaptor
+        String remoteJson = remoteContestAPIAdapter.getRemoteJSON("/scoreboard");
+        
+        //return scoreboard
+        return remoteJson;
+        
+    }
+
+    /**
+     * This method returns a String containing the current PC2 team list as obtained from the
+     * PC2 server, converted into CLICS Contest API "/teams" endpoint format 
+     * (see https://ccs-specs.icpc.io/contest_api#teams). 
+     * 
+     * @return a String containing the PC2 team list JSON.
+     */
+    public String getPC2TeamsJSON() {
+        
+        log.info("Fetching PC2 team JSON");
+        
+        //get the PC2 team account list from the InternalContest model
+        Vector<Account> teamAccounts = localContest.getAccounts(Type.TEAM);
+        
+        //open the return string as an array of teams
+        String retJson = "["; 
+        
+        //convert PC2 team accounts into CLICS JSON format (see https://ccs-specs.icpc.io/contest_api#teams)
+        boolean first = true;
+        for (Account teamAcct : teamAccounts) {
+            
+            //get the required values out of the team account
+            ClientId clientId = teamAcct.getClientId();
+            String teamId = "" + clientId.getClientNumber();
+            String teamName = teamAcct.getDisplayName();
+            
+            //add this team element to the return JSON, preceded by a comma if it's not the first element
+            if (!first) {
+                retJson += ",";
+            }
+            retJson += "{" ;
+            retJson += "\"id\":\"" + teamId + "\"";
+            retJson += ",";
+            retJson += "\"name\":\"" + teamName + "\"";
+            retJson += "}";
+            
+            first = false ;
+        }
+        
+        //close the array of teams
+        retJson += "]";
+                
+        //return the PC2 teams JSON
+        return retJson;
+    }
+
+
+    /**
+     * This method returns a String containing the current remote CCS team list as obtained from the
+     * remote CCS Contest API "/teams" endpoint. 
+     * 
+     * @return a String containing the remote CCS team list JSON.
+     */
+    public String getRemoteTeamsJSON() {
+        
+        log.info("Fetching Remote CCS team JSON");
+        
+        //get team list from remoteAPIAdaptor
+        String remoteJson = remoteContestAPIAdapter.getRemoteJSON("/teams");
+                
+        //return team list
+        return remoteJson;
+        
+    }
+
+   /**
+     * Returns a Map which maps remote CCS submissionIds to a judgement acronym.
      * 
      * Any judgements from the Remote CCS which are null, which have values which are null or empty, which 
      * have submissionIds which are null or empty, or which have judgement acronyms which are null or empty,
@@ -491,11 +654,11 @@ public class ShadowController {
             }
 
         } // end for each PC2 run
+                        
+        return pc2JudgementInfoMap;
         
-        return pc2JudgementInfoMap ;
-
     }
-
+    
     
     /**
      * Returns a list of differences between the currently-configured remote contest

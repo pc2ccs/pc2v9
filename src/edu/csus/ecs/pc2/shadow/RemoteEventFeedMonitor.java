@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
-import edu.csus.ecs.pc2.ui.ShadowComparePane;
+import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
 
 /**
  * This class listens for submission events in the event feed input stream from a remote CCS CLICS Contest API Event Feed.
@@ -30,7 +30,7 @@ import edu.csus.ecs.pc2.ui.ShadowComparePane;
  * as a submission to the local (Shadow) PC2 system.
  * 
  * Events of type "judgements" result in updating a global map of judgements received from the remote system; this map
- * is subsequently used by the {@link ShadowComparePane} class to display comparisons between local (shadow) judgements
+ * is subsequently used by the {@link ShadowCompareRunsPane} class to display comparisons between local (shadow) judgements
  * and the corresponding judgements from the remote CCS.
  * 
  * @author pc2@ecs.csus.edu
