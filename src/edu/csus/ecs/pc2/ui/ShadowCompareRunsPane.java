@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
@@ -33,6 +34,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.shadow.ShadowJudgementInfo;
 import edu.csus.ecs.pc2.shadow.ShadowJudgementPair;
@@ -146,6 +148,11 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                      (remoteJudgement != null && remoteJudgement.toLowerCase().contains("pending"))) {
                     c.setBackground(new Color(255, 255, 153));
                 }
+                
+                // update font to bold & italic if row is selected
+                if (isRowSelected(row)) {
+                    c.setFont(new Font("Arial Bold", Font.ITALIC, 14));
+                }
 
                 return c;
             }
@@ -164,7 +171,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         
         resultsTable.setRowSelectionAllowed(true);
         resultsTable.setColumnSelectionAllowed(false);
-        resultsTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
         return resultsTable;
 
@@ -264,26 +271,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 // refresh the results table
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-
-                        //save info on the current sort column/order for the resultsTable
-                        RowSorter<? extends TableModel> oldSorter = resultsTable.getRowSorter();
-                        
-                        //get a new model based on the current data
-                        TableModel newTableModel = getUpdatedResultsTableModel();
-                        
-                        //create a new sorter based on the updated model
-                        TableRowSorter<DefaultTableModel> newSorter = new TableRowSorter<DefaultTableModel>((DefaultTableModel) newTableModel);
-                        if (oldSorter != null) {
-                            newSorter.setSortKeys(oldSorter.getSortKeys());
-                        }
-
-                        //update the model and the row sorter in the table so the table remains sorted as before
-                        resultsTable.setModel(newTableModel);
-                        resultsTable.setRowSorter(newSorter);
-
-                        //update the summary panel to correspond to the new table data
-                        getSummaryPanel().updateSummary(currentJudgementMap);
-                        
+                        refreshResultsTable();
                     }
                 });
             }
@@ -303,10 +291,157 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         });
         buttonPanel.add(saveButton);
         
+        Component horizontalStrut2 = Box.createHorizontalStrut(20);
+        buttonPanel.add(horizontalStrut2);
+        
+        JButton resolveButton = new JButton("Resolve Selected");
+        resolveButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                
+                // resolve currently selected runs and refresh the results table
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        boolean changed = resolveSelectedRuns();
+                        if (changed) {
+                            refreshResultsTable();
+                        }
+                    }
+                });
+            }
+        });
+        buttonPanel.add(resolveButton);
+        
+        
        
         return buttonPanel ;
     }
     
+    private void refreshResultsTable() {
+        
+        //save info on the current sort column/order for the resultsTable
+        RowSorter<? extends TableModel> oldSorter = resultsTable.getRowSorter();
+        
+        //get a new model based on the current data
+        TableModel newTableModel = getUpdatedResultsTableModel();
+        
+        //create a new sorter based on the updated model
+        TableRowSorter<DefaultTableModel> newSorter = new TableRowSorter<DefaultTableModel>((DefaultTableModel) newTableModel);
+        if (oldSorter != null) {
+            newSorter.setSortKeys(oldSorter.getSortKeys());
+        }
+
+        //update the model and the row sorter in the table so the table remains sorted as before
+        resultsTable.setModel(newTableModel);
+        resultsTable.setRowSorter(newSorter);
+
+        //update the summary panel to correspond to the new table data
+        getSummaryPanel().updateSummary(currentJudgementMap);
+        
+    }
+    
+    /**
+     * "Resolves" all currently selected runs by updating the run judgement in the PC2 Shadow to match
+     * the judgement assigned by the remote Primary CCS.  Displays a warning dialog and requires confirmation
+     * prior to actually updating the runs in PC2; displays an error dialog if there are no runs currently selected.
+     * 
+     * @return true if one or more runs were "resolved" (updated in PC2); false if no runs were changed.
+     */
+    private boolean resolveSelectedRuns() {
+        
+        //make sure there are some runs selected
+        if (runsAreSelected()) {
+            
+        } else {
+            //display error dialog
+            JOptionPane.showMessageDialog(this, "There are no runs selected for resolving.", "No runs selected; nothing to resolve", JOptionPane.ERROR_MESSAGE);
+            return false ;
+        }
+        
+        //there are runs selected; determine how many
+        int selectedRunCount = getCountOfSelectedRuns();
+        String pluralizer = "";
+        if (selectedRunCount>1) {
+            pluralizer = "s";
+        }
+        
+        //warn the user about the consequences of continuing
+        String warningMsg = "";
+        warningMsg += "You are about to change the judgement for " + selectedRunCount + " run" + pluralizer + " in PC2 from the current PC2 " + "\n";
+        warningMsg += "judgement value to the value reported by the remote Primary CCS.\n\n";
+        warningMsg += "Are you sure you want to do this?\n";
+        warningMsg += "(Hit Yes to change the judgement on all selected runs; hit No or Cancel to abort without changing any judgements.)";
+        
+        int response = JOptionPane.showConfirmDialog(this, warningMsg, "Confirm intent to change PC2 Judgement(s)", JOptionPane.YES_NO_CANCEL_OPTION);
+        
+        if (response==JOptionPane.YES_OPTION) {
+            processSelectedRuns();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns an indication of whether or not there are any runs currently selected in the Runs table.
+     * 
+     * @return true if the results table is not null and there is at least one run (row) in the table 
+     *              which is selected; false otherwise.
+     */
+    private boolean runsAreSelected() {
+        
+        if (resultsTable==null) {
+            return false;
+        }
+        
+        int selectedCount = resultsTable.getSelectedRowCount();
+        if (selectedCount > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Returns a count of the number of rows in the runs table which are currently selected.
+     * 
+     * @return the count of selected runs (rows) in the runs table.
+     */
+    private int getCountOfSelectedRuns() {
+        if (resultsTable==null) {
+            return 0;
+        } else {
+            return resultsTable.getSelectedRowCount();
+        }
+    }
+
+    /**
+     * Processes each currently-selected row in the runs table by updating the PC2 judgement for that
+     * row to match the judgements specified by the remote (Primary) CCS.
+     * 
+     * 
+     */
+    private void processSelectedRuns() {
+
+        System.out.println ("Would have updated the following " + getCountOfSelectedRuns() + " runs in PC2:");
+        
+        //get JTable (view) row indices
+        int [] viewRowIndices = resultsTable.getSelectedRows();
+        
+        //convert view indices to model indices
+        int [] modelRowIndices = new int[viewRowIndices.length];
+        for (int i=0; i<viewRowIndices.length; i++) {
+            modelRowIndices[i] = resultsTable.convertRowIndexToModel(viewRowIndices[i]);
+        }
+        
+        for (int modelRow : modelRowIndices) {
+            Integer submissionID = (Integer) resultsTable.getModel().getValueAt(modelRow, 3); //TODO: use an Enum for columns (3=SubmissionID)
+            System.out.println ("   Submision ID: " + submissionID);
+        }
+        
+    }
+
     /**
      * Saves the current judgement comparisons in a CSV (comma-separate-values) file.
      */
@@ -333,8 +468,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                     try {
                         saveFile.createNewFile();
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        shadowController.getLog().log(Log.SEVERE, "Exception saving file: " + e.getMessage(), e);
                     }
                 }
 
