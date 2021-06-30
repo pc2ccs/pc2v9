@@ -38,7 +38,15 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType;
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunResultFiles;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.shadow.ShadowJudgementInfo;
 import edu.csus.ecs.pc2.shadow.ShadowJudgementPair;
@@ -66,6 +74,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
 
     private String lastDirectory = ".";
 
+    private Log log;
+
     @Override
     public String getPluginTitle() {
         return "Shadow_Compare_Pane";
@@ -88,6 +98,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         this.setMinimumSize(size);
         
         this.shadowController = shadowController ;
+        
+        this.log = shadowController.getLog();
         
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         JLabel header = new JLabel("Comparison of PC2 vs. Remote Judgements");
@@ -135,7 +147,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
             private Border highlight = new CompoundBorder(outside, inside);
 
 
-//          String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
+//          String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?", "Overridden?" };
 
             // override JTable's default renderer to set the background color based on the "Match?" value
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
@@ -198,14 +210,15 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         currentJudgementMap = shadowController.getJudgementComparisonInfo();
 
         //define the columns for the table
-        String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
+        String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?", "Overridden?" };
         
         //an array to hold the table data
-        Object[][] data = new Object[currentJudgementMap.size()][7];
+        Object[][] data = new Object[currentJudgementMap.size()][8];
         
         //fill in each data row with info from the shadow controller's judgement map
         int row = 0;
         for (String key : currentJudgementMap.keySet()) {
+            
             ShadowJudgementInfo curJudgementInfo = currentJudgementMap.get(key);
             data[row][0] = curJudgementInfo.getTeamID();
             data[row][1] = curJudgementInfo.getProblemID();
@@ -217,6 +230,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 data[row][4] = curPair.getPc2Judgement();
                 data[row][5] = curPair.getRemoteCCSJudgement();
             }
+            
             data[row][6] = "---";
             if (data[row][4]!=null && data[row][5]!=null) {
                 if (!((String)data[row][4]).toLowerCase().contains("pending") &&
@@ -225,6 +239,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                     data[row][6] = ((String) data[row][4]).equalsIgnoreCase((String) data[row][5]) ? "Y" : "N";
                 }
             }
+            
+            data[row][7] = "N";
 
             row++;
         }
@@ -233,8 +249,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         TableModel tableModel = new DefaultTableModel(data, columnNames){
             static final long serialVersionUID = 1;
             
-//          String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?" };
-            Class<?>[] types = { Integer.class, String.class, String.class, Integer.class, String.class, String.class, String.class };
+//          String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?", "Overridden?" };
+            Class<?>[] types = { Integer.class, String.class, String.class, Integer.class, String.class, String.class, String.class, String.class };
             
             //return the appropriate class for the column so that correct cell renderer will be used
             @Override
@@ -387,13 +403,51 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         int response = JOptionPane.showConfirmDialog(this, warningMsg, "Confirm intent to change PC2 Judgement(s)", JOptionPane.YES_NO_CANCEL_OPTION);
         
         if (response==JOptionPane.YES_OPTION) {
-            updateSelectedRuns();
+            
+            if (isAllowedEditRun()) {
+                
+                //update the selected runs
+                boolean result = updateSelectedRuns();
+                if (result) {
+                    log.log(Log.INFO, "Updated judgements in selected runs");
+                } else {
+                    log.log(Log.WARNING, "Update of selected run judgements failed");
+                }
+                return result;
+                
+            } else {
+                
+                //current Feeder client account does not have EditRun permission - display error msg
+                ClientId clientId = getContest().getClientId();
+                String client = clientId.getName();
+                String msg = "";
+                msg += "Your login account (" + client + ") does not have permission to edit (update) runs.\n\n" ;
+                msg += "You will need to have an Administrator update your account permissions in order to be able to update runs.";
+                
+                JOptionPane.showMessageDialog(this, msg, "Missing Edit Permission", JOptionPane.WARNING_MESSAGE);
+                log.log (Log.WARNING, "Client attempted to update run without having Edit Run permission");
+                return false;
+            }
+        } else {
+            log.log(Log.INFO, "Update of selected runs cancelled by user");
+            return false;
+        }
+    }
+    
+    /**
+     * Returns an indication of whether the current client has permission to Edit Runs.
+     * @return true if the current client can edit runs; false if not.
+     */
+    private boolean isAllowedEditRun() {
+        
+        ClientId clientId = getContest().getClientId();
+        if (getContest().getAccount(clientId).isAllowed(Permission.Type.EDIT_RUN)) {
             return true;
         } else {
             return false;
         }
     }
-    
+
     /**
      * Returns an indication of whether or not there are any runs currently selected in the Runs table.
      * 
@@ -429,11 +483,14 @@ public class ShadowCompareRunsPane extends JPanePlugin {
 
     /**
      * Processes each currently-selected row in the runs table by updating the PC2 judgement for that
-     * row to match the judgements specified by the remote (Primary) CCS.
+     * row to match the judgements specified by the remote (Primary) CCS, unless either PC2 or the
+     * remote CCS shows the judgement as "Pending".
+     * 
+     * @return true if all the currently-selected runs were successfully updated; false if not.
      * 
      * 
      */
-    private void updateSelectedRuns() {
+    private boolean updateSelectedRuns() {
 
         //debug:
         System.out.println ("Updating the following " + getCountOfSelectedRuns() + " runs in PC2:");
@@ -447,77 +504,116 @@ public class ShadowCompareRunsPane extends JPanePlugin {
             modelRowIndices[i] = resultsTable.convertRowIndexToModel(viewRowIndices[i]);
         }
         
+        boolean result = true;
         for (int modelRow : modelRowIndices) {
-            Integer submissionId = (Integer) resultsTable.getModel().getValueAt(modelRow, 3); //TODO: use an Enum for columns (3=SubmissionID)
             
+            //get the run id
+            //TODO: use an Enum for columnIds instead of hard-coded integers which can change if the table is rearranged
+            Integer submissionId = (Integer) resultsTable.getModel().getValueAt(modelRow, 3); // 3=SubmissionID
+
             //debug:
             System.out.println ("   Submision ID: " + submissionId);
             
-            //add code here to update PC2 (see EditRunPane)
-            updateRun(submissionId);
+            //make sure the run is not "Pending" in either system
+            String pc2Judgement = (String) resultsTable.getModel().getValueAt(modelRow, 4);      // 4 = PC2 Judgment
+            String remoteJudgement = (String) resultsTable.getModel().getValueAt(modelRow, 5);   // 5=remote CCS judgement
+            
+            if (pc2Judgement.toLowerCase().contains("pending") || remoteJudgement.toLowerCase().contains("pending")) {
+                
+                JOptionPane.showMessageDialog(this, "Cannot update submission " + submissionId + " because it still has judgements Pending", 
+                                                    "Submission judgement Pending", JOptionPane.WARNING_MESSAGE);
+                log.log (Log.INFO, "Attempted to update pending submission: " + submissionId);
+                result = false;
+                
+            } else {
+            
+                //verify the remote judgement is a valid value
+                boolean isClicsAcronym = CLICSJudgementType.isCLICSAcronym(remoteJudgement);
+                if (isClicsAcronym) {
+                    
+                    //get the CLICS acronym for the specified judgement 
+                    CLICS_JUDGEMENT_ACRONYM judgementAcronym = CLICSJudgementType.getCLICSAcronymFromElementName(remoteJudgement);
+
+                    // run is not pending in either system and the remote judgement is a valid CLICS judgement; 
+                    // attempt to update PC2 to match remote CCS judgement
+                    result &= updateRun(submissionId, judgementAcronym);
+                    
+                } else {
+                    
+                    //there is no known judgement matching the judgement string
+                    JOptionPane.showMessageDialog(this, "Cannot update submission " + submissionId + ": invalid remote judgement: " + remoteJudgement, 
+                                                        "Invalid judgement acronym", JOptionPane.WARNING_MESSAGE);
+                    log.log (Log.INFO, "Attempted to update pending submission: " + submissionId);
+                    result = false;
+                }
+            }
         }
+        
+        //return true iff every selected run was successfully updated
+        return result;
         
     }
 
-    //use the following (from EditRunPane) as a guide for invoking the server to update the run
-    protected void updateRun(Integer submissionId) {
+    /**
+     * Invokes the PC2 server to update the status of the specified run to match the specified judgement.
+     * 
+     * @param submissionId the Id of the run to be updated.
+     * 
+     * @return true if the run was successfully updated; false if the run could not be updated for some reason 
+     *              (such as not being able to find the specified run).
+     */
+    protected boolean updateRun(Integer submissionId, CLICS_JUDGEMENT_ACRONYM newJudgement) {
 
-//        Run newRun = getRunFromFields();
-//
-//        JudgementRecord judgementRecord = null;
-//        RunResultFiles runResultFiles = null;
-//
-//        if (judgementChanged()) {
-//            newRun.setStatus(RunStates.JUDGED);
-//
-//            boolean solved = getJudgementComboBox().getSelectedIndex() == 0;
-//            Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
-//
-//            judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
-//            judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
-//        }
-//
-//        newRun.setDeleted(deleteCheckBox.isSelected());
-//        
-//        int elapsed = getIntegerValue(getElapsedTimeTextField().getText());
-//        newRun.setElapsedMins(elapsed);
-//
-//        ElementId problemId = ((Problem) getProblemComboBox().getSelectedItem()).getElementId();
-//        if (problemId != null) {
-//            newRun.setProblemId(problemId);
-//        }
-//        ElementId languageId = ((Language) getLanguageComboBox().getSelectedItem()).getElementId();
-//        if (languageId != null) {
-//            newRun.setLanguageId(languageId);
-//        }
-//
-//        if (isStatusChanged()) {
-//
-//            RunStates prevState = run.getStatus();
-//            RunStates newRunState = (Run.RunStates) runStatusComboBox.getSelectedItem();
-//
-//            int result = FrameUtilities.yesNoCancelDialog(this, "Are you sure you want to change status from " + //
-//                    prevState.toString() + " to " + newRunState.toString() + "?", "Update/Change run status?");
-//
-//            if (result != JOptionPane.YES_OPTION) {
-//                enableUpdateButton(); // required to re-enable Update button
-//                return;
-//            }
-//
-//            newRun.setStatus(newRunState);
-//        }
-//
-//        ExecutionData executionData = null;
-//        if (executable != null) {
-//            executionData = executable.getExecutionData();
-//        }
-// 
-//        runResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
-//        getController().updateRun(newRun, judgementRecord, runResultFiles);
-//
-//        if (getParentFrame() != null) {
-//            getParentFrame().setVisible(false);
-//        }
+        //get all the runs
+        Run [] allRuns = getController().getContest().getRuns();
+        
+        //search for the desired run by Id
+        boolean found = false ;
+        Run targetRun = null;
+        for (Run run : allRuns) {
+            if (run.getNumber()==submissionId) {
+                targetRun = run;
+                found = true;
+                break;
+            }
+        }
+        
+        //if we didn't find the run, return failure
+        if (!found) {
+            
+            JOptionPane.showMessageDialog(this, "Failed to find submission " + submissionId, "Submission not found", JOptionPane.WARNING_MESSAGE);
+            log.log (Log.WARNING, "Failed to find run to be updated: " + submissionId);
+            return false;
+        }
+        
+        //if we get here we've found the run to be updated;
+        //try to find a PC2 Judgement that matches the remote CCS's CLICS judgement
+        Judgement [] judgementsArray = getContest().getJudgements();
+        for (Judgement judgement : judgementsArray) {
+            
+            if (newJudgement.name().contentEquals(judgement.getAcronym())) {
+                
+                //we found a matching PC2 judgement; check if the new judgement is a "yes"
+                boolean solved = CLICSJudgementType.isYesAcronym(newJudgement);
+                
+                //build a new JudgementRecord for PC2 containing the desired judgement values
+                JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
+
+                //duplicate the existing RunResultFiles, with null executionData (since we haven't actually re-executed the run)
+                RunResultFiles runResultFiles = new RunResultFiles(targetRun, targetRun.getProblemId(), judgementRecord, null);
+                
+                //update the run in PC2
+                getController().updateRun(targetRun, judgementRecord, runResultFiles);
+                
+                return true;
+                
+            }
+        }
+        
+        //we failed to find a matching judgement
+        JOptionPane.showMessageDialog(this, "Failed to find PC2 Judgement corresponding to Remote CCS Judgement for submission " + submissionId, "No such judgement", JOptionPane.WARNING_MESSAGE);
+        log.log (Log.WARNING, "Failed to find PC2 Judgement corresponding to Remote CCS Judgement for submission " + submissionId);
+        return false;
         
     }
 
@@ -547,7 +643,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                     try {
                         saveFile.createNewFile();
                     } catch (IOException e) {
-                        shadowController.getLog().log(Log.SEVERE, "Exception saving file: " + e.getMessage(), e);
+                        log.log(Log.SEVERE, "Exception saving file: " + e.getMessage(), e);
                     }
                 }
 
