@@ -21,7 +21,9 @@ public class ShadowCompareRunsFrame extends JFrame {
         Dimension size = new Dimension(600,600);
         this.setPreferredSize(size);
 //        this.setMinimumSize(size);
-        this.getContentPane().add(new ShadowCompareRunsPane(shadowController));
+        ShadowCompareRunsPane runsPane = new ShadowCompareRunsPane(shadowController);
+        runsPane.setContestAndController(shadowController.getLocalContest(), shadowController.getLocalController());
+        this.getContentPane().add(runsPane);
     }
 
 }
