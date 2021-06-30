@@ -597,7 +597,7 @@ public class ShadowController {
                         }
 
                         // try to convert the judgement string text to a corresponding acronym (returns null if judgementString is null or not found)
-                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronym(judgementString);
+                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(judgementString);
 
                         if (acronym == null) {
                             // we couldn't find a CLICS judgement matching the string;
@@ -609,7 +609,7 @@ public class ShadowController {
                                 judgementString = judgementString.substring(5); // strip off the "No - "
                             }
 
-                            acronym = CLICSJudgementType.getCLICSAcronym(judgementString);
+                            acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(judgementString);
 
                         }
 
@@ -922,5 +922,13 @@ public class ShadowController {
             }
         }
         return (result);
+    }
+
+    public IInternalContest getLocalContest() {
+        return localContest;
+    }
+
+    public IInternalController getLocalController() {
+        return localController;
     }
 }
