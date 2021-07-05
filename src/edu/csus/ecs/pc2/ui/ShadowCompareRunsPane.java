@@ -564,6 +564,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
      */
     protected boolean updateRun(Integer submissionId, CLICS_JUDGEMENT_ACRONYM newJudgement) {
 
+        log.log(Log.INFO, "Updating run " + submissionId + " to '" + newJudgement.name() + "'");
+        
         //get all the runs
         Run [] allRuns = getController().getContest().getRuns();
         
@@ -601,6 +603,11 @@ public class ShadowCompareRunsPane extends JPanePlugin {
 
                 //duplicate the existing RunResultFiles, with null executionData (since we haven't actually re-executed the run)
                 RunResultFiles runResultFiles = new RunResultFiles(targetRun, targetRun.getProblemId(), judgementRecord, null);
+                
+                log.log(Log.INFO, "Sending new JudgementRecord to PC2 server: "
+                        + " judgementId=" + judgementRecord.getJudgementId()
+                        + " elementId=" + judgementRecord.getElementId()
+                        + " isSolved=" + judgementRecord.isSolved());
                 
                 //update the run in PC2
                 getController().updateRun(targetRun, judgementRecord, runResultFiles);
