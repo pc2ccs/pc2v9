@@ -313,7 +313,7 @@ public class ShadowController {
     public Map<String, ShadowJudgementInfo> getJudgementComparisonInfo() {
         
         if (getStatus()!= SHADOW_CONTROLLER_STATUS.SC_RUNNING) {
-//            log.warning("Shadow Controller 'getJudgementComparisonInfo()' called when Shadow controller is not running"); 
+            log.warning("Shadow Controller 'getJudgementComparisonInfo()' called when Shadow controller is not running"); 
             return null;
         } else {
             log.info("Constructing Shadow Judgement comparisons");
