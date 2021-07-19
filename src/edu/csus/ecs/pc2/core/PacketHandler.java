@@ -2308,7 +2308,7 @@ public class PacketHandler {
 
                 securityCheck(Permission.Type.EDIT_RUN, packet.getSourceId(), connectionHandlerID);
 
-                if (isSuperUser(packet.getSourceId())) {
+                if (isSuperUser(packet.getSourceId())  || isFeederUser(packet.getSourceId())) {
                     info("updateRun by " + packet.getSourceId() + " " + run);
                     if (judgementRecord != null) {
                         RunResultFiles[] runResultFilesArray = contest.getRunResultFiles(run);
@@ -2326,7 +2326,7 @@ public class PacketHandler {
                     }
 
                 } else {
-                    throw new SecurityException("Non-admin user " + packet.getSourceId() + " attempted to update run " + run);
+                    throw new SecurityException("Non-privileged user " + packet.getSourceId() + " attempted to update run " + run);
                 }
 
                 Run theRun = contest.getRun(run.getElementId());
@@ -3159,6 +3159,10 @@ public class PacketHandler {
 
     private boolean isSuperUser(ClientId id) {
         return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
+    }
+
+    private boolean isFeederUser(ClientId id) {
+        return id.getClientType().equals(ClientType.Type.FEEDER);
     }
 
     public void cancelRun(Packet packet, Run run, ClientId whoCanceledRun, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
