@@ -21,8 +21,17 @@ public class ShadowCompareRunsFrame extends JFrame {
         Dimension size = new Dimension(600,600);
         this.setPreferredSize(size);
 //        this.setMinimumSize(size);
+        
         ShadowCompareRunsPane runsPane = new ShadowCompareRunsPane(shadowController);
-        runsPane.setContestAndController(shadowController.getLocalContest(), shadowController.getLocalController());
+        
+//        runsPane.setContestAndController(shadowController.getLocalContest(), shadowController.getLocalController());
+        //the above statement was moved into the ShadowCompareRunsPane() constructor, as follows:
+        //   this.setContestAndController(shadowController.getLocalContest(), shadowController.getLocalController());
+        // This allows the ShadowCompareRunsPane object to reference the contest and controller during construction, 
+        // rather than having to wait for some (non-guaranteed) external code to initialize the contest and controller.  
+        // (This fixes a Technical Deficit present in most other PC2 panes, which allow themselves to be constructed 
+        // in an invalid state -- existing but having no contest or controller with which to work.)
+
         this.getContentPane().add(runsPane);
     }
 
