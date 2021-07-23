@@ -42,9 +42,11 @@ import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.shadow.ShadowController;
@@ -76,6 +78,10 @@ public class ShadowCompareRunsPane extends JPanePlugin {
 
     private Log log;
 
+    private Run runWeRequestedServerToUpdate;
+
+    private boolean serverHasUpdatedOurRun;
+
     @Override
     public String getPluginTitle() {
         return "Shadow_Compare_Pane";
@@ -101,6 +107,11 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         
         this.log = shadowController.getLog();
         
+        this.setContestAndController(shadowController.getLocalContest(), shadowController.getLocalController());
+
+        //add a run listener so we can be notified when run edits which we invoke (during the "Resolve Run" operation) are completed
+        getContest().addRunListener(new RunListenerImplementation());
+
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         JLabel header = new JLabel("Comparison of PC2 vs. Remote Judgements");
         header.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -560,7 +571,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
      * @param submissionId the Id of the run to be updated.
      * 
      * @return true if the run was successfully updated; false if the run could not be updated for some reason 
-     *              (such as not being able to find the specified run).
+     *              (such as not being able to find the specified run, or the server failing to acknowledge a request
+     *              to edit/update the run).
      */
     protected boolean updateRun(Integer submissionId, CLICS_JUDGEMENT_ACRONYM newJudgement) {
 
@@ -611,6 +623,36 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 
                 //update the run in PC2
                 getController().updateRun(targetRun, judgementRecord, runResultFiles);
+                
+                runWeRequestedServerToUpdate = targetRun;
+                
+                // wait for the server to reply (i.e., to make a callback to the run listener) -- but only for up to 30 sec
+                int waitedMS = 0;
+                serverHasUpdatedOurRun = false;
+                while (!serverHasUpdatedOurRun && waitedMS < 30000) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        getLog().log(Log.WARNING, "Sleep interrupted while waiting for server response to Update Run request; ignoring.");
+                    }
+                    waitedMS += 100;
+                }
+            
+                //check if we got a reply from the server
+                if (serverHasUpdatedOurRun) {
+                    
+                    getLog().log(Log.INFO, "Received run updated notification from PC2 server for run " 
+                                    + runWeRequestedServerToUpdate.getNumber());
+                    
+                    //refresh the grid
+                    refreshResultsTable();
+                    
+                } else {
+                    //we didn't get a run-update notification from the server, so we must have gotten here due to a timeout 
+                    // in the above while-loop
+                    getLog().log(Log.WARNING, "Timeout while waiting for a response from the PC2 server to an Edit/Update Run request");
+                    return false;
+                }
                 
                 return true;
                 
@@ -729,6 +771,53 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         retStr += match ;
 
         return retStr;
+    }
+    
+    /**
+     * 
+     * 
+     * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
+     */
+    public class RunListenerImplementation implements IRunListener {
+
+        public void runAdded(RunEvent event) {
+            //we don't care about added runs; we're only interested in when runs get EDITED
+        }
+        
+        public void refreshRuns(RunEvent event) {
+            //we'll refresh when we get an Edited Run Updated notification for the run we requested to be edited
+        }
+
+        public void runChanged(RunEvent event) {
+
+            if (event != null) {
+                
+                //get the run for which we have received a server "changed" notification
+                Run updatedRun = event.getRun();
+                
+                //check if the run update was for the run we requested the server to update
+                if (updatedRun.getElementId().equals(runWeRequestedServerToUpdate.getElementId())) {
+                    
+                    serverHasUpdatedOurRun = true;
+                    
+                    //TODO: figure out how to deal with the possibility that the SAME run was edited/updated by something 
+                    // OTHER than our Edit Run request -- e.g. because an Admin or a Judge updated the run.
+                    
+                } else {
+                    //this was an update for some other run; ignore it
+                }
+                
+            } else {
+                //we got a null run during a runChanged event -- ignore it because we don't have access to the
+                // log in this (inner) class.
+            }
+                
+        }
+
+        public void runRemoved(RunEvent event) {
+            //TODO: what should the Shadow do if PC2 decides to remove a run??
+        }
+
     }
     
 }
