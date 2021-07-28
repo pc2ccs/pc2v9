@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -63,6 +64,8 @@ import edu.csus.ecs.pc2.shadow.ShadowJudgementPair;
 public class ShadowCompareRunsPane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
+    
+    private static final int RUN_UPDATE_REQUEST_SERVER_TIMEOUT_MILLIS = 30000;
     
     private ShadowController shadowController = null ;
     
@@ -341,10 +344,20 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 // resolve currently selected runs and refresh the results table
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        boolean changed = resolveSelectedRuns();
-                        if (changed) {
+                        
+                        //change to a wait-cursor
+                        Cursor savedCursor = getCursor();
+                        Cursor waitCursor = new Cursor(Cursor.WAIT_CURSOR);
+                        setCursor(waitCursor);
+                        
+                        //attempt to resolve the runs which are selected in the grid
+                        boolean atLeastOneRunWasChanged = resolveSelectedRuns();
+                        if (atLeastOneRunWasChanged) {
                             refreshResultsTable();
                         }
+                        
+                        //restore cursor
+                        setCursor(savedCursor);
                     }
                 });
             }
@@ -383,16 +396,16 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     /**
      * "Resolves" all currently selected runs by updating the run judgement in the PC2 Shadow to match
      * the judgement assigned by the remote Primary CCS.  Displays a warning dialog and requires confirmation
-     * prior to actually updating the runs in PC2; displays an error dialog if there are no runs currently selected.
+     * prior to actually updating the runs in PC2; displays an error dialog if there are no runs currently selected
+     * in the grid or if the current account does not have the "Edit Runs" permission.
      * 
      * @return true if one or more runs were "resolved" (updated in PC2); false if no runs were changed.
      */
     private boolean resolveSelectedRuns() {
         
         //make sure there are some runs selected
-        if (runsAreSelected()) {
+        if (!runsAreSelected()) {
             
-        } else {
             //display error dialog
             JOptionPane.showMessageDialog(this, "There are no runs selected for resolving.", "No runs selected; nothing to resolve", JOptionPane.ERROR_MESSAGE);
             return false ;
@@ -418,14 +431,21 @@ public class ShadowCompareRunsPane extends JPanePlugin {
             
             if (isAllowedEditRun()) {
                 
-                //update the selected runs
-                boolean result = updateSelectedRuns();
-                if (result) {
-                    log.log(Log.INFO, "Updated judgements in selected runs");
+                //try to update the runs which are currently selected in the grid
+                int numRunsUpdated = updateSelectedRuns();
+                
+                //check whether some runs were updated
+                if (numRunsUpdated > 0) {
+                    
+                    log.log(Log.INFO, "Updated judgements in " + numRunsUpdated + " selected runs");  
+                    return true;
+                    
                 } else {
-                    log.log(Log.WARNING, "Update of selected run judgements failed");
+                    
+                    //no runs got updated
+                    log.log(Log.WARNING, "" + selectedRunCount + " runs were selected for updating but " + numRunsUpdated + " were actually updated");
+                    return false;
                 }
-                return result;
                 
             } else {
                 
@@ -494,15 +514,15 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     }
 
     /**
-     * Processes each currently-selected row in the runs table by updating the PC2 judgement for that
-     * row to match the judgements specified by the remote (Primary) CCS, unless either PC2 or the
+     * Processes each currently-selected row in the runs table by invoking the PC2 server to update the judgement for the submission
+     * listed in that row to match the judgement specified by the remote (Primary) CCS, unless either PC2 or the
      * remote CCS shows the judgement as "Pending".
      * 
-     * @return true if all the currently-selected runs were successfully updated; false if not.
+     * @return a count of the number of runs that were successfully updated.
      * 
      * 
      */
-    private boolean updateSelectedRuns() {
+    private int updateSelectedRuns() {
 
         //debug:
         System.out.println ("Updating the following " + getCountOfSelectedRuns() + " runs in PC2:");
@@ -521,7 +541,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         for (int modelRow : modelRowIndices) {
             
             //get the next submission id
-            //TODO: use an Enum for columnIds instead of hard-coded integers which can change if the table is rearranged
+            //TODO: use an Enum for columnIds instead of hard-coded integers, which can change if the table is rearranged
             Integer nextSubmissionId = (Integer) resultsTable.getModel().getValueAt(modelRow, 3); // 3=SubmissionID
 
             //add the submissionID to the map of submissions to be updated, attaching its model row number
@@ -532,7 +552,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
             
         }
         
-        boolean success = true;
+        int numRunsUpdated = 0;
         for (int submissionId : submissionIdMap.keySet()) {
                         
             //make sure the run is not "Pending" in either system
@@ -545,7 +565,6 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 JOptionPane.showMessageDialog(this, "Cannot update submission " + submissionId + " because it still has judgements Pending", 
                                                     "Submission judgement Pending", JOptionPane.WARNING_MESSAGE);
                 log.log (Log.INFO, "Attempted to update pending submission: " + submissionId);
-                success = false;
                 
             } else {
             
@@ -558,7 +577,11 @@ public class ShadowCompareRunsPane extends JPanePlugin {
 
                     // run is not pending in either system and the remote judgement is a valid CLICS judgement; 
                     // attempt to update PC2 to match remote CCS judgement
-                    success &= updateRun(submissionId, judgementAcronym);
+                    boolean success = updateRun(submissionId, judgementAcronym);
+                    
+                    if (success) {
+                        numRunsUpdated++;
+                    }
                     
                 } else {
                     
@@ -566,13 +589,13 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                     JOptionPane.showMessageDialog(this, "Cannot update submission " + submissionId + ": invalid remote judgement: " + remoteJudgement, 
                                                         "Invalid judgement acronym", JOptionPane.WARNING_MESSAGE);
                     log.log (Log.INFO, "Attempted to update pending submission: " + submissionId);
-                    success = false;
+
                 }
             }
         }
         
-        //return true iff every selected run was successfully updated
-        return success;
+        //return the count of successfully updated runs
+        return numRunsUpdated;
         
     }
 
@@ -584,7 +607,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
      * 
      * @return true if the run was successfully updated; false if the run could not be updated for some reason 
      *              (such as not being able to find the specified run, or the server failing to acknowledge a request
-     *              to edit/update the run).
+     *              to edit/update the run within the server-timeout-limit).
      */
     protected boolean updateRun(Integer submissionId, CLICS_JUDGEMENT_ACRONYM newJudgement) {
 
@@ -641,7 +664,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 // wait for the server to reply (i.e., to make a callback to the run listener) -- but only for up to 30 sec
                 int waitedMS = 0;
                 serverHasUpdatedOurRun = false;
-                while (!serverHasUpdatedOurRun && waitedMS < 30000) {
+                while (!serverHasUpdatedOurRun && waitedMS < RUN_UPDATE_REQUEST_SERVER_TIMEOUT_MILLIS) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -654,26 +677,22 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 if (serverHasUpdatedOurRun) {
                     
                     getLog().log(Log.INFO, "Received run updated notification from PC2 server for run " 
-                                    + runWeRequestedServerToUpdate.getNumber());
-                    
-                    //refresh the grid
-                    probably don't want to refresh here; wait until ALL runs have been processed
-                    refreshResultsTable();
+                                    + runWeRequestedServerToUpdate.getNumber() );
+                    return true;
                     
                 } else {
                     //we didn't get a run-update notification from the server, so we must have gotten here due to a timeout 
                     // in the above while-loop
-                    getLog().log(Log.WARNING, "Timeout while waiting for a response from the PC2 server to an Edit/Update Run request");
+                    getLog().log(Log.WARNING, "Timeout while waiting for a response from the PC2 server following a request to Edit/Update run "
+                                                + runWeRequestedServerToUpdate.getNumber() );
                     return false;
                 }
-                
-                return true;
-                
             }
         }
         
         //we failed to find a matching judgement
-        JOptionPane.showMessageDialog(this, "Failed to find PC2 Judgement corresponding to Remote CCS Judgement for submission " + submissionId, "No such judgement", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Failed to find PC2 Judgement corresponding to Remote CCS Judgement for submission " + submissionId, 
+                                            "No such judgement", JOptionPane.WARNING_MESSAGE);
         log.log (Log.WARNING, "Failed to find PC2 Judgement corresponding to Remote CCS Judgement for submission " + submissionId);
         return false;
         
