@@ -11,6 +11,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.Box;
@@ -515,17 +516,27 @@ public class ShadowCompareRunsPane extends JPanePlugin {
             modelRowIndices[i] = resultsTable.convertRowIndexToModel(viewRowIndices[i]);
         }
         
-        boolean result = true;
+        //build a map of the submissionIds of all the selected runs (rows) and the corresponding model row
+        HashMap<Integer, Integer> submissionIdMap = new HashMap<Integer,Integer>();
         for (int modelRow : modelRowIndices) {
             
-            //get the run id
+            //get the next submission id
             //TODO: use an Enum for columnIds instead of hard-coded integers which can change if the table is rearranged
-            Integer submissionId = (Integer) resultsTable.getModel().getValueAt(modelRow, 3); // 3=SubmissionID
+            Integer nextSubmissionId = (Integer) resultsTable.getModel().getValueAt(modelRow, 3); // 3=SubmissionID
 
-            //debug:
-            System.out.println ("   Submision ID: " + submissionId);
+            //add the submissionID to the map of submissions to be updated, attaching its model row number
+            submissionIdMap.put(nextSubmissionId, modelRow);
             
+            //debug:
+            System.out.println ("   Submision ID: " + nextSubmissionId);
+            
+        }
+        
+        boolean success = true;
+        for (int submissionId : submissionIdMap.keySet()) {
+                        
             //make sure the run is not "Pending" in either system
+            Integer modelRow = submissionIdMap.get(submissionId);
             String pc2Judgement = (String) resultsTable.getModel().getValueAt(modelRow, 4);      // 4 = PC2 Judgment
             String remoteJudgement = (String) resultsTable.getModel().getValueAt(modelRow, 5);   // 5=remote CCS judgement
             
@@ -534,7 +545,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 JOptionPane.showMessageDialog(this, "Cannot update submission " + submissionId + " because it still has judgements Pending", 
                                                     "Submission judgement Pending", JOptionPane.WARNING_MESSAGE);
                 log.log (Log.INFO, "Attempted to update pending submission: " + submissionId);
-                result = false;
+                success = false;
                 
             } else {
             
@@ -547,7 +558,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
 
                     // run is not pending in either system and the remote judgement is a valid CLICS judgement; 
                     // attempt to update PC2 to match remote CCS judgement
-                    result &= updateRun(submissionId, judgementAcronym);
+                    success &= updateRun(submissionId, judgementAcronym);
                     
                 } else {
                     
@@ -555,13 +566,13 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                     JOptionPane.showMessageDialog(this, "Cannot update submission " + submissionId + ": invalid remote judgement: " + remoteJudgement, 
                                                         "Invalid judgement acronym", JOptionPane.WARNING_MESSAGE);
                     log.log (Log.INFO, "Attempted to update pending submission: " + submissionId);
-                    result = false;
+                    success = false;
                 }
             }
         }
         
         //return true iff every selected run was successfully updated
-        return result;
+        return success;
         
     }
 
@@ -569,6 +580,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
      * Invokes the PC2 server to update the status of the specified run to match the specified judgement.
      * 
      * @param submissionId the Id of the run to be updated.
+     * @param newJudgement the judgement which should be applied to the specified run.
      * 
      * @return true if the run was successfully updated; false if the run could not be updated for some reason 
      *              (such as not being able to find the specified run, or the server failing to acknowledge a request
@@ -645,6 +657,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                                     + runWeRequestedServerToUpdate.getNumber());
                     
                     //refresh the grid
+                    probably don't want to refresh here; wait until ALL runs have been processed
                     refreshResultsTable();
                     
                 } else {
