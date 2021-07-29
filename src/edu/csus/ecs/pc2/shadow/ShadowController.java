@@ -190,8 +190,8 @@ public class ShadowController {
         log = getLog();
         
         log.info("Starting shadowing for URL '"+ remoteCCSURLString + "' using login '" + remoteCCSLogin + "'");
-        System.out.println ("ShadowController: starting shadowing for URL '" + remoteCCSURLString 
-                            + "' using login '" + remoteCCSLogin + "'");
+//        System.out.println ("ShadowController: starting shadowing for URL '" + remoteCCSURLString 
+//                            + "' using login '" + remoteCCSLogin + "'");
         
         setStatus(SHADOW_CONTROLLER_STATUS.SC_STARTING);
         

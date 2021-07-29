@@ -554,7 +554,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     private int updateSelectedRuns() {
 
         //debug:
-        System.out.println ("Updating the following " + getCountOfSelectedRuns() + " runs in PC2:");
+//        System.out.println ("Updating the following " + getCountOfSelectedRuns() + " runs in PC2:");
         
         //get JTable (view) row indices
         int [] viewRowIndices = resultsTable.getSelectedRows();
@@ -577,7 +577,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
             submissionIdMap.put(nextSubmissionId, modelRow);
             
             //debug:
-            System.out.println ("   Submision ID: " + nextSubmissionId);
+//            System.out.println ("   Submision ID: " + nextSubmissionId);
             
         }
         
@@ -775,7 +775,9 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                         bw.write(data);
                         bw.newLine();
                     }
-                    System.out.println ("Wrote Shadow Comparison data to file '" + saveFile.getName() + "'");
+                    
+                    getLog().log(Log.INFO, "Wrote Shadow Comparison data to file '" + saveFile.getName() + "'");
+//                    System.out.println ("Wrote Shadow Comparison data to file '" + saveFile.getName() + "'");
 
                } catch (IOException ioe) {
                    ioe.printStackTrace();
