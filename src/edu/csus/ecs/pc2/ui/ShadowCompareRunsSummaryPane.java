@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.shadow.ShadowJudgementInfo;
  * @author John Clevenger -- PC^2 Development Team (pc2@ecs.csus.edu)
  *
  */
-public class ShadowCompareSummaryPane extends JPanel {
+public class ShadowCompareRunsSummaryPane extends JPanel {
 
     private static final long serialVersionUID = 1L;
     
@@ -43,13 +43,13 @@ public class ShadowCompareSummaryPane extends JPanel {
 
     
     /**
-     * Construct a ShadowCompareSummaryPane displaying a summary of the information contained in the
+     * Construct a ShadowCompareRunsSummaryPane displaying a summary of the information contained in the
      * specified ShadowJudgementInfo map.  If the specified map is null then the summary pane will contain
      * a message that no summary information is available.
      * 
      * @param currentJudgementMap a map containing the shadow judgement information to be summarized and displayed in this pane.
      */
-    public ShadowCompareSummaryPane(Map<String, ShadowJudgementInfo> currentJudgementMap) {
+    public ShadowCompareRunsSummaryPane(Map<String, ShadowJudgementInfo> currentJudgementMap) {
         
         this.setMaximumSize(new Dimension(600,40));
        
@@ -58,7 +58,7 @@ public class ShadowCompareSummaryPane extends JPanel {
     }
     
     /**
-     * Updates this {@link ShadowCompareSummaryPane} with summary data taken from the specified map.
+     * Updates this {@link ShadowCompareRunsSummaryPane} with summary data taken from the specified map.
      * If the specified map is null a message to that effect is instead displayed in the pane.
      * 
      * Note that this method is called from the class constructor, but may also be called from external code

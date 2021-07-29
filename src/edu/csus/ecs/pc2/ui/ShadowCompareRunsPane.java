@@ -77,7 +77,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     private JTable resultsTable = null ;
     
     //a pane displaying a summary of the current judgement comparison status
-    private ShadowCompareSummaryPane summaryPanel = null ;
+    private ShadowCompareRunsSummaryPane summaryPanel = null ;
 
     private String lastDirectory = ".";
 
@@ -316,10 +316,10 @@ public class ShadowCompareRunsPane extends JPanePlugin {
      *  
      * @return a JPanel containing a submission comparison summary
      */
-    private ShadowCompareSummaryPane getSummaryPanel() {
+    private ShadowCompareRunsSummaryPane getSummaryPanel() {
         
         if (summaryPanel==null) {
-            summaryPanel = new ShadowCompareSummaryPane(currentJudgementMap);
+            summaryPanel = new ShadowCompareRunsSummaryPane(currentJudgementMap);
         }
         
         return summaryPanel;
