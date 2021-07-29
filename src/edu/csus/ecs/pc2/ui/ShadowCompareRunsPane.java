@@ -44,6 +44,7 @@ import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -246,16 +247,44 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 data[row][5] = curPair.getRemoteCCSJudgement();
             }
             
+            //set default "match" and "overridden" entries
             data[row][6] = "---";
+            data[row][7] = "---";
+            
+            //check if run is not "pending"
             if (data[row][4]!=null && data[row][5]!=null) {
                 if (!((String)data[row][4]).toLowerCase().contains("pending") &&
                     !((String)data[row][5]).toLowerCase().contains("pending") ) {
                     
+                    //run is not pending (either in PC2 or in Remote CCS), so:
+                    
+                    //update "match" column
                     data[row][6] = ((String) data[row][4]).equalsIgnoreCase((String) data[row][5]) ? "Y" : "N";
+                    
+                    //update "overridden?" column
+                    ClientId judger = curJudgementInfo.getJudgerID();
+                    
+                    if (judger != null) {
+                        
+                        //check if the most recent judgement came from a Feeder (shadow) client
+                        if (judger.getClientType().equals(ClientType.Type.FEEDER)) {
+                            
+                            //a feeder client has overridden the original judgment
+                            data[row][7] = "Y";
+
+                        } else {
+                            
+                            //the most recent judgement was not applied by a feeder
+                            data[row][7] = "N";
+                        }
+                            
+                    } else {
+                        //no judgement yet in PC2; retain default "---" entry in "Overridden?" column
+                        // (i.e., do nothing)
+                    }  
                 }
             }
             
-            data[row][7] = "N";
 
             row++;
         }
