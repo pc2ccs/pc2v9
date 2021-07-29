@@ -571,7 +571,7 @@ public class ShadowController {
 
                 if (run.isJudged()) {
 
-                    // get the judgement assigned to the run by PC2
+                    // get the most recent judgement assigned to the run in PC2
                     JudgementRecord jr = run.getJudgementRecord();
 
                     if (jr != null) {
@@ -614,6 +614,9 @@ public class ShadowController {
                         }
 
                         if (acronym != null) {
+                            
+                            //get the id of who applied the most recent judgement
+                            ClientId judgerClientID = jr.getJudgerClientId();
 
                             // assign PC2 judgement, plus a "pending" for remote judgement (to be filled in later)
                             ShadowJudgementPair pair = new ShadowJudgementPair(submissionId, acronym.name(), "<pending>");
@@ -622,7 +625,7 @@ public class ShadowController {
 //                            System.out.println("  submissionID=" + submissionId + " teamID=" + teamID + " problemID=" + problemID + " languageID=" + languageID 
 //                                    + " pc2Judgement=" + acronym.name() + " remoteJudgement=" + "<pending>");
 
-                            ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, pair);
+                            ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, judgerClientID, pair);
 
                             pc2JudgementInfoMap.put(submissionId, info);
 
@@ -638,9 +641,9 @@ public class ShadowController {
 
                 } else {
                     
-                    // we have a run which has not yet been judged by PC2; assign "pending" for both the PC2 and remote judgement
+                    // we have a run which has not yet been judged by PC2; assign "pending" for both the PC2 and remote judgement and null for the judgerId
                     ShadowJudgementPair pair = new ShadowJudgementPair(submissionId, "<pending>", "<pending>");
-                    ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, pair);
+                    ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, null, pair);
                     
 //                    System.out.print("Debug: adding to judgementsMap: ");
 //                    System.out.println("  submissionID=" + submissionId + " teamID=" + teamID + " problemID=" + problemID + " languageID=" + languageID 
