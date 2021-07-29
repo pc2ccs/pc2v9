@@ -104,7 +104,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
      * @param shadowController a ShadowController used to obtain a Mapping of submission IDs to ShadowJudgementInfo objects
      */
     public ShadowCompareRunsPane(ShadowController shadowController) {
-        Dimension size = new Dimension(600,600);
+        Dimension size = new Dimension(700,700);
         this.setPreferredSize(size);
         this.setMinimumSize(size);
         

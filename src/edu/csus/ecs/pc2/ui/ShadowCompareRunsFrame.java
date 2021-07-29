@@ -18,7 +18,7 @@ public class ShadowCompareRunsFrame extends JFrame {
     private static final long serialVersionUID = 1L;
     
     public ShadowCompareRunsFrame(ShadowController shadowController) {
-        Dimension size = new Dimension(600,600);
+        Dimension size = new Dimension(750,750);
         this.setPreferredSize(size);
 //        this.setMinimumSize(size);
         
