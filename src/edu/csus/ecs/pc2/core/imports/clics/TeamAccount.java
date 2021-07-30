@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.imports.clics;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +31,7 @@ public class TeamAccount {
     private String organization_id;
 
     @JsonProperty
-    private String group_ids;
+    private List< String> group_ids;
 
     // {"id": "1", "icpc_id": "449759", "name": "Kansas State University", "display_name": "Kansas State University", "organization_id": "k-state_edu", "group_ids": ["4"]},
     /**
@@ -77,14 +79,15 @@ public class TeamAccount {
         this.organization_id = organization_id;
     }
 
-    public String getGroup_ids() {
+   
+    public List<String> getGroup_ids() {
         return group_ids;
     }
-
-    public void setGroup_ids(String group_ids) {
+    
+    public void setGroup_ids(List<String> group_ids) {
         this.group_ids = group_ids;
     }
-
+    
     public String toJSON() throws JsonProcessingException {
 
         ObjectMapper om = JSONObjectMapper.getObjectMapper();
