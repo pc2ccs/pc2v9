@@ -36,6 +36,12 @@ public class CreateTeamsTSVTest extends AbstractTestCase {
         assertEquals("Expected teams", 171, list.size());
     }
     
+    
+    /**
+     * Test create 
+     * @throws Exception
+     */
+    
     public void testWriteTSVFiles() throws Exception {
         String dataDir = getDataDirectory("testloadAccounts");
         String name = dataDir + File.separator + CreateTeamsTSV.TEAMS_JSON_FILENAME;
@@ -59,7 +65,7 @@ public class CreateTeamsTSVTest extends AbstractTestCase {
         String grOutName = outdir + File.separator + CreateTeamsTSV.GROUPS_TSV_FILENAME;
         assertFileExists(grOutName);
         
-        startExplorer(outdir);
+//        startExplorer(outdir);
 //      editFile(name);
 
     }
