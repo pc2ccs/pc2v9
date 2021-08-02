@@ -707,6 +707,10 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                     
                     getLog().log(Log.INFO, "Received run updated notification from PC2 server for run " 
                                     + runWeRequestedServerToUpdate.getNumber() );
+                    
+                    //we are no longer waiting for a server run update
+                    runWeRequestedServerToUpdate = null;
+                    
                     return true;
                     
                 } else {
@@ -714,6 +718,11 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                     // in the above while-loop
                     getLog().log(Log.WARNING, "Timeout while waiting for a response from the PC2 server following a request to Edit/Update run "
                                                 + runWeRequestedServerToUpdate.getNumber() );
+                    
+                    //we don't want to be waiting any longer for this run to be updated -- but we need to make sure 
+                    // possible subsequent updates by other clients don't appear to be updates we requested
+                    runWeRequestedServerToUpdate = null;
+                    
                     return false;
                 }
             }
