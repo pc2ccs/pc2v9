@@ -858,21 +858,36 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 //get the run for which we have received a server "changed" notification
                 Run updatedRun = event.getRun();
                 
-                //check if the run update was for the run we requested the server to update
-                if (updatedRun.getElementId().equals(runWeRequestedServerToUpdate.getElementId())) {
+                if (updatedRun != null) {
                     
-                    serverHasUpdatedOurRun = true;
-                    
-                    //TODO: figure out how to deal with the possibility that the SAME run was edited/updated by something 
-                    // OTHER than our Edit Run request -- e.g. because an Admin or a Judge updated the run.
+                    //make sure we're currently waiting for a server update (this event could be due to some other client)
+                    if (runWeRequestedServerToUpdate != null) {
+                        
+                        //check if the run update was for the run we requested the server to update
+                        if (updatedRun.getElementId().equals(runWeRequestedServerToUpdate.getElementId())) {
+
+                            serverHasUpdatedOurRun = true;
+                            runWeRequestedServerToUpdate = null;
+
+                            //TODO: figure out how to deal with the possibility that the SAME run was edited/updated by something 
+                            // OTHER than our Edit Run request -- e.g. because an Admin or a Judge updated the run.
+
+                        } else {
+                            //this was an update for some other run; ignore it
+                        }
+                        
+                    } else {
+                        //we're not waiting for a server update; ignore this update
+                    }
                     
                 } else {
-                    //this was an update for some other run; ignore it
+                    //we got an event with a null run
+                    getLog().log(Log.WARNING, "Run is null in ShadowCompareRunsPane RunListener.runChanged() method");
                 }
                 
             } else {
-                //we got a null run during a runChanged event -- ignore it because we don't have access to the
-                // log in this (inner) class.
+                //we got a null event
+                getLog().log(Log.WARNING, "RunEvent is null in ShadowCompareRunsPane RunListener.runChanged() method");
             }
                 
         }
