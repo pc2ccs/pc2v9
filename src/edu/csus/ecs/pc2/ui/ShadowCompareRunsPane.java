@@ -867,7 +867,6 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                         if (updatedRun.getElementId().equals(runWeRequestedServerToUpdate.getElementId())) {
 
                             serverHasUpdatedOurRun = true;
-                            runWeRequestedServerToUpdate = null;
 
                             //TODO: figure out how to deal with the possibility that the SAME run was edited/updated by something 
                             // OTHER than our Edit Run request -- e.g. because an Admin or a Judge updated the run.
