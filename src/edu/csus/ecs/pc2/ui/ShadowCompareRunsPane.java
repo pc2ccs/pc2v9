@@ -683,7 +683,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 log.log(Log.INFO, "Sending new JudgementRecord to PC2 server: "
                         + " judgementId=" + judgementRecord.getJudgementId()
                         + " elementId=" + judgementRecord.getElementId()
-                        + " isSolved=" + judgementRecord.isSolved());
+                        + " isSolved=" + judgementRecord.isSolved()
+                        + " for run " + targetRun);
                 
                 //update the run in PC2
                 getController().updateRun(targetRun, judgementRecord, runResultFiles);
