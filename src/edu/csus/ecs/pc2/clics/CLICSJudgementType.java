@@ -175,7 +175,8 @@ public class CLICSJudgementType {
     }
     
     /**
-     * An enumeration of all the acronyms which represent correct ("yes", "accepted") submission judgements.
+     * An enumeration of all the acronyms which represent correct submission judgements (that is, judgements which represent
+     * a 'yes' or 'accepted' condition assigned by a judge).
      * 
      * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
      *
