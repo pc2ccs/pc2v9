@@ -660,7 +660,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         if (!found) {
             
             JOptionPane.showMessageDialog(this, "Failed to find submission " + submissionId, "Submission not found", JOptionPane.WARNING_MESSAGE);
-            log.log (Log.WARNING, "Failed to find run to be updated: " + submissionId);
+            log.log (Log.WARNING, "Failed to find run to be updated: submission " + submissionId + " not found in run list.");
             return false;
         }
         
