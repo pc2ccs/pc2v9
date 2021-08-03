@@ -763,7 +763,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                     try {
                         saveFile.createNewFile();
                     } catch (IOException e) {
-                        log.log(Log.SEVERE, "Exception saving file: " + e.getMessage(), e);
+                        log.log(Log.SEVERE, "Exception saving judgement comparison CSV file: " + e.getMessage(), e);
                     }
                 }
 
