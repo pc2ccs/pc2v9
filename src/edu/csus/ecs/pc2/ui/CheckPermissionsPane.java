@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -94,13 +93,6 @@ public class CheckPermissionsPane extends JPanePlugin {
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
-    }
-
-    public void showMessage(final String message) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-            }
-        });
     }
 
 }
