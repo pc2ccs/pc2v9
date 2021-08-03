@@ -18,11 +18,14 @@ public class ShadowCompareRunsFrame extends JFrame {
     private static final long serialVersionUID = 1L;
     
     public ShadowCompareRunsFrame(ShadowController shadowController) {
+        setMinimumSize(new Dimension(750, 900));
         Dimension size = new Dimension(750,750);
         this.setPreferredSize(size);
 //        this.setMinimumSize(size);
         
         ShadowCompareRunsPane runsPane = new ShadowCompareRunsPane(shadowController);
+        runsPane.setMinimumSize(new Dimension(750, 900));
+        runsPane.setPreferredSize(new Dimension(750, 900));
         
 //        runsPane.setContestAndController(shadowController.getLocalContest(), shadowController.getLocalController());
         //the above statement was moved into the ShadowCompareRunsPane() constructor, as follows:
