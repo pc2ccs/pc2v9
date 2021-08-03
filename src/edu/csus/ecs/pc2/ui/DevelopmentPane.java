@@ -33,7 +33,7 @@ public class DevelopmentPane extends JPanePlugin {
     
     private SubmitSubmissionsPane submitSubmissionsPane = new SubmitSubmissionsPane();
     
-    private CheckPermissionsPane checkPermissionsPane = new CheckPermissionsPane();
+    private DisplayPermissionsPane displayPermissionsPane = new DisplayPermissionsPane();
     
    public DevelopmentPane() {
         super();
@@ -58,7 +58,7 @@ public class DevelopmentPane extends JPanePlugin {
 
         tabbedPane.addTab("Options", null, optionsPane, null);
         
-        tabbedPane.addTab("Check Permissions", null, checkPermissionsPane, null);
+        tabbedPane.addTab("Check Permissions", null, displayPermissionsPane, null);
         
    }
 
@@ -78,7 +78,7 @@ public class DevelopmentPane extends JPanePlugin {
         contestScheduledStartClockPane.setContestAndController(inContest, inController);
         contestClockAllPane.setContestAndController(inContest, inController);
         submitSubmissionsPane.setContestAndController(inContest, inController);
-        checkPermissionsPane.setContestAndController(inContest, inController);
+        displayPermissionsPane.setContestAndController(inContest, inController);
     }
     
 

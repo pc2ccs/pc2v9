@@ -23,11 +23,11 @@ import edu.csus.ecs.pc2.core.security.Permission;
  * 
  * @author John Clevenger, PC^2 Development Team (pc2@ecs.csus.edu).
  */
-public class CheckPermissionsPane extends JPanePlugin {
+public class DisplayPermissionsPane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
 
-    public CheckPermissionsPane() {
+    public DisplayPermissionsPane() {
         super();
         this.setLayout(new BorderLayout(0, 0));
 
