@@ -9,6 +9,8 @@ import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.shadow.ShadowJudgementInfo;
 
 /**
@@ -18,7 +20,7 @@ import edu.csus.ecs.pc2.shadow.ShadowJudgementInfo;
  * @author John Clevenger -- PC^2 Development Team (pc2@ecs.csus.edu)
  *
  */
-public class ShadowCompareSummaryPane extends JPanel {
+public class ShadowCompareRunsSummaryPane extends JPanel {
 
     private static final long serialVersionUID = 1L;
     
@@ -31,28 +33,32 @@ public class ShadowCompareSummaryPane extends JPanel {
     private JLabel nonMatchCountLabel = null;
     private final String NON_MATCH_COUNT_TEXT = "Non-matches: " ;
     
+    private JLabel overriddenCountLabel = null;
+    private final String OVERRIDDEN_COUNT_TEXT = "Overridden: " ;    
+    
     private JLabel pendingCountLabel = null;
     private final String PENDING_COUNT_TEXT = "Pending: " ;
 
     private boolean currentlyShowingNoSummaryAvailable = false;
+
     
     /**
-     * Construct a ShadowCompareSummaryPane displaying a summary of the information contained in the
+     * Construct a ShadowCompareRunsSummaryPane displaying a summary of the information contained in the
      * specified ShadowJudgementInfo map.  If the specified map is null then the summary pane will contain
      * a message that no summary information is available.
      * 
      * @param currentJudgementMap a map containing the shadow judgement information to be summarized and displayed in this pane.
      */
-    public ShadowCompareSummaryPane(Map<String, ShadowJudgementInfo> currentJudgementMap) {
+    public ShadowCompareRunsSummaryPane(Map<String, ShadowJudgementInfo> currentJudgementMap) {
         
-        this.setMaximumSize(new Dimension(500,40));
+        this.setMaximumSize(new Dimension(600,40));
        
         updateSummary(currentJudgementMap);
 
     }
     
     /**
-     * Updates this {@link ShadowCompareSummaryPane} with summary data taken from the specified map.
+     * Updates this {@link ShadowCompareRunsSummaryPane} with summary data taken from the specified map.
      * If the specified map is null a message to that effect is instead displayed in the pane.
      * 
      * Note that this method is called from the class constructor, but may also be called from external code
@@ -80,29 +86,39 @@ public class ShadowCompareSummaryPane extends JPanel {
             }
             submissionCountLabel.setText(SUBMISSION_COUNT_TEXT + new Integer(submissionCount).toString());
             
-            //calculate the number of matching/non-matching/pending judgements
+            //initialize the number of matching/non-matching/overridden/pending judgements
             int match = 0;
-            int noMatch = 0;
+            int nonMatch = 0;
+            int overridden = 0;
             int pending = 0;
+            
+            //check each submission
             for (String submissionID : currentJudgementMap.keySet()) {
 
+                //get the current judgements (if any) applied to the submission
                 String pc2Judgement = currentJudgementMap.get(submissionID).getShadowJudgementPair().getPc2Judgement();
                 String remoteJudgement = currentJudgementMap.get(submissionID).getShadowJudgementPair().getRemoteCCSJudgement();
-                if (pc2Judgement != null && remoteJudgement != null && 
-                        !(pc2Judgement.contains("pending")) && !(remoteJudgement.contains("pending")) &&
-                         (pc2Judgement.equalsIgnoreCase(remoteJudgement))) {
-                    match++;
+                
+                //if either judgement is null or "pending", count as a pending run
+                if (pc2Judgement == null || remoteJudgement == null || pc2Judgement.contains("pending") || remoteJudgement.contains("pending")) {
+                    
+                    pending++ ;
+                    
                 } else {
-                    //it's not a match; separate out "pendings"
-                    if (   (pc2Judgement!=null && pc2Judgement.contains("pending")) ||
-                           (remoteJudgement!=null && remoteJudgement.contains("pending")) ) {
-                        pending++;
+                    
+                    //run is not pending; check if it's a match
+                    if (pc2Judgement.equalsIgnoreCase(remoteJudgement)) {
+                        match++ ;
                     } else {
-                        //it can't be counted "pending" either by virtue of the PC2 status or the Remote status; count as "noMatch"
-                        // TODO: filter out late/deleted submissions into a separate category?
-                        noMatch++;
+                        nonMatch++ ;
                     }
-                }
+                    
+                    //run is not pending; check if it has a judgement which was overridden by a Feeder client
+                    ClientId judger = currentJudgementMap.get(submissionID).getJudgerID();
+                    if (judger!=null && judger.getClientType().equals(ClientType.Type.FEEDER)) {
+                        overridden++;
+                    }
+                } 
             }
             
             Component horizontalStrut_2 = Box.createHorizontalStrut(15);
@@ -123,8 +139,18 @@ public class ShadowCompareSummaryPane extends JPanel {
                 nonMatchCountLabel = new JLabel();
                 this.add(nonMatchCountLabel);
             }
-            nonMatchCountLabel.setText(NON_MATCH_COUNT_TEXT + noMatch);
+            nonMatchCountLabel.setText(NON_MATCH_COUNT_TEXT + nonMatch);
 
+            Component horizontalStrut_5 = Box.createHorizontalStrut(15);
+            this.add(horizontalStrut_5);
+            
+            //show the overridden count (note that labels may have been removed by a previous call with a null judgement map)
+            if (overriddenCountLabel==null) {
+                overriddenCountLabel = new JLabel();
+                this.add(overriddenCountLabel);
+            }
+            overriddenCountLabel.setText(OVERRIDDEN_COUNT_TEXT + overridden);
+            
             Component horizontalStrut_4 = Box.createHorizontalStrut(15);
             this.add(horizontalStrut_4);
             
@@ -134,6 +160,8 @@ public class ShadowCompareSummaryPane extends JPanel {
                 this.add(pendingCountLabel);
             }
             pendingCountLabel.setText(PENDING_COUNT_TEXT + pending);
+            
+            
 
         } else {
             //we have a null judgement map

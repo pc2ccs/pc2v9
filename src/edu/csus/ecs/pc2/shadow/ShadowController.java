@@ -190,8 +190,8 @@ public class ShadowController {
         log = getLog();
         
         log.info("Starting shadowing for URL '"+ remoteCCSURLString + "' using login '" + remoteCCSLogin + "'");
-        System.out.println ("ShadowController: starting shadowing for URL '" + remoteCCSURLString 
-                            + "' using login '" + remoteCCSLogin + "'");
+//        System.out.println ("ShadowController: starting shadowing for URL '" + remoteCCSURLString 
+//                            + "' using login '" + remoteCCSLogin + "'");
         
         setStatus(SHADOW_CONTROLLER_STATUS.SC_STARTING);
         
@@ -313,7 +313,7 @@ public class ShadowController {
     public Map<String, ShadowJudgementInfo> getJudgementComparisonInfo() {
         
         if (getStatus()!= SHADOW_CONTROLLER_STATUS.SC_RUNNING) {
-//            log.warning("Shadow Controller 'getJudgementComparisonInfo()' called when Shadow controller is not running"); 
+            log.warning("Shadow Controller 'getJudgementComparisonInfo()' called when Shadow controller is not running"); 
             return null;
         } else {
             log.info("Constructing Shadow Judgement comparisons");
@@ -571,7 +571,7 @@ public class ShadowController {
 
                 if (run.isJudged()) {
 
-                    // get the judgement assigned to the run by PC2
+                    // get the most recent judgement assigned to the run in PC2
                     JudgementRecord jr = run.getJudgementRecord();
 
                     if (jr != null) {
@@ -597,7 +597,7 @@ public class ShadowController {
                         }
 
                         // try to convert the judgement string text to a corresponding acronym (returns null if judgementString is null or not found)
-                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronym(judgementString);
+                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(judgementString);
 
                         if (acronym == null) {
                             // we couldn't find a CLICS judgement matching the string;
@@ -609,11 +609,14 @@ public class ShadowController {
                                 judgementString = judgementString.substring(5); // strip off the "No - "
                             }
 
-                            acronym = CLICSJudgementType.getCLICSAcronym(judgementString);
+                            acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(judgementString);
 
                         }
 
                         if (acronym != null) {
+                            
+                            //get the id of who applied the most recent judgement
+                            ClientId judgerClientID = jr.getJudgerClientId();
 
                             // assign PC2 judgement, plus a "pending" for remote judgement (to be filled in later)
                             ShadowJudgementPair pair = new ShadowJudgementPair(submissionId, acronym.name(), "<pending>");
@@ -622,7 +625,7 @@ public class ShadowController {
 //                            System.out.println("  submissionID=" + submissionId + " teamID=" + teamID + " problemID=" + problemID + " languageID=" + languageID 
 //                                    + " pc2Judgement=" + acronym.name() + " remoteJudgement=" + "<pending>");
 
-                            ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, pair);
+                            ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, judgerClientID, pair);
 
                             pc2JudgementInfoMap.put(submissionId, info);
 
@@ -638,9 +641,9 @@ public class ShadowController {
 
                 } else {
                     
-                    // we have a run which has not yet been judged by PC2; assign "pending" for both the PC2 and remote judgement
+                    // we have a run which has not yet been judged by PC2; assign "pending" for both the PC2 and remote judgement and null for the judgerId
                     ShadowJudgementPair pair = new ShadowJudgementPair(submissionId, "<pending>", "<pending>");
-                    ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, pair);
+                    ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, null, pair);
                     
 //                    System.out.print("Debug: adding to judgementsMap: ");
 //                    System.out.println("  submissionID=" + submissionId + " teamID=" + teamID + " problemID=" + problemID + " languageID=" + languageID 
@@ -922,5 +925,13 @@ public class ShadowController {
             }
         }
         return (result);
+    }
+
+    public IInternalContest getLocalContest() {
+        return localContest;
+    }
+
+    public IInternalController getLocalController() {
+        return localController;
     }
 }
