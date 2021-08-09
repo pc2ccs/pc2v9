@@ -19,6 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
@@ -190,11 +193,16 @@ public class RemoteEventFeedMonitor implements Runnable {
 //                                System.out.println("\nfound event: " + eventType + ":" + event); // TODO log this.
 
                                 if ("submissions".equals(eventType)) {
-//                                    System.out.println("debug 22 found submission event");
+
+                                    if (isReadOnlyClient()) {
+                                        log.info("Skipping submission event due to being in read-only mode");
+                                        event = reader.readLine();
+                                        continue;
+                                    }
 
                                     //process a submission event
                                     try {
-//                                        log.log(Level.INFO, "Processing " + eventType + " event");
+                                        log.log(Level.INFO, "Processing " + eventType + " event");
 
                                         //get a map of the data comprising the submission
                                         Map<String, Object> submissionEventDataMap = (Map<String, Object>) eventMap.get("data");
@@ -419,6 +427,37 @@ public class RemoteEventFeedMonitor implements Runnable {
         } // end else
     }
     
+    /**
+     * Returns an indication of whether the current client is a "read-only shadow" client.
+     * 
+     * Currently, account "feeder1" is allowed to be a read-write Shadow (meaning, it has the ability
+     * to actually submit runs to the PC2 server when they are received from the Remote CCS); all
+     * other accounts are considered "read-only" -- meaning they can look at submissions,
+     * the scoreboards, etc. but they will not actually submit runs received from the Remote CCS to
+     * the PC2 server.
+     * 
+     * TODO: extend this function to allow a broader definition and control of when a client
+     *      is considered "read-only"; for example, managing this by Permissions and/or via
+     *      Admin settings.  See https://github.com/pc2ccs/pc2v9/issues/240.
+     * 
+     * @return true if the current client is a "read-only Shadow" client; false if the client
+     *          is allowed to do read-write operations (such as submitting a run from the Remote CCS
+     *          to the PC2 server).
+     */
+    private boolean isReadOnlyClient() {
+        ClientId clientId = pc2Controller.getContest().getClientId(); 
+        ClientType.Type clientType = clientId.getClientType();
+        int clientNum = clientId.getClientNumber();
+        
+        if (clientType.equals(Type.FEEDER) && clientNum==1) {
+            //client is Feeder1; it is NOT a "read-only" client
+            return false;
+        } else {
+            //client is something other than Feeder1; it IS "read-only"
+            return true;
+        }
+    }
+
     /**
      * Initializes the Map<String,String> which holds mappings of judgement id's to corresponding submissions and judgement
      * types (acronymns).
