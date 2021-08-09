@@ -134,7 +134,7 @@ public class ScoreboardJsonTest extends AbstractTestCase {
         /**
          * pc2 Standings XML for NADC Practice 2.
          */
-        String xmlFilename = "testdata/ScoreboardJSONTest/testNADC21Prac2EF/nadcPractice-event-feed.xml";
+        String xmlFilename = "testdata/ScoreboardJsonTest/testNADC21Prac2EF/nadcPractice-event-feed.xml";
 
         ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(new File(xmlFilename));
 
