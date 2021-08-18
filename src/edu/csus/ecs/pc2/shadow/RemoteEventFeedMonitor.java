@@ -119,6 +119,9 @@ public class RemoteEventFeedMonitor implements Runnable {
         Log log = pc2Controller.getLog();
         
         //open connection to remoteURL event-feed endpoint
+        //debug
+        System.out.println("Opening connection to remote event feed");
+        log.info("Opening connection to remote event feed");
         remoteInputStream = remoteContestAPIAdapter.getRemoteEventFeedInputStream();
 
         if (remoteInputStream == null) {
@@ -129,6 +132,7 @@ public class RemoteEventFeedMonitor implements Runnable {
             
         } else {
 
+            String event = "null event";
             try {
 
                 //wrap the event stream (which consists of newline-delimited character strings representing events)
@@ -136,7 +140,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(remoteInputStream));
 
                 //read the next event from the event feed stream
-                String event = reader.readLine();
+                event = reader.readLine();
 
                 //process the next event
                 while ((event != null) && keepRunning) {
@@ -187,14 +191,18 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                 // find event type
                                 String eventType = (String) eventMap.get("type");
-//                                System.out.println("\nfound event: " + eventType + ":" + event); // TODO log this.
+                                
+                                //debug
+                                System.out.println("Found event: " + eventType + ":" + event);
+                                log.info("Found event: " + eventType + ":" + event);
 
                                 if ("submissions".equals(eventType)) {
-//                                    System.out.println("debug 22 found submission event");
+                                    //debug
+                                    System.out.println("\nFound submission event");
 
                                     //process a submission event
                                     try {
-//                                        log.log(Level.INFO, "Processing " + eventType + " event");
+                                        log.log(Level.INFO, "Processing " + eventType + ": " + event);
 
                                         //get a map of the data comprising the submission
                                         Map<String, Object> submissionEventDataMap = (Map<String, Object>) eventMap.get("data");
@@ -227,7 +235,8 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             throw new Exception("Error parsing submission data " + event);
                                         } else {
 
-                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
+                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id()
+                                                                + ": event= " + event);
 //                                            System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
 
                                             //construct the override values to be used for the shadow submission
@@ -310,7 +319,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             if (files.size() <= 0) {
                                                 //TODO: deal with this error -- how to propagate it back to the invoker?
                                                 System.err.println("Error: submitted files list is empty");
-                                                log.log(Level.WARNING, "Received a submssion with empty files list");
+                                                log.log(Level.WARNING, "Received a submssion with empty files list: event= " + event);
                                             } else {
                                                 mainFile = files.get(0);
                                             }
@@ -326,19 +335,24 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             } catch (Exception e) {
                                                 // TODO design error handling reporting
                                                 System.err.println("Exception submitting run for: " + event);
+                                                log.log(Level.WARNING, "Exception submitting run for: \\" + event);
+                                                
                                                 e.printStackTrace();
                                             }
                                         }
 
                                     } catch (Exception e) {
                                         // TODO design error handling reporting (logging?)
-                                        System.err.println("Exception parsing event: " + event);
+                                        System.err.println("Exception parsing event: " + e.toString() + ": " + event);
+                                        log.log(Level.WARNING, "Exception parsing event: " + e.toString() + ": " + event);
+
                                         e.printStackTrace();
                                     }
 
                                 } else if ("judgements".equals(eventType)) {
                                     
-//                                    System.out.println("debug 22 recognized judgement event");
+                                    //debug
+                                    System.out.println("Found judgement event");
                                     log.log(Level.INFO, "Found " + eventType + " event");
 
                                     //process a judgement event
@@ -394,15 +408,16 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     }
 
                                 } else {
-//                                    System.out.println("debug 22 - ignoring event " + eventType);
-//                                    log.log (Level.INFO, "Ignoring " + eventType + " event");
+                                    //debug
+                                    System.out.println("Ignoring " + eventType + " event");
+                                    log.log (Level.INFO, "Ignoring " + eventType + " event");
                                 }
 
                             } // else
                         } catch (Exception e) {
                             // TODO design error handling reporting (logging?)
                             System.err.println("Exception processing event: " + event);
-                            log.log(Level.SEVERE, "Exception processing event: " + event);
+                            log.log(Level.SEVERE, "Exception processing event: " + e.toString() + ": "+ event);
                             e.printStackTrace();
                         } 
                     }
@@ -413,7 +428,7 @@ public class RemoteEventFeedMonitor implements Runnable {
             } catch (Exception e) {
                 // TODO design error handling reporting (logging?)
                 System.err.println("Exception reading event from stream ");
-                log.log(Level.SEVERE, "Exception reading event from stream: " + e.toString());
+                log.log(Level.SEVERE, "Exception reading event from stream: " + e.toString() + " event: " + event);
                 e.printStackTrace();
             }
         } // end else
