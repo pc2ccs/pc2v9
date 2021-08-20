@@ -98,7 +98,9 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     
     protected  HttpURLConnection createConnection(URL url2) throws IOException {
         try {
-            return HTTPSSecurity.createConnection(url2, login, password);
+            HttpURLConnection conn = HTTPSSecurity.createConnection(url2, login, password);
+            conn.setReadTimeout(60000);
+            return conn;
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
