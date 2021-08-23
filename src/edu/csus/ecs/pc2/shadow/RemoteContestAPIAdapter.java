@@ -99,7 +99,7 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     protected  HttpURLConnection createConnection(URL url2) throws IOException {
         try {
             HttpURLConnection conn = HTTPSSecurity.createConnection(url2, login, password);
-            conn.setReadTimeout(60000);
+            conn.setReadTimeout(60000); //note: it seems VERY unlikely this works; see https://github.com/pc2ccs/pc2v9/issues/286
             return conn;
         } catch (IOException e) {
             throw e;
