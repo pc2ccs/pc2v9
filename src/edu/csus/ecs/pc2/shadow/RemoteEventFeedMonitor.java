@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -353,18 +354,85 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             }
                                             log.info("Fetching files from remote system using id "+overrideSubmissionID);
                                             
-                                            files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
+                                            //try up to maxTries times to get files without having a SocketTimeout
+                                            int tryNum = 1;
+                                            int maxTries = 10;
+                                            boolean success = false ;
+                                            Exception ex = null;
+                                            
+                                            while (!success && tryNum<=maxTries) {
+                                                try {              
+                                                    //request files from remote CCS
+                                                    files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
+                                                    
+                                                    //if we get here, no exception was thrown while getting the files
+                                                    success = true;
 
+                                                } catch (Exception e) {
+                                                    
+                                                    //we got an exception attempting to get the files for the submission from the remote CCS;
+                                                    //see if the underlying cause of the exception was a socket timeout
+                                                    Throwable cause = e.getCause();
+                                                    if (cause!=null && cause instanceof SocketTimeoutException) {
+
+                                                            if (Utilities.isDebugMode()) {
+                                                                System.out.println("Warning: SocketTimeoutException getting files for submission " + overrideSubmissionID 
+                                                                        + " on try " + tryNum + "; trying up to " + maxTries + " times");
+                                                            }
+                                                            log.warning("SocketTimeoutException getting files for submission " + overrideSubmissionID 
+                                                                    + " on try " + tryNum + "; trying up to " + maxTries + " times");
+                                                            tryNum++;
+                                                            
+                                                            //save the exception so we can rethrow it if we never get "success"
+                                                            ex = e;
+                                                        
+                                                    } else {
+                                                        //we got an exception other than a socket timeout; rethrow it outward (which will be logged in the catch clause)
+                                                        throw e;
+                                                    }
+                                                }
+                                            }
+                                            
+                                            //if after maxTries we still weren't successful getting files, log it and rethrow the last exception
+                                            if (!success) {
+                                                if (Utilities.isDebugMode()) {
+                                                    System.out.println("Severe: unable to get files for submission " + overrideSubmissionID
+                                                                    + " from remote CCS after " + maxTries + " tries; giving up.");
+                                                }
+                                                log.severe("Unable to get files for submission " + overrideSubmissionID
+                                                            + " from remote CCS after " + maxTries + " tries; giving up.");
+                                                throw ex;
+                                            } else {
+                                                //we got files from the remote CCS; log how many tries it took
+                                                String pluralizer = tryNum==1 ? " try." : " tries."; 
+                                                if (Utilities.isDebugMode()) {
+                                                    System.out.println("Got files for submission id " + overrideSubmissionID + " from remote CCS after " 
+                                                                    + tryNum + pluralizer);
+                                                }
+                                                log.info("Got files for submission id " + overrideSubmissionID + " from remote CCS after " + tryNum + pluralizer);
+                                            }
+                                            
+                                            //if we get here we at least know we got a "success" from the above communication with the remote CCS
+                                            if (files==null) {
+                                                if (Utilities.isDebugMode()) {
+                                                    System.err.println("Null file list returned from remote system while processing event: " + event);
+                                                }
+                                                log.log(Level.SEVERE, "Null file list returned from remote system while processing event: " + event);
+                                                throw new Exception("Null file list returned from remote system while processing event: " + event);
+                                            }
+                                            
                                             IFile mainFile = null;
+
                                             if (files.size() <= 0) {
                                                 
-                                                //TODO: deal with this error -- how to propagate it back to the invoker?
                                                 if (Utilities.isDebugMode()) {
-                                                    System.err.println("Warning: received a submssion with empty files list: event= " + event);
+                                                    System.err.println("Empty file list returned from remote system while processing event: " + event);
                                                 }
-                                                log.log(Level.WARNING, "Received a submssion with empty files list: event= " + event);
+                                                log.log(Level.SEVERE, "Empty file list returned from remote system while processing event: " + event);
+                                                throw new Exception("Empty file list returned from remote system while processing event: " + event);
                                                 
                                             } else {
+                                                
                                                 if (Utilities.isDebugMode()) {
                                                     System.err.println("Received files from remote system for id " + overrideSubmissionID);
                                                 }
