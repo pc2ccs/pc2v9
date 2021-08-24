@@ -3499,5 +3499,68 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Public HTML Directory", "public_html_dir", publicDir);
 
     }
+    
+    
+    public void testTenProbsisStopOnFirstFailedTestCase() throws Exception {
+        
+        String sampleName = "tenprobs";
+        IInternalContest contest  = fullLoadSampleContest(sampleName);
+        assertNotNull(contest);
+
+        Problem[] problems = contest.getProblems();
+        assertEquals("Num problems ",10, problems.length);
+        
+        for (Problem problem : problems) {
+            assertTrue(problem.getShortName()+" stop on first ", problem.isStopOnFirstFailedTestCase());
+        }
+        
+    }
+    
+    public void testisStopOnFirstFailedTestCase() throws Exception {
+        
+        String sampleName = "problemflagtest"; // use CDP sample problemflagtest
+        IInternalContest contest  = fullLoadSampleContest(sampleName);
+        assertNotNull(contest);
+
+        Problem[] problems = contest.getProblems();
+        assertEquals("Num problems ", 8, problems.length);
+        
+        for (Problem problem : problems) {
+            assertTrue(problem.getShortName()+" stop on first ", problem.isStopOnFirstFailedTestCase());
+        }
+        
+    }
+    
+    
+    
+    /**
+     * Test load problem.yaml isStopOnFirstFailedTestCase.
+     * 
+     * @throws Exception
+     */
+    public void testvaltesttStopOnFirstFailedTestCase() throws Exception {
+        
+        String sampleName = "valtest";
+        IInternalContest contest  = fullLoadSampleContest(sampleName);
+ 
+        assertNotNull(contest);
+
+        Problem[] problems = contest.getProblems();
+        assertEquals("Num problems ",6, problems.length);
+        
+        for (Problem problem : problems) {
+            assertFalse(problem.getShortName()+" stop on first ", problem.isStopOnFirstFailedTestCase());
+        }
+        
+    }
+
+    private IInternalContest fullLoadSampleContest(String sampleName) throws Exception {
+        IInternalContest contest  = new InternalContest();
+        loadGroupsFromSampContest(contest, sampleName);
+        contest = loadSampleContest(contest, sampleName);
+        return contest;
+    }
+    
+    
 }
 
