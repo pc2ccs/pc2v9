@@ -504,7 +504,7 @@ public class JSONTool {
                     resultString = judgementRecord.getValidatorResultString();
                     if (resultString!=null) {
                         //try to convert the validator string to a known acronym
-                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronym(resultString);
+                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(resultString);
                         //check if we got back a judgement acronym
                         if (acronym!=null) {
                             resultString = acronym.name();

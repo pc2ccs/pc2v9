@@ -7,15 +7,23 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Vector;
 import java.util.logging.Level;
+
+import javax.xml.bind.JAXBException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -24,6 +32,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
+import edu.csus.ecs.pc2.services.core.ScoreboardJson;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
@@ -35,13 +45,13 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  * The class is instantiated with an {@link IInternalController} (a PC2 Controller for a local instance of a contest)
  * along with an {@link IInternalContest} (a PC2 Contest model).
  * It obtains, from the local PC2 Server, information on the remote system to be shadowed, and uses classes behind (comprising) 
- * the facade to obtain team submissions from the remote system.
+ * the facade to obtain team submissions as well as scoreboard information from the remote system.
  * It uses the provided PC2 controller to perform local operations as if teams on the remote CCS were submitting to the local PC2
  * CCS.
  * 
  * The class (facade) presumes that the remote system implements the 
  * <A href="https://clics.ecs.baylor.edu/index.php?title=Contest_API">CLICS Contest API</a>; 
- * this is how it communicates with the remote system to obtain team submissions. 
+ * this is how it communicates with the remote system to obtain team submissions and remote scoreboard information. 
  * 
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  *
@@ -85,6 +95,7 @@ public class ShadowController {
     private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
     private RemoteContestConfiguration remoteContestConfig;
     private Thread monitorThread;
+    private IRemoteContestAPIAdapter remoteContestAPIAdapter;
 
     /**
      * a ContestInformation Listener
@@ -179,8 +190,8 @@ public class ShadowController {
         log = getLog();
         
         log.info("Starting shadowing for URL '"+ remoteCCSURLString + "' using login '" + remoteCCSLogin + "'");
-        System.out.println ("ShadowController: starting shadowing for URL '" + remoteCCSURLString 
-                            + "' using login '" + remoteCCSLogin + "'");
+//        System.out.println ("ShadowController: starting shadowing for URL '" + remoteCCSURLString 
+//                            + "' using login '" + remoteCCSLogin + "'");
         
         setStatus(SHADOW_CONTROLLER_STATUS.SC_STARTING);
         
@@ -196,7 +207,7 @@ public class ShadowController {
         }
         
         //get an adapter which connects to the remote Contest API
-        IRemoteContestAPIAdapter remoteContestAPIAdapter = createRemoteContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
+        remoteContestAPIAdapter = createRemoteContestAPIAdapter(remoteCCSURL, remoteCCSLogin, remoteCCSPassword);
         
 //        //get a remote contest configuration from the adapter
 //        remoteContestConfig  = remoteContestAPIAdapter.getRemoteContestConfiguration();
@@ -302,226 +313,355 @@ public class ShadowController {
     public Map<String, ShadowJudgementInfo> getJudgementComparisonInfo() {
         
         if (getStatus()!= SHADOW_CONTROLLER_STATUS.SC_RUNNING) {
-//            log.warning("Shadow Controller 'getJudgementComparisonInfo()' called when Shadow controller is not running"); 
+            log.warning("Shadow Controller 'getJudgementComparisonInfo()' called when Shadow controller is not running"); 
             return null;
         } else {
-//            log.info("Constructing Shadow Judgement comparisons");
-            
-            //get a Map of the judgements assigned by the remote CCS to each submission; note that this map uses "remote event id"
-            // as the key and combines the submission ID with the Judgement acronym, separated by a colon, as the value
-            Map<String,String> remoteJudgementsMap = RemoteEventFeedMonitor.getRemoteJudgementsMap();
-            
-            //convert the Map to one with submission ID as key and acronym (judgement) as value
-            Map<String,String> remoteSubmissionsJudgementMap = new HashMap<String,String>();
-            for (String key : remoteJudgementsMap.keySet()) {
-                String value = remoteJudgementsMap.get(key) ;
-                String submissionID = value.substring(0, value.lastIndexOf(':'));
-                String judgementAcronym = value.substring(value.lastIndexOf(':')+1);
-                remoteSubmissionsJudgementMap.put(submissionID, judgementAcronym);
-            }
-            
-            //if specified, convert remote judgements to "Big 5"
-            if (isConvertJudgementsToBig5()) {
-//                log.info("Converting remote judgements to CLICS 'Big 5'");
-                convertMapToBig5(remoteSubmissionsJudgementMap);
-            }
-            
-            //create a Map of the judgements assigned by PC2
-            Run[] runs = localContest.getRuns();
-            
-//            //debug loop
-//            for (Run run : runs) {
-//                if (!run.isJudged()) {
-//                    log.warning("Found unjudged run in PC2 Shadow system: " + run);
-//                    System.err.println ("Found unjudged run in PC2 Shadow system: ");
-//                    System.err.println ("  " + run);
-//                }
-//            }
-            
-            //build a map of PC2 Shadow judgements, mapping submissionID to judgement acronym for each submission
-            Map<String,String> pc2JudgementsMap = new HashMap<String,String>();
-            for (Run run : runs) {
-                
-                if (run.isJudged()) {
-                    
-                    JudgementRecord jr = run.getJudgementRecord();
-                    
-                    if (jr != null) {
-
-                        String judgementString;
-
-                        if (jr.isUsedValidator() && jr.getValidatorResultString() != null) {
-                            judgementString = jr.getValidatorResultString();
-                        } else {
-                            //no validator result; fall back to using judgementId (remembering that this
-                            // defaults to "RTE" for all "no" judgements -- see V9 bug list)
-                            ElementId judgementId = jr.getJudgementId();
-                            Judgement judgement = localContest.getJudgement(judgementId);
-                            judgementString = judgement.getDisplayName();
-                            if (judgementString.startsWith("No - ")) {
-                                judgementString = judgementString.substring(5); //strip off the "No - "
-                            }
-                        }
-
-                        if (judgementString==null) {
-//                            log.warning("null judgement string for run " + run.getNumber());
-                            System.err.println ("null judgement string in ShadowController.getJudgementComparisonInfo() for run " + run.getNumber());
-                        }
+            log.info("Constructing Shadow Judgement comparisons");
+                       
+            //get the runs (submissions) currently in PC2 (i.e. runs already received from the remote CCS and submitted to the PC2 server)
+            Run[] pc2Runs = localContest.getRuns();
                         
-                        //at this point we have the judgement string text; try to convert it to a corresponding acronym
-                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronym(judgementString);
+            //get a map from submissionID to ShadowJudgementInfo for each submission which PC2 knows about
+            Map<String,ShadowJudgementInfo> judgementsMap = getJudgementsMap(pc2Runs);
+            
+            //At this point we have a Map ("judgementsMap") which maps every submissionId that PC2 knows about to a ShadowJudgementInfo object
                         
-                        if (acronym==null) {
-                            //we couldn't find a CLICS judgement matching the string; 
-                            //try to use the judgement record (which may be incorrect; see V9 bug list regarding defaulting to RTE)
-                            ElementId judgementId = jr.getJudgementId();
-                            Judgement judgement = localContest.getJudgement(judgementId);
-                            judgementString = judgement.getDisplayName();
-                            if (judgementString.startsWith("No - ")) {
-                                judgementString = judgementString.substring(5); //strip off the "No - "
-                            }
-                            
-                            acronym = CLICSJudgementType.getCLICSAcronym(judgementString);
-                            
-                        }
-
-                        if (acronym!=null) {
-                            //put the judgement acronym into the pc2Judgements map under the submissionID
-                            String submissionID = String.valueOf(run.getNumber());
-                            pc2JudgementsMap.put(submissionID, acronym.name());
-                            
-                        } else { 
-                            //we've exhausted methods of obtaining an acronym
-//                            log.warning("null acronym for run " + run.getNumber() + ", judgement string " + judgementString);
-                            System.err.println ("null acronym in ShadowController.getJudgementComparision() for "
-                                    + "run " + run.getNumber() + ", judgement string " + judgementString);
-                        }
-
-                    } else {
-                        //we got a null judgment record from the run, but it's supposedly been judged -- error!
-//                        log.severe("Error: found a (supposedly) judged run with no JudgementRecord!");
-                        System.err.println ("Error in getJudgementComparisonInfo(): found a (supposedly) judged run with no JudgementRecord!");
-                    }                    
-                    
-                } else {
-                    //we have an as-yet unjudged run
-                    String submissionID = String.valueOf(run.getNumber());
-                    pc2JudgementsMap.put(submissionID, "<pending>");
-                }
+            //get the submission judgements which have been reported by the remote CCS
+            Map<String,String> remoteSubmissionsToJudgementsMap = getRemoteSubmissionsToJudgementsMap();
+                        
+            //check every submission reported to have a judgement by the remote CCS
+            for (String key : remoteSubmissionsToJudgementsMap.keySet()) {
                 
-            }//end for each run
-
-            //if specified, convert PC2 judgements to "Big 5"
-            if (isConvertJudgementsToBig5()) {
-//                log.info("Converting PC2 judgements to 'CLICS Big 5'");
-                convertMapToBig5(pc2JudgementsMap);
-            }
-            
-            //verify that we have corresponding maps (from the remote vs. the local systems)
-            Set<String> remoteKeys = remoteSubmissionsJudgementMap.keySet();
-            Set<String> localKeys = pc2JudgementsMap.keySet();
-            if (!remoteKeys.equals(localKeys)) {
-//                log.warning("Contents of remote judgements map does not match that of local PC2 judgements map"
-//                        + " (this could happen if PC2 is not keeping up with remote submissions)");
-                System.err.println("Note: contents of remote judgements map does not match that of local PC2 judgements map"
-                        + " (this could happen if PC2 is not keeping up with remote submissions)");
-            }
-            
-            //construct a single map containing the ShadowJudgementInfo for each submission ("run" in PC2 terms)
-            Map<String,ShadowJudgementInfo> judgementsMap = new HashMap<String,ShadowJudgementInfo>();
-            
-            //first put into the combined map the judgements from the remote system, with the corresponding PC2 value
-            //   (which could be null if PC2 doesn't have a judgement for the corresponding submission)
-            String teamID;
-            String problemID;
-            String languageID;
-            
-            for (String submissionID : remoteKeys) {
-                
-                //get the run corresponding to the current submissionID
-                Run run = getRun(runs,submissionID);
-                
-                //get the team/problem/language info corresponding to the run
-                teamID = new Integer(run.getSubmitter().getClientNumber()).toString();
-                
-                ElementId probElementID = run.getProblemId();
-                problemID = localContest.getProblem(probElementID).getShortName();
-                
-                ElementId langElementID = run.getLanguageId();
-                languageID = localContest.getLanguage(langElementID).getID();
-
-                ShadowJudgementPair pair = new ShadowJudgementPair(submissionID, pc2JudgementsMap.get(submissionID), 
-                                                    remoteSubmissionsJudgementMap.get(submissionID));
-                
-                System.out.println("Debug: adding to judgementsMap: ") ;
-                System.out.println ("  submissionID=" + submissionID + " teamID=" + teamID + " problemID=" 
-                        + problemID + " languageID=" + languageID + " pc2Judgement=" + pc2JudgementsMap.get(submissionID)
-                        + " remoteJudgement=" + remoteSubmissionsJudgementMap.get(submissionID));
-                
-                ShadowJudgementInfo info = new ShadowJudgementInfo(submissionID, teamID, problemID, languageID, pair);
-                
-                judgementsMap.put(submissionID, info);
-            }
-            
-            //now add judgements from the PC2 map that might not have existed in the remote map
-            for (String submissionID : localKeys) {
-                if (!remoteSubmissionsJudgementMap.containsKey(submissionID)) {
+                //check if PC2 has seen this submission (it might not have yet due to lags with RemoteEventFeedMonitor submitting to PC2)
+                if (judgementsMap.containsKey(key)) {
                     
-                    //get the run corresponding to the current submissionID
-                    Run run = getRun(runs,submissionID);
-                                       
-//                    teamID = run.getSubmitter().toString();
-//                    problemID = run.getProblemId().toString();
-//                    languageID = run.getLanguageId().toString();
-                    
-                    //get the team/problem/language info corresponding to the run
-                    teamID = new Integer(run.getSubmitter().getClientNumber()).toString();
-                    
-                    ElementId probElementID = run.getProblemId();
-                    problemID = localContest.getProblem(probElementID).getShortName();
-                    
-                    ElementId langElementID = run.getLanguageId();
-                    languageID = localContest.getLanguage(langElementID).getID();
-                    
-                    ShadowJudgementPair pair = new ShadowJudgementPair(submissionID, pc2JudgementsMap.get(submissionID), 
-                                 remoteSubmissionsJudgementMap.get(submissionID)); //the remote map will always return null
-                    
-                    System.out.println("Debug: adding to judgementsMap: ") ;
-                    System.out.println ("  submissionID=" + submissionID + " teamID=" + teamID + " problemID=" 
-                            + problemID + " languageID=" + languageID + " pc2Judgement=" + pc2JudgementsMap.get(submissionID)
-                            + " remoteJudgement=" + remoteSubmissionsJudgementMap.get(submissionID));
-                    
-                    
-                    ShadowJudgementInfo info = new ShadowJudgementInfo(submissionID, teamID, problemID, languageID, pair);
-                                        
-                    judgementsMap.put(submissionID, info);
+                    //we found a submission, known to PC2, for which the remote CCS has reported a judgement; update the remote judgement info under that key
+                    ShadowJudgementInfo info = judgementsMap.get(key);
+                    ShadowJudgementPair pair = info.getShadowJudgementPair();
+                    pair.setRemoteCCSJudgement(remoteSubmissionsToJudgementsMap.get(key));
                 }
             }
-                        
+ 
+            //we now have a complete map from submissions known to PC2 to ShadowJudgementInfo objects containing known PC2 judgements and known remote CCS judgements
+            
+            //if specified, convert judgements to "Big 5"
+            if (isConvertJudgementsToBig5()) {
+                log.info("Converting judgements to 'CLICS Big 5'");
+                convertMapToBig5(judgementsMap);
+            }
+            
             return judgementsMap;
         }
         
     }
     
+ 
     /**
-     * Searches the given array of Runs and returns the run, if any, whose run number matches the specified
-     * submissionId; otherwise returns null.
+     * Returns an array of {@link ShadowScoreboardRowComparison}s, each element of which contains a comparison of
+     * corresponding rows of the current PC2 and remote CCS scoreboards.
      * 
-     * @param runs an array of Runs to be searched
-     * @param submissionID the id of the desired run
+     * Each ShadowScoreboardRowComparison contains a pair of {@link TeamScoreRow}s, one each from the PC2 and remote CCS
+     * scoreboards, along with a boolean flag indicating whether the rows are equal or not (that is, whether or not the rows
+     * contain the same rank, teamId, number of problems solved, and total (penalty) points).  If for some reason a row exists
+     * in one of the scoreboards but not the other, the corresponding entry in the ShadowScoreboardRowComparison will be null 
+     * (an indication of scoreboards which inherently are not equal).
      * 
-     * @return the Run matching the specified submissionID, or null if no Run matches
+     * This method is only operative while Shadow operations are running; if shadowing is not running
+     * then the method returns an empty array (that is, an array of size zero).
+     * 
+     * The method also returns an empty array if an error occurs when fetching either the PC2 or the remote CCS 
+     * JSON scoreboard  strings, or when parsing those strings.
+     * 
+     * @return an array of ShadowScoreboardRowComparison information, or an empty array if shadowing isn't running
+     *          or an error occurs during processing either of the JSON strings representing the two scoreboards.
      */
-    private Run getRun(Run[] runs, String submissionID) {
+    public ShadowScoreboardRowComparison[] getScoreboardComparisonInfo() {
+
+        //initialize return to empty
+        ShadowScoreboardRowComparison[] emptyArray = new ShadowScoreboardRowComparison[0];
+
+        if (getStatus() != SHADOW_CONTROLLER_STATUS.SC_RUNNING) {
+            log.warning("Shadow Controller 'getScoreboardComparisonInfo()' called when Shadow controller is not running");
+            return emptyArray;
+        }
+
+        // get the PC2 scoreboard JSON
+        String pc2Json = getPC2ScoreboardJSON();
+        if (pc2Json==null) {
+            log.warning("Got empty or null JSON scoreboard from PC2");
+            return emptyArray;
+        }
+
+        // get the remote CCS scoreboard JSON
+        String remoteJson = getRemoteScoreboardJSON();
+        if (remoteJson==null) {
+            log.warning("Got empty or null JSON scoreboard from remote CCS");
+            return emptyArray;
+        }
+
+        // construct a comparator to compare the two JSON strings
+        ShadowScoreboardComparisonGenerator comparator = new ShadowScoreboardComparisonGenerator(this);
+
+        //use the comparator to obtain a row-by-row comparison of the two JSON scoreboards
+        ShadowScoreboardRowComparison[] results = comparator.compare(pc2Json, remoteJson);
+
+        return results;
+    }
+
+   /**
+     * This method constructs a PC2 {@link ScoreboardJson} object and uses it to return a String
+     * containing the current PC2 scoreboard in CLICS Contest API format. 
+     * 
+     * @return a String containing the PC2 scoreboard JSON.
+     */
+    private String getPC2ScoreboardJSON() {
         
-        for (Run nextRun : runs) {
-            String runNumberString = new Integer(nextRun.getNumber()).toString();
-            if (runNumberString.equalsIgnoreCase(submissionID)) {
-                return nextRun;
+        ScoreboardJson sbJsonObject = new ScoreboardJson();
+        String pc2Json ;
+        try {
+            pc2Json = sbJsonObject.createJSON(localContest, log);
+        } catch (JsonProcessingException | IllegalContestState | JAXBException e) {
+            log.warning("Exception creating PC2 scoreboard JSON: " + e.getMessage());
+            return null;
+        }
+        
+        return pc2Json;
+    }
+
+    /**
+     * This method returns a String containing the current remote CCS scoreboard as obtained from the
+     * remote CCS Contest API "/scoreboard" endpoint. 
+     * 
+     * @return a String containing the remote CCS scoreboard JSON.
+     */
+    private String getRemoteScoreboardJSON() {
+        
+        //get scoreboard from remoteAPIAdaptor
+        String remoteJson = remoteContestAPIAdapter.getRemoteJSON("/scoreboard");
+        
+        //return scoreboard
+        return remoteJson;
+        
+    }
+
+    /**
+     * This method returns a String containing the current PC2 team list as obtained from the
+     * PC2 server, converted into CLICS Contest API "/teams" endpoint format 
+     * (see https://ccs-specs.icpc.io/contest_api#teams). 
+     * 
+     * @return a String containing the PC2 team list JSON.
+     */
+    public String getPC2TeamsJSON() {
+        
+        log.info("Fetching PC2 team JSON");
+        
+        //get the PC2 team account list from the InternalContest model
+        Vector<Account> teamAccounts = localContest.getAccounts(Type.TEAM);
+        
+        //open the return string as an array of teams
+        String retJson = "["; 
+        
+        //convert PC2 team accounts into CLICS JSON format (see https://ccs-specs.icpc.io/contest_api#teams)
+        boolean first = true;
+        for (Account teamAcct : teamAccounts) {
+            
+            //get the required values out of the team account
+            ClientId clientId = teamAcct.getClientId();
+            String teamId = "" + clientId.getClientNumber();
+            String teamName = teamAcct.getDisplayName();
+            
+            //add this team element to the return JSON, preceded by a comma if it's not the first element
+            if (!first) {
+                retJson += ",";
+            }
+            retJson += "{" ;
+            retJson += "\"id\":\"" + teamId + "\"";
+            retJson += ",";
+            retJson += "\"name\":\"" + teamName + "\"";
+            retJson += "}";
+            
+            first = false ;
+        }
+        
+        //close the array of teams
+        retJson += "]";
+                
+        //return the PC2 teams JSON
+        return retJson;
+    }
+
+
+    /**
+     * This method returns a String containing the current remote CCS team list as obtained from the
+     * remote CCS Contest API "/teams" endpoint. 
+     * 
+     * @return a String containing the remote CCS team list JSON.
+     */
+    public String getRemoteTeamsJSON() {
+        
+        log.info("Fetching Remote CCS team JSON");
+        
+        //get team list from remoteAPIAdaptor
+        String remoteJson = remoteContestAPIAdapter.getRemoteJSON("/teams");
+                
+        //return team list
+        return remoteJson;
+        
+    }
+
+   /**
+     * Returns a Map which maps remote CCS submissionIds to a judgement acronym.
+     * 
+     * Any judgements from the Remote CCS which are null, which have values which are null or empty, which 
+     * have submissionIds which are null or empty, or which have judgement acronyms which are null or empty,
+     * are silently ignored (not represented in the map returned by this method).
+     * 
+     * @return a Map with entries mapping a submissionId String to an acronym String.
+     */
+    private Map<String, String> getRemoteSubmissionsToJudgementsMap() {
+        
+        //get a copy of the RemoteEventFeedMonitor's Judgements map, which maps "judgementIds" to a String of the form "submissionId:acronym"
+        Map<String, String> remoteJudgementsMap = RemoteEventFeedMonitor.getRemoteJudgementsMapSnapshot();
+
+        // convert the RemoteEFMonitor Map to one with submission ID as key and acronym (judgement) as value
+        Map<String, String> remoteSubmissionsToJudgementsMap = new HashMap<String, String>();
+        for (String key : remoteJudgementsMap.keySet()) {
+            if (key != null) {
+                String value = remoteJudgementsMap.get(key);
+                if (value != null) {
+                    String submissionID = value.substring(0, value.lastIndexOf(':'));
+                    if (submissionID != null && !submissionID.contentEquals("")) {
+                        String judgementAcronym = value.substring(value.lastIndexOf(':') + 1);
+                        if (judgementAcronym != null && !judgementAcronym.contentEquals("")) {
+                            remoteSubmissionsToJudgementsMap.put(submissionID, judgementAcronym);
+                        }
+                    }
+                }
             }
         }
-        return null;
+        return remoteSubmissionsToJudgementsMap;
     }
+    
+    
+    /**
+     * Returns a Map which maps submissionIds to {@link ShadowJudgementInfo} objects for every submission (run) in the
+     * specified array of PC2 Runs.
+     */
+    private Map<String, ShadowJudgementInfo> getJudgementsMap(Run[] pc2Runs) {
+
+        Map<String, ShadowJudgementInfo> pc2JudgementInfoMap = new HashMap<String, ShadowJudgementInfo>();
+
+        // check each PC2 run (submission)
+        for (Run run : pc2Runs) {
+
+            // avoid any "null" runs which might be returned in the PC2 RunList
+            if (run != null) {
+
+                //get the submissionId of the run (basically, the Run number)
+                String submissionId = String.valueOf(run.getNumber());
+
+                // get the team/problem/language info corresponding to the run
+                String teamID = new Integer(run.getSubmitter().getClientNumber()).toString();
+
+                ElementId probElementID = run.getProblemId();
+                String problemID = localContest.getProblem(probElementID).getShortName();
+
+                ElementId langElementID = run.getLanguageId();
+                String languageID = localContest.getLanguage(langElementID).getID();
+
+                if (run.isJudged()) {
+
+                    // get the most recent judgement assigned to the run in PC2
+                    JudgementRecord jr = run.getJudgementRecord();
+
+                    if (jr != null) {
+
+                        // try to determine the judgement string assigned to the run
+                        String judgementString;
+
+                        if (jr.isUsedValidator() && jr.getValidatorResultString() != null) {
+                            judgementString = jr.getValidatorResultString();
+                        } else {
+                            // no validator result; fall back to using judgementId (remembering that this
+                            // defaults to "RTE" for all "no" judgements -- see V9 bug list)
+                            ElementId judgementId = jr.getJudgementId();
+                            Judgement judgement = localContest.getJudgement(judgementId);
+                            judgementString = judgement.getDisplayName();
+                            if (judgementString.startsWith("No - ")) {
+                                judgementString = judgementString.substring(5); // strip off the "No - "
+                            }
+                        }
+
+                        if (judgementString == null) {
+                            log.warning("Null judgement string for run " + run.getNumber());
+                        }
+
+                        // try to convert the judgement string text to a corresponding acronym (returns null if judgementString is null or not found)
+                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(judgementString);
+
+                        if (acronym == null) {
+                            // we couldn't find a CLICS judgement matching the string;
+                            // try to use the judgement record (which may be incorrect; see V9 bug list regarding defaulting to RTE)
+                            ElementId judgementId = jr.getJudgementId();
+                            Judgement judgement = localContest.getJudgement(judgementId);
+                            judgementString = judgement.getDisplayName();
+                            if (judgementString.startsWith("No - ")) {
+                                judgementString = judgementString.substring(5); // strip off the "No - "
+                            }
+
+                            acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(judgementString);
+
+                        }
+
+                        if (acronym != null) {
+                            
+                            //get the id of who applied the most recent judgement
+                            ClientId judgerClientID = jr.getJudgerClientId();
+
+                            // assign PC2 judgement, plus a "pending" for remote judgement (to be filled in later)
+                            ShadowJudgementPair pair = new ShadowJudgementPair(submissionId, acronym.name(), "<pending>");
+
+//                            System.out.print("Debug: adding to judgementsMap: ");
+//                            System.out.println("  submissionID=" + submissionId + " teamID=" + teamID + " problemID=" + problemID + " languageID=" + languageID 
+//                                    + " pc2Judgement=" + acronym.name() + " remoteJudgement=" + "<pending>");
+
+                            ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, judgerClientID, pair);
+
+                            pc2JudgementInfoMap.put(submissionId, info);
+
+                        } else {
+                            // we've exhausted methods of obtaining an acronym
+                            log.warning("Null judgement acronym for run " + run.getNumber() + ", judgement string " + judgementString + "; skipping");
+                        }
+
+                    } else {
+                        // we got a null judgment record from the run, but it's supposedly been judged -- error!
+                        log.severe("Error: found a (supposedly) judged PC2 run with no PC2 JudgementRecord!" + " (Submission id = " + run.getNumber() + ")");
+                    }
+
+                } else {
+                    
+                    // we have a run which has not yet been judged by PC2; assign "pending" for both the PC2 and remote judgement and null for the judgerId
+                    ShadowJudgementPair pair = new ShadowJudgementPair(submissionId, "<pending>", "<pending>");
+                    ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, null, pair);
+                    
+//                    System.out.print("Debug: adding to judgementsMap: ");
+//                    System.out.println("  submissionID=" + submissionId + " teamID=" + teamID + " problemID=" + problemID + " languageID=" + languageID 
+//                            + " pc2Judgement=" + "<pending>" + " remoteJudgement=" + "<pending>");
+                    
+                    pc2JudgementInfoMap.put(submissionId, info);
+                }
+
+            } else {
+                log.warning("Encountered null run in PC2 RunList; skipping");
+            }
+
+        } // end for each PC2 run
+                        
+        return pc2JudgementInfoMap;
+        
+    }
+    
     
     /**
      * Returns a list of differences between the currently-configured remote contest
@@ -601,37 +741,115 @@ public class ShadowController {
         return convertJudgementsToBig5 ;
     }
     
+//    /**
+//     * Converts the given map so that all judgement acronyms are CLICS "Big 5" acronyms if a corresponding CLICS Big 5 acronym 
+//     * can be found.  If no corresponding acronym can be found, then a check is made to see if the initial acronym contains the
+//     * substring "pending"; if so, the original acronym is retained, if not then the acronym is replaced with a string of the form
+//     * "<NoBig5:xxx>" where "xxx" is the original acronym.
+//     * 
+//     * @param map the map to be converted
+//     */
+//    private void convertMapToBig5 (Map<String,String> map) {
+//        //process each submission in the specified map
+//        for (String submissionID : map.keySet()) {
+//            String judgementAcronym = map.get(submissionID) ;
+//            //construct a CLICSJudgement for the acronym
+//            CLICSJudgementType clicsJudgement = new CLICSJudgementType(judgementAcronym, "dummy", false, false);
+//            //check if the judgement is already a "Big 5"
+//            if (!clicsJudgement.isBig5()) {
+//                //no it's not a Big 5; get a corresponding Big 5 acronym in the map
+//                String newAcronym = clicsJudgement.getBig5EquivalentAcronym();
+//                //the above method returns null if there is no matching Big 5 acronym
+//                if (newAcronym==null) {
+//                    //there's no Big5 for the judgement acronym; see if it's "pending"
+//                    if (!judgementAcronym.toLowerCase().contains("pending")) {
+//                        //not pending; replace with message
+//                        newAcronym = "<NoBig5:" + judgementAcronym + ">";
+//                    } else {
+//                        //it does contain pending; keep the original acronym
+//                        newAcronym = judgementAcronym ;
+//                    }
+//                }
+//                map.put(submissionID, newAcronym);
+//            }
+//        }
+//
+//    }
+
     /**
-     * Converts the given map so that all judgement acronyms are CLICS "Big 5" acronyms.
+     * Converts the given map so that all judgement acronyms are CLICS "Big 5" acronyms if a corresponding CLICS Big 5 acronym 
+     * can be found.  If no corresponding acronym can be found, then a check is made to see if the initial acronym contains the
+     * substring "pending"; if so, the original acronym is retained, if not then the acronym is replaced with a string of the form
+     * "<NoBig5:xxx>" where "xxx" is the original acronym.
      * 
      * @param map the map to be converted
      */
-    private void convertMapToBig5 (Map<String,String> map) {
-        //process each submission judgement from the remote CCS
+    private void convertMapToBig5 (Map<String,ShadowJudgementInfo> map) {
+        
+        //process each submission in the specified map
         for (String submissionID : map.keySet()) {
-            String judgementAcronym = map.get(submissionID) ;
-            //construct a CLICSJudgement for the acronym
-            CLICSJudgementType clicsJudgement = new CLICSJudgementType(judgementAcronym, "dummy", false, false);
-            //check if the judgement is already a "Big 5"
-            if (!clicsJudgement.isBig5()) {
-                //no it's not a Big 5; get a corresponding Big 5 acronym in the map
-                String newAcronym = clicsJudgement.getBig5EquivalentAcronym();
-                //the above method returns null if there is no matching Big 5 acronym
-                if (newAcronym==null) {
-                    //there's no Big5 for the judgement acronym; see if it's "pending"
-                    if (!judgementAcronym.toLowerCase().contains("pending")) {
-                        //not pending; replace with message
-                        newAcronym = "<NoBig5:" + judgementAcronym + ">";
-                    } else {
-                        //it does contain pending; keep the original acronym
-                        newAcronym = judgementAcronym ;
-                    }
-                }
-                map.put(submissionID, newAcronym);
+            
+            //get the judgement info out of the submission
+            ShadowJudgementInfo info = map.get(submissionID) ;
+            
+            //get the ShadowJudgementPair out of the judgement info
+            ShadowJudgementPair pair = info.getShadowJudgementPair();
+            
+            String judgementAcronym = pair.getPc2Judgement();
+            pair.setPc2Judgement(convertJudgementToCLICSBig5(judgementAcronym));
+            
+            judgementAcronym = pair.getRemoteCCSJudgement();
+            pair.setRemoteCCSJudgement(convertJudgementToCLICSBig5(judgementAcronym));
+            
+        }
+    }
+    
+    /**
+     * Returns a String representing the "CLICS Big5 acronym" (one of WA/RTE/TLE/CE/AC) corresponding to the specified judgement acronym tring.
+     * If there is no corresponding conversion (as defined by {@link CLICSJudgementType#getBig5EquivalentAcronym()},
+     * then if the specified judgement string contains the substring "pending" then the specified judgement string is returned,
+     * otherwise a String of the form "<NoBig5:xxx>" (where xxx is the input string) is returned.
+     * 
+     * @param judgementAcronym the string to be converted to its "CLICS Big 5" equivalent.
+     * 
+     * @return a String containing a CLICS Big5 acronym if there is such an acronym matching the input judgement; otherwise 
+     *              returns the input judgement or a string containing the input judgement.
+     */
+    private String convertJudgementToCLICSBig5(String judgementAcronym) {
+
+        String retStr ;
+
+        //construct dummy "JudgementType" representing the input judgement string
+        CLICSJudgementType judgement = new CLICSJudgementType (judgementAcronym, "dummy", false, false) ;
+        
+        //try to get a "BIG5" acronym string corresponding to the input acronym judgement string
+        String big5AcronymString = judgement.getBig5EquivalentAcronym();
+
+        // the above method returns null if there is no matching Big 5 acronym string
+        if (big5AcronymString == null) {
+
+            // there's no Big5 for the input judgement string; see if it's "pending"
+            if (!judgementAcronym.toLowerCase().contains("pending")) {
+
+                // not pending; replace with message
+                retStr = "<NoBig5:" + judgementAcronym + ">";
+
+            } else {
+                // it does contain pending; keep the original judgement string
+                retStr = judgementAcronym;
             }
+            
+        } else {
+            //there was a CLICS Big5 acronym matching the input string; return the CLICS Big5 string
+            retStr = big5AcronymString;
         }
 
+        return retStr;
     }
+    
+
+
+
 
     public Log getLog() {
         if (log == null) {
@@ -707,5 +925,13 @@ public class ShadowController {
             }
         }
         return (result);
+    }
+
+    public IInternalContest getLocalContest() {
+        return localContest;
+    }
+
+    public IInternalController getLocalController() {
+        return localController;
     }
 }

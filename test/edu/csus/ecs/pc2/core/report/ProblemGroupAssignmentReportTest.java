@@ -40,7 +40,7 @@ public class ProblemGroupAssignmentReportTest extends AbstractTestCase {
         String sampleContestDirName = "valtest";
 
         String dirname = getContestSampleCDPDirname(sampleContestDirName);
-        dirname = "/test/cdps/PacificNWReal2020/";
+//        dirname = "/test/cdps/PacificNWReal2020/";   // local CDP
 
         File cdpConfigDirectory = new File(dirname);
         IInternalContest contest = new InternalContest();
@@ -56,7 +56,7 @@ public class ProblemGroupAssignmentReportTest extends AbstractTestCase {
         report.createReportFile(filename, new Filter());
         
         assertFileExists(filename, "Expecting report file for ProblemGroupAssignmentReport");
-
+        
 //        editFile(filename);
 //        catFile(filename);
     }

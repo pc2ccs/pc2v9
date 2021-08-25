@@ -28,7 +28,7 @@ import java.util.Map;
  * defined by an instance of the class is one of the CLICS "Big 5" judgement types and for mapping the instance judgement type
  * into a recommended "Big 5" judgement.
  * 
- * The class also provides method {@link #getCLICSAcronym(String)} which accepts an arbitrary judgement string (for example,
+ * The class also provides method {@link #getCLICSAcronymFromDisplayText(String)} which accepts an arbitrary judgement string (for example,
  * "Incorrect Output Format") and returns the corresponding CLICS acronym if such an acronym has been defined (see the CLICS
  * Contest API for all currently-defined strings and their corresponding acronyms).
  * 
@@ -173,6 +173,51 @@ public class CLICSJudgementType {
         }
 
     }
+    
+    /**
+     * An enumeration of all the acronyms which represent correct submission judgements (that is, judgements which represent
+     * a 'yes' or 'accepted' condition assigned by a judge).
+     * 
+     * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
+     *
+     */
+    public static enum CLICS_YES_ACRONYM {
+        
+        AC  ("Accepted"),
+        ACY ("Yes"),
+        ACC ("Correct"),
+        APE  ("Accepted - Presentation Error");
+        
+        private final String name;
+
+        private CLICS_YES_ACRONYM(String name) {
+            this.name   = name;
+        }
+        
+        public String getValue() {
+            return name;
+        }
+    }
+    
+    /**
+     * Returns true if the specified {@link CLICS_JUDGEMENT_ACRONYM} represents a "Yes" (Accepted) judgement.
+     * 
+     * @param acronym the acronym to be tested.
+     * 
+     * @return true if the specified acronym represents a "Yes" judgement.
+     */
+    public static boolean isYesAcronym(CLICS_JUDGEMENT_ACRONYM acronym) {
+        
+        String targetName = acronym.name();
+        
+        for (CLICS_YES_ACRONYM nextName : CLICS_YES_ACRONYM.values()) {
+            if (targetName.toString().contentEquals(nextName.toString())) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     /**
      * This List defines the mappings between all currently-known forms of CCS judgement messages
@@ -185,6 +230,8 @@ public class CLICSJudgementType {
      */
     private static ArrayList<JudgementMapping> judgementStringMappings = new ArrayList<JudgementMapping>() {
  
+        private static final long serialVersionUID = 1L;
+
         {
             add(new JudgementMapping("Accepted",CLICS_JUDGEMENT_ACRONYM.AC));
             
@@ -413,21 +460,22 @@ public class CLICSJudgementType {
      * specification at https://clics.ecs.baylor.edu/index.php?title=Contest_API#Judgement_Types), or null
      * if there is no recommended mapping for the acronym defined in this judgement type.
      * 
-     * @return the CLICS "Big 5" judgement 
+     * @return the CLICS "Big 5" judgement corresponding to this CLICS judgement, or null if there is no Big5 equivalent defined.
      */
     public String getBig5EquivalentAcronym() {
         return big5Mapping.get(this.id);
     }
     
     /**
-     * Returns the {@link CLICS_JUDGEMENT_ACRONYM} element which corresponds to the specified text string, or null
-     * ff there is no CLICS_JUDGEMENT_ACRONYM whose text string matches the specified text.
+     * Returns the {@link CLICS_JUDGEMENT_ACRONYM} element having a "display name" (that is, a toString() value) 
+     * which corresponds to the specified text string, or null
+     * if there is no CLICS_JUDGEMENT_ACRONYM whose display name string matches the specified text.
      * 
-     * @param text a String giving a judgement message; for example "Wrong Answer"
+     * @param text a String giving a judgement display name message; for example "Wrong Answer"
      * 
-     * @return the CLICS_JUDGEMENT_ACRONYM element corresponding to the received text (e.g. CLICS_JUDGEMENT_ACRONYM.WA), or null 
+     * @return the CLICS_JUDGEMENT_ACRONYM element corresponding to the received text (e.g. CLICS_JUDGEMENT_ACRONYM.WA), or null. 
      */
-    public static CLICS_JUDGEMENT_ACRONYM getCLICSAcronym (String text) {
+    public static CLICS_JUDGEMENT_ACRONYM getCLICSAcronymFromDisplayText (String text) {
           
         for (JudgementMapping mapping : judgementStringMappings) {
             
@@ -439,6 +487,43 @@ public class CLICSJudgementType {
         }
         
         //Text string not found
+        return null;
+    }
+    
+    /**
+     * Returns true if the specified String name corresponds exactly to the declared enum element "name" of a CLICS acronym.
+     */
+    public static boolean isCLICSAcronym(String name) {
+        
+        for (CLICS_JUDGEMENT_ACRONYM clicsAcronym : CLICS_JUDGEMENT_ACRONYM.values()) {
+            String clicsName = clicsAcronym.name();
+            if (name.toLowerCase().contentEquals(clicsName.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Returns the element of the CLICS_JUDGEMENT_ACRONYM enum whose declared acronym name (that is, the declared value of the enum element,
+     * not the "display name") matches the specified text, or null if there is no
+     * element of the CLICS_JUDGEMENT_ACRONYM enum with a matching declared name.
+     * 
+     *  For example, if the specified text is "AC", this method will return {@link  edu.csus.ecs.pc2.clics.CLICS_JUDGEMENT_ACRONYM#AC}.
+     *  If the specified text is "Accepted", this method will return null (because there is no enum element whose declared name is "Accepted"
+     *  (even though that happens to be the "display name" associated with the element "AC")).
+     *  
+     *  @return the CLICS_JUDGEMENT_ACRONYM element matching the specified string name, or null if there is no such match.
+     */
+    public static CLICS_JUDGEMENT_ACRONYM getCLICSAcronymFromElementName(String name) {
+        
+        for (CLICS_JUDGEMENT_ACRONYM clicsAcronym : CLICS_JUDGEMENT_ACRONYM.values()) {
+            String clicsName = clicsAcronym.name();
+            if (clicsName.contentEquals(name)) {
+                return clicsAcronym;
+            }
+        }
+        
         return null;
     }
     

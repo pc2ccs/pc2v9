@@ -125,7 +125,7 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
         
         //if we found a judgement string, try to convert it to a corresponding CLICS acronym
         if (result!=null && result.length()>0) {
-            CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronym(result);
+            CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(result);
             if (acronym!=null) {
                 result = acronym.name();
             }
