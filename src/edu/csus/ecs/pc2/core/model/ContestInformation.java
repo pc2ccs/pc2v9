@@ -164,6 +164,13 @@ public class ContestInformation implements Serializable{
     private Date thawed = null;
 
     private boolean allowMultipleLoginsPerTeam;
+    
+    
+    /**
+     * stop-on-first-failed-test-case
+     * 
+     */
+    private boolean stopOnFirstFailedtestCase = false;
 
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
@@ -732,8 +739,17 @@ public class ContestInformation implements Serializable{
      * @return a boolean indicating the current "allow multiple simultaneous logins" setting for teams.
      */
     public boolean isAllowMultipleLoginsPerTeam() {
-        return this.allowMultipleLoginsPerTeam;
+        return this.allowMultipleLoginsPerTeam;   
     }
+
+    public boolean isStopOnFirstFailedtestCase() {
+        return stopOnFirstFailedtestCase;
+    }
+    
+    public void setStopOnFirstFailedtestCase(boolean stopOnFirstFailedtestCase) {
+        this.stopOnFirstFailedtestCase = stopOnFirstFailedtestCase;
+    }
+    
     
     /**
      * Returns a string which defines which fields will be dispayed on the scoreboard.
