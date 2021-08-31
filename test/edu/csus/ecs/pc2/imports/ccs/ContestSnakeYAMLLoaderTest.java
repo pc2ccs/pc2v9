@@ -3508,7 +3508,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         String[] yamlLines = { //
                 "",
-                "team-display-on-scoreboard-string : '{:teamname}'", //
+                "team-scoreboard-display-format-string : '{:teamname}'", //
                 "",
                 "accounts:", //
                 "  - account: TEAM", //
@@ -3562,7 +3562,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         String[] yamlLines = { //
                 "",
-                "team-display-on-scoreboard-string : '"+teamDisplayString+"'", //
+                "team-scoreboard-display-format-string : '"+teamDisplayString+"'", //
                 "",
                 "accounts:", //
                 "  - account: TEAM", //

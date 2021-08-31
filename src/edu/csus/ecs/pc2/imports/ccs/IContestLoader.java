@@ -193,7 +193,7 @@ public interface IContestLoader {
      * 
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, IInternalContest, edu.csus.ecs.pc2.core.model.Account)
      */
-    String TEAM_DISPLAY_ON_SCOREBOARD_STRING = "team-display-on-scoreboard-string";
+    String TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING  = "team-scoreboard-display-format-string";
 
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 

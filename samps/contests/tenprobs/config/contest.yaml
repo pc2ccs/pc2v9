@@ -7,7 +7,7 @@ short-name: Sumit10
 
 # Test very long team subs
 
-team-display-on-scoreboard-string : 'Team {:clientnumber}  {:teamname} and login: {:teamloginname} {:groupid}:{:groupname} long: {:longschoolname} short: {:shortschoolname} cms id: {:externalid}'
+team-scoreboard-display-format-string : 'Team {:clientnumber}  {:teamname} and login: {:teamloginname} {:groupid}:{:groupname} long: {:longschoolname} short: {:shortschoolname} cms id: {:externalid}'
 
 ccs-test-mode : true
 
