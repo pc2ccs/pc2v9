@@ -3522,7 +3522,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Account[] teams = getTeamAccounts(contest);
         assertEquals("Team count", 22, teams.length);
 
-        String displayString = contest.getContestInformation().getTeamDisplayOnScoreboard();
+        String displayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
         assertEquals("Team getTeamDisplayOnScoreboard", "{:teamname}", displayString);
         
         /**
@@ -3554,8 +3554,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //        assertDirectoryExists(dataDirName);
         
         String teamDisplayString = "{:clientnumber} {:countrycode} {:groupid} {:groupname} {:externalid}";
-        String expeccted = "21 XXX {:groupid} {:groupname} 1021";
-        yamlTestTeamDisplayOnBoard(dataDirName, teamDisplayString, expeccted);
+        String expected = "21 XXX {:groupid} {:groupname} 1021";
+        yamlTestTeamDisplayOnBoard(dataDirName, teamDisplayString, expected);
     }
     
     void yamlTestTeamDisplayOnBoard (String dirname, String teamDisplayString, String expectedString) {
@@ -3576,7 +3576,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Account[] teams = getTeamAccounts(contest);
         assertEquals("Team count", 22, teams.length);
 
-        String ciDisplayString = contest.getContestInformation().getTeamDisplayOnScoreboard();
+        String ciDisplayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
         assertEquals("Team getTeamDisplayOnScoreboard", teamDisplayString, ciDisplayString);
 
         Account account20 = getSortedTeamAccounts(contest)[20];
@@ -3586,7 +3586,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
     }
     
-    public void testname() throws Exception {
+    public void testAllSubstitutions() throws Exception {
         
         IInternalContest contest = loadFullSampleContest(null, "tenprobs");
         assertNotNull(contest);
@@ -3596,7 +3596,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         String teamDisplayString = "Team {:clientnumber}  {:teamname} and login: {:teamloginname} {:groupid}:{:groupname} long: {:longschoolname} short: {:shortschoolname} cms id: {:externalid}";
 
-        String ciDisplayString = contest.getContestInformation().getTeamDisplayOnScoreboard();
+        String ciDisplayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
         assertEquals("Team getTeamDisplayOnScoreboard", teamDisplayString, ciDisplayString);
 
         Account account20 = getSortedTeamAccounts(contest)[20];

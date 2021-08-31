@@ -588,7 +588,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             groupCount++;
         }
         
-        String teamVarDisplayString = contestInformation.getTeamDisplayOnScoreboard();
+        String teamVarDisplayString = contestInformation.getTeamScoreboardDisplayFormat();
         
         StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
         

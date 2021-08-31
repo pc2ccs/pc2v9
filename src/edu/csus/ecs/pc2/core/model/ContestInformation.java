@@ -84,7 +84,7 @@ public class ContestInformation implements Serializable{
      * 
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, Account, Group)
      */
-    private String teamDisplayOnScoreboard = ScoreboardVariableReplacer.TEAM_NAME;
+    private String teamScoreboardDisplayFormat = ScoreboardVariableReplacer.TEAM_NAME;
 
     /**
      * 
@@ -757,11 +757,11 @@ public class ContestInformation implements Serializable{
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, Account, Group)
      * @return
      */
-    public String getTeamDisplayOnScoreboard() {
-        return teamDisplayOnScoreboard;
+    public String getTeamScoreboardDisplayFormat() {
+        return teamScoreboardDisplayFormat;
     }
-    
-    public void setTeamDisplayOnScoreboard(String teamDisplayOnScoreboard) {
-        this.teamDisplayOnScoreboard = teamDisplayOnScoreboard;
+
+    public void setTeamScoreboardDisplayFormat(String teamScoreboardDisplayFormat) {
+        this.teamScoreboardDisplayFormat = teamScoreboardDisplayFormat;
     }
 }

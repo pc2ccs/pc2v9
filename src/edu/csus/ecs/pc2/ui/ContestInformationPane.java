@@ -874,7 +874,7 @@ public class ContestInformationPane extends JPanePlugin {
             
             newContestInformation.setLastRunNumberSubmitted(savedContestInformation.getLastRunNumberSubmitted());
             newContestInformation.setAutoStartContest(savedContestInformation.isAutoStartContest());
-            newContestInformation.setTeamDisplayOnScoreboard(savedContestInformation.getTeamDisplayOnScoreboard());
+            newContestInformation.setTeamScoreboardDisplayFormat(savedContestInformation.getTeamScoreboardDisplayFormat());
         }
 
         newContestInformation.setScoringProperties(changedScoringProperties);

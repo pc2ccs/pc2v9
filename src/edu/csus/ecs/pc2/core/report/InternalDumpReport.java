@@ -157,7 +157,7 @@ public class InternalDumpReport implements IReport {
         
         printWriter.println();
         printWriter.println("  Auto Start Contest                   : " + Utilities.yesNoString(contestInformation.isAutoStartContest()));
-        printWriter.println("  Team Display on Scoreboard           : " + contestInformation.getTeamDisplayOnScoreboard());
+        printWriter.println("  Team Display on Scoreboard           : " + contestInformation.getTeamScoreboardDisplayFormat());
         printWriter.println("  Allow multiple team logins           : " + Utilities.yesNoString(contestInformation.isAllowMultipleLoginsPerTeam()));
         
         String gregTimeString = null;
