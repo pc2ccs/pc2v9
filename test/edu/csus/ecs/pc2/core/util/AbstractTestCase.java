@@ -43,6 +43,7 @@ import org.xml.sax.SAXException;
 
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.LogFormatter;
@@ -53,11 +54,13 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
@@ -1479,6 +1482,51 @@ public class AbstractTestCase extends TestCase {
     
     public void setGUI(boolean useGUI) {
         this.usingGUI = useGUI;
+    }
+
+    /**
+     * Load contest model from CDP
+     * @param contest
+     * @param cdpDir CDP directory, Ex. sumithello
+     * @return
+     * @throws Exception
+     */
+    public IInternalContest loadFullSampleContest(IInternalContest contest, File cdpDir) throws Exception {
+        
+        String configDir = cdpDir.getAbsolutePath() + File.separator + IContestLoader.CONFIG_DIRNAME;
+
+        if (contest == null) {
+            contest = new InternalContest();
+            contest.setClientId(new ClientId(1, Type.SERVER, 0));
+        }
+
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+
+        LoadICPCTSVData loadTSVData = new LoadICPCTSVData();
+        loadTSVData.setContestAndController(contest, null);
+        String teamsTSVFile = configDir + File.separator + LoadICPCTSVData.TEAMS_FILENAME;
+        boolean loaded = loadTSVData.loadFiles(teamsTSVFile, false, false);
+
+        if (!loaded) {
+            System.err.println("Expected to find file '" + teamsTSVFile + " from dir  " + configDir);
+            return null;
+        }
+
+        return loader.fromYaml(contest, configDir);
+    }
+
+    /**
+     * Load contest model from samples.
+     * 
+     * Loads groups.tsv, teams.tsv and all other data.
+     * 
+     * @param contest
+     * @param sampleName name of pc2 sample, under samps/contests/<sampleName>
+     * @return
+     * @throws Exception
+     */
+    public IInternalContest loadFullSampleContest(IInternalContest contest, String sampleName) throws Exception {
+        return loadFullSampleContest (contest, new File(getTestSampleContestDirectory(sampleName)));
     }
     
 }

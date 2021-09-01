@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.core.DateUtilities;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
+import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
  * Contest-wide Information/settings.
@@ -77,6 +78,13 @@ public class ContestInformation implements Serializable{
     private String rsiCommand = null;
     
     private int lastRunNumberSubmitted = 0;
+    
+    /**
+     * Display string for team display on standings.
+     * 
+     * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, Account, Group)
+     */
+    private String teamScoreboardDisplayFormat = ScoreboardVariableReplacer.TEAM_NAME;
 
     /**
      * 
@@ -731,14 +739,29 @@ public class ContestInformation implements Serializable{
      * @return a boolean indicating the current "allow multiple simultaneous logins" setting for teams.
      */
     public boolean isAllowMultipleLoginsPerTeam() {
-        return this.allowMultipleLoginsPerTeam;
+        return this.allowMultipleLoginsPerTeam;   
     }
-    
+
     public boolean isStopOnFirstFailedtestCase() {
         return stopOnFirstFailedtestCase;
     }
     
     public void setStopOnFirstFailedtestCase(boolean stopOnFirstFailedtestCase) {
         this.stopOnFirstFailedtestCase = stopOnFirstFailedtestCase;
+    }
+    
+    
+    /**
+     * Returns a string which defines which fields will be dispayed on the scoreboard.
+     * 
+     * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, Account, Group)
+     * @return
+     */
+    public String getTeamScoreboardDisplayFormat() {
+        return teamScoreboardDisplayFormat;
+    }
+
+    public void setTeamScoreboardDisplayFormat(String teamScoreboardDisplayFormat) {
+        this.teamScoreboardDisplayFormat = teamScoreboardDisplayFormat;
     }
 }
