@@ -89,7 +89,6 @@ public class ContestInformation implements Serializable{
     /**
      * 
      * @author pc2@ecs.csus.edu
-     * @version $Id$
      */
     public enum TeamDisplayMask {
         /**
@@ -261,6 +260,9 @@ public class ContestInformation implements Serializable{
                 return false;
             }
             if (maxFileSize != contestInformation.getMaxFileSize()){
+                return false;
+            }
+            if (!teamScoreboardDisplayFormat.equals(contestInformation.getTeamScoreboardDisplayFormat())) {
                 return false;
             }
             if (! scoringProperties.equals(contestInformation.getScoringProperties())){
