@@ -233,7 +233,7 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JLabel teamScoreboardDisplayFormatLabel;
 
-    private JLabel teamDisplayFormatButton;
+    private JLabel teamDisplayFormatWhatsThisButton;
     
 //    private JTextField textfieldPrimaryCCSURL;
 //
@@ -582,27 +582,27 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JLabel getTeamScoreboardDisplayFormatWhatsThisButton() {
         
-            if (teamDisplayFormatButton == null) {
+            if (teamDisplayFormatWhatsThisButton == null) {
                 Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
                 if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
                     // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
-                    teamDisplayFormatButton = new JLabel("<What's This?>");
-                    teamDisplayFormatButton.setForeground(Color.blue);
+                    teamDisplayFormatWhatsThisButton = new JLabel("<What's This?>");
+                    teamDisplayFormatWhatsThisButton.setForeground(Color.blue);
                 } else {
                     Image image = ((ImageIcon) questionIcon).getImage();
-                    teamDisplayFormatButton = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+                    teamDisplayFormatWhatsThisButton = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
                 }
 
-                teamDisplayFormatButton.setToolTipText("What's This? (click for additional information)");
-                teamDisplayFormatButton.addMouseListener(new MouseAdapter() {
+                teamDisplayFormatWhatsThisButton.setToolTipText("What's This? (click for additional information)");
+                teamDisplayFormatWhatsThisButton.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
                         JOptionPane.showMessageDialog(null, displayFormatWhatsThisMessage, "About Team Scoreboard Display Format Strings", JOptionPane.INFORMATION_MESSAGE, null);
                     }
                 });
-                teamDisplayFormatButton.setBorder(new EmptyBorder(0, 15, 0, 0));
+                teamDisplayFormatWhatsThisButton.setBorder(new EmptyBorder(0, 15, 0, 0));
             }
-            return teamDisplayFormatButton;
+            return teamDisplayFormatWhatsThisButton;
         }
 
     // the string which will be displayed when the "What's This" icon in the Team Settings panel is clicked
@@ -618,16 +618,16 @@ public class ContestInformationPane extends JPanePlugin {
             + "\n\nLiteral characters (i.e., anything NOT part of a substituion variable) are displayed exactly as written in the format string." //
 
             + "\n\nRecognized substitution variables include:" //
-            + "\n    {:teamname}        -- the name of the team (for example, \"Hot Coders\")" //
-            + "\n    {:teamloginname}   -- the account name which the team uses to login to PC^2 (e.g., \"team102\")" //
-            + "\n    {:clientnumber}    -- the PC^2 client (team) number for the team (e.g., \"102\")" //
-            + "\n    {:shortschoolname} -- the short name of the team's school (e.g., \"CSUS\" or \"UCB\")" //
-            + "\n    {:longschoolname}  -- the long name of the team's school (e.g., \"California State University, Sacramento\"" //
-            + "\n    {:groupname}       -- the name of the group (if any) to which the team is assigned (e.g., \"Upper Division\" or \"Northern Site\")" //
-            + "\n    {:groupid}         -- the id number of the group (if any) to which the team is assigned (e.g., \"1\" or \"201\")" //
-            + "\n    {:sitenumber}      -- the PC^2 site number (in a multi-site contest) to which the team logs in (e.g., \"1\" or \"5\")" //
-            + "\n    {:countrycode}     -- the ISO Country Code associated with the team (e.g. \"CAN\" or \"USA\")" //
-            + "\n    {:externalid}      -- the ICPC CMS id number (if any) associated with the team (e.g., \"309407\")" //
+            + "\n    {:teamname}                -- the name of the team (for example, \"Hot Coders\")" //
+            + "\n    {:teamloginname}       -- the account name which the team uses to login to PC^2 (e.g., \"team102\")" //
+            + "\n    {:clientnumber}           -- the PC^2 client (team) number for the team (e.g., \"102\")" //
+            + "\n    {:shortschoolname}  -- the short name of the team's school (e.g., \"CSUS\" or \"UCB\")" //
+            + "\n    {:longschoolname}    -- the long name of the team's school (e.g., \"California State University, Sacramento\"" //
+            + "\n    {:groupname}             -- the name of the group (if any) to which the team is assigned (e.g., \"Upper Division\" or \"Northern Site\")" //
+            + "\n    {:groupid}                     -- the id number of the group (if any) to which the team is assigned (e.g., \"1\" or \"201\")" //
+            + "\n    {:sitenumber}             -- the PC^2 site number (in a multi-site contest) to which the team logs in (e.g., \"1\" or \"5\")" //
+            + "\n    {:countrycode}           -- the ISO Country Code associated with the team (e.g. \"CAN\" or \"USA\")" //
+            + "\n    {:externalid}                -- the ICPC CMS id number (if any) associated with the team (e.g., \"309407\")" //
             
             + "\n\nSo for example a display format string like \"{:teamname} ({:shortschoolname}) might display the following on the scoreboard:" //
             + "\n    Hot Coders (CSUS) " //
@@ -635,13 +635,19 @@ public class ContestInformationPane extends JPanePlugin {
             
             + "\n\nSubstitution values depend on the corresponding data having been loaded into the PC^2 Server; if there is no value defined for a" //
             + "\nspecified substitution string then the substitution string itself appears in the result."
+            + " If the defined value is null or empty then an empty string appears in the result."
 
             + "\n\n"; //
 
     private JTextField getTeamScoreboardDisplayFormatTextfield() {
         if (teamScoreboardDisplayFormatTextfield==null) {
-            teamScoreboardDisplayFormatTextfield = new JTextField("Developer note: replace with current setting",30);
+            teamScoreboardDisplayFormatTextfield = new JTextField("Undefined",30);
             
+            teamScoreboardDisplayFormatTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return teamScoreboardDisplayFormatTextfield;
     }
@@ -965,6 +971,7 @@ public class ContestInformationPane extends JPanePlugin {
         long maximumFileSize = Long.parseLong(maxFileSizeString);
         newContestInformation.setMaxFileSize(maximumFileSize * 1000);
         newContestInformation.setAllowMultipleLoginsPerTeam(getAllowMultipleTeamLoginsCheckbox().isSelected());
+        newContestInformation.setTeamScoreboardDisplayFormat(getTeamScoreboardDisplayFormatTextfield().getText());
 
         //fill in values already saved, if any
         if (savedContestInformation != null) {
@@ -982,7 +989,6 @@ public class ContestInformationPane extends JPanePlugin {
             
             newContestInformation.setLastRunNumberSubmitted(savedContestInformation.getLastRunNumberSubmitted());
             newContestInformation.setAutoStartContest(savedContestInformation.isAutoStartContest());
-            newContestInformation.setTeamScoreboardDisplayFormat(savedContestInformation.getTeamScoreboardDisplayFormat());
         }
 
         newContestInformation.setScoringProperties(changedScoringProperties);
@@ -1043,6 +1049,7 @@ public class ContestInformationPane extends JPanePlugin {
                 
                 getMaxOutputSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
                 getAllowMultipleTeamLoginsCheckbox().setSelected(contestInformation.isAllowMultipleLoginsPerTeam());
+                getTeamScoreboardDisplayFormatTextfield().setText(contestInformation.getTeamScoreboardDisplayFormat());
                 getContestFreezeLengthtextField().setText(contestInformation.getFreezeTime());
                 
                 getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
