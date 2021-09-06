@@ -338,7 +338,6 @@ public class Permission implements Serializable {
         hash.put(Type.ADD_ACCOUNT, "Add Accounts");
         hash.put(Type.EDIT_ACCOUNT, "Edit Accounts");
         hash.put(Type.EDIT_PERMISSIONS, "Edit Permissions");
-        hash.put(Type.EDIT_PERMISSIONS, "Edit Runs");
         hash.put(Type.EXECUTE_RUN, "Execute but not judge runs");
         hash.put(Type.JUDGE_RUN, "Judge runs");
         hash.put(Type.LOGIN, "Login");
