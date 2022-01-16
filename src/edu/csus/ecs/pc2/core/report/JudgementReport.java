@@ -4,10 +4,14 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.JudgementSortBySiteAcronymComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -52,6 +56,7 @@ public class JudgementReport implements IReport {
             printWriter.print("  '" + judgement + "'");
             printWriter.print(" acronym=" + judgement.getAcronym());
             printWriter.print(" id=" + judgement.getElementId());
+            printWriter.print(" site=" + judgement.getSiteNumber());
             printWriter.println();
         }
         
@@ -65,8 +70,62 @@ public class JudgementReport implements IReport {
             printWriter.print("' ");
             printWriter.print(" acronym=" + judgement.getAcronym());
             printWriter.print(hiddenText+" id=" + judgement.getElementId());
+            printWriter.print(" site=" + judgement.getSiteNumber());
             printWriter.println();
         }
+        
+        
+        printWriter.println();
+        printWriter.println();
+        printWriter.println("     All Judgements for all sites, " + judgements.length + " Judgements");
+        printWriter.println();
+        
+        Arrays.sort(judgements, new JudgementSortBySiteAcronymComparator());
+        
+        int lastSite = -1;
+        for (Judgement judgement : judgements) {
+
+            if (lastSite != judgement.getSiteNumber()) {
+                printWriter.println();
+                // print # judgements per site
+                List<Judgement> judgementList = getSitesJudgements(judgements, judgement.getSiteNumber());
+                int judgementPerSiteCount = judgementList.size();
+                printWriter.println("-- Site " + judgement.getSiteNumber() + " has " + judgementPerSiteCount + " Judgements --");
+                lastSite = judgement.getSiteNumber();
+            }
+        
+            
+            String hiddenText = "";
+            if (!judgement.isActive()){
+                hiddenText = "[HIDDEN] ";
+            }
+            printWriter.print(" site=" + judgement.getSiteNumber());
+            printWriter.print("  '" + judgement );
+            printWriter.print("' ");
+            printWriter.print(" acronym=" + judgement.getAcronym());
+            printWriter.print(hiddenText+" id=" + judgement.getElementId());
+            printWriter.println();
+            
+        }
+    }
+
+    /**
+     * Return a list of all judgements assigned for a site number
+     * @param judgements
+     * @param siteNumber
+     * @return list of judgements with site number siteNumber.
+     */
+    private List<Judgement> getSitesJudgements(Judgement[] judgements, int siteNumber) {
+
+        List<Judgement> list = new ArrayList<Judgement>();
+
+        for (Judgement judgement : judgements) {
+            if (siteNumber == judgement.getSiteNumber()) {
+                list.add(judgement);
+            }
+        }
+
+        return list;
     }
 
     public void printHeader(PrintWriter printWriter) {
