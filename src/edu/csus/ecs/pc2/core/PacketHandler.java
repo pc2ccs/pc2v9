@@ -3602,11 +3602,9 @@ public class PacketHandler {
     }
 
     /**
-     * Loads only the settings from the remote server into this server.
+     * Loads only the settings from the remote server into this server's model.
      * 
-     * Loads settings from other server, submissions, etc.  Sends
-     * out a login packet to any "new" servers which this site
-     * is not logged into. 
+     * Loads settings from other server, submissions, etc. into model.
      * 
      * @param packet
      * @param connectionHandlerID
@@ -3641,6 +3639,20 @@ public class PacketHandler {
         loader.addAllConnectionIdsToModel(contest, controller, packet);
 
         loader.addRemoteLoginsToModel(contest, controller, packet, remoteSiteNumber);
+        
+        loader.addJudgementsToModel(contest, controller, packet);
+
+        if (isServer()) {
+            try {
+                contest.storeConfiguration(controller.getLog());
+            } catch (Exception e) {
+                // huh
+                Exception ex = new Exception("Server " + contest.getClientId() + " problem storing config update  " + packet);
+                controller.getLog().log(Log.WARNING, ex.getMessage(), ex);
+            }
+        }
+        
+        controller.sendToJudgesAndOthers(packet, false);
         
         info("Done loading settings from remote site "+remoteSiteNumber);
     }

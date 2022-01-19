@@ -486,9 +486,9 @@ public class ReportPane extends JPanePlugin {
             resumeTime = getContest().getContestTime().getResumeTime();
         }
         if (resumeTime == null) {
-            printWriter.print("  Contest date/time: never started");
+            printWriter.print("  Contest date/time: never started on site "+getContest().getSiteNumber());
         } else {
-            printWriter.print("  Contest date/time: " + resumeTime.getTime());
+            printWriter.print("  Contest date/time: " + resumeTime.getTime()+" on site "+getContest().getSiteNumber());
 
         }
 
