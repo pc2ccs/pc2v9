@@ -26,7 +26,7 @@ public class JudgementSortBySiteAcronymComparator implements  Comparator<Judgeme
         } else if (jOne.getAcronym().equals(j2.getAcronym())) {
             return jOne.getDisplayName().compareTo(j2.getDisplayName());
         } else {
-            return jOne.getAcronym().compareTo(jOne.getAcronym());
+            return jOne.getAcronym().compareTo(j2.getAcronym());
         }
 
     }
