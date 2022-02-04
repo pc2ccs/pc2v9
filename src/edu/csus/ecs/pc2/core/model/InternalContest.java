@@ -736,6 +736,9 @@ public class InternalContest implements IInternalContest {
     }
 
     public void addJudgement(Judgement judgement) {
+        if (judgement.getSiteNumber() == 0) {
+            judgement.setSiteNumber(getSiteNumber());
+        }
         judgementDisplayList.add(judgement);
         judgementList.add(judgement);
         JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.ADDED, judgement);
