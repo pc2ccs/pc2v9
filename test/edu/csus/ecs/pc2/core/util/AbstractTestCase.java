@@ -99,8 +99,8 @@ public class AbstractTestCase extends TestCase {
      * Used to skip tests that take longer than a second.
      * 
      */
-//    private boolean fastJUnitTesting = true;
-    private boolean fastJUnitTesting = false;
+    private boolean fastJUnitTesting = true;
+//    private boolean fastJUnitTesting = false;
     
     private String testDataDirectory = null;
 
