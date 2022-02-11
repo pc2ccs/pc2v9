@@ -34,7 +34,8 @@ job-build:
     # install "n" the Node/npm version manager/updater
     - npm install -g n
     # Install the latest stable version of nodejs/npm
-    - n 12
+    # before - n stable
+    - n 14
     - export PATH="/usr/local/bin:$PATH"
     - npm --version
     - node --version
