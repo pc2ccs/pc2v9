@@ -78,7 +78,7 @@ public class ScoreboardJsonTest extends AbstractTestCase {
         
         assertNotNull(json);
         
-        System.out.println("debug 22 FAUX "+json);
+//        System.out.println("debug 22 FAUX "+json);
     }
     
     public void testNADC21Prac2EF() throws Exception {
