@@ -39,7 +39,7 @@ job-build:
     - export PATH="/usr/local/bin:$PATH"
     - npm --version
     - node --version
-    - ant -file package.xml archiveSkipTests
+    - ant -file package.xml
     - echo $CI_JOB_ID > dist/ci_job_id.txt
   artifacts:
     paths:
