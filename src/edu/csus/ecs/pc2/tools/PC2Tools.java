@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.tools;
 
 import java.util.Arrays;
@@ -18,7 +18,7 @@ public class PC2Tools {
 
 // Automation tasks left 
 // TODO	 PC2Tools --loggedin - list of all servers and clients that are logged in
-// TODO fetch information from CCS REST end pions 
+// TODO fetch information from CCS REST end points 
 
     private static void usage() {
 
@@ -31,6 +31,7 @@ public class PC2Tools {
                 "--mer   - prints mail merge file to stdtout, use --help --mer for usage", //
                 "--sr   -  submit runs from CLICS JSON EF, use --help --sr for usage", //
                 "--ttsv -  convert teams.json to teams.tsv, use --help --ttsv for usage", //
+                "--upjdf  -  update judge data file names for a CDP or problem", //
                 "",
                 
                 "--login LOGIN ", //
@@ -86,6 +87,10 @@ public class PC2Tools {
         } else if (parseArguments.isOptPresent("--ttsv")) {
 
             CreateTeamsTSV.main(options);
+            
+        } else if (parseArguments.isOptPresent("--upjdf")) {
+
+            UpdateJudgesDataFileNames.main(options);
 
         } else if (parseArguments.isOptPresent("--mer")) {
 
