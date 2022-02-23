@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.PermissionGroup;
@@ -579,7 +581,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Hashtable<Group, Integer> groupIndexHash = new Hashtable<Group, Integer>();
         int groupCount = 0;
         for (Group group : groups) {
-            // no refence to groups that should not be displayed on scoreboard
+            // no reference to groups that should not be displayed on scoreboard
             if (!group.isDisplayOnScoreboard()) {
                 continue;
             }
@@ -587,7 +589,26 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             groupIndexHash.put(group, Integer.valueOf(groupCount));
             groupCount++;
         }
-        
+        Hashtable<Group, Integer> divisionIndexHash = new Hashtable<Group, Integer>();
+        int divisionCount = 0;
+        // TODO this bit should in the future can probably go away when divisions are supported better.
+        int lastFound = 0;
+        for (Group group : groups) {
+            // no reference to groups that should not be displayed on scoreboard
+            if (!group.isDisplayOnScoreboard()) {
+                continue;
+            }
+            Pattern pattern = Pattern.compile("D\\d+$");
+            Matcher matcher = pattern.matcher(group.getDisplayName());
+            if (matcher.find()) {
+                Integer found = Integer.parseInt(matcher.group(0).substring(1));
+                if (found.intValue() > lastFound) {
+                    lastFound = found.intValue();
+                }
+                divisionIndexHash.put(group, found);
+            }
+        }
+        divisionCount = lastFound;
         String teamVarDisplayString = contestInformation.getTeamScoreboardDisplayFormat();
         
         StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
@@ -626,6 +647,20 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             groupRank[i] = 0;
             groupIndexRank[i] = 0;
         }
+        long[] divisionNumSolved = new long[divisionCount];
+        for (int i = 0; i < divisionCount; i++) {
+            divisionNumSolved[i] = -1;
+        }
+        int[] divisionRank = new int[divisionCount];
+        int[] divisionIndexRank = new int[divisionCount];
+        long[] divisionScore = new long[divisionCount];
+        long[] divisionLastSolved = new long[divisionCount];
+        for (int i = 0; i < divisionCount; i++) {
+            divisionRank[i] = 0;
+            divisionIndexRank[i] = 0;
+            divisionScore[i] = 0;
+            divisionLastSolved[i] = 0;
+        }
         while (iterator.hasNext()) {
             Object o = iterator.next();
             StandingsRecord standingsRecord = (StandingsRecord) o;
@@ -649,6 +684,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
             standingsRecordMemento.putInteger("solved", standingsRecord.getNumberSolved());
             standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
+            standingsRecordMemento.putInteger("overalRank", standingsRecord.getRankNumber());
             standingsRecordMemento.putInteger("index", index);
             Account account = accountList.getAccount(standingsRecord.getClientId());
             
@@ -696,6 +732,23 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 standingsRecordMemento.putInteger("teamGroupId", groupIndex+1);
                 standingsRecordMemento.putInteger("teamGroupExternalId", group.getGroupId());
                 standingsRecordMemento.putInteger("scoringAdjustment", account.getScoringAdjustment());
+                // division stuff
+                if (divisionIndexHash.containsKey(group)) {
+                    int divisionIndex = divisionIndexHash.get(group).intValue()-1;
+                    divisionIndexRank[divisionIndex]++;
+                    if (!isTeamTied(standingsRecord, divisionNumSolved[divisionIndex], divisionScore[divisionIndex],divisionLastSolved[divisionIndex])) {
+                        divisionNumSolved[divisionIndex] = standingsRecord.getNumberSolved();
+                        divisionScore[divisionIndex] = standingsRecord.getPenaltyPoints();
+                        divisionLastSolved[divisionIndex] = standingsRecord.getLastSolved();
+                        divisionRank[divisionIndex] = divisionIndexRank[divisionIndex];
+                        standingsRecord.setDivisionRankNumber(divisionRank[divisionIndex]);
+                    } else {
+                        // current user tied with last user, so same rank
+                        standingsRecord.setDivisionRankNumber(divisionRank[divisionIndex]);
+                    }
+                    
+                    standingsRecordMemento.putInteger("divisionRank", standingsRecord.getDivisionRankNumber());
+                }
             }
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             for (int i = 0; i < problems.length; i++) {
