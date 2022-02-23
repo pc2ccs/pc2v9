@@ -592,7 +592,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Hashtable<Group, Integer> divisionIndexHash = new Hashtable<Group, Integer>();
         int divisionCount = 0;
         // TODO this bit should in the future can probably go away when divisions are supported better.
-        int lastFound = 0;
+        int highestFound = 0;
         for (Group group : groups) {
             // no reference to groups that should not be displayed on scoreboard
             if (!group.isDisplayOnScoreboard()) {
@@ -601,14 +601,19 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             Pattern pattern = Pattern.compile("D\\d+$");
             Matcher matcher = pattern.matcher(group.getDisplayName());
             if (matcher.find()) {
+                // we found pattern in the group name
+                // the group include the D to take the substring
                 Integer found = Integer.parseInt(matcher.group(0).substring(1));
-                if (found.intValue() > lastFound) {
-                    lastFound = found.intValue();
+                if (found.intValue() > highestFound) {
+                    // keep track of the highest division number
+                    highestFound = found.intValue();
                 }
+                // store by group, it's division number
                 divisionIndexHash.put(group, found);
             }
         }
-        divisionCount = lastFound;
+        // this is the number used in the array constructors,  bigger is ok, smaller is not.
+        divisionCount = highestFound;
         String teamVarDisplayString = contestInformation.getTeamScoreboardDisplayFormat();
         
         StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
@@ -684,7 +689,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
             standingsRecordMemento.putInteger("solved", standingsRecord.getNumberSolved());
             standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
-            standingsRecordMemento.putInteger("overalRank", standingsRecord.getRankNumber());
+            standingsRecordMemento.putInteger("overallRank", standingsRecord.getRankNumber());
             standingsRecordMemento.putInteger("index", index);
             Account account = accountList.getAccount(standingsRecord.getClientId());
             
