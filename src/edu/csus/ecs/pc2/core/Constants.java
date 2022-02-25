@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 /**
@@ -165,5 +165,10 @@ public final class Constants {
     
     public static final int INPUT_VALIDATOR_EXECUTION_ERROR_CODE = -39;
     
-    public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";   
+    public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";
+    
+    /**
+     * New line constant (OS specific).
+     */
+    public static final String NL = System.getProperty("line.separator");
 }
