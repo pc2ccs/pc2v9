@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.export;
 
 import java.io.File;
@@ -45,7 +45,19 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
  * 
  * @author pc2@ecs.csus.edu
  */
+// TODO REFACTOR and CI use constants for secret and sample dir names
 public class ExportYAML {
+    
+    /**
+     * CDP directory name for judges' data files
+     */
+    public static final String SECRET_DIRECTORY_NAME = "secret";
+
+    /**
+     * CDP directory name for sample data files
+     */
+    public static final String SAMPLE_DIRECTORY_NAME = "sample";
+
 
     private static final String PAD4 = "    ";
 

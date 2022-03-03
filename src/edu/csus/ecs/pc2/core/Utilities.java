@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
@@ -1201,11 +1202,11 @@ public final class Utilities {
     }
 
     /**
-     * Return list of directory entries (including dirs) with extension.
+     * Return list of directory entries matching with extension.
      * 
      * @param directoryName
      * @param extension
-     * @return
+     * @return list of basename filenames in directory directoryName
      */
     public static String[] getFileNames(String directoryName, String extension) {
 
@@ -1844,5 +1845,66 @@ public final class Utilities {
             return Long.MIN_VALUE;
         }
     }
+    
+    /**
+     * Fetch directories names (full path).
+     * 
+     * @param directory
+     * @return list of directories (prepended by directory)
+     */
+    public static List<String> getDirectoryNames(String directory) {
+
+        List<String> list = new ArrayList<String>();
+
+        File dir = new File(directory);
+
+        String[] entries = dir.list();
+        if (entries == null) {
+            return list;
+        }
+
+        Arrays.sort(entries);
+
+        for (String name : entries) {
+            String entry = directory + File.separator + name;
+            
+            if (new File(entry).isDirectory()) {
+                list.add(entry);
+            }
+        }
+
+        return list;
+    }
+    
+    /**
+     * Fetch all CDP data directories for all problems under cdpConfigDirectory directory.
+     * 
+     * @param cdpConfigDirectory
+     * @return a list of data directories (full path)
+     */
+    public static List<String> getCDPDataDirectories(String cdpConfigDirectory) {
+
+        List<String> list = new ArrayList<String>();
+
+        File dir = new File(cdpConfigDirectory);
+
+        String[] entries = dir.list();
+        if (entries == null) {
+            return list;
+        }
+
+        Arrays.sort(entries);
+
+        for (String name : entries) {
+            String entry = cdpConfigDirectory + File.separator + name + File.separator + "data";
+            if (new File(entry).isDirectory()) {
+                list.add(entry);
+            }
+        }
+
+        return list;
+    }
+
+    
   
 }
