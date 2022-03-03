@@ -1844,5 +1844,60 @@ public final class Utilities {
             return Long.MIN_VALUE;
         }
     }
-  
+    
+    /**
+     * Accepts a "duration" (an amount of time) in milliseconds and returns that duration in formatted form.
+     * The general form of the returned format is HHHH:MM:SS.sss, where the number of hour digits will always be
+     * at least two, but may be more depending on the input value 
+     * (in other words, this is not a "time of day" which is restricted to just two hour-digits).
+     * Note however that the minutes and seconds fields will always be two digits, and the msec field will 
+     * always be three digits.
+     * 
+     * @param milliseconds the duration to be formatted, in msec.
+     * @return the formatted value of the input duration.
+     */
+    public static String formatDuration (long milliseconds) {
+        
+        String result = "";
+        
+        long msecPerSecond = 1000;
+        long msecPerMinute = msecPerSecond*60 ;
+        long msecPerHour = msecPerMinute*60 ;             
+        
+        long hours = milliseconds / msecPerHour ;   //whole hours (fractional portion is truncated
+        if (hours<10) {
+            //prepend a zero to insure at least two hour digits
+            result += "0";
+        }
+        String hourString = Long.toString(hours);
+        result += hourString + ":";
+        
+        long minutes = (milliseconds - (hours*msecPerHour)) / (60*1000);  //whole minutes (truncated)
+        if (minutes<10) {
+            result += "0";
+        }
+        String minuteString = Long.toString(minutes);
+        result += minuteString + ":";
+        
+        long seconds = (milliseconds - (hours*msecPerHour) - (minutes*msecPerMinute)) / 1000;   //whole seconds (truncated)
+        if (seconds<10) {
+            result += "0";
+        }
+        String secondsString = Long.toString(seconds);
+        result += secondsString + ".";
+        
+        long millis = milliseconds - (hours*msecPerHour) - (minutes*msecPerMinute) - (seconds*msecPerSecond);   //fractional seconds (truncated)
+        if (millis<100) {
+            result += "0";
+        }
+        if (millis<10) {
+            result += "0";
+        }
+        String fractionString = Long.toString(millis);
+        result += fractionString;
+        
+        return result;
+    }
+
+    
 }
