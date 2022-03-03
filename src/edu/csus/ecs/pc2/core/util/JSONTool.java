@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
 import java.util.Calendar;
@@ -212,7 +212,7 @@ public class JSONTool {
             startTime = Utilities.getIso8601formatterWithMS().format(model.getContestTime().getContestStartTime().getTime());
             element.put("started", startTime);
             if (model.getContestTime().isPastEndOfContest()) {
-                Calendar endedDate = calculateElapsedWalltime(model, model.getContestTime().getContestStartTime().getTimeInMillis() + model.getContestTime().getContestLengthMS());
+                Calendar endedDate = calculateElapsedWalltime(model, model.getContestTime().getContestLengthMS());
                 if (endedDate != null) {
                     element.put("ended", Utilities.getIso8601formatterWithMS().format(endedDate.getTimeInMillis()));
                 }
