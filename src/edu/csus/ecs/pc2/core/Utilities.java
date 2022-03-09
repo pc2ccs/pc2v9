@@ -1845,6 +1845,65 @@ public final class Utilities {
         }
     }
     
+    
+    /**
+     * Fetch directories names (full path).
+     * 
+     * @param directory
+     * @return list of directories (prepended by directory)
+     */
+    public static List<String> getDirectoryNames(String directory) {
+
+        List<String> list = new ArrayList<String>();
+
+        File dir = new File(directory);
+
+        String[] entries = dir.list();
+        if (entries == null) {
+            return list;
+        }
+
+        Arrays.sort(entries);
+
+        for (String name : entries) {
+            String entry = directory + File.separator + name;
+            
+            if (new File(entry).isDirectory()) {
+                list.add(entry);
+            }
+        }
+
+        return list;
+    }
+    
+    /**
+     * Fetch all CDP data directories for all problems under cdpConfigDirectory directory.
+     * 
+     * @param cdpConfigDirectory
+     * @return a list of data directories (full path)
+     */
+    public static List<String> getCDPDataDirectories(String cdpConfigDirectory) {
+
+        List<String> list = new ArrayList<String>();
+
+        File dir = new File(cdpConfigDirectory);
+
+        String[] entries = dir.list();
+        if (entries == null) {
+            return list;
+        }
+
+        Arrays.sort(entries);
+
+        for (String name : entries) {
+            String entry = cdpConfigDirectory + File.separator + name + File.separator + "data";
+            if (new File(entry).isDirectory()) {
+                list.add(entry);
+            }
+        }
+
+        return list;
+    }    
     /**
      * Accepts a "duration" (an amount of time) in milliseconds and returns that duration in formatted form.
      * The general form of the returned format is HHHH:MM:SS.sss, where the number of hour digits will always be
