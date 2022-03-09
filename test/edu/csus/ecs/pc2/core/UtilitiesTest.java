@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -6,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import edu.csus.ecs.pc2.core.Utilities.DataFileType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -496,4 +498,22 @@ public class UtilitiesTest extends AbstractTestCase {
         lines = Utilities.loadFile(filename, num);
         assertEquals("Expecting "+num+" lines", num, lines.length);
     }
+    
+    /**
+     * Test get data directory names.
+     * 
+     * @throws Exception
+     */
+    public void testgetCDPDataDirectories() throws Exception {
+        String dataFileBaseDirectory = "samps/contests/tenprobs/config";
+        List<String> dataDirs = Utilities.getCDPDataDirectories(dataFileBaseDirectory);
+        assertEquals("Expecting data dirs for under "+dataFileBaseDirectory, 10, dataDirs.size());
+        
+        dataFileBaseDirectory = "samps/contests/sumithello/config";
+        dataDirs = Utilities.getCDPDataDirectories(dataFileBaseDirectory);
+        assertEquals("Expecting data dirs for under "+dataFileBaseDirectory, 2, dataDirs.size());
+        
+        
+    }
+    
 }

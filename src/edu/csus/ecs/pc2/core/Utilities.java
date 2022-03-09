@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
@@ -1201,11 +1202,11 @@ public final class Utilities {
     }
 
     /**
-     * Return list of directory entries (including dirs) with extension.
+     * Return list of directory entries matching with extension.
      * 
      * @param directoryName
      * @param extension
-     * @return
+     * @return list of basename filenames in directory directoryName
      */
     public static String[] getFileNames(String directoryName, String extension) {
 
@@ -1845,7 +1846,6 @@ public final class Utilities {
         }
     }
     
-    
     /**
      * Fetch directories names (full path).
      * 
@@ -1903,7 +1903,9 @@ public final class Utilities {
         }
 
         return list;
+
     }    
+  
     /**
      * Accepts a "duration" (an amount of time) in milliseconds and returns that duration in formatted form.
      * The general form of the returned format is HHHH:MM:SS.sss, where the number of hour digits will always be
@@ -1958,5 +1960,4 @@ public final class Utilities {
         return result;
     }
 
-    
 }
