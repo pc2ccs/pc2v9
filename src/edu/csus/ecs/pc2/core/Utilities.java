@@ -1913,6 +1913,8 @@ public final class Utilities {
      * (in other words, this is not a "time of day" which is restricted to just two hour-digits).
      * Note however that the minutes and seconds fields will always be two digits, and the msec field will 
      * always be three digits.
+     * If the input value is negative then it is converted to a positive value and the returned value is
+     * the positive value preceded by a minus sign.
      * 
      * @param milliseconds the duration to be formatted, in msec.
      * @return the formatted value of the input duration.
@@ -1921,11 +1923,18 @@ public final class Utilities {
         
         String result = "";
         
+        //ensure calculations are based on positive milliseconds
+        long posMsec = milliseconds;
+        if (milliseconds<0) {
+            posMsec *= -1;
+            result += "-";  //if input was negative, prepend "-" to output
+        }
+
         long msecPerSecond = 1000;
         long msecPerMinute = msecPerSecond*60 ;
         long msecPerHour = msecPerMinute*60 ;             
         
-        long hours = milliseconds / msecPerHour ;   //whole hours (fractional portion is truncated
+        long hours = posMsec / msecPerHour ;   //whole hours (fractional portion is truncated
         if (hours<10) {
             //prepend a zero to insure at least two hour digits
             result += "0";
@@ -1933,21 +1942,21 @@ public final class Utilities {
         String hourString = Long.toString(hours);
         result += hourString + ":";
         
-        long minutes = (milliseconds - (hours*msecPerHour)) / (60*1000);  //whole minutes (truncated)
+        long minutes = (posMsec - (hours*msecPerHour)) / (60*1000);  //whole minutes (truncated)
         if (minutes<10) {
             result += "0";
         }
         String minuteString = Long.toString(minutes);
         result += minuteString + ":";
         
-        long seconds = (milliseconds - (hours*msecPerHour) - (minutes*msecPerMinute)) / 1000;   //whole seconds (truncated)
+        long seconds = (posMsec - (hours*msecPerHour) - (minutes*msecPerMinute)) / 1000;   //whole seconds (truncated)
         if (seconds<10) {
             result += "0";
         }
         String secondsString = Long.toString(seconds);
         result += secondsString + ".";
         
-        long millis = milliseconds - (hours*msecPerHour) - (minutes*msecPerMinute) - (seconds*msecPerSecond);   //fractional seconds (truncated)
+        long millis = posMsec - (hours*msecPerHour) - (minutes*msecPerMinute) - (seconds*msecPerSecond);   //fractional seconds (truncated)
         if (millis<100) {
             result += "0";
         }

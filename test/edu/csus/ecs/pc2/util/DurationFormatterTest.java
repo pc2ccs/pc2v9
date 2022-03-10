@@ -203,5 +203,33 @@ public class DurationFormatterTest extends AbstractTestCase {
 
     }
 
+    /**
+     * Test formatting of duration specified by method name.
+     * 
+     * @throws Exception
+     */
+    public void testFormattingOfNegativeDurations() throws Exception {
+
+        long testVal = -4442400000L;  //1,234 hours
+        
+        String actual = Utilities.formatDuration(testVal);
+        String expected = "-1234:00:00.000";
+        
+        assertEquals("Formatting error: ", expected, actual);
+
+        testVal = -1380000;         //-23 minutes
+      
+        actual = Utilities.formatDuration(testVal);
+        expected = "-00:23:00.000";
+      
+        assertEquals("Formatting error: ", expected, actual);
+
+        testVal = -17123;       //-17.123 seconds
     
+        actual = Utilities.formatDuration(testVal);
+        expected = "-00:00:17.123";
+    
+        assertEquals("Formatting error: ", expected, actual);
+    }
+
 }
