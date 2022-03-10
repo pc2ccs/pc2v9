@@ -75,7 +75,7 @@ public class JSONTool {
         element.put("problem_id", getProblemId(model.getProblem(submission.getProblemId())));
         element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
         element.put("time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
-        element.put("contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
+        element.put("contest_time", Utilities.formatDuration(submission.getElapsedMS()));
         if (submission.getEntryPoint() != null) {
             element.put("entry_point", new String(submission.getEntryPoint()));
         }
