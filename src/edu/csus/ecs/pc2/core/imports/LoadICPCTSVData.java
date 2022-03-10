@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.File;
@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -29,6 +30,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 // $HeadURL$
 public class LoadICPCTSVData implements UIPlugin {
 
+    private static String NL = Constants.NL;
+    
     public static final String TEAMS2_TSV = "teams2.tsv";
 
     /**
@@ -112,8 +115,8 @@ public class LoadICPCTSVData implements UIPlugin {
 
             if (useConfirmGUI){
                 
-                String nl = System.getProperty("line.separator");
-                String message = "Add " + nl + accounts.length + " accounts and " + nl + groups.length + " groups?";
+                String NL = System.getProperty("line.separator");
+                String message = "Update/Add " + NL + accounts.length + " team accounts and " + NL + groups.length + " groups?";
 
                 result = FrameUtilities.yesNoCancelDialog(null, message, "Load TSV files");
             }
@@ -165,7 +168,13 @@ public class LoadICPCTSVData implements UIPlugin {
                 info("Load from file " + groupsFilename);
                 info("Load from file " + teamsFilename);
                 
-                info("Added " + accounts.length + " accounts and " + groups.length + " groups.");
+                info("There are now " + accounts.length + " team accounts and " + groups.length + " groups.");
+                
+                if(useConfirmGUI)
+                {
+                    String message = "Updated/Added " + NL + accounts.length + " team accounts and " + NL + groups.length + " groups";
+                    FrameUtilities.showMessage(null,"TSV Files loaded", message);
+                }
 
                 return true;
             } else {
