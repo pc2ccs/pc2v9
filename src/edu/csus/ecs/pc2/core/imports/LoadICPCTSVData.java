@@ -172,7 +172,7 @@ public class LoadICPCTSVData implements UIPlugin {
                 
                 if(useConfirmGUI)
                 {
-                    String message = "Updated/Added " + NL + accounts.length + " team accounts and " + NL + groups.length + " groups?";
+                    String message = "Updated/Added " + NL + accounts.length + " team accounts and " + NL + groups.length + " groups";
                     FrameUtilities.showMessage(null,"TSV Files loaded", message);
                 }
 
