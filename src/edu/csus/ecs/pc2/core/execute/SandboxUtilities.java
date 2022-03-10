@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
- * 
+ * Input to Sandbox. 
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
@@ -23,28 +23,35 @@ public class SandboxUtilities {
      * 
      * @param executeDirectory
      * @param run
+     * @param sourceFileName - name of team's source file name, ex. Sumit.java
      * @param problem
-     * @param inputFile
+     * @param language
+     * @param judgesDataFile - name of judge's data file
      * @param memlimitK
      * @param timelimitMS
-     * @return filename were properties written
+     * @return filename where properties written.
      * @throws IOException
      */
-    public static String writeSandboxInputProperties(String executeDirectory, Run run, Problem problem, Language language, File inputFile, int memlimitK, int timelimitMS) throws IOException {
+    public static String writeSandboxInputProperties(String executeDirectory, Run run, String sourceFileName, Problem problem, Language language, File judgesDataFile, int memlimitK, int timelimitMS) throws IOException {
 
         Properties properties = new Properties();
 
         properties.put(SandboxInput.RUNID_KEY, Integer.toString(run.getNumber()));
 
-        properties.put(SandboxInput.MEMLIMIT_KEY, inputFile);
-        properties.put(SandboxInput.TIMELIMIT_KEY, timelimitMS);
+        if (memlimitK > 0) {
+            properties.put(SandboxInput.MEMLIMIT_KEY, Integer.toString(memlimitK));
+        }
+        if (timelimitMS > 0) {
+            properties.put(SandboxInput.TIMELIMIT_KEY, Integer.toString(timelimitMS));
+        }
 
         properties.put(SandboxInput.LANGUAGE_KEY, language.getDisplayName());
         properties.put(SandboxInput.PROBLEM_LETTER_KEY, problem.getLetter());
 
-        properties.put(SandboxInput.INPUTFILENAME_KEY, inputFile);
+        properties.put(SandboxInput.DATAFILENAME_KEY, judgesDataFile.getAbsoluteFile().toString());
+        properties.put(SandboxInput.SOURCEFILENAME, sourceFileName);
 
-        String outfilename = new SandboxInput().store(new File(executeDirectory));
+        String outfilename = new SandboxInput().store(new File(executeDirectory), properties);
 
         return outfilename;
     }

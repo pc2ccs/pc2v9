@@ -15,11 +15,22 @@ import java.util.Properties;
  */
 public class SandboxInput {
 
-    private static final String SANDBOX_PROPERTIES_FILENAME = "sandbox.properties";
+    /**
+     * Judges data file name, aka sumit.in
+     */
+    public static final String DATAFILENAME_KEY = "datafilename";
+    
+    /**
+     * Source file name, aka Sumit.java
+     */
+    public static final String SOURCEFILENAME = "sourcefilename";
+
+    /**
+     * Name of sandbox settings input file.
+     */
+    public static final String SANDBOX_PROPERTIES_FILENAME = "sandbox.properties";
 
     public static final String TIMELIMIT_KEY = "timelimit";
-
-    public static final String INPUTFILENAME_KEY = "inputfilename";
 
     public static final String MEMLIMIT_KEY = "memlimit";
 
@@ -28,9 +39,7 @@ public class SandboxInput {
     public static final String PROBLEM_LETTER_KEY = "problemLetter";
 
     public static final String RUNID_KEY = "runid";
-
-    private Properties inputProperties = new Properties();
-
+    
     private String outputPropertiesFilename = SANDBOX_PROPERTIES_FILENAME;
 
     /**
@@ -41,15 +50,15 @@ public class SandboxInput {
      * @return
      * @throws IOException
      */
-    public String store(File outputDirectory) throws IOException {
+    public String store(File outputDirectory, Properties sandboxProperties) throws IOException {
 
         String filename = SANDBOX_PROPERTIES_FILENAME;
         if (outputDirectory != null) {
-            filename = outputDirectory.getAbsolutePath() + File.pathSeparator + SANDBOX_PROPERTIES_FILENAME;
+            filename = outputDirectory.getAbsolutePath() + File.separator + SANDBOX_PROPERTIES_FILENAME;
         }
 
         FileOutputStream fileOutputStream = new FileOutputStream(filename, false);
-        inputProperties.store(fileOutputStream, "PC^2 Sandbox Input properties on " + new Date());
+        sandboxProperties.store(fileOutputStream, "PC^2 Sandbox Input properties on " + new Date());
 
         outputPropertiesFilename = filename;
         return outputPropertiesFilename;

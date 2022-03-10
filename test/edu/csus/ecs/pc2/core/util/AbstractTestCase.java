@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 import java.util.logging.ConsoleHandler;
@@ -1527,6 +1528,21 @@ public class AbstractTestCase extends TestCase {
      */
     public IInternalContest loadFullSampleContest(IInternalContest contest, String sampleName) throws Exception {
         return loadFullSampleContest (contest, new File(getTestSampleContestDirectory(sampleName)));
+    }
+
+    /**
+     * Compares expected and actual value for properties key
+     * @param message
+     * @param props 
+     * @param keyName key in props
+     * @param expected
+     * @param actual
+     */
+    public void assertPropertiesValueEquals(String message, Properties props, String keyName, String expected, String actual) {
+        if (! expected .equals  (actual)) {
+            throw new ComparisonFailure(message +" for key "+keyName, expected, actual);
+        }
+        
     }
     
 }

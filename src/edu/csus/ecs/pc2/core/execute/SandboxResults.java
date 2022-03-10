@@ -7,14 +7,20 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * Sandbox Results loader
+ * Sandbox Results loader.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
 public class SandboxResults {
 
+    /**
+     * Sandbox results filename.
+     */
     public static final String SANDBOX_RESULTS_FILENAME = "sandbox.results.properties";
 
+    /**
+     * Comment or more info from the sandbox
+     */
     public static final String COMMENT_KEY = "comment";
 
     public static final String JUDGEMENT_ACRONYM_KEY = "judgementAcronym";
@@ -33,8 +39,14 @@ public class SandboxResults {
         resultsProperties.load(fileInputStream);
     }
 
-    public String getProperty(String s) {
-        return resultsProperties.getProperty(s);
+    /**
+     * Return value for property from sandbox file.
+     * 
+     * @param key
+     * @return null or key value.
+     */
+    public String getProperty(String key) {
+        return resultsProperties.getProperty(key);
     }
 
     private void setComment(String comment) {
@@ -61,6 +73,10 @@ public class SandboxResults {
                 return 0;
             }
         }
+    }
+    
+    public Properties getProperties() {
+        return resultsProperties;
     }
 
 }
