@@ -1930,9 +1930,9 @@ public final class Utilities {
             result += "-";  //if input was negative, prepend "-" to output
         }
 
-        long msecPerSecond = 1000;
-        long msecPerMinute = msecPerSecond*60 ;
-        long msecPerHour = msecPerMinute*60 ;             
+        long msecPerSecond = Constants.MS_PER_SECOND;
+        long msecPerMinute = Constants.MS_PER_MINUTE;
+        long msecPerHour = msecPerMinute*60 ;           
         
         long hours = posMsec / msecPerHour ;   //whole hours (fractional portion is truncated
         if (hours<10) {
