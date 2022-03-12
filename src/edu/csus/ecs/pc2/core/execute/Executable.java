@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedInputStream;
@@ -2396,7 +2396,8 @@ public class Executable extends Plugin implements IExecutable {
         String afterString = new Integer(afterInt).toString();
         return replaceString(origString, beforeString, afterString);
     }
-
+    
+    
     /**
      * return string with all field variables filled with values.
      * 
@@ -2512,7 +2513,7 @@ public class Executable extends Plugin implements IExecutable {
             } else {
                 log.config("substituteAllStrings() problem is undefined (null)");
             }
-
+            
             if (executionData != null) {
                 if (executionData.getExecuteProgramOutput() != null) {
                     if (executionData.getExecuteProgramOutput().getName() != null) {
@@ -2524,10 +2525,24 @@ public class Executable extends Plugin implements IExecutable {
                 newString = replaceString(newString, "{:exitvalue}", Integer.toString(executionData.getExecuteExitValue()));
                 newString = replaceString(newString, "{:executetime}", Long.toString(executionData.getExecuteTimeMS()));
             }
+            
             String pc2home = new VersionInfo().locateHome();
             if (pc2home != null && pc2home.length() > 0) {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
+            
+            ContestInformation contestInformation = contest.getContestInformation();
+            if (contestInformation.getMemoryLimitInMeg() > 0) {
+                newString = replaceString(newString, "{:memlimit}", Integer.toString(contestInformation.getMemoryLimitInMeg()));
+            }
+
+            if (!StringUtilities.isEmpty(contestInformation.getSandboxCommandLine())) {
+                if (newString.indexOf("{:sandbox}") > -1) {
+                    newString = replaceString(newString, "{:sandbox}", contestInformation.getSandboxCommandLine());
+                    newString = substituteAllStrings(inRun, newString);
+                }
+            }
+
         } catch (Exception e) {
             log.log(Log.CONFIG, "Exception substituting strings ", e);
             // carrying on not required to save exception

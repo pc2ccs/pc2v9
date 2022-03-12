@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedReader;
@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.DataLoader;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -83,7 +84,7 @@ public class ExecutableTest extends AbstractTestCase {
     private String clicsNoJudgement = ClicsValidator.CLICS_WRONG_ANSWER_MSG;
     
     private String clicsWrongOutputSpacingJudgement = ClicsValidator.CLICS_INCORRECT_OUTPUT_FORMAT_MSG;
-
+    
     public ExecutableTest(String string) {
         super(string);
     }
@@ -1936,4 +1937,42 @@ public class ExecutableTest extends AbstractTestCase {
 
     }
     
+    /**
+     * Test sandbox command line ( "{:sandbox} ) and memory limit ( "{:memlimit} ) substitutions.
+     * 
+     */
+    public void testMemLimitandSandboxSubstitutions() throws Exception {
+
+        ContestInformation info = contest.getContestInformation();
+
+        assertEquals("title ", "Programming Contest", info.getContestTitle());
+
+        Run run = new SampleContest().addARun(contest, "6,5,A,12,Yes");
+        RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("hello.java"));
+        contest.acceptRun(run, runFiles);
+
+        contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
+
+        Executable executable = new Executable(contest, controller, run, runFiles);
+
+        // No sandbox in ContestInfo, no substitution
+        String datain = "{:sandbox} ./a.out";
+        String expected = "{:sandbox} ./a.out";
+        String actual = executable.substituteAllStrings(run, datain);
+
+        assertEquals("Expected substitute string for " + datain, expected, actual);
+
+        info = contest.getContestInformation();
+
+        datain = "{:sandbox} ./a.out";
+        String sandboxCommandLine = "/usr/bin/sandy54 --mem={:memlimit}";
+        info.setSandboxCommandLine(sandboxCommandLine);
+        info.setMemoryLimitInMeg(128);
+        contest.updateContestInformation(info);
+
+        expected = "/usr/bin/sandy54 --mem=128 ./a.out";
+        actual = executable.substituteAllStrings(run, datain);
+        assertEquals("Expected substitute string for " + datain, expected, actual);
+
+    }
 }
