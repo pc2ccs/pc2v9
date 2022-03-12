@@ -103,6 +103,10 @@ public interface IContestLoader {
     String JUDGE_CONFIG_PATH_KEY = "judge-config-path";
 
     String TIMEOUT_KEY = "timeout";
+    
+    final String MEMORY_LIMIT_IN_MEG_KEY = "memory-limit-in-Meg";
+    
+    final String SANDBOX_KEY = "sandbox";
 
     String LIMITS_KEY = "limits";
 
