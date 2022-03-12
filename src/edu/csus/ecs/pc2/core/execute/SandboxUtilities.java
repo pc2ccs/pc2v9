@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
- * Input to Sandbox. 
+ * TODO add javadoc.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
@@ -27,19 +27,19 @@ public class SandboxUtilities {
      * @param problem
      * @param language
      * @param judgesDataFile - name of judge's data file
-     * @param memlimitK
+     * @param memlimitM
      * @param timelimitMS
      * @return filename where properties written.
      * @throws IOException
      */
-    public static String writeSandboxInputProperties(String executeDirectory, Run run, String sourceFileName, Problem problem, Language language, File judgesDataFile, int memlimitK, int timelimitMS) throws IOException {
+    public static String writeSandboxInputProperties(String executeDirectory, Run run, String sourceFileName, Problem problem, Language language, File judgesDataFile, int memlimitM, int timelimitMS) throws IOException {
 
         Properties properties = new Properties();
 
         properties.put(SandboxInput.RUNID_KEY, Integer.toString(run.getNumber()));
 
-        if (memlimitK > 0) {
-            properties.put(SandboxInput.MEMLIMIT_KEY, Integer.toString(memlimitK));
+        if (memlimitM > 0) {
+            properties.put(SandboxInput.MEMLIMIT_KEY, Integer.toString(memlimitM));
         }
         if (timelimitMS > 0) {
             properties.put(SandboxInput.TIMELIMIT_KEY, Integer.toString(timelimitMS));

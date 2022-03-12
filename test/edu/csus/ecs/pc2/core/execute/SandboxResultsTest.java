@@ -27,7 +27,6 @@ public class SandboxResultsTest extends AbstractTestCase {
         props.put(SandboxResults.COMMENT_KEY,"This is too much");
         props.put(SandboxResults.JUDGEMENT_ACRONYM_KEY,"IO");
         props.put(SandboxResults.RUNID_KEY,"45");
-        props.put(SandboxResults.RUNTIME_KEY,"2310");
         
         String propFilename = storageDirectory + File.separator + SandboxResults.SANDBOX_RESULTS_FILENAME;
 
@@ -39,24 +38,13 @@ public class SandboxResultsTest extends AbstractTestCase {
         SandboxResults sandboxResults = new SandboxResults(new File(propFilename));
         
         int count = sandboxResults.getProperties().size();
-        assertEquals("Expected number of properties in "+propFilename, 4, count);
+        assertEquals("Expected number of properties in "+propFilename, 3, count);
         
-        
-//        String keyName = SandboxInput.MEMLIMIT_KEY;
-//        String str = props.getProperty(keyName);
-//        int value = Integer.parseInt(str);
-//        assertEquals("For run "+run.getNumber()+" expecting value for key "+keyName, timeLimit, value);
-
-        String keyName = SandboxResults.RUNTIME_KEY;
-        String expected = "2310";
+        String keyName = SandboxResults.JUDGEMENT_ACRONYM_KEY;
+        String expected = "IO";
         String actual = sandboxResults.getProperty(keyName);
         assertPropertiesValueEquals("Property value does not match", props, keyName, expected, actual);
-        
-         keyName = SandboxResults.JUDGEMENT_ACRONYM_KEY;
-        expected = "IO";
-        actual = sandboxResults.getProperty(keyName);
-        assertPropertiesValueEquals("Property value does not match", props, keyName, expected, actual);
-        
+
         keyName = SandboxResults.RUNID_KEY;
         expected = "45";
         actual = sandboxResults.getProperty(keyName);
@@ -67,7 +55,6 @@ public class SandboxResultsTest extends AbstractTestCase {
         actual = sandboxResults.getProperty(keyName);
         assertPropertiesValueEquals("Property value does not match", props, keyName, expected, actual);
 
-        
     }
 
 }

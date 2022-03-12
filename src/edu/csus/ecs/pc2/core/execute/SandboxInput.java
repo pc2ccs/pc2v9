@@ -16,12 +16,12 @@ import java.util.Properties;
 public class SandboxInput {
 
     /**
-     * Judges data file name, aka sumit.in
+     * Judges data file name, e.g. sumit.in
      */
     public static final String DATAFILENAME_KEY = "datafilename";
     
     /**
-     * Source file name, aka Sumit.java
+     * Source file name, e.g. Sumit.java
      */
     public static final String SOURCEFILENAME = "sourcefilename";
 

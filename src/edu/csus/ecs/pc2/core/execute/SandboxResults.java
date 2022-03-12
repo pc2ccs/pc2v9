@@ -13,6 +13,8 @@ import java.util.Properties;
  */
 public class SandboxResults {
 
+    
+
     /**
      * Sandbox results filename.
      */
@@ -29,10 +31,9 @@ public class SandboxResults {
 
     public static final String RUNTIME_KEY = "runtime";
 
+    public static final String EXITCODE_KEY = "exitcode";
+    
     private Properties resultsProperties = new Properties();
-
-    public SandboxResults() {
-    }
 
     public SandboxResults(File propertiesFilename) throws IOException {
         FileInputStream fileInputStream = new FileInputStream(propertiesFilename);
@@ -43,7 +44,7 @@ public class SandboxResults {
      * Return value for property from sandbox file.
      * 
      * @param key
-     * @return null or key value.
+     * @return null or value stored under the specified key
      */
     public String getProperty(String key) {
         return resultsProperties.getProperty(key);
@@ -62,7 +63,7 @@ public class SandboxResults {
     }
 
     public int getExitCode() {
-        Object obj = resultsProperties.get("exitcode");
+        Object obj = resultsProperties.get(EXITCODE_KEY);
         if (obj == null) {
             return 0;
         } else {
