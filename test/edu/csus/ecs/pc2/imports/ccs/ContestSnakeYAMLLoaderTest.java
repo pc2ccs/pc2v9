@@ -3674,7 +3674,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      * @throws Exception
      */
     
-    public void testLodSandboxAndMemoryLimit() throws Exception {
+    public void testLoadSandboxAndMemoryLimit() throws Exception {
         
 
         /**
