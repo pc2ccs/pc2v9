@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
@@ -78,6 +78,16 @@ public class ContestInformation implements Serializable{
     private String rsiCommand = null;
     
     private int lastRunNumberSubmitted = 0;
+    
+    /**
+     * Memory Limit for team's solution (application).
+     */
+    private int memoryLimitInMeg = 0;
+    
+    /**
+     * Sandbox application or application command line.
+     */
+    private String sandboxCommandLine = "";
     
     /**
      * Display string for team display on standings.
@@ -766,4 +776,22 @@ public class ContestInformation implements Serializable{
     public void setTeamScoreboardDisplayFormat(String teamScoreboardDisplayFormat) {
         this.teamScoreboardDisplayFormat = teamScoreboardDisplayFormat;
     }
+
+    public int getMemoryLimitInMeg() {
+        return memoryLimitInMeg;
+    }
+
+    public void setMemoryLimitInMeg(int memoryLimitInMeg) {
+        this.memoryLimitInMeg = memoryLimitInMeg;
+    }
+
+    public String getSandboxCommandLine() {
+        return sandboxCommandLine;
+    }
+
+    public void setSandboxCommandLine(String sandboxCommandLine) {
+        this.sandboxCommandLine = sandboxCommandLine;
+    }
+    
+    
 }

@@ -12,6 +12,10 @@ scoreboard-freeze: 4:00:00
 output-private-score-dir: super_secret
 output-public-score-dir: public_html_dir
 
+memory-limit-in-Meg: 8086
+
+sandbox: 'linux_sandbox --verbose'
+
 default-clars:
   - No comment, read problem statement.
   - This will be answered during the answers to questions session.

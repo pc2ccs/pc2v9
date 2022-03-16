@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.ByteArrayInputStream;
@@ -258,6 +258,20 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
+
+    private void setSandboxCommand(IInternalContest contest, String sandboxCommandLine) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setSandboxCommandLine(sandboxCommandLine);
+        contest.updateContestInformation(contestInformation);
+    }
+    
+    private void setMemoryLimit(IInternalContest contest, int memoryLimit) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setMemoryLimitInMeg(memoryLimit);
+        contest.updateContestInformation(contestInformation);
+    }
+
+
     private void setCcsTestMode(IInternalContest contest, boolean ccsTestMode) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setCcsTestMode(ccsTestMode);
@@ -451,7 +465,19 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         Integer defaultTimeout = fetchIntValue(content, TIMEOUT_KEY, DEFAULT_TIME_OUT);
-
+        
+        Integer memoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, 0);
+        
+        if (memoryLimit != null) {
+            setMemoryLimit(contest, memoryLimit);
+        }
+        
+        String sandboxCommandLine = fetchValue(content, SANDBOX_KEY);
+        
+        if (sandboxCommandLine != null) {
+            setSandboxCommand (contest, sandboxCommandLine);
+        }
+        
         for (String line : yamlLines) {
             if (line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
                 setTitle(contest, unquoteAll(line.substring(line.indexOf(DELIMIT) + 1).trim()));
@@ -1076,6 +1102,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return value;
     }
 
+    /**
+     * Fetch value from a map.
+     * 
+     * @param content
+     * @param key
+     * @return null if content does not contain a value for the key, else the value for the key.
+     */
     private String fetchValue(Map<String, Object> content, String key) {
         if (content == null) {
             return null;

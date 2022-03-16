@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -3664,6 +3664,42 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         for (Problem problem : problems) {
             assertFalse(problem.getShortName()+" stop on first ", problem.isStopOnFirstFailedTestCase());
         }
+        
+    }
+    
+    
+    /**
+     * Test yaml import for memory-limit-in-Meg and sandbox.
+     * 
+     * @throws Exception
+     */
+    
+    public void testLoadSandboxAndMemoryLimit() throws Exception {
+        
+
+        /**
+         * Contest to use as input
+         */
+        String sampleContestDirName = "ccs1";
+        
+        IInternalContest contest = new InternalContest();
+        
+        loadSampleContest(contest, sampleContestDirName);
+        
+        assertNotNull(contest);
+        ContestInformation info = contest.getContestInformation();
+        
+        assertEquals("title ", "ACM-ICPC CLI CCS Sample One", info.getContestTitle());
+        
+        // from ccs1 yaml
+        //        memory-limit-in-Meg: 8086
+        //        sandbox: 'linux_sandbox --verbose'
+        
+        int expectedLimit = 8086;
+        assertEquals("Memory limit", expectedLimit, info.getMemoryLimitInMeg());
+        
+        String expected = "linux_sandbox --verbose";
+        assertEquals("Sandbox command", expected, info.getSandboxCommandLine());
         
     }
 

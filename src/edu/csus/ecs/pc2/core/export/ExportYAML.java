@@ -155,6 +155,14 @@ public class ExportYAML {
         contestWriter.println("elapsed: " + contestTime.getElapsedTimeStr());
         contestWriter.println("remaining: " + contestTime.getRemainingTimeStr());
         contestWriter.println("running: " + contestTime.isContestRunning());
+
+        contestWriter.println(IContestLoader.MEMORY_LIMIT_IN_MEG_KEY + ": " + info.getMemoryLimitInMeg());
+
+        String sandbox = info.getSandboxCommandLine();
+        if (sandbox == null) {
+            sandbox = "";
+        }
+        contestWriter.println(IContestLoader.SANDBOX_KEY + ": " + quote(sandbox));
         
         // PC^2 Specific
         contestWriter.println(IContestLoader.AUTO_STOP_CLOCK_AT_END_KEY + ": " + info.isAutoStopContest());
