@@ -265,7 +265,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
     
-    private void setMemoryLimit(IInternalContest contest, Integer memoryLimit) {
+    private void setMemoryLimit(IInternalContest contest, int memoryLimit) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setMemoryLimitInMeg(memoryLimit);
         contest.updateContestInformation(contestInformation);
