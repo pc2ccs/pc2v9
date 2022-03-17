@@ -1955,9 +1955,9 @@ public class ExecutableTest extends AbstractTestCase {
 
         Executable executable = new Executable(contest, controller, run, runFiles);
 
-        // No sandbox in ContestInfo, no substitution
+        // No sandbox in ContestInfo, substitue empty string
         String datain = "{:sandbox} ./a.out";
-        String expected = "{:sandbox} ./a.out";
+        String expected = "./a.out";
         String actual = executable.substituteAllStrings(run, datain);
 
         assertEquals("Expected substitute string for " + datain, expected, actual);

@@ -2535,12 +2535,17 @@ public class Executable extends Plugin implements IExecutable {
             if (contestInformation.getMemoryLimitInMeg() > 0) {
                 newString = replaceString(newString, "{:memlimit}", Integer.toString(contestInformation.getMemoryLimitInMeg()));
             }
-
-            if (!StringUtilities.isEmpty(contestInformation.getSandboxCommandLine())) {
-                if (newString.indexOf("{:sandbox}") > -1) {
+            
+            if (newString.indexOf("{:sandbox}") > -1) {
+                if (!StringUtilities.isEmpty(contestInformation.getSandboxCommandLine())) {
+                    
                     newString = replaceString(newString, "{:sandbox}", contestInformation.getSandboxCommandLine());
                     newString = substituteAllStrings(inRun, newString);
+                } else {
+                    // remove {:sandbox} if no sandbox defined in pc2
+                    newString = replaceString(newString, "{:sandbox}", "");
                 }
+                
             }
 
         } catch (Exception e) {
