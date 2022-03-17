@@ -3,8 +3,10 @@ package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
 
 import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.FileUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -461,4 +463,79 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         
     }
     
+    public void testgetAllSubmittedFilenamesForCPP() throws Exception {
+        
+        SampleContest sampleContest = new SampleContest();
+        IInternalContest contest = sampleContest.createContest(2, 2, 12, 12, true);
+        
+        Account[] teams = SampleContest.getTeamAccounts(contest);
+
+        Problem[] problems = contest.getProblems();
+        Language[] languages = contest.getLanguages();
+
+        Problem problem = problems[problems.length-1];
+        Language language = languages[languages.length-1];
+        
+        ClientId submitter = teams[teams.length-1].getClientId();
+
+        Run run = new Run(submitter, language, problem);
+        
+        String validatorDir = getTestSampleContestDirectory("qanat") + File.separator + //
+                "config" + File.separator + "qanat" + File.separator + "input_format_validators";
+        
+        assertDirectoryExists(validatorDir);
+        
+        List<String> validatorSourcefiles = FileUtilities.getDirectoryEntries(validatorDir, true);
+        
+        SerializedFile mainFile = new SerializedFile(validatorSourcefiles + File.separator + "qanat_checker.cc");
+        SerializedFile otherFile = new SerializedFile(validatorSourcefiles + File.separator + "validate.h");
+        
+        SerializedFile[] otherFiles = { otherFile};
+        
+        RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);
+        
+        String filelist = ExecuteUtilities.getAllSubmittedFilenames(runFiles);
+        
+        String expected = "qanat_checker.cc";
+        assertEquals("Expected file list ", expected, filelist);
+        
+    }
+
+    /**
+     * Test matchIncludeRe method
+     * @throws Exception
+     */
+    public void testmatchIncludeRe() throws Exception {
+    
+        String [] testData = {
+                "file.c", //
+                "fileh", //
+                "filename.cpp", //
+                "filename.C", //
+                "filename.py", //
+                "filename", //
+        };
+        
+        for (String str : testData) {
+            assertFalse("Should not match include/header file name: "+str, ExecuteUtilities.matchIncludeRe(str));
+        }
+    }
+    
+    /**
+     * Negative tests for matchIncludeRe method
+     * @throws Exception
+     */
+    public void testmatchIncludeReNegative() throws Exception {
+        
+        String [] testData = {
+                "file.h", //
+                "filename.hh", //
+                "filename.H", //
+        };
+        
+        for (String str : testData) {
+            assertTrue("Should  match include/header file name: " + str, ExecuteUtilities.matchIncludeRe(str));
+        }
+    }
+
 }

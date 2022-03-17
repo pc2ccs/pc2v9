@@ -9,6 +9,8 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -37,6 +39,16 @@ public class ExecuteUtilities extends Plugin {
      * 
      */
     private static final long serialVersionUID = -9167576117688387694L;
+    
+    /**
+     * Regular Expression to match include file names.
+     */
+    public static final String INCLUDE_RE = "(\\.h$)|(\\.hh$)|(\\.H$)";
+
+    /**
+     * Pattern for INCLUDE_RE.
+     */
+    private static Pattern includeRePattern = Pattern.compile(INCLUDE_RE);
 
     private Run run;
     
@@ -160,11 +172,44 @@ public class ExecuteUtilities extends Plugin {
     }
     
     
+    /**
+     * Match string to RE.
+     * 
+     * @param str
+     * @param reString
+     * @return true if str matches regular expression reString
+     */
+    public static boolean matchRegularExpression (String str, String reString) {
+        Pattern p = Pattern.compile(reString);
+        Matcher m = p.matcher(str);
+        return m.find();
+        
+    }
+    
+    /**
+     * Match String to {@link #INCLUDE_RE}.
+     * 
+     * @param str
+     * @return true if string matches {{@link #INCLUDE_RE}.
+     */
+    public static boolean matchIncludeRe(String str) {
+        return includeRePattern.matcher(str).find();
+    }
+    
+    /**
+     * Return all compilable submitted file names.
+     * 
+     * @param files
+     * @return main file and any additional filenames that end in: .c, .cpp or .C
+     */
     public static String getAllSubmittedFilenames(RunFiles files){
         String filelist = files.getMainFile().getName();
+        
         if (files.getOtherFiles() != null && files.getOtherFiles().length > 0){
             for (SerializedFile file : files.getOtherFiles()) {
-                filelist += " " + file.getName();
+                if (! matchIncludeRe(file.getName())) {
+                    filelist += " " + file.getName();
+                }
             }
         }
         return filelist;
