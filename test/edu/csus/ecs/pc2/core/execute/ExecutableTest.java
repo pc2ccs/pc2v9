@@ -1957,7 +1957,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         // No sandbox in ContestInfo, substitue empty string
         String datain = "{:sandbox} ./a.out";
-        String expected = "./a.out";
+        String expected = " ./a.out";
         String actual = executable.substituteAllStrings(run, datain);
 
         assertEquals("Expected substitute string for " + datain, expected, actual);
