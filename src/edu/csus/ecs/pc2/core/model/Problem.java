@@ -33,9 +33,14 @@ public class Problem implements IElementObject {
 
     private static final long serialVersionUID = 1708763261096488240L;
 
-    public static final int DEFAULT_TIMEOUT_SECONDS = 30;
+    public static final int DEFAULT_TIMEOUT_SECONDS = 10;
     
+    public static final int DEFAULT_MEMORY_LIMIT_MB = 2048 ;
+    
+    public static final String DEFAULT_SANDBOX_COMMAND_LINE = "{:sandbox} {:memlimit} {:timelimit}";
 
+    private static final String DEFAULT_SANDBOX_PROGRAM = "./pc2sandbox.sh";
+    
     /**
      * Problem title.
      */
@@ -313,6 +318,14 @@ public class Problem implements IElementObject {
     private List<Group> groups = new ArrayList<Group>(); 
     
     /**
+     * Fields related to Sandbox support for memory limits.
+     */
+    private boolean hasMemoryLimit = false;
+    private int memoryLimitMB = DEFAULT_MEMORY_LIMIT_MB;
+    private String sandboxCmdLine = DEFAULT_SANDBOX_COMMAND_LINE;
+    private String sandboxProgram = DEFAULT_SANDBOX_PROGRAM;
+    
+    /**
      * Create a problem with the display name.
      * 
      * @param displayName
@@ -328,6 +341,7 @@ public class Problem implements IElementObject {
         this.customInputValidationStatus = InputValidationStatus.UNKNOWN;
         this.customInputValidationResults = new Vector<InputValidationResult>();
         this.vivaSettings = new VivaInputValidatorSettings();
+        this.hasMemoryLimit = false;
     }
 
     public Problem copy(String newDisplayName) {
@@ -1962,5 +1976,86 @@ public class Problem implements IElementObject {
             vivaSettings = new VivaInputValidatorSettings();
         }
         vivaSettings.setVivaInputValidatorHasBeenRun(vivaInputValidatorHasBeenRun);
+    }
+
+    /**
+     * Returns the flag indicating whether this Problem has a runtime memory limit associated with it.
+     * 
+     * @return the flag indicating whether or not this Problem has been configured with a memory limit.
+     */
+    public boolean hasMemoryLimit() {
+        return hasMemoryLimit;
+    }
+    
+    /**
+     * Sets the memory limit for this problem, and sets the boolean flag indicating that this problem has a memory limit to true.
+     * 
+     * @param memLimitInMB the memory limit for the problem, in MB.
+     */
+    public void setMemoryLimit(int memLimitInMB) {
+        this.memoryLimitMB = memLimitInMB;
+        this.hasMemoryLimit = true;
+    }
+    
+    /**
+     * Returns the currently configured memory limit (in MB) for this Problem.
+     * Note that it is the responsibility of the caller to first check {@link #hasMemoryLimit()} to determine
+     * whether the problem has been configured with a memory limit; if {@link #hasMemoryLimit()} returns false
+     * then the value returned by THIS method is meaningless.
+     * Note also that memory limits are not enforced unless a sandbox has been selected on the Edit Problem GUI (or via YAML configuration).
+     * 
+     * @return
+     */
+    public int getMemoryLimitMB() {
+        return memoryLimitMB;
+    }
+    
+    /**
+     * Clears (sets to false) the flag indicating that this Problem has a memory limit.
+     * 
+     * @see #getMemoryLimitMB()
+     */
+    public void clearMemoryLimit() {
+        this.hasMemoryLimit = false;
+    }
+
+    /**
+     * Returns a String containing the name of the sandbox program (if any) used by this Problem.
+     * 
+     * @return the currently-defined sandbox program name.
+     */
+    public String getSandboxProgram() {
+        return sandboxProgram;
+    }
+
+    /**
+     * Sets the name of the sandbox program used by this Problem.
+     * Note that setting a sandbox program name does NOT in and of itself cause the specified sandbox to be
+     * used; the Admin must enable the sandbox using the Edit Problem dialog (or via YAML configuration).
+     * 
+     * @param sandboxProgram the name of the sandbox program to be used by this Problem, when sandbox usage is enabled.
+     */
+    public void setSandboxProgram(String sandboxProgram) {
+        this.sandboxProgram = sandboxProgram;
+    }
+
+    /**
+     * Returns the String containing the command used to invoke the sandbox configured for this problem. 
+     * 
+     * @return the command line used to invoke the sandbox for this problem.
+     */
+    public String getSandboxCmdLine() {
+        return sandboxCmdLine;
+    }
+
+    /**
+     * Sets the command line used to invoke the sandbox for this Problem.
+     * Note that setting the sandbox command line does not in and of itself enable the use of a sandbox; the
+     * Admin must enable the sandbox via the Edit Problem dialog (or via YAML configuration).
+     * 
+     * @param sandboxCmdLine the command line used to invoke the Problem sandbox.
+     */
+    public void setSandboxCmdLine(String sandboxCmdLine) {
+        this.sandboxCmdLine = sandboxCmdLine;
     }
 }
