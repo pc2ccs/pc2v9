@@ -54,6 +54,7 @@ import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
+import edu.csus.ecs.pc2.core.model.Problem.SandboxType;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -466,17 +467,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         Integer defaultTimeout = fetchIntValue(content, TIMEOUT_KEY, DEFAULT_TIME_OUT);
         
-        Integer memoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, 0);
-        
-        if (memoryLimit != null) {
-            setMemoryLimit(contest, memoryLimit);
-        }
-        
-        String sandboxCommandLine = fetchValue(content, SANDBOX_KEY);
-        
-        if (sandboxCommandLine != null) {
-            setSandboxCommand (contest, sandboxCommandLine);
-        }
         
         for (String line : yamlLines) {
             if (line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
@@ -1364,6 +1354,30 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Integer timeOut = fetchIntValue(limitsContent, TIMEOUT_KEY);
         if (timeOut != null) {
             problem.setTimeOutInSeconds(timeOut);
+        }
+        
+        Integer memoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_IN_MEG_KEY, Problem.DEFAULT_MEMORY_LIMIT_MB);
+        problem.setMemoryLimit(memoryLimit);
+        
+        String sandboxCommandLine = fetchValue(content, SANDBOX_COMMAND_LINE_KEY, "");
+        problem.setSandboxCmdLine(sandboxCommandLine);
+        
+        String sandboxProgramName = fetchValue(content, SANDBOX_PROGRAM_NAME_KEY, "");
+        problem.setSandboxProgramName(sandboxProgramName);
+        
+        String sandboxTypeString = fetchValue(content, SANDBOX_TYPE_KEY);
+        if (sandboxTypeString != null) {
+
+            try {
+                SandboxType type = SandboxType.valueOf(sandboxTypeString);
+                problem.setSandboxType(type);
+            } catch (Exception e) {
+                throw new YamlLoadException("For problem short name " + problem.getShortName() + //
+                        ", unknown sandbox type " + sandboxTypeString + " " + e.getMessage(), e);
+            }
+
+        } else {
+            problem.setSandboxType(SandboxType.NONE);
         }
 
         if (!usingCustomValidator) {
