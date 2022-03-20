@@ -2531,6 +2531,9 @@ public class Executable extends Plugin implements IExecutable {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
             
+            // TODO add to logic to use  problem.getSandboxType() and get clarification
+            // on how to handle sandbox variables if getSandboxType() == NONE, and other requirements
+            
             // TODO REFACTOR replace vars with constants for: memlimit, sandboxcommandline,sandboxprogramname
             newString = replaceString(newString, "{:memlimit}", Integer.toString(problem.getMemoryLimitMB()));
 
@@ -2540,7 +2543,6 @@ public class Executable extends Plugin implements IExecutable {
                     newString = replaceString(newString, "{:sandboxcommandline}", problem.getSandboxCmdLine());
                     newString = substituteAllStrings(inRun, newString);
                 } else {
-                    // remove {:sandbox} if no sandbox defined in pc2
                     newString = replaceString(newString, "{:sandboxcommandline}", "");
                 }
             }
