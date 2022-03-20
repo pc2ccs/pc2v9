@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -33,9 +34,10 @@ public class Problem implements IElementObject {
 
     private static final long serialVersionUID = 1708763261096488240L;
 
-    public static final int DEFAULT_TIMEOUT_SECONDS = 30;
+    public static final int DEFAULT_TIMEOUT_SECONDS = 10;
     
-
+    public static final int DEFAULT_MEMORY_LIMIT_MB = 2048 ;
+    
     /**
      * Problem title.
      */
@@ -313,6 +315,30 @@ public class Problem implements IElementObject {
     private List<Group> groups = new ArrayList<Group>(); 
     
     /**
+     * Fields related to Sandbox support.
+     */
+    public enum SandboxType {
+        /**
+         * No sandbox being used.
+         */
+        NONE, 
+        /**
+         * Using the PC2 Internal sandbox.
+         */
+        PC2_INTERNAL_SANDBOX, 
+        /**
+         * Using an external (user-defined) sandbox.
+         */
+        EXTERNAL_SANDBOX 
+    }
+    
+    private boolean hasMemoryLimit = false;
+    private int memoryLimitMB = DEFAULT_MEMORY_LIMIT_MB;
+    private SandboxType sandboxType = SandboxType.NONE;
+    private String sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_COMMAND_LINE;
+    private String sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM;
+    
+    /**
      * Create a problem with the display name.
      * 
      * @param displayName
@@ -328,6 +354,8 @@ public class Problem implements IElementObject {
         this.customInputValidationStatus = InputValidationStatus.UNKNOWN;
         this.customInputValidationResults = new Vector<InputValidationResult>();
         this.vivaSettings = new VivaInputValidatorSettings();
+        this.hasMemoryLimit = false;
+        this.sandboxType = SandboxType.NONE;
     }
 
     public Problem copy(String newDisplayName) {
@@ -1963,4 +1991,127 @@ public class Problem implements IElementObject {
         }
         vivaSettings.setVivaInputValidatorHasBeenRun(vivaInputValidatorHasBeenRun);
     }
+
+    /**
+     * Returns the flag indicating whether this Problem has a runtime memory limit associated with it.
+     * 
+     * @return the flag indicating whether or not this Problem has been configured with a memory limit.
+     */
+    public boolean hasMemoryLimit() {
+        return hasMemoryLimit;
+    }
+    
+    /**
+     * Sets the memory limit for this problem, and sets the boolean flag indicating that this problem has a memory limit to true.
+     * 
+     * @param memLimitInMB the memory limit for the problem, in MB.
+     */
+    public void setMemoryLimit(int memLimitInMB) {
+        this.memoryLimitMB = memLimitInMB;
+        this.hasMemoryLimit = true;
+    }
+    
+    /**
+     * Returns the currently configured memory limit (in MB) for this Problem.
+     * Note that it is the responsibility of the caller to first check {@link #hasMemoryLimit()} to determine
+     * whether the problem has been configured with a memory limit; if {@link #hasMemoryLimit()} returns false
+     * then the value returned by THIS method is meaningless.
+     * Note also that memory limits are not enforced unless a sandbox has been selected on the Edit Problem GUI (or via YAML configuration).
+     * 
+     * @return
+     */
+    public int getMemoryLimitMB() {
+        return memoryLimitMB;
+    }
+    
+    /**
+     * Clears (sets to false) the flag indicating that this Problem has a memory limit.
+     * 
+     * @see #getMemoryLimitMB()
+     */
+    public void clearMemoryLimit() {
+        this.hasMemoryLimit = false;
+    }
+
+    /**
+     * Returns a String containing the name of the sandbox program (if any) used by this Problem.
+     * 
+     * @return the currently-defined sandbox program name.
+     */
+    public String getSandboxProgramName() {
+        return sandboxProgramName;
+    }
+
+    /**
+     * Sets the name of the sandbox program used by this Problem.
+     * Note that setting a sandbox program name does NOT in and of itself cause the specified sandbox to be
+     * used; the Admin must configure/enable the sandbox using the Edit Problem dialog (or via YAML configuration).
+     * Note further that the returned value is meaningless if the Problem has not been configured with a sandbox.
+     * 
+     * @param sandboxProgramName the name of the sandbox program to be used by this Problem, when sandbox usage is enabled.
+     */
+    public void setSandboxProgramName(String sandboxProgram) {
+        this.sandboxProgramName = sandboxProgram;
+    }
+
+    /**
+     * Returns the String containing the command used to invoke the sandbox configured for this problem.
+     * Note that the returned value is meaninless if the Problem has not been configured to use a sandbox. 
+     * 
+     * @return the command line used to invoke the sandbox for this problem, when sandbox usage is enabled.
+     */
+    public String getSandboxCmdLine() {
+        return sandboxCmdLine;
+    }
+
+    /**
+     * Sets the command line used to invoke the sandbox for this Problem.
+     * Note that setting the sandbox command line does not in and of itself enable the use of a sandbox; the
+     * Admin must enable the sandbox via the Edit Problem dialog (or via YAML configuration).
+     * Note also that the value of sandboxCmdLine is meaningless if the Problem is currently configured
+     * with {@link SandboxType#NONE}.
+     * 
+     * @param sandboxCmdLine the command line used to invoke the Problem sandbox.
+     */
+    public void setSandboxCmdLine(String sandboxCmdLine) {
+        this.sandboxCmdLine = sandboxCmdLine;
+    }
+
+    /**
+     * Returns a boolean flag which indicates whether this Problem has been configured to use a sandbox.
+     *
+     * @return false if the currently configured SandboxType for the problem is {@link Problem.SandboxType#NONE}; 
+     *          true if any other sandbox type has been configured.
+     */
+    public boolean isUsingSandbox() {
+        return sandboxType != SandboxType.NONE;
+    }
+
+    /**
+     * Returns the type of sandbox configured in this Problem; an element of {@link Problem.SandboxType} 
+     * which might be {@link SandboxType#NONE}.
+     * 
+     * @return an element of {@link Problem.SandboxType}.
+     */
+    public SandboxType getSandboxType() {
+        return sandboxType;
+    }
+
+    /**
+     * Sets the type of sandbox being used by this Problem.  If the specified type of sandbox is
+     * {@link SandboxType#PC2_INTERNAL_SANDBOX}, also sets the Sandbox Command Line and Sandbox Program Name
+     * to their PC2 Internal Sandbox values.
+     * 
+     * @param sandboxType the type of sandbox to be used by this Problem, which might be {@link Sandbox#NONE}.
+     */
+    public void setSandboxType(SandboxType sandboxType) {
+        this.sandboxType = sandboxType;
+        
+        //if we're setting the PC2 internal sandbox, also set the sandbox command line and program name
+        if (sandboxType == SandboxType.PC2_INTERNAL_SANDBOX) {
+            sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_COMMAND_LINE;
+            sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM;
+        }
+    }
+
 }

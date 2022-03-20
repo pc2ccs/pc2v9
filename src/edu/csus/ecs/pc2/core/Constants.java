@@ -166,4 +166,11 @@ public final class Constants {
     public static final int INPUT_VALIDATOR_EXECUTION_ERROR_CODE = -39;
     
     public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";   
+    
+    /**
+     * Sandbox constants
+     */
+    public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "{:sandbox} {:memlimit} {:timelimit}";
+
+    public static final String PC2_INTERNAL_SANDBOX_PROGRAM = "pc2sandbox.sh";
 }
