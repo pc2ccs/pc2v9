@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedInputStream;
@@ -1870,7 +1870,7 @@ public class Executable extends Plugin implements IExecutable {
             
             log.log(Log.DEBUG, "cmdline before substitution: " + cmdline);
             cmdline = substituteAllStrings(run, cmdline);
-            log.log(Log.DEBUG, "cmdline after  substitution: " + cmdline);
+            log.log(Log.DEBUG, "cmdline after substitution: " + cmdline);
 
             /**
              * Insure that the first command in the command line can be executed by prepending the execute directory name.
@@ -2508,7 +2508,8 @@ public class Executable extends Plugin implements IExecutable {
         String afterString = new Integer(afterInt).toString();
         return replaceString(origString, beforeString, afterString);
     }
-
+    
+    
     /**
      * return string with all field variables filled with values.
      * 
@@ -2623,14 +2624,29 @@ public class Executable extends Plugin implements IExecutable {
                     newString = replaceString(newString, "{:ansfile}", nullArgument);
                 }
                 newString = replaceString(newString, "{:timelimit}", Long.toString(problem.getTimeOutInSeconds()));
-                newString = replaceString(newString, "{:memlimit}", Long.toString(problem.getMemoryLimitMB()));
-                newString = replaceString(newString, "{:sandboxCmdLine}", problem.getSandboxCmdLine());
-                newString = replaceString(newString, "{:sandbox}", problem.getSandboxProgramName());
+              
+                // TODO REFACTOR replace vars with constants for: memlimit, sandboxcommandline,sandboxprogramname
+                newString = replaceString(newString, "{:memlimit}", Integer.toString(problem.getMemoryLimitMB()));
 
+                if (newString.indexOf("{:sandboxcommandline}") > -1) {
+                    if (!StringUtilities.isEmpty(problem.getSandboxCmdLine())) {
+
+                        newString = replaceString(newString, "{:sandboxcommandline}", problem.getSandboxCmdLine());
+                        newString = substituteAllStrings(inRun, newString);
+                    } else {
+                        newString = replaceString(newString, "{:sandboxcommandline}", "");
+                    }
+                }
+
+                if (!StringUtilities.isEmpty(problem.getSandboxProgramName())) {
+                    newString = replaceString(newString, "{:sandboxprogramname}", problem.getSandboxProgramName());
+                } else {
+                    newString = replaceString(newString, "{:sandboxprogramname}", "");
+                }
             } else {
                 log.config("substituteAllStrings() problem is undefined (null)");
             }
-
+            
             if (executionData != null) {
                 if (executionData.getExecuteProgramOutput() != null) {
                     if (executionData.getExecuteProgramOutput().getName() != null) {

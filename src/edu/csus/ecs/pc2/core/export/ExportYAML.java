@@ -47,7 +47,7 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
  */
 // TODO REFACTOR and CI use constants for secret and sample dir names
 public class ExportYAML {
-    
+
     /**
      * CDP directory name for judges' data files
      */
@@ -156,13 +156,6 @@ public class ExportYAML {
         contestWriter.println("remaining: " + contestTime.getRemainingTimeStr());
         contestWriter.println("running: " + contestTime.isContestRunning());
 
-        contestWriter.println(IContestLoader.MEMORY_LIMIT_IN_MEG_KEY + ": " + info.getMemoryLimitInMeg());
-
-        String sandbox = info.getSandboxCommandLine();
-        if (sandbox == null) {
-            sandbox = "";
-        }
-        contestWriter.println(IContestLoader.SANDBOX_KEY + ": " + quote(sandbox));
         
         // PC^2 Specific
         contestWriter.println(IContestLoader.AUTO_STOP_CLOCK_AT_END_KEY + ": " + info.isAutoStopContest());
@@ -640,6 +633,16 @@ public class ExportYAML {
         
         problemWriter.println(IContestLoader.LIMITS_KEY + ":");
         problemWriter.println(PAD4 + "timeout: " + problem.getTimeOutInSeconds());
+        if (problem.getMemoryLimitMB() > 0) {
+            problemWriter.println(PAD4 + IContestLoader.MEMORY_LIMIT_IN_MEG_KEY + ": " + problem.getMemoryLimitMB());
+        }
+        
+        problemWriter.println();
+        
+        problemWriter.println(IContestLoader.SANDBOX_TYPE_KEY+": "+problem.getSandboxType());
+        problemWriter.println(IContestLoader.SANDBOX_COMMAND_LINE_KEY+": "+quote(problem.getSandboxCmdLine()));
+        problemWriter.println(IContestLoader.SANDBOX_PROGRAM_NAME_KEY+": "+quote(problem.getSandboxProgramName()));
+        
         problemWriter.println();
 
         if (problem.isValidatedProblem()) {
