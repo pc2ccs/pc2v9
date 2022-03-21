@@ -111,6 +111,8 @@ public class ProblemsReport implements IReport {
         if (problem.getTimeOutInSeconds() == 0) {
             printWriter.print(" (no time limit when zero seconds)");
         }
+        printWriter.print("   Memory limit         : " + problem.getMemoryLimitMB() + " MB");
+
         printWriter.println();
 
         printWriter.println("        Computer Judged : " + problem.isComputerJudged());
@@ -149,6 +151,12 @@ public class ProblemsReport implements IReport {
         printWriter.print(" customValidatorSettings: ");
         splitPad(printWriter, ";", " customValidatorSettings> ", nullSafeString(problem.getCustomOutputValidatorSettings()),";");
     
+        printWriter.println();
+
+        printWriter.println("  Sandbox Type          : " + problem.getSandboxType());
+        printWriter.println("  Sandbox program name  : " + problem.getSandboxProgramName());
+        printWriter.println("  Sandbox command line  : " + problem.getSandboxCmdLine());
+ 
         printWriter.println();
 
         //input validator settings

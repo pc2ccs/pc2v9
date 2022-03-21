@@ -3675,32 +3675,34 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      */
     
     public void testLoadSandboxAndMemoryLimit() throws Exception {
-        
 
         /**
          * Contest to use as input
          */
-        String sampleContestDirName = "ccs1";
+        String sampleContestDirName = "SumitMTC";
         
         IInternalContest contest = new InternalContest();
+        
         
         loadSampleContest(contest, sampleContestDirName);
         
         assertNotNull(contest);
+
         ContestInformation info = contest.getContestInformation();
+        assertEquals("title ", "Sumit multi test set", info.getContestTitle());
+
+//        startExplorer(info.getJudgeCDPBasePath());
+
+        Problem problem = getProblemByLetter(contest, "A");
+
+        int expectedLimit = 2099;
+        assertEquals("Memory limit", expectedLimit, problem.getMemoryLimitMB());
+
+        String expected = "{:sandboxprogramname} {:memlimit} {:timelimit}";
+        assertEquals("Sandbox command", expected, problem.getSandboxCmdLine());
         
-        assertEquals("title ", "ACM-ICPC CLI CCS Sample One", info.getContestTitle());
         
-        // from ccs1 yaml
-        //        memory-limit-in-Meg: 8086
-        //        sandbox: 'linux_sandbox --verbose'
-        
-        int expectedLimit = 8086;
-        assertEquals("Memory limit", expectedLimit, info.getMemoryLimitInMeg());
-        
-        String expected = "linux_sandbox --verbose";
-        assertEquals("Sandbox command", expected, info.getSandboxCommandLine());
-        
+   
     }
 
     private IInternalContest fullLoadSampleContest(String sampleName) throws Exception {
@@ -3708,6 +3710,25 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         loadGroupsFromSampContest(contest, sampleName);
         contest = loadSampleContest(contest, sampleName);
         return contest;
+    }
+    
+    /**
+     * Find/match problem in contest by problem letter
+     * @param inContest
+     * @param letter
+     * @return null if not found, else problem that is found to match letter
+     */
+    // TODO REFACTOR proomote/move getProblemByLetter into AbstractTestCase
+    private Problem getProblemByLetter(IInternalContest inContest, String letter) {
+        
+        Problem[] problems = inContest.getProblems();
+        for (Problem problem : problems) {
+            if (letter.equalsIgnoreCase(problem.getLetter())) {
+                return problem;
+            }
+            
+        }
+        return null;
     }
     
 }
