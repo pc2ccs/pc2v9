@@ -1821,6 +1821,7 @@ public class Executable extends Plugin implements IExecutable {
                 stderrlog.close();
                 stdoutlog.close();
                 executionData.setExecuteSucess(false);
+                executionData.setExecutionException(e);
                 return false;
             }
             
