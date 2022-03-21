@@ -40,6 +40,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.SandboxType;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -211,6 +212,8 @@ public class Executable extends Plugin implements IExecutable {
     private String packageName = "";
 
     private String packagePath = "";
+    
+    private boolean usingSandbox = false;
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
@@ -1811,9 +1814,63 @@ public class Executable extends Plugin implements IExecutable {
 
             }
 
-            log.log(Log.DEBUG, "before substitution: " + cmdline);
+            //check whether the Problem is configured to use a sandbox 
+            usingSandbox = false;
+            log.info("Checking problem sandbox usage...");
+            if (problem.isUsingSandbox() && !isTeam()) {
+                
+                //check the OS to be sure we have a sandbox supported
+                String osName = System.getProperty("os.name").toLowerCase();
+                if ( osName.contains("windows") ) {
+                    log.severe("Attempt to execute a problem configured with a sandbox on a Windows system: not supported");
+                    log.info("stopping ExecuteTimer " + executionTimer.toString());
+                    executionTimer.stopTimer();
+                    stderrlog.close();
+                    stdoutlog.close();
+                    executionData.setExecuteSucess(false);
+                    return false;
+                } else {
+                    //OS supported (other values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
+                    //check if we're supposed to use the PC2 internal sandbox
+                    SandboxType sbType = problem.getSandboxType();
+                    if (sbType == SandboxType.PC2_INTERNAL_SANDBOX) {
+                        generatePC2Sandbox();
+                    } else if (sbType == SandboxType.EXTERNAL_SANDBOX){
+                        //unsupported sandbox type "external"
+                        //TODO: replace this block with whatever code is necessary to properly set up the specified external sandbox
+                        log.severe("Unsupported sandbox type '" + sbType +"' in Problem configuration; cannot execute submission");
+                        log.info("stopping ExecuteTimer " + executionTimer.toString());
+                        executionTimer.stopTimer();
+                        stderrlog.close();
+                        stdoutlog.close();
+                        executionData.setExecuteSucess(false);
+                        return false;
+                    } else {
+                        //unknown sandbox type
+                        log.severe("Unknown sandbox type '" + sbType +"' in Problem configuration; cannot execute submission");
+                        log.info("stopping ExecuteTimer " + executionTimer.toString());
+                        executionTimer.stopTimer();
+                        stderrlog.close();
+                        stdoutlog.close();
+                        executionData.setExecuteSucess(false);
+                        return false;
+                    }
+                }
+                
+                log.info("Using sandbox type '" + problem.getSandboxType() + "'; problem memory limit = " + problem.getMemoryLimitMB() + "MB");
+                
+                //Problem has a sandbox and we're not running a Team client; ensure we run the sandbox
+                usingSandbox = true;
+            }
+            
+            if (usingSandbox) {
+                //insert the command for invoking the sandbox at the front of the command line
+                cmdline += problem.getSandboxCmdLine() + " " + cmdline ;
+            }
+            
+            log.log(Log.DEBUG, "cmdline before substitution: " + cmdline);
             cmdline = substituteAllStrings(run, cmdline);
-            log.log(Log.DEBUG, "after  substitution: " + cmdline);
+            log.log(Log.DEBUG, "cmdline after  substitution: " + cmdline);
 
             /**
              * Insure that the first command in the command line can be executed by prepending the execute directory name.
@@ -1845,6 +1902,14 @@ public class Executable extends Plugin implements IExecutable {
                 autoStop = true;
             }
 
+            //if a sandbox is being used, disable both the ExecutionTimer's actionPerformed() ability to stop the process
+            // as well as the TimerTask's ability to stop the process
+            if (usingSandbox) {
+                //don't allow either the GUI timer or the TimerTask to stop the team code process; 
+                // the sandbox will be responsible for this.
+                autoStop = false;
+            }
+            
             //start the program executing.  Note that runProgram() sets the "startTimeNanos" timestamp 
             /// immediately prior to actually "execing" the process.
             log.info("starting team program...");
@@ -1869,6 +1934,7 @@ public class Executable extends Plugin implements IExecutable {
             log.info("got new TLE-Timer: " + timeLimitKillTimer.toString());
             
             //create a TimerTask to kill the process if it exceeds the problem time limit
+            // (note that this task only gets scheduled (see below) if we are NOT using a sandbox)
             
             killedByTimer = false ;
             
@@ -1898,6 +1964,7 @@ public class Executable extends Plugin implements IExecutable {
             long delay = (long) (problem.getTimeOutInSeconds() * 1000) ;
             
             //schedule the TLE kill task with the Timer -- but only for judged runs (i.e., non-team runs)
+            // and only when we're not using a sandbox (which will handle time limit within the sandbox)
             if (autoStop) {
                 log.info ("scheduling kill task with TLE-Timer with " + delay + " msec delay");
                 timeLimitKillTimer.schedule(task, delay);
@@ -2117,6 +2184,51 @@ public class Executable extends Plugin implements IExecutable {
         }
         
         return proceedToValidation;
+    }
+
+    /**
+     * Generates, in the execution directory, a file whose name corresponds to the PC2 Internal Sandbox program name
+     * and whose contents are the lines defining the PC2 Internal Sandbox code.
+     */
+    private void generatePC2Sandbox() {
+        File targetFile = new File (prefixExecuteDirname(problem.getSandboxProgramName()));
+
+//        try {
+//            PrintWriter pw = new PrintWriter(targetFile);
+//            
+//            // invoke Utilities.catFile to copy sandbox/pc2InternalSandbox.sh to the execute directory
+//            // ....
+//            
+//        } catch (FileNotFoundException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//        
+//        
+//        private static String getDefaultSyleSheetDirectoryName() {
+//
+//            String xslDir = "data" + File.separator + "xsl";
+//            File xslDirFile = new File(xslDir);
+//            if (!(xslDirFile.canRead() && xslDirFile.isDirectory())) {
+//                VersionInfo versionInfo = new VersionInfo();
+//                xslDir = versionInfo.locateHome() + File.separator + xslDir;
+//            }
+//            return xslDir;
+//        }
+//
+//        use this (from ExecuteUtilities):
+//        public static boolean copyFile(String fileOne, String fileTwo, Log log) {
+//            try {
+//
+    }
+
+    /**
+     * Returns an indication of whether the currently executing client is a Team (as opposed to a Judge, Admin, or Scoreboard for example).
+     * 
+     * @return true if the currently executing client is a Team; false otherwise.
+     */
+    private boolean isTeam() {
+        return executorId.getClientType() == ClientType.Type.TEAM;
     }
 
     private boolean isAppendStderrToStdout() {
@@ -2415,6 +2527,8 @@ public class Executable extends Plugin implements IExecutable {
      *              {:outfile}
      *              {:ansfile}
      *              {:pc2home}
+     *              {:sandbox} -the sandbox program (only under non-Windows OS's)
+     *              {:sandboxCmdLine} - the command used to invoke the sandbox 
      * </pre>
      * 
      * @param inRun
@@ -2509,6 +2623,10 @@ public class Executable extends Plugin implements IExecutable {
                     newString = replaceString(newString, "{:ansfile}", nullArgument);
                 }
                 newString = replaceString(newString, "{:timelimit}", Long.toString(problem.getTimeOutInSeconds()));
+                newString = replaceString(newString, "{:memlimit}", Long.toString(problem.getMemoryLimitMB()));
+                newString = replaceString(newString, "{:sandboxCmdLine}", problem.getSandboxCmdLine());
+                newString = replaceString(newString, "{:sandbox}", problem.getSandboxProgramName());
+
             } else {
                 log.config("substituteAllStrings() problem is undefined (null)");
             }
@@ -2524,10 +2642,13 @@ public class Executable extends Plugin implements IExecutable {
                 newString = replaceString(newString, "{:exitvalue}", Integer.toString(executionData.getExecuteExitValue()));
                 newString = replaceString(newString, "{:executetime}", Long.toString(executionData.getExecuteTimeMS()));
             }
+            
             String pc2home = new VersionInfo().locateHome();
             if (pc2home != null && pc2home.length() > 0) {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
+
+            
         } catch (Exception e) {
             log.log(Log.CONFIG, "Exception substituting strings ", e);
             // carrying on not required to save exception
