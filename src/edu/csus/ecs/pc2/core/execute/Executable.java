@@ -1689,7 +1689,6 @@ public class Executable extends Plugin implements IExecutable {
 
             log.info("Constructing ExecuteTimer...");
             executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
-//            executionTimer.startTimer();    //TODO: why is this here?  method runProgram() (called below) starts the timer (which is where it should be done).
             log.info("Created new ExecuteTimer: " + executionTimer.toString());
             
             if (problem.getDataFileName() != null) {
@@ -1822,34 +1821,49 @@ public class Executable extends Plugin implements IExecutable {
                 //check the OS to be sure we have a sandbox supported
                 String osName = System.getProperty("os.name").toLowerCase();
                 if ( osName.contains("windows") ) {
+                    
                     log.severe("Attempt to execute a problem configured with a sandbox on a Windows system: not supported");
-                    log.info("stopping ExecuteTimer " + executionTimer.toString());
-                    executionTimer.stopTimer();
+                    //the following is not needed; the execution time doesn't get started until runProgram() is called, below
+//                    log.info("stopping ExecuteTimer " + executionTimer.toString());
+//                    executionTimer.stopTimer();
                     stderrlog.close();
                     stdoutlog.close();
                     executionData.setExecuteSucess(false);
                     return false;
+                    
                 } else {
+                    
                     //OS supported (other values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
                     //check if we're supposed to use the PC2 internal sandbox
                     SandboxType sbType = problem.getSandboxType();
                     if (sbType == SandboxType.PC2_INTERNAL_SANDBOX) {
-                        generatePC2Sandbox();
+                        
+                        //copy the PC2 internal sandbox into the execution directory
+                        boolean success = generatePC2Sandbox();
+                        
+                        if (!success) {
+                            
+                            log.severe("Unable to generate PC2 Internal Sandbox; cannot execute submission");
+                            stderrlog.close();
+                            stdoutlog.close();
+                            executionData.setExecuteSucess(false);
+                            return false;
+                            
+                        }
+                        
                     } else if (sbType == SandboxType.EXTERNAL_SANDBOX){
-                        //unsupported sandbox type "external"
+
                         //TODO: replace this block with whatever code is necessary to properly set up the specified external sandbox
                         log.severe("Unsupported sandbox type '" + sbType +"' in Problem configuration; cannot execute submission");
-                        log.info("stopping ExecuteTimer " + executionTimer.toString());
-                        executionTimer.stopTimer();
                         stderrlog.close();
                         stdoutlog.close();
                         executionData.setExecuteSucess(false);
                         return false;
+                        
                     } else {
+                        
                         //unknown sandbox type
                         log.severe("Unknown sandbox type '" + sbType +"' in Problem configuration; cannot execute submission");
-                        log.info("stopping ExecuteTimer " + executionTimer.toString());
-                        executionTimer.stopTimer();
                         stderrlog.close();
                         stdoutlog.close();
                         executionData.setExecuteSucess(false);
@@ -2061,9 +2075,10 @@ public class Executable extends Plugin implements IExecutable {
             //get rid of the TLE timer (whether the TLE-kill task has been fired or not)
             log.info("cancelling TLE-Timer (note: this does not stop any already-running TLE-Timer tasks...)");
             timeLimitKillTimer.cancel();
-            
-//            System.out.println("  Process run time was " + getExecutionTimeInMSecs() + "ms");
 
+
+            //////// need code here to deal with sandbox results..
+            
             //update executionData info
             executionData.setExecuteExitValue(exitCode);
             executionData.setExecuteTimeMS(getExecutionTimeInMSecs());
@@ -2188,38 +2203,33 @@ public class Executable extends Plugin implements IExecutable {
 
     /**
      * Generates, in the execution directory, a file whose name corresponds to the PC2 Internal Sandbox program name
-     * and whose contents are the lines defining the PC2 Internal Sandbox code.
+     * and whose contents are the lines contained in the PC2 Internal Sandbox code.
+     * 
+     * @return true if creation of the sandbox file in the execution directory was successful; false if not.
      */
-    private void generatePC2Sandbox() {
-        File targetFile = new File (prefixExecuteDirname(problem.getSandboxProgramName()));
+    private boolean generatePC2Sandbox() {
+        
+        String targetFileName = prefixExecuteDirname(Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME);
 
-//        try {
-//            PrintWriter pw = new PrintWriter(targetFile);
-//            
-//            // invoke Utilities.catFile to copy sandbox/pc2InternalSandbox.sh to the execute directory
-//            // ....
-//            
-//        } catch (FileNotFoundException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//        
-//        
-//        private static String getDefaultSyleSheetDirectoryName() {
-//
-//            String xslDir = "data" + File.separator + "xsl";
-//            File xslDirFile = new File(xslDir);
-//            if (!(xslDirFile.canRead() && xslDirFile.isDirectory())) {
-//                VersionInfo versionInfo = new VersionInfo();
-//                xslDir = versionInfo.locateHome() + File.separator + xslDir;
-//            }
-//            return xslDir;
-//        }
-//
-//        use this (from ExecuteUtilities):
-//        public static boolean copyFile(String fileOne, String fileTwo, Log log) {
-//            try {
-//
+        //use the VersionInfo class to get the PC2 installation directory
+        VersionInfo versionInfo = new VersionInfo();
+        String home = versionInfo.locateHome();
+        
+        //point to the PC2 Internal Sandbox file (under "/sandbox" in the home, i.e. installation, directory)
+        String srcFileName = home + File.separator + "sandbox" + File.separator + Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME ;
+        
+        boolean success;
+        try {
+            //copy the PC2 internal sandbox program into the execute directory
+            success = ExecuteUtilities.copyFile(srcFileName, targetFileName, getLog());
+            
+        } catch (Exception e){
+            log.severe("Exception copying PC2 Internal Sandbox to execute directory: " + e.getMessage());
+            success = false ;
+        }
+        
+        return success;
+            
     }
 
     /**

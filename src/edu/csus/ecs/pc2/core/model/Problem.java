@@ -336,7 +336,7 @@ public class Problem implements IElementObject {
     private int memoryLimitMB = DEFAULT_MEMORY_LIMIT_MB;
     private SandboxType sandboxType = SandboxType.NONE;
     private String sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_COMMAND_LINE;
-    private String sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM;
+    private String sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME;
     
     /**
      * Create a problem with the display name.
@@ -2110,7 +2110,7 @@ public class Problem implements IElementObject {
         //if we're setting the PC2 internal sandbox, also set the sandbox command line and program name
         if (sandboxType == SandboxType.PC2_INTERNAL_SANDBOX) {
             sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_COMMAND_LINE;
-            sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM;
+            sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME;
         }
     }
 
