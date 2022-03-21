@@ -447,11 +447,11 @@ public class EditRunPane extends JPanePlugin {
             String valString = jr.getValidatorResultString();
             if (valString != null) {
                 judgementDescription += " Validator returns '" + valString + "'";
+                judgementLabel.setText("Judgement*");
             }
 
             log.info("Edit Run " + run.getNumber() + " judgement is " + judgementDescription);
             judgementLabel.setToolTipText(judgementDescription);
-            judgementLabel.setText("Judgement*");
         }
         
         for (Judgement judgement : getContest().getJudgements()) {
