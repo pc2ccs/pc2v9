@@ -212,8 +212,6 @@ public class Executable extends Plugin implements IExecutable {
     private String packageName = "";
 
     private String packagePath = "";
-    
-    private boolean usingSandbox = false;
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
@@ -1674,6 +1672,7 @@ public class Executable extends Plugin implements IExecutable {
         
         boolean proceedToValidation = false;
         String inputDataFileName = null;
+        boolean usingSandbox = false ;
 
         // a one-based test data set number
         int testSetNumber = dataSetNumber + 1;
@@ -1813,68 +1812,17 @@ public class Executable extends Plugin implements IExecutable {
 
             }
 
-            //check whether the Problem is configured to use a sandbox 
-            usingSandbox = false;
-            log.info("Checking problem sandbox usage...");
-            if (problem.isUsingSandbox() && !isTeam()) {
-                
-                //check the OS to be sure we have a sandbox supported
-                String osName = System.getProperty("os.name").toLowerCase();
-                if ( osName.contains("windows") ) {
-                    
-                    log.severe("Attempt to execute a problem configured with a sandbox on a Windows system: not supported");
-                    //the following is not needed; the execution time doesn't get started until runProgram() is called, below
-//                    log.info("stopping ExecuteTimer " + executionTimer.toString());
-//                    executionTimer.stopTimer();
-                    stderrlog.close();
-                    stdoutlog.close();
-                    executionData.setExecuteSucess(false);
-                    return false;
-                    
-                } else {
-                    
-                    //OS supported (other values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
-                    //check if we're supposed to use the PC2 internal sandbox
-                    SandboxType sbType = problem.getSandboxType();
-                    if (sbType == SandboxType.PC2_INTERNAL_SANDBOX) {
-                        
-                        //copy the PC2 internal sandbox into the execution directory
-                        boolean success = generatePC2Sandbox();
-                        
-                        if (!success) {
-                            
-                            log.severe("Unable to generate PC2 Internal Sandbox; cannot execute submission");
-                            stderrlog.close();
-                            stdoutlog.close();
-                            executionData.setExecuteSucess(false);
-                            return false;
-                            
-                        }
-                        
-                    } else if (sbType == SandboxType.EXTERNAL_SANDBOX){
+            //determine whether the Problem is configured to use a sandbox 
+            try {
+                usingSandbox = isUsingSandbox();
+            } catch (Exception e) {
+                //an exception means there is something wrong about sandbox usage (e.g. not allowed on this platform)
+                log.severe("Exception during sandbox usage check: " + e.getMessage());
+                stderrlog.close();
+                stdoutlog.close();
+                executionData.setExecuteSucess(false);
+                return false;
 
-                        //TODO: replace this block with whatever code is necessary to properly set up the specified external sandbox
-                        log.severe("Unsupported sandbox type '" + sbType +"' in Problem configuration; cannot execute submission");
-                        stderrlog.close();
-                        stdoutlog.close();
-                        executionData.setExecuteSucess(false);
-                        return false;
-                        
-                    } else {
-                        
-                        //unknown sandbox type
-                        log.severe("Unknown sandbox type '" + sbType +"' in Problem configuration; cannot execute submission");
-                        stderrlog.close();
-                        stdoutlog.close();
-                        executionData.setExecuteSucess(false);
-                        return false;
-                    }
-                }
-                
-                log.info("Using sandbox type '" + problem.getSandboxType() + "'; problem memory limit = " + problem.getMemoryLimitMB() + "MB");
-                
-                //Problem has a sandbox and we're not running a Team client; ensure we run the sandbox
-                usingSandbox = true;
             }
             
             if (usingSandbox) {
@@ -2077,7 +2025,7 @@ public class Executable extends Plugin implements IExecutable {
             timeLimitKillTimer.cancel();
 
 
-            //////// need code here to deal with sandbox results..
+            //////// TODO: need code here to deal with sandbox results..
             
             //update executionData info
             executionData.setExecuteExitValue(exitCode);
@@ -2202,12 +2150,76 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Generates, in the execution directory, a file whose name corresponds to the PC2 Internal Sandbox program name
-     * and whose contents are the lines contained in the PC2 Internal Sandbox code.
+     * Returns true if the current Problem is configured to use a sandbox, sandbox usage is supported on the current platform, 
+     * and the current client is not a Team; false otherwise.
+     * 
+     * @return true if the Problem is to use a sandbox; false if not.
+     * 
+     * @throws IOException if there is a sandbox configuration issue, such as 
+     *          we're running on an OS platform where sandbox isn't supported or
+     *          the specified sandbox can't be loaded into the execute directory.
+     */
+    private boolean isUsingSandbox() throws Exception {
+        
+        log.info("Checking problem sandbox usage...");
+        
+        if (problem.isUsingSandbox() && !isTeam()) {
+            
+            //check the OS to be sure we have a sandbox supported
+            String osName = System.getProperty("os.name").toLowerCase();
+            if ( osName.contains("windows") ) {
+                
+                log.severe("Attempt to execute a problem configured with a sandbox on a Windows system: not supported");
+                throw new Exception ("Sandbox not supported on Windows OS");
+                
+            } else {
+                
+                //OS supported (other values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
+                //check if we're supposed to use the PC2 internal sandbox
+                SandboxType sbType = problem.getSandboxType();
+                if (sbType == SandboxType.PC2_INTERNAL_SANDBOX) {
+                    
+                    //copy the PC2 internal sandbox into the execution directory
+                    boolean success = copyPC2Sandbox();
+                    
+                    if (!success) {
+                        
+                        log.severe("Unable to copy PC2 Internal Sandbox to execute directory; cannot execute submission");
+                        throw new Exception("Unable to copy PC2 Internal Sandbox");
+                        
+                    }
+                    
+                } else if (sbType == SandboxType.EXTERNAL_SANDBOX){
+
+                    //TODO: replace this block with whatever code is necessary to properly set up the specified external sandbox
+                    log.severe("Unsupported sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
+                    throw new Exception ("Unsupported sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
+                    
+                } else {
+                    
+                    //unknown sandbox type
+                    log.severe("Unknown sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
+                    throw new Exception ("Unknown sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
+                }
+            }
+            
+            log.info("Using sandbox type '" + problem.getSandboxType() + "'; problem memory limit = " + problem.getMemoryLimitMB() + "MB");
+            
+            //Problem has a properly-configured sandbox and we're not running a Team client
+            return true;
+            
+        } else {
+            //either the problem has no sandbox configured, or we are executing on a Team client; in either case we don't use a sandbox
+            return false;
+        }
+    }
+
+    /**
+     * Copies the PC2 internal sandbox implementation file into the execution directory.
      * 
      * @return true if creation of the sandbox file in the execution directory was successful; false if not.
      */
-    private boolean generatePC2Sandbox() {
+    private boolean copyPC2Sandbox() {
         
         String targetFileName = prefixExecuteDirname(Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME);
 
@@ -2538,8 +2550,8 @@ public class Executable extends Plugin implements IExecutable {
      *              {:outfile}
      *              {:ansfile}
      *              {:pc2home}
-     *              {:sandbox} -the sandbox program (only under non-Windows OS's)
-     *              {:sandboxCmdLine} - the command used to invoke the sandbox 
+     *              {:sandboxprogramname} - the sandbox program name as defined in the Problem
+     *              {:sandboxcommandline} - the command line used to invoke the sandbox as defined in the Problem 
      * </pre>
      * 
      * @param inRun
