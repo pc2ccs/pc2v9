@@ -434,10 +434,26 @@ public class EditRunPane extends JPanePlugin {
 
         ElementId judgementId = null;
 
-        if (run.isJudged()) {
-            judgementId = run.getJudgementRecord().getJudgementId();
-        }
+        judgementLabel.setText("Judgement");
 
+        if (run.isJudged()) {
+            JudgementRecord jr = run.getJudgementRecord();
+            judgementId = jr.getJudgementId();
+
+            // Add judgement description to judgement tool tip
+            Judgement judgement = getContest().getJudgement(judgementId);
+            String judgementDescription = judgement.getAcronym() + " " + judgement.getDisplayName();
+
+            String valString = jr.getValidatorResultString();
+            if (valString != null) {
+                judgementDescription += " Validator returns '" + valString + "'";
+            }
+
+            log.info("Edit Run " + run.getNumber() + " judgement is " + judgementDescription);
+            judgementLabel.setToolTipText(judgementDescription);
+            judgementLabel.setText("Judgement*");
+        }
+        
         for (Judgement judgement : getContest().getJudgements()) {
             getJudgementComboBox().addItem(judgement);
             if (judgement.getElementId().equals(judgementId)) {
@@ -445,6 +461,9 @@ public class EditRunPane extends JPanePlugin {
             }
             index++;
         }
+        
+        // Select judgement in combo box
+        judgementComboBox.setSelectedIndex(selectedIndex);
         
         selectedIndex = -1;
         index = 0;
