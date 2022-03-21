@@ -2510,6 +2510,25 @@ public class Executable extends Plugin implements IExecutable {
                     newString = replaceString(newString, "{:ansfile}", nullArgument);
                 }
                 newString = replaceString(newString, "{:timelimit}", Long.toString(problem.getTimeOutInSeconds()));
+                
+                // TODO REFACTOR replace vars with constants for: memlimit, sandboxcommandline,sandboxprogramname
+                newString = replaceString(newString, "{:memlimit}", Integer.toString(problem.getMemoryLimitMB()));
+
+                if (newString.indexOf("{:sandboxcommandline}") > -1) {
+                    if (!StringUtilities.isEmpty(problem.getSandboxCmdLine())) {
+
+                        newString = replaceString(newString, "{:sandboxcommandline}", problem.getSandboxCmdLine());
+                        newString = substituteAllStrings(inRun, newString);
+                    } else {
+                        newString = replaceString(newString, "{:sandboxcommandline}", "");
+                    }
+                }
+
+                if (!StringUtilities.isEmpty(problem.getSandboxProgramName())) {
+                    newString = replaceString(newString, "{:sandboxprogramname}", problem.getSandboxProgramName());
+                } else {
+                    newString = replaceString(newString, "{:sandboxprogramname}", "");
+                }
             } else {
                 log.config("substituteAllStrings() problem is undefined (null)");
             }
@@ -2531,27 +2550,7 @@ public class Executable extends Plugin implements IExecutable {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
             
-            // TODO add to logic to use  problem.getSandboxType() and get clarification
-            // on how to handle sandbox variables if getSandboxType() == NONE, and other requirements
-            
-            // TODO REFACTOR replace vars with constants for: memlimit, sandboxcommandline,sandboxprogramname
-            newString = replaceString(newString, "{:memlimit}", Integer.toString(problem.getMemoryLimitMB()));
 
-            if (newString.indexOf("{:sandboxcommandline}") > -1) {
-                if (!StringUtilities.isEmpty(problem.getSandboxCmdLine())) {
-
-                    newString = replaceString(newString, "{:sandboxcommandline}", problem.getSandboxCmdLine());
-                    newString = substituteAllStrings(inRun, newString);
-                } else {
-                    newString = replaceString(newString, "{:sandboxcommandline}", "");
-                }
-            }
-
-            if (!StringUtilities.isEmpty(problem.getSandboxProgramName())) {
-                newString = replaceString(newString, "{:sandboxprogramname}", problem.getSandboxProgramName());
-            } else {
-                newString = replaceString(newString, "{:sandboxprogramname}", "");
-            }
              
 
         } catch (Exception e) {
