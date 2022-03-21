@@ -1822,7 +1822,6 @@ public class Executable extends Plugin implements IExecutable {
                 stdoutlog.close();
                 executionData.setExecuteSucess(false);
                 return false;
-
             }
             
             if (usingSandbox) {
@@ -2155,7 +2154,7 @@ public class Executable extends Plugin implements IExecutable {
      * 
      * @return true if the Problem is to use a sandbox; false if not.
      * 
-     * @throws IOException if there is a sandbox configuration issue, such as 
+     * @throws Exception if there is a sandbox configuration issue, such as 
      *          we're running on an OS platform where sandbox isn't supported or
      *          the specified sandbox can't be loaded into the execute directory.
      */
