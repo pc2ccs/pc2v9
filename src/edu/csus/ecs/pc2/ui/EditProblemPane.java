@@ -69,6 +69,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
+import edu.csus.ecs.pc2.core.model.Problem.SandboxType;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -237,6 +238,8 @@ public class EditProblemPane extends JPanePlugin {
 
     private Log log;
 
+    private EditProblemSandboxPane editProblemSandboxPane;
+
 
     /**
      * Constructs an EditProblemPane with default settings.
@@ -269,7 +272,7 @@ public class EditProblemPane extends JPanePlugin {
         getInputValidatorPane().setContestAndController(inContest, inController);
         
         getProblemGroupPane().setContestAndController(inContest, inController);
-
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 getLoadButton().setVisible(Utilities.isDebugMode());
@@ -285,6 +288,8 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         log = inController.getLog();
+
+        getProblemSandboxPane().setContestAndController(inContest, inController);
 
     }
 
@@ -1372,7 +1377,22 @@ public class EditProblemPane extends JPanePlugin {
         if (debug22EditProblem) {
             Utilities.dump(newProblemDataFiles, "debug after populateProblemTestSetFilenames");
         }
-
+        
+        //updates to support memory limit sandbox
+        if (getProblemSandboxPane().getUseNoSandboxRadioButton().isSelected()) {
+            checkProblem.setSandboxType(SandboxType.NONE);
+        } else if (getProblemSandboxPane().getUsePC2SandboxRadioButton().isSelected()) {
+            try {
+                int memLimit = Integer.parseInt(getProblemSandboxPane().getPC2SandboxOptionMemLimitTextbox().getText());
+                checkProblem.setMemoryLimit(memLimit);
+                checkProblem.setSandboxType(SandboxType.PC2_INTERNAL_SANDBOX);
+            } catch (NumberFormatException e) {
+                log.warning("Invalid memory limit value :" + e);
+                throw new InvalidFieldValue("Invalid memory limit value");
+            } 
+        }
+        
+        
         return checkProblem;
 
     }
@@ -2188,6 +2208,7 @@ public class EditProblemPane extends JPanePlugin {
             Utilities.dump(originalProblemDataFiles, "debug   ORIGINAL  populateGUI A");
         }
         getProblemGroupPane().setProblem(inProblem);
+        getProblemSandboxPane().setProblem(inProblem);
 
         if (inProblem != null) {
 
@@ -2212,6 +2233,8 @@ public class EditProblemPane extends JPanePlugin {
         enableOutputValidatorTabComponents();
 
         enableInputValidatorTabComponents();
+        
+        enableSandboxTabComponents();
 
         // enableGeneralTabComponents:
         enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
@@ -2300,6 +2323,9 @@ public class EditProblemPane extends JPanePlugin {
         getMultipleDataSetPane().setLoadDirectory(inProblem.getExternalDataFileLocation());
         
         getProblemGroupPane().setProblem(inProblem);
+        
+        // Sandbox tab:
+        initializeSandboxTabFields(inProblem);
 
     }
 
@@ -2674,6 +2700,19 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
+     * Initializes the external EditProblemSandboxPane object with the values from the specified problem.
+     * 
+     * @param inProblem the {@link Problem} used to initialize the sandbox pane.
+     */
+    private void initializeSandboxTabFields(Problem inProblem) {
+        
+        EditProblemSandboxPane sandboxPane = getProblemSandboxPane();
+        
+        sandboxPane.initializeFields(inProblem);
+        
+    }
+
+    /**
      * This method updates the Input Validation Results JTable (contained in the ResultsFrame, referenced via the 
      * {@link InputValidatorPane}) from the specified Iterable InputValidationResults.
      * 
@@ -2782,6 +2821,7 @@ public class EditProblemPane extends JPanePlugin {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.setPreferredSize(new Dimension(900, 800));
+            mainTabbedPane.insertTab("Sandbox", null, getProblemSandboxPane(), null, 0);
             mainTabbedPane.insertTab("Groups", null, getProblemGroupPane(), null, 0);
             mainTabbedPane.insertTab("Input Validator", null, getInputValidatorPane(), null, 0);
             mainTabbedPane.insertTab("Test Data Files", null, getMultipleDataSetPane(), null, 0);
@@ -2790,6 +2830,22 @@ public class EditProblemPane extends JPanePlugin {
             mainTabbedPane.insertTab("General", null, getGeneralPane(), null, 0);
         }
         return mainTabbedPane;
+    }
+
+    /**
+     * Returns a singleton instance of the Edit Problem Sandbox pane, which is a JPanePlugin (and hence a JPanel).
+     * 
+     * @return a singleton {@link EditProblemSandboxPane}.
+     */
+    private EditProblemSandboxPane getProblemSandboxPane() {
+
+        if (editProblemSandboxPane == null) {
+            editProblemSandboxPane = new EditProblemSandboxPane();
+            editProblemSandboxPane.setContestAndController(getContest(), getController());
+            editProblemSandboxPane.setParentPane(this);
+        }
+        return editProblemSandboxPane;
+
     }
 
     private ProblemGroupPane getProblemGroupPane() {
@@ -3414,6 +3470,12 @@ public class EditProblemPane extends JPanePlugin {
             enableCustomValidatorComponents(false);
             getShowValidatorToJudgesCheckBox().setEnabled(false);
         }
+    }
+    
+    private void enableSandboxTabComponents() {
+        //get the sandbox pane (which is an external class)
+        EditProblemSandboxPane sandboxPane = getProblemSandboxPane();
+        sandboxPane.enableEditProblemSandboxTabComponents();
     }
 
     private void enablePC2ValidatorComponents(boolean enableComponents) {
@@ -4139,6 +4201,9 @@ public class EditProblemPane extends JPanePlugin {
 
         // Input Validator tab:
         initializeInputValidatorTabFields();
+        
+        // Sandbox tab:
+        initializeSandboxTabFields();
 
         // Data Files tab:
         // ???
@@ -4214,6 +4279,24 @@ public class EditProblemPane extends JPanePlugin {
 
     }
 
+    private void initializeSandboxTabFields() {
+        
+        //get the sandbox pane (which is an external class)
+        EditProblemSandboxPane sandboxPane = getProblemSandboxPane();
+        
+        // default to "no sandbox"
+        sandboxPane.getUseNoSandboxRadioButton().setSelected(true);
+        
+        //clear and disable the PC2 sandbox options
+        sandboxPane.getPC2SandboxOptionMemLimitTextbox().setText("");
+        sandboxPane.setPanelEnabled(sandboxPane.getPC2SandboxOptionsSubPanel(), false);
+
+        // clear and disable the Custom sandbox options
+        sandboxPane.getCustomSandboxCommandLineTextField().setText("");
+        sandboxPane.getCustomSandboxExecutableProgramTextField().setText("");
+        sandboxPane.setPanelEnabled(sandboxPane.getCustomSandboxOptionsSubPanel(), false);
+    }
+    
     /**
      * This method initializes the useComputerJudging Radio Button
      * 
