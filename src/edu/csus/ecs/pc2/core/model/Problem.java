@@ -1195,7 +1195,22 @@ public class Problem implements IElementObject {
                 return false;
             }
             
+            //check for equivalence in Sandbox configuration
+            if (this.getSandboxType() != otherProblem.getSandboxType()) {
+                return false ;
+            } else if (this.getSandboxType() == SandboxType.PC2_INTERNAL_SANDBOX) {
+                if (this.hasMemoryLimit() != otherProblem.hasMemoryLimit() ) {
+                    return false;
+                } else {
+                    if (this.getMemoryLimitMB() != otherProblem.getMemoryLimitMB()) {
+                        return false;
+                    }
+                }
+            }
+            
+            //all comparisons pass; problems are equivalent
             return true;
+            
         } catch (Exception e) {
             StaticLog.getLog().log(Log.WARNING, "Exception comparing Problem "+e.getMessage(), e);
             e.printStackTrace(System.err);
