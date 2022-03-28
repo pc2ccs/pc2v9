@@ -760,6 +760,9 @@ public class ContestInformation implements Serializable{
      * @return
      */
     public String getTeamScoreboardDisplayFormat() {
+        if(teamScoreboardDisplayFormat == null) {
+            teamScoreboardDisplayFormat = ScoreboardVariableReplacer.TEAM_NAME;
+        }
         return teamScoreboardDisplayFormat;
     }
 

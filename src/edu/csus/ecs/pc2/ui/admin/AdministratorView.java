@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.ui.AboutPane;
 import edu.csus.ecs.pc2.ui.AccountsPane;
+import edu.csus.ecs.pc2.ui.AccountsTablePane;
 import edu.csus.ecs.pc2.ui.AutoJudgesPane;
 import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
 import edu.csus.ecs.pc2.ui.CategoriesPane;
@@ -228,9 +229,12 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                  * add UI components involved with Configuration to the ConfigureContest tabbed pane
                  */
 
-                AccountsPane accountsPane = new AccountsPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Accounts", accountsPane);
+                AccountsTablePane accountsTablePane = new AccountsTablePane();
+                addUIPlugin(getConfigureContestTabbedPane(), "Accounts", accountsTablePane);
                 
+                AccountsPane accountsPane = new AccountsPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "Old Accounts", accountsPane);
+               
                 if (Utilities.isDebugMode()) {
                     try {
                         CategoriesPane categoriesPane = new CategoriesPane();
