@@ -75,8 +75,6 @@ public class AccountsTablePane extends JPanePlugin {
      */
     private static final long serialVersionUID = 2297963114219167947L;
 
-//    private MCLB accountListBox = null;
-    
     private JTable accountTable = null;
     private DefaultTableModel accountTableModel = null;
 
@@ -147,7 +145,7 @@ public class AccountsTablePane extends JPanePlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-//        Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias"};
+//        Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "External ID"};
 
         try {
             int cols = accountTable.getColumnCount();
@@ -161,6 +159,7 @@ public class AccountsTablePane extends JPanePlugin {
             s[3] = getTeamDisplayName(account);
             s[4] = getGroupName(account);
             s[5] = getTeamAlias(account);
+            s[6] = getExternalId(account);
             return s;
         } catch (Exception exception) {
             StaticLog.getLog().log(Log.INFO, "Exception in buildAccountRow()", exception);
@@ -203,6 +202,17 @@ public class AccountsTablePane extends JPanePlugin {
         return "";
     }
 
+    private String getExternalId(Account account) {
+        if (account != null) {
+            String eid = account.getExternalId();
+            if (eid != null) {
+                return eid;
+            }
+        }
+
+        return "";
+    }
+
     /**
      * This method initializes accountTable and accountTableModel
      * 
@@ -211,7 +221,7 @@ public class AccountsTablePane extends JPanePlugin {
     private JTable getAccountsTable() {
         if (accountTable == null) {
             int i;
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias"};
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "External Id"};
             accountTableModel = new DefaultTableModel(cols, 0) {
                 @Override
                 public boolean isCellEditable(int row, int col) {
@@ -239,6 +249,7 @@ public class AccountsTablePane extends JPanePlugin {
             
             trs.setComparator(2, new StringToNumberComparator());
             trs.setComparator(3, new AccountNameCaseComparator());
+            trs.setComparator(6, new StringToNumberComparator());
            
             resizeColumnWidth(accountTable);
         }

@@ -67,6 +67,7 @@ import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.RunsPane;
+import edu.csus.ecs.pc2.ui.RunsTablePane;
 import edu.csus.ecs.pc2.ui.SitesPane;
 import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
 import edu.csus.ecs.pc2.ui.StandingsPane;
@@ -369,8 +370,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ReportPane reportPane = new ReportPane();
                 addUIPlugin(getRunContestTabbedPane(), "Reports", reportPane);
 
+                RunsTablePane runsTablePane = new RunsTablePane();
+                addUIPlugin(getRunContestTabbedPane(), "Runs", runsTablePane);
+
                 RunsPane runsPane = new RunsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Runs", runsPane);
+                addUIPlugin(getRunContestTabbedPane(), "Old Runs", runsPane);
 
                 SitesPane sitesPanel = new SitesPane();
                 addUIPlugin(getRunContestTabbedPane(), "Sites", sitesPanel);
