@@ -760,6 +760,11 @@ public class ContestInformation implements Serializable{
      * @return
      */
     public String getTeamScoreboardDisplayFormat() {
+        // Handle case where deserializing old contest objects sets teamScoreboardDisplayFormat to null.
+        // In this case, just set it to the default (i361 - DSA causes NPE)
+        if(teamScoreboardDisplayFormat == null) {
+            teamScoreboardDisplayFormat = ScoreboardVariableReplacer.TEAM_NAME;
+        }
         return teamScoreboardDisplayFormat;
     }
 
