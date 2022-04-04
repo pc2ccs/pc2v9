@@ -3150,7 +3150,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         assertEquals("Expecting language count ", 7, languages.length);
         
-        
         for (Language language : languages) {
             if ("Perl".equals(language.getDisplayName())){
                 assertFalse ("Expect NOT Using judges command line boolean  "+language, language.isUsingJudgeProgramExecuteCommandLine());
