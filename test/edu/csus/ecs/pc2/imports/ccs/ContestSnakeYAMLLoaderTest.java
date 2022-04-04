@@ -2901,13 +2901,13 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     }
     
     /**
-     * Test load of input format validator using sumitMTC sample.
+     * Test load of input format validator using SumitMTC sample.
      * 
      * @throws Exception
      */
     public void testLoadInputFormatValidator() throws Exception {
 
-        IInternalContest con = loadSampleContest(null, "sumitMTC");
+        IInternalContest con = loadSampleContest(null, "SumitMTC");
         assertNotNull(con);
 
         // expecting input format validator defined
@@ -2917,7 +2917,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         String valiatorFileName = "valid.bat";
 
-        String ifvfilename = "samps/contests/sumitMTC/config/sumit/input_format_validators/"+valiatorFileName;
+        String ifvfilename = "samps/contests/SumitMTC/config/sumit/input_format_validators/"+valiatorFileName;
         assertFileExists(ifvfilename);
 
         Problem p = problems[0];
@@ -3139,17 +3139,16 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      */
     public void testLanguageLoadJudgeCmdLine() throws Exception {
         
-//        String configDir = getTestSampleContestDirectory( "sumitMTC") + File.separator + IContestLoader.CONFIG_DIRNAME;
+//        String configDir = getTestSampleContestDirectory( "SumitMTC") + File.separator + IContestLoader.CONFIG_DIRNAME;
 //        String yamlFile = configDir + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
 //        editFile(yamlFile);
 
-        IInternalContest contest = loadSampleContest(null, "sumitMTC");
+        IInternalContest contest = loadSampleContest(null, "SumitMTC");
         assertNotNull(contest);
         
         Language[] languages = contest.getLanguages();
         
         assertEquals("Expecting language count ", 7, languages.length);
-        
         
         for (Language language : languages) {
             if ("Perl".equals(language.getDisplayName())){
