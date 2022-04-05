@@ -39,6 +39,7 @@ import edu.csus.ecs.pc2.ui.AutoJudgesPane;
 import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
 import edu.csus.ecs.pc2.ui.CategoriesPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
+import edu.csus.ecs.pc2.ui.ClarificationsTablePane;
 import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
@@ -307,8 +308,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ConnectionsPane connectionsPane = new ConnectionsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
 
+                ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
+                addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsTablePane);
+
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsPane);
+                addUIPlugin(getRunContestTabbedPane(), "Old Clarifications", clarificationsPane);
 
                 if (Utilities.isDebugMode()) {
                     try {

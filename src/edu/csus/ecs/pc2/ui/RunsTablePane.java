@@ -227,7 +227,7 @@ public class RunsTablePane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "Runs Panel";
+        return "Runs Table Panel";
     }
 
     protected Object[] buildRunRow(Run run, ClientId judgeId) {
@@ -812,11 +812,7 @@ public class RunsTablePane extends JPanePlugin {
         
         StringToNumberComparator numericStringSorter = new StringToNumberComparator();
         AccountNameCaseComparator accountNameSorter = new AccountNameCaseComparator();
-        
-//        trs.setComparator(2, new StringToNumberComparator());
-//        trs.setComparator(3, new AccountNameCaseComparator());
-//        trs.setComparator(6, new StringToNumberComparator());
-       
+            
         int idx = 0;
 
         if (isTeam(getContest().getClientId())) {
@@ -824,6 +820,7 @@ public class RunsTablePane extends JPanePlugin {
 //            Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Balloon", "Language" };
 
             // These are in column order - omitted ones are straight string compare
+            trs.setComparator(0, accountNameSorter);
             trs.setComparator(1, numericStringSorter);
             trs.setComparator(3, numericStringSorter);
             // These are in sort order
@@ -840,6 +837,7 @@ public class RunsTablePane extends JPanePlugin {
 //            Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Balloon", "Language", "OS" };
 
             // These are in column order - omitted ones are straight string compare
+            trs.setComparator(0, accountNameSorter);
             trs.setComparator(1, accountNameSorter);
             trs.setComparator(2, numericStringSorter);
             trs.setComparator(3, numericStringSorter);
@@ -861,6 +859,7 @@ public class RunsTablePane extends JPanePlugin {
 //            Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Balloon", "Language", "OS" };
             
             // These are in column order - omitted ones are straight string compare
+            trs.setComparator(0, accountNameSorter);
             trs.setComparator(1, accountNameSorter);
             trs.setComparator(2, numericStringSorter);
             trs.setComparator(3, numericStringSorter);
