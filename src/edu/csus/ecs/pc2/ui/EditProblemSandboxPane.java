@@ -15,6 +15,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -31,9 +32,13 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
+import edu.csus.ecs.pc2.core.OSType;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.SandboxType;
@@ -87,14 +92,25 @@ public class EditProblemSandboxPane extends JPanePlugin {
      * last directory where searched for files.
      */
     private String lastDirectory; 
+    
+    private SandboxType mostRecentlySelectedType ;
+    
+    //setting this to True will cause the Sandbox Pane GUI panels to show boundary borders... useful for layout debugging.
+    private boolean debugShowPanelBorders = false;
+    
+    //setting this to True will override the prohibition on selecting a Sandbox when running on Windows.
+    // Note that THIS IS FOR DEBUGGING PURPOSES; it does NOT imply any support for Windows sandboxing.
+    private boolean debugAllowSandoxSelectionOnWindows = true;
 
 
 
     public EditProblemSandboxPane() {
-
+        if (debugShowPanelBorders) {
+            setBorder(new LineBorder(Color.RED));
+        }
         this.setAlignmentX(Component.LEFT_ALIGNMENT);
         this.setAlignmentY(Component.TOP_ALIGNMENT);
-        this.setMaximumSize(new Dimension(500, 400));
+        this.setMaximumSize(new Dimension(500, 200));
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(getVerticalStrut_1());
         this.add(getNoSandboxPanel());
@@ -103,7 +119,9 @@ public class EditProblemSandboxPane extends JPanePlugin {
         this.add(getVerticalStrut_3());
         this.add(getCustomSandboxPanel());
         this.add(getVerticalStrut_4());
-        getSandboxChoiceButtonGroup().setSelected(getUseNoSandboxRadioButton().getModel(), true);
+        this.getSandboxChoiceButtonGroup().setSelected(getUseNoSandboxRadioButton().getModel(), true);
+        mostRecentlySelectedType = SandboxType.NONE;
+        this.enableEditProblemSandboxTabComponents();
         
     }
 
@@ -115,6 +133,20 @@ public class EditProblemSandboxPane extends JPanePlugin {
     
     public void setProblem(Problem problem) {
         this.problem = problem;
+        
+        //activate the appropriate sandbox selection button (the buttons are in a group so selecting one will deselect the others)
+        if (this.problem.getSandboxType() == SandboxType.NONE) {
+            getUseNoSandboxRadioButton().setSelected(true);
+            
+        } else if (this.problem.getSandboxType() == SandboxType.PC2_INTERNAL_SANDBOX) {
+            getUsePC2SandboxRadioButton().setSelected(true);
+            getPC2SandboxOptionMemLimitTextbox().setText(Integer.toString(problem.getMemoryLimitMB()));
+            
+        } else if (this.problem.getSandboxType() == SandboxType.EXTERNAL_SANDBOX) {
+            getLog().severe("Problem has 'Custom sandbox' selected -- should not be possible in this version of PC^2!");
+            //default to "None"
+            getUseNoSandboxRadioButton().setSelected(true);
+        }
     }
 
     public void setParentPane(EditProblemPane editProblemPane) {
@@ -134,12 +166,8 @@ public class EditProblemSandboxPane extends JPanePlugin {
             getLog().warning("EditProblemSandboxPane.initializeFields() called with null Problem; cannot initialize");
         } else {
 
-            // fill in the text fields from the problem
-            if (inProblem.hasMemoryLimit()) {
-                getPC2SandboxOptionMemLimitTextbox().setText(new Integer(inProblem.getMemoryLimitMB()).toString());
-            } else {
-                getPC2SandboxOptionMemLimitTextbox().setText("");
-            }
+            // fill in the sandbox text fields from the problem
+            getPC2SandboxOptionMemLimitTextbox().setText(new Integer(inProblem.getMemoryLimitMB()).toString());
             getCustomSandboxCommandLineTextField().setText(inProblem.getSandboxCmdLine());
             getCustomSandboxExecutableProgramTextField().setText(inProblem.getSandboxProgramName());
 
@@ -171,9 +199,20 @@ public class EditProblemSandboxPane extends JPanePlugin {
     private JPanel getNoSandboxPanel() {
         if (noSandboxPanel == null) {
             noSandboxPanel = new JPanel();
-            noSandboxPanel.setMaximumSize(new Dimension(500, 200));
+            noSandboxPanel.setMaximumSize(new Dimension(500, 50));
             noSandboxPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            noSandboxPanel.setBorder(null);
+            
+            //set borders without or without lines depending on debugShowPanelBorders
+            Border emptyBorder = new EmptyBorder(5,30,5,5);             //this border provides the desired inset spacing
+            Border lineBorder = new LineBorder(new Color(0,255,0));     //this border provides colored lines for debugging purposes
+            Border finalBorder;
+            if (debugShowPanelBorders) {
+                finalBorder = BorderFactory.createCompoundBorder(emptyBorder, lineBorder);
+            } else {
+                finalBorder = emptyBorder;
+            }
+            noSandboxPanel.setBorder(finalBorder);
+            
             FlowLayout flowLayout = (FlowLayout) noSandboxPanel.getLayout();
             flowLayout.setHgap(10);
             flowLayout.setAlignment(FlowLayout.LEFT);
@@ -185,9 +224,21 @@ public class EditProblemSandboxPane extends JPanePlugin {
     private JPanel getPC2SandboxPanel() {
         if (pc2SandboxPanel == null) {
             pc2SandboxPanel = new JPanel();
+            
+            //set borders without or without lines depending on debugShowPanelBorders
+            Border emptyBorder = new EmptyBorder(5,30,5,5);             //this border provides the desired inset spacing
+            Border lineBorder = new LineBorder(new Color(0,0,255));     //this border provides colored lines for debugging purposes
+            Border finalBorder;
+            if (debugShowPanelBorders) {
+                finalBorder = BorderFactory.createCompoundBorder(emptyBorder, lineBorder);
+            } else {
+                finalBorder = emptyBorder;
+            }
+            pc2SandboxPanel.setBorder(finalBorder);
+
             pc2SandboxPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             pc2SandboxPanel.setLayout(new BorderLayout(0, 0));
-            pc2SandboxPanel.setMaximumSize(new Dimension(500, 200));
+            pc2SandboxPanel.setMaximumSize(new Dimension(500, 120));
             pc2SandboxPanel.add(getPC2SandboxOptionButtonPanel(), BorderLayout.NORTH);
             pc2SandboxPanel.add(getHorizontalStrut_1(), BorderLayout.WEST);
             pc2SandboxPanel.add(getPC2SandboxOptionsSubPanel());
@@ -213,9 +264,21 @@ public class EditProblemSandboxPane extends JPanePlugin {
     private JPanel getCustomSandboxPanel() {
         if (customSandboxPanel == null) {
             customSandboxPanel = new JPanel();
+
+            //set borders without or without lines depending on debugShowPanelBorders
+            Border emptyBorder = new EmptyBorder(5,30,5,5);             //this border provides the desired inset spacing
+            Border lineBorder = new LineBorder(new Color(0,255,255));   //this border provides colored lines for debugging purposes
+            Border finalBorder;
+            if (debugShowPanelBorders) {
+                finalBorder = BorderFactory.createCompoundBorder(emptyBorder, lineBorder);
+            } else {
+                finalBorder = emptyBorder;
+            }
+            customSandboxPanel.setBorder(finalBorder);
+
             customSandboxPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             customSandboxPanel.setLayout(new BorderLayout(0, 0));
-            customSandboxPanel.setMaximumSize(new Dimension(500, 200));
+            customSandboxPanel.setMaximumSize(new Dimension(700, 200));
             customSandboxPanel.add(getCustomSandboxOptionButtonPanel(), BorderLayout.NORTH);
             customSandboxPanel.add(getHorizontalStrut_2(), BorderLayout.WEST);
             customSandboxPanel.add(getCustomSandboxOptionsSubPanel());
@@ -252,32 +315,25 @@ public class EditProblemSandboxPane extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableEditProblemSandboxTabComponents();
                     enableUpdateButton();
+                    mostRecentlySelectedType = SandboxType.NONE;
                 }
             });
         }
         return useNoSandboxRadioButton;
     }
-    
+
+
     /**
-     * Temporary method for testing...
+     * Notifies the EditProblemPane parent pane to enable its update button.
      */
     protected void enableUpdateButton() {
-        System.out.println ("Unimplemented method 'enableUpdateButton() invoked...");
-        JOptionPane.showMessageDialog(this, "Method 'enableUpdateButton()' invoked but not implemented");
+        if (getParentPane()!=null) {
+            getParentPane().enableUpdateButton();
+        } else {
+            getLog().warning("EditProblemSandboxPane has null EditProblemPane parent!");
+        }
     }
-
-//    /**
-//     * Temporary method for testing...
-//     */
-//    protected void enableEditProblemSandboxTabComponents() {
-////        System.out.println ("Unimplemented method 'enableEditProblemSandboxTabComponents() invoked...");
-////        JOptionPane.showMessageDialog(this, "Method 'enableEditProblemSandboxTabComponents()' invoked but not implemented");
-//
-//        getUseNoSandboxRadioButton().setEnabled(true);
-//        getUseNoSandboxRadioButton().setSelected(true);
-//        setPanelEnabled(getCustomSandboxPanel(), false);
-//    }
-
+    
     protected void setPanelEnabled(JPanel panel, Boolean isEnabled) {
 
         panel.setEnabled(isEnabled);
@@ -312,28 +368,48 @@ public class EditProblemSandboxPane extends JPanePlugin {
             usePC2SandboxRadioButton.setText("Use PC^2 Sandbox (not available on Windows)");
             usePC2SandboxRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableEditProblemSandboxTabComponents();
-                    enableUpdateButton();
+                    if (debugAllowSandoxSelectionOnWindows || ! (Utilities.getOSType().equals(OSType.WINDOWS) ) ) {
+                        enableEditProblemSandboxTabComponents();
+                        enableUpdateButton();
+                        mostRecentlySelectedType = SandboxType.PC2_INTERNAL_SANDBOX;
+                    } else  {
+                        JOptionPane.showMessageDialog(getParentPane(), notAvailableOnWindowsMsg, "Not Available on Windows", JOptionPane.WARNING_MESSAGE);
+                        if (mostRecentlySelectedType == SandboxType.NONE) {
+                            getUseNoSandboxRadioButton().setSelected(true);
+                        } else if (mostRecentlySelectedType == SandboxType.PC2_INTERNAL_SANDBOX) {
+                                getUsePC2SandboxRadioButton().setSelected(true);
+                            }
+                    }
                 }
             });
         }
         return usePC2SandboxRadioButton;
     }
     
-    private JRadioButton getUseCustomSandboxRadioButton() {
+    private String notAvailableOnWindowsMsg = "It appears you are running on a Microsoft Windows platform; this option is not available on Windows. ";
+    
+    protected JRadioButton getUseCustomSandboxRadioButton() {
         if (useCustomSandboxRadioButton == null) {
             useCustomSandboxRadioButton = new JRadioButton();
             useCustomSandboxRadioButton.setMargin(new Insets(2, 12, 2, 2));
             useCustomSandboxRadioButton.setText("Use Custom (User-supplied) Sandbox");
             useCustomSandboxRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableEditProblemSandboxTabComponents();
-                    enableUpdateButton();
-                }
+                    //custom sandbox option not available in this version
+                    JOptionPane.showMessageDialog(getParentPane(), customSandboxNotAvailableMsg, "Option not available", 
+                                                    JOptionPane.INFORMATION_MESSAGE);
+                    if (mostRecentlySelectedType == SandboxType.NONE) {
+                        getUseNoSandboxRadioButton().setSelected(true);
+                    } else if (mostRecentlySelectedType == SandboxType.PC2_INTERNAL_SANDBOX) {
+                            getUsePC2SandboxRadioButton().setSelected(true);
+                        }
+                    }
             });
         }
         return useCustomSandboxRadioButton;
     }
+    
+    private String customSandboxNotAvailableMsg = "Sorry; this option is not available in the current version of PC^2" ;
     
     protected void enableEditProblemSandboxTabComponents() {
         if (getUseNoSandboxRadioButton().isSelected()) {
@@ -396,27 +472,50 @@ public class EditProblemSandboxPane extends JPanePlugin {
             pc2SandboxOptionsSubPanel
                     .setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "PC^2 Sandbox options", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 255)));
 
-            GridBagLayout gbl_pc2SandboxOptionsSubPanel = new GridBagLayout();
-            gbl_pc2SandboxOptionsSubPanel.columnWidths = new int[] { 100, 100 };
-            gbl_pc2SandboxOptionsSubPanel.rowHeights = new int[] { 30, 30 };
-            gbl_pc2SandboxOptionsSubPanel.columnWeights = new double[] { 0.0, 0.0 };
-            gbl_pc2SandboxOptionsSubPanel.rowWeights = new double[] { 0.0, 0.0 };
-            pc2SandboxOptionsSubPanel.setLayout(gbl_pc2SandboxOptionsSubPanel);
+            //the following commented-out section was the initial layout, which creates a grid (really, gridbag) layout for a tabular
+            // arrangement of components in the PC2 Sandbox Options subPanel.  Since there is currently only a single row in the subpanel
+            // (containing the memory limit elements), it was easier to replace this code with a simple FlowLayout (see below).
+            // This code block was left here to make it easier for someone later to see how to add additional rows using GridBagLayout.
+//            GridBagLayout gbl_pc2SandboxOptionsSubPanel = new GridBagLayout();
+//            gbl_pc2SandboxOptionsSubPanel.columnWidths = new int[] { 100, 50, 100 };
+//            gbl_pc2SandboxOptionsSubPanel.rowHeights = new int[] { 30 };
+//            gbl_pc2SandboxOptionsSubPanel.columnWeights = new double[] { 0.0, 0.0, 0 };
+//            gbl_pc2SandboxOptionsSubPanel.rowWeights = new double[] { 1.0 };
+//            pc2SandboxOptionsSubPanel.setLayout(gbl_pc2SandboxOptionsSubPanel);
+//
+//            GridBagConstraints gbc_pc2SandboxOptionMemLimitLabel = new GridBagConstraints();
+//            gbc_pc2SandboxOptionMemLimitLabel.insets = new Insets(15, 20, 5, 5);
+//            gbc_pc2SandboxOptionMemLimitLabel.gridx = 0;
+//            gbc_pc2SandboxOptionMemLimitLabel.gridy = 0;
+//            pc2SandboxOptionsSubPanel.add(getPC2SandboxOptionMemLimitLabel(), gbc_pc2SandboxOptionMemLimitLabel);
+//
+//            GridBagConstraints gbc_pc2SandboxOptionMemLimitTextField = new GridBagConstraints();
+//            gbc_pc2SandboxOptionMemLimitTextField.anchor = GridBagConstraints.WEST;
+//            gbc_pc2SandboxOptionMemLimitTextField.fill = GridBagConstraints.VERTICAL;
+//            gbc_pc2SandboxOptionMemLimitTextField.weightx = 1.0;
+//            gbc_pc2SandboxOptionMemLimitTextField.insets = new Insets(15, 5, 5, 0);
+//            gbc_pc2SandboxOptionMemLimitTextField.gridx = 1;
+//            gbc_pc2SandboxOptionMemLimitTextField.gridy = 0;
+//            pc2SandboxOptionsSubPanel.add(getPC2SandboxOptionMemLimitTextbox(), gbc_pc2SandboxOptionMemLimitTextField);
+//            
+//            GridBagConstraints gbc_pc2SandboxOptionMemLimitWhatsThisLabel = new GridBagConstraints();
+//            gbc_pc2SandboxOptionMemLimitWhatsThisLabel.anchor = GridBagConstraints.WEST;
+//            gbc_pc2SandboxOptionMemLimitWhatsThisLabel.fill = GridBagConstraints.VERTICAL;
+//            gbc_pc2SandboxOptionMemLimitWhatsThisLabel.weightx = 1.0;
+//            gbc_pc2SandboxOptionMemLimitWhatsThisLabel.insets = new Insets(15, 0, 5, 0);
+//            gbc_pc2SandboxOptionMemLimitWhatsThisLabel.gridx = 2;
+//            gbc_pc2SandboxOptionMemLimitWhatsThisLabel.gridy = 0;
+//            pc2SandboxOptionsSubPanel.add(getLblWhatsThisPC2SandboxMemLimit(), gbc_pc2SandboxOptionMemLimitWhatsThisLabel);
 
-            GridBagConstraints gbc_pc2SandboxOptionMemLimitLabel = new GridBagConstraints();
-            gbc_pc2SandboxOptionMemLimitLabel.insets = new Insets(15, 20, 5, 5);
-            gbc_pc2SandboxOptionMemLimitLabel.gridx = 0;
-            gbc_pc2SandboxOptionMemLimitLabel.gridy = 0;
-            pc2SandboxOptionsSubPanel.add(getPC2SandboxOptionMemLimitLabel(), gbc_pc2SandboxOptionMemLimitLabel);
+            //use a simple FlowLayout when there's just a single row
+            pc2SandboxOptionsSubPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            FlowLayout fl_pc2SandboxOptionsSubPanel = new FlowLayout(FlowLayout.LEFT);
+            fl_pc2SandboxOptionsSubPanel.setHgap(10);
+            pc2SandboxOptionsSubPanel.setLayout(fl_pc2SandboxOptionsSubPanel);
 
-            GridBagConstraints gbc_pc2SandboxOptionMemLimitTextField = new GridBagConstraints();
-            gbc_pc2SandboxOptionMemLimitTextField.anchor = GridBagConstraints.WEST;
-            gbc_pc2SandboxOptionMemLimitTextField.fill = GridBagConstraints.VERTICAL;
-            gbc_pc2SandboxOptionMemLimitTextField.weightx = 1.0;
-            gbc_pc2SandboxOptionMemLimitTextField.insets = new Insets(15, 5, 5, 5);
-            gbc_pc2SandboxOptionMemLimitTextField.gridx = 1;
-            gbc_pc2SandboxOptionMemLimitTextField.gridy = 0;
-            pc2SandboxOptionsSubPanel.add(getPC2SandboxOptionMemLimitTextbox(), gbc_pc2SandboxOptionMemLimitTextField);
+            pc2SandboxOptionsSubPanel.add(getPC2SandboxOptionMemLimitLabel());
+            pc2SandboxOptionsSubPanel.add(getPC2SandboxOptionMemLimitTextbox());
+            pc2SandboxOptionsSubPanel.add(getLblWhatsThisPC2SandboxMemLimit());
 
         }
         return pc2SandboxOptionsSubPanel;
@@ -424,13 +523,14 @@ public class EditProblemSandboxPane extends JPanePlugin {
 
     protected JTextField getPC2SandboxOptionMemLimitTextbox() {
         if (pc2SandboxOptionMemLimitTextField == null) {
-            pc2SandboxOptionMemLimitTextField = new JTextField();
-            if (problem!=null && problem.hasMemoryLimit()) {
-                int curLimit = problem.getMemoryLimitMB();
-                pc2SandboxOptionMemLimitTextField.setText(Integer.toString(curLimit));
-            } else {
-                pc2SandboxOptionMemLimitTextField.setText("<none>");
-            }
+            pc2SandboxOptionMemLimitTextField = new JTextField(6);
+            pc2SandboxOptionMemLimitTextField.setPreferredSize(new Dimension(100,25));
+            
+            pc2SandboxOptionMemLimitTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return pc2SandboxOptionMemLimitTextField;
     }
@@ -439,6 +539,7 @@ public class EditProblemSandboxPane extends JPanePlugin {
     private JLabel getPC2SandboxOptionMemLimitLabel() {
         if (pc2SandboxOptionMemLimitLabel == null) {
             pc2SandboxOptionMemLimitLabel = new JLabel("Memory limit (MB):");
+            pc2SandboxOptionMemLimitLabel.setBorder(new EmptyBorder(10,25,5,5));
         }
         return pc2SandboxOptionMemLimitLabel;
     }
@@ -456,9 +557,9 @@ public class EditProblemSandboxPane extends JPanePlugin {
             // define the (GridBag) layout for the Custom sandbox subpanel
             GridBagLayout gbl_customSandboxOptionsPanel = new GridBagLayout();
             gbl_customSandboxOptionsPanel.columnWidths = new int[] { 140, 150, 50 };
-            gbl_customSandboxOptionsPanel.rowHeights = new int[] { 40, 40, 0, 0 };
+            gbl_customSandboxOptionsPanel.rowHeights = new int[] { 40, 40 };
             gbl_customSandboxOptionsPanel.columnWeights = new double[] { 0.0, 0.0, 0.0 };
-            gbl_customSandboxOptionsPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0 };
+            gbl_customSandboxOptionsPanel.rowWeights = new double[] { 0.0, 0.0 };
             customSandboxOptionsSubPanel.setLayout(gbl_customSandboxOptionsPanel);
 
             // add the Custom Sandbox Executable Program Label to the subpanel
@@ -625,9 +726,48 @@ public class EditProblemSandboxPane extends JPanePlugin {
 
             ;
 
+    private JLabel lblWhatsThisPC2MemLimit;
+    /**
+     * Generates and returns a JLabel that displays a Question Mark icon and when clicked displays
+     * a "What's This" information panel about the PC2 Sandbox Memory Limit.
+     * 
+     * @return a clickable JLabel
+     */
+    private JLabel getLblWhatsThisPC2SandboxMemLimit() {
+        if (lblWhatsThisPC2MemLimit == null) {
+            Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+            if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                lblWhatsThisPC2MemLimit = new JLabel("<What's This?>");
+                lblWhatsThisPC2MemLimit.setForeground(Color.blue);
+            } else {
+                Image image = ((ImageIcon) questionIcon).getImage();
+                lblWhatsThisPC2MemLimit = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            }
+
+            lblWhatsThisPC2MemLimit.setToolTipText("What's This? (click for additional information)");
+            lblWhatsThisPC2MemLimit.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, whatsThisPC2MemLimitMessage, "PC2 Sandbox Memory Limit", JOptionPane.INFORMATION_MESSAGE, null);
+                }
+            });
+            lblWhatsThisPC2MemLimit.setBorder(new EmptyBorder(0, 15, 0, 0));
+        }
+        return lblWhatsThisPC2MemLimit;
+    }
+
+    /**
+     * The message displayed when the "What's This" icon on the PC2 Sandbox Memory Limit textbox is clicked.
+     */
+    private String whatsThisPC2MemLimitMessage = "The value in this textbox specifies the memory limit (in MB) to be enforced for this problem by the PC2 sandbox."
+
+            + "\n\nA value of zero indicates 'no limit' -- meaning the only limit is whatever is enforced by the"
+            + "\n   underlying hardware, the OS platform, and the language-specific runtime system."
+            ;
+    
+    
     private JLabel lblWhatsThisCustomSandbox;
-
-
     /**
      * Generates and returns a JLabel that displays a Question Mark icon and when clicked displays
      * a "What's This" information panel about the Custom Sandbox option.
@@ -725,7 +865,12 @@ public class EditProblemSandboxPane extends JPanePlugin {
         chooser = null;
         return result;
     }
-
+    
+    
+    private EditProblemPane getParentPane() {
+        return this.parentPane;
+    }
+    
     /**
      * Returns the name of the last directory from which a file was selected/loaded
      * by a component of this EditProblemSandboxPane.
@@ -758,14 +903,14 @@ public class EditProblemSandboxPane extends JPanePlugin {
 
      private Component getVerticalStrut_1() {
         if (verticalStrut_1 == null) {
-            verticalStrut_1 = Box.createVerticalStrut(20);
+            verticalStrut_1 = Box.createVerticalStrut(40);
         }
         return verticalStrut_1;
     }
 
     private Component getVerticalStrut_2() {
         if (verticalStrut_2 == null) {
-            verticalStrut_2 = Box.createVerticalStrut(20);
+            verticalStrut_2 = Box.createVerticalStrut(5);
         }
         return verticalStrut_2;
     }
@@ -804,7 +949,7 @@ public class EditProblemSandboxPane extends JPanePlugin {
         JFrame frame = new JFrame();
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.add("Sandbox", new EditProblemSandboxPane());
-        frame.add(tabbedPane);
+        frame.getContentPane().add(tabbedPane);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(900, 900);
         frame.pack();
