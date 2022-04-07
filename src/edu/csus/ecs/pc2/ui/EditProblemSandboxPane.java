@@ -100,7 +100,7 @@ public class EditProblemSandboxPane extends JPanePlugin {
     
     //setting this to True will override the prohibition on selecting a Sandbox when running on Windows.
     // Note that THIS IS FOR DEBUGGING PURPOSES; it does NOT imply any support for Windows sandboxing.
-    private boolean debugAllowSandoxSelectionOnWindows = true;
+    private boolean debugAllowSandboxSelectionOnWindows = true;
 
 
 
@@ -368,7 +368,7 @@ public class EditProblemSandboxPane extends JPanePlugin {
             usePC2SandboxRadioButton.setText("Use PC^2 Sandbox (not available on Windows)");
             usePC2SandboxRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    if (debugAllowSandoxSelectionOnWindows || ! (Utilities.getOSType().equals(OSType.WINDOWS) ) ) {
+                    if (debugAllowSandboxSelectionOnWindows || ! (Utilities.getOSType().equals(OSType.WINDOWS) ) ) {
                         enableEditProblemSandboxTabComponents();
                         enableUpdateButton();
                         mostRecentlySelectedType = SandboxType.PC2_INTERNAL_SANDBOX;
