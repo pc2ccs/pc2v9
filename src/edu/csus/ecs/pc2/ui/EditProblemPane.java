@@ -72,7 +72,6 @@ import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
 import edu.csus.ecs.pc2.core.model.Problem.SandboxType;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
-import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResultsTableModel;
@@ -5619,14 +5618,14 @@ public class EditProblemPane extends JPanePlugin {
         //build an EditProblemFrame containing an EditProblemPane containing an EditProblemSandboxPane
         EditProblemFrame frame = new EditProblemFrame();
         
-        //put a contest and controller in the frame (which also puts it in the panes)
-        IInternalContest contest;
-        IInternalController controller;
-
-        SampleContest sampleContest = new SampleContest();
-        contest = sampleContest.createContest(2, 4, 12, 6, true);
-        controller = sampleContest.createController(contest, true, false);
-        frame.setContestAndController(contest, controller);
+//        //put a contest and controller in the frame (which also puts it in the panes)
+//        IInternalContest contest;
+//        IInternalController controller;
+//
+//        SampleContest sampleContest = new SampleContest();
+//        contest = sampleContest.createContest(2, 4, 12, 6, true);
+//        controller = sampleContest.createController(contest, true, false);
+//        frame.setContestAndController(contest, controller);
 
         //set JFrame options
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
