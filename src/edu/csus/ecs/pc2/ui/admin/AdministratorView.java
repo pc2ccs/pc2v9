@@ -72,6 +72,7 @@ import edu.csus.ecs.pc2.ui.RunsTablePane;
 import edu.csus.ecs.pc2.ui.SitesPane;
 import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
 import edu.csus.ecs.pc2.ui.StandingsPane;
+import edu.csus.ecs.pc2.ui.StandingsTablePane;
 import edu.csus.ecs.pc2.ui.TeamStatusPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
@@ -233,10 +234,12 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 AccountsTablePane accountsTablePane = new AccountsTablePane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Accounts", accountsTablePane);
-                
+
+            // Remove below when we're satisified the above works VVVVVVVVVV
                 AccountsPane accountsPane = new AccountsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Old Accounts", accountsPane);
-               
+            // Remove above when we're satisified the above works ^^^^^^^
+              
                 if (Utilities.isDebugMode()) {
                     try {
                         CategoriesPane categoriesPane = new CategoriesPane();
@@ -311,8 +314,10 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsTablePane);
 
+            // Remove below when we're satisified the above works VVVVVVVVVV
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Old Clarifications", clarificationsPane);
+            // Remove above when we're satisified the above works ^^^^^^^
 
                 if (Utilities.isDebugMode()) {
                     try {
@@ -377,14 +382,21 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 RunsTablePane runsTablePane = new RunsTablePane();
                 addUIPlugin(getRunContestTabbedPane(), "Runs", runsTablePane);
 
+            // Remove below when we're satisified the above works VVVVVVVVVV
                 RunsPane runsPane = new RunsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Old Runs", runsPane);
+            // Remove above when we're satisified the above works ^^^^^^^
 
                 SitesPane sitesPanel = new SitesPane();
                 addUIPlugin(getRunContestTabbedPane(), "Sites", sitesPanel);
 
+                StandingsTablePane standingsTablePane = new StandingsTablePane();
+                addUIPlugin(getRunContestTabbedPane(), "Standings", standingsTablePane);
+
+            // Remove below when we're satisified the above works VVVVVVVVVV
                 StandingsPane standingsPane = new StandingsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Standings", standingsPane);
+                addUIPlugin(getRunContestTabbedPane(), "Old Standings", standingsPane);
+            // Remove above when we're satisified the above works ^^^^^^^
 
                 StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
                 addUIPlugin(getRunContestTabbedPane(), "Standings HTML", standingsHTMLPane);

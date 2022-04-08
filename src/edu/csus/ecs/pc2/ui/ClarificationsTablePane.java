@@ -30,9 +30,6 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import com.ibm.webrunner.j2mclb.util.HeapSorter;
-import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
-
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountNameCaseComparator;

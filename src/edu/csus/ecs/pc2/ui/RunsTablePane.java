@@ -93,7 +93,6 @@ public class RunsTablePane extends JPanePlugin {
     private static final int HORZ_PAD = 20;
 
 
-//    private MCLB runListBox = null;
     private JTable runTable = null;
     private DefaultTableModel runTableModel = null;
 

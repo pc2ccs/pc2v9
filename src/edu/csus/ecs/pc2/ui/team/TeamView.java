@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.AboutPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
+import edu.csus.ecs.pc2.ui.ClarificationsTablePane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -31,6 +32,7 @@ import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.RunsPane;
+import edu.csus.ecs.pc2.ui.RunsTablePane;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -253,16 +255,27 @@ public class TeamView extends JFrame implements UIPlugin {
                 SubmitRunPane submitRunPane = new SubmitRunPane();
                 addUIPlugin(getMainTabbedPane(), "Submit Run", submitRunPane);
         
+                RunsTablePane runsTablePanel = new RunsTablePane();
+                runsTablePanel.setShowJudgesInfo(false);
+                addUIPlugin(getMainTabbedPane(), "View Runs", runsTablePanel);
+                
+            // Remove below when we're satisfied the above works VVVVVVV
                 RunsPane runsPanel = new RunsPane();
                 runsPanel.setShowJudgesInfo(false);
-                addUIPlugin(getMainTabbedPane(), "View Runs", runsPanel);
-        
+                addUIPlugin(getMainTabbedPane(), "OldView Runs", runsPanel);
+            // Remove above when we're satisified the above works ^^^^^^^
+                
                 SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
                 addUIPlugin(getMainTabbedPane(), "Request Clarification", submitClarificationPane);
 
+                ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
+                addUIPlugin(getMainTabbedPane(), "View Clarifications", clarificationsTablePane);
+
+            // Remove below when we're satisfied the above works VVVVVVV
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
-                addUIPlugin(getMainTabbedPane(), "View Clarifications", clarificationsPane);
-        
+                addUIPlugin(getMainTabbedPane(), "Old View Clarifications", clarificationsPane);
+            // Remove above when we're satisified the above works ^^^^^^^
+       
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 

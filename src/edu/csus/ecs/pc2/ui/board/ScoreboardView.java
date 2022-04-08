@@ -38,6 +38,7 @@ import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.StandingsPane;
+import edu.csus.ecs.pc2.ui.StandingsTablePane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -188,9 +189,15 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
                 setFrameTitle(contest.getContestTime().isContestRunning());
 
+                StandingsTablePane standingsTablePane = new StandingsTablePane();
+                addUIPlugin(getMainTabbedPane(), "Standings", standingsTablePane);
+                standingsTablePane.addPropertyChangeListener("standings", new PropertyChangeListenerImplementation());
+                
+            // Remove the following when we are satisfied the above works
                 StandingsPane standingsPane = new StandingsPane();
-                addUIPlugin(getMainTabbedPane(), "Standings", standingsPane);
-                standingsPane.addPropertyChangeListener("standings", new PropertyChangeListenerImplementation());
+                addUIPlugin(getMainTabbedPane(), "Old Standings", standingsPane);
+            // Remove the previous ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                
                 BalloonColorListPane colorsPane = new BalloonColorListPane();
                 addUIPlugin(getMainTabbedPane(), "Colors", colorsPane);
                 BalloonPane balloonHandler = new BalloonPane();
