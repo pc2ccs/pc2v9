@@ -2105,6 +2105,9 @@ public class Problem implements IElementObject {
      * @return an element of {@link Problem.SandboxType}.
      */
     public SandboxType getSandboxType() {
+        if (sandboxType == null) {
+            sandboxType = SandboxType.NONE;
+        }
         return sandboxType;
     }
 
