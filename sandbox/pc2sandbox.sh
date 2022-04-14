@@ -48,7 +48,7 @@ shift
 # ulimit memory limit in K
 # set limit in Meg (add 000)
 if [ "$MEMLIMIT" -gt "0" ] ; then
-  ulimit -m ${MEMLIMIT}000
+  ulimit -v ${MEMLIMIT}000
 fi 
 
 # time limit in seconds
