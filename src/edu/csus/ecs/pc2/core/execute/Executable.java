@@ -1832,7 +1832,7 @@ public class Executable extends Plugin implements IExecutable {
             
             if (usingSandbox) {
                 //insert the command for invoking the sandbox at the front of the command line
-                cmdline += problem.getSandboxCmdLine() + " " + cmdline ;
+                cmdline = problem.getSandboxCmdLine() + " " + cmdline ;
             }
             
             log.log(Log.DEBUG, "cmdline before substitution: " + cmdline);
@@ -1840,25 +1840,29 @@ public class Executable extends Plugin implements IExecutable {
             log.log(Log.DEBUG, "cmdline after substitution: " + cmdline);
 
             /**
-             * Insure that the first command in the command line can be executed by prepending the execute directory name.
+             * Insure that the first command in the command line can be executed by prepending the execute directory name
+             *   (but be sure to retain any command line arguments).
              */
 
-            int i; // location of first space in command line.
-            String actFilename = new String(cmdline);
-
-            i = actFilename.trim().indexOf(" ");
+            String trimmedCmd = cmdline.trim();
+            String cmdWord; //the first "word" in the command line
+            
+            //find the location of the first space in the trimmed command line (if any)
+            int i = trimmedCmd.indexOf(" ");
             if (i > -1) {
-                actFilename = prefixExecuteDirname(actFilename.trim().substring(0, i));
+                //there was a space; build the command word with the full path to the execute directory prefixed
+                cmdWord = prefixExecuteDirname(trimmedCmd.substring(0, i));
             } else {
-                actFilename = prefixExecuteDirname(actFilename.trim());
+                //there was no space; take the whole command line as the command word
+                cmdWord = prefixExecuteDirname(trimmedCmd);
             }
 
-            File f = new File(actFilename);
+            File f = new File(cmdWord);
             if (f.exists()) {
                 /**
-                 * If the first word is a existing file, use the full path
+                 * If the first word is an existing file, use the full path to the file (adding any following arguments)
                  */
-                cmdline = f.getCanonicalPath();
+                cmdline = f.getCanonicalPath() + trimmedCmd.substring(i);
             }
 
             boolean autoStop = false;
