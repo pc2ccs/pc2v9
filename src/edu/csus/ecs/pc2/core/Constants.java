@@ -1,8 +1,6 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
-import java.io.File;
-
 /**
  * Constants for pc2.
  * 
@@ -172,7 +170,7 @@ public final class Constants {
     /**
      * Sandbox constants
      */
-    public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "." + File.separator + "{:sandboxprogramname} {:memlimit} {:timelimit}";
+    public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit}";
 
     public static final String PC2_INTERNAL_SANDBOX_PROGRAM_NAME = "pc2sandbox.sh";
 }
