@@ -27,8 +27,8 @@ if [ -z "$1" ] ; then
    exit $FAIL_EXIT_CODE
 fi 
 
-if [ -z "$4" ] ; then
-   echo $0: expected 4 or more arguments, specified: $*
+if [ -z "$3" ] ; then
+   echo $0: expected 3 or more arguments, found: $*
    exit $FAIL_EXIT_CODE
 fi 
 
