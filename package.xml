@@ -88,6 +88,9 @@
                 <include name="**/rotate*"/>
                 <include name="**/distribute_score"/>
             </zipfileset>
+            <zipfileset dir="${sandbox.dir}" filemode="755" prefix="${release}/sandbox">
+                <include name="**/pc2sandbox.sh"/>
+            </zipfileset>
             <zipfileset dir="${projects.dir}" filemode="755" prefix="${release}/projects">
                 <include name="*.zip"/>
                 <exclude name="EWTeam/*"/>
