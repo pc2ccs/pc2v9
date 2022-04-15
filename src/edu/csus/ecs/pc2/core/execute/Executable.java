@@ -215,6 +215,7 @@ public class Executable extends Plugin implements IExecutable {
     
     //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
     // Note that THIS IS FOR DEBUGGING PURPOSES; it does NOT imply any support for Windows sandboxing.
+    //TODO: change this variable to FALSE before generating a production distribution.
     private boolean debugAllowSandboxInvocationOnWindows = true;
 
 
