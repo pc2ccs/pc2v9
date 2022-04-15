@@ -2257,6 +2257,7 @@ public class Executable extends Plugin implements IExecutable {
             
         } catch (Exception e){
             log.severe("Exception copying PC2 Internal Sandbox to execute directory: " + e.getMessage());
+            executionData.setExecutionException(e);
             throw e;  
         }  
     }
