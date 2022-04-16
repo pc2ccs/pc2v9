@@ -3679,7 +3679,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         /**
          * Contest to use as input
          */
-        String sampleContestDirName = "SumitMTC";
+        String sampleContestDirName = "sumitMTC";
         
         IInternalContest contest = new InternalContest();
         
