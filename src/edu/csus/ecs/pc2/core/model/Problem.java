@@ -2051,6 +2051,9 @@ public class Problem implements IElementObject {
      * @return the currently-defined sandbox program name.
      */
     public String getSandboxProgramName() {
+        if (sandboxProgramName == null) {
+            sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME;
+        }
         return sandboxProgramName;
     }
 
@@ -2072,6 +2075,9 @@ public class Problem implements IElementObject {
      * @return the command line used to invoke the sandbox for this problem, when sandbox usage is enabled.
      */
     public String getSandboxCmdLine() {
+        if (sandboxCmdLine == null) {
+            sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_COMMAND_LINE;
+        }
         return sandboxCmdLine;
     }
 
