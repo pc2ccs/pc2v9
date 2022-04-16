@@ -170,7 +170,7 @@ public final class Constants {
     /**
      * Sandbox constants
      */
-    public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "{:sandbox} {:memlimit} {:timelimit}";
+    public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit}";
 
     public static final String PC2_INTERNAL_SANDBOX_PROGRAM_NAME = "pc2sandbox.sh";
 }

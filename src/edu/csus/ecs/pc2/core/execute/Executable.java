@@ -212,6 +212,12 @@ public class Executable extends Plugin implements IExecutable {
     private String packageName = "";
 
     private String packagePath = "";
+    
+    //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
+    // Note that THIS IS FOR DEBUGGING PURPOSES; it does NOT imply any support for Windows sandboxing.
+    //TODO: change this variable to FALSE before generating a production distribution.
+    private boolean debugAllowSandboxInvocationOnWindows = true;
+
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
@@ -1827,7 +1833,7 @@ public class Executable extends Plugin implements IExecutable {
             
             if (usingSandbox) {
                 //insert the command for invoking the sandbox at the front of the command line
-                cmdline += problem.getSandboxCmdLine() + " " + cmdline ;
+                cmdline = problem.getSandboxCmdLine() + " " + cmdline ;
             }
             
             log.log(Log.DEBUG, "cmdline before substitution: " + cmdline);
@@ -1835,25 +1841,29 @@ public class Executable extends Plugin implements IExecutable {
             log.log(Log.DEBUG, "cmdline after substitution: " + cmdline);
 
             /**
-             * Insure that the first command in the command line can be executed by prepending the execute directory name.
+             * Insure that the first command in the command line can be executed by prepending the execute directory name
+             *   (but be sure to retain any command line arguments).
              */
 
-            int i; // location of first space in command line.
-            String actFilename = new String(cmdline);
-
-            i = actFilename.trim().indexOf(" ");
+            String trimmedCmd = cmdline.trim();
+            String cmdWord; //the first "word" in the command line
+            
+            //find the location of the first space in the trimmed command line (if any)
+            int i = trimmedCmd.indexOf(" ");
             if (i > -1) {
-                actFilename = prefixExecuteDirname(actFilename.trim().substring(0, i));
+                //there was a space; build the command word with the full path to the execute directory prefixed
+                cmdWord = prefixExecuteDirname(trimmedCmd.substring(0, i));
             } else {
-                actFilename = prefixExecuteDirname(actFilename.trim());
+                //there was no space; take the whole command line as the command word
+                cmdWord = prefixExecuteDirname(trimmedCmd);
             }
 
-            File f = new File(actFilename);
+            File f = new File(cmdWord);
             if (f.exists()) {
                 /**
-                 * If the first word is a existing file, use the full path
+                 * If the first word is an existing file, use the full path to the file (adding any following arguments)
                  */
-                cmdline = f.getCanonicalPath();
+                cmdline = f.getCanonicalPath() + trimmedCmd.substring(i);
             }
 
             boolean autoStop = false;
@@ -2020,6 +2030,9 @@ public class Executable extends Plugin implements IExecutable {
             
             log.info("team process returned exit code " + exitCode);
             
+            //TODO: comment-out this debug statement
+            System.out.println ("team process returned exit code " + exitCode);
+            
             //get rid of the TLE timer (whether the TLE-kill task has been fired or not)
             log.info("cancelling TLE-Timer (note: this does not stop any already-running TLE-Timer tasks...)");
             timeLimitKillTimer.cancel();
@@ -2152,11 +2165,18 @@ public class Executable extends Plugin implements IExecutable {
     /**
      * Returns true if the current Problem is configured to use a sandbox, sandbox usage is supported on the current platform, 
      * and the current client is not a Team; false otherwise.
+     * If the returned value is True, the sandbox for the problem will have been copied into the Execute directory.
      * 
-     * @return true if the Problem is to use a sandbox; false if not.
+     *TODO: this is a query method with a side-effect (copying the sandbox into the execute directory); that's not good style...
+     *TODO:  Need to refactor this into two steps:  a query (without side effects) asking whether the problem is supposed to use
+     *TODO:    a sandbox, and then if that returns True, a call to a separate method which installs the sandbox.  This is tricky
+     *TODO:    because we want to get the proper exception back to the caller...
+     * 
+     * @return true if the Problem is to use a sandbox; false if not.  If True is returned, the sandbox will have been copied into 
+     *              the Execute directory.
      * 
      * @throws Exception if there is a sandbox configuration issue, such as 
-     *          we're running on an OS platform where sandbox isn't supported or
+     *          we're running on an OS platform where sandbox isn't supported, or
      *          the specified sandbox can't be loaded into the execute directory.
      */
     private boolean isUsingSandbox() throws Exception {
@@ -2167,29 +2187,28 @@ public class Executable extends Plugin implements IExecutable {
             
             //check the OS to be sure we have a sandbox supported
             String osName = System.getProperty("os.name").toLowerCase();
-            if ( osName.contains("windows") ) {
+            if ( osName.contains("windows") && !debugAllowSandboxInvocationOnWindows) {
                 
                 log.severe("Attempt to execute a problem configured with a sandbox on a Windows system: not supported");
                 throw new Exception ("Sandbox not supported on Windows OS");
                 
             } else {
                 
-                //OS supported (other values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
+                //OS supported (non-Windows values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
                 //check if we're supposed to use the PC2 internal sandbox
                 SandboxType sbType = problem.getSandboxType();
                 if (sbType == SandboxType.PC2_INTERNAL_SANDBOX) {
                     
-                    //copy the PC2 internal sandbox into the execution directory
-                    boolean success = copyPC2Sandbox();
-                    
-                    if (!success) {
-                        
+                    log.info("Copying PC2 sandbox into Execute directory");
+                    try {
+                        //copy the PC2 internal sandbox into the execution directory
+                        copyPC2Sandbox();
+                    } catch (Exception e) {
                         log.severe("Unable to copy PC2 Internal Sandbox to execute directory; cannot execute submission");
-                        throw new Exception("Unable to copy PC2 Internal Sandbox");
-                        
+                        throw e;
                     }
-                    
-                } else if (sbType == SandboxType.EXTERNAL_SANDBOX){
+
+                } else if (sbType == SandboxType.EXTERNAL_SANDBOX) {
 
                     //TODO: replace this block with whatever code is necessary to properly set up the specified external sandbox
                     log.severe("Unsupported sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
@@ -2217,10 +2236,13 @@ public class Executable extends Plugin implements IExecutable {
     /**
      * Copies the PC2 internal sandbox implementation file into the execution directory.
      * 
-     * @return true if creation of the sandbox file in the execution directory was successful; false if not.
+     * @throws Exception if creation of the sandbox file in the execution directory failed.  
+     *          The Exception which is thrown is whatever Exception occurred during execution
+     *          of the file copy operation.
      */
-    private boolean copyPC2Sandbox() {
+    private void copyPC2Sandbox() throws Exception {
         
+        //point to the file that we want to create
         String targetFileName = prefixExecuteDirname(Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME);
 
         //use the VersionInfo class to get the PC2 installation directory
@@ -2230,18 +2252,15 @@ public class Executable extends Plugin implements IExecutable {
         //point to the PC2 Internal Sandbox file (under "/sandbox" in the home, i.e. installation, directory)
         String srcFileName = home + File.separator + "sandbox" + File.separator + Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME ;
         
-        boolean success;
         try {
             //copy the PC2 internal sandbox program into the execute directory
-            success = ExecuteUtilities.copyFile(srcFileName, targetFileName, getLog());
+            ExecuteUtilities.copyFile(srcFileName, targetFileName, getLog());
             
         } catch (Exception e){
             log.severe("Exception copying PC2 Internal Sandbox to execute directory: " + e.getMessage());
-            success = false ;
-        }
-        
-        return success;
-            
+            executionData.setExecutionException(e);
+            throw e;  
+        }  
     }
 
     /**
