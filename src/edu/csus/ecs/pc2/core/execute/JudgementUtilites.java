@@ -196,7 +196,9 @@ public final class JudgementUtilites {
 
             int numberOfTestCases = problem.getNumberTestCases();
             log.info(prefixString + " Dumping for " + run + " judge id=" + judgeId);
-            log.info(prefixString + " There are " + numberOfTestCases + " for problem " + problem.getDisplayName() + " '" + problem.getShortName() + "'");
+            String verb = numberOfTestCases > 1 ? " are " : " is " ;
+            String pluralform = numberOfTestCases > 1 ? " testcases " : " testcase ";
+            log.info(prefixString + " There" + verb + numberOfTestCases + pluralform +  "for problem " + problem.getDisplayName() + " '" + problem.getShortName() + "'");
 
             String[] otherFiles = { "cstderr.pc2", "cstdout.pc2", "estderr.pc2", "estdout.pc2" };
 
