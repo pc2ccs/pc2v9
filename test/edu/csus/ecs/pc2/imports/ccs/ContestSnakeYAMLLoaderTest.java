@@ -3673,5 +3673,34 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         return contest;
     }
     
+    
+    /**
+     * Test halt-contest-clock-at-set to true.
+     * 
+     * @throws Exception
+     */
+    public void testisHaltContestAtTimeZero() throws Exception {
+        String sampleContestDirName = "ccs1";
+        String dirname = getContestSampleCDPConfigDirname(sampleContestDirName);
+        
+        IInternalContest contest = snake.fromYaml(null, dirname, false);
+        assertNotNull("Expecting to load ccs1 contest",contest);
+        assertTrue("Expected halt at end of contest ", contest.getContestInformation().isAutoStopContest());
+    }
+    
+    /** 
+     * Test halt-contest-clock-at-end value, for when missing key/value
+     * @throws Exception
+     */
+    public void testisHaltContestAtTimeZeroNegative() throws Exception {
+        String sampleContestDirName = "ccs2";
+        String dirname = getContestSampleCDPConfigDirname(sampleContestDirName);
+        
+        IInternalContest contest = snake.fromYaml(null, dirname, false);
+        assertNotNull("Expecting to load ccs2 contest",contest);
+        assertFalse("Expected NO halt at end of contest ", contest.getContestInformation().isAutoStopContest());
+    }
+   
+    
 }
 
