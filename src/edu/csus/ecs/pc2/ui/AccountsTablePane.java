@@ -6,6 +6,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -27,12 +29,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.imports.ExportAccounts;
 import edu.csus.ecs.pc2.core.list.AccountNameCaseComparator;
-import edu.csus.ecs.pc2.core.list.AccountNameComparator;
 import edu.csus.ecs.pc2.core.list.StringToNumberComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -141,15 +144,15 @@ public class AccountsTablePane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "Accounts Pane";
+        return "Accounts Table Pane";
     }
 
     protected Object[] buildAccountRow(Account account) {
-//        Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "External ID"};
+//        Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "External ID", "ClientId" };
 
         try {
-            int cols = accountTable.getColumnCount();
-            Object[] s = new String[cols];
+            int cols = accountTableModel.getColumnCount();
+            Object[] s = new Object[cols];
 
             ClientId clientId = account.getClientId();
             s[0] = getSiteTitle("" + account.getSiteNumber());
@@ -160,6 +163,7 @@ public class AccountsTablePane extends JPanePlugin {
             s[4] = getGroupName(account);
             s[5] = getTeamAlias(account);
             s[6] = getExternalId(account);
+            s[7] = clientId;
             return s;
         } catch (Exception exception) {
             StaticLog.getLog().log(Log.INFO, "Exception in buildAccountRow()", exception);
@@ -221,7 +225,7 @@ public class AccountsTablePane extends JPanePlugin {
     private JTable getAccountsTable() {
         if (accountTable == null) {
             int i;
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "External Id"};
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "External Id", "ClientId"};
             accountTableModel = new DefaultTableModel(cols, 0) {
                 @Override
                 public boolean isCellEditable(int row, int col) {
@@ -231,6 +235,23 @@ public class AccountsTablePane extends JPanePlugin {
             TableRowSorter<DefaultTableModel> trs = new TableRowSorter<DefaultTableModel>(accountTableModel);
             
             accountTable = new JTable(accountTableModel);
+            accountTable.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent me) {
+                    if (me.getClickCount() == 2) {     // to detect double click events
+                       JTable target = (JTable)me.getSource();
+                       if(target.getSelectedRow() != -1) {
+                           editSelectedAccount();
+                       }
+                    }
+                 }
+            });
+            /*
+             * Remove ClientId from display - this does not remove the column, it merely makes it invisible
+             * This is the "key" column
+             */
+            TableColumnModel tcm = accountTable.getColumnModel();
+            tcm.removeColumn(tcm.getColumn(cols.length - 1));
+            
             accountTable.setRowSorter(trs);
             accountTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             
@@ -255,36 +276,41 @@ public class AccountsTablePane extends JPanePlugin {
         }
         return accountTable;
     }
-
     
     /**
-     * This method looks up a row in the account table based on
-     * the account type and number.
-     * 
-     * @return JTable
+     * Find row that contains the supplied key (in last column)
+     * @param value - unique key - really, the ClientId of run
+     * @return index of row, or -1 if not found
      */
-    private int returnTableRowIndexForValue(final String value) {
-        int nRow = -1;
-        if(accountTable != null) {
-            String id;
-  
-            for (int i = 0; i < accountTable.getRowCount(); i++) {
-                id = accountTable.getValueAt(i, 1).toString().toLowerCase();
-                id += accountTable.getValueAt(i, 2).toString();
-
-                if (id.equals(value)) {
-                    try {
-                        nRow = accountTable.convertRowIndexToModel(i);
-                    } catch(Exception exception) {
-                        StaticLog.getLog().log(Log.INFO, "Exception in returnTableRowIndexForValue" + i, exception);                        
-                    }
-                    break;
+    private int getRowByKey(Object value) {
+        Object o;
+        
+        if(accountTableModel != null) {
+            int col = accountTableModel.getColumnCount() - 1;
+            for (int i = accountTableModel.getRowCount() - 1; i >= 0; --i) {
+                o = accountTableModel.getValueAt(i, col);
+                if (o != null && o.equals(value)) {
+                    return i;
                 }
             }
         }
-        return(nRow);
+        return(-1);
     }
-    
+
+    /**
+     * Looks up the unique ID for the account at the supplied table row.
+     * Have to map the row to the underlying tablemodel data first.
+     * The ClientId is stored in the last (invisible) column
+     * 
+     * @param nRow - selected row
+     */
+    private ClientId getClientIdFromTableRow(JTable table, int nRow) {
+        int modelIndex = table.convertRowIndexToModel(nRow);
+        TableModel tm = table.getModel();
+        ClientId clientId = (ClientId) tm.getValueAt(modelIndex,  tm.getColumnCount()-1);
+        return(clientId);
+    }
+   
     public void updateAccountRow(final Account account) {
         // default to autosizing and sorting
         updateAccountRow(account, true);
@@ -294,14 +320,8 @@ public class AccountsTablePane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                String acctname;
-                
                 Object[] objects = buildAccountRow(account);
-                int rowNumber;
-                acctname = account.getClientId().getClientType().toString().toLowerCase();
-                acctname += account.getClientId().getClientNumber();
-               
-                rowNumber = returnTableRowIndexForValue(acctname);
+                int rowNumber = getRowByKey(account.getClientId());
                 if(rowNumber == -1) {
                     accountTableModel.addRow(objects);;
                 } else {
@@ -581,23 +601,8 @@ public class AccountsTablePane extends JPanePlugin {
         }
 
         try {
-            Account[] accounts = getAllAccounts();
-            Account accountToEdit = null;
-            String acctname, acctsearch;
-            ClientId clientId = null;
-            // TODO bulk load these record
+            Account accountToEdit = getContest().getAccount(getClientIdFromTableRow(accountTable, selectedIndex));
             
-            acctsearch = accountTable.getValueAt(selectedIndex, 1).toString();
-            acctsearch += accountTable.getValueAt(selectedIndex, 2).toString();
-            for (Account account : accounts) {
-                clientId = account.getClientId();
-                acctname = clientId.getClientType().toString();
-                acctname += clientId.getClientNumber();
-                if(acctsearch.equalsIgnoreCase(acctname)) {
-                    accountToEdit = account;
-                    break;
-                }
-            }
             if(accountToEdit != null) {
                 editAccountFrame.setAccount(accountToEdit);
                 editAccountFrame.setVisible(true);
