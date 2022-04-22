@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.api.implementation.Contest;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -565,7 +566,8 @@ public class ContestController extends MainController {
 
 					// we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
 					try {
-						String xmlStandings = dsa.getStandings(internalContest, null, logger);
+						Properties props = ScoreboardUtilities.getScoringProperties(internalContest);
+						String xmlStandings = dsa.getStandings(internalContest, props, logger);
 						//					logger.fine("Got the following XML from DSA:");
 						//					logger.fine(xmlStandings);
 						logger.info("Converting DSA XML to JSON");
