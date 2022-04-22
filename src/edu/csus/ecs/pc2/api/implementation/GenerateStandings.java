@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
 
 import java.io.IOException;
@@ -28,15 +28,14 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
 
 /**
  * API generate IStandings array using DefaultScoringAlgorithm. 
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class GenerateStandings {
 
     private ProblemDetailsComparator detailsComparator = new ProblemDetailsComparator();
@@ -184,7 +183,8 @@ public class GenerateStandings {
 
         try {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-            xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
+            Properties scoreProperties = ScoreboardUtilites.getScoringProperties(contest);
+            xmlString = defaultScoringAlgorithm.getStandings(contest, scoreProperties, log);
             return getProblemDetails(contest, xmlString, log);
 
         } catch (Exception e) {
@@ -297,7 +297,8 @@ public class GenerateStandings {
         try {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
 
-            xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
+            Properties scoreProperties = ScoreboardUtilites.getScoringProperties(contest);
+            xmlString = defaultScoringAlgorithm.getStandings(contest, scoreProperties, log);
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
