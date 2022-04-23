@@ -565,7 +565,7 @@ public class ContestController extends MainController {
 
 					// we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
 					try {
-						Properties props = ScoreboardUtilities.getScoringProperties(internalContest);
+						Properties props = internalContest.getContestInformation().getScoringProperties();
 						String xmlStandings = dsa.getStandings(internalContest, props, logger);
 						//					logger.fine("Got the following XML from DSA:");
 						//					logger.fine(xmlStandings);
