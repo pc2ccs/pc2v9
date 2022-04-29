@@ -23,6 +23,12 @@ CGROUP_PATH=/sys/fs/cgroup
 PC2_CGROUP_PATH=$CGROUP_PATH/pc2
 PC2_SANDBOX_CGROUP_PATH=$PC2_CGROUP_PATH/pc2sandbox
 
+# control whether the script outputs debug/tracing info
+_DEBUG="off"   # change this to anything other than "on" to disable debug/trace output
+function DEBUG()
+{
+  [ "$_DEBUG" == "on" ] && $@
+}
 
 # ------------------------------------------------------------
 
@@ -63,7 +69,7 @@ shift
 
 # make sure we have CGroups V2 properly installed on this system, including a PC2 structure
 
-echo checking PC2 CGroup V2 installation...
+DEBUG echo checking PC2 CGroup V2 installation...
 if [ ! -d "$PC2_SANDBOX_CGROUP_PATH" ]; then
    echo $0: expected pc2sandbox CGroups v2 installation in $PC2_SANDBOX_CGROUP_PATH 
    exit $FAIL_INVALID_CGROUP_INSTALLATION
@@ -92,28 +98,28 @@ fi
 
 
 # we seem to have a valid CGroup installation
-echo ...done.
+DEBUG echo ...done.
 
 # set the specified memory limit - input is in MB, cgroup v2 requires bytes, so multiply by 1M
 # but only if > 0.
 # "max" means unlimited, which is the cgroup v2 default
-echo checking memory limit
+DEBUG echo checking memory limit
 if [ "$MEMLIMIT" -gt "0" ] ; then
-  echo setting memory limit to $MEMLIMIT MB
+  DEBUG echo setting memory limit to $MEMLIMIT MB
   echo $(( $MEMLIMIT * 1000000 ))  > $PC2_SANDBOX_CGROUP_PATH/memory.max
 else
-  echo setting memory limit to max, meaning no limit
+  DEBUG echo setting memory limit to max, meaning no limit
   echo "max" > $PC_SANDBOX_CGROUP_PATH/memory.max  
 fi
 
 # set the specified CPU time limit - input is in secs, cgroup v2 requires usec, so multiply by 1M.
 # cgroup v2 expects two parameters:  absolute time and "period", but if only one is provided it is "absolute time"
-echo setting cpu limit to $TIMELIMIT seconds
+DEBUG echo setting cpu limit to $TIMELIMIT seconds
 echo $(( $TIMELIMIT * 1000000 ))  > $PC2_SANDBOX_CGROUP_PATH/cpu.max
 
 #put the current process (and implicitly its children) into the pc2sandbox cgroup.
 #  Note that CGroups V2 defines that writing "0" to the cgroups.proc file means "current process".
-echo putting $$ into $PC2_SANDBOX_CGROUP_PATH cgroup
+DEBUG echo putting $$ into $PC2_SANDBOX_CGROUP_PATH cgroup
 # TODO: need to remove the requirement for sudo in the following command, which is needed here because
 # this shell is in the root cgroup by default and does not have write access to the root cgroup.procs file --
 # which it never should.
@@ -129,14 +135,18 @@ sudo echo 0 > $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
 
 # since we don't know how to use cgroup-tools to execute, just execute it directly (it's a child so it
 #  should still fall under the cgroup limits).
-echo Executing $COMMAND $* 
+DEBUG echo Executing $COMMAND $* 
 $COMMAND $*
 
-echo Finished executing $COMMAND $*
-echo
-echo TODO: determine how to pass pc2sandbox.sh results back to PC2...
-echo
+COMMAND_EXIT_CODE=$?
 
-exit 0
+DEBUG echo Finished executing $COMMAND $*
+DEBUG echo $COMMAND exited with exit code $COMMAND_EXIT_CODE
+DEBUG echo
+
+# TODO: determine how to pass pc2sandbox.sh results back to PC2...
+
+# return the exit code of the command as our exit code
+exit $COMMAND_EXIT_CODE
 
 # eof pc2sandbox.sh 
