@@ -165,10 +165,6 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
 
         loader.checkFiles(groupsFilename);
 
-        /**
-         * Second load of groups from groups.tsv
-         */
-        Group[] loadedGroups = ICPCTSVLoader.loadGroups(loader.getGroupsFilename());
         Account[] accounts = ICPCTSVLoader.loadAccounts(loader.getTeamsFilename());
 
         /**
@@ -179,9 +175,6 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
         assertEquals("Number of groups", 12, modelGroups.length);
         assertEquals("Number of accounts", 151, accounts.length);
 
-        /**
-         * Second load of groups from groups.tsv
-         */
         // Load groups from file, merge with modelGroups list.
         Group[] mergedGroups = ICPCTSVLoader.loadGroups(loader.getGroupsFilename(), modelGroups);
 
