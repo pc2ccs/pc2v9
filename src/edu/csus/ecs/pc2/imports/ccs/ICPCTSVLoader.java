@@ -364,7 +364,7 @@ public final class ICPCTSVLoader {
      * Search and return group if found.
      * 
      * @param authoritativeGroups list of groups
-     * @param groupCMSId group (CMS
+     * @param groupCMSId CMS group id
      * @return null if not found, else the group
      */
     private static Group findGroupById(Group[] authoritativeGroups, int groupCMSId) {
