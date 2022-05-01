@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.File;
@@ -146,10 +146,11 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
      */
     public void testReLoadTSV() throws Exception {
 
-        String groupsFilename = getTestSampleContestConfigFile("mini", LoadICPCTSVData.GROUPS_FILENAME);
+        String contestName = "mini";
+        String groupsFilename = getTestSampleContestConfigFile(contestName, LoadICPCTSVData.GROUPS_FILENAME);
         assertFileExists(groupsFilename);
 
-        IInternalContest contest = loadSampleContest(null, "mini");
+        IInternalContest contest = loadSampleContest(null, contestName);
         assertNotNull(contest);
         IInternalController controller = new SampleContest().createController(contest, true, false);
         
@@ -157,7 +158,7 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
         loader.setContestAndController(contest, controller);
         
         boolean loaded = loader.loadFiles(groupsFilename, false, false);
-        assertTrue("Expecting min contest loaded", loaded);
+        assertTrue("Expecting "+contestName+" contest loaded", loaded);
 
         assertEquals("Number of groups", 12, contest.getGroups().length);
         assertEquals("Number of accounts", 167, contest.getAccounts().length);
