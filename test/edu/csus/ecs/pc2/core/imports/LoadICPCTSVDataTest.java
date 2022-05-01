@@ -140,7 +140,7 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
      * Test loading a teams.tsv twice.
      * 
      * The 2nd load of teams and groups, in particular groups, caused all accounts' groups to be "empty"
-     * on the Accounts tab.  See 
+     * on the Accounts tab.  See https://github.com/pc2ccs/pc2v9/issues/318 for details.
      * 
      * @throws Exception
      */

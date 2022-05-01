@@ -259,7 +259,7 @@ public final class ICPCTSVLoader {
     }
     
     /**
-     * Load groups into this class.
+     * Merge/Add group data from filename and authoritativeGroups.
      * 
      * @param filename name of groups.tsv file.
      * @return list of groups 
@@ -270,10 +270,11 @@ public final class ICPCTSVLoader {
     }
     
     /**
-     * Merge/Load groups into this class
+     * Merge/Add group data from filename and authoritativeGroups.
+     * 
      * @param filename name of groups.tsv file.
      * @param authoritativeGroups an array of groups (from contest/model)
-     * @return list of groups
+     * @return unique groups from authoritativeGroups and filename's group list.
      * @throws Exception
      */
     public static Group[] loadGroups(String filename, Group[] authoritativeGroups) throws Exception {
@@ -295,11 +296,6 @@ public final class ICPCTSVLoader {
 
         // 1 Label groups fixed string (always same value)
         // 2 Version number 1 integer
-
-        // TODO CCS do check for 'groups' when tsv file contains that field.
-//        if (!fields[0].trim().equals("groups")) {
-//            throw new InvalidValueException("Expecting 'groups' got '" + fields[0] + "' in " + filename);
-//        }
 
         i++;
 
