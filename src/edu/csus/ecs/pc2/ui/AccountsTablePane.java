@@ -62,6 +62,11 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 public class AccountsTablePane extends JPanePlugin {
 
     /**
+     * 
+     */
+    private static final long serialVersionUID = -1932790185807184681L;
+
+    /**
      * These descriptions are used by the export accounts
      */
     private static final String XML_DESCRIPTION = "XML document (*.xml)";
@@ -73,12 +78,7 @@ public class AccountsTablePane extends JPanePlugin {
     private static final int VERT_PAD = 2;
     private static final int HORZ_PAD = 20;
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 2297963114219167947L;
-
-    private JTable accountTable = null;
+    private JTableCustomized accountTable = null;
     private DefaultTableModel accountTableModel = null;
 
     private JPanel buttonPane = null;
@@ -148,7 +148,7 @@ public class AccountsTablePane extends JPanePlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-//        Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "External ID", "ClientId" };
+//      Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "External ID", "ClientId" };
 
         try {
             int cols = accountTableModel.getColumnCount();
@@ -163,6 +163,7 @@ public class AccountsTablePane extends JPanePlugin {
             s[4] = getGroupName(account);
             s[5] = getTeamAlias(account);
             s[6] = getExternalId(account);
+            // This column is invisible for the "unique" ID
             s[7] = clientId;
             return s;
         } catch (Exception exception) {
@@ -220,9 +221,9 @@ public class AccountsTablePane extends JPanePlugin {
     /**
      * This method initializes accountTable and accountTableModel
      * 
-     * @return JTable
+     * @return JTableCustomized
      */
-    private JTable getAccountsTable() {
+    private JTableCustomized getAccountsTable() {
         if (accountTable == null) {
             int i;
             Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "External Id", "ClientId"};
@@ -234,7 +235,7 @@ public class AccountsTablePane extends JPanePlugin {
             };
             TableRowSorter<DefaultTableModel> trs = new TableRowSorter<DefaultTableModel>(accountTableModel);
             
-            accountTable = new JTable(accountTableModel);
+            accountTable = new JTableCustomized(accountTableModel);
             accountTable.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent me) {
                     if (me.getClickCount() == 2) {     // to detect double click events
@@ -247,7 +248,7 @@ public class AccountsTablePane extends JPanePlugin {
             });
             /*
              * Remove ClientId from display - this does not remove the column, it merely makes it invisible
-             * This is the "key" column
+             * This is the "key" / unique ID column
              */
             TableColumnModel tcm = accountTable.getColumnModel();
             tcm.removeColumn(tcm.getColumn(cols.length - 1));
@@ -262,12 +263,12 @@ public class AccountsTablePane extends JPanePlugin {
 
 
             /*
-             * Column headers left justified
+             * Column headers left justified with a tad of pad
              */
             ((DefaultTableCellRenderer)accountTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
             accountTable.setRowHeight(accountTable.getRowHeight() + VERT_PAD);
             
-            
+            // Set special compare routines for Account ID, Display Name and External ID
             trs.setComparator(2, new StringToNumberComparator());
             trs.setComparator(3, new AccountNameCaseComparator());
             trs.setComparator(6, new StringToNumberComparator());
@@ -304,7 +305,7 @@ public class AccountsTablePane extends JPanePlugin {
      * 
      * @param nRow - selected row
      */
-    private ClientId getClientIdFromTableRow(JTable table, int nRow) {
+    private ClientId getClientIdFromTableRow(JTableCustomized table, int nRow) {
         int modelIndex = table.convertRowIndexToModel(nRow);
         TableModel tm = table.getModel();
         ClientId clientId = (ClientId) tm.getValueAt(modelIndex,  tm.getColumnCount()-1);
@@ -312,7 +313,6 @@ public class AccountsTablePane extends JPanePlugin {
     }
    
     public void updateAccountRow(final Account account) {
-        // default to autosizing and sorting
         updateAccountRow(account, true);
     }
 
@@ -332,7 +332,6 @@ public class AccountsTablePane extends JPanePlugin {
                 
                 if (autoSizeAndSort) {
                     resizeColumnWidth(accountTable);
-//                    accountListBox.sort();
                 }
             }
         });
@@ -360,11 +359,8 @@ public class AccountsTablePane extends JPanePlugin {
 
     public void reloadAccountList() {
 
-        JTable at = getAccountsTable();
-        for(int i = at.getRowCount()-1; i >= 0; i--) {
-            accountTableModel.removeRow(i);
-        }
-        
+        JTableCustomized at = getAccountsTable();
+        accountTableModel.setNumRows(0);
         
         Account[] accounts = getAllAccounts();
 
@@ -386,11 +382,7 @@ public class AccountsTablePane extends JPanePlugin {
             getFilterButton().setToolTipText("Edit filter");
         }
         
-        resizeColumnWidth(getAccountsTable());
-        /*JB
-        getAccountsListBox().autoSizeAllColumns();
-        getAccountsListBox().sort();
-        */
+        resizeColumnWidth(at);
     }
     
     protected void dumpFilter(Filter filter2) {
@@ -765,7 +757,7 @@ public class AccountsTablePane extends JPanePlugin {
     }
     
     /**
-     * This method invokes the autoSizeAllColumns() and sort()
+     * This method invokes resizeColumnWidth - sorting is automatic.
      * for the AccountsTable on the awt thread.
      *
      */
@@ -773,7 +765,6 @@ public class AccountsTablePane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 resizeColumnWidth(getAccountsTable());
-//                getAccountsTable().sort();
             }
         });
     }
@@ -830,26 +821,11 @@ public class AccountsTablePane extends JPanePlugin {
         return scrollPane;
     }
     
-    private void resizeColumnWidth(JTable table) {
+    private void resizeColumnWidth(JTableCustomized table) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
                 tca.adjustColumns();
-/*
-                final TableColumnModel columnModel = table.getColumnModel();
-                for (int column = 0; column < table.getColumnCount(); column++) {
-                    int width = 15; // Min width
-                    for (int row = 0; row < table.getRowCount(); row++) {
-                        TableCellRenderer renderer = table.getCellRenderer(row, column);
-                        Component comp = table.prepareRenderer(renderer, row, column);
-                        width = Math.max(comp.getPreferredSize().width + 4 , width);
-                    }
-                    if(width > 300) {
-                        width = 300;
-                    }
-                    columnModel.getColumn(column).setPreferredWidth(width);
-                }
-*/
             }
         });
     }

@@ -27,7 +27,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -72,18 +71,18 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 // $HeadURL$
 public class ClarificationsTablePane extends JPanePlugin {
-
+   
     /**
      * 
      */
-    private static final long serialVersionUID = 5354454906850587233L;
+    private static final long serialVersionUID = 3155024092274820185L;
     
     private static final int VERT_PAD = 2;
     private static final int HORZ_PAD = 20;
 
     private JPanel clarificationButtonPane = null;
 
-    private JTable clarificationTable = null;
+    private JTableCustomized clarificationTable = null;
     private DefaultTableModel clarificationTableModel = null;
 
     private JButton giveButton = null;
@@ -280,11 +279,11 @@ public class ClarificationsTablePane extends JPanePlugin {
     /**
      * This method initializes clarificationListBox
      * 
-     * @return edu.csus.ecs.pc2.core.log.MCLB
+     * @return JTableCustomized
      */
-    private JTable getClarificationTable() {
+    private JTableCustomized getClarificationTable() {
         if (clarificationTable == null) {
-            clarificationTable = new JTable();
+            clarificationTable = new JTableCustomized();
 
             clarificationTable.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent me) {
@@ -428,7 +427,7 @@ public class ClarificationsTablePane extends JPanePlugin {
         resizeColumnWidth(clarificationTable);
     }
     
-    private void resizeColumnWidth(JTable table) {
+    private void resizeColumnWidth(JTableCustomized table) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
@@ -457,20 +456,6 @@ public class ClarificationsTablePane extends JPanePlugin {
         return(-1);
     }
 
-    /**
-     * Looks up the unique ID for the run at the supplied table row.
-     * Have to map the row to the underlying tablemodel data first.
-     * The ElementID is stored in the last (invisible) column
-     * 
-     * @param nRow - selected row
-     */
-    private ElementId getElementIdFromTableRow(JTable table, int nRow) {
-        int modelIndex = table.convertRowIndexToModel(nRow);
-        TableModel tm = table.getModel();
-        ElementId elementId = (ElementId) tm.getValueAt(modelIndex,  tm.getColumnCount()-1);
-        return(elementId);
-    }
-
 
     protected void showSelectedClarification() {
 
@@ -486,7 +471,7 @@ public class ClarificationsTablePane extends JPanePlugin {
         }
 
 
-        ElementId clarificationId = getElementIdFromTableRow(clarificationTable, selectedIndexes[0]);
+        ElementId clarificationId = clarificationTable.getElementIdFromTableRow(selectedIndexes[0]);
 
         Clarification clarification = getContest().getClarification(clarificationId);
 
@@ -612,6 +597,7 @@ public class ClarificationsTablePane extends JPanePlugin {
             // Oh my, really?
             boolean isTeam = getContest().getClientId().getClientType().equals(ClientType.Type.TEAM);
     
+            // Just close your eyes or look away.  This code is necessarily(?) complicated.
             if (isTeam) {
                 if (clar.isAnswered()) {
                     if (clar.isSendToAll()) {
@@ -1126,7 +1112,7 @@ public class ClarificationsTablePane extends JPanePlugin {
         }
 
         try {
-            ElementId elementId = getElementIdFromTableRow(clarificationTable, selectedIndexes[0]);
+            ElementId elementId = clarificationTable.getElementIdFromTableRow(selectedIndexes[0]);
             Clarification clarificationToAnswer = getContest().getClarification(elementId);
 
             if ((!clarificationToAnswer.getState().equals(ClarificationStates.NEW)) || clarificationToAnswer.isDeleted()) {

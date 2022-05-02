@@ -259,23 +259,12 @@ public class TeamView extends JFrame implements UIPlugin {
                 runsTablePanel.setShowJudgesInfo(false);
                 addUIPlugin(getMainTabbedPane(), "View Runs", runsTablePanel);
                 
-            // Remove below when we're satisfied the above works VVVVVVV
-                RunsPane runsPanel = new RunsPane();
-                runsPanel.setShowJudgesInfo(false);
-                addUIPlugin(getMainTabbedPane(), "OldView Runs", runsPanel);
-            // Remove above when we're satisified the above works ^^^^^^^
-                
                 SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
                 addUIPlugin(getMainTabbedPane(), "Request Clarification", submitClarificationPane);
 
                 ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
                 addUIPlugin(getMainTabbedPane(), "View Clarifications", clarificationsTablePane);
 
-            // Remove below when we're satisfied the above works VVVVVVV
-                ClarificationsPane clarificationsPane = new ClarificationsPane();
-                addUIPlugin(getMainTabbedPane(), "Old View Clarifications", clarificationsPane);
-            // Remove above when we're satisified the above works ^^^^^^^
-       
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 

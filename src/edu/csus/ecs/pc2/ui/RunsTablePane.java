@@ -23,12 +23,9 @@ import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
 import javax.swing.RowSorter.SortKey;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -93,7 +90,7 @@ public class RunsTablePane extends JPanePlugin {
     private static final int HORZ_PAD = 20;
 
 
-    private JTable runTable = null;
+    private JTableCustomized runTable = null;
     private DefaultTableModel runTableModel = null;
 
     private JPanel messagePanel = null;
@@ -221,7 +218,6 @@ public class RunsTablePane extends JPanePlugin {
         editRunFrame = new EditRunFrame();
         viewJudgementsFrame = new ViewJudgementsFrame();
         selectJudgementFrame = new SelectJudgementFrame();
-
     }
 
     @Override
@@ -274,9 +270,9 @@ public class RunsTablePane extends JPanePlugin {
                 s[idx++] = getBalloonColor(run);
                 s[idx++] = getLanguageTitle(run.getLanguageId());
             } else {
-                log.log(Log.INFO, "In RunPanes no mclb columns set");
+                log.log(Log.INFO, "In RunsTablePane no table columns set");
             }
-            // Unique key - this column is not displayed normally
+            // Unique key - this column is not displayed (invisible)
             s[idx++] = run.getElementId();
             return s;
         } catch (Exception exception) {
@@ -730,15 +726,16 @@ public class RunsTablePane extends JPanePlugin {
     /**
      * This method initializes the runTable
      * 
-     * @return JTable
+     * @return JTableCustomized
      */
-    private JTable getRunTable() {
+    private JTableCustomized getRunTable() {
         if (runTable == null) {
-            runTable = new JTable();
+            runTable = new JTableCustomized();
 
             runTable.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent me) {
-                   if (me.getClickCount() == 2) {     // to detect double click events
+                   // If double-click see if we can select the run
+                   if (me.getClickCount() == 2) {
                       JTable target = (JTable)me.getSource();
                       if(target.getSelectedRow() != -1 && isAllowed(Permission.Type.JUDGE_RUN)) {
                           requestSelectedRun();
@@ -753,8 +750,10 @@ public class RunsTablePane extends JPanePlugin {
     public void clearAllRuns() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                // This may have to be fixed -- JB
-                runTable.removeAll();
+                if(runTableModel != null) {
+                    // All rows are discarded - the TM will notify the Table
+                    runTableModel.setRowCount(0);
+                }
             }
         });
     }
@@ -877,7 +876,7 @@ public class RunsTablePane extends JPanePlugin {
         resizeColumnWidth(runTable);
     }
     
-    private void resizeColumnWidth(JTable table) {
+    private void resizeColumnWidth(JTableCustomized table) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
@@ -904,20 +903,6 @@ public class RunsTablePane extends JPanePlugin {
             }
         }
         return(-1);
-    }
-
-    /**
-     * Looks up the unique ID for the run at the supplied table row.
-     * Have to map the row to the underlying tablemodel data first.
-     * The ElementID is stored in the last (invisible) column
-     * 
-     * @param nRow - selected row
-     */
-    private ElementId getElementIdFromTableRow(JTable table, int nRow) {
-        int modelIndex = table.convertRowIndexToModel(nRow);
-        TableModel tm = table.getModel();
-        ElementId elementId = (ElementId) tm.getValueAt(modelIndex,  tm.getColumnCount()-1);
-        return(elementId);
     }
 
     /**
@@ -987,8 +972,10 @@ public class RunsTablePane extends JPanePlugin {
                 Object[] objects = buildRunRow(run, whoJudgedId);
                 int rowNumber = getRowByKey(run.getElementId());
                 if (rowNumber == -1) {
+                    // No row with this key - add new one
                     runTableModel.addRow(objects);
                 } else {
+                    // Update all fields
                     for(int j = runTableModel.getColumnCount()-1; j >= 0; j--) {
                         runTableModel.setValueAt(objects[j], rowNumber, j);
                     }
@@ -1003,8 +990,6 @@ public class RunsTablePane extends JPanePlugin {
                 if (autoSizeAndSort) {
                     updateRowCount();
                     resizeColumnWidth(runTable);
-// JB                    runListBox.autoSizeAllColumns();
-// JB                    runListBox.sort();
                 }
                 
 //                if (selectJudgementFrame != null) {
@@ -1068,9 +1053,6 @@ public class RunsTablePane extends JPanePlugin {
             public void run() {
                 updateRowCount();
                 resizeColumnWidth(runTable);
-// JB                runListBox.autoSizeAllColumns();
-// JB                runListBox.sort();
-
             }
         });
     }
@@ -1270,7 +1252,7 @@ public class RunsTablePane extends JPanePlugin {
         }
 
         try {
-            Run runToEdit = getContest().getRun(getElementIdFromTableRow(runTable,  selectedIndexes[0]));
+            Run runToEdit = getContest().getRun(runTable.getElementIdFromTableRow(selectedIndexes[0]));
 
             if ((!(runToEdit.getStatus().equals(RunStates.NEW) || runToEdit.getStatus().equals(RunStates.MANUAL_REVIEW)))
                     || runToEdit.isDeleted()) {
@@ -1298,7 +1280,7 @@ public class RunsTablePane extends JPanePlugin {
         }
 
         try {
-            Run runToEdit = getContest().getRun(getElementIdFromTableRow(runTable,  selectedIndexes[0]));
+            Run runToEdit = getContest().getRun(runTable.getElementIdFromTableRow(selectedIndexes[0]));
 
             if (!runToEdit.isJudged()) {
                 showMessage("Judge run before attempting to re-judge run");
@@ -1399,7 +1381,7 @@ public class RunsTablePane extends JPanePlugin {
         }
 
         try {
-            Run runToEdit = getContest().getRun(getElementIdFromTableRow(runTable,  selectedIndexes[0]));
+            Run runToEdit = getContest().getRun(runTable.getElementIdFromTableRow(selectedIndexes[0]));
 
             editRunFrame.setRun(runToEdit);
             editRunFrame.setVisible(true);
@@ -1430,7 +1412,7 @@ public class RunsTablePane extends JPanePlugin {
         return extractButton;
     }
 
-    protected void extractRuns(JTable runs) {
+    protected void extractRuns(JTableCustomized runs) {
 
         if (runs.getRowCount() < 1) {
             showMessageToUser("No runs to extract");
@@ -1476,25 +1458,25 @@ public class RunsTablePane extends JPanePlugin {
         }
     }
 
-    private ElementId[] getRunKeys(JTable runs) {
+    private ElementId[] getRunKeys(JTableCustomized runs) {
         Vector<ElementId> vector = new Vector<ElementId>();
         int totalRows = runs.getRowCount();
         for (int rowNumber = 0; rowNumber < totalRows; rowNumber++) {
-            vector.addElement(getElementIdFromTableRow(runs, rowNumber));
+            vector.addElement(runs.getElementIdFromTableRow(rowNumber));
         }
         return (ElementId[]) vector.toArray(new ElementId[vector.size()]);
     }
 
-    private ElementId[] getRunKeys(JTable runs, int[] selectedRows) {
+    private ElementId[] getRunKeys(JTableCustomized runs, int[] selectedRows) {
         Vector<ElementId> vector = new Vector<ElementId>();
         for (int rowNumber : selectedRows) {
-            vector.addElement(getElementIdFromTableRow(runs, rowNumber));
+            vector.addElement(runs.getElementIdFromTableRow(rowNumber));
         }
         return (ElementId[]) vector.toArray(new ElementId[vector.size()]);
     }
 
 
-    private int extractSelectedRuns(JTable runs, ElementId[] runKeys) {
+    private int extractSelectedRuns(JTableCustomized runs, ElementId[] runKeys) {
         int extractCount = 0;
         
         int totalRows = runKeys.length;
@@ -1561,7 +1543,7 @@ public class RunsTablePane extends JPanePlugin {
         }
 
         try {
-            Run runToEdit = getContest().getRun(getElementIdFromTableRow(runTable, selectedIndexes[0]));
+            Run runToEdit = getContest().getRun(runTable.getElementIdFromTableRow(selectedIndexes[0]));
 
             if (runToEdit.getStatus().equals(RunStates.BEING_JUDGED) || runToEdit.getStatus().equals(RunStates.NEW) || runToEdit.getStatus().equals(RunStates.BEING_RE_JUDGED)) {
                 getController().cancelRun(runToEdit);
@@ -1591,7 +1573,7 @@ public class RunsTablePane extends JPanePlugin {
             takeButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             takeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("TODO Take actionPerformed()");
+                    System.out.println("TODO RunsTable.getTakeButton actionPerformed()");
                     // TODO code Take Run
                 }
             });
@@ -1647,7 +1629,7 @@ public class RunsTablePane extends JPanePlugin {
         }
 
         try {
-            Run theRun = getContest().getRun(getElementIdFromTableRow(runTable, selectedIndexes[0]));
+            Run theRun = getContest().getRun(runTable.getElementIdFromTableRow(selectedIndexes[0]));
 
             if (theRun != null) {
                 viewJudgementsFrame.setRun(theRun);
@@ -2089,7 +2071,7 @@ public class RunsTablePane extends JPanePlugin {
         // we are allowed to view source and there's exactly one run selected; try to obtain the run source and display it in a MFV 
         try {
 
-            Run run = getContest().getRun(getElementIdFromTableRow(runTable, selectedIndexes[0]));
+            Run run = getContest().getRun(runTable.getElementIdFromTableRow(selectedIndexes[0]));
 
             // make sure we found the currently selected run
             if (run != null) {

@@ -46,7 +46,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
- * Standings Pane.
+ * Standings Table Pane.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -54,17 +54,17 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 // $HeadURL$
 public class StandingsTablePane extends JPanePlugin {
-
+    
     /**
      * 
      */
-    private static final long serialVersionUID = 5947564887534500596L;
+    private static final long serialVersionUID = -7721246142538681421L;
     
     private static final int VERT_PAD = 2;
     private static final int HORZ_PAD = 20;
     private static final int HORZ_INSET = 5;
 
-    private JTable standingsTable = null;
+    private JTableCustomized standingsTable = null;
     private DefaultTableModel standingsTableModel = null;
 
     private JPanel messagePane = null;
@@ -167,11 +167,9 @@ public class StandingsTablePane extends JPanePlugin {
      */
     protected void parseAndDisplay () {
 
-        JTable at = getStandingsTable();
-        for(int i = at.getRowCount()-1; i >= 0; i--) {
-            standingsTableModel.removeRow(i);
-        }
-        
+        // Return value ignored; this just makes sure the table/table model are set up
+        JTableCustomized atDummy = getStandingsTable();
+        standingsTableModel.setRowCount(0);
         
         Document document = null;
         String xmlString = null;
@@ -243,9 +241,9 @@ public class StandingsTablePane extends JPanePlugin {
     /**
      * This method initializes standingsListbox
      * 
-     * @return JTable
+     * @return JTableCustomized
      */
-    private JTable getStandingsTable() {
+    private JTableCustomized getStandingsTable() {
         Object[] cols = { "Rank", "Name", "Solved", "Points" };
         if (standingsTable == null) {
             standingsTableModel = new DefaultTableModel(cols, 0) {
@@ -254,7 +252,7 @@ public class StandingsTablePane extends JPanePlugin {
                     return false;
                 }
             };
-            standingsTable = new JTable(standingsTableModel);
+            standingsTable = new JTableCustomized(standingsTableModel);
             standingsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             
             /*
@@ -278,7 +276,6 @@ public class StandingsTablePane extends JPanePlugin {
             
             standingsTable.setRowHeight(standingsTable.getRowHeight() + VERT_PAD);
             
-            
             /*
              * Columns for solved and points, right justified
              */
@@ -288,13 +285,12 @@ public class StandingsTablePane extends JPanePlugin {
             standingsTable.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);            
             standingsTable.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);            
             
-            resizeColumnWidth(standingsTable);
-            
+            resizeColumnWidth(standingsTable);            
         }
         return standingsTable;
     }
     
-    private void resizeColumnWidth(JTable table) {
+    private void resizeColumnWidth(JTableCustomized table) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
@@ -497,7 +493,7 @@ public class StandingsTablePane extends JPanePlugin {
      * alignment as desired (horzAlignment).  In addition, we inset the headers a little bit
      * so they're not right up against the edge of the JLabel.  We do this by creating a compound
      * Border the consists of the original border (whatever that may be), and adding an EmptyBorder
-     * with the desired insets.
+     * with the desired insets.  Seems like there SHOULD be an easier way.
      */
     private static class HeaderRenderer implements TableCellRenderer {
         DefaultTableCellRenderer renderer;

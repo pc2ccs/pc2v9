@@ -192,9 +192,9 @@ public class JudgeView extends JFrame implements UIPlugin {
                 addUIPlugin(getMainTabbedPane(), "New Runs", newRunsTablePane);
                 newRunsTablePane.setFilterFrameTitle("New Runs Filter");
 
-                RunsTablePane runTablesPanel = new RunsTablePane();
-                addUIPlugin(getMainTabbedPane(), "All Runs", runTablesPanel);
-                runTablesPanel.setFilterFrameTitle("All Runs Filter");
+                RunsTablePane runsTablePane = new RunsTablePane();
+                addUIPlugin(getMainTabbedPane(), "All Runs", runsTablePane);
+                runsTablePane.setFilterFrameTitle("All Runs Filter");
 
                 ClarificationsTablePane newClarificationsTablePane = new ClarificationsTablePane();
                 newClarificationsTablePane.setShowNewClarificationsOnly(true);
@@ -202,26 +202,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
                 ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
                 addUIPlugin(getMainTabbedPane(), "All clarifications", clarificationsTablePane);
-
-            // Remove below when we're satisified the above works VVVVVVVVVV
-                RunsPane newRunsPane = new RunsPane(false);
-                newRunsPane.setShowNewRunsOnly(true);
-                newRunsPane.setMakeSoundOnOneRun(true);
-                addUIPlugin(getMainTabbedPane(), "Old New Runs", newRunsPane);
-                newRunsPane.setFilterFrameTitle("New Runs Filter");
-
-                RunsPane runsPanel = new RunsPane();
-                addUIPlugin(getMainTabbedPane(), "Old All Runs", runsPanel);
-                runsPanel.setFilterFrameTitle("All Runs Filter");
-
-                ClarificationsPane newClarificationsPane = new ClarificationsPane();
-                newClarificationsPane.setShowNewClarificationsOnly(true);
-                addUIPlugin(getMainTabbedPane(), "Old New Clars", newClarificationsPane);
-
-                ClarificationsPane clarificationsPane = new ClarificationsPane();
-                addUIPlugin(getMainTabbedPane(), "Old All clarifications", clarificationsPane);
-            // Remove to above  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                
+              
                 SubmitRunPane submitRunPane = new SubmitRunPane();
                 addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
                 
@@ -321,7 +302,7 @@ public class JudgeView extends JFrame implements UIPlugin {
                  */
 
                 try {
-                    runsPanel.startAutoJudging();
+                    runsTablePane.startAutoJudging();
                 } catch (Exception e) {
                     logException(e);
                 }

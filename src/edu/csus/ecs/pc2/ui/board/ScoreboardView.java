@@ -193,11 +193,6 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 addUIPlugin(getMainTabbedPane(), "Standings", standingsTablePane);
                 standingsTablePane.addPropertyChangeListener("standings", new PropertyChangeListenerImplementation());
                 
-            // Remove the following when we are satisfied the above works
-                StandingsPane standingsPane = new StandingsPane();
-                addUIPlugin(getMainTabbedPane(), "Old Standings", standingsPane);
-            // Remove the previous ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                
                 BalloonColorListPane colorsPane = new BalloonColorListPane();
                 addUIPlugin(getMainTabbedPane(), "Colors", colorsPane);
                 BalloonPane balloonHandler = new BalloonPane();
