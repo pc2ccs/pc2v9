@@ -1,0 +1,224 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage{fullpage}
+\usepackage{color}
+
+%\pagestyle{empty}
+
+\title{{\em Qanat} Problem: Discussion and Test Cases}
+\author{Michael Goldwasser\\{\tt goldwamh@slu.edu}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This is a beautiful mathematical problem with a recursive definition
+that allows for the optimal positions to be computed in iterative
+fashion with relatively minimal coding. With that said, I expect
+it should be rated in the medium-to-hard range of difficulty, as
+students will have to discover the recursive decomposition, and then
+manage the mathematical optimization, either analytically or through
+approximations.
+
+\section*{Detailed Analysis}
+
+The first key observation is that the problem is scale-invariant.  As
+a trivial consequence, we will assume, without loss of generality,
+that $H = 1$, for the purpose of discussion. The more important
+consequence of the scale-invariance is that it allows for a recursive
+solution to the placement of $N$ shafts. If we know the placement of
+the rightmost shaft, then the other $N-1$ shafts should be placed
+in optimal fashion within the remaining (and similar) triangle, as
+pictured below. Note that the shaft at position~$x$ effectively serves
+as the ``mother well'' for the remaining subproblem.
+The catch, however, is that the ratio of $x$ to $W$ for the rightmost
+shaft depends upon the value of $N$.
+
+\begin{center}
+\scalebox{0.5}{\input{recurse.pdf_t}}
+\end{center}
+
+We define the following recursive problem. For a fixed $W$, we define
+$C_k$ to be the minimal construction cost for the $W \times 1$
+configuration when using $k$ additional vertical shafts. We exclude
+from $C_k$ the cost for excavating the mother well (as it is clear
+that all of that dirt should exit through the top of the well and that
+cost does not depend on the placements of the other vertical shafts).
+
+\pagebreak
+\begin{center}
+\scalebox{0.5}{\input{formula.pdf_t}}
+\end{center}
+
+We next consider the contributions to the cost $C_k$. We note that
+dirt that is uniformly removed along a path of length $L$ must in
+general travel distance $\displaystyle \int_0^{L} i \, \mathrm{d}i
+= \frac{1}{2}L^2$.
+%
+In analyzing the problem, we define $x$ parametrically as $tW$ and
+solve for the parameter~$t$. The dirt from
+the tunnel between $(tW,0)$ and $(W,0)$ should be removed either
+through the mother well at $W$ or the shaft at $tW$. In fact, we can
+determine the location $a$ at which those two escape
+routes have equal length $L = a + t(1-W) = 1+W-a$,
+and thus $a = \frac{1+W+t(W-1)}{2}$. The collective dirt between $a$
+and $tW$ together with the vertical shaft at $tW$ comprises length $L$
+as above, and thus has removal cost $\frac{L^2}{2}$. The removal of the
+remaining dirt from $(a,0)$ to $(W,0)$ can be removed at cost
+$\frac{L^2}{2} - \frac{1}{2}$, with the $-\frac{1}{2}$ because we are
+not paying for the digging of the mother well with height~1.
+Finally, we must account for all costs to excavate the tunnel to the
+left of $x$. 
+Here we note that the optimal costs must be exactly $C_{k-1} t^2$, as
+the subproblem is identical to $C_{k-1}$ except at scale $t$, and the
+removal costs depend quadratically on the scale. (e.g., removing dirt
+along a path of length~$\frac{1}{2}$ requires only $\frac{1}{4}$ the
+effort as for a path of length~$1$.) 
+%
+Combining all costs,
+we have that
+$$C_k = C_{k-1}t^2 + L^2 - \frac{1}{2}.$$
+
+Further substituting for $L$, and then for $a$, we have that
+%
+\begin{eqnarray*}
+C_k & = & C_{k-1}t^2 + (1+W-a)^2 - \frac{1}{2}\\
+    & = & C_{k-1}t^2 + \frac{1}{4}\left(1+W+t(1-W)\right)^2 - \frac{1}{2}
+\end{eqnarray*}
+
+We see that $C_k$ is quadratic in variable $t$, therefore we can
+optimize to find the cost and the value of $t$ by setting
+$\frac{dC_k}{dt} = 0$.
+\begin{eqnarray*}
+0 & = & \frac{dC_k}{dt} = 2C_{k-1}t + \frac{1-W}{2}(1+W+t(1-W))\\
+0 & = & 2C_{k-1}t + \frac{(1-W)(1+W)}{2} + \frac{(1-W)^2}{2}t\\
+0 & = & \left(4C_{k-1}+(1-W)^2\right)t + (1-W^2)\\
+t & = & \frac{W^2-1}{4C_{k-1} + (W-1)^2}
+\end{eqnarray*}
+
+For further discussion, let notation $t_k$ denote the above value of
+$t$ used when optimizing $C_k$ for $1 \leq k \leq N$. We can now  use
+this analysis to constructively compute all $C_k$ and $t_k$ values.
+As a base case, we can compute $C_0$ using similar analysis as above
+but setting $t=0$ so that the phantom vertical shaft has height 0 at
+the outlet. This gets us that $C_0 = L^2 - \frac{1}{2}$ for $L$
+defined as before. We
+can then use $C_0$ to compute $t_1$ and $C_1$, use $C_1$ to
+compute $t_2$ and $C_2$, and so forth.
+
+
+In the end, we want to place the rightmost shaft at $t_NW$, the second
+rightmost at $t_{N-1}(t_NW)$, and in general the $k$th shaft at
+$W \cdot \prod_k^N t_k$. Of course, all of this analysis was based on
+the original assumption that $H=1$, but the proportions are the same
+when scaled.
+ 
+
+\bigskip
+As an aside, we note that if students can correctly define the
+recursive cost function, $C_k = C_{k-1}t^2 + L^2 - \frac{1}{2}$, they
+could choose to experimentally compute the optimal value of $t$ by
+means of binary search (rather than in computing the
+derivative). There would be some question as to how much precision
+must be guaranteed for each such value to ensure adequate precision
+for the eventual result. It is reasonable to expect that this approach
+should be sufficiently efficient.
+
+\bigskip
+As a separate issue, students could effectively optimize the
+placements by picking arbitrary positions for the $N$ shafts and the
+using hill-climbing to locally improve the solution. Given the
+structure of the problem, the global minimum is the unique local
+minimum for placing $N$ shafts. The challenge will be whether they can
+guarantee convergence within the necessary tolerances for each shaft
+while also being within the time limit. I'm confident that we could
+force a significant gap so as to allow an approach based on recursive
+decomposition, but disallow approaches based on a generic
+hill-climbing approach. This is the primary reason why we allow $N$ to
+be relatively large, while limiting the output to be the first 10.
+%
+It is also worth noting that the first $10$ have a lesser effect on
+the overall cost, so these are the most challenging to get within the
+stated tolerance of optimal.
+
+%% As a brief sanity check, when $N=1$ the optimal placement of the shaft
+%% will be at $\frac{W^2 - H^2}{2W}$. When $N=2$ the optimal placement of
+%% the shafts will be at 
+
+
+\section*{C++ Implementations}
+
+The file {\tt kattis/submission/accepted/qanat.cpp} is our primary
+implementation. It relies on the purely analytic approach, computing
+the shaft positions iteratively based on the closed form recursive
+equations.
+
+The file {\tt kattis/submission/wrong\_answer/hill\_climb.cpp}
+demonstrate an attempt at hill-climbing, with a few somewhat arbitrary
+choices of some delta/epsilon factors that effect the efficiency and stopping
+condition. Although this program can sufficiently match solutions for
+small $N$, it does not seem like any tuning of parameters is likely to
+suffice for both efficiency and accuracy. (Of course, depending on how
+they are set, this should either be an example of ``wrong answer'' or
+``time limit exceeded.'')
+
+
+\section*{Test Cases}
+
+For the sample cases given in the problem statement:
+\begin{itemize}
+\item 8 4 1\\
+This case is chosen to provide a sanity check for students in
+solidifying their understanding of the cost metric that is to be
+minimized. They ought to be able to manually verify the optimality of
+the placement of the one shaft, and we've chosen a case with an
+integral solution because it may help them verify the polynomial used
+to pick x.
+
+\item  196 65 2\\
+This example with $N=2$ might provide some opportunity to build
+intuition about the recursive nature when going to two shafts (but not
+quite as much intuition as if I looked at a case for $N=2$ with the
+same aspect ratio as the first example).
+
+\item 5000 1 50\\
+This case serves three purposes. First, it demonstrates that for $N >
+50$ you are only to output the first 10 values. Secondly, it may
+provide some additional intuition about the problem, which is that as
+the slope of the mountain approaches zero, the optimal placement of
+shafts approaches a limit in which they should be equally spaced from
+each other. Finally, by giving this larger sample, students with a
+correct implementation should be able to verify that they are within
+the proper tolerance limits. As a result, we wouldn't expect to
+receive many submissions with the wrong answer; the only remaining
+issue will be whether students have the efficiency to handle the upper
+limit of $N=500$.
+ 
+\end{itemize}
+
+For the secret judges' tests, there really are no meaningful special
+cases. Either they get them all or they don't, with the possible
+exception of efficiency and accuracy for those using non-analytical
+approaches. The biggest test case we try is for $N=500$ (and $W$ and
+$H$ chosen to ensure sufficient separation of all shafts).
+
+
+\section*{Problem Statement}
+
+I wonder whether the implied integral for the construction costs will
+be clear enough based on the explanation that ``those costs are
+proportional to the sum of the distances that each speck of excavated
+dirt must be transported to reach the surface.'' I'm open to other
+wording if anyone has a suggestion.
+
+
+\section*{Image Credit}
+
+The primary image was taken from {\tt
+http://www.eeer.org/journal/view.php?number=9}. That academic paper is
+published with a Creative Commons License, so I assume that this
+applies to use of the imagery as well.
+
+\end{document}

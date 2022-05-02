@@ -1,0 +1,29 @@
+#
+# problemset.yaml - list of CCS problem definitions
+#
+# created on: Wed Mar 16 13:42:08 PDT 2022
+# created by: $Id: mkprobset,v 1.8 2017/04/29 00:19:22 laned Exp $
+#
+# problems:
+problemset:
+# hello is Hello no input comp + man pc2 D1
+  - letter:     A
+    short-name: hello
+
+    color:      Black
+    rgb:        '#000000'
+
+# qanat is Qanat
+  - letter:     B
+    short-name: qanat
+
+    color:      White
+    rgb:        '#fbfbfb'
+
+# sumit is I Sumit stdin Comp+Man clics D1
+  - letter:     C
+    short-name: sumit
+
+    color:      Red
+    rgb:        '#df1328'
+

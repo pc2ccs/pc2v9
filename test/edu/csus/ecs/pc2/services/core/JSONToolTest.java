@@ -7,9 +7,11 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1071,10 +1073,15 @@ public class JSONToolTest extends AbstractTestCase {
         assertNotNull("Did not find ended element in json: " + json, endNode);
 
         // check ended value
-
         ContestTime contestTime = contest.getContestTime();
+        Calendar contestStart = contestTime.getContestStartTime();
 
-        Date date = contestTime.getContestStartTime().getTime();
+        long contestEndMS = contestStart.getTimeInMillis() + contestTime.getContestLengthMS(); 
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
+        calendar.setTimeInMillis(contestEndMS);
+        Date date = calendar.getTime();
+                
         SimpleDateFormat iso8601formatterWithMS = new SimpleDateFormat(Utilities.ISO_8601_TIMEDATE_FORMAT_WITH_MS);
         String iso8601DateString = iso8601formatterWithMS.format(date);
 
@@ -1086,8 +1093,11 @@ public class JSONToolTest extends AbstractTestCase {
         String actual = iso8601DateString.substring(0, 10); // only YYYY-MM-DD
         String expected = endValue.substring(0, 10); // only YYYY-MM-DD
 
-        // before fix, failed with date like: 2074-05-03 on 2022-03-02
-        assertEquals("Expected ended value", expected, actual);
+        // compare YYYY-MM-DD
+        assertEquals("Expected contest end date value", expected, actual);
+        
+        // compare full date string, ex. 2022-04-17T00:03:29.280-07
+        assertEquals("Expected contest end date value", iso8601DateString, endValue);
 
     }
 }
