@@ -2,12 +2,8 @@
 package edu.csus.ecs.pc2.ui;
 
 import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
-
-import com.ibm.webrunner.j2mclb.MultiColumnListbox;
-import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.model.ElementId;
 

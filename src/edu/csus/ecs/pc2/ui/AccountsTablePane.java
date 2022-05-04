@@ -148,7 +148,7 @@ public class AccountsTablePane extends JPanePlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-//      Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "External ID", "ClientId" };
+//      Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "CMS Id", "ClientId" };
 
         try {
             int cols = accountTableModel.getColumnCount();
@@ -226,7 +226,7 @@ public class AccountsTablePane extends JPanePlugin {
     private JTableCustomized getAccountsTable() {
         if (accountTable == null) {
             int i;
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "External Id", "ClientId"};
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "CMS Id", "ClientId"};
             accountTableModel = new DefaultTableModel(cols, 0) {
                 @Override
                 public boolean isCellEditable(int row, int col) {
@@ -268,7 +268,7 @@ public class AccountsTablePane extends JPanePlugin {
             ((DefaultTableCellRenderer)accountTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
             accountTable.setRowHeight(accountTable.getRowHeight() + VERT_PAD);
             
-            // Set special compare routines for Account ID, Display Name and External ID
+            // Set special compare routines for Account ID, Display Name and CMS Id
             trs.setComparator(2, new StringToNumberComparator());
             trs.setComparator(3, new AccountNameCaseComparator());
             trs.setComparator(6, new StringToNumberComparator());

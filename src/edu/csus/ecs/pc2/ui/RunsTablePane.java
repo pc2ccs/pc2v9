@@ -839,7 +839,7 @@ public class RunsTablePane extends JPanePlugin {
             trs.setComparator(1, accountNameSorter);
             trs.setComparator(2, numericStringSorter);
             trs.setComparator(3, numericStringSorter);
-            trs.setComparator(6, accountNameSorter);
+            trs.setComparator(7, accountNameSorter);
             // These are in sort order
             sortList.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
@@ -851,6 +851,7 @@ public class RunsTablePane extends JPanePlugin {
             sortList.add(new RowSorter.SortKey(7, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(8, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(9, SortOrder.ASCENDING));
+            sortList.add(new RowSorter.SortKey(10, SortOrder.ASCENDING));
             
         } else {
 

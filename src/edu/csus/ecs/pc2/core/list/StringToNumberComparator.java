@@ -31,7 +31,7 @@ public class StringToNumberComparator implements Comparator<String>, Serializabl
         try {
             iResult = Integer.parseInt(NumOne) - Integer.parseInt(NumTwo);
         } catch(Exception exception) {
-            StaticLog.getLog().log(Log.INFO, "Exception in compare() - StringToNumberComparator", exception);
+            StaticLog.getLog().log(Log.DEBUG, "Exception in compare() - StringToNumberComparator", exception);
         }
        return(iResult); 
     }
