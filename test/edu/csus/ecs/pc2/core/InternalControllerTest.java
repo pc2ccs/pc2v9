@@ -126,12 +126,12 @@ public class InternalControllerTest extends AbstractTestCase {
         assertEquals("Expecting judgements ", 7, judgements.length);
 
         String[] expected = { "AC;Yes", //
-                "WA001;Compilation Error", //
-                "WA002;Run-time Error", //
-                "WA003;Time Limit Exceeded", //
-                "WA004;Wrong Answer", //
-                "WA005;Presentation Error", //
-                "WA006;Other - Contact Staff", //
+                "WA001;No - Compilation Error", //
+                "WA002;No - Run-time Error", //
+                "WA003;No - Time Limit Exceeded", //
+                "WA004;No - Wrong Answer", //
+                "WA005;No - Presentation Error", //
+                "WA006;No - Other - Contact Staff", //
         };
 
         for (int i = 0; i < expected.length; i++) {

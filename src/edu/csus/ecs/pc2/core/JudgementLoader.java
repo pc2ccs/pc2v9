@@ -39,6 +39,7 @@ public class JudgementLoader {
     /**
      * Loads reject.ini file contents into Judgements.
      * 
+     * If finds reject.ini file, reads file. Adds Yes judgement, then prepends "No - " onto each entry from the reject.ini file and returns true.
      * 
      * If file contains a AC acronym judgement, then that line and its judgment name are used/loaded.
      * 
@@ -111,7 +112,7 @@ public class JudgementLoader {
 
             // Already loaded Yes
             if (!Judgement.ACRONYM_ACCEPTED.equals(getAcronym(line))) {
-                Judgement judgement = new Judgement(judgementText, acronym);
+                Judgement judgement = new Judgement("No - " + judgementText, acronym);
                 contest.addJudgement(judgement);
             }
         }
