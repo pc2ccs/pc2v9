@@ -341,18 +341,10 @@ public final class ICPCTSVLoader {
          * Add groups from authoritativeGroups if missing from groupList.
          */
         for (Group aGroup : authoritativeGroups) {
-            
-            Group missingGroup = null; 
-            
-            for (Group glGroup : groupList) {
-                if (aGroup.getGroupId() == glGroup.getGroupId()) {
-                    missingGroup = glGroup;
-                }
-            }
-            
-            if (missingGroup == null) {
-                groupList.add(aGroup);
-            }
+            if (! groupList.contains(aGroup)) {
+               groupList.add(aGroup);
+               break;
+           }
         }
         
         groups = (Group[]) groupList.toArray(new Group[groupList.size()]);
