@@ -464,9 +464,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             } catch (Exception e) {
                                                 // TODO design error handling reporting
                                                 if (Utilities.isDebugMode()) {
-                                                    System.err.println("Exception submitting run for: " + event + e);
+                                                    System.err.println("Exception submitting run for event: " + event + ": " + e);
                                                 }
-                                                log.log(Level.WARNING, "Exception submitting run for: " + event, e);
+                                                log.log(Level.WARNING, "Exception submitting run for event: " + event + ": ", e);
                                                 e.printStackTrace();
                                             }
                                         }
