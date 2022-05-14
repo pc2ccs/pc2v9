@@ -467,10 +467,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             } catch (Exception e) {
                                                 // TODO design error handling reporting
                                                 if (Utilities.isDebugMode()) {
-                                                    System.err.println("Exception submitting run for: " + event);
+                                                    System.err.println("Exception submitting run for event: " + event + ": " + e);
                                                 }
-                                                log.log(Level.WARNING, "Exception submitting run for: \\" + event);
-                                                
+                                                log.log(Level.WARNING, "Exception submitting run for event: " + event + ": ", e);
                                                 e.printStackTrace();
                                             }
                                         }
@@ -478,9 +477,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     } catch (Exception e) {
                                         // TODO design error handling reporting (logging?)
                                         if (Utilities.isDebugMode()) {
-                                            System.err.println("Exception processing event: " + e.toString() + ": event = " + event);
+                                            System.err.println("Exception processing event: " + event + "\n " + e.toString());
                                         }
-                                        log.log(Level.WARNING, "Exception processing event: " + e.toString() + ": event = " + event);
+                                        log.log(Level.WARNING, "Exception processing event: " + event, e);
 
                                         e.printStackTrace();
                                     }
@@ -551,9 +550,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     } catch (Exception e) {
                                         // TODO design error handling reporting (logging?)
                                         if (Utilities.isDebugMode()) {
-                                            System.err.println("Exception processing event: " + event);
+                                            System.err.println("Exception processing event: " + event + "\n" + e.toString());
                                         }
-                                        log.log(Level.SEVERE, "Exception processing event: " + event);
+                                        log.log(Level.SEVERE, "Exception processing event: " + event, e);
                                         e.printStackTrace();
                                     }
 
@@ -569,9 +568,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                         } catch (Exception e) {
                             // TODO design error handling reporting (logging?)
                             if (Utilities.isDebugMode()) {
-                                System.err.println("Exception processing event: " + e.toString() + ": event = " + event);
+                                System.err.println("Exception processing event: " + event + "\n" + e.toString());
                             }
-                            log.log(Level.SEVERE, "Exception processing event: " + e.toString() + ": event = " + event);
+                            log.log(Level.SEVERE, "Exception processing event: " + event, e);
                             e.printStackTrace();
                         } 
                     }
@@ -584,7 +583,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                 if (Utilities.isDebugMode()) {
                     System.err.println("Exception reading event from stream: " + e.toString() + ": event = " + event);
                 }
-                log.log(Level.SEVERE, "Exception reading event from stream: " + e.toString() + ": event = " + event);
+                log.log(Level.SEVERE, "Exception reading event from stream: " + event, e);
                 e.printStackTrace();
             }
         } // end else
