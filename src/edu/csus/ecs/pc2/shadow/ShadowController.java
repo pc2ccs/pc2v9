@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.net.MalformedURLException;
@@ -267,7 +267,7 @@ public class ShadowController {
             
         } catch (Exception e) {
             // TODO figure out how to return the exception to the caller cleanly
-            log.severe("Exception starting RemoteEventFeedMonitor: " + e);
+            log.log(Log.SEVERE, "Exception starting RemoteEventFeedMonitor: " + e, e);
             setStatus(SHADOW_CONTROLLER_STATUS.SC_MONITOR_STARTUP_FAILED);
 
             e.printStackTrace();
@@ -421,7 +421,7 @@ public class ShadowController {
         try {
             pc2Json = sbJsonObject.createJSON(localContest, log);
         } catch (JsonProcessingException | IllegalContestState | JAXBException e) {
-            log.warning("Exception creating PC2 scoreboard JSON: " + e.getMessage());
+            log.log(Log.WARNING,"Exception creating PC2 scoreboard JSON: " + e.getMessage(), e);
             return null;
         }
         
