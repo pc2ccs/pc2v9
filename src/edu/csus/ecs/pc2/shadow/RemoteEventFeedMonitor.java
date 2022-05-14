@@ -167,7 +167,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                     //See also GitHub Issue 267:  https://github.com/pc2ccs/pc2v9/issues/267
                     // Thread.sleep(10);
                     
-                    if (!event.contains("\"type\": \"organizations\"")) {
+                    if ((!event.contains("\"type\": \"organizations\"")) && (!event.contains("\"type\": \"runs\""))) {
                         Thread.sleep(500);
                     }
                     
