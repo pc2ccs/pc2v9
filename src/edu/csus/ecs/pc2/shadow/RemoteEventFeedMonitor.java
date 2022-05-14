@@ -165,8 +165,11 @@ public class RemoteEventFeedMonitor implements Runnable {
                     // Event Feed Monitor thread to get back to the CPU (and use it for a full scheduling timeslice).
                     // So it was determined that the following was the best solution, at least in the short term...
                     //See also GitHub Issue 267:  https://github.com/pc2ccs/pc2v9/issues/267
-                    Thread.sleep(10);
-
+                    // Thread.sleep(10);
+                    
+                    if (!event.contains("\"type\": \"organizations\"")) {
+                        Thread.sleep(500);
+                    }
                     
                     //skip blank lines and any that do not start/end with "{...}"
                     if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
