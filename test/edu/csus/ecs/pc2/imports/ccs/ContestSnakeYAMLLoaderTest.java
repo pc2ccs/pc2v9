@@ -3701,6 +3701,20 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertFalse("Expected NO halt at end of contest ", contest.getContestInformation().isAutoStopContest());
     }
    
+
+    
+    /**
+     * Test loading of output validator.
+     * 
+     * @throws Exception
+     */
+    public void testaddClicsOutputValidator() throws Exception {
+        
+        // TODO i407 - code unit test 
+        fail("i407 TODO code test for loading output validator");
+        
+    }
+
     
 }
 
