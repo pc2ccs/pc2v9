@@ -3710,11 +3710,39 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
      */
     public void testaddClicsOutputValidator() throws Exception {
         
-        // TODO i407 - code unit test 
-        fail("i407 TODO code test for loading output validator");
+        String sampleContestDirName = "valtest";
+        
+        IInternalContest contest = new InternalContest();
+        
+        /**
+         * Load groups data.
+         */
+        loadGroupsFromSampContest(contest, sampleContestDirName);
+        assertEquals("Number ground",12,contest.getGroups().length);
+        
+        IInternalContest internal = loadSampleContest(contest, sampleContestDirName);
+        assertNotNull(internal);
+        
+        String configDir = getTestSampleContestDirectory(sampleContestDirName) + File.separator + IContestLoader.CONFIG_DIRNAME;
+        assertDirectoryExists(configDir);
+
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+            
+            String outValProgram = problem.getOutputValidatorProgramName();
+            
+            System.out.print("debug 22 problem "+problem.getShortName()+"\t ");
+            System.out.println(outValProgram);
+            
+            if ("sumit4".equals(problem.getShortName())) {
+                assertEquals("bad_validator", problem.getOutputValidatorProgramName());
+            }
+            
+        }
+        
+        fail();
+        
         
     }
-
-    
 }
 
