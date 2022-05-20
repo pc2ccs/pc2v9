@@ -6,6 +6,7 @@ import java.util.Arrays;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.api.reports.APIReports;
 import edu.csus.ecs.pc2.core.ParseArguments;
+import edu.csus.ecs.pc2.exports.ccs.CLICSEventFeedExract;
 import edu.csus.ecs.pc2.ui.team.CreateTeamsTSV;
 import edu.csus.ecs.pc2.ui.team.SubmitterFromEF;
 
@@ -32,6 +33,7 @@ public class PC2Tools {
                 "--sr   -  submit runs from CLICS JSON EF, use --help --sr for usage", //
                 "--ttsv -  convert teams.json to teams.tsv, use --help --ttsv for usage", //
                 "--upjdf  -  update judge data file names for a CDP or problem", //
+                "--efx    - event feed extractor, use --help --efx for usage", //
                 "",
                 
                 "--login LOGIN ", //
@@ -79,6 +81,10 @@ public class PC2Tools {
         } else if (parseArguments.isOptPresent("--apir")) {
 
             APIReports.main(options);
+            
+        } else if (parseArguments.isOptPresent("--efx")) {
+
+            CLICSEventFeedExract.main(options);
             
         } else if (parseArguments.isOptPresent("--sr")) {
 

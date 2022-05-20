@@ -1,0 +1,56 @@
+#
+# Sumit Sample with remote Primary CCS values
+# Fri Nov 04 12:02:43 2016
+#
+--- 
+
+name: Remote Contest
+short-name: R Contest
+
+start-time:        2016-11-04T18:30:00-07:00
+
+duration:  2:00:00
+
+# freeze time before end of contest
+scoreboard-freeze: 01:00:00
+# scoreboard-freeze-length in CCS, but has it de facto changed to scoreboard-freeze in pc2?
+scoreboard-freeze-length: 01:00:00
+
+# pc2 specific settings
+# elapsed: 0:00:00
+# remaining: 5:00:00
+# running: false
+
+# default pc2 judging types
+computer-judged: true
+manual-review: true
+send-prelim-judgement: true
+
+# other pc2 settings
+default-validator: /home/judge/cdp/config/validefault {:infile} {:outfile} {:ansfile} {:resfile} {:problemletter}
+# default-validator:  /home/judge/cdp/config/validefault
+
+# Load data files into pc2 as SerializedFiles, not using CDP external files
+load-data-files: false
+
+# judge's data path
+judge-config-path: /home/judge/cdp/config
+
+languages:
+  - name: 'Java'
+    active: true
+    compilerCmd: 'javac -encoding UTF-8 -sourcepath . -d . {:mainfile}'
+    exemask: '{:basename}.class'
+    execCmd: 'java -Xss8m -Xmx1024m {:basename}'
+    runner: 'java'
+    runner-args: '{:basename}'
+    use-judge-cmd: true
+    judge-exec-cmd: '/usr/bin/wrapper_java {:timelimit} {:basename}'
+
+
+accounts:
+  - account: JUDGE
+    site: 1
+    count: 14
+
+# EOF Contest Configuration

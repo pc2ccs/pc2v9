@@ -33,7 +33,7 @@ public class TeamAccountTest extends TestCase {
 
         assertNotNull(account);
 
-        assertEquals("Account id ", 105, account.getId());
+        assertEquals("Account id ", "105", account.getId());
         assertEquals("Account name ", "Kansas State University", account.getName());
         assertEquals("display_name ", "Kansas State University", account.getDisplay_name());
         assertEquals("organization_id ", "k-state_edu", account.getOrganization_id());

@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
 public class TeamAccount {
 
     @JsonProperty
-    private int id;
+    private String id;
 
     @JsonProperty
     private String icpc_id;
@@ -39,11 +39,10 @@ public class TeamAccount {
      * 21 id "22" icpc_id "449752" name "Emory University" display_name "Emory University" organization_id "emory_edu" group_ids 0 "3"
      */
 
-    public int getId() {
+    public String getId() {
         return id;
     }
-
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
