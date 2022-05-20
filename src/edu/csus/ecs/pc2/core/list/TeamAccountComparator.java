@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.core.list;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.imports.clics.TeamAccount;
 
 /*
@@ -25,9 +26,7 @@ public class TeamAccountComparator implements Comparator<TeamAccount>, Serializa
         int teamId2 = Integer.parseInt(account2.getId().trim());
 
         if (teamId1 == teamId2) {
-
-            return account1.getDisplay_name().compareTo(account2.getDisplay_name());
-
+            return StringUtilities.nullSafecompareTo(account1.getDisplay_name(), account2.getDisplay_name());
         } else {
             return teamId1 - teamId2;
         }

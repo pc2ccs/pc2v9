@@ -275,5 +275,25 @@ public final class StringUtilities implements Serializable {
 
         return value;
     }
-    
+
+    /**
+     * Null safe compare for Strings
+     * 
+     * @param string1
+     * @param stringTwo
+     * @return 0 if equal, -1 if string1 before string2, else 1
+     */
+    public static int nullSafecompareTo(String string1, String stringTwo) {
+
+        if (string1 == null ^ stringTwo == null) {
+            return (string1 == null) ? -1 : 1;
+        }
+
+        if (string1 == null && stringTwo == null) {
+            return 0;
+        }
+
+        return string1.compareToIgnoreCase(stringTwo);
+    }
+
 }

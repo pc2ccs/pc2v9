@@ -92,4 +92,14 @@ public class TeamAccount {
         ObjectMapper om = JSONObjectMapper.getObjectMapper();
         return om.writeValueAsString(this);
     }
+    
+    @Override
+    public String toString() {
+        try {
+            return toJSON();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return super.toString();
+        }
+    }
 }
