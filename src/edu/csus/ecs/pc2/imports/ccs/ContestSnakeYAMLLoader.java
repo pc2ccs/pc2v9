@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.ByteArrayInputStream;
@@ -1356,28 +1356,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             if (outputValidatorProg != null) {
                 Problem cleanProblem = contest.getProblem(problem.getElementId());
                 ProblemDataFiles problemDataFile = contest.getProblemDataFile(problem);
-                
-                outputValidatorProg = findOutputValidatorFile (baseDirectoryName, problem);
-                String outputValidatorName = findOutputValidatorFile (baseDirectoryName, problem);
-                
-                if (!StringUtilities.isEmpty(outputValidatorName)) {
-                    
-                    // Check for output validator if defined
-                    
-                    if ( !new File(outputValidatorName).isFile()) {
-                        throw new YamlLoadException("Missing output validator for problem "+problem.getShortName()+", expecting at: "+outputValidatorName);
-                    }
-                    
-                    SerializedFile outputValidatorFile = new SerializedFile(outputValidatorProg);
-                    if (outputValidatorFile.getSHA1sum() != null) {
-                        problemDataFile.setOutputValidatorFile(outputValidatorFile);
-                        contest.updateProblem(cleanProblem, problemDataFile);
-                    } else {
-                        // Halt loading and throw YamlLoadException
-                        syntaxError("Error: problem " + problem.getLetter() + " - " + problem.getShortName() + " custom validator import failed: " + outputValidatorFile.getErrorMessage());
-                    }
+                SerializedFile outputValidatorFile = new SerializedFile(outputValidatorProg);
+                if (outputValidatorFile.getSHA1sum() != null) {
+                    problemDataFile.setOutputValidatorFile(outputValidatorFile);
+                    contest.updateProblem(cleanProblem, problemDataFile);
+                } else {
+                    // Halt loading and throw YamlLoadException
+                    syntaxError("Error: problem " + problem.getLetter() + " - " + problem.getShortName() + " custom validator import failed: " + outputValidatorFile.getErrorMessage());
                 }
-
             }
         }
         
@@ -2429,7 +2415,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      * 
      * @param problem the {@link Problem} to which the CLICS output validator is to be added.
      * @param problemDataFiles the {@link ProblemDataFiles} associated with the specified problem.
-     * @param baseDirectoryName the config of the directory where problems are found, ex /home/ubtuntu/current/config
+     * @param baseDirectoryName the name of the directory where the problem configuration lies.
      * 
      * @return an updated Problem (the problem is also modified via the received reference parameter).
      * 
@@ -2449,61 +2435,25 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problem.setOutputValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         }
 
+        String outputValidatorName = baseDirectoryName + File.separator + problem.getOutputValidatorProgramName();
+
+        try {
+            /**
+             * If file is there load it
+             */
+            if (new File(outputValidatorName).isFile()) {
+                //TODO:  Huh?  the following doesn't seem to make sense... the variable 'validatorName' has been assigned
+                // the value of the problem's OUTPUT validator (just above the "try"), but this statement is assigning
+                // that value to the problemDataFiles' INPUT validator.  Seems wrong... jlc
+                problemDataFiles.setCustomInputValidatorFile(new SerializedFile(outputValidatorName));
+            }
+        } catch (Exception e) {
+            throw new YamlLoadException("Unable to load validator for problem " + problem.getShortName() + ": " + outputValidatorName, e);
+        }
         
         return problem;
     }
 
-    /**
-     * Return path of output validator
-     * 
-     * @param baseDirectoryName CDP base directory
-     * @param problem
-     * @return null if 
-     */
-    protected String findOutputValidatorFile(String baseDirectoryName, Problem problem) {
-        
-        String validatorFile = problem.getCustomOutputValidatorSettings().getCustomValidatorProgramName();
-        if (StringUtilities.isEmpty(validatorFile)) {
-            return validatorFile;
-        }
-
-        /**
-         * Return path if validator is an absolute path.
-         * 
-         * Ex. /home/ubuntu/current/config/alt_output_validator
-         */
-        if (new File(validatorFile).isFile()) {
-            return validatorFile;
-        }
-        
-        /**
-         * Check for validator under output_validators/
-         * 
-         * Ex. /home/ubuntu/current/config/bells/output_validators/bells_validator/validator
-         */
-        validatorFile = baseDirectoryName + File.separator + problem.getShortName() + File.separator +  //
-                OUTPUT_VALIDATORS + File.separator + problem.getCustomInputValidatorProgramName();
-        
-        if (new File(validatorFile).isFile()) {
-            return validatorFile;
-        }
-        
-        /**
-         * Check for under CDP/basename
-         * 
-         * Ex. /home/ubuntu/current/config/bells/validator
-         */
-        String baseValidatorFile = baseDirectoryName + File.separator + problem.getCustomInputValidatorProgramName();
-        
-        if (new File(baseValidatorFile).isFile()) {
-            return baseValidatorFile;
-        }
-        
-        return validatorFile;
-        
-        
-        
-    }
 
     /**
      * Adds a Custom Input Validator (also called an Input Format Validator) to the specified {@link Problem} and
