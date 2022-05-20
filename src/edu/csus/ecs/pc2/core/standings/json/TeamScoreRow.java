@@ -16,6 +16,8 @@ public class TeamScoreRow implements Comparable<TeamScoreRow> {
     //    {"rank":1, 
     //     "team_id":325958,
 
+    public enum TeamScoreRowFields {RANK, NAME, SOLVED, TIME};
+    
     @JsonProperty
     private int rank;
     
