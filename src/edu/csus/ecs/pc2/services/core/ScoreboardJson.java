@@ -9,8 +9,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -36,9 +34,9 @@ public class ScoreboardJson {
      * @return
      * @throws IllegalContestState
      * @throws JAXBException
-     * @throws JsonProcessingException 
+     * @throws IOException 
      */
-    public String createJSON(IInternalContest contest) throws IllegalContestState, JAXBException, JsonProcessingException {
+    public String createJSON(IInternalContest contest) throws IllegalContestState, JAXBException, IOException {
         return createJSON(contest, null);
     }
 
@@ -50,9 +48,9 @@ public class ScoreboardJson {
      * @throws IllegalContestState
      * @return
      * @throws JAXBException
-     * @throws JsonProcessingException 
+     * @throws IOException 
      */
-    public String createJSON(IInternalContest contest, Log log) throws IllegalContestState, JAXBException, JsonProcessingException {
+    public String createJSON(IInternalContest contest, Log log) throws IllegalContestState, JAXBException, IOException {
 
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
 
@@ -73,12 +71,11 @@ public class ScoreboardJson {
      * @param xml
      * @return
      * @throws JAXBException
-     * @throws JsonProcessingException 
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
      */
-    public String createJSON(String xml) throws JAXBException, JsonProcessingException {
+    public String createJSON(String xml) throws JAXBException, IOException {
         ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(xml);
         String json = ScoreboardJsonUtility.createScoreboardJSON(contestStandings);
         return json;

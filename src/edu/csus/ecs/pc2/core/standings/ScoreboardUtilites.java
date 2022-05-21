@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
@@ -42,13 +43,20 @@ public class ScoreboardUtilites {
      * @param xmlString
      * @return
      * @throws JAXBException
+     * @throws IOException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
      */
-    public static ContestStandings createContestStandings(String xmlString) throws JAXBException {
+    public static ContestStandings createContestStandings(String xmlString) throws JAXBException, JsonParseException, JsonMappingException, IOException {
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(ContestStandings.class);
-        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-        ContestStandings contestStandings = (ContestStandings) jaxbUnmarshaller.unmarshal(new InputSource(new StringReader(xmlString)));
-        return contestStandings;
+        //JAXB was deprecated in Java 9 and removed entirely in Java 11; don't use it...
+//        JAXBContext jaxbContext = JAXBContext.newInstance(ContestStandings.class);
+//        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+//        ContestStandings contestStandings = (ContestStandings) jaxbUnmarshaller.unmarshal(new InputSource(new StringReader(xmlString)));
+        
+        XmlMapper xmlMapper = new XmlMapper();
+        ContestStandings standings = xmlMapper.readValue(xmlString, ContestStandings.class);
+        return standings;
     }
 
     /**
@@ -74,7 +82,7 @@ public class ScoreboardUtilites {
         return xml;
     }
     
-    public static ContestStandings createContestStandings(IInternalContest contest) throws JAXBException, IllegalContestState {
+    public static ContestStandings createContestStandings(IInternalContest contest) throws JAXBException, IllegalContestState, JsonParseException, JsonMappingException, IOException {
         String xmlString = ScoreboardUtilites.createScoreboardXML(contest);
         return createContestStandings(xmlString);
     }

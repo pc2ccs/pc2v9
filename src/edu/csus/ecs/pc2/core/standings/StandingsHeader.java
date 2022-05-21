@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.standings;
 
 import java.io.Serializable;
@@ -10,9 +10,23 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * This class defines the header which appears at the top of a {@link ContestStandings} object.  
+ * (A {@link ContestStandings} consists of a single {@link StandingsHeader} followed by a List of {@link TeamStanding}s.)
+ * This class is used as a target during conversion (deserialization) of an XML representation of a StandingsHeader into a POJO.
+ * 
+ * Note that the @JsonIgnoreProperties(ignoreUnknown=true) annotation is necessary because the XML returned by the 
+ * DefaultScoringAlgorithm class (which is frequently converted to a StandingsHeader object using, for example, 
+ * the Jackson XMLMapper class), contains an attribute "CurrentDate" which this class doesn't define.
+ * 
+ * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
+ *
+ */
+@JsonIgnoreProperties(ignoreUnknown=true)  
 @XmlRootElement(name = "standingsHeader")
 @XmlAccessorType (XmlAccessType.FIELD)
 public class StandingsHeader implements Serializable {

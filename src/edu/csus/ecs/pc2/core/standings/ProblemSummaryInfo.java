@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
-@XmlRootElement(name = "c")
+@XmlRootElement(name = "problemSummaryInfo")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ProblemSummaryInfo {
 
