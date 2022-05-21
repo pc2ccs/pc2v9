@@ -326,7 +326,7 @@ public class CLICSEventFeedExract {
         printWriter.println(String.join(TAB, headerCols));
 
         for (TeamAccount teamAccount : teams) {
-            String[] cols = { "1", teamAccount.getId(), teamAccount.getDisplay_name() };
+            String[] cols = { "1", "team" + teamAccount.getId(), teamAccount.getDisplay_name() };
 
             printWriter.println(String.join(TAB, cols));
         }
