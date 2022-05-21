@@ -54,5 +54,8 @@
 	<classpathentry kind="lib" path="vendor/lib/yasson-1.0.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/javax.ws.rs-api-2.1.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/viva.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jackson-dataformat-xml-2.5.4.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/stax2-api-4.2.1.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/jackson-module-jaxb-annotations-2.5.4.jar"/>
 	<classpathentry kind="output" path=".classes"/>
 </classpath>
