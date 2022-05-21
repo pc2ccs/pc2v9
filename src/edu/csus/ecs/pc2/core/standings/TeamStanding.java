@@ -9,17 +9,30 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
 /**
- * teamStanding element.
+ * This class defines an entry (one for each team) which appears in a List of TeamStandings in a {@link ContestStandings} object.  
+ * (A {@link ContestStandings} consists of a single {@link StandingsHeader} followed by a List of {@link TeamStanding}s.)
+ * This class is used as a target during conversion (deserialization) of an XML representation of a TeamStanding into a POJO.
  * 
- * @author Douglas A. Lane <pc2@ecs.csus.edu>
+ * Note that the @JsonIgnoreProperties(ignoreUnknown=true) annotation is supplied in the event the XML returned by the 
+ * DefaultScoringAlgorithm class (which is frequently converted to a ContestStandings object using, for example, 
+ * the Jackson XMLMapper class), contains attributes which this class doesn't define.
+ *
+ * @author Douglas A. Lane, John Clevenger, <pc2@ecs.csus.edu>
  *
  */
+@JsonIgnoreProperties(ignoreUnknown=true)
 @XmlRootElement(name = "teamStanding")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TeamStanding {
 
     @XmlElement(name = "problemSummaryInfo")
+    @JacksonXmlProperty(localName = "problemSummaryInfo")
+    @JacksonXmlElementWrapper(useWrapping = false)
     private List<ProblemSummaryInfo> problemSummaryInfos = null;
 
     @XmlAttribute
@@ -82,6 +95,10 @@ public class TeamStanding {
     @XmlAttribute
     private String totalAttempts;
 
+//    @XmlAttribute
+//    @XmlElement(name = "problemSummaryInfos")
+//    @JacksonXmlProperty(localName = "problemSummaryInfos")
+//    @JacksonXmlElementWrapper(useWrapping = false)
     public List<ProblemSummaryInfo> getProblemSummaryInfos() {
         return problemSummaryInfos;
     }
