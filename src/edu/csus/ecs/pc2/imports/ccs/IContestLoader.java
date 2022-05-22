@@ -32,6 +32,8 @@ public interface IContestLoader {
     String DEFAULT_PROBLEM_SET_YAML_FILENAME = "problemset.yaml";
     
     String DEFAULT_PROBLEM_LATEX_FILENAME = "problem.tex";
+    
+    String DEFAULT_ENGLISH_PROBLEM_LATEX_FILENAME = "problem.en.tex";
 
     String DEFAULT_SYSTEM_YAML_FILENAME = "system.yaml";
     
@@ -149,6 +151,12 @@ public interface IContestLoader {
     String INTERPRETED_LANGUAGE_KEY = "interpreted";
 
     String READ_FROM_STDIN_KEY = "readFromSTDIN";
+
+    /**
+     * output validators directory name.
+     */
+    final String OUTPUT_VALIDATORS = "output_validators";
+
     
     //keys for YAML entries specifying data for Input Validators:
     String INPUT_VALIDATOR_KEY = "input_validator"; //the section header for Input Validator info

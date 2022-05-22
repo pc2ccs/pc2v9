@@ -3700,6 +3700,44 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertNotNull("Expecting to load ccs2 contest",contest);
         assertFalse("Expected NO halt at end of contest ", contest.getContestInformation().isAutoStopContest());
     }
+    
+    public String getTestDataDirname(String dirname) {
+        String contestConfigDir = getRootInputTestDataDirectory() +File.separator + dirname +File.separator+ IContestLoader.CONFIG_DIRNAME;
+        return contestConfigDir;
+    }
+    
+    /**
+     * Test loading problem title from problem.en.tex.
+     * 
+     * @throws Exception
+     */
+    public void testProblemNameENTex() throws Exception {
+        String testDataContestDirName = "samplecdp";
+
+        String dirname = getTestDataDirname(testDataContestDirName);
+//        startExplorer(dirname);
+
+        IInternalContest contest = snake.fromYaml(null, dirname, false);
+        assertNotNull(contest);
+
+        Problem[] problems = contest.getProblems();
+
+        for (Problem problem : problems) {
+            if ("ship".equals(problem.getShortName())) {
+                String expected = "Ship Traffic";
+                assertEquals("Expect problem title ", expected, problem.getDisplayName());
+            }
+            if ("tours".equals(problem.getShortName())) {
+                String expected = "Tours";
+                assertEquals("Expect problem title ", expected, problem.getDisplayName());
+            }
+
+            if ("evolution".equals(problem.getShortName())) {
+                String expected = "Evolution in Parallel";
+                assertEquals("Expect problem title ", expected, problem.getDisplayName());
+            }
+        }
+    }
    
     
 }

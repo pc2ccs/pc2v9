@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.ByteArrayInputStream;
@@ -153,7 +153,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 contents = concat(contents, lines);
             }
         } catch (IOException e) {
-            throw new YamlLoadException("Problem loading " + e.getMessage(), e, contestYamlFilename);
+            throw new YamlLoadException("Problem loading yaml " + e.toString(), e, contestYamlFilename);
         }
         return fromYaml(contest, contents, directoryName, loadDataFileContents);
     }
@@ -1281,6 +1281,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String problemTitle = fetchValue(content, PROBLEM_NAME_KEY);
 
         if (new File(problemLaTexFilename).isFile()) {
+            problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
+        } else {
+            problemLaTexFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_ENGLISH_PROBLEM_LATEX_FILENAME;
             problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
         }
 
