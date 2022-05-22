@@ -1335,10 +1335,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         String fullPath = FileUtilities.getCurrentDirectory() +"\\"+baseDirectoryName+"\\"+problem.getShortName();
-//        System.out.println("debug 22 pwd = " + FileUtilities.getCurrentDirectory());
-//        System.out.println("debug 22 config dir = "+baseDirectoryName+"\\"+problem.getShortName());
-        System.out.println("debug 22 full path = "+fullPath);;
-        System.out.println("debug 22 usingCustomValidator =  "+usingCustomValidator);
 
         if (!usingCustomValidator) {
             if (!pc2FormatProblemYamlFile) {
@@ -1361,15 +1357,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             // using Custom Output Validator
             String outputValidatorNameFromYaml = fetchValue(validatorContent, "validatorProg");
             
-            System.out.println("debug 22  A name "+outputValidatorNameFromYaml);
-            
             if (outputValidatorNameFromYaml != null) {
                 Problem cleanProblem = contest.getProblem(problem.getElementId());
                 ProblemDataFiles problemDataFile = contest.getProblemDataFile(problem);
                 
                 String outputValidatorName = findOutputValidatorFile (baseDirectoryName, problem, outputValidatorNameFromYaml);
-                
-                System.out.println("debug 22  D validator name  "+outputValidatorName);
                 
                 if (!StringUtilities.isEmpty(outputValidatorName)) {
                     
@@ -1387,8 +1379,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                         
                         // save validator program name
                         problem.setOutputValidatorProgramName(outputValidatorName);
-                        System.out.println("debug 22 ov name "+problem.getOutputValidatorProgramName());
-                        
                         contest.updateProblem(cleanProblem, problemDataFile);
                     } else {
                         // Halt loading and throw YamlLoadException
@@ -1526,16 +1516,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 
                 customSettings.setValidatorCommandLine(validatorCmd);
                 
-                System.out.println("debug 22 b4 name "+customSettings.getCustomValidatorProgramName());
-                System.out.println("debug 22 ov name "+problem.getOutputValidatorProgramName());
-                
                 if (problem.getOutputValidatorProgramName() != null) {
                     // TODO REFACTOR There are two locations that store the validator program name, there should be one.
                     customSettings.setValidatorProgramName(problem.getOutputValidatorProgramName());
                 }
-                
-                
-                System.out.println("debug 22 af name "+customSettings.getCustomValidatorProgramName());
                 
                 customSettings.setValidatorProgramName(validatorProg);
                 problem.setCustomOutputValidatorSettings(customSettings);
@@ -2496,7 +2480,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (StringUtilities.isEmpty(validatorFile)) {
             return validatorFile;
         }
-
+        
         /**
          * Return path if validator is an absolute path.
          * 
