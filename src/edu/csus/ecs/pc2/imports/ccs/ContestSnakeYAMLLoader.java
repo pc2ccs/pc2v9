@@ -27,7 +27,6 @@ import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
 
 import edu.csus.ecs.pc2.core.Constants;
-import edu.csus.ecs.pc2.core.FileUtilities;
 import edu.csus.ecs.pc2.core.JudgementLoader;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -1334,8 +1333,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problem.setTimeOutInSeconds(timeOut);
         }
 
-        String fullPath = FileUtilities.getCurrentDirectory() +"\\"+baseDirectoryName+"\\"+problem.getShortName();
-
         if (!usingCustomValidator) {
             if (!pc2FormatProblemYamlFile) {
                 // SOMEDAY CCS add CCS validator derived based on build script
@@ -2471,16 +2468,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     /**
      * Return path of output validator
      * 
-     * @param baseDirectoryName CDP base directory
+     * @param baseDirectoryName
+     *            CDP base directory
      * @param problem
-     * @return null if 
+     * @return null if
      */
     protected String findOutputValidatorFile(String baseDirectoryName, Problem problem, String validatorFile) {
-        
+
         if (StringUtilities.isEmpty(validatorFile)) {
             return validatorFile;
         }
-        
+
         /**
          * Return path if validator is an absolute path.
          * 
@@ -2489,34 +2487,31 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (new File(validatorFile).isFile()) {
             return validatorFile;
         }
-        
+
         /**
          * Check for validator under output_validators/
          * 
          * Ex. /home/ubuntu/current/config/bells/output_validators/bells_validator/validator
          */
-        validatorFile = baseDirectoryName + File.separator + problem.getShortName() + File.separator +  //
+        validatorFile = baseDirectoryName + File.separator + problem.getShortName() + File.separator + //
                 OUTPUT_VALIDATORS + File.separator + validatorFile;
-        
+
         if (new File(validatorFile).isFile()) {
             return validatorFile;
         }
-        
+
         /**
          * Check for under CDP/basename
          * 
          * Ex. /home/ubuntu/current/config/bells/validator
          */
         String baseValidatorFile = baseDirectoryName + File.separator + validatorFile;
-        
+
         if (new File(baseValidatorFile).isFile()) {
             return baseValidatorFile;
         }
-        
+
         return validatorFile;
-        
-        
-        
     }
 
     /**
