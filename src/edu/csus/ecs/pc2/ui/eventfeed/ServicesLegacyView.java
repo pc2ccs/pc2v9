@@ -175,7 +175,7 @@ public class ServicesLegacyView extends JFrame implements UIPlugin {
                 
                 try {
                     ShadowLegacyControlPane shadowPane = new ShadowLegacyControlPane(inContest, inController);
-                    addUIPlugin(getMainTabbedPane(), "Shadow Mode (Legacy)", shadowPane);
+                    addUIPlugin(getMainTabbedPane(), "Legacy Shadow Mode", shadowPane);
                 } catch (Exception e) {
                     if (StaticLog.getLog() != null) {
                         StaticLog.getLog().log(Log.WARNING, "Exception", e);
