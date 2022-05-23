@@ -1,7 +1,8 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.eventfeed;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -31,10 +32,9 @@ import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
-import edu.csus.ecs.pc2.ui.ShadowControlPane;
+import edu.csus.ecs.pc2.ui.ShadowLegacyControlPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import edu.csus.ecs.pc2.ui.WebServerPane;
-import java.awt.Dimension;
 
 /**
  * This class presents a graphical user interface for controlling the services exposed to external clients.
@@ -42,14 +42,16 @@ import java.awt.Dimension;
  * each of these services, as well as to define the port(s)
  * on which the services appear to external clients.
  * 
+ * This version of the class is a clone of the original {@link ServicesView}; this version uses the old (legacy)
+ * versions of the {@link ShadowController} and {@link RemoteEventFeedMonitor} classes -- that is, the versions
+ * of those classes prior to updates made in support of fixes for https://github.com/pc2ccs/pc2v9/issues/267.
+ * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class ServicesLegacyView extends JFrame implements UIPlugin {
 
-    private static final long serialVersionUID = 2157337344457051296L;
+    private static final long serialVersionUID = 1;
 
     private IInternalContest contest;
 
@@ -172,8 +174,8 @@ public class ServicesLegacyView extends JFrame implements UIPlugin {
                 }
                 
                 try {
-                    ShadowControlPane shadowPane = new ShadowControlPane(inContest, inController);
-                    addUIPlugin(getMainTabbedPane(), "Shadow Mode", shadowPane);
+                    ShadowLegacyControlPane shadowPane = new ShadowLegacyControlPane(inContest, inController);
+                    addUIPlugin(getMainTabbedPane(), "Shadow Mode (Legacy)", shadowPane);
                 } catch (Exception e) {
                     if (StaticLog.getLog() != null) {
                         StaticLog.getLog().log(Log.WARNING, "Exception", e);

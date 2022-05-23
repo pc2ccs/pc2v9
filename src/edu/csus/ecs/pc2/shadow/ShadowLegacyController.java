@@ -55,7 +55,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  *
  */
-public class ShadowControllerLegacy {
+public class ShadowLegacyController {
 
     private IInternalContest localContest;
     private IInternalController localController;
@@ -141,7 +141,7 @@ public class ShadowControllerLegacy {
      * @param localContest a PC2 Contest to be used by the Shadow Controller
      * @param localController a PC2 Controller to be used by the Shadow Controller
      */
-    public ShadowControllerLegacy(IInternalContest localContest, IInternalController localController) {
+    public ShadowLegacyController(IInternalContest localContest, IInternalController localController) {
 
         this(localContest, localController, 
                 localContest.getContestInformation().getPrimaryCCS_URL(),
@@ -159,7 +159,7 @@ public class ShadowControllerLegacy {
      * @param remoteCCSLogin
      * @param remoteCCSPassword
      */
-    public ShadowControllerLegacy(IInternalContest localContest, IInternalController localController, 
+    public ShadowLegacyController(IInternalContest localContest, IInternalController localController, 
                             String remoteURL, String remoteCCSLogin, String remoteCCSPassword) {
 
         this.localContest = localContest;
@@ -399,7 +399,7 @@ public class ShadowControllerLegacy {
         }
 
         // construct a comparator to compare the two JSON strings
-        ShadowScoreboardComparisonGeneratorLegacy comparator = new ShadowScoreboardComparisonGeneratorLegacy(this);
+        ShadowLegacyScoreboardComparisonGenerator comparator = new ShadowLegacyScoreboardComparisonGenerator(this);
 
         //use the comparator to obtain a row-by-row comparison of the two JSON scoreboards
         ShadowScoreboardRowComparison[] results = comparator.compare(pc2Json, remoteJson);
