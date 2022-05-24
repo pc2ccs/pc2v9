@@ -90,7 +90,7 @@ public class ShadowLegacyCompareRunsPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "Shadow_Compare_Pane";
+        return "Shadow_Legacy_Compare_Pane";
     }
     
     /**

@@ -170,7 +170,7 @@ public class ShadowLegacyControlPane extends JPanePlugin {
             startStopButton = new JButton();
             startStopButton.setText("Start Shadowing");
             startStopButton.setMnemonic(KeyEvent.VK_S);
-            startStopButton.setToolTipText("Start shadowing operations on the specified remote CCS using legacy shadow code");
+            startStopButton.setToolTipText("Start shadowing operations on the specified remote CCS using legacy code");
             startStopButton.addActionListener(new java.awt.event.ActionListener() {
 
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -600,7 +600,7 @@ public class ShadowLegacyControlPane extends JPanePlugin {
                         JFrame shadowCompareRunsFrame = new ShadowLegacyCompareRunsFrame(shadowController);
                         shadowCompareRunsFrame.setSize(600,700);
                         shadowCompareRunsFrame.setLocationRelativeTo(null); // centers frame
-                        shadowCompareRunsFrame.setTitle("(Legacy) Shadow Run Comparison");
+                        shadowCompareRunsFrame.setTitle("Shadow Run Comparison (Legacy)");
                         shadowCompareRunsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                         shadowCompareRunsFrame.setVisible(true);
                     }
@@ -631,7 +631,7 @@ public class ShadowLegacyControlPane extends JPanePlugin {
                                 JFrame shadowCompareScoreboardFrame = new ShadowLegacyCompareScoreboardFrame(shadowController);
                                 shadowCompareScoreboardFrame.setSize(600,700);
                                 shadowCompareScoreboardFrame.setLocationRelativeTo(null); // centers frame
-                                shadowCompareScoreboardFrame.setTitle("(Legacy) Shadow Scoreboard Comparison");
+                                shadowCompareScoreboardFrame.setTitle("Shadow Scoreboard Comparison (Legacy)");
                                 shadowCompareScoreboardFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                                 shadowCompareScoreboardFrame.setVisible(true);
                             }

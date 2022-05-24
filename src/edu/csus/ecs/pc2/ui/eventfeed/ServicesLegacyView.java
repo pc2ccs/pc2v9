@@ -133,7 +133,7 @@ public class ServicesLegacyView extends JFrame implements UIPlugin {
         contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
         log = controller.getLog();
-        log.info("Started Services View");
+        log.info("Started Legacy Services View");
         
         contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
         contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
@@ -223,7 +223,7 @@ public class ServicesLegacyView extends JFrame implements UIPlugin {
     }
 
     public String getPluginTitle() {
-        return "Services View";
+        return "Legacy Services View";
     }
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {

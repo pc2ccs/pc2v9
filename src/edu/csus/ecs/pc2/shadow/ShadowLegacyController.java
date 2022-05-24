@@ -67,7 +67,7 @@ public class ShadowLegacyController {
 
     private String remoteCCSPassword;
 
-    private RemoteEventFeedLegacyMonitor monitor;
+    private RemoteEventFeedMonitor monitor;
 
     
     public enum SHADOW_CONTROLLER_STATUS {
@@ -248,7 +248,7 @@ public class ShadowLegacyController {
             
             //construct an EventFeedMonitor for keeping track of the remote CCS events
             log.info("Constructing new RemoteEventFeedMonitor");
-            monitor = new RemoteEventFeedLegacyMonitor(localController, remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter);
+            monitor = new RemoteEventFeedMonitor(localController, remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter);
 
             if (! remoteContestAPIAdapter.testConnection()){
                 
