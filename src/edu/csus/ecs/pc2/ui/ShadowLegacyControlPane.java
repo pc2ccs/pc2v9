@@ -170,7 +170,7 @@ public class ShadowLegacyControlPane extends JPanePlugin {
             startStopButton = new JButton();
             startStopButton.setText("Start Shadowing");
             startStopButton.setMnemonic(KeyEvent.VK_S);
-            startStopButton.setToolTipText("Start shadowing operations on the specified remote CCS");
+            startStopButton.setToolTipText("Start shadowing operations on the specified remote CCS using legacy shadow code");
             startStopButton.addActionListener(new java.awt.event.ActionListener() {
 
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -481,7 +481,7 @@ public class ShadowLegacyControlPane extends JPanePlugin {
         } else {
             shadowingStatusValueLabel.setText("OFF");
             getStartStopButton().setText("Start shadowing");
-            getStartStopButton().setToolTipText("Start shadowing the currently specified remote CCS");
+            getStartStopButton().setToolTipText("Start shadowing the currently specified remote CCS using legacy code");
         }
         
         updateShadowSettingsPane(currentlyShadowing);

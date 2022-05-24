@@ -40,7 +40,7 @@ import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
  * @author pc2@ecs.csus.edu
  *
  */
-public class RemoteEventFeedMonitorLegacy implements Runnable {
+public class RemoteEventFeedLegacyMonitor implements Runnable {
 
     private IRemoteContestAPIAdapter remoteContestAPIAdapter;
     private URL remoteURL;
@@ -98,7 +98,7 @@ public class RemoteEventFeedMonitorLegacy implements Runnable {
      * @param password the password to the remote CCS account
      * @param submitter a {@link Runnable} which knows how to submit a receive remote run to PC2
      */
-    public RemoteEventFeedMonitorLegacy(IInternalController pc2Controller, IRemoteContestAPIAdapter remoteContestAPIAdapter, URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
+    public RemoteEventFeedLegacyMonitor(IInternalController pc2Controller, IRemoteContestAPIAdapter remoteContestAPIAdapter, URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
 
         this.pc2Controller = pc2Controller ;
         this.remoteContestAPIAdapter = remoteContestAPIAdapter;
