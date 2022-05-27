@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Dimension;
@@ -20,10 +20,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * Pane to allow user to choose and open/start plugin window or pane.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class PluginLoadPane extends JPanePlugin {
 
     /**
@@ -179,7 +177,11 @@ public class PluginLoadPane extends JPanePlugin {
 
     private JPanePlugin[] getPluginList() {
         Vector<JPanePlugin> plugins = new Vector<JPanePlugin>();
-
+        
+        plugins.add(new RunsTablePane());
+        plugins.add(new AccountsTablePane());
+        plugins.add(new StandingsTablePane());
+        plugins.add(new ClarificationsTablePane());
         plugins.add(new EventFeedServerPane());
         plugins.add(new AccountsPane());
         plugins.add(new BalloonColorListPane());
