@@ -175,7 +175,7 @@ public class ReportsView extends JFrame implements UIPlugin, ChangeListener {
                 addUIPlugin(getMainTabbedPanel(), "Reports", reportPaneC);
 
                 PluginLoadPane pluginLoadPane = new PluginLoadPane();
-                addUIPlugin(getMainTabbedPanel(), "UI Plugin", pluginLoadPane);
+                addUIPlugin(getMainTabbedPanel(), "UI Plugins", pluginLoadPane);
                 pluginLoadPane.setParentTabbedPane(getMainTabbedPanel());
 
                 OptionsPane optionsPanel = new OptionsPane();
