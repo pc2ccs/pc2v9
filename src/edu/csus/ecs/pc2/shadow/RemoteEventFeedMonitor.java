@@ -573,6 +573,18 @@ public class RemoteEventFeedMonitor implements Runnable {
                             log.log(Level.SEVERE, "Exception processing event: " + event, e);
                             e.printStackTrace();
                         } 
+                    } else {
+                        
+                        //we're skipping an event feed input line -- log the reason
+                        if (event.length()<=0) {
+                            log.log(Level.INFO, "Skipping event feed input line (length is " + event.length() + ")");
+                        } else if (!event.trim().startsWith("{")) {
+                            log.log(Level.INFO, "Skipping event feed input line (does not start with \"{\"): " + event.toString());
+                        } else if (!event.trim().endsWith("}")) {
+                            log.log(Level.INFO, "Skipping event feed input line (does not end with \"}\"): " + event.toString());                            
+                        } else {
+                            log.log(Level.WARNING, "Skipping event feed input line (sorry - no explanation for why): " + event.toString());
+                        }
                     }
                     
                     event = reader.readLine();
