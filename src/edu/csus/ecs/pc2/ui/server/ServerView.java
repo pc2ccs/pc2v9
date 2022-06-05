@@ -49,7 +49,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LoadContestPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
-import edu.csus.ecs.pc2.ui.LoginsPane;
+import edu.csus.ecs.pc2.ui.LoginsTablePane;
 import edu.csus.ecs.pc2.ui.MessageMonitorPane;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
@@ -507,7 +507,7 @@ public class ServerView extends JFrame implements UIPlugin {
             }
         }
         
-        LoginsPane loginsPane = new LoginsPane();
+        LoginsTablePane loginsPane = new LoginsTablePane();
         addUIPlugin(getMainTabbedPane(), "Logins", loginsPane);
 
         if (Utilities.isDebugMode()) {

@@ -195,6 +195,7 @@ public class PluginLoadPane extends JPanePlugin {
         plugins.add(new JudgementsPane());
         plugins.add(new LanguagesPane());
         plugins.add(new LoadContestPane());
+        plugins.add(new LoginsTablePane());
         plugins.add(new LoginsPane());
         plugins.add(new OptionsPane());
         plugins.add(new PacketExplorerPane());
