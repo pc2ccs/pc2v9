@@ -181,9 +181,12 @@ public class PluginLoadPane extends JPanePlugin {
         Vector<JPanePlugin> plugins = new Vector<JPanePlugin>();
 
         plugins.add(new EventFeedServerPane());
+        plugins.add(new AccountsTablePane());
         plugins.add(new AccountsPane());
-        plugins.add(new BalloonColorListPane());
+        plugins.add(new BalloonColorListPane());      
+        plugins.add(new ClarificationsTablePane());
         plugins.add(new ClarificationsPane());
+        plugins.add(new ConnectionsTablePane());
         plugins.add(new ConnectionsPane());
         plugins.add(new ContestClockPane());
         plugins.add(new ContestTimesPane());
@@ -199,9 +202,11 @@ public class PluginLoadPane extends JPanePlugin {
         plugins.add(new ProblemsPane());
         plugins.add(new ProfilesPane());
         plugins.add(new ReportPane());
+        plugins.add(new RunsTablePane());
         plugins.add(new RunsPane());
         plugins.add(new SitesPane());
         // plugins.add(new StandingsHTMLPane());
+        plugins.add(new StandingsTablePane());
         plugins.add(new StandingsPane());
         plugins.add(new SubmissionBiffPane());
         plugins.add(new TeamStatusPane());

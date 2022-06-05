@@ -38,7 +38,7 @@ import edu.csus.ecs.pc2.ui.AutoJudgesPane;
 import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
 import edu.csus.ecs.pc2.ui.CategoriesPane;
 import edu.csus.ecs.pc2.ui.ClarificationsTablePane;
-import edu.csus.ecs.pc2.ui.ConnectionsPane;
+import edu.csus.ecs.pc2.ui.ConnectionsTablePane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.ContestInformationPane;
@@ -299,7 +299,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                  * add UI components involved with Running the contest to the RunContest tabbed pane
                  */
 
-                ConnectionsPane connectionsPane = new ConnectionsPane();
+                ConnectionsTablePane connectionsPane = new ConnectionsTablePane();
                 addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
 
                 ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
