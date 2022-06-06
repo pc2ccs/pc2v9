@@ -38,7 +38,7 @@ import edu.csus.ecs.pc2.ui.AutoJudgesPane;
 import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
 import edu.csus.ecs.pc2.ui.CategoriesPane;
 import edu.csus.ecs.pc2.ui.ClarificationsTablePane;
-import edu.csus.ecs.pc2.ui.ConnectionsPane;
+import edu.csus.ecs.pc2.ui.ConnectionsTablePane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.ContestInformationPane;
@@ -55,7 +55,7 @@ import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.JudgementsPane;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
-import edu.csus.ecs.pc2.ui.LoginsPane;
+import edu.csus.ecs.pc2.ui.LoginsTablePane;
 import edu.csus.ecs.pc2.ui.MessageMonitorPane;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketExplorerPane;
@@ -299,9 +299,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                  * add UI components involved with Running the contest to the RunContest tabbed pane
                  */
 
-                ConnectionsPane connectionsPane = new ConnectionsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
-
+                if (!controller.isSuppressConnectionsPaneDisplay()) {
+                    ConnectionsTablePane connectionsPane = new ConnectionsTablePane();
+                    addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
+                }
+                
                 ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsTablePane);
 
@@ -323,9 +325,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 FinalizePane finalizePane = new FinalizePane();
                 addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
 
-                LoginsPane loginsPane = new LoginsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Logins", loginsPane);
-             
+                if (!controller.isSuppressLoginsPaneDisplay()) {
+                    LoginsTablePane loginsTablePane = new LoginsTablePane();
+                    addUIPlugin(getRunContestTabbedPane(), "Logins", loginsTablePane);
+                }
+                
                 if (Utilities.isDebugMode()) {
                     try {
                         MessageMonitorPane messageMonitorPane = new MessageMonitorPane();

@@ -549,4 +549,14 @@ public class NullController implements IInternalController {
         // TODO Auto-generated method stub
         
     }
+
+    @Override
+    public boolean isSuppressConnectionsPaneDisplay() {
+        return false;
+    }
+
+    @Override
+    public boolean isSuppressLoginsPaneDisplay() {
+        return false;
+    }
 }

@@ -182,6 +182,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 //    private static final String LOAD_YAML_OPTION_STRING = "--loadyaml";
 
     private static final String PASSWORD_OPTION_STRING = "--password";
+    
+    //the following are used to support suppression of loading specific large grids
+    // which seem to cause problems
+    private static final String NO_CONNECTIONS_PANE_OPTION_STRING = "--noconnectionspane";
+    private static final String NO_LOGINS_PANE_OPTION_STRING = "--nologinspane";
+    
+    private boolean suppressConnectionsPaneDisplay = false;
+    private boolean suppressLoginsPaneDisplay = false;
 
     /**
      * The port that the server will listen on.
@@ -3347,6 +3355,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             overRideUIName = overrideClassName;
         }
 
+        if (parseArguments.isOptPresent(NO_CONNECTIONS_PANE_OPTION_STRING)) {
+            suppressConnectionsPaneDisplay = true;
+        } else {
+            suppressConnectionsPaneDisplay = false;
+        }
+
+        if (parseArguments.isOptPresent(NO_LOGINS_PANE_OPTION_STRING)) {
+            suppressLoginsPaneDisplay = true;
+        } else {
+            suppressLoginsPaneDisplay = false;
+        }
+
     }
 
     private boolean isEventFeeder(ClientId clientId) {
@@ -4271,6 +4291,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public boolean isUsingGUI() {
         return usingGUI;
+    }
+
+    public boolean isSuppressConnectionsPaneDisplay() {
+        return suppressConnectionsPaneDisplay;
+    }
+
+    public boolean isSuppressLoginsPaneDisplay() {
+        return suppressLoginsPaneDisplay;
     }
 
     public ILogWindow startLogWindow(IInternalContest inContest) {
