@@ -299,9 +299,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                  * add UI components involved with Running the contest to the RunContest tabbed pane
                  */
 
-                ConnectionsTablePane connectionsPane = new ConnectionsTablePane();
-                addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
-
+                if (!controller.isSuppressConnectionsPaneDisplay()) {
+                    ConnectionsTablePane connectionsPane = new ConnectionsTablePane();
+                    addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
+                }
+                
                 ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsTablePane);
 
@@ -323,9 +325,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 FinalizePane finalizePane = new FinalizePane();
                 addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
 
-                LoginsTablePane loginsTablePane = new LoginsTablePane();
-                addUIPlugin(getRunContestTabbedPane(), "Logins", loginsTablePane);
-             
+                if (!controller.isSuppressLoginsPaneDisplay()) {
+                    LoginsTablePane loginsTablePane = new LoginsTablePane();
+                    addUIPlugin(getRunContestTabbedPane(), "Logins", loginsTablePane);
+                }
+                
                 if (Utilities.isDebugMode()) {
                     try {
                         MessageMonitorPane messageMonitorPane = new MessageMonitorPane();

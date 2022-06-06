@@ -2,8 +2,6 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.util.Base64;
 
-import edu.csus.ecs.pc2.core.model.IFile;
-
 /**
  * This class is a concrete implementation of a file from the point of view of the PC<sup>2</sup> API.
  * 
