@@ -3545,11 +3545,11 @@ public class PacketHandler {
                     } catch (Exception e) {
                         controller.getLog().warning("contest.getRunFiles (R/O) can not get files for run " + run.getNumber() + ": " + e.getMessage());
                         
-                        try {
-                            contest.cancelRunCheckOut(run, whoRequestsRunId);
-                        } catch (Exception e1) {
-                            controller.getLog().severe("Problem canceling run checkout after error getting run " + run.getNumber() + " files." + e1);
-                        }
+                        // set status to NEW indicating there was a failure and it has to be manually taken care of
+                        // the judges will be notifed of a new run.
+                        theRun.setStatus(Run.RunStates.NEW);
+                        Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoRequestsRunId, theRun);
+                        controller.sendToJudgesAndOthers(availableRunPacket, true);
                         
                         Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
                         controller.sendToClient(notAvailableRunPacket);
@@ -3579,12 +3579,13 @@ public class PacketHandler {
                             controller.getLog().warning("contest.getRunFiles can not get files for run " + run.getNumber() + " (settng to status NEW): " + e.getMessage());
                             
                             try {
+                                // cancel the checkout and set run state to NEW to notify judges
                                 contest.cancelRunCheckOut(run, whoRequestsRunId);
                                 theRun.setStatus(Run.RunStates.NEW);
                                 Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoRequestsRunId, theRun);
                                 controller.sendToJudgesAndOthers(availableRunPacket, true);
                             } catch (Exception e1) {
-                                controller.getLog().severe("Problem canceling run checkout after error getting run " + run.getNumber() + " files." + e1);
+                                controller.getLog().severe("Problem cancelling run checkout after error getting run " + run.getNumber() + " files." + e1);
                             }
                             
                             Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
@@ -3597,7 +3598,7 @@ public class PacketHandler {
                             try {
                                 contest.cancelRunCheckOut(run, whoRequestsRunId);
                             } catch (UnableToUncheckoutRunException e) {
-                                controller.getLog().severe("Problem canceling run checkout after error getting run files.");
+                                controller.getLog().severe("Problem cancelling run checkout after error getting run files.");
                             }
                             throw new RunUnavailableException("Error retrieving files.");
                         }
