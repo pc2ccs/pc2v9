@@ -3543,7 +3543,7 @@ public class PacketHandler {
                     try {
                         runFiles = contest.getRunFiles(run);  
                     } catch (Exception e) {
-                        controller.getLog().info("contest.getRunFiles (R/O) can not get files for run " + run.getNumber() + ": " + e.getMessage());
+                        controller.getLog().warning("contest.getRunFiles (R/O) can not get files for run " + run.getNumber() + ": " + e.getMessage());
                         
                         try {
                             contest.cancelRunCheckOut(run, whoRequestsRunId);
@@ -3576,7 +3576,7 @@ public class PacketHandler {
                         try {
                             runFiles = contest.getRunFiles(run);  
                         } catch (Exception e) {
-                            controller.getLog().info("contest.getRunFiles can not get files for run " + run.getNumber() + " (settng to status NEW): " + e.getMessage());
+                            controller.getLog().warning("contest.getRunFiles can not get files for run " + run.getNumber() + " (settng to status NEW): " + e.getMessage());
                             
                             try {
                                 contest.cancelRunCheckOut(run, whoRequestsRunId);
