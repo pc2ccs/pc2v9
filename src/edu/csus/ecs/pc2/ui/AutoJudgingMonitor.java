@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
-import edu.csus.ecs.pc2.core.list.RunComparator;
+import edu.csus.ecs.pc2.core.list.RunComparatorByElapsedRunIdSite;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -187,7 +187,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         }
 
         Run[] runs = contest.getRuns();
-        Arrays.sort(runs,new RunComparator());
+        Arrays.sort(runs,new RunComparatorByElapsedRunIdSite());
 
         for (Run run : runs) {
             if (run.getStatus() == RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT) {
