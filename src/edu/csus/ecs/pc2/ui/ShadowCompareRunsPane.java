@@ -483,7 +483,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                 String client = clientId.getName();
                 String msg = "";
                 msg += "Your login account (" + client + ") does not have permission to edit (update) runs.\n\n" ;
-                msg += "You will need to have an Administrator update your account permissions in order to be able to update runs.";
+                msg += "You will need to have an Administrator update your account permissions (by adding the \"Edit a Run\" permission) in order to be able to update runs.";
                 
                 JOptionPane.showMessageDialog(this, msg, "Missing Edit Permission", JOptionPane.WARNING_MESSAGE);
                 log.log (Log.WARNING, "Client attempted to update run without having Edit Run permission");

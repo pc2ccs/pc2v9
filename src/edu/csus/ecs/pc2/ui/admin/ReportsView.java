@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-20 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.admin;
 
 import java.awt.BorderLayout;
@@ -23,7 +23,6 @@ import javax.swing.event.ChangeListener;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
-import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -33,60 +32,29 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.ui.AboutPane;
-import edu.csus.ecs.pc2.ui.AccountsTablePane;
-import edu.csus.ecs.pc2.ui.AutoJudgesPane;
-import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
-import edu.csus.ecs.pc2.ui.CategoriesPane;
-import edu.csus.ecs.pc2.ui.ClarificationsTablePane;
-import edu.csus.ecs.pc2.ui.ConnectionsTablePane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
-import edu.csus.ecs.pc2.ui.ContestInformationPane;
-import edu.csus.ecs.pc2.ui.ContestPreloadPane;
-import edu.csus.ecs.pc2.ui.ContestTimesPane;
-import edu.csus.ecs.pc2.ui.EventFeedServerPane;
-import edu.csus.ecs.pc2.ui.ExportDataPane;
-import edu.csus.ecs.pc2.ui.FinalizePane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
-import edu.csus.ecs.pc2.ui.GroupsPane;
-import edu.csus.ecs.pc2.ui.ICPCLoadPane;
-import edu.csus.ecs.pc2.ui.ImportDataPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
-import edu.csus.ecs.pc2.ui.JudgementsPane;
-import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
-import edu.csus.ecs.pc2.ui.LoginsTablePane;
-import edu.csus.ecs.pc2.ui.MessageMonitorPane;
 import edu.csus.ecs.pc2.ui.OptionsPane;
-import edu.csus.ecs.pc2.ui.PacketExplorerPane;
-import edu.csus.ecs.pc2.ui.PacketMonitorPane;
-import edu.csus.ecs.pc2.ui.PlaybackPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
-import edu.csus.ecs.pc2.ui.ProblemsPane;
-import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
-import edu.csus.ecs.pc2.ui.RunsTablePane;
-import edu.csus.ecs.pc2.ui.SitesPane;
-import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
-import edu.csus.ecs.pc2.ui.StandingsTablePane;
-import edu.csus.ecs.pc2.ui.TeamStatusPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
- * Administrator GUI.
+ * ReportsView - view that just shows report tab
  * 
- * @author pc2@ecs.csus.edu
- * @version $Id$
+ * @author Douglas A. Lane <pc2@ecs.csus.edu>
+ *
  */
-
-// $HeadURL$
-public class AdministratorView extends JFrame implements UIPlugin, ChangeListener {
+public class ReportsView extends JFrame implements UIPlugin, ChangeListener {
 
     private static final long serialVersionUID = 1L;
 
     private IInternalContest contest;
 
-    private IInternalController controller;  //  @jve:decl-index=0:
+    private IInternalController controller; // @jve:decl-index=0:
 
     private JPanel jPanel = null;
 
@@ -110,25 +78,21 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     private ContestClockDisplay contestClockDisplay = null;
 
-    private JTabbedPane configureContestTabbedPane = null;
-
-    private JTabbedPane runContestTabbedPane = null;
-
     private static final Color ACTIVE_TAB_COLOR = Color.BLUE;
 
-    private static final Color INACTIVE_TAB_COLOR = Color.GRAY ;
+    private static final Color INACTIVE_TAB_COLOR = Color.GRAY;
 
     private JPanel centerPane = null;
 
     private JPanel aMessagePane = null;
 
     private JLabel messageLabel = null;
-    
+
     /**
      * This method initializes
      * 
      */
-    public AdministratorView() {
+    public ReportsView() {
         super();
         initialize();
     }
@@ -141,7 +105,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setBounds(new java.awt.Rectangle(0, 0, 1080, 750));
         this.setContentPane(getJPanel());
-        this.setTitle("PC^2 Administrator");
+        this.setTitle("PC^2 Reports");
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 promptAndExit();
@@ -149,33 +113,30 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         });
 
         getMainTabbedPanel().addChangeListener(this);
-        
+
         overRideLookAndFeel();
-    
+
         FrameUtilities.centerFrame(this);
     }
-    
-    private void overRideLookAndFeel(){
+
+    private void overRideLookAndFeel() {
         String value = IniFile.getValue("client.plaf");
-        if (value != null && value.equalsIgnoreCase("java")){
+        if (value != null && value.equalsIgnoreCase("java")) {
             FrameUtilities.setJavaLookAndFeel();
         }
-        if (value != null && value.equalsIgnoreCase("native")){
+        if (value != null && value.equalsIgnoreCase("native")) {
             FrameUtilities.setNativeLookAndFeel();
         }
     }
-    
+
     /**
      * Listeners for admin view.
      * 
      * This provides a way to refresh the admin view on refresh.
      * 
      * @author pc2@ecs.csus.edu
-     * @version $Id$
      */
-    
-    // $HeadURL$
-    protected class AdminListeners implements UIPlugin {
+    protected class Listeners implements UIPlugin {
 
         /**
          * 
@@ -183,20 +144,14 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         private static final long serialVersionUID = 3733076435840880891L;
 
         public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-            
+
             inContest.addProfileListener(new ProfileListenerImplementation());
         }
 
         public String getPluginTitle() {
-            return "AdminListeners";
+            return "Listeners";
         }
     }
-
-//    Show ScheduledStartTime (if any) on AdminView in place of Contest Clock.
-//    Need to add a ContestInformationListener to the AdminView frame, and register it in AdminView.setContestAndController().
-//    Then in the ContestInformationChanged() listener method, check if there is a ScheduledStartTime set AND if the contest
-//        is NOT started; if both are true then get the ScheduledStartTime, format it, and display it on the Frame.
-
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
@@ -204,11 +159,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         final JFrame thisFrame = this;
 
         updateProfileLabel();
-        
-        AdminListeners adminListeners = new AdminListeners();
-        adminListeners.setContestAndController(inContest, inController);
-        controller.register(adminListeners);
-        
+
+        Listeners listeners = new Listeners();
+        listeners.setContestAndController(inContest, inController);
+        controller.register(listeners);
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
 
@@ -216,181 +171,20 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 initializeSecurityAlertWindow(contest);
 
-                // set the tab names and other characteristics for the main tabs
-                int fontSize = getMainTabbedPanel().getFont().getSize();
-                getMainTabbedPanel().setFont(getMainTabbedPanel().getFont().deriveFont(Font.BOLD, fontSize + 6));
-                getMainTabbedPanel().setTitleAt(0, "Configure Contest");
-                getMainTabbedPanel().setForegroundAt(0, ACTIVE_TAB_COLOR);
-                getMainTabbedPanel().setTitleAt(1, "Run Contest");
-                getMainTabbedPanel().setForegroundAt(1, INACTIVE_TAB_COLOR);
-
-                /**
-                 * add UI components involved with Configuration to the ConfigureContest tabbed pane
-                 */
-
-                AccountsTablePane accountsTablePane = new AccountsTablePane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Accounts", accountsTablePane);
-
-                if (Utilities.isDebugMode()) {
-                    try {
-                        CategoriesPane categoriesPane = new CategoriesPane();
-                        addUIPlugin(getConfigureContestTabbedPane(), "Clar Categories", categoriesPane);
-                        
-                        ContestPreloadPane contestPreloadPane = new ContestPreloadPane();
-                        addUIPlugin(getConfigureContestTabbedPane(), "Contests", contestPreloadPane);
-                    } catch (Exception e) {
-                        logException(e);
-                    }
-                }
-                
-                AutoJudgesPane autoJudgesPane = new AutoJudgesPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Auto Judge", autoJudgesPane);
-
-                GroupsPane groupsPane = new GroupsPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Groups", groupsPane);
-
-                ICPCLoadPane icpcPane = new ICPCLoadPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "ICPC", icpcPane);
-                
-                ImportDataPane importDataPane = new ImportDataPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Import Config", importDataPane);
-
-                JudgementsPane judgementsPanel = new JudgementsPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Judgements", judgementsPanel);
-
-                LanguagesPane languagesPane = new LanguagesPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Languages", languagesPane);
-                
-                BalloonSettingsPane balloonSettingsPane = new BalloonSettingsPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Notifications", balloonSettingsPane);
-
-                // XXX bug 417 hide for 9.1 release
-                // EOCNotificationsPane eocNotificationsPane = new EOCNotificationsPane();
-                // addUIPlugin(getConfigureContestTabbedPane(), "End of Contest Control", eocNotificationsPane);
-
-                if (Utilities.isDebugMode()) {
-                    try {
-                        PacketExplorerPane explorerPane = new PacketExplorerPane();
-                        addUIPlugin(getConfigureContestTabbedPane(), "Packets", explorerPane);
-                    } catch (Exception e) {
-                        logException(e);
-                    }
-                }
-
-                ProblemsPane problemsPane = new ProblemsPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Problems", problemsPane);
-
-                ProfilesPane profilesPane = new ProfilesPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Profiles", profilesPane);
-
                 ReportPane reportPaneC = new ReportPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Reports", reportPaneC);
+                addUIPlugin(getMainTabbedPanel(), "Reports", reportPaneC);
 
-                ContestInformationPane contestInformationPane = new ContestInformationPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Settings", contestInformationPane);
-
-                ContestTimesPane contestTimesPane = new ContestTimesPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Times", contestTimesPane);
-
-                AboutPane aboutPane = new AboutPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "About", aboutPane);
-
-                /**
-                 * add UI components involved with Running the contest to the RunContest tabbed pane
-                 */
-
-                if (!controller.isSuppressConnectionsPaneDisplay()) {
-                    ConnectionsTablePane connectionsPane = new ConnectionsTablePane();
-                    addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
-                }
-                
-                ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
-                addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsTablePane);
-
-                if (Utilities.isDebugMode()) {
-                    try {
-                        EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
-                        addUIPlugin(getRunContestTabbedPane(), "Event Feed Server", eventFeedServerPane);
-                    } catch (Exception e) {
-                        logException(e);
-                    }
-                }
-                
-//                EventFeedsPane eventFeedsPane = new EventFeedsPane();
-//                addUIPlugin(getRunContestTabbedPane(), "Event Feeds", eventFeedsPane);
-
-                ExportDataPane exportPane = new ExportDataPane();
-                addUIPlugin(getRunContestTabbedPane(), "Export", exportPane);
-                
-                FinalizePane finalizePane = new FinalizePane();
-                addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
-
-                if (!controller.isSuppressLoginsPaneDisplay()) {
-                    LoginsTablePane loginsTablePane = new LoginsTablePane();
-                    addUIPlugin(getRunContestTabbedPane(), "Logins", loginsTablePane);
-                }
-                
-                if (Utilities.isDebugMode()) {
-                    try {
-                        MessageMonitorPane messageMonitorPane = new MessageMonitorPane();
-                        addUIPlugin(getRunContestTabbedPane(), "Messages", messageMonitorPane);
-                    } catch (Exception e) {
-                        logException(e);
-                    }
-                }
-
+                PluginLoadPane pluginLoadPane = new PluginLoadPane();
+                addUIPlugin(getMainTabbedPanel(), "UI Plugins", pluginLoadPane);
+                pluginLoadPane.setParentTabbedPane(getMainTabbedPanel());
 
                 OptionsPane optionsPanel = new OptionsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Options", optionsPanel);
+                addUIPlugin(getMainTabbedPanel(), "Options", optionsPanel);
                 optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
 
-                if (Utilities.isDebugMode()) {
-                    try {
-                        PacketMonitorPane pane = new PacketMonitorPane();
-                        addUIPlugin(getRunContestTabbedPane(), "Packets", pane);
-                    } catch (Exception e) {
-                        logException(e);
-                    }
-                }
-                
-                if (Utilities.isDebugMode()) {
-                    try {
-                        PlaybackPane playbackPane = new PlaybackPane();
-                        
-                        addUIPlugin(getRunContestTabbedPane(), "Replay", playbackPane);
-                        PluginLoadPane pane = new PluginLoadPane();
-                        pane.setParentTabbedPane(getRunContestTabbedPane());
-                        addUIPlugin(getRunContestTabbedPane(), "Plugin Load", pane);
-                    } catch (Exception e) {
-                        logException(e);
-                    }
-                }
+                AboutPane aboutPane = new AboutPane();
+                addUIPlugin(getMainTabbedPanel(), "About", aboutPane);
 
-                ReportPane reportPane = new ReportPane();
-                addUIPlugin(getRunContestTabbedPane(), "Reports", reportPane);
-
-                RunsTablePane runsTablePane = new RunsTablePane();
-                addUIPlugin(getRunContestTabbedPane(), "Runs", runsTablePane);
-
-                SitesPane sitesPanel = new SitesPane();
-                addUIPlugin(getRunContestTabbedPane(), "Sites", sitesPanel);
-
-                StandingsTablePane standingsTablePane = new StandingsTablePane();
-                addUIPlugin(getRunContestTabbedPane(), "Standings", standingsTablePane);
-
-                StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
-                addUIPlugin(getRunContestTabbedPane(), "Standings HTML", standingsHTMLPane);
-
-                TeamStatusPane teamStatusPane = new TeamStatusPane();
-                addUIPlugin(getRunContestTabbedPane(), "Team Status", teamStatusPane);
-
-                AboutPane aboutPane2 = new AboutPane();
-                addUIPlugin(getRunContestTabbedPane(), "About", aboutPane2);
-
-
-                setSelectedTab (getRunContestTabbedPane(), "Runs");
-                setSelectedTab (getConfigureContestTabbedPane(), "Accounts");
-                
                 /**
                  * Clock and frame title.
                  */
@@ -402,15 +196,14 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 contest.addContestTimeListener(new ContestTimeListenerImplementation());
                 controller.register(contestClockDisplay);
-                
+
                 FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contest.getContestTime().isContestRunning(), new VersionInfo());
                 setVisible(true);
             }
 
-
-     });
+        });
     }
-    
+
     /**
      * Set the tab for the input name.
      * 
@@ -418,19 +211,16 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
      * @param name
      */
     protected void setSelectedTab(JTabbedPane tabbedPane, String name) {
-        
-        for (int i = 0; i < tabbedPane.getComponentCount(); i ++){
+
+        for (int i = 0; i < tabbedPane.getComponentCount(); i++) {
             String tabTitle = tabbedPane.getTitleAt(i);
-//            System.err.println("For "+tabbedPane.getName()+" found "+tabTitle);
-            if (tabTitle != null && name.equals(tabTitle)){
-//                System.err.println("For "+tabbedPane.getName()+"   selected "+name);
+            if (tabTitle != null && name.equals(tabTitle)) {
                 tabbedPane.setSelectedIndex(i);
             }
         }
     }
 
-
-    private void logException(Exception e) {
+    void logException(Exception e) {
 
         if (StaticLog.getLog() != null) {
             StaticLog.getLog().log(Log.WARNING, "Exception", e);
@@ -441,17 +231,17 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     }
 
     protected void initializeSecurityAlertWindow(IInternalContest inContest) {
-        if (securityAlertLogWindow == null){
+        if (securityAlertLogWindow == null) {
             securityAlertLogWindow = new LogWindow(inContest.getSecurityAlertLog());
         }
         securityAlertLogWindow.setContestAndController(inContest, controller);
         securityAlertLogWindow.setTitle("Contest Security Alerts " + inContest.getClientId().toString());
         VersionInfo versionInfo = new VersionInfo();
-        securityAlertLogWindow.getLog().info("Security Log Started "+versionInfo.getSystemVersionInfo());
+        securityAlertLogWindow.getLog().info("Security Log Started " + versionInfo.getSystemVersionInfo());
     }
 
     public String getPluginTitle() {
-        return "Admin GUI";
+        return "Reports GUI";
     }
 
     /**
@@ -478,8 +268,6 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     private JTabbedPane getMainTabbedPanel() {
         if (mainTabbedPanel == null) {
             mainTabbedPanel = new JTabbedPane();
-            mainTabbedPanel.addTab(null, null, getConfigureContestTabbedPane(), null);
-            mainTabbedPanel.addTab(null, null, getRunContestTabbedPane(), null);
         }
         return mainTabbedPanel;
     }
@@ -544,13 +332,12 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
 
-        // TODO this should throw an exception
         if (plugin == null) {
             return;
         }
 
         try {
-            controller.register (plugin);
+            controller.register(plugin);
             plugin.setParentFrame(this);
             plugin.setContestAndController(contest, controller);
             tabbedPane.add(plugin, tabTitle);
@@ -579,7 +366,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             clockLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 18));
             clockPane = new JPanel();
             clockPane.setLayout(new BorderLayout());
-            clockPane.setPreferredSize(new java.awt.Dimension(85,34));
+            clockPane.setPreferredSize(new java.awt.Dimension(85, 34));
             clockPane.add(clockLabel, BorderLayout.WEST);
         }
         return clockPane;
@@ -615,44 +402,18 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         return padPane;
     }
 
-    /**
-     * This method initializes configureContestTabbedPane
-     * 
-     * @return javax.swing.JTabbedPane
-     */
-    private JTabbedPane getConfigureContestTabbedPane() {
-        if (configureContestTabbedPane == null) {
-            configureContestTabbedPane = new JTabbedPane();
-            configureContestTabbedPane.setToolTipText("");
-            configureContestTabbedPane.setName("Configure Contest");
-        }
-        return configureContestTabbedPane;
-    }
-
-    /**
-     * This method initializes runContestTabbedPane
-     * 
-     * @return javax.swing.JTabbedPane
-     */
-    private JTabbedPane getRunContestTabbedPane() {
-        if (runContestTabbedPane == null) {
-            runContestTabbedPane = new JTabbedPane();
-        }
-        return runContestTabbedPane;
-    }
-
-    public void stateChanged (ChangeEvent e) {
-        if (e.getSource()==getMainTabbedPanel()) {
-            //change all mainpanel tab text to black
+    public void stateChanged(ChangeEvent e) {
+        if (e.getSource() == getMainTabbedPanel()) {
+            // change all mainpanel tab text to black
             int tabCount = getMainTabbedPanel().getTabCount();
-            for (int i=0; i<tabCount; i++) {
-                getMainTabbedPanel().setForegroundAt(i,INACTIVE_TAB_COLOR);
+            for (int i = 0; i < tabCount; i++) {
+                getMainTabbedPanel().setForegroundAt(i, INACTIVE_TAB_COLOR);
             }
-            //change the currently selected mainpanel tab to red 
+            // change the currently selected mainpanel tab to red
             int selectedTab = getMainTabbedPanel().getSelectedIndex();
-            getMainTabbedPanel().setForegroundAt( selectedTab, ACTIVE_TAB_COLOR);
+            getMainTabbedPanel().setForegroundAt(selectedTab, ACTIVE_TAB_COLOR);
         } else {
-            throw new RuntimeException ("Unexpected ChangeEvent: " + e);
+            throw new RuntimeException("Unexpected ChangeEvent: " + e);
         }
     }
 
@@ -692,14 +453,19 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     }
 
     public static void main(String[] args) {
-        AdministratorView administratorView = new AdministratorView();
-        administratorView.setVisible(true);
+        try {
+            ReportsView reportView = new ReportsView();
+            reportView.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
-    
+
     protected boolean isThisSite(int siteNumber) {
         return contest.getSiteNumber() == siteNumber;
     }
-    
+
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -735,37 +501,28 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             contestTimeChanged(event);
         }
 
-        /** This method exists to support differentiation between manual and automatic starts,
-         * in the event this is desired in the future.
-         * Currently it just delegates the handling to the contestStarted() method,
-         * although it also pops up a notification dialog that the contest has been "auto-started".
+        /**
+         * This method exists to support differentiation between manual and automatic starts, in the event this is desired in the future. Currently it just delegates the handling to the
+         * contestStarted() method, although it also pops up a notification dialog that the contest has been "auto-started".
          */
         @Override
         public void contestAutoStarted(ContestTimeEvent event) {
             contestStarted(event);
-            
+
             Log log = controller.getLog();
             if (log != null) {
                 log.info("Contest automatically started due to arrival of enabled scheduled start time.");
             }
 
-            //display a popup message notification that the contest has auto-started
-            //Note: previously the following line of code was used for the popup; however, showMessageDialog() does
-            // not allow to call setAlwaysOnTop()
-//            JOptionPane.showMessageDialog(null, "Scheduled Start Time has arrived; contest has been automatically started!", "Contest Started",
-//                    JOptionPane.INFORMATION_MESSAGE);
-            
             JOptionPane optionPane = new JOptionPane();
             optionPane.setMessage("Scheduled Start Time has arrived; contest has been automatically started!");
-            optionPane.setMessageType(JOptionPane.INFORMATION_MESSAGE); 
+            optionPane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
             JDialog dialog = optionPane.createDialog("Contest Started");
-            dialog.setLocationRelativeTo(null); //center the dialog
+            dialog.setLocationRelativeTo(null); // center the dialog
             dialog.setModalityType(ModalityType.APPLICATION_MODAL);
-            
-            //force the notification dialog to always be on top even if the Admin isn't the active program
-            // (Note: this works on Windows; it may not work under Linux -- and/or it may be window-system dependent...)
+
             dialog.setAlwaysOnTop(true);
-            
+
             dialog.setVisible(true);
         }
 
@@ -775,7 +532,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         final JFrame thisFrame = this;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                
+
                 FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contestStarted, new VersionInfo());
                 if (contestStarted) {
                     contestClockDisplay.fireClockStateChange(contest.getContestTime());
@@ -791,7 +548,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
         FrameUtilities.regularCursor(this);
     }
-    
+
     private void updateProfileLabel() {
 
         int numberProfiles = contest.getProfiles().length;
@@ -809,14 +566,12 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             }
         });
     }
-    
+
     /**
+     * Profile listener
      * 
      * @author pc2@ecs.csus.edu
-     * @version $Id$
      */
-    
-    // $HeadURL$
     protected class ProfileListenerImplementation implements IProfileListener {
 
         public void profileAdded(ProfileEvent event) {
@@ -829,15 +584,12 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
         public void profileRemoved(ProfileEvent event) {
             // ignore
-            
+
         }
 
         public void profileRefreshAll(ProfileEvent profileEvent) {
             updateProfileLabel();
         }
     }
-        
-
-
 
 } // @jve:decl-index=0:visual-constraint="10,10"

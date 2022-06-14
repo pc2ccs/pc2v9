@@ -1,6 +1,7 @@
 // Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
@@ -11,8 +12,6 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import javax.xml.bind.JAXBException;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
@@ -420,7 +419,7 @@ public class ShadowController {
         String pc2Json ;
         try {
             pc2Json = sbJsonObject.createJSON(localContest, log);
-        } catch (JsonProcessingException | IllegalContestState | JAXBException e) {
+        } catch (IllegalContestState | JAXBException | IOException e) {
             log.log(Log.WARNING,"Exception creating PC2 scoreboard JSON: " + e.getMessage(), e);
             return null;
         }

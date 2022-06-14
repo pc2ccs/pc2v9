@@ -7,6 +7,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -136,12 +137,20 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
             getRemoteScoreboardTable().getColumnModel().getColumn(3).setPreferredWidth(10);
            
 
-            //remove the "match" column from the views (although not from the model; it needs to remain in the 
-            // model for access by the JTable CellRenderer)
+            //remove the "match" and "mismatchedFields" columns from the views (although not from the model; 
+            // they need to remain in the model for access by the JTable CellRenderer)
+            //Note that MISMATCHEDFIELDS (the rightmost column) is removed FIRST, *then* MATCH is removed.
+            // If this is done in the opposite order, removing MATCH causes column numbers above it to shift down,
+            // which results in an ArrayIndexOutOfBoundsException because of the attempt to remove column "5" (MISMATCHED.ordinal())
+            // when there are now only columns 0-4 present.
             TableColumnModel tcm = getPC2ScoreboardTable().getColumnModel();
+            tcm.removeColumn(tcm.getColumn(ScoreboardColumnId.MISMATCHEDFIELDS.ordinal()));
             tcm.removeColumn(tcm.getColumn(ScoreboardColumnId.MATCH.ordinal()));
+
             tcm = getRemoteScoreboardTable().getColumnModel();
+            tcm.removeColumn(tcm.getColumn(ScoreboardColumnId.MISMATCHEDFIELDS.ordinal()));
             tcm.removeColumn(tcm.getColumn(ScoreboardColumnId.MATCH.ordinal()));
+
 
             //show "done"
             this.setCursor(Cursor.getDefaultCursor());
@@ -289,8 +298,9 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
     /**
      * Returns a JTable organized for containing Scoreboard representations, either for a PC2 scoreboard or 
      * for a Remote CSS scoreboard.
-     * The returned JTable applies formatting to row cell colors based on the status of the row comparisons
-     * (that is, whether the row matched its corresponding row in the other scoreboard type).
+     * The returned JTable applies color formatting to individual row cells based on the status of the row comparisons
+     * (that is, whether the row matched its corresponding row in the other scoreboard type and, if the row does not match,
+     * based on the list of mismatched fields in the row).
      * 
      * Note: this method does not actually fill in any table data; it is expected that external code will
      * invoke {@link #getUpdatedResultsTableModel()} to create and load the current comparison results into the table.
@@ -302,7 +312,7 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
         JTable resultsTable = new JTable() {
             private static final long serialVersionUID = 1L;
 
-//          String[] columnNames = { "Rank", "Team", "Solved", "Time", "Match" };
+//            String[] columnNames = { "Rank", "Team (Id)", "Solved", "Time", "Match", "Mismatched Fields" };
             
             // override JTable's default renderer to set the background color based on the "Match?" value
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
@@ -319,13 +329,29 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
                 // have "?" in all data fields in this table)
                 if (hasCorrespondingRow(modelRow)) {
 
-                    // Color the row based on the "Match?" cell value, which indicates whether this row matches its
+                    // Color the cell based on the "Mismatched Fields" cell value, which indicates whether this row matches its
                     //  corresponding row in the other scoreboard table
                     boolean matches = (boolean) getModel().getValueAt(modelRow, ScoreboardColumnId.MATCH.ordinal());
                     if (matches) {
                         c.setBackground(new Color(153, 255, 153)); // light green for all cells in this row
                     } else {
-                        c.setBackground(new Color(255, 153, 153)); // light red for all cells in this row
+                        //the row doesn't match in (at least) one field; determine whether the particular cell currently being rendered matches.
+                        //Start by getting the list of mismatched cells
+                        @SuppressWarnings("unchecked")
+                        ArrayList<Integer> mismatchedCellList = (ArrayList<Integer>) getModel().getValueAt(modelRow, ScoreboardColumnId.MISMATCHEDFIELDS.ordinal());
+                        //see if the current cell (column) is in the mismatched list
+                        boolean isMismatched = false;
+                        for (Integer fieldNum : mismatchedCellList) {
+                            if (fieldNum.equals(column)) {
+                                isMismatched = true;
+                                break;
+                            }
+                        }
+                        if (isMismatched) {
+                            c.setBackground(new Color(255, 153, 153)); //light red
+                        } else {
+                            c.setBackground(new Color(153, 255, 153)); // light green
+                        }
                     }
                 }
                 
@@ -383,7 +409,7 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
     
     public enum ScoreboardType {PC2, REMOTE} ;
     
-    private enum ScoreboardColumnId {RANK, TEAM, NUM_SOLVED, TOTAL_TIME, MATCH} ;
+    private enum ScoreboardColumnId {RANK, TEAM, NUM_SOLVED, TOTAL_TIME, MATCH, MISMATCHEDFIELDS} ;
     
     /**
      * Returns a {@link TableModel} containing data for the current comparisons between the PC2 shadow and the Remote CCS.
@@ -399,7 +425,7 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
 
         //define the columns for the table
         //TODO: use Enum name/values instead of hard-coded strings for columnNames
-        String[] columnNames = { "Rank", "Team (Id)", "Solved", "Time", "Match" };
+        String[] columnNames = { "Rank", "Team (Id)", "Solved", "Time", "Match", "Mismatched Fields" };
        
         //an array to hold the table data
         Object[][] data = new Object[comparedResults.length][ScoreboardColumnId.values().length];
@@ -408,12 +434,14 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
         for (int row=0; row<comparedResults.length; row++) {
             ShadowScoreboardRowComparison curSB = comparedResults[row];
             TeamScoreRow curRow ;
+            //get the scoreboard row for the specified type of scoreboard (PC2 or Remote)
             if (scoreboardType==ScoreboardType.PC2) {
                 curRow = curSB.getSb1Row();
             } else {
                 curRow = curSB.getSb2Row();
             }
             if (curRow!=null) {
+                //fill the columns of the current row with the data from the specified scoreboard row
                 data[row][ScoreboardColumnId.RANK.ordinal()] = curRow.getRank();
                 
                 String teamName = curRow.getTeamName();
@@ -423,12 +451,15 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
                 data[row][ScoreboardColumnId.NUM_SOLVED.ordinal()] = curRow.getScore().getNum_solved();
                 data[row][ScoreboardColumnId.TOTAL_TIME.ordinal()] = curRow.getScore().getTotal_time();
                 data[row][ScoreboardColumnId.MATCH.ordinal()] = curSB.isMatch();
+                data[row][ScoreboardColumnId.MISMATCHEDFIELDS.ordinal()] = curSB.getMismatchedFieldList();
             } else {
+                //oops, we don't have this row in the specified scoreboard; fill the table data with placeholders
                 data[row][ScoreboardColumnId.RANK.ordinal()] = "?";
                 data[row][ScoreboardColumnId.TEAM.ordinal()] = "?";
                 data[row][ScoreboardColumnId.NUM_SOLVED.ordinal()] = "?";
                 data[row][ScoreboardColumnId.TOTAL_TIME.ordinal()] = "?";               
                 data[row][ScoreboardColumnId.MATCH.ordinal()] = false;
+                data[row][ScoreboardColumnId.MISMATCHEDFIELDS.ordinal()] = null;
             }
         }
         
@@ -436,10 +467,10 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
         TableModel tableModel = new DefaultTableModel(data, columnNames){
             static final long serialVersionUID = 1;
             
-//            String[] columnNames = { "Rank", "Team", "Solved", "Time" };
-            Class<?>[] types = { Integer.class, String.class, Integer.class, Integer.class };
+//          String[] columnNames = { "Rank", "Team (Id)", "Solved", "Time", "Match", "Mismatched Fields" };
+            Class<?>[] types = { Integer.class, String.class, Integer.class, Integer.class, Boolean.class, ArrayList.class };
             
-            //return the appropriate class for the column so that correct cell renderer will be used
+            //return the appropriate class for the column so that the correct cell renderer will be used
             @Override
             public Class<?> getColumnClass(int columnIndex) {
                 return this.types[columnIndex];

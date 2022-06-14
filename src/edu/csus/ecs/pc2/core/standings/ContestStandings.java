@@ -10,11 +10,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 /**
- * Root for the Default Scoring Algorithm XML maraling from XML into POJOs. contestStanding element.
+ * This class encapsulates a collection of data representing the current contest standings.  
+ * A ContestStandings consists of a single {@link StandingsHeader} along with a List of {@link TeamStanding}s.)
+ * This class is used as a target during conversion (deserialization) of an XML representation of contest standings into a POJO.
+ * Such deserialization is commonly applied to the XML contest standing string produced by {@link DefaultScoringAlgorithm#getStandings()}.
  * 
- * @author Douglas A. Lane <pc2@ecs.csus.edu>
+ * @author Douglas A. Lane, John Clevenger <pc2@ecs.csus.edu>
  *
  */
 @XmlRootElement(name = "contestStandings")
@@ -25,6 +30,8 @@ public class ContestStandings {
     private StandingsHeader standingsHeader;
 
     @XmlElement(name = "teamStanding")
+    @JacksonXmlProperty(localName = "teamStanding")
+    @JacksonXmlElementWrapper(useWrapping = false)
     private List<TeamStanding> teamStandings = null;
 
     public StandingsHeader getStandingsHeader() {
