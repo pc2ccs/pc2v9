@@ -67,7 +67,7 @@ import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
- * Load contest from Yaml using SnakeYaml methods.
+ * Load contest/model from Yaml and files in a CDP.
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
@@ -172,7 +172,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     }
 
     /**
-     * Load files with #include.
+     * Load from files, support #include FILENAME.
+     * 
+     * Loads text files, if a #include FILENAME  specified will
+     * replace the #incldue with the contents of FILENAME.
      * 
      * @param dirname
      *            if null will ignore #include files.
