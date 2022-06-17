@@ -942,10 +942,11 @@ public class Executable extends Plugin implements IExecutable {
             stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME), false));
             stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDERR_FILENAME), false));
 
-            String msg = "Working...";
+            String msg = "Working on";
             if (problem.isShowValidationToJudges()) {
-                msg = "Validating...";
+                msg = "Validating";
             }
+            msg += " test case " + testCase;
 
             //added per bug 1668
             validatorExecutionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI() ? executionFrame : null);
@@ -1856,7 +1857,7 @@ public class Executable extends Plugin implements IExecutable {
             //start the program executing.  Note that runProgram() sets the "startTimeNanos" timestamp 
             /// immediately prior to actually "execing" the process.
             log.info("starting team program...");
-            process = runProgram(cmdline, "Executing...", autoStop, executionTimer);
+            process = runProgram(cmdline, "Executing test case " + testSetNumber + "...", autoStop, executionTimer);
             
             //make sure we succeeded in getting the external process going
             if (process == null) {
