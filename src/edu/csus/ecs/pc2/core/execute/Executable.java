@@ -102,6 +102,8 @@ public class Executable extends Plugin implements IExecutable {
     private ExecutionData executionData = new ExecutionData();
 
     private ExecuteTimer executionTimer;
+    
+    private ExecuteTimerFrame executionFrame = null;
 
     private IFileViewer fileViewer = null;
 
@@ -243,6 +245,8 @@ public class Executable extends Plugin implements IExecutable {
         if (executorId.getClientType() != ClientType.Type.TEAM) {
             this.problemDataFiles = contest.getProblemDataFile(problem);
         }
+        
+        executionFrame = new ExecuteTimerFrame();
     }
 
     /**
@@ -281,7 +285,8 @@ public class Executable extends Plugin implements IExecutable {
 
         if (usingGUI) {
             fileViewer = new MultipleFileViewer(log);
-        } else {
+            executionFrame.setVisible(true);
+       } else {
             fileViewer = new NullViewer();
         }
 
@@ -575,6 +580,9 @@ public class Executable extends Plugin implements IExecutable {
         } catch (Exception e) {
             log.log(Log.INFO, "Exception during execute() ", e);
             fileViewer.addTextPane("Error during execute", "Exception during execute, check log " + e.getMessage());
+        }
+        if(isUsingGUI()) {
+            executionFrame.setVisible(false);
         }
 
         return fileViewer;
@@ -940,7 +948,7 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             //added per bug 1668
-            validatorExecutionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI());
+            validatorExecutionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI() ? executionFrame : null);
 
             log.info("constructed new validator ExecuteTimer " + validatorExecutionTimer.toString());
             long startTime = System.currentTimeMillis();
@@ -1685,7 +1693,7 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             log.info("Constructing ExecuteTimer...");
-            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
+            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI() ? executionFrame : null);
 //            executionTimer.startTimer();    //TODO: why is this here?  method runProgram() (called below) starts the timer (which is where it should be done).
             log.info("Created new ExecuteTimer: " + executionTimer.toString());
             
@@ -2201,7 +2209,7 @@ public class Executable extends Plugin implements IExecutable {
             BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false));
             BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDERR_FILENAME), false));
 
-            executionTimer = new ExecuteTimer(log, getCompilationTimeLimit(), executorId, isUsingGUI());
+            executionTimer = new ExecuteTimer(log, getCompilationTimeLimit(), executorId, isUsingGUI() ? executionFrame : null);
 //            executionTimer.startTimer();    //TODO: why is this here, when method runProgram() invokes startTimer()?  (it should only be done in runProgram...)
 
             long startSecs = System.currentTimeMillis();
