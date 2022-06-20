@@ -2125,7 +2125,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             }
             return null;
         }
-        tempExecutable = new Executable(getContest(), getController(), currentRun, currentRunFiles);
+        tempExecutable = new Executable(getContest(), getController(), currentRun, currentRunFiles, null);
         String exeDir = tempExecutable.getExecuteDirectoryName();
         return exeDir;
     }

@@ -4,8 +4,6 @@ package edu.csus.ecs.pc2.core.execute;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import edu.csus.ecs.pc2.core.log.Log;
@@ -29,7 +27,7 @@ public class ExecuteTimer extends Thread implements
 
     private Timer timer; // a timer to generate 1-sec interrupts
 
-    private ExecuteTimerFrame ivjExecuteTimerFrame = null;
+    private IExecuteTimerFrame ivjExecuteTimerFrame = null;
 
     private GregorianCalendar startTime = now();
 
@@ -51,7 +49,7 @@ public class ExecuteTimer extends Thread implements
 
     private boolean usingGUI = true;
     
-    public ExecuteTimer(Log log, int timeLimit, ClientId clientId, ExecuteTimerFrame eFrame) {
+    public ExecuteTimer(Log log, int timeLimit, ClientId clientId, IExecuteTimerFrame eFrame) {
         super();
         this.log = log;
         this.clientId = clientId;
@@ -101,7 +99,7 @@ public class ExecuteTimer extends Thread implements
         // check if time is past upper limit; if so, change text display to RED
         if (elapsedSecs > maxTime && (! isTeam())) {
             if(usingGUI) {
-                ivjExecuteTimerFrame.getTimerCountLabel().setForeground(java.awt.Color.red);
+                ivjExecuteTimerFrame.setTimerCountLabelColor(java.awt.Color.red);
             }
             if (doAutoStop) {
 //                System.out.println("ExecuteTimer - halting run execution, time " + elapsedSecs + " over time limit of " + maxTime + " seconds.");
@@ -113,7 +111,7 @@ public class ExecuteTimer extends Thread implements
         }
         // update the on-screen display time
         if(usingGUI) {
-            ivjExecuteTimerFrame.getTimerCountLabel().setText(newTime);
+            ivjExecuteTimerFrame.setTimerCountLabelText(newTime);
         }
     }
 
@@ -146,15 +144,6 @@ public class ExecuteTimer extends Thread implements
 //        System.out.println("milliDiff = " + milliDiff);
         long secs = milliDiff / 1000;
         return secs;
-    }
-
-    /**
-     * Return the ExecuteTimerFrame property value.
-     *
-     * @return javax.swing.JFrame
-     */
-    private javax.swing.JFrame getExecuteTimerFrame() {
-        return(ivjExecuteTimerFrame);
     }
 
     /**
@@ -244,7 +233,7 @@ public class ExecuteTimer extends Thread implements
      */
     public void setStartTime() {
         if(usingGUI) {
-            ivjExecuteTimerFrame.getTimerCountLabel().setText("00:00");
+            ivjExecuteTimerFrame.setTimerCountLabelText("00:00");
         }
         startTime = now();
 
@@ -253,7 +242,7 @@ public class ExecuteTimer extends Thread implements
     public void setTitle(String msg) {
         if(usingGUI) {
             ivjExecuteTimerFrame.resetFrame();
-            ivjExecuteTimerFrame.getExecuteTimerLabel1().setText(msg);
+            ivjExecuteTimerFrame.setExecuteTimerLabel(msg);
         }
     }
 
@@ -266,7 +255,7 @@ public class ExecuteTimer extends Thread implements
      */
     public void startTimer() {
         if (usingGUI) {
-            ivjExecuteTimerFrame.setNotify(this);
+            ivjExecuteTimerFrame.setTerminateButtonNotify(this);
         }
         setStartTime();
         timer.start();
@@ -301,7 +290,7 @@ public class ExecuteTimer extends Thread implements
      */
     public void stopTimer() {
         if (usingGUI) {
-            ivjExecuteTimerFrame.setNotify(null);
+            ivjExecuteTimerFrame.setTerminateButtonNotify(null);
         }
         timer.stop();
     }

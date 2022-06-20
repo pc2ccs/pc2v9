@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -9,6 +10,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.execute.IExecuteFrameNotify;
+import edu.csus.ecs.pc2.core.execute.IExecuteTimerFrame;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
@@ -19,7 +22,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  */
 
 // $HeadURL$
-public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudgeNotifyMessages {
+public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudgeNotifyMessages, IExecuteTimerFrame {
 
     /**
      * 
@@ -42,6 +45,8 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
     
     private AutoJudgingMonitor autoJudgingMonitor = null;
 
+    private IExecuteFrameNotify notifyFrame = null;
+    
     /**
      * This method initializes
      * 
@@ -138,10 +143,14 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
     private JButton getStopAutoJudgingButton() {
         if (stopAutoJudgingButton == null) {
             stopAutoJudgingButton = new JButton();
-            stopAutoJudgingButton.setText("Stop AutoJudging");
+            stopAutoJudgingButton.setText("Stop Auto Judging");
             stopAutoJudgingButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    startStopAutoJudging();
+                    if(notifyFrame != null) {
+                        notifyFrame.executeFrameTerminated();
+                    } else {
+                        startStopAutoJudging();
+                    }
                 }
             });
         }
@@ -220,6 +229,61 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
 
     public String getPluginTitle() {
         return "Auto Judge Status Frame";
+    }
+
+    @Override
+    public void resetFrame() {
+        if(bigAutoJudgeStatusLabel != null) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    bigAutoJudgeStatusLabel.setForeground(Color.black);
+                }
+            });
+           
+        }
+    }
+
+    @Override
+    public void setTimerFrameVisible(boolean bHow)
+    {
+        // The AJ Status frame is not controlled by the execution timer, but the AJ itself
+        return;
+    }
+    
+    @Override
+    public void setTimerCountLabelColor(Color fg) {
+        if(bigAutoJudgeStatusLabel != null) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    bigAutoJudgeStatusLabel.setForeground(fg);
+                }
+            });
+           
+        }
+    }
+
+    @Override
+    public void setTimerCountLabelText(String msg) {
+        updateStatusLabel(msg);
+        
+    }
+
+    @Override
+    public void setExecuteTimerLabel(String msg) {
+        updateMessage(msg);
+        
+    }
+
+    @Override
+    public void setTerminateButtonNotify(IExecuteFrameNotify ntfy) {
+        notifyFrame = ntfy;
+        if(ntfy != null) {
+            this.getStopAutoJudgingButton().setText("Terminate");
+        } else {
+            // We had to be auto-judging to get here
+            this.getStopAutoJudgingButton().setText("Stop Auto Judging");
+        }
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

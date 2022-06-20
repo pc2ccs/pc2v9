@@ -1,23 +1,25 @@
+// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
- * 
+ * ExecuteTimerFrame
+ * This frame can be used to display status of executing a run.  It implements the IExecuteTimerFrame
+ * interface used by the Executable class.
  */
 package edu.csus.ecs.pc2.core.execute;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 
 /**
  * @author John Buck
  *
  */
-public class ExecuteTimerFrame extends JFrame {
-    private JLabel ivjExecuteTimerLabel1 = null;
+public class ExecuteTimerFrame extends JFrame implements IExecuteTimerFrame {
+    private JLabel ivjExecuteTimerLabel = null;
 
     private JPanel ivjJFrameContentPane = null;
 
@@ -31,10 +33,6 @@ public class ExecuteTimerFrame extends JFrame {
     {
         super();
         initialize();
-    }
-    
-    public void setNotify(IExecuteFrameNotify ifc) {
-        iNotifyClient = ifc;
     }
     
     /**
@@ -73,7 +71,7 @@ public class ExecuteTimerFrame extends JFrame {
                 ivjJFrameContentPane.setName("JFrameContentPane");
                 ivjJFrameContentPane
                         .setLayout(getJFrameContentPaneBorderLayout());
-                getJFrameContentPane().add(getExecuteTimerLabel1(), "North");
+                getJFrameContentPane().add(getExecuteTimerLabel(), "North");
                 getJFrameContentPane().add(getTimerCountLabel(), "Center");
                 getJFrameContentPane().add(getbtnTerminate(), "South");
             } catch (java.lang.Throwable ivjExc) {
@@ -103,17 +101,17 @@ public class ExecuteTimerFrame extends JFrame {
 
     public void resetFrame()
     {
-        if(ivjExecuteTimerLabel1 != null) {
-            ivjExecuteTimerLabel1.setText("Execution Time");
-            ivjExecuteTimerLabel1
+        if(ivjExecuteTimerLabel != null) {
+            ivjExecuteTimerLabel.setText("Execution Time");
+            ivjExecuteTimerLabel
                     .setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-            ivjExecuteTimerLabel1
+            ivjExecuteTimerLabel
                     .setFont(new java.awt.Font("dialog", 1, 18));
-            ivjExecuteTimerLabel1
+            ivjExecuteTimerLabel
                     .setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-            ivjExecuteTimerLabel1
+            ivjExecuteTimerLabel
                     .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            ivjExecuteTimerLabel1.setCursor(new java.awt.Cursor(
+            ivjExecuteTimerLabel.setCursor(new java.awt.Cursor(
                     java.awt.Cursor.DEFAULT_CURSOR));
         }
         if(ivjTimerCount != null) {
@@ -131,32 +129,37 @@ public class ExecuteTimerFrame extends JFrame {
         }
     }
     
+    public void setTimerFrameVisible(boolean bVis)
+    {
+        setVisible(bVis);
+    }
+    
     /**
      * Return the ExecuteTimerLabel1 property value.
      *
      * @return javax.swing.JLabel
      */
-    public JLabel getExecuteTimerLabel1() {
-        if (ivjExecuteTimerLabel1 == null) {
+    private JLabel getExecuteTimerLabel() {
+        if (ivjExecuteTimerLabel == null) {
             try {
-                ivjExecuteTimerLabel1 = new javax.swing.JLabel();
-                ivjExecuteTimerLabel1.setName("ExecuteTimerLabel1");
-                ivjExecuteTimerLabel1.setText("Execution Time");
-                ivjExecuteTimerLabel1
+                ivjExecuteTimerLabel = new javax.swing.JLabel();
+                ivjExecuteTimerLabel.setName("ExecuteTimerLabel");
+                ivjExecuteTimerLabel.setText("Execution Time");
+                ivjExecuteTimerLabel
                         .setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-                ivjExecuteTimerLabel1
+                ivjExecuteTimerLabel
                         .setFont(new java.awt.Font("dialog", 1, 18));
-                ivjExecuteTimerLabel1
+                ivjExecuteTimerLabel
                         .setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-                ivjExecuteTimerLabel1
+                ivjExecuteTimerLabel
                         .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-                ivjExecuteTimerLabel1.setCursor(new java.awt.Cursor(
+                ivjExecuteTimerLabel.setCursor(new java.awt.Cursor(
                         java.awt.Cursor.DEFAULT_CURSOR));
             } catch (java.lang.Throwable ivjExc) {
                 handleException(ivjExc);
             }
         }
-        return ivjExecuteTimerLabel1;
+        return ivjExecuteTimerLabel;
     }
     
     /**
@@ -164,7 +167,7 @@ public class ExecuteTimerFrame extends JFrame {
      *
      * @return javax.swing.JLabel
      */
-    public JLabel getTimerCountLabel() {
+    private JLabel getTimerCountLabel() {
         if (ivjTimerCount == null) {
             try {
                 ivjTimerCount = new javax.swing.JLabel();
@@ -206,6 +209,29 @@ public class ExecuteTimerFrame extends JFrame {
             }
         }
         return ivjbtnTerminate;
+    }
+
+    @Override
+    public void setTimerCountLabelColor(Color fg) {
+        getTimerCountLabel().setForeground(fg);
+        
+    }
+
+    @Override
+    public void setTimerCountLabelText(String msg) {
+        getTimerCountLabel().setText(msg);
+        
+    }
+
+    @Override
+    public void setExecuteTimerLabel(String msg) {
+        getExecuteTimerLabel().setText(msg);
+        
+    }
+
+    @Override
+    public void setTerminateButtonNotify(IExecuteFrameNotify ntfy) {
+        iNotifyClient = ntfy;   
     }
 
 }

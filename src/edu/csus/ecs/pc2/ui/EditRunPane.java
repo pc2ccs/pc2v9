@@ -23,6 +23,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.execute.ExecuteTimerFrame;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -756,8 +757,10 @@ public class EditRunPane extends JPanePlugin {
     protected void executeRun() {
 
         System.gc();
-
-        executable = new Executable(getContest(), getController(), run, runFiles);
+        
+        ExecuteTimerFrame executeFrame = new ExecuteTimerFrame();
+        
+        executable = new Executable(getContest(), getController(), run, runFiles, executeFrame);
 
         IFileViewer fileViewer = executable.execute();
         
@@ -886,7 +889,7 @@ public class EditRunPane extends JPanePlugin {
 
     private void createAndViewFile(SerializedFile file, String title) {
         // TODO the executeable dir name should be from the model, eh ?
-        Executable tempEexecutable = new Executable(getContest(), getController(), run, runFiles);
+        Executable tempEexecutable = new Executable(getContest(), getController(), run, runFiles, null);
         String targetDirectory = tempEexecutable.getExecuteDirectoryName();
         Utilities.insureDir(targetDirectory);
         String targetFileName = targetDirectory + File.separator + file.getName();

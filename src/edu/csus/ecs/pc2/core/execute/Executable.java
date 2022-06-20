@@ -103,8 +103,6 @@ public class Executable extends Plugin implements IExecutable {
 
     private ExecuteTimer executionTimer;
     
-    private ExecuteTimerFrame executionFrame = null;
-
     private IFileViewer fileViewer = null;
 
     /**
@@ -171,6 +169,8 @@ public class Executable extends Plugin implements IExecutable {
     private IInternalController controller;
 
     private Log log;
+    
+    private IExecuteTimerFrame executionFrame = null;
 
     /**
      * The directory where files are unpacked and the program is executed.
@@ -214,7 +214,7 @@ public class Executable extends Plugin implements IExecutable {
 
     private String packagePath = "";
 
-    public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
+    public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, IExecuteTimerFrame msgFrame) {
         super();
         super.setContestAndController(inContest, inController);
 
@@ -224,7 +224,8 @@ public class Executable extends Plugin implements IExecutable {
         this.run = run;
         language = inContest.getLanguage(run.getLanguageId());
         problem = inContest.getProblem(run.getProblemId());
-
+        executionFrame = msgFrame;
+        
         initialize();
     }
 
@@ -245,8 +246,6 @@ public class Executable extends Plugin implements IExecutable {
         if (executorId.getClientType() != ClientType.Type.TEAM) {
             this.problemDataFiles = contest.getProblemDataFile(problem);
         }
-        
-        executionFrame = new ExecuteTimerFrame();
     }
 
     /**
@@ -285,7 +284,7 @@ public class Executable extends Plugin implements IExecutable {
 
         if (usingGUI) {
             fileViewer = new MultipleFileViewer(log);
-            executionFrame.setVisible(true);
+            executionFrame.setTimerFrameVisible(true);
        } else {
             fileViewer = new NullViewer();
         }
@@ -582,7 +581,7 @@ public class Executable extends Plugin implements IExecutable {
             fileViewer.addTextPane("Error during execute", "Exception during execute, check log " + e.getMessage());
         }
         if(isUsingGUI()) {
-            executionFrame.setVisible(false);
+            executionFrame.setTimerFrameVisible(false);
         }
 
         return fileViewer;
