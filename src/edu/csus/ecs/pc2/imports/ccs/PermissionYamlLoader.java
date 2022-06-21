@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,9 @@ public class PermissionYamlLoader {
 
     public PermissionYamlLoader(String[] yamlLines, Account[] accounts) {
         if (accounts == null || accounts.length == 0) {
-            throw new IllegalArgumentException("Empty list of accounts not allowed");
+            
+            // no accounts to update - done here.
+            return;
         }
 
         Collections.addAll(accountList, accounts);
@@ -42,7 +43,7 @@ public class PermissionYamlLoader {
         updateAccountPermissionsFromYaml(yamlLines);
     }
 
-    ArrayList fetchList(Map<String, Object> content, String key) {
+    protected ArrayList fetchList(Map<String, Object> content, String key) {
         return (ArrayList) content.get(key);
     }
 
@@ -66,13 +67,23 @@ public class PermissionYamlLoader {
         Map<String, Object> content = loadYaml(null, yamlLines);
 
         ArrayList permissionList = fetchList(content, "permissions");
+        
+        if (permissionList == null) {
+            // No permissions section in yaml - nothing more to do.
+            return;
+        }
 
         for (Object object : permissionList) {
 
             Map<String, Object> map = (Map<String, Object>) object;
 
             String accountType = fetchValue(map, "account");
-            ClientType.Type clientType = ClientType.Type.valueOf(accountType.trim());
+            Type clientType = null;
+            try {
+                 clientType  = ClientType.Type.valueOf(accountType.trim());
+            } catch (Exception e) {
+                throw new YamlLoadException("Unknown account type: '"+accountType+"'", e.getCause());
+            }
 
             String numberString = fetchValue(map, "number");
 
@@ -80,15 +91,16 @@ public class PermissionYamlLoader {
 
             int[] clientNumbers = getClientNumbers(accountList, numberString, clientType);
             
-            System.out.println("debug 22 cli num "+Arrays.toString(clientNumbers));
             for (int i = 0; i < clientNumbers.length; i++) {
 
-                Account account = getAccount(new ClientId(siteNumber, clientType, clientNumbers[i]));
-                System.out.println("debug 22 A "+account);
+                ClientId clientId = new ClientId(siteNumber, clientType, clientNumbers[i]);
+                Account account = getAccount(clientId);
+                if (account == null) {
+                    throw new YamlLoadException("No account found for "+clientType+" "+clientNumbers[i]);
+                }
                 String stringEnablePermissions = fetchValue(map, "enable");
 
                 if (!StringUtilities.isEmpty(stringEnablePermissions)) {
-                    System.out.println("debug 22 en BB "+stringEnablePermissions);
                     List<edu.csus.ecs.pc2.core.security.Permission.Type> enabledPerms = getPermissionList(stringEnablePermissions);
 
                     for (Permission.Type type : enabledPerms) {
@@ -98,7 +110,6 @@ public class PermissionYamlLoader {
 
                 String stringDisablePermissions = fetchValue(map, "disable");
                 if (!StringUtilities.isEmpty(stringDisablePermissions)) {
-                    System.out.println("debug 22 di CC "+stringDisablePermissions+" "+account);
                     List<edu.csus.ecs.pc2.core.security.Permission.Type> disablePerms = getPermissionList(stringDisablePermissions);
                     for (Permission.Type type : disablePerms) {
                         account.removePermission(type);
@@ -116,8 +127,12 @@ public class PermissionYamlLoader {
         String[] arr = string.trim().split(",");
         for (String term : arr) {
 
-            edu.csus.ecs.pc2.core.security.Permission.Type type = Permission.Type.valueOf(term.trim());
-            list.add(type);
+            try {
+                edu.csus.ecs.pc2.core.security.Permission.Type type = Permission.Type.valueOf(term.trim());
+                list.add(type);
+            } catch (Exception e) {
+                throw new YamlLoadException("Unknown Permission.Type '"+term+"'", e.getCause());
+            }
         }
 
         return list;
