@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.ByteArrayInputStream;
@@ -1063,8 +1063,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
 
         }
-
-        return (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        
+        // Load permissions from yaml into accounts
+        Account[] fullAccountList = accountVector.toArray(new Account[accountVector.size()]);
+        PermissionYamlLoader loader = new PermissionYamlLoader(yamlLines, fullAccountList);
+        return loader.getAccountsArray();
 
     }
 
