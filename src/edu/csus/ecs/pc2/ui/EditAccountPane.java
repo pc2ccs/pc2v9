@@ -1059,8 +1059,11 @@ public class EditAccountPane extends JPanePlugin {
     protected void resetPermissions() {
         Account fakeAccount = new Account(account.getClientId(), account.getPassword(), account.getSiteNumber());
         PermissionList permissionList = new PermissionGroup().getPermissionList (account.getClientId().getClientType());
-        if (permissionList != null){
+        if (permissionList != null) {
             account.clearListAndLoadPermissions(permissionList);
+            if (account.getClientId().getClientNumber() == 1 && account.getClientId().getClientType().equals(ClientType.Type.FEEDER)) {
+                new PermissionGroup().addShadowPermissions(account);
+            }
         }
         populatePermissions(fakeAccount);
         permissionList = null;

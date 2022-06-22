@@ -25,11 +25,15 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ShadowInformation;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.shadow.IRemoteContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.MockContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.RemoteContestAPIAdapter;
@@ -98,6 +102,7 @@ public class ShadowControlPane extends JPanePlugin {
         super();
         super.setContestAndController(inContest, inController);
         this.getContest().addContestInformationListener(new ContestInformationListenerImplementation());
+        this.getContest().addAccountListener(new AccountListenerImplementation());
         initialize();
     }
 
@@ -487,9 +492,46 @@ public class ShadowControlPane extends JPanePlugin {
         
         updateShadowSettingsPane(currentlyShadowing);
         lastEventTextfield.setText(contestInformation.getLastShadowEventID());
+        
+        // enable or disable components based on permissions
+        getStartStopButton().setEnabled(isAllowed(Type.START_STOP_SHADOWING));
+        
+        
+        getCompareRunsButton().setEnabled(isAllowed(Type.COMPARE_RUNS_SCOREBOARD));
+        getCompareScoreboardsButton().setEnabled(isAllowed(Type.COMPARE_RUNS_SCOREBOARD));
+ 
+        /**
+         * Can current client modify settings?
+         */
+        boolean enableEditing = ableToModifySettings(currentlyShadowing);
+        
+        getUpdateButton().setEnabled(enableEditing);
+        
+        updateShadowSettingsPane(currentlyShadowing);
+        
+        getShadowSettingsPane().getShadowModeCheckbox().setEnabled(enableEditing);
+        
+        lastEventTextfield.setEditable(enableEditing);
     }
 
-    private void updateShadowSettingsPane(boolean currentlyShadowing) {
+    /**
+     * Can current client modify settings?
+     * 
+     * Check both client Permissions and whether shadowing 
+     * 
+     * @param shadowing is shadowing currently active.
+     * @return true if components (text fields) can be enabled.
+     */
+    private boolean ableToModifySettings(boolean shadowing) {
+
+        boolean canEdit = isAllowed(Type.MODIFY_SHADOW_SETTINGS);
+        if (shadowing) {
+            canEdit = false; // if Shadowing is currently on, do not allow these settings to be changed
+        }
+        return canEdit;
+    }
+
+    private void updateShadowSettingsPane(boolean shadowing) {
         
         ContestInformation contestInformation = getContest().getContestInformation();
 
@@ -498,11 +540,12 @@ public class ShadowControlPane extends JPanePlugin {
         getShadowSettingsPane().getRemoteCCSLoginTextfield().setText(contestInformation.getPrimaryCCS_user_login());
         getShadowSettingsPane().getRemoteCCSPasswdTextfield().setText(contestInformation.getPrimaryCCS_user_pw());
 
-        // if Shadowing is currently on, do not allow these settings to be changed
-        getShadowSettingsPane().getRemoteCCSURLTextfield().setEditable(!currentlyShadowing);
-        getShadowSettingsPane().getRemoteCCSLoginTextfield().setEditable(!currentlyShadowing);
-        getShadowSettingsPane().getRemoteCCSPasswdTextfield().setEditable(!currentlyShadowing);
-        lastEventTextfield.setEditable(!currentlyShadowing);
+        boolean enableEditing = ableToModifySettings(shadowing);
+        
+        getShadowSettingsPane().getRemoteCCSURLTextfield().setEditable(enableEditing);
+        getShadowSettingsPane().getRemoteCCSLoginTextfield().setEditable(enableEditing);
+        getShadowSettingsPane().getRemoteCCSPasswdTextfield().setEditable(enableEditing);
+        lastEventTextfield.setEditable(enableEditing);
     }
 
     /**
@@ -554,6 +597,52 @@ public class ShadowControlPane extends JPanePlugin {
         contestInfo.setLastShadowEventID(shadowInfo.getLastEventID());
         
         getController().updateContestInformation(contestInfo);
+    }
+    
+    class AccountListenerImplementation implements IAccountListener {
+
+        @Override
+        public void accountAdded(AccountEvent accountEvent) {
+            // not used
+            
+        }
+
+        @Override
+        public void accountModified(AccountEvent event) {
+
+            // check if is this account
+            Account account = event.getAccount();
+            /**
+             * If this is the account then update the GUI display per the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUI();
+                    }
+                });
+            }
+            
+        }
+
+        @Override
+        public void accountsAdded(AccountEvent accountEvent) {
+            // not used
+            
+        }
+
+        @Override
+        public void accountsModified(AccountEvent accountEvent) {
+            // not used
+            
+        }
+
+        @Override
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            accountModified(accountEvent);
+        }
+
     }
 
     class ContestInformationListenerImplementation implements IContestInformationListener {
@@ -699,5 +788,5 @@ public class ShadowControlPane extends JPanePlugin {
             return new RemoteContestAPIAdapter(url, login, password);
         }
     }
-
+    
 }

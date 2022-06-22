@@ -113,6 +113,9 @@ public class AccountList extends BaseElementList {
                 PermissionList permissionList = permissionGroup.getPermissionList (type);
                 if (permissionList != null){
                     account.clearListAndLoadPermissions(permissionList);
+                    if (account.getClientId().getClientNumber() == 1 && account.getClientId().getClientType().equals(ClientType.Type.FEEDER)) {
+                        permissionGroup.addShadowPermissions(account);
+                    }
                 } else {
                     account.addPermission(Permission.Type.LOGIN);
                     account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
