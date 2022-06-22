@@ -317,6 +317,27 @@ public class Permission implements Serializable {
          * Act as proxy team in shadow mode
          */
         SHADOW_PROXY_TEAM,
+
+        /**
+         * Allow User to enable/disable shadowing
+         */
+        ENABLE_SHADOW_MODE,
+
+        /**
+         * Start/Stop Shadowing
+         */
+        START_STOP_SHADOWING,
+
+        /**
+         * View Runs Compare Scoreboard
+         */
+        COMPARE_RUNS_SCOREBOARD,
+
+        /**
+         * Modify Shadow settings.
+         */
+        MODIFY_SHADOW_SETTINGS,
+
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -419,6 +440,12 @@ public class Permission implements Serializable {
         hash.put(Type.EDIT_EVENT_FEED,"Edit Event Feeds");
         hash.put(Type.VIEW_EVENT_FEED,"View Event Feeds");
         hash.put(Type.SHADOW_PROXY_TEAM,"Shadow Proxy Team");
+
+        hash.put(Type.ENABLE_SHADOW_MODE, "Enable Shadow Mode");
+        hash.put(Type.START_STOP_SHADOWING, "Start/Stop Shadowing");
+        hash.put(Type.COMPARE_RUNS_SCOREBOARD, "Allow Compare Runs/Scoreboard");
+        hash.put(Type.MODIFY_SHADOW_SETTINGS, "Modify Shadow Settings");
+
     }
 
     /**

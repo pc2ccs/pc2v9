@@ -1,10 +1,11 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Holds Default Permissions for users.
@@ -149,7 +150,8 @@ public class PermissionGroup {
         feederPermissionList.addPermission(Type.VIEW_SUMMARY_ATTEMPTS_GRID);
         feederPermissionList.addPermission(Type.VIEW_RUN_JUDGEMENT_HISTORIES);
         feederPermissionList.addPermission(Type.ALLOWED_TO_FETCH_RUN);
-
+        
+        feederPermissionList.addPermission(Type.COMPARE_RUNS_SCOREBOARD);
 
     }
 
@@ -182,6 +184,22 @@ public class PermissionGroup {
         }
     }
 
+    
+    /**
+     * Add Shadow start/stop and other permissions to certain accounts.
+     * 
+     * Add permissions to any Admin and FEEEDER1.
+     * 
+     * @param account
+     */
+    public void addShadowPermissions(Account account) {
+
+        account.addPermission(Type.ENABLE_SHADOW_MODE);
+        account.addPermission(Type.START_STOP_SHADOWING);
+        account.addPermission(Type.MODIFY_SHADOW_SETTINGS);
+
+    }
+    
     // for (Type type : Permission.Type.values()) {
     // System.out.println("foo.addPermission(Type." + type + ");");
     // }
