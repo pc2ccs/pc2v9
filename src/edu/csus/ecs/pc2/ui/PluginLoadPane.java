@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -95,13 +96,41 @@ public class PluginLoadPane extends JPanePlugin {
             openNewPluginButton = new JButton();
             openNewPluginButton.setBounds(new Rectangle(41, 147, 134, 36));
             openNewPluginButton.setText("Add Tab");
-            openNewPluginButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    addNewTab();
+            openNewPluginButton.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (e.isShiftDown() && e.isControlDown()) {
+                        // to make it easier to find tba, put tabs on left.
+                        parentTabbedPane.setTabPlacement (SwingConstants.LEFT);    
+                        openAllPluginsInTabs();
+                    } else {
+                        addNewTab();
+                    }
                 }
             });
         }
         return openNewPluginButton;
+    }
+
+    /**
+     * Add tab for every plugin in combo box.
+     */
+    protected void openAllPluginsInTabs() {
+
+        int size = getPluginComboBox().getItemCount();
+        for (int i = 0; i < size; i++) {
+            PluginWrapper  wrapper = (PluginWrapper) getPluginComboBox().getItemAt(i);
+            AddNewPane(wrapper.getPlugin());
+        }
+    }
+    
+    /**
+     * Add a single tab.
+     * @param plugin
+     */
+    protected void AddNewPane(JPanePlugin plugin) {
+        getController().register(plugin);
+        plugin.setContestAndController(getContest(), getController());
+        parentTabbedPane.add(plugin, plugin.getPluginTitle());
     }
 
     protected void addNewTab() {
