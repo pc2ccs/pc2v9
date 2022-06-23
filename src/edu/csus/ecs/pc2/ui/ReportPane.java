@@ -340,6 +340,7 @@ public class ReportPane extends JPanePlugin {
     private void updateGUIperPermissions() {
         generateSummaryButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
         viewReportButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
+        exportDataButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
     }
 
     protected void refreshGUI() {
