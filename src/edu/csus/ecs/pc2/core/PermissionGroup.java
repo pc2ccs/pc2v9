@@ -152,6 +152,7 @@ public class PermissionGroup {
         feederPermissionList.addPermission(Type.ALLOWED_TO_FETCH_RUN);
         
         feederPermissionList.addPermission(Type.COMPARE_RUNS_SCOREBOARD);
+        feederPermissionList.addPermission(Type.START_STOP_SHADOWING);
 
     }
 
@@ -195,7 +196,6 @@ public class PermissionGroup {
     public void addShadowPermissions(Account account) {
 
         account.addPermission(Type.ENABLE_SHADOW_MODE);
-        account.addPermission(Type.START_STOP_SHADOWING);
         account.addPermission(Type.MODIFY_SHADOW_SETTINGS);
 
     }
