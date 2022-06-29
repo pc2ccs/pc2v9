@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import edu.csus.ecs.pc2.core.model.Account;
@@ -153,6 +153,8 @@ public class PermissionGroup {
         
         feederPermissionList.addPermission(Type.COMPARE_RUNS_SCOREBOARD);
         feederPermissionList.addPermission(Type.START_STOP_SHADOWING);
+        feederPermissionList.addPermission(Type.ENABLE_SHADOW_MODE);
+        
 
     }
 
@@ -195,7 +197,6 @@ public class PermissionGroup {
      */
     public void addShadowPermissions(Account account) {
 
-        account.addPermission(Type.ENABLE_SHADOW_MODE);
         account.addPermission(Type.MODIFY_SHADOW_SETTINGS);
 
     }
