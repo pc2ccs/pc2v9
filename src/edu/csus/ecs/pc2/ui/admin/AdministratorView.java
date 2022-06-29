@@ -33,12 +33,12 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.ui.AboutPane;
-import edu.csus.ecs.pc2.ui.AccountsPane;
+import edu.csus.ecs.pc2.ui.AccountsTablePane;
 import edu.csus.ecs.pc2.ui.AutoJudgesPane;
 import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
 import edu.csus.ecs.pc2.ui.CategoriesPane;
-import edu.csus.ecs.pc2.ui.ClarificationsPane;
-import edu.csus.ecs.pc2.ui.ConnectionsPane;
+import edu.csus.ecs.pc2.ui.ClarificationsTablePane;
+import edu.csus.ecs.pc2.ui.ConnectionsTablePane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.ContestInformationPane;
@@ -55,7 +55,7 @@ import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.JudgementsPane;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
-import edu.csus.ecs.pc2.ui.LoginsPane;
+import edu.csus.ecs.pc2.ui.LoginsTablePane;
 import edu.csus.ecs.pc2.ui.MessageMonitorPane;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketExplorerPane;
@@ -65,10 +65,10 @@ import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
-import edu.csus.ecs.pc2.ui.RunsPane;
+import edu.csus.ecs.pc2.ui.RunsTablePane;
 import edu.csus.ecs.pc2.ui.SitesPane;
 import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
-import edu.csus.ecs.pc2.ui.StandingsPane;
+import edu.csus.ecs.pc2.ui.StandingsTablePane;
 import edu.csus.ecs.pc2.ui.TeamStatusPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
@@ -228,9 +228,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                  * add UI components involved with Configuration to the ConfigureContest tabbed pane
                  */
 
-                AccountsPane accountsPane = new AccountsPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Accounts", accountsPane);
-                
+                AccountsTablePane accountsTablePane = new AccountsTablePane();
+                addUIPlugin(getConfigureContestTabbedPane(), "Accounts", accountsTablePane);
+
                 if (Utilities.isDebugMode()) {
                     try {
                         CategoriesPane categoriesPane = new CategoriesPane();
@@ -299,11 +299,13 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                  * add UI components involved with Running the contest to the RunContest tabbed pane
                  */
 
-                ConnectionsPane connectionsPane = new ConnectionsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
-
-                ClarificationsPane clarificationsPane = new ClarificationsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsPane);
+                if (!controller.isSuppressConnectionsPaneDisplay()) {
+                    ConnectionsTablePane connectionsPane = new ConnectionsTablePane();
+                    addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
+                }
+                
+                ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
+                addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsTablePane);
 
                 if (Utilities.isDebugMode()) {
                     try {
@@ -323,9 +325,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 FinalizePane finalizePane = new FinalizePane();
                 addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
 
-                LoginsPane loginsPane = new LoginsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Logins", loginsPane);
-             
+                if (!controller.isSuppressLoginsPaneDisplay()) {
+                    LoginsTablePane loginsTablePane = new LoginsTablePane();
+                    addUIPlugin(getRunContestTabbedPane(), "Logins", loginsTablePane);
+                }
+                
                 if (Utilities.isDebugMode()) {
                     try {
                         MessageMonitorPane messageMonitorPane = new MessageMonitorPane();
@@ -365,14 +369,14 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ReportPane reportPane = new ReportPane();
                 addUIPlugin(getRunContestTabbedPane(), "Reports", reportPane);
 
-                RunsPane runsPane = new RunsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Runs", runsPane);
+                RunsTablePane runsTablePane = new RunsTablePane();
+                addUIPlugin(getRunContestTabbedPane(), "Runs", runsTablePane);
 
                 SitesPane sitesPanel = new SitesPane();
                 addUIPlugin(getRunContestTabbedPane(), "Sites", sitesPanel);
 
-                StandingsPane standingsPane = new StandingsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Standings", standingsPane);
+                StandingsTablePane standingsTablePane = new StandingsTablePane();
+                addUIPlugin(getRunContestTabbedPane(), "Standings", standingsTablePane);
 
                 StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
                 addUIPlugin(getRunContestTabbedPane(), "Standings HTML", standingsHTMLPane);

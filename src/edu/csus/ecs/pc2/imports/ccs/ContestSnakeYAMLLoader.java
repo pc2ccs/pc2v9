@@ -73,8 +73,6 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
  */
 public class ContestSnakeYAMLLoader implements IContestLoader {
 
-
-
     /**
      * Full content of yaml file.
      */
@@ -264,8 +262,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setCcsTestMode(ccsTestMode);
         contest.updateContestInformation(contestInformation);
-
     }
+    
+    
+    private void setStopOnFirstFailedTestCase(IInternalContest contest, boolean stopOnFirstFail) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setStopOnFirstFailedtestCase(stopOnFirstFail);
+        contest.updateContestInformation(contestInformation);
+    }    
 
     /**
      * Parse and convert dateString to Date.
@@ -398,6 +402,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setCcsTestMode(contest, ccsTestMode);
         }
         
+        boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
+        setStopOnFirstFailedTestCase (contest, stopOnFirstFail);
+        
         /**
          * assign shadow values
          */
@@ -407,6 +414,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         //set allow-multiple-team-logins mode
         boolean allowMultipleTeamLogins = fetchBooleanValue(content, ALLOW_MULTIPLE_TEAM_LOGINS_KEY, contestInformation.isAllowMultipleLoginsPerTeam());
         contestInformation.setAllowMultipleLoginsPerTeam(allowMultipleTeamLogins);
+        
+        // Load team scoreboard string (the one with variables)
+        String teamScoreboadDisplayString = fetchValue(content, TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING, contestInformation.getTeamScoreboardDisplayFormat());
+        contestInformation.setTeamScoreboardDisplayFormat(teamScoreboadDisplayString);
         
         // enable shadow mode
         boolean shadowMode = fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
@@ -753,6 +764,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
+    
     /**
      * Generate and write OS password file.
      * @param passfilename
@@ -1354,8 +1366,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
             }
         }
+        
+        boolean globlStopOnFirstFail = contest.getContestInformation().isStopOnFirstFailedtestCase();
 
-        boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
+        boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, globlStopOnFirstFail);
         problem.setStopOnFirstFailedTestCase(stopOnFirstFail);
 
         assignJudgingType(content, problem, overrideManualReview);

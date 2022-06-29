@@ -2,7 +2,9 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -232,7 +234,7 @@ public final class ICPCTSVLoader {
     }
 
     private static ElementId getGroupForNumber(int groupId) {
-
+        
         for (Group group : groups) {
             if (group.getGroupId() == groupId) {
                 return group.getElementId();
@@ -255,15 +257,28 @@ public final class ICPCTSVLoader {
     public static void setGroups(Group[] groups) {
         ICPCTSVLoader.groups = groups;
     }
-
+    
     /**
-     * Load groups into this class.
+     * Merge/Add group data from filename and authoritativeGroups.
      * 
-     * @param filename
-     * @return list of groups or new Group[0]
+     * @param filename name of groups.tsv file.
+     * @return list of groups 
      * @throws Exception
      */
     public static Group[] loadGroups(String filename) throws Exception {
+        return loadGroups(filename, new Group[0]);
+    }
+    
+    /**
+     * Merge/Add group data from filename and authoritativeGroups.
+     * 
+     * @param filename name of groups.tsv file.
+     * @param authoritativeGroups an array of groups (from contest/model)
+     * @return unique groups from authoritativeGroups and filename's group list.
+     * @throws Exception
+     */
+    public static Group[] loadGroups(String filename, Group[] authoritativeGroups) throws Exception {
+        List<Group> groupList = new ArrayList<Group>();
         
         String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));
         
@@ -282,16 +297,7 @@ public final class ICPCTSVLoader {
         // 1 Label groups fixed string (always same value)
         // 2 Version number 1 integer
 
-        // TODO CCS do check for 'groups' when tsv file contains that field.
-//        if (!fields[0].trim().equals("groups")) {
-//            throw new InvalidValueException("Expecting 'groups' got '" + fields[0] + "' in " + filename);
-//        }
-
         i++;
-
-        groups = new Group[lines.length - 1];
-
-        int groupAccount = 0;
 
         for (; i < lines.length; i++) {
 
@@ -319,17 +325,49 @@ public final class ICPCTSVLoader {
             } catch (NumberFormatException e) {
                 throw new InvalidValueException("Expecting group number got '" + numberStr + "' on line " + lines[i], e);
             }
-
-            Group group = new Group(groupName);
+            
+            Group group = findGroupById(authoritativeGroups, number);
+            if (group == null) {
+                group = new Group(groupName);
+            }
+            
+            group.setDisplayName(groupName);
             group.setGroupId(number);
-
-            groups[groupAccount] = group;
-            groupAccount++;
+            
+            groupList.add(group);
         }
-
+        
+        /**
+         * Add groups from authoritativeGroups if missing from groupList.
+         */
+        for (Group aGroup : authoritativeGroups) {
+            if (! groupList.contains(aGroup)) {
+               groupList.add(aGroup);
+               break;
+           }
+        }
+        
+        groups = (Group[]) groupList.toArray(new Group[groupList.size()]);
+        
         return groups;
     }
-    
+
+    /**
+     * Search and return group if found.
+     * 
+     * @param authoritativeGroups list of groups
+     * @param groupCMSId CMS group id
+     * @return null if not found, else the group
+     */
+    private static Group findGroupById(Group[] authoritativeGroups, int groupCMSId) {
+        for (Group group : authoritativeGroups) {
+            if (groupCMSId == group.getGroupId()) {
+                return group;
+            }
+        }
+        return null;
+    }
+
     protected  static String extractTeamNumber (String accountString){
         int dash = accountString.indexOf('-');
         if (dash > 0) {
@@ -358,6 +396,7 @@ public final class ICPCTSVLoader {
         }
     }
     
+    
     public static HashMap<Integer, String> loadPasswordsFromAccountsTSV(String filename) throws Exception {
         String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));
 
@@ -376,4 +415,6 @@ public final class ICPCTSVLoader {
         }
         return passwordMap;
     }
+
+  
 }

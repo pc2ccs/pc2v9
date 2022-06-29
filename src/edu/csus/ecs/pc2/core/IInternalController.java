@@ -292,6 +292,18 @@ public interface IInternalController {
      * @return true if using GUI, false if using text only
      */
     boolean isUsingGUI();
+    
+    /**
+     * Is this controller suppressing display of Connections grids.
+     * @return true if GUIs using this controller should suppress display of Connections grids.
+     */
+    boolean isSuppressConnectionsPaneDisplay();
+
+    /**
+     * Is this controller suppressing display of Logins grids.
+     * @return true if GUIs using this controller should suppress display of Logins grids.
+     */
+    boolean isSuppressLoginsPaneDisplay();
 
     /**
      * Update site in contest, send site update packet to other servers and admins.

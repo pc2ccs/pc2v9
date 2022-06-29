@@ -736,6 +736,9 @@ public class InternalContest implements IInternalContest {
     }
 
     public void addJudgement(Judgement judgement) {
+        if (judgement.getSiteNumber() == 0) {
+            judgement.setSiteNumber(getSiteNumber());
+        }
         judgementDisplayList.add(judgement);
         judgementList.add(judgement);
         JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.ADDED, judgement);
@@ -1490,7 +1493,7 @@ public class InternalContest implements IInternalContest {
                 runList.updateRun(newRun);
                 return runList.get(run.getElementId());
             } else {
-                throw new RunUnavailableException("Client " + clientId + " can not checked out run " + run.getNumber() + " (site " + run.getSiteNumber() + ")");
+                throw new RunUnavailableException("Client " + whoChangedRun + " can not check out run " + run.getNumber() + " (site " + run.getSiteNumber() + ")");
             }
         
         }
@@ -1574,41 +1577,90 @@ public class InternalContest implements IInternalContest {
     public void addRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedItId) throws IOException, ClassNotFoundException, FileSecurityException {
 
         Run theRun = runList.get(run);
-        ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
-        ClientId whoChangedItId = judgementRecord.getJudgerClientId();
-
-        if (whoCheckedOut == null && !whoChangedItId.getClientType().equals(Type.ADMINISTRATOR)) {
-            // No one did this ?
-
-            Exception ex = new Exception("addRunJudgement - not in checkedout list, whoCheckedOut is null ");
-            logException("Odd that. ", ex);
-
-        } else if (!whoChangedItId.equals(whoCheckedOut)) {
-            // The judge who submitted this judgement is different than who actually judged it ?
-
-            if (! whoChangedItId.getClientType().equals(Type.ADMINISTRATOR)) {
-                Exception ex = new Exception("addRunJudgement - who checked out and who it is differ ");
-                logException(ex);
-            } // else - ok, admin changed it.
-
-        } // else - ok
-
-        boolean manualReview = getProblem(theRun.getProblemId()).isManualReview();
-
-        // pass in the orignal run which has the testCases
-        runList.updateRun(run, judgementRecord, manualReview); // this sets run to JUDGED and saves the testCases
         
-        runResultFilesList.add(theRun, judgementRecord, runResultFiles);
+        if (theRun != null ) {
+            
+            if (judgementRecord != null) {
+                
+                //at this point we know we have a non-null Run and a non-null JudgementRecord;
+                // get the Ids of who's trying to add the judgement to the run and who (if anyone) has checked out the run
+                ClientId whoIsChangingItId = judgementRecord.getJudgerClientId();
+                ClientId whoCheckedItOutId = runCheckOutList.get(run.getElementId());
+                
+                //assume it's NOT ok to add the judgement, until we verify who is requesting the add
+                boolean okToAddJudgement = false ;
+                
+                //see if it's a superuser trying to add the judgement
+                if (whoIsChangingItId.getClientType().equals(Type.ADMINISTRATOR) || whoIsChangingItId.getClientType().equals(Type.FEEDER) ) {
+                    //TODO: the above test should probably be consolidated into a single method something like "isSuperUser()".  
+                    // The PROBLEM with this is that there are different PERMISSIONS involved.  For example, a Feeder invokes this method when it
+                    // has the "EDIT_RUN" permission -- but there exists another Permission named "ADD_JUDGEMENTS"; such a method would have to
+                    // figure out what permission(s) need to be required to be a "superuser".  Work deferred for now.  jlc 8/2/21
+                    
+                    okToAddJudgement = true;
+                    
+                } else {
+                    
+                    //it's not a superuser trying to add the judgement; see if anyone has checked out the run
+                    if (whoCheckedItOutId == null) {
+                        
+                        // No one has checked out this run and it's not a "super-user" (Admin or Feeder) that's trying to add a judgement to it -- that's not logical...
+                        Exception ex = new Exception("addRunJudgement - run not in checkedout list ('whoCheckedOut' is null) and requestor is not Admin or Feeder ");
+                        logException("Odd that. ", ex);
+                        
+                        okToAddJudgement = false;     //note that this variable should already be false here anyway.... this is for insurance
         
-        if (whoCheckedOut != null) {
-            runCheckOutList.remove(run.getElementId());
+                    } else {
+                        
+                        //someone has checked out the run; see if it is the client who's trying to change it that has it checked out
+                        if (whoIsChangingItId.equals(whoCheckedItOutId)) {
+                            
+                            //the changer is the client who checked it out; we'll allow that
+                            okToAddJudgement = true;
+                            
+                        } else {
+                        
+                            // The client who submitted this add-judgement request is different than the client who checked out the run (and we already know the requestor is not a superuser);
+                            //  that's not a situation we're willing to allow
+                            Exception ex = new Exception("addRunJudgement - the client who checked this run out is not the same as the client who's changing it, "
+                                                             + "and the client who's changing it is not a 'superuser' (Admin or Feeder)" );
+                            logException(ex);
+                            
+                            okToAddJudgement = false;     //note that this variable should already be false here anyway.... this is for insurance
+        
+                        }
+                    } 
+                }         
+                
+                if (okToAddJudgement) {
+                
+                    boolean manualReview = getProblem(theRun.getProblemId()).isManualReview();
+                    
+                    // pass in the original run which has the testCases
+                    runList.updateRun(run, judgementRecord, manualReview); // this sets run to JUDGED and saves the testCases
+                    runResultFilesList.add(theRun, judgementRecord, runResultFiles);
+                    if (whoCheckedItOutId != null) {
+                        runCheckOutList.remove(run.getElementId());
+                    }
+                    // the new run with testCases
+                    theRun = runList.get(run);
+                    RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, theRun, null, null);
+                    fireRunListener(runEvent);
+                }
+                    
+            } else {
+                
+                //We've been asked to add a null judgementRecord to a run, which we can't do...
+                //TODO: need to log this as an error, but there's no local log, no getLog(), etc...
+                // use StaticLog??
+            }
+            
+        } else {
+             
+            //We've been asked to add a judgement to a null run, which we can't do...
+            //TODO: need to log this as an error, but there's no local log, no getLog(), etc...
+            // use StaticLog??
         }
-        // the new run with testCases
-        theRun = runList.get(run);
-
-        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, theRun, null, null);
-        fireRunListener(runEvent);
-
     }
 
     public void cancelRunCheckOut(Run run, ClientId fromId) throws UnableToUncheckoutRunException, IOException, ClassNotFoundException, FileSecurityException {
@@ -2206,7 +2258,7 @@ public class InternalContest implements IInternalContest {
                 clarificationList.updateClarification(newClar);
                 return clarificationList.get(clar.getElementId());
             } else {
-                throw new ClarificationUnavailableException("Client " + clientId + " can not checked out clar " + clar.getNumber() + " (site " + clar.getSiteNumber() + ")");
+                throw new ClarificationUnavailableException("Client " + whoChangedClar + " can not check out clar " + clar.getNumber() + " (site " + clar.getSiteNumber() + ")");
             }
         
         }

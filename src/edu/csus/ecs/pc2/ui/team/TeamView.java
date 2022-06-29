@@ -23,14 +23,14 @@ import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.AboutPane;
-import edu.csus.ecs.pc2.ui.ClarificationsPane;
+import edu.csus.ecs.pc2.ui.ClarificationsTablePane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
-import edu.csus.ecs.pc2.ui.RunsPane;
+import edu.csus.ecs.pc2.ui.RunsTablePane;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -253,16 +253,16 @@ public class TeamView extends JFrame implements UIPlugin {
                 SubmitRunPane submitRunPane = new SubmitRunPane();
                 addUIPlugin(getMainTabbedPane(), "Submit Run", submitRunPane);
         
-                RunsPane runsPanel = new RunsPane();
-                runsPanel.setShowJudgesInfo(false);
-                addUIPlugin(getMainTabbedPane(), "View Runs", runsPanel);
-        
+                RunsTablePane runsTablePanel = new RunsTablePane();
+                runsTablePanel.setShowJudgesInfo(false);
+                addUIPlugin(getMainTabbedPane(), "View Runs", runsTablePanel);
+                
                 SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
                 addUIPlugin(getMainTabbedPane(), "Request Clarification", submitClarificationPane);
 
-                ClarificationsPane clarificationsPane = new ClarificationsPane();
-                addUIPlugin(getMainTabbedPane(), "View Clarifications", clarificationsPane);
-        
+                ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
+                addUIPlugin(getMainTabbedPane(), "View Clarifications", clarificationsTablePane);
+
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 

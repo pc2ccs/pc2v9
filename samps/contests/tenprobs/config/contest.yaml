@@ -5,6 +5,10 @@
 name: Sumit Ten Problems  
 short-name: Sumit10
 
+# Test very long team subs
+
+team-scoreboard-display-format-string : 'Team {:clientnumber}  {:teamname} and login: {:teamloginname} {:groupid}:{:groupname} long: {:longschoolname} short: {:shortschoolname} cms id: {:externalid}'
+
 ccs-test-mode : true
 
 duration:  5:00:00
@@ -17,6 +21,9 @@ scoreboard-freeze-length: 01:00:00
 # elapsed: 0:00:00
 # remaining: 5:00:00
 running: true
+
+# default stop of first fail
+stop-on-first-failed-test-case: true
 
 # Halt contest clock at end of contest
 # auto-stop-clock-at-end: true
@@ -48,10 +55,6 @@ languages:
     clics-id : 'pythonCLICSId'
 
 accounts:
-  - account: TEAM
-    site: 1
-    count: 80
-
   - account: JUDGE
     site: 1
     count: 12

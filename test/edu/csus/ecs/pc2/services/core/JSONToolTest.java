@@ -1,13 +1,17 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,7 +19,9 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
@@ -28,6 +34,8 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -1021,4 +1029,75 @@ public class JSONToolTest extends AbstractTestCase {
 //        fail();
     }
 
+    
+    protected FinalizeData createFinalizeData(int numberGolds, int numberSilvers, int numberBronzes) {
+        FinalizeData data = new FinalizeData();
+        data.setGoldRank(numberGolds);
+        data.setSilverRank(numberSilvers);
+        data.setBronzeRank(numberBronzes);
+        data.setComment("Finalized by Director of Operations, no, really!");
+        return data;
+    }
+    
+    /**
+     * Test "ended" calculation.
+     * 
+     * Tests: https://github.com/pc2ccs/pc2v9/issues/325
+     * 
+     * @throws Exception
+     */
+
+    public void testtoStateJSONEnded() throws Exception {
+
+        SampleContest sampleContest = new SampleContest();
+        IInternalContest contest = sampleContest.createStandardContest();
+        IInternalController controller = sampleContest.createController(contest, true, false);
+
+        contest.getContestTime().startContestClock();
+        contest.getContestTime().stopContestClock();
+        contest.getContestTime().setRemainingSecs(0);
+
+        FinalizeData data = createFinalizeData(4, 4, 5);
+        data.setCertified(true);
+        contest.setFinalizeData(data);
+
+        JSONTool tool = new JSONTool(contest, controller);
+
+        ObjectNode rootNode = tool.toStateJSON(contest.getContestInformation());
+
+        assertNotNull(rootNode);
+
+        String json = rootNode.toString();
+
+        JsonNode endNode = rootNode.get("ended");
+        assertNotNull("Did not find ended element in json: " + json, endNode);
+
+        // check ended value
+        ContestTime contestTime = contest.getContestTime();
+        Calendar contestStart = contestTime.getContestStartTime();
+
+        long contestEndMS = contestStart.getTimeInMillis() + contestTime.getContestLengthMS(); 
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
+        calendar.setTimeInMillis(contestEndMS);
+        Date date = calendar.getTime();
+                
+        SimpleDateFormat iso8601formatterWithMS = new SimpleDateFormat(Utilities.ISO_8601_TIMEDATE_FORMAT_WITH_MS);
+        String iso8601DateString = iso8601formatterWithMS.format(date);
+
+        String endValue = endNode.textValue();
+
+        /**
+         * Compare dates but not the times.
+         */
+        String actual = iso8601DateString.substring(0, 10); // only YYYY-MM-DD
+        String expected = endValue.substring(0, 10); // only YYYY-MM-DD
+
+        // compare YYYY-MM-DD
+        assertEquals("Expected contest end date value", expected, actual);
+        
+        // compare full date string, ex. 2022-04-17T00:03:29.280-07
+        assertEquals("Expected contest end date value", iso8601DateString, endValue);
+
+    }
 }

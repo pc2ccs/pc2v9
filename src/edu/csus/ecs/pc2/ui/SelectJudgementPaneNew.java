@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -596,8 +596,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             judgementId = run.getJudgementRecord().getJudgementId();
         }
 
-        for (Judgement judgement : getContest().getJudgements()) {
-
+        for (Judgement judgement : JudgementUtilites.getSingleListofJudgements(getContest())) {
             if (judgement.isActive()) {
                 getJudgementComboBox().addItem(judgement);
                 if (judgement.getElementId().equals(judgementId)) {

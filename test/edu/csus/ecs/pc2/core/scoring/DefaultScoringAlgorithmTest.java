@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -1353,6 +1354,55 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         }
     }
 
+    public void testDivisonRank() {
+        try {
+            InternalContest contest = new InternalContest();
+            
+            initContestData(contest);
+            String base = "Oregon D";
+            Group[] groups = new Group[4];
+            for (int i = 1; i <= 2; i++) {
+                Group group = new Group(base+i);
+                contest.addGroup(group);
+                groups[i-1] = group;
+            }
+            base = "Hawaii D";
+            for (int i = 1; i <= 2; i++) {
+                Group group = new Group(base+i);
+                contest.addGroup(group);
+                groups[i+1] = group;
+            }
+            for (Account account : getAccounts(contest, ClientType.Type.TEAM)) {
+                account.setGroupId(groups[3].getElementId());
+                contest.updateAccount(account);
+            }
+            createJudgedRun(contest, 0, true);
+            try {
+                DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+                String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
+                
+                // getStandings should always return a well-formed xml
+                assertFalse("getStandings returned null ", xmlString == null);
+                assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
+                
+                DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+                Document doc = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+                NodeList nodeList = doc.getElementsByTagName("teamStanding");
+                Node node = nodeList.item(0).getAttributes().getNamedItem("divisionRank");
+                assertNotNull(node);
+                assertNotEquals("divisionRank=", "0", node.getNodeValue());
+            } catch (Exception e) {
+                e.printStackTrace();
+                assertTrue("exception", false);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue("exception", false);
+        }
+        
+    }
     public void testScoreAdjustment0() {
         try {
             InternalContest contest = new InternalContest();

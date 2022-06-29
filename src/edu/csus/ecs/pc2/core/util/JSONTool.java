@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
 import java.util.Calendar;
@@ -75,7 +75,7 @@ public class JSONTool {
         element.put("problem_id", getProblemId(model.getProblem(submission.getProblemId())));
         element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
         element.put("time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
-        element.put("contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
+        element.put("contest_time", Utilities.formatDuration(submission.getElapsedMS()));
         if (submission.getEntryPoint() != null) {
             element.put("entry_point", new String(submission.getEntryPoint()));
         }
@@ -212,7 +212,7 @@ public class JSONTool {
             startTime = Utilities.getIso8601formatterWithMS().format(model.getContestTime().getContestStartTime().getTime());
             element.put("started", startTime);
             if (model.getContestTime().isPastEndOfContest()) {
-                Calendar endedDate = calculateElapsedWalltime(model, model.getContestTime().getContestStartTime().getTimeInMillis() + model.getContestTime().getContestLengthMS());
+                Calendar endedDate = calculateElapsedWalltime(model, model.getContestTime().getContestLengthMS());
                 if (endedDate != null) {
                     element.put("ended", Utilities.getIso8601formatterWithMS().format(endedDate.getTimeInMillis()));
                 }
@@ -504,7 +504,7 @@ public class JSONTool {
                     resultString = judgementRecord.getValidatorResultString();
                     if (resultString!=null) {
                         //try to convert the validator string to a known acronym
-                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronym(resultString);
+                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(resultString);
                         //check if we got back a judgement acronym
                         if (acronym!=null) {
                             resultString = acronym.name();

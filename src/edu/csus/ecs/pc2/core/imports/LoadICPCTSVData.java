@@ -23,10 +23,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * Read input .tsv files, validate then if valid load into contest.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class LoadICPCTSVData implements UIPlugin {
 
     public static final String TEAMS2_TSV = "teams2.tsv";
@@ -87,13 +85,13 @@ public class LoadICPCTSVData implements UIPlugin {
             String instFilename = groupsFilename.replaceFirst(GROUPS_FILENAME,"institutions.tsv");
             // this must be loaded before accounts, and no harm before groups
             ICPCTSVLoader.loadInstitutions(instFilename);
-            Group[] groups = ICPCTSVLoader.loadGroups(groupsFilename);
+            Group[] groups = ICPCTSVLoader.loadGroups(groupsFilename, contest.getGroups());
             
-//            for (Group group : groups) {
-//                group.setSite(getContest().getSites()[0].getElementId());
-//            }
-            
+//          for (Group group : groups) {
+//              group.setSite(getContest().getSites()[0].getElementId());
+//          }
             Account[] accounts = ICPCTSVLoader.loadAccounts(teamsFilename);
+            
             if (!accountsFilename.equals("")) {
                 HashMap<Integer, String> passwordMap = ICPCTSVLoader.loadPasswordsFromAccountsTSV(accountsFilename);
                 if (!passwordMap.isEmpty()) {
@@ -144,7 +142,6 @@ public class LoadICPCTSVData implements UIPlugin {
                      * UpdateAccounts
                      */
                     Account[] updatedAccounts = (Account[]) accountList.toArray(new Account[accountList.size()]);
-
                     getController().updateAccounts(updatedAccounts);
                     info("Sent accounts from " + teamsFilename + " to server");
                 } else {
@@ -152,6 +149,7 @@ public class LoadICPCTSVData implements UIPlugin {
                     // since not sending to server, add to existing contest.
                     
                     Group[] updatedGroups = (Group[]) groupList.toArray(new Group[groupList.size()]);
+                    
                     for (Group group : updatedGroups) {
                         contest.updateGroup(group);
                     }
@@ -227,6 +225,8 @@ public class LoadICPCTSVData implements UIPlugin {
             
             accountList.set(i, existingAccount);
             i ++;
+            
+            
         }
         
     }

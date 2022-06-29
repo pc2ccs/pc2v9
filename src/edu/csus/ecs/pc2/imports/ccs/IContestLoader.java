@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
  * Contest Loader interface and Constants.
@@ -187,6 +188,12 @@ public interface IContestLoader {
     String SHADOW_MODE_KEY = "shadow-mode";
     
     String ALLOW_MULTIPLE_TEAM_LOGINS_KEY = "allow-multiple-team-logins";
+    
+    /**
+     * 
+     * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, IInternalContest, edu.csus.ecs.pc2.core.model.Account)
+     */
+    String TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING  = "team-scoreboard-display-format-string";
 
     Problem addDefaultPC2Validator(Problem problem, int optionNumber);
 

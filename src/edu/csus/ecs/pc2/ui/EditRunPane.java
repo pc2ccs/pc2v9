@@ -40,6 +40,8 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.ExtractRuns;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import java.awt.Point;
+import java.awt.Dimension;
 
 /**
  * Add/Edit Run Pane
@@ -92,11 +94,11 @@ public class EditRunPane extends JPanePlugin {
 
     private JLabel judgementLabel = null;
 
-    private JLabel statusLabel = null;
-
     private JLabel statusTitleLabel = null;
 
     private JComboBox<Problem> problemComboBox = null;
+    
+    private JComboBox<Run.RunStates> runStatusComboBox = null;
 
     private JComboBox<Language> languageComboBox = null;
 
@@ -234,7 +236,7 @@ public class EditRunPane extends JPanePlugin {
         Run newRun = getRunFromFields();
 
         cancelButton.setText("Close");
-        updateButton.setEnabled(false);
+        updateButton.setEnabled(false); // disable update button
 
         JudgementRecord judgementRecord = null;
         RunResultFiles runResultFiles = null;
@@ -256,14 +258,28 @@ public class EditRunPane extends JPanePlugin {
 
         ElementId problemId = ((Problem) getProblemComboBox().getSelectedItem()).getElementId();
         if (problemId != null) {
-            run.setProblemId(problemId);
+            newRun.setProblemId(problemId);
         }
         ElementId languageId = ((Language) getLanguageComboBox().getSelectedItem()).getElementId();
         if (languageId != null) {
-            run.setLanguageId(languageId);
+            newRun.setLanguageId(languageId);
         }
-        
-        newRun.setProblemId(problemId);
+
+        if (isStatusChanged()) {
+
+            RunStates prevState = run.getStatus();
+            RunStates newRunState = (Run.RunStates) runStatusComboBox.getSelectedItem();
+
+            int result = FrameUtilities.yesNoCancelDialog(this, "Are you sure you want to change status from " + //
+                    prevState.toString() + " to " + newRunState.toString() + "?", "Update/Change run status?");
+
+            if (result != JOptionPane.YES_OPTION) {
+                enableUpdateButton(); // required to re-enable Update button
+                return;
+            }
+
+            newRun.setStatus(newRunState);
+        }
 
         ExecutionData executionData = null;
         if (executable != null) {
@@ -276,6 +292,7 @@ public class EditRunPane extends JPanePlugin {
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
+        
     }
 
     /**
@@ -355,7 +372,6 @@ public class EditRunPane extends JPanePlugin {
 
             runInfoLabel.setText("Run " + run2.getNumber() + " (Site " + run2.getSiteNumber() + ") from " + teamName);
             deleteCheckBox.setSelected(run2.isDeleted());
-            statusLabel.setText(run.getStatus().toString());
             elapsedTimeTextField.setText(new Long(run.getElapsedMins()).toString());
             
             getNotifyTeamCheckBox().setSelected(notifyTeam());
@@ -365,7 +381,6 @@ public class EditRunPane extends JPanePlugin {
 
             runInfoLabel.setText("Could not get run");
             deleteCheckBox.setSelected(false);
-            statusLabel.setText("");
             elapsedTimeTextField.setText("");
 
             getNotifyTeamCheckBox().setSelected(false);
@@ -384,9 +399,11 @@ public class EditRunPane extends JPanePlugin {
         getProblemComboBox().removeAllItems();
         getLanguageComboBox().removeAllItems();
         getJudgementComboBox().removeAllItems();
+        
+        runStatusComboBox.removeAllItems();
 
         if (run == null) {
-            return; // No run no combo boxes.
+            return; // No run no combo boxes values
         }
 
         for (Problem problem : getContest().getProblems()) {
@@ -428,8 +445,22 @@ public class EditRunPane extends JPanePlugin {
             }
             index++;
         }
+        
+        selectedIndex = -1;
+        index = 0;
 
-        getJudgementComboBox().setSelectedIndex(selectedIndex);
+        runStatusComboBox.setSelectedIndex(selectedIndex);
+        
+        RunStates[] states = Run.RunStates.values();
+        for (RunStates runStates : states) {
+            runStatusComboBox.addItem(runStates);
+            if (run.getStatus().equals(runStates)) {
+                selectedIndex = index;
+            }
+            index++;
+        }
+        
+        runStatusComboBox.setSelectedIndex(selectedIndex);
 
     }
 
@@ -482,12 +513,27 @@ public class EditRunPane extends JPanePlugin {
 
             enableButton |= judgementChanged();
             
+            enableButton |= isStatusChanged();
+            
             enableButton |= notifyTeamChanged();
             
         }
 
         getUpdateButton().setEnabled(enableButton);
 
+    }
+
+    /**
+     * return if status changed by user.
+     * 
+     * @return true if input run status different than combobox status
+     */
+    private boolean isStatusChanged() {
+
+        RunStates prevState = run.getStatus();
+        RunStates newRunState = (Run.RunStates) runStatusComboBox.getSelectedItem();
+
+        return !prevState.equals(newRunState);
     }
 
     private boolean judgementChanged() {
@@ -568,9 +614,6 @@ public class EditRunPane extends JPanePlugin {
             statusTitleLabel.setBounds(new java.awt.Rectangle(73, 35, 142, 19));
             statusTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             statusTitleLabel.setText("Status");
-            statusLabel = new JLabel();
-            statusLabel.setBounds(new java.awt.Rectangle(224, 35, 271, 19));
-            statusLabel.setText("JLabel");
             judgementLabel = new JLabel();
             judgementLabel.setBounds(new java.awt.Rectangle(73, 99, 142, 19));
             judgementLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -586,7 +629,6 @@ public class EditRunPane extends JPanePlugin {
             generalPane.add(runInfoLabel, null);
             generalPane.add(getDeleteCheckBox(), null);
             generalPane.add(judgementLabel, null);
-            generalPane.add(statusLabel, null);
             generalPane.add(statusTitleLabel, null);
             generalPane.add(getProblemComboBox(), null);
             generalPane.add(getLanguageComboBox(), null);
@@ -595,6 +637,22 @@ public class EditRunPane extends JPanePlugin {
             generalPane.add(jLabel, null);
             generalPane.add(getElapsedTimeTextField(), null);
             generalPane.add(getNotifyTeamCheckBox(), null);
+            
+            runStatusComboBox = new JComboBox<Run.RunStates>();
+            runStatusComboBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    new Thread(new Runnable() {
+                        public void run() {
+                            enableUpdateButton();
+                        }
+                    }).start();
+                }
+            });
+
+            runStatusComboBox.setSize(new Dimension(263, 22));
+            runStatusComboBox.setLocation(new Point(224, 97));
+            runStatusComboBox.setBounds(224, 34, 263, 22);
+            generalPane.add(runStatusComboBox);
         }
         return generalPane;
     }

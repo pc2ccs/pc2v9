@@ -177,6 +177,7 @@ public class RunsReport implements IReport {
                     printWriter.println("Judgement is null for "+run);
                 }
                 ElementId elmentId = judgementRecord.getJudgementId();
+                Judgement judgement = contest.getJudgement(elmentId);
                 String judgementText = contest.getJudgement(elmentId).toString();
                 String validatorJudgementName = judgementRecord.getValidatorResultString();
                 if (judgementRecord.isUsedValidator() && validatorJudgementName != null) {
@@ -187,7 +188,7 @@ public class RunsReport implements IReport {
                 }
 
                 printWriter.print("     ");
-                printWriter.print(" '" + judgementText + "'");
+                printWriter.print(" '" + judgementText + "' site="+judgement.getSiteNumber());
                 printWriter.print(" by " + judgementRecord.getJudgerClientId().getName()+"/s"+judgementRecord.getJudgerClientId().getSiteNumber());
                 if (judgementRecord.isComputerJudgement()){
                     printWriter.print("/Computer");

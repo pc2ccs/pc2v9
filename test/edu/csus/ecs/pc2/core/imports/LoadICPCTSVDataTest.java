@@ -1,9 +1,11 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -11,7 +13,9 @@ import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.ICPCTSVLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Unit Tests for LoadICPCTSVData.
@@ -111,5 +115,82 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
             }
         }
     }
+    
+    private IInternalContest loadSampleContest(IInternalContest contest, String sampleName) throws Exception {
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        String configDir = getTestSampleContestConfigDirectory(sampleName);
 
+        try {
+            return loader.fromYaml(contest, configDir);
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw e;
+        }
+    }
+
+    private String getTestSampleContestConfigDirectory(String contestName) {
+        return getTestSampleContestDirectory(contestName) + File.separator + IContestLoader.CONFIG_DIRNAME;
+    }
+
+    private String getTestSampleContestConfigFile(String contestName, String filename) {
+        return getTestSampleContestDirectory(contestName) + File.separator + IContestLoader.CONFIG_DIRNAME + File.separator + filename;
+    }
+
+    /**
+     * Test loading a teams.tsv twice.
+     * 
+     * The 2nd load of teams and groups, in particular groups, caused all accounts' groups to be "empty"
+     * on the Accounts tab.  See https://github.com/pc2ccs/pc2v9/issues/318 for details.
+     * 
+     * @throws Exception
+     */
+    public void testReLoadTSV() throws Exception {
+
+        String contestName = "mini";
+        String groupsFilename = getTestSampleContestConfigFile(contestName, LoadICPCTSVData.GROUPS_FILENAME);
+        assertFileExists(groupsFilename);
+
+        IInternalContest contest = loadSampleContest(null, contestName);
+        assertNotNull(contest);
+        IInternalController controller = new SampleContest().createController(contest, true, false);
+        
+        LoadICPCTSVData loader = new LoadICPCTSVData();
+        loader.setContestAndController(contest, controller);
+        
+        boolean loaded = loader.loadFiles(groupsFilename, false, false);
+        assertTrue("Expecting "+contestName+" contest loaded", loaded);
+
+        assertEquals("Number of groups", 12, contest.getGroups().length);
+        assertEquals("Number of accounts", 167, contest.getAccounts().length);
+
+        loader.checkFiles(groupsFilename);
+
+        Account[] accounts = ICPCTSVLoader.loadAccounts(loader.getTeamsFilename());
+
+        /**
+         * Groups from contest/model, the authoritative groups from model.
+         */
+        Group[] modelGroups = contest.getGroups();
+
+        assertEquals("Number of groups", 12, modelGroups.length);
+        assertEquals("Number of accounts", 151, accounts.length);
+
+        // Load groups from file, merge with modelGroups list.
+        Group[] mergedGroups = ICPCTSVLoader.loadGroups(loader.getGroupsFilename(), modelGroups);
+
+        Account[] accounts2 = ICPCTSVLoader.loadAccounts(loader.getTeamsFilename());
+
+        assertEquals("Number of groups", 12, mergedGroups.length);
+        assertEquals("Number of accounts", 151, accounts2.length);
+
+        for (int i = 0; i < modelGroups.length; i++) {
+            assertEquals("(" + i + ") Expecting same group element id for group " + modelGroups[i], modelGroups[i].getElementId(), mergedGroups[i].getElementId());
+        }
+
+        // check that all accounts assigned groups in the model/contest
+        for (Account account : accounts2) {
+            Group group = contest.getGroup(account.getGroupId());
+            assertNotNull("Expecting group to exist in contest/model " + account.getGroupId(), group);
+        }
+    }
 }

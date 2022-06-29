@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,9 +20,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
-import edu.csus.ecs.pc2.ui.ShadowComparePane;
+import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
 
 /**
  * This class listens for submission events in the event feed input stream from a remote CCS CLICS Contest API Event Feed.
@@ -30,7 +34,7 @@ import edu.csus.ecs.pc2.ui.ShadowComparePane;
  * as a submission to the local (Shadow) PC2 system.
  * 
  * Events of type "judgements" result in updating a global map of judgements received from the remote system; this map
- * is subsequently used by the {@link ShadowComparePane} class to display comparisons between local (shadow) judgements
+ * is subsequently used by the {@link ShadowCompareRunsPane} class to display comparisons between local (shadow) judgements
  * and the corresponding judgements from the remote CCS.
  * 
  * @author pc2@ecs.csus.edu
@@ -72,7 +76,16 @@ public class RemoteEventFeedMonitor implements Runnable {
     private boolean listening;
     private IInternalController pc2Controller;
     private InputStream remoteInputStream;
+    
+    /**
+     * A Map mapping remote judgement ids to corresponding submission ids and the judgement applied to that submission.
+     */
     private static Map<String,String> remoteJudgements;
+    
+    /**
+     * A lock for synchronizing access to the above map.
+     */
+    private static Object remoteJudgementsMapLock = new Object();
 
     /**
      * Constructs a RemoteEventFeedMonitor with the specified values.  The RemoteEventFeedMonitor
@@ -110,16 +123,21 @@ public class RemoteEventFeedMonitor implements Runnable {
         Log log = pc2Controller.getLog();
         
         //open connection to remoteURL event-feed endpoint
+        if (Utilities.isDebugMode()) {
+            System.out.println("Opening connection to remote event feed");
+        }
+        log.info("Opening connection to remote event feed");
         remoteInputStream = remoteContestAPIAdapter.getRemoteEventFeedInputStream();
 
         if (remoteInputStream == null) {
             
-            //  TODO: design error handling (logging?)
-            log.log(Level.SEVERE, "Error opening event feed stream");
+            //  TODO: improve error handling (more than just logging?)
             System.err.println("Error opening event feed stream");
+            log.log(Level.SEVERE, "Error opening event feed stream");
             
         } else {
 
+            String event = "null event";
             try {
 
                 //wrap the event stream (which consists of newline-delimited character strings representing events)
@@ -127,15 +145,37 @@ public class RemoteEventFeedMonitor implements Runnable {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(remoteInputStream));
 
                 //read the next event from the event feed stream
-                String event = reader.readLine();
+                event = reader.readLine();
 
+                //process the next event
                 while ((event != null) && keepRunning) {
 
+                    //if the remote system feeds events too fast (which happens when testing with a completed contest/eventfeed, and could
+                    // in theory happen during a live contest), this RemoteEventFeedMonitor thread overwhelms the JVM scheduler, causing
+                    // things like AWT Dispatch thread GUI updates to become hung.
+                    //Let's sleep for a moment to allow other threads to run.
+                    //Note1: it might seem more logical to put this sleep at the END of the while-loop; however, there are multiple places
+                    // within the loop which invoke "continue", which would SKIP the sleep if it was at the end of the loop...
+                    //Note2:  the value "10ms" was experimentally determined using the NADC21 Kattis event feed, which contains over 53,300 
+                    // events (lines).  Any value below 10ms caused the GUI to freeze up.
+                    //Note3: an attempt was made to change the priority of this thread to a higher number (so, lower priority) than that 
+                    // assigned to the AWT Event Dispatch thread, and then to use Thread.yield() here instead of Thread.sleep().  In theory
+                    // this should have allowed the AWT thread to gain the CPU when it was ready to run, but in practice GUI lockups were 
+                    // still seen.  This could be because the AWT thread has multiple blocking conditions and each one of these allows this
+                    // Event Feed Monitor thread to get back to the CPU (and use it for a full scheduling timeslice).
+                    // So it was determined that the following was the best solution, at least in the short term...
+                    //See also GitHub Issue 267:  https://github.com/pc2ccs/pc2v9/issues/267
+                    // Thread.sleep(10);
+                    
+                    if ((!event.contains("\"type\": \"organizations\"")) && (!event.contains("\"type\": \"runs\""))) {
+                        Thread.sleep(500);
+                    }
+                    
                     //skip blank lines and any that do not start/end with "{...}"
                     if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
                         
-                        System.out.println("Got event string: " + event);
-//                        log.log(Level.INFO, "Got event string: " + event);
+//                        System.out.println("Got event string: " + event);
+                        log.log(Level.INFO, "Got event string: " + event);
                         try {
 
                             /**
@@ -153,20 +193,36 @@ public class RemoteEventFeedMonitor implements Runnable {
                             if (eventMap == null) {
                                 // could not parse event
                                 log.log(Level.WARNING, "Could not parse event: " + event);
-                                System.out.println("Could not parse event: " + event);
+                                if (Utilities.isDebugMode()) {
+                                    System.out.println("Could not parse event: " + event);
+                                }
 
                             } else {
 
                                 // find event type
                                 String eventType = (String) eventMap.get("type");
-//                                System.out.println("\nfound event: " + eventType + ":" + event); // TODO log this.
+                                
+                                if (Utilities.isDebugMode()) {
+                                    System.out.println("Found event of type " + eventType + ": " + event);
+                                }
+                                log.info("Found event of type " + eventType + ": " + event);
 
                                 if ("submissions".equals(eventType)) {
-//                                    System.out.println("debug 22 found submission event");
+
+                                    if (isReadOnlyClient()) {
+                                        log.info("Skipping submission event due to being logged in as a read-only client (not Feeder1)");
+                                        event = reader.readLine();
+                                        continue;
+                                    }
 
                                     //process a submission event
                                     try {
-//                                        log.log(Level.INFO, "Processing " + eventType + " event");
+
+                                        if (Utilities.isDebugMode()) {
+                                            System.out.println("\nProcessing submission event: " + event);
+                                        }
+
+                                        log.log(Level.INFO, "Processing submission event: " + event);
 
                                         //get a map of the data comprising the submission
                                         Map<String, Object> submissionEventDataMap = (Map<String, Object>) eventMap.get("data");
@@ -175,8 +231,13 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         String submissionID = (String) submissionEventDataMap.get("id");
                                         
                                         //check if the current submission is to be ignored due to filtering
+                                        // (submissionFilterIDsList is a list of submissions we WANT TO KEEP; typically used for debugging...)
                                         if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
 
+                                            if (Utilities.isDebugMode()) {
+                                                System.out.println ("Ignoring submission " + submissionID + " due to filter");
+                                            }
+                                            
                                             log.info("Ignoring submission " + submissionID + " due to filter");
                                             event = reader.readLine();
                                             continue;
@@ -185,6 +246,10 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         //make sure we haven't seen this submission before (this could happen if
                                         // we've done a restart but already processed this submission on a prior shadow run)
                                         if (RunUtilities.isAlreadySubmitted(pc2Controller.getContest(),submissionID) ) {
+                                            
+                                            if (Utilities.isDebugMode()) {
+                                                System.out.println ("Ignoring submission " + submissionID + " due to it already having been submitted");
+                                            }
                                             
                                             log.info("Ignoring submission " + submissionID + " due to it already having been submitted");
                                             event = reader.readLine();
@@ -195,12 +260,23 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
 
                                         if (runSubmission == null) {
+                                            
+                                            if (Utilities.isDebugMode()) {
+                                                System.out.println ("Severe error parsing submission data: " + event);
+                                            }
+                                            
                                             log.log(Level.SEVERE, "Error parsing submission data: " + event);
                                             throw new Exception("Error parsing submission data " + event);
+                                            
                                         } else {
 
-//                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
-                                            System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id());
+                                            if (Utilities.isDebugMode()) {
+                                                System.out.println("Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id()
+                                                                    + ": event= " + event);
+                                            }
+                                            
+                                            log.log(Level.INFO, "Found run " + runSubmission.getId() + " from team " + runSubmission.getTeam_id()
+                                                                    + ": event= " + event);
 
                                             //construct the override values to be used for the shadow submission
                                             long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
@@ -275,15 +351,96 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                             //this block is a temporary substitute for the above commented-out block
                                             List<IFile> files = null;
-                                            System.out.println("debug 22 get files using id "+overrideSubmissionID);
-                                            files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
+                                            
+                                            if (Utilities.isDebugMode()) {
+                                                System.out.println("Fetching files from remote system using id "+overrideSubmissionID);
+                                            }
+                                            log.info("Fetching files from remote system using id "+overrideSubmissionID);
+                                            
+                                            //try up to maxTries times to get files without having a SocketTimeout
+                                            int tryNum = 1;
+                                            int maxTries = 10;
+                                            boolean success = false ;
+                                            Exception ex = null;
+                                            
+                                            while (!success && tryNum<=maxTries) {
+                                                try {              
+                                                    //request files from remote CCS
+                                                    files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
+                                                    
+                                                    //if we get here, no exception was thrown while getting the files
+                                                    success = true;
 
-                                            IFile mainFile = null;
-                                            if (files.size() <= 0) {
-                                                //TODO: deal with this error -- how to propagate it back to the invoker?
-                                                System.err.println("Error: submitted files list is empty");
-                                                log.log(Level.WARNING, "Received a submssion with empty files list");
+                                                } catch (Exception e) {
+                                                    
+                                                    //we got an exception attempting to get the files for the submission from the remote CCS;
+                                                    //see if the underlying cause of the exception was a socket timeout
+                                                    Throwable cause = e.getCause();
+                                                    if (cause!=null && cause instanceof SocketTimeoutException) {
+
+                                                            if (Utilities.isDebugMode()) {
+                                                                System.out.println("Warning: SocketTimeoutException getting files for submission " + overrideSubmissionID 
+                                                                        + " on try " + tryNum + "; trying up to " + maxTries + " times");
+                                                            }
+                                                            log.warning("SocketTimeoutException getting files for submission " + overrideSubmissionID 
+                                                                    + " on try " + tryNum + "; trying up to " + maxTries + " times");
+                                                            tryNum++;
+                                                            
+                                                            //save the exception so we can rethrow it if we never get "success"
+                                                            ex = e;
+                                                        
+                                                    } else {
+                                                        //we got an exception other than a socket timeout; rethrow it outward (which will be logged in the catch clause)
+                                                        throw e;
+                                                    }
+                                                }
+                                            }
+                                            
+                                            //if after maxTries we still weren't successful getting files, log it and rethrow the last exception
+                                            if (!success) {
+                                                if (Utilities.isDebugMode()) {
+                                                    System.out.println("Severe: unable to get files for submission " + overrideSubmissionID
+                                                                    + " from remote CCS after " + maxTries + " tries; giving up.");
+                                                }
+                                                log.severe("Unable to get files for submission " + overrideSubmissionID
+                                                            + " from remote CCS after " + maxTries + " tries; giving up.");
+                                                throw ex;
                                             } else {
+                                                //we got files from the remote CCS; log how many tries it took
+                                                String pluralizer = tryNum==1 ? " try." : " tries."; 
+                                                if (Utilities.isDebugMode()) {
+                                                    System.out.println("Got files for submission id " + overrideSubmissionID + " from remote CCS after " 
+                                                                    + tryNum + pluralizer);
+                                                }
+                                                log.info("Got files for submission id " + overrideSubmissionID + " from remote CCS after " + tryNum + pluralizer);
+                                            }
+                                            
+                                            //if we get here we at least know we got a "success" from the above communication with the remote CCS
+                                            if (files==null) {
+                                                if (Utilities.isDebugMode()) {
+                                                    System.err.println("Null file list returned from remote system while processing event: " + event);
+                                                }
+                                                log.log(Level.SEVERE, "Null file list returned from remote system while processing event: " + event);
+                                                throw new Exception("Null file list returned from remote system while processing event: " + event);
+                                            }
+                                            
+                                            IFile mainFile = null;
+
+                                            if (files.size() <= 0) {
+                                                
+                                                if (Utilities.isDebugMode()) {
+                                                    System.err.println("Empty file list returned from remote system while processing event: " + event);
+                                                }
+                                                log.log(Level.SEVERE, "Empty file list returned from remote system while processing event: " + event);
+                                                throw new Exception("Empty file list returned from remote system while processing event: " + event);
+                                                
+                                            } else {
+                                                
+                                                if (Utilities.isDebugMode()) {
+                                                    System.err.println("Received files from remote system for id " + overrideSubmissionID);
+                                                }
+                                                log.log(Level.INFO, "Received files from remote system for id " + overrideSubmissionID);
+
                                                 mainFile = files.get(0);
                                             }
 
@@ -292,26 +449,47 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                 auxFiles = files.subList(1, files.size());
                                             }
 
+                                            if (Utilities.isDebugMode()) {
+                                                System.out.println ("Invoking submitter.submitRun() for team " + runSubmission.getTeam_id() 
+                                                                    + " problem " + runSubmission.getProblem_id() 
+                                                                    + " language " +  runSubmission.getLanguage_id()
+                                                                    + " time " + overrideTimeMS 
+                                                                    + " submissionID " + overrideSubmissionID);
+                                            }
+                                            log.info("Invoking submitter.submitRun() for team " + runSubmission.getTeam_id()  
+                                                                    + " problem " + runSubmission.getProblem_id() 
+                                                                    + " language " +  runSubmission.getLanguage_id()
+                                                                    + " time " + overrideTimeMS 
+                                                                    + " submissionID " + overrideSubmissionID);
                                             try {
                                                 submitter.submitRun("team" + runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(), mainFile, auxFiles,
                                                         overrideTimeMS, overrideSubmissionID);
                                             } catch (Exception e) {
                                                 // TODO design error handling reporting
-                                                System.err.println("Exception submitting run for: " + event);
+                                                if (Utilities.isDebugMode()) {
+                                                    System.err.println("Exception submitting run for event: " + event + ": " + e);
+                                                }
+                                                log.log(Level.WARNING, "Exception submitting run for event: " + event + ": ", e);
                                                 e.printStackTrace();
                                             }
                                         }
 
                                     } catch (Exception e) {
                                         // TODO design error handling reporting (logging?)
-                                        System.err.println("Exception parsing event: " + event);
+                                        if (Utilities.isDebugMode()) {
+                                            System.err.println("Exception processing event: " + event + "\n " + e.toString());
+                                        }
+                                        log.log(Level.WARNING, "Exception processing event: " + event, e);
+
                                         e.printStackTrace();
                                     }
 
                                 } else if ("judgements".equals(eventType)) {
                                     
-                                    System.out.println("debug 22 recognized judgement event");
-//                                    log.log(Level.INFO, "Found " + eventType + " event");
+                                    if (Utilities.isDebugMode()) {
+                                        System.out.println("Found judgement event: " + event);
+                                    }
+                                    log.log(Level.INFO, "Found judgement event: " + event);
 
                                     //process a judgement event
                                     try {
@@ -321,9 +499,12 @@ public class RemoteEventFeedMonitor implements Runnable {
                                         // check if this is a "delete" event
                                         String operation = (String) eventMap.get("op");
                                         if (operation != null && operation.equals("delete")) {
+                                            
                                             //it is a delete; remove from the global map the judgement whose ID is specified
                                             String idToDelete = (String) judgementEventDataMap.get("id");
-                                            getRemoteJudgementsMap().remove(idToDelete);
+                                            synchronized (remoteJudgementsMapLock) {
+                                                getRemoteJudgementsMap().remove(idToDelete);
+                                            }
 
                                             //TODO: how do we notify the local PC2 system that this judgement should be deleted??
 
@@ -339,40 +520,71 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                 String submissionID = (String) judgementEventDataMap.get("submission_id");
 
                                                 //check if the submission for this judgement is to be ignored due to filtering
-                                                if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
+                                                // (submissionFilterIDsList is a list of submissions we WANT TO KEEP; typically used for debugging...)
+                                               if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
                                                     
+                                                    if (Utilities.isDebugMode()) {
+                                                        System.out.println ("Ignoring judgement " + judgementID + " for submission " + submissionID + " due to filter");
+                                                    }
                                                     log.info("Ignoring judgement " + judgementID + 
                                                             " for submission " + submissionID + " due to filter");
                                                     event = reader.readLine();
                                                     continue;
                                                 }
-     
-                                                // this is a judgement we want; save it in the global judgements map under a key of
+                                                   
+                                                   //TODO: make sure this is a judgement for a submission we know about.  
+                                                   //  Question: isn't it possible the remote system will send us a "judgement" before it sends us 
+                                                   //  the "submission" associated with that judgement?  It seems that this is both allowed by the CLICS
+                                                   //  specification, and in fact does happen (e.g. in Kattis) when it sends "judgements" at the beginning
+                                                   //  of the event stream which specify a "create" op and have "null" for values such as "judgement_type_id".
+         
+                                                // this (appears to be) a judgement we want; save it in the global judgements map under a key of
                                                 // the judgement ID with value "submissionID:judgement"
-                                                System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");                                                
-                                                getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
+//                                                System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");                                                
+                                                synchronized (remoteJudgementsMapLock) {
+                                                    getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
+                                                }
                                             }
                                         }
 
                                     } catch (Exception e) {
                                         // TODO design error handling reporting (logging?)
-                                        System.err.println("Exception parsing event: " + event);
-                                        log.log(Level.SEVERE, "Exception parsing event: " + event);
+                                        if (Utilities.isDebugMode()) {
+                                            System.err.println("Exception processing event: " + event + "\n" + e.toString());
+                                        }
+                                        log.log(Level.SEVERE, "Exception processing event: " + event, e);
                                         e.printStackTrace();
                                     }
 
                                 } else {
-//                                    System.out.println("debug 22 - ignoring event " + eventType);
-//                                    log.log (Level.INFO, "Ignoring " + eventType + " event");
+
+                                    if (Utilities.isDebugMode()) {
+                                        System.out.println("Ignoring " + eventType + " event");
+                                    }
+                                    log.log (Level.INFO, "Ignoring " + eventType + " event");
                                 }
 
                             } // else
                         } catch (Exception e) {
                             // TODO design error handling reporting (logging?)
-                            System.err.println("Exception processing event: " + event);
-                            log.log(Level.SEVERE, "Exception processing event: " + event);
+                            if (Utilities.isDebugMode()) {
+                                System.err.println("Exception processing event: " + event + "\n" + e.toString());
+                            }
+                            log.log(Level.SEVERE, "Exception processing event: " + event, e);
                             e.printStackTrace();
                         } 
+                    } else {
+                        
+                        //we're skipping an event feed input line -- log the reason
+                        if (event.length()<=0) {
+                            log.log(Level.INFO, "Skipping event feed input line (length is " + event.length() + ")");
+                        } else if (!event.trim().startsWith("{")) {
+                            log.log(Level.INFO, "Skipping event feed input line (does not start with \"{\"): " + event.toString());
+                        } else if (!event.trim().endsWith("}")) {
+                            log.log(Level.INFO, "Skipping event feed input line (does not end with \"}\"): " + event.toString());                            
+                        } else {
+                            log.log(Level.WARNING, "Skipping event feed input line (sorry - no explanation for why): " + event.toString());
+                        }
                     }
                     
                     event = reader.readLine();
@@ -380,32 +592,98 @@ public class RemoteEventFeedMonitor implements Runnable {
                 } // while
             } catch (Exception e) {
                 // TODO design error handling reporting (logging?)
-                System.err.println("Exception reading event from stream ");
-                log.log(Level.SEVERE, "Exception reading event from stream: " + e.toString());
+                if (Utilities.isDebugMode()) {
+                    System.err.println("Exception reading event from stream: " + e.toString() + ": event = " + event);
+                }
+                log.log(Level.SEVERE, "Exception reading event from stream: " + event, e);
                 e.printStackTrace();
             }
         } // end else
     }
     
     /**
-     * Constructs a Map<String,String> to hold mappings of judgement id's to corresponding submissions and judgement
+     * Returns an indication of whether the current client is a "read-only shadow" client.
+     * 
+     * Currently, account "feeder1" is allowed to be a read-write Shadow (meaning, it has the ability
+     * to actually submit runs to the PC2 server when they are received from the Remote CCS); all
+     * other accounts are considered "read-only" -- meaning they can look at submissions,
+     * the scoreboards, etc. but they will not actually submit runs received from the Remote CCS to
+     * the PC2 server.
+     * 
+     * TODO: extend this function to allow a broader definition and control of when a client
+     *      is considered "read-only"; for example, managing this by Permissions and/or via
+     *      Admin settings.  See https://github.com/pc2ccs/pc2v9/issues/240.
+     * 
+     * @return true if the current client is a "read-only Shadow" client; false if the client
+     *          is allowed to do read-write operations (such as submitting a run from the Remote CCS
+     *          to the PC2 server).
+     */
+    private boolean isReadOnlyClient() {
+        ClientId clientId = pc2Controller.getContest().getClientId(); 
+        ClientType.Type clientType = clientId.getClientType();
+        int clientNum = clientId.getClientNumber();
+        
+        if (clientType.equals(Type.FEEDER) && clientNum==1) {
+            //client is Feeder1; it is NOT a "read-only" client
+            return false;
+        } else {
+            //client is something other than Feeder1; it IS "read-only"
+            return true;
+        }
+    }
+
+    /**
+     * Initializes the Map<String,String> which holds mappings of judgement id's to corresponding submissions and judgement
      * types (acronymns).
      * 
      * The keys to the map are Strings containing the numerical value of a judgement id as received from the remote CCS;
      * the values under each key are the concatenation of the submission id corresponding to the judgement with the
      * judgement type id (i.e., the judgement acronym), separated by a colon (":").
      * 
+     * Note that this method is PRIVATE; external clients wanting access to the remoteJudgementsMap should use method {@link #getRemoteJudgementsMapSnapshot()}.
+     * 
      * @return a Mapping of judgement id's to the corresponding submission and judgement type (value).
      *              If no remote judgements have yet been received the returned Map will be empty (but not null).
      */
-    public static Map<String,String> getRemoteJudgementsMap() {
-        if (remoteJudgements==null) {
-            remoteJudgements = new HashMap<String,String>();
+    private static Map<String,String> getRemoteJudgementsMap() {
+        synchronized (remoteJudgementsMapLock) {
+            if (remoteJudgements == null) {
+                remoteJudgements = new HashMap<String, String>();
+            }
+            return remoteJudgements;
         }
-        return remoteJudgements;
     }
 
  
+    /**
+     * Returns a snapshot of the current contents of the Map<String,String> which holds mappings of judgement id's to corresponding 
+     * submissions and judgement types (acronymns).
+     * 
+     * The keys to the map are Strings containing the numerical value of a judgement id as received from the remote CCS;
+     * the values under each key are the concatenation of the submission id corresponding to the judgement with the
+     * judgement type id (i.e., the judgement acronym), separated by a colon (":").
+     * 
+     * Note that this method returns a <I>copy</i> which is a <I>snapshot</i>; there is no guarantee that the map will not subsequently be 
+     * changed by other threads. However, the method does provide internal synchronization to insure that the map is not simultaneously 
+     * altered while the snapshot is being created.
+     * 
+     * @return a snapshot copy of the current Mapping of judgement id's to the corresponding submission and judgement type (value).
+     *              If no remote judgements have yet been received the returned Map will be empty (but not null).
+     */
+    public static Map<String,String> getRemoteJudgementsMapSnapshot() {
+        
+        synchronized (remoteJudgementsMapLock) {
+            Map<String, String> currentMap = getRemoteJudgementsMap();
+            
+            Map<String, String> copy = new HashMap<String,String>();
+            for (String key : currentMap.keySet()) {
+                copy.put(key, currentMap.get(key));
+            }
+           
+            return copy;
+        }
+    }
+
     /**
      * Returns a Map containing the key/value elements in the specified JSON string.
      * This method uses the Jackson {@link ObjectMapper} to perform the conversion from the JSON
