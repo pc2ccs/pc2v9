@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.util.List;
@@ -320,6 +320,73 @@ public class JudgementUtilitesTest extends AbstractTestCase {
             run.addTestCase(runTestCaseResult);
         }
     }
-    
 
+    /**
+     * Test with sample contest/default judgements.
+     * 
+     * By default will use the judgements from the current site (site number 3)
+     * 
+     * @throws Exception
+     */
+    public void testgetSingleListofJudgements() throws Exception {
+
+        IInternalContest contest = sample.createStandardContest();
+        Judgement[] judgements = contest.getJudgements();
+        sample.createController(contest, true, false); // creates StaticLog instance
+
+        assertEquals("judgement count", 9, judgements.length);
+
+        List<Judgement> jList = JudgementUtilites.getSingleListofJudgements(contest);
+        assertEquals("judgement count", 9, jList.size());
+
+        assertEquals("judgement site number", 3, jList.get(0).getSiteNumber());
+        assertEquals("judgement ", "Yes.", jList.get(0).toString());
+        assertEquals("judgement ", "You have no clue", jList.get(4).toString());
+        assertEquals("judgement ", "Contact Staff - you have no hope", jList.get(jList.size() - 1).toString());
+
+    }
+
+    /**
+     * Test to ensure that all judgements found are on site 1.
+     * 
+     * When there are judgements from site 1, use those judgements.
+     * 
+     * @throws Exception
+     */
+    public void testgetSingleListofJudgementsWithSite1Judgements() throws Exception {
+
+        IInternalContest contest = sample.createStandardContest();
+        Judgement[] judgements = contest.getJudgements();
+        sample.createController(contest, true, false); // creates StaticLog instance
+
+        assertEquals("judgement count", 9, judgements.length);
+        assertEquals("site count", 3, contest.getSites().length);
+
+        addNewJudgements(1, contest, contest.getJudgements());
+
+        // Model now has 18 judgements, from site 3 and site 1
+        judgements = contest.getJudgements();
+        assertEquals("judgement count", 18, judgements.length);
+
+        List<Judgement> jList = JudgementUtilites.getSingleListofJudgements(contest);
+        assertEquals("judgement count", 9, jList.size());
+
+        assertEquals("judgement site number", 1, jList.get(0).getSiteNumber());
+        assertEquals("judgement ", "Yes.", jList.get(0).toString());
+        assertEquals("judgement ", "You have no clue", jList.get(4).toString());
+        assertEquals("judgement ", "Contact Staff - you have no hope", jList.get(jList.size() - 1).toString());
+
+        // ensure that each judgement is from site 1
+        for (Judgement judgement : jList) {
+            assertEquals("judgement site number", 1, judgement.getSiteNumber());
+        }
+    }
+
+    private void addNewJudgements(int siteNumber, IInternalContest contest, Judgement[] judgements) {
+        for (Judgement judgement : judgements) {
+            Judgement newJudgement = new Judgement(judgement.toString(), judgement.getAcronym());
+            newJudgement.setSiteNumber(siteNumber);
+            contest.addJudgement(newJudgement);
+        }
+    }
 }

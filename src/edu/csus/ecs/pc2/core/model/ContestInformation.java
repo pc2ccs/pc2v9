@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.core.DateUtilities;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
+import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
  * Contest-wide Information/settings.
@@ -77,11 +78,17 @@ public class ContestInformation implements Serializable{
     private String rsiCommand = null;
     
     private int lastRunNumberSubmitted = 0;
+    
+    /**
+     * Display string for team display on standings.
+     * 
+     * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, Account, Group)
+     */
+    private String teamScoreboardDisplayFormat = ScoreboardVariableReplacer.TEAM_NAME;
 
     /**
      * 
      * @author pc2@ecs.csus.edu
-     * @version $Id$
      */
     public enum TeamDisplayMask {
         /**
@@ -156,6 +163,13 @@ public class ContestInformation implements Serializable{
     private Date thawed = null;
 
     private boolean allowMultipleLoginsPerTeam;
+    
+    
+    /**
+     * stop-on-first-failed-test-case
+     * 
+     */
+    private boolean stopOnFirstFailedtestCase = false;
 
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
@@ -246,6 +260,9 @@ public class ContestInformation implements Serializable{
                 return false;
             }
             if (maxFileSize != contestInformation.getMaxFileSize()){
+                return false;
+            }
+            if (!teamScoreboardDisplayFormat.equals(contestInformation.getTeamScoreboardDisplayFormat())) {
                 return false;
             }
             if (! scoringProperties.equals(contestInformation.getScoringProperties())){
@@ -724,6 +741,34 @@ public class ContestInformation implements Serializable{
      * @return a boolean indicating the current "allow multiple simultaneous logins" setting for teams.
      */
     public boolean isAllowMultipleLoginsPerTeam() {
-        return this.allowMultipleLoginsPerTeam;
+        return this.allowMultipleLoginsPerTeam;   
+    }
+
+    public boolean isStopOnFirstFailedtestCase() {
+        return stopOnFirstFailedtestCase;
+    }
+    
+    public void setStopOnFirstFailedtestCase(boolean stopOnFirstFailedtestCase) {
+        this.stopOnFirstFailedtestCase = stopOnFirstFailedtestCase;
+    }
+    
+    
+    /**
+     * Returns a string which defines which fields will be dispayed on the scoreboard.
+     * 
+     * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, Account, Group)
+     * @return
+     */
+    public String getTeamScoreboardDisplayFormat() {
+        // Handle case where deserializing old contest objects sets teamScoreboardDisplayFormat to null.
+        // In this case, just set it to the default (i361 - DSA causes NPE)
+        if(teamScoreboardDisplayFormat == null) {
+            teamScoreboardDisplayFormat = ScoreboardVariableReplacer.TEAM_NAME;
+        }
+        return teamScoreboardDisplayFormat;
+    }
+
+    public void setTeamScoreboardDisplayFormat(String teamScoreboardDisplayFormat) {
+        this.teamScoreboardDisplayFormat = teamScoreboardDisplayFormat;
     }
 }

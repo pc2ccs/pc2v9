@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.AboutPane;
-import edu.csus.ecs.pc2.ui.ClarificationsPane;
+import edu.csus.ecs.pc2.ui.ClarificationsTablePane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.EventFeedServerPane;
@@ -35,7 +35,7 @@ import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
-import edu.csus.ecs.pc2.ui.RunsPane;
+import edu.csus.ecs.pc2.ui.RunsTablePane;
 import edu.csus.ecs.pc2.ui.SubmissionBiffPane;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
@@ -184,23 +184,23 @@ public class JudgeView extends JFrame implements UIPlugin {
                 setFrameTitle(contest.getContestTime().isContestRunning());
                 showMessage("");
 
-                RunsPane newRunsPane = new RunsPane(false);
-                newRunsPane.setShowNewRunsOnly(true);
-                newRunsPane.setMakeSoundOnOneRun(true);
-                addUIPlugin(getMainTabbedPane(), "New Runs", newRunsPane);
-                newRunsPane.setFilterFrameTitle("New Runs Filter");
+                RunsTablePane newRunsTablePane = new RunsTablePane(false);
+                newRunsTablePane.setShowNewRunsOnly(true);
+                newRunsTablePane.setMakeSoundOnOneRun(true);
+                addUIPlugin(getMainTabbedPane(), "New Runs", newRunsTablePane);
+                newRunsTablePane.setFilterFrameTitle("New Runs Filter");
 
-                RunsPane runsPanel = new RunsPane();
-                addUIPlugin(getMainTabbedPane(), "All Runs", runsPanel);
-                runsPanel.setFilterFrameTitle("All Runs Filter");
+                RunsTablePane runsTablePane = new RunsTablePane();
+                addUIPlugin(getMainTabbedPane(), "All Runs", runsTablePane);
+                runsTablePane.setFilterFrameTitle("All Runs Filter");
 
-                ClarificationsPane newClarificationsPane = new ClarificationsPane();
-                newClarificationsPane.setShowNewClarificationsOnly(true);
-                addUIPlugin(getMainTabbedPane(), "New Clars", newClarificationsPane);
+                ClarificationsTablePane newClarificationsTablePane = new ClarificationsTablePane();
+                newClarificationsTablePane.setShowNewClarificationsOnly(true);
+                addUIPlugin(getMainTabbedPane(), "New Clars", newClarificationsTablePane);
 
-                ClarificationsPane clarificationsPane = new ClarificationsPane();
-                addUIPlugin(getMainTabbedPane(), "All clarifications", clarificationsPane);
-
+                ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
+                addUIPlugin(getMainTabbedPane(), "All clarifications", clarificationsTablePane);
+              
                 SubmitRunPane submitRunPane = new SubmitRunPane();
                 addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
                 
@@ -300,7 +300,7 @@ public class JudgeView extends JFrame implements UIPlugin {
                  */
 
                 try {
-                    runsPanel.startAutoJudging();
+                    runsTablePane.startAutoJudging();
                 } catch (Exception e) {
                     logException(e);
                 }

@@ -8,20 +8,20 @@ import javax.swing.JFrame;
 import edu.csus.ecs.pc2.shadow.ShadowController;
 
 /**
- * A JFrame which displays a Shadow comparison results pane.
+ * A JFrame which displays a Shadow Scoreboard comparison results pane.
  * 
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  *
  */
-public class ShadowCompareFrame extends JFrame {
+public class ShadowCompareScoreboardFrame extends JFrame {
 
     private static final long serialVersionUID = 1L;
     
-    public ShadowCompareFrame(ShadowController shadowController) {
-        Dimension size = new Dimension(600,600);
+    public ShadowCompareScoreboardFrame(ShadowController shadowController) {
+        Dimension size = new Dimension(1200,900);
         this.setPreferredSize(size);
-//        this.setMinimumSize(size);
-        this.getContentPane().add(new ShadowComparePane(shadowController));
+        this.setMinimumSize(size);
+        this.getContentPane().add(new ShadowCompareScoreboardPane(shadowController));
     }
 
 }

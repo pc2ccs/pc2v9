@@ -1,14 +1,16 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.LogUtilities;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -312,6 +314,49 @@ public final class JudgementUtilites {
         return list;
     }
     
+    /**
+     * Return a single set of judgements.
+     * 
+     * If there is more than one site connected, all judgements from all other sites are in the model. 
+     * If more than one site is defined, returns the site 1 judgements.
+     * 
+     * @return a list of judgements for the judges
+     */
+    public static List<Judgement> getSingleListofJudgements(IInternalContest contest) {
+        List<Judgement> list = new ArrayList<Judgement>();
+
+        Judgement[] judgements = contest.getJudgements();
+
+        /**
+         * Is a multi site contest?
+         */
+        boolean multiSiteContest = contest.getSites().length > 1;
+
+        for (Judgement judgement : judgements) {
+
+            if (multiSiteContest) {
+                if (judgement.getSiteNumber() == 1) {
+                    // only add judgements from site 1 if there is more than one site.
+                    list.add(judgement);
+                }
+            } else {
+                // add judgements from model (if not a multiSiteContest
+                list.add(judgement);
+            }
+        }
+
+        if (list.size() == 0) {
+            /**
+             * A catch all condition. If a rare condition occurs where there are no judgements added to the list, all all model's judgements.
+             * 
+             * This should never happen.
+             */
+            list.addAll(Arrays.asList(judgements));
+            StaticLog.getLog().log(Log.WARNING, "getSingleListofJudgements, note in multi site did not find judgements from site 1");
+        }
+
+        return list;
+    }
     
 
 }

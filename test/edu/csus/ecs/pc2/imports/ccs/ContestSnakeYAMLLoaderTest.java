@@ -53,6 +53,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 
 /**
@@ -3149,7 +3150,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         assertEquals("Expecting language count ", 7, languages.length);
         
-        
         for (Language language : languages) {
             if ("Perl".equals(language.getDisplayName())){
                 assertFalse ("Expect NOT Using judges command line boolean  "+language, language.isUsingJudgeProgramExecuteCommandLine());
@@ -3499,5 +3499,208 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Public HTML Directory", "public_html_dir", publicDir);
 
     }
+    
+    public void testLoadDisplay() throws Exception {
+        
+        String dirname = getOutputDataDirectory(getName());
+        ensureDirectory(dirname);
+        
+        String[] yamlLines = { //
+                "",
+                "team-scoreboard-display-format-string : '{:teamname}'", //
+                "",
+                "accounts:", //
+                "  - account: TEAM", //
+                "    site: 1", //
+                "    count: 22", //
+        };
+
+
+        IInternalContest contest = loader.fromYaml(null, yamlLines, dirname);
+        
+        Account[] teams = getTeamAccounts(contest);
+        assertEquals("Team count", 22, teams.length);
+
+        String displayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
+        assertEquals("Team getTeamDisplayOnScoreboard", "{:teamname}", displayString);
+        
+        /**
+         * 
+     * Client/Team number - {:clientnumber} = 514
+     * Country Code - {:countrycode} = CAN
+     * CMS/External ID - {:externalid} = 309407
+     * Group Id Number - {:groupid} = 12545
+     * Group name - {:groupname} = Canada - University of British Columbia D1
+     * Long School name - {:longschoolname} = UBC! (U British Columbia)
+     * Short Shool name - {:shortschoolname} = U British Columbia
+     * Team site number - {:sitenumber} = 1
+     * Team login name - {:teamloginname} = team514
+     * Team name - {:teamname} = UBC!
+         */
+
+        Account account20 = getSortedTeamAccounts(contest)[20];
+
+        String teamDisplayString = ScoreboardVariableReplacer.substituteDisplayNameVariables(displayString, contest, account20);
+        assertEquals("Expected display ", "team21", teamDisplayString);
+        
+        yamlTestTeamDisplayOnBoard(dirname, teamDisplayString, "team21");
+    }
+    
+    public void testOne() throws Exception {
+        
+        String dataDirName = getDataDirectory(getName());
+//        Utilities.insureDir(dataDirName);
+//        assertDirectoryExists(dataDirName);
+        
+        String teamDisplayString = "{:clientnumber} {:countrycode} {:groupid} {:groupname} {:externalid}";
+        String expected = "21 XXX {:groupid} {:groupname} 1021";
+        yamlTestTeamDisplayOnBoard(dataDirName, teamDisplayString, expected);
+    }
+    
+    void yamlTestTeamDisplayOnBoard (String dirname, String teamDisplayString, String expectedString) {
+        
+        String[] yamlLines = { //
+                "",
+                "team-scoreboard-display-format-string : '"+teamDisplayString+"'", //
+                "",
+                "accounts:", //
+                "  - account: TEAM", //
+                "    site: 1", //
+                "    count: 22", //
+        };
+
+
+        IInternalContest contest = loader.fromYaml(null, yamlLines, dirname);
+        
+        Account[] teams = getTeamAccounts(contest);
+        assertEquals("Team count", 22, teams.length);
+
+        String ciDisplayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
+        assertEquals("Team getTeamDisplayOnScoreboard", teamDisplayString, ciDisplayString);
+
+        Account account20 = getSortedTeamAccounts(contest)[20];
+
+        String actual = ScoreboardVariableReplacer.substituteDisplayNameVariables(ciDisplayString, contest, account20);
+        assertEquals("Expected display string for "+ciDisplayString, expectedString, actual);
+
+    }
+    
+    public void testAllSubstitutions() throws Exception {
+        
+        IInternalContest contest = loadFullSampleContest(null, "tenprobs");
+        assertNotNull(contest);
+        
+        Account[] teams = getTeamAccounts(contest);
+        assertEquals("Team count", 80, teams.length);
+        
+        String teamDisplayString = "Team {:clientnumber}  {:teamname} and login: {:teamloginname} {:groupid}:{:groupname} long: {:longschoolname} short: {:shortschoolname} cms id: {:externalid}";
+
+        String ciDisplayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
+        assertEquals("Team getTeamDisplayOnScoreboard", teamDisplayString, ciDisplayString);
+
+        Account account20 = getSortedTeamAccounts(contest)[20];
+
+        String expectedString = "Team 21  Team21 and login: team21 100:North long: Long21 short: Short21 cms id: 1021";
+        String actual = ScoreboardVariableReplacer.substituteDisplayNameVariables(ciDisplayString, contest, account20);
+        assertEquals("Expected display string for "+ciDisplayString, expectedString, actual);
+        
+    }
+
+    private Account[] getSortedTeamAccounts(IInternalContest contest) {
+        Account[] accounts = getTeamAccounts(contest);
+        Arrays.sort(accounts, new AccountComparator());
+        return accounts;
+    }
+    
+    
+    public void testTenProbsisStopOnFirstFailedTestCase() throws Exception {
+        
+        String sampleName = "tenprobs";
+        IInternalContest contest  = fullLoadSampleContest(sampleName);
+        assertNotNull(contest);
+
+        Problem[] problems = contest.getProblems();
+        assertEquals("Num problems ",10, problems.length);
+        
+        for (Problem problem : problems) {
+            assertTrue(problem.getShortName()+" stop on first ", problem.isStopOnFirstFailedTestCase());
+        }
+        
+    }
+    
+    public void testisStopOnFirstFailedTestCase() throws Exception {
+        
+        String sampleName = "problemflagtest"; // use CDP sample problemflagtest
+        IInternalContest contest  = fullLoadSampleContest(sampleName);
+        assertNotNull(contest);
+
+        Problem[] problems = contest.getProblems();
+        assertEquals("Num problems ", 8, problems.length);
+        
+        for (Problem problem : problems) {
+            assertTrue(problem.getShortName()+" stop on first ", problem.isStopOnFirstFailedTestCase());
+        }
+        
+    }
+    
+    
+    
+    /**
+     * Test load problem.yaml isStopOnFirstFailedTestCase.
+     * 
+     * @throws Exception
+     */
+    public void testvaltesttStopOnFirstFailedTestCase() throws Exception {
+        
+        String sampleName = "valtest";
+        IInternalContest contest  = fullLoadSampleContest(sampleName);
+ 
+        assertNotNull(contest);
+
+        Problem[] problems = contest.getProblems();
+        assertEquals("Num problems ",6, problems.length);
+        
+        for (Problem problem : problems) {
+            assertFalse(problem.getShortName()+" stop on first ", problem.isStopOnFirstFailedTestCase());
+        }
+        
+    }
+
+    private IInternalContest fullLoadSampleContest(String sampleName) throws Exception {
+        IInternalContest contest  = new InternalContest();
+        loadGroupsFromSampContest(contest, sampleName);
+        contest = loadSampleContest(contest, sampleName);
+        return contest;
+    }
+    
+    
+    /**
+     * Test halt-contest-clock-at-set to true.
+     * 
+     * @throws Exception
+     */
+    public void testisHaltContestAtTimeZero() throws Exception {
+        String sampleContestDirName = "ccs1";
+        String dirname = getContestSampleCDPConfigDirname(sampleContestDirName);
+        
+        IInternalContest contest = snake.fromYaml(null, dirname, false);
+        assertNotNull("Expecting to load ccs1 contest",contest);
+        assertTrue("Expected halt at end of contest ", contest.getContestInformation().isAutoStopContest());
+    }
+    
+    /** 
+     * Test halt-contest-clock-at-end value, for when missing key/value
+     * @throws Exception
+     */
+    public void testisHaltContestAtTimeZeroNegative() throws Exception {
+        String sampleContestDirName = "ccs2";
+        String dirname = getContestSampleCDPConfigDirname(sampleContestDirName);
+        
+        IInternalContest contest = snake.fromYaml(null, dirname, false);
+        assertNotNull("Expecting to load ccs2 contest",contest);
+        assertFalse("Expected NO halt at end of contest ", contest.getContestInformation().isAutoStopContest());
+    }
+   
+    
 }
 

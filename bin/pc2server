@@ -25,7 +25,7 @@ fi
 HEAPPARAM=$JAVA64BIT_HEAPSIZE
 JAVA32=0
 # if we are not running a 64bit java reduce to 1.6G
-java -Djdk.crypto.KeyAgreement.legacyKDF=true -d64 -version 2>&1 | grep -q "Error" && JAVA32=1
+java -version 2>&1 | grep -qi 64-bit || JAVA32=1
 # found a 32bit java
 if [ $JAVA32 = "1" ]; then
 # reduce the heap size

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
@@ -53,6 +54,8 @@ public final class Reports {
     private static final String FILE_OPTION_STRING = "-F";
     
     private static final String DIR_OPTION_STRING = "--dir";
+    
+    private static final String RAW_OPTION_STRING = "--raw";
 
     public Reports(String profileName, char[] charArray) {
         super();
@@ -157,6 +160,8 @@ public final class Reports {
         
         reports.add(new ProblemsGroupReport());
         
+        reports.add(new ProblemGroupAssignmentReport());
+        
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
     }
@@ -184,6 +189,7 @@ public final class Reports {
                 "-F filename    - specify command line options in filename", //
                 "--profile name - profile name, default uses current profile.  name may be a ## from --listp listing", //
                 "--contestPassword padd  - password needed to decrypt pc2 data", //
+                "--raw          - suppress footer and header \"raw\" report content", //
                 "--xml          - output only XML for report", //
                 "--list         - list names of reports (and the report numbers)", //
                 "--dir name     - alternate base directory name, by default uses profile dir name", //
@@ -305,7 +311,7 @@ public final class Reports {
      *            either number or name for the report
      * @param outputXML
      */
-    private void printReport(String arg, boolean outputXML) {
+    private void printReport(String arg, boolean suppressHeaderAndFooter, boolean outputXML) {
 
         String dirName = getInstallDirectory();
 
@@ -345,7 +351,7 @@ public final class Reports {
             contest.setClientId(clientId);
 
             IReport report = getReport(arg);
-
+            
             if (report == null) {
                 System.out.println("Unable to match/find report " + arg);
             } else {
@@ -353,15 +359,27 @@ public final class Reports {
                 controller.setLog(log);
                 String filename = getReportFileName(report);
                 report.setContestAndController(contest, controller);
+                
+                
                 if (outputXML) {
                     String xml = report.createReportXML(new Filter());
                     writeFile(filename, xml);
                 } else {
-                    report.createReportFile(filename, new Filter());
+                    
+                    if (suppressHeaderAndFooter) {
+                        // Wrap Report and suppress header and footer
+                        writeReportNoHeaderFooter(report, filename, new Filter());
+                    } else {
+                        report.createReportFile(filename, new Filter());
+                    }
+                    
                 }
                 catfile(filename);
+                
+              
 
             }
+            
         } catch (FileNotFoundException fnfe) {
             System.err.println("ERROR nothing to print, no pc2 files/profiles found under " + getInstallDirectory());
             fnfe.printStackTrace(); // debug 22
@@ -370,6 +388,18 @@ public final class Reports {
             System.err.println("For directory " + dirName);
         } catch (Exception e) {
             System.err.println("ERROR " + e.getMessage());
+        }
+    }
+
+    private void writeReportNoHeaderFooter(IReport report, String filename, Filter filter) {
+
+        PrintWriter printWriter = null;
+        try {
+            printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+            report.writeReport(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
         }
     }
 
@@ -544,6 +574,11 @@ public final class Reports {
             }
             setInstallDirectory(dir);
         }
+        
+        /**
+         * Raw - do not output header or footer, just contents.
+         */
+        boolean rawOutput = arguments.isOptPresent(RAW_OPTION_STRING);
 
         if (arguments.isOptPresent("--list")) {
             listReports();
@@ -582,7 +617,7 @@ public final class Reports {
 
         for (int i = 0; i < arguments.getArgCount(); i++) {
             String arg = arguments.getArg(i);
-            reports.printReport(arg, xmlOutputOption);
+            reports.printReport(arg, rawOutput, xmlOutputOption);
         }
 
     }

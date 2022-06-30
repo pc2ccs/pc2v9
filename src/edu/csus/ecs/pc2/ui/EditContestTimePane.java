@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -30,10 +30,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * Add/Edit ContestTime Pane.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class EditContestTimePane extends JPanePlugin {
 
     private static final long serialVersionUID = -1060536964672397704L;
@@ -303,6 +301,11 @@ public class EditContestTimePane extends JPanePlugin {
     }
 
     protected void handleUpdate() {
+        
+        if (getContest().getContestTime().isContestRunning()) {
+            showMessage("Updating of time while contest clock is running is not allowed");
+            return;
+        }
 
         //check contest length, elapsed, and remaining times in GUI textboxes
         if (!validateContestTimeFields()) {

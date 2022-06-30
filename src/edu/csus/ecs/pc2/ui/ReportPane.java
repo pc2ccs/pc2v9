@@ -84,6 +84,7 @@ import edu.csus.ecs.pc2.core.report.OldRunsReport;
 import edu.csus.ecs.pc2.core.report.PasswordsReport;
 import edu.csus.ecs.pc2.core.report.PlaybackDumpReport;
 import edu.csus.ecs.pc2.core.report.PluginsReport;
+import edu.csus.ecs.pc2.core.report.ProblemGroupAssignmentReport;
 import edu.csus.ecs.pc2.core.report.ProblemsGroupReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
@@ -106,6 +107,8 @@ import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /**
  * Report Pane, allows picking and viewing reports.
@@ -162,6 +165,7 @@ public class ReportPane extends JPanePlugin {
     private JCheckBox xmlOutputCheckbox = null;
 
     private JButton generateSummaryButton = null;
+    private JButton exportDataButton;
 
     public String getReportDirectory() {
         return reportDirectory;
@@ -294,6 +298,8 @@ public class ReportPane extends JPanePlugin {
         
         reports.add(new ProblemsGroupReport());
         
+        reports.add(new ProblemGroupAssignmentReport());
+        
         if (isServer()){
             // SOMEDAY Bug 1166 remove this isServer when added to Admin. 
             reports.add(new CDPReport());
@@ -395,6 +401,7 @@ public class ReportPane extends JPanePlugin {
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
             buttonPane.setPreferredSize(new java.awt.Dimension(45, 45));
+            buttonPane.add(getExportDataButton());
             buttonPane.add(getViewReportButton(), null);
             buttonPane.add(getGenerateSummaryButton(), null);
         }
@@ -435,7 +442,7 @@ public class ReportPane extends JPanePlugin {
                     if (getBreakdownBySiteCheckbox().isSelected()) {
                         generateSelectedReportBySite();
                     } else {
-                        generateSelectedReport();
+                        generateSelectedReport(true);
                     }
                 }
             });
@@ -483,9 +490,9 @@ public class ReportPane extends JPanePlugin {
             resumeTime = getContest().getContestTime().getResumeTime();
         }
         if (resumeTime == null) {
-            printWriter.print("  Contest date/time: never started");
+            printWriter.print("  Contest date/time: never started on site "+getContest().getSiteNumber());
         } else {
-            printWriter.print("  Contest date/time: " + resumeTime.getTime());
+            printWriter.print("  Contest date/time: " + resumeTime.getTime()+" on site "+getContest().getSiteNumber());
 
         }
 
@@ -550,7 +557,7 @@ public class ReportPane extends JPanePlugin {
         }
     }
 
-    protected void generateSelectedReport() {
+    protected void generateSelectedReport(boolean includeHeaderFooter) {
 
         try {
 
@@ -573,6 +580,11 @@ public class ReportPane extends JPanePlugin {
             if (writeXML) {
                 extension = "xml";
             }
+            
+            if (selectedReport.getReportTitle().toLowerCase().indexOf("json") != -1) {
+                extension = "json";
+            }
+            
             String filename = getFileName(selectedReport, extension);
 
             File reportDirectoryFile = new File(getReportDirectory());
@@ -600,6 +612,10 @@ public class ReportPane extends JPanePlugin {
                 if (selectedReport instanceof IReportFile) {
                     IReportFile reportFile = (IReportFile) selectedReport;
                     suppressHeaderFooter = reportFile.suppressHeaderFooter();
+                }
+                
+                if (! includeHeaderFooter) {
+                    suppressHeaderFooter = true;
                 }
                 createReportFile(selectedReport, suppressHeaderFooter, filename, filter);
             }
@@ -839,7 +855,7 @@ public class ReportPane extends JPanePlugin {
                         if (getBreakdownBySiteCheckbox().isSelected()) {
                             generateSelectedReportBySite();
                         } else {
-                            generateSelectedReport();
+                            generateSelectedReport(true);
                         }
                     }
                 }
@@ -1081,4 +1097,17 @@ public class ReportPane extends JPanePlugin {
         }
     }
 
+    private JButton getExportDataButton() {
+        if (exportDataButton == null) {
+        	exportDataButton = new JButton("Export Report Contents");
+        	exportDataButton.addActionListener(new ActionListener() {
+        	    public void actionPerformed(ActionEvent e) {
+        	        generateSelectedReport(false);
+        	    }
+        	});
+        	exportDataButton.setToolTipText("Export and View Report with no header or footer");
+        	exportDataButton.setMnemonic('X');
+        }
+        return exportDataButton;
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"

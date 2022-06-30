@@ -7,11 +7,17 @@ import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
@@ -22,6 +28,8 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -33,6 +41,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -213,9 +222,18 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox shadowModeCheckbox;
 
     private JCheckBox allowMultipleTeamLoginsCheckbox;
-    private boolean allowMultipleLoginsPerTeam = false;
 
     private Component rigidArea1;
+
+    private Component rigidArea2;
+
+    private JPanel teamScoreboardDisplayFormatPane;
+
+    private JTextField teamScoreboardDisplayFormatTextfield;
+
+    private JLabel teamScoreboardDisplayFormatLabel;
+
+    private JLabel teamDisplayFormatWhatsThisButton;
     
 //    private JTextField textfieldPrimaryCCSURL;
 //
@@ -519,8 +537,8 @@ public class ContestInformationPane extends JPanePlugin {
         if (teamSettingsPane == null ) {
             
             teamSettingsPane = new JPanel();
-            teamSettingsPane.setMaximumSize(new Dimension(500, 100));
-            teamSettingsPane.setPreferredSize(new Dimension(500,100));
+            teamSettingsPane.setMaximumSize(new Dimension(800, 120));
+            teamSettingsPane.setPreferredSize(new Dimension(800,120));
             teamSettingsPane.setAlignmentX(LEFT_ALIGNMENT); 
 
             if (showPaneOutlines) {
@@ -542,8 +560,103 @@ public class ContestInformationPane extends JPanePlugin {
             teamSettingsPane.add(getMaxOutputSizeInKTextField(), null);
             teamSettingsPane.add(getRigidArea1());
             teamSettingsPane.add(getAllowMultipleTeamLoginsCheckbox(), null);
+            teamSettingsPane.add(getRigidArea2());
+            teamSettingsPane.add(getTeamScoreboardDisplayFormatPane(), null);
         }
         return teamSettingsPane;
+    }
+
+    private JPanel getTeamScoreboardDisplayFormatPane() {
+
+        if (teamScoreboardDisplayFormatPane==null) {
+            teamScoreboardDisplayFormatPane = new JPanel();
+            
+            //contents of the pane:
+            
+            teamScoreboardDisplayFormatPane.add(getTeamScoreboardDisplayFormatLabel());
+            teamScoreboardDisplayFormatPane.add(getTeamScoreboardDisplayFormatTextfield());
+            teamScoreboardDisplayFormatPane.add(getTeamScoreboardDisplayFormatWhatsThisButton());
+        }
+        return teamScoreboardDisplayFormatPane;
+    }
+
+    private JLabel getTeamScoreboardDisplayFormatWhatsThisButton() {
+        
+            if (teamDisplayFormatWhatsThisButton == null) {
+                Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+                if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                    // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                    teamDisplayFormatWhatsThisButton = new JLabel("<What's This?>");
+                    teamDisplayFormatWhatsThisButton.setForeground(Color.blue);
+                } else {
+                    Image image = ((ImageIcon) questionIcon).getImage();
+                    teamDisplayFormatWhatsThisButton = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+                }
+
+                teamDisplayFormatWhatsThisButton.setToolTipText("What's This? (click for additional information)");
+                teamDisplayFormatWhatsThisButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        JOptionPane.showMessageDialog(null, displayFormatWhatsThisMessage, "About Team Scoreboard Display Format Strings", JOptionPane.INFORMATION_MESSAGE, null);
+                    }
+                });
+                teamDisplayFormatWhatsThisButton.setBorder(new EmptyBorder(0, 15, 0, 0));
+            }
+            return teamDisplayFormatWhatsThisButton;
+        }
+
+    // the string which will be displayed when the "What's This" icon in the Team Settings panel is clicked
+    private String displayFormatWhatsThisMessage = //
+            "\nThe Team Scoreboard Display Format field allows you to specify a string which defines the format in which team names " //
+            + "will be displayed on the PC^2 Scoreboard." //
+
+            + "\n\nThe format string is a pattern which (typically) contains \"substitution variables\", identified by substrings starting with \"{:\"" //
+            + " and ending with \"}\" (for example, {:teamname} )." //
+            + "\nPC^2 automatically replaces substitution variables with the corresponding value for each team" //
+            + " (for example, the substitution variable {:teamname} "  //
+            + "\ngets replaced on the scoreboard with each team's name as defined in the PC^2 Server)." //
+            + "\n\nLiteral characters (i.e., anything NOT part of a substituion variable) are displayed exactly as written in the format string." //
+
+            + "\n\nRecognized substitution variables include:" //
+            + "\n    {:teamname}                -- the name of the team (for example, \"Hot Coders\")" //
+            + "\n    {:teamloginname}       -- the account name which the team uses to login to PC^2 (e.g., \"team102\")" //
+            + "\n    {:clientnumber}           -- the PC^2 client (team) number for the team (e.g., \"102\")" //
+            + "\n    {:shortschoolname}  -- the short name of the team's school (e.g., \"CSUS\" or \"UCB\")" //
+            + "\n    {:longschoolname}    -- the long name of the team's school (e.g., \"California State University, Sacramento\"" //
+            + "\n    {:groupname}             -- the name of the group (if any) to which the team is assigned (e.g., \"Upper Division\" or \"Northern Site\")" //
+            + "\n    {:groupid}                     -- the id number of the group (if any) to which the team is assigned (e.g., \"1\" or \"201\")" //
+            + "\n    {:sitenumber}             -- the PC^2 site number (in a multi-site contest) to which the team logs in (e.g., \"1\" or \"5\")" //
+            + "\n    {:countrycode}           -- the ISO Country Code associated with the team (e.g. \"CAN\" or \"USA\")" //
+            + "\n    {:externalid}                -- the ICPC CMS id number (if any) associated with the team (e.g., \"309407\")" //
+            
+            + "\n\nSo for example a display format string like \"{:teamname} ({:shortschoolname}) might display the following on the scoreboard:" //
+            + "\n    Hot Coders (CSUS) " //
+            + "\n(Notice the addition of the literal parentheses around the short school name.)" //
+            
+            + "\n\nSubstitution values depend on the corresponding data having been loaded into the PC^2 Server; if there is no value defined for a" //
+            + "\nspecified substitution string then the substitution string itself appears in the result."
+            + " If the defined value is null or empty then an empty string appears in the result."
+
+            + "\n\n"; //
+
+    private JTextField getTeamScoreboardDisplayFormatTextfield() {
+        if (teamScoreboardDisplayFormatTextfield==null) {
+            teamScoreboardDisplayFormatTextfield = new JTextField("Undefined",30);
+            
+            teamScoreboardDisplayFormatTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return teamScoreboardDisplayFormatTextfield;
+    }
+
+    private Component getTeamScoreboardDisplayFormatLabel() {
+        if (teamScoreboardDisplayFormatLabel==null) {
+            teamScoreboardDisplayFormatLabel = new JLabel("Team Scoreboard Display Format: ");
+        }
+        return teamScoreboardDisplayFormatLabel;
     }
 
     private JLabel getMaxOutputSizeLabel() {
@@ -857,7 +970,8 @@ public class ContestInformationPane extends JPanePlugin {
         String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();
         long maximumFileSize = Long.parseLong(maxFileSizeString);
         newContestInformation.setMaxFileSize(maximumFileSize * 1000);
-        newContestInformation.setAllowMultipleLoginsPerTeam(allowMultipleLoginsPerTeam);
+        newContestInformation.setAllowMultipleLoginsPerTeam(getAllowMultipleTeamLoginsCheckbox().isSelected());
+        newContestInformation.setTeamScoreboardDisplayFormat(getTeamScoreboardDisplayFormatTextfield().getText());
 
         //fill in values already saved, if any
         if (savedContestInformation != null) {
@@ -870,7 +984,9 @@ public class ContestInformationPane extends JPanePlugin {
             newContestInformation.setContestShortName(savedContestInformation.getContestShortName());
             newContestInformation.setExternalYamlPath(savedContestInformation.getExternalYamlPath());
             
+            //TODO: why is the following being done here when it is overridden below?
             newContestInformation.setFreezeTime(savedContestInformation.getFreezeTime());
+            
             newContestInformation.setLastRunNumberSubmitted(savedContestInformation.getLastRunNumberSubmitted());
             newContestInformation.setAutoStartContest(savedContestInformation.isAutoStartContest());
         }
@@ -933,6 +1049,7 @@ public class ContestInformationPane extends JPanePlugin {
                 
                 getMaxOutputSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
                 getAllowMultipleTeamLoginsCheckbox().setSelected(contestInformation.isAllowMultipleLoginsPerTeam());
+                getTeamScoreboardDisplayFormatTextfield().setText(contestInformation.getTeamScoreboardDisplayFormat());
                 getContestFreezeLengthtextField().setText(contestInformation.getFreezeTime());
                 
                 getCcsTestModeCheckbox().setSelected(contestInformation.isCcsTestMode());
@@ -1315,7 +1432,6 @@ public class ContestInformationPane extends JPanePlugin {
             allowMultipleTeamLoginsCheckbox.addActionListener (new ActionListener() {
                 
                 public void actionPerformed(ActionEvent e) {
-                    allowMultipleLoginsPerTeam = getAllowMultipleTeamLoginsCheckbox().isSelected();
                     enableUpdateButton();
                 }
             });
@@ -1415,6 +1531,17 @@ public class ContestInformationPane extends JPanePlugin {
         return runSubmissionInterfaceCommandTextField;
     }
 
+    private Image getScaledImage(Image srcImg, int w, int h) {
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+
+        return resizedImg;
+    }
+
     private Component getHorizontalStrut_2() {
         if (horizontalStrut_2 == null) {
         	horizontalStrut_2 = Box.createHorizontalStrut(20);
@@ -1459,5 +1586,11 @@ public class ContestInformationPane extends JPanePlugin {
             rigidArea1 = Box.createRigidArea(new Dimension(20,20));
         }
         return rigidArea1;
+    }
+    private Component getRigidArea2( ) {
+        if (rigidArea2==null) {
+            rigidArea2 = Box.createRigidArea(new Dimension(20,20));
+        }
+        return rigidArea2;
     }
 }

@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
@@ -1201,11 +1202,11 @@ public final class Utilities {
     }
 
     /**
-     * Return list of directory entries (including dirs) with extension.
+     * Return list of directory entries matching with extension.
      * 
      * @param directoryName
      * @param extension
-     * @return
+     * @return list of basename filenames in directory directoryName
      */
     public static String[] getFileNames(String directoryName, String extension) {
 
@@ -1844,5 +1845,128 @@ public final class Utilities {
             return Long.MIN_VALUE;
         }
     }
+    
+    /**
+     * Fetch directories names (full path).
+     * 
+     * @param directory
+     * @return list of directories (prepended by directory)
+     */
+    public static List<String> getDirectoryNames(String directory) {
+
+        List<String> list = new ArrayList<String>();
+
+        File dir = new File(directory);
+
+        String[] entries = dir.list();
+        if (entries == null) {
+            return list;
+        }
+
+        Arrays.sort(entries);
+
+        for (String name : entries) {
+            String entry = directory + File.separator + name;
+            
+            if (new File(entry).isDirectory()) {
+                list.add(entry);
+            }
+        }
+
+        return list;
+    }
+    
+    /**
+     * Fetch all CDP data directories for all problems under cdpConfigDirectory directory.
+     * 
+     * @param cdpConfigDirectory
+     * @return a list of data directories (full path)
+     */
+    public static List<String> getCDPDataDirectories(String cdpConfigDirectory) {
+
+        List<String> list = new ArrayList<String>();
+
+        File dir = new File(cdpConfigDirectory);
+
+        String[] entries = dir.list();
+        if (entries == null) {
+            return list;
+        }
+
+        Arrays.sort(entries);
+
+        for (String name : entries) {
+            String entry = cdpConfigDirectory + File.separator + name + File.separator + "data";
+            if (new File(entry).isDirectory()) {
+                list.add(entry);
+            }
+        }
+
+        return list;
+
+    }    
   
+    /**
+     * Accepts a "duration" (an amount of time) in milliseconds and returns that duration in formatted form.
+     * The general form of the returned format is HHHH:MM:SS.sss, where the number of hour digits will always be
+     * at least two, but may be more depending on the input value 
+     * (in other words, this is not a "time of day" which is restricted to just two hour-digits).
+     * Note however that the minutes and seconds fields will always be two digits, and the msec field will 
+     * always be three digits.
+     * If the input value is negative then it is converted to a positive value and the returned value is
+     * the positive value preceded by a minus sign.
+     * 
+     * @param milliseconds the duration to be formatted, in msec.
+     * @return the formatted value of the input duration.
+     */
+    public static String formatDuration (long milliseconds) {
+        
+        String result = "";
+        
+        //ensure calculations are based on positive milliseconds
+        long posMsec = milliseconds;
+        if (milliseconds<0) {
+            posMsec *= -1;
+            result += "-";  //if input was negative, prepend "-" to output
+        }
+
+        long msecPerSecond = Constants.MS_PER_SECOND;
+        long msecPerMinute = Constants.MS_PER_MINUTE;
+        long msecPerHour = msecPerMinute*60 ;           
+        
+        long hours = posMsec / msecPerHour ;   //whole hours (fractional portion is truncated
+        if (hours<10) {
+            //prepend a zero to insure at least two hour digits
+            result += "0";
+        }
+        String hourString = Long.toString(hours);
+        result += hourString + ":";
+        
+        long minutes = (posMsec - (hours*msecPerHour)) / (60*1000);  //whole minutes (truncated)
+        if (minutes<10) {
+            result += "0";
+        }
+        String minuteString = Long.toString(minutes);
+        result += minuteString + ":";
+        
+        long seconds = (posMsec - (hours*msecPerHour) - (minutes*msecPerMinute)) / 1000;   //whole seconds (truncated)
+        if (seconds<10) {
+            result += "0";
+        }
+        String secondsString = Long.toString(seconds);
+        result += secondsString + ".";
+        
+        long millis = posMsec - (hours*msecPerHour) - (minutes*msecPerMinute) - (seconds*msecPerSecond);   //fractional seconds (truncated)
+        if (millis<100) {
+            result += "0";
+        }
+        if (millis<10) {
+            result += "0";
+        }
+        String fractionString = Long.toString(millis);
+        result += fractionString;
+        
+        return result;
+    }
+
 }

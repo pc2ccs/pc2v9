@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
@@ -1857,7 +1858,7 @@ public class PacketHandler {
         JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
         RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
         ClientId whoJudgedRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        judgeRun(run, judgementRecord, runResultFiles, whoJudgedRunId, connectionHandlerID, packet);
+        sendRunJudgementToClients(run, judgementRecord, runResultFiles, whoJudgedRunId, connectionHandlerID, packet);
 
     }
 
@@ -2307,7 +2308,7 @@ public class PacketHandler {
 
                 securityCheck(Permission.Type.EDIT_RUN, packet.getSourceId(), connectionHandlerID);
 
-                if (isSuperUser(packet.getSourceId())) {
+                if (isSuperUser(packet.getSourceId())  || isFeederUser(packet.getSourceId())) {
                     info("updateRun by " + packet.getSourceId() + " " + run);
                     if (judgementRecord != null) {
                         RunResultFiles[] runResultFilesArray = contest.getRunResultFiles(run);
@@ -2325,7 +2326,7 @@ public class PacketHandler {
                     }
 
                 } else {
-                    throw new SecurityException("Non-admin user " + packet.getSourceId() + " attempted to update run " + run);
+                    throw new SecurityException("Non-privileged user " + packet.getSourceId() + " attempted to update run " + run);
                 }
 
                 Run theRun = contest.getRun(run.getElementId());
@@ -3160,6 +3161,10 @@ public class PacketHandler {
         return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
 
+    private boolean isFeederUser(ClientId id) {
+        return id.getClientType().equals(ClientType.Type.FEEDER);
+    }
+
     public void cancelRun(Packet packet, Run run, ClientId whoCanceledRun, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
 
         if (isServer()) {
@@ -3297,7 +3302,7 @@ public class PacketHandler {
     }
 
     /**
-     * Judge a run
+     * This method sends the specified judgement to all clients that need to know about it.
      * 
      * @param run
      * @param judgementRecord
@@ -3309,7 +3314,7 @@ public class PacketHandler {
      * @throws ClassNotFoundException 
      * @throws IOException 
      */
-    protected void judgeRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, 
+    protected void sendRunJudgementToClients(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, 
             ClientId whoJudgedId, ConnectionHandlerID connectionHandlerID, Packet packet) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
         if (isServer()) {
@@ -3331,9 +3336,24 @@ public class PacketHandler {
 
                 Run theRun = contest.getRun(run.getElementId());
 
-                if (judgementRecord.isComputerJudgement()) {
-                    if (contest.getProblem(theRun.getProblemId()).isManualReview()) {
-                        if (contest.getProblem(theRun.getProblemId()).isPrelimaryNotification()) {
+                try {
+                    
+                    //try to send the judgement to the team
+                    if (judgementRecord.isComputerJudgement()) {
+                        
+                        if (contest.getProblem(theRun.getProblemId()).isManualReview()) {
+                            if (contest.getProblem(theRun.getProblemId()).isPrelimaryNotification()) {
+
+                                // Do not send RunResultFiles to the team
+                                RunResultFiles rrf = runResultFiles;
+                                if (run.getSubmitter().getClientType().equals(ClientType.Type.TEAM)) {
+                                    rrf = null;
+                                }
+                                Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
+                                
+                                sendJudgementToTeam (judgementPacket, theRun);
+                            }
+                        } else {
 
                             // Do not send RunResultFiles to the team
                             RunResultFiles rrf = runResultFiles;
@@ -3341,7 +3361,6 @@ public class PacketHandler {
                                 rrf = null;
                             }
                             Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
-                            
                             sendJudgementToTeam (judgementPacket, theRun);
                         }
                     } else {
@@ -3354,17 +3373,12 @@ public class PacketHandler {
                         Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
                         sendJudgementToTeam (judgementPacket, theRun);
                     }
-                } else {
-
-                    // Do not send RunResultFiles to the team
-                    RunResultFiles rrf = runResultFiles;
-                    if (run.getSubmitter().getClientType().equals(ClientType.Type.TEAM)) {
-                        rrf = null;
-                    }
-                    Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
-                    sendJudgementToTeam (judgementPacket, theRun);
+                } catch (Exception e) {
+                    
+                    controller.getLog().log(Level.WARNING, "Exception attempting to send judgement for run " + run + " in packet " + packet + ": "+ e.getMessage(), e);
                 }
 
+                //try to send the judgement to other clients 
                 Packet judgementUpdatePacket = PacketFactory.createRunJudgmentUpdate(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoJudgedId);
                 controller.sendToJudgesAndOthers(judgementUpdatePacket, true);
             }
@@ -3522,7 +3536,26 @@ public class PacketHandler {
                     // just get run and sent it to them.
 
                     theRun = contest.getRun(run.getElementId());
-                    RunFiles runFiles = contest.getRunFiles(run);
+                    
+                    RunFiles runFiles = null;
+                    
+                    // in case GetRunFiles throws an exception we want to deal with it separately
+                    try {
+                        runFiles = contest.getRunFiles(run);  
+                    } catch (Exception e) {
+                        controller.getLog().warning("contest.getRunFiles (R/O) can not get files for run " + run.getNumber() + ": " + e.getMessage());
+                        
+                        // set status to NEW indicating there was a failure and it has to be manually taken care of
+                        // the judges will be notifed of a new run.
+                        theRun.setStatus(Run.RunStates.NEW);
+                        Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoRequestsRunId, theRun);
+                        controller.sendToJudgesAndOthers(availableRunPacket, true);
+                        
+                        Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
+                        controller.sendToClient(notAvailableRunPacket);
+
+                        return;
+                    }
 
                     RunResultFiles[] runResultFiles = contest.getRunResultFiles(run);
 
@@ -3537,12 +3570,35 @@ public class PacketHandler {
 
                         theRun = contest.checkoutRun(run, whoRequestsRunId, false, computerJudge);
 
-                        RunFiles runFiles = contest.getRunFiles(run);
+                        RunFiles runFiles = null;
+                        
+                        // in case GetRunFiles throws an exception we want to deal with it separately
+                        try {
+                            runFiles = contest.getRunFiles(run);  
+                        } catch (Exception e) {
+                            controller.getLog().warning("contest.getRunFiles can not get files for run " + run.getNumber() + " (settng to status NEW): " + e.getMessage());
+                            
+                            try {
+                                // cancel the checkout and set run state to NEW to notify judges
+                                contest.cancelRunCheckOut(run, whoRequestsRunId);
+                                theRun.setStatus(Run.RunStates.NEW);
+                                Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoRequestsRunId, theRun);
+                                controller.sendToJudgesAndOthers(availableRunPacket, true);
+                            } catch (Exception e1) {
+                                controller.getLog().severe("Problem cancelling run checkout after error getting run " + run.getNumber() + " files." + e1);
+                            }
+                            
+                            Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
+                            controller.sendToClient(notAvailableRunPacket);
+
+                            return;
+                        }
+                        
                         if (runFiles == null) {
                             try {
                                 contest.cancelRunCheckOut(run, whoRequestsRunId);
                             } catch (UnableToUncheckoutRunException e) {
-                                controller.getLog().severe("Problem canceling run checkout after error getting run files.");
+                                controller.getLog().severe("Problem cancelling run checkout after error getting run files.");
                             }
                             throw new RunUnavailableException("Error retrieving files.");
                         }
@@ -3588,11 +3644,9 @@ public class PacketHandler {
     }
 
     /**
-     * Loads only the settings from the remote server into this server.
+     * Loads only the settings from the remote server into this server's model.
      * 
-     * Loads settings from other server, submissions, etc.  Sends
-     * out a login packet to any "new" servers which this site
-     * is not logged into. 
+     * Loads settings from other server, submissions, etc. into model.
      * 
      * @param packet
      * @param connectionHandlerID
@@ -3627,6 +3681,20 @@ public class PacketHandler {
         loader.addAllConnectionIdsToModel(contest, controller, packet);
 
         loader.addRemoteLoginsToModel(contest, controller, packet, remoteSiteNumber);
+        
+        loader.addJudgementsToModel(contest, controller, packet);
+
+        if (isServer()) {
+            try {
+                contest.storeConfiguration(controller.getLog());
+            } catch (Exception e) {
+                // huh
+                Exception ex = new Exception("Server " + contest.getClientId() + " problem storing config update  " + packet);
+                controller.getLog().log(Log.WARNING, ex.getMessage(), ex);
+            }
+        }
+        
+        controller.sendToJudgesAndOthers(packet, false);
         
         info("Done loading settings from remote site "+remoteSiteNumber);
     }
