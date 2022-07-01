@@ -2,10 +2,12 @@
 package edu.csus.ecs.pc2.ui.team;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import edu.csus.ecs.pc2.core.FileUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -91,6 +93,23 @@ public class QuickSubmitter implements UIPlugin {
         return files;
     }
 
+    public File sendSubmission(File sourceFile) throws Exception {
+        File submittedFile = null;
+
+        Language language = guessLanguage(getContest(), sourceFile.getAbsolutePath());
+        if (language == null) {
+            String ext = getExtension(sourceFile.getAbsolutePath());
+            throw new Exception("Cannot identify language for ext= " + ext + " = Can not send submission for file " + sourceFile.getAbsolutePath());
+        } else {
+            Problem problem = guessProblem(getContest(), sourceFile.getAbsolutePath());
+            controller.submitJudgeRun(problem, language, sourceFile.getAbsolutePath(), null);
+            System.out.println("submitted run send with language: " + language + " and problem: " + problem.getShortName() + " title:" + problem + " as " + getContest().getClientId());
+            submittedFile = sourceFile;
+        }
+
+        return submittedFile;
+    }
+
     /**
      * submit runs for all input files.
      * 
@@ -100,31 +119,25 @@ public class QuickSubmitter implements UIPlugin {
      * @see #guessProblem(IInternalContest, String)
      * 
      * @param someSubmitFiles
+     * @return a list of files that were submitted
      */
-    public void sendSubmissions(List<File> someSubmitFiles) {
+    public List<File> sendSubmissions(List<File> someSubmitFiles) {
 
+        List<File> fileList = new ArrayList<File>();
         for (File file : someSubmitFiles) {
-            try {
 
-                Language language = guessLanguage(getContest(), file.getAbsolutePath());
-                if (language == null) {
-                    String ext = getExtension(file.getAbsolutePath());
-                    System.err.println("Cannot identify language for ext= " + ext + " = Can not send submission for file " + file.getAbsolutePath());
-                } else {
-                    Problem problem = guessProblem(getContest(), file.getAbsolutePath());
-                    try {
-                        controller.submitJudgeRun(problem, language, file.getAbsolutePath(), null);
-                        System.out.println("submitted run send with language " + language + " and problem " + problem);
-                    } catch (Exception e) {
-                        System.err.println("Warning problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage());
-                        log.log(Level.WARNING, "problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage(), e);
-                    }
+            try {
+                File subFile = sendSubmission(file);
+                if (subFile != null) {
+                    fileList.add(file);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("Warning problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage());
                 log.log(Level.WARNING, "problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage(), e);
             }
         }
+        
+        return fileList ;
     }
 
     /**
@@ -137,7 +150,8 @@ public class QuickSubmitter implements UIPlugin {
     private Problem guessProblem(IInternalContest contest2, String absolutePath) {
         Problem[] problems = contest.getProblems();
         for (Problem problem : problems) {
-            if (absolutePath.indexOf(problem.getShortName()) != -1) {
+            String problemPath = IContestLoader.CONFIG_DIRNAME + File.separator + problem.getShortName() + File.separator;
+            if (absolutePath.indexOf(problemPath) != -1) {
                 return problem;
             }
         }
@@ -233,5 +247,22 @@ public class QuickSubmitter implements UIPlugin {
         }
         
         return outFiles;
+    }
+
+    public List<File> getAllCDPsubmissionFileNames(IInternalContest myContest, String cdpPath, boolean submitYesSamples, boolean submitNoSamples) throws FileNotFoundException {
+
+        File configDir = FileUtilities.findCDPConfigDirectory(new File(cdpPath));
+
+        if (configDir == null || (!configDir.isDirectory())) {
+            throw new FileNotFoundException("No such CDP directory: " + cdpPath);
+        }
+
+        List<File> files = getAllCDPsubmissionFileNames(myContest, configDir.getAbsolutePath());
+
+        if (submitNoSamples || submitYesSamples) {
+            files = filterRuns(files, submitYesSamples, submitNoSamples);
+        }
+
+        return files;
     }
 }

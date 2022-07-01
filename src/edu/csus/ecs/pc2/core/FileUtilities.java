@@ -73,15 +73,14 @@ public class FileUtilities {
         if (entry.isDirectory()) {
 
             // assume they specified a CDP directory
-            File dir = new File(entry.getAbsoluteFile() + File.separator + IContestLoader.CONFIG_DIRNAME);
+            File configDir = new File(entry.getAbsoluteFile() + File.separator + IContestLoader.CONFIG_DIRNAME);
 
-            if (dir.isDirectory()) {
-                cdpConfigDirectory = dir;
-            } else {
-                if (dir.isDirectory() && IContestLoader.CONFIG_DIRNAME.equals(dir.getName())) {
-                    // they specified a config/ directory
-                    cdpConfigDirectory = dir;
-                }
+            if ( IContestLoader.CONFIG_DIRNAME.equals(entry.getName())) {
+                // they specified a config/ directory
+                cdpConfigDirectory = entry;
+            }
+            else if (configDir.isDirectory()) {
+                cdpConfigDirectory = configDir;
             }
 
         } else if (entry.isFile()) {

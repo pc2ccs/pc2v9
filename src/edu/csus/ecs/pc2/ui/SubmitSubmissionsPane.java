@@ -1,15 +1,20 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -20,8 +25,6 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.team.QuickSubmitter;
-import java.awt.BorderLayout;
-import javax.swing.JCheckBox;
 
 /**
  * A UI that to submit files found in a CDP.
@@ -58,15 +61,15 @@ public class SubmitSubmissionsPane extends JPanePlugin {
 
         cdptextField = new JTextField();
         cdptextField.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        cdptextField.setBounds(113, 54, 315, 27);
+        cdptextField.setBounds(113, 54, 404, 27);
         centerPane.add(cdptextField);
         cdptextField.setColumns(10);
 
         messageLabel = new JLabel("message label");
-        messageLabel.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        messageLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
         messageLabel.setForeground(Color.RED);
         messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        messageLabel.setBounds(10, 11, 418, 32);
+        messageLabel.setBounds(10, 11, 738, 32);
         centerPane.add(messageLabel);
         
         
@@ -90,7 +93,11 @@ public class SubmitSubmissionsPane extends JPanePlugin {
         JButton submitRunButton = new JButton("Submit");
         submitRunButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                submitSampleSubmissions();
+                try {
+                    submitSampleSubmissions();
+                } catch (Exception e2) {
+                    showMessage("Cannot submit samples, "+e2.getMessage());
+                }
             }
         });
         submitRunButton.setToolTipText("Edit log file ");
@@ -100,46 +107,60 @@ public class SubmitSubmissionsPane extends JPanePlugin {
 
     /**
      * Submit submissions
+     * @throws FileNotFoundException 
      */
-    protected void submitSampleSubmissions() {
+    protected void submitSampleSubmissions() throws FileNotFoundException {
         showMessage("");
+        
+        if (!getContest().getContestTime().isContestRunning()) {
+            FrameUtilities.showMessage(this, "Contest not started", "Cannot submit, contest not started");
+            return;
+        }
 
         boolean submitall = true;
 
+        String cdpPath = cdptextField.getText();
         if (submitall) {
-            List<File> files = submitter.getAllCDPsubmissionFileNames(getContest(), cdptextField.getText());
-            
+
             boolean submitYesSamples = checkBoxSubmitYesSamples.isSelected();
             boolean submitNoSamples = checkBoxSubmitFailingSamples.isSelected();
-            
-            if (! submitYesSamples || ! submitNoSamples){
-                files =  QuickSubmitter.filterRuns (files, submitYesSamples, submitNoSamples);
-            }
-            
-            
-            int count = 1;
-            for (File file : files) {
-                System.out.println("Found file " + count + " " + file.getAbsolutePath());
-                count++;
-                
-                
+
+            List<File> files = submitter.getAllCDPsubmissionFileNames(getContest(), cdpPath, submitYesSamples, submitNoSamples);
+            if (files.size() == 0) {
+                FrameUtilities.showMessage(this, "No samples to submit", "No samples found under: " + cdpPath);
+                return;
             }
 
             int result = FrameUtilities.yesNoCancelDialog(this, "Submit " + files.size() + " sample submissions?", "Submit CDP submissions");
 
             if (result == JOptionPane.YES_OPTION) {
-                submitter.sendSubmissions(files);
-                
-                showMessage("Submitted "+files.size()+" runs.");
+                List<File> submittedFiles = new ArrayList<File>();
+
+                for (File subFile : files) {
+                    try {
+                        submitter.sendSubmission(subFile);
+                        submittedFiles.add(subFile);
+                        System.out.println("Submitted file: "+subFile.getAbsolutePath());
+                    } catch (Exception e) {
+                        getLog().log(Level.WARNING, "Could not submit sample "+subFile.getAbsolutePath()+" "+e.getMessage(), e);
+                        System.out.println("Could not submit sample "+subFile.getAbsolutePath()+" "+e.getMessage());
+                    }
+                }
+
+                if (submittedFiles.size() == files.size()) {
+                    showMessage("Submitted all " + submittedFiles.size() + " runs.");
+                } else {
+                    int failureCount = files.size() - submittedFiles.size();
+                    showMessage("Only submitted " + submittedFiles.size() + " of " + files.size() + " runs, check log for details of " + failureCount + " failures.");
+                }
+
             }
-
-        } // else TODO provide way to send some of the runs, not just all.
-
+        }
     }
 
     @Override
     public String getPluginTitle() {
-        return "Submitter Pane";
+        return "Submit Samples Pane";
     }
 
     @Override
