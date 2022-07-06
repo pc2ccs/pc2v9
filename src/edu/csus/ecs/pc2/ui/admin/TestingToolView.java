@@ -1,4 +1,4 @@
-// Copyright (C) 1989-20 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.admin;
 
 import java.awt.BorderLayout;
@@ -41,10 +41,9 @@ import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
- * ReportsView - view that just shows report tab
+ * Testing Tool View - provides testing tools.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
- *
  */
 public class TestingToolView extends JFrame implements UIPlugin, ChangeListener {
 
@@ -103,7 +102,7 @@ public class TestingToolView extends JFrame implements UIPlugin, ChangeListener 
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setBounds(new java.awt.Rectangle(0, 0, 1080, 750));
         this.setContentPane(getJPanel());
-        this.setTitle("PC^2 Reports");
+        this.setTitle("PC^2 Test Tool");
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 promptAndExit();
@@ -243,7 +242,7 @@ public class TestingToolView extends JFrame implements UIPlugin, ChangeListener 
     }
 
     public String getPluginTitle() {
-        return "Reports GUI";
+        return "Test Tool GUI";
     }
 
     /**
