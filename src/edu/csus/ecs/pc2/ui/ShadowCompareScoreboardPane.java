@@ -548,13 +548,13 @@ public class ShadowCompareScoreboardPane extends JPanePlugin {
             + "\nIf there is a rank present in one scoreboard but not in the other scoreboard (for example, due to ties in earlier ranks),"
             + "\nan empty row containing question marks is displayed in the scoreboard which does not have an entry for that rank."
             
-            + "\n\nFor each rank which is present in both scoreboards, if the data for that rank matches in all corresponding fields of the two scoreboards"
-            + "\nthen the row is displayed in green; if any data values do not match then the row is displayed in red."
+            + "\n\nFor each rank row which is present in both scoreboards, if the data for that rank matches in all corresponding fields of the two scoreboards"
+            + "\nthen the row is displayed in green; if any data values do not match then the mismatched fields are displayed in red."
             
             + "\n\nThe effect of the above is that early in a contest when the PC2 Shadow system is still catching up to the Remote CCS, there will typically"
-            + "\nbe many rows where one scoreboard has data that the other does not (because of ties within ranks due to the submissions which that system"
+            + "\nbe many rows where one scoreboard has data that the other does not (because of ties within ranks due to the submissions which one or the other system"
             + "\nhas/has not judged), and there will be many rows where there is a single rank in both scoreboards but the data values will not match"
-            + "\n(the rows will be red) because the PC2 Shadow system has not judged precisely the same number of submissions as the remote CCS."
+            + "\n(some fields in the rows will be red) because the PC2 Shadow system has not judged precisely the same number of submissions as the remote CCS."
             
             + "\n\nAt the end of the contest the Scoreboard Comparison screen will show the true comparison of scoreboards for the PC2 Shadow and the Remote CCS."
             + "\n(If the scoreboards do not match at the end of the contest, the most likely reason is because the PC2 Shadow system has given a different"
