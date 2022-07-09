@@ -176,16 +176,15 @@ public class UnavailableRunsList {
         long timeNow = contest.getContestTime().getElapsedSecs();
         
         //repeatedly look at the run at the head of the queue to see if its expiration time has passed
-        while (unavailableRuns.peek().getExpirationTimeInSecs() < timeNow) {
+        while ( (unavailableRuns.peek()!=null) && (unavailableRuns.peek().getExpirationTimeInSecs() < timeNow) ) {
             
             //the run at the head of the queue has an expiration time which has passed; remove it from the queue
             // (note that method "poll()" is the PriorityBlockingQueue method to remove the head of the queue without blocking if the queue is empty)
             UnavailableRun removedRun = unavailableRuns.poll();
             
-            //if we actually removed a run and we have a non-null log, log the removal
-            //  (note that poll() can return null if the queue is empty)
-            if (removedRun!=null && log!=null) {
-                    log.info("Removed run " + removedRun.getRun().getNumber() + " from UnavailableRuns list");
+            //log the removal
+            if (log!=null) {
+                log.info("Removed run " + removedRun.getRun().getNumber() + " from UnavailableRuns list");
             }
         }
     }
