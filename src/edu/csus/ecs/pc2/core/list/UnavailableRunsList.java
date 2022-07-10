@@ -13,25 +13,33 @@ import edu.csus.ecs.pc2.core.model.UnavailableRun;
 import edu.csus.ecs.pc2.ui.AutoJudgingMonitor;
 
 /**
- * This class maintains a list of unavailable runs -- that is, runs which an AutoJudge has previously requested but
- * received back a RUN_NOTAVAILABLE response (packet).
+ * This class maintains a list of unavailable runs -- that is, runs which an AutoJudge has previously requested to check out (because it 
+ * found the run in the QUEUED_FOR_COMPUTER_JUDGEMENT state), but for which it received back a RUN_NOTAVAILABLE response (packet).
  * 
  * The list of unavailable runs is managed as a {@link PriorityBlockingQueue}.  Note: class {@link PriorityBlockingQueue} 
  * is used rather than {@link PriorityQueue} because the former is thread-safe whereas the latter is not.
  * 
- * The priority of a queue element is based on an "expiration time" -- the contest elapsed time (in seconds) at which the run should no longer
- * be considered "unavailable".  Runs whose "expiration time" has arrived become candidates for removal
- * from the list. (The purpose of this is to ensure that at some point an AJ will go back and
- * consider runs which were PREVIOUSLY unavailable but which might now be legitimately available; this could happen for example if some
- * other judge grabbed the run while a given judge was requesting it, but then the other judge returned the run unjudged.)
+ * The priority of a queue element (unavailable run) is based on an "expiration time" -- the contest elapsed time (in seconds) at which the run should 
+ * no longer be considered "unavailable".  Runs with earlier expiration times appear closer to the head of the queue.  When a run is inserted into 
+ * the queue (by calling method {@link #addRun(Run run)}), that method computes an "expiration time" (the contest time at which the run becomes a 
+ * candidate for removal from the list), which then becomes the "priority" of that unavailable run.  
+ * Runs whose "expiration time" has arrived (or passed) become candidates for removal from the list. 
  * 
- * Runs with earlier expiration times appear closer to the head of the queue.  When a run is inserted into the queue (by calling
- * method {@link #addRun(Run run)}), that method computes an "expiration time" (the contest time at which the run becomes a candidate
- * for removal from the list.  
+ * The purpose of the "expiration time" of an unavailable run is to ensure that at some point an AJ will go back and
+ * consider runs which were PREVIOUSLY unavailable but which might now be legitimately available.  This could happen for example if some
+ * other judge, or an Admin, grabbed the run while a given AJ was requesting it, but then the other judge/Admin returned the run unjudged.
+ * It could also happen due to an unknown bug in the system.
+ * The "expiration timeout" is thus in effect a "fail-safe" mechanism to ensure that if a run somehow was marked "unavailable" but then
+ * somehow later got legitimately returned to the QUEUED_FOR_COMPUTER_JUDGEMENT state, the AJ will (eventually) attempt to judge it once again.
  * 
- * The class also tracks the <I>number of times</i> a given run gets inserted into the UnavailableRunsList; the more times a given
+ * This class tracks the <I>number of times</i> a given run gets inserted into the UnavailableRunsList; the more times a given
  * Run gets inserted, the longer (further in the future) its computed "expiration time" will be (see method {@link #addRun(Run)} for details).
  * 
+ * Note that the notion of a "list of unavailable runs" is strictly associated with AutoJudging; "human" or "manual" judging should never
+ * be making any use of this UnavailableRunsList class.  The purpose of the class is to deal with situations
+ * where, in the current PC2 distribution, an AJ can (for currently unknown/unexplained reasons) find a run in the QUEUED_FOR_COMPUTER_JUDGEMENT
+ * state but when it sends a RUN_CHECKOUT request it gets back a RUN_NOTAVAILABLE response.  Note that this actually SHOULDN'T EVER HAPPEN;
+ * however, it DOES in fact happen under some (currently unknown) condition in the system.
  * The list managed by this class was created as a (hopefully, temporary) workaround for the issue of AJ's repeatedly 
  * requesting the same unavailable run ad infinitum -- something which has been seen in various contests.  
  * See https://github.com/pc2ccs/pc2v9/issues/480 for details.
