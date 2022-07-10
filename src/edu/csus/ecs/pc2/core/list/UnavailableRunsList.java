@@ -131,13 +131,15 @@ public class UnavailableRunsList {
         //   increase.  However, since this entire class is (hopefully) temporary, I didn't spend any more time on that... jlc)
         long contestTimeNowInSecs = contest.getContestTime().getElapsedSecs();
         long expirationTimeInSecs = contestTimeNowInSecs + (INITIAL_EXPIRATION_TIME_OFFSET_SECS * timesAddedToRunList) ;
+        long expirationLengthInSecs = expirationTimeInSecs - contestTimeNowInSecs;
         
         //add the run to the priority queue (note that method add(run) adds the run into the queue in priority order based on the expiration time in the run)
         UnavailableRun runToAdd = new UnavailableRun(run, expirationTimeInSecs);
         unavailableRuns.add(runToAdd);
         
         if (log!=null) { 
-            log.info("Added run " + run.getNumber() + " to UnavailableRuns list (times added = " + timesAddedToRunList + ")");
+            log.info("Added run " + run.getNumber() + " to UnavailableRuns list (times added = " + timesAddedToRunList 
+                            + "; time until expiration = " + expirationLengthInSecs + " secs); list size = " + unavailableRuns.size());
         } else {
             System.err.println("Added run " + run.getNumber() + " to UnavailableRuns list (times added = " + timesAddedToRunList + ") but no log was available for logging!!");
             throw new RuntimeException("Added run " + run.getNumber() + " to UnavailableRuns list (times added = " + timesAddedToRunList + ") but no log was available for logging!!");            
