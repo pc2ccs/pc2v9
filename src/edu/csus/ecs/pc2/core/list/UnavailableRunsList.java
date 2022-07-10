@@ -7,6 +7,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.UnavailableRun;
@@ -57,7 +58,7 @@ public class UnavailableRunsList {
     
     //a hashtable to keep track of how many times any given run has ever been added to the UnavailableRunsList.
     // This allows computing increased expiration times the more times a given run is found "unavailable".
-    private Hashtable<Run,Integer> allAddedRuns = new Hashtable<Run,Integer>();
+    private Hashtable<ElementId,Integer> allAddedRuns = new Hashtable<ElementId,Integer>();
     
     private IInternalContest contest;
     private Log log;
@@ -107,22 +108,22 @@ public class UnavailableRunsList {
         
         //find the number of times the run has previously been added to the UnavailableRunsList (if any).
         //  (Note that we're checking the hashtable of ALL runs which have EVER been added to the UnavailableRunsList, 
-        //  not the current UnavailableRunsList.) The "allAddedRuns" hashtable maps Runs to a count of the number of times 
-        // that run has ever been added to the UnavailableRunsList.
+        //  not the current UnavailableRunsList.) The "allAddedRuns" hashtable maps Runs (via their ElementId) to a count 
+        //  of the number of times that run has ever been added to the UnavailableRunsList.
         int timesAddedToRunList;
-        if (allAddedRuns.containsKey(run)) {
+        if (allAddedRuns.containsKey(run.getElementId())) {
             
             //the run has previously been added; get the count of number of times it has been added previously
-            timesAddedToRunList = allAddedRuns.get(run);
+            timesAddedToRunList = allAddedRuns.get(run.getElementId());
             
             //indicate another addition is occurring
             timesAddedToRunList++ ;
-            allAddedRuns.put(run, timesAddedToRunList);
+            allAddedRuns.put(run.getElementId(), timesAddedToRunList);
             
         } else {
             
             //this is the first time the run has been added
-            allAddedRuns.put(run,  1);
+            allAddedRuns.put(run.getElementId(),  1);
             timesAddedToRunList = 1;
         }
         
@@ -161,7 +162,7 @@ public class UnavailableRunsList {
         UnavailableRun nextRun;
         while (iterator.hasNext()) {
             nextRun = iterator.next();
-            if (nextRun != null  &&  nextRun.getRun().equals(run)) {
+            if (nextRun != null  &&  nextRun.getRun().getElementId().equals(run.getElementId())) {
                 //we found the specified Run in the list
                 return true;
             }
