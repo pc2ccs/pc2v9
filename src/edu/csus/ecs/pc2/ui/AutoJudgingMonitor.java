@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
 import edu.csus.ecs.pc2.core.list.RunComparatorByElapsedRunIdSite;
+import edu.csus.ecs.pc2.core.list.UnavailableRunsList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -90,6 +91,8 @@ public class AutoJudgingMonitor implements UIPlugin {
     private boolean judgingRun;
     
     private Runnable controlLoop = null;
+
+    private UnavailableRunsList unavailableRunsList;
 
     // private edu.csus.ecs.pc2.ui.AutoJudgingMonitor.FetchRunListenerImplemenation fetchRunListenerImplemenation;
 
@@ -188,9 +191,17 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         Run[] runs = contest.getRuns();
         Arrays.sort(runs,new RunComparatorByElapsedRunIdSite());
+        
+        //make sure that any runs which were previously put on the "unavailable runs" list but whose "expiration time"
+        // for being on that list has passed get removed from the list, so that the following loop will (again) consider them.  
+        try {
+            getUnavailableRunsList().removeExpiredRuns();
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while attempting to remove expired runs from UnavailableRunsList: ", e);
+        }
 
         for (Run run : runs) {
-            if (run.getStatus() == RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT) {
+            if (run.getStatus() == RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT && !getUnavailableRunsList().contains(run)) {
                 if (filter.matches(run)) {
                     return run;
                 }
@@ -199,6 +210,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         return null;
     }
+
 
     /**
      * get filter which contains problems to be auto judged.
@@ -338,8 +350,24 @@ public class AutoJudgingMonitor implements UIPlugin {
                         // and we received a not available for the run we were requesting
                         if (event.getRun().getNumber() ==  runBeingAutoJudged.getNumber() 
                                 && event.getRun().getSiteNumber() == runBeingAutoJudged.getSiteNumber()) {
-                            // XXX should we log this?
-                            // claim to have received it, so fetchRun can exit
+                            
+                            // the run we requested is not available -- log this unusual (though possibly legitimate) condition
+                            log.info("Received 'RUN_NOT_AVAILABLE' message for requested run " + event.getRun().getNumber() + " from site " + event.getRun().getSiteNumber() );
+                            
+                            //add the run to the list of requested-but-unavailable runs 
+                            // (a patch to support keeping the AJ from continually re-requesting the same run; see https://github.com/pc2ccs/pc2v9/issues/480)
+                            try {
+                                getUnavailableRunsList().addRun(runBeingAutoJudged);
+                            } catch (Exception e1) {
+                                if (runBeingAutoJudged!=null) {
+                                    log.log(Log.WARNING, "Exception attempting to add run " + runBeingAutoJudged.getNumber() 
+                                                        + " from site " + runBeingAutoJudged.getSiteNumber() + " to UnavailableRunsList: ", e1);
+                                } else {
+                                    log.log(Log.WARNING, "Exception attempting to add null run to UnavailableRunsList: ", e1);
+                                }
+                            } 
+                            
+                            // indicate a response to the RUN_REQUEST was received, so fetchRun can exit
                             synchronized (listening) {
                                 try {
                                     answerReceived = true;
@@ -359,6 +387,21 @@ public class AutoJudgingMonitor implements UIPlugin {
         public void runRemoved(RunEvent event) {
             // ignored
         }
+    }
+    
+    /**
+     * Returns the list of runs which this judge has previously requested and then received back a
+     * RUN_NOTAVAILABLE message.  
+     * If the list does not already exist, an (empty) list is created and returned.
+     * 
+     * @return the list of previously-requested but unavailable runs.
+     */
+    private UnavailableRunsList getUnavailableRunsList() {
+        
+        if (unavailableRunsList == null) {
+            unavailableRunsList = new UnavailableRunsList(contest,controller);
+        }
+        return unavailableRunsList;
     }
 
     /**
