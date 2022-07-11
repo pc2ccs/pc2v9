@@ -352,7 +352,7 @@ public class AutoJudgingMonitor implements UIPlugin {
                                 && event.getRun().getSiteNumber() == runBeingAutoJudged.getSiteNumber()) {
                             
                             // the run we requested is not available -- log this unusual (though possibly legitimate) condition
-                            log.info("Received 'NOT_AVAILABLE' message for requested run " + event.getRun().getNumber() );
+                            log.info("Received 'RUN_NOT_AVAILABLE' message for requested run " + event.getRun().getNumber() + " from site " + event.getRun().getSiteNumber() );
                             
                             //add the run to the list of requested-but-unavailable runs 
                             // (a patch to support keeping the AJ from continually re-requesting the same run; see https://github.com/pc2ccs/pc2v9/issues/480)
