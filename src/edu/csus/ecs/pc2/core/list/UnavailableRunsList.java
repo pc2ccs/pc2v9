@@ -101,7 +101,6 @@ public class UnavailableRunsList {
             if (log!=null) {
                 log.warning("Attempted to add a null run to the UnavailableRunsList!");
             } else {
-                System.err.println("Attempted to add a null run to the UnavailableRunsList, and no log is available for logging!!");
                 throw new RuntimeException("Attempted to add a null run to the UnavailableRunsList, and no log is available for logging!!");
             }
         }
@@ -139,11 +138,11 @@ public class UnavailableRunsList {
         unavailableRuns.add(runToAdd);
         
         if (log!=null) { 
-            log.info("Added run " + run.getNumber() + " to UnavailableRuns list (times added = " + timesAddedToRunList 
+            log.info("Added run " + run.getNumber() + " from site " + run.getSiteNumber() + " to UnavailableRuns list (times added = " + timesAddedToRunList 
                             + "; time until expiration = " + expirationLengthInSecs + " secs); list size = " + unavailableRuns.size());
         } else {
-            System.err.println("Added run " + run.getNumber() + " to UnavailableRuns list (times added = " + timesAddedToRunList + ") but no log was available for logging!!");
-            throw new RuntimeException("Added run " + run.getNumber() + " to UnavailableRuns list (times added = " + timesAddedToRunList + ") but no log was available for logging!!");            
+            throw new RuntimeException("Added run " + run.getNumber() + " from site " + run.getSiteNumber() + " to UnavailableRuns list (times added = " + timesAddedToRunList 
+                            + "; time until expiration = " + expirationLengthInSecs + " secs; list size = " + unavailableRuns.size()+ ") but no log was available for logging!!");            
         }
     }
     

@@ -356,7 +356,16 @@ public class AutoJudgingMonitor implements UIPlugin {
                             
                             //add the run to the list of requested-but-unavailable runs 
                             // (a patch to support keeping the AJ from continually re-requesting the same run; see https://github.com/pc2ccs/pc2v9/issues/480)
-                            getUnavailableRunsList().addRun(runBeingAutoJudged); 
+                            try {
+                                getUnavailableRunsList().addRun(runBeingAutoJudged);
+                            } catch (Exception e1) {
+                                if (runBeingAutoJudged!=null) {
+                                    log.log(Log.WARNING, "Exception attempting to add run " + runBeingAutoJudged.getNumber() 
+                                                        + " from site " + runBeingAutoJudged.getSiteNumber() + " to UnavailableRunsList: ", e1);
+                                } else {
+                                    log.log(Log.WARNING, "Exception attempting to add null run to UnavailableRunsList: ", e1);
+                                }
+                            } 
                             
                             // indicate a response to the RUN_REQUEST was received, so fetchRun can exit
                             synchronized (listening) {
