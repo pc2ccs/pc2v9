@@ -194,7 +194,11 @@ public class AutoJudgingMonitor implements UIPlugin {
         
         //make sure that any runs which were previously put on the "unavailable runs" list but whose "expiration time"
         // for being on that list has passed get removed from the list, so that the following loop will (again) consider them.  
-        getUnavailableRunsList().removeExpiredRuns();
+        try {
+            getUnavailableRunsList().removeExpiredRuns();
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while attempting to remove expired runs from UnavailableRunsList: ", e);
+        }
 
         for (Run run : runs) {
             if (run.getStatus() == RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT && !getUnavailableRunsList().contains(run)) {
