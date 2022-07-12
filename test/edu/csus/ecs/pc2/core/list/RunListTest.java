@@ -229,9 +229,7 @@ public class RunListTest extends AbstractTestCase {
 //        startExplorer(new File(testDir));
         
         
-        // TODO 
-//        Thread.sleep(20* 000);
-//        assertExpectedFileCount("Expecting runlist files count ", new File(testDir), 8);
+        assertExpectedFileCount("Expecting runlist files count ", new File(testDir), 8);
         assertNoZeroSizeFiles(new File(testDir));
         
     }
