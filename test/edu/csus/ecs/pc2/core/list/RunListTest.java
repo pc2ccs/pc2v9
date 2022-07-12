@@ -223,16 +223,16 @@ public class RunListTest extends AbstractTestCase {
 
         Run[] runs = sample.createRandomRuns(contest, numRuns, true, true, true);
         
+        runList.setSaveToDisk(true);
+        
         for (Run run : runs) {
             runList.addNewRun(run);
             runList.updateRun(run);
         }
         
-        runList.setSaveToDisk(true);
-
 //        startExplorer(new File(testDir));
         
-        assertExpectedFileCount("Expecting dir entries ", new File(testDir), 9);
+        assertExpectedFileCount("Expecting runlist files count ", new File(testDir), 8);
         
         assertNoZeroSizeFiles(new File(testDir));
         

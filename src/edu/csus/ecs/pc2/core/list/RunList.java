@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
@@ -297,19 +297,35 @@ public class RunList implements Serializable {
      * @throws IOException
      * 
      */
-    private synchronized boolean writeToDisk() throws IOException, ClassNotFoundException, FileSecurityException {
+    private boolean writeToDisk() throws IOException, ClassNotFoundException, FileSecurityException {
+
         if (!isSaveToDisk()) {
             return false;
         }
         
         boolean stored;
         String fileName = getFileName();
-        String backupFilename = getBackupFilename();
         
+        String backupFilename;
+        
+        Hashtable<String, Run>copyofRunHash;
         synchronized (runHashLock) {
-            stored = storage.store(fileName, runHash);
-            storage.store(backupFilename, runHash);
+            backupFilename = getBackupFilename();
+            
+            try {
+                File currentRunList = new File (fileName);
+                File backupRunList= new File (backupFilename);
+
+                currentRunList.renameTo(backupRunList);
+            } catch (Exception e) {
+                StaticLog.getLog().log(Log.WARNING, "FAILED to rename current " + fileName + " to " + backupFilename, e);
+            }
+            
+            copyofRunHash = new Hashtable<String, Run>(runHash);
+            
+            stored = storage.store(fileName, copyofRunHash);
         }
+        stored =  true;
         
         backupList.add(backupFilename);
         while(backupList.size() > 100) {
@@ -319,7 +335,7 @@ public class RunList implements Serializable {
                 file.delete();
             }
         }
-
+       
         return stored;
     }
 
@@ -400,8 +416,7 @@ public class RunList implements Serializable {
     }
     
     private void logException(String string, Exception e) {
-        //TODO:  huh?  the following two lines say "if X is null then call a method on X".  Doesn't make sense. Maybe should be "if != null"?  jlc
-        if (StaticLog.getLog() == null) {
+        if (StaticLog.getLog() != null) {
             StaticLog.getLog().log(Log.WARNING, string, e);
         } else {
             System.err.println(string + " " + e.getMessage());
