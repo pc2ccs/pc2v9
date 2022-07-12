@@ -55,15 +55,6 @@ job-build:
 #     - echo "Running test stage..."
 #     - echo "Do a test here!"
 
-push to ECS at CSUS:
-  stage: deploy
-  script:
-    - echo "Running deploy stage"
-    - export BUILDNUMBER=`echo dist/pc2-*.zip | sed 's#^dist.*build-\([0-9]*\)[.~].*#\1#'`
-    - BUILD_JOB_ID=$(cat dist/ci_job_id.txt)
-    - curl "http://pc2.ecs.csus.edu/cgi-bin/grabgitlabartifacts.cgi?authkey=$AUTHKEY&url=https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/jobs/$BUILD_JOB_ID/artifacts&buildnumber=$BUILDNUMBER"
-
-
 push release to GitHub:
   stage: deploy
   rules:
