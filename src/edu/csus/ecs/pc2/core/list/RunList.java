@@ -56,6 +56,8 @@ public class RunList implements Serializable {
     
     private Object runListWriteLock = new Object();
 
+    private Object diskWriteLock = new Object();
+
     public RunList() {
         saveToDisk = false;
         nextRunNumber = getINIBaseRunNumber();
@@ -433,7 +435,9 @@ public class RunList implements Serializable {
                 }
 
                 copyofRunHash = new Hashtable<String, Run>(runHash);
-
+            }
+            
+            synchronized (diskWriteLock) {
                 stored = storage.store(fileName, copyofRunHash);
             }
             stored = true;
