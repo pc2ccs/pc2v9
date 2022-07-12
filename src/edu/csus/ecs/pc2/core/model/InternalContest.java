@@ -792,11 +792,11 @@ public class InternalContest implements IInternalContest {
         Run newRun = runList.addNewRun(run); // this set the run number.
         if (runFiles != null) {
             runFilesList.add(newRun, runFiles);
-            SerializedFile file = runFiles.getMainFile();
-            if (file != null){
-                newRun.setEntryPoint(file.getName());
-                addRun(newRun);
-            }
+//            SerializedFile file = runFiles.getMainFile();
+//            if (file != null){
+//                newRun.setEntryPoint(file.getName());
+//                addRun(newRun);
+//            }
         }
         return newRun;
     }
