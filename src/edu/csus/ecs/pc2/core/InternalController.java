@@ -131,6 +131,10 @@ import edu.csus.ecs.pc2.ui.UIPluginList;
 public class InternalController implements IInternalController, ITwoToOne, IBtoA {
 
     private static final String NOLOGGING_OPTION_STRING = "--nologging";
+    /**
+     * Do not show standings panes on AdminView
+     */
+    private static final String NOSTANDINGS_OPTION_STRING = "--nostandings";
 
     private static final String INI_FILENAME_OPTION_STRING = "--ini";
 
