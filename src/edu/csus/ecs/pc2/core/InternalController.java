@@ -130,6 +130,7 @@ import edu.csus.ecs.pc2.ui.UIPluginList;
  */
 public class InternalController implements IInternalController, ITwoToOne, IBtoA {
 
+    private static final String NOLOGGING_OPTION_STRING = "--nologging";
 
     private static final String INI_FILENAME_OPTION_STRING = "--ini";
 
@@ -3253,6 +3254,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     "Usage: Starter [--help] [-F filename] [--server] [--first] [--login <login>] [--password <pass>] " + //
                     "[" + LOAD_OPTION_STRING + " <dir>|<file> ] " + //
                     "[--skipini] " + //
+                    "[" + NOLOGGING_OPTION_STRING + "] ", //
                     "[" + INI_FILENAME_OPTION_STRING + " filename] [" + //
                     CONTEST_PASSWORD_OPTION + " <pass>] [" + NO_GUI_OPTION_STRING + "] "+ //
                     "[" + REMOTE_SERVER_OPTION_STRING + " <remoteHostname> --proxyme]" + //
@@ -3264,6 +3266,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 System.out.println(string);
             }
             System.exit(0);
+        }
+
+        if (parseArguments.isOptPresent(NOLOGGING_OPTION_STRING)) {
+            Log.setDoNotWriteLogEntries(true);
         }
 
         if (parseArguments.isOptPresent(FILE_OPTION_STRING)) {
