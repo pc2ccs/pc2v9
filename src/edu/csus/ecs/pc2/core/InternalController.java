@@ -3261,6 +3261,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     "[" + NOLOGGING_OPTION_STRING + "] ", //
                     "[" + INI_FILENAME_OPTION_STRING + " filename] [" + //
                     CONTEST_PASSWORD_OPTION + " <pass>] [" + NO_GUI_OPTION_STRING + "] "+ //
+                    "[" + NOSTANDINGS_OPTION_STRING + "] "+ //
                     "[" + REMOTE_SERVER_OPTION_STRING + " <remoteHostname> --proxyme]" + //
                     "[" + MAIN_UI_OPTION + " classname]", // 
                     "", //
@@ -3288,6 +3289,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             } catch (IOException e) {
                 fatalError("Unable to read file " + propertiesFileName, e);
             }
+        }
+        
+        if (parseArguments.isOptPresent(NOSTANDINGS_OPTION_STRING)) {
+            Utilities.setShowStandingsPanes(false);
         }
 
         if (parseArguments.isOptPresent(NO_GUI_OPTION_STRING)) {
