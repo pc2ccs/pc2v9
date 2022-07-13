@@ -55,6 +55,8 @@ import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 public final class Utilities {
 
     private static boolean debugMode = false;
+    
+    private static boolean showStandingsPanes = true;
 
     /**
      * LETTERS is a lookup always 1-26 String.substring starts at 0, so letters begin at 1
@@ -1967,6 +1969,14 @@ public final class Utilities {
         result += fractionString;
         
         return result;
+    }
+
+    public static void setShowStandingsPanes(boolean showStandingsPanes) {
+        Utilities.showStandingsPanes = showStandingsPanes;
+    }
+    
+    public static boolean isShowStandingsPanes() {
+        return showStandingsPanes;
     }
 
 }

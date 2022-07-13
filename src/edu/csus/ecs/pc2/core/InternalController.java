@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -130,6 +130,10 @@ import edu.csus.ecs.pc2.ui.UIPluginList;
  */
 public class InternalController implements IInternalController, ITwoToOne, IBtoA {
 
+    /**
+     * Do not show standings panes on AdminView
+     */
+    private static final String NOSTANDINGS_OPTION_STRING = "--nostandings";
 
     private static final String INI_FILENAME_OPTION_STRING = "--ini";
 
@@ -3254,7 +3258,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     "[" + LOAD_OPTION_STRING + " <dir>|<file> ] " + //
                     "[--skipini] " + //
                     "[" + INI_FILENAME_OPTION_STRING + " filename] [" + //
-                    CONTEST_PASSWORD_OPTION + " <pass>] [" + NO_GUI_OPTION_STRING + "] "+ //
+                    CONTEST_PASSWORD_OPTION + " <pass>] [" + NO_GUI_OPTION_STRING + "] "+ // 
+                    "[" + NOSTANDINGS_OPTION_STRING + "] "+ //
                     "[" + REMOTE_SERVER_OPTION_STRING + " <remoteHostname> --proxyme]" + //
                     "[" + MAIN_UI_OPTION + " classname]", // 
                     "", //
@@ -3280,6 +3285,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
 
+        if (parseArguments.isOptPresent(NOSTANDINGS_OPTION_STRING)) {
+            Utilities.setShowStandingsPanes(false);
+        }
+        
         if (parseArguments.isOptPresent(NO_GUI_OPTION_STRING)) {
 
             usingGUI = false;
