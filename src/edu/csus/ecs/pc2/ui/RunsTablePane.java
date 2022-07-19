@@ -182,6 +182,8 @@ public class RunsTablePane extends JPanePlugin {
     private Run fetchedRun;
 
     private RunFiles fetchedRunFiles;
+    
+    private Run requestedRun;
 
     protected int viewSourceThreadCounter;
 
@@ -560,38 +562,57 @@ public class RunsTablePane extends JPanePlugin {
                 getController().getLog().log(Log.INFO, "RunsPane.RunListener: Action=" + action + "; DetailedAction=" + details + "; msg=" + msg
                                         + "; run=" + aRun + "; runFiles=" + aRunFiles);
 
-                
-                if (event.getRun() != null) {
-                        
+                if (aRun != null) {
+                    // make local reference for consistency in case requestedRun gets cleared - avoids synchronization
+                    Run locRun = requestedRun;
+                    
+                    // we are only interested in the run we may have requested from View Source - all other run changes are ignored.
+                    if(locRun != null && aRun.getNumber() == locRun.getNumber() && aRun.getSiteNumber() == locRun.getSiteNumber()) {
+
                         // RUN_NOT_AVAILABLE is undirected (sentToClient is null)
                         if (event.getAction().equals(Action.RUN_NOT_AVAILABLE)) {
                             
                             getController().getLog().log(Log.WARNING, "Reply from server: requested run not available");
-                            
+                            serverReplied = true;                                 
                         } else {
-                            
-                            //make sure this RunEvent was meant for me
-                            if (event.getSentToClientId() != null && event.getSentToClientId().equals(getContest().getClientId())) {
-                                
-                                getController().getLog().log(Log.INFO, "Reply from server: " + "Run Status=" + event.getAction()
-                                                        + "; run=" + event.getRun() + ";  runFiles=" + event.getRunFiles());
-                                
-                                fetchedRun = event.getRun();
-                                fetchedRunFiles = event.getRunFiles();    
-                                
-                            } else {
-                                
+                            // Only interested in the first reply (we don't want fetchedRun changing once its been set - it really shouldn't)
+                            if(fetchedRun == null) {
                                 ClientId toClient = event.getSentToClientId() ;
                                 ClientId myID = getContest().getClientId();
-
-                                getController().getLog().log(Log.INFO, "Event not for me: sent to " + toClient + " but my ID is " + myID);
-
-                                //TODO:  this needs to be reconsidered; why are we continuing when the event wasn't sent to us?  (Why wasn't it sent to us?)
-                                fetchedRun = event.getRun();
-                                fetchedRunFiles = event.getRunFiles();
+                                
+                                // see if the event was directed to me explicitly, which it should be (see PacketHandler.handleFetchedRun())
+                                // but isn't due to the way updateRun() works.  We'll leave this code here in case someday that changes.
+                                if (toClient != null && toClient.equals(myID)) {
+                                    
+                                    getController().getLog().log(Log.INFO, "Reply from server: " + "Run Status=" + event.getAction()
+                                                            + "; run=" + event.getRun() + ";  runFiles=" + event.getRunFiles());
+                                    
+                                    fetchedRun = aRun;
+                                    fetchedRunFiles = aRunFiles;    
+                                    serverReplied = true;     
+                                  
+                                } else {
+                                    
+                                    // The FETCHED_REQUESTED_RUN reply is sent with a a SentToClientID of null as found in
+                                    // InternalContest.updateRun().  the RunEvent's sentToClientId member is only set when the run
+                                    // is being checked out for BEING_JUDGED, BEING_RE_JUDGED, CHECKED_OUT, HOLD, otherwise it is
+                                    // is not set (null), and winds up here in the case of "View Source" but not from a being-judged dialog.
+                                    
+                                    getController().getLog().log(Log.INFO, "Event not directed to me: sent to " + toClient + " but my ID is " + myID);
+                                    
+                                    if(toClient == null) {
+                                        fetchedRun = aRun;
+                                        fetchedRunFiles = aRunFiles;    
+                                        serverReplied = true;     
+                                    }
+                                }
                             }
                         }
-                        
+                    } else {
+                        // changed run was not the one we wanted
+                        getController().getLog().log(Log.INFO, "Run event not for requested run: " + "Run Status=" + event.getAction()
+                            + "; run=" + aRun + " requested=" + locRun);                        
+                    }
                 } else {
                     //run from server was null
                     getController().getLog().log(Log.WARNING, "Run received from server was null");
@@ -600,7 +621,6 @@ public class RunsTablePane extends JPanePlugin {
                 }
                 
                 
-                serverReplied = true;     
                 
         }
 
@@ -2087,6 +2107,11 @@ public class RunsTablePane extends JPanePlugin {
                 //check if we already have the RunFiles for the run
                 if (!getContest().isRunFilesPresent(run)) {
                     
+                    // this is the run we're after
+                    requestedRun = run;
+                    // reset this each time so we be sure to get the first new reply
+                    fetchedRun = null;
+                    
                     //we don't have the files; request them from the server
                     getController().fetchRun(run);
 
@@ -2097,6 +2122,8 @@ public class RunsTablePane extends JPanePlugin {
                         Thread.sleep(100);
                         waitedMS += 100;
                     }
+                    // no longer interested in getting updates for this run.
+                    requestedRun = null;
                 
                     //check if we got a reply from the server
                     if (serverReplied) {
@@ -2146,7 +2173,10 @@ public class RunsTablePane extends JPanePlugin {
                         SerializedFile[] otherFiles = runFiles.getOtherFiles();
 
                         // create a MultiFileViewer in which to display the runFiles
-                        MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + fetchedRun.getSiteNumber() + " Run " + fetchedRun.getNumber());
+                        // Note: previously used 'fetchedRun' here for site/number; it is possible that those values are not
+                        // correct if the run files are already present; in that case, we would have never asked for them to be
+                        // retrieved, and would have used whatever was in fetchedRun.
+                        MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + run.getSiteNumber() + " Run " + run.getNumber());
                         mfv.setContestAndController(getContest(), getController());
 
                         // add any other files to the MFV (these are added first so that the mainFile will appear at index 0)
@@ -2196,8 +2226,10 @@ public class RunsTablePane extends JPanePlugin {
         } catch (Exception e) {
             getController().getLog().log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to show run source, check log");
+            
+            //make sure this is clear in case of exception
+            requestedRun = null;
         }
-
     }
 
 }
