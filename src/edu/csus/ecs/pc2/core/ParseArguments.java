@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedInputStream;
@@ -10,6 +10,8 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
+
+import edu.csus.ecs.pc2.AppConstants;
 
 /**
  * Parses command line options and arguments, give access to options, values after options and arguments after options.
@@ -65,6 +67,8 @@ public class ParseArguments {
     private static final String NULL_VALUE = "<GAA" + Long.MAX_VALUE;
 
     private String[] requireArgOpts = null;
+    
+    private String[] validOptions = null;
 
     /**
      * ParseArgs constructor comment.
@@ -302,6 +306,24 @@ public class ParseArguments {
     }
 
     /**
+     * Does the value match any of the allowed options?
+     * 
+     * @param value
+     * @return boolean
+     */
+    public boolean isValidOption(String value) {
+        if(validOptions != null) {
+            for(String sOpt: validOptions) {
+                if(sOpt.equals(value)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+    
+    /**
      * Load in command line args.
      */
     public void loadArgs(String[] args) {
@@ -323,8 +345,11 @@ public class ParseArguments {
                 if (curOpt != null) {
                     argHash.put(curOpt, NULL_VALUE);
                 }
-
-                curOpt = value;
+                if(isValidOption(value)) {
+                    curOpt = value;
+                } else {
+                    throw new IllegalArgumentException("invalid option '" + value + "'");
+                }
             } else if (curOpt != null) {
                 // found a value (not an option)
 
@@ -472,6 +497,27 @@ public class ParseArguments {
     }
 
     /**
+     * Set options which are valid
+     *
+     * @param newValidOpts
+     *            java.lang.String[]
+     */
+    public void setValidOpts(java.lang.String[] newValidOpts) {
+        validOptions = newValidOpts;
+    }
+
+    /**
+     * Set a single valid option.
+     *
+     * @param newValidOpt
+     *            java.lang.String
+     */
+    public void setValidOpts(String newValidOpt) {
+        validOptions = new String[1];
+        validOptions[0] = newValidOpt;
+    }
+
+    /**
      * ParseArgs args and options requiring values.
      *
      * @param args
@@ -481,6 +527,23 @@ public class ParseArguments {
      */
     public ParseArguments(String[] args, String[] requiredArgs) {
         super();
+        setRequireArgOpts(requiredArgs);
+        loadArgs(args);
+    }
+
+    /**
+     * ParseArgs args and options requiring values making sure options are valid.
+     *
+     * @param args
+     *            java.lang.String [] - command line arguments
+     * @param requiredArgs
+     *            java.lang.String [] - options requiring args
+     * @param validOpts
+     *            java.lang.String [] - valid option strings
+     */
+    public ParseArguments(String[] args, String[] requiredArgs, String[] validOpts) {
+        super();
+        setValidOpts(validOpts);
         setRequireArgOpts(requiredArgs);
         loadArgs(args);
     }

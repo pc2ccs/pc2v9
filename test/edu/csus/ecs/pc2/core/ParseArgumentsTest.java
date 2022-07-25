@@ -49,6 +49,31 @@ public class ParseArgumentsTest extends TestCase {
 
         assertFalse("Option should not have value ", parseArguments.optHasValue("--bogus"));
     }
+
+    public void testInvalidOption() {
+        String opt = "--login";
+        String opt2 = "--debad";
+        String opt3 = "--nogui";
+        String optp = "-pass";
+        String value = "name";
+        String opt4 = "--bill";
+
+        String[] required = { opt, optp };
+        String[] args = { opt, value, opt3, opt4, optp };
+        String[] valOpts = { opt, opt3, optp };
+        
+        boolean bValid = false;
+        
+        // --bill is invalid (opt4)
+        try {
+            @SuppressWarnings("unused")
+            ParseArguments parseArguments = new ParseArguments(args, required, valOpts);
+        } catch (IllegalArgumentException exc) {
+            nullFakeRoutine("Passed test threw IllegalArgumentException for --bill");
+            bValid = true;
+        }
+        assertTrue(opt4 + " option should be invalid (cause exception)", bValid);
+    }
     
     public void testIsOptPresent() {
 
@@ -72,6 +97,40 @@ public class ParseArgumentsTest extends TestCase {
         assertNull(opt2+" option should be null value", parseArguments.getOptValue(opt2));
     }
     
+    public void testAreOptsValid() {
+
+        String opt = "--login";
+        String opt2 = "--debad";
+        String opt3 = "--nogui";
+        String optp = "-pass";
+        String value = "name";
+        String opt4 = "--bill";
+
+        String[] required = { opt, optp };
+        String[] args = { opt, value, opt3, opt4, optp };
+        String[] valOpts = { opt, opt3, optp };
+        ParseArguments parseArguments = null;
+        boolean bValid = true;
+        
+        try {
+            parseArguments = new ParseArguments(args, required);
+        } catch (IllegalArgumentException exc) {
+            nullFakeRoutine("faileed test threw IllegalArgumentException for valid opts" + exc.getMessage());
+           bValid = false;
+        }
+        assertTrue("all arguments should be valid", bValid);
+//        parseArguments.dumpArgs(System.out);
+
+        parseArguments.setValidOpts(valOpts);
+        assertTrue(opt + " option should be valid", parseArguments.isValidOption(opt));
+        assertFalse(opt2 + " option should not be valid", parseArguments.isValidOption(opt2));
+        assertTrue(optp + " option should be valid", parseArguments.isValidOption(optp));
+        assertFalse(value + " option should not be valid ", parseArguments.isValidOption(value));
+        
+        assertFalse(opt4 + " option should not be valid", parseArguments.isValidOption(opt4));
+        assertTrue(opt3 + " option should be valid", parseArguments.isValidOption(opt3));
+    }
+    
     /**
      * main test routine for ParseArgs <br>
      *
@@ -79,6 +138,10 @@ public class ParseArgumentsTest extends TestCase {
      *            java.lang.String[]
      */
     public static void main(String[] args) {
+        ParseArgumentsTest t = new ParseArgumentsTest();
+        t.testIsOptPresent();
+        t.testAreOptsValid();
+        if(false) {
         ParseArguments pa = new ParseArguments();
         pa.loadArgs(args);
         pa.dumpArgs(System.out);
@@ -96,7 +159,7 @@ public class ParseArgumentsTest extends TestCase {
         pa.setRequireArgOpts(reqArgs);
         pa.loadArgs(args);
         pa.dumpArgs(System.out);
-
+        }
     }
 
 }
