@@ -110,10 +110,6 @@ jobs:
           git config --global user.email "pc2@troyspaws.com"
           git config --global user.name "PC2 bot"
           website/scripts/populate-releases.py ${{ secrets.RELEASE_TOKEN }}
-          website/scripts/copy-readmes.py dist
-          cp doc/ChangeLog.md website/
-          sed -i 's/^# .*//' website/ChangeLog.md
-          sed -r 's/^## (.*)/#### \1/' -i website/ChangeLog.md
           mkdir ~/website
           git clone git@github.com:pc2ccs/pc2ccs.github.io.git ~/website
           ln -s ~/website website/public
