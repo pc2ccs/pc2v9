@@ -1,0 +1,125 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: pc2fromecs/jdk8hugo
+    steps:
+      - uses: actions/checkout@v2
+        with:
+         fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14.17.x
+          cache: npm
+
+      - name: Build
+        run: ant -noinput -buildfile package.xml
+
+      - name: Add run ID
+        run: echo $GITHUB_RUN_ID > dist/github_run_id.txt
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: dist/*
+
+  push-release:
+    runs-on: ubuntu-latest
+    container: pc2fromecs/jdk8hugo
+    needs: build
+    if: github.ref == 'refs/heads/master' or github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v2
+        with:
+         fetch-depth: 0
+      - uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: dist
+      - name: Create GitHub release
+        run: |
+          export VERSION_PREFIX=$(awk -F '=' '{ print $2 } ' version.properties)
+          VERSION=${VERSION_PREFIX}.$(git rev-list $GITHUB_SHA --count)
+          RELEASE_COMMIT=$(git rev-parse HEAD)
+          http --ignore-stdin POST \
+            https://api.github.com/repos/pc2ccs/builds/releases \
+            "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+            "Accept: application/vnd.github.v3+json" \
+            tag_name=v$VERSION \
+            target_commitish=$RELEASE_COMMIT \
+            name=v$VERSION \
+            prerelease:=true | tee ~/new-release.txt
+          RELEASE_ID=$(cat ~/new-release.txt | jq .id)
+          RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2ccs/builds/releases/${RELEASE_ID}/assets
+          cd dist
+          echo "Uploading release $VERSION"
+          for archive in *.zip *.gz
+          do
+            echo $archive...
+            case "$archive" in
+              *.zip)
+                cat $archive | http --timeout 300 POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$zip \
+                  "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                  'Accept: application/vnd.github.v3+json' \
+                  'Content-Type: application/zip' | jq .state
+              *.tar.gz)
+                cat $archive | http --timeout 300 POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$zip \
+                  "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                  'Accept: application/vnd.github.v3+json' \
+                  'Content-Type: application/gzip' | jq .state
+            esac
+            if [ -f $archive.sha256.txt ]; then
+                echo $archive.sha256.txt
+                cat $archive.sha256 | http POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$zip.sha256 \
+                  "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                  'Accept: application/vnd.github.v3+json' \
+                  'Content-Type: text/plain' | jq .state
+                echo $archive.sha512...
+                cat $archive.sha512 | http POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$zip.sha512 \
+                  "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                  'Accept: application/vnd.github.v3+json' \
+                  'Content-Type: text/plain' | jq .state
+            fi
+          done
+  update-website:
+    runs-on: ubuntu-latest
+    container: pc2fromecs/jdk8hugo
+    needs: push-release
+    if: github.ref == 'refs/heads/master' or github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: dist
+      - name: Push release to website
+        run: |
+          eval $(ssh-agent -s)
+          echo "${{ secrets.SSH_PRIVATE_KEY_WEBSITE }}" | tr -d '\r' | ssh-add -
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
+          git config --global user.email "pc2@troyspaws.com"
+          git config --global user.name "PC2 bot"
+          website/scripts/populate-releases.py ${{ secrets.RELEASE_TOKEN }}
+          website/scripts/copy-readmes.py dist
+          cp doc/ChangeLog.md website/
+          sed -i 's/^# .*//' website/ChangeLog.md
+          sed -r 's/^## (.*)/#### \1/' -i website/ChangeLog.md
+          mkdir ~/website
+          git clone git@github.com:pc2ccs/pc2ccs.github.io.git ~/website
+          ln -s ~/website website/public
+          cd website
+          hugo
+          cd ~/website
+          git add .
+          git commit --allow-empty -m "Update website for pc2v9 commit $GITHUB_SHA"
+          git push
