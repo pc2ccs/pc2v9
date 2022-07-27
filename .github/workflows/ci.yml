@@ -19,6 +19,8 @@ jobs:
         with:
           node-version: 14.17.x
           cache: npm
+          cache-dependency-path: projects/WTI-UI/package.json
+
 
       - name: Build
         run: ant -noinput -buildfile package.xml
