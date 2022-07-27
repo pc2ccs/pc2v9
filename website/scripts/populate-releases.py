@@ -5,13 +5,14 @@ import re
 import json
 import datetime
 import itertools
+import sys
 
 destination = "website/data/releases/"
 public_url = 'https://api.github.com/repos/pc2ccs/builds/releases'
 nightly_url = 'https://api.github.com/repos/pc2ccs/nightly-builds/releases'
 included_versions = {}
 
-def all_releases(url):
+def all_releases(url, token):
     result = []
 
     linkPattern = re.compile(r'<(?P<url>.*)>; rel="(?P<type>.*)"')
@@ -24,7 +25,7 @@ def all_releases(url):
         for link in links:
             match = linkPattern.search(link)
             if match.group("type") == "next":
-                r = request_from_github(match.group("url"))
+                r = request_from_github(match.group("url"), token)
                 result += r.json()
                 nextFound = True
         if not nextFound:
@@ -32,11 +33,12 @@ def all_releases(url):
 
     return sorted(result, key=lambda release: release["published_at"], reverse=True)
 
-def request_from_github(url):
-#    token = os.environ["GITHUB_TOKEN"]
+def request_from_github(url, token):
+    if token == None:
+        token = os.environ["GITHUB_TOKEN"]
     headers = {
         'Accept': 'application/vnd.github.v3+json',
-#        'Authorization': 'token {}'.format(token)
+        'Authorization': 'token {}'.format(token)
     }
     r = requests.get(url, headers=headers)
 
@@ -116,8 +118,11 @@ def filter_tag_name(release):
 if not os.path.isdir(destination): 
     os.mkdir(destination, 0o755)
 
-releases = all_releases(public_url)
-nightly_releases = all_releases(nightly_url)
+token = None
+if len(sys.argv) > 1:
+    token = sys.argv[1]
+releases = all_releases(public_url, token)
+nightly_releases = all_releases(nightly_url, token)
 
 latest_stable = list(filter(lambda release: not release["prerelease"], releases))[0]
 included_versions[base_tag_name(latest_stable['tag_name'])]="1"
