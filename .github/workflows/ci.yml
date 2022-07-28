@@ -19,6 +19,8 @@ jobs:
         with:
           node-version: 14.17.x
           cache: npm
+          cache-dependency-path: projects/WTI-UI/package.json
+
 
       - name: Build
         run: ant -noinput -buildfile package.xml
@@ -35,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     container: pc2fromecs/jdk8hugo
     needs: build
-    if: github.ref == 'refs/heads/master' or github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v2
         with:
@@ -93,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     container: pc2fromecs/jdk8hugo
     needs: push-release
-    if: github.ref == 'refs/heads/master' or github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v3
