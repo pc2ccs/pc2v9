@@ -45,9 +45,14 @@ jobs:
       - name: Create GitHub release
         run: |
           export VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
-          RELEASE_COMMIT=$(git rev-parse HEAD)
+          RELEASE_COMMIT=$GITHUB_SHA
+          if [ github.ref == 'refs/heads/master' ]; then
+             TARGET=builds
+          else
+             TARGET=nightly-builds
+          fi
           http --ignore-stdin POST \
-            https://api.github.com/repos/pc2ccs/builds/releases \
+            https://api.github.com/repos/pc2ccs/${TARGET}/releases \
             "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
             "Accept: application/vnd.github.v3+json" \
             tag_name=v$VERSION \
@@ -55,12 +60,7 @@ jobs:
             name=v$VERSION \
             prerelease:=true | tee ~/new-release.txt
           RELEASE_ID=$(cat ~/new-release.txt | jq .id)
-          if [ github.ref == 'refs/heads/master' ]; then
-             target=builds
-          else
-             target=nightly-builds
-          fi
-          RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2ccs/$target/releases/${RELEASE_ID}/assets
+          RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2ccs/${TARGET}/releases/${RELEASE_ID}/assets
           cd dist
           echo "Uploading release $VERSION"
           for archive in *.zip *.gz
