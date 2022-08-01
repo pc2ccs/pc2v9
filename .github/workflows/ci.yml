@@ -21,12 +21,8 @@ jobs:
           cache: npm
           cache-dependency-path: projects/WTI-UI/package.json
 
-
       - name: Build
         run: ant -noinput -buildfile package.xml
-
-      - name: Add run ID
-        run: echo $GITHUB_RUN_ID > dist/github_run_id.txt
 
       - uses: actions/upload-artifact@v3
         with:
@@ -48,8 +44,7 @@ jobs:
           path: dist
       - name: Create GitHub release
         run: |
-          export VERSION_PREFIX=$(awk -F '=' '{ print $2 } ' version.properties)
-          VERSION=${VERSION_PREFIX}.$(git rev-list $GITHUB_SHA --count)
+          export VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
           RELEASE_COMMIT=$(git rev-parse HEAD)
           http --ignore-stdin POST \
             https://api.github.com/repos/pc2ccs/builds/releases \
@@ -60,7 +55,12 @@ jobs:
             name=v$VERSION \
             prerelease:=true | tee ~/new-release.txt
           RELEASE_ID=$(cat ~/new-release.txt | jq .id)
-          RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2ccs/builds/releases/${RELEASE_ID}/assets
+          if [ github.ref == 'refs/heads/master' ]; then
+             target=builds
+          else
+             target=nightly-builds
+          fi
+          RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2ccs/$target/releases/${RELEASE_ID}/assets
           cd dist
           echo "Uploading release $VERSION"
           for archive in *.zip *.gz
