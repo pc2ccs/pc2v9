@@ -17,7 +17,7 @@ def all_releases(url, token):
 
     linkPattern = re.compile(r'<(?P<url>.*)>; rel="(?P<type>.*)"')
 
-    r = request_from_github(url)
+    r = request_from_github(url, token)
     result += r.json()
     while "Link" in r.headers:
         links = r.headers["Link"].split(", ")
