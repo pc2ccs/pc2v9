@@ -55,8 +55,8 @@ jobs:
           curl --silent --show-error --retry 6 --max-time 300 -X POST \
             -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/johnbrvc/${TARGET}/releases \
-             -d '{"tag_name":"'"v$VERSION1"'", "target_commitish":"'"$GITHUB_SHA"'", "name":"'"v$VERSION"'" }' | \
+            ${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY_OWNER}/${TARGET}/releases \
+             -d '{"tag_name":"'"v$VERSION1"'", "name":"'"v$VERSION"'" }' | \
              tee ~/new-release.txt
           RELEASE_ASSET_UPLOAD_URL=$(cat ~/new-release.txt | jq .upload_url | sed -e 's/"//g' -e 's#/assets{.*#/assets#' )
           cd dist
