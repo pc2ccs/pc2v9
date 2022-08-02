@@ -47,7 +47,6 @@ jobs:
         run: |
           export VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
           export VERSION1=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#' | sed 's/~.*//'`
-          RELEASE_COMMIT=$GITHUB_SHA
           if [ github.ref == 'refs/heads/master' ]; then
              TARGET=builds
           else
@@ -57,7 +56,7 @@ jobs:
             -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/johnbrvc/${TARGET}/releases \
-             -d '{"tag_name":"'"v$VERSION1"'", "target_commitish":"master", "name":"'"v$VERSION"'" }' | \
+             -d '{"tag_name":"'"v$VERSION1"'", "target_commitish":"'"$GITHUB_SHA"'", "name":"'"v$VERSION"'" }' | \
              tee ~/new-release.txt
           RELEASE_ASSET_UPLOAD_URL=$(cat ~/new-release.txt | jq .upload_url | sed -e 's/"//g' -e 's#/assets{.*#/assets#' )
           cd dist
