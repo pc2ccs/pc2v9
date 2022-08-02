@@ -46,6 +46,7 @@ jobs:
         shell: bash
         run: |
           export VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
+          export VERSION1=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#' | sed 's/~.*//'`
           RELEASE_COMMIT=$GITHUB_SHA
           if [ github.ref == 'refs/heads/master' ]; then
              TARGET=builds
@@ -56,7 +57,7 @@ jobs:
             https://api.github.com/repos/pc2ccs/${TARGET}/releases \
             "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
             "Accept: application/vnd.github.v3+json" \
-            tag_name=v$VERSION \
+            tag_name=v$VERSION1 \
             target_commitish=$RELEASE_COMMIT \
             name=v$VERSION \
             prerelease:=true | tee ~/new-release.txt
