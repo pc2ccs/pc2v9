@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - master
       - develop
   pull_request:
 jobs:
@@ -53,48 +53,56 @@ jobs:
           else
              TARGET=nightly-builds
           fi
-          http --ignore-stdin POST \
-            https://api.github.com/repos/pc2ccs/${TARGET}/releases \
-            "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
-            "Accept: application/vnd.github.v3+json" \
-            tag_name=v$VERSION1 \
-            target_commitish=$RELEASE_COMMIT \
-            name=v$VERSION \
-            prerelease:=true | tee ~/new-release.txt
-          RELEASE_ID=$(cat ~/new-release.txt | jq .id)
-          RELEASE_ASSET_UPLOAD_URL=https://uploads.github.com/repos/pc2ccs/${TARGET}/releases/${RELEASE_ID}/assets
+          curl --silent --show-error --retry 6 --max-time 300 -X POST \
+            -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/johnbrvc/${TARGET}/releases \
+             -d '{"tag_name":"'"v$VERSION1"'", "target_commitish":"master", "name":"'"v$VERSION"'" }' | \
+             tee ~/new-release.txt
+          RELEASE_ASSET_UPLOAD_URL=$(cat ~/new-release.txt | jq .upload_url | sed -e 's/"//g' -e 's#/assets{.*#/assets#' )
           cd dist
-          echo "Uploading release $VERSION"
+          echo "Uploading release $VERSION using URL $RELEASE_ASSET_UPLOAD_URL"
           for archive in *.zip *.gz
           do
             echo $archive...
             case "$archive" in
               *.zip)
-                cat $archive | http --timeout 300 POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$zip \
-                  "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
-                  'Accept: application/vnd.github.v3+json' \
-                  'Content-Type: application/zip' | jq .state
+                  curl --silent --show-error --retry 6 --max-time 300 --data-binary "@$archive" -X POST \
+                    -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                    -H 'Accept: application/vnd.github.v3+json' \
+                    -H 'Content-Type: application/zip' \
+                    ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive \
+                    | jq .state 
                 ;;
               *.tar.gz)
-                cat $archive | http --timeout 300 POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$zip \
-                  "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
-                  'Accept: application/vnd.github.v3+json' \
-                  'Content-Type: application/gzip' | jq .state
+                  curl --silent --show-error --retry 6 --max-time 300 --data-binary "@$archive" -X POST \
+                    -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                    -H 'Accept: application/vnd.github.v3+json' \
+                    -H 'Content-Type: application/gzip' \
+                    ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive \
+                    |  jq .state
                 ;;
             esac
             if [ -f $archive.sha256.txt ]; then
-                echo $archive.sha256.txt
-                cat $archive.sha256 | http POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$zip.sha256 \
-                  "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
-                  'Accept: application/vnd.github.v3+json' \
-                  'Content-Type: text/plain' | jq .state
-                echo $archive.sha512...
-                cat $archive.sha512 | http POST ${RELEASE_ASSET_UPLOAD_URL}\?name=$zip.sha512 \
-                  "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
-                  'Accept: application/vnd.github.v3+json' \
-                  'Content-Type: text/plain' | jq .state
+                echo $archive.sha256.txt...
+                curl --silent --show-error --retry 6 --max-time 300 --data-binary "@$archive.sha256.txt" -X POST \
+                    -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                    -H 'Accept: application/vnd.github.v3+json' \
+                    -H 'Content-Type: text/plain' \
+                    ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive.sha256.txt \
+                    |  jq .state
+            fi
+            if [ -f $archive.sha512.txt ]; then
+                echo $archive.sha512.txt...
+                curl --silent --show-error --retry 6 --max-time 300 --data-binary "@$archive.sha512.txt" -X POST \
+                    -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                    -H 'Accept: application/vnd.github.v3+json' \
+                    -H 'Content-Type: text/plain' \
+                    ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive.sha512.txt \
+                    |  jq .state
             fi
           done
+          
   update-website:
     runs-on: ubuntu-latest
     container: pc2fromecs/jdk8hugo
