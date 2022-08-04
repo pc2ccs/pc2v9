@@ -45,6 +45,14 @@ jobs:
       - name: Create GitHub release
         shell: bash
         run: |
+          eval $(ssh-agent -s)
+          echo "${{ secrets.SSH_PRIVATE_KEY_WEBSITE }}" | tr -d '\r' | ssh-add -
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+          git config --global user.email "pc2@troyspaws.com"
+          git config --global user.name "PC2 bot"
           export VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
           export VERSION1=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#' | sed 's/~.*//'`
           if [ github.ref == 'refs/heads/master' ]; then
@@ -52,11 +60,20 @@ jobs:
           else
              TARGET=nightly-builds
           fi
+          cur_dir=`pwd`
+          mkdir ~/builds
+          cd ~/builds
+          git clone git@github.com:${GITHUB_REPOSITORY_OWNER}/${TARGET}.git .
+          # a commit is needed to associate to a release
+          git commit --allow-empty -m "Add build $VERSION"
+          git push
+          RELEASE_COMMIT=$(git rev-parse HEAD)
+          cd "$cur_dir"
           curl --silent --show-error --retry 6 --max-time 300 -X POST \
             -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             ${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY_OWNER}/${TARGET}/releases \
-             -d '{"tag_name":"'"v$VERSION1"'", "name":"'"v$VERSION"'" }' | \
+             -d '{"tag_name":"'"v$VERSION1"'", "name":"'"v$VERSION"'", "prerelease": true, "target_commitish": "'"$RELEASE_COMMIT"'" }' | \
              tee ~/new-release.txt
           RELEASE_ASSET_UPLOAD_URL=$(cat ~/new-release.txt | jq .upload_url | sed -e 's/"//g' -e 's#/assets{.*#/assets#' )
           cd dist

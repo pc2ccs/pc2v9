@@ -1,5 +1,5 @@
 # Mapping from tool index from JSON files to name to display on all-builds page
 - tool: pc2
-  name: PC&sup2; System
+  name: PC<sup>2</sup> System
 - tool: api-doc
-  name: PC&sup2; API Documentation
+  name: PC<sup>2</sup> Documentation
