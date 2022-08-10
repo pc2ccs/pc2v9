@@ -840,8 +840,12 @@ public class InternalContest implements IInternalContest {
         //construct an AvailableAJRun from the specified input run
         AvailableAJRun availableAJRun = new AvailableAJRun(run.getElementId(), run.getElapsedMS(), run.getProblemId());
         
-        //put the availableAJRun in the list of runs available for auto-judging
-        availableAJRunList.add(availableAJRun);
+        //ensure that we don't mess with the available-runs list while some other thread is doing so (for example, running inside method dispatchRunsToAutoJudges())
+        synchronized (ajLock) {
+            
+            //put the availableAJRun in the list of runs available for auto-judging
+            availableAJRunList.add(availableAJRun);
+        }
     }
     
     /**
@@ -863,6 +867,8 @@ public class InternalContest implements IInternalContest {
                     
                     AvailableAJ chosenJudge = null;
                     AvailableAJRun chosenRun = null;
+                    //a list to keep track of runs on the "available AJ runs" list which actually get assigned to an AJ
+                    // (see comments below, where runs get added to this list)
                     AvailableAJRunList assignedRunsList = new AvailableAJRunList();
                     
                     //check each run which is awaiting an AJ
