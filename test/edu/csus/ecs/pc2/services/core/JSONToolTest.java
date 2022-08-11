@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -1099,5 +1100,186 @@ public class JSONToolTest extends AbstractTestCase {
         // compare full date string, ex. 2022-04-17T00:03:29.280-07
         assertEquals("Expected contest end date value", iso8601DateString, endValue);
 
+    }
+    
+    
+    /**
+     * List of override judgements from CLICSJudgementType.
+     * 
+     * @return list of override judgements from {@link CLICSJudgementType} judgementStringMappings
+     */
+    String [] getJudgementMappingList() {
+        
+        String[] JudgementMappingList = {
+                "Accepted", //
+                "Yes", //
+                "Correct", //
+                "Rejected", //
+                "Incorrect", //
+                "No", //
+                "Wrong Answer", //
+                "No - Wrong Answer", //
+                "Time Limit Exceeded", //
+                "Time-Limit Exceeded", //
+                "No - Time Limit Exceeded", //
+                "No - Time-Limit Exceeded", //
+                "Run Time Error", //
+                "Runtime Error", //
+                "Run-Time Error", //
+                "No - Run Time Error", //
+                "No - Runtime Error", //
+                "No - Run-Time Error", //
+                "Compile Error", //
+                "Compiler Error", //
+                "Compilation Error", //
+                "No - Compile Error", //
+                "No - Compiler Error", //
+                "No - Compilation Error", //
+                "Accepted - Presentation Error", //
+                "Output Limit Exceeded", //
+                "No - Output Limit Exceeded", //
+                "Presentation Error", //
+                "Output Format Error", //
+                "Incorrect Output Format", //
+                "No - Presentation Error", //
+                "No - Output Format Error", //
+                "No - Incorrect Output Format", //
+                "Excessive Output", //
+                "Incomplete Output", //
+                "No Output", //
+                "Presentation Error", //
+                "No - Excessive Output", //
+                "No - Incomplete Output", //
+                "No - No Output", //
+                "No - Presentation Error", //
+                "Wallclock Time Limit Exceeded", //
+                "Wall-clock Time Limit Exceeded", //
+                "Wall Clock Time Limit Exceeded", //
+                "No - Wallclock Time Limit Exceeded", //
+                "No - Wall-clock Time Limit Exceeded", //
+                "No - Wall Clock Time Limit Exceeded", //
+                "Idleness Limit Exceeded", //
+                "Idle Limit Exceeded", //
+                "No - Idleness Limit Exceeded", //
+                "No - Idle Limit Exceeded", //
+                "Time Limit Exceeded - Correct Output", //
+                "Time-Limit Exceeded - Correct Output", //
+                "Time Limit Exceeded - Wrong Answer", //
+                "Time-Limit Exceeded - Wrong Answer", //
+                "Time Limit Exceeded - Presentation Error", //
+                "Time-Limit Exceeded - Presentation Error", //
+                "Time Limit Exceeded - Excessive Output", //
+                "Time-Limit Exceeded - Excessive Output", //
+                "Time Limit Exceeded - Incomplete Output", //
+                "Time-Limit Exceeded - Incomplete Output", //
+                "Time Limit Exceeded - No Output", //
+                "Time-Limit Exceeded - No Output", //
+                "Memory Limit Exceeded", //
+                "Memory-Limit Exceeded", //
+                "No - Memory Limit Exceeded", //
+                "No - Memory-Limit Exceeded", //
+                "Runtime Error - Correct Output", //
+                "Run-time Error - Correct Output", //
+                "Run Time Error - Correct Output", //
+                "Runtime Error - Wrong Answer", //
+                "Run-time Error - Wrong Answer", //
+                "Run Time Error - Wrong Answer", //
+                "Runtime Error - Presentation Error", //
+                "Run-time Error - Presentation Error", //
+                "Run Time Error - Presentation Error", //
+                "Runtime Error - Excessive Output", //
+                "Run-time Error - Excessive Output", //
+                "Run Time Error - Excessive Output", //
+                "Runtime Error - Incomplete Output", //
+                "Run-time Error - Incomplete Output", //
+                "Run Time Error - Incomplete Output", //
+                "Runtime Error - No Output", //
+                "Run-time Error - No Output", //
+                "Run Time Error - No Output", //
+                "Compile Time Limit Exceeded", //
+                "Compile Time-Limit Exceeded", //
+                "No - Compile Time Limit Exceeded", //
+                "No - Compile Time-Limit Exceeded", //
+                "Security Violation", //
+                "Illegal Function", //
+                "Judging Error", //
+                "Submission Error", //
+                "Contact Staff", //
+                "Other Contact Staff", //
+                "Other - Contact Staff", //
+        };
+        
+        return JudgementMappingList;
+    }
+    
+    /**
+     * A single test where the judgement acronym from JSON does not match run from model judgement acronym.
+     * 
+     * @throws Exception
+     */
+    public void testForInvalidAcronym() throws Exception {
+        
+        SampleContest sampleContest = new SampleContest();
+        
+        IInternalContest contest = sampleContest.createStandardContest();
+        
+        String runInfoLine = "1,1,A,1,No,No,4"; // 0 (a No before first yes Security Violation)
+        SampleContest.addRunFromInfo(contest, runInfoLine, true);
+        
+        IInternalController conroller = null;
+        JSONTool jsonTool = new JSONTool(contest,conroller);
+
+        Run firstRun = contest.getRuns()[0];
+        assertTrue(firstRun.isJudged());
+        Judgement judgement = contest.getJudgement(firstRun.getJudgementRecord().getJudgementId());
+        String expectedJudgementAcroynym = judgement.getAcronym();
+
+        //        add(new JudgementMapping("Incomplete Output",CLICS_JUDGEMENT_ACRONYM.IO));
+        firstRun.getJudgementRecord().setValidatorResultString("Incomplete Output");
+
+        ObjectNode node = jsonTool.convertJudgementToJSON(firstRun);
+
+        String judgementAcronym = node.get("judgement_type_id").toString();
+
+        judgementAcronym = judgementAcronym.replaceAll("\"", "");   // strip off " around judgement acronym, "RTE" to RTE
+
+        assertEquals("Expected run judgement acronym ", expectedJudgementAcroynym, judgementAcronym);
+        
+    }
+    
+    /**
+     * Test very JudgementMapping udgement acronym from JSON does not match run from model judgement acronym.
+     * 
+     * @throws Exception
+     */
+    public void testForInvalidAcronymFromMappgingList() throws Exception {
+        
+        SampleContest sampleContest = new SampleContest();
+        
+        IInternalContest contest = sampleContest.createStandardContest();
+        
+        String runInfoLine = "1,1,A,1,No,No,4"; // 0 (a No before first yes Security Violation)
+        SampleContest.addRunFromInfo(contest, runInfoLine, true);
+        
+        IInternalController conroller = null;
+        JSONTool jsonTool = new JSONTool(contest,conroller);
+
+        Run firstRun = contest.getRuns()[0];
+        assertTrue(firstRun.isJudged());
+        Judgement judgement = contest.getJudgement(firstRun.getJudgementRecord().getJudgementId());
+        String expectedJudgementAcroynym = judgement.getAcronym();
+
+        String [] overRideJudgements =getJudgementMappingList();
+        for (String overrideString : overRideJudgements) {
+            
+            firstRun.getJudgementRecord().setValidatorResultString(overrideString);
+            ObjectNode node = jsonTool.convertJudgementToJSON(firstRun);
+            
+            String judgementAcronym = node.get("judgement_type_id").toString();
+            
+            judgementAcronym = judgementAcronym.replaceAll("\"", "");   // strip off " around judgement acronym, "RTE" to RTE
+            
+            assertEquals("Expected run judgement acronym ", expectedJudgementAcroynym, judgementAcronym);
+        }
     }
 }
