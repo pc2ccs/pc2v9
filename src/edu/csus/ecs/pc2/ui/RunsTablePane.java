@@ -184,6 +184,8 @@ public class RunsTablePane extends JPanePlugin {
     private RunFiles fetchedRunFiles;
     
     private Run requestedRun;
+    
+    private boolean showSourceActive = false;
 
     protected int viewSourceThreadCounter;
 
@@ -2037,12 +2039,42 @@ public class RunsTablePane extends JPanePlugin {
         }
     }
 
+    /**
+     * @author pc2@ecs.csus.edu
+     *
+     * Don't let any more View Source's to be issued
+     */
+    private void BlockViewSource()
+    {
+        showSourceActive = true;
+    }
+    
+    /**
+     * @author pc2@ecs.csus.edu
+     *
+     * Allow View Source to be issued
+     */
+    private void AllowViewSource()
+    {
+        showSourceActive = false;
+    }
+    
+    private boolean IsAllowedViewSource()
+    {
+        return (showSourceActive == false);
+    }
+    
     private JButton getViewSourceButton() {
         if (viewSourceButton == null) {
             viewSourceButton = new JButton("View Source");
             viewSourceButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
 
+                    // Only let one View Source to be outstanding at-a-time
+                    if(!IsAllowedViewSource()) {
+                        showMessage("There is already a View Source pending");
+                        return;
+                    }
 //                    SwingUtilities.invokeLater(new Runnable() {
 //                        public void run() {
 //                            showSourceForSelectedRun();
@@ -2054,6 +2086,8 @@ public class RunsTablePane extends JPanePlugin {
                             showSourceForSelectedRun();
                         }
                     };
+                    // only one View Source active at-a-time
+                    BlockViewSource();
                     viewSourceThread.setName("ViewSourceThread-" + viewSourceThreadCounter++);
                     viewSourceThread.start();
                 }
@@ -2075,6 +2109,7 @@ public class RunsTablePane extends JPanePlugin {
         if (!isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN)) {
             getController().getLog().log(Log.WARNING, "Account does not have the permission ALLOWED_TO_FETCH_RUN; cannot view run source.");
             showMessage("Unable to fetch run, check log");
+            AllowViewSource();
             return;
         }
 
@@ -2083,9 +2118,11 @@ public class RunsTablePane extends JPanePlugin {
 
         if (selectedIndexes.length < 1) {
             showMessage("Please select a run ");
+            AllowViewSource();
             return;
         } else if (selectedIndexes.length > 1) {
             showMessage("Please select exactly ONE run in order to view source ");
+            AllowViewSource();
             return;
         }
 
@@ -2133,13 +2170,13 @@ public class RunsTablePane extends JPanePlugin {
                             
                             //we got some RunFiles from the server; put them into the contest model
                             getContest().updateRunFiles(run, fetchedRunFiles);
-                            
                         } else {
                             
                             //we got a reply from the server but we didn't get any RunFiles
                             getController().getLog().log(Log.WARNING, "Server failed to return RunFiles in response to fetch run request");
                             getController().getLog().log(Log.WARNING, "Unable to fetch source files for run " + run.getNumber() + " from server");
                             showMessage("Unable to fetch selected run; check log");
+                            AllowViewSource();
                             return;
                         }
                         
@@ -2149,10 +2186,13 @@ public class RunsTablePane extends JPanePlugin {
                         getController().getLog().log(Log.WARNING, "No response from server to fetch run request after " + waitedMS + "ms");
                         getController().getLog().log(Log.WARNING, "Unable to fetch run " + run.getNumber() + " from server");
                         showMessage("Unable to fetch selected run; check log");
-                        return;
+                        AllowViewSource();
+                       return;
                     }
                 }
-                
+                // OK to now start another view source
+                AllowViewSource();
+               
                 //if we get here we know there should be RunFiles in the contest model -- but let's sanity-check that
                 if (!getContest().isRunFilesPresent(run)) {
                     
@@ -2230,6 +2270,9 @@ public class RunsTablePane extends JPanePlugin {
             //make sure this is clear in case of exception
             requestedRun = null;
         }
+        
+        // OK to now start another view source now
+        AllowViewSource();
     }
 
 }
