@@ -4,7 +4,7 @@
         v9 build file
     </description>
     <!-- set global properties for this build -->
-    <property name="lastECSbuild" value="5999" />
+    <property name="lastGITLABbuild" value="6259" />
     <property name="apt.build.javac.target" value="1.8" />
     <property name="apt.build.javac.source" value="1.8" />
     <property name="src.dir" location="src" />
@@ -56,8 +56,8 @@
     <property name="jar.name" value="${name}.jar"/>
     <property name="jar.path" value="${dist.dir}/${jar.name}"/>
     <property environment="env"/>
-    <condition property="exists.CI_PIPELINE_IID">
-        <isset property="env.CI_PIPELINE_IID"/>
+    <condition property="exists.GITHUB_RUN_NUMBER">
+        <isset property="env.GITHUB_RUN_NUMBER"/>
     </condition>
 
     <tstamp>
@@ -129,7 +129,7 @@
         <!-- Create the time stamp -->
         <tstamp />
     </target>
-    <target name="-execgit" unless="exists.CI_PIPELINE_IID">
+    <target name="-execgit" unless="exists.GITHUB_RUN_NUMBER">
         <exec executable="git" outputproperty="repo.version" failifexecutionfails="false" errorproperty="">
             <arg value="rev-list"/>
             <arg value="${git_hash}"/>
@@ -142,18 +142,19 @@
             </not>
         </condition>
     </target>
-    <target name="-getenv" if="exists.CI_PIPELINE_IID">
-       <add operand1="${lastECSbuild}" operand2="${env.CI_PIPELINE_IID}" result="repo.version0"/>
+    <target name="-getenv" if="exists.GITHUB_RUN_NUMBER">
+       <add operand1="${lastGITLABbuild}" operand2="${env.GITHUB_RUN_NUMBER}" result="repo.version0"/>
 <!--
-TODO consider switching back to this at 9.7.0/9.8build
-        <property name="repo.version0" value="${env.CI_PIPELINE_IID}"/>
+TODO consider switching back to this at 9.8.0/9.9build
+        <property name="repo.version0" value="${env.GITHUB_RUN_NUMBER}"/>
 -->
-        <condition property="version.add" value="~${env.CI_COMMIT_REF_SLUG}" else="">
+        <condition property="version.add" value="~${env.GITHUB_REF_NAME}" else="">
            <not>
-               <equals arg1="${env.CI_COMMIT_REF_SLUG}" arg2="master"/>
+               <equals arg1="${env.GITHUB_REF_NAME}" arg2="master"/>
            </not>
         </condition>
         <property name="repo.version" value="${repo.version0}${version.add}"/>
+
     </target>
 
     <target name="compile" depends="init,checkstyle" description="compile the source ">

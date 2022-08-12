@@ -1892,12 +1892,13 @@ public class SampleContest {
      * 
      * @param contest
      * @param runInfoLine
+     * @param computerJudged 
      * @throws Exception 
      * @throws FileSecurityException 
      * @throws ClassNotFoundException 
      * @throws IOException 
      */
-    public static void addRunFromInfo(IInternalContest contest, String runInfoLine) throws Exception {
+    public static void addRunFromInfo(IInternalContest contest, String runInfoLine, boolean computerJudged) throws Exception {
 
         // get 5th judge
         ClientId judgeId = contest.getAccounts(Type.JUDGE).elementAt(4).getClientId();
@@ -1945,7 +1946,7 @@ public class SampleContest {
         if (solved) {
             judgementId = yesJudgement.getElementId();
         }
-        JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
+        JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, computerJudged);
         judgementRecord.setSendToTeam(sendToTeams);
 
         try {
@@ -1962,9 +1963,14 @@ public class SampleContest {
 
     }
 
+    public static void addRunFromInfo(IInternalContest contest, String runInfoLine) throws Exception {
+        addRunFromInfo(contest, runInfoLine, false);
+    }
+    
+    
     public static void addRunFromInfo(IInternalContest contest, String[] runInfoLines) throws Exception {
         for (String runInfoLine  : runInfoLines) {
-            addRunFromInfo(contest, runInfoLine);
+            addRunFromInfo(contest, runInfoLine, false);
         }
     }
 
