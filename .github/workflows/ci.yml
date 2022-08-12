@@ -45,6 +45,7 @@ jobs:
       - name: Create GitHub release
         shell: bash
         run: |
+          git config --global --add safe.directory ${GITHUB_WORKSPACE}
           eval $(ssh-agent -s)
           echo "${{ secrets.SSH_PRIVATE_KEY_WEBSITE }}" | tr -d '\r' | ssh-add -
           mkdir -p ~/.ssh
@@ -69,7 +70,7 @@ jobs:
           git push
           RELEASE_COMMIT=$(git rev-parse HEAD)
           cd "$cur_dir"
-          curl --silent --show-error --retry 6 --max-time 300 -X POST \
+          curl --silent --show-error --retry 6 --retry-all-errors --max-time 300 -X POST \
             -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             ${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY_OWNER}/${TARGET}/releases \
@@ -83,7 +84,7 @@ jobs:
             echo $archive...
             case "$archive" in
               *.zip)
-                  curl --silent --show-error --retry 6 --max-time 300 --data-binary "@$archive" -X POST \
+                  curl --silent --show-error --retry 6 ---retry-all-errors -max-time 300 --data-binary "@$archive" -X POST \
                     -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
                     -H 'Accept: application/vnd.github.v3+json' \
                     -H 'Content-Type: application/zip' \
@@ -91,7 +92,7 @@ jobs:
                     | jq .state 
                 ;;
               *.tar.gz)
-                  curl --silent --show-error --retry 6 --max-time 300 --data-binary "@$archive" -X POST \
+                  curl --silent --show-error --retry 6 --retry-all-errors --max-time 300 --data-binary "@$archive" -X POST \
                     -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
                     -H 'Accept: application/vnd.github.v3+json' \
                     -H 'Content-Type: application/gzip' \
@@ -101,7 +102,7 @@ jobs:
             esac
             if [ -f $archive.sha256.txt ]; then
                 echo $archive.sha256.txt...
-                curl --silent --show-error --retry 6 --max-time 300 --data-binary "@$archive.sha256.txt" -X POST \
+                curl --silent --show-error --retry 6 --retry-all-errors --max-time 300 --data-binary "@$archive.sha256.txt" -X POST \
                     -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
                     -H 'Accept: application/vnd.github.v3+json' \
                     -H 'Content-Type: text/plain' \
@@ -110,7 +111,7 @@ jobs:
             fi
             if [ -f $archive.sha512.txt ]; then
                 echo $archive.sha512.txt...
-                curl --silent --show-error --retry 6 --max-time 300 --data-binary "@$archive.sha512.txt" -X POST \
+                curl --silent --show-error --retry 6 --retry-all-errors --max-time 300 --data-binary "@$archive.sha512.txt" -X POST \
                     -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
                     -H 'Accept: application/vnd.github.v3+json' \
                     -H 'Content-Type: text/plain' \

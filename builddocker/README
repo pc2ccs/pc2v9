@@ -1,0 +1,5 @@
+# pc2fromecs with d$ password
+docker login
+cp ../projects/WTI-UI/package.json .
+docker build . -f Dockerfile -t pc2fromecs/jdk8hugo
+docker push pc2fromecs/jdk8hugo
