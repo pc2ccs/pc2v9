@@ -84,7 +84,7 @@ jobs:
             echo $archive...
             case "$archive" in
               *.zip)
-                  curl --silent --show-error --retry 6 ---retry-all-errors -max-time 300 --data-binary "@$archive" -X POST \
+                  curl --silent --show-error --retry 6 --retry-all-errors -max-time 300 --data-binary "@$archive" -X POST \
                     -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
                     -H 'Accept: application/vnd.github.v3+json' \
                     -H 'Content-Type: application/zip' \
