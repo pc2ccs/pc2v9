@@ -1486,8 +1486,8 @@ public class PacketHandler {
                 ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
                 if (contest.isLocalLoggedIn(serverClientId) || contest.isRemoteLoggedIn(serverClientId)) {
 
-                    // send request to remote server
-                    Packet fetchRunPacket = PacketFactory.createFetchRun(serverClientId, whoRequestsRunId, run, serverClientId);
+                    // send request to remote site server from this server and specify the original requestor (whoRequestsRunId)
+                    Packet fetchRunPacket = PacketFactory.createFetchRun(contest.getClientId(), serverClientId, run, whoRequestsRunId);
                     controller.sendToRemoteServer(run.getSiteNumber(), fetchRunPacket);
 
                 } else {
@@ -1912,6 +1912,11 @@ public class PacketHandler {
         ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         RunResultFiles[] runResultFiles = (RunResultFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
         contest.updateRun(run, runFiles, whoCheckedOut, runResultFiles);
+        
+        // If this is the server, make sure the reply gets to the correct local client.
+        if(isServer()) {
+            controller.sendToClient(packet);
+        }
     }
     
     /**

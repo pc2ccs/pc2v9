@@ -111,6 +111,8 @@ public class Log extends Logger {
 
     public static final String LOG_DIRECTORY_NAME = "logs";
 
+    private static boolean doNotWriteLogEntries = false;
+
     private LogStreamHandler streamHandler = null;
     
     private Handler consoleHandler = null;
@@ -314,5 +316,34 @@ public class Log extends Logger {
     
     public String getLogfilename() {
         return logfilename;
+    }
+    
+    @Override
+    public void log(Level level, String msg) {
+        if (!doNotWriteLogEntries) {
+            super.log(level, msg);
+        }
+    }
+
+    @Override
+    public void log(Level level, String msg, Object param1) {
+        if (!doNotWriteLogEntries) {
+            super.log(level, msg, param1);
+        }
+    }
+
+    @Override
+    public void log(Level level, String msg, Throwable thrown) {
+        if (!doNotWriteLogEntries) {
+            super.log(level, msg, thrown);
+        }
+    }
+
+    public static void setDoNotWriteLogEntries(boolean doNotLog) {
+        doNotWriteLogEntries = doNotLog;
+    }
+    
+    public static boolean isDoNotWriteLogEntries() {
+        return doNotWriteLogEntries;
     }
 }

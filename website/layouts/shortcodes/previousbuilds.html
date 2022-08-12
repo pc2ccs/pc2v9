@@ -14,7 +14,7 @@
             {{ if isset $build.downloads $pc2.tool }}
             {{ $download := index $build.downloads $pc2.tool }}
             <tr>
-                <th>{{ $pc2.name }}</th>
+                <th>{{ $pc2.name | safeHTML }}</th>
                 <td>
                     <a href="{{ $download.urls.zip }}">{{ $pc2.tool }}-{{ $download.version }}.zip</a> ({{ $download.sizes.zip }} MB)
                     {{ if and (isset $download.urls.sha256 "zip") (isset $download.urls.sha512 "zip") }}
@@ -24,7 +24,7 @@
             </tr>
                 {{ if isset $download.urls "tar_gz" }}
             <tr>
-                <th>{{ $pc2.name }} in tar.gz form</th>
+                <th>{{ $pc2.name | safeHTML }} in tar.gz form</th>
                 <td>
                     <a href="{{ $download.urls.tar_gz }}">{{ $pc2.tool }}-{{ $download.version }}.tar.gz</a> ({{ $download.sizes.tar_gz }} MB)
                     {{ if and (isset $download.urls.sha256 "tar_gz") (isset $download.urls.sha512 "tar_gz") }}

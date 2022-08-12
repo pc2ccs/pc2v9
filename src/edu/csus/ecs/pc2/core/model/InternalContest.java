@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
@@ -792,12 +792,12 @@ public class InternalContest implements IInternalContest {
         Run newRun = runList.addNewRun(run); // this set the run number.
         if (runFiles != null) {
             runFilesList.add(newRun, runFiles);
-            SerializedFile file = runFiles.getMainFile();
-            if (file != null){
-                run.setEntryPoint(file.getName());
-            }
+//            SerializedFile file = runFiles.getMainFile();
+//            if (file != null){
+//                newRun.setEntryPoint(file.getName());
+//                addRun(newRun);
+//            }
         }
-        addRun(newRun);
         return newRun;
     }
 
