@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-    <title>{{ block "title" . }}{{ .Site.Title }}{{ with .Params.Title }} | {{ . }}{{ end }}{{ end }}</title>
+    <title>{{ block "title" . }}{{ .Site.Title | safeHTML }}{{ with .Params.Title }} | {{ . }}{{ end }}{{ end }}</title>
 
     <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/css/adminlte.min.css">
@@ -25,14 +25,14 @@
 </head>
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
-        {{ partial "navbar.html" . }}
-        {{ partial "sidebar.html" . }}
+        {{ partial "navbar.html" . | safeHTML }}
+        {{ partial "sidebar.html" . | safeHTML }}
         <div class="content-wrapper">
             <div class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-md-12">
-                            <h1 class="m-0 text-dark">{{ .Params.Title }}</h1>
+                            <h1 class="m-0 text-dark">{{ .Params.Title | safeHTML }}</h1>
                         </div>
                     </div>
                 </div>
