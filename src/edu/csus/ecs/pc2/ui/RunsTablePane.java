@@ -2084,6 +2084,25 @@ public class RunsTablePane extends JPanePlugin {
                         }
                         return;
                     }
+                    
+                    // make sure we're allowed to fetch a run
+                    if (!isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN)) {
+                        getController().getLog().log(Log.WARNING, "Account does not have the permission ALLOWED_TO_FETCH_RUN; cannot view run source.");
+                        showMessage("Unable to fetch run, check log");
+                        return;
+                    }
+
+                    // make sure there's exactly one run selected in the grid
+                    int[] selectedIndexes = runTable.getSelectedRows();
+
+                    if (selectedIndexes.length < 1) {
+                        showMessage("Please select a run ");
+                        return;
+                    } else if (selectedIndexes.length > 1) {
+                        showMessage("Please select exactly ONE run in order to view source ");
+                        return;
+                    }
+
 //                    SwingUtilities.invokeLater(new Runnable() {
 //                        public void run() {
 //                            showSourceForSelectedRun();
@@ -2092,7 +2111,7 @@ public class RunsTablePane extends JPanePlugin {
 
                     Thread viewSourceThread = new Thread() {
                         public void run() {
-                            showSourceForSelectedRun();
+                            showSourceForSelectedRun(selectedIndexes[0]);
                         }
                     };
                     // only one View Source active at-a-time
@@ -2112,35 +2131,14 @@ public class RunsTablePane extends JPanePlugin {
      * If no run is selected, or more than one run is selected, prompts the user to select just one run (row) in the grid
      * and does nothing else.
      */
-    private void showSourceForSelectedRun() {
+    private void showSourceForSelectedRun(int nSelectedRunIndex) {
 
         boolean bFetchError = false;
         
-        // make sure we're allowed to fetch a run
-        if (!isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN)) {
-            getController().getLog().log(Log.WARNING, "Account does not have the permission ALLOWED_TO_FETCH_RUN; cannot view run source.");
-            showMessage("Unable to fetch run, check log");
-            AllowViewSource();
-            return;
-        }
-
-        // make sure there's exactly one run selected in the grid
-        int[] selectedIndexes = runTable.getSelectedRows();
-
-        if (selectedIndexes.length < 1) {
-            showMessage("Please select a run ");
-            AllowViewSource();
-            return;
-        } else if (selectedIndexes.length > 1) {
-            showMessage("Please select exactly ONE run in order to view source ");
-            AllowViewSource();
-            return;
-        }
-
         // we are allowed to view source and there's exactly one run selected; try to obtain the run source and display it in a MFV 
         try {
 
-            Run run = getContest().getRun(runTable.getElementIdFromTableRow(selectedIndexes[0]));
+            Run run = getContest().getRun(runTable.getElementIdFromTableRow(nSelectedRunIndex));
 
             // make sure we found the currently selected run
             if (run != null) {
