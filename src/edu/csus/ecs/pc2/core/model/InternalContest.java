@@ -3434,4 +3434,10 @@ public class InternalContest implements IInternalContest {
     public String getCommandLineOptionValue(String optionNaeme) {
         return parseArguments.getOptValue(optionNaeme);
     }
+
+    @Override
+    public void addAvailableAJ(ConnectionHandlerID connectionHandlerID, ClientId fromId) {
+        throw new UnsupportedOperationException("Method InternalContest.addAvailableAJ(ConnHandler,ClientId) not implemented yet.");
+        
+    }
 }

@@ -63,6 +63,7 @@ import edu.csus.ecs.pc2.core.packet.PacketType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.transport.ConnectionHandler;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.profile.ProfileManager;
@@ -461,6 +462,10 @@ public class PacketHandler {
             case AUTO_REGISTRATION_SUCCESS:
                 handleAutoRegistratioSuccess(packet, connectionHandlerID);
                 break;
+                
+            case AJ_AVAILABLE:
+                handleAJAvailable(connectionHandlerID, fromId);
+                break;
           
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
@@ -469,6 +474,18 @@ public class PacketHandler {
         }
 
         info("handlePacket end " + packet);
+    }
+
+    /**
+     * This method is invoked when the server receives an "AJ_AVAILABLE" packet from an AutoJudge,
+     * indicating that the specifid AJ is available to judge submissions.
+     * 
+     * @param connectionHandlerID  the {@link ConnectionHandler} associated with the client which sent the packet.
+     * @param fromId the {@link ClientId} of the client which sent the packet.
+     */
+    private void handleAJAvailable(ConnectionHandlerID connectionHandlerID, ClientId fromId) {
+        
+        contest.addAvailableAJ(connectionHandlerID, fromId);
     }
 
     private void handleAutoRegistratioSuccess(Packet packet, ConnectionHandlerID connectionHandlerID) {

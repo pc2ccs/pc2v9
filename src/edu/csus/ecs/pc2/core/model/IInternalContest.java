@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.transport.ConnectionHandler;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
@@ -1241,4 +1242,14 @@ public interface IInternalContest {
      * @return
      */
     String getCommandLineOptionValue(String optionNaeme);
+
+    /**
+     * Add the specified ClientId, accessible via the specified ConnectionHandlerID, to the 
+     * list of currently available AutoJudges (that is, AJs waiting to receive a submission to judge).
+     * 
+     * @param connectionHandlerID the {@link ConnectionHandlerID} for the {@link ConnectionHandler}
+     *                              used to access the AJ client.
+     * @param fromId  the {@link ClientId} of the AutoJudge who sent the notification of availability.
+     */
+    void addAvailableAJ(ConnectionHandlerID connectionHandlerID, ClientId fromId);
 }

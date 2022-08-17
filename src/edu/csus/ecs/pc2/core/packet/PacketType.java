@@ -764,6 +764,12 @@ public final class PacketType implements Serializable {
          * to the server for team's run source (RunFile []) files.
          */
         REQUEST_FETCH_TEAMS_SUBMISSION_FILES,
+        
+        /**
+         * An AutoJudge has sent a notification to the server that it is available to 
+         * accept a submission for judgement.
+         */
+        AJ_AVAILABLE
     }
 
     /**
