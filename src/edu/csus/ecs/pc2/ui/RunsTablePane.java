@@ -2070,9 +2070,18 @@ public class RunsTablePane extends JPanePlugin {
             viewSourceButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
 
-                    // Only let one View Source to be outstanding at-a-time
+                    // For now, only allow one View Source to be outstanding at-a-time
+                    // TODO: this has to be re-evaluated so that multiple outstanding View Source
+                    //       requests will work.
                     if(!IsAllowedViewSource()) {
-                        showMessage("There is already a View Source pending");
+                        if(requestedRun != null) {
+                            showMessage("There is already a View Source pending for Run " + requestedRun.getNumber() + " at site " + requestedRun.getSiteNumber());
+                            getController().getLog().log(Log.INFO, "There is already a View Source pending for Run " + requestedRun.getNumber() + " at site " + requestedRun.getSiteNumber());
+                       } else {
+                            // This could mean that the requestedRun's info just came in.
+                            showMessage("There is already a View Source pending");                           
+                            getController().getLog().log(Log.INFO, "There is already a View Source pending but no requestedRun");
+                        }
                         return;
                     }
 //                    SwingUtilities.invokeLater(new Runnable() {
@@ -2105,6 +2114,8 @@ public class RunsTablePane extends JPanePlugin {
      */
     private void showSourceForSelectedRun() {
 
+        boolean bFetchError = false;
+        
         // make sure we're allowed to fetch a run
         if (!isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN)) {
             getController().getLog().log(Log.WARNING, "Account does not have the permission ALLOWED_TO_FETCH_RUN; cannot view run source.");
@@ -2149,7 +2160,7 @@ public class RunsTablePane extends JPanePlugin {
                     // reset this each time so we be sure to get the first new reply
                     fetchedRun = null;
                     
-                    //we don't have the files; request them from the server
+                    //we don't have the files; request them from the server (this is NOT a checkout, but a read-only fetch)
                     getController().fetchRun(run);
 
                     // wait for the server to reply (i.e., to make a callback to the run listener) -- but only for up to 30 sec
@@ -2174,30 +2185,32 @@ public class RunsTablePane extends JPanePlugin {
                             
                             //we got a reply from the server but we didn't get any RunFiles
                             getController().getLog().log(Log.WARNING, "Server failed to return RunFiles in response to fetch run request");
-                            getController().getLog().log(Log.WARNING, "Unable to fetch source files for run " + run.getNumber() + " from server");
-                            showMessage("Unable to fetch selected run; check log");
-                            AllowViewSource();
-                            return;
+                            bFetchError = true;
                         }
                         
                     } else {
                         
                         // the server failed to reply to the fetchRun request within the time limit
                         getController().getLog().log(Log.WARNING, "No response from server to fetch run request after " + waitedMS + "ms");
-                        getController().getLog().log(Log.WARNING, "Unable to fetch run " + run.getNumber() + " from server");
-                        showMessage("Unable to fetch selected run; check log");
-                        AllowViewSource();
-                       return;
+                        bFetchError = true;
                     }
                 }
+                
                 // OK to now start another view source
                 AllowViewSource();
                
+                // if any type of error occurred requesting the run to view, log a summary message and finish
+                if(bFetchError) {
+                    getController().getLog().log(Log.WARNING, "Unable to fetch run " + run.getNumber() + " at site " + run.getSiteNumber() + " from server");
+                    showMessage("Unable to fetch selected run; check log");
+                   return;
+                }
+                
                 //if we get here we know there should be RunFiles in the contest model -- but let's sanity-check that
                 if (!getContest().isRunFilesPresent(run)) {
                     
                     //something bad happened -- we SHOULD have RunFiles at this point!
-                    getController().getLog().log(Log.SEVERE, "Unable to find RunFiles for run " + run.getNumber() + " -- server error?");
+                    getController().getLog().log(Log.SEVERE, "Unable to find RunFiles for run " + run.getNumber() + " at site " + run.getSiteNumber() + " -- server error?");
                     showMessage("Unable to fetch selected run; check log");
                     return;
 
@@ -2215,7 +2228,9 @@ public class RunsTablePane extends JPanePlugin {
                         // create a MultiFileViewer in which to display the runFiles
                         // Note: previously used 'fetchedRun' here for site/number; it is possible that those values are not
                         // correct if the run files are already present; in that case, we would have never asked for them to be
-                        // retrieved, and would have used whatever was in fetchedRun.
+                        // retrieved, and would have used whatever was in fetchedRun.  An NPE was also possible if fetchedRun was null;
+                        // that is, the runfiles were already present from an edit run or judge run on the current client, not no
+                        // server request was every made for a run's files.
                         MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + run.getSiteNumber() + " Run " + run.getNumber());
                         mfv.setContestAndController(getContest(), getController());
 
