@@ -2201,75 +2201,73 @@ public class RunsTablePane extends JPanePlugin {
                 if(bFetchError) {
                     getController().getLog().log(Log.WARNING, "Unable to fetch run " + run.getNumber() + " at site " + run.getSiteNumber() + " from server");
                     showMessage("Unable to fetch selected run; check log");
-                   return;
-                }
-                
-                //if we get here we know there should be RunFiles in the contest model -- but let's sanity-check that
-                if (!getContest().isRunFilesPresent(run)) {
-                    
-                    //something bad happened -- we SHOULD have RunFiles at this point!
-                    getController().getLog().log(Log.SEVERE, "Unable to find RunFiles for run " + run.getNumber() + " at site " + run.getSiteNumber() + " -- server error?");
-                    showMessage("Unable to fetch selected run; check log");
-                    return;
-
                 } else {
-                    
-                    //get the RunFiles
-                    RunFiles runFiles = getContest().getRunFiles(run);
-
-                    if (runFiles != null) {
-
-                        // get the (serialized) source files out of the RunFiles
-                        SerializedFile mainFile = runFiles.getMainFile();
-                        SerializedFile[] otherFiles = runFiles.getOtherFiles();
-
-                        // create a MultiFileViewer in which to display the runFiles
-                        // Note: previously used 'fetchedRun' here for site/number; it is possible that those values are not
-                        // correct if the run files are already present; in that case, we would have never asked for them to be
-                        // retrieved, and would have used whatever was in fetchedRun.  An NPE was also possible if fetchedRun was null;
-                        // that is, the runfiles were already present from an edit run or judge run on the current client, not no
-                        // server request was every made for a run's files.
-                        MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + run.getSiteNumber() + " Run " + run.getNumber());
-                        mfv.setContestAndController(getContest(), getController());
-
-                        // add any other files to the MFV (these are added first so that the mainFile will appear at index 0)
-                        boolean otherFilesPresent = false;
-                        boolean otherFilesLoadedOK = false;
-                        if (otherFiles != null) {
-                            otherFilesPresent = true;
-                            otherFilesLoadedOK = true;
-                            for (SerializedFile otherFile : otherFiles) {
-                                otherFilesLoadedOK &= mfv.addFilePane(otherFile.getName(), otherFile);
-                            }
-                        }
-
-                        // add the mainFile to the MFV
-                        boolean mainFilePresent = false;
-                        boolean mainFileLoadedOK = false;
-                        if (mainFile != null) {
-                            mainFilePresent = true;
-                            mainFileLoadedOK = mfv.addFilePane("Main File" + " (" + mainFile.getName() + ")", mainFile);
-                        }
-
-                        // if we successfully added all files, show the MFV
-                        if ((!mainFilePresent || (mainFilePresent && mainFileLoadedOK)) 
-                                && (!otherFilesPresent || (otherFilesPresent && otherFilesLoadedOK))) {
-                            mfv.setSelectedIndex(0);  //always make leftmost selected; normally this will be MainFile
-                            mfv.setVisible(true);
-                            showMessage("");
-                        } else {
-                            getController().getLog().log(Log.WARNING, "Unable to load run source files into MultiFileViewer");
-                            showMessage("Unable to load run source files into MultiFileViewer");
-                        }
-
-                    } else {
-                        // runfiles is null
-                        getController().getLog().log(Log.WARNING, "Unable to obtain RunFiles for Site " + run.getSiteNumber() + " run " + run.getNumber());
-                        showMessage("Unable to obtain RunFiles for selected run");
-                    }
-                    
-                }
                 
+                    //if we get here we know there should be RunFiles in the contest model -- but let's sanity-check that
+                    if (!getContest().isRunFilesPresent(run)) {
+                        
+                        //something bad happened -- we SHOULD have RunFiles at this point!
+                        getController().getLog().log(Log.SEVERE, "Unable to find RunFiles for run " + run.getNumber() + " at site " + run.getSiteNumber() + " -- server error?");
+                        showMessage("Unable to fetch selected run; check log");    
+                    } else {
+                        
+                        //get the RunFiles
+                        RunFiles runFiles = getContest().getRunFiles(run);
+    
+                        if (runFiles != null) {
+    
+                            // get the (serialized) source files out of the RunFiles
+                            SerializedFile mainFile = runFiles.getMainFile();
+                            SerializedFile[] otherFiles = runFiles.getOtherFiles();
+    
+                            // create a MultiFileViewer in which to display the runFiles
+                            // Note: previously used 'fetchedRun' here for site/number; it is possible that those values are not
+                            // correct if the run files are already present; in that case, we would have never asked for them to be
+                            // retrieved, and would have used whatever was in fetchedRun.  An NPE was also possible if fetchedRun was null;
+                            // that is, the runfiles were already present from an edit run or judge run on the current client, so no
+                            // server request was ever made for a run's files.
+                            MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + run.getSiteNumber() + " Run " + run.getNumber());
+                            mfv.setContestAndController(getContest(), getController());
+    
+                            // add any other files to the MFV (these are added first so that the mainFile will appear at index 0)
+                            boolean otherFilesPresent = false;
+                            boolean otherFilesLoadedOK = false;
+                            if (otherFiles != null) {
+                                otherFilesPresent = true;
+                                otherFilesLoadedOK = true;
+                                for (SerializedFile otherFile : otherFiles) {
+                                    otherFilesLoadedOK &= mfv.addFilePane(otherFile.getName(), otherFile);
+                                }
+                            }
+    
+                            // add the mainFile to the MFV
+                            boolean mainFilePresent = false;
+                            boolean mainFileLoadedOK = false;
+                            if (mainFile != null) {
+                                mainFilePresent = true;
+                                mainFileLoadedOK = mfv.addFilePane("Main File" + " (" + mainFile.getName() + ")", mainFile);
+                            }
+    
+                            // if we successfully added all files, show the MFV
+                            if ((!mainFilePresent || (mainFilePresent && mainFileLoadedOK)) 
+                                    && (!otherFilesPresent || (otherFilesPresent && otherFilesLoadedOK))) {
+                                mfv.setSelectedIndex(0);  //always make leftmost selected; normally this will be MainFile
+                                mfv.setVisible(true);
+                                showMessage("");
+                            } else {
+                                getController().getLog().log(Log.WARNING, "Unable to load run source files into MultiFileViewer");
+                                showMessage("Unable to load run source files into MultiFileViewer");
+                            }
+    
+                        } else {
+                            // runfiles is null
+                            getController().getLog().log(Log.WARNING, "Unable to obtain RunFiles for Site " + run.getSiteNumber() + " run " + run.getNumber());
+                            showMessage("Unable to obtain RunFiles for selected run");
+                        }
+                        
+                    }
+                }
+                return;
             } else {
                 // getContest().getRun() returned null
                 getController().getLog().log(Log.WARNING, "Selected run not found");
