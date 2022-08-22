@@ -18,22 +18,19 @@ public class ParseArgumentsTest extends TestCase {
         try {
             @SuppressWarnings("unused")
             ParseArguments parseArguments = new ParseArguments(null);
+            fail("Expecting IllegalArgumentException for ParseArguments(null) ");
         } catch (IllegalArgumentException e) {
-            nullFakeRoutine("Passed test threw IllegalArgumentException");
+            String expected = "args is null";
+            assertEquals("Expected exception message", expected, e.getMessage());
         }
 
     }
 
     public void testEmpty() {
-        @SuppressWarnings("unused")
         ParseArguments parseArguments = new ParseArguments(new String[0]);
+        assertNotNull(parseArguments);
     }
 
-    private void nullFakeRoutine(String reason) {
-        // TODO Auto-generated method stub
-
-    }
-    
     public void testOptHasValue() {
 
         String opt = "--login";
@@ -60,19 +57,18 @@ public class ParseArgumentsTest extends TestCase {
 
         String[] required = { opt, optp };
         String[] args = { opt, value, opt3, opt4, optp };
-        String[] valOpts = { opt, opt3, optp };
+        String[] allowOpts = { opt, opt3, optp };
         
-        boolean bValid = false;
-        
-        // --bill is invalid (opt4)
+        // --bill is not allowed (opt4)
         try {
             @SuppressWarnings("unused")
-            ParseArguments parseArguments = new ParseArguments(args, required, valOpts);
+            ParseArguments parseArguments = new ParseArguments(args, required, allowOpts);
+            fail("Expecting IllegalArgumentException for ParseArguments(args, required, allowOpts) ");
+            
         } catch (IllegalArgumentException exc) {
-            nullFakeRoutine("Passed test threw IllegalArgumentException for --bill");
-            bValid = true;
+            String expected = "invalid option '--bill'";
+            assertEquals("Expected exception message", expected, exc.getMessage());
         }
-        assertTrue(opt4 + " option should be invalid (cause exception)", bValid);
     }
     
     public void testIsOptPresent() {
@@ -108,27 +104,24 @@ public class ParseArgumentsTest extends TestCase {
 
         String[] required = { opt, optp };
         String[] args = { opt, value, opt3, opt4, optp };
-        String[] valOpts = { opt, opt3, optp };
+        String[] allowedOpts = { opt, opt3, optp };
         ParseArguments parseArguments = null;
-        boolean bValid = true;
         
         try {
             parseArguments = new ParseArguments(args, required);
         } catch (IllegalArgumentException exc) {
-            nullFakeRoutine("faileed test threw IllegalArgumentException for valid opts" + exc.getMessage());
-           bValid = false;
+            fail("Un-expected IllegalArgumentException for ParseArguments(args, required)");
         }
-        assertTrue("all arguments should be valid", bValid);
 //        parseArguments.dumpArgs(System.out);
 
-        parseArguments.setValidOpts(valOpts);
-        assertTrue(opt + " option should be valid", parseArguments.isValidOption(opt));
-        assertFalse(opt2 + " option should not be valid", parseArguments.isValidOption(opt2));
-        assertTrue(optp + " option should be valid", parseArguments.isValidOption(optp));
-        assertFalse(value + " option should not be valid ", parseArguments.isValidOption(value));
+        parseArguments.setAllowedOpts(allowedOpts);
+        assertTrue(opt + " option should be allowed", parseArguments.isAllowedOption(opt));
+        assertFalse(opt2 + " option should not be allowed", parseArguments.isAllowedOption(opt2));
+        assertTrue(optp + " option should be allowed", parseArguments.isAllowedOption(optp));
+        assertFalse(value + " option should not be allowed ", parseArguments.isAllowedOption(value));
         
-        assertFalse(opt4 + " option should not be valid", parseArguments.isValidOption(opt4));
-        assertTrue(opt3 + " option should be valid", parseArguments.isValidOption(opt3));
+        assertFalse(opt4 + " option should not be allowed", parseArguments.isAllowedOption(opt4));
+        assertTrue(opt3 + " option should be allowed", parseArguments.isAllowedOption(opt3));
     }
     
     /**
