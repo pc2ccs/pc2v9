@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -18,6 +18,8 @@ import java.util.Properties;
 import java.util.Vector;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
+
+import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.AppConstants;
 import edu.csus.ecs.pc2.VersionInfo;
@@ -2897,7 +2899,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          */
         TransportException savedTransportException = null;
 
-        String[] requireArguementArgs = { // 
+        String[] requireArgumentArgs = { // 
                 AppConstants.LOGIN_OPTION_STRING, 
                 AppConstants.PASSWORD_OPTION_STRING,
                 AppConstants.MAIN_UI_OPTION_STRING, 
@@ -2910,8 +2912,29 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 AppConstants.CONTEST_ID_OPTION_STRING,
                 AppConstants.FILE_OPTION_STRING };
         
-        parseArguments = new ParseArguments(stringArray, requireArguementArgs, AppConstants.allOptionStrings);
-
+        /**
+         * This will not catch unknown options, that is done below after logging is set up
+         * We scan the arguments twice.  First time to allow logging to be set up
+         * Second time to validate allowed options.
+         */
+        try {
+            parseArguments = new ParseArguments(stringArray, requireArgumentArgs);
+        } catch (Exception e) {
+            // mostly catches "IllegalArgumentException" and informs the user
+            fatalError(e.getMessage(), e);
+        }
+        
+        /**
+         * This should be set early no matter what, since we do not want to pop-up
+         * GUI message boxes on errors, if NO_GUI_OPTION_STRING was specified.
+         * Validation of NO_GUI_OPTION_STRING is handled in handleCommandLineOptions().
+         * That is, currently, NO_GUI_OPTION_STRING is only allowed for AJ and server.
+         * We don't care about that at this point in time though. 
+         */
+        if (parseArguments.isOptPresent(AppConstants.NO_GUI_OPTION_STRING)) {
+            usingGUI = false;
+        }
+        
         if (parseArguments.isOptPresent(AppConstants.DEBUG_OPTION_STRING)){
             parseArguments.dumpArgs(System.out);
         }
@@ -2931,6 +2954,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             startLog(null, "pc2.startup."+System.currentTimeMillis(), null, null);
         }
         
+        // make sure supplied arguments are recognized (allowed)
+        try {
+            // throw away object to validate allowed options only
+            @SuppressWarnings("unused")
+            ParseArguments checkAllowedArgs = new ParseArguments(stringArray, requireArgumentArgs, AppConstants.allOptionStrings);
+        } catch(Exception e) {
+            // mostly catches "IllegalArgumentException" and informs the user
+            fatalError(e.getMessage(), e);
+        }
+
         handleCommandLineOptions();
 
         for (String arg : stringArray) {
@@ -4041,8 +4074,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     private void showErrorMessage(String message, String title) {
-        // TODO 736 fix this to show GUI message
-        System.err.println(title+": "+message); // TODO 736 remove this
+        JOptionPane.showMessageDialog(null,  message, title, JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**
