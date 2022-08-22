@@ -68,7 +68,7 @@ public class ParseArguments {
 
     private String[] requireArgOpts = null;
     
-    private String[] validOptions = null;
+    private String[] allowedOptions = null;
 
     /**
      * ParseArgs constructor comment.
@@ -311,9 +311,9 @@ public class ParseArguments {
      * @param value
      * @return boolean
      */
-    public boolean isValidOption(String value) {
-        if(validOptions != null) {
-            for(String sOpt: validOptions) {
+    public boolean isAllowedOption(String value) {
+        if(allowedOptions != null) {
+            for(String sOpt: allowedOptions) {
                 if(sOpt.equals(value)) {
                     return true;
                 }
@@ -345,7 +345,7 @@ public class ParseArguments {
                 if (curOpt != null) {
                     argHash.put(curOpt, NULL_VALUE);
                 }
-                if(isValidOption(value)) {
+                if(isAllowedOption(value)) {
                     curOpt = value;
                 } else {
                     throw new IllegalArgumentException("invalid option '" + value + "'");
@@ -474,7 +474,7 @@ public class ParseArguments {
             }
         }
     }
-
+    
     /**
      * Set options which require a value.
      *
@@ -497,24 +497,24 @@ public class ParseArguments {
     }
 
     /**
-     * Set options which are valid
+     * Set options which are allowed
      *
-     * @param newValidOpts
+     * @param newAllowedOpts
      *            java.lang.String[]
      */
-    public void setValidOpts(java.lang.String[] newValidOpts) {
-        validOptions = newValidOpts;
+    public void setAllowedOpts(java.lang.String[] newAllowedOpts) {
+        allowedOptions = newAllowedOpts;
     }
 
     /**
-     * Set a single valid option.
+     * Set a single allowed option.
      *
-     * @param newValidOpt
+     * @param newAllowedOpt
      *            java.lang.String
      */
-    public void setValidOpts(String newValidOpt) {
-        validOptions = new String[1];
-        validOptions[0] = newValidOpt;
+    public void setAllowedOpt(String newAllowedOpt) {
+        allowedOptions = new String[1];
+        allowedOptions[0] = newAllowedOpt;
     }
 
     /**
@@ -532,18 +532,18 @@ public class ParseArguments {
     }
 
     /**
-     * ParseArgs args and options requiring values making sure options are valid.
+     * ParseArgs args and options requiring values making sure options supplied are allowed.
      *
      * @param args
      *            java.lang.String [] - command line arguments
      * @param requiredArgs
      *            java.lang.String [] - options requiring args
-     * @param validOpts
-     *            java.lang.String [] - valid option strings
+     * @param allowedOpts
+     *            java.lang.String [] - allowed option strings
      */
-    public ParseArguments(String[] args, String[] requiredArgs, String[] validOpts) {
+    public ParseArguments(String[] args, String[] requiredArgs, String[] allowedOpts) {
         super();
-        setValidOpts(validOpts);
+        setAllowedOpts(allowedOpts);
         setRequireArgOpts(requiredArgs);
         loadArgs(args);
     }
