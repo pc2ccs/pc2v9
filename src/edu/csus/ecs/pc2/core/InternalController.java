@@ -2925,7 +2925,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         
         /**
-         * This should be set early no matter what, since we do not want to pop-up
+         * usingGUI should be set early no matter what, since we do not want to pop-up
          * GUI message boxes on errors, if NO_GUI_OPTION_STRING was specified.
          * Validation of NO_GUI_OPTION_STRING is handled in handleCommandLineOptions().
          * That is, currently, NO_GUI_OPTION_STRING is only allowed for AJ and server.
