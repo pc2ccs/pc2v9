@@ -3217,7 +3217,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     "[" + AppConstants.CONTEST_PASSWORD_OPTION_STRING + " <pass>] ",
                     "           " +
                     "[" + AppConstants.REMOTE_SERVER_OPTION_STRING + " <remoteHostname> " + AppConstants.PROXY_ME_SERVER_KEY + "] " + //
-                    "[" + AppConstants.MAIN_UI_OPTION_STRING + " classname]", // 
+                    "[" + AppConstants.MAIN_UI_OPTION_STRING + " classname] " + //
+                    "[" + AppConstants.PORT_OPTION_STRING + " <port>]",
                     "           " +
                     "[" + AppConstants.NOLOGGING_OPTION_STRING + "] " + //
                     "[" + AppConstants.NO_GUI_OPTION_STRING + "] " + //
