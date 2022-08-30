@@ -2956,7 +2956,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         // make sure supplied arguments are recognized (allowed)
         try {
-            // throw away object to validate allowed options only
+            // this is the second scan of the argument list where accepted options are checked.
+            // a dummy object is created that will check the arguments that were passed in on the command line against
+            // the list of allowed options (AppConstants.allOptionStrings).  An exception will be thrown if any of
+            // the command line arguments do not appear in the AppConstants.allOptionStrings array.
             @SuppressWarnings("unused")
             ParseArguments checkAllowedArgs = new ParseArguments(stringArray, requireArgumentArgs, AppConstants.allOptionStrings);
         } catch(Exception e) {
@@ -3205,21 +3208,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     "[" + AppConstants.FILE_OPTION_STRING + " filename] " + //
                     "[" + AppConstants.SERVER_OPTION_STRING + "] " + //
                     "[" + AppConstants.FIRST_SERVER_OPTION_STRING + "] " + //
-                    "[" + AppConstants.LOGIN_OPTION_STRING + " <login> " + //
-                    "[" + AppConstants.PASSWORD_OPTION_STRING + " <pass> ", //
+                    "[" + AppConstants.LOGIN_OPTION_STRING + " <login>] " + //
+                    "[" + AppConstants.PASSWORD_OPTION_STRING + " <pass>]", //
                     "           " + 
                     "[" + AppConstants.LOAD_OPTION_STRING + " <dir>|<file> ] " + //
                     "[" + AppConstants.SKIP_INI_OPTION_STRING + "] " + //
                     "[" + AppConstants.INI_FILENAME_OPTION_STRING + " INIfilename] " + //
-                    "[" + AppConstants.CONTEST_PASSWORD_OPTION_STRING + " <pass>] " + 
-                    "[" + AppConstants.REMOTE_SERVER_OPTION_STRING + " <remoteHostname> " + AppConstants.PROXY_ME_SERVER_KEY + "]" + //
+                    "[" + AppConstants.CONTEST_PASSWORD_OPTION_STRING + " <pass>] ",
+                    "           " +
+                    "[" + AppConstants.REMOTE_SERVER_OPTION_STRING + " <remoteHostname> " + AppConstants.PROXY_ME_SERVER_KEY + "] " + //
                     "[" + AppConstants.MAIN_UI_OPTION_STRING + " classname]", // 
                     "           " +
                     "[" + AppConstants.NOLOGGING_OPTION_STRING + "] " + //
                     "[" + AppConstants.NO_GUI_OPTION_STRING + "] " + //
-                    "[" + AppConstants.NOSTANDINGS_OPTION_STRING + "] ", //
+                    "[" + AppConstants.NOSTANDINGS_OPTION_STRING + "] " + 
+                    "[" + AppConstants.NO_CONNECTIONS_PANE_OPTION_STRING + "] " + 
+                    "[" + AppConstants.NO_LOGINS_PANE_OPTION_STRING + "]", //
                     "", //
-                    "See http://pc2.ecs.csus.edu/wiki/Command_Line for more information", // 
+                    "See https://github.com/pc2ccs/pc2v9/wiki/Command-Line-Arguments for more information", // 
             };
             for (String string : usage) {
                 System.out.println(string);
@@ -4074,7 +4080,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     private void showErrorMessage(String message, String title) {
-        JOptionPane.showMessageDialog(null,  message, title, JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null,  message, title, JOptionPane.ERROR_MESSAGE);
     }
 
     /**

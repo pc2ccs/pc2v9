@@ -49,7 +49,6 @@ public class ParseArgumentsTest extends TestCase {
 
     public void testInvalidOption() {
         String opt = "--login";
-        String opt2 = "--debad";
         String opt3 = "--nogui";
         String optp = "-pass";
         String value = "name";
@@ -134,25 +133,25 @@ public class ParseArgumentsTest extends TestCase {
         ParseArgumentsTest t = new ParseArgumentsTest();
         t.testIsOptPresent();
         t.testAreOptsValid();
-        if(false) {
-        ParseArguments pa = new ParseArguments();
-        pa.loadArgs(args);
-        pa.dumpArgs(System.out);
-        System.out.println();
-        
-        String [] reqArgs = { "--l", "--file" };
-
-        System.out.print("Using required arguments:");
-        for (String s : reqArgs){
-            System.out.print(" "+s);
-        }
-        System.out.println();
-        
-        pa = new ParseArguments();
-        pa.setRequireArgOpts(reqArgs);
-        pa.loadArgs(args);
-        pa.dumpArgs(System.out);
-        }
+//      if(false) {
+//      ParseArguments pa = new ParseArguments();
+//      pa.loadArgs(args);
+//      pa.dumpArgs(System.out);
+//      System.out.println();
+//      
+//      String [] reqArgs = { "--l", "--file" };
+//
+//      System.out.print("Using required arguments:");
+//      for (String s : reqArgs){
+//          System.out.print(" "+s);
+//      }
+//      System.out.println();
+//      
+//      pa = new ParseArguments();
+//      pa.setRequireArgOpts(reqArgs);
+//      pa.loadArgs(args);
+//      pa.dumpArgs(System.out);
+//      }
     }
 
 }

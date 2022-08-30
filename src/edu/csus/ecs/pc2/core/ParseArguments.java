@@ -306,7 +306,10 @@ public class ParseArguments {
     }
 
     /**
-     * Does the value match any of the allowed options?
+     * Does the value match any of the allowed options?  A null list of
+     * allowed options implies there are no restrictions for what arguments
+     * are allowed (everything accepted).  This is the default when the new
+     * 3 argument constructor is not used.
      * 
      * @param value
      * @return boolean
