@@ -610,4 +610,15 @@ public class MockController implements IInternalController {
         return false;
     }
 
+    @Override
+    public void sendAvailableToAutoJudge(ClientId judgeClientId) {
+        
+    }
+
+    @Override
+    public void checkOutRun(ClientId clientId, Run run, boolean readOnly, boolean computerJudge) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

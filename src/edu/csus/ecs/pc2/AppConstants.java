@@ -6,6 +6,7 @@ package edu.csus.ecs.pc2;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
+// TODO i 496  repleace class with head
 public class AppConstants {
 
     public static final String HELP_OPTION_STRING = "--help";
@@ -15,6 +16,8 @@ public class AppConstants {
     public static final String LOGIN_OPTION_STRING = "--login";
 
     public static final String PASSWORD_OPTION_STRING = "--password";
+    
+    public static final String CONSOLE_OPTION_STRING = "--console";
 
     public static final String DATETIME_PATTERN_LONG = "E, dd MMM yyyy HH:mm:ss z";
 }

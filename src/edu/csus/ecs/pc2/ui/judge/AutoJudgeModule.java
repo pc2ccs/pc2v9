@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.judge;
 
 import java.text.DateFormat;
@@ -19,10 +19,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 /**
  * A non-GUI Auto Judge Module.
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class AutoJudgeModule implements UIPlugin {
 
     /**
@@ -36,7 +34,7 @@ public class AutoJudgeModule implements UIPlugin {
 
     private Log log;
 
-    private AutoJudgingMonitor autoJudgingMonitor = new AutoJudgingMonitor();
+    private AutoJudgingMonitor autoJudgingMonitor = new AutoJudgingMonitor();  
 
     public String getPluginTitle() {
         return "Server (non-GUI)";
@@ -58,7 +56,7 @@ public class AutoJudgeModule implements UIPlugin {
         controller = inController;
         log = controller.getLog();
 
-        autoJudgingMonitor.setContestAndController(getContest(), getController());
+        autoJudgingMonitor.setContestAndController(getContest(), getController());  
         try {
             ContestInformation ci = contest.getContestInformation();
             if (ci != null) {
@@ -90,6 +88,9 @@ public class AutoJudgeModule implements UIPlugin {
 
     protected void startAutoJudging() {
         if (isAutoJudgingEnabled()) {
+            
+            // Send AVAILABLE_TO_AUTO_JUDGE to server for this (judge) client
+            getController().sendAvailableToAutoJudge(getContest().getClientId());
 
             // Keep this off the AWT thread.
             new Thread(new Runnable() {
@@ -98,8 +99,9 @@ public class AutoJudgeModule implements UIPlugin {
                     autoJudgingMonitor.startAutoJudging();
                 }
             }).start();
+            
         } else {
-            showMessage("Administrator has turned off Auto Judging");
+            showMessage("Administrator has turned off Auto Judging - no AVAILABLE_TO_AUTO_JUDGE sent to server");
         }
     }
 

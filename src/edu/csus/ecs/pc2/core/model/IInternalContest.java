@@ -1,9 +1,10 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IStorage;
@@ -1241,4 +1242,63 @@ public interface IInternalContest {
      * @return
      */
     String getCommandLineOptionValue(String optionNaeme);
+
+    /**
+     * Add or Update AutoJudge/judge to list of available auto judges.
+     * 
+     * @param sourceClientId
+     * @return null if cannot add, or the AvailableAJ added.
+     */
+    AvailableAJ addAvailableAutoJudge(ClientId sourceClientId);
+    
+    /**
+     * Remove auto judge from list of available auto judges.
+     * 
+     * If a judge logs out, or the admin turns autojudging off for a judge,
+     * remove the judge from the list. 
+     * @param judgeClientId
+     */
+    void removeAvailableAutoJudge(ClientId judgeClientId);
+
+    /**
+     * Remove run from list of available auto judge runs.
+     * 
+     * @param run
+     */
+    void removeAvailableAutoJudgeRun(Run run);
+
+    /**
+     * For the input client id (judge) find the next run it should judge.
+     * 
+     * @param judgeClientId
+     * @return null (no run found) or the Run.
+     */
+    Run findRunToAutoJudge(ClientId judgeClientId);
+
+    /**
+     * Fetch list of auto judges that are available to auto judge. 
+     */
+    List<AvailableAJ> getAvailableAutoJudges();
+
+    /**
+     * Fetch list of runs that can be auto judged.
+     * @return
+     */
+    List<AvailableAJRun> getAvailableAutoJudgeRuns();
+
+    /**
+     * Add a run to be auto judged.
+     * 
+     * @param run
+     * @return null if no run found, else the avaiable run
+     */
+    AvailableAJRun addAvailableAutoJudgeRun(Run run);
+
+    /**
+     * Find auto judge for run.
+     * 
+     * @param run
+     * @return null if no judge found, else the auto judge clientid
+     */
+    ClientId findAutoJudgeForRun(Run run);
 }

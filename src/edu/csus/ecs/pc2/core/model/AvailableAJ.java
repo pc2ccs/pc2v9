@@ -1,46 +1,32 @@
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import edu.csus.ecs.pc2.core.list.ProblemList;
-import edu.csus.ecs.pc2.core.transport.ConnectionHandler;
 
 /**
  * This class encapsulates the notion of an AutoJudge (AJ) which is currently "available" to accept and judge runs.
  * 
- * An AvailableAJ contains a {@link ClientId}, a {@link ConnectionHandler},
+ * An AvailableAJ contains a {@link ClientId}
  * and a list of {@link Problem}s which the AJ client is configured to judge.
  * 
  * @author John Clevenger, PC2 Development Team
- *
  */
 public class AvailableAJ {
 
     private ClientId clientId ;
-    private ConnectionHandler connHandler ;
     private ProblemList problemList ;
     
     /**
-     * Constructs an AvailableAJ with a specified clientId, connectionHandler, and problem list.
+     * Constructs an AvailableAJ with a specified clientId, and problem list.
      * 
      * @param clientId the ClientId for this AutoJudge.
-     * @param connHandler the ConnectionHandler for accessing this AutoJudge.
      * @param probList the list of problems which this AJ is configured to judge.
-     */
-    
-    public AvailableAJ (ClientId clientId, ConnectionHandler connHandler, ProblemList probList) {
-        this.clientId = clientId;
-        this.connHandler = connHandler;
-        this.problemList = probList;
-    }
-    
-    /**
-     * Constructs an AvailableAJ with a specified clientId, connectionHandler, and an empty problem list.
      * 
-     * @param clientId the ClientId for this AutoJudge.
-     * @param connHandler the ConnectionHandler for accessing this AutoJudge.
      */
-    public AvailableAJ (ClientId clientId, ConnectionHandler connHandler) {
-        this(clientId, connHandler, new ProblemList());
-    }
+    public AvailableAJ (ClientId clientId, ProblemList probList) {
+        this.clientId = clientId;
+        this.problemList = probList;
+    }    
     
     /**
      * Add a problem to the {@link ProblemList} for this AvailableAJ.
@@ -102,14 +88,6 @@ public class AvailableAJ {
      */
     public ClientId getClientId() {
         return clientId;
-    }
-
-    /**
-     * Get the {@link ConnectionHandler} associated with this AvailableAJ.
-     * @return the AvailableAJ's ConnectionHandler.
-     */
-    public ConnectionHandler getConnHandler() {
-        return connHandler;
     }
 
     /**

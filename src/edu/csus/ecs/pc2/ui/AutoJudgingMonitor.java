@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.util.ArrayList;
@@ -46,10 +46,8 @@ import edu.csus.ecs.pc2.ui.judge.JudgeView;
  * 
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class AutoJudgingMonitor implements UIPlugin {
 
     private IInternalContest contest;
@@ -168,8 +166,6 @@ public class AutoJudgingMonitor implements UIPlugin {
         return "Auto Judging Monitor";
     }
 
-    
-    
     /**
      * Searches run database for run to auto judge.
      * 
@@ -317,12 +313,35 @@ public class AutoJudgingMonitor implements UIPlugin {
             startAutoJudging();
         }
 
+        @Override
         public void runChanged(RunEvent event) {
+            
+            
+            TimeZone tz = TimeZone.getTimeZone("GMT");
+            startTimeCalendar = new GregorianCalendar(tz);
+            fetchedRunFiles = event.getRunFiles();
+            fetchedRun = event.getRun();
+            
+            log.log(Log.INFO, "debug 22 event "+event.getAction()+" run="+event.getRun());
+            try {
+                executeAndAutoJudgeRun();
+            } catch (Exception e) {
+                log.log(Log.WARNING, "Problem attempting to judge run "+fetchedRun);
+            }
+            
+            cleanupLastAutoJudge();
+            
+        }
+        
+        // TODO i 496 remove old code old_runChanged
+        public void old_runChanged(RunEvent event) {
 
             // bug XXX added verification the run is directed to us
             if (runBeingAutoJudged != null && event.getRun().getElementId().equals(runBeingAutoJudged.getElementId())
                     && (event.getSentToClientId() != null && event.getSentToClientId().equals(contest.getClientId()))) {
                 // found the run we requested
+                
+                
 
                 if (fetchedRun == null) {
                     // start the time to judge
@@ -419,6 +438,12 @@ public class AutoJudgingMonitor implements UIPlugin {
         
         // and this is what allows us to get into that next attemptToFetchNewRun()
         setCurrentlyAutoJudging(false);
+        
+        /**
+         * send AVAILABLE_TO_AUTO_JUDGE packet to server.
+         */
+        controller.sendAvailableToAutoJudge(contest.getClientId());;
+        
     }
 
     private void setAlreadyJudgingRun(boolean b) {
@@ -747,7 +772,14 @@ public class AutoJudgingMonitor implements UIPlugin {
             // These are my settings
             
             if (clientSettings.isAutoJudging()){
+                
                 startAutoJudging();
+
+                /**
+                 * send AVAILABLE_TO_AUTO_JUDGE packet to server.
+                 */
+                controller.sendAvailableToAutoJudge(contest.getClientId());
+                
             } else {
                 stopAutoJudging();
             }

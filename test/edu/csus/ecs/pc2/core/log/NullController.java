@@ -669,4 +669,16 @@ public class NullController implements IInternalController{
     public boolean isSuppressLoginsPaneDisplay() {
         return false;
     }
+
+    @Override
+    public void sendAvailableToAutoJudge(ClientId judgeClientId) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void checkOutRun(ClientId clientId, Run run, boolean readOnly, boolean computerJudge) {
+        // TODO Auto-generated method stub
+        
+    }
 }

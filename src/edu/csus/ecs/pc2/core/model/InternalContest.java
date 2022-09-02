@@ -22,9 +22,8 @@ import edu.csus.ecs.pc2.core.exception.ProfileCloneException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.AccountList;
-import edu.csus.ecs.pc2.core.list.AvailableAJList;
-import edu.csus.ecs.pc2.core.list.AvailableAJRunList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
+import edu.csus.ecs.pc2.core.list.AutoJudgeManager;
 import edu.csus.ecs.pc2.core.list.BalloonSettingsList;
 import edu.csus.ecs.pc2.core.list.CategoryDisplayList;
 import edu.csus.ecs.pc2.core.list.CategoryList;
@@ -237,21 +236,32 @@ public class InternalContest implements IInternalContest {
      */
     private JudgementList judgementList = new JudgementList();
     
-    /**
-     * List of currently available AutoJudge clients (that is, Judge clients which have registered
-     * as being available to AutoJudge a set of problems).
-     */
-    private AvailableAJList availableAJList = new AvailableAJList();
     
     /**
-     * List of submitted runs currently awaiting dispatching to an available AutoJudge.
+     * A class that maintains a list of runs and auto judges that are available.
+     * 
      */
-    private AvailableAJRunList availableAJRunList = new AvailableAJRunList();
+    private AutoJudgeManager autoJudgeManager = new AutoJudgeManager();
     
-    /**
-     * Locking object for synchronizing access to the lists of available AutoJudges and runs waiting to be AutoJudged
-     */
-    Object ajLock = new Object();
+    // TODO i 496 remove old code availableAJList  
+//    /**     * List of currently available AutoJudge clients (that is, Judge clients which have registered
+//     * as being available to AutoJudge a set of problems).
+//     * deprecated  use AutoJudgeManager
+//     */
+//    private AvailableAJList availableAJList = new AvailableAJList();
+    
+    // TODO i 496 remove old code availableAJRunList
+//    /**
+//     * List of submitted runs currently awaiting dispatching to an available AutoJudge.
+//     * deprecated  use AutoJudgeManager
+//     */
+//    private AvailableAJRunList availableAJRunList = new AvailableAJRunList();
+    
+    // TODO i 496 remove old code ajLock
+//    /**
+//     * Locking object for synchronizing access to the lists of available AutoJudges and runs waiting to be AutoJudged
+//     */
+//    Object ajLock = new Object();
     
     private SecurityMessageHandler securityMessageHandler;
     
@@ -323,6 +333,9 @@ public class InternalContest implements IInternalContest {
 
             resetRunStatus(siteNum);
 
+            // TODO i 496 remove old code
+//            addAvailableAJRuns();
+
             clarificationList.loadFromDisk(siteNum);
             Clarification[] clarList = clarificationList.getList();
             for (int i = 0; i < clarList.length; i++) {
@@ -333,6 +346,29 @@ public class InternalContest implements IInternalContest {
             }
         }
     }
+
+    // TODO i 496 remove unused code
+//    /**
+//     * Add all computer judged runs for current site into AJ List.
+//     */
+//    private void addAvailableAJRuns() {
+//
+//        try {
+//            Run[] runs = runList.getList();
+//            for (Run run : runs) {
+//                Problem problem = getProblem(run.getProblemId());
+//                System.out.println("debug 22 cancelRun " + run + " " + problem);
+//                if (JudgementUtilites.isQueuedForComputerJudging(run) && JudgementUtilites.canBeAutoJudged(problem)) {
+//                    // only need to add run into avaiable AJ list.
+//                    addAvailableAutoJudgeRun(run);
+//                    StaticLog.getLog().log(Log.INFO, "Added run to to available AJ runs " + run);
+//                }
+//            }
+//        } catch (Exception e) {
+//
+//            StaticLog.getLog().log(Log.INFO, "Problem initially adding run(s) to available AJ list");
+//        }
+//    }
 
     /**
      * For each run reset to a non-checked out state. 
@@ -816,117 +852,123 @@ public class InternalContest implements IInternalContest {
 //                addRun(newRun);
 //            }
         }
-        
-        //check whether the problem for this run has been assigned for Auto-Judging
-        if (getProblem(newRun.getProblemId()).isComputerJudged()) {
-            
-            //yes, it's a run to be auto-judged; add it to the list of runs awaiting auto-judging
-            addRunToAJRunList(newRun);
-        }
-        
-        //attempt to assign any and all available runs to available AutoJudges
-        dispatchRunsToAutoJudges();
+
+        // TODO i 496 remove old code that adds and dispatches
+//        //check whether the problem for this run has been assigned for Auto-Judging
+//        if (getProblem(newRun.getProblemId()).isComputerJudged()) {
+//            
+//            //yes, it's a run to be auto-judged; add it to the list of runs awaiting auto-judging
+//            addRunToAJRunList(newRun);
+//        }
+//        
+//        //attempt to assign any and all available runs to available AutoJudges
+//        dispatchRunsToAutoJudges();
                 
         return newRun;
     }
 
-    /**
-     * This method adds the specified Run to the list of runs awaiting AutoJudging.
-     * 
-     * @param run the Run to be added to the waiting-for-AutoJudge list.
-     */
-    private void addRunToAJRunList(Run run) {
-        
-        //construct an AvailableAJRun from the specified input run
-        AvailableAJRun availableAJRun = new AvailableAJRun(run.getElementId(), run.getElapsedMS(), run.getProblemId());
-        
-        //ensure that we don't mess with the available-runs list while some other thread is doing so (for example, running inside method dispatchRunsToAutoJudges())
-        synchronized (ajLock) {
-            
-            //put the availableAJRun in the list of runs available for auto-judging
-            availableAJRunList.add(availableAJRun);
-        }
-    }
+    // TODO i 496 remove code, old code, remove commented out addRunToAJRunList
+//    /**
+//     * This method adds the specified Run to the list of runs awaiting AutoJudging.
+//     * 
+//     * @param run the Run to be added to the waiting-for-AutoJudge list.
+//     * @deprecated use {@link AutoJudgeManager#addRunToAutoJudge(Run)
+//     */
+//    private void addRunToAJRunList(Run run) {
+//        
+//        //construct an AvailableAJRun from the specified input run
+//        AvailableAJRun availableAJRun = new AvailableAJRun(run.getElementId(), run.getElapsedMS(), run.getProblemId());
+//        
+//        //ensure that we don't mess with the available-runs list while some other thread is doing so (for example, running inside method dispatchRunsToAutoJudges())
+//        synchronized (ajLock) {
+//            
+//            //put the availableAJRun in the list of runs available for auto-judging
+//            availableAJRunList.add(availableAJRun);
+//        }
+//    }
     
-    /**
-     * This method checks every run in the list of runs waiting for AutoJudging; if an available AJ can be found for the run
-     * then the run is "dispatched" to that AJ -- meaning, the method performs a "run checkout", sending the run to the chosen AJ.
-     */
-    private void dispatchRunsToAutoJudges() {
-        boolean done = false;
-        
-        while (!done) {
-            if ( availableAJList.size()<=0  || availableAJRunList.size()<=0 ) {
-                // there are either no available AJs or no runs waiting for AJs; nothing to dispatch
-                done = true;
-            } else {
-                
-                //there are available runs, or available AJs (or both); 
-                //ensure only one thread at a time can manipulate the available AJ and AJRuns lists
-                synchronized (ajLock) {
-                    
-                    AvailableAJ chosenJudge = null;
-                    AvailableAJRun chosenRun = null;
-                    //a list to keep track of runs on the "available AJ runs" list which actually get assigned to an AJ
-                    // (see comments below, where runs get added to this list)
-                    AvailableAJRunList assignedRunsList = new AvailableAJRunList();
-                    
-                    //check each run which is awaiting an AJ
-                    for (AvailableAJRun currentAJRun : availableAJRunList) {
-                        
-                        //try to find an AJ which can judge the current run (i.e. is configured for that problem)
-                        boolean foundJudge = false;
-                        for (AvailableAJ currentAJ : availableAJList) {
-                            
-                            //check if the problem for the current run can be judged by the current AJ
-                            if (currentAJ.canJudge(currentAJRun.getProblemId())) {
-                                
-                                //we found an AJ which can judge the current run
-                                foundJudge = true;
-                                chosenJudge = currentAJ;
-                                break;
-                            }
-                        }
-                        
-                        if (foundJudge) {
-                            
-                            //we found an available AJ that can judge the run; dispatch the run to that AJ
-                            assignRunToAutoJudge(chosenRun, chosenJudge);
-                            
-                            //remove the assigned judge from the list of available AJs
-                            availableAJList.remove(chosenJudge);
-                            
-                            //add the run to a list of runs which need to be removed from the "availableAJRuns" list.
-                            // (This is done rather than just immediately removing the run from the list in order to avoid 
-                            // "concurrent modification" exceptions which could occur if the run
-                            // was removed while the corresponding iterator is still active.)
-                            assignedRunsList.add(currentAJRun);
-                            
-                        }
-                        
-                    }//end for each availableRun
-                    
-                    // remove any runs which got dispatched to judges from the "available runs" list (see comment above)
-                    for (AvailableAJRun assignedRun : assignedRunsList) {
-                        availableAJRunList.remove(assignedRun);
-                    }
-                    
-                }//end synchronized block
-            }
-        }
-        
-    }
+    
+    // TODO i 496 remove old code for dispatchRunsToAutoJudges
+//    /**
+//     * This method checks every run in the list of runs waiting for AutoJudging; if an available AJ can be found for the run
+//     * then the run is "dispatched" to that AJ -- meaning, the method performs a "run checkout", sending the run to the chosen AJ.
+//     */
+//    private void dispatchRunsToAutoJudges() {
+//        boolean done = false;
+//        
+//        while (!done) {
+//            if ( availableAJList.size()<=0  || availableAJRunList.size()<=0 ) {
+//                // there are either no available AJs or no runs waiting for AJs; nothing to dispatch
+//                done = true;
+//            } else {
+//                
+//                //there are available runs, or available AJs (or both); 
+//                //ensure only one thread at a time can manipulate the available AJ and AJRuns lists
+//                synchronized (ajLock) {
+//                    
+//                    AvailableAJ chosenJudge = null;
+//                    AvailableAJRun chosenRun = null;
+//                    //a list to keep track of runs on the "available AJ runs" list which actually get assigned to an AJ
+//                    // (see comments below, where runs get added to this list)
+//                    AvailableAJRunList assignedRunsList = new AvailableAJRunList();
+//                    
+//                    //check each run which is awaiting an AJ
+//                    for (AvailableAJRun currentAJRun : availableAJRunList) {
+//                        
+//                        //try to find an AJ which can judge the current run (i.e. is configured for that problem)
+//                        boolean foundJudge = false;
+//                        for (AvailableAJ currentAJ : availableAJList) {
+//                            
+//                            //check if the problem for the current run can be judged by the current AJ
+//                            if (currentAJ.canJudge(currentAJRun.getProblemId())) {
+//                                
+//                                //we found an AJ which can judge the current run
+//                                foundJudge = true;
+//                                chosenJudge = currentAJ;
+//                                break;
+//                            }
+//                        }
+//                        
+//                        if (foundJudge) {
+//                            
+//                            //we found an available AJ that can judge the run; dispatch the run to that AJ
+//                            assignRunToAutoJudge(chosenRun, chosenJudge);
+//                            
+//                            //remove the assigned judge from the list of available AJs
+//                            availableAJList.remove(chosenJudge);
+//                            
+//                            //add the run to a list of runs which need to be removed from the "availableAJRuns" list.
+//                            // (This is done rather than just immediately removing the run from the list in order to avoid 
+//                            // "concurrent modification" exceptions which could occur if the run
+//                            // was removed while the corresponding iterator is still active.)
+//                            assignedRunsList.add(currentAJRun);
+//                            
+//                        }
+//                        
+//                    }//end for each availableRun
+//                    
+//                    // remove any runs which got dispatched to judges from the "available runs" list (see comment above)
+//                    for (AvailableAJRun assignedRun : assignedRunsList) {
+//                        availableAJRunList.remove(assignedRun);
+//                    }
+//                    
+//                }//end synchronized block
+//            }
+//        }
+//        
+//    }
 
-    /**
-     * This method performs a "run checkout", sending the specified run to the specified AJ.
-     * 
-     * @param run the Run which is to be assigned to the specified AJ.
-     * @param judge the available AutoJudge to which the run is to be dispatched.
-     */
-    private void assignRunToAutoJudge(AvailableAJRun run, AvailableAJ judge) {
-        throw new UnsupportedOperationException("Method InternalContest.assignRunToAutoJudge() has not yet been implemented...");
-        
-    }
+    // TODO i 496 remove old code
+//    /**
+//     * This method performs a "run checkout", sending the specified run to the specified AJ.
+//     * 
+//     * @param run the Run which is to be assigned to the specified AJ.
+//     * @param judge the available AutoJudge to which the run is to be dispatched.
+//     */
+//    private void assignRunToAutoJudge(AvailableAJRun run, AvailableAJ judge) {
+//        throw new UnsupportedOperationException("Method InternalContest.assignRunToAutoJudge() has not yet been implemented...");
+//
+//    }
 
     /**
      * Accept Clarification, add clar into this server.
@@ -3433,5 +3475,48 @@ public class InternalContest implements IInternalContest {
     @Override
     public String getCommandLineOptionValue(String optionNaeme) {
         return parseArguments.getOptValue(optionNaeme);
+    }
+
+    @Override
+    public AvailableAJ addAvailableAutoJudge(ClientId judgeClientId) {
+        AvailableAJ availableAJ = autoJudgeManager.addAvailableAutoJudge(this, judgeClientId);
+        return availableAJ;
+    }
+    
+    @Override
+    public AvailableAJRun addAvailableAutoJudgeRun(Run run) {
+        AvailableAJRun availableAJRun = autoJudgeManager.addRunToAutoJudge(run);
+        return availableAJRun;
+    }
+    
+
+    @Override
+    public void removeAvailableAutoJudge(ClientId judgeClientId) {
+        autoJudgeManager.removeAvailableAutoJudge(judgeClientId);
+    }
+    
+    @Override
+    public void removeAvailableAutoJudgeRun(Run run) {
+        autoJudgeManager.removeAutoJudgeRun(run);
+    }
+
+    @Override
+    public Run findRunToAutoJudge(ClientId judgeClientId) {
+        return autoJudgeManager.findRunToAutoJudge(this, judgeClientId);
+    }
+    
+    @Override
+    public ClientId findAutoJudgeForRun(Run run) {
+        return autoJudgeManager.findAutoJudgeForRun(run);
+    }
+
+    @Override
+    public List<AvailableAJ> getAvailableAutoJudges() {
+        return autoJudgeManager.getAvailableAJList();
+    }
+
+    @Override
+    public List<AvailableAJRun> getAvailableAutoJudgeRuns() {
+        return autoJudgeManager.getAvailableAJRuns();
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
@@ -558,5 +558,16 @@ public class NullController implements IInternalController {
     @Override
     public boolean isSuppressLoginsPaneDisplay() {
         return false;
+    }
+
+    @Override
+    public void sendAvailableToAutoJudge(ClientId judgeClientId) {
+        
+    }
+
+    @Override
+    public void checkOutRun(ClientId clientId, Run run, boolean readOnly, boolean computerJudge) {
+        // TODO Auto-generated method stub
+        
     }
 }

@@ -19,6 +19,7 @@ import java.util.Vector;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
+import edu.csus.ecs.pc2.AppConstants;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.clics.RunSubmitterInterfaceManager;
 import edu.csus.ecs.pc2.convert.EventFeedRun;
@@ -1709,6 +1710,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                             System.err.println("Security Violation Packet from non-logged in server " + packet);
                             info("Note: Security violation in packet: Packet from non-logged in server "+ packet);
                             log.info("Security Violation for packet " + packet);
+                            
+                            // TODO i 496 remove debugging code 
+//                            System.out.println("debug 22 less secure processed " + packet);
+//                            processPacket(packet, connectionHandlerID);  log.info("debug 22 less secure processed " + packet);
+                            
                        }
                         return;
                     } else {
@@ -2779,6 +2785,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             contest.setClientId(clientId);
 
             startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), clientId.getName(), clientId.getName());
+            
+            if (parseArguments.isOptPresent(AppConstants.CONSOLE_OPTION_STRING)) {
+                addConsoleLogging(); // // TODO i 496 remove console option
+            }
 
             boolean isServer = clientId.getClientType().equals(ClientType.Type.SERVER);
 
@@ -3466,11 +3476,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void checkOutRun(Run run, boolean readOnly, boolean computerJudge) {
         ClientId clientId = contest.getClientId();
         Packet packet = PacketFactory.createRunRequest(clientId, getServerClientId(), run, clientId, readOnly, computerJudge);
         sendToLocalServer(packet);
     }
+    
+    @Override
+    public void checkOutRun(ClientId clientId, Run run, boolean readOnly, boolean computerJudge) {
+        Packet packet = PacketFactory.createRunRequest(clientId, getServerClientId(), run, clientId, readOnly, computerJudge);
+        sendToLocalServer(packet);
+    }
+
 
     public void checkOutRejudgeRun(Run run) {
         ClientId clientId = contest.getClientId();
@@ -4689,6 +4707,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideRunId);
         sendToLocalServer(packet);
         
+    }
+
+    @Override
+    public void sendAvailableToAutoJudge(ClientId judgeClientId) {
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Packet packet = PacketFactory.createAvaiableToAutoJudge(judgeClientId, serverClientId);
+        sendToLocalServer(packet);
     }
     
 }

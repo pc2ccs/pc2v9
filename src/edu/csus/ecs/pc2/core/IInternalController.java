@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
@@ -70,10 +70,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * 
  * @see edu.csus.ecs.pc2.Starter
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public interface IInternalController {
 
     /**
@@ -760,5 +758,24 @@ public interface IInternalController {
      * @param overrideRunId
      */
     void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId);
+
+    /**
+     * Send available to auto judge for current judge to server.
+     * 
+     * Send AVAILABLE_TO_AUTO_JUDGE packet.
+     * 
+     * @param judgeClientId - client Id for judge.
+     */
+    void sendAvailableToAutoJudge(ClientId judgeClientId);
+
+    /**
+     * Check out run, specifying who checked it out.
+     * 
+     * @param clientId who checked out run
+     * @param run
+     * @param readOnly
+     * @param computerJudge
+     */
+    void checkOutRun(ClientId clientId, Run run, boolean readOnly, boolean computerJudge);
 
 }
