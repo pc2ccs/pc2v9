@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.BufferedReader;
@@ -94,7 +94,7 @@ public class RemoteEventFeedMonitor implements Runnable {
      * @param pc2Controller an {@link IInternalController} for passing error handling back to the local PC2 system
      * @param remoteContestAPIAdapter an adapter for accessing the remote contest API
      * @param remoteURL the URL to the remote CCS
-     * @param login the login (account) on the remote CCS
+     * @param k the login (account) on the remote CCS
      * @param password the password to the remote CCS account
      * @param submitter a {@link Runnable} which knows how to submit a receive remote run to PC2
      */
@@ -491,26 +491,42 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     }
                                     log.log(Level.INFO, "Found judgement event: " + event);
 
-                                    //process a judgement event
+                                    //process a judgment event
                                     try {
                                         //get a map of the data elements for the judgement
                                         Map<String, Object> judgementEventDataMap = (Map<String, Object>) eventMap.get("data");
-
-                                        // check if this is a "delete" event
                                         String operation = (String) eventMap.get("op");
-                                        if (operation != null && operation.equals("delete")) {
-                                            
-                                            //it is a delete; remove from the global map the judgement whose ID is specified
-                                            String idToDelete = (String) judgementEventDataMap.get("id");
-                                            synchronized (remoteJudgementsMapLock) {
-                                                getRemoteJudgementsMap().remove(idToDelete);
-                                            }
-
-                                            //TODO: how do we notify the local PC2 system that this judgement should be deleted??
-
+                                        String idToDelete = null;
+                                        boolean isDelete = false;
+                                        
+                                        // check if this is a "delete" event
+                                        // For the 2022-07 (and 2021-11) clics spec, "operation" will always be null since the "op" field was removed
+                                        // For the 2020-03 the "op" field will be non-null.  This is how we determine the feed type.                                        
+                                       if (operation == null) {
+                                           // 2022-07 feed - the ID of the judgment is in the notification object since there is
+                                           // no data object.
+                                           isDelete = true;
+                                           idToDelete = (String)eventMap.get("id");
+                                       } else if(operation.equals("delete")) {
+                                           // 2020-03 feed, "op" field present and is an explicit delete, judgment id is in "data" object
+                                           isDelete = true;
+                                           // there better be a "data" object, if not, we just ignore this message
+                                           if(judgementEventDataMap != null) {
+                                               idToDelete = (String) judgementEventDataMap.get("id");
+                                           }
+                                       }
+                                       if(isDelete) {
+                                           // idToDelete obtained from different "id" fields above depending on feed version
+                                           if(idToDelete != null) {
+                                               // we have a judgement id; remove from the global map the judgment whose ID is specified
+                                                synchronized (remoteJudgementsMapLock) {
+                                                    getRemoteJudgementsMap().remove(idToDelete);
+                                                }
+                                                //TODO: how do we notify the local PC2 system that this judgment should be deleted??
+                                           }
                                         } else {
-                                            //it's not a delete; see if there is an actual judgement (acronym) in the event data
-                                            // (there might not be such an element; "create" operations do not always have a judgement)
+                                            //it's not a delete; see if there is an actual judgment (acronym) in the event data
+                                            // (there might not be such an element; "create" operations do not always have a judgment)
                                             String judgement = (String) judgementEventDataMap.get("judgement_type_id");
                                             if (judgement != null && !judgement.equals("")) {
 
