@@ -110,4 +110,23 @@ public class AvailableAJ {
         return false;
     }
     
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof AvailableAJ) {
+            AvailableAJ otherAvailableAJ = (AvailableAJ) obj;
+            return clientId.equals(otherAvailableAJ.getClientId());
+        } else {
+            throw new ClassCastException("expected a AvailableAJ found: " + obj.getClass().getName());
+        }
+    }
+    
+    public int hashCode() {
+        return clientId.toString().hashCode();
+    }
 }

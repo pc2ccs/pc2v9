@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 /**
@@ -42,4 +43,23 @@ public class AvailableAJRun {
         return problemId;
     }
     
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof AvailableAJRun) {
+            AvailableAJRun otherAvailableAJRun = (AvailableAJRun) obj;
+            return runId.equals(otherAvailableAJRun.getRunId());
+        } else {
+            throw new ClassCastException("expected a AvailableAJRun found: " + obj.getClass().getName());
+        }
+    }
+    
+    public int hashCode() {
+        return runId.toString().hashCode();
+    }
 }
