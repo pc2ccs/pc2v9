@@ -134,13 +134,29 @@ public class AutoJudgeManager  {
                         //check if the problem for the current run can be judged by the current AJ
                         if (currentAJ.canJudge(currentAJRun.getProblemId())) {
                             
-                            // remove AJRun
-                            availableAJRunList.remove(currentAJRun);
+                            try {
+                                // remove Judge from list
+                                availableAJList.remove(currentAJ);
+                                
+                                try {
                             
-                            // remove Judge 
-                            availableAJList.remove(currentAJ);
+                                    // remove AJRun from list
+                                    availableAJRunList.remove(currentAJRun);
+                                    
+                                    return contest.getRun(currentAJRun.getRunId());
+                                    
+                                } catch (Exception e) {
+                                    
+                                    log(Level.WARNING, "Problem removing run from list "+currentAJRun+" adding AJ back into list "+currentAJ, e);
+                                    
+                                    //  Add Judge back into list because/when run could not be removed from list.
+                                    availableAJList.add(currentAJ);
+                                }
+                                
+                            } catch (Exception e) {
+                                log(Level.WARNING, "Problem removing judge from list "+currentAJ+" ", e);
+                            }
                             
-                            return contest.getRun(currentAJRun.getRunId());
                         }
                     } catch (Exception e) {
                         log(Level.WARNING, "Problem assigning run to judge "+currentAJ.getClientId()+" "+getRun(contest, currentAJRun.getRunId()));
@@ -158,13 +174,24 @@ public class AutoJudgeManager  {
      * @param warning
      * @param string
      */
-    private void log(Level level, String string) {
+    private void log(Level level, String message) {
 
         try {
-            StaticLog.getLog().log(level, string);
+            StaticLog.getLog().log(level, message);
         } catch (Exception e) {
-            System.err.println("Unable to write message to StaticLog " + e.getMessage());
-            System.err.println(string);
+            System.err.println("Unable to write message to StaticLog " + e.getMessage()+" "+message);
+            System.err.println(message);
+        }
+
+    }
+    
+    private void log(Level level, String message, Throwable throwable) {
+
+        try {
+            StaticLog.getLog().log(level, message, throwable);
+        } catch (Exception e) {
+            System.err.println("Unable to write message to StaticLog " + e.getMessage()+" "+message);
+            throwable.printStackTrace(System.err);
         }
 
     }
