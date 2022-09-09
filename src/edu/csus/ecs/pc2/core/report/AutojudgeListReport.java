@@ -140,7 +140,7 @@ public class AutojudgeListReport implements IReportFile {
             List<Problem> list = Arrays.asList(problems);
             
             List<String> problemStrings = list.stream() //
-                    .flatMap(p -> Stream.of(p.getShortName())) //
+                    .flatMap(p -> Stream.of(p.getLetter()+" - "+p.getShortName())) //
                     .collect(Collectors.toList());
             
             problemListString = String.join(", ",  problemStrings);
