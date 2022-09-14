@@ -161,6 +161,7 @@ public final class Reports {
         reports.add(new ProblemsGroupReport());
         
         reports.add(new ProblemGroupAssignmentReport());
+        reports.add(new ScoreboardJSONReport());
         
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 
