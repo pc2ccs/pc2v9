@@ -375,11 +375,13 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 SitesPane sitesPanel = new SitesPane();
                 addUIPlugin(getRunContestTabbedPane(), "Sites", sitesPanel);
 
-                StandingsTablePane standingsTablePane = new StandingsTablePane();
-                addUIPlugin(getRunContestTabbedPane(), "Standings", standingsTablePane);
+                if (Utilities.isShowStandingsPanes()) {
+                    StandingsTablePane standingsTablePane = new StandingsTablePane();
+                    addUIPlugin(getRunContestTabbedPane(), "Standings", standingsTablePane);
 
-                StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
-                addUIPlugin(getRunContestTabbedPane(), "Standings HTML", standingsHTMLPane);
+                    StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
+                    addUIPlugin(getRunContestTabbedPane(), "Standings HTML", standingsHTMLPane);
+                }
 
                 TeamStatusPane teamStatusPane = new TeamStatusPane();
                 addUIPlugin(getRunContestTabbedPane(), "Team Status", teamStatusPane);

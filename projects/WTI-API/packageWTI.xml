@@ -2,6 +2,12 @@
 
 <project name="package-WTI" default="archives" basedir=".">
 	
+    <property environment="env"/>
+    <condition property="exists.GITHUB_RUN_NUMBER">
+        <isset property="env.GITHUB_RUN_NUMBER"/>
+    </condition>
+    <property name="lastGITLABbuild" value="6259" />
+
 	<!-- import buildWTI.xml instead of duplicating properties -->
     <import file="buildWTI.xml"/>
 
@@ -59,28 +65,38 @@
 		<echo message="Staged project files at ${staging.dist.dir}"/>
 	</target>
 
-	<!-- set the value of ${repo.version} --> 
-    <target name="gitversion">
-		<available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
-    	
-    	<!-- set ${git-hash} to either to the value of GIT_COMMIT if it exists in the environment, or HEAD if it doesn't -->
-         <condition property="git_hash" value="${env.GIT_COMMIT}" else="HEAD">
-            <isset property="env.GIT_COMMIT"/>
-        </condition>
-    	
-    	<!-- call git to obtain the number (count) of the most recent version associated with the value of ${git-hash} -->
+    <target name="-execgit" unless="exists.GITHUB_RUN_NUMBER">
         <exec executable="git" outputproperty="repo.version" failifexecutionfails="false" errorproperty="">
             <arg value="rev-list"/>
             <arg value="${git_hash}"/>
             <arg value="--count"/>
         </exec>
-    	
         <!-- if above failed, set the repo.version to 0 -->
         <condition property="repo.version" value="0">
             <not>
                <isset property="repo.version"/>
             </not>
         </condition>
+    </target>
+    <target name="-getenv" if="exists.GITHUB_RUN_NUMBER">
+       <add operand1="${lastGITLABbuild}" operand2="${env.GITHUB_RUN_NUMBER}" result="repo.version0"/>
+<!--
+TODO consider switching back to this at 9.8.0/9.9build
+        <property name="repo.version0" value="${env.GITHUB_RUN_NUMBER}"/>
+-->
+        <condition property="version.add" value="~${env.GITHUB_REF_NAME}" else="">
+           <not>
+               <equals arg1="${env.GITHUB_REF_NAME}" arg2="master"/>
+           </not>
+        </condition>
+        <property name="repo.version" value="${repo.version0}${version.add}"/>
+
+    </target>
+
+
+    <target name="packaging" depends="-execgit, -getenv">
+		<available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+    	
 	</target>
     	
 	<!-- zip all the staged files, and construct checksum files for the zip file -->
@@ -103,7 +119,7 @@
     </target>
 	
 	<!-- create zip and tar archives of the files found in ${staging.dir} -->
-    <target name="archives" depends="stage_files, gitversion" description="construct zip/tar archives">
+    <target name="archives" depends="stage_files, packaging" description="construct zip/tar archives">
 
         <property name="zip.name" value="${release}-${repo.version}.zip"/>
         <property name="zip.path" value="${staging.dist.dir}/${zip.name}"/>
