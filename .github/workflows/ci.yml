@@ -1,0 +1,153 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: pc2fromecs/jdk8hugo
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14.17.x
+          cache: npm
+          cache-dependency-path: projects/WTI-UI/package.json
+
+      - name: Build
+        run: ant -noinput -buildfile package.xml
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: dist/*
+
+  push-release:
+    runs-on: ubuntu-latest
+    container: pc2fromecs/jdk8hugo
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: dist
+      - name: Create GitHub release
+        shell: bash
+        run: |
+          git config --global --add safe.directory ${GITHUB_WORKSPACE}
+          eval $(ssh-agent -s)
+          echo "${{ secrets.SSH_PRIVATE_KEY_WEBSITE }}" | tr -d '\r' | ssh-add -
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+          git config --global user.email "pc2@troyspaws.com"
+          git config --global user.name "PC2 bot"
+          export VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
+          export VERSION1=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#' | sed 's/~.*//'`
+          if [ github.ref == 'refs/heads/master' ]; then
+             TARGET=builds
+          else
+             TARGET=nightly-builds
+          fi
+          cur_dir=`pwd`
+          mkdir ~/builds
+          cd ~/builds
+          git clone git@github.com:${GITHUB_REPOSITORY_OWNER}/${TARGET}.git .
+          # a commit is needed to associate to a release
+          git commit --allow-empty -m "Add build $VERSION"
+          git push
+          RELEASE_COMMIT=$(git rev-parse HEAD)
+          cd "$cur_dir"
+          curl --silent --show-error --retry 6 --retry-all-errors --max-time 300 -X POST \
+            -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            ${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY_OWNER}/${TARGET}/releases \
+             -d '{"tag_name":"'"v$VERSION1"'", "name":"'"v$VERSION"'", "prerelease": true, "target_commitish": "'"$RELEASE_COMMIT"'" }' | \
+             tee ~/new-release.txt
+          RELEASE_ASSET_UPLOAD_URL=$(cat ~/new-release.txt | jq .upload_url | sed -e 's/"//g' -e 's#/assets{.*#/assets#' )
+          cd dist
+          echo "Uploading release $VERSION using URL $RELEASE_ASSET_UPLOAD_URL"
+          for archive in *.zip *.gz
+          do
+            echo $archive...
+            case "$archive" in
+              *.zip)
+                  curl --silent --show-error --retry 6 --retry-all-errors --max-time 300 --data-binary "@$archive" -X POST \
+                    -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                    -H 'Accept: application/vnd.github.v3+json' \
+                    -H 'Content-Type: application/zip' \
+                    ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive \
+                    | jq .state 
+                ;;
+              *.tar.gz)
+                  curl --silent --show-error --retry 6 --retry-all-errors --max-time 300 --data-binary "@$archive" -X POST \
+                    -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                    -H 'Accept: application/vnd.github.v3+json' \
+                    -H 'Content-Type: application/gzip' \
+                    ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive \
+                    |  jq .state
+                ;;
+            esac
+            if [ -f $archive.sha256.txt ]; then
+                echo $archive.sha256.txt...
+                curl --silent --show-error --retry 6 --retry-all-errors --max-time 300 --data-binary "@$archive.sha256.txt" -X POST \
+                    -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                    -H 'Accept: application/vnd.github.v3+json' \
+                    -H 'Content-Type: text/plain' \
+                    ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive.sha256.txt \
+                    |  jq .state
+            fi
+            if [ -f $archive.sha512.txt ]; then
+                echo $archive.sha512.txt...
+                curl --silent --show-error --retry 6 --retry-all-errors --max-time 300 --data-binary "@$archive.sha512.txt" -X POST \
+                    -H "Authorization: token ${{ secrets.RELEASE_TOKEN }}" \
+                    -H 'Accept: application/vnd.github.v3+json' \
+                    -H 'Content-Type: text/plain' \
+                    ${RELEASE_ASSET_UPLOAD_URL}\?name=$archive.sha512.txt \
+                    |  jq .state
+            fi
+          done
+          
+  update-website:
+    runs-on: ubuntu-latest
+    container: pc2fromecs/jdk8hugo
+    needs: push-release
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: dist
+      - name: Push release to website
+        shell: bash
+        run: |
+          eval $(ssh-agent -s)
+          echo "${{ secrets.SSH_PRIVATE_KEY_WEBSITE }}" | tr -d '\r' | ssh-add -
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
+          git config --global user.email "pc2@troyspaws.com"
+          git config --global user.name "PC2 bot"
+          website/scripts/populate-releases.py ${{ secrets.RELEASE_TOKEN }}
+          mkdir ~/website
+          git clone git@github.com:pc2ccs/pc2ccs.github.io.git ~/website
+          ln -s ~/website website/public
+          cd website
+          hugo
+          cd ~/website
+          git add .
+          git commit --allow-empty -m "Update website for pc2v9 commit $GITHUB_SHA"
+          git push
