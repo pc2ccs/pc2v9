@@ -41,7 +41,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.report.ContestSummaryReports;
 import edu.csus.ecs.pc2.ui.AboutPane;
-import edu.csus.ecs.pc2.ui.ConnectionsPane;
+import edu.csus.ecs.pc2.ui.ConnectionsTablePane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.EventFeedServerPane;
 import edu.csus.ecs.pc2.ui.ExportDataPane;
@@ -49,7 +49,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LoadContestPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
-import edu.csus.ecs.pc2.ui.LoginsPane;
+import edu.csus.ecs.pc2.ui.LoginsTablePane;
 import edu.csus.ecs.pc2.ui.MessageMonitorPane;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
@@ -483,7 +483,7 @@ public class ServerView extends JFrame implements UIPlugin {
         ServerListeners serverListeners = new ServerListeners();
         registerPlugin(serverListeners);
 
-        ConnectionsPane connectionsPane = new ConnectionsPane();
+        ConnectionsTablePane connectionsPane = new ConnectionsTablePane();
         addUIPlugin(getMainTabbedPane(), "Connections", connectionsPane);
 
         if (Utilities.isDebugMode()) {
@@ -507,7 +507,7 @@ public class ServerView extends JFrame implements UIPlugin {
             }
         }
         
-        LoginsPane loginsPane = new LoginsPane();
+        LoginsTablePane loginsPane = new LoginsTablePane();
         addUIPlugin(getMainTabbedPane(), "Logins", loginsPane);
 
         if (Utilities.isDebugMode()) {

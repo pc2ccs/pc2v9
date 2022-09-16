@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
@@ -35,7 +35,7 @@ public class RunList implements Serializable {
      * List of runs.
      */
     private Hashtable<String, Run> runHash = new Hashtable<String, Run>(200);
-    
+
     /**
      * Lock for accessing list of runs.
      */
@@ -52,9 +52,16 @@ public class RunList implements Serializable {
 
     private LinkedList<String> backupList = new LinkedList<String>();
     
+    private RunListWriteThread runListWriteThread = null;
+    
+    private Object runListWriteLock = new Object();
+
+    private Object diskWriteLock = new Object();
+
     public RunList() {
         saveToDisk = false;
         nextRunNumber = getINIBaseRunNumber();
+        createAndStartRunListWriteThread();
     }
 
     private int getINIBaseRunNumber() {
@@ -79,7 +86,7 @@ public class RunList implements Serializable {
         } else {
             retVal = 1;
         }
-        
+
         return retVal;
     }
 
@@ -110,7 +117,7 @@ public class RunList implements Serializable {
         add(run);
         return run;
     }
-    
+
     /**
      * Add a run into the run list, no changes.
      * @param run
@@ -126,7 +133,7 @@ public class RunList implements Serializable {
             writeToDisk();
         }
     }
-    
+
 
     /**
      * Get a run from the list.
@@ -175,7 +182,7 @@ public class RunList implements Serializable {
      * @throws IOException 
      */
     public boolean delete(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
-        
+
         synchronized (runHashLock) {
             Run fetchedRun = get(getRunKey(run));
             if (fetchedRun == null) {
@@ -186,7 +193,7 @@ public class RunList implements Serializable {
         }
         writeToDisk();
         return true;
-        
+
 
     }
 
@@ -271,7 +278,7 @@ public class RunList implements Serializable {
         }
         writeToDisk();
     }
-    
+
     public Enumeration <Run> getRunList() {
         synchronized (runHashLock) {
             return runHash.elements();
@@ -281,8 +288,8 @@ public class RunList implements Serializable {
     protected String getFileName() {
         return storage.getDirectoryName() + File.separator + "runlist.dat";
     }
-    
-    
+
+
     public String getBackupFilename() {
         return storage.getDirectoryName() + File.separator + "runlist." + Utilities.getDateTime() + "." + System.nanoTime() + ".dat";
     }
@@ -297,30 +304,17 @@ public class RunList implements Serializable {
      * @throws IOException
      * 
      */
-    private synchronized boolean writeToDisk() throws IOException, ClassNotFoundException, FileSecurityException {
+    private boolean writeToDisk() throws IOException, ClassNotFoundException, FileSecurityException {
+
         if (!isSaveToDisk()) {
             return false;
         }
         
-        boolean stored;
-        String fileName = getFileName();
-        String backupFilename = getBackupFilename();
-        
-        synchronized (runHashLock) {
-            stored = storage.store(fileName, runHash);
-            storage.store(backupFilename, runHash);
-        }
-        
-        backupList.add(backupFilename);
-        while(backupList.size() > 100) {
-            String removeBackupFile = backupList.removeFirst();
-            File file = new File(removeBackupFile);
-            if (file.exists()) {
-                file.delete();
-            }
+        synchronized (runListWriteLock) {
+            runListWriteLock.notify();
         }
 
-        return stored;
+        return true;
     }
 
     /**
@@ -398,19 +392,108 @@ public class RunList implements Serializable {
             logException("Unable to copy run info files " + getFileName() + " to " + storage2.getDirectoryName(), e);
         }
     }
-    
+
     private void logException(String string, Exception e) {
-        //TODO:  huh?  the following two lines say "if X is null then call a method on X".  Doesn't make sense. Maybe should be "if != null"?  jlc
-        if (StaticLog.getLog() == null) {
+        if (StaticLog.getLog() != null) {
             StaticLog.getLog().log(Log.WARNING, string, e);
         } else {
             System.err.println(string + " " + e.getMessage());
             e.printStackTrace(System.err);
         }
     }
-    
+
     public int getNextRunNumber() {
         return nextRunNumber;
+    }
+
+    /**
+     * Backup and store run list.
+     * @return true if run list and backup done.
+     */
+    boolean backupAndWriteRunList() {
+
+        boolean stored = false;
+
+        String fileName = getFileName();
+
+        String backupFilename;
+
+        Hashtable<String, Run> copyofRunHash;
+
+        try {
+
+            synchronized (runHashLock) {
+                backupFilename = getBackupFilename();
+
+                try {
+                    File currentRunList = new File(fileName);
+                    File backupRunList = new File(backupFilename);
+
+                    currentRunList.renameTo(backupRunList);
+                } catch (Exception e) {
+                    StaticLog.getLog().log(Log.WARNING, "FAILED to rename current " + fileName + " to " + backupFilename, e);
+                }
+
+                copyofRunHash = new Hashtable<String, Run>(runHash);
+            }
+            
+            synchronized (diskWriteLock) {
+                stored = storage.store(fileName, copyofRunHash);
+            }
+            stored = true;
+
+            backupList.add(backupFilename);
+            while (backupList.size() > 100) {
+                String removeBackupFile = backupList.removeFirst();
+                File file = new File(removeBackupFile);
+                if (file.exists()) {
+                    file.delete();
+                }
+            }
+
+        } catch (Exception e) {
+            StaticLog.getLog().log(Log.WARNING, "Problem storing or backing up run list", e);
+        }
+
+        return stored;
+    }
+    
+    
+    public RunListWriteThread createAndStartRunListWriteThread() {
+        if (runListWriteThread == null) {
+            runListWriteThread = new RunListWriteThread();
+            runListWriteThread.start();
+        }
+        
+        return runListWriteThread;
+    }
+    
+    
+    /**
+     * Thread that writes that backs up and writes run list file.
+     * 
+     * @author Douglas A. Lane <pc2@ecs.csus.edu>
+     *
+     */
+    class RunListWriteThread extends Thread {
+
+        @Override
+        public void run() {
+            try {
+
+                synchronized (runListWriteLock) {
+                    while (true) {
+                        runListWriteLock.wait();
+                        backupAndWriteRunList();
+                        
+                    }
+                }
+
+            } catch (Exception e) {
+                StaticLog.getLog().log(Log.WARNING, "Problem storing or backing up run list", e);
+            }
+
+        }
     }
 
 }
