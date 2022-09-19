@@ -151,12 +151,6 @@ public interface IContestLoader {
     String INTERPRETED_LANGUAGE_KEY = "interpreted";
 
     String READ_FROM_STDIN_KEY = "readFromSTDIN";
-
-    /**
-     * output validators directory name.
-     */
-    final String OUTPUT_VALIDATORS = "output_validators";
-
     
     //keys for YAML entries specifying data for Input Validators:
     String INPUT_VALIDATOR_KEY = "input_validator"; //the section header for Input Validator info
