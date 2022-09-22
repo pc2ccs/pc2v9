@@ -11,8 +11,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.AppConstants;
-
 /**
  * Parses command line options and arguments, give access to options, values after options and arguments after options.
  * <P>
