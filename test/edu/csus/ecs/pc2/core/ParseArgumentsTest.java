@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import junit.framework.TestCase;
@@ -133,25 +133,6 @@ public class ParseArgumentsTest extends TestCase {
         ParseArgumentsTest t = new ParseArgumentsTest();
         t.testIsOptPresent();
         t.testAreOptsValid();
-//      if(false) {
-//      ParseArguments pa = new ParseArguments();
-//      pa.loadArgs(args);
-//      pa.dumpArgs(System.out);
-//      System.out.println();
-//      
-//      String [] reqArgs = { "--l", "--file" };
-//
-//      System.out.print("Using required arguments:");
-//      for (String s : reqArgs){
-//          System.out.print(" "+s);
-//      }
-//      System.out.println();
-//      
-//      pa = new ParseArguments();
-//      pa.setRequireArgOpts(reqArgs);
-//      pa.loadArgs(args);
-//      pa.dumpArgs(System.out);
-//      }
     }
 
 }

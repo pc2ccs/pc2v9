@@ -480,6 +480,8 @@ public class ParseArguments {
     
     /**
      * Set options which require a value.
+     * Replaces the array of options that require an argument with the array
+     * of supplied options (newRequireArgOpts)
      *
      * @param newRequireArgOpts
      *            java.lang.String[]
@@ -490,6 +492,8 @@ public class ParseArguments {
 
     /**
      * Set option which requires a value.
+     * Replaces the array of options that require an argument with an array
+     * consisting of the single supplied option (newRequireArgOpts)
      *
      * @param newRequireArgOpts
      *            java.lang.String
@@ -500,7 +504,9 @@ public class ParseArguments {
     }
 
     /**
-     * Set options which are allowed
+     * Set options which are allowed.  
+     * Replaces the array of allowed options with the supplied array of
+     * allowed options (newAllowedOpts)
      *
      * @param newAllowedOpts
      *            java.lang.String[]
@@ -511,6 +517,8 @@ public class ParseArguments {
 
     /**
      * Set a single allowed option.
+     * This replaces the array of allowed options with an array consisting of
+     * the single supplied option (newAllowedOpt)
      *
      * @param newAllowedOpt
      *            java.lang.String
