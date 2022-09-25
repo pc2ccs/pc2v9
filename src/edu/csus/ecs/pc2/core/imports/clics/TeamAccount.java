@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports.clics;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
 
 /**
- * A JSON representation for the ICPC teams.json data.
+ *  A JSON representation for the CLICS API teams json data.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
