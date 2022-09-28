@@ -186,7 +186,12 @@ public class ShadowControlPane extends JPanePlugin {
                     } else {
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
-                                stopShadowing();
+
+                                int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to stop shadowing?", "Stop Shadowing");
+
+                                if (result == JOptionPane.YES_OPTION) {
+                                    stopShadowing();
+                                }
                             }
                         });
 
