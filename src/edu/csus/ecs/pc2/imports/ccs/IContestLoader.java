@@ -32,6 +32,8 @@ public interface IContestLoader {
     String DEFAULT_PROBLEM_SET_YAML_FILENAME = "problemset.yaml";
     
     String DEFAULT_PROBLEM_LATEX_FILENAME = "problem.tex";
+    
+    String DEFAULT_ENGLISH_PROBLEM_LATEX_FILENAME = "problem.en.tex";
 
     String DEFAULT_SYSTEM_YAML_FILENAME = "system.yaml";
     
