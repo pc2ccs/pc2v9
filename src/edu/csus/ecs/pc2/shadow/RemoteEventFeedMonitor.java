@@ -42,6 +42,8 @@ import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
  */
 public class RemoteEventFeedMonitor implements Runnable {
 
+    public static final int REMOTE_EVENT_FEED_DELAYMS = 500;
+    
     private IRemoteContestAPIAdapter remoteContestAPIAdapter;
     private URL remoteURL;
     private String login;
@@ -115,6 +117,7 @@ public class RemoteEventFeedMonitor implements Runnable {
     
     @Override
     public void run() {
+        boolean bDelay;
         
         Thread.currentThread().setName("RemoteEventFeedMonitorThread");
 
@@ -166,11 +169,11 @@ public class RemoteEventFeedMonitor implements Runnable {
                     // So it was determined that the following was the best solution, at least in the short term...
                     //See also GitHub Issue 267:  https://github.com/pc2ccs/pc2v9/issues/267
                     // Thread.sleep(10);
-                    
-                    if ((!event.contains("\"type\": \"organizations\"")) && (!event.contains("\"type\": \"runs\""))) {
-                        Thread.sleep(500);
-                    }
-                    
+                    // We now set a flag indicating if we want to delay at the END of the loop.  Any message we want to
+                    // delay for will set the bDelay to true, such as submissions and judgements (which is currently all we process anyway)
+                    // by default, we will NOT delay.  This lets messages like organizations, runs, teams, etc, fly by quickly.
+                    bDelay = false;
+                   
                     //skip blank lines and any that do not start/end with "{...}"
                     if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
                         
@@ -256,6 +259,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             continue;
                                         }
 
+                                        // This is the commit point for a submission, so we will want to delay at the end of the loop
+                                        bDelay = true;
+                                        
                                         //convert submission data into a ShadowRunSubmission object
                                         ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
 
@@ -486,6 +492,9 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                 } else if ("judgements".equals(eventType)) {
                                     
+                                    // Delay on judgements
+                                    bDelay = true;
+                                    
                                     if (Utilities.isDebugMode()) {
                                         System.out.println("Found judgement event: " + event);
                                     }
@@ -603,6 +612,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                         }
                     }
                     
+                    if(bDelay) {
+                        Thread.sleep(REMOTE_EVENT_FEED_DELAYMS);
+                    }
                     event = reader.readLine();
 
                 } // while
