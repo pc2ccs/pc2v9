@@ -1,0 +1,179 @@
+{"type":"contests", "id":"pc2-1", "op":"create", "data": {"id":"Default-1071869245148443774","name":"PacNW Mini","formal_name":"Pac NW Mini Contest","start_time":"2016-11-04T18:30:00.000-07","duration":"2:00:00","scoreboard_freeze_duration":"01:00:00","penalty_time":20}}
+{"type":"state", "id":"pc2-2", "op":"create", "data": {}}
+{"type":"judgement-types", "id":"pc2-3", "op":"create", "data": {"id":"AC","name":"Yes","penalty":false,"solved":true}}
+{"type":"judgement-types", "id":"pc2-4", "op":"create", "data": {"id":"CE","name":"No - Compilation Error","penalty":false,"solved":false}}
+{"type":"judgement-types", "id":"pc2-5", "op":"create", "data": {"id":"RTE","name":"No - Run-time Error","penalty":true,"solved":false}}
+{"type":"judgement-types", "id":"pc2-6", "op":"create", "data": {"id":"TLE","name":"No - Time Limit Exceeded","penalty":true,"solved":false}}
+{"type":"judgement-types", "id":"pc2-7", "op":"create", "data": {"id":"WA","name":"No - Wrong Answer","penalty":true,"solved":false}}
+{"type":"judgement-types", "id":"pc2-8", "op":"create", "data": {"id":"EO","name":"No - Excessive Output","penalty":true,"solved":false}}
+{"type":"judgement-types", "id":"pc2-9", "op":"create", "data": {"id":"OFE","name":"No - Output Format Error","penalty":true,"solved":false}}
+{"type":"judgement-types", "id":"pc2-10", "op":"create", "data": {"id":"OCS","name":"No - Other - Contact Staff","penalty":true,"solved":false}}
+{"type":"languages", "id":"pc2-11", "op":"create", "data": {"id":"Java-1830893526185063544","name":"Java"}}
+{"type":"languages", "id":"pc2-12", "op":"create", "data": {"id":"GNU_C-2557208361663346707","name":"GNU C"}}
+{"type":"languages", "id":"pc2-13", "op":"create", "data": {"id":"GNU_C++--3362936011185130798","name":"GNU C++"}}
+{"type":"languages", "id":"pc2-14", "op":"create", "data": {"id":"Python2-2935943277801972186","name":"Python2"}}
+{"type":"languages", "id":"pc2-15", "op":"create", "data": {"id":"Python3-9073564329594283194","name":"Python3"}}
+{"type":"languages", "id":"pc2-16", "op":"create", "data": {"id":"C#-7113718510246209530","name":"C#"}}
+{"type":"problems", "id":"pc2-17", "op":"create", "data": {"id":"sumit","label":"A","name":"Sumit","ordinal":1,"color":"Black","rgb":"#000000","test_data_count":7}}
+{"type":"groups", "id":"pc2-18", "op":"create", "data": {"id":"12545","icpc_id":"12545","name":"Canada - University of British Columbia D1"}}
+{"type":"groups", "id":"pc2-19", "op":"create", "data": {"id":"312545","icpc_id":"312545","name":"Canada - University of British Columbia D2"}}
+{"type":"groups", "id":"pc2-20", "op":"create", "data": {"id":"12542","icpc_id":"12542","name":"Hawaii - BYUH, Laie, Oahu D1"}}
+{"type":"groups", "id":"pc2-21", "op":"create", "data": {"id":"312542","icpc_id":"312542","name":"Hawaii - BYUH, Laie, Oahu D2"}}
+{"type":"groups", "id":"pc2-22", "op":"create", "data": {"id":"12547","icpc_id":"12547","name":"N. California - UC Berkeley D1"}}
+{"type":"groups", "id":"pc2-23", "op":"create", "data": {"id":"312547","icpc_id":"312547","name":"N. California - UC Berkeley D2"}}
+{"type":"groups", "id":"pc2-24", "op":"create", "data": {"id":"12543","icpc_id":"12543","name":"Northeast - EWU, Cheney/Spokane D1"}}
+{"type":"groups", "id":"pc2-25", "op":"create", "data": {"id":"312543","icpc_id":"312543","name":"Northeast - EWU, Cheney/Spokane D2"}}
+{"type":"groups", "id":"pc2-26", "op":"create", "data": {"id":"12544","icpc_id":"12544","name":"Northwest - George Fox University D1"}}
+{"type":"groups", "id":"pc2-27", "op":"create", "data": {"id":"312544","icpc_id":"312544","name":"Northwest - George Fox University D2"}}
+{"type":"groups", "id":"pc2-28", "op":"create", "data": {"id":"12546","icpc_id":"12546","name":"Puget Sound - University of Puget Sound D1"}}
+{"type":"groups", "id":"pc2-29", "op":"create", "data": {"id":"312546","icpc_id":"312546","name":"Puget Sound - University of Puget Sound D2"}}
+{"type":"teams", "id":"pc2-30", "op":"create", "data": {"id":"101","icpc_id":"307560","name":"Whitworth Pirates (Whitworth)","group_ids":["12543"]}}
+{"type":"teams", "id":"pc2-31", "op":"create", "data": {"id":"102","icpc_id":"307561","name":"Whitworth Buccaneers (Whitworth)","group_ids":["12543"]}}
+{"type":"teams", "id":"pc2-32", "op":"create", "data": {"id":"103","icpc_id":"307562","name":"Whitworth Freebooters (Whitworth)","group_ids":["12543"]}}
+{"type":"teams", "id":"pc2-33", "op":"create", "data": {"id":"104","icpc_id":"307563","name":"Whitworth Corsairs (Whitworth)","group_ids":["12543"]}}
+{"type":"teams", "id":"pc2-34", "op":"create", "data": {"id":"105","icpc_id":"309099","name":"Eagle Black (EWU)","group_ids":["12543"]}}
+{"type":"teams", "id":"pc2-35", "op":"create", "data": {"id":"106","icpc_id":"309100","name":"Eagle Red (EWU)","group_ids":["12543"]}}
+{"type":"teams", "id":"pc2-36", "op":"create", "data": {"id":"107","icpc_id":"309552","name":"str8_2dabank (Gonzaga U.)","group_ids":["12543"]}}
+{"type":"teams", "id":"pc2-37", "op":"create", "data": {"id":"108","icpc_id":"309553","name":"Zags (Gonzaga U.)","group_ids":["12543"]}}
+{"type":"teams", "id":"pc2-38", "op":"create", "data": {"id":"109","icpc_id":"309753","name":"WSU 1 (WSU)","group_ids":["12543"]}}
+{"type":"teams", "id":"pc2-39", "op":"create", "data": {"id":"110","icpc_id":"309805","name":"Vandal Gold (U of I)","group_ids":["12543"]}}
+{"type":"teams", "id":"pc2-40", "op":"create", "data": {"id":"151","icpc_id":"309101","name":"D2 Eagle White (EWU)","group_ids":["312543"]}}
+{"type":"teams", "id":"pc2-41", "op":"create", "data": {"id":"152","icpc_id":"309102","name":"D2 Screaming Eagles (EWU)","group_ids":["312543"]}}
+{"type":"teams", "id":"pc2-42", "op":"create", "data": {"id":"153","icpc_id":"309103","name":"D2 The Eagle Has Landed (EWU)","group_ids":["312543"]}}
+{"type":"teams", "id":"pc2-43", "op":"create", "data": {"id":"154","icpc_id":"309104","name":"D2 Eagle > Drone (EWU)","group_ids":["312543"]}}
+{"type":"teams", "id":"pc2-44", "op":"create", "data": {"id":"155","icpc_id":"309536","name":"D2 Reagle Eagles (EWU)","group_ids":["312543"]}}
+{"type":"teams", "id":"pc2-45", "op":"create", "data": {"id":"156","icpc_id":"309554","name":"D2 We got Class (Gonzaga U.)","group_ids":["312543"]}}
+{"type":"teams", "id":"pc2-46", "op":"create", "data": {"id":"157","icpc_id":"309745","name":"D2 3AGL3S (EWU)","group_ids":["312543"]}}
+{"type":"teams", "id":"pc2-47", "op":"create", "data": {"id":"158","icpc_id":"309806","name":"D2-Vandal Silver (U of I)","group_ids":["312543"]}}
+{"type":"teams", "id":"pc2-48", "op":"create", "data": {"id":"159","icpc_id":"309807","name":"D2-Vandal Black (U of I)","group_ids":["312543"]}}
+{"type":"teams", "id":"pc2-49", "op":"create", "data": {"id":"201","icpc_id":"306001","name":"uffer Ring B (George Fox)","group_ids":["12544"]}}
+{"type":"teams", "id":"pc2-50", "op":"create", "data": {"id":"202","icpc_id":"306003","name":"Proof by Excessive Hand Waving (George Fox)","group_ids":["12544"]}}
+{"type":"teams", "id":"pc2-51", "op":"create", "data": {"id":"203","icpc_id":"306005","name":"<h1>[whatever]</h1> (George Fox)","group_ids":["12544"]}}
+{"type":"teams", "id":"pc2-52", "op":"create", "data": {"id":"204","icpc_id":"307185","name":"short int / long jacket (U of Oregon)","group_ids":["12544"]}}
+{"type":"teams", "id":"pc2-53", "op":"create", "data": {"id":"205","icpc_id":"309518","name":"Algogriffins 1 (Reed)","group_ids":["12544"]}}
+{"type":"teams", "id":"pc2-54", "op":"create", "data": {"id":"207","icpc_id":"309567","name":"2B || !2B (UP)","group_ids":["12544"]}}
+{"type":"teams", "id":"pc2-55", "op":"create", "data": {"id":"208","icpc_id":"309572","name":"LC D1 (Lewis & Clark)","group_ids":["12544"]}}
+{"type":"teams", "id":"pc2-56", "op":"create", "data": {"id":"209","icpc_id":"309581","name":"Too Simple Sometimes Naive (PSU)","group_ids":["12544"]}}
+{"type":"teams", "id":"pc2-57", "op":"create", "data": {"id":"210","icpc_id":"309816","name":"DROP TABLE teams (OSU)","group_ids":["12544"]}}
+{"type":"teams", "id":"pc2-58", "op":"create", "data": {"id":"211","icpc_id":"309817","name":"OSU Beaver (OSU)","group_ids":["12544"]}}
+{"type":"teams", "id":"pc2-59", "op":"create", "data": {"id":"251","icpc_id":"305999","name":"D2 MSDMSMPMCRAPAFRRFTC (George Fox)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-60", "op":"create", "data": {"id":"252","icpc_id":"306000","name":"D2 The Front Row (George Fox)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-61", "op":"create", "data": {"id":"253","icpc_id":"306002","name":"D2 Byte Our Dust (George Fox)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-62", "op":"create", "data": {"id":"254","icpc_id":"306004","name":"D2 Classy Foos (George Fox)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-63", "op":"create", "data": {"id":"255","icpc_id":"307186","name":"D2-UO-placeholder-name (U of Oregon)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-64", "op":"create", "data": {"id":"256","icpc_id":"308732","name":"D2 Linfield 1 (Linfield)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-65", "op":"create", "data": {"id":"257","icpc_id":"308740","name":"D2 Linfield 3 (Linfield)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-66", "op":"create", "data": {"id":"258","icpc_id":"308741","name":"D2 Linfield 2 (Linfield)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-67", "op":"create", "data": {"id":"259","icpc_id":"308742","name":"D2 Linfield 4 (Linfield)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-68", "op":"create", "data": {"id":"260","icpc_id":"308928","name":"D2 Linfield 5 (Linfield)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-69", "op":"create", "data": {"id":"261","icpc_id":"309454","name":"D2 - Alpha Omega (PacificU)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-70", "op":"create", "data": {"id":"262","icpc_id":"309455","name":"D2 - OperationGCC (PacificU)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-71", "op":"create", "data": {"id":"263","icpc_id":"309456","name":"D2 - Abstract Cats (PacificU)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-72", "op":"create", "data": {"id":"264","icpc_id":"309457","name":"D2 - Score++ (PacificU)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-73", "op":"create", "data": {"id":"265","icpc_id":"309458","name":"D2 - Panic-- (PacificU)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-74", "op":"create", "data": {"id":"266","icpc_id":"309459","name":"D2 - Pacific Coders (PacificU)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-75", "op":"create", "data": {"id":"267","icpc_id":"309519","name":"D2 Algogriffins 2 (Reed)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-76", "op":"create", "data": {"id":"268","icpc_id":"309563","name":"D2 4e6f204e616d65 (UP)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-77", "op":"create", "data": {"id":"269","icpc_id":"309564","name":"D2 UP-TOWN FUNK (UP)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-78", "op":"create", "data": {"id":"270","icpc_id":"309565","name":"D2 UP in the Air (UP)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-79", "op":"create", "data": {"id":"271","icpc_id":"309573","name":"D2 LC (Lewis & Clark)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-80", "op":"create", "data": {"id":"272","icpc_id":"309819","name":"D2-Beaver Black (OSU)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-81", "op":"create", "data": {"id":"273","icpc_id":"309820","name":"D2-Team Sinisa (OSU)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-82", "op":"create", "data": {"id":"274","icpc_id":"309818","name":"D2-Beaver Orange (OSU)","group_ids":["312544"]}}
+{"type":"teams", "id":"pc2-83", "op":"create", "data": {"id":"301","icpc_id":"308430","name":"Lute Octothorpe (PLU)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-84", "op":"create", "data": {"id":"302","icpc_id":"308916","name":"UW Thuskies (U of Washington)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-85", "op":"create", "data": {"id":"303","icpc_id":"309294","name":"UWT Purple One (UW Tacoma)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-86", "op":"create", "data": {"id":"304","icpc_id":"309295","name":"Drop Table Contestants (UW Tacoma)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-87", "op":"create", "data": {"id":"305","icpc_id":"309296","name":"Haccah (UW Tacoma)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-88", "op":"create", "data": {"id":"306","icpc_id":"309297","name":"UWT Purple Two (UW Tacoma)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-89", "op":"create", "data": {"id":"307","icpc_id":"309299","name":"UWT Huskies Two (UW Tacoma)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-90", "op":"create", "data": {"id":"308","icpc_id":"309320","name":"UW Last1 (U of Washington)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-91", "op":"create", "data": {"id":"309","icpc_id":"309321","name":"UW Orz (U of Washington)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-93", "op":"create", "data": {"id":"311","icpc_id":"309323","name":"UW Potatoes with an Attitude (U of Washington)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-94", "op":"create", "data": {"id":"312","icpc_id":"309324","name":"UW #Surge (U of Washington)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-95", "op":"create", "data": {"id":"313","icpc_id":"309420","name":"WWU Alpha (WWU)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-96", "op":"create", "data": {"id":"314","icpc_id":"309550","name":"#DIV/CUCUMBER! (University of Puget Sound)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-97", "op":"create", "data": {"id":"351","icpc_id":"308431","name":"D2 Cup Of Java (PLU)","group_ids":["312546"]}}
+{"type":"teams", "id":"pc2-98", "op":"create", "data": {"id":"352","icpc_id":"308432","name":"D2 Swag Fault (PLU)","group_ids":["312546"]}}
+{"type":"teams", "id":"pc2-99", "op":"create", "data": {"id":"353","icpc_id":"308433","name":"D2 Lute-CCA (PLU)","group_ids":["312546"]}}
+{"type":"teams", "id":"pc2-100", "op":"create", "data": {"id":"354","icpc_id":"308434","name":"D2 MLG_Programmers (PLU)","group_ids":["312546"]}}
+{"type":"teams", "id":"pc2-101", "op":"create", "data": {"id":"355","icpc_id":"308435","name":"D2 Lute++ (PLU)","group_ids":["312546"]}}
+{"type":"teams", "id":"pc2-102", "op":"create", "data": {"id":"356","icpc_id":"309298","name":"D2 UWT Gold Two (UW Tacoma)","group_ids":["312546"]}}
+{"type":"teams", "id":"pc2-103", "op":"create", "data": {"id":"357","icpc_id":"309449","name":"D2 WWU Beta (WWU)","group_ids":["312546"]}}
+{"type":"teams", "id":"pc2-104", "op":"create", "data": {"id":"358","icpc_id":"309606","name":"D2 Hack&&Code (University of Puget Sound)","group_ids":["312546"]}}
+{"type":"teams", "id":"pc2-105", "op":"create", "data": {"id":"359","icpc_id":"309607","name":"D2 //TODO: Team Name (University of Puget Sound)","group_ids":["312546"]}}
+{"type":"teams", "id":"pc2-106", "op":"create", "data": {"id":"360","icpc_id":"309608","name":"D2 Turtle Hermits (University of Puget Sound)","group_ids":["312546"]}}
+{"type":"teams", "id":"pc2-107", "op":"create", "data": {"id":"361","icpc_id":"309609","name":"D2 Hack Hack Chop Chop (University of Puget Sound)","group_ids":["312546"]}}
+{"type":"teams", "id":"pc2-108", "op":"create", "data": {"id":"401","icpc_id":"305323","name":"Wildcat1 (CSU Chico)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-109", "op":"create", "data": {"id":"402","icpc_id":"305324","name":"Wildcat2 (CSU Chico)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-110", "op":"create", "data": {"id":"403","icpc_id":"305325","name":"Wildcat3 (CSU Chico)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-111", "op":"create", "data": {"id":"404","icpc_id":"305326","name":"Wildcat4 (CSU Chico)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-112", "op":"create", "data": {"id":"405","icpc_id":"305327","name":"Wildcat5 (CSU Chico)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-113", "op":"create", "data": {"id":"406","icpc_id":"307817","name":"Davis Gold (UC Davis)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-114", "op":"create", "data": {"id":"407","icpc_id":"308367","name":"Stanford Cardinal (Stanford)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-115", "op":"create", "data": {"id":"408","icpc_id":"308368","name":"Stanford Red (Stanford)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-116", "op":"create", "data": {"id":"409","icpc_id":"308369","name":"Stanford White (Stanford)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-117", "op":"create", "data": {"id":"410","icpc_id":"308370","name":"Stanford Band (Stanford)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-118", "op":"create", "data": {"id":"411","icpc_id":"308474","name":"Hornet 1 (CSUS)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-119", "op":"create", "data": {"id":"412","icpc_id":"308475","name":"Hornet 2 (CSUS)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-120", "op":"create", "data": {"id":"413","icpc_id":"308476","name":"Hornet 3 (CSUS)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-121", "op":"create", "data": {"id":"414","icpc_id":"308477","name":"Hornet 4 (CSUS)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-122", "op":"create", "data": {"id":"415","icpc_id":"308478","name":"Hornet 5 (CSUS)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-123", "op":"create", "data": {"id":"416","icpc_id":"308549","name":"Berkeley Blue (UC Berkeley)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-124", "op":"create", "data": {"id":"417","icpc_id":"308550","name":"Berkeley Gold (UC Berkeley)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-125", "op":"create", "data": {"id":"418","icpc_id":"308551","name":"Berkeley Radicals (UC Berkeley)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-126", "op":"create", "data": {"id":"419","icpc_id":"309157","name":"xkcd285 (UC Berkeley)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-127", "op":"create", "data": {"id":"420","icpc_id":"309485","name":"Avengers (SCU)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-128", "op":"create", "data": {"id":"421","icpc_id":"309561","name":"Minerva Schools (Minerva Schools at KGI)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-129", "op":"create", "data": {"id":"422","icpc_id":"309600","name":"Tigers (UOP)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-130", "op":"create", "data": {"id":"423","icpc_id":"309679","name":"#techissue (Minerva Schools at KGI)","group_ids":["12547"]}}
+{"type":"teams", "id":"pc2-131", "op":"create", "data": {"id":"451","icpc_id":"307818","name":"D2:Davis Blue (UC Davis)","group_ids":["312547"]}}
+{"type":"teams", "id":"pc2-132", "op":"create", "data": {"id":"452","icpc_id":"309601","name":"D2Tigers (UOP)","group_ids":["312547"]}}
+{"type":"teams", "id":"pc2-133", "op":"create", "data": {"id":"453","icpc_id":"309700","name":"D2 Ursi (UC Berkeley)","group_ids":["312547"]}}
+{"type":"teams", "id":"pc2-134", "op":"create", "data": {"id":"454","icpc_id":"309832","name":"D2Tigers2 (UOP)","group_ids":["312547"]}}
+{"type":"teams", "id":"pc2-135", "op":"create", "data": {"id":"455","icpc_id":"309939","name":"D2 #breakitdown (Minerva Schools at KGI)","group_ids":["312547"]}}
+{"type":"teams", "id":"pc2-136", "op":"create", "data": {"id":"456","icpc_id":"309941","name":"D2 #rightproblem (Minerva Schools at KGI)","group_ids":["312547"]}}
+{"type":"teams", "id":"pc2-137", "op":"create", "data": {"id":"501","icpc_id":"307375","name":"Kek Squad (Thompson Rivers University)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-138", "op":"create", "data": {"id":"502","icpc_id":"307376","name":"Bool Boys (Thompson Rivers University)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-139", "op":"create", "data": {"id":"503","icpc_id":"307377","name":"A Walk In The Park (Thompson Rivers University)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-140", "op":"create", "data": {"id":"504","icpc_id":"307784","name":"tabs>spaces (UBCO)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-141", "op":"create", "data": {"id":"505","icpc_id":"308591","name":"UVic White (University of Victoria)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-142", "op":"create", "data": {"id":"506","icpc_id":"308592","name":"UVic Blue (University of Victoria)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-143", "op":"create", "data": {"id":"508","icpc_id":"308952","name":"SFU Royal (SFU)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-144", "op":"create", "data": {"id":"509","icpc_id":"308953","name":"SFU Snow White (SFU)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-145", "op":"create", "data": {"id":"510","icpc_id":"308954","name":"SFU Magenta (SFU)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-146", "op":"create", "data": {"id":"511","icpc_id":"309173","name":"COSCOC1 (OC)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-147", "op":"create", "data": {"id":"512","icpc_id":"309174","name":"COSCOC2 (OC)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-148", "op":"create", "data": {"id":"513","icpc_id":"309406","name":"UBC* (U British Columbia)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-149", "op":"create", "data": {"id":"514","icpc_id":"309407","name":"UBC! (U British Columbia)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-150", "op":"create", "data": {"id":"515","icpc_id":"309408","name":"UBC+ (U British Columbia)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-151", "op":"create", "data": {"id":"516","icpc_id":"309409","name":"UBC~ (U British Columbia)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-152", "op":"create", "data": {"id":"517","icpc_id":"309410","name":"UBC# (U British Columbia)","group_ids":["12545"]}}
+{"type":"teams", "id":"pc2-153", "op":"create", "data": {"id":"551","icpc_id":"306520","name":"D2 UNBC Stacked (University of Northern British Columbia )","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-154", "op":"create", "data": {"id":"552","icpc_id":"306521","name":"D2 UNBC Forked (University of Northern British Columbia )","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-155", "op":"create", "data": {"id":"553","icpc_id":"307785","name":"D2 SwagOutOfBoundsException (UBCO)","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-156", "op":"create", "data": {"id":"554","icpc_id":"307786","name":"D2 ConjoinedTrianglesOfSuccess (UBCO)","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-157", "op":"create", "data": {"id":"555","icpc_id":"308593","name":"D2 UVic Cyan (University of Victoria)","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-158", "op":"create", "data": {"id":"556","icpc_id":"308594","name":"D2 UVic Maroon (University of Victoria)","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-159", "op":"create", "data": {"id":"557","icpc_id":"308955","name":"D2 SFU Cardinal (SFU)","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-160", "op":"create", "data": {"id":"558","icpc_id":"308956","name":"D2 SFU Ivory (SFU)","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-161", "op":"create", "data": {"id":"559","icpc_id":"309175","name":"D2COSCOC3 (OC)","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-162", "op":"create", "data": {"id":"560","icpc_id":"309411","name":"D2 UBC^ (U British Columbia)","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-163", "op":"create", "data": {"id":"561","icpc_id":"309412","name":"D2 UBC& (U British Columbia)","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-164", "op":"create", "data": {"id":"562","icpc_id":"309413","name":"D2 UBC% (U British Columbia)","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-165", "op":"create", "data": {"id":"563","icpc_id":"309414","name":"D2 UBC@ (U British Columbia)","group_ids":["312545"]}}
+{"type":"teams", "id":"pc2-166", "op":"create", "data": {"id":"601","icpc_id":"302113","name":"Radioactive Turtles (BYU Hawaii)","group_ids":["12542"]}}
+{"type":"teams", "id":"pc2-167", "op":"create", "data": {"id":"602","icpc_id":"305358","name":"00FF00 (HPU)","group_ids":["12542"]}}
+{"type":"teams", "id":"pc2-168", "op":"create", "data": {"id":"605","icpc_id":"307570","name":"Alliterations Are Awesome (UH-Hilo)","group_ids":["12542"]}}
+{"type":"teams", "id":"pc2-169", "op":"create", "data": {"id":"606","icpc_id":"309177","name":"UHM NEETs (UH Manoa)","group_ids":["12542"]}}
+{"type":"teams", "id":"pc2-170", "op":"create", "data": {"id":"607","icpc_id":"309178","name":"UHM Spicy Boyz (UH Manoa)","group_ids":["12542"]}}
+{"type":"teams", "id":"pc2-171", "op":"create", "data": {"id":"608","icpc_id":"309179","name":"UHM #1 (UH Manoa)","group_ids":["12542"]}}
+{"type":"teams", "id":"pc2-172", "op":"create", "data": {"id":"651","icpc_id":"302109","name":"D2 Logic Bombers (BYU Hawaii)","group_ids":["312542"]}}
+{"type":"teams", "id":"pc2-173", "op":"create", "data": {"id":"652","icpc_id":"302110","name":"D2 BrAts (BYU Hawaii)","group_ids":["312542"]}}
+{"type":"teams", "id":"pc2-174", "op":"create", "data": {"id":"653","icpc_id":"302111","name":"D2 KORding (BYU Hawaii)","group_ids":["312542"]}}
+{"type":"teams", "id":"pc2-175", "op":"create", "data": {"id":"654","icpc_id":"302112","name":"D2 MFM (BYU Hawaii)","group_ids":["312542"]}}
+{"type":"teams", "id":"pc2-176", "op":"create", "data": {"id":"655","icpc_id":"305364","name":"D2 0000FF (HPU)","group_ids":["312542"]}}
+{"type":"teams", "id":"pc2-177", "op":"create", "data": {"id":"656","icpc_id":"305376","name":"D2 FF0000 (HPU)","group_ids":["312542"]}}
+{"type":"teams", "id":"pc2-178", "op":"create", "data": {"id":"657","icpc_id":"305688","name":"D2 Cope With It (BYU Hawaii)","group_ids":["312542"]}}
+{"type":"teams", "id":"pc2-179", "op":"create", "data": {"id":"658","icpc_id":"307572","name":"D2 - Follow Your Heart (UH-Hilo)","group_ids":["312542"]}}
+{"type":"teams", "id":"pc2-180", "op":"create", "data": {"id":"659","icpc_id":"309496","name":"D2 FFFFFF (HPU)","group_ids":["312542"]}}

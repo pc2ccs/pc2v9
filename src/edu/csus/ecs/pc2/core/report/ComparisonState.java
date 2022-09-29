@@ -2,7 +2,7 @@
 package edu.csus.ecs.pc2.core.report;
 
 /**
- * Comparisons states.
+ * A list of comparisons for two field values.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */

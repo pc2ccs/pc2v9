@@ -72,7 +72,7 @@ public class ContestCompareModel {
     private CLICSContests clicsContests = new CLICSContests();
 
     /**
-     * List of comparsisong records (comparing contest model to event feed model)
+     * List of comparison records (comparing contest model to event feed model)
      */
     List<ContestCompareRecord> compRecs = new ArrayList<ContestCompareRecord>();
 
@@ -82,22 +82,31 @@ public class ContestCompareModel {
     }
 
     /**
+     * Create comparison based on JSON String
      * 
      * @param contest
-     *            pc2 model
-     * @param eventFeedJSON
-     * @throws IOException
-     * @throws JsonMappingException
+     * @param nldjson  new-line delimited event feed JSON 
      * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws IOException
      */
     public ContestCompareModel(IInternalContest contest, String nldjson) throws JsonParseException, JsonMappingException, IOException {
         this.contest = contest;
-        loadRemoteContest(nldjson);
+        createComparison(nldjson);
     }
 
+    /**
+     * Create comparison based on JSON lines.
+     * 
+     * @param contest
+     * @param eventFeedJSONLines event feed JSON lines.
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws IOException
+     */
     public ContestCompareModel(IInternalContest contest, String[] eventFeedJSONLines) throws JsonParseException, JsonMappingException, IOException {
         this.contest = contest;
-        loadRemoteContest(eventFeedJSONLines);
+        createComparison(eventFeedJSONLines);
     }
 
     /**
@@ -108,9 +117,9 @@ public class ContestCompareModel {
      * @throws JsonMappingException
      * @throws JsonParseException
      */
-    private void loadRemoteContest(String ndjson) throws JsonParseException, JsonMappingException, IOException {
+    private void createComparison(String ndjson) throws JsonParseException, JsonMappingException, IOException {
         String[] lines = ndjson.split("\\n");
-        loadRemoteContest(lines);
+        createComparison(lines);
 
     }
 
@@ -122,7 +131,7 @@ public class ContestCompareModel {
      * @throws JsonMappingException
      * @throws JsonParseException
      */
-    protected void loadRemoteContest(String[] lines) throws JsonParseException, JsonMappingException, IOException {
+    protected void createComparison(String[] lines) throws JsonParseException, JsonMappingException, IOException {
 
         for (String event : lines) {
 
@@ -209,9 +218,11 @@ public class ContestCompareModel {
     }
 
     /**
-     * Load ContestCompareRecord list.
+     * Compare model and event feed/remote contest model, load comparison records.
      */
     private void loadComparisons() {
+        
+        loadContestComparisions();
 
         loadJudgementComparisons();
 
@@ -223,6 +234,25 @@ public class ContestCompareModel {
 
     }
 
+    /**
+     * Load Contest information comparison.
+     */
+    private void loadContestComparisions() {
+        
+        String eventType = CLICSEventType.CONTESTS.toString();
+        
+        String contestTitle = contest.getContestInformation().getContestTitle();
+        
+        if (StringUtilities.isEmpty(clicsContests.getId())) {
+            // no EF contests event
+            ContestCompareRecord rec = new ContestCompareRecord(eventType, "", "formal_name", contestTitle, null);
+            compRecs.add(rec);
+        } else {
+            ContestCompareRecord rec = new ContestCompareRecord(eventType, clicsContests.getId(), "formal_name", contestTitle, clicsContests.getFormal_name());
+            compRecs.add(rec);
+        }
+    }
+
     public static Account[] getAccounts(IInternalContest contest, ClientType.Type type) {
         Vector<Account> accountVector = contest.getAccounts(type);
         Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
@@ -231,6 +261,9 @@ public class ContestCompareModel {
         return accounts;
     }
 
+    /**
+     * Load comparison records for team accounts.
+     */
     private void loadTeamComparisons() {
 
         Account[] accounts = getAccounts(contest, Type.TEAM);
@@ -289,6 +322,9 @@ public class ContestCompareModel {
 
     }
 
+    /**
+     * Load comparison records for problems.
+     */
     private void loadProblemComparisons() {
 
         String eventType = CLICSEventType.PROBLEMS.toString();
@@ -335,6 +371,9 @@ public class ContestCompareModel {
 
     }
 
+    /**
+     * Load comparison records for languages
+     */
     private void loadLanguageComparsions() {
 
         Language[] languages = contest.getLanguages();
@@ -381,6 +420,9 @@ public class ContestCompareModel {
 
     }
 
+    /**
+     * Load comparison records for judgemnts.
+     */
     private void loadJudgementComparisons() {
 
         Judgement[] judgemnts = contest.getJudgements();
@@ -426,6 +468,11 @@ public class ContestCompareModel {
         }
     }
 
+    /**
+     * Get an object mapper that ignores unknown properties.
+     * 
+     * @return an object mapper that ignores unknown properties
+     */
     public ObjectMapper getMapper() {
         if (mapperField != null) {
             return mapperField;
@@ -437,17 +484,9 @@ public class ContestCompareModel {
     }
 
     /**
-     * Return true if after configuration events for event feed.
-     * 
-     * @param eventType
-     * @return true if past configuration events
-     */
-    private boolean isAfterConfig(String eventType) {
-        return CLICSEventType.SUBMISSIONS.toString().equals(eventType);
-    }
-
-    /**
      * Get Static log instance.
+     * 
+     * This provides a log instance without requiring Log to be passed to each method.
      * 
      * @return
      */
@@ -455,6 +494,14 @@ public class ContestCompareModel {
         return StaticLog.getLog();
     }
 
+    /**
+     * Load model from primary server, using model's shadow properties.
+     * 
+     * @param contest
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws IOException
+     */
     public ContestCompareModel(IInternalContest contest) throws JsonParseException, JsonMappingException, IOException {
         this(contest, new URL(contest.getContestInformation().getPrimaryCCS_URL()), contest.getContestInformation().getPrimaryCCS_user_login(), //
                 contest.getContestInformation().getPrimaryCCS_user_pw());
@@ -489,17 +536,18 @@ public class ContestCompareModel {
         remoteContestAPIAdapter = createRemoteContestAPIAdapter(url, login, password);
         InputStream inputStream = remoteContestAPIAdapter.getRemoteEventFeedInputStream();
         String eventFeedJSON = fetchEVentFeed(inputStream);
-        loadRemoteContest(eventFeedJSON);
+        createComparison(eventFeedJSON);
     }
 
     /**
-     * Load/fetch event feed string from input stream.
+     * Load/fetch event feed string from event feed input stream.
      * 
      * @param inputStream
      * @return
      */
-    private String fetchEVentFeed(InputStream inputStream) {
+    public static String fetchEVentFeed(InputStream inputStream) {
 
+        // TODO i 536 fetch string from primary server
         return null;
     }
 
@@ -524,7 +572,7 @@ public class ContestCompareModel {
     }
 
     /**
-     * Total number of different values comararing contest/model to event feed model.
+     * Total number of different values comparing contest/model to event feed model.
      * @return
      */
     int numberDifferences() {
@@ -542,10 +590,6 @@ public class ContestCompareModel {
                 feedJudgements.size() != contest.getJudgements().length || //
                 feedLanguages.size() != contest.getLanguages().length || //
                 feedProblems.size() != contest.getProblems().length) {
-            return false;
-        }
-
-        if (!getContestTitle().equals(getEventFedContestTitle())) {
             return false;
         }
 
