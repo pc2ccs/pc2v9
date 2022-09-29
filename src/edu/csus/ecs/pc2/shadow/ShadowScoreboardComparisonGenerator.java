@@ -245,7 +245,12 @@ public class ShadowScoreboardComparisonGenerator {
         
         //add each team to the return map, which maps team ids to team names
         for (Team team : teamList) {
-            retMap.put(team.getId(), team.getName());
+            // spec says "display_name" may be empty/null, in which case "name" should be used.
+            String teamDispName = team.getDisplay_name();
+            if(teamDispName == null || teamDispName.isEmpty()) {
+                teamDispName = team.getName();
+            }
+            retMap.put(team.getId(), teamDispName);
         }
         
         return retMap;
