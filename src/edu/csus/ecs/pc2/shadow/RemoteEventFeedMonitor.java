@@ -462,7 +462,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                                     + " time " + overrideTimeMS 
                                                                     + " submissionID " + overrideSubmissionID);
                                             try {
-                                                submitter.submitRun("team" + runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(), mainFile, auxFiles,
+                                                submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(), mainFile, auxFiles,
                                                         overrideTimeMS, overrideSubmissionID);
                                             } catch (Exception e) {
                                                 // TODO design error handling reporting
@@ -761,7 +761,6 @@ public class RemoteEventFeedMonitor implements Runnable {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
         return mapper.convertValue(eventDataMap, ShadowRunSubmission.class);
     }
- 
     
     /**
      * This method is used to terminate the RemoteEventFeedListener thread.
