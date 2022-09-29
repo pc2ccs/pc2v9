@@ -1159,6 +1159,25 @@ public class AbstractTestCase extends TestCase {
         }
     }
     
+    /**
+     * Compares path, directory path in-sensitive.
+     * 
+     * @param message
+     * @param expected 
+     * @param actual
+     */
+    public void asserPathEqual(String message, String expected, String actual) {
+        
+        // convert \ to /
+        String actualPath = actual.replaceAll("\\\\", "/");
+        String expectedPath = expected.replaceAll("\\\\", "/");
+        
+        if (!actualPath.equals(expectedPath)){
+            throw new ComparisonFailure(message, expectedPath, actualPath);
+        }
+    }
+    
+    
 
     public Account getFirstJudge(IInternalContest contest) {
         Account[] accounts = new SampleContest().getJudgeAccounts(contest);

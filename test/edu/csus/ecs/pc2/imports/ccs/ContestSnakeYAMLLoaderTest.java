@@ -2246,7 +2246,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Number of languages", 3, languages.length);
         
         Account[] accounts = contest.getAccounts();
-        assertEquals("Number of accounts", 0, accounts.length);
+        assertEquals("Number of accounts", 80, accounts.length);
 
         Site[] sites = contest.getSites();
         assertEquals("Number of sites", 1, sites.length);
@@ -3739,6 +3739,50 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
     }
    
+
     
+    /**
+     * Test loading of output validator.
+     * 
+     * @throws Exception
+     */
+    public void testaddClicsOutputValidator() throws Exception {
+
+        String sampleContestDirName = "ccs1";
+
+        IInternalContest contest = new InternalContest();
+
+        /**
+         * Load groups data.
+         */
+        loadGroupsFromSampContest(contest, sampleContestDirName);
+        assertEquals("Number ground", 4, contest.getGroups().length);
+
+        IInternalContest internal = loadSampleContest(contest, sampleContestDirName);
+        assertNotNull(internal);
+
+        String configDir = getTestSampleContestDirectory(sampleContestDirName) + File.separator + IContestLoader.CONFIG_DIRNAME;
+        assertDirectoryExists(configDir);
+
+//        startExplorer(configDir);
+
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+
+//            String outValProgram = problem.getOutputValidatorProgramName();
+
+            if ("castles".equals(problem.getShortName())) {
+                // test validatorProg: 'yes_always.sh'
+                String expected = "samps/contests/ccs1/config/castles/output_validators/yes_always.sh";
+                asserPathEqual("Expected output validator location", expected, problem.getOutputValidatorProgramName());
+            }
+
+            if ("channel".equals(problem.getShortName())) {
+                // test validatorProg: 'samps/contests/ccs1/config/channel/output_validators/yes_always_2.sh'
+                String expected = "samps/contests/ccs1/config/channel/output_validators/yes_always_2.sh";
+                asserPathEqual("Expected output validator location", expected, problem.getOutputValidatorProgramName());
+            }
+        }
+    }
 }
 
