@@ -9,11 +9,15 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import edu.csus.ecs.pc2.AppConstants;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSEventType;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
@@ -33,20 +37,52 @@ public class ContestCompareReport implements IReport {
     private Log log;
     
     private Filter filter;
+    
+    /**
+     * Get value from .ini file if it exists.
+     * 
+     * @param key
+     * @return
+     */
+    // TODO REFACTOR move somewhere like new class IniUtilities
+    private String getINIValue(String key) {
+        if (IniFile.isFilePresent()) {
+            return IniFile.getValue(key);
+        } else {
+            return "";
+        }
+    }
 
     public void writeReport(PrintWriter printWriter) throws JsonParseException, JsonMappingException, IOException {
         
-        /**
-         * Compare with Primary CCS.
-         */
-//        ContestCompareModel comp = new ContestCompareModel(contest);
+        ContestInformation contestInformation = contest.getContestInformation();
         
+        printWriter.println("Shadow mode      : " + Utilities.yesNoString(contestInformation.isShadowMode()));
+        printWriter.println("CCS URL          : " + contestInformation.getPrimaryCCS_URL());
+        printWriter.println("CCS Login        : " + contestInformation.getPrimaryCCS_user_login());
         
-        String eventfeedFile = "/contests/2022/2022Finals/pretest2/event-feed.pretest2.part.json";
-        String[] lines = Utilities.loadFile(eventfeedFile);
+        printWriter.println();
         
-        System.out.println("debug 22 Do not use event feed from "+eventfeedFile);
-        ContestCompareModel comp = new ContestCompareModel(contest, lines);
+        // Get a file name from the pc2v9.ini file, ini key server.eventFeedFile
+        String overRideEventFilename = getINIValue(AppConstants.OVERRIDE_EVENT_FEED_FILE);
+        
+        ContestCompareModel comp = null;
+        
+        if (StringUtilities.isEmpty(overRideEventFilename)) {
+            /**
+             * Compare with Primary CCS event feed
+             */
+            comp = new ContestCompareModel(contest);
+        } else {
+            /**
+             * Compare with event feed on disk
+             */
+            printWriter.println("Reading event feed from file "+overRideEventFilename);
+            printWriter.println();
+            
+            String[] lines = Utilities.loadFile(overRideEventFilename);
+            comp = new ContestCompareModel(contest, lines);
+        }
         
         printWriter.println("Contest title = '"+comp.getContestTitle()+"'"+ //
                 " primary contest title = '"+comp.getEventFedContestTitle()+"'");
@@ -81,6 +117,7 @@ public class ContestCompareReport implements IReport {
             printWriter.println("**   There are "+type+" "+compList.size()+" records");
             for (ContestCompareRecord ccr : compList) {
                 printWriter.println(ccr.getEventType()+" "+ccr.getState() + " " + ccr.getId() + " " + ccr.getFieldName() + " " + ccr.getvs());
+                printWriter.println("debug 22 CCR " + ccr);
             }
 
             printWriter.println();

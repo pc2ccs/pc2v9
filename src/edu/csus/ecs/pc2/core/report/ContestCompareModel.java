@@ -1,11 +1,14 @@
 // Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -16,6 +19,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -44,10 +48,14 @@ import edu.csus.ecs.pc2.shadow.MockContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.RemoteContestAPIAdapter;
 
 /**
- * Model that compares two contest models.
+ * Creates comparison and creates comparison lists for two contest models.
  *
  */
 public class ContestCompareModel {
+
+    private static final int EVENT_FEED_TIME_OUT_SECONDS = 60;
+    
+    private static int feedTimeout = EVENT_FEED_TIME_OUT_SECONDS;
 
     private IRemoteContestAPIAdapter remoteContestAPIAdapter = null;
 
@@ -490,7 +498,7 @@ public class ContestCompareModel {
      * 
      * @return
      */
-    private Log getLog() {
+    private static Log getLog() {
         return StaticLog.getLog();
     }
 
@@ -534,6 +542,8 @@ public class ContestCompareModel {
         }
 
         remoteContestAPIAdapter = createRemoteContestAPIAdapter(url, login, password);
+        
+        getLog().log(Level.INFO, "Opening event feed for '"+url+" login="+login);
         InputStream inputStream = remoteContestAPIAdapter.getRemoteEventFeedInputStream();
         String eventFeedJSON = fetchEVentFeed(inputStream);
         createComparison(eventFeedJSON);
@@ -545,10 +555,48 @@ public class ContestCompareModel {
      * @param inputStream
      * @return
      */
-    public static String fetchEVentFeed(InputStream inputStream) {
+    public static List<String> fetchEVentFeedAsList(InputStream remoteInputStream) {
 
-        // TODO i 536 fetch string from primary server
-        return null;
+        List<String> list = new ArrayList<String>();
+
+        String event = "null event";
+        
+        /**
+         * Event line number.
+         */
+        int eventCount = 0;
+        
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(remoteInputStream));
+            
+            eventCount ++;
+            event = reader.readLine();
+            
+            long timeoutSeconds = new Date().getTime() + (Constants.MS_PER_SECOND * feedTimeout);
+            
+            // process the next event
+            while ((event != null) && timeoutSeconds > new Date().getTime()) {
+                System.out.println("debug 22 #" + eventCount + " " + new Date() + " event " + event);
+                list.add(event);
+                eventCount ++;
+                event = reader.readLine();
+                
+            }
+        } catch (Exception e) {
+            System.out.println("Error while reading event feed API, event line number "+eventCount);
+            e.printStackTrace();
+            getLog().log(Level.WARNING, "Error while reading event feed API, event line number ", e);
+        }
+        
+        System.out.println("debug 22 Laat Event read #" +eventCount+" "+event);
+        getLog().log(Level.INFO, "Laat Event read #" +eventCount+" "+event);
+
+        return list;
+    }
+    
+    public static String fetchEVentFeed(InputStream remoteInputStream) {
+        List<String> lines = fetchEVentFeedAsList(remoteInputStream);
+        return String.join("\n", lines);
     }
 
     /**
