@@ -132,4 +132,8 @@ public class ContestCompareRecord {
         return val1 + " vs "+val2;
     }
 
+    public boolean isIdentical() {
+        return ComparisonState.SAME.equals(getState());
+    }
+
 }

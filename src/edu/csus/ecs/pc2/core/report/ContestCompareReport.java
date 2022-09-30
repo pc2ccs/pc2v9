@@ -38,6 +38,9 @@ public class ContestCompareReport implements IReport {
     
     private Filter filter;
     
+    // Get a file name from the pc2v9.ini file, ini key server.eventFeedFile
+    private String overRideEventFilename = getINIValue(AppConstants.OVERRIDE_EVENT_FEED_FILE);
+    
     /**
      * Get value from .ini file if it exists.
      * 
@@ -45,7 +48,7 @@ public class ContestCompareReport implements IReport {
      * @return
      */
     // TODO REFACTOR move somewhere like new class IniUtilities
-    private String getINIValue(String key) {
+    private final static String getINIValue(String key) {
         if (IniFile.isFilePresent()) {
             return IniFile.getValue(key);
         } else {
@@ -62,9 +65,6 @@ public class ContestCompareReport implements IReport {
         printWriter.println("CCS Login        : " + contestInformation.getPrimaryCCS_user_login());
         
         printWriter.println();
-        
-        // Get a file name from the pc2v9.ini file, ini key server.eventFeedFile
-        String overRideEventFilename = getINIValue(AppConstants.OVERRIDE_EVENT_FEED_FILE);
         
         ContestCompareModel comp = null;
         
@@ -84,14 +84,6 @@ public class ContestCompareReport implements IReport {
             comp = new ContestCompareModel(contest, lines);
         }
         
-        printWriter.println("Contest title = '"+comp.getContestTitle()+"'"+ //
-                " primary contest title = '"+comp.getEventFedContestTitle()+"'");
-        
-        if (! comp.getContestTitle().equals(comp.getEventFedContestTitle())) {
-            printWriter.println();
-            printWriter.println("Contest titles do not match");
-        }
-        
         printWriter.println();
         
         printWriter.println("Contest models match ? " +comp.isMatch());
@@ -99,25 +91,27 @@ public class ContestCompareReport implements IReport {
         printWriter.println();
         
         printWriter.println("Comparison Summary");
-        
-        CLICSEventType [] types = { CLICSEventType.TEAMS, CLICSEventType.PROBLEMS, CLICSEventType.LANGUAGES, CLICSEventType.JUDGEMENT_TYPES };
-      
+
+        CLICSEventType[] types = { CLICSEventType.CONTEST, CLICSEventType.TEAMS, CLICSEventType.PROBLEMS, CLICSEventType.LANGUAGES, CLICSEventType.JUDGEMENT_TYPES };
+
         for (CLICSEventType type : types) {
             String mess = comp.compareSummary(type.toString(), type, comp.getComparisonRecords(type));
             printWriter.println(mess);
         }
-        
+
         printWriter.println();
         
         printWriter.println("Comparison Details");
-        
+
         for (CLICSEventType type : types) {
             
-            List<ContestCompareRecord> compList = comp.getComparisonRecords(CLICSEventType.LANGUAGES);
-            printWriter.println("**   There are "+type+" "+compList.size()+" records");
+            List<ContestCompareRecord> compList = comp.getNonMatchingComparisonRecords(type);
+            printWriter.println("**   There are " + compList.size() + " different " + type + " records");
+
             for (ContestCompareRecord ccr : compList) {
-                printWriter.println(ccr.getEventType()+" "+ccr.getState() + " " + ccr.getId() + " " + ccr.getFieldName() + " " + ccr.getvs());
-                printWriter.println("debug 22 CCR " + ccr);
+                if (!ccr.isIdentical()) {
+                    printWriter.println(ccr.getEventType() + " " + ccr.getState() + " " + ccr.getId() + " " + ccr.getFieldName() + " " + ccr.getvs());
+                }
             }
 
             printWriter.println();
@@ -190,6 +184,19 @@ public class ContestCompareReport implements IReport {
 
     public void setFilter(Filter filter) {
         this.filter = filter;
+    }
+    
+    /**
+     * Read event feed from file rather than from Primary API event feed.
+     * 
+     * @param overRideEventFilename
+     */
+    public void setOverRideEventFilename(String overRideEventFilename) {
+        this.overRideEventFilename = overRideEventFilename;
+    }
+    
+    public String getOverRideEventFilename() {
+        return overRideEventFilename;
     }
 
 }

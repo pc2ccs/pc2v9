@@ -29,7 +29,6 @@ import edu.csus.ecs.pc2.core.imports.clics.CLICSLanguage;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSProblem;
 import edu.csus.ecs.pc2.core.imports.clics.EventFeed;
 import edu.csus.ecs.pc2.core.imports.clics.JudgementType;
-import edu.csus.ecs.pc2.core.imports.clics.TeamAccount;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -42,6 +41,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.standings.json.Team;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.shadow.IRemoteContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.MockContestAPIAdapter;
@@ -53,13 +53,13 @@ import edu.csus.ecs.pc2.shadow.RemoteContestAPIAdapter;
  */
 public class ContestCompareModel {
 
-    private static final int EVENT_FEED_TIME_OUT_SECONDS = 60;
+    private static final int EVENT_FEED_TIME_OUT_SECONDS = 10;
     
     private static int feedTimeout = EVENT_FEED_TIME_OUT_SECONDS;
 
     private IRemoteContestAPIAdapter remoteContestAPIAdapter = null;
 
-    private ObjectMapper mapperField = new ObjectMapper();
+    private ObjectMapper mapperField = null;
 
     /**
      * Event Feed Judgements
@@ -70,7 +70,7 @@ public class ContestCompareModel {
 
     private List<CLICSLanguage> feedLanguages = new ArrayList<CLICSLanguage>();
 
-    private List<TeamAccount> feedTeams = new ArrayList<TeamAccount>();
+    private List<Team> feedTeams = new ArrayList<Team>();
 
     private IInternalContest contest = new InternalContest();
 
@@ -141,6 +141,11 @@ public class ContestCompareModel {
      */
     protected void createComparison(String[] lines) throws JsonParseException, JsonMappingException, IOException {
 
+        
+//        String filename = "stuf-event-feed."+new Date().getTime()+".json";
+//        FileUtilities.writeFileContents(filename, lines);
+//        System.out.println("write event feed to "+filename);
+        
         for (String event : lines) {
 
             if (event.length() == 0) {
@@ -203,10 +208,10 @@ public class ContestCompareModel {
                     // {"type": "teams", "id": "289de609-b1a0-40d8-a9e0-54a30e752e69", "op": "create", "data": {"id": "169347", "name": "Colin Peppler", "icpc_id": null, "group_ids": [],
                     // "display_name": "Virginia Tech", "organization_id": "vt_edu"}}
 
-                    TeamAccount team = mapper.convertValue(eventFeedEntry.getData(), TeamAccount.class);
+                    Team team = mapper.convertValue(eventFeedEntry.getData(), Team.class);
                     feedTeams.add(team);
 
-                } else if (CLICSEventType.CONTESTS.toString().equals(eventType)) {
+                } else if (CLICSEventType.CONTEST.toString().equals(eventType)) {
                     // contests
 
                     // type contests data = {duration=5:00:00.000, start_time=2022-05-21T18:00:00.000+00, scoreboard_freeze_duration=1:00:00.000, name=nac22practice5, id=nac22practice5,
@@ -247,13 +252,13 @@ public class ContestCompareModel {
      */
     private void loadContestComparisions() {
         
-        String eventType = CLICSEventType.CONTESTS.toString();
+        String eventType = CLICSEventType.CONTEST.toString();
         
         String contestTitle = contest.getContestInformation().getContestTitle();
         
-        if (StringUtilities.isEmpty(clicsContests.getId())) {
+        if (StringUtilities.isEmpty(clicsContests.getFormal_name())) {
             // no EF contests event
-            ContestCompareRecord rec = new ContestCompareRecord(eventType, "", "formal_name", contestTitle, null);
+            ContestCompareRecord rec = new ContestCompareRecord(eventType, clicsContests.getId(), "formal_name", contestTitle, null);
             compRecs.add(rec);
         } else {
             ContestCompareRecord rec = new ContestCompareRecord(eventType, clicsContests.getId(), "formal_name", contestTitle, clicsContests.getFormal_name());
@@ -285,14 +290,14 @@ public class ContestCompareModel {
             if (isActiveTeamAccount(account)) {
 
                 boolean found = false;
-                for (TeamAccount teamAccount : feedTeams) {
+                for (Team team: feedTeams) {
 
-                    if (id == teamAccount.getId()) {
+                    if (idStr.equals(team.getId())) {
 
-                        ContestCompareRecord rec = new ContestCompareRecord(eventType, idStr, "name", account.getDisplayName(), teamAccount.getName());
+                        ContestCompareRecord rec = new ContestCompareRecord(eventType, idStr, "display_name", account.getDisplayName(), team.getName());
                         compRecs.add(rec);
 
-                        rec = new ContestCompareRecord(eventType, idStr, "icpc_id", account.getExternalId(), teamAccount.getIcpc_id());
+                        rec = new ContestCompareRecord(eventType, idStr, "icpc_id", account.getExternalId(), team.getIcpc_id());
                         compRecs.add(rec);
 
                         found = true;
@@ -307,23 +312,23 @@ public class ContestCompareModel {
             }
         }
 
-        for (TeamAccount teamAccount : feedTeams) {
+        for (Team team : feedTeams) {
 
-            int id = teamAccount.getId();
-            String idStr = Integer.toString(id);
+            String idStr = team.getId();
             boolean found = false;
             for (Account account : accounts) {
-
-                if (account.getClientId().getClientNumber() == id) {
+                
+                String accountIdString = Integer.toString(account.getClientId().getClientNumber());
+                if (idStr.equals(accountIdString)) {
                     found = true;
                 }
             }
 
             if (!found) {
-                ContestCompareRecord rec = new ContestCompareRecord(eventType, idStr, "name", teamAccount.getName(), null);
+                ContestCompareRecord rec = new ContestCompareRecord(eventType, idStr, "name", team.getName(), null);
                 compRecs.add(rec);
 
-                rec = new ContestCompareRecord(eventType, idStr, "icpc_id", teamAccount.getIcpc_id(), null);
+                rec = new ContestCompareRecord(eventType, idStr, "icpc_id", team.getIcpc_id(), null);
                 compRecs.add(rec);
             }
         }
@@ -356,6 +361,7 @@ public class ContestCompareModel {
             }
 
             if (!found) {
+                
                 ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "name", problem.getDisplayName(), null);
                 compRecs.add(rec);
             }
@@ -372,7 +378,9 @@ public class ContestCompareModel {
             }
 
             if (!found) {
-                ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "name", null, clicsProblem.getName());
+                ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "id", null, clicsProblem.getId());
+                compRecs.add(rec);
+                rec = new ContestCompareRecord(eventType, id, "name", null, clicsProblem.getName());
                 compRecs.add(rec);
             }
         }
@@ -401,6 +409,7 @@ public class ContestCompareModel {
                     ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "name", language.getDisplayName(), clicsLanguage.getName());
                     compRecs.add(rec);
                     found = true;
+                    
                 }
             }
 
@@ -452,7 +461,9 @@ public class ContestCompareModel {
             }
 
             if (!found) {
-                ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "name", judgement.getDisplayName(), null);
+                ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "id", judgement.getAcronym(), null);
+                compRecs.add(rec);
+                 rec = new ContestCompareRecord(eventType, id, "name", judgement.getDisplayName(), null);
                 compRecs.add(rec);
             }
         }
@@ -470,7 +481,9 @@ public class ContestCompareModel {
             }
 
             if (!found) {
-                ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "name", null, judgementType.getName());
+                ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "id", null, judgementType.getId());
+                compRecs.add(rec);
+                 rec = new ContestCompareRecord(eventType, id, "name", null, judgementType.getName());
                 compRecs.add(rec);
             }
         }
@@ -576,7 +589,7 @@ public class ContestCompareModel {
             
             // process the next event
             while ((event != null) && timeoutSeconds > new Date().getTime()) {
-                System.out.println("debug 22 #" + eventCount + " " + new Date() + " event " + event);
+//                System.out.println("debug 22 #" + eventCount + " " + new Date() + " event '" + event+"'");
                 list.add(event);
                 eventCount ++;
                 event = reader.readLine();

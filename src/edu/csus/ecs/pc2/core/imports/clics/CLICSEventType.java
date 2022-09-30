@@ -20,7 +20,7 @@ public enum CLICSEventType {
     /**
      * contest event
      */
-    CONTESTS("contests"),
+    CONTEST("contest"),
     /**
      * groups event
      */
