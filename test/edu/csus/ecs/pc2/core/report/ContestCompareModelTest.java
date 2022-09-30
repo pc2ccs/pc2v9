@@ -8,7 +8,9 @@ import java.util.List;
 import edu.csus.ecs.pc2.core.InternalControllerSpecial;
 import edu.csus.ecs.pc2.core.JudgementLoader;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSEventType;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Filter;
@@ -55,7 +57,7 @@ public class ContestCompareModelTest extends AbstractTestCase {
         }
 
         List<ContestCompareRecord> records = comp.getComparisonRecords();
-        assertEquals("Expecting comparison records/differences ", 285, records.size());
+        assertEquals("Expecting comparison records/differences ", 291, records.size());
 
         CLICSEventType type = CLICSEventType.CONTEST;
         assertEquals("Expecting one " + type + " comparison records ", 1, comp.getComparisonRecords(type).size());
@@ -64,11 +66,19 @@ public class ContestCompareModelTest extends AbstractTestCase {
         assertEquals("Expecting " + type + " comparison records ", 224, comp.getComparisonRecords(type).size());
 
         List<ContestCompareRecord> nonMatchRecords = comp.getNonMatchingComparisonRecords();
-        assertEquals("Expecting non matching records", 284, nonMatchRecords.size());
+        assertEquals("Expecting non matching records", 290, nonMatchRecords.size());
 
         assertFalse(comp.isMatch());
     }
     
+    /**
+     * Load and initialize data into model.
+     * 
+     * @param contest
+     * @param entryLocation
+     * @return
+     * @throws Exception
+     */
     protected IInternalContest loadAndInitializeContest(IInternalContest contest, String entryLocation) throws Exception{
 
         if (contest == null) {
@@ -96,7 +106,7 @@ public class ContestCompareModelTest extends AbstractTestCase {
     }
 
     /**
-     * Testing where EF and contest model DO match.
+     * Testing mini contest model comparison with event feed filename.
      * 
      * @throws Exception
      */
@@ -104,6 +114,14 @@ public class ContestCompareModelTest extends AbstractTestCase {
         
         IInternalContest contest = loadAndInitializeContest(null, "mini");
         assertNotNull(contest);
+        
+        String testDirectory = getDataDirectory(getName());
+        ensureDirectory(testDirectory);
+        
+        String eventfeedFile = testDirectory + File.separator + "mini.event.feed.json";
+        assertFileExists(eventfeedFile);
+//        startExplorer(testDirectory); 
+//        editFile(eventfeedFile);
         
         Judgement[] judgements = contest.getJudgements();
         assertEquals("Expecting judgement count ", 8, judgements.length);
@@ -114,35 +132,23 @@ public class ContestCompareModelTest extends AbstractTestCase {
 //        PrintWriter stream = new PrintWriter(System.out);
 //        report.writeReport(stream);
 
-        String testDirectory = getDataDirectory(getName());
-        ensureDirectory(testDirectory);
+        // write event feed to file 
+//      EventFeedJSONReport report = new EventFeedJSONReport();
+//      report.setContestAndController(contest, new NullController());
+//      report.createReportFile(eventfeedFile, new Filter());
         
-        String eventfeedFile = testDirectory + File.separator + "ccs2.event.feed.json";
-//        editFile(eventfeedFile);
-        
-        assertFileExists(eventfeedFile);
 
         String[] lines = Utilities.loadFile(eventfeedFile);
         assertTrue("Expecting lines in "+eventfeedFile, lines.length > 0);
 
         ContestCompareModel comp = new ContestCompareModel(contest, lines);
 
-        
-        if (! comp.isMatch() )
-        {
-            List<ContestCompareRecord> compareRecords = comp.getComparisonRecords();
-            
-            String sameString = ComparisonState.SAME.toString();
-            
-            for (ContestCompareRecord contestCompareRecord : compareRecords) {
-                if (! sameString.equals(contestCompareRecord.getState().toString())){
-                    System.out.println("debug rec " + contestCompareRecord.getEventType() + " " + contestCompareRecord);
-                }
-            }
-        }
-        
-        setDebugMode(true);
-        if (isDebugMode()) {
+        if (!comp.isMatch()) {
+            /**
+             * If the modes do not match print differences
+             */
+            System.out.println(getName()+" Contest do not match, ef file = "+eventfeedFile);
+
             CLICSEventType[] types = { CLICSEventType.TEAMS, CLICSEventType.PROBLEMS, CLICSEventType.LANGUAGES, CLICSEventType.JUDGEMENT_TYPES };
 
             String sameString = ComparisonState.SAME.toString();
@@ -162,71 +168,32 @@ public class ContestCompareModelTest extends AbstractTestCase {
             System.out.println(mess);
         }
 
-
-        // TODO i 536 complete unit test  (debug 22)
-        
-//        assertTrue("Model and event feed do not match", comp.isMatch());
+        assertTrue("Model and event feed do not match", comp.isMatch());
 
     }
 
-
-    // old code - testing with WF pretest API
-//    /**
-//     * test wf pretest 2 contest.
-//     * 
-//     * This is a debugging unit test that only works if cdpPath exists.
-//     * 
-//     * @throws Exception
-//     */
-//    public void testPretest2() throws Exception {
-//
-//        String cdpPath = "c:\\repos\\icpc\\ccsconfig-dhaka\\contests\\pretest2";
-//        
-////        cdpPath = "c:\\repos\\icpc\\ccsconfig-dhaka\\contests\\prete"; // debug 22
-//        
-//        if (! new File(cdpPath).isDirectory()) {
-//            return;
-//        }
-//        
-//        IInternalContest contest = loadAndInitializeContest(null, cdpPath);
-//        assertNotNull(contest);
-//        
-//         Vector<Account> teamAccounts = contest.getAccounts(Type.TEAM);
-//         assertTrue("No accounts defined ", teamAccounts.size() > 0);
-//
-//         System.out.println("debug 22 ta "+teamAccounts.size());
-//         Account account = teamAccounts.firstElement();
-//         
-//         assertNotEquals("account should have title", account.getDisplayName(), account.getTeamName());
-//
-//        Judgement[] judgements = contest.getJudgements();
-//        assertEquals("Expecting judgement count ", 8, judgements.length);
-//        
-//        InternalControllerSpecial controller = new InternalControllerSpecial(contest);
-//        
-//        Log log = new Log("logs/"+getName()+".log");
-//        StaticLog.setLog(log);
-//        
-////        ContestCompareModel comp = new ContestCompareModel(contest);
-////        assertTrue(comp.isMatch());
-//        String outDir = getOutputDataDirectory(getName());
-//        ensureDirectory(outDir);
-//        assertDirectoryExists(outDir);
-//
-//        String efName = "stuf-event-feed.1664499410895.json";
-////        editFile(efName);
-//
-//        String reportFile = createContestCompareReport(contest, controller, efName, getOutputDataDirectory(getName()));
-//        editFile(reportFile);
-//        
-//    }
-    
+    /**
+     * Test compare of pretest CDP and existing event feed file.
+     * 
+     * @throws Exception
+     */
     public void testReport() throws Exception {
         
         String cdpPath = "c:\\repos\\icpc\\ccsconfig-dhaka\\contests\\pretest2";
         
+        if (! new File(cdpPath).isDirectory()) {
+            // only test if there is a pretest dir found
+            return;
+        }
+        
         IInternalContest contest = loadAndInitializeContest(null, cdpPath);
         assertNotNull(contest);
+
+        // Load Accounts
+        String loadAccountFilename = "/repos/icpc/ccsconfig-dhaka/contests/pretest2/config/load_accounts_real.tsv";
+        assertFileExists(loadAccountFilename);
+        Account[] updateAccounts = LoadAccounts.updateAccountsFromFile(contest, loadAccountFilename);
+        contest.updateAccounts(updateAccounts);
 
         InternalControllerSpecial controller = new InternalControllerSpecial(contest);
         
@@ -237,8 +204,12 @@ public class ContestCompareModelTest extends AbstractTestCase {
         String efName = "stuf-event-feed.1664499410895.json";
 //        editFile(efName);
         
-        String reportFile = createContestCompareReport(contest, controller,efName, getOutputDataDirectory(getName()));
+        String reportFile = createContestCompareReport(contest, controller, efName, getOutputDataDirectory(getName()));
 //        editFile(reportFile);
+//        writeReport(contest, controller,efName);
+        
+        assertFileExists(reportFile);
+        
     }
 
     private String createContestCompareReport(IInternalContest contest, InternalControllerSpecial controller,  String overRideEventFilename, String outputDataDirectory) throws IOException {
@@ -249,5 +220,13 @@ public class ContestCompareModelTest extends AbstractTestCase {
         String outfile =  outputDataDirectory + File.separator + "testCompReport.txt";
         report.createReportFile(outfile, new Filter());
         return outfile;
+    }
+    
+    private void writeReport(IInternalContest contest, InternalControllerSpecial controller,  String overRideEventFilename) throws IOException {
+        ContestCompareReport report = new ContestCompareReport();
+        report.setContestAndController(contest, controller);
+        report.setOverRideEventFilename(overRideEventFilename);
+        report.writeReport(System.out);
+        System.out.flush();
     }
 }

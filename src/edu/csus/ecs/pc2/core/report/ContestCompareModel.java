@@ -283,7 +283,7 @@ public class ContestCompareModel {
         String eventType = CLICSEventType.TEAMS.toString();
 
         for (Account account : accounts) {
-
+            
             int id = account.getClientId().getClientNumber();
             String idStr = Integer.toString(id);
 
@@ -317,10 +317,12 @@ public class ContestCompareModel {
             String idStr = team.getId();
             boolean found = false;
             for (Account account : accounts) {
-                
-                String accountIdString = Integer.toString(account.getClientId().getClientNumber());
-                if (idStr.equals(accountIdString)) {
-                    found = true;
+
+                if (isActiveTeamAccount(account)) {
+                    String accountIdString = Integer.toString(account.getClientId().getClientNumber());
+                    if (idStr.equals(accountIdString)) {
+                        found = true;
+                    }
                 }
             }
 
@@ -332,7 +334,6 @@ public class ContestCompareModel {
                 compRecs.add(rec);
             }
         }
-
     }
 
     /**
@@ -347,13 +348,11 @@ public class ContestCompareModel {
         for (Problem problem : problems) {
 
             String id = problem.getShortName();
-
             boolean found = false;
 
             for (CLICSProblem clicsProblem : feedProblems) {
 
-                if (problem.getDisplayName().equals(clicsProblem.getName())) {
-
+                if (id.contentEquals(clicsProblem.getId())) {
                     ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "name", problem.getDisplayName(), clicsProblem.getName());
                     compRecs.add(rec);
                     found = true;
@@ -361,8 +360,10 @@ public class ContestCompareModel {
             }
 
             if (!found) {
-                
-                ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "name", problem.getDisplayName(), null);
+
+                ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "id", id, null);
+                compRecs.add(rec);
+                rec = new ContestCompareRecord(eventType, id, "name", problem.getDisplayName(), null);
                 compRecs.add(rec);
             }
         }
@@ -372,7 +373,7 @@ public class ContestCompareModel {
 
             boolean found = false;
             for (Problem problem : problems) {
-                if (problem.getDisplayName().equals(clicsProblem.getName())) {
+                if (id.equals(problem.getShortName())) {
                     found = true;
                 }
             }
@@ -678,6 +679,12 @@ public class ContestCompareModel {
         return count;
     }
 
+    /**
+     * Is this account "active" shown on the scoreboard?
+     * 
+     * @param account
+     * @return
+     */
     private boolean isActiveTeamAccount(Account account) {
         return account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD);
     }

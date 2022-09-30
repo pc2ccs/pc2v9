@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.report;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -55,9 +56,14 @@ public class ContestCompareReport implements IReport {
             return "";
         }
     }
+    
+    public void writeReport(OutputStream out) throws JsonParseException, JsonMappingException, IOException {
+        PrintWriter writer = new PrintWriter(out);
+        writeReport(writer);
+    }
 
     public void writeReport(PrintWriter printWriter) throws JsonParseException, JsonMappingException, IOException {
-        
+
         ContestInformation contestInformation = contest.getContestInformation();
         
         printWriter.println("Shadow mode      : " + Utilities.yesNoString(contestInformation.isShadowMode()));

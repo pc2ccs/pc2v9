@@ -89,7 +89,7 @@
 {"type":"teams", "id":"pc2-89", "op":"create", "data": {"id":"307","icpc_id":"309299","name":"UWT Huskies Two (UW Tacoma)","group_ids":["12546"]}}
 {"type":"teams", "id":"pc2-90", "op":"create", "data": {"id":"308","icpc_id":"309320","name":"UW Last1 (U of Washington)","group_ids":["12546"]}}
 {"type":"teams", "id":"pc2-91", "op":"create", "data": {"id":"309","icpc_id":"309321","name":"UW Orz (U of Washington)","group_ids":["12546"]}}
-{"type":"teams", "id":"pc2-92", "op":"create", "data": {"id":"310","icpc_id":"309321","name":"UW Finkle (U of Washington)","group_ids":["12546"]}}
+{"type":"teams", "id":"pc2-92", "op":"create", "data": {"id":"310","icpc_id":"309322","name":"UW Finkle (U of Washington)","group_ids":["12546"]}}
 {"type":"teams", "id":"pc2-93", "op":"create", "data": {"id":"311","icpc_id":"309323","name":"UW Potatoes with an Attitude (U of Washington)","group_ids":["12546"]}}
 {"type":"teams", "id":"pc2-94", "op":"create", "data": {"id":"312","icpc_id":"309324","name":"UW #Surge (U of Washington)","group_ids":["12546"]}}
 {"type":"teams", "id":"pc2-95", "op":"create", "data": {"id":"313","icpc_id":"309420","name":"WWU Alpha (WWU)","group_ids":["12546"]}}
