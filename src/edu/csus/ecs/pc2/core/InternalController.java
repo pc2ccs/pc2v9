@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -19,6 +19,9 @@ import java.util.Vector;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
+import javax.swing.JOptionPane;
+
+import edu.csus.ecs.pc2.AppConstants;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.clics.RunSubmitterInterfaceManager;
 import edu.csus.ecs.pc2.convert.EventFeedRun;
@@ -130,22 +133,6 @@ import edu.csus.ecs.pc2.ui.UIPluginList;
  */
 public class InternalController implements IInternalController, ITwoToOne, IBtoA {
 
-
-    private static final String INI_FILENAME_OPTION_STRING = "--ini";
-
-    /**
-     * Override profile option.
-     * 
-     */
-    private static final String PROFILE_OPTION_STRING = "--profile";
-    
-    private static final String LOAD_OPTION_STRING = "--load";
-    
-    private static final String LOAD_EF_JUDGEMENTS = "--addefjs";
-
-    private static final String FILE_OPTION_STRING = "-F";
-
-    private static final String NO_GUI_OPTION_STRING = "--nogui";
     
     private boolean haltOnFatalError = true;
 
@@ -174,14 +161,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private Log log;
 
     private Ini ini = new Ini();
-
-    private static final String DEBUG_OPTION_STRING = "--debug";
-
-    private static final String LOGIN_OPTION_STRING = "--login";
     
-//    private static final String LOAD_YAML_OPTION_STRING = "--loadyaml";
-
-    private static final String PASSWORD_OPTION_STRING = "--password";
+    private boolean suppressConnectionsPaneDisplay = false;
+    private boolean suppressLoginsPaneDisplay = false;
 
     /**
      * The port that the server will listen on.
@@ -203,44 +185,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * Both client and server who are connecting a server use this port as the portt to contact.
      */
     private int remoteHostPort;
-
-    /**
-     * .ini key for an override port for the server to listen on.
-     * 
-     */
-    private static final String SERVER_PORT_KEY = "server.port";
-
-    /**
-     * Key in the .ini for the remote server host name.
-     * <P>
-     * The form of the value is: host:port.
-     * <P>
-     * port is optional.
-     */
-    private static final String REMOTE_SERVER_KEY = "server.remoteServer";
-    
-    /**
-     * Key in the .ini that indicates whether this site wants to be proxied.
-     * 
-     * Example:  server.proxyme=true
-     */
-    private static final String PROXY_ME_SERVER_KEY = "server.proxyme";
-
-    /**
-     * Host/IP for the client to contact.
-     * 
-     * The form of the value is: host:port.
-     * <P>
-     * port is optional.
-     * 
-     */
-    private static final String CLIENT_SERVER_KEY = "client.server";
-
-    /**
-     * Key in the .ini for the client port.
-     */
-    private static final String CLIENT_PORT_KEY = "client.port";
-
     /**
      * The connection handle for the server this server logged into.
      */
@@ -292,10 +236,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     public static final int SECURITY_NONE_LEVEL = 0;
 
-    private static final String CONTEST_PASSWORD_OPTION = "--contestpassword";
-
-    private static final String MAIN_UI_OPTION = "--ui";
-
     private static final String LOG_WINDOW_GUI_CLASS = "edu.csus.ecs.pc2.ui.LogWindow";
 
     private String logWindowClassName = LOG_WINDOW_GUI_CLASS;
@@ -305,20 +245,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private static final String LOGIN_UI_GUI_CLASSNAME = "edu.csus.ecs.pc2.ui.LoginFrame";
 
     private static final String COUNTDOWN_UI_CLASSNAME = "edu.csus.ecs.pc2.ui.CountDownMessage";
-
-    private static final String PORT_OPTION_STRING = "--port";
-
-    /**
-     * Remote server to login to.
-     */
-    private static final String REMOTE_SERVER_OPTION_STRING = "--remoteServer";
-
-    /**
-     * Proxy this server, used with {{@link #REMOTE_SERVER_OPTION_STRING}}
-     */
-    private static final String PROXYME_OPTION_STRING = "--proxyme";
-
-    private static final Object FIRST_SERVER_OPTION_STRING = "--first";
 
     private String loginClassName = LOGIN_UI_GUI_CLASSNAME;
 
@@ -818,7 +744,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             if (!serverModule) {
                 SecurityException securityException = new SecurityException("Cannot login as server, check logs");
-                getLog().log(Log.WARNING, "Cannot login as server, must start this module with --server command line option");
+                getLog().log(Log.WARNING, "Cannot login as server, must start this module with " + AppConstants.SERVER_OPTION_STRING + " command line option");
                 throw securityException;
             }
 
@@ -840,9 +766,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 info("Contacted using connection id " + remoteServerConnectionHandlerID);
                 
-                boolean loggingInSiteRequestsToBeProxy = getBooleanValue(getINIValue(PROXY_ME_SERVER_KEY), false);
+                boolean loggingInSiteRequestsToBeProxy = getBooleanValue(getINIValue(AppConstants.PROXY_ME_SERVER_KEY), false);
                 
-                if (parseArguments.isOptPresent(PROXYME_OPTION_STRING)){
+                if (parseArguments.isOptPresent(AppConstants.PROXYME_OPTION_STRING)){
                     loggingInSiteRequestsToBeProxy = true;
                 }
                 
@@ -867,7 +793,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else {
             if (serverModule) {
                 SecurityException securityException = new SecurityException("Cannot login as client, check logs");
-                getLog().log(Log.WARNING, "Cannot login as client, must start this module without --server command line option");
+                getLog().log(Log.WARNING, "Cannot login as client, must start this module without " + AppConstants.SERVER_OPTION_STRING + " command line option");
                 throw securityException;
             }
 
@@ -1328,9 +1254,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         remoteHostName = "localhost";
         remoteHostPort = Integer.parseInt(ConnectionManager.DEFAULT_PC2_PORT);
 
-        if (ini.containsKey(CLIENT_SERVER_KEY)) {
+        if (ini.containsKey(AppConstants.CLIENT_SERVER_KEY)) {
 
-            remoteHostName = ini.getValue(CLIENT_SERVER_KEY);
+            remoteHostName = ini.getValue(AppConstants.CLIENT_SERVER_KEY);
             getLog().log(Log.INFO, "INI File location: " + ini.getIniFileURL());
 
             int idx = remoteHostName.lastIndexOf(":");
@@ -1342,8 +1268,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             getLog().log(Log.INFO, "setClientServerAndPort " + remoteHostName + " parsed as " + remoteHostName + " port " + remoteHostPort);
 
-        } else if (containsINIKey(CLIENT_SERVER_KEY)) {
-            remoteHostName = getINIValue(CLIENT_SERVER_KEY);
+        } else if (containsINIKey(AppConstants.CLIENT_SERVER_KEY)) {
+            remoteHostName = getINIValue(AppConstants.CLIENT_SERVER_KEY);
 
             getLog().log(Log.INFO, "INIFile File location: " + IniFile.getIniFileURL());
             /*
@@ -1359,12 +1285,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             getLog().log(Log.INFO, "setClientServerAndPort " + remoteHostName + " parsed as " + remoteHostName + " port " + remoteHostPort);
         }
 
-        if (containsINIKey(CLIENT_PORT_KEY)) {
-            remoteHostPort = Integer.parseInt(getINIValue(CLIENT_PORT_KEY));
+        if (containsINIKey(AppConstants.CLIENT_PORT_KEY)) {
+            remoteHostPort = Integer.parseInt(getINIValue(AppConstants.CLIENT_PORT_KEY));
         }
 
         if (portString != null) {
-            getLog().log(Log.INFO, "Attempting to use port from --port '" + portString + "'");
+            getLog().log(Log.INFO, "Attempting to use port from " + AppConstants.PORT_OPTION_STRING + "'" + portString + "'");
             remoteHostPort = Integer.parseInt(portString);
         }
 
@@ -1373,7 +1299,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void setServerRemoteHostAndPort(String remoteServerValue) {
 
         // Contacting another server. "join"
-        String hostName = getINIValue(REMOTE_SERVER_KEY);
+        String hostName = getINIValue(AppConstants.REMOTE_SERVER_KEY);
         if (hostName != null && hostName.length() > 4) {
             remoteHostName = hostName;
             contactingRemoteServer = true;
@@ -1405,12 +1331,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         port = Integer.parseInt(ConnectionManager.DEFAULT_PC2_PORT);
 
-        if (containsINIKey(SERVER_PORT_KEY)) {
-            port = Integer.parseInt(getINIValue(SERVER_PORT_KEY));
+        if (containsINIKey(AppConstants.SERVER_PORT_KEY)) {
+            port = Integer.parseInt(getINIValue(AppConstants.SERVER_PORT_KEY));
         }
 
         if (portString != null) {
-            getLog().log(Log.INFO, "Attempting to use port from --port '" + portString + "'");
+            getLog().log(Log.INFO, "Attempting to use port from " + AppConstants.PORT_OPTION_STRING + "'" + portString + "'");
             port = Integer.parseInt(portString);
         }
 
@@ -2774,9 +2700,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 port = getPortForSite(contest.getSiteNumber());
 
-                if (parseArguments.getOptValue(PORT_OPTION_STRING) != null) {
-                    String portString = parseArguments.getOptValue(PORT_OPTION_STRING);
-                    getLog().log(Log.INFO, "Attempting to use port from --port '" + portString + "'");
+                if (parseArguments.getOptValue(AppConstants.PORT_OPTION_STRING) != null) {
+                    String portString = parseArguments.getOptValue(AppConstants.PORT_OPTION_STRING);
+                    getLog().log(Log.INFO, "Attempting to use port from " + AppConstants.PORT_OPTION_STRING + "'" + portString + "'");
                     port = Integer.parseInt(portString);
                 }
 
@@ -2844,9 +2770,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         /**
          * Name of CDP dir or file to be loaded.
          */
-        String entryLocation = contest.getCommandLineOptionValue(LOAD_OPTION_STRING);
+        String entryLocation = contest.getCommandLineOptionValue(AppConstants.LOAD_OPTION_STRING);
         
-        if (contest.isCommandLineOptionPresent(LOAD_OPTION_STRING)){
+        if (contest.isCommandLineOptionPresent(AppConstants.LOAD_OPTION_STRING)){
             
             if (allowedToLoadConfig){
                 
@@ -2905,7 +2831,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                             
                             info("Loading "+eventFeedRuns.size()+" event feed runs.");
                             
-                            boolean addRuneJudgementsFromEventFeed = contest.isCommandLineOptionPresent(LOAD_EF_JUDGEMENTS);
+                            boolean addRuneJudgementsFromEventFeed = contest.isCommandLineOptionPresent(AppConstants.LOAD_EF_JUDGEMENTS_OPTION_STRING);
                             
                             loadRuns.updateContestFromEFRuns(contest, eventFeedRuns, cdpConfigDir.getParent(), addRuneJudgementsFromEventFeed);
                             
@@ -2936,8 +2862,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 }
             } else {
                 
-                info("** Not loading (--load) CDP from " + entryLocation+" contest config ALREADY exists. **");
-                System.err.println ("Warning: contest configuration already exists; ignoring --load option"); 
+                info("** Not loading (" + AppConstants.LOAD_OPTION_STRING + ") CDP from " + entryLocation+" contest config ALREADY exists. **");
+                System.err.println ("Warning: contest configuration already exists; ignoring " + AppConstants.LOAD_OPTION_STRING + " option"); 
                 
             }
         }
@@ -2973,28 +2899,49 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          */
         TransportException savedTransportException = null;
 
-        String[] requireArguementArgs = { // 
-                "--login", //
-                "--password", // 
-                MAIN_UI_OPTION, 
-                REMOTE_SERVER_OPTION_STRING, //
-                PORT_OPTION_STRING, //
-                LOAD_OPTION_STRING, //
-                PROFILE_OPTION_STRING, //
-                INI_FILENAME_OPTION_STRING, //
-                CONTEST_PASSWORD_OPTION, //
-                "--id", // 
-                FILE_OPTION_STRING };
+        String[] requireArgumentArgs = { // 
+                AppConstants.LOGIN_OPTION_STRING, 
+                AppConstants.PASSWORD_OPTION_STRING,
+                AppConstants.MAIN_UI_OPTION_STRING, 
+                AppConstants.REMOTE_SERVER_OPTION_STRING, //
+                AppConstants.PORT_OPTION_STRING, //
+                AppConstants.LOAD_OPTION_STRING, //
+                AppConstants.PROFILE_OPTION_STRING, //
+                AppConstants.INI_FILENAME_OPTION_STRING, //
+                AppConstants.CONTEST_PASSWORD_OPTION_STRING, //
+                AppConstants.CONTEST_ID_OPTION_STRING,
+                AppConstants.FILE_OPTION_STRING };
         
-        parseArguments = new ParseArguments(stringArray, requireArguementArgs);
-
-        if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)){
+        /**
+         * This will not catch unknown options, that is done below after logging is set up
+         * We scan the arguments twice.  First time to allow logging to be set up
+         * Second time to validate allowed options.
+         */
+        try {
+            parseArguments = new ParseArguments(stringArray, requireArgumentArgs);
+        } catch (Exception e) {
+            // mostly catches "IllegalArgumentException" and informs the user
+            fatalError(e.getMessage(), e);
+        }
+        
+        /**
+         * usingGUI should be set early no matter what, since we do not want to pop-up
+         * GUI message boxes on errors, if NO_GUI_OPTION_STRING was specified.
+         * Validation of NO_GUI_OPTION_STRING is handled in handleCommandLineOptions().
+         * That is, currently, NO_GUI_OPTION_STRING is only allowed for AJ and server.
+         * We don't care about that at this point in time though. 
+         */
+        if (parseArguments.isOptPresent(AppConstants.NO_GUI_OPTION_STRING)) {
+            usingGUI = false;
+        }
+        
+        if (parseArguments.isOptPresent(AppConstants.DEBUG_OPTION_STRING)){
             parseArguments.dumpArgs(System.out);
         }
         
         contest.setCommandLineArguments(parseArguments);
         
-        if (parseArguments.isOptPresent("--server")) {
+        if (parseArguments.isOptPresent(AppConstants.SERVER_OPTION_STRING)) {
             if (!isContactingRemoteServer()) {
                 theProfile = getCurrentProfile();
                 String profilePath = theProfile.getProfilePath();
@@ -3007,10 +2954,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             startLog(null, "pc2.startup."+System.currentTimeMillis(), null, null);
         }
         
+        // make sure supplied arguments are recognized (allowed)
+        try {
+            // this is the second scan of the argument list where accepted options are checked.
+            // a dummy object is created that will check the arguments that were passed in on the command line against
+            // the list of allowed options (AppConstants.allOptionStrings).  An exception will be thrown if any of
+            // the command line arguments do not appear in the AppConstants.allOptionStrings array.
+            @SuppressWarnings("unused")
+            ParseArguments checkAllowedArgs = new ParseArguments(stringArray, requireArgumentArgs, AppConstants.allOptionStrings);
+        } catch(Exception e) {
+            // mostly catches "IllegalArgumentException" and informs the user
+            fatalError(e.getMessage(), e);
+        }
+
         handleCommandLineOptions();
 
         for (String arg : stringArray) {
-            if (arg.equals(FIRST_SERVER_OPTION_STRING)) {
+            if (arg.equals(AppConstants.FIRST_SERVER_OPTION_STRING)) {
                 setContactingRemoteServer(false);
             }
         }
@@ -3030,10 +2990,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         log.info("Started ConnectionManager");
 
-        boolean useIniFile = !parseArguments.isOptPresent("--skipini");
+        boolean useIniFile = !parseArguments.isOptPresent(AppConstants.SKIP_INI_OPTION_STRING);
 
-        if (parseArguments.isOptPresent(INI_FILENAME_OPTION_STRING) && useIniFile) {
-            String iniName = parseArguments.getOptValue(INI_FILENAME_OPTION_STRING);
+        if (parseArguments.isOptPresent(AppConstants.INI_FILENAME_OPTION_STRING) && useIniFile) {
+            String iniName = parseArguments.getOptValue(AppConstants.INI_FILENAME_OPTION_STRING);
             Exception exception = null;
             try {
                 System.err.println("Loading INI from " + iniName);
@@ -3059,7 +3019,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         contest.setSiteNumber(0);
 
-        if (useIniFile && (!parseArguments.isOptPresent(INI_FILENAME_OPTION_STRING))) {
+        if (useIniFile && (!parseArguments.isOptPresent(AppConstants.INI_FILENAME_OPTION_STRING))) {
             if (IniFile.isFilePresent()) {
                 // Only read and load .ini file if it is present.
                 new IniFile();
@@ -3070,18 +3030,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
 
         // SOMEDAY code add NO_SAVE_OPTION_STRING
-        if (parseArguments.isOptPresent("--nosave")) {
+        if (parseArguments.isOptPresent(AppConstants.NO_SAVE_OPTION_STRING)) {
             saveCofigurationToDisk = false;
         }
 
-        if (parseArguments.isOptPresent("--server")) {
+        if (parseArguments.isOptPresent(AppConstants.SERVER_OPTION_STRING)) {
 
             info("Starting Server Transport...");
             connectionManager.startServerTransport(this);
             serverModule = true;
 
             contactingRemoteServer = false;
-            setServerRemoteHostAndPort(parseArguments.getOptValue(REMOTE_SERVER_OPTION_STRING));
+            setServerRemoteHostAndPort(parseArguments.getOptValue(AppConstants.REMOTE_SERVER_OPTION_STRING));
 
             if (!isContactingRemoteServer()) {
                 theProfile = getCurrentProfile();
@@ -3091,10 +3051,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             try {
-                setServerPort(parseArguments.getOptValue(PORT_OPTION_STRING));
+                setServerPort(parseArguments.getOptValue(AppConstants.PORT_OPTION_STRING));
             } catch (NumberFormatException numException) {
-                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue(PORT_OPTION_STRING) + "'");
-                log.log(Log.WARNING, "Exception parsing --port ", numException);
+                savedTransportException = new TransportException("Unable to parse value after " + 
+                        AppConstants.PORT_OPTION_STRING + "'" + parseArguments.getOptValue(AppConstants.PORT_OPTION_STRING) + "'");
+                log.log(Log.WARNING, "Exception parsing " + AppConstants.PORT_OPTION_STRING, numException);
             }
 
         } else {
@@ -3102,12 +3063,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             try {
 
-                setClientServerAndPort(parseArguments.getOptValue(PORT_OPTION_STRING));
+                setClientServerAndPort(parseArguments.getOptValue(AppConstants.PORT_OPTION_STRING));
 
                 info("Contacting server at " + remoteHostName + ":" + remoteHostPort);
                 connectionManager.startClientTransport(remoteHostName, remoteHostPort, this);
             } catch (NumberFormatException numException) {
-                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue(PORT_OPTION_STRING) + "'");
+                savedTransportException = new TransportException("Unable to parse value after " + AppConstants.PORT_OPTION_STRING + "'" + parseArguments.getOptValue(AppConstants.PORT_OPTION_STRING) + "'");
                 log.log(Log.WARNING, "Exception setting remote host and port ", numException);
             }
 
@@ -3122,7 +3083,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         isStarted = true;
 
-        if (!parseArguments.isOptPresent(LOGIN_OPTION_STRING)) {
+        if (!parseArguments.isOptPresent(AppConstants.LOGIN_OPTION_STRING)) {
 
             if (usingGUI && isUsingMainUI()) {
                 loginUI = createLoginFrame();
@@ -3133,14 +3094,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             // Get loginId
             String loginName = "";
-            if (parseArguments.isOptPresent(LOGIN_OPTION_STRING)) {
-                loginName = parseArguments.getOptValue(LOGIN_OPTION_STRING);
+            if (parseArguments.isOptPresent(AppConstants.LOGIN_OPTION_STRING)) {
+                loginName = parseArguments.getOptValue(AppConstants.LOGIN_OPTION_STRING);
             }
 
             // get password (optional if joe password)
             String password = "";
-            if (parseArguments.isOptPresent(PASSWORD_OPTION_STRING)) {
-                password = parseArguments.getOptValue(PASSWORD_OPTION_STRING);
+            if (parseArguments.isOptPresent(AppConstants.PASSWORD_OPTION_STRING)) {
+                password = parseArguments.getOptValue(AppConstants.PASSWORD_OPTION_STRING);
             }
 
             if (usingGUI) {
@@ -3238,19 +3199,34 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private void handleCommandLineOptions() {
 
-        if (parseArguments.isOptPresent("--help")) {
+        if (parseArguments.isOptPresent(AppConstants.HELP_OPTION_STRING)) {
             // -F is the ParseArguements internal option to pre-load command line options from a file
 
             String[] usage = { //
-                    "Usage: Starter [--help] [-F filename] [--server] [--first] [--login <login>] [--password <pass>] " + //
-                    "[" + LOAD_OPTION_STRING + " <dir>|<file> ] " + //
-                    "[--skipini] " + //
-                    "[" + INI_FILENAME_OPTION_STRING + " filename] [" + //
-                    CONTEST_PASSWORD_OPTION + " <pass>] [" + NO_GUI_OPTION_STRING + "] "+ //
-                    "[" + REMOTE_SERVER_OPTION_STRING + " <remoteHostname> --proxyme]" + //
-                    "[" + MAIN_UI_OPTION + " classname]", // 
+                    "Usage: Starter " + //
+                    "[" + AppConstants.HELP_OPTION_STRING + "] " + //
+                    "[" + AppConstants.FILE_OPTION_STRING + " filename] " + //
+                    "[" + AppConstants.SERVER_OPTION_STRING + "] " + //
+                    "[" + AppConstants.FIRST_SERVER_OPTION_STRING + "] " + //
+                    "[" + AppConstants.LOGIN_OPTION_STRING + " <login>] " + //
+                    "[" + AppConstants.PASSWORD_OPTION_STRING + " <pass>]", //
+                    "           " + 
+                    "[" + AppConstants.LOAD_OPTION_STRING + " <dir>|<file> ] " + //
+                    "[" + AppConstants.SKIP_INI_OPTION_STRING + "] " + //
+                    "[" + AppConstants.INI_FILENAME_OPTION_STRING + " INIfilename] " + //
+                    "[" + AppConstants.CONTEST_PASSWORD_OPTION_STRING + " <pass>] ",
+                    "           " +
+                    "[" + AppConstants.REMOTE_SERVER_OPTION_STRING + " <remoteHostname> " + AppConstants.PROXY_ME_SERVER_KEY + "] " + //
+                    "[" + AppConstants.MAIN_UI_OPTION_STRING + " classname] " + //
+                    "[" + AppConstants.PORT_OPTION_STRING + " <port>]",
+                    "           " +
+                    "[" + AppConstants.NOLOGGING_OPTION_STRING + "] " + //
+                    "[" + AppConstants.NO_GUI_OPTION_STRING + "] " + //
+                    "[" + AppConstants.NOSTANDINGS_OPTION_STRING + "] " + 
+                    "[" + AppConstants.NO_CONNECTIONS_PANE_OPTION_STRING + "] " + 
+                    "[" + AppConstants.NO_LOGINS_PANE_OPTION_STRING + "]", //
                     "", //
-                    "See http://pc2.ecs.csus.edu/wiki/Command_Line for more information", // 
+                    "See https://github.com/pc2ccs/pc2v9/wiki/Command-Line-Arguments for more information", // 
             };
             for (String string : usage) {
                 System.out.println(string);
@@ -3258,8 +3234,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             System.exit(0);
         }
 
-        if (parseArguments.isOptPresent(FILE_OPTION_STRING)) {
-            String propertiesFileName = parseArguments.getOptValue(FILE_OPTION_STRING);
+        if (parseArguments.isOptPresent(AppConstants.NOLOGGING_OPTION_STRING)) {
+            Log.setDoNotWriteLogEntries(true);
+        }
+
+        if (parseArguments.isOptPresent(AppConstants.FILE_OPTION_STRING)) {
+            String propertiesFileName = parseArguments.getOptValue(AppConstants.FILE_OPTION_STRING);
 
             if (!(new File(propertiesFileName).exists())) {
                 fatalError(propertiesFileName + " does not exist (pwd: " + Utilities.getCurrentDirectory() + ")", null);
@@ -3271,22 +3251,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 fatalError("Unable to read file " + propertiesFileName, e);
             }
         }
+        
+        if (parseArguments.isOptPresent(AppConstants.NOSTANDINGS_OPTION_STRING)) {
+            Utilities.setShowStandingsPanes(false);
+        }
 
-        if (parseArguments.isOptPresent(NO_GUI_OPTION_STRING)) {
+        if (parseArguments.isOptPresent(AppConstants.NO_GUI_OPTION_STRING)) {
 
             usingGUI = false;
 
             // Insure that they have specified required
             // do not check contestPassword here
 
-            if (!parseArguments.isOptPresent(LOGIN_OPTION_STRING)) {
-                fatalError("Must specify " + LOGIN_OPTION_STRING + " option and login name when using " + NO_GUI_OPTION_STRING);
+            if (!parseArguments.isOptPresent(AppConstants.LOGIN_OPTION_STRING)) {
+                fatalError("Must specify " + AppConstants.LOGIN_OPTION_STRING + " option and login name when using " + AppConstants.NO_GUI_OPTION_STRING);
             }
 
-            String loginName = parseArguments.getOptValue(LOGIN_OPTION_STRING);
+            String loginName = parseArguments.getOptValue(AppConstants.LOGIN_OPTION_STRING);
 
             if (loginName == null) {
-                fatalError("Missing login name after " + LOGIN_OPTION_STRING);
+                fatalError("Missing login name after " + AppConstants.LOGIN_OPTION_STRING);
             }
 
             ClientId client = null;
@@ -3307,13 +3291,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 } else if (isEventFeeder(client)) {
                     overRideUIName = "edu.csus.ecs.pc2.services.eventFeed.EventFeederModule"; 
                 } else {
-                    fatalError(NO_GUI_OPTION_STRING + " can only be used with a judge or server login, login '" + loginName + "' is not a judge or server login.");
+                    fatalError(AppConstants.NO_GUI_OPTION_STRING + " can only be used with a judge or server login, login '" + loginName + "' is not a judge or server login.");
                 }
             }
 
         }
 
-        if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)) {
+        if (parseArguments.isOptPresent(AppConstants.DEBUG_OPTION_STRING)) {
 
             Utilities.setDebugMode(true);
 
@@ -3330,21 +3314,33 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
 
-        if (parseArguments.isOptPresent(CONTEST_PASSWORD_OPTION)) {
+        if (parseArguments.isOptPresent(AppConstants.CONTEST_PASSWORD_OPTION_STRING)) {
 
-            String newContestPassword = parseArguments.getOptValue(CONTEST_PASSWORD_OPTION);
+            String newContestPassword = parseArguments.getOptValue(AppConstants.CONTEST_PASSWORD_OPTION_STRING);
             if (newContestPassword == null) {
-                fatalError("No contest password found after " + CONTEST_PASSWORD_OPTION);
+                fatalError("No contest password found after " + AppConstants.CONTEST_PASSWORD_OPTION_STRING);
             }
             contest.setContestPassword(newContestPassword);
         }
 
-        if (parseArguments.isOptPresent(MAIN_UI_OPTION)) {
-            String overrideClassName = parseArguments.getOptValue(MAIN_UI_OPTION);
+        if (parseArguments.isOptPresent(AppConstants.MAIN_UI_OPTION_STRING)) {
+            String overrideClassName = parseArguments.getOptValue(AppConstants.MAIN_UI_OPTION_STRING);
             if (overrideClassName == null) {
-                fatalError("No UI name after " + MAIN_UI_OPTION);
+                fatalError("No UI name after " + AppConstants.MAIN_UI_OPTION_STRING);
             }
             overRideUIName = overrideClassName;
+        }
+
+        if (parseArguments.isOptPresent(AppConstants.NO_CONNECTIONS_PANE_OPTION_STRING)) {
+            suppressConnectionsPaneDisplay = true;
+        } else {
+            suppressConnectionsPaneDisplay = false;
+        }
+
+        if (parseArguments.isOptPresent(AppConstants.NO_LOGINS_PANE_OPTION_STRING)) {
+            suppressLoginsPaneDisplay = true;
+        } else {
+            suppressLoginsPaneDisplay = false;
         }
 
     }
@@ -4085,8 +4081,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     private void showErrorMessage(String message, String title) {
-        // TODO 736 fix this to show GUI message
-        System.err.println(title+": "+message); // TODO 736 remove this
+        JOptionPane.showMessageDialog(null,  message, title, JOptionPane.ERROR_MESSAGE);
     }
 
     /**
@@ -4271,6 +4266,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public boolean isUsingGUI() {
         return usingGUI;
+    }
+
+    public boolean isSuppressConnectionsPaneDisplay() {
+        return suppressConnectionsPaneDisplay;
+    }
+
+    public boolean isSuppressLoginsPaneDisplay() {
+        return suppressLoginsPaneDisplay;
     }
 
     public ILogWindow startLogWindow(IInternalContest inContest) {

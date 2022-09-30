@@ -600,4 +600,14 @@ public class MockController implements IInternalController {
         return s;
     }
 
+    @Override
+    public boolean isSuppressConnectionsPaneDisplay() {
+        return false;
+    }
+
+    @Override
+    public boolean isSuppressLoginsPaneDisplay() {
+        return false;
+    }
+
 }

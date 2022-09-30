@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Dimension;
@@ -20,10 +20,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * Pane to allow user to choose and open/start plugin window or pane.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class PluginLoadPane extends JPanePlugin {
 
     /**
@@ -179,38 +177,43 @@ public class PluginLoadPane extends JPanePlugin {
 
     private JPanePlugin[] getPluginList() {
         Vector<JPanePlugin> plugins = new Vector<JPanePlugin>();
-
-        plugins.add(new EventFeedServerPane());
+        
         plugins.add(new AccountsPane());
+        plugins.add(new AccountsTablePane());
+        plugins.add(new AutoJudgesPane());
         plugins.add(new BalloonColorListPane());
         plugins.add(new ClarificationsPane());
+        plugins.add(new ClarificationsTablePane());
         plugins.add(new ConnectionsPane());
+        plugins.add(new ConnectionsTablePane());
         plugins.add(new ContestClockPane());
+        plugins.add(new ContestScheduledStartClockPane());
         plugins.add(new ContestTimesPane());
+        plugins.add(new EventFeedServerPane());
         plugins.add(new GroupsPane());
         plugins.add(new InfoPane());
         plugins.add(new JudgementsPane());
         plugins.add(new LanguagesPane());
         plugins.add(new LoadContestPane());
         plugins.add(new LoginsPane());
+        plugins.add(new LoginsTablePane());
+        plugins.add(new MessageMonitorPane());
         plugins.add(new OptionsPane());
         plugins.add(new PacketExplorerPane());
+        plugins.add(new PacketMonitorPane());
         plugins.add(new PlaybackPane());
         plugins.add(new ProblemsPane());
         plugins.add(new ProfilesPane());
         plugins.add(new ReportPane());
         plugins.add(new RunsPane());
+        plugins.add(new RunsTablePane());
         plugins.add(new SitesPane());
-        // plugins.add(new StandingsHTMLPane());
         plugins.add(new StandingsPane());
+        // plugins.add(new StandingsHTMLPane());
+        plugins.add(new StandingsTablePane());
         plugins.add(new SubmissionBiffPane());
         plugins.add(new TeamStatusPane());
         plugins.add(new ViewPropertiesPane());
-        plugins.add(new PacketMonitorPane());
-        plugins.add(new MessageMonitorPane());
-        plugins.add(new EventFeedServerPane());
-        plugins.add(new AutoJudgesPane());
-        plugins.add(new ContestScheduledStartClockPane());
 
         JPanePlugin[] pluginList = (JPanePlugin[]) plugins.toArray(new JPanePlugin[plugins.size()]);
 

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
@@ -792,12 +792,12 @@ public class InternalContest implements IInternalContest {
         Run newRun = runList.addNewRun(run); // this set the run number.
         if (runFiles != null) {
             runFilesList.add(newRun, runFiles);
-            SerializedFile file = runFiles.getMainFile();
-            if (file != null){
-                run.setEntryPoint(file.getName());
-            }
+//            SerializedFile file = runFiles.getMainFile();
+//            if (file != null){
+//                newRun.setEntryPoint(file.getName());
+//                addRun(newRun);
+//            }
         }
-        addRun(newRun);
         return newRun;
     }
 
@@ -1493,7 +1493,7 @@ public class InternalContest implements IInternalContest {
                 runList.updateRun(newRun);
                 return runList.get(run.getElementId());
             } else {
-                throw new RunUnavailableException("Client " + clientId + " can not checked out run " + run.getNumber() + " (site " + run.getSiteNumber() + ")");
+                throw new RunUnavailableException("Client " + whoChangedRun + " can not check out run " + run.getNumber() + " (site " + run.getSiteNumber() + ")");
             }
         
         }
@@ -2258,7 +2258,7 @@ public class InternalContest implements IInternalContest {
                 clarificationList.updateClarification(newClar);
                 return clarificationList.get(clar.getElementId());
             } else {
-                throw new ClarificationUnavailableException("Client " + clientId + " can not checked out clar " + clar.getNumber() + " (site " + clar.getSiteNumber() + ")");
+                throw new ClarificationUnavailableException("Client " + whoChangedClar + " can not check out clar " + clar.getNumber() + " (site " + clar.getSiteNumber() + ")");
             }
         
         }

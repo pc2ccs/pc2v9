@@ -4,8 +4,6 @@ package edu.csus.ecs.pc2.tools;
 import java.util.List;
 
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.tools.PasswordGenerator;
-import edu.csus.ecs.pc2.tools.PasswordType2;
 
 /**
  * Unit test.

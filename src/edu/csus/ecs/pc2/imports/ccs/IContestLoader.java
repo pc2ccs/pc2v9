@@ -17,13 +17,11 @@ import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 /**
  * Contest Loader interface and Constants.
  * 
- * Constants and methods used in loading YAML.
+ * Constants and methods used in loading YAML into contest/model.
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public interface IContestLoader {
-
-    // default filenames
 
     String DEFAULT_CONTEST_YAML_FILENAME = "contest.yaml";
 
@@ -32,6 +30,8 @@ public interface IContestLoader {
     String DEFAULT_PROBLEM_SET_YAML_FILENAME = "problemset.yaml";
     
     String DEFAULT_PROBLEM_LATEX_FILENAME = "problem.tex";
+    
+    String DEFAULT_ENGLISH_PROBLEM_LATEX_FILENAME = "problem.en.tex";
 
     String DEFAULT_SYSTEM_YAML_FILENAME = "system.yaml";
     
@@ -149,6 +149,12 @@ public interface IContestLoader {
     String INTERPRETED_LANGUAGE_KEY = "interpreted";
 
     String READ_FROM_STDIN_KEY = "readFromSTDIN";
+
+    /**
+     * output validators directory name.
+     */
+    final String OUTPUT_VALIDATORS = "output_validators";
+
     
     //keys for YAML entries specifying data for Input Validators:
     String INPUT_VALIDATOR_KEY = "input_validator"; //the section header for Input Validator info
@@ -255,6 +261,11 @@ public interface IContestLoader {
 
     Site[] getSites(String[] yamlLines);
 
+    /**
+     * Are data file contents to ba loaded into configuration?.
+     * 
+     * @return true if data files are not external
+     */
     boolean isLoadProblemDataFiles();
 
     /**
@@ -281,6 +292,7 @@ public interface IContestLoader {
 
     void setLoadProblemDataFiles(boolean loadProblemDataFiles);
 
+    // TODO REFACTOR move this into StringUtilities
     String unquote(String input, String string);
 
     /**
@@ -304,6 +316,7 @@ public interface IContestLoader {
      */
     String getCCSDataFileDirectory(String yamlDirectory, String shortDirName);
 
+    // TODO REFACTOR move this into StringUtilities
     boolean getBooleanValue(String string, boolean defaultBoolean);
 
     /**
@@ -317,9 +330,16 @@ public interface IContestLoader {
     /**
      * Locates the CDP config directory.
      * 
+     * Attempts to find CDP config directory at:
+     * <li> current directory
+     * <li> parent directory
+     * <li> samps/contests/<BASENAME> directory, ex "mini" finds samps/contests/<BASENAME>/config
+     * 
+     * If no directory found, returns null.
+     * 
      * @param entry
      *            a directory, filename or PC^2 sample CCS contest directory name.
-     * @return location for file or null if not found.
+     * @return null or the location of the CDP config/ directory.
      */
     File findCDPConfigDirectory(File entry);
 }

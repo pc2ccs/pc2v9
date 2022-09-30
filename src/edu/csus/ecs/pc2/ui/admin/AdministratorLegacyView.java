@@ -297,9 +297,11 @@ public class AdministratorLegacyView extends JFrame implements UIPlugin, ChangeL
                  * add UI components involved with Running the contest to the RunContest tabbed pane
                  */
 
-                ConnectionsPane connectionsPane = new ConnectionsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
-
+                if (!controller.isSuppressConnectionsPaneDisplay()) {
+                    ConnectionsPane connectionsPane = new ConnectionsPane();
+                    addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
+                }
+                
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsPane);
 
@@ -321,9 +323,11 @@ public class AdministratorLegacyView extends JFrame implements UIPlugin, ChangeL
                 FinalizePane finalizePane = new FinalizePane();
                 addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
 
-                LoginsPane loginsPane = new LoginsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Logins", loginsPane);
-             
+                if (!controller.isSuppressLoginsPaneDisplay()) {
+                    LoginsPane loginsPane = new LoginsPane();
+                    addUIPlugin(getRunContestTabbedPane(), "Logins", loginsPane);
+                }
+                
                 if (Utilities.isDebugMode()) {
                     try {
                         MessageMonitorPane messageMonitorPane = new MessageMonitorPane();
