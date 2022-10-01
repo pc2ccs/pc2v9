@@ -96,7 +96,7 @@ public class RemoteEventFeedMonitor implements Runnable {
      * @param pc2Controller an {@link IInternalController} for passing error handling back to the local PC2 system
      * @param remoteContestAPIAdapter an adapter for accessing the remote contest API
      * @param remoteURL the URL to the remote CCS
-     * @param k the login (account) on the remote CCS
+     * @param login the login (account) on the remote CCS
      * @param password the password to the remote CCS account
      * @param submitter a {@link Runnable} which knows how to submit a receive remote run to PC2
      */
@@ -218,6 +218,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             event = reader.readLine();
                                             continue;
                                         }
+
     
                                         //process a submission event
                                         try {
@@ -493,50 +494,26 @@ public class RemoteEventFeedMonitor implements Runnable {
     
                                     } else if ("judgements".equals(eventType)) {
                                         
-                                        // Delay on judgements
+                                        // Delay on judgments
                                         bDelay = true;
-                                        
+                                    
                                         if (Utilities.isDebugMode()) {
-                                            System.out.println("Found judgement event: " + event);
+                                            System.out.println("Found event of type " + eventType + ": " + event);
                                         }
                                         log.log(Level.INFO, "Found judgement event: " + event);
     
                                         //process a judgment event
                                         try {
-                                            //get a map of the data elements for the judgement
-                                            Map<String, Object> judgementEventDataMap = (Map<String, Object>) eventMap.get("data");
-                                            String operation = (String) eventMap.get("op");
-                                            String idToDelete = null;
-                                            boolean isDelete = false;
-                                            
-                                            // check if this is a "delete" event
-                                            // For the 2022-07 (and 2021-11) clics spec, "operation" will always be null since the "op" field was removed
-                                            // For the 2020-03 the "op" field will be non-null.  This is how we determine the feed type.                                        
-                                           if (operation == null) {
-                                               // 2022-07 feed - the ID of the judgment is in the notification object since there is
-                                               // no data object.
-                                               isDelete = true;
-                                               idToDelete = (String)eventMap.get("id");
-                                           } else if(operation.equals("delete")) {
-                                               // 2020-03 feed, "op" field present and is an explicit delete, judgment id is in "data" object
-                                               isDelete = true;
-                                               // there better be a "data" object, if not, we just ignore this message
-                                               if(judgementEventDataMap != null) {
-                                                   idToDelete = (String) judgementEventDataMap.get("id");
-                                               }
-                                           }
-                                           if(isDelete) {
-                                               // idToDelete obtained from different "id" fields above depending on feed version
-                                               if(idToDelete != null) {
-                                                   // we have a judgement id; remove from the global map the judgment whose ID is specified
-                                                    synchronized (remoteJudgementsMapLock) {
-                                                        getRemoteJudgementsMap().remove(idToDelete);
-                                                    }
-                                                    //TODO: how do we notify the local PC2 system that this judgment should be deleted??
-                                               }
+                                            if(isDeleteOperation(eventMap)) {
+                                                if(!deleteJudgment(eventMap)) {
+                                                    log.log(Level.WARNING, "Unable to delete judgement for event: " +event);
+                                                }
                                             } else {
                                                 //it's not a delete; see if there is an actual judgment (acronym) in the event data
                                                 // (there might not be such an element; "create" operations do not always have a judgment)
+                                                // get a map of the data elements for the judgment
+                                                Map<String, Object> judgementEventDataMap = (Map<String, Object>) eventMap.get("data");
+                                                
                                                 String judgement = (String) judgementEventDataMap.get("judgement_type_id");
                                                 if (judgement != null && !judgement.equals("")) {
     
@@ -769,6 +746,79 @@ public class RemoteEventFeedMonitor implements Runnable {
         }
         return null;
     }
+
+    /**
+     * Return if an event is a delete operation
+     * 
+     * For older event feed events, the "op" property will be checked for existence
+     * and if it's a "delete".
+     * For newer event feed (2022-07), there is no "op", but if the "data" object
+     * is null, then it's a delete.
+     * 
+     * @param eventMap map of all properties in the event
+     * @return true if this is the event map passed in specifies a delete operation
+     */  
+    private boolean isDeleteOperation(Map<String, Object> eventMap)
+    {
+        boolean bDelete = false;
+        
+        // "op" property, if it's there - old feed format uses this
+        String operation = (String) eventMap.get("op");
+        
+        if(operation != null) {
+            // Old feed
+            if(operation.equals("delete")) {
+                bDelete = true;
+            }
+        } else if((Map<String, Object>) eventMap.get("data") == null){
+            bDelete = true;
+        }
+        return(bDelete);
+    }
+    
+    /** Delete the judgment specified by the supplied eventMap properties
+     * 
+     * For older event feed events, the "op" property will be checked for existence
+     * and if it's a "delete", we use the eventDataMap's "id" property.
+     * For newer event feed (2022-07), there is no "op", and no "data" object
+     * but the "id" is in the eventMap.
+     * 
+     * @param eventMap map of all properties in the event
+     * @return true if this is the event map passed in specifies a delete operation
+     */  
+    private boolean deleteJudgment(Map<String, Object> eventMap)
+    {
+        String operation = (String) eventMap.get("op");
+        String idToDelete = null;
+        boolean bDeleted = false;
+        
+        // Determine feed version, and where to get the judgement id.
+        // For the 2022-07 (and 2021-11) clics spec, "operation" will always be null since the "op" field was removed
+        // For the 2020-03 the "op" field will be non-null.  This is how we determine the feed type.                                        
+       if (operation == null) {
+           // 2022-07 (newer) feed - the ID of the judgment is in the notification object since there is
+           // no data object.
+           idToDelete = (String)eventMap.get("id");
+       } else if(operation.equals("delete")) {
+           // 2020-03 feed, "op" field present and is an explicit delete, judgment id is in "data" object
+           Map<String, Object> judgmentEventDataMap = (Map<String, Object>) eventMap.get("data");
+           
+           if(judgmentEventDataMap != null) {
+               idToDelete = (String) judgmentEventDataMap.get("id");
+           }
+       }
+       // idToDelete obtained from different "id" fields above depending on feed version
+       if(idToDelete != null && !idToDelete.isEmpty()) {
+           // we have a judgment id; remove from the global map the judgment whose ID is specified
+            synchronized (remoteJudgementsMapLock) {
+                getRemoteJudgementsMap().remove(idToDelete);
+            }
+            bDeleted= true;
+            //TODO: how do we notify the local PC2 system that this judgment should be deleted??
+       }
+       return(bDeleted);
+    }
+
 
     protected static ShadowRunSubmission createRunSubmission(Map<String, Object> eventDataMap) {
         ObjectMapper mapper = new ObjectMapper();
