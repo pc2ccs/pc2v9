@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.BufferedReader;
@@ -42,6 +42,8 @@ import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
  */
 public class RemoteEventFeedMonitor implements Runnable {
 
+    public static final int REMOTE_EVENT_FEED_DELAYMS = 500;
+    
     private IRemoteContestAPIAdapter remoteContestAPIAdapter;
     private URL remoteURL;
     private String login;
@@ -115,6 +117,7 @@ public class RemoteEventFeedMonitor implements Runnable {
     
     @Override
     public void run() {
+        boolean bDelay;
         
         Thread.currentThread().setName("RemoteEventFeedMonitorThread");
 
@@ -166,11 +169,11 @@ public class RemoteEventFeedMonitor implements Runnable {
                     // So it was determined that the following was the best solution, at least in the short term...
                     //See also GitHub Issue 267:  https://github.com/pc2ccs/pc2v9/issues/267
                     // Thread.sleep(10);
-                    
-                    if ((!event.contains("\"type\": \"organizations\"")) && (!event.contains("\"type\": \"runs\""))) {
-                        Thread.sleep(500);
-                    }
-                    
+                    // We now set a flag indicating if we want to delay at the END of the loop.  Any message we want to
+                    // delay for will set the bDelay to true, such as submissions and judgements (which is currently all we process anyway)
+                    // by default, we will NOT delay.  This lets messages like organizations, runs, teams, etc, fly by quickly.
+                    bDelay = false;
+                   
                     //skip blank lines and any that do not start/end with "{...}"
                     if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
                         
@@ -256,6 +259,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             continue;
                                         }
 
+                                        // This is the commit point for a submission, so we will want to delay at the end of the loop
+                                        bDelay = true;
+                                        
                                         //convert submission data into a ShadowRunSubmission object
                                         ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
 
@@ -462,7 +468,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                                     + " time " + overrideTimeMS 
                                                                     + " submissionID " + overrideSubmissionID);
                                             try {
-                                                submitter.submitRun("team" + runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(), mainFile, auxFiles,
+                                                submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(), mainFile, auxFiles,
                                                         overrideTimeMS, overrideSubmissionID);
                                             } catch (Exception e) {
                                                 // TODO design error handling reporting
@@ -486,31 +492,26 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                 } else if ("judgements".equals(eventType)) {
                                     
+                                    // Delay on judgments
+                                    bDelay = true;
+                                    
                                     if (Utilities.isDebugMode()) {
                                         System.out.println("Found judgement event: " + event);
                                     }
                                     log.log(Level.INFO, "Found judgement event: " + event);
 
-                                    //process a judgement event
+                                    //process a judgment event
                                     try {
-                                        //get a map of the data elements for the judgement
-                                        Map<String, Object> judgementEventDataMap = (Map<String, Object>) eventMap.get("data");
-
-                                        // check if this is a "delete" event
-                                        String operation = (String) eventMap.get("op");
-                                        if (operation != null && operation.equals("delete")) {
-                                            
-                                            //it is a delete; remove from the global map the judgement whose ID is specified
-                                            String idToDelete = (String) judgementEventDataMap.get("id");
-                                            synchronized (remoteJudgementsMapLock) {
-                                                getRemoteJudgementsMap().remove(idToDelete);
+                                        if(isDeleteOperation(eventMap)) {
+                                            if(!deleteJudgment(eventMap)) {
+                                                log.log(Level.WARNING, "Unable to delete judgement for event: " +event);
                                             }
-
-                                            //TODO: how do we notify the local PC2 system that this judgement should be deleted??
-
                                         } else {
-                                            //it's not a delete; see if there is an actual judgement (acronym) in the event data
-                                            // (there might not be such an element; "create" operations do not always have a judgement)
+                                            //it's not a delete; see if there is an actual judgment (acronym) in the event data
+                                            // (there might not be such an element; "create" operations do not always have a judgment)
+                                            // get a map of the data elements for the judgment
+                                            Map<String, Object> judgementEventDataMap = (Map<String, Object>) eventMap.get("data");
+                                            
                                             String judgement = (String) judgementEventDataMap.get("judgement_type_id");
                                             if (judgement != null && !judgement.equals("")) {
 
@@ -587,6 +588,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                         }
                     }
                     
+                    if(bDelay) {
+                        Thread.sleep(REMOTE_EVENT_FEED_DELAYMS);
+                    }
                     event = reader.readLine();
 
                 } // while
@@ -740,12 +744,84 @@ public class RemoteEventFeedMonitor implements Runnable {
         return null;
     }
 
+    /**
+     * Return if an event is a delete operation
+     * 
+     * For older event feed events, the "op" property will be checked for existence
+     * and if it's a "delete".
+     * For newer event feed (2022-07), there is no "op", but if the "data" object
+     * is null, then it's a delete.
+     * 
+     * @param eventMap map of all properties in the event
+     * @return true if this is the event map passed in specifies a delete operation
+     */  
+    private boolean isDeleteOperation(Map<String, Object> eventMap)
+    {
+        boolean bDelete = false;
+        
+        // "op" property, if it's there - old feed format uses this
+        String operation = (String) eventMap.get("op");
+        
+        if(operation != null) {
+            // Old feed
+            if(operation.equals("delete")) {
+                bDelete = true;
+            }
+        } else if((Map<String, Object>) eventMap.get("data") == null){
+            bDelete = true;
+        }
+        return(bDelete);
+    }
+    
+    /** Delete the judgment specified by the supplied eventMap properties
+     * 
+     * For older event feed events, the "op" property will be checked for existence
+     * and if it's a "delete", we use the eventDataMap's "id" property.
+     * For newer event feed (2022-07), there is no "op", and no "data" object
+     * but the "id" is in the eventMap.
+     * 
+     * @param eventMap map of all properties in the event
+     * @return true if this is the event map passed in specifies a delete operation
+     */  
+    private boolean deleteJudgment(Map<String, Object> eventMap)
+    {
+        String operation = (String) eventMap.get("op");
+        String idToDelete = null;
+        boolean bDeleted = false;
+        
+        // Determine feed version, and where to get the judgement id.
+        // For the 2022-07 (and 2021-11) clics spec, "operation" will always be null since the "op" field was removed
+        // For the 2020-03 the "op" field will be non-null.  This is how we determine the feed type.                                        
+       if (operation == null) {
+           // 2022-07 (newer) feed - the ID of the judgment is in the notification object since there is
+           // no data object.
+           idToDelete = (String)eventMap.get("id");
+       } else if(operation.equals("delete")) {
+           // 2020-03 feed, "op" field present and is an explicit delete, judgment id is in "data" object
+           Map<String, Object> judgmentEventDataMap = (Map<String, Object>) eventMap.get("data");
+           
+           if(judgmentEventDataMap != null) {
+               idToDelete = (String) judgmentEventDataMap.get("id");
+           }
+       }
+       // idToDelete obtained from different "id" fields above depending on feed version
+       if(idToDelete != null && !idToDelete.isEmpty()) {
+           // we have a judgment id; remove from the global map the judgment whose ID is specified
+            synchronized (remoteJudgementsMapLock) {
+                getRemoteJudgementsMap().remove(idToDelete);
+            }
+            bDeleted= true;
+            //TODO: how do we notify the local PC2 system that this judgment should be deleted??
+       }
+       return(bDeleted);
+    }
+
+
     protected static ShadowRunSubmission createRunSubmission(Map<String, Object> eventDataMap) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
         return mapper.convertValue(eventDataMap, ShadowRunSubmission.class);
     }
- 
     
     /**
      * This method is used to terminate the RemoteEventFeedListener thread.
