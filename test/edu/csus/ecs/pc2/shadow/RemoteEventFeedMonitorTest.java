@@ -68,7 +68,7 @@ public class RemoteEventFeedMonitorTest extends AbstractTestCase {
         assertTrue("Expecting connection available for " + remoteURL, remoteContestAPIAdapter.testConnection());
 
         try {
-            InputStream str = remoteContestAPIAdapter.getRemoteEventFeedInputStream();
+            InputStream str = remoteContestAPIAdapter.getRemoteEventFeedInputStream(null);
             assertNotNull("Expecting non-null EF stream for " + remoteURL, str);
         } catch (Exception e) {
 //            e.printStackTrace(System.err);

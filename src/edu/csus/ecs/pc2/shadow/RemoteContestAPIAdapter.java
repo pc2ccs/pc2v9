@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.BufferedInputStream;
@@ -200,11 +200,15 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
     /**
      * {@inheritDoc}
      */
-    public InputStream getRemoteEventFeedInputStream() {
+    public InputStream getRemoteEventFeedInputStream(String token) {
         
         String eventFeedURLString = remoteURL.toString();
         eventFeedURLString = appendIfMissing(eventFeedURLString, "/") +"event-feed";
         
+        // Add on optional starting point token
+        if(token != null && !token.isEmpty()) {
+            eventFeedURLString += "?since_token=" + token;
+        }
         InputStream stream = null;
         try {
             URL url = new URL(eventFeedURLString);

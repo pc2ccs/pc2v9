@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.InputStream;
@@ -40,10 +40,14 @@ public interface IRemoteContestAPIAdapter {
      * Returns an {@link InputStream} from which CLICS events from a remote
      * contest can be read.
      * 
+     * @param token the token signifies a starting  point in the event feed.
+     *      this is done by adding a url parameter ?since_token=token
+     *      Passing an empty string or null will start the feed at the beginning
+     * 
      * @return the remote system event feed input stream, or null if no input stream could be acquired
      * 
      */
-    public InputStream getRemoteEventFeedInputStream() ;
+    public InputStream getRemoteEventFeedInputStream(String token) ;
     
     /**
      * Returns a {@link List} of PC2 {@link IFile} objects associated with the specified
