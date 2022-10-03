@@ -42,7 +42,7 @@ import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
  */
 public class RemoteEventFeedMonitor implements Runnable {
 
-    public static final int REMOTE_EVENT_FEED_DELAYMS = 500;
+    public static final int REMOTE_EVENT_FEED_DELAYMS = 100;
     
     private IRemoteContestAPIAdapter remoteContestAPIAdapter;
     private URL remoteURL;
