@@ -43,6 +43,8 @@ import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
 public class RemoteEventFeedMonitor implements Runnable {
 
     public static final int REMOTE_EVENT_FEED_DELAYMS = 500;
+    public static final int RECONNECT_RETRY_DELAY = 5000;
+    public static final boolean ATTEMPT_RECONNECTS = true;
     
     private IRemoteContestAPIAdapter remoteContestAPIAdapter;
     private URL remoteURL;
@@ -83,6 +85,8 @@ public class RemoteEventFeedMonitor implements Runnable {
     private String lastToken = null;
     private String msg;
     private int nRecords;
+    private int retryConnectDelay = RECONNECT_RETRY_DELAY;
+    private boolean attemptConnectRetries = ATTEMPT_RECONNECTS;
     
    /**
      * A Map mapping remote judgement ids to corresponding submission ids and the judgement applied to that submission.
@@ -132,7 +136,7 @@ public class RemoteEventFeedMonitor implements Runnable {
        
         Log log = pc2Controller.getLog();
         
-        if(keepRunning) {
+        while(keepRunning) {
             // open or reopen connection to remoteURL event-feed endpoint
             // make up nice message for log
             if(bOpened) {
@@ -146,8 +150,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                 msg = msg + " connection to remote event feed";
             }
             logAndDebugPrint(log, Level.INFO, msg);
-            // TODO add lasttoken to call to getRemoveEventFeedInputStream
-            remoteInputStream = remoteContestAPIAdapter.getRemoteEventFeedInputStream();
+            remoteInputStream = remoteContestAPIAdapter.getRemoteEventFeedInputStream(lastToken);
     
             if (remoteInputStream == null) {
                 //  TODO: improve error handling (more than just logging?)
@@ -155,6 +158,8 @@ public class RemoteEventFeedMonitor implements Runnable {
             } else {
     
                 String event = "null event";
+                
+                bOpened = true;
                 try {
     
                     //wrap the event stream (which consists of newline-delimited character strings representing events)
@@ -548,6 +553,18 @@ public class RemoteEventFeedMonitor implements Runnable {
                     logAndDebugPrint(log, Level.INFO, msg, ioe); 
                     // TODO Send to GUI
                     // AddToJList(lastToken);
+                    if(!attemptConnectRetries) {
+                        logAndDebugPrint(log, Level.INFO, "Remote connection retry attempts is not enabled");
+                        break;
+                    }
+                    if(retryConnectDelay > 0) {
+                        logAndDebugPrint(log, Level.INFO, "Attempted to reconnect to remote in " + retryConnectDelay + "ms");
+                        try {
+                            Thread.sleep(retryConnectDelay);
+                        } catch(Exception e) {
+                            logAndDebugPrint(log, Level.INFO, "Retry sleep interrupted", e);
+                        }
+                    }
                 } catch (Exception e) {
                     // TODO design error handling reporting (logging?)
                     logAndDebugPrint(log, Level.SEVERE, "Exception reading event from stream: " + event, e); 
@@ -555,6 +572,7 @@ public class RemoteEventFeedMonitor implements Runnable {
             } // end else
         } // keepRunning
     }
+    
     
     /**
      * Returns an indication of whether the current client is a "read-only shadow" client.
@@ -773,8 +791,86 @@ public class RemoteEventFeedMonitor implements Runnable {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
         return mapper.convertValue(eventDataMap, ShadowRunSubmission.class);
     }
+
     
+    /**
+     * Set lastToken starting point for next open of remote feed
+     * 
+     * 
+     * @param token where to start reading remote feed from
+     */  
+    public void setStartAfterToken(String token) {
+        lastToken = token;
+    }
+
+    
+    /**
+     * Get lastToken starting point for next open of remote feed
+     * 
+     * 
+     * @return token of last processed event
+     */  
+    public String getStartAfterToken() {
+        return(lastToken);
+    }
+
+    
+    /**
+     * Get the number of records read from remote.  This is NOT the number of
+     * events processed.  This includes events we do not care about.
+     * 
+     * 
+     * @return number of records read
+     */  
+    public int getRecordsRead() {
+        return(nRecords);
+    }
+
+    
+    /**
+     * Set the delay of how long to wait between reconnect attempts
+     * to the primary
+     * 
+     * @param delay how long to wait (in ms) between connect attempts to primary
+     */  
+    public void setRetryConnectDelay(int delay) {
+        retryConnectDelay = delay;
+    }
+
+    
+    /**
+     * Get the delay of how long to wait between reconnect attempts
+     * to the primary
+     * 
+     * @return number of ms to delay before a reconnect attempt (0 is allowed)
+     */  
+    public int getRetryConnectDelay() {
+        return(retryConnectDelay);
+    }
+
+    
+    /**
+     * Set whether or not connection retries are being attempted
+     * 
+     * 
+     * @param attemptRetries is true to attempt retries on connection failures
+     */  
+    public void setAttemptConnectRetries(boolean attemptRetries) {
+        attemptConnectRetries = attemptRetries;
+    }
+
+    
+    /**
+     * Get whether or not connection retries are being attempted
+     * 
+     * 
+     * @return true if attempts are being attempted on errors
+     */  
+    public boolean getAttemptConnectRetries() {
+        return(attemptConnectRetries);
+    }
        
+    
     /** Shorthand method to print a message if debugging is enable, but always
      * log the message
      * 
