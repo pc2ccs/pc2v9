@@ -235,7 +235,7 @@ TODO consider switching back to this at 9.8.0/9.9build
     <target name="jar" depends="test" description="creates a jar of our classes">
         <antcall target="version"/>
 
-        <antcall target="buildSubProjects"/>
+        
 
         <mkdir dir="${dist.dir}" />
 
@@ -258,6 +258,8 @@ TODO consider switching back to this at 9.8.0/9.9build
                 <attribute name="Main-Class" value="edu.csus.ecs.pc2.Starter"/>
             </manifest>
         </jar>
+    	
+    	<antcall target="buildSubProjects"/>
 
     </target>
 

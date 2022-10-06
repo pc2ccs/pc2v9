@@ -162,6 +162,11 @@
         <antcall target="clean"/>
         <antcall target="apizip"/>
         <!-- bug 490 gzip depends on zip do not call explicitly -->
-        <antcall target="gzip"/> 
+        <antcall target="gzip"/>
+    	
+    	<echo message="Version ${version} ${date} ${repo.version} (${timestamp.english})${line.separator}"/>
+    	<echo message="Created  distribution ${zip.path}"/>
+    	<echo message="Created  distribution ${gzip.path}"/>
+    	<echo message="Packaging complete."/>
     </target>
 </project>
