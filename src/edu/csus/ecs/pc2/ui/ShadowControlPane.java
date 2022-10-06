@@ -11,6 +11,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.GregorianCalendar;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -31,6 +33,7 @@ import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ShadowInformation;
 import edu.csus.ecs.pc2.shadow.IRemoteContestAPIAdapter;
+import edu.csus.ecs.pc2.shadow.IShadowMonitorStatus;
 import edu.csus.ecs.pc2.shadow.MockContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.RemoteContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.ShadowController;
@@ -48,7 +51,7 @@ import edu.csus.ecs.pc2.shadow.ShadowController.SHADOW_CONTROLLER_STATUS;
  */
 
 // $HeadURL$
-public class ShadowControlPane extends JPanePlugin {
+public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStatus {
 
     private static final long serialVersionUID = 1;
 
@@ -81,6 +84,17 @@ public class ShadowControlPane extends JPanePlugin {
     private JButton compareRunsButton;
 
     private JButton compareScoreboardsButton;
+
+    private JTextField lastRecordTextfield;
+    
+    private JTextField lastEventTimeTextField;
+    
+    private int numRecord = 0;
+    
+    private String lastToken = null;
+    
+    private SimpleDateFormat lastDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
 
     /**
      * Constructs a new ShadowControlPane using the specified Contest and Controller.
@@ -225,7 +239,7 @@ public class ShadowControlPane extends JPanePlugin {
         boolean shadowDataComplete = verifyShadowControls();
         
         if (shadowCheckboxEnabled && shadowDataComplete) {
-            shadowController = new ShadowController(this.getContest(),this.getController()) ;
+            shadowController = new ShadowController(this.getContest(), this.getController(), (IShadowMonitorStatus)this, lastToken) ;
             boolean success = shadowController.start();
             if (success) {
                 currentlyShadowing = true;
@@ -322,6 +336,8 @@ public class ShadowControlPane extends JPanePlugin {
             getStartStopButton().setText("Start Shadowing");
             getStartStopButton().setToolTipText("Start shadowing operations on the specified remote CCS");
             getController().getLog().info("Shadowing stopped");
+            // save last token on server
+            updateContestInformation();
         }
         updateGUI();
     }
@@ -387,6 +403,15 @@ public class ShadowControlPane extends JPanePlugin {
             
             lastEventIDPane.setLayout(new FlowLayout(FlowLayout.CENTER));
             
+            JLabel lastEventDateLabel = new JLabel("Last Event Processed At:");
+            lastEventDateLabel.setToolTipText("The time the last event was processed");
+            lastEventIDPane.add(lastEventDateLabel);
+            
+            // 2022-09-27 23:02:03.009 (23 chars), but that's too many columns for our font
+            lastEventTimeTextField = new JTextField("N/A", 16);
+            lastEventTimeTextField.setEditable(false);
+            lastEventIDPane.add(lastEventTimeTextField);
+            
             JLabel lastEventIDLabel = new JLabel("Last Event ID:");
             lastEventIDLabel.setToolTipText("The ID of the last event already received; i.e., the \"since_id\" for events being requested");
             lastEventIDPane.add(lastEventIDLabel);
@@ -397,7 +422,18 @@ public class ShadowControlPane extends JPanePlugin {
                     enableButtons();
                 }
             });
+            lastEventTextfield.setHorizontalAlignment(JTextField.RIGHT);
             lastEventIDPane.add(lastEventTextfield);
+            
+            JLabel lastRecordLabel = new JLabel("Records Read:");
+            lastRecordLabel.setToolTipText("The number of JSON event records read from the primary");
+            lastEventIDPane.add(lastRecordLabel);
+            
+            lastRecordTextfield = new JTextField(10);
+            lastRecordTextfield.setEditable(false);
+            lastRecordTextfield.setHorizontalAlignment(JTextField.RIGHT);
+            lastEventIDPane.add(lastRecordTextfield);
+            
         }
         return lastEventIDPane;
     }
@@ -453,7 +489,7 @@ public class ShadowControlPane extends JPanePlugin {
     private ShadowInformation getCurrentShadowInformation(ContestInformation contestInformation) {
         
         ShadowInformation newShadowInfo = new ShadowInformation();
-        
+
         newShadowInfo.setShadowModeEnabled(contestInformation.isShadowMode());
         newShadowInfo.setRemoteCCSURL(contestInformation.getPrimaryCCS_URL());
         newShadowInfo.setRemoteCCSLogin(contestInformation.getPrimaryCCS_user_login());
@@ -491,9 +527,10 @@ public class ShadowControlPane extends JPanePlugin {
         }
         
         updateShadowSettingsPane(currentlyShadowing);
-        lastEventTextfield.setText(contestInformation.getLastShadowEventID());
+        lastToken = contestInformation.getLastShadowEventID();
+        lastEventTextfield.setText(lastToken);
     }
-
+    
     private void updateShadowSettingsPane(boolean currentlyShadowing) {
         
         ContestInformation contestInformation = getContest().getContestInformation();
@@ -524,7 +561,7 @@ public class ShadowControlPane extends JPanePlugin {
         newShadowInformation.setRemoteCCSLogin(getShadowSettingsPane().getRemoteCCSLoginTextfield().getText());
         newShadowInformation.setRemoteCCSPassword(getShadowSettingsPane().getRemoteCCSPasswdTextfield().getText());
         newShadowInformation.setLastEventID(lastEventTextfield.getText());
-   
+
         return (newShadowInformation);
     }
 
@@ -693,7 +730,79 @@ public class ShadowControlPane extends JPanePlugin {
         }
         return testConnectionButton;
     }
+
+    /*
+     * IShadowMonitorStatus implementaiton
+     */
+    /**
+     * {@inheritDoc}
+     */
+    public void updateShadowLastToken(String token)
+    {
+        // if the value supplied is valid and different from what we last saw,
+        // then we update the text fields
+        if(token != null) {
+            if(lastToken == null || !token.equals(lastToken)) {
+                // TODO: Do we want to save the token to a file here in case we crash?
+                //       Currently, token is only saved when the shadow is "stopped"
+                // TODO: Do we want to "InvokeLater" these (simple) updates to text fields?
+                lastToken = token;
+                lastEventTextfield.setText(lastToken);
+                try {
+                    GregorianCalendar cal = new GregorianCalendar();
+                    
+                    lastDateFormat.setCalendar(cal);
+                    lastEventTimeTextField.setText(lastDateFormat.format(cal.getTime()));
+                } catch(Exception e) {
+                    // Just ignore any exception from date formatter
+                }
+            }
+        }
+    }
     
+    /**
+     * {@inheritDoc}
+     */
+    public void updateShadowNumberofRecords(int nRec)
+    {
+        // if the number of records is different from what we last display and it's valid
+        // update the instrumentation.
+        if(nRec != numRecord && nRec >= 0) {
+            // TODO: Do we want to "InvokeLater" this (simple) update to a text field?
+            numRecord = nRec;
+            // Save to file? Send to server contestinfo?
+            lastRecordTextfield.setText(String.valueOf(numRecord));
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void connectFailed(String token)
+    {
+        // Update JTable - future commit
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void connectSucceeded(String token)
+    {
+        // Update JTable - future commit
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void errorDisconnect(String errMsg)
+    {
+        // Update JTable - future commit
+        // Save last token on disconnect
+        if(lastToken != null && !lastToken.isEmpty()) {
+            updateContestInformation();
+        }
+    }
+   
     private IRemoteContestAPIAdapter createRemoteContestAPIAdapter(URL url, String login, String password) {
 
         boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow.usemockcontestadapter"), false);

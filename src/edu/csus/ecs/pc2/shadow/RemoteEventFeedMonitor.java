@@ -80,6 +80,7 @@ public class RemoteEventFeedMonitor implements Runnable {
     private boolean listening;
     private IInternalController pc2Controller;
     private InputStream remoteInputStream;
+    private IShadowMonitorStatus monitorStatus;
     
     //for support of reconnecting to the primary
     private String lastToken = null;
@@ -109,7 +110,25 @@ public class RemoteEventFeedMonitor implements Runnable {
      * @param password the password to the remote CCS account
      * @param submitter a {@link Runnable} which knows how to submit a receive remote run to PC2
      */
-    public RemoteEventFeedMonitor(IInternalController pc2Controller, IRemoteContestAPIAdapter remoteContestAPIAdapter, URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
+    public RemoteEventFeedMonitor(IInternalController pc2Controller, IRemoteContestAPIAdapter remoteContestAPIAdapter,
+                                  URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
+        this(pc2Controller, remoteContestAPIAdapter, remoteURL, login, password, submitter, null);
+    }
+    
+    /**
+     * Constructs a RemoteEventFeedMonitor with the specified values.  The RemoteEventFeedMonitor
+     * is used to listen for submission events in the event feed from a remote CCS contest.  
+     *
+     * @param pc2Controller an {@link IInternalController} for passing error handling back to the local PC2 system
+     * @param remoteContestAPIAdapter an adapter for accessing the remote contest API
+     * @param remoteURL the URL to the remote CCS
+     * @param login the login (account) on the remote CCS
+     * @param password the password to the remote CCS account
+     * @param submitter a {@link Runnable} which knows how to submit a receive remote run to PC2
+     * @param monStatus interface for monitoring stats (can be null if not desired)
+     */
+    public RemoteEventFeedMonitor(IInternalController pc2Controller, IRemoteContestAPIAdapter remoteContestAPIAdapter,
+                                  URL remoteURL, String login, String password, RemoteRunSubmitter submitter, IShadowMonitorStatus mon) {
 
         this.pc2Controller = pc2Controller ;
         this.remoteContestAPIAdapter = remoteContestAPIAdapter;
@@ -117,6 +136,7 @@ public class RemoteEventFeedMonitor implements Runnable {
         this.login = login;
         this.password = password;
         this.submitter = submitter;
+        this.monitorStatus = mon;
         
         //create a filter for submissions (only used if respectSubmmissionFilter = true)
         submissionFilterIDsList = new ArrayList<String>(submissionFilterIDs.length);
@@ -132,7 +152,6 @@ public class RemoteEventFeedMonitor implements Runnable {
 
         keepRunning = true;
         nRecords = 0;
-        lastToken = null;
        
         Log log = pc2Controller.getLog();
         
@@ -155,11 +174,19 @@ public class RemoteEventFeedMonitor implements Runnable {
             if (remoteInputStream == null) {
                 //  TODO: improve error handling (more than just logging?)
                 logAndDebugPrint(log, Level.SEVERE, "Error opening event feed stream");
+                // if someone is monitoring, inform them we have a problem.
+                if(monitorStatus != null) {
+                    monitorStatus.connectFailed(lastToken);
+                }
             } else {
     
                 String event = "null event";
                 
                 bOpened = true;
+                if(monitorStatus != null) {
+                    // if someone is monitoring, inform them we are connected
+                    monitorStatus.connectSucceeded(lastToken);
+                }
                 try {
     
                     //wrap the event stream (which consists of newline-delimited character strings representing events)
@@ -225,7 +252,10 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     String evToken = (String)eventMap.get("token");
                                     if(evToken != null && !evToken.isEmpty()) {
                                         lastToken = evToken;
-                                        // TODO: Update token file
+                                        // if someone is  monitoring, let them know about the new event
+                                        if(monitorStatus != null) {
+                                            monitorStatus.updateShadowLastToken(lastToken);
+                                        }
                                     }
    
                                     // find event type
@@ -537,6 +567,10 @@ public class RemoteEventFeedMonitor implements Runnable {
                         }
                         // keep track of how many records (events) we read
                         nRecords++;
+                        // if someone is  monitoring, let them know we read another record
+                        if(monitorStatus != null) {
+                            monitorStatus.updateShadowNumberofRecords(nRecords);
+                        }
                         
                         if(bDelay) {
                             Thread.sleep(REMOTE_EVENT_FEED_DELAYMS);
@@ -550,9 +584,11 @@ public class RemoteEventFeedMonitor implements Runnable {
                     } else {
                         msg = "Unexpected IO Exception on Event Feed before getting any events";
                     }
-                    logAndDebugPrint(log, Level.INFO, msg, ioe); 
-                    // TODO Send to GUI
-                    // AddToJList(lastToken);
+                    logAndDebugPrint(log, Level.INFO, msg, ioe);
+                    // if someone monitoring, let them know there was an error
+                    if(monitorStatus != null) {
+                        monitorStatus.errorDisconnect(msg);
+                    }
                     if(!attemptConnectRetries) {
                         logAndDebugPrint(log, Level.INFO, "Remote connection retry attempts is not enabled");
                         break;
