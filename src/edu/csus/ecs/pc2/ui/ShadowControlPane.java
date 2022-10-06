@@ -176,6 +176,11 @@ public class ShadowControlPane extends JPanePlugin {
 
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (!currentlyShadowing) {
+                        
+                        if (!getContest().getContestTime().isContestRunning()) {
+                            showErrorMessage("Contest clock STOPPED, cannot start shadowing", "Cannot start shadowing");
+                            return;
+                        }
 
                     	SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
