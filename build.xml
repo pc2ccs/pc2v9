@@ -125,13 +125,13 @@
 		<antcall target="jar"/>
 	</target>
 
-	<target name="jarSkipTestAndSubprojectBulds" description="create jar file skip unit tests do not build sub projects">
+	<target name="jarSkipTestsAndSubprojectBuilds" description="create jar file skip unit tests do not build sub projects">
 		 <property name="RUN_NO_TESTS" value="Yes"/>
 		 <property name="BUILD_NO_SUBPROJECTS" value="Yes"/>
 		<antcall target="jar"/>
 	</target>
 
-	<target name="jarSkipBuildSubprojectsOnly" description="create jar file, run unit tests, skip building sub projects ">
+	<target name="jarSkipBuildSubprojects" description="create jar file, run unit tests, skip building sub projects ">
 		 <property name="BUILD_NO_SUBPROJECTS" value="Yes"/>
 		<antcall target="jar"/>
 	</target>
@@ -234,9 +234,6 @@ TODO consider switching back to this at 9.8.0/9.9build
     </target>
     <target name="jar" depends="test" description="creates a jar of our classes">
         <antcall target="version"/>
-
-        
-
         <mkdir dir="${dist.dir}" />
 
 		<!-- include the images in the jar -->
