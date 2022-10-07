@@ -4297,16 +4297,31 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return logWindow;
     }
 
+    private String noLogWindowAvailableMsg = 
+            "Log Window is null or invalid; cannot show log." 
+            + "\n (Log Windows were temporarily disabled in certain Clients (see Issue https://github.com/pc2ccs/pc2v9/pull/555);"
+            + "\n   you may be running a version of PC^2 which still includes this patch...)";                
+
     public void showLogWindow(boolean showWindow) {
 
         if (isUsingGUI()) {
-            logWindow.setVisible(showWindow);
+            if (logWindow != null && logWindow instanceof ILogWindow) {
+                logWindow.setVisible(showWindow);
+            } else {
+                logWarning(noLogWindowAvailableMsg);
+                JOptionPane.showMessageDialog(null, noLogWindowAvailableMsg, "No Log Window available", JOptionPane.WARNING_MESSAGE);
+            }
         }
     }
 
     public boolean isLogWindowVisible() {
         if (isUsingGUI()) {
-            logWindow.isVisible();
+            if (logWindow != null && logWindow instanceof ILogWindow) {
+                return logWindow.isVisible();
+            } else {
+                logWarning(noLogWindowAvailableMsg);
+                JOptionPane.showMessageDialog(null, noLogWindowAvailableMsg, "No Log Window available", JOptionPane.WARNING_MESSAGE);
+            }
         }
 
         return false;
