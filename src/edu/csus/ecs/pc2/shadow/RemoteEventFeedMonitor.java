@@ -42,7 +42,7 @@ import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
  */
 public class RemoteEventFeedMonitor implements Runnable {
 
-    public static final int REMOTE_EVENT_FEED_DELAYMS = 500;
+    public static final int REMOTE_EVENT_FEED_DELAYMS = 0;
     public static final int RECONNECT_RETRY_DELAY = 5000;
     public static final boolean ATTEMPT_RECONNECTS = true;
     
@@ -88,7 +88,7 @@ public class RemoteEventFeedMonitor implements Runnable {
     private int nRecords;
     private int retryConnectDelay = RECONNECT_RETRY_DELAY;
     private boolean attemptConnectRetries = ATTEMPT_RECONNECTS;
-    
+        
    /**
      * A Map mapping remote judgement ids to corresponding submission ids and the judgement applied to that submission.
      */
@@ -149,7 +149,10 @@ public class RemoteEventFeedMonitor implements Runnable {
         boolean bDelay;
         boolean bOpened = false;
         Thread.currentThread().setName("RemoteEventFeedMonitorThread");
-
+        // local map to look for duplicate submissions
+        Map<String, Boolean> mapSubmissions = new HashMap<String, Boolean>();
+        Boolean bFound;
+        
         keepRunning = true;
         nRecords = 0;
        
@@ -292,6 +295,15 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                 continue;
                                             }
     
+                                            bFound = (Boolean)mapSubmissions.get(submissionID);
+                                            if(bFound != null && bFound.booleanValue() == true) {
+                                                
+                                                logAndDebugPrint(log, Level.INFO, "Quickly Ignoring submission " + submissionID + " due to it already having been submitted");
+
+                                                event = reader.readLine();
+                                                continue;
+                                            }
+                                            
                                             //make sure we haven't seen this submission before (this could happen if
                                             // we've done a restart but already processed this submission on a prior shadow run)
                                             if (RunUtilities.isAlreadySubmitted(pc2Controller.getContest(),submissionID) ) {
@@ -302,6 +314,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                 continue;
                                             }
     
+                                            // add to local map to detect quick duplicate before they get entered into the system
+                                            mapSubmissions.put(submissionID, true);
+                                            
                                             // This is the commit point for a submission, so we will want to delay at the end of the loop
                                             bDelay = true;
                                             
