@@ -144,7 +144,7 @@
 		   <antcall target="archives"/>
       </target>
 
-   	<target name="archiveSkipTestsAndBuildSubProjects">
+   	<target name="archiveSkipTestsAndSubprojectBuilds">
 		   <property name="RUN_NO_TESTS" value="Yes"/>
 		   <property name="BUILD_NO_SUBPROJECTS" value="Yes"/>
 		   <antcall target="archives"/>
