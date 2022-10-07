@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.AboutPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
+import edu.csus.ecs.pc2.ui.ContestEFComparePane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.EventFeedServerPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -183,6 +184,18 @@ public class ServicesView extends JFrame implements UIPlugin {
                     }
                 }
                 
+                try {
+                    ContestEFComparePane contestEFComparePane = new ContestEFComparePane();
+                    contestEFComparePane.setContestAndController(inContest, inController);
+                    addUIPlugin(getMainTabbedPane(), "EF Comparerer", contestEFComparePane);
+                } catch (Exception e) {
+                    if (StaticLog.getLog() != null) {
+                        StaticLog.getLog().log(Log.WARNING, "Exception", e);
+                        e.printStackTrace(System.err);
+                    } else {
+                        e.printStackTrace(System.err);
+                    }
+                }
                
                if (Utilities.isDebugMode()) {
                     

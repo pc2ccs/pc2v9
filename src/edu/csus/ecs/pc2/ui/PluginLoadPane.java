@@ -215,6 +215,7 @@ public class PluginLoadPane extends JPanePlugin {
         plugins.add(new TeamStatusPane());
         plugins.add(new ViewPropertiesPane());
 
+        plugins.add(new ContestEFComparePane());
         JPanePlugin[] pluginList = (JPanePlugin[]) plugins.toArray(new JPanePlugin[plugins.size()]);
 
         Arrays.sort(pluginList, new JPluginPaneNameComparator());
