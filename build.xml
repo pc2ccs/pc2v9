@@ -264,7 +264,7 @@ TODO consider switching back to this at 9.8.0/9.9build
     </target>
 
 	 <!-- build sub-projects unless BUILD_NO_SUBPROJECTS defined -->
-    <target name="buildSubProjects" unless="BUILD_NO_SUBPROJECTS"  description="build subj projects ">
+    <target name="buildSubProjects" unless="BUILD_NO_SUBPROJECTS"  description="build sub projects ">
 
     	<!-- Build the (old) EWTeam project and copy it (in zip/tar.gz form) to the "projects" folder -->
       <ant dir="projects/EWTeam" antfile="package.xml" useNativeBasedir="true" inheritAll="false"/>
