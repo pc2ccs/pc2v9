@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.imports.clics.CLICSContests;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSEventType;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSLanguage;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSProblem;
-import edu.csus.ecs.pc2.core.imports.clics.EventFeed;
+import edu.csus.ecs.pc2.core.imports.clics.CLICSEventFeedEvent;
 import edu.csus.ecs.pc2.core.imports.clics.JudgementType;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -146,7 +146,11 @@ public class ContestCompareModel {
 //        FileUtilities.writeFileContents(filename, lines);
 //        System.out.println("write event feed to "+filename);
         
+        int eventCount = 0;
+        
         for (String event : lines) {
+            
+            eventCount ++;
 
             if (event.length() == 0) {
                 // EOF
@@ -165,7 +169,7 @@ public class ContestCompareModel {
 
             } else {
 
-                EventFeed eventFeedEntry = (EventFeed) mapper.readValue(event, EventFeed.class);
+                CLICSEventFeedEvent eventFeedEntry = (CLICSEventFeedEvent) mapper.readValue(event, CLICSEventFeedEvent.class);
                 // find event type
                 String eventType = eventFeedEntry.getType();
 
@@ -175,7 +179,14 @@ public class ContestCompareModel {
 
 //                System.out.println(" event "+eventType+" "+eventFeedEntry.getData());
 
-                if (CLICSEventType.LANGUAGES.toString().equals(eventType)) {
+                if (eventFeedEntry.getData() == null) {
+                    
+                    // SOMEDAY handle delete or whatver op has null data
+                    // log for now.
+                    getLog().log(Level.FINE, "Line: "+eventCount+ " data:null in event line '"+event+"'");
+                    
+                }
+                else if (CLICSEventType.LANGUAGES.toString().equals(eventType)) {
                     // languages
 
                     // languages data = {name=C, id=c}
