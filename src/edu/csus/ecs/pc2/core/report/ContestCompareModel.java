@@ -146,7 +146,11 @@ public class ContestCompareModel {
 //        FileUtilities.writeFileContents(filename, lines);
 //        System.out.println("write event feed to "+filename);
         
+        int eventCount = 0;
+        
         for (String event : lines) {
+            
+            eventCount ++;
 
             if (event.length() == 0) {
                 // EOF
@@ -175,7 +179,14 @@ public class ContestCompareModel {
 
 //                System.out.println(" event "+eventType+" "+eventFeedEntry.getData());
 
-                if (CLICSEventType.LANGUAGES.toString().equals(eventType)) {
+                if (eventFeedEntry.getData() == null) {
+                    
+                    // SOMEDAY handle delete or whatver op has null data
+                    // log for now.
+                    getLog().log(Level.FINE, "Line: "+eventCount+ " data:null in event line '"+event+"'");
+                    
+                }
+                else if (CLICSEventType.LANGUAGES.toString().equals(eventType)) {
                     // languages
 
                     // languages data = {name=C, id=c}
