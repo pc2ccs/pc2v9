@@ -164,7 +164,7 @@ public class AppConstants {
     
     
     /**
-     * The value is a full path to a event-feed.json file.
+     * The value is the name of an event-feed.json file.
      * 
      */
     public static final String OVERRIDE_EVENT_FEED_FILE = "server.eventFeedFile";
