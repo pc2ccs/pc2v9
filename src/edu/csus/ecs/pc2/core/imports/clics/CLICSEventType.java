@@ -62,6 +62,10 @@ public enum CLICSEventType {
      */
     SUBMISSIONS("submissions"),
     /**
+     * Awards event
+     */
+    AWARDS("awards"),
+    /**
      * teams event
      */
     TEAMS("teams");
