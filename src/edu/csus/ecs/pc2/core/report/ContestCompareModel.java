@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.imports.clics.CLICSContests;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSEventType;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSLanguage;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSProblem;
-import edu.csus.ecs.pc2.core.imports.clics.EventFeed;
+import edu.csus.ecs.pc2.core.imports.clics.CLICSEventFeedEvent;
 import edu.csus.ecs.pc2.core.imports.clics.JudgementType;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -169,7 +169,7 @@ public class ContestCompareModel {
 
             } else {
 
-                EventFeed eventFeedEntry = (EventFeed) mapper.readValue(event, EventFeed.class);
+                CLICSEventFeedEvent eventFeedEntry = (CLICSEventFeedEvent) mapper.readValue(event, CLICSEventFeedEvent.class);
                 // find event type
                 String eventType = eventFeedEntry.getType();
 

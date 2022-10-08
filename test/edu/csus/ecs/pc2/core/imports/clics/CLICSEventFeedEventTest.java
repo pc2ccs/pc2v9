@@ -12,7 +12,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
-public class EventFeedTest extends AbstractTestCase {
+public class CLICSEventFeedEventTest extends AbstractTestCase {
 
     private ObjectMapper mapperField;
 
@@ -20,7 +20,7 @@ public class EventFeedTest extends AbstractTestCase {
 
         ObjectMapper mapper = getMapper();
         String json = "{\"type\": \"problems\", \"id\": \"542cc6e2-104a-49bc-9fea-04752f9af5ad\", \"op\": \"delete\", \"data\": null }";
-        EventFeed eventFeedEntry = (EventFeed) mapper.readValue(json, EventFeed.class);
+        CLICSEventFeedEvent eventFeedEntry = (CLICSEventFeedEvent) mapper.readValue(json, CLICSEventFeedEvent.class);
         assertNull(eventFeedEntry.getData());
 
     }
@@ -37,7 +37,7 @@ public class EventFeedTest extends AbstractTestCase {
         ObjectMapper mapper = getMapper();
 
         for (String json : eventLines) {
-            EventFeed eventFeedEntry = (EventFeed) mapper.readValue(json, EventFeed.class);
+            CLICSEventFeedEvent eventFeedEntry = (CLICSEventFeedEvent) mapper.readValue(json, CLICSEventFeedEvent.class);
 //            System.out.println("debug data type " + eventFeedEntry.getData().getClass().getName());
             assertNotNull(eventFeedEntry.getData());
 

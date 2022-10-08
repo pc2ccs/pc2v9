@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
  */
 
 //@JsonIgnoreProperties(ignoreUnknown = true)
-public class EventFeed {
+public class CLICSEventFeedEvent {
 
     // {"type": "teams", "id": "289de609-b1a0-40d8-a9e0-54a30e752e69", "op": "create", "data": {"id": "169347", "name": "Colin Peppler", "icpc_id": null, "group_ids": [], "display_name": "Virginia
     // Tech", "organization_id": "vt_edu"}}
