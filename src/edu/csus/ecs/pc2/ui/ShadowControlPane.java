@@ -785,7 +785,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      */
     public void connectFailed(String token)
     {
-        // Update JTable - future commit
+        // TODO: Update JTable - future commit/PR
     }
 
     /**
@@ -793,7 +793,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      */
     public void connectSucceeded(String token)
     {
-        // Update JTable - future commit
+        // TODO: Update JTable - future commit/PR
     }
     
     /**
@@ -801,7 +801,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      */
     public void errorDisconnect(String errMsg)
     {
-        // Update JTable - future commit
+        // TODO: Update JTable - future commit/PR
+        
         // Save last token on disconnect
         if(lastToken != null && !lastToken.isEmpty()) {
             updateContestInformation();
