@@ -1547,5 +1547,23 @@ public class AbstractTestCase extends TestCase {
     public IInternalContest loadFullSampleContest(IInternalContest contest, String sampleName) throws Exception {
         return loadFullSampleContest (contest, new File(getTestSampleContestDirectory(sampleName)));
     }
+
+    /**
+     * Test whether account HAS permission
+     * @param type permission 
+     * @param account
+     */
+    public void assertHasPermssion(edu.csus.ecs.pc2.core.security.Permission.Type type, Account account) {
+        assertTrue("Expected for " + account + " Permission " + type, account.isAllowed(type));
+    }
+
+    /**
+     * Test wether account does NOT have permission
+     * @param type permission
+     * @param account
+     */
+    public void assertNoPermssion(edu.csus.ecs.pc2.core.security.Permission.Type type, Account account) {
+        assertFalse("Expected for  " + account + " Permission " + type, account.isAllowed(type));
+    }
     
 }
