@@ -965,6 +965,8 @@ public class ContestInformationPane extends JPanePlugin {
         newContestInformation.setPrimaryCCS_URL(getShadowSettingsPane().getRemoteCCSURLTextfield().getText());
         newContestInformation.setPrimaryCCS_user_login(getShadowSettingsPane().getRemoteCCSLoginTextfield().getText());
         newContestInformation.setPrimaryCCS_user_pw(getShadowSettingsPane().getRemoteCCSPasswdTextfield().getText());
+        // preserve last shadow event since there is no way to change it on this pane.
+        newContestInformation.setLastShadowEventID(currentContestInformation.getLastShadowEventID());
         
         //fill in additional field values
         String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();

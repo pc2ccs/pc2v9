@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.File;
@@ -96,8 +96,8 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
     public InputStream readRemoteCCSEventFeedFromFile(File file) {
         PacedFileInputStream efEventStreamReader;
         try {
-            int secondsPauseForEAchLine = 1;
-            efEventStreamReader = new PacedFileInputStream(file,secondsPauseForEAchLine);
+            int secondsPauseForEachLine = 1;
+            efEventStreamReader = new PacedFileInputStream(file,secondsPauseForEachLine);
             return efEventStreamReader;
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -111,6 +111,16 @@ public class MockContestAPIAdapter implements IRemoteContestAPIAdapter {
      * This implementation returns local data taken from a file.
      */
     public InputStream getRemoteEventFeedInputStream(){
+        return(getRemoteEventFeedInputStream(null));
+    }
+
+    @Override
+    /**
+     * {@inheritDoc}
+     * 
+     * This implementation returns local data taken from a file.
+     */
+    public InputStream getRemoteEventFeedInputStream(String token){
         
         /**
          * Test JSON event feed.
