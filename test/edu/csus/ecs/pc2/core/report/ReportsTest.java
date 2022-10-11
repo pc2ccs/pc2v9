@@ -276,6 +276,7 @@ public class ReportsTest extends AbstractTestCase {
                 "Event Feed JSON Report", //
                 "Groups for Problems Report", //
                 "Problem Group Assignment", //
+                "Compare Primary with model Report", //
         };
 
         IReport [] reportList = Reports.getReports();
