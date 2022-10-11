@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 
 import javax.swing.JButton;
@@ -19,9 +20,17 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.RowSorter.SortKey;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
@@ -54,6 +63,9 @@ import edu.csus.ecs.pc2.shadow.ShadowController.SHADOW_CONTROLLER_STATUS;
 public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStatus {
 
     private static final long serialVersionUID = 1;
+    
+    private static final int VERT_PAD = 2;
+    private static final int HORZ_PAD = 20;
 
     private JPanel buttonPanel = null;
 
@@ -74,6 +86,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private JPanel lastEventIDPane;
 
     private JPanel shadowingOnOffStatusPane;
+    
+    private JScrollPane connectStatusPane;
 
     private JLabel shadowingStatusValueLabel;
 
@@ -88,6 +102,10 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private JTextField lastRecordTextfield;
     
     private JTextField lastEventTimeTextField;
+    
+    private JTableCustomized connectStatusTable;
+    
+    private DefaultTableModel connectStatusTableModel;
     
     private int numRecord = 0;
     
@@ -125,6 +143,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         this.add(getButtonPanel(), BorderLayout.SOUTH);
         this.add(getCenterPanel(), BorderLayout.CENTER);
 
+        setupConnectionStatusTable();
         updateGUI();
     }
 
@@ -361,7 +380,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             centerPanel.add(getShadowingOnOffStatusPane());
             centerPanel.add(getShadowSettingsPane());
             centerPanel.add(getLastEventIDPane());
-
+            centerPanel.add(getConnectStatusPane());
             
         }
         return centerPanel;
@@ -446,6 +465,24 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     /**
      * @return
      */
+    private JScrollPane getConnectStatusPane() {
+        if (connectStatusPane == null) {
+            connectStatusPane = new JScrollPane(getConnectStatusTable());
+            connectStatusPane.setPreferredSize(new java.awt.Dimension(600,150));
+        }
+        
+        return connectStatusPane;
+    }
+    
+    private JTableCustomized getConnectStatusTable() {
+        connectStatusTable = new JTableCustomized();
+        
+        return(connectStatusTable);
+    }
+
+    /**
+     * @return
+     */
     private JPanel getShadowingOnOffStatusPane() {
         if (shadowingOnOffStatusPane==null) {
             shadowingOnOffStatusPane = new JPanel();
@@ -503,6 +540,54 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         return newShadowInfo;
     }
 
+    private void setupConnectionStatusTable() {
+
+        Object[] columns = { "Time             ", "Description               " };
+        connectStatusTable.removeAll();
+        
+        connectStatusTableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                return false;
+            }
+        };
+
+        connectStatusTable.setModel(connectStatusTableModel);
+
+        // Sorters
+        TableRowSorter<DefaultTableModel> trs = new TableRowSorter<DefaultTableModel>(connectStatusTableModel);
+        
+        connectStatusTable.setRowSorter(trs);
+        connectStatusTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        
+        ArrayList<SortKey> sortList = new ArrayList<SortKey>();
+        
+        /*
+         * Column headers left justified
+         */
+        ((DefaultTableCellRenderer)connectStatusTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
+        connectStatusTable.setRowHeight(connectStatusTable.getRowHeight() + VERT_PAD);
+                     
+        int idx = 0;
+
+        // These are in sort order
+        // Time
+        sortList.add(new RowSorter.SortKey(idx++, SortOrder.ASCENDING));
+        // Description
+        sortList.add(new RowSorter.SortKey(idx++, SortOrder.ASCENDING));
+        trs.setSortKeys(sortList);
+        resizeColumnWidth(connectStatusTable);
+    }
+    
+    private void resizeColumnWidth(JTableCustomized table) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
+                tca.adjustColumns();
+            }
+        });
+    }
+    
     /**
      * Updates the GUI to correspond to the current state.
      */
@@ -713,8 +798,10 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                     boolean isConnected = remoteContestAPIAdapter.testConnection();
                                     if (isConnected) {
                                         showMessage ("Connection to remote CCS is successful");
+                                        addConnectTableEntry("Test connection to remote CCS successful");
                                     } else {
                                         showErrorMessage("Connection to remote CCS failed", "Connection failed");
+                                        addConnectTableEntry("Test connection to remote CCS failed");
                                     }
 
                                 } catch (Exception e) {
@@ -736,6 +823,31 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         return testConnectionButton;
     }
 
+    private void addConnectTableEntry(String msg)
+    {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                Object[] objects = new Object[2];
+                
+                try {
+                    GregorianCalendar cal = new GregorianCalendar();
+                    
+                    lastDateFormat.setCalendar(cal);
+                    objects[0] = lastDateFormat.format(cal.getTime());
+                } catch(Exception e) {
+                    objects[0] = "Unknown";
+                }
+                if(msg == null || msg.isEmpty()) {
+                    objects[1] = "<Empty Message>";
+                } else {
+                    objects[1] = msg;
+                }
+                connectStatusTableModel.addRow(objects);
+                resizeColumnWidth(connectStatusTable);            }
+        });
+        
+    }
+    
     /*
      * IShadowMonitorStatus implementaiton
      */
@@ -785,7 +897,11 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      */
     public void connectFailed(String token)
     {
-        // TODO: Update JTable - future commit/PR
+        if(token == null || token.isEmpty()) {
+            addConnectTableEntry("Connection failed");
+        } else {
+            addConnectTableEntry("Connection failed starting at token " + token);
+        }
     }
 
     /**
@@ -793,7 +909,28 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      */
     public void connectSucceeded(String token)
     {
-        // TODO: Update JTable - future commit/PR
+        if(token == null || token.isEmpty()) {
+            addConnectTableEntry("Connected successfully");
+        } else {
+            addConnectTableEntry("Connected successfully starting at token " + token);
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void connectClosed(String msg)
+    {
+        if(msg == null || msg.isEmpty()) {
+            msg = "Connection closed";
+        }
+        
+        // Save last token on disconnect
+        if(lastToken != null && !lastToken.isEmpty()) {
+            updateContestInformation();
+            msg += " at token " + lastToken;
+        }
+        addConnectTableEntry(msg);
     }
     
     /**
@@ -801,7 +938,10 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      */
     public void errorDisconnect(String errMsg)
     {
-        // TODO: Update JTable - future commit/PR
+        if(errMsg == null || errMsg.isEmpty()) {
+            errMsg = "Unexpected disconnect";
+        }
+        addConnectTableEntry(errMsg);
         
         // Save last token on disconnect
         if(lastToken != null && !lastToken.isEmpty()) {

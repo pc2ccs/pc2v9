@@ -762,6 +762,11 @@ public class ShadowController {
             
             //garbage-collect the monitor
             monitor = null;        
+            
+            // nullifying the monitor, will close the connection
+            if(shadowMonitorStatus != null) {
+                shadowMonitorStatus.connectClosed("Connection closed by PC2");
+            }
         }
         
         setStatus(SHADOW_CONTROLLER_STATUS.SC_STOPPED) ;
