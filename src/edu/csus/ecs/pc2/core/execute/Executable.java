@@ -2490,6 +2490,9 @@ public class Executable extends Plugin implements IExecutable {
                 if (index > 0) {
                     newString = replaceString(newString, "{:problem}", index);
                     newString = replaceString(newString, "{:problemletter}", Utilities.convertNumber(index));
+                    if(problem != null) {
+                        newString = replaceString(newString, "{:problemshort}", problem.getShortName());
+                    }
                 }
             }
             if (inRun.getSubmitter() != null) {
