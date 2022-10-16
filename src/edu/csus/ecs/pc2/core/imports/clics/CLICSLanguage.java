@@ -14,8 +14,6 @@ import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
  */
 public class CLICSLanguage {
 
-    // languages data = {name=C, id=c}
-
     /**
      * short name, ex python3
      */
@@ -27,6 +25,21 @@ public class CLICSLanguage {
      */
     @JsonProperty
     private String name;
+    
+    @JsonProperty
+    String entry_point_required;
+
+    @JsonProperty
+    String entry_point_name;
+    
+    @JsonProperty
+    String extensions;
+
+    @JsonProperty
+    String compiler;
+
+    @JsonProperty
+    String runner;
 
     public String getId() {
         return id;
@@ -34,6 +47,27 @@ public class CLICSLanguage {
 
     public String getName() {
         return name;
+    }
+    
+
+    public String getExtensions() {
+        return extensions;
+    }
+
+    public String getCompiler() {
+        return compiler;
+    }
+
+    public String getRunner() {
+        return runner;
+    }
+    
+    public String getEntry_point_required() {
+        return entry_point_required;
+    }
+
+    public String getEntry_point_name() {
+        return entry_point_name;
     }
 
     public String toJSON() throws JsonProcessingException {

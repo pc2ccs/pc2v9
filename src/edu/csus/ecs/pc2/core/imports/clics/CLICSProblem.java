@@ -14,8 +14,7 @@ import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
  *
  */
 public class CLICSProblem {
-
-    // {time_limit=1, color=null, name=Match Game, id=matchgame, label=A, test_data_count=48, rgb=null, ordinal=1}
+    
     @JsonProperty
     private String id;
 
@@ -39,6 +38,19 @@ public class CLICSProblem {
 
     @JsonProperty
     private Integer ordinal;
+    
+    @JsonProperty
+    String uuid;
+    
+    @JsonProperty
+    String max_score;
+    
+    @JsonProperty("package")
+    String package_string;
+    
+    @JsonProperty
+    String statement;
+    
 
     public String getId() {
         return id;
@@ -70,6 +82,22 @@ public class CLICSProblem {
 
     public Integer getOrdinal() {
         return ordinal;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public String getMax_score() {
+        return max_score;
+    }
+
+    public String getPackage() {
+        return package_string;
+    }
+
+    public String getStatement() {
+        return statement;
     }
 
     public String toJSON() throws JsonProcessingException {
