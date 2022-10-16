@@ -2517,6 +2517,11 @@ public class Executable extends Plugin implements IExecutable {
                 } else {
                     newString = replaceString(newString, "{:ansfile}", nullArgument);
                 }
+                
+                String fileName = problem.getDataFileName(dataSetNumber);
+                if (fileName != null && !fileName.equals("")) {
+                    newString = replaceString(newString, "{:infilename}", fileName);
+                } else {
                     newString = replaceString(newString, "{:infilename}", nullArgument);
                 }
                 fileName = problem.getAnswerFileName(dataSetNumber);
