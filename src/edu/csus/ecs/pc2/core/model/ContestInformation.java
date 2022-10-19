@@ -65,7 +65,7 @@ public class ContestInformation implements Serializable{
     /**
      * Max output file size.
      */
-    private long maxFileSize = 512000;
+    private long maxFileSizeInBytes = 512000;
 
     /**
      * This is a list of the judgement notification end of contest control settings.
@@ -259,7 +259,7 @@ public class ContestInformation implements Serializable{
             if (sendAdditionalRunStatusInformation != contestInformation.isSendAdditionalRunStatusInformation()) {
                 return false;
             }
-            if (maxFileSize != contestInformation.getMaxFileSize()){
+            if (maxFileSizeInBytes != contestInformation.getMaxFileSize()){
                 return false;
             }
             if (!teamScoreboardDisplayFormat.equals(contestInformation.getTeamScoreboardDisplayFormat())) {
@@ -413,16 +413,32 @@ public class ContestInformation implements Serializable{
     }
 
     /**
-     * Maximum file size for output files.
+     * This method returns the global maximum file size for output files, in BYTES.
+     * Note that this global value can be overridden on a per-problem basis
+     * via a call to {@link Problem#setMaxOutputFileSizeKB(int)}; note also that
+     * the parameter for {@link Problem#setMaxOutputFileSizeKB(int)} is in KB, whereas
+     * the value returned by THIS method is in BYTES.
      * 
-     * @return file size in bytes
+     * @return maximum output file size in bytes.
      */
     public long getMaxFileSize() {
-        return maxFileSize;
+        return maxFileSizeInBytes;
     }
 
-    public void setMaxFileSize(long maxFileSize) {
-        this.maxFileSize = maxFileSize;
+    /**
+     * This method sets the global maximum file size for output files, in BYTES.
+     * Note that the global maximum file size set by this method is used when a
+     * Problem does NOT have a specified problem-specific output file size limit.
+     * Note also that problem-specific output file size limits are specified in KB,
+     * whereas the parameter for this method gives the (global) output file size in BYTES.
+     * 
+     * @param maxFileSizeInBytes
+     * 
+     * @see Problem#setMaxOutputFileSizeKB(int) 
+     * @see Problem#getMaxOutputFileSizeKB()
+     */
+    public void setMaxFileSize(long maxFileSizeInBytes) {
+        this.maxFileSizeInBytes = maxFileSizeInBytes;
     }
     
     /**
