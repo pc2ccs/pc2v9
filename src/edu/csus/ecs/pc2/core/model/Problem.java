@@ -34,7 +34,9 @@ public class Problem implements IElementObject {
     private static final long serialVersionUID = 1708763261096488240L;
 
     public static final int DEFAULT_TIMEOUT_SECONDS = 30;
-    
+
+    public static final int DEFAULT_MAX_OUTPUT_FILE_SIZE_KB = 0; // zero indicates no per-problem output limit has been set 
+                                                                //  (and therefore the default global setting should be used)
 
     /**
      * Problem title.
@@ -90,6 +92,11 @@ public class Problem implements IElementObject {
      * Seconds per problem run.
      */
     private int timeOutInSeconds = DEFAULT_TIMEOUT_SECONDS;
+    
+    /**
+     * Maximum output allowed to be produced by a solution for this problem.
+     */
+    private int maxOutputFileSizeKB = DEFAULT_MAX_OUTPUT_FILE_SIZE_KB ;
 
     /**
      * This enum defines the types of Output Validators which a Problem can have.
@@ -613,6 +620,28 @@ public class Problem implements IElementObject {
      */
     public int getTimeOutInSeconds() {
         return timeOutInSeconds;
+    }
+
+    /**
+     * Returns the problem-specific maximum allowed output file size, in KB.
+     * A returned value of zero indicates that the problem has no problem-specific output size limit,
+     * in which case the value of the global output size limit should be used instead.
+     * 
+     * @return the problem-specific maximum allowed output size limit in KB.
+     */
+    public int getMaxOutputFileSizeKB() {
+        return maxOutputFileSizeKB;
+    }
+
+    /**
+     * Set the maximum output size (in KB) allowed by this problem.
+     * A value of zero (which is the default) indicates that no problem-specific output size limit
+     * has been set and that the global value (as returned by {@link IInternalContest#getContestInformation()}) should be used.  
+     * 
+     * @param maxOutputFileSizeKB the maximum output size, in KB, to set for this problem.
+     */
+    public void setMaxOutputFileSizeKB(int maxOutputFileSizeKB) {
+        this.maxOutputFileSizeKB = maxOutputFileSizeKB;
     }
 
     /**
@@ -1164,6 +1193,10 @@ public class Problem implements IElementObject {
             }
             
             if ( ! groups.equals(otherProblem.getGroups())){
+                return false;
+            }
+            
+            if (! (this.getMaxOutputFileSizeKB() == otherProblem.getMaxOutputFileSizeKB()) ) {
                 return false;
             }
             
