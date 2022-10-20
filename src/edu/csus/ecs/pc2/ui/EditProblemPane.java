@@ -189,7 +189,6 @@ public class EditProblemPane extends JPanePlugin {
     private MultipleDataSetPane multipleDataSetPane = null;
     private JPanel judgeTypeInnerPane = null;
     private JTextField shortNameTextfield;
-    private JTextField maxOutputSizeTextfield;
     private String fileNameOne;
 
     // the panel holding the "Do not use validator" radio button
@@ -226,6 +225,8 @@ public class EditProblemPane extends JPanePlugin {
     private JComboBox<String> pc2ValidatorOptionComboBox;
     private JCheckBox pc2ValidatorIgnoreCaseCheckBox;
     private JLabel lblWhatsThisCLICSValidator;
+    
+    private JTextField maxOutputSizeTextfield;
     private JLabel lblMaxOutputSizeKB;
     private JLabel lblWhatsThisMaxOutputSize;
 
@@ -2930,15 +2931,6 @@ public class EditProblemPane extends JPanePlugin {
         return generalPane;
     }
 
-    private JLabel getLblMaxOutputSizeKB() {
-        if (lblMaxOutputSizeKB==null) {
-            lblMaxOutputSizeKB = new JLabel();
-            lblMaxOutputSizeKB.setText("Max output size (KB):");
-            lblMaxOutputSizeKB.setBounds(285, 46, 138, 16);
-        }
-        return lblMaxOutputSizeKB;
-    }
-
     /**
      * This method initializes problemNameTextField
      * 
@@ -2977,26 +2969,6 @@ public class EditProblemPane extends JPanePlugin {
             });
         }
         return timeOutSecondTextField;
-    }
-
-    /**
-     * This method initializes the maximum output size textfield.
-     * 
-     * @return javax.swing.JTextField holding the maximum allowed output size for this problem.
-     */
-    private JTextField getMaxOutputTextField() {
-        if (maxOutputSizeTextfield == null) {
-            maxOutputSizeTextfield = new JTextField();
-            maxOutputSizeTextfield.setBounds(new Rectangle(415, 44, 97, 20));
-            maxOutputSizeTextfield.setPreferredSize(new java.awt.Dimension(120, 20));
-            maxOutputSizeTextfield.setDocument(new IntegerDocument());
-            maxOutputSizeTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyReleased(java.awt.event.KeyEvent e) {
-                    enableUpdateButton();
-                }
-            });
-        }
-        return maxOutputSizeTextfield;
     }
 
     public JTextField getProblemLetterTextField() {
@@ -3499,39 +3471,47 @@ public class EditProblemPane extends JPanePlugin {
         return useCLICSValidatorRadioButton;
     }
 
-    private JLabel getLblWhatsThisMaxOutputSize() {
-        if (lblWhatsThisMaxOutputSize == null) {
+    private JLabel getLblWhatsThisCLICSValidator() {
+        if (lblWhatsThisCLICSValidator == null) {
             Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
             if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
                 // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
-                lblWhatsThisMaxOutputSize = new JLabel("<What's This?>");
-                lblWhatsThisMaxOutputSize.setForeground(Color.blue);
+                lblWhatsThisCLICSValidator = new JLabel("<What's This?>");
+                lblWhatsThisCLICSValidator.setForeground(Color.blue);
             } else {
                 Image image = ((ImageIcon) questionIcon).getImage();
-                lblWhatsThisMaxOutputSize = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+                lblWhatsThisCLICSValidator = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
             }
 
-            lblWhatsThisMaxOutputSize.setToolTipText("What's This? (click for additional information)");
-            lblWhatsThisMaxOutputSize.addMouseListener(new MouseAdapter() {
+            lblWhatsThisCLICSValidator.setToolTipText("What's This? (click for additional information)");
+            lblWhatsThisCLICSValidator.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    JOptionPane.showMessageDialog(null, whatsThisMaxOutputMessage, "Maximum Allowed Output", JOptionPane.INFORMATION_MESSAGE, null);
+                    JOptionPane.showMessageDialog(null, whatsThisCLICSValidatorMessage, "CLICS Validator", JOptionPane.INFORMATION_MESSAGE, null);
                 }
             });
-            lblWhatsThisMaxOutputSize.setBorder(new EmptyBorder(0, 15, 0, 0));
-            
-            //TODO: the General pane (on which this component is placed) should use a Layout Manager instead of using absolute coordinates.
-            //  Until such a change is made, this component needs to have absolute coordinates for consistency with the rest of the pane.
-            lblWhatsThisMaxOutputSize.setBounds(510, 42, 30, 25);
+            lblWhatsThisCLICSValidator.setBorder(new EmptyBorder(0, 15, 0, 0));
         }
-        return lblWhatsThisMaxOutputSize;
+        return lblWhatsThisCLICSValidator;
     }
 
-    private String whatsThisMaxOutputMessage = "This textbox allows you to specify the maximum allowed output (in KB) for this problem."
+    private String whatsThisCLICSValidatorMessage = "Selecting this option allows you to use the PC^2 implementation of the \"CLICS Validator\"."
 
-            + "\nSpecifying a value of zero indicates that the global maximum output limit (as specified on the \"Team Settings\" panel"
-            + "\n on the Contest Administrator's Configure Contest > Settings tab) should be used for the problem."
-            ;
+            + "\n\nCLICS is the Competitive Learning Initiative Contest System specification, used among other things to define "
+            + "\nrequirements for Contest Control Systems used at the ICPC World Finals. The CLICS specification includes a"
+            + "\ndefinition for a \"standard validator\" used as the default when no other validator is selected."
+
+            + "\n\nThe CLICS Validator \"tokenizes\" the Judge's Answer file and the Team Output file, ignoring case and whitespace"
+            + "\nby default, and determines \"equivalence\" by comparing the corresponding tokens."
+
+            + "\n\nOptions allow the user to require case-sensitivity and/or \"space-sensitivity\" (i.e., an exact match in whitespace),"
+            + "\nand to specify tolerance requirements which floating-point tokens must meet to be considered equal."
+
+            + "\n\nIf both absolute and relative tolerance values are specified, floating-point tokens are considered equivalent if"
+            + "\nif they match within EITHER of the specified tolerances.  If neither absolute nor relative tolerance is specified,"
+            + "\nfloating-point tokens must match character-for-character to be considered equivalent."
+
+            + "\n\nFor more information, see the CLICS specification at https://clics.ecs.baylor.edu/index.php/Problem_format#Validators.  ";
 
     private String whatsThisPC2ValStdMessage = "Selecting this option indicates that your Validator is going to interface with PC^2 using the \"PC^2 Validator Standard\"."
 
@@ -3578,48 +3558,6 @@ public class EditProblemPane extends JPanePlugin {
             + "\n\nFor more information, see the PC^2 Contest Administrator's Guide; in particular, the Appendix on Validators."
             + "\nSee also the CLICS specification at https://clics.ecs.baylor.edu/index.php/Problem_format#Validators.";
 
-    private JLabel getLblWhatsThisCLICSValidator() {
-        if (lblWhatsThisCLICSValidator == null) {
-            Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
-            if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
-                // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
-                lblWhatsThisCLICSValidator = new JLabel("<What's This?>");
-                lblWhatsThisCLICSValidator.setForeground(Color.blue);
-            } else {
-                Image image = ((ImageIcon) questionIcon).getImage();
-                lblWhatsThisCLICSValidator = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
-            }
-
-            lblWhatsThisCLICSValidator.setToolTipText("What's This? (click for additional information)");
-            lblWhatsThisCLICSValidator.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    JOptionPane.showMessageDialog(null, whatsThisCLICSValidatorMessage, "CLICS Validator", JOptionPane.INFORMATION_MESSAGE, null);
-                }
-            });
-            lblWhatsThisCLICSValidator.setBorder(new EmptyBorder(0, 15, 0, 0));
-        }
-        return lblWhatsThisCLICSValidator;
-    }
-
-    private String whatsThisCLICSValidatorMessage = "Selecting this option allows you to use the PC^2 implementation of the \"CLICS Validator\"."
-
-            + "\n\nCLICS is the Competitive Learning Initiative Contest System specification, used among other things to define "
-            + "\nrequirements for Contest Control Systems used at the ICPC World Finals. The CLICS specification includes a"
-            + "\ndefinition for a \"standard validator\" used as the default when no other validator is selected."
-
-            + "\n\nThe CLICS Validator \"tokenizes\" the Judge's Answer file and the Team Output file, ignoring case and whitespace"
-            + "\nby default, and determines \"equivalence\" by comparing the corresponding tokens."
-
-            + "\n\nOptions allow the user to require case-sensitivity and/or \"space-sensitivity\" (i.e., an exact match in whitespace),"
-            + "\nand to specify tolerance requirements which floating-point tokens must meet to be considered equal."
-
-            + "\n\nIf both absolute and relative tolerance values are specified, floating-point tokens are considered equivalent if"
-            + "\nif they match within EITHER of the specified tolerances.  If neither absolute nor relative tolerance is specified,"
-            + "\nfloating-point tokens must match character-for-character to be considered equivalent."
-
-            + "\n\nFor more information, see the CLICS specification at https://clics.ecs.baylor.edu/index.php/Problem_format#Validators.  ";
-
     private JPanel clicsOptionButtonPanel;
 
     private JLabel lblValidatorInterface;
@@ -3643,6 +3581,72 @@ public class EditProblemPane extends JPanePlugin {
     private JTextField balloonColorTextField;
 
     private JTextField rgbTextField;
+
+    /**
+     * This method returns the label for the Maxmimum Output Size textfield.
+     */
+    private JLabel getLblMaxOutputSizeKB() {
+        if (lblMaxOutputSizeKB==null) {
+            lblMaxOutputSizeKB = new JLabel();
+            lblMaxOutputSizeKB.setText("Max output size (KB):");
+            lblMaxOutputSizeKB.setBounds(285, 46, 138, 16);
+        }
+        return lblMaxOutputSizeKB;
+    }
+
+    /**
+     * This method initializes the maximum output size textfield.
+     * 
+     * @return javax.swing.JTextField holding the maximum allowed output size for this problem.
+     */
+    private JTextField getMaxOutputTextField() {
+        if (maxOutputSizeTextfield == null) {
+            maxOutputSizeTextfield = new JTextField();
+            maxOutputSizeTextfield.setBounds(new Rectangle(415, 44, 97, 20));
+            maxOutputSizeTextfield.setPreferredSize(new java.awt.Dimension(120, 20));
+            maxOutputSizeTextfield.setDocument(new IntegerDocument());
+            maxOutputSizeTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return maxOutputSizeTextfield;
+    }
+
+    private JLabel getLblWhatsThisMaxOutputSize() {
+        if (lblWhatsThisMaxOutputSize == null) {
+            Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+            if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                lblWhatsThisMaxOutputSize = new JLabel("<What's This?>");
+                lblWhatsThisMaxOutputSize.setForeground(Color.blue);
+            } else {
+                Image image = ((ImageIcon) questionIcon).getImage();
+                lblWhatsThisMaxOutputSize = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            }
+
+            lblWhatsThisMaxOutputSize.setToolTipText("What's This? (click for additional information)");
+            lblWhatsThisMaxOutputSize.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, whatsThisMaxOutputMessage, "Maximum Allowed Output", JOptionPane.INFORMATION_MESSAGE, null);
+                }
+            });
+            lblWhatsThisMaxOutputSize.setBorder(new EmptyBorder(0, 15, 0, 0));
+            
+            //TODO: the General pane (on which this component is placed) should use a Layout Manager instead of using absolute coordinates.
+            //  Until such a change is made, this component needs to have absolute coordinates for consistency with the rest of the pane.
+            lblWhatsThisMaxOutputSize.setBounds(510, 42, 30, 25);
+        }
+        return lblWhatsThisMaxOutputSize;
+    }
+
+    private String whatsThisMaxOutputMessage = "This textbox allows you to specify the maximum allowed output (in KB) for this problem."
+
+            + "\nSpecifying a value of zero indicates that the global maximum output limit (as specified on the \"Team Settings\" panel"
+            + "\n on the Contest Administrator's Configure Contest > Settings tab) should be used for the problem."
+            ;
 
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
