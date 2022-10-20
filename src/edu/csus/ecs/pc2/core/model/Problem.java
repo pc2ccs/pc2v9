@@ -95,8 +95,10 @@ public class Problem implements IElementObject {
     
     /**
      * Maximum output allowed to be produced by a solution for this problem.
+     * Note that a value of zero indicates that this problem does not have its own
+     * problem-specific limit and that the global (contest-wide) limit should be used instead.
      */
-    private int maxOutputFileSizeKB = DEFAULT_MAX_OUTPUT_FILE_SIZE_KB ;
+    private long maxOutputFileSizeKB = DEFAULT_MAX_OUTPUT_FILE_SIZE_KB ;
 
     /**
      * This enum defines the types of Output Validators which a Problem can have.
@@ -629,7 +631,7 @@ public class Problem implements IElementObject {
      * 
      * @return the problem-specific maximum allowed output size limit in KB.
      */
-    public int getMaxOutputFileSizeKB() {
+    public long getMaxOutputFileSizeKB() {
         return maxOutputFileSizeKB;
     }
 
@@ -640,7 +642,7 @@ public class Problem implements IElementObject {
      * 
      * @param maxOutputFileSizeKB the maximum output size, in KB, to set for this problem.
      */
-    public void setMaxOutputFileSizeKB(int maxOutputFileSizeKB) {
+    public void setMaxOutputFileSizeKB(long maxOutputFileSizeKB) {
         this.maxOutputFileSizeKB = maxOutputFileSizeKB;
     }
 
