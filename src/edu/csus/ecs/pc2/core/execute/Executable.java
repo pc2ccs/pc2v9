@@ -2336,12 +2336,45 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Get max output file size.
+     * This method returns the maximum allowed output file size for the current problem, in BYTES.
      * 
-     * @return
+     * The method first checks to see if the current problem has a non-zero maximum output file size
+     * specified.  If so, that value is converted to bytes (it is stored in the {@link Problem} class
+     * as a value in KB) and returned.  If not, the current global (contest-wide) max file size value
+     * (which is stored in the {@link IInternalContest} object's {@link ContestInformation} object, in
+     * BYTES) is returned.
+     * 
+     *  If the current problem is null, an error is logged and a value of zero is returned.
+     * 
+     * 
+     * @return max currently allowed output file size.
      */
     private long getMaxFileSize() {
-        return contest.getContestInformation().getMaxFileSize();
+        
+        //make sure we have a Problem defined
+        if (problem != null) {
+            
+            //check if the problem has its own (problem-specific) output file size limit, which is noted
+            //  by having a limit value in the problem which is greater than zero
+            long problemLimit = problem.getMaxOutputFileSizeKB();
+            if (problemLimit > 0) {
+                //problem has its own limit; convert from KB to BYTES and return that
+                return problemLimit * 1000;
+            } else {
+                //problem doesn't have its own limit; return the global (contest-wide) value
+                return contest.getContestInformation().getMaxFileSize();
+            }
+                
+        } else {
+            
+            //problem is null; log error and return zero
+            if (log != null) {
+                log.log(Log.WARNING, "Problem is null, cannot determine output size limit; returning zero");
+            } else {
+                System.err.println("WARNING: log is null; cannot log message 'Problem is null, cannot determine output size limit; returning zero'");
+            }
+            return 0L;
+        }
     }
 
     /**
