@@ -2336,12 +2336,15 @@ public class EditProblemPane extends JPanePlugin {
      */
     private void initializeGeneralTabFields(Problem inProblem, ProblemDataFiles inProblemDataFiles) {
 
-        // initialize problem description fields:
+        // initialize problem identifier fields:
         getProblemNameTextField().setText(inProblem.getDisplayName());
-        getTimeOutTextField().setText(inProblem.getTimeOutInSeconds() + "");
         getShortNameTextfield().setText(inProblem.getShortName());
         getProblemLetterTextField().setText(inProblem.getLetter()); // note: Problem Letter is currently not displayed in the GUI!
 
+        //initialize problem limit fields
+        getTimeOutTextField().setText(inProblem.getTimeOutInSeconds() + "");
+        getMaxOutputTextField().setText(inProblem.getMaxOutputFileSizeKB() + "");
+        
         // input data fields:
         problemRequiresDataCheckBox.setSelected(inProblem.getDataFileName() != null);
         if (inProblem.isReadInputDataFromSTDIN()) {
@@ -3602,7 +3605,7 @@ public class EditProblemPane extends JPanePlugin {
     private JTextField getMaxOutputTextField() {
         if (maxOutputSizeTextfield == null) {
             maxOutputSizeTextfield = new JTextField();
-            maxOutputSizeTextfield.setBounds(new Rectangle(415, 44, 97, 20));
+            maxOutputSizeTextfield.setBounds(new Rectangle(415, 44, 74, 20));
             maxOutputSizeTextfield.setPreferredSize(new java.awt.Dimension(120, 20));
             maxOutputSizeTextfield.setDocument(new IntegerDocument());
             maxOutputSizeTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -3637,7 +3640,7 @@ public class EditProblemPane extends JPanePlugin {
             
             //TODO: the General pane (on which this component is placed) should use a Layout Manager instead of using absolute coordinates.
             //  Until such a change is made, this component needs to have absolute coordinates for consistency with the rest of the pane.
-            lblWhatsThisMaxOutputSize.setBounds(510, 42, 30, 25);
+            lblWhatsThisMaxOutputSize.setBounds(480, 42, 30, 25);
         }
         return lblWhatsThisMaxOutputSize;
     }
