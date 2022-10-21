@@ -241,6 +241,10 @@ public class EditProblemPane extends JPanePlugin {
 
     private Log log;
 
+    private JLabel lblShortName;
+
+    private JLabel problemLetterLabel;
+
 
     /**
      * Constructs an EditProblemPane with default settings.
@@ -2844,50 +2848,35 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes generalPane
+     * This method initializes the generalPane which contains general problem description components
+     * such as problem name, limits, input data and judging files, etc.
      * 
-     * @return javax.swing.JPanel
+     * @return a JPanel containing general problem description components.
      */
     private JPanel getGeneralPane() {
         if (generalPane == null) {
-            timeoutLabel = new JLabel();
-            timeoutLabel.setBounds(new Rectangle(23, 46, 150, 16));
-            timeoutLabel.setText("Run Timeout Limit (Secs):");
-            problemNameLabel = new JLabel();
-            problemNameLabel.setBounds(new Rectangle(23, 14, 150, 16));
-            problemNameLabel.setText("Problem name:");
+            
             generalPane = new JPanel();
-            generalPane.setLayout(null);
+            generalPane.setLayout(null);    //TODO:  use a proper LayoutManager!
+            
+            //add the problem identifier components -- name, shortname, letter
+            generalPane.add(getProblemNameLabel(), null);
             generalPane.add(getProblemNameTextField(), null);
+            generalPane.add(getShortNameLabel());
+            generalPane.add(getShortNameTextField(), null);
+            generalPane.add(getProblemLetterLabel(), null);
+            generalPane.add(getProblemLetterTextField(), null);      
+            
+            //add the problem limit components
             generalPane.add(getTimeOutTextField(), null);
             generalPane.add(getProblemRequiresDataCheckBox(), null);
             generalPane.add(getDataProblemPane(), null);
             generalPane.add(getJudgesHaveAnswerFilesCheckbox(), null);
             generalPane.add(getAnswerFilePane(), null);
-            generalPane.add(problemNameLabel, null);
-            generalPane.add(timeoutLabel, null);
+            generalPane.add(getTimeoutLabel(), null);
             generalPane.add(getShowCompareCheckBox(), null);
             generalPane.add(getDoShowOutputWindowCheckBox(), null);
             generalPane.add(getDeleteProblemCheckBox(), null);
-
-            generalPane.add(getProblemLetterTextField(), null);
-
-            JLabel lblShortName = new JLabel();
-            lblShortName.setText("Short Name:");
-            lblShortName.setBounds(new Rectangle(23, 14, 179, 16)); //TODO: remove?  (Overridden by next line...) jlc
-            lblShortName.setBounds(380, 14, 84, 16);
-            generalPane.add(lblShortName);
-
-            shortNameTextfield = new JTextField();
-            shortNameTextfield.setPreferredSize(new Dimension(120, 20));
-            shortNameTextfield.setBounds(new Rectangle(220, 44, 120, 20));  //TODO: remove?  (Overridden by next line...) jlc
-            shortNameTextfield.setBounds(474, 12, 97, 20);
-            shortNameTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyReleased(java.awt.event.KeyEvent e) {
-                    enableUpdateButton();
-                }
-            });
-            generalPane.add(shortNameTextfield);
             
             //add "problem-specific output size limit" components
             generalPane.add(getLblMaxOutputSizeKB());
@@ -2933,6 +2922,20 @@ public class EditProblemPane extends JPanePlugin {
         }
         return generalPane;
     }
+    
+    /**
+     * This method initializes the label for the Problem Name textfield.
+     * 
+     * @return a JLabel containing the name string for the Problem Name textfield label.
+     */
+    private JLabel getProblemNameLabel() {
+        if (problemNameLabel == null) {
+            problemNameLabel = new JLabel();
+            problemNameLabel.setBounds(new Rectangle(23, 14, 150, 16));
+            problemNameLabel.setText("Problem name:");
+        }
+        return problemNameLabel;
+    }
 
     /**
      * This method initializes problemNameTextField
@@ -2955,7 +2958,86 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes the timeOut textfield
+     * This method returns the label for the Short Name textfield.
+     * 
+     * @return a JLabel containing the string to be used to label the Short Name textfield.
+     */
+    private JLabel getShortNameLabel() {
+        if (lblShortName == null) {
+            lblShortName = new JLabel();
+            lblShortName.setText("Short Name:");
+            lblShortName.setBounds(380, 14, 84, 16);
+        }
+        return lblShortName;
+    }
+
+    /**
+     * This method initializes the textfield used to display the problem Short name.
+     * 
+     * @return a JTextField for holding the problem short name.
+     */
+    private JTextField getShortNameTextField() {
+        if (shortNameTextfield == null) {
+            shortNameTextfield = new JTextField();
+            shortNameTextfield.setPreferredSize(new Dimension(120, 20));
+            shortNameTextfield.setBounds(465, 12, 97, 20);
+            shortNameTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return shortNameTextfield;
+    }
+    
+    /**
+     * This method initializes the label for the Problem Letter textfield.
+     * 
+     * @return a JLabel containing the name string for the Problem Letter textfield label.
+     */
+    private JLabel getProblemLetterLabel() {
+        if (problemLetterLabel == null) {
+            problemLetterLabel = new JLabel();
+            problemLetterLabel.setBounds(new Rectangle(580, 12, 60, 16));
+            problemLetterLabel.setText("Letter: ");
+        }
+        return problemLetterLabel;
+    }
+
+    /**
+     * This method initializes the text field holding the problem letter.
+     * 
+     * @return a JTextField used to hold the problem letter.
+     */
+    private JTextField getProblemLetterTextField() {
+        if (problemLetterTextField == null) {
+            problemLetterTextField = new JTextField();
+            problemLetterTextField.setBounds(630, 10, 25, 20);
+            problemLetterTextField.setEditable(false);
+            problemLetterTextField.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+            problemLetterTextField.setToolTipText("The letter associated with a problem is set when the problem is created and cannot be changed.");
+        }
+        return problemLetterTextField;
+    }
+
+
+
+    /**
+     * This method initializes the label for the timeout limit textfield.
+     * 
+     * @return a JLabel containing the name string for the timeout textfield.
+     */
+    private JLabel getTimeoutLabel() {
+        if (timeoutLabel == null) {
+            timeoutLabel = new JLabel();
+            timeoutLabel.setBounds(new Rectangle(23, 46, 150, 16));
+            timeoutLabel.setText("Run Timeout Limit (Secs):");
+        }
+        return timeoutLabel;
+    }
+
+    /**
+     * This method initializes the timeOut textfield.
      * 
      * @return javax.swing.JTextField holding the timeOut
      */
@@ -2972,14 +3054,6 @@ public class EditProblemPane extends JPanePlugin {
             });
         }
         return timeOutSecondTextField;
-    }
-
-    public JTextField getProblemLetterTextField() {
-        // SOMEDAY - add field to form, define and make visible.
-        if (problemLetterTextField == null) {
-            problemLetterTextField = new JTextField();
-        }
-        return problemLetterTextField;
     }
 
     /**
