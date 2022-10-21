@@ -2938,9 +2938,9 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes problemNameTextField
+     * This method initializes problemNameTextField.
      * 
-     * @return javax.swing.JTextField
+     * @return a JTextField for holding the problem name.
      */
     protected JTextField getProblemNameTextField() {
         if (problemNameTextField == null) {
@@ -4279,10 +4279,10 @@ public class EditProblemPane extends JPanePlugin {
         // initialize the General Tab fields:
 
         // Problem description components:
-        problemNameTextField.setText("");
-        timeOutSecondTextField.setText(Integer.toString(Problem.DEFAULT_TIMEOUT_SECONDS));
-        shortNameTextfield.setText("");
-        maxOutputSizeTextfield.setText("0");
+        getProblemNameTextField().setText("");
+        getTimeOutTextField().setText(Integer.toString(Problem.DEFAULT_TIMEOUT_SECONDS));
+        getShortNameTextfield().setText("");
+        getMaxOutputTextField().setText("0");
 
         // input data options:
         getProblemRequiresDataCheckBox().setSelected(false);
