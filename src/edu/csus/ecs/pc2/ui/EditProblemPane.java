@@ -4283,6 +4283,11 @@ public class EditProblemPane extends JPanePlugin {
         getTimeOutTextField().setText(Integer.toString(Problem.DEFAULT_TIMEOUT_SECONDS));
         getShortNameTextfield().setText("");
         getMaxOutputTextField().setText("0");
+        
+        //show the next letter (which would be used if the problem is eventually saved)
+        int numberProblems = getContest().getProblems().length;
+        String nextLetter = Utilities.getProblemLetter(numberProblems + 1);
+        getProblemLetterTextField().setText(nextLetter);
 
         // input data options:
         getProblemRequiresDataCheckBox().setSelected(false);
