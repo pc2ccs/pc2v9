@@ -48,9 +48,8 @@ public class CLICSProblem {
     @JsonProperty("package")
     String package_string;
     
-    @JsonProperty
-    String statement;
-    
+//    @JsonProperty
+//    CLICSStatement statement;
 
     public String getId() {
         return id;
@@ -96,9 +95,9 @@ public class CLICSProblem {
         return package_string;
     }
 
-    public String getStatement() {
-        return statement;
-    }
+//    public CLICSStatement getStatement() {
+//        return statement;
+//    }
 
     public String toJSON() throws JsonProcessingException {
 
