@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,8 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -55,7 +59,11 @@ public class ContestCompareModel {
     private static final int EVENT_FEED_TIME_OUT_SECONDS = 10;
     
     private static int feedTimeout = EVENT_FEED_TIME_OUT_SECONDS;
-
+    
+    private static final String CCS_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+    
+    private SimpleDateFormat formatter = new SimpleDateFormat(CCS_DATE_FORMAT);
+    
     private IRemoteContestAPIAdapter remoteContestAPIAdapter = null;
 
     private ObjectMapper mapperField = null;
@@ -264,16 +272,59 @@ public class ContestCompareModel {
         
         String eventType = CLICSEventType.CONTEST.toString();
         
-        String contestTitle = contest.getContestInformation().getContestTitle();
+//        {
+//            "token": "1567",
+//            "id": null,
+//            "type": "contest",
+//            "data": {
+//              "formal_name": "Benelux Algorithm Programming Contest 2022",
+//              "penalty_time": 20,
+//              "start_time": "2022-10-22T12:30:00+02:00",
+//              "end_time": "2022-10-22T17:30:00+02:00",
+//              "duration": "5:00:00.000",
+//              "scoreboard_freeze_duration": "1:00:00.000",
+//              "id": "bapc2022",
+//              "external_id": "bapc2022",
+//              "name": "Benelux Algorithm Programming Contest 2022",
+//              "shortname": "bapc2022"
+//            },
+//            "time": "2022-10-21T12:35:37.218+02:00"
+//          }
+      
+        ContestInformation info = contest.getContestInformation();
+        ContestTime contestTime = contest.getContestTime();
+
+        addContestCompareRecord(eventType, "formal_name", info.getContestTitle(), clicsContests.getFormal_name());
+
+        addContestCompareRecord(eventType, "shortname", info.getContestShortName(), clicsContests.getShortname());
+
+//        addContestCompareRecord ("penalty_time",info.get(), clicsContests.getShortname());
+
+        addContestCompareRecord(eventType, "duration", contestTime.getContestLengthStr(), ContestCompareModel.clipMs(clicsContests.getDuration()));
         
-        if (StringUtilities.isEmpty(clicsContests.getFormal_name())) {
-            // no EF contests event
-            ContestCompareRecord rec = new ContestCompareRecord(eventType, clicsContests.getId(), "formal_name", contestTitle, null);
-            compRecs.add(rec);
-        } else {
-            ContestCompareRecord rec = new ContestCompareRecord(eventType, clicsContests.getId(), "formal_name", contestTitle, clicsContests.getFormal_name());
-            compRecs.add(rec);
+        // formatter.setTimeZone(TimeZone.getTimeZone("UTC")); // use GMT
+        Calendar startTime = info.getScheduledStartTime();
+        String startTimeStr = null;
+        if (startTime != null) {
+            startTimeStr =        formatter.format(startTime.getTime());
         }
+
+        addContestCompareRecord(eventType, "start_time", startTimeStr, clicsContests.getStart_time());
+        addContestCompareRecord(eventType, "scoreboard_freeze_duration", info.getFreezeTime(), ContestCompareModel.clipMs(clicsContests.getScoreboard_freeze_duration()));
+
+
+//      "shortname": "bapc2022"
+//      "penalty_time": 20,
+//      "duration": "5:00:00.000",
+//      "start_time": "2022-10-22T12:30:00+02:00", 
+//      "scoreboard_freeze_duration": "1:00:00.000",
+        
+        
+    }
+
+    private void addContestCompareRecord(String eventType, String fieldName, String pc2Value, String primaryCCSValue) {
+        ContestCompareRecord rec = new ContestCompareRecord(eventType, clicsContests.getId(), fieldName, pc2Value, primaryCCSValue);
+        compRecs.add(rec);
     }
 
     public static Account[] getAccounts(IInternalContest contest, ClientType.Type type) {
@@ -365,6 +416,17 @@ public class ContestCompareModel {
                 if (id.contentEquals(clicsProblem.getId())) {
                     ContestCompareRecord rec = new ContestCompareRecord(eventType, id, "name", problem.getDisplayName(), clicsProblem.getName());
                     compRecs.add(rec);
+                    
+                    rec = new ContestCompareRecord(eventType, id, "rgb", problem.getColorRGB(), clicsProblem.getRgb());
+                    compRecs.add(rec);
+                    
+                    rec = new ContestCompareRecord(eventType, id, "color", problem.getColorName(), clicsProblem.getColor());
+                    compRecs.add(rec);
+
+                    rec = new ContestCompareRecord(eventType, id, "color", problem.getNumberTestCases(), clicsProblem.getTest_data_count());
+                    compRecs.add(rec);
+
+                    
                     found = true;
                 }
             }
@@ -816,6 +878,26 @@ public class ContestCompareModel {
      */
     public List<ContestCompareRecord> getNonMatchingComparisonRecords() {
         return getNonMatchingComparisonRecords(null);
+    }
+    
+    /**
+     * Clips off ms from a string
+     * 
+     * <pre>
+     * 
+     * 
+     * @param timeStr string with or without ms
+     * @return time string without ms
+     */
+    public static String clipMs(String timeStr) {
+        if (timeStr == null) {
+            return null;
+        }
+        int idx = timeStr.indexOf('.');
+        if (idx > 0) {
+            timeStr = timeStr.substring(0,idx);
+        }
+        return timeStr;
     }
 
 
