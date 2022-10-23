@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports.clics;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,8 +50,8 @@ public class CLICSProblem {
     @JsonProperty("package")
     String package_string;
     
-//    @JsonProperty
-//    CLICSStatement statement;
+    @JsonProperty
+    List<CLICSStatement> statement;
 
     public String getId() {
         return id;
@@ -95,9 +97,9 @@ public class CLICSProblem {
         return package_string;
     }
 
-//    public CLICSStatement getStatement() {
-//        return statement;
-//    }
+    public List<CLICSStatement> getStatement() {
+        return statement;
+    }
 
     public String toJSON() throws JsonProcessingException {
 
