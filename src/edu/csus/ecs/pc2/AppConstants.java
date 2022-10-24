@@ -162,4 +162,10 @@ public class AppConstants {
      */
     public static final String DATETIME_PATTERN_LONG = "E, dd MMM yyyy HH:mm:ss z";
     
+    
+    /**
+     * The value is the name of an event-feed.json file.
+     * 
+     */
+    public static final String OVERRIDE_EVENT_FEED_FILE = "server.eventFeedFile";
 }

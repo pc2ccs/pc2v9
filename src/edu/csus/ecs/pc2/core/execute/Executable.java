@@ -1812,7 +1812,7 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             log.log(Log.DEBUG, "before substitution: " + cmdline);
-            cmdline = substituteAllStrings(run, cmdline);
+            cmdline = substituteAllStrings(run, cmdline, dataSetNumber+1);
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
             /**
@@ -2397,6 +2397,10 @@ public class Executable extends Plugin implements IExecutable {
         return replaceString(origString, beforeString, afterString);
     }
 
+    public String substituteAllStrings(Run inRun, String origString) {
+        return(substituteAllStrings(inRun, origString, 1));
+    }
+    
     /**
      * return string with all field variables filled with values.
      * 
@@ -2417,13 +2421,15 @@ public class Executable extends Plugin implements IExecutable {
      *              {:pc2home}
      * </pre>
      * 
+     * @param dataSetNumber
+     *            which set of judge data to use (1 in the case of only 1 file)
      * @param inRun
      *            submitted by team
      * @param origString
      *            - original string to be substituted.
      * @return string with values
      */
-    public String substituteAllStrings(Run inRun, String origString) {
+    public String substituteAllStrings(Run inRun, String origString, int dataSetNumber) {
         String newString = "";
         String nullArgument = "-"; /* this needs to change */
 
@@ -2490,6 +2496,9 @@ public class Executable extends Plugin implements IExecutable {
                 if (index > 0) {
                     newString = replaceString(newString, "{:problem}", index);
                     newString = replaceString(newString, "{:problemletter}", Utilities.convertNumber(index));
+                    if(problem != null) {
+                        newString = replaceString(newString, "{:problemshort}", problem.getShortName());
+                    }
                 }
             }
             if (inRun.getSubmitter() != null) {
@@ -2507,6 +2516,19 @@ public class Executable extends Plugin implements IExecutable {
                     newString = replaceString(newString, "{:ansfile}", problem.getAnswerFileName());
                 } else {
                     newString = replaceString(newString, "{:ansfile}", nullArgument);
+                }
+                
+                String fileName = problem.getDataFileName(dataSetNumber);
+                if (fileName != null && !fileName.equals("")) {
+                    newString = replaceString(newString, "{:infilename}", fileName);
+                } else {
+                    newString = replaceString(newString, "{:infilename}", nullArgument);
+                }
+                fileName = problem.getAnswerFileName(dataSetNumber);
+                if (fileName != null && !fileName.equals("")) {
+                    newString = replaceString(newString, "{:ansfilename}", fileName);
+                } else {
+                    newString = replaceString(newString, "{:ansfilename}", nullArgument);
                 }
                 newString = replaceString(newString, "{:timelimit}", Long.toString(problem.getTimeOutInSeconds()));
             } else {
