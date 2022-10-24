@@ -33,6 +33,10 @@ public class ContestCompareRecord {
 
     @JsonProperty
     private String valueTwo;
+    
+    public ContestCompareRecord(String eventType, String id, String fieldName, int valueOne, int valueTwo) {
+        this(eventType, id, fieldName, Integer.toString(valueOne), Integer.toString(valueTwo));
+    }
 
     /**
      * Create Compare Record.

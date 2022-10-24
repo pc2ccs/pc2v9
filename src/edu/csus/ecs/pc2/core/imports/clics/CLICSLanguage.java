@@ -33,7 +33,7 @@ public class CLICSLanguage {
     String entry_point_name;
     
     @JsonProperty
-    String extensions;
+    String [] extensions;
 
     @JsonProperty
     String compiler;
@@ -50,7 +50,7 @@ public class CLICSLanguage {
     }
     
 
-    public String getExtensions() {
+    public String [] getExtensions() {
         return extensions;
     }
 
