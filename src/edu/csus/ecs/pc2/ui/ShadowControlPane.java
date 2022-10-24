@@ -10,10 +10,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -48,6 +50,8 @@ import edu.csus.ecs.pc2.shadow.RemoteContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.shadow.ShadowController.SHADOW_CONTROLLER_STATUS;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * This class provides a GUI for configuring and starting Shadowing operations on a remote CCS.
  * 
@@ -66,6 +70,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     
     private static final int VERT_PAD = 2;
     private static final int HORZ_PAD = 20;
+    
+    private static final String CCS_API_ENDPOINT = "/";
 
     private JPanel buttonPanel = null;
 
@@ -803,6 +809,53 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                         showErrorMessage("Connection to remote CCS failed", "Connection failed");
                                         addConnectTableEntry("Test connection to remote CCS failed");
                                     }
+                                    
+                                    // API endpoint is right before /contests/ in the URL, so find that, if it's there
+                                    int iApi = remoteURLString.lastIndexOf("/contests/");
+                                    if(iApi != -1) {
+                                        // eg: https://judge.gehack.nl/api/contests/bapc2022 -> https://judge.gehack.nl/api
+                                        String remoteAPIURL = remoteURLString.substring(0, iApi);
+                                        String infoStr = null;
+                                        
+                                        if(!remoteAPIURL.isEmpty()) {
+                                            // If we have a valid URL to try, let's do it.  If this fails for any reason, we really don't care that much
+                                            // And we will show it in the table as an unavailable URL.
+                                            try {
+                                                remoteContestAPIAdapter = createRemoteContestAPIAdapter(new URL(remoteAPIURL), remoteLogin, remotePW);
+                                                Map<String, Object> map = getMap(remoteContestAPIAdapter.getRemoteJSON(CCS_API_ENDPOINT));
+                                                if(map != null) {
+                                                    // ex. {"version":"2022-07","version_url":"https://ccs-specs.icpc.io/2022-07/contest_api","name":"domjudge"}
+                                                    String verstr = (String)map.get("version");
+                                                    String provider = (String)map.get("name");
+                                                    
+                                                    infoStr = "API Version: ";
+                                                    
+                                                    // Try to make an intelligent looking string if stuff is missing
+                                                    if(verstr == null || verstr.isEmpty()) {
+                                                        infoStr += "N/A";
+                                                    } else {
+                                                        infoStr += verstr;
+                                                    }
+                                                    if(provider != null && !provider.isEmpty()) {
+                                                        infoStr += " by " + provider;
+                                                    } else {
+                                                        infoStr += " (unknown provider)";
+                                                    }
+                                                } else {
+                                                    infoStr = "No API version available at " + remoteAPIURL;                                                   
+                                                }
+                                            } catch(Exception e) {
+                                                infoStr = "No API endpoint " + remoteAPIURL + " available";
+                                            }
+                                        } else {
+                                            infoStr = "No API Version URL availabe";
+                                        }
+                                        // infoStr should always get set above, but, just in case it doesn't...
+                                        if(infoStr != null) {
+                                            addConnectTableEntry(infoStr);
+                                            getController().getLog().info("Shadow EventFeed: " + infoStr);
+                                        }
+                                    }
 
                                 } catch (Exception e) {
                                     showErrorMessage("Exception attempting to connect to remote system:\n" + e, "Exception in connecting");
@@ -821,6 +874,33 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             });
         }
         return testConnectionButton;
+    }
+
+    /**
+     * Returns a Map containing the key/value elements in the specified JSON string.
+     * This method uses the Jackson {@link ObjectMapper} to perform the conversion from the JSON
+     * string to a Map.  Note that the ObjectMapper recurses for nested JSON elements, returning
+     * a appropriate Object in the Map under the corresponding key string.
+     * 
+     * @param jsonString a JSON string to be converted to a Map
+     * @return a Map mapping the keys in the JSON string to corresponding values, or null if the input
+     *          String is null or if an exception occurs while converting the JSON to a Map.
+     */
+    @SuppressWarnings("unchecked")
+    protected static Map<String, Object> getMap(String jsonString) {
+        
+        if (jsonString == null){
+            return null;
+        }
+        
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            Map<String, Object> map = mapper.readValue(jsonString, Map.class);
+            return map;
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+            return null;
+        }
     }
 
     private void addConnectTableEntry(String msg)
