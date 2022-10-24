@@ -1,10 +1,12 @@
 package edu.csus.ecs.pc2.core.imports.clics;
 
 import java.util.HashMap;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
@@ -44,6 +46,52 @@ public class CLICSEventFeedEventTest extends AbstractTestCase {
             assertTrue(eventFeedEntry.getData() instanceof HashMap<?, ?>);
         }
 
+    }
+    
+    /**
+     * Test problem statement element from CLICS event feed
+     * 
+     * @throws Exception
+     */
+    public void testCLICSProblem() throws Exception {
+
+        String filename = getTestFilename("event-feed.4probs.nljson");
+
+        assertFileExists(filename);
+//        editFile(filename);
+
+        String[] eventLines = Utilities.loadFile(filename);
+
+        ObjectMapper mapper = getMapper();
+
+        for (String json : eventLines) {
+            CLICSEventFeedEvent eventFeedEntry = (CLICSEventFeedEvent) mapper.readValue(json, CLICSEventFeedEvent.class);
+
+            assertNotNull("Expecting data in JSON " + json, eventFeedEntry.getData());
+
+            if (CLICSEventType.PROBLEMS.toString().equals(eventFeedEntry.getType())) {
+
+                CLICSProblem problem = mapper.convertValue(eventFeedEntry.getData(), CLICSProblem.class);
+                assertNotNull(problem);
+
+                assertNotNull(problem.getId());
+
+                List<CLICSStatement> statements = problem.getStatement();
+                assertNotNull(statements);
+
+                if ("imperfectimperialunits".equals(problem.getId())) {
+
+                    // test statement parse
+                    CLICSStatement statement = statements.get(0);
+
+//                    System.out.println("debug statement "+statement.toJSON());
+
+                    assertEquals("getHref", "contests/bapc2022/problems/imperfectimperialunits/statement", statement.getHref());
+                    assertEquals("getMime", "application/pdf", statement.getMime());
+                    assertEquals("getFilename", "I.pdf", statement.getFilename());
+                }
+            }
+        }
     }
 
     /**

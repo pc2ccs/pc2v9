@@ -24,10 +24,10 @@ import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSContests;
+import edu.csus.ecs.pc2.core.imports.clics.CLICSEventFeedEvent;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSEventType;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSLanguage;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSProblem;
-import edu.csus.ecs.pc2.core.imports.clics.CLICSEventFeedEvent;
 import edu.csus.ecs.pc2.core.imports.clics.JudgementType;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -36,7 +36,6 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -72,7 +71,7 @@ public class ContestCompareModel {
 
     private List<Team> feedTeams = new ArrayList<Team>();
 
-    private IInternalContest contest = new InternalContest();
+    private IInternalContest contest = null;
 
     /**
      * Event Feed Contests
@@ -556,6 +555,8 @@ public class ContestCompareModel {
      */
     public ContestCompareModel(IInternalContest contest, URL url, String login, String password) throws JsonParseException, JsonMappingException, IOException {
 
+        this.contest = contest;
+        
         if (url == null) {
             throw new IllegalArgumentException("URL is null/missing");
         }
