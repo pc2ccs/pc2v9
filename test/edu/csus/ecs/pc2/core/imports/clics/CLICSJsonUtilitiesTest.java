@@ -26,6 +26,8 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  */
 public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
+    private SampleContest sampleContest;
+
     public void testWithNoRuns() throws Exception {
 
         SampleContest sample = new SampleContest();
@@ -72,21 +74,11 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
                 "12,2,D,40,Yes,No,0", 
         };
 
-        //        // Rank  TeamId Solved Penalty
-        //        
-        //        String [] rankData = {
-        //                "1,team1,1,23",
-        //                "2,team2,1,50"
-        //        };
-        //        
-        //        String [] rankData5 = {
-        //                "1,team1,1,33", // +7 for SV + 3 for CE
-        //                "2,team2,1,57" // +7 for SV
-        //        };
-
         InternalContest contest = createContestWithJudgedRuns(12, runsData, 8);
 
         assertNotNull(contest);
+        
+        assertEquals("Expecting groups", 2, contest.getGroups().length);
 
         List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
 
@@ -94,7 +86,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 //            System.out.println("debug award "+clicsAward.toJSON());
 //        }
 
-        assertEquals("Awards expected ", 4, awards.size());
+        assertEquals("Awards expected ", 5, awards.size());
 
         String outdir = getOutputDataDirectory(getName());
         ensureDirectory(outdir);
@@ -103,10 +95,98 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
 
-//        editFile(awardsFile);
+//        editFile(awardsFile, "debug C "+getName());
+
+    }
+    
+    /**
+     * Test with runs with no Yes/awards.
+     * 
+     * @throws Exception
+     */
+    public void testWithNoAwards() throws Exception {
+
+        /**
+         * runsData columns.
+         * 
+         * 0 - run id, int
+         * 1 - team id, int
+         * 2 - problem letter, char
+         * 3 - elapsed, int
+         * 4 - solved, String &quot;Yes&quot; or No
+         * 5 - send to teams, Yes or No
+         * 6 - No Judgement index
+         */
+        String[] runsData = { //
+                "1,1,A,1,No,No,4", //
+                "2,1,A,1,No,No,2", //
+                "3,1,A,1,No,No,1", //
+                "4,1,A,3,No,No,3", //
+                "5,1,A,5,No,No,1", //
+                "6,1,A,7,No,No,3", //
+                "7,1,A,9,No,No,1", //
+                "8,1,B,11,No,No,1", //
+                "9,2,A,48,No,No,4", //
+                "10,2,A,50,No,No,1", //
+                "11,2,C,35,No,No,2", //
+                "12,2,D,40,No,No,3", //
+        };
+
+
+        InternalContest contest = createContestWithJudgedRuns(12, runsData, 8);
+
+        assertNotNull(contest);
+        
+        assertEquals("Expecting groups", 2, contest.getGroups().length);
+
+        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+
+        assertEquals("Awards expected ", 0, awards.size());
+
+        String outdir = getOutputDataDirectory(getName());
+        ensureDirectory(outdir);
+        String awardsFile = outdir + File.separator + "awards.json";
+        CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
 
     }
 
+    public void testWithTwoAwards() throws Exception {
+
+        /**
+         * runsData columns.
+         * 
+         * 0 - run id, int
+         * 1 - team id, int
+         * 2 - problem letter, char
+         * 3 - elapsed, int
+         * 4 - solved, String &quot;Yes&quot; or No
+         * 5 - send to teams, Yes or No
+         * 6 - No Judgement index
+         */
+        String[] runsData = { //
+                "1,2,A,1,Yes,No,0", //
+                "2,1,A,1,No,No,2", //
+        };
+
+
+        InternalContest contest = createContestWithJudgedRuns(12, runsData, 8);
+
+        assertNotNull(contest);
+        
+        assertEquals("Expecting groups", 2, contest.getGroups().length);
+
+        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+
+        assertEquals("Awards expected ", 3, awards.size());
+
+        String outdir = getOutputDataDirectory(getName());
+        ensureDirectory(outdir);
+        String awardsFile = outdir + File.separator + "awards.json";
+        CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        
+//        editFile(awardsFile, "debug A "+getName());
+    }
+    
     /**
      * Test load awards.json from file.
      * 
@@ -122,7 +202,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         String awardsFile = dataDir + File.separator + "bapc2020.awards.json";
         assertFileExists(awardsFile);
 
-        //        editFile (awardsFile);
+//        editFile (awardsFile, "debug tr "+getName());
 
         List<CLICSAward> awards = CLICSJsonUtilities.readAwardsList(awardsFile);
 
@@ -247,7 +327,10 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         // Add accounts
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), numTeams, true);
         contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 6, true);
-
+        
+        sampleContest = new SampleContest();
+        sampleContest.assignSampleGroups(contest, "Group Thing One", "Group Thing Two");
+        
         // Add scoreboard account and set the scoreboard account for this client (in contest)
         contest.setClientId(createBoardAccount(contest));
 
@@ -258,6 +341,8 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
             char letter = 'A';
             letter += i;
             Problem problem = new Problem("" + letter);
+            problem.setShortName("shortA");
+            problem.setLetter(""+letter);
             contest.addProblem(problem);
         }
 
@@ -302,6 +387,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
      * @return
      * @throws Exception
      */
+    // TODO REFACTOR move to SampleContest
     public InternalContest createContestWithJudgedRuns(int numTeams, String[] runsDataList, int numberProblems, boolean respectSendTo) throws Exception {
 
         InternalContest contest = new InternalContest();

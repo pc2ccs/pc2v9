@@ -22,8 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.RunComparatorByElapsedRunIdSite;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -73,17 +75,98 @@ public class CLICSJsonUtilities {
         if (runs.length == 0) {
             return list;
         }
-        
-        addFirestToSolve(contest, runs, list);
-        
-        addWinner (contest, list);
 
+        addFirstToSolve(contest, runs, list);
 
+        addWinner(contest, list);
+
+        addGroupWinners(contest, runs, list);
 
         return list;
     }
 
-    private static void addWinner(IInternalContest contest, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
+    public static void addGroupWinners(IInternalContest contest, Run[] runs, List<CLICSAward> list) {
+
+        Arrays.sort(runs, new RunComparatorByElapsedRunIdSite());
+
+        Group[] groups = contest.getGroups();
+
+        if (groups.length == 0) {
+            // no groups defined, no group winners
+            return;
+        }
+
+        /**
+         * Group Id and Client/Team Id
+         */
+        Map<Group, ClientId> groupWinners = new HashMap<Group, ClientId>();
+
+        for (Run run : runs) {
+            if (run.isSolved()) {
+                Group teamGroup = getGroupForTeam(contest, run.getSubmitter());
+
+                if (teamGroup != null) {
+                    ClientId clientId = groupWinners.get(teamGroup);
+                    if (clientId == null) {
+                        groupWinners.put(teamGroup, run.getSubmitter());
+                    }
+                }
+            }
+        }
+
+        Set<Group> problemElementIds = groupWinners.keySet();
+        for (Group group : problemElementIds) {
+            // first to solve for group
+            ClientId clientId = groupWinners.get(group);
+            if (clientId != null) {
+                Account account = contest.getAccount(clientId);
+
+//            "citation": "Winner(s) of group University of Luxembourg", 
+//            "id": "group-winner-17"
+
+                String awardId = "Winner(s) of group " + account.getDisplayName();
+                String citation = "group-winner-" + group.getGroupId();
+
+                CLICSAward groupWinner = new CLICSAward(awardId, citation, "" + clientId.getClientNumber());
+                list.add(groupWinner);
+            }
+
+        }
+    }
+
+    /**
+     * Get group for team/account.
+     * 
+     * @param contest
+     * @param submitter clientId for team
+     * @return null if not found, else the group
+     */
+    public static Group getGroupForTeam(IInternalContest contest, ClientId submitter) {
+        Account account = contest.getAccount(submitter);
+        if (account != null) {
+            ElementId groupElementId = account.getGroupId();
+            if (groupElementId != null) {
+                Group group = contest.getGroup(groupElementId);
+                if (group != null) {
+                    return group;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Add winner award.
+     * 
+     * @param contest
+     * @param list
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IllegalContestState
+     * @throws IOException
+     */
+    public static void addWinner(IInternalContest contest, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
         
         ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
@@ -94,10 +177,12 @@ public class CLICSJsonUtilities {
 //        }
         
         TeamScoreRow teamRow = model.getRows().get(0);
-        String winnerId = Integer.toString( teamRow.getTeam_id());
-
-        CLICSAward firstToSolveAward = new CLICSAward("Contest winner","winner" , winnerId);
-        list.add(firstToSolveAward);
+        if (teamRow.getScore().getNum_solved() > 0) {
+            String winnerId = Integer.toString( teamRow.getTeam_id());
+            
+            CLICSAward firstToSolveAward = new CLICSAward("Contest winner","winner" , winnerId);
+            list.add(firstToSolveAward);
+        }
         
         
     }
@@ -106,6 +191,7 @@ public class CLICSJsonUtilities {
      * Add first to solve awards to list
      * 
      * @param contest
+     * @param runs 
      * @param runs
      * @param list
      * @throws JsonParseException
@@ -114,11 +200,11 @@ public class CLICSJsonUtilities {
      * @throws IllegalContestState
      * @throws IOException
      */
-    private static void addFirestToSolve(IInternalContest contest, Run[] runs, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
-        
-        Arrays.sort(runs,new RunComparatorByElapsedRunIdSite());
+    private static void addFirstToSolve(IInternalContest contest, Run[] runs, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
+
+        Arrays.sort(runs, new RunComparatorByElapsedRunIdSite());
         Map<ElementId, ClientId> firstToSolveTeamId = new HashMap<ElementId, ClientId>();
-        
+
         for (Run run : runs) {
             if (run.isSolved()) {
                 ClientId clientId = firstToSolveTeamId.get(run.getProblemId());
