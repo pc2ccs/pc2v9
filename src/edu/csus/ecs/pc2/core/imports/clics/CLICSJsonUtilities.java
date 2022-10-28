@@ -75,10 +75,10 @@ public class CLICSJsonUtilities {
         if (runs.length == 0) {
             return list;
         }
+        
+        addWinner(contest, list);
 
         addFirstToSolve(contest, runs, list);
-
-        addWinner(contest, list);
 
         addGroupWinners(contest, runs, list);
 

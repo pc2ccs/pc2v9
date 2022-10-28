@@ -16,8 +16,30 @@ import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
+
 public class CLICSAward {
 
+    /**
+     * Identifier of the award.
+     */
+    @JsonProperty
+    private String id;
+
+    /**
+     * Award citation, e.g. "Gold medal winner".
+     */
+    @JsonProperty
+    private String citation;
+
+    /**
+     * JSON array of team ids receiving this award.
+     * 
+     * No meaning must be implied or inferred from the order of IDs. If the value is null this means that the award is not currently being updated. If the value is the empty array this means that the
+     * award is being updated, but no team has been awarded the award at this time.
+     */
+    @JsonProperty
+    private List<String> team_ids;
+    
     public CLICSAward() {
         super();
     }
@@ -48,27 +70,6 @@ public class CLICSAward {
         team_ids.add(teamid);
     }
 
-    /**
-     * Identifier of the award.
-     */
-    @JsonProperty
-    private String id;
-
-    /**
-     * Award citation, e.g. "Gold medal winner".
-     */
-    @JsonProperty
-    private String citation;
-
-    /**
-     * JSON array of team ids receiving this award.
-     * 
-     * No meaning must be implied or inferred from the order of IDs. If the value is null this means that the award is not currently being updated. If the value is the empty array this means that the
-     * award is being updated, but no team has been awarded the award at this time.
-     */
-    @JsonProperty
-    private List<String> team_ids;
-
     public String getId() {
         return id;
     }
@@ -77,7 +78,7 @@ public class CLICSAward {
         return citation;
     }
 
-    public List<String> getTeamIds() {
+    public List<String> getTeam_ids() {
         return team_ids;
     }
 

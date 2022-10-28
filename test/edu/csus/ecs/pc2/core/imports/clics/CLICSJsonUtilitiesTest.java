@@ -28,6 +28,11 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
     private SampleContest sampleContest;
 
+    /**
+     * Test no awards (no runs) in awards.json
+     * 
+     * @throws Exception
+     */
     public void testWithNoRuns() throws Exception {
 
         SampleContest sample = new SampleContest();
@@ -46,7 +51,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         assertEquals("Expecting no award rows ", 0, rowsWritten);
     }
 
-    public void testcreateAwardsList() throws Exception {
+    public void testcreateAwardsListFor5awards() throws Exception {
 
         /**
          * runsData columns.
@@ -93,14 +98,15 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         String awardsFile = outdir + File.separator + "awards.json";
 
-        CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        assertEquals("Expecting awards elements ", 5, rowsWritten);
 
 //        editFile(awardsFile, "debug C "+getName());
 
     }
     
     /**
-     * Test with runs with no Yes/awards.
+     * Test with runs with only No judgement runs.   No awards output.
      * 
      * @throws Exception
      */
@@ -146,10 +152,17 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         String outdir = getOutputDataDirectory(getName());
         ensureDirectory(outdir);
         String awardsFile = outdir + File.separator + "awards.json";
-        CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        
+        int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        assertEquals("Expecting awards elements ", 0, rowsWritten);
 
     }
 
+    /**
+     * Test with two awards.
+     * 
+     * @throws Exception
+     */
     public void testWithTwoAwards() throws Exception {
 
         /**
@@ -163,6 +176,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
          * 5 - send to teams, Yes or No
          * 6 - No Judgement index
          */
+        
         String[] runsData = { //
                 "1,2,A,1,Yes,No,0", //
                 "2,1,A,1,No,No,2", //
@@ -182,9 +196,79 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         String outdir = getOutputDataDirectory(getName());
         ensureDirectory(outdir);
         String awardsFile = outdir + File.separator + "awards.json";
-        CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+
+        int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        assertEquals("Expecting no award rows ", 3, rowsWritten);
         
 //        editFile(awardsFile, "debug A "+getName());
+    }
+    
+    /**
+     * Test with 23 runs and 8 awards.
+     * 
+     * @throws Exception
+     */
+    public void testEightAwards() throws Exception {
+        
+        /**
+         * runsData columns.
+         * 
+         * 0 - run id, int
+         * 1 - team id, int
+         * 2 - problem letter, char
+         * 3 - elapsed, int
+         * 4 - solved, String &quot;Yes&quot; or No
+         * 5 - send to teams, Yes or No
+         * 6 - No Judgement index
+         */
+        
+        String[] runsData = { //
+                "1,1,A,1,No,No,4",// 
+                "2,1,A,1,No,No,2", //
+                "3,1,A,1,No,No,1", // 
+                "4,1,A,3,Yes,No,0", // 
+                "5,1,A,5,No,No,1",  //
+                "6,1,A,7,Yes,No,0",  //
+                "7,1,A,9,No,No,1",  //
+                "8,1,B,11,No,No,1",  //
+                "9,2,A,48,No,No,4",  //
+                "10,2,A,50,Yes,No,0",  //
+                "11,2,C,35,Yes,No,0",  //
+                "12,2,D,40,Yes,No,0",  //
+                "13,3,A,42,Yes,No,0",  //
+                "14,3,B,46,Yes,No,0",  //
+                "15,3,C,48,Yes,No,0",  //
+                "16,3,D,50,Yes,No,0",  //
+                "17,3,D,60,Yes,No,0",  //
+                "18,4,A,6,Yes,No,0",  //
+                "19,4,B,62,Yes,No,0",  //
+                "20,4,C,66,Yes,No,0",  //
+                "21,4,D,66,Yes,No,0",  //
+                "22,4,E,66,Yes,No,0",  //
+                "23,4,F,66,Yes,No,0",  //
+        };
+
+        int numProbs = 8;
+        InternalContest contest = createContestWithJudgedRuns(12, runsData, numProbs);
+
+        assertNotNull(contest);
+        
+        assertEquals("Expecting groups", 2, contest.getGroups().length);
+
+        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+
+        assertEquals("Awards expected ", 8, awards.size());
+
+        String outdir = getOutputDataDirectory(getName());
+        ensureDirectory(outdir);
+        String awardsFile = outdir + File.separator + "awards.json";
+
+        int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        assertEquals("Expecting no award rows ", 8, rowsWritten);
+        
+//        editFile(awardsFile, "debug A "+getName());
+        
+        
     }
     
     /**
@@ -264,7 +348,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         CLICSAward award = findAward(awards, id);
         assertNotNull("Missing award for citation " + id, award);
 
-        List<String> teams = award.getTeamIds();
+        List<String> teams = award.getTeam_ids();
         int expectedTeamCount = 1;
         assertEquals("Expecting only " + expectedTeamCount + "team ", 1, teams.size());
 
@@ -273,9 +357,11 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
     }
 
     /**
+     * Find award in awards list
      * 
      * @param awards
-     * @param citation
+     * @param id the award id
+     * @return
      * @return null if not found, otherwise award for citation
      * @throws JsonProcessingException
      */
@@ -340,8 +426,8 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         for (int i = 0; i < numProblems; i++) {
             char letter = 'A';
             letter += i;
-            Problem problem = new Problem("" + letter);
-            problem.setShortName("shortA");
+            Problem problem = new Problem("Problem " + letter);
+            problem.setShortName("short"+letter);
             problem.setLetter(""+letter);
             contest.addProblem(problem);
         }
