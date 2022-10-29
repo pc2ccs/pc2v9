@@ -36,6 +36,8 @@ public class AppConstants {
     public static final String NO_SAVE_OPTION_STRING = "--nosave";
 
     public static final String PASSWORD_OPTION_STRING = "--password";
+    
+    public static final String CONSOLE_OPTION_STRING = "--console";
 
     public static final String PORT_OPTION_STRING = "--port";
 
