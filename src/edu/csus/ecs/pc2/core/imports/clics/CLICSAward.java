@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -17,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
 
+@JsonTypeInfo(use=Id.NONE)
 public class CLICSAward {
 
     /**
