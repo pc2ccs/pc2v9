@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.core.imports.clics;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
@@ -268,17 +270,139 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
         
-//        for (CLICSAward clicsAward : awards) {
-//            System.out.println("debug 22 award = "+clicsAward.toJSON());
-//        }
-        
+//        dumpAwards(System.out,  awards);
         
         assertEquals("Awards expected ", 12, awards.size());
         
         
     }
     
+    public void testAwardsTwo() throws Exception {
+
+        
+        /**
+         * runsData columns.
+         * 
+         * 0 - run id, int
+         * 1 - team id, int
+         * 2 - problem letter, char
+         * 3 - elapsed, int
+         * 4 - solved, String &quot;Yes&quot; or No
+         * 5 - send to teams, Yes or No
+         * 6 - No Judgement index
+         */
+        
+        String[] runsData = { //
+                "1,1,A,1,Yes,No,0", //
+                "2,2,A,2,Yes,No,0", //
+                "3,3,A,3,Yes,No,0", //
+                "4,4,A,4,Yes,No,0", //
+                
+                "5,5,A,5,Yes,No,0", //
+                "6,6,A,6,Yes,No,0", //
+                "7,7,A,7,Yes,No,0", //
+                "8,8,A,8,Yes,No,0", //
+                
+                
+                "9,9,A,9,Yes,No,0", //
+                "10,10,A,13,Yes,No,0", //
+                "11,11,A,13,Yes,No,0", //
+                "12,12,A,13,Yes,No,0", //
+                "13,13,A,13,Yes,No,0", //
+                "14,14,A,13,Yes,No,0", //
+                "15,15,A,13,Yes,No,0", //
+                "16,16,A,13,Yes,No,0", //
+                "17,17,A,13,Yes,No,0", //
+                "18,18,A,13,Yes,No,0", //
+                "19,19,A,13,Yes,No,0", //
+                
+                "20,20,A,23,Yes,No,0", //
+                "21,21,A,21,Yes,No,0", //
+                "22,22,A,22,Yes,No,0", //
+//                "23,23,A,23,Yes,No,0", //
+//                "24,24,A,24,Yes,No,0", //
+//                "25,25,A,25,Yes,No,0", //
+//                "26,26,A,26,Yes,No,0", //
+//                "27,27,A,27,Yes,No,0", //
+//                "28,28,A,28,Yes,No,0", //
+//                "20,29,A,29,Yes,No,0", //
+//                "22,30,A,30,Yes,No,0", //
+//                "28,31,A,31,Yes,No,0", //
+//                "24,24,A,32,Yes,No,0", //
+
+        };
+        
+
+        int numProbs = 8;
+        InternalContest contest = createContestWithJudgedRuns(40, runsData, numProbs);
+
+        assertNotNull(contest);
+
+        assertEquals("Expecting groups", 2, contest.getGroups().length);
+
+        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+
+        assertTeamCount(awards, CLICSJsonUtilities.ID_WINNER, 1);
+
+        assertTeamCount(awards, CLICSJsonUtilities.ID_GOLD_MEDAL, 4);
+        assertTeamCount(awards, CLICSJsonUtilities.ID_SILVER_MEDAL, 4);
+        assertTeamCount(awards, CLICSJsonUtilities.ID_BRONZE_MEDAL, 11);
+
+//        dumpAwards (System.out, awards);
+        
+        assertEquals("Awards expected ", 7, awards.size());
+        
+        
+        FinalizeData data = createFinalizeData(4, 4, 13);
+        contest.setFinalizeData(data);
+        awards = CLICSJsonUtilities.createAwardsList(contest);
+        
+        assertTeamCount(awards, CLICSJsonUtilities.ID_WINNER, 1);
+
+        assertTeamCount(awards, CLICSJsonUtilities.ID_GOLD_MEDAL, 4);
+        assertTeamCount(awards, CLICSJsonUtilities.ID_SILVER_MEDAL, 4);
+        assertTeamCount(awards, CLICSJsonUtilities.ID_BRONZE_MEDAL, 14);
+
+        assertEquals("Awards expected ", 7, awards.size());
+    }
     
+    protected void dumpAwards(PrintStream out, List<CLICSAward> awards) throws JsonProcessingException {
+      for (CLICSAward clicsAward : awards) {
+          out.println("debug dump award  = " + clicsAward.toJSON());
+      }
+
+        
+    }
+
+    protected FinalizeData createFinalizeData(int numberGolds, int numberSilvers, int numberBronzes) {
+        FinalizeData data = new FinalizeData();
+        data.setGoldRank(numberGolds);
+        data.setSilverRank(numberSilvers);
+        data.setBronzeRank(numberBronzes);
+        data.setComment("Finalized by Director of Operations, no, really!");
+        return data;
+    }
+    
+    /**
+     * Expect team count for awards id to be the same as expectedNumber
+     * @param awards
+     * @param id
+     * @param expectedNumber
+     */
+    private void assertTeamCount(List<CLICSAward> awards, String id, int expectedNumber) {
+        List<String> teamIds = getTeamList (awards, id);
+        assertEquals ("Expecting team count for award "+id, expectedNumber, teamIds.size());
+    }
+
+    private List<String> getTeamList(List<CLICSAward> awards, String id) {
+        for (CLICSAward clicsAward : awards) {
+            if (id.equals( clicsAward.getId())) {
+                return clicsAward.getTeam_ids();
+            }
+        }
+        return new ArrayList<String>();
+    }
+
     /**
      * Test with 23 runs and 8 awards.
      * 
@@ -336,10 +460,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         List<CLICSAward> list = new ArrayList<CLICSAward>();
         CLICSJsonUtilities.addMedals(contest, list);
         
-//        for (CLICSAward clicsAward : list) {
-//            System.out.println("debug 22 ward = "+clicsAward.toJSON());
-//        }
-        
+//        dumpAwards(System.out,  awards);
         assertEquals("Awards expected ", 9, awards.size());
 
         String outdir = getOutputDataDirectory(getName());
