@@ -192,12 +192,16 @@ public class ContestCompareModelTest extends AbstractTestCase {
             // only test if there is a pretest dir found
             return;
         }
+        // Load Accounts
+        String loadAccountFilename = "/repos/icpc/ccsconfig-dhaka/contests/pretest2/config/load_accounts_real.tsv";
+        if (! new File(loadAccountFilename).isFile()) {
+            return;
+        }
+        
         
         IInternalContest contest = loadAndInitializeContest(null, cdpPath);
         assertNotNull(contest);
 
-        // Load Accounts
-        String loadAccountFilename = "/repos/icpc/ccsconfig-dhaka/contests/pretest2/config/load_accounts_real.tsv";
         assertFileExists(loadAccountFilename);
         Account[] updateAccounts = LoadAccounts.updateAccountsFromFile(contest, loadAccountFilename);
         contest.updateAccounts(updateAccounts);

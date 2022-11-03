@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
 import edu.csus.ecs.pc2.core.standings.json.ScoreboardJsonModel;
+import edu.csus.ecs.pc2.core.standings.json.StandingScore;
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 
 /**
@@ -81,6 +82,8 @@ public class CLICSJsonUtilities {
         addFirstToSolve(contest, runs, list);
 
         addGroupWinners(contest, runs, list);
+        
+        addMedals(contest, list);
 
         return list;
     }
@@ -154,6 +157,96 @@ public class CLICSJsonUtilities {
         }
         return null;
     }
+    
+    
+    public static void addMedals(IInternalContest contest, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
+     
+        
+        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+        ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
+        
+//        List<TeamScoreRow> rows = model.getRows();
+//        for (TeamScoreRow teamScoreRow : rows) {
+//            System.out.println("debug  srow "+getStandingsRow(teamScoreRow));
+//        }
+        
+        TeamScoreRow teamRow = model.getRows().get(0);
+        if (teamRow.getScore().getNum_solved() > 0) {
+            
+            // only assign medals to those who have solved a problem
+            
+             List<String> teamList = getTeamids (0, 3, model.getRows());
+            
+            if (teamList.size () > 0) {
+                //  "citation": "Gold Medalist", 
+                //  "id": "gold-medal"
+                CLICSAward firstToSolveAward = new CLICSAward("gold-medal","Gold Medalist" , teamList);
+                list.add(firstToSolveAward);
+            }
+            
+ 
+            teamList = getTeamids (4, 7, model.getRows());
+            
+            if (teamList.size () > 0) {
+                CLICSAward firstToSolveAward = new CLICSAward("silver-medal","Silver Medalist" , teamList);
+                list.add(firstToSolveAward);
+            }
+            
+            int b = 0; // TODO assign be if finalized
+            
+            teamList = getTeamids (8, 11 + b, 12 + b, model.getRows());
+            if (teamList.size () > 0) {
+                CLICSAward firstToSolveAward = new CLICSAward("bronze-medal","Bronze Medalist" , teamList);
+                list.add(firstToSolveAward);
+            }
+        }
+    }
+        
+
+    /**
+     * get team list for reams who have solved at least one problem.
+     * @param startIdx
+     * @param endidx
+     * @param maxrank only include teams ids where their rank is <= maxrank
+     * @param teamRows
+     * @return
+     */
+    private static List<String>  getTeamids(int startIdx, int endidx, int maxrank, List<TeamScoreRow> teamRows) {
+
+        
+        List<String> list = new ArrayList<String>();
+        
+       
+        for (int rowidx = startIdx; rowidx <= endidx; rowidx++) {
+
+            if (rowidx < teamRows.size()) {
+                TeamScoreRow row = teamRows.get(rowidx);
+
+                if (row.getScore().getNum_solved() > 0) {
+                    // must solve at least one to be medal winner
+                    
+                    if (row.getRank() <= maxrank ) {
+                        list.add("" + row.getTeam_id());
+                    }
+
+
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * get team list for reams who have solved at least one problem.
+     * @param startIdx
+     * @param endidx
+     * @param teamRows
+     * @return
+     */
+    private static List<String> getTeamids(int startIdx, int endidx, List<TeamScoreRow> teamRows) {
+        return getTeamids(  startIdx,   endidx, Integer.MAX_VALUE, teamRows);
+    }
+
 
     /**
      * Add winner award.
@@ -230,15 +323,14 @@ public class CLICSJsonUtilities {
         }
     }
 
-    // old code
-//    private static String getStandingsRow(TeamScoreRow row) {
-//        StandingScore scoreRow = row.getScore();
-//
-//        return row.getRank() + " " + //
-//                scoreRow.getNum_solved() + " " + //
-//                scoreRow.getTotal_time() + " " + //
-//                row.getTeamName();
-//    }
+    static String getStandingsRow(TeamScoreRow row) {
+        StandingScore scoreRow = row.getScore();
+
+        return row.getRank() + " " + //
+                scoreRow.getNum_solved() + " " + //
+                scoreRow.getTotal_time() + " " + //
+                row.getTeamName();
+    }
 
     /**
      * Load list of CLICS awards json from file.

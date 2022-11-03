@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.core.imports.clics;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -91,7 +92,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 //            System.out.println("debug award "+clicsAward.toJSON());
 //        }
 
-        assertEquals("Awards expected ", 5, awards.size());
+        assertEquals("Awards expected ", 6, awards.size());
 
         String outdir = getOutputDataDirectory(getName());
         ensureDirectory(outdir);
@@ -99,7 +100,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         String awardsFile = outdir + File.separator + "awards.json";
 
         int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
-        assertEquals("Expecting awards elements ", 5, rowsWritten);
+        assertEquals("Expecting awards elements ", 6, rowsWritten);
 
 //        editFile(awardsFile, "debug C "+getName());
 
@@ -191,17 +192,92 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
 
-        assertEquals("Awards expected ", 3, awards.size());
+        assertEquals("Awards expected ", 4, awards.size());
 
         String outdir = getOutputDataDirectory(getName());
         ensureDirectory(outdir);
         String awardsFile = outdir + File.separator + "awards.json";
 
         int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
-        assertEquals("Expecting no award rows ", 3, rowsWritten);
+        assertEquals("Expecting no award rows ", 4, rowsWritten);
         
 //        editFile(awardsFile, "debug A "+getName());
     }
+    
+    public void testAllAwards() throws Exception {
+        
+        /**
+         * runsData columns.
+         * 
+         * 0 - run id, int
+         * 1 - team id, int
+         * 2 - problem letter, char
+         * 3 - elapsed, int
+         * 4 - solved, String &quot;Yes&quot; or No
+         * 5 - send to teams, Yes or No
+         * 6 - No Judgement index
+         */
+        
+        String[] runsData = { //
+                "1,1,A,1,No,No,4",// 
+                "2,1,A,1,No,No,2", //
+                "3,1,A,1,No,No,1", // 
+                "4,1,A,3,Yes,No,0", // 
+                "5,1,A,5,No,No,1",  //
+                "6,1,A,7,Yes,No,0",  //
+                "7,1,A,9,No,No,1",  //
+                "8,11,B,11,Yes,No,1",  //
+                "9,12,A,48,Yes,No,4",  //
+                "10,2,A,50,Yes,No,0",  //
+                "11,2,C,35,Yes,No,0",  //
+                "12,2,D,40,Yes,No,0",  //
+                "13,6,A,42,Yes,No,0",  //
+                "14,13,B,46,Yes,No,0",  //
+                "15,8,C,48,Yes,No,0",  //
+                "16,13,D,50,Yes,No,0",  //
+                "17,10,D,60,Yes,No,0",  //
+                "18,10,A,6,Yes,No,0",  //
+                "19,14,B,62,Yes,No,0",  //
+                "20,14,C,66,Yes,No,0",  //
+                "21,1,D,66,Yes,No,0",  //
+                "22,14,E,66,Yes,No,0",  //
+                "23,14,F,66,Yes,No,0",  //
+
+                "24,16,F,166,Yes,No,0",  //
+                "25,17,F,266,Yes,No,0",  //
+                "26,18,F,366,Yes,No,0",  //
+                "27,19,F,866,Yes,No,0",  //
+                
+                "28,12,F,1466,Yes,No,0",  //
+                "20,11,A, 123,Yes,No,0",  //
+                
+                "21,22,F,1466,Yes,No,0",  //
+                "22,22,A, 123,Yes,No,0",  //
+                "28,23,F,1466,Yes,No,0",  //
+                "24,24,A, 123,Yes,No,0",  //
+                
+
+        };
+
+        int numProbs = 8;
+        InternalContest contest = createContestWithJudgedRuns(30, runsData, numProbs);
+
+        assertNotNull(contest);
+        
+        assertEquals("Expecting groups", 2, contest.getGroups().length);
+
+        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+        
+//        for (CLICSAward clicsAward : awards) {
+//            System.out.println("debug 22 award = "+clicsAward.toJSON());
+//        }
+        
+        
+        assertEquals("Awards expected ", 12, awards.size());
+        
+        
+    }
+    
     
     /**
      * Test with 23 runs and 8 awards.
@@ -256,15 +332,22 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
         List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
-
-        assertEquals("Awards expected ", 8, awards.size());
+        
+        List<CLICSAward> list = new ArrayList<CLICSAward>();
+        CLICSJsonUtilities.addMedals(contest, list);
+        
+//        for (CLICSAward clicsAward : list) {
+//            System.out.println("debug 22 ward = "+clicsAward.toJSON());
+//        }
+        
+        assertEquals("Awards expected ", 9, awards.size());
 
         String outdir = getOutputDataDirectory(getName());
         ensureDirectory(outdir);
         String awardsFile = outdir + File.separator + "awards.json";
 
         int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
-        assertEquals("Expecting no award rows ", 8, rowsWritten);
+        assertEquals("Expecting no award rows ", 9, rowsWritten);
         
 //        editFile(awardsFile, "debug A "+getName());
         
