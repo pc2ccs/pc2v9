@@ -1885,6 +1885,7 @@ public class SampleContest {
      * 4 - solved, String &quot;Yes&quot; or No
      * 5 - send to teams, Yes or No
      * 6 - No Judgement index
+     * 7 - Validator judgement string
      * 
      * Example:
      * &quot;6,5,A,12,Yes&quot;
@@ -1911,6 +1912,7 @@ public class SampleContest {
         Judgement yesJudgement = contest.getJudgements()[0];
         Judgement[] judgement = contest.getJudgements();
         Judgement noJudgement = null;
+        
         for (int i = 0; i < judgement.length; i++) {
             if (judgement[i].getAcronym().equals("WA")) {
                 noJudgement = judgement[i];
@@ -1935,6 +1937,11 @@ public class SampleContest {
         if (data.length > 6) {
             noJudgement = contest.getJudgements()[getIntegerValue(data[6])];
         }
+        
+        String validatorJudgementString = null;
+        if (data.length > 7) {
+            validatorJudgementString = data[7];
+        }
 
         int problemIndex = probLet.charAt(0) - 'A';
         Problem problem = problemList[problemIndex];
@@ -1949,6 +1956,9 @@ public class SampleContest {
             judgementId = yesJudgement.getElementId();
         }
         JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, computerJudged);
+        if (validatorJudgementString != null) {
+            judgementRecord.setValidatorResultString(validatorJudgementString);
+        }
         judgementRecord.setSendToTeam(sendToTeams);
 
         try {
