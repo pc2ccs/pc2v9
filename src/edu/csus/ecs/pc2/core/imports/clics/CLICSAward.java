@@ -1,7 +1,6 @@
 // Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports.clics;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,7 +40,7 @@ public class CLICSAward {
      * award is being updated, but no team has been awarded the award at this time.
      */
     @JsonProperty
-    private List<String> team_ids;
+    private String [] team_ids;
     
     public CLICSAward() {
         super();
@@ -56,7 +55,7 @@ public class CLICSAward {
         super();
         this.id = id;
         this.citation = citation;
-        this.team_ids = team_ids;
+        this.team_ids = (String[]) team_ids.toArray(new String[team_ids.size()]);
     }
     
     /**
@@ -69,8 +68,8 @@ public class CLICSAward {
         super();
         this.id = id;
         this.citation = citation;
-        this.team_ids = new ArrayList<String>();
-        team_ids.add(teamid);
+        String [] teamIds = {teamid};
+        this.team_ids = teamIds;
     }
 
     public String getId() {
@@ -81,10 +80,10 @@ public class CLICSAward {
         return citation;
     }
 
-    public List<String> getTeam_ids() {
+    public String[] getTeam_ids() {
         return team_ids;
     }
-
+    
     public String toJSON() throws JsonProcessingException {
         ObjectMapper om = JSONObjectMapper.getObjectMapper();
         return om.writeValueAsString(this);

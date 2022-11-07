@@ -104,7 +104,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
         assertEquals("Expecting awards elements ", 6, rowsWritten);
 
-//        editFile(awardsFile, "debug C "+getName());
+//      editFile(awardsFile, "debug C "+getName());
 
     }
     
@@ -390,17 +390,17 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
      * @param expectedNumber
      */
     private void assertTeamCount(List<CLICSAward> awards, String id, int expectedNumber) {
-        List<String> teamIds = getTeamList (awards, id);
-        assertEquals ("Expecting team count for award "+id, expectedNumber, teamIds.size());
+         String[] teamIds = getTeamList (awards, id);
+        assertEquals ("Expecting team count for award "+id, expectedNumber, teamIds.length);
     }
 
-    private List<String> getTeamList(List<CLICSAward> awards, String id) {
+    private String[] getTeamList(List<CLICSAward> awards, String id) {
         for (CLICSAward clicsAward : awards) {
             if (id.equals( clicsAward.getId())) {
                 return clicsAward.getTeam_ids();
             }
         }
-        return new ArrayList<String>();
+        return new String [0];
     }
 
     /**
@@ -552,11 +552,11 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         CLICSAward award = findAward(awards, id);
         assertNotNull("Missing award for citation " + id, award);
 
-        List<String> teams = award.getTeam_ids();
+        String[] teams = award.getTeam_ids();
         int expectedTeamCount = 1;
-        assertEquals("Expecting only " + expectedTeamCount + "team ", 1, teams.size());
+        assertEquals("Expecting only " + expectedTeamCount + "team ", 1, teams.length);
 
-        String teamid = teams.get(0);
+        String teamid = teams[0];
         assertEquals("Expected team for " + id, team, teamid);
     }
 
