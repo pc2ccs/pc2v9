@@ -690,12 +690,11 @@ public class ShadowController {
                             pc2JudgementInfoMap.put(submissionId, info);
 
                         } else {
-                            // we've exhausted methods of obtaining an acronym
-                            log.warning("Null judgement acronym for run " + run.getNumber() + ", judgement string " + judgementString + "; skipping");
+                            // we've exhausted methods of obtaining an acronym from the validator judgement string
 
                             Judgement judgement = localContest.getJudgement(jr.getJudgementId());
                             if (judgement == null) {
-                                log.warning("Null judgement acronym for run " + run.getNumber() + ", Judgement not found in model for run");
+                                log.warning("Null judgement for run " + run.getNumber() + ", Judgement not found in model for run");
                             } else {
 
                                 /**
@@ -709,7 +708,7 @@ public class ShadowController {
                                 ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, judgerClientID, pair);
                                 pc2JudgementInfoMap.put(submissionId, info);
 
-                                log.info("Null judgement acronym for run " + run.getNumber() + ", cjudgement string " + judgementString + "; not skipped assigned acronym = " + acronymnName);
+                                log.info("Null judgement acronym for run " + run.getNumber() + ", judgement string " + judgementString + "; not skipped assigned acronym = " + acronymnName);
                             }
 
                         }
