@@ -24,12 +24,14 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.RunComparatorByElapsedRunIdSite;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
 import edu.csus.ecs.pc2.core.standings.json.ScoreboardJsonModel;
@@ -119,7 +121,7 @@ public class CLICSJsonUtilities {
 
                 if (teamGroup != null) {
                     ClientId clientId = groupWinners.get(teamGroup);
-                    if (clientId == null) {
+                    if (clientId == null && isActive(contest, run.getSubmitter())) {
                         groupWinners.put(teamGroup, run.getSubmitter());
                     }
                 }
@@ -144,6 +146,14 @@ public class CLICSJsonUtilities {
             }
 
         }
+    }
+
+    private static boolean isActive(IInternalContest contest, ClientId clientId) {
+        Account account = contest.getAccount(clientId);
+        if (account != null && account.isAllowed(Type.DISPLAY_ON_SCOREBOARD)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -174,7 +184,7 @@ public class CLICSJsonUtilities {
         ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
         
-        List<TeamScoreRow> rows = model.getRows();
+//        List<TeamScoreRow> rows = model.getRows();
 //        for (TeamScoreRow teamScoreRow : rows) {
 //            System.out.println("debug  srow "+getStandingsRow(teamScoreRow));
 //        }
@@ -280,19 +290,28 @@ public class CLICSJsonUtilities {
         ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
         
-//        List<TeamScoreRow> rows = model.getRows();
-//        for (TeamScoreRow teamScoreRow : rows) {
-//            System.out.println("debug  srow "+getStandingsRow(teamScoreRow));
-//        }
+        String winnerId = null;
         
-        TeamScoreRow teamRow = model.getRows().get(0);
-        if (teamRow.getScore().getNum_solved() > 0) {
-            String winnerId = Integer.toString( teamRow.getTeam_id());
-            
+        /**
+         * Get teams in rank order.
+         */
+        List<TeamScoreRow> rows = model.getRows();
+        int site = contest.getSiteNumber();
+        
+        for (TeamScoreRow teamRow : rows) {
+            int clientNumber = teamRow.getTeam_id();
+            ClientId clientId = new ClientId(site, ClientType.Type.TEAM, clientNumber);
+            if (teamRow.getScore().getNum_solved() > 0 && 
+            winnerId == null & isActive(contest, clientId ) ) {
+                winnerId = Integer.toString( teamRow.getTeam_id());
+                
+            }
+        }
+
+        if (winnerId != null) {
             CLICSAward firstToSolveAward = new CLICSAward(ID_WINNER, "Contest winner", winnerId);
             list.add(firstToSolveAward);
         }
-        
         
     }
 
@@ -317,7 +336,7 @@ public class CLICSJsonUtilities {
         for (Run run : runs) {
             if (run.isSolved()) {
                 ClientId clientId = firstToSolveTeamId.get(run.getProblemId());
-                if (clientId == null) {
+                if (clientId == null && isActive(contest, run.getSubmitter())) {;
                     firstToSolveTeamId.put(run.getProblemId(), run.getSubmitter());
                 }
             }
