@@ -2757,6 +2757,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 loadDataFiles(problem, dataFiles, answerFiles, sampleDataDirectory, loadExternalFile);
             }
 
+            
+            // TODO REFACTOR use loadDataFiles to load secret data files.
+            
             for (int idx = 0; idx < inputFileNames.length; idx++) {
 
                 problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
