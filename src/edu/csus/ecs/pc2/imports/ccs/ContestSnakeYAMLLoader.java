@@ -267,7 +267,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
 
-    private void LoadSampleJudgesData(IInternalContest contest, boolean loadSampleFiles) {
+    private void setLoadSampleJudgesData(IInternalContest contest, boolean loadSampleFiles) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setLoadSampleJudgesData(loadSampleFiles);
         contest.updateContestInformation(contestInformation);
@@ -411,7 +411,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
         
         boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, true);
-        LoadSampleJudgesData(contest, loadSamples);
+        setLoadSampleJudgesData(contest, loadSamples);
         
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
         setStopOnFirstFailedTestCase (contest, stopOnFirstFail);
@@ -2819,23 +2819,30 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         
         String[] inputFileNames = getFileNames(sampleDataDirectory, ".in");
         String[] answerFileNames = getFileNames(sampleDataDirectory, ".ans");
-
-        Arrays.sort(inputFileNames);
         
-        for (int idx = 0; idx < inputFileNames.length; idx++) {
-            
-            problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
+        if (inputFileNames.length == answerFileNames.length) {
 
-            String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
-            
-            String dataFileName = sampleDataDirectory + File.separator + inputFileNames[idx];
-            String answerFileName = dataFileName.replaceAll(".in$", ".ans");
-            
-            checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + sampleDataDirectory);
-            checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + sampleDataDirectory);
-            
-            dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
-            answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
+            Arrays.sort(inputFileNames);
+
+            for (int idx = 0; idx < inputFileNames.length; idx++) {
+
+                problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
+
+                String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
+
+                String dataFileName = sampleDataDirectory + File.separator + inputFileNames[idx];
+                String answerFileName = dataFileName.replaceAll(".in$", ".ans");
+
+                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + sampleDataDirectory);
+                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + sampleDataDirectory);
+
+                dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
+                answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
+            }
+
+        } else {
+            throw new YamlLoadException("  For " + problem.getShortName() + " Missing data files -  there are " + inputFileNames.length + " .in files and " + //
+                    answerFileNames.length + " .ans files " + " in " + sampleDataDirectory);
         }
 
     }
