@@ -113,7 +113,9 @@ public interface IContestLoader {
     String AUTO_JUDGE_KEY = "auto-judging";
 
     String CCS_TEST_MODE = "ccs-test-mode";
-
+    
+    String LOAD_SAMPLE_JUDGES_DATA = "load-sample-judges-data";
+    
     String INPUT_KEY = "input";
 
     String PROBLEM_LOAD_DATA_FILES_KEY = "load-data-files";

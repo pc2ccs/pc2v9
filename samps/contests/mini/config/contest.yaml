@@ -35,6 +35,10 @@ default-validator: /home/judge/cdp/config/validefault {:infile} {:outfile} {:ans
 # Load data files into pc2 as SerializedFiles, not using CDP external files
 load-data-files: false
 
+# load sample files then load secret data files, default is true
+# load-sample-judges-data : false
+# load-sample-judges-data : true
+
 # judge's data path
 judge-config-path: /home/judge/cdp/config
 

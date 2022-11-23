@@ -64,6 +64,8 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
+    private static final String MINI_CONTEST_DIR = "mini";
+
     private static final String YYYY_MM_DD_FORMAT1 = "yyyy-MM-dd HH:mm";
 
     private String dateTimeFormat = "EEE MMM dd HH:mm:ss yyyy";
@@ -3784,5 +3786,24 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
         }
     }
-}
+    
+    public void testLoadSampleFiles() throws Exception {
 
+        IInternalContest contest = loadFullSampleContest(null, MINI_CONTEST_DIR);
+        assertNotNull(contest);
+
+        int totalTestCases = 0;
+
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+
+            totalTestCases += problem.getNumberTestCases();
+//            for (int i = 0; i < problem.getNumberTestCases(); i++) {
+//                System.out.println("debug "+problem.getDataFileName(i+1));
+//            }
+        }
+
+        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 10, totalTestCases);
+
+    }
+}

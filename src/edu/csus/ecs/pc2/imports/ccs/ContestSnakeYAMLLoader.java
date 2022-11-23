@@ -266,8 +266,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contestInformation.setCcsTestMode(ccsTestMode);
         contest.updateContestInformation(contestInformation);
     }
-    
-    
+
+    private void LoadSampleJudgesData(IInternalContest contest, boolean loadSampleFiles) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setLoadSampleJudgesData(loadSampleFiles);
+        contest.updateContestInformation(contestInformation);
+    }
+
     private void setStopOnFirstFailedTestCase(IInternalContest contest, boolean stopOnFirstFail) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setStopOnFirstFailedtestCase(stopOnFirstFail);
@@ -404,6 +409,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (ccsTestMode) {
             setCcsTestMode(contest, ccsTestMode);
         }
+        
+        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, true);
+        LoadSampleJudgesData(contest, loadSamples);
         
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
         setStopOnFirstFailedTestCase (contest, stopOnFirstFail);
@@ -2721,6 +2729,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
          * Data files are external so data files should not be loaded into problem data files.
          */
         boolean loadExternalFile = problem.isUsingExternalDataFiles();
+        
+        boolean loadSamples = contest.getContestInformation().isLoadSampleJudgesData();
+        
+        String sampleDataDirectory = dataFileBaseDirectory.replaceAll("secret$", "sample");
 
         String[] inputFileNames = getFileNames(dataFileBaseDirectory, ".in");
 
@@ -2740,6 +2752,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
             ArrayList<SerializedFile> dataFiles = new ArrayList<SerializedFile>();
             ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
+            
+            if (loadSamples) {
+                loadDataFiles(problem, dataFiles, answerFiles, sampleDataDirectory, loadExternalFile);
+            }
 
             for (int idx = 0; idx < inputFileNames.length; idx++) {
 
@@ -2797,6 +2813,31 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         validateCCSData(contest, problem);
 
         return problem;
+    }
+
+    protected void loadDataFiles(Problem problem, ArrayList<SerializedFile> dataFiles, ArrayList<SerializedFile> answerFiles, String sampleDataDirectory, boolean loadExternalFile) {
+        
+        String[] inputFileNames = getFileNames(sampleDataDirectory, ".in");
+        String[] answerFileNames = getFileNames(sampleDataDirectory, ".ans");
+
+        Arrays.sort(inputFileNames);
+        
+        for (int idx = 0; idx < inputFileNames.length; idx++) {
+            
+            problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
+
+            String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
+            
+            String dataFileName = sampleDataDirectory + File.separator + inputFileNames[idx];
+            String answerFileName = dataFileName.replaceAll(".in$", ".ans");
+            
+            checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + sampleDataDirectory);
+            checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + sampleDataDirectory);
+            
+            dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
+            answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
+        }
+
     }
 
     private void validateCCSData(IInternalContest contest, Problem problem) {
