@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.BufferedReader;
@@ -195,6 +195,143 @@ public class LoadAccounts {
         return account;
     }
     
+    
+    /**
+     * Create a new account or update an existing account given input values from load accounts file.
+     * 
+     * @param values
+     * @return
+     * @throws IllegalTSVFormatException
+     */
+    protected Account getAccountFromFields(String[] values) throws IllegalTSVFormatException {
+        String accountString = values[accountColumn];
+        String[] accountSplit = accountString.split("[0-9]+$");
+        String accountName = accountString.substring(0, accountSplit[0].length());
+        Type type = Type.valueOf(accountName.toUpperCase());
+        int clientNumber = Integer.parseInt(accountString.substring(accountSplit[0].length()));
+        String siteString = values[siteColumn];
+        ClientId clientId = new ClientId(Integer.parseInt(siteString), type, clientNumber);
+        Account existingAccount = existingAccountsMap.get(clientId);
+        if (existingAccount == null) {
+
+            // "Create" new account
+            int siteNumber = Integer.parseInt(siteString);
+
+            if (passwordColumn != -1 && values.length > passwordColumn) {
+                existingAccount = new Account(clientId, values[passwordColumn], siteNumber);
+            } else {
+                throw new IllegalTSVFormatException("Password required for new account for " + clientId);
+            }
+        }
+        
+        Account account = new Account(existingAccount.getClientId(), existingAccount.getPassword(), existingAccount.getClientId().getSiteNumber());
+        
+        account.clearListAndLoadPermissions(existingAccount.getPermissionList());
+        account.setGroupId(existingAccount.getGroupId());
+        account.setDisplayName(new String(existingAccount.getDisplayName()));
+        account.setAliasName(new String(existingAccount.getAliasName()));
+        account.setExternalId(new String(existingAccount.getExternalId()));
+        account.setExternalName(new String(existingAccount.getExternalName()));
+        account.setGroupId(existingAccount.getGroupId());
+        account.setLongSchoolName(new String(existingAccount.getLongSchoolName()));
+        account.setShortSchoolName(new String(existingAccount.getShortSchoolName()));
+
+        // now start updating fields
+        
+        if (passwordColumn != -1 && values.length > passwordColumn) {
+            account.setPassword(values[passwordColumn]);
+        }
+        if (displayNameColumn != -1 && values.length > displayNameColumn) {
+            account.setDisplayName(values[displayNameColumn]);
+        }
+        if (aliasColumn != -1 && values.length > aliasColumn) {
+            account.setAliasName(values[aliasColumn]);
+        }
+        if (externalIdColumn != -1 && values.length > externalIdColumn) {
+            account.setExternalId(values[externalIdColumn]);
+        }
+        if (longSchoolNameColumnn != -1 && values.length > longSchoolNameColumnn) {
+            account.setLongSchoolName(values[longSchoolNameColumnn]);
+        }
+        if (shortSchoolNameColumn != -1 && values.length > shortSchoolNameColumn) {
+            account.setShortSchoolName(values[shortSchoolNameColumn]);
+        }
+        if (countryCodeColumn != -1 && values.length > countryCodeColumn) {
+            account.setCountryCode(values[countryCodeColumn]);
+        }
+        if (teamNameColumn != -1 && values.length > teamNameColumn) {
+            account.setExternalName(values[teamNameColumn]);
+        }
+        
+        if (groups.size() > 0) {
+            if (groupColumn != -1 && values.length > groupColumn && values[groupColumn].length() > 0) {
+                if (groups.containsKey(values[groupColumn])) {
+                    account.setGroupId(groups.get(values[groupColumn]).getElementId());
+                }
+            }
+        }
+        // do not allow permission changes for root
+        if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
+            boolean newValue = Boolean.parseBoolean(values[permDisplayColumn]);
+            if (clientId.getClientType().equals(ClientType.Type.ADMINISTRATOR) && clientId.getClientNumber() == 1) {
+                if (account.getPermissionList().isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) != newValue) {
+                    String message = "Attempt to change root permission DISPLAY_ON_SCOREBOARD denied.";
+                    StaticLog.warning(message);
+                    System.out.println("WARNING: "+message);
+                }
+            } else {
+                if (newValue) {
+                    account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+                } else {
+                    account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+                }
+            }
+        }
+        if (permLoginColumn != -1 && values.length > permLoginColumn && values[permLoginColumn].length() > 0) {
+            boolean newValue = Boolean.parseBoolean(values[permLoginColumn]);
+            if (clientId.getClientType().equals(ClientType.Type.ADMINISTRATOR) && clientId.getClientNumber() == 1) {
+                if (account.getPermissionList().isAllowed(Permission.Type.LOGIN) != newValue) {
+                    String message = "Attempt to change root permission LOGIN denied.";
+                    StaticLog.warning(message);
+                    System.out.println("WARNING: "+message);
+                }
+            } else {
+                if (Boolean.parseBoolean(values[permLoginColumn])) {
+                    account.addPermission(Permission.Type.LOGIN);
+                } else {
+                    account.removePermission(Permission.Type.LOGIN);
+                }
+            }
+        }
+        if (permPasswordColumn != -1 && values.length > permPasswordColumn && values[permPasswordColumn].length() > 0) {
+            Permission.Type perm = Permission.Type.CHANGE_PASSWORD;
+            boolean newValue = Boolean.parseBoolean(values[permPasswordColumn]);
+            if (clientId.getClientType().equals(ClientType.Type.ADMINISTRATOR) && clientId.getClientNumber() == 1) {
+                if (account.getPermissionList().isAllowed(perm) != newValue) {
+                    String message = "Attempt to change root permission "+perm+" denied.";
+                    StaticLog.warning(message);
+                    System.out.println("WARNING: "+message);
+                }
+            } else {
+                if (Boolean.parseBoolean(values[permPasswordColumn])) {
+                    account.addPermission(perm);
+                } else {
+                    account.removePermission(perm);
+                }
+            }
+        }
+        if (scoreAdjustmentColumn != -1 && values.length > scoreAdjustmentColumn && values[scoreAdjustmentColumn].length() > 0) {
+            try {
+                int newValue = Integer.parseInt(values[scoreAdjustmentColumn]);
+                account.setScoringAdjustment(newValue);
+            } catch (NumberFormatException e) {
+                String message = e.getMessage();
+                StaticLog.warning(message);
+                System.out.println("WARNING: " + message);
+            }
+        }
+        return account;
+    }
     /**
      * Returns a list of accounts updated from the input load accounts file.
      * 
@@ -396,5 +533,173 @@ public class LoadAccounts {
             contest.updateAccounts(updateAccounts);
             contest.storeConfiguration(StaticLog.getLog());
         }
+    }
+    
+    
+    
+    /**
+     * Create a list of updated accounts, if account in TSV file does not exist will create a new Account.
+     * 
+     * Intention is a list of all accounts in the TSV files that need to be updated or added.
+     * 
+     * File must have a header of field names.  The fields can appear in any order.
+     * 
+     * Reads TSV file, updates existing accounts in model, returns only a list
+     * of accounts that should be updated.
+     * 
+     * <P>
+     * 
+     * All accounts that are specified in the tsv file must exist, if an account
+     * does not exist then a IllegalTSVFormatException will be thrown.
+     * 
+     * <P>
+     * 
+     * 
+     * 1st line should contain the column headers.   Columns can appear in any order.
+     * Supported column headers are:
+     * <pre>
+     * account (required)
+     * alias
+     * displayname
+     * group (name)
+     * password
+     * permdisplay
+     * permlogin
+     * site (required)
+
+     * </pre>
+     * 
+     * @param filename
+     * @param existingAccounts 
+     * @param groupList
+     * @return an array of accounts
+     * @throws Exception
+     */
+    public Account[] fromTSVFileWithNewAccounts(String filename, Account[] existingAccounts, Group[] groupList) throws Exception  {
+        
+        /**
+         * Output accounts
+         */
+        Map<ClientId, Account> accountMap = new HashMap<ClientId, Account>();
+        
+        if (existingAccounts != null && existingAccounts.length > 0) {
+            for (int i = 0; i < existingAccounts.length; i++) {
+                existingAccountsMap.put(existingAccounts[i].getClientId(), existingAccounts[i]);
+            }
+        }
+        groups.clear();
+        for (Group group : groupList) {
+            groups.put(group.toString(),group);
+        }
+        int lineCount = 0;
+        String[] columns;
+        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF8"));
+        String line = in.readLine();
+        while (line != null && line.startsWith("#")) {
+            line = in.readLine();
+            lineCount++;
+        }
+        lineCount++;
+        if (line != null) {
+            columns = TabSeparatedValueParser.parseLine(line);
+            siteColumn = -1;
+            accountColumn = -1;
+            displayNameColumn = -1;
+            passwordColumn = -1;
+            groupColumn = -1;
+            aliasColumn = -1;
+            externalIdColumn = -1;
+            permDisplayColumn = -1;
+            permLoginColumn = -1;
+            permPasswordColumn = -1;
+            scoreAdjustmentColumn = -1;
+            for (int i = 0; i < columns.length; i++) {
+                
+                if (Constants.SITE_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    siteColumn = i;
+                }
+                if (Constants.ACCOUNT_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    accountColumn = i;
+                }
+                if (Constants.DISPLAYNAME_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    displayNameColumn = i;
+                }
+                if (Constants.PASSWORD_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    passwordColumn = i;
+                }
+                if (Constants.GROUP_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    groupColumn = i;
+                }
+                if (Constants.PERMDISPLAY_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    permDisplayColumn = i;
+                }
+                if (Constants.PERMLOGIN_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    permLoginColumn = i;
+                }
+                if (Constants.EXTERNALID_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    externalIdColumn = i;
+                }
+                if (Constants.ALIAS_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    aliasColumn = i;
+                }
+                if (Constants.PERMPASSWORD_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    permPasswordColumn = i;
+                }
+                if (Constants.LONGSCHOOLNAME_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    longSchoolNameColumnn = i;
+                }
+                if (Constants.SHORTSCHOOLNAME_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    shortSchoolNameColumn = i;
+                }
+                if (Constants.COUNTRY_CODE_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    countryCodeColumn = i;
+                }
+                if (Constants.TEAMNAME_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    teamNameColumn = i;
+                }
+                if (Constants.SCORING_ADJUSTMENT_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
+                    scoreAdjustmentColumn = i;
+                }
+            }
+            if (accountColumn == -1 || siteColumn == -1) {
+                String msg = "1st line should be the row headers (account and site are required)";
+                in.close();
+                throw new IllegalTSVFormatException(msg);
+            }
+        }
+        line = in.readLine();
+        lineCount++;
+        while (line != null) {
+            try {
+                // skip comments & line blanks
+                if (line.startsWith("#") || line.equals("")) {
+                    line = in.readLine();
+                    lineCount++;
+                    continue;
+                }
+                String[] values = TabSeparatedValueParser.parseLine(line);
+
+                Account account = getAccountFromFields(values);
+                
+                
+                accountMap.put(account.getClientId(), account);
+                
+            } catch (IllegalTSVFormatException e2) {
+                // already a properly formatted exception
+                in.close();
+                throw e2;
+            } catch (Exception e) {
+                String msg = "Error " + filename + ":" + lineCount + ": " + e.getMessage();
+                Exception sendException = new Exception(msg);
+                sendException.setStackTrace(e.getStackTrace());
+                in.close();
+                throw sendException;
+            }
+            line = in.readLine();
+            lineCount++;
+        }
+        in.close();
+        in = null;
+        return accountMap.values().toArray(new Account[accountMap.size()]);
     }
 }
