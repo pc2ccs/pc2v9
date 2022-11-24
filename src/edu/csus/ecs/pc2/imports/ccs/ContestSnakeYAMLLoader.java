@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.MailMergeFile;
+import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
@@ -425,6 +426,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // enable shadow mode
         boolean shadowMode = fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
         contestInformation.setShadowMode(shadowMode);
+        
+        String altAccountsLoadFilename = fetchValue(content, LOAD_ACCOUNTS_FILE_KEY, null);
+        contestInformation.setOverrideLoadAccountsFilename(altAccountsLoadFilename);
         
         // base URL for CCS REST service
         String  ccsUrl= fetchValue(content, CCS_URL_KEY, contestInformation.getPrimaryCCS_URL());
@@ -3150,10 +3154,60 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     StaticLog.info(result);
                 }
             }
+            
+            // Load  accounts load file
 
+            String loadAccountsFile = cdpConfigDirectory + File.separator + Constants.ACCOUNTS_LOAD_FILENAME;
+            String altFilename = contest.getContestInformation().getOverrideLoadAccountsFilename();
+            if (altFilename != null) {
+                loadAccountsFile = altFilename;
+
+                /**
+                 * If altfilena is not a full/partal path, check whether alt file is under config/
+                 */
+                if (!Utilities.fileExists(altFilename)) {
+                    String altFileInConfig = cdpConfigDirectory + File.separator + altFilename;
+                    if (Utilities.fileExists(altFileInConfig)) {
+                        loadAccountsFile = altFileInConfig;
+                    }
+                }
+            }
+
+            loadAccountLoadFile(contest, loadAccountsFile);
         }
 
         return contest;
+    }
+
+    protected void loadAccountLoadFile(IInternalContest contest, String loadfilename) throws Exception {
+        LoadAccounts loader = new LoadAccounts();
+
+        Vector<Account> teams = contest.getAccounts(ClientType.Type.TEAM);
+        Account[] teamAccounts = (Account[]) teams.toArray(new Account[teams.size()]);
+
+        Group[] groups = contest.getGroups();
+
+        Account[] accList = loader.fromTSVFileWithNewAccounts(loadfilename, teamAccounts, groups);
+
+        List<Account> newAccounts = new ArrayList<Account>();
+        List<Account> updatedAccount = new ArrayList<Account>();
+
+        for (Account account : accList) {
+            if (null != contest.getAccount(account.getClientId())) {
+                updatedAccount.add(account);
+            } else {
+                newAccounts.add(account);
+            }
+        }
+
+        for (Account account : newAccounts) {
+            contest.addAccount(account);
+        }
+        
+        for (Account account : updatedAccount) {
+            contest.updateAccount(account);
+        }
+
     }
 
 }

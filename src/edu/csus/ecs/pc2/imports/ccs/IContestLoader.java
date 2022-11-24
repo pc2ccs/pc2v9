@@ -195,6 +195,8 @@ public interface IContestLoader {
     
     String ALLOW_MULTIPLE_TEAM_LOGINS_KEY = "allow-multiple-team-logins";
     
+    String LOAD_ACCOUNTS_FILE_KEY = "load-accounts-file";
+
     /**
      * 
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, IInternalContest, edu.csus.ecs.pc2.core.model.Account)

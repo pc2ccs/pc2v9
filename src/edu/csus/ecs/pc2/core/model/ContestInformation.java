@@ -171,6 +171,8 @@ public class ContestInformation implements Serializable{
      */
     private boolean stopOnFirstFailedtestCase = false;
 
+    private String overrideLoadAccountsFilename = null;
+    
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
      * This value is null if no scheduled start time has been set,
@@ -770,5 +772,13 @@ public class ContestInformation implements Serializable{
 
     public void setTeamScoreboardDisplayFormat(String teamScoreboardDisplayFormat) {
         this.teamScoreboardDisplayFormat = teamScoreboardDisplayFormat;
+    }
+    
+    public String getOverrideLoadAccountsFilename() {
+        return overrideLoadAccountsFilename;
+    }
+    
+    public void setOverrideLoadAccountsFilename(String overrideLoadAccountsFilename) {
+        this.overrideLoadAccountsFilename = overrideLoadAccountsFilename;
     }
 }
