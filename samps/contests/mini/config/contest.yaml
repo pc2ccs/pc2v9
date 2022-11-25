@@ -35,6 +35,14 @@ default-validator: /home/judge/cdp/config/validefault {:infile} {:outfile} {:ans
 # Load data files into pc2 as SerializedFiles, not using CDP external files
 load-data-files: false
 
+# Loader will automatically load accounts file CDPDIRconfig/accounts_load.tsv
+
+# To load a different load accounts file use key load-accounts-file 
+# load file fron ocnfig/ dir 
+# load-accounts-file : 'mini.load.accounts.up.tsv'
+# load file fron /home/ubuntu/current/config
+# load-accounts-file : '/home/ubuntu/current/config/mini.load.accounts.up.tsv'
+
 # judge's data path
 judge-config-path: /home/judge/cdp/config
 
