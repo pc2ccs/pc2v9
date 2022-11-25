@@ -42,6 +42,8 @@ load-data-files: false
 # load-accounts-file : 'mini.load.accounts.up.tsv'
 # load file fron /home/ubuntu/current/config
 # load-accounts-file : '/home/ubuntu/current/config/mini.load.accounts.up.tsv'
+# with new accounts too
+# load-accounts-file : mini.load.accounts02.up.tsv
 
 # judge's data path
 judge-config-path: /home/judge/cdp/config
