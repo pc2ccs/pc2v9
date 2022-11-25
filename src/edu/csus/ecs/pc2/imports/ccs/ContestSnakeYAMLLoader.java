@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -3144,18 +3145,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 Site site = createFirstSite(contest.getSiteNumber(), "localhost", Constants.DEFAULT_PC2_PORT);
                 contest.addSite(site);
             }
-            
+
             if (contest.getJudgements().length == 0) {
                 // judgements not loaded from yaml
-                
+
                 String rejectIniFile = cdpConfigDirectory + File.separator + Constants.JUDGEMENT_INIT_FILENAME;
-                if (Utilities.fileExists(rejectIniFile)){
+                if (Utilities.fileExists(rejectIniFile)) {
                     String result = JudgementLoader.loadJudgements(contest, false, cdpConfigDirectory.getAbsolutePath());
                     StaticLog.info(result);
                 }
             }
-            
-            // Load  accounts load file
+
+            // Load accounts load file
 
             String loadAccountsFile = cdpConfigDirectory + File.separator + Constants.ACCOUNTS_LOAD_FILENAME;
             String altFilename = contest.getContestInformation().getOverrideLoadAccountsFilename();
@@ -3171,9 +3172,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                         loadAccountsFile = altFileInConfig;
                     }
                 }
+
+                if (!Utilities.fileExists(loadAccountsFile)) {
+                    // if alternate file specifed - bu cannot find file - fatal error.
+
+                    StaticLog.getLog().log(Level.SEVERE, "Missing accounts load file at " + altFilename);
+                    throw new FileNotFoundException(altFilename);
+                }
             }
 
-            loadAccountLoadFile(contest, loadAccountsFile);
+            if (Utilities.fileExists(loadAccountsFile)) {
+                StaticLog.info("Loading from No accounts load file " + loadAccountsFile);
+                loadAccountLoadFile(contest, loadAccountsFile);
+            } else {
+                StaticLog.getLog().log(Level.FINEST, "No accounts load file found at " + loadAccountsFile + ", ok");
+            }
         }
 
         return contest;
@@ -3207,6 +3220,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         for (Account account : updatedAccount) {
             contest.updateAccount(account);
         }
+        
+        System.out.println("Update " + updatedAccount.size() + " accounts, add " + newAccounts.size() + " accounts from " + loadfilename);
+        StaticLog.info("Update " + updatedAccount.size() + " accounts, add " + newAccounts.size() + " accounts from " + loadfilename);
 
     }
 
