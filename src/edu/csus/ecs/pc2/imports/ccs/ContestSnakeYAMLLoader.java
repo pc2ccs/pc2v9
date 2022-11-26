@@ -2749,6 +2749,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (inputFileNames.length == answerFileNames.length) {
 
             Arrays.sort(inputFileNames);
+            Arrays.sort(answerFileNames);
 
             ArrayList<SerializedFile> dataFiles = new ArrayList<SerializedFile>();
             ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
@@ -2826,6 +2827,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (inputFileNames.length == answerFileNames.length) {
 
             Arrays.sort(inputFileNames);
+            Arrays.sort(answerFileNames);
 
             for (int idx = 0; idx < inputFileNames.length; idx++) {
 
