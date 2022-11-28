@@ -3088,9 +3088,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         File cdpConfigDirectory = null;
 
         if (entry.isDirectory()) {
-
-            // found a directory
-            cdpConfigDirectory = new File(entry.getAbsoluteFile() + File.separator + CONFIG_DIRNAME);
+            
+            String contestYamlFile = entry.getPath() + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+            if (new File(contestYamlFile).exists()) {
+                // if contest.yaml in current directory, then this is the equiv of config directory.
+                return entry;
+            } else {
+                // found a CDP base directory
+                cdpConfigDirectory = new File(entry.getAbsoluteFile() + File.separator + CONFIG_DIRNAME);
+            }
 
         } else if (entry.isFile()) {
 
