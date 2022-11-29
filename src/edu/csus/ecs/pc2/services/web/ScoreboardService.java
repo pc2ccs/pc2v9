@@ -1,8 +1,6 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.web;
 
-import java.io.IOException;
-
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -13,18 +11,16 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
-import javax.xml.bind.JAXBException;
+import javax.ws.rs.core.Response.Status;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.exports.ccs.StandingsJSON2016;
-import edu.csus.ecs.pc2.services.core.ScoreboardJson;
+import edu.csus.ecs.pc2.exports.ccs.ContestAPIStandingsJSON;
 /**
  * Webservice to handle scoreboard requests
  * 
@@ -55,21 +51,15 @@ public class ScoreboardService implements Feature {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getScoreboard(@Context HttpServletRequest servletRequest, @Context SecurityContext sc) {
 
+        ContestAPIStandingsJSON standings = new ContestAPIStandingsJSON();
+
         String jsonScoreboard;
         try {
             ContestTime contestTime = contest.getContestTime();
             // verify contest has started or user is an admin
             if (contestTime.getElapsedMS() > 0 || sc.isUserInRole("admin")) {
                 //ok to return scoreboard
-
-                try {
-                    ScoreboardJson sbJsonObject = new ScoreboardJson();                    
-                    jsonScoreboard = sbJsonObject.createJSON(contest, controller.getLog());
-                } catch (IllegalContestState | JAXBException | IOException e) {
-                    controller.getLog().log(Log.WARNING,"Exception creating PC2 scoreboard JSON: " + e.getMessage(), e);
-                    return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-                }
-                
+                jsonScoreboard = standings.createJSON(contest, controller, sc.isUserInRole("public"), servletRequest, sc);
             } else {
                 // do not show (return) the scoreboard if the contest has not
                 // been started and the requester is not an admin)
@@ -77,7 +67,7 @@ public class ScoreboardService implements Feature {
                 return Response.status(Status.FORBIDDEN).build();
             }
 
-        } catch (Exception e) {
+        } catch (IllegalContestState e) {
             controller.getLog().log(Log.WARNING, "ScoreboardService: problem creating scoreboard JSON:  " + e, e);
             e.printStackTrace();
             //return HTTP error response code
