@@ -533,7 +533,8 @@ public class JSONTool {
         ObjectNode element = mapper.createObjectNode();
         element.put("id", run.getElementId().toString());
         element.put("judgement_id", run.getRunElementId().toString());
-        element.put("ordinal", ordinal);
+        // CLICS spec says this has to start at 1 not 0 (ACPC 2022 DJ Shadow)
+        element.put("ordinal", ordinal+1);
         element.put("judgement_type_id", getJudgementType(model.getJudgement(run.getJudgementId())));
         // SOMEDAY get the time from the server instead of the judge
         element.put("time", Utilities.getIso8601formatterWithMS().format(run.getDate().getTime()));
