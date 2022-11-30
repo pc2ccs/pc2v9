@@ -534,7 +534,10 @@ public class JSONTool {
         element.put("id", run.getElementId().toString());
         element.put("judgement_id", run.getRunElementId().toString());
         // CLICS spec says this has to start at 1 not 0 (ACPC 2022 DJ Shadow)
-        element.put("ordinal", ordinal+1);
+        // The RunTestCase already has a 1-based test case number, we can use
+        // that since it really exactly what we want here.  It is always in the
+        // range 1 through #_of_test_cases.
+        element.put("ordinal", run.getTestNumber());
         element.put("judgement_type_id", getJudgementType(model.getJudgement(run.getJudgementId())));
         // SOMEDAY get the time from the server instead of the judge
         element.put("time", Utilities.getIso8601formatterWithMS().format(run.getDate().getTime()));
