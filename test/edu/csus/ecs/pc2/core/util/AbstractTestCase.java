@@ -47,6 +47,7 @@ import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.LogFormatter;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -1566,4 +1567,11 @@ public class AbstractTestCase extends TestCase {
         assertFalse("Expected for  " + account + " Permission " + type, account.isAllowed(type));
     }
     
+    public void ensureStaticLog() {
+        
+        if (StaticLog.getLog() == null) {
+            String testDirectory = getOutputDataDirectory();
+            StaticLog.setLog(new Log(testDirectory, "testPrintreport.log"));
+        }
+    }
 }

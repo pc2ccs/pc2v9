@@ -23,6 +23,8 @@ import edu.csus.ecs.pc2.core.InternalControllerSpecial;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
@@ -2045,12 +2047,21 @@ public class SampleContest {
 
         try {
             String cdpDir = getTestSampleContestDirectory(sampleName);
+            ensureStaticLog();
             loader.initializeContest(contest, new File( cdpDir));
             return contest;
 
         } catch (Exception e) {
             e.printStackTrace(System.err);
             throw e;
+        }
+    }
+    
+    public void ensureStaticLog() {
+        
+        if (StaticLog.getLog() == null) {
+            String testDirectory = getOutputDataDirectory();
+            StaticLog.setLog(new Log(testDirectory, "testPrintreport.log"));
         }
     }
     

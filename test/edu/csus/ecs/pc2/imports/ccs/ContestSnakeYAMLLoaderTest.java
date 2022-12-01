@@ -2230,7 +2230,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         String entryLocation = "ccs1";
         
         InternalContest contest = new InternalContest();
-        
+        ensureStaticLog();
+
         loader.initializeContest(contest, new File(entryLocation));
         
 //        System.out.println("Loaded CDP/config values from " + entryLocation);
