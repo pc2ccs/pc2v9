@@ -2060,7 +2060,7 @@ public class SampleContest {
     public void ensureStaticLog() {
         
         if (StaticLog.getLog() == null) {
-            String testDirectory = getOutputDataDirectory();
+            String testDirectory = "logs";
             StaticLog.setLog(new Log(testDirectory, "testPrintreport.log"));
         }
     }
