@@ -1093,7 +1093,15 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setLetter(getProblemLetterTextField().getText());
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
         checkProblem.setShortName(getShortNameTextfield().getText());
-        checkProblem.setMaxOutputFileSizeKB(getLongValue(getMaxOutputTextField().getText()));
+        
+        //set checkProblem's max output to either the current problem's value (which is in KB), 
+        // or if that's zero, set it to the global value (which is in BYTES and must be converted to KB)
+        long maxOutputKB = getLongValue(getMaxOutputTextField().getText());
+        if (maxOutputKB == 0) {
+            //no per-problem value; get global value, which is in BYTES so convert it to KB
+            maxOutputKB = getContest().getContestInformation().getMaxOutputSizeInBytes() / 1024L;
+        }
+        checkProblem.setMaxOutputSizeKB(maxOutputKB);
 
         if (!checkProblem.isValidShortName()) {
             throw new InvalidFieldValue("Invalid problem short name");
@@ -1752,6 +1760,32 @@ public class EditProblemPane extends JPanePlugin {
             showMessage("Enter a problem name (\"General\" tab)");
             return false;
         }
+        
+        // verify that the max output value is a non-negative number
+        try {
+            long maxOutput = Long.parseLong(getMaxOutputTextField().getText().trim());
+            if (maxOutput < 0) {
+                showMessage("Maximum output value must be non-negative");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showMessage("Maximum output value must be a number");
+            return false;
+        }
+        
+        // verify that the time limit is a positive number (code added as "continuous improvement")
+        try {
+            int timeLimit = Integer.parseInt(getTimeOutTextField().getText().trim());
+            if (timeLimit <= 0) {
+                showMessage("Time limit must be a positive integer");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showMessage("Time limit must be a number");
+            return false;
+        }
+        
+        
 
         // verify that if the PC2 Validator is selected, an option has been chosen
         if (getUsePC2ValidatorRadioButton().isSelected()) {
@@ -2347,7 +2381,7 @@ public class EditProblemPane extends JPanePlugin {
 
         //initialize problem limit fields
         getTimeOutTextField().setText(inProblem.getTimeOutInSeconds() + "");
-        getMaxOutputTextField().setText(inProblem.getMaxOutputFileSizeKB() + "");
+        getMaxOutputTextField().setText(inProblem.getMaxOutputSizeKB() + "");
         
         // input data fields:
         problemRequiresDataCheckBox.setSelected(inProblem.getDataFileName() != null);
