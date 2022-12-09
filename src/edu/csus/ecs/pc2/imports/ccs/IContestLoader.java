@@ -250,9 +250,14 @@ public interface IContestLoader {
 
     Problem[] getProblems(String[] contents, int defaultTimeOut);
 
+    Problem[] getProblems(String[] contents, int defaultTimeOut, long defaultMaxOutputSizeInBytes);
+
     Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine);
 
     Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
+            boolean manualReviewOverride);
+
+    Problem[] getProblems(String[] yamlLines, int seconds, long maxOutputSizeInBytes, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
             boolean manualReviewOverride);
 
     Problem[] getProblemsFromLetters(Problem[] contestProblems, String string);
