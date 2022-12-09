@@ -572,7 +572,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             if (maxOutputSize instanceof Integer) {
                 int maxSizeInK = ((Integer) maxOutputSize).intValue();
                 if (maxSizeInK > 0) {
-                    setMaxOutputSize(contest, maxSizeInK * 1000);
+                    setMaxOutputSize(contest, maxSizeInK * 1024);
                 } else {
                     throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must be > 0 ", null, contestFileName);
                 }
@@ -622,7 +622,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             manualReviewOverride = fetchBooleanValue(content, MANUAL_REVIEW_KEY, false);
         }
 
-        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
+        //get the current default global output size for the contest so getProblems() can use it if no
+        // Problem-specific output limit is defined
+        Long defaultMaxOutputBytes = new Long(contest.getContestInformation().getMaxOutputSizeInBytes());
+        
+        Problem[] problems = getProblems(yamlLines, defaultTimeout, defaultMaxOutputBytes, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
 
         if (loadProblemDataFiles) {
             for (Problem problem : problems) {
@@ -906,9 +910,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
 
-    private void setMaxOutputSize(IInternalContest contest, int maxFileSize) {
+    private void setMaxOutputSize(IInternalContest contest, int maxOutputBytes) {
         ContestInformation contestInformation = contest.getContestInformation();
-        contestInformation.setMaxFileSize(maxFileSize);
+        contestInformation.setMaxOutputSizeInBytes(maxOutputBytes);
         contest.updateContestInformation(contestInformation);
     }
 
@@ -1221,6 +1225,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Integer value = null;
         if (map != null) {
             value = (Integer) map.get(key);
+        }
+        if (value != null) {
+            try {
+                return value;
+            } catch (Exception e) {
+                syntaxError("Expecting number after " + key + ": field, found '" + value + "'");
+            }
+        }
+        return defaultValue;
+    }
+
+    private Long fetchLongValue(Map<String, Object> map, String key, long defaultValue) {
+        Long value = null;
+        if (map != null) {
+            value = (Long) map.get(key);
         }
         if (value != null) {
             try {
@@ -1780,7 +1799,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
+    public Problem[] getProblems(String[] yamlLines, int seconds, long maxOutputBytes, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
             boolean manualReviewOverride) {
 
         Vector<Problem> problemList = new Vector<Problem>();
@@ -1838,6 +1857,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // contains a "TIMEOUT_KEY", use the timeout value from the problem.yaml; otherwise use the passed-in default.
                 int actSeconds = fetchIntValue(problemMap, TIMEOUT_KEY, seconds);
                 problem.setTimeOutInSeconds(actSeconds);
+
+                //set problem output limit.  If the problem.yaml file for the current problem (codified in the "problemMap")
+                // contains an "OUTPUT" key, use the timeout value from the problem.yaml; otherwise use the passed-in default.
+                Long actualMaxOutputBytes = fetchLongValue(problemMap, MAX_OUTPUT_SIZE_K_KEY, maxOutputBytes);
+                problem.setMaxOutputSizeKB(actualMaxOutputBytes/1024L);
+                
+                //TODO:  add code to check for the CLICS-compliant key "output:" in the "limits: section
+                // of problem.yaml if the PC2 "MAX_OUTPUT_SIZE_K_KEY doesn't exist
 
                 problem.setShowCompareWindow(false);
 
@@ -2285,17 +2312,27 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @Override
     public Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine) {
-        return getProblems(contents, defaultTimeOut, loadDataFileContents, defaultValidatorCommandLine, null, false, false);
+        return getProblems(contents, defaultTimeOut, Constants.DEFAULT_MAX_OUTPUT_SIZE_K*1024, loadDataFileContents, defaultValidatorCommandLine, null, false, false);
     }
 
     @Override
     public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String directoryName) {
         return fromYaml(contest, yamlLines, directoryName, false);
     }
+    
+    @Override
+    public Problem[] getProblems(String[] yamlLines, int defaultTimeOut) {
+        return getProblems(yamlLines, defaultTimeOut, Constants.DEFAULT_MAX_OUTPUT_SIZE_K*1024);
+    }
+    
+    @Override
+    public Problem[] getProblems(String[] yamlLines, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator, boolean manualReviewOverride) {
+        return getProblems(yamlLines, defaultTimeOut, Constants.DEFAULT_MAX_OUTPUT_SIZE_K*1024, loadDataFileContents, defaultValidatorCommand, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
+    }
 
     @Override
-    public Problem[] getProblems(String[] contents, int defaultTimeOut) {
-        return getProblems(contents, defaultTimeOut, true, null, null, false, false);
+    public Problem[] getProblems(String[] contents, int defaultTimeOut, long defaultMaxOutputSize) {
+        return getProblems(contents, defaultTimeOut, defaultMaxOutputSize, true, null, null, false, false);
     }
 
     @Override
