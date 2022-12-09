@@ -2869,7 +2869,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         ContestInformation info = contest.getContestInformation();
         assertNotNull("Expecting ContestInformation ", info);
-        assertEquals("Expected max file size ",128000,info.getMaxFileSize());
+        assertEquals("Expected max file size ",128000,info.getMaxOutputSizeInBytes());
     }
 
     

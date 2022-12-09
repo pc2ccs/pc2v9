@@ -38,11 +38,11 @@ public class ContestInformationTest extends TestCase {
 
         assertTrue("Same title", contestInformation1.isSameAs(contestInformation2));
 
-        contestInformation1.setMaxFileSize(4000);
+        contestInformation1.setMaxOutputSizeInBytes(4000);
 
         assertFalse("Diff max file size", contestInformation1.isSameAs(contestInformation2));
 
-        contestInformation2.setMaxFileSize(4000);
+        contestInformation2.setMaxOutputSizeInBytes(4000);
 
         assertTrue("Same max file size", contestInformation1.isSameAs(contestInformation2));
         

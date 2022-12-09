@@ -2356,13 +2356,13 @@ public class Executable extends Plugin implements IExecutable {
             
             //check if the problem has its own (problem-specific) output file size limit, which is noted
             //  by having a limit value in the problem which is greater than zero
-            long problemLimit = problem.getMaxOutputFileSizeKB();
+            long problemLimit = problem.getMaxOutputSizeKB();
             if (problemLimit > 0) {
                 //problem has its own limit; convert from KB to BYTES and return that
-                return problemLimit * 1000;
+                return problemLimit * 1024;
             } else {
                 //problem doesn't have its own limit; return the global (contest-wide) value
-                return contest.getContestInformation().getMaxFileSize();
+                return contest.getContestInformation().getMaxOutputSizeInBytes();
             }
                 
         } else {

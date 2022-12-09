@@ -189,6 +189,6 @@ public class ProgramRunner {
      * @return
      */
     private long getMaxFileSize() {
-        return contest.getContestInformation().getMaxFileSize();
+        return contest.getContestInformation().getMaxOutputSizeInBytes();
     }
 }
