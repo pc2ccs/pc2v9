@@ -98,7 +98,7 @@ public class Problem implements IElementObject {
      * Note that a value of zero indicates that this problem does not have its own
      * problem-specific limit and that the global (contest-wide) limit should be used instead.
      */
-    private long maxOutputFileSizeKB = DEFAULT_MAX_OUTPUT_FILE_SIZE_KB ;
+    private long maxOutputSizeKB = DEFAULT_MAX_OUTPUT_FILE_SIZE_KB ;
 
     /**
      * This enum defines the types of Output Validators which a Problem can have.
@@ -631,8 +631,8 @@ public class Problem implements IElementObject {
      * 
      * @return the problem-specific maximum allowed output size limit in KB.
      */
-    public long getMaxOutputFileSizeKB() {
-        return maxOutputFileSizeKB;
+    public long getMaxOutputSizeKB() {
+        return maxOutputSizeKB;
     }
 
     /**
@@ -640,10 +640,10 @@ public class Problem implements IElementObject {
      * A value of zero (which is the default) indicates that no problem-specific output size limit
      * has been set and that the global value (as returned by {@link IInternalContest#getContestInformation()}) should be used.  
      * 
-     * @param maxOutputFileSizeKB the maximum output size, in KB, to set for this problem.
+     * @param maxOutputSizeKB the maximum output size, in KB, to set for this problem.
      */
-    public void setMaxOutputFileSizeKB(long maxOutputFileSizeKB) {
-        this.maxOutputFileSizeKB = maxOutputFileSizeKB;
+    public void setMaxOutputSizeKB(long maxOutputSizeKB) {
+        this.maxOutputSizeKB = maxOutputSizeKB;
     }
 
     /**
@@ -1198,7 +1198,7 @@ public class Problem implements IElementObject {
                 return false;
             }
             
-            if (! (this.getMaxOutputFileSizeKB() == otherProblem.getMaxOutputFileSizeKB()) ) {
+            if (! (this.getMaxOutputSizeKB() == otherProblem.getMaxOutputSizeKB()) ) {
                 return false;
             }
             
