@@ -74,6 +74,9 @@ public final class Constants {
      * Default contest length.
      */
     public static final long DEFAULT_CONTEST_LENGTH_SECONDS = 18000; // 5 * 60 * 60
+    
+    
+    public static final int DEFAULT_MAX_OUTPUT_SIZE_K = 512;
 
     /**
      * PC<sup>2</sup> Validator Program Name.
