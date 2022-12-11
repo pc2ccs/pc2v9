@@ -88,6 +88,11 @@ public class ProblemTest extends AbstractTestCase {
         assertFalse("Is not same as, setTimeOutInSeconds 1 ", p2.isSameAs(p1));
 
         p2 = getProblemAnew();
+        p2.setMaxOutputSizeKB(10);
+        assertFalse("Is not same as, setMaxOutputSizeKB 10 ", p1.isSameAs(p2));
+        assertFalse("Is not same as, setMaxOutputSizeKB 10 ", p2.isSameAs(p1));
+
+        p2 = getProblemAnew();
         p2.setDataFileName(null);
         checkString("setDataFileName null", p1.getDataFileName(), p2.getDataFileName(), p1, p2);
 
