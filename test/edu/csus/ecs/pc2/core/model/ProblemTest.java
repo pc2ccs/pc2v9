@@ -272,7 +272,14 @@ public class ProblemTest extends AbstractTestCase {
 
     }
     
-    /**
+    public void testDefaultMaxOutputKB() throws Exception {
+
+        Problem problem = new Problem("Bar");
+
+        assertEquals("Max output", Problem.DEFAULT_MAX_OUTPUT_FILE_SIZE_KB, problem.getMaxOutputSizeKB());
+    }
+    
+   /**
      * Test isSameas for balloon color and rgb.
      * 
      * @throws Exception
