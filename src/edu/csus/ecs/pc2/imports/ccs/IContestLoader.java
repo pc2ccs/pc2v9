@@ -62,6 +62,12 @@ public interface IContestLoader {
     
     String MAX_OUTPUT_SIZE_K_KEY = "max-output-size-K";
     
+    String CLICS_MAX_OUTPUT_KEY = "output";
+    
+    String CLICS_TIME_MULTIPLIER_KEY = "time_multiplier";
+    
+    String CLICS_TIME_SAFETY_MARGIN_KEY = "time_safety_margin";
+    
     final String OUTPUT_PRIVATE_SCORE_DIR_KEY = "output-private-score-dir";
 
     final String OUTPUT_PUBLIC_SCORE_DIR_KEY = "output-public-score-dir";
