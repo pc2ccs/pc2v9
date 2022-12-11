@@ -972,7 +972,7 @@ public class ContestInformationPane extends JPanePlugin {
         //fill in additional field values
         String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();
         long maximumFileSize = Long.parseLong(maxFileSizeString);
-        newContestInformation.setMaxOutputSizeInBytes(maximumFileSize * 1000);
+        newContestInformation.setMaxOutputSizeInBytes(maximumFileSize * 1024);
         newContestInformation.setAllowMultipleLoginsPerTeam(getAllowMultipleTeamLoginsCheckbox().isSelected());
         newContestInformation.setTeamScoreboardDisplayFormat(getTeamScoreboardDisplayFormatTextfield().getText());
 
@@ -1050,7 +1050,7 @@ public class ContestInformationPane extends JPanePlugin {
                 getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
                 
-                getMaxOutputSizeInKTextField().setText((contestInformation.getMaxOutputSizeInBytes() / 1000) + "");
+                getMaxOutputSizeInKTextField().setText((contestInformation.getMaxOutputSizeInBytes() / 1024) + "");
                 getAllowMultipleTeamLoginsCheckbox().setSelected(contestInformation.isAllowMultipleLoginsPerTeam());
                 getTeamScoreboardDisplayFormatTextfield().setText(contestInformation.getTeamScoreboardDisplayFormat());
                 getContestFreezeLengthtextField().setText(contestInformation.getFreezeTime());
