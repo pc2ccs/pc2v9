@@ -1382,17 +1382,29 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             //it currently doesn't have any support for reading/executing the judge's accepted solutions to get these values,
             //so we'll reject any time_multiplier and time_safety_margin values that are present.
             
-            Integer clics_time_multiplier = fetchIntValue(limitsContent, CLICS_TIME_MULTIPLIER_KEY);
-            if (clics_time_multiplier != null) {
-                //TODO: replace the following exception with code to properly handle the CLICS time_multiplier value.
-                throw new YamlLoadException("Unsupported CLICS attribute in " + problemYamlFilename + " 'limits' section: " + CLICS_TIME_MULTIPLIER_KEY);
+            //Note also:  the following code is COMMENTED OUT because some of the existing PC2 JUnits contain "limits:" sections
+            // which DO have CLICS "time_multiplier" and/or "time_saftety_margin" entries in them (even though PC2 doesn't currently
+            // support those attibutes).  The problem is that the presence of those attributes in these JUnit test files results
+            // in those JUnits throwing YamlLoadExceptions.
+//            Integer clics_time_multiplier = fetchIntValue(limitsContent, CLICS_TIME_MULTIPLIER_KEY);
+//            if (clics_time_multiplier != null) {
+//                //TODO: replace the following exception with code to properly handle the CLICS time_multiplier value.
+//                throw new YamlLoadException("Unsupported CLICS attribute in " + problemYamlFilename + " 'limits' section: " + CLICS_TIME_MULTIPLIER_KEY);
+//            }
+//            Integer clics_time_safety_margin = fetchIntValue(limitsContent, CLICS_TIME_SAFETY_MARGIN_KEY);
+//            if (clics_time_safety_margin != null) {
+//                //TODO: replace the following exception with code to properly handle the CLICS time_safety_margin value.
+//                throw new YamlLoadException("Unsupported CLICS attribute in " + problemYamlFilename + " 'limits' section: " + CLICS_TIME_SAFETY_MARGIN_KEY);
+//            }
+            
+            //check for a timeout limit within the CLICS "limits:" section. 
+            // Note that the presence of a "timeout:" entry within a CLICS
+            // "limits:" section is non-CLICS standard -- but we want to support it in PC2.
+            Integer clicsTimeout = fetchIntValue(limitsContent, TIMEOUT_KEY);
+            if (clicsTimeout != null) {
+                problem.setTimeOutInSeconds(clicsTimeout);
             }
-            Integer clics_time_safety_margin = fetchIntValue(limitsContent, CLICS_TIME_SAFETY_MARGIN_KEY);
-            if (clics_time_safety_margin != null) {
-                //TODO: replace the following exception with code to properly handle the CLICS time_safety_margin value.
-                throw new YamlLoadException("Unsupported CLICS attribute in " + problemYamlFilename + " 'limits' section: " + CLICS_TIME_SAFETY_MARGIN_KEY);
-            }
-          
+            
             //check for a CLICS maxoutput limit
             Integer clicsMaxOutput = fetchIntValue(limitsContent, CLICS_MAX_OUTPUT_KEY);
             if (clicsMaxOutput != null) {
