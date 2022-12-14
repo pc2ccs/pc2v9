@@ -35,8 +35,12 @@ public class Problem implements IElementObject {
 
     public static final int DEFAULT_TIMEOUT_SECONDS = 30;
 
-    public static final int DEFAULT_MAX_OUTPUT_FILE_SIZE_KB = 0; // zero indicates no per-problem output limit has been set 
-                                                                //  (and therefore the default global setting should be used)
+    /**
+     * The default value for the per-problem maximum output size.
+     * Zero indicates no per-problem limit has been set (and therefore the current
+     * global setting should be used).
+     */
+    public static final int DEFAULT_MAX_OUTPUT_FILE_SIZE_KB = 0; 
 
     /**
      * Problem title.
