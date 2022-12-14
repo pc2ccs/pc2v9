@@ -572,7 +572,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             if (maxOutputSize instanceof Integer) {
                 int maxSizeInK = ((Integer) maxOutputSize).intValue();
                 if (maxSizeInK > 0) {
-                    setMaxOutputSize(contest, maxSizeInK * 1024);
+                    setMaxOutputSize(contest, maxSizeInK * Constants.BYTES_PER_KIBIBYTE);
                 } else {
                     throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must be > 0 ", null, contestFileName);
                 }
@@ -1912,7 +1912,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 //set problem output limit.  If the problem.yaml file for the current problem (codified in the "problemMap")
                 // contains an "OUTPUT" key, use the timeout value from the problem.yaml; otherwise use the passed-in default.
                 Long actualMaxOutputBytes = fetchLongValue(problemMap, MAX_OUTPUT_SIZE_K_KEY, maxOutputBytes);
-                problem.setMaxOutputSizeKB(actualMaxOutputBytes/1024L);
+                problem.setMaxOutputSizeKB(actualMaxOutputBytes/Constants.BYTES_PER_KIBIBYTE);
                 
                 //TODO:  add code to check for the CLICS-compliant key "output:" in the "limits: section
                 // of problem.yaml if the PC2 "MAX_OUTPUT_SIZE_K_KEY doesn't exist

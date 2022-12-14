@@ -168,5 +168,7 @@ public final class Constants {
     
     public static final int INPUT_VALIDATOR_EXECUTION_ERROR_CODE = -39;
     
-    public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";   
+    public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";
+
+    public static final int BYTES_PER_KIBIBYTE = 1024;   
 }
