@@ -2373,7 +2373,7 @@ public class Executable extends Plugin implements IExecutable {
             } else {
                 System.err.println("WARNING: log is null; cannot log message 'Problem is null, cannot determine output size limit; returning zero'");
             }
-            return 0L;
+            return contest.getContestInformation().getMaxOutputSizeInBytes();
         }
     }
 
