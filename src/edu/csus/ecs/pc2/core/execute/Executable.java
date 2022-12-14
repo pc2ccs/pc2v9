@@ -2367,13 +2367,15 @@ public class Executable extends Plugin implements IExecutable {
                 
         } else {
             
-            //problem is null; log error and return zero
+            //problem is null; log error and return global value since no per-problem value is available
+            long globalMaxOutput = contest.getContestInformation().getMaxOutputSizeInBytes();
             if (log != null) {
-                log.log(Log.WARNING, "Problem is null, cannot determine output size limit; returning zero");
+                log.log(Log.WARNING, "Problem is null, cannot determine output size limit; returning global max output value " + globalMaxOutput);
             } else {
-                System.err.println("WARNING: log is null; cannot log message 'Problem is null, cannot determine output size limit; returning zero'");
+                System.err.println("WARNING: Executable.getMaxFileSize(): log is null; cannot log message "
+                        + "'Problem is null, cannot determine output size limit; returning global max output value " + globalMaxOutput + "'");
             }
-            return contest.getContestInformation().getMaxOutputSizeInBytes();
+            return globalMaxOutput;
         }
     }
 
