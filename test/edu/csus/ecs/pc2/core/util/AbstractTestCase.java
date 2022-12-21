@@ -1159,6 +1159,25 @@ public class AbstractTestCase extends TestCase {
         }
     }
     
+    /**
+     * Compares path, directory path in-sensitive.
+     * 
+     * @param message
+     * @param expected 
+     * @param actual
+     */
+    public void asserPathEqual(String message, String expected, String actual) {
+        
+        // convert \ to /
+        String actualPath = actual.replaceAll("\\\\", "/");
+        String expectedPath = expected.replaceAll("\\\\", "/");
+        
+        if (!actualPath.equals(expectedPath)){
+            throw new ComparisonFailure(message, expectedPath, actualPath);
+        }
+    }
+    
+    
 
     public Account getFirstJudge(IInternalContest contest) {
         Account[] accounts = new SampleContest().getJudgeAccounts(contest);
@@ -1527,6 +1546,24 @@ public class AbstractTestCase extends TestCase {
      */
     public IInternalContest loadFullSampleContest(IInternalContest contest, String sampleName) throws Exception {
         return loadFullSampleContest (contest, new File(getTestSampleContestDirectory(sampleName)));
+    }
+
+    /**
+     * Test whether account HAS permission
+     * @param type permission 
+     * @param account
+     */
+    public void assertHasPermssion(edu.csus.ecs.pc2.core.security.Permission.Type type, Account account) {
+        assertTrue("Expected for " + account + " Permission " + type, account.isAllowed(type));
+    }
+
+    /**
+     * Test wether account does NOT have permission
+     * @param type permission
+     * @param account
+     */
+    public void assertNoPermssion(edu.csus.ecs.pc2.core.security.Permission.Type type, Account account) {
+        assertFalse("Expected for  " + account + " Permission " + type, account.isAllowed(type));
     }
     
 }

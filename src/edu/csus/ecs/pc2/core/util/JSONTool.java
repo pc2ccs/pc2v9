@@ -14,8 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import edu.csus.ecs.pc2.clics.CLICSJudgementType;
-import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -26,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -476,55 +475,12 @@ public class JSONTool {
 
             JudgementRecord judgementRecord = submission.getJudgementRecord();
             
-            //commented out; only fetch the judgement if it's needed (see below)
-//            Judgement judgement = model.getJudgement(judgementRecord.getJudgementId());
-            
             // only output its judgement and end times if this is the final judgement
             if (!judgementRecord.isPreliminaryJudgement()) {
 
-                //****************
-                //new code, copied from RunsPane.getJudgementResultString().  
-                //This code has the effect of attempting to use the Validator Result String, 
-                // if it exists, to determine what judgement type (acronym) to put into the JSON Event Feed
-                // rather than defaulting to using the JudgementType out of the Judgement Record directly.  
-                // This was added because PC2 assigns a default judgement type
-                // of "RTE" to any run which is neither a Yes nor a CE.  See Bug xxx.
-                //
-                //Note that this change does not take into account the possibility that a judge changed the judgement
-                //  manually but didn't cause the validator judgement to change.  If there is a validator
-                //  result in the judgementRecord, this code will put into the returned JSON the judgement type corresponding to 
-                //  the validator (not that from the current judgement result).
-                
-                String resultString = null;
-                boolean usingValidator = false;
-                
-                //check if there's a validator result
-                if (judgementRecord.isUsedValidator() && judgementRecord.getValidatorResultString() != null) {
-                    
-                    resultString = judgementRecord.getValidatorResultString();
-                    if (resultString!=null) {
-                        //try to convert the validator string to a known acronym
-                        CLICS_JUDGEMENT_ACRONYM acronym = CLICSJudgementType.getCLICSAcronymFromDisplayText(resultString);
-                        //check if we got back a judgement acronym
-                        if (acronym!=null) {
-                            resultString = acronym.name();
-                            usingValidator = true;
-                        }
-                    }
-                } 
-                
-                if (!usingValidator) {
-                    //no validator result; get the string representation of the judgement itself
-                    Judgement judgement = model.getJudgement(judgementRecord.getJudgementId());
-                    if (judgement != null) {
-                        resultString = judgement.getAcronym();
-                    }
-                }
-                //***************
-                
-                
-//                element.put("judgement_type_id", getJudgementType(judgement));
-                element.put("judgement_type_id", resultString);
+                // Fetch judgement_type_id from judgement acronym
+                String judgmentAcronym = getJudgementAcronymn(judgementRecord);
+                element.put("judgement_type_id", judgmentAcronym);
                 
                 Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime() * 60000);
                 if (wallElapsed != null) {
@@ -536,6 +492,19 @@ public class JSONTool {
         }
         
         return element;
+    }
+
+    /**
+     * Fetch Judgement Acronym for run judgement.
+     * 
+     * @param judgementRecord
+     * @return judgement acronym.
+     */
+    private String getJudgementAcronymn(JudgementRecord judgementRecord) {
+        
+        ElementId judgementId = judgementRecord.getJudgementId();
+        Judgement judgement = model.getJudgement(judgementId);
+        return judgement.getAcronym();
     }
 
     public String getSubmissionId(Run submission) {
@@ -564,7 +533,11 @@ public class JSONTool {
         ObjectNode element = mapper.createObjectNode();
         element.put("id", run.getElementId().toString());
         element.put("judgement_id", run.getRunElementId().toString());
-        element.put("ordinal", ordinal);
+        // CLICS spec says this has to start at 1 not 0 (ACPC 2022 DJ Shadow)
+        // The RunTestCase already has a 1-based test case number, we can use
+        // that since it really exactly what we want here.  It is always in the
+        // range 1 through #_of_test_cases.
+        element.put("ordinal", run.getTestNumber());
         element.put("judgement_type_id", getJudgementType(model.getJudgement(run.getJudgementId())));
         // SOMEDAY get the time from the server instead of the judge
         element.put("time", Utilities.getIso8601formatterWithMS().format(run.getDate().getTime()));

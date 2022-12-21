@@ -33,6 +33,8 @@ import edu.csus.ecs.pc2.core.security.FileStorage;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 import edu.csus.ecs.pc2.core.util.NotificationUtilities;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.ui.InvalidFieldValue;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
@@ -1883,6 +1885,7 @@ public class SampleContest {
      * 4 - solved, String &quot;Yes&quot; or No
      * 5 - send to teams, Yes or No
      * 6 - No Judgement index
+     * 7 - Validator judgement string
      * 
      * Example:
      * &quot;6,5,A,12,Yes&quot;
@@ -1892,12 +1895,13 @@ public class SampleContest {
      * 
      * @param contest
      * @param runInfoLine
+     * @param computerJudged 
      * @throws Exception 
      * @throws FileSecurityException 
      * @throws ClassNotFoundException 
      * @throws IOException 
      */
-    public static void addRunFromInfo(IInternalContest contest, String runInfoLine) throws Exception {
+    public static void addRunFromInfo(IInternalContest contest, String runInfoLine, boolean computerJudged) throws Exception {
 
         // get 5th judge
         ClientId judgeId = contest.getAccounts(Type.JUDGE).elementAt(4).getClientId();
@@ -1908,6 +1912,7 @@ public class SampleContest {
         Judgement yesJudgement = contest.getJudgements()[0];
         Judgement[] judgement = contest.getJudgements();
         Judgement noJudgement = null;
+        
         for (int i = 0; i < judgement.length; i++) {
             if (judgement[i].getAcronym().equals("WA")) {
                 noJudgement = judgement[i];
@@ -1932,6 +1937,11 @@ public class SampleContest {
         if (data.length > 6) {
             noJudgement = contest.getJudgements()[getIntegerValue(data[6])];
         }
+        
+        String validatorJudgementString = null;
+        if (data.length > 7) {
+            validatorJudgementString = data[7];
+        }
 
         int problemIndex = probLet.charAt(0) - 'A';
         Problem problem = problemList[problemIndex];
@@ -1945,7 +1955,10 @@ public class SampleContest {
         if (solved) {
             judgementId = yesJudgement.getElementId();
         }
-        JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
+        JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, computerJudged);
+        if (validatorJudgementString != null) {
+            judgementRecord.setValidatorResultString(validatorJudgementString);
+        }
         judgementRecord.setSendToTeam(sendToTeams);
 
         try {
@@ -1962,9 +1975,14 @@ public class SampleContest {
 
     }
 
+    public static void addRunFromInfo(IInternalContest contest, String runInfoLine) throws Exception {
+        addRunFromInfo(contest, runInfoLine, false);
+    }
+    
+    
     public static void addRunFromInfo(IInternalContest contest, String[] runInfoLines) throws Exception {
         for (String runInfoLine  : runInfoLines) {
-            addRunFromInfo(contest, runInfoLine);
+            addRunFromInfo(contest, runInfoLine, false);
         }
     }
 
@@ -1983,6 +2001,56 @@ public class SampleContest {
         for (Account account : getTeamAccounts(contest)) {
             account.setExternalId(Integer.toString(id));
             id++;
+        }
+    }
+
+    public Vector<Account> generateNewAccounts(IInternalContest contest, Type type, int count) {
+        Vector<Account> accounts = contest.generateNewAccounts(type.toString(), count, true);
+        return accounts;
+    }
+
+    /**
+     * Get account at current site.
+     * 
+     * @param contest
+     * @param administrator
+     * @param clientNumber
+     * @return
+     */
+    public Account getAccount(IInternalContest contest, Type type, int clientNumber) {
+        return   contest.getAccount(new ClientId(contest.getSiteNumber(), type, clientNumber));
+    }
+    
+    public String getTestSampleContestDirectory(String dirname) {
+        return getSampleContestsDirectory() + File.separator + dirname;
+    }
+
+    public String getSampleContestsDirectory() {
+        return "samps" + File.separator + "contests";
+    }
+    
+    /**
+     * Load contest from sample contets
+     * @param contest
+     * @param sampleName name for directory under samps/contests/
+     * @return contest model
+     * @throws Exception
+     */
+    public IInternalContest loadSampleContest(IInternalContest contest, String sampleName) throws Exception {
+
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        if (contest == null) {
+            contest = new InternalContest();
+        }
+
+        try {
+            String cdpDir = getTestSampleContestDirectory(sampleName);
+            loader.initializeContest(contest, new File( cdpDir));
+            return contest;
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw e;
         }
     }
     

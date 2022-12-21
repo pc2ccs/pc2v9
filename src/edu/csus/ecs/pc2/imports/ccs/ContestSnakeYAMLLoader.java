@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.ByteArrayInputStream;
@@ -67,7 +67,7 @@ import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
- * Load contest from Yaml using SnakeYaml methods.
+ * Load contest/model from Yaml and files in a CDP.
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
@@ -153,7 +153,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 contents = concat(contents, lines);
             }
         } catch (IOException e) {
-            throw new YamlLoadException("Problem loading " + e.getMessage(), e, contestYamlFilename);
+            throw new YamlLoadException("Problem loading yaml " + e.toString(), e, contestYamlFilename);
         }
         return fromYaml(contest, contents, directoryName, loadDataFileContents);
     }
@@ -172,7 +172,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     }
 
     /**
-     * Load files with #include.
+     * Load from files, support #include FILENAME.
+     * 
+     * Loads text files, if a #include FILENAME  specified will
+     * replace the #incldue with the contents of FILENAME.
      * 
      * @param dirname
      *            if null will ignore #include files.
@@ -1063,8 +1066,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
 
         }
-
-        return (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        
+        // Load permissions from yaml into accounts
+        Account[] fullAccountList = accountVector.toArray(new Account[accountVector.size()]);
+        PermissionYamlLoader loader = new PermissionYamlLoader(yamlLines, fullAccountList);
+        return loader.getAccountsArray();
 
     }
 
@@ -1282,6 +1288,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         if (new File(problemLaTexFilename).isFile()) {
             problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
+        } else {
+            problemLaTexFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_ENGLISH_PROBLEM_LATEX_FILENAME;
+            problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
         }
 
         Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
@@ -1352,18 +1361,37 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         } else {
             // using Custom Output Validator
-            String outputValidatorProg = fetchValue(validatorContent, "validatorProg");
-            if (outputValidatorProg != null) {
+            String outputValidatorNameFromYaml = fetchValue(validatorContent, "validatorProg");
+            
+            if (outputValidatorNameFromYaml != null) {
                 Problem cleanProblem = contest.getProblem(problem.getElementId());
                 ProblemDataFiles problemDataFile = contest.getProblemDataFile(problem);
-                SerializedFile outputValidatorFile = new SerializedFile(outputValidatorProg);
-                if (outputValidatorFile.getSHA1sum() != null) {
-                    problemDataFile.setOutputValidatorFile(outputValidatorFile);
-                    contest.updateProblem(cleanProblem, problemDataFile);
-                } else {
-                    // Halt loading and throw YamlLoadException
-                    syntaxError("Error: problem " + problem.getLetter() + " - " + problem.getShortName() + " custom validator import failed: " + outputValidatorFile.getErrorMessage());
+                
+                String outputValidatorName = findOutputValidatorFile (baseDirectoryName, problem, outputValidatorNameFromYaml);
+                
+                if (!StringUtilities.isEmpty(outputValidatorName)) {
+                    
+                    // Check for output validator if defined
+                    
+                    if (!new File(outputValidatorName).isFile()) {
+                        throw new YamlLoadException("Missing output validator for problem " + problem.getShortName() + ", expecting at: " + outputValidatorName);
+                    }
+
+                    SerializedFile outputValidatorFile = new SerializedFile(outputValidatorName);
+                    if (outputValidatorFile.getSHA1sum() != null) {
+                        
+                        // Save validator internal file
+                        problemDataFile.setOutputValidatorFile(outputValidatorFile);
+                        
+                        // save validator program name
+                        problem.setOutputValidatorProgramName(outputValidatorName);
+                        contest.updateProblem(cleanProblem, problemDataFile);
+                    } else {
+                        // Halt loading and throw YamlLoadException
+                        syntaxError("Error: problem " + problem.getLetter() + " - " + problem.getShortName() + " custom validator import failed: " + outputValidatorFile.getErrorMessage());
+                    }
                 }
+
             }
         }
         
@@ -1416,7 +1444,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 Group group = lookupGroupInfo(groups, groupInfo);
                 if (group == null) {
                     if (groups == null || groups.length == 0) {
-                        syntaxError("ERROR No groups defined. (groups.tsv not loaded?), error when trying to find group for '" + groupInfo + "' from yaml value '" + groupListString + "' ");
+                        syntaxError("For "+problem.getShortName()+" ERROR No groups defined. (groups.tsv not loaded?), error when trying to find group for '" + groupInfo + "' from yaml value '" + groupListString + "' ");
                     } else {
                         syntaxError("Undefined group '" + groupInfo + "' for group list '" + groupListString + "' ");
                     }
@@ -1491,7 +1519,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 } else {
                     customSettings.setUsePC2ValidatorInterface();
                 }
+                
                 customSettings.setValidatorCommandLine(validatorCmd);
+                
+                if (problem.getOutputValidatorProgramName() != null) {
+                    // TODO REFACTOR There are two locations that store the validator program name, there should be one.
+                    customSettings.setValidatorProgramName(problem.getOutputValidatorProgramName());
+                }
+                
                 customSettings.setValidatorProgramName(validatorProg);
                 problem.setCustomOutputValidatorSettings(customSettings);
             }
@@ -2415,7 +2450,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      * 
      * @param problem the {@link Problem} to which the CLICS output validator is to be added.
      * @param problemDataFiles the {@link ProblemDataFiles} associated with the specified problem.
-     * @param baseDirectoryName the name of the directory where the problem configuration lies.
+     * @param baseDirectoryName the config of the directory where problems are found, ex /home/ubtuntu/current/config
      * 
      * @return an updated Problem (the problem is also modified via the received reference parameter).
      * 
@@ -2435,25 +2470,58 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problem.setOutputValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         }
 
-        String outputValidatorName = baseDirectoryName + File.separator + problem.getOutputValidatorProgramName();
-
-        try {
-            /**
-             * If file is there load it
-             */
-            if (new File(outputValidatorName).isFile()) {
-                //TODO:  Huh?  the following doesn't seem to make sense... the variable 'validatorName' has been assigned
-                // the value of the problem's OUTPUT validator (just above the "try"), but this statement is assigning
-                // that value to the problemDataFiles' INPUT validator.  Seems wrong... jlc
-                problemDataFiles.setCustomInputValidatorFile(new SerializedFile(outputValidatorName));
-            }
-        } catch (Exception e) {
-            throw new YamlLoadException("Unable to load validator for problem " + problem.getShortName() + ": " + outputValidatorName, e);
-        }
         
         return problem;
     }
 
+    /**
+     * Return path of output validator
+     * 
+     * @param baseDirectoryName
+     *            CDP base directory
+     * @param problem
+     * @return null if
+     */
+    protected String findOutputValidatorFile(String baseDirectoryName, Problem problem, String validatorFile) {
+
+        if (StringUtilities.isEmpty(validatorFile)) {
+            return validatorFile;
+        }
+
+        /**
+         * Return path if validator is an absolute path.
+         * 
+         * Ex. /home/ubuntu/current/config/alt_output_validator
+         */
+        if (new File(validatorFile).isFile()) {
+            return validatorFile;
+        }
+
+        /**
+         * Check for validator under output_validators/
+         * 
+         * Ex. /home/ubuntu/current/config/bells/output_validators/bells_validator/validator
+         */
+        validatorFile = baseDirectoryName + File.separator + problem.getShortName() + File.separator + //
+                OUTPUT_VALIDATORS + File.separator + validatorFile;
+
+        if (new File(validatorFile).isFile()) {
+            return validatorFile;
+        }
+
+        /**
+         * Check for under CDP/basename
+         * 
+         * Ex. /home/ubuntu/current/config/bells/validator
+         */
+        String baseValidatorFile = baseDirectoryName + File.separator + validatorFile;
+
+        if (new File(baseValidatorFile).isFile()) {
+            return baseValidatorFile;
+        }
+
+        return validatorFile;
+    }
 
     /**
      * Adds a Custom Input Validator (also called an Input Format Validator) to the specified {@link Problem} and
@@ -3020,9 +3088,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         File cdpConfigDirectory = null;
 
         if (entry.isDirectory()) {
-
-            // found a directory
-            cdpConfigDirectory = new File(entry.getAbsoluteFile() + File.separator + CONFIG_DIRNAME);
+            
+            String contestYamlFile = entry.getPath() + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+            if (new File(contestYamlFile).exists()) {
+                // if contest.yaml in current directory, then this is the equiv of config directory.
+                return entry;
+            } else {
+                // found a CDP base directory
+                cdpConfigDirectory = new File(entry.getAbsoluteFile() + File.separator + CONFIG_DIRNAME);
+            }
 
         } else if (entry.isFile()) {
 

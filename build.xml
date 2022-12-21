@@ -1,10 +1,11 @@
 <?xml version="1.0"?>
+<!--  Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. -->
 <project name="pc2v9" default="jar" basedir=".">
     <description>
         v9 build file
     </description>
     <!-- set global properties for this build -->
-    <property name="lastECSbuild" value="5999" />
+    <property name="lastGITLABbuild" value="6259" />
     <property name="apt.build.javac.target" value="1.8" />
     <property name="apt.build.javac.source" value="1.8" />
     <property name="src.dir" location="src" />
@@ -56,8 +57,8 @@
     <property name="jar.name" value="${name}.jar"/>
     <property name="jar.path" value="${dist.dir}/${jar.name}"/>
     <property environment="env"/>
-    <condition property="exists.CI_PIPELINE_IID">
-        <isset property="env.CI_PIPELINE_IID"/>
+    <condition property="exists.GITHUB_RUN_NUMBER">
+        <isset property="env.GITHUB_RUN_NUMBER"/>
     </condition>
 
     <tstamp>
@@ -119,8 +120,19 @@
         </condition>
     </target>
 	
-	<target name="jarSkipTests">
+	<target name="jarSkipTests" description="create jar file skip unit tests">
 		 <property name="RUN_NO_TESTS" value="Yes"/>
+		<antcall target="jar"/>
+	</target>
+
+	<target name="jarSkipTestsAndSubprojectBuilds" description="create jar file skip unit tests do not build sub projects">
+		 <property name="RUN_NO_TESTS" value="Yes"/>
+		 <property name="BUILD_NO_SUBPROJECTS" value="Yes"/>
+		<antcall target="jar"/>
+	</target>
+
+	<target name="jarSkipBuildSubprojects" description="create jar file, run unit tests, skip building sub projects ">
+		 <property name="BUILD_NO_SUBPROJECTS" value="Yes"/>
 		<antcall target="jar"/>
 	</target>
 
@@ -129,7 +141,7 @@
         <!-- Create the time stamp -->
         <tstamp />
     </target>
-    <target name="-execgit" unless="exists.CI_PIPELINE_IID">
+    <target name="-execgit" unless="exists.GITHUB_RUN_NUMBER">
         <exec executable="git" outputproperty="repo.version" failifexecutionfails="false" errorproperty="">
             <arg value="rev-list"/>
             <arg value="${git_hash}"/>
@@ -142,18 +154,19 @@
             </not>
         </condition>
     </target>
-    <target name="-getenv" if="exists.CI_PIPELINE_IID">
-       <add operand1="${lastECSbuild}" operand2="${env.CI_PIPELINE_IID}" result="repo.version0"/>
+    <target name="-getenv" if="exists.GITHUB_RUN_NUMBER">
+       <add operand1="${lastGITLABbuild}" operand2="${env.GITHUB_RUN_NUMBER}" result="repo.version0"/>
 <!--
-TODO consider switching back to this at 9.7.0/9.8build
-        <property name="repo.version0" value="${env.CI_PIPELINE_IID}"/>
+TODO consider switching back to this at 9.8.0/9.9build
+        <property name="repo.version0" value="${env.GITHUB_RUN_NUMBER}"/>
 -->
-        <condition property="version.add" value="~${env.CI_COMMIT_REF_SLUG}" else="">
+        <condition property="version.add" value="~${env.GITHUB_REF_NAME}" else="">
            <not>
-               <equals arg1="${env.CI_COMMIT_REF_SLUG}" arg2="master"/>
+               <equals arg1="${env.GITHUB_REF_NAME}" arg2="master"/>
            </not>
         </condition>
         <property name="repo.version" value="${repo.version0}${version.add}"/>
+
     </target>
 
     <target name="compile" depends="init,checkstyle" description="compile the source ">
@@ -243,22 +256,29 @@ TODO consider switching back to this at 9.7.0/9.8build
             </manifest>
         </jar>
     	
+    	<antcall target="buildSubProjects"/>
+
+    </target>
+
+	 <!-- build sub-projects unless BUILD_NO_SUBPROJECTS defined -->
+    <target name="buildSubProjects" unless="BUILD_NO_SUBPROJECTS"  description="build sub projects ">
+
     	<!-- Build the (old) EWTeam project and copy it (in zip/tar.gz form) to the "projects" folder -->
-        <ant dir="projects/EWTeam" antfile="package.xml" useNativeBasedir="true" inheritAll="false"/>
-        <copy todir="projects">
+      <ant dir="projects/EWTeam" antfile="package.xml" useNativeBasedir="true" inheritAll="false"/>
+      <copy todir="projects">
             <fileset dir="projects/EWTeam/dist" includes="EWTeam*.tar.gz"/>
             <fileset dir="projects/EWTeam/dist" includes="EWTeam*.zip"/>
-        </copy>
-    	
+      </copy>
+
     	<!-- Build the WebTeamInterface (WTI) project (which also implicitly builds WTI-UI) and copy it to the "projects" folder. -->
         <ant dir="projects/WTI-API" antfile="packageWTI.xml" useNativeBasedir="true" inheritAll="false"/>
     	
     	<!-- Copy the archive (zip and tar.gz) files of the WTI project to the projects folder -->
-        <copy todir="projects">
+      <copy todir="projects">
             <fileset dir="projects/WTI-API/dist" includes="WebTeamInterface*.tar.gz"/>
             <fileset dir="projects/WTI-API/dist" includes="WebTeamInterface*.zip"/>
-        </copy>
-   	
+      </copy>
+
     </target>
 
     <target name="clean" description="clean up">

@@ -141,7 +141,7 @@ public class ServicesView extends JFrame implements UIPlugin {
             public void run() {
                 setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
 
-                controller.startLogWindow(contest);
+//                controller.startLogWindow(contest);
                 
                 setFrameTitle(contest.getContestTime().isContestRunning());
 

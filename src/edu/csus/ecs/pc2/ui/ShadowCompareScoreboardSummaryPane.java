@@ -33,7 +33,7 @@ public class ShadowCompareScoreboardSummaryPane extends JPanel {
      */
     public ShadowCompareScoreboardSummaryPane() {
         
-        setMaximumSize(new Dimension(500, 100));
+        setMaximumSize(new Dimension(800, 100));
 
 //        JLabel header = new JLabel("Comparison of PC2 vs. Remote Scoreboard");
 //        header.setAlignmentX(Component.CENTER_ALIGNMENT);

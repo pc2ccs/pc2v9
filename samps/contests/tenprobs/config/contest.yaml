@@ -65,7 +65,7 @@ accounts:
 
   - account: FEEDER
     site: 1
-    count: 2
+    count: 4
 
   - account: ADMINISTRATOR
     site: 1
@@ -83,5 +83,35 @@ auto-judging:
     number: 6,7,8,9
     letters: All
     enabled: yes
+
+# General forms
+#  permissions:
+#    - account: TYPE
+#      number: 10,11,12,13,14,15
+#      number: All
+#      enable:  list of permissions 
+#      disable:  list of permissions 
+#  
+#  
+
+# disable Contest Security Alert window
+
+# account permissions
+permissions:
+
+  - account: ADMINISTRATOR
+    number: 1,2,3
+    disable: VIEW_SECURITY_ALERTS
+
+  - account: JUDGE
+    number: All
+    enable: GIVE_RUN
+
+
+# enable EDIT_RUN for FEEDER 3
+
+  - account: FEEDER
+    number: 3
+    enable: SHADOW_PROXY_TEAM, EDIT_RUN
 
 # EOF Contest Configuration
