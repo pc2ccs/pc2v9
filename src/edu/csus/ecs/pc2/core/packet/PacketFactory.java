@@ -2322,4 +2322,16 @@ public final class PacketFactory {
         return packet;
     }
     
+
+    /**
+     * Auto judge ready to judge.
+     * 
+     */
+    public static Packet createAvaiableToAutoJudge(ClientId source, ClientId destination) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        Packet packet = new Packet(Type.AVAILABLE_TO_AUTO_JUDGE, source, destination, prop);
+        return packet;
+    }
+
 }

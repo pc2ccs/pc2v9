@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.LogUtilities;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -388,6 +390,44 @@ public final class JudgementUtilites {
 
         return list;
     }
+
+
+    /**
+     * Can Problem be auto judged.?
+     * 
+     * Problem must:
+     * <li> computer judged
+     * <li> has a validator
+     * 
+     * @param problem
+     * @return
+     */
+    public static boolean canBeAutoJudged(Problem problem) {
+        return problem.isComputerJudged() && problem.isValidatedProblem();
+    }
+
+    /**
+     * Returns the list of problems that match filter.
+     * 
+     * @param contest
+     * @param judgesAJProblemsFilter - judge client id
+     * @return
+     */
+    public static ProblemList getAutoJudgedProblemList(IInternalContest contest, Filter judgesAJProblemsFilter) {
+        ProblemList list = new ProblemList();
+        
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+            if (JudgementUtilites.canBeAutoJudged(problem)) {
+               if (judgesAJProblemsFilter.matches(problem)) {
+                   list.add(problem);
+               }
+            }
+        }
+        
+        return list;
+    }
+
     
 
 }
