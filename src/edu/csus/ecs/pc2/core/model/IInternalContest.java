@@ -1268,7 +1268,7 @@ public interface IInternalContest {
     void removeAvailableAutoJudgeRun(Run run);
 
     /**
-     * For the input client id (judge) find the next run it should judge.
+     * Find run to be autojudged.  If client found then remove run and judge client from available lists.oo
      * 
      * @param judgeClientId
      * @return null (no run found) or the Run.
@@ -1295,7 +1295,8 @@ public interface IInternalContest {
     AvailableAJRun addAvailableAutoJudgeRun(Run run);
 
     /**
-     * Find auto judge for run.
+     * Find auto judge for run.  If run found then remove run and judge client from available lists.oo
+     * 
      * 
      * @param run
      * @return null if no judge found, else the auto judge clientid

@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.LogUtilities;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -20,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 
 /**
@@ -393,9 +395,8 @@ public final class JudgementUtilites {
 
 
     /**
-     * Can Problem be auto judged.?
+     * Can Problem be auto judged.?.
      * 
-     * Problem must:
      * <li> computer judged
      * <li> has a validator
      * 
@@ -428,6 +429,28 @@ public final class JudgementUtilites {
         return list;
     }
 
-    
+    /**
+     * Is this a rn that is queued for computer judging.
+     * @param run
+     * @return true if queued for computer judgement, else false.
+     */
+    public static boolean isQueuedForComputerJudging(Run run) {
+        return RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT.equals(run.getStatus());
+    }
+
+    /**
+     * Is auto judging enabled on this client?
+     * @param contest
+     * @param fromId
+     * @return true if enabled, false if not enabled.
+     */
+    public static boolean judgeAutoJudgeEnabled(IInternalContest contest, ClientId clientId) {
+        ClientSettings clientSettings = contest.getClientSettings(clientId);
+        if (clientSettings != null) {
+            return clientSettings.isAutoJudging();
+        }
+        return false;
+    }
+
 
 }

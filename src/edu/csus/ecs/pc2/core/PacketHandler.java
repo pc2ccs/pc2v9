@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2012 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -15,6 +15,8 @@ import edu.csus.ecs.pc2.core.exception.ProfileCloneException;
 import edu.csus.ecs.pc2.core.exception.ProfileException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
+import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
+import edu.csus.ecs.pc2.core.list.AutoJudgeListsManager;
 import edu.csus.ecs.pc2.core.list.ClientIdComparator;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.list.RunFilesList;
@@ -22,6 +24,7 @@ import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AvailableAJ;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
@@ -77,7 +80,6 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * @version $Id$
  */
 
-// $HeadURL$
 public class PacketHandler {
 
     private IInternalContest contest = null;
@@ -142,6 +144,10 @@ public class PacketHandler {
                 // RUN submitted by team to server
                 runSubmission(packet, fromId, connectionHandlerID);
                 break;
+            case AVAILABLE_TO_AUTO_JUDGE:
+                // judge available, from judge to server, then from server to server/admin
+                handleAvailableToAutoJudge(packet, fromId, connectionHandlerID);
+                break;
             case RUN_SUBMISSION_CONFIRM_SERVER:
                 // RUN send from one server to another 
                 handleRunSubmissionConfirmationServer (packet, fromId);
@@ -191,7 +197,7 @@ public class PacketHandler {
                 break;
             case RUN_NOTAVAILABLE:
                 // Run not available from server
-                handleRunNotAvailable(packet);
+                handleRunNotAvailable(packet, fromId, connectionHandlerID);
                 break;
             case FORCE_DISCONNECTION:
                 sendForceDisconnection(packet);
@@ -1230,17 +1236,38 @@ public class PacketHandler {
     /**
      * 
      * @param packet
+     * @param connectionHandlerID 
+     * @param fromId 
      */
-    private void handleRunNotAvailable(Packet packet) {
+    private void handleRunNotAvailable(Packet packet, ClientId fromId, ConnectionHandlerID connectionHandlerID) {
 
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         contest.runNotAvailable(run);
 
         if (isServer()) {
+            
             ClientId clientId = packet.getDestinationId();
-            if (isThisSite(clientId)) {
-                controller.sendToClient(packet);
+            
+            try {
+                if (isThisSite(clientId)) {
+                    controller.sendToClient(packet);
+                    
+                    Problem problem = contest.getProblem(run.getProblemId());
+                    System.out.println("debug 22 runSubmission " + run + " " + problem);
+                    
+                    if (JudgementUtilites.isQueuedForComputerJudging(run) && JudgementUtilites.canBeAutoJudged(problem) && JudgementUtilites.judgeAutoJudgeEnabled(contest, fromId)) {
+                        
+                        contest.addAvailableAutoJudgeRun(run);  // put judge back in list
+                        
+                        handleAssignRunToAutoJudge(packet, run, connectionHandlerID);
+                    }
+                }
+            } catch (Exception e) {
+                info("Trouble sending huh to client "+clientId+" packet "+packet);
+                
             }
+            
+            
         }
     }
     
@@ -1610,6 +1637,18 @@ public class PacketHandler {
             controller.sendToJudgesAndOthers(confirmPacket, false);
             Packet dupSubmissionPacket = PacketFactory.createRunSubmissionConfirmation(contest.getClientId(), fromId, run, runFiles);
             controller.sendToServers(dupSubmissionPacket);
+            
+            try {
+                Problem problem = contest.getProblem(run.getProblemId());
+                System.out.println("debug 22 runSubmission " + run + " " + problem);
+                if (JudgementUtilites.isQueuedForComputerJudging(run) && JudgementUtilites.canBeAutoJudged(problem)) {
+                    contest.addAvailableAutoJudgeRun(run);
+                    handleAssignRunToAutoJudge(packet, run, connectionHandlerID);
+                }
+
+            } catch (Exception e) {
+                controller.getLog().log(Log.WARNING, "Exception while adding run to be auto judgted, " + run, e);
+            }
         }
         
         controller.sendRunToSubmissionInterface(run, runFiles);
@@ -4365,5 +4404,103 @@ public class PacketHandler {
             controller.sendToLocalServer(messPacket);
         }
     }
+    
+    /**
+     * Judge reports that it is ready to auto judge runs, assign run if available, forward to clients/servers.
+     * 
+     * @param packet
+     * @param connectionHandlerID - the judges connection id
+     * @param sourceClientId - the judge id that is ready to auto judge.
+     */
+    protected void handleAvailableToAutoJudge(Packet packet, ClientId fromId, ConnectionHandlerID connectionHandlerID) {
 
+        ClientId sourceClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        
+        // TODO 496 - improve try/catch, if failure should put items back in AJ lists.
+
+        try {
+            AutoJudgeListsManager.dump("New AJ debug 22 B4 " + sourceClientId, System.out, contest);
+
+            AvailableAJ availableAJ = contest.addAvailableAutoJudge(sourceClientId);
+
+            if (availableAJ == null) {
+                // Could not add AJ to list of available auto judgers.
+                controller.getLog().log(Log.WARNING, "Judge not configured to auto judge, either !isAutoJudge() or no problems assigned " + sourceClientId);
+                return;
+            }
+
+            Run run = contest.findRunToAutoJudge(sourceClientId);
+
+            if (run != null) {
+                controller.getLog().log(Log.INFO, "Found Run for auto judge judge=" + sourceClientId + " Run is " + run);
+                contest.removeAvailableAutoJudge(sourceClientId);
+
+                try {
+
+                    controller.getLog().log(Level.INFO, "Attempting to checkout" + run + " to judge " + sourceClientId);
+
+                    // process run as if judge/client had sent a request run
+                    checkoutRun(packet, run, sourceClientId, false, true, connectionHandlerID);
+                } catch (Exception e) {
+                    controller.getLog().log(Level.INFO, "Unable to checkout run " + run + " to judge " + sourceClientId, e);
+                }
+
+            } else {
+                controller.getLog().log(Log.INFO, "No run in list to auto judge for judge=" + sourceClientId);
+            }
+        } catch (Exception e) {
+            controller.getLog().log(Level.WARNING, "Poblem whild processing judge available packet " + packet + " " + packet + " " + fromId, 3);
+        }
+
+        AutoJudgeListsManager.dump("New AJ debug 22 AF " + sourceClientId, System.out, contest);
+
+    }
+    
+
+    /**
+     * Assign run to auto judge.
+     * 
+     * Find auto judge for run, if found, assign/checkout run to AJ.
+     * 
+     * @param packet
+     * @param run sibossopm tp aitp kidge
+     * @param connectionHandlerID
+     */
+    private void handleAssignRunToAutoJudge(Packet packet, Run run, ConnectionHandlerID connectionHandlerID) {
+        
+        ClientId judgeClientId = contest.findAutoJudgeForRun(run);
+        
+        AutoJudgeListsManager.dump("New Run  debug 22 B4" + run + " for judge "+judgeClientId , System.out, contest );
+
+        if (judgeClientId != null) {
+            // found an AJ
+
+            controller.getLog().log(Log.INFO, "Found Auto Judge= " + judgeClientId + " for run " + run);
+
+            try {
+
+                controller.getLog().log(Level.INFO, "Attempting to checkout" + run + " to judge " + judgeClientId);
+
+                if (isThisSite(run)) {
+
+                    // process run as if judge/client had sent a request run
+                    checkoutRun(packet, run, judgeClientId, false, true, connectionHandlerID);
+                } else {
+                    // TODO 496 run from other site, send checkout request to other server.
+                    controller.getLog().log(Level.INFO, "TODO 496 - write codeto send checkout request to other server");
+                    
+                }
+
+            } catch (Exception e) {
+                controller.getLog().log(Level.INFO, "Unable to checkout run " + run + " to judge " + judgeClientId, e);
+            }
+
+        } else {
+            controller.getLog().log(Level.INFO, "No AJ found in available AJ list for run " + run);
+        }
+        
+        AutoJudgeListsManager.dump("New Run  debug 22 AF " + run + " for judge "+judgeClientId , System.out, contest );
+
+    }
+               
 }
