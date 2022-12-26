@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.admin;
 
 import java.awt.BorderLayout;
@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.ui.AboutPane;
 import edu.csus.ecs.pc2.ui.AccountsTablePane;
+import edu.csus.ecs.pc2.ui.AutoJudgeAvailablePane;
 import edu.csus.ecs.pc2.ui.AutoJudgesPane;
 import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
 import edu.csus.ecs.pc2.ui.CategoriesPane;
@@ -76,10 +77,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * Administrator GUI.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class AdministratorView extends JFrame implements UIPlugin, ChangeListener {
 
     private static final long serialVersionUID = 1L;
@@ -294,6 +292,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 AboutPane aboutPane = new AboutPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "About", aboutPane);
+                
+                AutoJudgeAvailablePane autoJudgeAvailablePane= new AutoJudgeAvailablePane();
+                addUIPlugin(getRunContestTabbedPane(), "Auto Judging", autoJudgeAvailablePane);
 
                 /**
                  * add UI components involved with Running the contest to the RunContest tabbed pane

@@ -1,11 +1,12 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.server;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog.ModalityType;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.Dialog.ModalityType;
 import java.awt.event.KeyEvent;
 import java.util.Date;
 
@@ -41,6 +42,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.report.ContestSummaryReports;
 import edu.csus.ecs.pc2.ui.AboutPane;
+import edu.csus.ecs.pc2.ui.AutoJudgeAvailablePane;
 import edu.csus.ecs.pc2.ui.ConnectionsTablePane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.EventFeedServerPane;
@@ -59,19 +61,13 @@ import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import java.awt.Dimension;
 
 /**
  * GUI for Server.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class ServerView extends JFrame implements UIPlugin {
-
-    public static final String SVN_ID = "$Id$";
 
     private IInternalContest model = null;  //  @jve:decl-index=0:
 
@@ -482,6 +478,9 @@ public class ServerView extends JFrame implements UIPlugin {
 
         ServerListeners serverListeners = new ServerListeners();
         registerPlugin(serverListeners);
+        
+        AutoJudgeAvailablePane autoJudgeAvailablePane= new AutoJudgeAvailablePane();
+        addUIPlugin(getMainTabbedPane(), "Auto Judging", autoJudgeAvailablePane);
 
         ConnectionsTablePane connectionsPane = new ConnectionsTablePane();
         addUIPlugin(getMainTabbedPane(), "Connections", connectionsPane);

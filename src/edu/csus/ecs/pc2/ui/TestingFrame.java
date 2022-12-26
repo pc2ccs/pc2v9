@@ -47,7 +47,7 @@ public class TestingFrame extends JFrame {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(456, 240));
+        this.setSize(new java.awt.Dimension(640, 480));
         this.setContentPane(getCenterPane());
         this.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
         // this.setContentPane(getPluginPane());
