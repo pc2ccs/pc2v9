@@ -277,6 +277,7 @@ public class ReportsTest extends AbstractTestCase {
                 "Groups for Problems Report", //
                 "Problem Group Assignment", //
                 "Compare Primary with model Report", //
+                "Autojudge Lists", //
         };
 
         IReport [] reportList = Reports.getReports();
