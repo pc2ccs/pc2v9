@@ -4126,6 +4126,10 @@ public class PacketHandler {
             contestLoginSuccessData.setRemoteLoggedInUsers(getAllRemoteLoggedInUsers());
             contestLoginSuccessData.setLocalLoggedInUsers(getAllLocalLoggedInUsers());
             contestLoginSuccessData.setConnectionHandlerIDs(inContest.getConnectionHandleIDs());
+            
+            contestLoginSuccessData.setAvailableToAJRuns(contest.getAvailableAutoJudgeRuns());
+            contestLoginSuccessData.setAvaiableToAJJudges(contest.getAvailableAutoJudges());
+            
         } else {
             contestLoginSuccessData.setRemoteLoggedInUsers(new ClientId[0]);
             contestLoginSuccessData.setLocalLoggedInUsers(new ClientId[0]);

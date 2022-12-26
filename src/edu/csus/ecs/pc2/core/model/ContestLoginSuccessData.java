@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
@@ -43,6 +44,8 @@ public class ContestLoginSuccessData implements Serializable {
     private int siteNumber;
     private ContestInformation information; 
     private FinalizeData finalizeData;
+    private List<AvailableAJRun> availableToAJRuns;
+    private List<AvailableAJ> AvaiableToAJJudges;
 
     /**
      * @return Returns the accounts.
@@ -277,5 +280,20 @@ public class ContestLoginSuccessData implements Serializable {
     public void setFinalizeData(FinalizeData finalizeData) {
         this.finalizeData = finalizeData;
     }
-    
+
+    public List<AvailableAJRun> getAvailableToAJRuns() {
+        return availableToAJRuns;
+    }
+
+    public void setAvailableToAJRuns(List<AvailableAJRun> availableToAJRuns) {
+        this.availableToAJRuns = availableToAJRuns;
+    }
+
+    public List<AvailableAJ> getAvaiableToAJJudges() {
+        return AvaiableToAJJudges;
+    }
+
+    public void setAvaiableToAJJudges(List<AvailableAJ> avaiableToAJJudges) {
+        AvaiableToAJJudges = avaiableToAJJudges;
+    }    
 }

@@ -3,10 +3,13 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AvailableAJ;
+import edu.csus.ecs.pc2.core.model.AvailableAJRun;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
@@ -1032,7 +1035,40 @@ public class ContestLoader {
         addGeneralProblemToModel(contest, controller, packet);
         
         setFinalizeData(contest, controller, packet);
+        
+        addAvailAJLists (contest, controller, packet);
 
+    }
+
+    /**
+     * Extract from packet and add avaialbe AJ Runs and Judges.
+     * 
+     * @param contest
+     * @param controller
+     * @param packet
+     */
+    @SuppressWarnings("unchecked")
+    private void addAvailAJLists(IInternalContest contest, IInternalController controller, Packet packet) {
+        
+        try {
+
+            List<AvailableAJ> availableJudges  = (List<AvailableAJ> ) PacketFactory.getObjectValue(packet, PacketFactory.AVAILABLE_AUTO_JUDGE_JUDGES);
+            if (availableJudges != null) {
+                for (AvailableAJ availableAJ : availableJudges) {
+                    contest.addAvailableAutoJudge(availableAJ.getClientId());
+                }
+            }
+            List<AvailableAJRun> availableRuns  = (List<AvailableAJRun>) PacketFactory.getObjectValue(packet, PacketFactory.AVAILABLE_AUTO_JUDGE_RUNS);
+            if (availableRuns!=null) {
+                for (AvailableAJRun availableAJRun : availableRuns) {
+                    Run run = contest.getRun(availableAJRun.getRunId());
+                    contest.addAvailableAutoJudgeRun(run);
+                }
+            }
+            
+        } catch (Exception e) {
+            controller.logWarning("Unable to load available AJ lists into model ", e);
+        } 
     }
 
     /**

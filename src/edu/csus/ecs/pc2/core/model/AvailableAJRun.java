@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.Serializable;
+
 /**
  * This class encapsulates the notion of a {@link Run} which is currently waiting to be judged by an AutoJudge.
  * 
@@ -11,8 +13,12 @@ package edu.csus.ecs.pc2.core.model;
  * @author John Clevenger, PC2 Development Team
  *
  */
-public class AvailableAJRun {
+public class AvailableAJRun implements Serializable{
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1643039335505755842L;
     private ElementId runId ;
     private long contestSubmissionTimeMsec ;
     private ElementId problemId ;

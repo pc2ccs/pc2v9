@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -16,6 +17,8 @@ import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AvailableAJ;
+import edu.csus.ecs.pc2.core.model.AvailableAJRun;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
@@ -356,6 +359,17 @@ public final class PacketFactory {
     public static final String TEAM_RUN_SOURCE_FILES_LIST = "TEAM_RUN_SOURCE_FILES_LIST";
 
     public static final String REQUEST_LOGIN_AS_PROXY = "REQUEST_LOGIN_AS_PROXY";
+
+    /**
+     * List of available aj runs (AvailableAJRun)
+     */
+    public static final String AVAILABLE_AUTO_JUDGE_RUNS = "AVAILABLE_AUTO_JUDGE_RUNS";
+
+    
+    /**
+     * List of available AJ Judges (AvailableAJ)
+     */
+    public static final String AVAILABLE_AUTO_JUDGE_JUDGES = "AVAILABLE_AUTO_JUDGE_JUDGES";
     
     
     /**
@@ -1199,7 +1213,7 @@ public final class PacketFactory {
         prop.put(SITE_NUMBER, new Integer(data.getSiteNumber()));
         prop.put(CONTEST_TIME, data.getContestTime());
         prop.put(CONTEST_INFORMATION, data.getContestInformation());
-        
+
         if (data.getFinalizeData() != null) {
             prop.put(FINALIZE_DATA, data.getFinalizeData());
         }
@@ -1211,6 +1225,14 @@ public final class PacketFactory {
         if (data.getCategories() != null){
             prop.put(CATEGORY_LIST, data.getCategories());
         }
+
+        if (data.getAvailableToAJRuns() != null) {
+            prop.put(AVAILABLE_AUTO_JUDGE_RUNS, data.getAvailableToAJRuns());
+        }
+        if (data.getAvaiableToAJJudges() != null) {
+            prop.put(AVAILABLE_AUTO_JUDGE_JUDGES, data.getAvaiableToAJJudges());
+        }
+        
     }
 
     /**
@@ -2334,4 +2356,18 @@ public final class PacketFactory {
         return packet;
     }
 
+    /**
+     * Auto judge ready to judge.
+     * 
+     */
+    public static Packet createAvailableAutoJudgeLists(ClientId source, ClientId destination, List<AvailableAJRun> availableRuns, List<AvailableAJ> availableJudges) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(AVAILABLE_AUTO_JUDGE_RUNS, availableRuns);
+        prop.put(AVAILABLE_AUTO_JUDGE_JUDGES, availableJudges);
+        Packet packet = new Packet(Type.AVAILABLE_AJ_LISTS, source, destination, prop);
+        return packet;
+    }
+
+    
 }

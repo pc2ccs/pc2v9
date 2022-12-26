@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.Serializable;
+
 import edu.csus.ecs.pc2.core.list.ProblemList;
 
 /**
@@ -11,8 +13,13 @@ import edu.csus.ecs.pc2.core.list.ProblemList;
  * 
  * @author John Clevenger, PC2 Development Team
  */
-public class AvailableAJ {
+public class AvailableAJ implements Serializable{
+    
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2378901620039640236L;
     private ClientId clientId ;
     private ProblemList problemList ;
     
