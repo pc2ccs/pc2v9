@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
-import edu.csus.ecs.pc2.core.list.AutoJudgeListsManager;
 import edu.csus.ecs.pc2.core.model.AvailableAJ;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
