@@ -3,25 +3,33 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.Arrays;
+import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.model.AvailableAJ;
 import edu.csus.ecs.pc2.core.model.AvailableAJRun;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
- * Pane to show Autoudge Runs and Judges that are available to be autojudged.
+ * Pane to show Autojudge Runs and Judges that are available to be autojudged.
  * 
  * @author Douglas A. Lane <laned@csus.edu>
  *
@@ -102,7 +110,47 @@ public class AutoJudgeAvailablePane extends JPanePlugin {
         judgesCEnterPael.add(judgeCustomizeTable);
 
         JPanel buttonPane = new JPanel();
+
+        
         add(buttonPane, BorderLayout.SOUTH);
+
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                populateGUI();
+            }
+        });
+        refreshButton.setMnemonic(KeyEvent.VK_R);
+        refreshButton.setToolTipText("Refresh the pane data");
+        buttonPane.add(refreshButton);
+    }
+
+    /**
+     * Refresh gui data.
+     */
+    protected void populateGUI() {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (runsTableModel != null) {
+                    runsTableModel.setRowCount(0);
+                }
+                if (judgesTableModel != null) {
+                    judgesTableModel.setRowCount(0);
+                }
+
+                List<AvailableAJRun> runs = getContest().getAvailableAutoJudgeRuns();
+                for (AvailableAJRun availableAJRun : runs) {
+                    updateRunRow(availableAJRun);
+                }
+
+                List<AvailableAJ> judges = getContest().getAvailableAutoJudges();
+                for (AvailableAJ availableAJ : judges) {
+                    updateJudgeRow(availableAJ);
+                }
+            }
+        });
+
     }
 
     private JTableCustomized getrunsCustomizeTab1le() {
@@ -139,7 +187,6 @@ public class AutoJudgeAvailablePane extends JPanePlugin {
     }
 
     private Object toString(ProblemList problemList) {
-        String s = "";
         Problem[] problems = problemList.getList();
         return Arrays.toString(problems);
     }
@@ -183,6 +230,12 @@ public class AutoJudgeAvailablePane extends JPanePlugin {
             tableColumnModel.removeColumn(tableColumnModel.getColumn(columns.length - 1));
         }
         return judgeCustomizeTable;
+    }
+
+    @Override
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        super.setContestAndController(inContest, inController);
+        populateGUI();
     }
 
     @Override

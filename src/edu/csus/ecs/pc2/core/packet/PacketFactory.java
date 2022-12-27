@@ -2369,5 +2369,18 @@ public final class PacketFactory {
         return packet;
     }
 
-    
+
+    /**
+     * Stop judging on judge.
+     * 
+     * @param source
+     * @param destination
+     * @return
+     */
+    public static Packet createResetAutoJudge (ClientId source, ClientId destination) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        Packet packet = new Packet(Type.RESET_AUTO_JUDGE, source, destination, prop);
+        return packet;
+    }
 }

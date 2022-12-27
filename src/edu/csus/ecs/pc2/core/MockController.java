@@ -610,4 +610,9 @@ public class MockController implements IInternalController {
         return false;
     }
 
+    @Override
+    public void sendAvailableToAutoJudge(ClientId judgeClientId) {
+        ;
+    }
+
 }

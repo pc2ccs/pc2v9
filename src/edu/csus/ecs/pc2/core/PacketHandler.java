@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2012 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -79,7 +79,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
-
+// TODO 496 on local judge logoff remove them from AJ Judge List
 public class PacketHandler {
 
     private IInternalContest contest = null;
@@ -466,6 +466,10 @@ public class PacketHandler {
                 
             case AUTO_REGISTRATION_SUCCESS:
                 handleAutoRegistratioSuccess(packet, connectionHandlerID);
+                break;
+                
+            case RESET_AUTO_JUDGE:
+                handleResetAutoJudge(packet, connectionHandlerID);
                 break;
           
             default:
@@ -4506,5 +4510,10 @@ public class PacketHandler {
         AutoJudgeListsManager.dump("New Run  debug 22 AF " + run + " for judge "+judgeClientId , System.out, contest );
 
     }
+
+    private void handleResetAutoJudge(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        // TODO 496 implement reset of judge, stop any judging, send available to auto judge
+    }
+
                
 }

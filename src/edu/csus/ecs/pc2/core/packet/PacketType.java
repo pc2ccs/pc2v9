@@ -774,13 +774,21 @@ public final class PacketType implements Serializable {
          AVAILABLE_TO_AUTO_JUDGE,
          
          /**
-          * List of avaiable AJ Judges and Runs.
+          * List of available AJ Judges and Runs.
           * 
           * from server to server
           * contains: List of Available judges to autojudge
           * List of runs to auto judge
           */
          AVAILABLE_AJ_LISTS,
+         
+         /**
+          * Reset Auto Judge - clear any judging done by judge.
+          * 
+          * from server to judge
+          * contains: nothing
+          */
+         RESET_AUTO_JUDGE,
     }
 
     /**

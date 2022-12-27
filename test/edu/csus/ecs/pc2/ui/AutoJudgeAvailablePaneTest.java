@@ -2,18 +2,16 @@ package edu.csus.ecs.pc2.ui;
 
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.log.NullController;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
-import edu.csus.ecs.pc2.core.model.AvailableAJ;
-import edu.csus.ecs.pc2.core.model.AvailableAJRun;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.SampleContest;
@@ -90,9 +88,7 @@ public class AutoJudgeAvailablePaneTest extends AbstractTestCase {
 
     }
 
-
     public static void main(String[] args) throws Exception {
-
 
         try {
             IInternalContest contest = create16RunContest();
@@ -101,7 +97,14 @@ public class AutoJudgeAvailablePaneTest extends AbstractTestCase {
             StaticLog.setLog(controller.getLog());
 
             ClientId adminClient = contest.getAccounts(Type.ADMINISTRATOR).firstElement().getClientId();
-
+            
+            Problem[] problems = contest.getProblems();
+            for (Problem problem : problems) {
+                problem.setComputerJudged(true);
+                problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
+                contest.updateProblem(problem);
+            }
+            
             // update all runs to QUEUED_FOR_COMPUTER_JUDGEMENT
 
             Run[] runs = contest.getRuns();
@@ -110,42 +113,46 @@ public class AutoJudgeAvailablePaneTest extends AbstractTestCase {
                 contest.updateRun(run, adminClient);
             }
 
-            // Update all judges to auto judget all
-
             Vector<Account> judges = contest.getAccounts(Type.JUDGE);
             for (Account account : judges) {
-                updateAsAutoJudge(contest, account);
-            }
-
-            AutoJudgeAvailablePane pane = new AutoJudgeAvailablePane();
-            pane.setContestAndController(contest, controller);
-
-            for (Run run : runs) {
-                AvailableAJRun availableAJRun = new AvailableAJRun(run.getElementId(), run.getElapsedMS(), run.getProblemId());
-                pane.updateRunRow(availableAJRun);
-            }
-            Problem[] problems = contest.getProblems();
-            ProblemList probList = new ProblemList();
-            for (Problem problem : problems) {
-                probList.add(problem);
+                setToUpdateAllAutoJudge(contest, account);
+                contest.addAvailableAutoJudge(account.getClientId());
             }
             
-            for (Account account : judges) {
-                AvailableAJ availableAJ = new AvailableAJ(account.getClientId(), probList);
-                pane.updateJudgeRow(availableAJ);
+            for (Run run : runs) {
+                contest.addAvailableAutoJudgeRun(run);
             }
-
+            
+            AutoJudgeAvailablePane pane = new AutoJudgeAvailablePane();
+            pane.setContestAndController(contest, controller);
             TestingFrame frame = new TestingFrame(pane);
 
-            //        JFrame frame = new JFrame();
-            //        frame.setContentPane(pane);
             frame.setVisible(true);
-
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    private static void setToUpdateAllAutoJudge(IInternalContest contest, Account account) {
+        
+        ClientSettings settings = contest.getClientSettings(account.getClientId());
+        if (settings == null) {
+            settings = new ClientSettings(account.getClientId());
+        }
+        settings.setAutoJudging(true);
+        
+        Filter filter = new Filter();
+        
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+            filter.addProblem(problem);
+        }
+        
+        settings.setAutoJudgeFilter(filter);
+        contest.updateClientSettings(settings);
+        
     }
 
 

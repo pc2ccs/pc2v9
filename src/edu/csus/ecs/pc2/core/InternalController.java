@@ -4666,4 +4666,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
     }
     
+    @Override
+    public void sendAvailableToAutoJudge(ClientId judgeClientId) {
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Packet packet = PacketFactory.createAvaiableToAutoJudge(judgeClientId, serverClientId);
+        sendToLocalServer(packet);
+    }
+    
 }

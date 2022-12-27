@@ -761,4 +761,10 @@ public interface IInternalController {
      */
     void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId);
 
+    /**
+     * Send Available to Auto Judge to server.
+     * 
+     * @param judgeClientId judge client
+     */
+    void sendAvailableToAutoJudge(ClientId judgeClientId);
 }
