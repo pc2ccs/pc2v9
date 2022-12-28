@@ -13,6 +13,8 @@ start-time:        2016-11-04T18:30:00-07:00
 
 duration:  2:00:00
 
+max-output-size-K: 142
+
 # freeze time before end of contest
 scoreboard-freeze: 01:00:00
 # scoreboard-freeze-length in CCS, but has it de facto changed to scoreboard-freeze in pc2?
