@@ -6,14 +6,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.Vector;
 import java.util.logging.Level;
 
+import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.PacketHandler;
+import edu.csus.ecs.pc2.core.PacketUtilities;
 import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.LogUtilities;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AvailableAJ;
+import edu.csus.ecs.pc2.core.model.AvailableAJRun;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -452,5 +460,60 @@ public final class JudgementUtilites {
         return false;
     }
 
+    /**
+     * Load Available Judges and Runs into Available AJ Lists.
+     * 
+     * Assumes empty AJ Lists (does not merge, just adds judges and runs).
+     * 
+     * @param contest
+     * @param internalController
+     */
+    public static void loadAvaiableRunsAndJudges(IInternalContest contest, InternalController internalController) {
 
+        Vector<Account> judges = contest.getAccounts(Type.JUDGE);
+        for (Account account : judges) {
+            if (judgeAutoJudgeEnabled(contest, account.getClientId())) {
+                if (contest.isLocalLoggedIn(account.getClientId())) {
+                    contest.addAvailableAutoJudge(account.getClientId());
+                }
+            }
+        }
+
+        Run[] runs = contest.getRuns();
+        for (Run run : runs) {
+            if (isQueuedForComputerJudging(run)) {
+                contest.addAvailableAutoJudgeRun(run);
+            }
+        }
+
+    }
+
+    /**
+     * Loop through AJ runs list and assign/checkout runs until no runs to assign.
+     * 
+     * @param contest
+     * @param packetHandler 
+     * @param internalController
+     */
+    public static void initialAssignAJ(IInternalContest contest, InternalController controller, PacketHandler packetHandler) {
+        
+        List<AvailableAJRun> runs = contest.getAvailableAutoJudgeRuns();
+        List<AvailableAJ> judges = contest.getAvailableAutoJudges();
+        
+        if (runs.size() > 0 && judges.size() > 0) {
+            // only assign if there are runs and judges to assign
+
+            for (AvailableAJRun availableAJRun : runs) {
+                try {
+                    Run run = contest.getRun(availableAJRun.getRunId());
+                    ClientId judgeId = contest.findAutoJudgeForRun(run);
+                    
+                    PacketUtilities.checkoutRun(run, contest, controller, packetHandler, judgeId);
+                    
+                } catch (Exception e) {
+                    controller.getLog().log(Level.WARNING,"Unable to assign run "+availableAJRun.getRunId()+" to a judge", e);
+                }
+            }
+        }
+    }
 }

@@ -59,8 +59,10 @@ public class RunJudger {
     public ExecutionData executeAndAutoJudgeRun(Run run, RunFiles runFiles) throws Exception {
 
         long executeTimeMS = 0;
+        
+        System.out.println("debug 22 executeAndAutoJudgeRun "+run);
 
-        if (runBeingJudged != null) {
+        if (runBeingJudged == null) {
             throw new Exception("Cannot judge " + run + " already judging run " + runBeingJudged);
         }
 
@@ -268,23 +270,26 @@ public class RunJudger {
     }
 
     public void warn(String s, Exception exception) {
-        controller.getLog().log(Log.WARNING, s, exception);
         System.err.println(Thread.currentThread().getName() + " " + s);
         System.err.flush();
         exception.printStackTrace(System.err);
+        controller.getLog().log(Log.WARNING, s, exception);
     }
 
     public class Notifier {
 
         public void updateStatusLabel(String string) {
+            
             // TODO 496 write to log and to stdout?
-
-            // TODO Auto-generated method stub
+            info(string);
+            System.out.println(string);
 
         }
 
-        public void updateMessage(String runDescription) {
-            // TODO Auto-generated method stub
+        public void updateMessage(String string) {
+            // TODO 496 write to log and to stdout?
+               info(string);
+            System.out.println(string);
 
         }
 
@@ -304,7 +309,7 @@ public class RunJudger {
      * @return true if judging, false if not
      */
     public boolean isJudging() {
-        return runBeingJudged == null;
+        return runBeingJudged != null;
     }
 
 }

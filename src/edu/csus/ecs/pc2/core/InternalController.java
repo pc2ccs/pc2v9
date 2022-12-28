@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.core.archive.PacketArchiver;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.ProfileException;
 import edu.csus.ecs.pc2.core.exception.ServerProcessException;
+import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
 import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -1110,6 +1111,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         updateAutoStartInformation(inContest, this);
         
         updateAutoStopClockThread();
+        
+        JudgementUtilites.loadAvaiableRunsAndJudges(contest, this);
+        
+        JudgementUtilites.initialAssignAJ(contest, this, packetHandler);
     }
 
     private void insureProfileDirectory(Profile profile) {
@@ -2226,6 +2231,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 } catch (ContestSecurityException e) {
                     log.log(Log.WARNING, "Warning on canceling runs/clars for " + clientId, e);
                 }
+            }
+            
+            try {
+                if (JudgementUtilites.judgeAutoJudgeEnabled(contest, clientId)) {
+                    contest.removeAvailableAutoJudge(clientId);
+                    getLog().log(Log.INFO, "connection Dropped for " + clientId + " removed from Available Auto Judge List");
+                }
+
+            } catch (Exception e) {
+                log.log(Log.WARNING, "Warning on removeAvailableAutoJudge for " + clientId, e);
             }
         }
 

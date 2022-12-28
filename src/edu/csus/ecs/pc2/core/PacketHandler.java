@@ -2470,6 +2470,8 @@ public class PacketHandler {
                 controller.getLog().info("No logoff server allowed, logoff packet "+packet+" ignored");
                 
             } else if (contest.isLocalLoggedIn(whoLoggedOff)) {
+                
+                contest.removeAvailableAutoJudge(whoLoggedOff);
                 // Logged into this server, so we log them off and send out packet.
                 controller.logoffUser(whoLoggedOff);
                 
@@ -3554,7 +3556,7 @@ public class PacketHandler {
      * @throws ClassNotFoundException 
      * @throws IOException 
      */
-    private void checkoutRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly, boolean computerJudge, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException,
+    public void checkoutRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly, boolean computerJudge, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException,
             IOException, ClassNotFoundException, FileSecurityException {
 
         if (isServer()) {
@@ -4440,18 +4442,8 @@ public class PacketHandler {
             Run run = contest.findRunToAutoJudge(sourceClientId);
 
             if (run != null) {
-                controller.getLog().log(Log.INFO, "Found Run for auto judge judge=" + sourceClientId + " Run is " + run);
-                contest.removeAvailableAutoJudge(sourceClientId);
-
-                try {
-
-                    controller.getLog().log(Level.INFO, "Attempting to checkout" + run + " to judge " + sourceClientId);
-
-                    // process run as if judge/client had sent a request run
-                    checkoutRun(packet, run, sourceClientId, false, true, connectionHandlerID);
-                } catch (Exception e) {
-                    controller.getLog().log(Level.INFO, "Unable to checkout run " + run + " to judge " + sourceClientId, e);
-                }
+                
+                PacketUtilities.checkoutRun(run, contest, controller, this, sourceClientId, connectionHandlerID, packet);
 
             } else {
                 controller.getLog().log(Log.INFO, "No run in list to auto judge for judge=" + sourceClientId);
@@ -4464,7 +4456,6 @@ public class PacketHandler {
 
     }
     
-
     /**
      * Assign run to auto judge.
      * 

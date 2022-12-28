@@ -142,12 +142,13 @@ public class AutoJudgeModuleNew implements UIPlugin {
             System.out.println("debug 22 runfiles ? " + (runFiles != null));
             System.out.println("debug 22 Sent to " + event.getSentToClientId());
 
-            if (event.getSentToClientId().equals(contest.getClientId())) {
+            if (event.getWhoModifiedRun().equals(contest.getClientId())) {
                 // run is for us.
 
                 if (!runJudger.isJudging()) {
                     try {
                         runJudger.executeAndAutoJudgeRun(run, runFiles);
+                        System.out.println("debug 22 judging "+run);
                     } catch (Exception e) {
                         warn("Problem trying to judge run " + run, e);
                     }
