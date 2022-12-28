@@ -23,10 +23,16 @@ import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.model.AvailableAJ;
 import edu.csus.ecs.pc2.core.model.AvailableAJRun;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettingsEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IClientSettingsListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.ILoginListener;
+import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunEvent;
 
 /**
  * Pane to show Autojudge Runs and Judges that are available to be autojudged.
@@ -35,13 +41,14 @@ import edu.csus.ecs.pc2.core.model.Run;
  *
  */
 // TODO 496 Add sort/column header
-// TODO 496 auto size, esp Problems
+// TODO 496 auto size, esp Problems List
 // TODO 496 if judge's auto judge settings, problem list or on/off change update judge list
 // TODO 496 dynamic update when judge available
 // TODO 496 dynamic update runs table
 // TODO 496 add count for # judges
 // TODO 496 add count for number of problems
 // TODO 496 on judges table, get Judge display name or remove column
+// TODO 496 add view details button
 public class AutoJudgeAvailablePane extends JPanePlugin {
     /**
      * 
@@ -236,6 +243,15 @@ public class AutoJudgeAvailablePane extends JPanePlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         populateGUI();
+        
+        IClientSettingsListener clientSettingsListener = new ClientSettingsListener();
+        inContest.addClientSettingsListener(clientSettingsListener);
+        
+        ILoginListener loginListener = new LoginListener();
+        inContest.addLoginListener(loginListener);
+        
+        IRunListener runListener = new RunListener();
+        inContest.addRunListener(runListener);
     }
 
     @Override
@@ -243,14 +259,149 @@ public class AutoJudgeAvailablePane extends JPanePlugin {
         return "Autojudge Available Runs and Judges";
     }
 
+    /**
+     * Update available judge row, add, remove or update judge row.
+     * 
+     * @param availableAJ
+     */
     public void updateJudgeRow(AvailableAJ availableAJ) {
+        
+        // TODO 496 add code to update an existing row, or remove row/judge
+        
         Object[] objects = buildJudgeRow(availableAJ);
         judgesTableModel.addRow(objects);
     }
 
+    /**
+     * Update available run row, add, remove or update run row.
+     * @param run
+     */
+    private void updateRunRow(Run run) {
+        
+        AvailableAJRun availableAJRun = new AvailableAJRun(run.getElementId(), run.getElapsedMS(), run.getProblemId());
+        updateRunRow(availableAJRun);
+    }
+
+    /**
+     * Update available run row, add, remove or update run row.
+     * 
+     * @param availableAJRun
+     */
     public void updateRunRow(AvailableAJRun availableAJRun) {
+        // TODO 496 add code to update an existing row, or remove row/run
+        
+        // TODO 496 only add if can be computer judged
+        
         Object[] objects = buildRunRow(availableAJRun);
         runsTableModel.addRow(objects);
     }
 
+
+    /**
+     * Listener to dynamically change avalable run table.
+     * 
+     * @author Douglas A. Lane, PC^2 team pc2@ecs.csus.edu
+     */
+    class RunListener implements IRunListener  {
+
+        @Override
+        public void runAdded(RunEvent event) {
+
+            runChanged(event);
+        }
+
+        @Override
+        public void runChanged(RunEvent event) {
+            
+            try {
+                updateRunRow(event.getRun());
+            } catch (Exception e) {
+                // TODO 496 handle exception
+            }
+            
+            
+        }
+
+
+        @Override
+        public void runRemoved(RunEvent event) {
+            
+            runChanged(event);
+            
+        }
+
+        @Override
+        public void refreshRuns(RunEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+        
+    }
+
+    /**
+     * Login listener to update available judge list
+     * 
+     * @author Douglas A. Lane, PC^2 team pc2@ecs.csus.edu
+     */
+    class LoginListener implements ILoginListener {
+
+        @Override
+        public void loginAdded(LoginEvent event) {
+            
+            // TODO 496 Potentially add judge to avail liast
+            
+        }
+
+        @Override
+        public void loginRemoved(LoginEvent event) {
+            // TODO 496 remove judge from avail list
+            ;
+            
+            
+        }
+
+        @Override
+        public void loginDenied(LoginEvent event) {
+            ;  // nop 
+            
+        }
+
+        @Override
+        public void loginRefreshAll(LoginEvent event) {
+            ; // nop
+            
+        }
+        
+    }
+    class ClientSettingsListener implements  IClientSettingsListener{
+
+        @Override
+        public void clientSettingsAdded(ClientSettingsEvent event) {
+
+            clientSettingsChanged(event);
+        }
+
+        @Override
+        public void clientSettingsChanged(ClientSettingsEvent event) {
+            
+         // TODO 496 add/remove judge from avail list
+//          event.getClientId();
+            
+          
+        }
+
+        @Override
+        public void clientSettingsRemoved(ClientSettingsEvent event) {
+
+            clientSettingsChanged(event);
+            
+        }
+
+        @Override
+        public void clientSettingsRefreshAll(ClientSettingsEvent clientSettingsEvent) {
+           ; // nop 
+            
+        }
+        
+    }
 }
