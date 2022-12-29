@@ -22,6 +22,8 @@ public class AppConstants {
     public static final String FIRST_SERVER_OPTION_STRING = "--first";
     
     public static final String HELP_OPTION_STRING = "--help";
+    
+    public static final String CONSOLE_OPTION_STRING = "--console";
 
     public static final String CONTEST_ID_OPTION_STRING = "--id";
 
@@ -37,8 +39,6 @@ public class AppConstants {
 
     public static final String PASSWORD_OPTION_STRING = "--password";
     
-    public static final String CONSOLE_OPTION_STRING = "--console";
-
     public static final String PORT_OPTION_STRING = "--port";
 
     public static final String PROFILE_OPTION_STRING = "--profile";
