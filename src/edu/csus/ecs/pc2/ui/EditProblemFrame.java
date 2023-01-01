@@ -30,7 +30,7 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
 
     private IInternalController controller;
 
-    private EditProblemPane problemPane = null;
+    private EditProblemPane editProblemPane = null;
 
     /**
      * This method initializes
@@ -48,7 +48,7 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
     private void initialize() {
         this.setSize(new Dimension(900, 800));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.setContentPane(getProblemPane());
+        this.setContentPane(getEditProblemPane());
         this.setTitle("New Problem");
 
         FrameUtilities.centerFrame(this);
@@ -59,8 +59,8 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
         this.contest = inContest;
         this.controller = inController;
 
-        getProblemPane().setContestAndController(contest, controller);
-        problemPane.setParentFrame(this);
+        getEditProblemPane().setContestAndController(contest, controller);
+        editProblemPane.setParentFrame(this);
 
     }
 
@@ -74,7 +74,7 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
             }
             
         }
-        getProblemPane().setProblem(problem);
+        getEditProblemPane().setProblem(problem);
     }
 
     /**
@@ -88,13 +88,13 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
         setTitle("Add New Problem");
         if (problem == null){
             setTitle("Add New Problem");
-            getProblemPane().setProblem(problem);
+            getEditProblemPane().setProblem(problem);
         } else {
             setTitle("Edit Problem " + problem.getDisplayName());
             if (problem.isUsingExternalDataFiles()) {
                 setTitle("Edit Problem " + problem.getDisplayName()+" ("+problem.getExternalDataFileLocation()+")");
             }  
-            getProblemPane().setProblem(problem, problemDataFiles);
+            getEditProblemPane().setProblem(problem, problemDataFiles);
         }
     }
 
@@ -103,20 +103,21 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes problemPane
+     * This method returns a singleton instance of an {@link EditProblemPane}.
+     * If no instance has yet been created then one is created.
      * 
-     * @return edu.csus.ecs.pc2.ui.ProblemPane
+     * @return edu.csus.ecs.pc2.ui.EditProblemPane
      */
-    private EditProblemPane getProblemPane() {
-        if (problemPane == null) {
-            problemPane = new EditProblemPane();
+    private EditProblemPane getEditProblemPane() {
+        if (editProblemPane == null) {
+            editProblemPane = new EditProblemPane();
         }
-        return problemPane;
+        return editProblemPane;
     }
 
     public void setProblemCopy(Problem problem, ProblemDataFiles problemDataFiles) {
         setTitle("Add New Problem");
-        getProblemPane().setProblem(problem, problemDataFiles);
+        getEditProblemPane().setProblem(problem, problemDataFiles);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -41,6 +41,13 @@ public interface IContestLoader {
     
     String CONFIG_DIRNAME = "config";
 
+    // Sandbox fields
+    
+    final String SANDBOX_PROGRAM_NAME_KEY = "sandbox-program-name";
+
+    final String SANDBOX_COMMAND_LINE_KEY = "sandbox-command-line";
+
+    final String SANDBOX_TYPE_KEY = "sandbox-type";
 
     // Other constants.
 
@@ -109,7 +116,9 @@ public interface IContestLoader {
     String JUDGE_CONFIG_PATH_KEY = "judge-config-path";
 
     String TIMEOUT_KEY = "timeout";
-
+    
+    final String MEMORY_LIMIT_IN_MEG_KEY = "memory-limit-in-Meg";
+    
     String LIMITS_KEY = "limits";
 
     String PROBLEM_NAME_KEY = "title";

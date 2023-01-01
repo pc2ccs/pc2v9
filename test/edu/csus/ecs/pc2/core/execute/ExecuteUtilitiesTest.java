@@ -183,7 +183,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
                 "{:siteid};2", // 
                 "{:teamid};1", // 
                 "{files};Sumit.java", // 
-                "{:timelimit};30", // 
+                "{:timelimit};10", // 
                 "{:validator};edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
                 "{:pc2home};"+ExecuteUtilities.getPC2Home(), // 
         };
@@ -263,7 +263,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
                 "{:problemletter};F", // 
                 "{:siteid};2", // 
                 "{:teamid};12", // 
-                "{:timelimit};30", // 
+                "{:timelimit};10", // 
                 "{:validator};edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
                 "{:pc2home};"+ExecuteUtilities.getPC2Home(), //
         };

@@ -268,7 +268,7 @@ public class ProblemTest extends AbstractTestCase {
         Problem problem = new Problem("Foo");
 
         assertEquals("Time limit", Problem.DEFAULT_TIMEOUT_SECONDS, problem.getTimeOutInSeconds());
-        assertEquals("Time limit", 30, problem.getTimeOutInSeconds());
+        assertEquals("Time limit", 10, problem.getTimeOutInSeconds());
 
     }
     
