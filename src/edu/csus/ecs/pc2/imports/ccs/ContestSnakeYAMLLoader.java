@@ -1388,7 +1388,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problem.setMaxOutputSizeKB(maxOutputPC2);
         }
         
-        Integer memoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_IN_MEG_KEY, Problem.DEFAULT_MEMORY_LIMIT_MB);
+        Integer memoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, Problem.DEFAULT_MEMORY_LIMIT_MB);
         problem.setMemoryLimit(memoryLimit);
         
         String sandboxCommandLine = fetchValue(content, SANDBOX_COMMAND_LINE_KEY, "");

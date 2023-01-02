@@ -3753,26 +3753,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     public void testProblemNameENTex() throws Exception {
         String testDataContestDirName = "samplecdp";
 
-        /**
-     * Find/match problem in contest by problem letter
-     * @param inContest
-     * @param letter
-     * @return null if not found, else problem that is found to match letter
-     */
-    // TODO REFACTOR proomote/move getProblemByLetter into AbstractTestCase
-    private Problem getProblemByLetter(IInternalContest inContest, String letter) {
-        
-        Problem[] problems = inContest.getProblems();
-        for (Problem problem : problems) {
-            if (letter.equalsIgnoreCase(problem.getLetter())) {
-                return problem;
-            }
-            
-        }
-        return null;
-    }
-    
-}
 
         String dirname = getTestDataDirname(testDataContestDirName);
 //        startExplorer(dirname);
@@ -3799,7 +3779,25 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
     }
    
-
+    /**
+     * Find/match problem in contest by problem letter
+     * @param inContest
+     * @param letter
+     * @return null if not found, else problem that is found to match letter
+     */
+    // TODO REFACTOR proomote/move getProblemByLetter into AbstractTestCase
+    private Problem getProblemByLetter(IInternalContest inContest, String letter) {
+        
+        Problem[] problems = inContest.getProblems();
+        for (Problem problem : problems) {
+            if (letter.equalsIgnoreCase(problem.getLetter())) {
+                return problem;
+            }
+            
+        }
+        return null;
+    }
+    
     
     /**
      * Test loading of output validator.
