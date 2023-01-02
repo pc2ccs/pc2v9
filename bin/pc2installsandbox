@@ -43,6 +43,7 @@ fi
 
 if ! grep -q -F "cpu" "$CGROUP_PATH/cgroup.subtree_control"; then
    echo $0: cgroup.subtree_control in $CGROUP_PATH does not enable cpu controller
+   echo $0: Perhaps you have: echo +cpu ">$CGROUP_PATH/cgroup.subtree_control"
    exit $FAIL_CPU_CONTROLLER_NOT_ENABLED
 fi
 
@@ -55,6 +56,15 @@ fi
 # we seem to have a valid CGroup installation
 echo ...done.
 
+# First, remove any existing remnants
+if test -d $PC2_SANDBOX_CGROUP_PATH
+then
+	rmdir $PC2_SANDBOX_CGROUP_PATH
+fi
+if test -d $PC2_CGROUP_PATH
+then
+	rmdir $PC2_CGROUP_PATH
+fi
 
 # Create a pc2 cgroup to be managed by the root cgroup
 echo Creating PC2 CGroup structure...
@@ -79,3 +89,4 @@ mkdir $PC2_SANDBOX_CGROUP_PATH
 echo "+cpu +memory" > $PC2_SANDBOX_CGROUP_PATH/cgroup.subtree_control
 
 echo ...done.
+

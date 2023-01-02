@@ -22,9 +22,12 @@ FAIL_MEMORY_CONTROLLER_NOT_ENABLED=50
 CGROUP_PATH=/sys/fs/cgroup
 PC2_CGROUP_PATH=$CGROUP_PATH/pc2
 PC2_SANDBOX_CGROUP_PATH=$PC2_CGROUP_PATH/pc2sandbox
+# TODO: should have unique runbox in case multiple instances are executing in separate judges
+# For now, just use userid
+PC2_SANDBOX_RUN_CGROUP_PATH=$PC2_CGROUP_PATH/pc2sandbox/runbox_$USER
 
 # control whether the script outputs debug/tracing info
-_DEBUG="off"   # change this to anything other than "on" to disable debug/trace output
+_DEBUG="on"   # change this to anything other than "on" to disable debug/trace output
 function DEBUG()
 {
   [ "$_DEBUG" == "on" ] && $@
@@ -65,6 +68,13 @@ COMMAND=$3
 shift
 shift
 shift
+
+### Debugging - just set expected first 3 args to: 16MB 5seconds
+###MEMLIMIT=16
+###TIMELIMIT=5
+###COMMAND=$1
+###shift
+
 # the rest is the command args
 
 # make sure we have CGroups V2 properly installed on this system, including a PC2 structure
@@ -106,27 +116,41 @@ DEBUG echo ...done.
 DEBUG echo checking memory limit
 if [ "$MEMLIMIT" -gt "0" ] ; then
   DEBUG echo setting memory limit to $MEMLIMIT MB
-  echo $(( $MEMLIMIT * 1000000 ))  > $PC2_SANDBOX_CGROUP_PATH/memory.max
+  echo $(( $MEMLIMIT * 1024 * 1024 ))  > $PC2_SANDBOX_CGROUP_PATH/memory.max
+  echo 1  > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max
 else
   DEBUG echo setting memory limit to max, meaning no limit
   echo "max" > $PC_SANDBOX_CGROUP_PATH/memory.max  
+  echo "max" > $PC_SANDBOX_CGROUP_PATH/memory.swap.max  
 fi
 
 # set the specified CPU time limit - input is in secs, cgroup v2 requires usec, so multiply by 1M.
 # cgroup v2 expects two parameters:  absolute time and "period", but if only one is provided it is "absolute time"
 DEBUG echo setting cpu limit to $TIMELIMIT seconds
-echo $(( $TIMELIMIT * 1000000 ))  > $PC2_SANDBOX_CGROUP_PATH/cpu.max
+ulimit -t $TIMELIMIT
+TIMELIMIT_US=$((TIMELIMIT * 1000000))
+#echo $TIMELIMIT_US  > $PC2_SANDBOX_RUN_CGROUP_PATH/cpu.max
 
-#put the current process (and implicitly its children) into the pc2sandbox cgroup.
-#  Note that CGroups V2 defines that writing "0" to the cgroups.proc file means "current process".
-DEBUG echo putting $$ into $PC2_SANDBOX_CGROUP_PATH cgroup
+
+# Avoid "no internal processes" rule
+DEBUG echo creating run sub-sandbox $PC2_SANDBOX_RUN_CGROUP_PATH
+if test -d "$PC2_SANDBOX_RUN_CGROUP_PATH"
+then
+	rmdir $PC2_SANDBOX_RUN_CGROUP_PATH
+fi
+mkdir $PC2_SANDBOX_RUN_CGROUP_PATH
+
 # TODO: need to remove the requirement for sudo in the following command, which is needed here because
 # this shell is in the root cgroup by default and does not have write access to the root cgroup.procs file --
 # which it never should.
 # Need to have a way to put this shell into the pc2/pc2sandbox/cgroup.procs file as root, once.
 # See https://man7.org/conf/ndctechtown2021/cgroups-v2-part-2-diving-deeper-NDC-TechTown-2021-Kerrisk.pdf,
 # slides 25-28.
-sudo echo 0 > $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
+#
+
+#put the current process (and implicitly its children) into the pc2sandbox cgroup.
+DEBUG echo putting $$ into $PC2_SANDBOX_RUN_CGROUP_PATH cgroup
+sudo echo $$ > $PC2_SANDBOX_RUN_CGROUP_PATH/cgroup.procs
 
 # run the command
 # the following are the cgroup-tools V1 commands; need to find cgroup-tools v2 commands
@@ -136,10 +160,28 @@ sudo echo 0 > $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
 # since we don't know how to use cgroup-tools to execute, just execute it directly (it's a child so it
 #  should still fall under the cgroup limits).
 DEBUG echo Executing $COMMAND $* 
+
 $COMMAND $*
 
 COMMAND_EXIT_CODE=$?
 
+if test "$COMMAND_EXIT_CODE" -ge 128
+then
+	kills=`grep oom_kill $PC2_SANDBOX_RUN_CGROUP_PATH/memory.events | cut -d ' ' -f 2`
+	if test "$kills" != "0"
+	then
+		DEBUG echo The command was killed due to out of memory
+	else
+		# Get cpu time
+		cputime=`grep usage_usec $PC2_SANDBOX_RUN_CGROUP_PATH/cpu.stat | cut -d ' ' -f 2`
+		if test "$cputime" -gt "$TIMELIMIT_US"
+		then
+			DEBUG echo The command was killed due to out of CPU Time "($cputime > $TIMELIMIT_US)"
+		else
+			DEBUG echo The command terminated abnormally with exit code $COMMAND_EXIT_CODE
+		fi
+	fi
+fi
 DEBUG echo Finished executing $COMMAND $*
 DEBUG echo $COMMAND exited with exit code $COMMAND_EXIT_CODE
 DEBUG echo
@@ -150,3 +192,4 @@ DEBUG echo
 exit $COMMAND_EXIT_CODE
 
 # eof pc2sandbox.sh 
+
