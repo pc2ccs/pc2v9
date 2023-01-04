@@ -13,7 +13,6 @@ FAIL_MEMORY_CONTROLLER_NOT_ENABLED=48
 
 CGROUP_PATH=/sys/fs/cgroup
 PC2_CGROUP_PATH=$CGROUP_PATH/pc2
-PC2_SANDBOX_CGROUP_PATH=$PC2_CGROUP_PATH/pc2sandbox
 
 # ------------------------------------------------------------
 
@@ -43,8 +42,9 @@ fi
 
 if ! grep -q -F "cpu" "$CGROUP_PATH/cgroup.subtree_control"; then
    echo $0: cgroup.subtree_control in $CGROUP_PATH does not enable cpu controller
-   echo $0: Perhaps you have: echo +cpu ">$CGROUP_PATH/cgroup.subtree_control"
-   exit $FAIL_CPU_CONTROLLER_NOT_ENABLED
+#   echo $0: Perhaps you have: echo +cpu ">$CGROUP_PATH/cgroup.subtree_control"
+   echo $0: Executing: echo +cpu ">$CGROUP_PATH/cgroup.subtree_control"
+   echo +cpu > $CGROUP_PATH/cgroup.subtree_control
 fi
 
 if ! grep -q -F "memory" "$CGROUP_PATH/cgroup.subtree_control"; then
@@ -57,10 +57,14 @@ fi
 echo ...done.
 
 # First, remove any existing remnants
-if test -d $PC2_SANDBOX_CGROUP_PATH
-then
-	rmdir $PC2_SANDBOX_CGROUP_PATH
-fi
+for dir in `ls $PC2_CGROUP_PATH/sandbox* 2>/dev/null`
+do
+	if test -d "$dir"
+	then
+		DEBUG echo Removing existing $dir
+		rmdir "$dir"
+	fi
+done
 if test -d $PC2_CGROUP_PATH
 then
 	rmdir $PC2_CGROUP_PATH
@@ -76,17 +80,15 @@ sudo chown pc2:pc2 $PC2_CGROUP_PATH
 # those must remain under control of the PARENT -- root -- cgroup
 sudo chown pc2:pc2 $PC2_CGROUP_PATH/cgroup.procs
 sudo chown pc2:pc2 $PC2_CGROUP_PATH/cgroup.subtree_control
+#sudo chown pc2:pc2 $PC2_CGROUP_PATH/memory.max
+
+# Have to allow PC2 to write to the ancestor tree cgroup.procs
+sudo chown root.pc2  $CGROUP_PATH/cgroup.procs
+sudo chmod 664 $CGROUP_PATH/cgroup.procs
 
 # Enable the cpu and memory controllers for the pc2 cgroup.
 # Note that this must be done BEFORE creating the pc2sandbox subgroup, so that the subgroup inherits the controllers.
 echo "+cpu +memory" > $PC2_CGROUP_PATH/cgroup.subtree_control 
-
-# Create a "pc2sandbox" sub-cgroup that can be 100% managed by the pc2 cgroup
-#  and inherits the pc2 cgroup attributes
-mkdir $PC2_SANDBOX_CGROUP_PATH
-
-# Enable the cpu and memory controllers for the pc2sandbox cgroup
-echo "+cpu +memory" > $PC2_SANDBOX_CGROUP_PATH/cgroup.subtree_control
 
 echo ...done.
 
