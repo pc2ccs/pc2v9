@@ -119,6 +119,8 @@ public interface IContestLoader {
     
     final String MEMORY_LIMIT_IN_MEG_KEY = "memory-limit-in-Meg";
     
+    final String MEMORY_LIMIT_CLICS = "memory";
+    
     String LIMITS_KEY = "limits";
 
     String PROBLEM_NAME_KEY = "title";

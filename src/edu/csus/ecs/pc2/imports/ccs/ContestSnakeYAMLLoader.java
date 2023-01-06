@@ -1457,6 +1457,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             if (clicsMaxOutput != null) {
                 problem.setMaxOutputSizeKB(clicsMaxOutput);
             }
+            
+            Integer clicsMemoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, Problem.DEFAULT_MEMORY_LIMIT_MB);
+            problem.setMemoryLimit(clicsMemoryLimit);
         }
         
         if (!usingCustomValidator) {
