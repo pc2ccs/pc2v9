@@ -577,11 +577,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         if (clockPane == null) {
             clockLabel = new JLabel();
             clockLabel.setText("STOPPED");
-            clockLabel.setPreferredSize(new Dimension(100, 24));
+            clockLabel.setPreferredSize(new Dimension(200, 24));
             clockLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 18));
             clockPane = new JPanel();
             clockPane.setLayout(new BorderLayout());
-            clockPane.setPreferredSize(new java.awt.Dimension(85,34));
+            clockPane.setPreferredSize(new Dimension(220, 34));
             clockPane.add(clockLabel, BorderLayout.WEST);
         }
         return clockPane;
