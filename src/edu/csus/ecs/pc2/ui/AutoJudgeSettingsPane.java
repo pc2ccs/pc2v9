@@ -286,31 +286,24 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
     }
 
     protected void handleCancelButton() {
-
-        if (getAddButton().isEnabled() || getUpdateButton().isEnabled()) {
+        
+        boolean dismissSettings = true;
+        
+        if (getUpdateButton().isEnabled()) {
 
             // Something changed, are they sure ?
 
             int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Auto Judge modified, save changes?", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
-                if (getAddButton().isEnabled()) {
-                    addClientSettings();
-                } else {
-                    updateClientSettings();
-                }
-                if (getParentFrame() != null) {
-                    getParentFrame().setVisible(false);
-                }
-            } else if (result == JOptionPane.NO_OPTION) {
-                if (getParentFrame() != null) {
-                    getParentFrame().setVisible(false);
-                }
+                updateClientSettings();
+            } else if(result != JOptionPane.NO_OPTION) {
+                // in the case of Cancel, do not dismiss settings
+                dismissSettings = false;
             }
-        } else {
-            if (getParentFrame() != null) {
-                getParentFrame().setVisible(false);
-            }
+        }
+        if (dismissSettings && getParentFrame() != null) {
+            getParentFrame().setVisible(false);
         }
     }
 
