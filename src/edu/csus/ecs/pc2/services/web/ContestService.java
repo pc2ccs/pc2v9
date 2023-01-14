@@ -132,14 +132,19 @@ public class ContestService implements Feature {
             // return HTTP 400 response code per CLICS spec
             return Response.status(Status.BAD_REQUEST).entity("Missing 'id' key in /contest request").build();
 
-        } else {
-            // validate id
-            // TODO can the contestIdentifier be null?
-            if (!model.getContestIdentifier().equals(requestMap.get("id"))) {
-                controller.getLog().log(Log.WARNING, "Starttime PATCH Service: JSON mismatched 'id' key: '" + requestMap.get("id") + "'");
-                // return HTTP 400 response code per CLICS spec
-                return Response.status(Status.CONFLICT).entity("Invalid 'id' key in /contest request").build();
-            }
+//        } else {
+//            // validate id
+//            // TODO can the contestIdentifier be null?  Yes, but it may be something else too.  The CDS gives 'null',
+//            // and it is unclear what other CCS's that we are shadowing for may provide.  It is almost
+//            // certainly NOT what PC2 set up as the identifier (Default-###############).  As such, until the
+//            // API endpoints are fixed to include a (configurable) contest identifier, a reasonable thing to
+//            // do at this point is not validate the id at all.  Just make sure one was specified (above).  That's
+//            // enough for now.            
+//            if (!model.getContestIdentifier().equals(requestMap.get("id"))) {
+//                controller.getLog().log(Log.WARNING, "Starttime PATCH Service: JSON mismatched 'id' key: '" + requestMap.get("id") + "'");
+//                // return HTTP 400 response code per CLICS spec
+//                return Response.status(Status.CONFLICT).entity("Invalid 'id' key in /contest request").build();
+//            }
         }
         // if we get here then the JSON parsed correctly; see if it contained "start_time" as a key
         if (!requestMap.containsKey("start_time")) {

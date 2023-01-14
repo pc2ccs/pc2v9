@@ -295,6 +295,8 @@ public final class JudgementUtilites {
                 RunTestCase[] testCases = run.getRunTestCases();
                 for (RunTestCase runTestCase : testCases) {
 
+                    // JB - I think this is wrong - should be == 1, not 0 since getTestNumber() always returns
+                    // > 0, see Executable.executeAndValidateDataSet(), where testNumber is set to dataset + 1
                     if (runTestCase.getTestNumber() == 0) {
                         // if new set of test cases, start list all over again.
                         list = new ArrayList<Judgement>();
@@ -312,6 +314,35 @@ public final class JudgementUtilites {
         }
 
         return list;
+    }
+
+    /**
+     * Get test cases for last run
+     * Based on Doug Lane's code posted to Slack.
+     * 
+     * @param contest
+     * @param run
+     * @return null array if no test cases judgement in run, else the list of judgements
+     */
+    public static RunTestCase[] getLastTestCaseArray(IInternalContest contest, Run run) {
+        
+        List<RunTestCase> list = new ArrayList<RunTestCase>();
+        try {
+            
+            // Find last test case with ordinal 1 in the list of run cases
+            RunTestCase[] testCases = run.getRunTestCases();
+            for (RunTestCase runTestCase : testCases) {
+                // Found a new start of test cases, so dump old array and make new one
+                if (runTestCase.getTestNumber() == 1) {
+                    list = new ArrayList<RunTestCase>();
+                }
+                list.add(runTestCase);
+            }
+        } catch (Exception e) {
+            System.err.println("ERROR in getLastTestCaseArray "+e.getMessage());
+            e.printStackTrace();
+        }
+        return (RunTestCase[]) list.toArray(new RunTestCase[list.size()]);
     }
     
     /**

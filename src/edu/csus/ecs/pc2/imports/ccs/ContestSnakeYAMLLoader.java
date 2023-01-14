@@ -580,7 +580,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             if (maxOutputSize instanceof Integer) {
                 int maxSizeInK = ((Integer) maxOutputSize).intValue();
                 if (maxSizeInK > 0) {
-                    setMaxOutputSize(contest, maxSizeInK * 1000);
+                    setMaxOutputSize(contest, maxSizeInK * Constants.BYTES_PER_KIBIBYTE);
                 } else {
                     throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must be > 0 ", null, contestFileName);
                 }
@@ -630,7 +630,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             manualReviewOverride = fetchBooleanValue(content, MANUAL_REVIEW_KEY, false);
         }
 
-        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
+        //get the current default global output size for the contest so getProblems() can use it if no
+        // Problem-specific output limit is defined
+        Long defaultMaxOutputBytes = new Long(contest.getContestInformation().getMaxOutputSizeInBytes());
+        
+        Problem[] problems = getProblems(yamlLines, defaultTimeout, defaultMaxOutputBytes, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
 
         if (loadProblemDataFiles) {
             for (Problem problem : problems) {
@@ -914,9 +918,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
 
-    private void setMaxOutputSize(IInternalContest contest, int maxFileSize) {
+    private void setMaxOutputSize(IInternalContest contest, int maxOutputBytes) {
         ContestInformation contestInformation = contest.getContestInformation();
-        contestInformation.setMaxFileSize(maxFileSize);
+        contestInformation.setMaxOutputSizeInBytes(maxOutputBytes);
         contest.updateContestInformation(contestInformation);
     }
 
@@ -1240,6 +1244,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return defaultValue;
     }
 
+    private Long fetchLongValue(Map<String, Object> map, String key, long defaultValue) {
+        Long value = null;
+        if (map != null) {
+            value = (Long) map.get(key);
+        }
+        if (value != null) {
+            try {
+                return value;
+            } catch (Exception e) {
+                syntaxError("Expecting number after " + key + ": field, found '" + value + "'");
+            }
+        }
+        return defaultValue;
+    }
+
     private Integer fetchIntValue(Map<String, Object> map, String key) {
         if (map == null) {
             // SOMEDAY figure out why map would every be null
@@ -1343,13 +1362,64 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         //
         assignValidatorSettings(content, problem);
-
-        Map<String, Object> limitsContent = fetchMap(content, LIMITS_KEY);
-        Integer timeOut = fetchIntValue(limitsContent, TIMEOUT_KEY);
-        if (timeOut != null) {
-            problem.setTimeOutInSeconds(timeOut);
+        
+        //read any PC2-format limits specified at the top level of the problem.yaml file
+        Integer timeoutSecs = fetchIntValue(content, TIMEOUT_KEY);
+        if (timeoutSecs != null) {
+            problem.setTimeOutInSeconds(timeoutSecs);
+        }
+        Integer maxOutputPC2 = fetchIntValue(content, MAX_OUTPUT_SIZE_K_KEY);
+        if (maxOutputPC2 != null) {
+            problem.setMaxOutputSizeKB(maxOutputPC2);
         }
 
+        //get the map (if any) of the CLICS "limits" section in the problem.yaml file
+        Map<String, Object> limitsContent = fetchMap(content, LIMITS_KEY);
+
+        //if there is a CLICS "limits" section in the problem.yaml, read any values in that section and use 
+        // them to override any PC2-formatted values (just read in, above)
+        if (limitsContent != null) {
+            
+            //check for a CLICS timeout limit
+            //NOTE:  CLICS does not support directly specifying a problem time limit (like PC2 does with the "timeout" key).
+            //Rather, the CLCIS problem package format (at https://icpc.io/problem-package-format/spec/problem_package_format#limits)
+            //specifies two time-related limit values:  "time_multiplier" and "time_safety_margin".  The overall idea is that the CCS should
+            //first read and execute all the "acccepted judge's solutions" (contained in the CDP shortname/submissions/accepted folder).
+            //Next, the CCS should apply the "time_multiplier" to the slowest of the accepted judge's solutions and use that as the "timeout"
+            //value, allowing for a variance specified by the "time-safety_margin".  PC2 needs to implement this for CLICS compatibility, but
+            //it currently doesn't have any support for reading/executing the judge's accepted solutions to get these values,
+            //so we'll reject any time_multiplier and time_safety_margin values that are present.
+            
+            //Note also:  the following code is COMMENTED OUT because some of the existing PC2 JUnits contain "limits:" sections
+            // which DO have CLICS "time_multiplier" and/or "time_saftety_margin" entries in them (even though PC2 doesn't currently
+            // support those attibutes).  The problem is that the presence of those attributes in these JUnit test files results
+            // in those JUnits throwing YamlLoadExceptions.
+//            Integer clics_time_multiplier = fetchIntValue(limitsContent, CLICS_TIME_MULTIPLIER_KEY);
+//            if (clics_time_multiplier != null) {
+//                //TODO: replace the following exception with code to properly handle the CLICS time_multiplier value.
+//                throw new YamlLoadException("Unsupported CLICS attribute in " + problemYamlFilename + " 'limits' section: " + CLICS_TIME_MULTIPLIER_KEY);
+//            }
+//            Integer clics_time_safety_margin = fetchIntValue(limitsContent, CLICS_TIME_SAFETY_MARGIN_KEY);
+//            if (clics_time_safety_margin != null) {
+//                //TODO: replace the following exception with code to properly handle the CLICS time_safety_margin value.
+//                throw new YamlLoadException("Unsupported CLICS attribute in " + problemYamlFilename + " 'limits' section: " + CLICS_TIME_SAFETY_MARGIN_KEY);
+//            }
+            
+            //check for a timeout limit within the CLICS "limits:" section. 
+            // Note that the presence of a "timeout:" entry within a CLICS
+            // "limits:" section is non-CLICS standard -- but we want to support it in PC2.
+            Integer clicsTimeout = fetchIntValue(limitsContent, TIMEOUT_KEY);
+            if (clicsTimeout != null) {
+                problem.setTimeOutInSeconds(clicsTimeout);
+            }
+            
+            //check for a CLICS maxoutput limit
+            Integer clicsMaxOutput = fetchIntValue(limitsContent, CLICS_MAX_OUTPUT_KEY);
+            if (clicsMaxOutput != null) {
+                problem.setMaxOutputSizeKB(clicsMaxOutput);
+            }
+        }
+        
         if (!usingCustomValidator) {
             if (!pc2FormatProblemYamlFile) {
                 // SOMEDAY CCS add CCS validator derived based on build script
@@ -1788,7 +1858,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
+    public Problem[] getProblems(String[] yamlLines, int seconds, long maxOutputBytes, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
             boolean manualReviewOverride) {
 
         Vector<Problem> problemList = new Vector<Problem>();
@@ -1846,6 +1916,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // contains a "TIMEOUT_KEY", use the timeout value from the problem.yaml; otherwise use the passed-in default.
                 int actSeconds = fetchIntValue(problemMap, TIMEOUT_KEY, seconds);
                 problem.setTimeOutInSeconds(actSeconds);
+
+                //set problem output limit.  If the problem.yaml file for the current problem (codified in the "problemMap")
+                // contains an "OUTPUT" key, use the timeout value from the problem.yaml; otherwise use the passed-in default.
+                Long actualMaxOutputBytes = fetchLongValue(problemMap, MAX_OUTPUT_SIZE_K_KEY, maxOutputBytes);
+                problem.setMaxOutputSizeKB(actualMaxOutputBytes/Constants.BYTES_PER_KIBIBYTE);
+                
+                //TODO:  add code to check for the CLICS-compliant key "output:" in the "limits: section
+                // of problem.yaml if the PC2 "MAX_OUTPUT_SIZE_K_KEY doesn't exist
 
                 problem.setShowCompareWindow(false);
 
@@ -2293,17 +2371,27 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @Override
     public Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine) {
-        return getProblems(contents, defaultTimeOut, loadDataFileContents, defaultValidatorCommandLine, null, false, false);
+        return getProblems(contents, defaultTimeOut, Constants.DEFAULT_MAX_OUTPUT_SIZE_K*1024, loadDataFileContents, defaultValidatorCommandLine, null, false, false);
     }
 
     @Override
     public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String directoryName) {
         return fromYaml(contest, yamlLines, directoryName, false);
     }
+    
+    @Override
+    public Problem[] getProblems(String[] yamlLines, int defaultTimeOut) {
+        return getProblems(yamlLines, defaultTimeOut, Constants.DEFAULT_MAX_OUTPUT_SIZE_K*1024);
+    }
+    
+    @Override
+    public Problem[] getProblems(String[] yamlLines, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator, boolean manualReviewOverride) {
+        return getProblems(yamlLines, defaultTimeOut, Constants.DEFAULT_MAX_OUTPUT_SIZE_K*1024, loadDataFileContents, defaultValidatorCommand, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
+    }
 
     @Override
-    public Problem[] getProblems(String[] contents, int defaultTimeOut) {
-        return getProblems(contents, defaultTimeOut, true, null, null, false, false);
+    public Problem[] getProblems(String[] contents, int defaultTimeOut, long defaultMaxOutputSize) {
+        return getProblems(contents, defaultTimeOut, defaultMaxOutputSize, true, null, null, false, false);
     }
 
     @Override
@@ -3141,9 +3229,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         File cdpConfigDirectory = null;
 
         if (entry.isDirectory()) {
-
-            // found a directory
-            cdpConfigDirectory = new File(entry.getAbsoluteFile() + File.separator + CONFIG_DIRNAME);
+            
+            String contestYamlFile = entry.getPath() + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
+            if (new File(contestYamlFile).exists()) {
+                // if contest.yaml in current directory, then this is the equiv of config directory.
+                return entry;
+            } else {
+                // found a CDP base directory
+                cdpConfigDirectory = new File(entry.getAbsoluteFile() + File.separator + CONFIG_DIRNAME);
+            }
 
         } else if (entry.isFile()) {
 

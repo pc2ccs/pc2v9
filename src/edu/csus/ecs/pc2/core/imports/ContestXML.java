@@ -365,7 +365,7 @@ public class ContestXML {
     
 
     public IMemento addSystemProperties(IMemento memento, ContestInformation contestInformation) {
-        memento.putLong("maxFileSize", contestInformation.getMaxFileSize());
+        memento.putLong("maxFileSize", contestInformation.getMaxOutputSizeInBytes());
         memento.putString("teamDisplayMode", contestInformation.getTeamDisplayMode().toString());
         addScoringProperties (memento, contestInformation.getScoringProperties());
         return memento;
