@@ -27,9 +27,10 @@ PC2_SANDBOX_CGROUP_PATH=$PC2_CGROUP_PATH/sandbox_$USER
 
 # control whether the script outputs debug/tracing info
 _DEBUG="on"   # change this to anything other than "on" to disable debug/trace output
+DEBUG_FILE=sandbox.log
 function DEBUG()
 {
-  [ "$_DEBUG" == "on" ] && $@
+  [ "$_DEBUG" == "on" ] && $@ >> $DEBUG_FILE
 }
 
 # ------------------------------------------------------------
@@ -139,8 +140,8 @@ ulimit -t $TIMELIMIT
 TIMELIMIT_US=$((TIMELIMIT * 1000000))
 #echo $TIMELIMIT_US  > $PC2_SANDBOX_RUN_CGROUP_PATH/cpu.max
 
-DEBUG echo setting maximum user processes to 32
-ulimit -u 32
+DEBUG echo setting maximum user processes to 32 + whatever the user is currently using
+ulimit -u $((32+`ps -T -u pc2 | wc -l`))
 
 #put the current process (and implicitly its children) into the pc2sandbox cgroup.
 DEBUG echo putting $$ into $PC2_SANDBOX_CGROUP_PATH cgroup
