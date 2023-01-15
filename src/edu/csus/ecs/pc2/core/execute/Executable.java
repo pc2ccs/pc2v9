@@ -11,6 +11,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
@@ -2254,13 +2256,14 @@ public class Executable extends Plugin implements IExecutable {
         
         try {
             //copy the PC2 internal sandbox program into the execute directory
-            ExecuteUtilities.copyFile(srcFileName, targetFileName, getLog());
-            
+            Files.copy(new File(srcFileName).toPath(), new File(targetFileName).toPath());
+        } catch (FileAlreadyExistsException ae) {
+            // this is OK, just use the one there.
         } catch (Exception e){
             log.severe("Exception copying PC2 Internal Sandbox to execute directory: " + e.getMessage());
             executionData.setExecutionException(e);
             throw e;  
-        }  
+        }
     }
 
     /**
