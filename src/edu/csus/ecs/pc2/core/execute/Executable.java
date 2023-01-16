@@ -159,7 +159,30 @@ public class Executable extends Plugin implements IExecutable {
     private static final String EXIT_CODE_FILENAME = "EXITCODE.TXT";
 
     private static final long NANOSECS_PER_MILLISEC = 1_000_000;
-
+    
+    /**
+     * Sandbox constants
+     */
+    public static final long SANDBOX_EXTRA_KILLTIME_MS = 1000;
+    
+    /**
+     * Return codes from sandbox
+     */
+    public static final int FAIL_RETCODE_BASE = 128 + 64;
+    public static final int FAIL_EXIT_CODE = FAIL_RETCODE_BASE + 43;
+    public static final int FAIL_NO_ARGS_EXIT_CODE = FAIL_RETCODE_BASE + 44;
+    public static final int FAIL_INSUFFICIENT_ARGS_EXIT_CODE = FAIL_RETCODE_BASE + 45;
+    public static final int FAIL_INVALID_CGROUP_INSTALLATION = FAIL_RETCODE_BASE + 46;
+    public static final int FAIL_MISSING_CGROUP_CONTROLLERS_FILE = FAIL_RETCODE_BASE + 47;
+    public static final int FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE = FAIL_RETCODE_BASE + 48;
+    public static final int FAIL_CPU_CONTROLLER_NOT_ENABLED = FAIL_RETCODE_BASE + 49;
+    public static final int FAIL_MEMORY_CONTROLLER_NOT_ENABLED = FAIL_RETCODE_BASE + 50;
+    public static final int FAIL_MEMORY_LIMIT_EXCEEDED = FAIL_RETCODE_BASE + 51;
+    public static final int FAIL_TIME_LIMIT_EXCEEDED = FAIL_RETCODE_BASE + 52;
+    
+    public static final int FAIL_RETCODE_FIRST = FAIL_EXIT_CODE;
+    public static final int FAIL_RECODE_LAST = FAIL_TIME_LIMIT_EXCEEDED;
+    
     /**
      * Files submitted with the Run.
      */
@@ -1681,6 +1704,7 @@ public class Executable extends Plugin implements IExecutable {
         boolean proceedToValidation = false;
         String inputDataFileName = null;
         boolean usingSandbox = false ;
+        boolean bSandboxSystemError = false;
 
         // a one-based test data set number
         int testSetNumber = dataSetNumber + 1;
@@ -1878,11 +1902,11 @@ public class Executable extends Plugin implements IExecutable {
 
             //if a sandbox is being used, disable both the ExecutionTimer's actionPerformed() ability to stop the process
             // as well as the TimerTask's ability to stop the process
-            if (usingSandbox) {
-                //don't allow either the GUI timer or the TimerTask to stop the team code process; 
-                // the sandbox will be responsible for this.
-                autoStop = false;
-            }
+//            if (usingSandbox) {
+//                //don't allow either the GUI timer or the TimerTask to stop the team code process; 
+//                // the sandbox will be responsible for this.
+//                autoStop = false;
+//            }
             
             //start the program executing.  Note that runProgram() sets the "startTimeNanos" timestamp 
             /// immediately prior to actually "execing" the process.
@@ -1936,6 +1960,11 @@ public class Executable extends Plugin implements IExecutable {
             
             //set the TLE kill task delay to the number of milliseconds allowed by the problem
             long delay = (long) (problem.getTimeOutInSeconds() * 1000) ;
+            
+            if(usingSandbox) {
+                log.info ("adding " + SANDBOX_EXTRA_KILLTIME_MS + " msec delay to TLE-Timer for sandbox");
+                delay += SANDBOX_EXTRA_KILLTIME_MS;
+            }
             
             //schedule the TLE kill task with the Timer -- but only for judged runs (i.e., non-team runs)
             // and only when we're not using a sandbox (which will handle time limit within the sandbox)
@@ -2033,21 +2062,46 @@ public class Executable extends Plugin implements IExecutable {
             log.info("team process returned exit code " + exitCode);
             
             //TODO: comment-out this debug statement
-            System.out.println ("team process returned exit code " + exitCode);
+            //System.out.println ("team process returned exit code " + exitCode);
             
             //get rid of the TLE timer (whether the TLE-kill task has been fired or not)
             log.info("cancelling TLE-Timer (note: this does not stop any already-running TLE-Timer tasks...)");
             timeLimitKillTimer.cancel();
 
-
-            //////// TODO: need code here to deal with sandbox results..
-            
             //update executionData info
             executionData.setExecuteExitValue(exitCode);
             executionData.setExecuteTimeMS(getExecutionTimeInMSecs());
             
             boolean runTimeLimitWasExceeded = getExecutionTimeInMSecs() > problem.getTimeOutInSeconds()*1000 ;
             executionData.setRunTimeLimitExceeded(runTimeLimitWasExceeded);
+            
+            /**
+             * Check sandbox script return codes
+             */
+            if(usingSandbox) {
+                if(exitCode >= FAIL_RETCODE_FIRST && exitCode <= FAIL_RECODE_LAST) {
+                    log.info("Sandbox returned normalized error " + (exitCode - FAIL_RETCODE_BASE));
+                    switch(exitCode) {
+                    case FAIL_EXIT_CODE:
+                    case FAIL_NO_ARGS_EXIT_CODE:
+                    case FAIL_INSUFFICIENT_ARGS_EXIT_CODE:
+                    case FAIL_INVALID_CGROUP_INSTALLATION:
+                    case FAIL_MISSING_CGROUP_CONTROLLERS_FILE:
+                    case FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE:
+                    case FAIL_CPU_CONTROLLER_NOT_ENABLED:
+                    case FAIL_MEMORY_CONTROLLER_NOT_ENABLED:
+                        // These are all "system errors"
+                        bSandboxSystemError = true;
+                        break;
+                    case FAIL_MEMORY_LIMIT_EXCEEDED:
+                        executionData.setMemoryLimitExceeded(true);
+                        break;
+                    case FAIL_TIME_LIMIT_EXCEEDED:
+                        executionData.setRunTimeLimitExceeded(true);
+                        break;
+                    }
+                }
+            }
  
             if (executionData.isRunTimeLimitExceeded()) {
                 log.info("Run exceeded problem time limit of " + problem.getTimeOutInSeconds() + " secs: actual run time = " + executionData.getExecuteTimeMS() + " msec;  Run = " + run);
@@ -2064,8 +2118,9 @@ public class Executable extends Plugin implements IExecutable {
             log.info("calling Process.destroy() on process " + getProcessID(process) );
             process.destroy();
 
-            // if the process generated a Runtime Error and did NOT exceed time limit, add error msg to team output
-            if (!executionData.isRunTimeLimitExceeded() && !terminatedByOperator && exitCode != 0) {
+            // if the process generated a Runtime Error and did NOT exceed time/memory limit, and not sandbox error, add error msg to team output
+            if (!executionData.isRunTimeLimitExceeded() && !executionData.isMemoryLimitExceeded() &&
+                !terminatedByOperator && !bSandboxSystemError && exitCode != 0) {
                 String msg = "Note: program exited with non-zero exit code '" + exitCode + "'" + NL;
                 stdoutlog.write(msg.getBytes());
             }
@@ -2146,9 +2201,33 @@ public class Executable extends Plugin implements IExecutable {
             executionData.setValidationResults(judgementString);
             executionData.setValidationSuccess(true);
             proceedToValidation = false;
+        } else if(executionData.isMemoryLimitExceeded()) {
+            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "MLE");
+            String judgementString = "No - Memory Limit Exceeded"; // default
+            if (judgement != null) {
+                judgementString = judgement.getDisplayName();
+            }
+
+            executionData.setValidationResults(judgementString);
+            executionData.setValidationSuccess(true);
+            proceedToValidation = false;
+            
+        } else if(bSandboxSystemError) {
+            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "OCS");
+            String judgementString = "No - contact staff"; // default
+            if (judgement != null) {
+                judgementString = judgement.getDisplayName();
+            }
+
+            executionData.setValidationResults(judgementString);
+            executionData.setValidationSuccess(true);
+            proceedToValidation = false;
         }
 
-        if (executionData.getExecuteExitValue() != 0  &&  !killedByTimer) {
+        // if return code wasn't 0, it means something went wrong.  We only override the result
+        // if we were not killed by the execute timer and we didn't override the judgement above by
+        // TLE/MLE/OCS
+        if (executionData.getExecuteExitValue() != 0  &&  !killedByTimer && proceedToValidation) {
             
             Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "RTE");
             String judgementString = "No - Run-time Error"; // default
