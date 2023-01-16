@@ -179,9 +179,10 @@ public class Executable extends Plugin implements IExecutable {
     public static final int FAIL_MEMORY_CONTROLLER_NOT_ENABLED = FAIL_RETCODE_BASE + 50;
     public static final int FAIL_MEMORY_LIMIT_EXCEEDED = FAIL_RETCODE_BASE + 51;
     public static final int FAIL_TIME_LIMIT_EXCEEDED = FAIL_RETCODE_BASE + 52;
+    public static final int FAIL_WALL_TIME_LIMIT_EXCEEDED = FAIL_RETCODE_BASE + 53;
     
     public static final int FAIL_RETCODE_FIRST = FAIL_EXIT_CODE;
-    public static final int FAIL_RECODE_LAST = FAIL_TIME_LIMIT_EXCEEDED;
+    public static final int FAIL_RECODE_LAST = FAIL_WALL_TIME_LIMIT_EXCEEDED;
     
     /**
      * Files submitted with the Run.
@@ -2097,6 +2098,9 @@ public class Executable extends Plugin implements IExecutable {
                         executionData.setMemoryLimitExceeded(true);
                         break;
                     case FAIL_TIME_LIMIT_EXCEEDED:
+                        executionData.setRunTimeLimitExceeded(true);
+                        break;
+                    case FAIL_WALL_TIME_LIMIT_EXCEEDED:
                         executionData.setRunTimeLimitExceeded(true);
                         break;
                     }

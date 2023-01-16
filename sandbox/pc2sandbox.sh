@@ -24,6 +24,10 @@ FAIL_CPU_CONTROLLER_NOT_ENABLED=$((FAIL_RETCODE_BASE+49))
 FAIL_MEMORY_CONTROLLER_NOT_ENABLED=$((FAIL_RETCODE_BASE+50))
 FAIL_MEMORY_LIMIT_EXCEEDED=$((FAIL_RETCODE_BASE+51))
 FAIL_TIME_LIMIT_EXCEEDED=$((FAIL_RETCODE_BASE+52))
+FAIL_WALL_TIME_LIMIT_EXCEEDED=$((FAIL_RETCODE_BASE+53))
+
+# Process ID of submission
+submissionpid=""
 
 CGROUP_PATH=/sys/fs/cgroup
 PC2_CGROUP_PATH=$CGROUP_PATH/pc2
@@ -51,6 +55,21 @@ timelimit, in seconds
 
 SAGE
 }
+
+# Function to handle getting killed by PC2's execute timer (basically, this
+# is wall-time exceeded which is execute time limit + 1 second
+HandleTerminateFromPC2()
+{
+	DEBUG echo "Received TERMINATE signal from PC2"
+	if test -n "$submissionpid"
+	then
+		DEBUG echo "Killing off submission process $submissionpid"
+		kill -9 "$submissionpid"
+	fi
+	DEBUG echo $0: Wall time exceeded - exiting with code $FAIL_WALL_TIME_LIMIT_EXCEEDED
+	exit $FAIL_WALL_TIME_LIMIT_EXCEEDED 
+}
+
 # ------------------------------------------------------------
 
 if [ "$#" -lt 1 ] ; then
@@ -166,7 +185,14 @@ fi
 #  should still fall under the cgroup limits).
 DEBUG echo Executing $COMMAND $* 
 
-$COMMAND $*
+# Set up trap handler to catch wall-clock time exceeded and getting killed by PC2's execute timer
+trap HandleTerminateFromPC2 15
+
+$COMMAND $* &
+# Remember child's PID for possible killing off later
+submissionpid=$!
+# Wait for child
+wait
 
 COMMAND_EXIT_CODE=$?
 
