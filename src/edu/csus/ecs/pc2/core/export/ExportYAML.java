@@ -634,7 +634,7 @@ public class ExportYAML {
         problemWriter.println(IContestLoader.LIMITS_KEY + ":");
         problemWriter.println(PAD4 + "timeout: " + problem.getTimeOutInSeconds());
         if (problem.getMemoryLimitMB() > 0) {
-            problemWriter.println(PAD4 + IContestLoader.MEMORY_LIMIT_IN_MEG_KEY + ": " + problem.getMemoryLimitMB());
+            problemWriter.println(PAD4 + IContestLoader.MEMORY_LIMIT_CLICS + ": " + problem.getMemoryLimitMB());
         }
         
         problemWriter.println();
