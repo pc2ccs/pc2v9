@@ -8,7 +8,7 @@
 #  $3: command to be executed
 #  $4... : command arguments
 # 
-# Author: John Clevenger, based on an earlier version by Doug Lane
+# Author: John Buck, based on earlier versions by John Clevenger and Doug Lane
 
 # FAIL_RETCODE_BASE is 128 + 64 + xx
 # 128 = system error, like signal
