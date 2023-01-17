@@ -422,18 +422,18 @@ public class JudgementUtilitesTest extends AbstractTestCase {
         RunTestCase[] recs = JudgementUtilites.getLastTestCaseArray(contest, run);
         assertEquals("Expected zero test cases ", 0, recs.length);
         // Add firstset of test cases - all AC
-        for (int testCaseNum = 1; testCaseNum < problem.getNumberTestCases(); testCaseNum++) {
-            addRunTestCase(contest, run, testCaseNum++, acJudgement, judges[0].getClientId());
+        for (int testCaseNum = 1; testCaseNum <= problem.getNumberTestCases(); testCaseNum++) {
+            addRunTestCase(contest, run, testCaseNum, acJudgement, judges[0].getClientId());
         }
         recs = JudgementUtilites.getLastTestCaseArray(contest, run);
-        assertEquals("Expected test cases ", 3, recs.length);
+        assertEquals("Expected test cases ", 10, recs.length);
         // Add second set of test cases - all WA
-        for (int testCaseNum = 1; testCaseNum < problem.getNumberTestCases(); testCaseNum++) {
-            addRunTestCase(contest, run, testCaseNum++, waJudgement, judges[0].getClientId());
+        for (int testCaseNum = 1; testCaseNum <= problem.getNumberTestCases(); testCaseNum++) {
+            addRunTestCase(contest, run, testCaseNum, waJudgement, judges[0].getClientId());
         }
-        assertEquals("Expected total test cases ", 6, run.getRunTestCases().length);
+        assertEquals("Expected total test cases ", 20, run.getRunTestCases().length);
         recs = JudgementUtilites.getLastTestCaseArray(contest, run);
-        assertEquals("Expected test cases ", 3, recs.length);
+        assertEquals("Expected test cases ", 10, recs.length);
         // Test that all judgements are WA
         for (RunTestCase runTestCase : recs) {
             ElementId judgementId = runTestCase.getJudgementId();
