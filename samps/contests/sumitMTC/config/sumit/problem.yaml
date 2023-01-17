@@ -14,7 +14,7 @@ rights_owner:
 
 limits: 
    timeout: 30
-   memory-limit-in-Meg: 2099
+   memory: 2099
 
 sandbox-type: NONE
 # sandbox-type: PC2_INTERNAL_SANDBOX
