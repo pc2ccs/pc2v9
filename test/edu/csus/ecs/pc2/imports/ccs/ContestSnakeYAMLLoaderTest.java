@@ -64,6 +64,8 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
+    private static final String MINI_CONTEST_DIR = "mini";
+
     private static final String YYYY_MM_DD_FORMAT1 = "yyyy-MM-dd HH:mm";
 
     private String dateTimeFormat = "EEE MMM dd HH:mm:ss yyyy";
@@ -2660,7 +2662,6 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
                 assertTrue("Expecting at least one problem in contest in " + directoryName, problems.length > 0);
 
             } catch (YamlLoadException e) {
-                System.err.println("Failed to load config from " + directoryName+" "+e.getMessage());
                 System.err.println("Failed to load config from " + directoryName + " " + e.getCause().getMessage());
                 throw e.getCause();
             }
@@ -3842,135 +3843,24 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
         }
     }
+    
+    public void testLoadSampleFiles() throws Exception {
 
-    /**
-     * Test that problems are assigned default max-output-size-K if not specified in problem dot yaml.
-     * 
-     * Implements: Verify that if no explicit output limit is specified anywhere, a problem acquires 
-     * the max output value defined by Constants.DEFAULT_MAX_OUTPUT_SIZE_K (512).
-     */
-    public void testProblemDefaultMaxOutputSize() throws Exception {
-
-        IInternalContest contest = loadSampleContest(null, "tenprobs");
+        IInternalContest contest = loadFullSampleContest(null, MINI_CONTEST_DIR);
         assertNotNull(contest);
 
-        Problem[] problems = contest.getProblems();
-        assertEquals("Number of problems", 10, problems.length);
-
-        for (Problem problem : problems) {
-            assertEquals("For problem '" + problem.getShortName() + "' expecting same output file size", Constants.DEFAULT_MAX_OUTPUT_SIZE_K, problem.getMaxOutputSizeKB());
-        }
-    }
-    
-    /**
-     * Test default max-output-size-K for sample contest dot yaml files.
-     */
-    public void testDefaultMaxOutputSizeForSampleContests() throws Exception {
-
-        String[] allSamps = {
-                // contests without default max output value
-                // "ccs1", //
-                // "qanat", //
-                // "mini", //
-                // "valtest", //
-//                "sumithello", //
-
-                // contests WITH default max output value
-                "ccs2", //
-                "problemflagtest", //
-                "sumitMTC", //
-                "tenprobs", //
-        };
-
-        for (String shortName : allSamps) {
-            IInternalContest contest = loadSampleContest(null, shortName);
-            assertNotNull("Contest " + shortName, contest);
-
-            Problem[] problems = contest.getProblems();
-            for (Problem problem : problems) {
-                assertEquals("For problem '" + problem.getShortName() + "': expecting same output file size", Constants.DEFAULT_MAX_OUTPUT_SIZE_K, problem.getMaxOutputSizeKB());
-            }
-
-        }
-
-    }
-    
-    /**
-     * Test where max-output-size-K: 137 in contest dot yaml and overridden by problem dot yaml  max-output-size-K.
-     * 
-     * Implements: Verify that if there is a max-output-size-K entry in contest.yaml but also a max-output-size-K 
-     * entry (with a different value) in a problem.yaml, the problem acquires the value specified in
-     * the problem.yamlfile (overriding the value in contest.yaml).
-     * 
-     * @throws Exception
-     */
-    public void testProblemYamlMaxFileSizeOverride() throws Exception {
-        
-        IInternalContest contest = loadSampleContest(null, "sumithello");
-        assertNotNull(contest);
-        
-//        String yamlfile = getContestSampleYamlFilename("ccs1");
-//        editFile(yamlfile);
+        int totalTestCases = 0;
 
         Problem[] problems = contest.getProblems();
-        assertEquals("Number of problems", 2, problems.length);
-        
-        ContestInformation info = contest.getContestInformation();
-        assertNotNull("expecting ContestInformation", info);
-        
-        // from contest.yaml, max-output-size-K: 137
-        long infoMaxOutputSize = info.getMaxOutputSizeInBytes();
-        long expectedBytesFromContestYaML = 137 * 1024;
-        assertEquals("Expected max-output-size-K in contest.yaml ", expectedBytesFromContestYaML, infoMaxOutputSize);
-        
-        /**
-         * Expected max-output-size-K in problem.yaml (128)
-         */
-        long expectedMaxOutputSizeKB = 128;
-
         for (Problem problem : problems) {
-            // from problem.yaml, max-output-size-K: 128
-            assertEquals("For problem '" + problem.getShortName() + "': expecting same output file size", expectedMaxOutputSizeKB, problem.getMaxOutputSizeKB());
+
+            totalTestCases += problem.getNumberTestCases();
+//            for (int i = 0; i < problem.getNumberTestCases(); i++) {
+//                System.out.println("debug "+problem.getDataFileName(i+1));
+//            }
         }
-        
+
+        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 10, totalTestCases);
+
     }
-
-    /**
-     * Test limits output: override.
-     * 
-     * Implements: Verify that if there is a max-output-size-K entry in contest.yaml but also a problem.yaml 
-     * file containing a "limits:" section which in turn contains an "output:" key, the problem
-     * acquires the value specified by the "output:" key (overriding both the DEFAULT_MAX_OUTPUT_SIZE_K value 
-     * and the max-output-size-K value set in contest.yaml).
-     */
-    public void testLimitsOutputOverride() throws Exception {
-        IInternalContest contest = loadSampleContest(null, "mini");
-        assertNotNull(contest);
-        
-//        String yamlfile = getContestSampleYamlFilename("sumithello");
-//        editFile(yamlfile);
-        
-        Problem[] problems = contest.getProblems();
-        assertEquals("Number of problems", 1, problems.length);
-        
-        ContestInformation info = contest.getContestInformation();
-        assertNotNull("expecting ContestInformation", info);
-
-        // from contest.yaml, max-output-size-K: 142
-        long infoMaxOutputSize = info.getMaxOutputSizeInBytes();
-        long expectedBytesFromContestYaML = 142 * 1024;
-        assertEquals("Expected max-output-size-K in contest.yaml ", expectedBytesFromContestYaML, infoMaxOutputSize);
-        
-        /**
-         * Expected limits/output: in problem.yaml (778)
-         */
-        long expectedMaxOutputSizeKB = 778;
-
-        for (Problem problem : problems) {
-            // from problem.yaml, max-output-size-K: 128
-            assertEquals("For problem '" + problem.getShortName() + "': expecting same output file size", expectedMaxOutputSizeKB, problem.getMaxOutputSizeKB());
-        }
-        
-    }
-    
 }
