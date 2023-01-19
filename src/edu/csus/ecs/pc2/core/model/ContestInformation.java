@@ -168,6 +168,18 @@ public class ContestInformation implements Serializable{
     
     
     /**
+     * Load CDP samples/data in front of judges secret data. 
+     * 
+     * <pre>
+     * # in yaml, do not load sample judges data 
+     * loadSampleJudgesData : false
+     * </pre>
+     * 
+     */
+    private boolean loadSampleJudgesData = true;
+    
+    
+    /**
      * stop-on-first-failed-test-case
      * 
      */
@@ -788,5 +800,13 @@ public class ContestInformation implements Serializable{
 
     public void setTeamScoreboardDisplayFormat(String teamScoreboardDisplayFormat) {
         this.teamScoreboardDisplayFormat = teamScoreboardDisplayFormat;
+    }
+    
+    public boolean isLoadSampleJudgesData() {
+        return loadSampleJudgesData;
+    }
+    
+    public void setLoadSampleJudgesData(boolean loadSampleJudgesData) {
+        this.loadSampleJudgesData = loadSampleJudgesData;
     }
 }
