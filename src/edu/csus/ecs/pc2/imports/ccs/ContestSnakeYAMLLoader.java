@@ -3164,7 +3164,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 loadAccountsFile = altFilename;
 
                 /**
-                 * If altfilena is not a full/partal path, check whether alt file is under config/
+                 * If altFilename is not a full/partal path, check whether alt file is under config/
                  */
                 if (!Utilities.fileExists(altFilename)) {
                     String altFileInConfig = cdpConfigDirectory + File.separator + altFilename;
