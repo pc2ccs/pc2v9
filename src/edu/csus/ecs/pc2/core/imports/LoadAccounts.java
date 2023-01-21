@@ -407,7 +407,7 @@ public class LoadAccounts {
         String[] columns;
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF8"));
         String line = in.readLine();
-        while (line != null && line.startsWith("#")) {
+        while (line != null && (line.startsWith("#") || line.trim().length() == 0)) {
             line = in.readLine();
             lineCount++;
         }
@@ -425,6 +425,15 @@ public class LoadAccounts {
             permLoginColumn = -1;
             permPasswordColumn = -1;
             scoreAdjustmentColumn = -1;
+            /*
+             * These correspond to columns found in the icpc data
+             */
+            longSchoolNameColumnn = -1;
+            shortSchoolNameColumn = -1;
+            countryCodeColumn = -1;
+            teamNameColumn = -1;
+            scoreAdjustmentColumn = -1;
+            
             for (int i = 0; i < columns.length; i++) {
                 
                 if (Constants.SITE_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
@@ -484,7 +493,7 @@ public class LoadAccounts {
         while (line != null) {
             try {
                 // skip comments & line blanks
-                if (line.startsWith("#") || line.equals("")) {
+                if (line.startsWith("#") || line.trim().length() == 0) {
                     line = in.readLine();
                     lineCount++;
                     continue;
@@ -613,6 +622,16 @@ public class LoadAccounts {
             permLoginColumn = -1;
             permPasswordColumn = -1;
             scoreAdjustmentColumn = -1;
+            
+            /*
+             * These correspond to columns found in the icpc data
+             */
+            longSchoolNameColumnn = -1;
+            shortSchoolNameColumn = -1;
+            countryCodeColumn = -1;
+            teamNameColumn = -1;
+            scoreAdjustmentColumn = -1;
+            
             for (int i = 0; i < columns.length; i++) {
                 
                 if (Constants.SITE_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
