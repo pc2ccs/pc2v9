@@ -56,7 +56,7 @@ jobs:
           git config --global user.name "PC2 bot"
           export VERSION=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#'`
           export VERSION1=`echo dist/pc2-*.zip | sed 's#^dist.*pc2-\(.*\).zip*#\1#' | sed 's/~.*//'`
-          if [ github.ref == 'refs/heads/master' ]; then
+           if ( test "$GITHUB_REF" = 'refs/heads/master' ); then
              TARGET=builds
           else
              TARGET=nightly-builds

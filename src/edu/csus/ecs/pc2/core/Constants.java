@@ -74,6 +74,9 @@ public final class Constants {
      * Default contest length.
      */
     public static final long DEFAULT_CONTEST_LENGTH_SECONDS = 18000; // 5 * 60 * 60
+    
+    
+    public static final int DEFAULT_MAX_OUTPUT_SIZE_K = 512;
 
     /**
      * PC<sup>2</sup> Validator Program Name.
@@ -165,5 +168,7 @@ public final class Constants {
     
     public static final int INPUT_VALIDATOR_EXECUTION_ERROR_CODE = -39;
     
-    public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";   
+    public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";
+
+    public static final int BYTES_PER_KIBIBYTE = 1024;   
 }

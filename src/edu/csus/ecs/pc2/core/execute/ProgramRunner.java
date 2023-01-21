@@ -71,6 +71,25 @@ public class ProgramRunner {
     public int runProgram(ExecutionData executionData, String executeDirectoryName, String cmdline,
             int msTimeout, ExecuteTimer executionTimer, String stdinFilename, String stdoutFilename, String stderrFilename) throws ExecuteException {
 
+        //TODO:  currently, this method (ProgramRunner.runProgram()) is ONLY invoked by method
+        // CustomInputValidatorRunner.runCustomInputValidator().  For that use-case, the value
+        // of getMaxFileSize() being passed to the IOCollector (see below) is really meaningless, because that
+        // value (which is obtained by a call to contest.getContestInformation().getMaxFileSize())
+        // specifies the maximum output size for a SUBMISSION; it has nothing to do with running
+        // an Input Validator.  The effect of this at the moment is just that an Input Validator 
+        // will be limited to producing no more output than that allowed by a team submission.
+        // This is not correct, but it doesn't seem terribly bad because Input Validators are not
+        // typically expected to produce huge amounts of output.
+        // However, if this method is ever used for running any OTHER programs, or if the value returned
+        // by contest.getContestInformation().getMaxFileSize() was small, this could become
+        // an issue.  The issue becomes further complicated by the fact that a change associated with
+        // GitHub Issue #564 -- Support per-problem output limits -- means that each Problem now has
+        // its own output limit; method getMaxFileSize() in this class does not respect this (and
+        // currently doesn't even have access to the current Problem, so the entire calling sequence
+        // would need to be adjusted.) 
+        // See method getMaxFileSize() in class Executable for insight into how to obtain per-problem
+        // output size limits.
+        
         String message;
         int returnValue = -1 ;
 
@@ -189,6 +208,6 @@ public class ProgramRunner {
      * @return
      */
     private long getMaxFileSize() {
-        return contest.getContestInformation().getMaxFileSize();
+        return contest.getContestInformation().getMaxOutputSizeInBytes();
     }
 }

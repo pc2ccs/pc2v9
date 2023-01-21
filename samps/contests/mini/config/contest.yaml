@@ -13,6 +13,8 @@ start-time:        2016-11-04T18:30:00-07:00
 
 duration:  2:00:00
 
+max-output-size-K: 142
+
 # freeze time before end of contest
 scoreboard-freeze: 01:00:00
 # scoreboard-freeze-length in CCS, but has it de facto changed to scoreboard-freeze in pc2?
@@ -44,6 +46,10 @@ load-data-files: false
 # load-accounts-file : '/home/ubuntu/current/config/mini.load.accounts.up.tsv'
 # with new accounts too
 # load-accounts-file : mini.load.accounts02.up.tsv
+
+# load sample files then load secret data files, default is true
+# load-sample-judges-data : false
+# load-sample-judges-data : true
 
 # judge's data path
 judge-config-path: /home/judge/cdp/config

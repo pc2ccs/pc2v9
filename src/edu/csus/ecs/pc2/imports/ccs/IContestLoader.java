@@ -62,6 +62,12 @@ public interface IContestLoader {
     
     String MAX_OUTPUT_SIZE_K_KEY = "max-output-size-K";
     
+    String CLICS_MAX_OUTPUT_KEY = "output";
+    
+    String CLICS_TIME_MULTIPLIER_KEY = "time_multiplier";
+    
+    String CLICS_TIME_SAFETY_MARGIN_KEY = "time_safety_margin";
+    
     final String OUTPUT_PRIVATE_SCORE_DIR_KEY = "output-private-score-dir";
 
     final String OUTPUT_PUBLIC_SCORE_DIR_KEY = "output-public-score-dir";
@@ -113,7 +119,9 @@ public interface IContestLoader {
     String AUTO_JUDGE_KEY = "auto-judging";
 
     String CCS_TEST_MODE = "ccs-test-mode";
-
+    
+    String LOAD_SAMPLE_JUDGES_DATA = "load-sample-judges-data";
+    
     String INPUT_KEY = "input";
 
     String PROBLEM_LOAD_DATA_FILES_KEY = "load-data-files";
@@ -252,9 +260,14 @@ public interface IContestLoader {
 
     Problem[] getProblems(String[] contents, int defaultTimeOut);
 
+    Problem[] getProblems(String[] contents, int defaultTimeOut, long defaultMaxOutputSizeInBytes);
+
     Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine);
 
     Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
+            boolean manualReviewOverride);
+
+    Problem[] getProblems(String[] yamlLines, int seconds, long maxOutputSizeInBytes, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
             boolean manualReviewOverride);
 
     Problem[] getProblemsFromLetters(Problem[] contestProblems, String string);

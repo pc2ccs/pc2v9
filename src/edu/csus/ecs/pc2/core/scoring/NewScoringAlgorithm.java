@@ -160,7 +160,17 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         
         setContest(contest);
 
-        Vector<Account> accountVector = getContest().getAccounts(Type.TEAM);
+        /*
+         * Get all the teams, then create a new vector of only those teams shown on the
+         * scoreboard.  The new vector is used for the standings computations.
+         */
+        Vector<Account> allAccountVector = getContest().getAccounts(Type.TEAM);
+        Vector<Account> accountVector = new Vector<Account>();
+        for(Account av : allAccountVector) {
+            if(av.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                accountVector.add(av);
+            }
+        }
         Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
 
         // Kludge for DefaultStandingsRecordComparator
