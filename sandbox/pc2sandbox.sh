@@ -188,7 +188,7 @@ DEBUG echo Executing $COMMAND $*
 # Set up trap handler to catch wall-clock time exceeded and getting killed by PC2's execute timer
 trap HandleTerminateFromPC2 15
 
-$COMMAND $* &
+$COMMAND $* <&0 &
 # Remember child's PID for possible killing off later
 submissionpid=$!
 # Wait for child
