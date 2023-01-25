@@ -68,7 +68,10 @@ public class ShadowController {
     private String remoteCCSPassword;
 
     private RemoteEventFeedMonitor monitor;
-
+    
+    private IShadowMonitorStatus shadowMonitorStatus = null;
+    
+    private String lastToken = null;
     
     public enum SHADOW_CONTROLLER_STATUS {
         
@@ -95,6 +98,8 @@ public class ShadowController {
     private RemoteContestConfiguration remoteContestConfig;
     private Thread monitorThread;
     private IRemoteContestAPIAdapter remoteContestAPIAdapter;
+
+    private boolean convertJudgementsToBig5 = true;
 
     /**
      * a ContestInformation Listener
@@ -143,7 +148,41 @@ public class ShadowController {
      */
     public ShadowController(IInternalContest localContest, IInternalController localController) {
 
-        this(localContest, localController, 
+        this(localContest, localController, null, null,
+                localContest.getContestInformation().getPrimaryCCS_URL(),
+                localContest.getContestInformation().getPrimaryCCS_user_login(),
+                localContest.getContestInformation().getPrimaryCCS_user_pw());
+
+    }
+
+    /**
+     * Constructs a new ShadowController for the remote CCS specified by the data in the 
+     * specified {@link IInternalContest} and {@link IInternalContest}. 
+     * 
+     * @param localContest a PC2 Contest to be used by the Shadow Controller
+     * @param localController a PC2 Controller to be used by the Shadow Controller
+     */
+    public ShadowController(IInternalContest localContest, IInternalController localController, IShadowMonitorStatus mon) {
+
+        this(localContest, localController, mon, null,
+                localContest.getContestInformation().getPrimaryCCS_URL(),
+                localContest.getContestInformation().getPrimaryCCS_user_login(),
+                localContest.getContestInformation().getPrimaryCCS_user_pw());
+
+    }
+
+    /**
+     * Constructs a new ShadowController for the remote CCS specified by the data in the 
+     * specified {@link IInternalContest} and {@link IInternalContest}. 
+     * 
+     * @param localContest a PC2 Contest to be used by the Shadow Controller
+     * @param localController a PC2 Controller to be used by the Shadow Controller
+     * @param mon optional monitor status handler
+     * @param lastToken location of where to resume feed from
+     */
+    public ShadowController(IInternalContest localContest, IInternalController localController, IShadowMonitorStatus mon, String lastToken) {
+
+        this(localContest, localController, mon, lastToken,
                 localContest.getContestInformation().getPrimaryCCS_URL(),
                 localContest.getContestInformation().getPrimaryCCS_user_login(),
                 localContest.getContestInformation().getPrimaryCCS_user_pw());
@@ -162,11 +201,31 @@ public class ShadowController {
     public ShadowController(IInternalContest localContest, IInternalController localController, 
                             String remoteURL, String remoteCCSLogin, String remoteCCSPassword) {
 
+        this(localContest, localController, null, null,
+                localContest.getContestInformation().getPrimaryCCS_URL(),
+                localContest.getContestInformation().getPrimaryCCS_user_login(),
+                localContest.getContestInformation().getPrimaryCCS_user_pw());
+    }
+
+    /**
+     * Constructs a new ShadowController for the remote CCS specified by the input parameters.
+     * 
+     * @param localContest a PC2 Contest to be used by the Shadow Controller
+     * @param localController a PC2 Controller to be used by the Shadow Controller
+     * @param remoteURL the URL of the remote CCS
+     * @param remoteCCSLogin
+     * @param remoteCCSPassword
+     */
+    public ShadowController(IInternalContest localContest, IInternalController localController, IShadowMonitorStatus mon, String lastToken,
+                            String remoteURL, String remoteCCSLogin, String remoteCCSPassword) {
+
         this.localContest = localContest;
         this.localController = localController;
         this.remoteCCSURLString = remoteURL;
         this.remoteCCSLogin = remoteCCSLogin;
         this.remoteCCSPassword = remoteCCSPassword;
+        this.shadowMonitorStatus = mon;
+        this.lastToken = lastToken;
         this.localContest.addContestInformationListener(new ContestInformationListenerImplementation());
         this.setStatus(SHADOW_CONTROLLER_STATUS.SC_NEVER_STARTED);
     }
@@ -248,13 +307,16 @@ public class ShadowController {
             
             //construct an EventFeedMonitor for keeping track of the remote CCS events
             log.info("Constructing new RemoteEventFeedMonitor");
-            monitor = new RemoteEventFeedMonitor(localController, remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter);
+            monitor = new RemoteEventFeedMonitor(localController, remoteContestAPIAdapter, remoteCCSURL, remoteCCSLogin, remoteCCSPassword, submitter, shadowMonitorStatus);
 
             if (! remoteContestAPIAdapter.testConnection()){
                 
                 return false;
             }
             
+            // tell monitor where to start feed from (can be null to start from the beginning)
+            monitor.setStartAfterToken(lastToken);
+
             //start the monitor running as a thread listening for submissions from the remote CCS
             monitorThread = new Thread(monitor);
             monitorThread.start();
@@ -285,9 +347,6 @@ public class ShadowController {
             return new RemoteContestAPIAdapter(url, login, password);
         }
     }
-
-    private boolean convertJudgementsToBig5 = true;
-    private boolean shadowModeEnabled = false;
     
     /**
      * Returns a Map which maps submissionIDs to {@link ShadowJudgementInfo}s
@@ -546,9 +605,11 @@ public class ShadowController {
      * Returns a Map which maps submissionIds to {@link ShadowJudgementInfo} objects for every submission (run) in the
      * specified array of PC2 Runs.
      */
-    private Map<String, ShadowJudgementInfo> getJudgementsMap(Run[] pc2Runs) {
+    protected Map<String, ShadowJudgementInfo> getJudgementsMap(Run[] pc2Runs) {
 
         Map<String, ShadowJudgementInfo> pc2JudgementInfoMap = new HashMap<String, ShadowJudgementInfo>();
+        
+        log = getLog();
 
         // check each PC2 run (submission)
         for (Run run : pc2Runs) {
@@ -629,13 +690,34 @@ public class ShadowController {
                             pc2JudgementInfoMap.put(submissionId, info);
 
                         } else {
-                            // we've exhausted methods of obtaining an acronym
-                            log.warning("Null judgement acronym for run " + run.getNumber() + ", judgement string " + judgementString + "; skipping");
+                            // we've exhausted methods of obtaining an acronym from the validator judgement string
+
+                            Judgement judgement = localContest.getJudgement(jr.getJudgementId());
+                            if (judgement == null) {
+                                log.warning("Null judgement for run " + run.getNumber() + ", Judgement not found in model for run");
+                            } else {
+
+                                /**
+                                 * Acronym for run judgement
+                                 */
+                                String acronymnName = judgement.getAcronym().toString();
+
+                                // Add ShadowJudgementInfo for run into pc2JudgementInfoMap 
+                                ClientId judgerClientID = jr.getJudgerClientId();
+                                ShadowJudgementPair pair = new ShadowJudgementPair(submissionId, acronymnName, "<pending>");
+                                ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, judgerClientID, pair);
+                                pc2JudgementInfoMap.put(submissionId, info);
+
+                                log.info("Null judgement acronym for run " + run.getNumber() + ", judgement string " + judgementString + "; not skipped assigned acronym = " + acronymnName);
+                            }
+
                         }
 
                     } else {
                         // we got a null judgment record from the run, but it's supposedly been judged -- error!
                         log.severe("Error: found a (supposedly) judged PC2 run with no PC2 JudgementRecord!" + " (Submission id = " + run.getNumber() + ")");
+                        
+                        
                     }
 
                 } else {
@@ -864,13 +946,11 @@ public class ShadowController {
 
     private void updateCached(ContestInformation ci) {
         if (ci != null) {
-            shadowModeEnabled  = ci.isShadowMode();
             remoteCCSURLString = ci.getPrimaryCCS_URL();
             remoteCCSLogin = ci.getPrimaryCCS_user_login();
             remoteCCSPassword = ci.getPrimaryCCS_user_pw();
         } else {
             // there is no ContestInformation, reset to defaults
-            shadowModeEnabled = false;
             remoteCCSURLString = "";
             remoteCCSLogin = "";
             remoteCCSPassword = "";
@@ -885,7 +965,7 @@ public class ShadowController {
     private boolean restartShadowIfNeeded(ContestInformation ci) {
         boolean result = false;
         if (ci != null && ci.isShadowMode()) {
-            if (shadowModeEnabled) {
+            if (getStatus().equals(SHADOW_CONTROLLER_STATUS.SC_RUNNING)) {
                 // we are suppose to be running, and we were running
                 // check for differences
                 String message = "";
@@ -902,13 +982,6 @@ public class ShadowController {
                     message = message + "Restarting shadow controller";
                     showMessage(message);
                     stop();
-                    updateCached(ci);
-                    start();
-                }
-            } else {
-                // we are not running, but we are suppose to be running
-                if (!getStatus().equals(SHADOW_CONTROLLER_STATUS.SC_RUNNING)) {
-                    showMessage("Starting shadow controller");
                     updateCached(ci);
                     start();
                     result = true;

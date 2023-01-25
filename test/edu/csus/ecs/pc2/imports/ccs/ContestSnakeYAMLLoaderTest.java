@@ -64,6 +64,8 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
+    private static final String MINI_CONTEST_DIR = "mini";
+
     private static final String YYYY_MM_DD_FORMAT1 = "yyyy-MM-dd HH:mm";
 
     private String dateTimeFormat = "EEE MMM dd HH:mm:ss yyyy";
@@ -2246,7 +2248,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Number of languages", 3, languages.length);
         
         Account[] accounts = contest.getAccounts();
-        assertEquals("Number of accounts", 0, accounts.length);
+        assertEquals("Number of accounts", 80, accounts.length);
 
         Site[] sites = contest.getSites();
         assertEquals("Number of sites", 1, sites.length);
@@ -2869,7 +2871,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         ContestInformation info = contest.getContestInformation();
         assertNotNull("Expecting ContestInformation ", info);
-        assertEquals("Expected max file size ",128000,info.getMaxFileSize());
+        assertEquals("Expected max file size ",128*1024,info.getMaxOutputSizeInBytes());
     }
 
     
@@ -3700,7 +3702,108 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertNotNull("Expecting to load ccs2 contest",contest);
         assertFalse("Expected NO halt at end of contest ", contest.getContestInformation().isAutoStopContest());
     }
-   
     
-}
+    public String getTestDataDirname(String dirname) {
+        String contestConfigDir = getRootInputTestDataDirectory() +File.separator + dirname +File.separator+ IContestLoader.CONFIG_DIRNAME;
+        return contestConfigDir;
+    }
+    
+    /**
+     * Test loading problem title from problem.en.tex.
+     * 
+     * @throws Exception
+     */
+    public void testProblemNameENTex() throws Exception {
+        String testDataContestDirName = "samplecdp";
 
+        String dirname = getTestDataDirname(testDataContestDirName);
+//        startExplorer(dirname);
+
+        IInternalContest contest = snake.fromYaml(null, dirname, false);
+        assertNotNull(contest);
+
+        Problem[] problems = contest.getProblems();
+
+        for (Problem problem : problems) {
+            if ("ship".equals(problem.getShortName())) {
+                String expected = "Ship Traffic";
+                assertEquals("Expect problem title ", expected, problem.getDisplayName());
+            }
+            if ("tours".equals(problem.getShortName())) {
+                String expected = "Tours";
+                assertEquals("Expect problem title ", expected, problem.getDisplayName());
+            }
+
+            if ("evolution".equals(problem.getShortName())) {
+                String expected = "Evolution in Parallel";
+                assertEquals("Expect problem title ", expected, problem.getDisplayName());
+            }
+        }
+    }
+   
+
+    
+    /**
+     * Test loading of output validator.
+     * 
+     * @throws Exception
+     */
+    public void testaddClicsOutputValidator() throws Exception {
+
+        String sampleContestDirName = "ccs1";
+
+        IInternalContest contest = new InternalContest();
+
+        /**
+         * Load groups data.
+         */
+        loadGroupsFromSampContest(contest, sampleContestDirName);
+        assertEquals("Number ground", 4, contest.getGroups().length);
+
+        IInternalContest internal = loadSampleContest(contest, sampleContestDirName);
+        assertNotNull(internal);
+
+        String configDir = getTestSampleContestDirectory(sampleContestDirName) + File.separator + IContestLoader.CONFIG_DIRNAME;
+        assertDirectoryExists(configDir);
+
+//        startExplorer(configDir);
+
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+
+//            String outValProgram = problem.getOutputValidatorProgramName();
+
+            if ("castles".equals(problem.getShortName())) {
+                // test validatorProg: 'yes_always.sh'
+                String expected = "samps/contests/ccs1/config/castles/output_validators/yes_always.sh";
+                asserPathEqual("Expected output validator location", expected, problem.getOutputValidatorProgramName());
+            }
+
+            if ("channel".equals(problem.getShortName())) {
+                // test validatorProg: 'samps/contests/ccs1/config/channel/output_validators/yes_always_2.sh'
+                String expected = "samps/contests/ccs1/config/channel/output_validators/yes_always_2.sh";
+                asserPathEqual("Expected output validator location", expected, problem.getOutputValidatorProgramName());
+            }
+        }
+    }
+    
+    public void testLoadSampleFiles() throws Exception {
+
+        IInternalContest contest = loadFullSampleContest(null, MINI_CONTEST_DIR);
+        assertNotNull(contest);
+
+        int totalTestCases = 0;
+
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+
+            totalTestCases += problem.getNumberTestCases();
+//            for (int i = 0; i < problem.getNumberTestCases(); i++) {
+//                System.out.println("debug "+problem.getDataFileName(i+1));
+//            }
+        }
+
+        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 10, totalTestCases);
+
+    }
+}
