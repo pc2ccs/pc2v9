@@ -21,6 +21,19 @@ A wide variety of configurable options allow the contest administrator to tailor
 PC2 was developed at California State University, Sacramento (CSUS), and is Copyright (C) by the PC2 Development Team: John Clevenger,
 Doug Lane, Samir Ashoo, and Troy Boudreau.  
 
+# Getting Started  
+
+To install PC2, go to https://pc2ccs.github.io/, download the latest distribution (either the .zip or .tar.gz), and unzip that file in any 
+folder on your machine.  That's it -- PC2 is now installed and ready to run.
+
+To learn how to run PC2 and configure it for a contest, go into the "doc" folder at the root of the unzipped PC2 installation,
+where you will find a document named "pc2v9AdminGuide.pdf".  Chapter 2 in that doc provides an overview of how to set up PC2 for a contest.
+
+If you are trying to set up PC2 so that contest teams can access it from a browser (rather than having to install PC2 on each team machine),
+you will likely also be interested in the PC2 "Web Team Interface" (WTI); Appendix N in that same document provides complete instructions fpr 
+setting up and running the WTI.
+
+
 # Licensing Information
 See the file [LICENSE.TXT](./LICENSE.TXT)
 
