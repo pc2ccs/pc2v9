@@ -51,6 +51,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.ui.IFileViewer;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 import edu.csus.ecs.pc2.ui.NullViewer;
+import edu.csus.ecs.pc2.util.OSCompatibilityUtilities;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
@@ -2271,8 +2272,7 @@ public class Executable extends Plugin implements IExecutable {
         if (problem.isUsingSandbox() && !isTeam()) {
             
             //check the OS to be sure we have a sandbox supported
-            String osName = System.getProperty("os.name").toLowerCase();
-            if ( osName.contains("windows") && !debugAllowSandboxInvocationOnWindows) {
+            if (OSCompatibilityUtilities.isRunningOnWindows() && !debugAllowSandboxInvocationOnWindows) {
                 
                 log.severe("Attempt to execute a problem configured with a sandbox on a Windows system: not supported");
                 throw new Exception ("Sandbox not supported on Windows OS");

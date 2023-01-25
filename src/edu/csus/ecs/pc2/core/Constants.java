@@ -178,4 +178,10 @@ public final class Constants {
     public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit}";
 
     public static final String PC2_INTERNAL_SANDBOX_PROGRAM_NAME = "pc2sandbox.sh";
+    
+    /**
+     * OS Compatibility constants
+     */
+    public static final String WINDOWS_CHECK_SANDBOX_SCRIPT = "pc2syscheck.cmd";
+    public static final String UNIX_CHECK_SANDBOX_SCRIPT = "pc2syscheck.sh";
 }

@@ -36,6 +36,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
+import edu.csus.ecs.pc2.util.OSCompatibilityUtilities;
 
 /**
  * Auto Judge Monitor.
@@ -169,7 +170,35 @@ public class AutoJudgingMonitor implements UIPlugin {
     }
 
     
-    
+    /**
+     * Get a list of auto-judge problems the OS does not supported judging, likely due
+     * to missing OS features needed for sandbox running.  eg. cgroups on Linux
+     * 
+     * @return List<Problem> of problems that can't be judged on this system
+     *            due to OS mis-configuration or incomplete configuration.
+     */
+    public List<Problem> getOSUnsupportedAutojudgeProblemList()
+    {
+        Filter filter = getAutoJudgeFilter();
+        List<Problem> list = new ArrayList<Problem>();
+        
+        // only if there's a filter do we have to check
+        if(filter != null) {
+            
+            // List of problems that can't be judged on this system
+            List<Problem> plist = OSCompatibilityUtilities.getUnableToJudgeList(contest, log);
+            
+            // See if this judge has any of these problems on its AJ list, if so create a new
+            // list containing only the bad problems
+            for(Problem prob: plist) {
+                if(filter.matches(prob)) {
+                    list.add(prob);
+                }
+            }
+        }
+        return(list);
+    }
+   
     /**
      * Searches run database for run to auto judge.
      * 
