@@ -196,23 +196,24 @@ wait
 
 COMMAND_EXIT_CODE=$?
 
-if test "$COMMAND_EXIT_CODE" -ge 128
+# See if we were killed due to memory - this is a kill 9 if it happened
+
+kills=`grep oom_kill $PC2_SANDBOX_CGROUP_PATH/memory.events | cut -d ' ' -f 2`
+
+if test "$kills" != "0"
 then
-	kills=`grep oom_kill $PC2_SANDBOX_CGROUP_PATH/memory.events | cut -d ' ' -f 2`
-	if test "$kills" != "0"
+	DEBUG echo The command was killed due to out of memory
+	COMMAND_EXIT_CODE=${FAIL_MEMORY_LIMIT_EXCEEDED}
+else
+	# Get cpu time
+	cputime=`grep usage_usec $PC2_SANDBOX_CGROUP_PATH/cpu.stat | cut -d ' ' -f 2`
+	if test "$cputime" -gt "$TIMELIMIT_US"
 	then
-		DEBUG echo The command was killed due to out of memory
-		COMMAND_EXIT_CODE=${FAIL_MEMORY_LIMIT_EXCEEDED}
-	else
-		# Get cpu time
-		cputime=`grep usage_usec $PC2_SANDBOX_CGROUP_PATH/cpu.stat | cut -d ' ' -f 2`
-		if test "$cputime" -gt "$TIMELIMIT_US"
-		then
-			DEBUG echo The command was killed due to out of CPU Time "($cputime > $TIMELIMIT_US)"
-			COMMAND_EXIT_CODE=${FAIL_TIME_LIMIT_EXCEEDED}
-		else
-			DEBUG echo The command terminated abnormally with exit code $COMMAND_EXIT_CODE
-		fi
+		DEBUG echo The command was killed due to out of CPU Time "($cputime > $TIMELIMIT_US)"
+		COMMAND_EXIT_CODE=${FAIL_TIME_LIMIT_EXCEEDED}
+	elif test "$COMMAND_EXIT_CODE" -ge 128
+	then
+		DEBUG echo The command terminated abnormally with exit code $COMMAND_EXIT_CODE
 	fi
 fi
 DEBUG echo Finished executing $COMMAND $*
