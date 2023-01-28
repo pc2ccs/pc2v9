@@ -1865,7 +1865,7 @@ public class Executable extends Plugin implements IExecutable {
             }
             
             log.log(Log.DEBUG, "cmdline before substitution: " + cmdline);
-            cmdline = substituteAllStrings(run, cmdline);
+            cmdline = substituteAllStrings(run, cmdline, testSetNumber);
             log.log(Log.DEBUG, "cmdline after substitution: " + cmdline);
 
             /**
