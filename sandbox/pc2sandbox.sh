@@ -142,7 +142,11 @@ then
 fi
 
 DEBUG echo Creating sandbox $PC2_SANDBOX_CGROUP_PATH
-mkdir $PC2_SANDBOX_CGROUP_PATH
+if ! mkdir $PC2_SANDBOX_CGROUP_PATH
+then
+	DEBUG echo Can not create $PC2_SANDBOX_CGROUP_PATH
+	exit $FAIL_INVALID_CGROUP_INSTALLATION
+fi
 
 # set the specified memory limit - input is in MB, cgroup v2 requires bytes, so multiply by 1M
 # but only if > 0.
