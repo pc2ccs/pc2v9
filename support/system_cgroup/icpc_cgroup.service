@@ -1,0 +1,10 @@
+[Unit]
+Description=Create CGROUP necessary for PC2 judging
+
+[Service]
+Type=oneshot
+ExecStart=/usr/pc2/bin/pc2installsandbox
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
