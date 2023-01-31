@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.export;
 
 import java.io.File;
@@ -439,8 +439,6 @@ public class ExportYAML {
                 writer.println(PAD4 + "rgb: "+ quote(colorRGB));
             }
 
-            writer.println(PAD4 + IContestLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + (!problem.isUsingExternalDataFiles()));
-
             String[] filesWritten = writeProblemYAML(contest, directoryName, problem, shortName);
 
             if (filesWritten.length > 0) {
@@ -597,7 +595,6 @@ public class ExportYAML {
         problemWriter.println(IContestLoader.SHOW_OUTPUT_WINDOW+": "+!problem.isHideOutputWindow());
         problemWriter.println(IContestLoader.SHOW_COMPARE_WINDOW+": " + problem.isShowCompareWindow());
         problemWriter.println(IContestLoader.SHOW_VALIDATION_RESULTS+": "+problem.isShowValidationToJudges());
-        problemWriter.println(IContestLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + (!isExternalFiles(problemDataFiles)));
         problemWriter.println(IContestLoader.STOP_ON_FIRST_FAILED_TEST_CASE_KEY + ": " + problem.isStopOnFirstFailedTestCase());
         
         problemWriter.println();
