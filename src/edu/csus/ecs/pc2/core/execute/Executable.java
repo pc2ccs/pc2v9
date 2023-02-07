@@ -1889,9 +1889,13 @@ public class Executable extends Plugin implements IExecutable {
             File f = new File(cmdWord);
             if (f.exists()) {
                 /**
-                 * If the first word is an existing file, use the full path to the file (adding any following arguments)
+                 * If the first word is an existing file, use the full path to the file
                  */
-                cmdline = f.getCanonicalPath() + trimmedCmd.substring(i);
+                cmdline = f.getCanonicalPath();
+                //  (adding any following arguments, if any)
+                if(i > 0) {
+                    cmdline += trimmedCmd.substring(i);
+                }
             }
 
             boolean autoStop = false;
