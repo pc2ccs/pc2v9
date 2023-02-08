@@ -122,7 +122,7 @@ public class NewScoringAlgorithmTest extends TestCase {
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
         ObjectMapper mapper = new ObjectMapper();
 
-        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties(), true);
+        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties(), true, null);
         StandingsRecord standingsRecord = standingsRecords[1];
         JsonNode rootNode = mapper.readTree(standingsRecord.toString());
         for (Iterator<JsonNode> iterator = rootNode.findValue("listOfSummaryInfo").elements(); iterator.hasNext();) {
@@ -135,7 +135,7 @@ public class NewScoringAlgorithmTest extends TestCase {
         ci.setThawed(true);
         contest.updateContestInformation(ci);
         // once the contest is unfrozen the pendingRunCount should go to 0
-        standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties(), true);
+        standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties(), true, null);
         // just look at 2nd team
         standingsRecord = standingsRecords[1];
         rootNode = mapper.readTree(standingsRecord.toString());

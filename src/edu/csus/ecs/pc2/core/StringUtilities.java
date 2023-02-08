@@ -276,4 +276,25 @@ public final class StringUtilities implements Serializable {
         return value;
     }
     
+    /**
+     * get team number from login string.
+     * 
+     * @param user,
+     *            team login in form team#, team102
+     * @return null if no number found or number
+     */
+    public static Integer getTeamNumber(String userLogin) {
+        int idx = userLogin.lastIndexOf("team");
+        if (idx != -1) {
+            String numstring = userLogin.substring(idx + 4);
+            try {
+                int num = Integer.parseInt(numstring);
+                return num;
+            } catch (Exception e) {
+                // ignore Num parse error, will return null
+            }
+        }
+        return null;
+    }
+    
 }

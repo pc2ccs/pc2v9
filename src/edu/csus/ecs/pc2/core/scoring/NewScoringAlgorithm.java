@@ -138,7 +138,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
     @Override
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties) throws IllegalContestState {
-        return getStandingsRecords(contest, properties, false);
+        return getStandingsRecords(contest, properties, false, null);
     }
 
     /**
@@ -148,11 +148,12 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
      * @param contest
      * @param properties
      * @param honorScoreboardFreeze
+     * @param runs 
      * @return ranked StandingsRecords.
      * @throws IllegalContestState
      */
 
-    public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties, boolean honorScoreboardFreeze) throws IllegalContestState {
+    public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
         
         if (contest == null){
             throw new IllegalArgumentException("contest is null");
@@ -180,7 +181,9 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         }
         comparator.setCachedAccountList(accountList);
 
-        Run[] runs = getContest().getRuns();
+        if (runs == null) {
+            runs = getContest().getRuns();
+        }
 
         respectEOC = isAllowed(getContest(), getContest().getClientId(), Permission.Type.RESPECT_EOC_SUPPRESSION);
 
@@ -249,11 +252,16 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
         return (Run[]) vector.toArray(new Run[vector.size()]);
     }
+    
+    @Override
+    public String getStandings(IInternalContest contest, Properties properties, Log inputLog) throws IllegalContestState {
+        return getStandings(contest, null, properties, inputLog);
+    }
 
     @Override
     // TODO SA SOMEDAY Move this to a SA Utility Class
     // returns XML String for standings.
-    public String getStandings(IInternalContest contest, Properties properties, Log log) throws IllegalContestState {
+    public String getStandings(IInternalContest contest, Run[] runs, Properties properties, Log inputLog) throws IllegalContestState {
 
         StandingsRecord[] standings = getStandingsRecords(contest, properties);
 
@@ -986,5 +994,4 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         // nothing to dispose of.
 
     }
-
 }

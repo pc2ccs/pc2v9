@@ -285,13 +285,19 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     public void setProperties(Properties properties) {
         this.props = properties;
     }
+    
+    @Override
+    public String getStandings(IInternalContest theContest, Properties properties, Log inputLog) throws IllegalContestState {
+           return getStandings(theContest, null, properties, inputLog);
+    }
 
     /*
      * (non-Javadoc)
      * 
      * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
      */
-    public String getStandings(IInternalContest theContest, Properties properties, Log inputLog) throws IllegalContestState {
+    @Override
+    public String getStandings(IInternalContest theContest, Run[] runs, Properties properties, Log inputLog) throws IllegalContestState {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
@@ -376,7 +382,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 dumpBalloonSettings(balloonSettings[i], problems, balloonSettingsMemento);
             }
         }
-        Run[] runs = theContest.getRuns();
+        if (runs == null) {
+            runs = theContest.getRuns();
+        }
         synchronized (mutex) {
             Account[] accounts = accountList.getList();
             
