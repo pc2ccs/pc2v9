@@ -3,9 +3,11 @@ package controllers;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -29,7 +31,9 @@ import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -543,6 +547,8 @@ public class ContestController extends MainController {
 		try {
 			logger.info("Standings requested by team " + userInformation.getMyClient().getLoginName());
 			
+			xlog(logger, "debug 22 Start" );
+			
 			//insure that only one browser client at a time can attempt to use the DSA to update standings
 			synchronized (updateStandingsMutex) {
 				
@@ -550,6 +556,7 @@ public class ContestController extends MainController {
 				if (!wtiServerStandingsAreCurrent) {
 
 					logger.info("Standings are not current; invoking DSA to update");
+					
 
 					// Standings could have changed; try to get the actual InternalContest so
 					// we can use it to get updated standings
@@ -566,6 +573,30 @@ public class ContestController extends MainController {
 					// we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
 					try {
 						Properties props = internalContest.getContestInformation().getScoringProperties();
+
+						xlog(logger, "debug 22 props "+props);
+						if (props != null) {
+						       Set<Object> set = props.keySet();
+
+						        String[] keys = (String[]) set.toArray(new String[set.size()]);
+
+						        Arrays.sort(keys);
+								xlog(logger, "debug 22   Scoring Properties, there are " + keys.length + " keys");
+
+						        for (String string : keys) {
+									xlog(logger, "debug 22      " + string + "='" + props.get(string) + "'");
+						        }
+						}
+						
+						props = DefaultScoringAlgorithm.getDefaultProperties();
+						xlog(logger, "debug 22  set Default Scoring Props for "+key);
+
+						
+						// TODO use key to find clientId then use clientId to find division runs for this client
+//						ClientId clientId = null;
+//						Run[] runs = ScoreboardUtilites.getRunsForUser(clientId, internalContest);
+						
+                        Run[] runs = internalContest.getRuns();
 						String xmlStandings = dsa.getStandings(internalContest, props, logger);
 						//					logger.fine("Got the following XML from DSA:");
 						//					logger.fine(xmlStandings);
@@ -609,7 +640,17 @@ public class ContestController extends MainController {
 		}
 	}
 
-	
+	/**
+	 * debug 22 log to both console and log.
+	 * 
+	 * @param logger logger instance
+	 * @param string message to log/output
+	 */
+	private void xlog(Log logger, String string) {
+		logger.info("debug 22 XL " + string);
+		System.out.println("debug 22 XL " + string);
+	}
+
 	/**
 	 * Returns a JSON String containing the standings represented by the given XML Document String.
 	 * 
