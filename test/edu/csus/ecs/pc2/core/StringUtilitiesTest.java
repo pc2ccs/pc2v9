@@ -226,6 +226,12 @@ public class StringUtilitiesTest extends AbstractTestCase {
         initializeStaticLog(getName());
         InternalContest contest = new InternalContest();
         String cdpDir = "C:/repos/PacNWSpring2023/testcontest1/config";
+        
+        if (! new File(cdpDir).isDirectory()) {
+            // TODO coipy testcontest1 into testdata or samples then use that path
+            System.out.println("testgetRunsForUser Irnoring test using "+cdpDir);
+            return;
+        }
         IContestLoader loader = new ContestSnakeYAMLLoader();
         loader.initializeContest(contest, new File( cdpDir));
 
