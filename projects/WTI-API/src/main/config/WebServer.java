@@ -2,7 +2,6 @@ package config;
 
 import java.net.URISyntaxException;
 import java.util.EnumSet;
-import java.util.logging.ConsoleHandler;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
@@ -80,7 +79,7 @@ public class WebServer {
 			//create a new Jetty server
 			logger.info("Creating Jetty server");
 			Server server = new Server(ini.getPortNum());
-			System.out.println("debug 22 starting on port "+ini.getPortNum());
+			System.out.println("Starting on port "+ini.getPortNum());
 
 			//install the endpoint handlers in Jetty
 			logger.info("Installing service handlers in Jetty");
