@@ -191,12 +191,6 @@ public class ScoreboardUtilites {
         return Utilities.nullSafeToInt(string, defaultNumber);
     }
 
-    /**
-     * 
-     * @param clientId
-     * @param contest
-     * @return
-     */
     public static Run[] getRunsForUserDivision(ClientId clientId, IInternalContest contest) {
 
         String division = getDivision(contest, clientId);
@@ -227,6 +221,21 @@ public class ScoreboardUtilites {
         } else {
             return contest.getRuns();
         }
+    }
+    
+    public static Run[] getRunsForDivision(IInternalContest contest, String division) {
+
+        List<Run> theDivisionTeamRuns = new ArrayList<Run>();
+        for (Run run : contest.getRuns()) {
+
+            // add if submitting team in same division
+            if (matchDivsion(contest, division, run.getSubmitter())) {
+                theDivisionTeamRuns.add(run);
+            }
+        }
+
+        return (Run[]) theDivisionTeamRuns.toArray(new Run[theDivisionTeamRuns.size()]);
+
     }
 
     /**
@@ -285,7 +294,6 @@ public class ScoreboardUtilites {
         int idx = groupName.lastIndexOf('D');
         if (idx != -1) {
             // expecting D# at end of string
-            int j  = groupName.length();
             if (idx == groupName.length() - 2) {
                 return groupName.substring(idx+1);
             }

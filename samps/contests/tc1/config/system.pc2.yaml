@@ -1,0 +1,70 @@
+#
+# File:    system.pc2.yaml
+# Purpose: PacNWSpring2023 Contest
+#
+# Wed Feb 15 07:47:46 PDT 2023
+#
+
+# output soreboared/html paths 
+output-private-score-dir: /home/ubuntu/pc2/wti/WebTeamInterface-1.1/WebContent/WTI-UI/secret22
+output-public-score-dir: /home/ubuntu/pc2/wti/WebTeamInterface-1.1/WebContent/WTI-UI/scoreboard
+
+# 2022 paths were:
+# -- output-private-score-dir: /home/ubuntu/pc2/6177/projects/WebTeamInterface-1.1/WebContent/WTI-UI/supersecret
+# -- paths output-public-score-dir: /home/ubuntu/pc2/6177/projects/WebTeamInterface-1.1/WebContent/WTI-UI/scoreboard
+
+team-scoreboard-display-format-string: '{:teamname}  ({:groupname})'
+
+# note: pc2 load fils ./accounts_load.tsv
+
+accounts:
+
+# team accounts are created/loaded using accounts_load.tsv
+
+  - account: ADMINISTRATOR
+    site: 1
+    count: 10
+
+# PacNW Human Judges 1-10
+  - account: JUDGE
+    site: 1
+    start: 1
+    count: 10
+
+# RockyMountain Human Judges  11-20
+  - account: JUDGE
+    site: 1
+    start: 11
+    count: 10
+
+# Auto Judges  101-120
+  - account: JUDGE
+    site: 1
+    start: 101
+    count: 20
+
+  - account: SCOREBOARD
+    site: 1
+    count: 2
+
+# --
+
+auto-judging:
+  - account: JUDGE
+    site: 1
+#   once PR 634 approved we can use, number: 101-120
+    number: 101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120
+    letters: all
+    enabled: yes
+
+# --
+# Create read-only Admin #5
+permissions:
+
+# Admin 5
+  - account: ADMINISTRATOR
+    number: 5,6,7,8,8,10
+
+    disable: ADD_ACCOUNT,ADD_CATEGORY,ADD_GROUPS,ADD_JUDGEMENTS,ADD_LANGUAGE,ADD_NOTIFICATIONS,ADD_PROBLEM,ADD_SETTINGS,ADD_SITE,ALLOWED_TO_AUTO_JUDGE,ALLOWED_TO_FETCH_RUN,ALLOWED_TO_RECONNECT_SERVER,ANSWER_CLARIFICATION,BALLOON_OUTPUT_SHUTOFF,CLONE_PROFILE,EDIT_ACCOUNT,EDIT_AJ_SETTINGS,EDIT_CATEGORY,EDIT_CLARIFICATION,EDIT_CONTEST_CLOCK,EDIT_EVENT_FEED,EDIT_GROUPS,EDIT_JUDGEMENTS,EDIT_LANGUAGE,EDIT_NOTIFICATIONS,EDIT_PERMISSIONS,EDIT_PLAYBACK,EDIT_PROBLEM,EDIT_RUN,EDIT_SITE,EXECUTE_RUN,FORCE_LOGOFF_CLIENT,FORCE_LOGOFF_SERVER,GENERATE_NEW_CLARIFICATION,GIVE_CLARIFICATION,GIVE_RUN,JUDGE_RUN,REJUDGE_RUN,RESET_CONTEST,SHADOW_PROXY_TEAM,SHUTDOWN_ALL_SERVERS,SHUTDOWN_SERVER,START_CONTEST_CLOCK,START_PLAYBACK,STOP_CONTEST_CLOCK,STOP_PLAYBACK,SUBMIT_CLARIFICATION,SUBMIT_RUN,SWITCH_PROFILE,TAKE_CLARIFICATION,TAKE_RUN,TEST_RUN
+
+# EOF system.pc2.yaml
