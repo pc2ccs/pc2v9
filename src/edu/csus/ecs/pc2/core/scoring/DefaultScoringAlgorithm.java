@@ -307,8 +307,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             properties = getProperties();
         }
         
-        System.out.println("DSA: the divisionNumber is "+divisionNumber);
-        
         this.log = inputLog;
         long freezeSeconds = -1;
         boolean isThawn = false;

@@ -229,19 +229,25 @@ public class ScoreboardUtilites {
         }
     }
 
+    /**
+     * Is the submitter in the inputDivision?
+     * @param contest
+     * @param inputDivision
+     * @param submitter
+     * @return true if submitter division matches inputDivision, else false
+     */
     protected static boolean matchDivsion(IInternalContest contest, String inputDivision, ClientId submitter) {
-        
-          String division = getDivision(contest, submitter);
-          
-//          System.out.println("debug 22 matchDivsion  "+inputDivision+" vs "+division+" for "+submitter);
-          
-          if (inputDivision == null && division == null) {
-              return true;
-          } if (inputDivision == null) {
-              return false;
-          } else {
-              return inputDivision.equals(division);
-          }
+
+        String division = getDivision(contest, submitter);
+
+        if (inputDivision == null && division == null) {
+            return true;
+        }
+        if (inputDivision == null) {
+            return false;
+        } else {
+            return inputDivision.equals(division);
+        }
     }
 
     /**
