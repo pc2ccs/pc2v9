@@ -268,6 +268,12 @@ public class ScoreboardUtilites {
         return getDivision(groupName);
     }
 
+    /**
+     * Return division number from groupName
+     * @param groupName
+     * @return null if no division nubmer found, else the division number
+     */
+    // TODO REFACTOR i689 redesign how divisions are identified. 
     public static String getDivision(String groupName) {
 
         int idx = groupName.lastIndexOf('D');

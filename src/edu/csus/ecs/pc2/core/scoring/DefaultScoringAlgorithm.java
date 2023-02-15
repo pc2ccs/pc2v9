@@ -603,6 +603,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Hashtable<Group, Integer> divisionIndexHash = new Hashtable<Group, Integer>();
         int divisionCount = 0;
         // TODO this bit should in the future can probably go away when divisions are supported better.
+        // TODO REFACTOR I689 redesign how divisions are identified
         int highestFound = 0;
         for (Group group : groups) {
             // no reference to groups that should not be displayed on scoreboard

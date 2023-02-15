@@ -33,12 +33,11 @@ public interface IScoringAlgorithm {
      * 
      * @param theContest
      *            A proxy object referencing the underlying model describing the contest
+     * @param runs null use all runs, otherwise runs to be used.
      * @param properties
      *            general and implementation specific settings.
-     * @param log
+     * @param inputLog
      *            a logger, used to add info to the log file and window.
-     * @return An XML descriptor giving standings properties for each team    
-     * @param runs null use all runs, otherwise runs to be used.
      * @return An XML descriptor giving standings properties for each team
      * @throws IllegalContestState
      */
