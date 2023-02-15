@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.standings;
 
 import java.io.File;
@@ -205,24 +205,24 @@ public class ScoreboardUtilites {
 
         if (ClientType.Type.TEAM.equals(clientId.getClientType())) {
 
-            List<Run> teamRuns = new ArrayList<Run>();
+            List<Run> theDivisionTeamRuns = new ArrayList<Run>();
             for (Run run : contest.getRuns()) {
 
                 ClientId runClientId = run.getSubmitter();
 
                 if (runClientId.equals(clientId)) {
                     // add team/client's own runs
-                    teamRuns.add(run);
+                    theDivisionTeamRuns.add(run);
                 } else {
                     // add if submitting team in same division
                     if (matchDivsion(contest, division, run.getSubmitter())) {
-                        teamRuns.add(run);
+                        theDivisionTeamRuns.add(run);
 //                        System.out.println("debug 22 Added run " + run);
                     }
                 }
             }
 
-            return (Run[]) teamRuns.toArray(new Run[teamRuns.size()]);
+            return (Run[]) theDivisionTeamRuns.toArray(new Run[theDivisionTeamRuns.size()]);
             
         } else {
             return contest.getRuns();
