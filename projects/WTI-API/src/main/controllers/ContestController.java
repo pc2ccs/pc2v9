@@ -562,7 +562,26 @@ public class ContestController extends MainController {
 			synchronized (updateStandingsMutex) {
 				
 				// check if some event has occurred which could have changed the standings
-				wtiServerStandingsAreCurrent = false; // NEW - forcing to false so will recalculate for each user
+				
+				/**
+				 * Should scoreboaed only show the teams in a team's division?
+				 */
+				boolean useDivisionFilter = false;
+
+				if (IniFile.isFilePresent()) {
+					new IniFile();
+					useDivisionFilter = StringUtilities.getBooleanValue(IniFile.getValue(SERVER_WTI_BOARD_USE_DIVISIONS_KEY), false);
+				}
+
+				if (useDivisionFilter) {
+					/**
+					 * If divisions are to be shown to each user, must force a new recacl of
+					 * standings for each call. This removes the efficiency of using a cached copy
+					 * of the standings.
+					 */
+					wtiServerStandingsAreCurrent = false; // force scoreboard recalc
+				}
+
 				if (!wtiServerStandingsAreCurrent) {
 
 					logger.info("Standings are not current; invoking DSA to update");
@@ -591,20 +610,12 @@ public class ContestController extends MainController {
 						        for (String string : keys) {
 									xlog(logger, "input SA properties " + string + "='" + props.get(string) + "'");
 						        }
-						}
-						
+						} 
+
+						// Assigning DefaultScoringAlgorithm.getDefaultProperties(); is a tempoary fix, i686 and i680 describe the bug.
+						// TODO i686 - Find/fix root cause for NPE in WTI DSA, details in i680 #686
+						// this is a temporary fix until root cause is found, and the bug fixed.
 						props = DefaultScoringAlgorithm.getDefaultProperties();
-
-						
-						/**
-						 * Should we use filer by division logic to filter runs ?
-						 */
-						boolean useDivisionFilter = false;
-
-						if (IniFile.isFilePresent()) {
-							new IniFile();
-							useDivisionFilter = StringUtilities.getBooleanValue(IniFile.getValue(SERVER_WTI_BOARD_USE_DIVISIONS_KEY), false);
-						}
 
 						String xmlStandings = null;
 						Run[] runs = null;
