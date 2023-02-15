@@ -1,6 +1,7 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+ // Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -11,8 +12,9 @@ import java.util.Vector;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -20,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -28,6 +31,10 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
+import junit.framework.TestCase;
 
 /**
  * 
@@ -53,6 +60,7 @@ public class NewScoringAlgorithmTest extends TestCase {
         SampleContest sampleContest = new SampleContest();
 
         IInternalContest contest = sampleContest.createContest(2, 2, 6, 12, true);
+        setFirstTeamClient(contest);
 
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
 
@@ -63,7 +71,6 @@ public class NewScoringAlgorithmTest extends TestCase {
         assertEquals("getStandingsRecords accounts and records unequal", numberAccounts, standingsRecords.length);
 
         createJudgedRun(contest, 0, true, 12);
-
         standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties());
 
         if (debugMode) {
@@ -86,7 +93,7 @@ public class NewScoringAlgorithmTest extends TestCase {
         Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
         account.setScoringAdjustment(-2);
         contest.updateAccount(account);
-
+        
         StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties());
         assertEquals("scoring adjustment -2", 10, standingsRecords[0].getPenaltyPoints());
         account.setScoringAdjustment(-15);
@@ -122,7 +129,7 @@ public class NewScoringAlgorithmTest extends TestCase {
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
         ObjectMapper mapper = new ObjectMapper();
 
-        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties(), true, null);
+        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null, new Properties(), true, null);
         StandingsRecord standingsRecord = standingsRecords[1];
         JsonNode rootNode = mapper.readTree(standingsRecord.toString());
         for (Iterator<JsonNode> iterator = rootNode.findValue("listOfSummaryInfo").elements(); iterator.hasNext();) {
@@ -135,7 +142,7 @@ public class NewScoringAlgorithmTest extends TestCase {
         ci.setThawed(true);
         contest.updateContestInformation(ci);
         // once the contest is unfrozen the pendingRunCount should go to 0
-        standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties(), true, null);
+        standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null, new Properties(), true, null);
         // just look at 2nd team
         standingsRecord = standingsRecords[1];
         rootNode = mapper.readTree(standingsRecord.toString());
@@ -278,6 +285,132 @@ public class NewScoringAlgorithmTest extends TestCase {
                 System.out.println("debug Account  " + accounts[i].getClientId() + " " + accounts[i].getGroupId());
             }
         }
+    }
+    
+    
+    protected Run [] addTc1Runs(IInternalContest contest) throws Exception {
+        
+        String [] runsDataList = { //
+                "1,101,B,1,Yes", //
+                "2,151,C,1,Yes", //
+                "3,201,B,1,Yes", //
+                "4,251,C,1,Yes", //
+                "5,301,D,1,Yes", //
+                "6,351,A,1,Yes", //
+                "7,401,A,1,Yes", //
+                "8,451,B,1,No", //
+                "9,501,A,1,Yes", //
+                "10,551,A,1,Yes", //
+                "11,551,D,1,Yes", //
+                "12,551,D,1,No", //
+                "13,602,A,1,Yes", //
+                "14,801,A,1,No", //
+                "15,801,D,1,Yes", //
+                "16,801,B,1,No", //
+                "17,801,A,1,No", //
+                "18,901,C,1,No", //
+                "19,901,D,1,Yes", //
+                "20,901,B,1,No", //
+                "90,901,C,2,No" //
+        };
+
+        for (String runInfoLine : runsDataList) {
+            SampleContest.addRunFromInfo(contest, runInfoLine);
+        }
+
+        return contest.getRuns();
+    }
+    
+    private void initializeStaticLog(String name) {
+        StaticLog.setLog(new Log("logs", name + ".log"));
+    }
+    
+    public void testWithPacnNWSpringTestContest1() throws Exception {
+        
+        initializeStaticLog(getName());
+        InternalContest contest = new InternalContest();
+        String cdpDir = "C:/repos/PacNWSpring2023/testcontest1/config";
+        
+        if (! new File(cdpDir).isDirectory()) {
+            // TODO coipy testcontest1 into testdata or samples then use that path
+            System.out.println("testgetRunsForUser Irnoring test using "+cdpDir);
+            return;
+        }
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        loader.initializeContest(contest, new File( cdpDir));
+        setFirstTeamClient(contest);
+        
+
+        Group[] groups = contest.getGroups();
+        
+        for (Group group : groups) {
+            String divName = ScoreboardUtilites.getDivision(group.getDisplayName());
+            assertNotNull("No division found for "+group.getDisplayName(), divName);
+        }
+        
+        Account[] accounts = getTeamAccounts(contest);
+        Arrays.sort(accounts, new AccountComparator());
+        for (Account account : accounts) {
+            String name = ScoreboardUtilites.getDivision(contest, account.getClientId());
+            assertNotNull("No division found for "+account, name);
+        }
+
+        Judgement[] judgements = contest.getJudgements();
+
+        assertEquals("Expecting # jugements", 10, judgements.length);
+
+        addTc1Runs(contest);
+        
+        Run[] runlist = contest.getRuns();
+        for (Run run : runlist) {
+            assertNotNull("Expecting account for "+run.getSubmitter(), contest.getAccount(run.getSubmitter()));
+            String div = ScoreboardUtilites.getDivision(contest, run.getSubmitter());
+            assertNotNull("Missing division for "+run.getSubmitter(), div);
+        }
+        
+        assertEquals("Expecting # runs", 21, runlist.length);
+        
+        ClientId client1 = accounts[5].getClientId();
+        Group group = contest.getGroup(contest.getAccount(client1).getGroupId());
+
+        Run[] runs = ScoreboardUtilites.getRunsForUserDivision(client1, contest);
+        assertEquals("Expecting runs matching group " + group, 7, runs.length);
+
+        client1 = accounts[12].getClientId();
+        runs = ScoreboardUtilites.getRunsForUserDivision(client1, contest);
+        assertEquals("Expecting runs matching group " + group, 5, runs.length);
+
+        NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
+        
+        Account acc = contest.getAccount(client1);
+        assertNotNull(acc.getGroupId());
+        Group group2 = contest.getGroup(acc.getGroupId());
+        assertNotNull(group2);
+        
+        String divString = ScoreboardUtilites.getDivision(contest, client1);
+        Integer division = new Integer(divString);
+        ClientId id  = contest.getClientId();
+        assertNotNull("No client Id for contest",id);
+        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, division,DefaultScoringAlgorithm.getDefaultProperties(), false, runs);
+        
+        assertEquals("Expecting standing records for client "+client1, 18, standingsRecords.length);
+        
+        //    public StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
+        
+        
+        
+    }
+
+    /**
+     * Assign client for contest to first team.
+     * 
+     * @param contest
+     */
+    private void setFirstTeamClient(IInternalContest contest) {
+        Account[] acc = getTeamAccounts(contest);
+        Arrays.sort(acc, new AccountComparator());
+        contest.setClientId(acc[0].getClientId());
+        
     }
 
 }

@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package controllers;
 
 import java.io.IOException;
@@ -583,22 +584,16 @@ public class ContestController extends MainController {
 					try {
 						Properties props = internalContest.getContestInformation().getScoringProperties();
 
-						xlog(logger, "debug 22 scoreboard 2 props "+props);
 						if (props != null) {
 						       Set<Object> set = props.keySet();
-
 						        String[] keys = (String[]) set.toArray(new String[set.size()]);
-
 						        Arrays.sort(keys);
-								xlog(logger, "debug 22   Scoring Properties, there are " + keys.length + " keys");
-
 						        for (String string : keys) {
-									xlog(logger, "debug 22      " + string + "='" + props.get(string) + "'");
+									xlog(logger, "input SA properties " + string + "='" + props.get(string) + "'");
 						        }
 						}
 						
 						props = DefaultScoringAlgorithm.getDefaultProperties();
-						xlog(logger, "debug 22  set Default Scoring Props for "+key);
 
 						
 						/**
@@ -611,24 +606,25 @@ public class ContestController extends MainController {
 							useDivisionFilter = StringUtilities.getBooleanValue(IniFile.getValue(SERVER_WTI_BOARD_USE_DIVISIONS_KEY), false);
 						}
 
-						xlog(logger, "useDivisionFilter is " + useDivisionFilter);
-
+						String xmlStandings = null;
 						Run[] runs = null;
 						if (useDivisionFilter) {
 							String userLogin= userInformation.getMyClient().getLoginName();
-							xlog(logger, "debug 22 useDivisionFilter userLogin = "+userLogin);
 							Integer clientNumber = StringUtilities.getTeamNumber(userLogin);
-							xlog(logger, "debug 22 useDivisionFilter clientNumber = "+clientNumber);
 							ClientId clientId = new ClientId(internalContest.getSiteNumber(), Type.TEAM, clientNumber);
-							xlog(logger, "debug 22 useDivisionFilter clientId = "+clientId);
 							runs = ScoreboardUtilites.getRunsForUserDivision(clientId, internalContest);
 							
+							String teamDivisionStr = ScoreboardUtilites.getDivision(internalContest, clientId);
+							xlog(logger, "Runs for "+key+" useDivisionFilter true, total runs  = "+runs.length+" for div "+teamDivisionStr);
+							Integer teamDivision = Integer.parseInt(teamDivisionStr);
+							
+							xmlStandings = dsa.getStandings(internalContest, runs, teamDivision, props, logger);
 						} else {
 							runs = internalContest.getRuns();
+							xlog(logger, "Runs for "+key+" Not using division useDivisionFilter false, total runs  = "+runs.length);
+							xmlStandings = dsa.getStandings(internalContest, runs, null, props, logger);
 						}
-						xlog(logger, "debug 22 useDivisionFilter total runs  = "+runs.length);
 
-						String xmlStandings = dsa.getStandings(internalContest, runs, props, logger);
 						//					logger.fine("Got the following XML from DSA:");
 						//					logger.fine(xmlStandings);
 						logger.info("Converting DSA XML to JSON");
@@ -658,9 +654,6 @@ public class ContestController extends MainController {
 				}
 			}//end synchronized block
 			
-			logger.info("Returning JSON standings in HTTP Response");
-//			logger.fine(currentJSONStandings);
-
 			// standings are (now) current; return them to requestor
 			return Response.ok().entity(currentJSONStandings).type(MediaType.APPLICATION_JSON).build();
 			
@@ -671,10 +664,16 @@ public class ContestController extends MainController {
 		}
 	}
 
-	
+	/**
+	 * Logs to logger and stdout.
+	 * 
+	 * @param logger
+	 * @param string
+	 */
+	// TODO REFACTOR - Refactor all logging and exception handling
 	private void xlog(Log logger, String string) {
-		logger.info("debug 22 XL "+string);
-		System.out.println("debug 22 XL "+string);
+		logger.info("ContestController: " + string);
+		System.out.println("ContestController: " + string);
 	}
 
 	/**

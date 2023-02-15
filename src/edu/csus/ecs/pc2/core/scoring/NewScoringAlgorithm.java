@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
@@ -41,10 +42,7 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
  * Uses same SA as the {@link DefaultScoringAlgorithm}
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm {
 
     /**
@@ -138,7 +136,11 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
     @Override
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties) throws IllegalContestState {
-        return getStandingsRecords(contest, properties, false, null);
+        return getStandingsRecords(contest, null, properties, false, null);
+    }
+    
+    private StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Properties properties) throws IllegalContestState {
+        return getStandingsRecords(contest, divisionNumber, properties, false, null);
     }
 
     /**
@@ -152,8 +154,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
      * @return ranked StandingsRecords.
      * @throws IllegalContestState
      */
-
-    public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
+    public StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
         
         if (contest == null){
             throw new IllegalArgumentException("contest is null");
@@ -169,6 +170,15 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         Vector<Account> accountVector = new Vector<Account>();
         for(Account av : allAccountVector) {
             if(av.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                if (divisionNumber != null) {
+                    String div = ScoreboardUtilites.getDivision(contest, av.getClientId());
+                    if (! divisionNumber.toString().trim().equals(div.trim())){
+                        /**
+                         * If this account is NOT in the same division as the divisionNumber, then do not account to list of accounts on scoreboard, skip to next account.
+                         */
+                        continue;
+                    }
+                }
                 accountVector.add(av);
             }
         }
@@ -255,15 +265,15 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
     
     @Override
     public String getStandings(IInternalContest contest, Properties properties, Log inputLog) throws IllegalContestState {
-        return getStandings(contest, null, properties, inputLog);
+        return getStandings(contest, null, null, properties, inputLog);
     }
-
+    
     @Override
     // TODO SA SOMEDAY Move this to a SA Utility Class
     // returns XML String for standings.
-    public String getStandings(IInternalContest contest, Run[] runs, Properties properties, Log inputLog) throws IllegalContestState {
+    public String getStandings(IInternalContest contest, Run[] runs, Integer divisionNumber, Properties properties, Log inputLog) throws IllegalContestState {
 
-        StandingsRecord[] standings = getStandingsRecords(contest, properties);
+        StandingsRecord[] standings = getStandingsRecords(contest, divisionNumber, properties);
 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
         IMemento summaryMememento = createSummaryMomento(contest.getContestInformation(), mementoRoot);
