@@ -89,7 +89,7 @@ public class JSONTool {
         // TODO shadow add time and mime elements to submission
 //        element.put("mime","application/zip");
         
-        String pathValue = "/submissions/" + submission.getNumber() + "/files";
+        String pathValue = "/contest/submissions/" + submission.getNumber() + "/files";
         
         ObjectMapper mymapper = new ObjectMapper();
         ArrayNode arrayNode = mymapper.createArrayNode();
