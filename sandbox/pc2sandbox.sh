@@ -170,7 +170,7 @@ TIMELIMIT_US=$((TIMELIMIT * 1000000))
 #echo $TIMELIMIT_US  > $PC2_SANDBOX_RUN_CGROUP_PATH/cpu.max
 
 DEBUG echo setting maximum user processes to 32 + whatever the user is currently using
-ulimit -u $((32+`ps -T -u pc2 | wc -l`))
+ulimit -u $((32+`ps -T -u $USER | wc -l`))
 
 #put the current process (and implicitly its children) into the pc2sandbox cgroup.
 DEBUG echo putting $$ into $PC2_SANDBOX_CGROUP_PATH cgroup
