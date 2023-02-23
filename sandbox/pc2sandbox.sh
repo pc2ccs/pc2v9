@@ -196,7 +196,7 @@ $COMMAND $* <&0 &
 # Remember child's PID for possible killing off later
 submissionpid=$!
 # Wait for child
-wait
+wait $submissionpid
 
 COMMAND_EXIT_CODE=$?
 
