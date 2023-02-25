@@ -401,6 +401,12 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                     sendJSON(json + NL);
                 } else {
                     if (run.isJudged()) {
+                        if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !run.isDeleted()) {
+
+                            String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(run, servletRequest, null).toString());
+                            sendJSON(json + NL);
+                        }
+                        
                         String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertJudgementToJSON(run).toString());
                         sendJSON(json + NL);
                         // Now send out the runcases (test cases).  Get most recent ones for this run.
