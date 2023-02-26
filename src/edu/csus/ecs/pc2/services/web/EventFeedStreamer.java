@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.web;
 
 import java.io.ByteArrayOutputStream;
@@ -401,6 +401,15 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                     sendJSON(json + NL);
                 } else {
                     if (run.isJudged()) {
+                        /**
+                         * Likely due to the async nature of run judgements sometimes judgement events
+                         * were not preceded by a submissions event.
+                         * 
+                         * A hypothesis is that the Aj is so fast that the judgment event is sent
+                         * before the actual submissions event.
+                         * 
+                         * Force a submissions event before every judgement event. (issue 698)
+                         */
                         if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !run.isDeleted()) {
 
                             String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(run, servletRequest, null).toString());
