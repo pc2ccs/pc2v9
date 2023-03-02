@@ -35,9 +35,10 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
+import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
- * Scoring Algorithm implementation.
+ * "New" Scoring Algorithm implementation.
  * 
  * Uses same SA as the {@link DefaultScoringAlgorithm}
  * 
@@ -509,6 +510,13 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
     private IMemento addTeamMemento(IMemento mementoRoot, IInternalContest contest, StandingsRecord standingsRecord, int indexNumber) {
 
         IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
+        
+        String teamVarDisplayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
+        ElementId groupId = contest.getAccount(standingsRecord.getClientId()).getGroupId();
+        Group group = null;
+        if (groupId != null) {
+            group = contest.getGroup(groupId);    
+        }
 
         // if (standingsRecord.getNumberSolved() > 0){
         standingsRecordMemento.putLong("firstSolved", standingsRecord.getFirstSolved());
@@ -519,7 +527,10 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
         standingsRecordMemento.putInteger("index", indexNumber);
         Account account = contest.getAccount(standingsRecord.getClientId());
-        standingsRecordMemento.putString("teamName", account.getDisplayName());
+ 
+        standingsRecordMemento.putString("teamName", ScoreboardVariableReplacer.substituteDisplayNameVariables(teamVarDisplayString, account, group));
+//        standingsRecordMemento.putString("teamName", account.getDisplayName());
+        
         standingsRecordMemento.putInteger("teamId", account.getClientId().getClientNumber());
         standingsRecordMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
         standingsRecordMemento.putString("teamKey", account.getClientId().getTripletKey());
@@ -532,7 +543,6 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
         ElementId elementId = account.getGroupId();
         if (elementId != null && contest.getGroup(elementId) != null) {
-            Group group = contest.getGroup(elementId);
             standingsRecordMemento.putInteger("groupRank", standingsRecord.getGroupRankNumber());
             standingsRecordMemento.putString("teamGroupName", group.getDisplayName());
             // TODO dal CRITICAL
