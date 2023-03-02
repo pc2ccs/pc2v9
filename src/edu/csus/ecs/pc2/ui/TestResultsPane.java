@@ -1905,9 +1905,6 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             //get the table model which defines the current table contents
             TestCaseResultsTableModel tableModel = (TestCaseResultsTableModel) resultsTable.getModel();
             
-            //get how many total test cases were configured into the problem
-            int totalTestCaseCount = currentProblem.getNumberTestCases();
-            
             //get how many test case rows are already in the table model
             int testCasesInTableModel = tableModel.getRowCount();
             
