@@ -214,6 +214,7 @@ public class PluginLoadPane extends JPanePlugin {
         plugins.add(new SubmissionBiffPane());
         plugins.add(new TeamStatusPane());
         plugins.add(new ViewPropertiesPane());
+        plugins.add(new NSAStandingsPane());
 
         JPanePlugin[] pluginList = (JPanePlugin[]) plugins.toArray(new JPanePlugin[plugins.size()]);
 
