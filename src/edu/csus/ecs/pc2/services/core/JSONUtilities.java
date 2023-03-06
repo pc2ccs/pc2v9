@@ -1,9 +1,13 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.core;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -337,4 +341,31 @@ public class JSONUtilities {
         return Integer.toString(getLanguageIndex(contest, elementId));
     }
 
+    /**
+     * Returns a Map containing the key/value elements in the specified JSON string.
+     * This method uses the Jackson {@link ObjectMapper} to perform the conversion from the JSON
+     * string to a Map.  Note that the ObjectMapper recurses for nested JSON elements, returning
+     * a appropriate Object in the Map under the corresponding key string.
+     * 
+     * @param jsonString a JSON string to be converted to a Map
+     * @return a Map mapping the keys in the JSON string to corresponding values, or null if the input
+     *          String is null or if an exception occurs while converting the JSON to a Map.
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> getMap(String jsonString) {
+        
+        if (jsonString == null){
+            return null;
+        }
+        
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            Map<String, Object> map = mapper.readValue(jsonString, Map.class);
+            return map;
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+            return null;
+        }
+    }
+    
 }

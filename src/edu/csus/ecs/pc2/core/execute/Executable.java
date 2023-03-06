@@ -1812,7 +1812,7 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             log.log(Log.DEBUG, "before substitution: " + cmdline);
-            cmdline = substituteAllStrings(run, cmdline);
+            cmdline = substituteAllStrings(run, cmdline, dataSetNumber+1);
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
             /**
@@ -2336,12 +2336,47 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
-     * Get max output file size.
+     * This method returns the maximum allowed output file size for the current problem, in BYTES.
      * 
-     * @return
+     * The method first checks to see if the current problem has a non-zero maximum output file size
+     * specified.  If so, that value is converted to bytes (it is stored in the {@link Problem} class
+     * as a value in KB) and returned.  If not, the current global (contest-wide) max file size value
+     * (which is stored in the {@link IInternalContest} object's {@link ContestInformation} object, in
+     * BYTES) is returned.
+     * 
+     *  If the current problem is null, an error is logged and a value of zero is returned.
+     * 
+     * 
+     * @return max currently allowed output file size.
      */
     private long getMaxFileSize() {
-        return contest.getContestInformation().getMaxFileSize();
+        
+        //make sure we have a Problem defined
+        if (problem != null) {
+            
+            //check if the problem has its own (problem-specific) output file size limit, which is noted
+            //  by having a limit value in the problem which is greater than zero
+            long problemLimit = problem.getMaxOutputSizeKB();
+            if (problemLimit > 0) {
+                //problem has its own limit; convert from KB to BYTES and return that
+                return problemLimit * 1024;
+            } else {
+                //problem doesn't have its own limit; return the global (contest-wide) value
+                return contest.getContestInformation().getMaxOutputSizeInBytes();
+            }
+                
+        } else {
+            
+            //problem is null; log error and return global value since no per-problem value is available
+            long globalMaxOutput = contest.getContestInformation().getMaxOutputSizeInBytes();
+            if (log != null) {
+                log.log(Log.WARNING, "Problem is null, cannot determine output size limit; returning global max output value " + globalMaxOutput);
+            } else {
+                System.err.println("WARNING: Executable.getMaxFileSize(): log is null; cannot log message "
+                        + "'Problem is null, cannot determine output size limit; returning global max output value " + globalMaxOutput + "'");
+            }
+            return globalMaxOutput;
+        }
     }
 
     /**
@@ -2397,6 +2432,10 @@ public class Executable extends Plugin implements IExecutable {
         return replaceString(origString, beforeString, afterString);
     }
 
+    public String substituteAllStrings(Run inRun, String origString) {
+        return(substituteAllStrings(inRun, origString, 1));
+    }
+    
     /**
      * return string with all field variables filled with values.
      * 
@@ -2417,13 +2456,15 @@ public class Executable extends Plugin implements IExecutable {
      *              {:pc2home}
      * </pre>
      * 
+     * @param dataSetNumber
+     *            which set of judge data to use (1 in the case of only 1 file)
      * @param inRun
      *            submitted by team
      * @param origString
      *            - original string to be substituted.
      * @return string with values
      */
-    public String substituteAllStrings(Run inRun, String origString) {
+    public String substituteAllStrings(Run inRun, String origString, int dataSetNumber) {
         String newString = "";
         String nullArgument = "-"; /* this needs to change */
 
@@ -2490,6 +2531,9 @@ public class Executable extends Plugin implements IExecutable {
                 if (index > 0) {
                     newString = replaceString(newString, "{:problem}", index);
                     newString = replaceString(newString, "{:problemletter}", Utilities.convertNumber(index));
+                    if(problem != null) {
+                        newString = replaceString(newString, "{:problemshort}", problem.getShortName());
+                    }
                 }
             }
             if (inRun.getSubmitter() != null) {
@@ -2507,6 +2551,19 @@ public class Executable extends Plugin implements IExecutable {
                     newString = replaceString(newString, "{:ansfile}", problem.getAnswerFileName());
                 } else {
                     newString = replaceString(newString, "{:ansfile}", nullArgument);
+                }
+                
+                String fileName = problem.getDataFileName(dataSetNumber);
+                if (fileName != null && !fileName.equals("")) {
+                    newString = replaceString(newString, "{:infilename}", fileName);
+                } else {
+                    newString = replaceString(newString, "{:infilename}", nullArgument);
+                }
+                fileName = problem.getAnswerFileName(dataSetNumber);
+                if (fileName != null && !fileName.equals("")) {
+                    newString = replaceString(newString, "{:ansfilename}", fileName);
+                } else {
+                    newString = replaceString(newString, "{:ansfilename}", nullArgument);
                 }
                 newString = replaceString(newString, "{:timelimit}", Long.toString(problem.getTimeOutInSeconds()));
             } else {

@@ -1,0 +1,53 @@
+#
+# File:    system.pc2.yaml
+# Purpose: pc2 setttings for a contest
+#
+
+# TODO update scoreboard html locations
+# Locations to write scorboard html/web pages
+# unfrozen board
+# output-private-score-dir: /home/ubuntu/pc2/WebTeamInterface-1.1/WebContent/WTI-UI/secret
+# frozen board 
+# output-public-score-dir: /home/ubuntu/pc2/WebTeamInterface-1.1/WebContent/WTI-UI/scoreboard
+
+# account permissions
+permissions:
+# enable perms for FEEDER 1 to edit runs and submit runs
+  - account: FEEDER
+    number: 1
+    enable: SHADOW_PROXY_TEAM, EDIT_RUN
+
+accounts:
+
+  - account: TEAM
+    site: 1
+    start: 1
+    count: 99
+
+  - account: ADMINISTRATOR
+    site: 1
+    count: 6
+
+  - account: JUDGE
+    site: 1
+    count: 15
+
+  - account: FEEDER
+    site: 1
+    count: 4
+
+  - account: SCOREBOARD
+    site: 1
+    count: 2
+
+# TODO ASSIGN AJ's
+
+auto-judging:
+  - account: JUDGE
+    site: 1
+    number: all
+    letters: all
+    enabled: yes
+
+
+# EOF system.pc2.yaml

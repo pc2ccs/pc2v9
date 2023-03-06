@@ -162,7 +162,8 @@ public class RemoteRunSubmitter {
         // search for this site's logins first
         for (Account account : accounts) {
             if (account.getSiteNumber() == thisSiteNumber) {
-                if (account.getClientId().getName().equals(clientIdString)) {
+                if (account.getClientId().getName().equals(clientIdString) ||
+                    account.getAliasName().equals(clientIdString)) {
                     return account;
                 }
                 if (account.getClientId().getName().equals("team" + clientIdString)) {
@@ -174,9 +175,10 @@ public class RemoteRunSubmitter {
         // Sort by site, type then id.
         Arrays.sort(accounts, new AccountComparator());
 
-        // serach all site's logins
+        // search all site's logins
         for (Account account : accounts) {
-            if (account.getClientId().getName().equals(clientIdString)) {
+            if (account.getClientId().getName().equals(clientIdString) ||
+                account.getAliasName().equals(clientIdString)) {
                 return account;
             }
             if (account.getClientId().getName().equals("team" + clientIdString)) {

@@ -1,0 +1,53 @@
+#
+# contest.yaml - Pac NW 2022 45 Contest
+# February 2023
+#
+# testcontest1 
+--- 
+
+name: Pacific NorthWest 2022 Test Contest
+short-name: PacNW21 Test 1
+
+# Note auto start countdown will not be started unless start-time is in future.
+
+# TODO update start date/time
+
+start-time:        2022-02-08T11:00:00-08:00
+
+duration:  5:00:00
+
+# amount of freeze time before end of contest
+scoreboard-freeze: 01:00:00
+
+# scoreboard-freeze-length in CCS, but has it de facto changed to scoreboard-freeze in pc2?
+scoreboard-freeze-length: 01:00:00
+
+# pc2 specific settings
+# elapsed: 0:00:00
+# remaining: 5:00:00
+# running: false
+
+# pc2 judging types 
+computer-judged: true
+manual-review: false
+send-prelim-judgement: false
+
+# other pc2 settings
+# default-validator: /home/judge/cdp/config/validefault {:infile} {:outfile} {:ansfile} {:resfile} {:problemletter}
+# default-validator:  /home/judge/cdp/config/validefault
+
+# Load data files into pc2 as SerializedFiles, not using CDP external files
+load-data-files: false
+
+# judge's data path
+# TODO update judge-config-path
+judge-config-path: /home/ubuntu/current/config
+
+allow-multiple-team-logins: true
+
+# note: pc2 load fils ./accounts_load.tsv
+
+# 10M = 10 000
+max-output-size-K: 10000
+
+# EOF Contest Configuration

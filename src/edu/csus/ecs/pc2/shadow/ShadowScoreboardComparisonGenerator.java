@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.log.Log;
@@ -230,6 +231,9 @@ public class ShadowScoreboardComparisonGenerator {
         // containing a list of teams
         ObjectMapper mapper = new ObjectMapper();
         
+        // ignore out-of-spec property fields (some ccs, like DOMJudge, like to add extra things)
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        
         List<Team> teamList = null;
         try {
             teamList = mapper.readValue(teamsJson, new TypeReference<List<Team>>() {});
@@ -241,7 +245,12 @@ public class ShadowScoreboardComparisonGenerator {
         
         //add each team to the return map, which maps team ids to team names
         for (Team team : teamList) {
-            retMap.put(team.getId(), team.getName());
+            // spec says "display_name" may be empty/null, in which case "name" should be used.
+            String teamDispName = team.getDisplay_name();
+            if(teamDispName == null || teamDispName.isEmpty()) {
+                teamDispName = team.getName();
+            }
+            retMap.put(team.getId(), teamDispName);
         }
         
         return retMap;
@@ -302,6 +311,9 @@ public class ShadowScoreboardComparisonGenerator {
             
             //deserialize the input JSON to a ScoreboardJsonModel object
             ObjectMapper mapper = new ObjectMapper();
+            
+            // ignore out-of-spec property fields (some ccs, like DOMJudge, like to add extra things)
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             ScoreboardJsonModel jsonModel = mapper.readValue(scoreboardJson, ScoreboardJsonModel.class);
             
             //get the list of TeamScoreRows out of the JSON model

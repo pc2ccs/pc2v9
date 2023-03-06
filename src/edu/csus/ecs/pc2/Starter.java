@@ -36,7 +36,7 @@ public final class Starter  {
         IInternalContest model = new InternalContest();
         InternalController controller = new InternalController (model);
         
-        if (args.length > 0 && args[0].equals("--team1")){
+        if (args.length > 0 && args[0].equals(AppConstants.TEAM1_OPTION_STRING)){
             try {
                 controller.setUsingMainUI(false);
                 controller.start(args);
