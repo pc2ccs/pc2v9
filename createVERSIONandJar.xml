@@ -100,7 +100,7 @@ To Use this:
 
 	<target name="compile" depends="init" description="compile the source ">
 		<!-- Compile the java code from ${src.dir} into ${build.dir} -->
-		<javac srcdir="${src.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
+		<javac srcdir="${src.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" classpath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
 			<compilerarg line="${compilerArg}" compiler="${build.compiler}" />
 			<!-- classpath refid="project.classpath" /> -->
 			<!-- <compilerarg value="" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/> -->
@@ -129,7 +129,7 @@ To Use this:
 		<property name="testBundleBootClasspath" value="${testBootclasspath}" />
 		
 		<javac srcdir="${test.dir}" destdir="${build.test.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" 
-		bootclasspath="${testBundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
+		classpath="${testBundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
 			<compilerarg line="${compilerArg}" compiler="${build.compiler}" />
 			<compilerarg line="-log '${build.dir}/${name}.test${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter" />
 		</javac>

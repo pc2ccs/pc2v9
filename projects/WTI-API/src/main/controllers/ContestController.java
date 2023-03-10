@@ -1,11 +1,14 @@
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package controllers;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -28,9 +31,16 @@ import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -64,6 +74,11 @@ import services.ScoreboardChangeListener;
 		@Authorization(value="sampleoauth", scopes = {})
 })
 public class ContestController extends MainController {
+	
+	/**
+	 * Key to enable filtering scoreboard by division.
+	 */
+	private static final String SERVER_WTI_BOARD_USE_DIVISIONS_KEY = "server.wtiBoardUseDivisions";
 	
 	public final static String DEFAULT_PC2_SCOREBOARD_ACCOUNT = "scoreboard2";
 	public final static String DEFAULT_PC2_SCOREBOARD_PASSWORD = "scoreboard2";
@@ -547,9 +562,30 @@ public class ContestController extends MainController {
 			synchronized (updateStandingsMutex) {
 				
 				// check if some event has occurred which could have changed the standings
+				
+				/**
+				 * Should scoreboaed only show the teams in a team's division?
+				 */
+				boolean useDivisionFilter = false;
+
+				if (IniFile.isFilePresent()) {
+					new IniFile();
+					useDivisionFilter = StringUtilities.getBooleanValue(IniFile.getValue(SERVER_WTI_BOARD_USE_DIVISIONS_KEY), false);
+				}
+
+				if (useDivisionFilter) {
+					/**
+					 * If divisions are to be shown to each user, must force a new recacl of
+					 * standings for each call. This removes the efficiency of using a cached copy
+					 * of the standings.
+					 */
+					wtiServerStandingsAreCurrent = false; // force scoreboard recalc
+				}
+
 				if (!wtiServerStandingsAreCurrent) {
 
 					logger.info("Standings are not current; invoking DSA to update");
+					
 
 					// Standings could have changed; try to get the actual InternalContest so
 					// we can use it to get updated standings
@@ -566,7 +602,40 @@ public class ContestController extends MainController {
 					// we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
 					try {
 						Properties props = internalContest.getContestInformation().getScoringProperties();
-						String xmlStandings = dsa.getStandings(internalContest, props, logger);
+
+						if (props != null) {
+						       Set<Object> set = props.keySet();
+						        String[] keys = (String[]) set.toArray(new String[set.size()]);
+						        Arrays.sort(keys);
+						        for (String string : keys) {
+									xlog(logger, "input SA properties " + string + "='" + props.get(string) + "'");
+						        }
+						} 
+
+						// Assigning DefaultScoringAlgorithm.getDefaultProperties(); is a tempoary fix, i686 and i680 describe the bug.
+						// TODO i686 - Find/fix root cause for NPE in WTI DSA, details in i680 #686
+						// this is a temporary fix until root cause is found, and the bug fixed.
+						props = DefaultScoringAlgorithm.getDefaultProperties();
+
+						String xmlStandings = null;
+						Run[] runs = null;
+						if (useDivisionFilter) {
+							String userLogin= userInformation.getMyClient().getLoginName();
+							Integer clientNumber = StringUtilities.getTeamNumber(userLogin);
+							ClientId clientId = new ClientId(internalContest.getSiteNumber(), Type.TEAM, clientNumber);
+							runs = ScoreboardUtilites.getRunsForUserDivision(clientId, internalContest);
+							
+							String teamDivisionStr = ScoreboardUtilites.getDivision(internalContest, clientId);
+							xlog(logger, "Runs for "+key+" useDivisionFilter true, total runs  = "+runs.length+" for div "+teamDivisionStr);
+							Integer teamDivision = Integer.parseInt(teamDivisionStr);
+							
+							xmlStandings = dsa.getStandings(internalContest, runs, teamDivision, props, logger);
+						} else {
+							runs = internalContest.getRuns();
+							xlog(logger, "Runs for "+key+" Not using division useDivisionFilter false, total runs  = "+runs.length);
+							xmlStandings = dsa.getStandings(internalContest, runs, null, props, logger);
+						}
+
 						//					logger.fine("Got the following XML from DSA:");
 						//					logger.fine(xmlStandings);
 						logger.info("Converting DSA XML to JSON");
@@ -596,9 +665,6 @@ public class ContestController extends MainController {
 				}
 			}//end synchronized block
 			
-			logger.info("Returning JSON standings in HTTP Response");
-//			logger.fine(currentJSONStandings);
-
 			// standings are (now) current; return them to requestor
 			return Response.ok().entity(currentJSONStandings).type(MediaType.APPLICATION_JSON).build();
 			
@@ -609,7 +675,18 @@ public class ContestController extends MainController {
 		}
 	}
 
-	
+	/**
+	 * Logs to logger and stdout.
+	 * 
+	 * @param logger
+	 * @param string
+	 */
+	// TODO REFACTOR - Refactor all logging and exception handling
+	private void xlog(Log logger, String string) {
+		logger.info("ContestController: " + string);
+		System.out.println("ContestController: " + string);
+	}
+
 	/**
 	 * Returns a JSON String containing the standings represented by the given XML Document String.
 	 * 

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.Serializable;
@@ -274,6 +274,26 @@ public final class StringUtilities implements Serializable {
         }
 
         return value;
+    }
+    
+    /**
+     * get team number from login string.
+     * 
+     * @param user team login in form team#, team102
+     * @return null if no team number found or string after team is not a number.
+     */
+    public static Integer getTeamNumber(String userLogin) {
+        int idx = userLogin.lastIndexOf("team");
+        if (idx != -1) {
+            String numstring = userLogin.substring(idx + 4);
+            try {
+                int num = Integer.parseInt(numstring);
+                return num;
+            } catch (Exception e) {
+                // ignore Num parse error, will return null
+            }
+        }
+        return null;
     }
     
 }
