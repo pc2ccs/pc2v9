@@ -1927,6 +1927,9 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                     new Boolean(false),                         //selection checkbox
                     new String("*"),                            //test case number
                     rowData);
+            getNumFailedTestCasesLabel().setForeground(Color.cyan);
+            getNumFailedTestCasesLabel().setText("(Judging)");
+
         }
     }
     
