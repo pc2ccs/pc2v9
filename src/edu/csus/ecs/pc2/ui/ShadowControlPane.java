@@ -7,6 +7,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -113,6 +115,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private JTableCustomized connectStatusTable;
     
     private DefaultTableModel connectStatusTableModel;
+    
+    private int statusScrollBarMax = 0;
     
     private int numRecord = 0;
     
@@ -476,6 +480,17 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         if (connectStatusPane == null) {
             connectStatusPane = new JScrollPane(getConnectStatusTable());
             connectStatusPane.setPreferredSize(new java.awt.Dimension(600,150));
+
+            // make it so it always scrolls to the bottom of the pane
+            connectStatusPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+                public void adjustmentValueChanged(AdjustmentEvent e) {
+                    if(statusScrollBarMax == e.getAdjustable().getMaximum()) {
+                        return;
+                    }
+                    statusScrollBarMax = e.getAdjustable().getMaximum();
+                    e.getAdjustable().setValue(statusScrollBarMax);  
+                }
+            });
         }
         
         return connectStatusPane;
