@@ -11,6 +11,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -810,56 +811,16 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                         addConnectTableEntry("Test connection to remote CCS failed");
                                     }
                                     
-                                    // API endpoint is right before /contests/ in the URL, so find that, if it's there
-                                    int iApi = remoteURLString.lastIndexOf("/contests/");
-                                    if(iApi != -1) {
-                                        // eg: https://judge.gehack.nl/api/contests/bapc2022 -> https://judge.gehack.nl/api
-                                        String remoteAPIURL = remoteURLString.substring(0, iApi);
-                                        String infoStr = null;
-                                        
-                                        if(!remoteAPIURL.isEmpty()) {
-                                            // If we have a valid URL to try, let's do it.  If this fails for any reason, we really don't care that much
-                                            // And we will show it in the table as an unavailable URL.
-                                            try {
-                                                remoteContestAPIAdapter = createRemoteContestAPIAdapter(new URL(remoteAPIURL), remoteLogin, remotePW);
-                                                Map<String, Object> map = getMap(remoteContestAPIAdapter.getRemoteJSON(CCS_API_ENDPOINT));
-                                                if(map != null) {
-                                                    // ex. {"version":"2022-07","version_url":"https://ccs-specs.icpc.io/2022-07/contest_api","name":"domjudge"}
-                                                    String verstr = (String)map.get("version");
-                                                    String provider = (String)map.get("name");
-                                                    
-                                                    infoStr = "API Version: ";
-                                                    
-                                                    // Try to make an intelligent looking string if stuff is missing
-                                                    if(verstr == null || verstr.isEmpty()) {
-                                                        infoStr += "N/A";
-                                                    } else {
-                                                        infoStr += verstr;
-                                                    }
-                                                    if(provider != null && !provider.isEmpty()) {
-                                                        infoStr += " by " + provider;
-                                                    } else {
-                                                        infoStr += " (unknown provider)";
-                                                    }
-                                                } else {
-                                                    infoStr = "No API version available at " + remoteAPIURL;                                                   
-                                                }
-                                            } catch(Exception e) {
-                                                infoStr = "No API endpoint " + remoteAPIURL + " available";
-                                            }
-                                        } else {
-                                            infoStr = "No API Version URL availabe";
-                                        }
-                                        // infoStr should always get set above, but, just in case it doesn't...
-                                        if(infoStr != null) {
-                                            addConnectTableEntry(infoStr);
-                                            getController().getLog().info("Shadow EventFeed: " + infoStr);
-                                        }
+                                    // Try to get the remote API version
+                                    String infoStr = getRemoteAPIVersionInfo(remoteURLString, remoteLogin, remotePW);
+                                    // infoStr is supposed to be non-null all the time, but let's be sure
+                                    if(infoStr != null && !infoStr.isEmpty()) {
+                                        addConnectTableEntry(infoStr);
+                                        getController().getLog().info("Shadow EventFeed: " + infoStr);
                                     }
-
                                 } catch (Exception e) {
-                                    showErrorMessage("Exception attempting to connect to remote system:\n" + e, "Exception in connecting");
-                                    getController().getLog().log(Log.SEVERE, "Exception attempting to connect to remote system: " + e.getMessage(), e);
+                                    showErrorMessage("Exception attempting to test connection to remote system:\n" + e, "Exception in connecting");
+                                    getController().getLog().log(Log.SEVERE, "Exception attempting to test connection to remote system: " + e.getMessage(), e);
                                     
                                 } finally {
                                     if (remoteContestAPIAdapter != null) {
@@ -923,7 +884,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                     objects[1] = msg;
                 }
                 connectStatusTableModel.addRow(objects);
-                resizeColumnWidth(connectStatusTable);            }
+                resizeColumnWidth(connectStatusTable);
+            }
         });
         
     }
@@ -1028,7 +990,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             updateContestInformation();
         }
     }
-   
+
+    
     private IRemoteContestAPIAdapter createRemoteContestAPIAdapter(URL url, String login, String password) {
 
         boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow.usemockcontestadapter"), false);
@@ -1039,5 +1002,105 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             return new RemoteContestAPIAdapter(url, login, password);
         }
     }
+    
+    /**
+     * Returns a String containing the URL of the remote version endpoint, or null if the string can not be formed
+     * from the supplied remoteURLString
+     * This endpoint is distinctly different from the /contest/xxxx endpoints in that it is the same for all contests
+     * provided by that server; it is contest independent.  Therefore, it does not appear as a /contest/ endpoint but a
+     * server endpoint.
+     * eg: https://judge.gehack.nl/api/contests/bapc2022 -> https://judge.gehack.nl/api
+     * @return a String with the remote URL Version API endpoint
+     */
+    private String getRemoteAPIVersionURLString(String remoteURLString)
+    {
+        String remoteAPIVersionURLString = null;
+    
+        // API (Version) endpoint is right before /contests/ in the URL, so find that, if it's there
+        int iApi = remoteURLString.lastIndexOf("/contests/");
+        if(iApi != -1) {
+            // eg: https://judge.gehack.nl/api/contests/bapc2022 -> https://judge.gehack.nl/api
+            remoteAPIVersionURLString = remoteURLString.substring(0, iApi);
+            if(remoteAPIVersionURLString.isEmpty()) {
+                remoteAPIVersionURLString = null;
+            }
+        }
+        return(remoteAPIVersionURLString);
+    }
+    
+    /**
+     * Returns a new IRemoteContestAPIAdapter object suitable for connecting to the VERSION api endpoint of the remote CCS
+     * This endpoint is distinctly different from the /contest/xxxx endpoints in that it is the same for all contests
+     * provided by that server; it is contest independent.  Therefore, it does not appear as a /contest/ endpoint but a
+     * server endpoint.
+     * eg: https://judge.gehack.nl/api/contests/bapc2022 -> https://judge.gehack.nl/api
+     * @return a IRemoteContestAPIAdapter object
+     */
+    private IRemoteContestAPIAdapter createRemoteContestVersionAPIAdapter(String remoteURLString, String login, String password) throws MalformedURLException {
 
+        boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow.usemockcontestadapter"), false);
+        
+        String remoteAPIVersionURLString = getRemoteAPIVersionURLString(remoteURLString);
+        if(remoteAPIVersionURLString != null) {
+            // If we have a valid URL to try, let's do it.
+            if (useMockAdapter)
+            {
+                return new MockContestAPIAdapter(new URL(remoteAPIVersionURLString), login, password);
+            } else {
+                return new RemoteContestAPIAdapter(new URL(remoteAPIVersionURLString), login, password);
+            }
+        }
+        return(null);
+    }
+
+    /**
+     * Returns a String suitable for display in a log indicating the CLICS API version supported by the remote.
+     * A valid string will always be returned as follows:
+     * Can not form API Version URL from xxxxx - If the remote URL string does not contain a contest URL path, eg. /contests/
+     * No API version available at  - If the remote did not return valid information for the version API
+     * API Version: N/A - A response was returned by the remote, but it did not contain version information (version)
+     * API Version: 2022-07 by XXXXX - A valid version and provider was returned by the remote
+     * API Version: 2022-07 (unknown provider) - A valid version was returned by the remote, but no provider (name)
+     * No version API endpoint available for contest URL: xxxxx - An exception occurred due to a bad URL supplied for the contest(s)
+     * @return a non-null String representing log-ready version info of the remote API
+     */
+    private String getRemoteAPIVersionInfo(String remoteURLString, String login, String password)
+    {
+        String infoStr;
+        
+        try {
+            // get the special API adapter for version info
+            IRemoteContestAPIAdapter remoteAPI = createRemoteContestVersionAPIAdapter(remoteURLString, login, password);
+            if(remoteAPI != null) {
+                Map<String, Object> map = getMap(remoteAPI.getRemoteJSON(CCS_API_ENDPOINT));
+                if(map != null) {
+                    // ex. {"version":"2022-07","version_url":"https://ccs-specs.icpc.io/2022-07/contest_api","name":"domjudge"}
+                    String verstr = (String)map.get("version");
+                    String provider = (String)map.get("name");
+                    
+                    infoStr = "API Version: ";
+                    
+                    // Try to make an intelligent looking string if stuff is missing
+                    if(verstr == null || verstr.isEmpty()) {
+                        infoStr += "N/A";
+                    } else {
+                        infoStr += verstr;
+                    }
+                    if(provider != null && !provider.isEmpty()) {
+                        infoStr += " by " + provider;
+                    } else {
+                        infoStr += " (unknown provider)";
+                    }
+                } else {
+                    // getRemoteAPIVersionURLString will always return non-null here for those wondering, or remoteAPI would be null!
+                    infoStr = "No API version available at " + getRemoteAPIVersionURLString(remoteURLString);                                                   
+                }
+            } else {
+                infoStr = "Can not form API Version URL from " + remoteURLString;
+            }
+        } catch(Exception e) {
+            infoStr = "No version API endpoint available for contest URL: " + remoteURLString;
+        }
+        return(infoStr);
+    }
 }
