@@ -3,11 +3,14 @@ package edu.csus.ecs.pc2.core.execute;
 
 import java.util.List;
 
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
@@ -389,4 +392,104 @@ public class JudgementUtilitesTest extends AbstractTestCase {
             contest.addJudgement(newJudgement);
         }
     }
+
+    /**
+     * Test JudgementUtilites.getLastTestCaseArray.
+     *
+     * Added two test cases (first all judged AC, second all judged WA).
+     * Test that getLastTestCaseArray returns the last ("WA") RunTestCases
+     *
+     * @throws Exception
+     */
+    public void testgetLastTestCaseArray() throws Exception {
+        IInternalContest contest = loadFullSampleContest(null, "mini");
+        Account[] teams = getTeamAccounts(contest);
+        assertNotNull(teams);
+        assertEquals("Team count ", 151, teams.length);
+        Account[] judges = getJudgesAccounts(contest);
+        assertNotNull(judges);
+        assertEquals("Judge count ", 14, judges.length);
+        Language language = contest.getLanguages()[0];
+        Problem problem = contest.getProblems()[0];
+        Run run = new Run(teams[0].getClientId(), language, problem);
+        addJudgements(contest);
+        Judgement[] judgements = contest.getJudgements();
+        assertEquals("Judgement count ", 2, judgements.length);
+        Judgement acJudgement = getJudgement(contest, Judgement.ACRONYM_ACCEPTED);
+        assertNotNull("AC Judgement", acJudgement);
+        Judgement waJudgement = getJudgement(contest, Judgement.ACRONYM_WRONG_ANSWER);
+        assertNotNull("WA Judgement", waJudgement);
+        RunTestCase[] recs = JudgementUtilites.getLastTestCaseArray(contest, run);
+        assertEquals("Expected zero test cases ", 0, recs.length);
+        // Add firstset of test cases - all AC
+        for (int testCaseNum = 1; testCaseNum <= problem.getNumberTestCases(); testCaseNum++) {
+            addRunTestCase(contest, run, testCaseNum, acJudgement, judges[0].getClientId());
+        }
+        recs = JudgementUtilites.getLastTestCaseArray(contest, run);
+        
+        // TODO 701 change from expected 7 files to 10 files
+//        assertEquals("Expected test cases ", 10, recs.length);
+        assertEquals("Expected test cases ", 7, recs.length);
+        // Add second set of test cases - all WA
+        for (int testCaseNum = 1; testCaseNum <= problem.getNumberTestCases(); testCaseNum++) {
+            addRunTestCase(contest, run, testCaseNum, waJudgement, judges[0].getClientId());
+        }
+     // TODO 701 change from expected 14 files to 20 files
+//        assertEquals("Expected total test cases ", 20, run.getRunTestCases().length);
+        assertEquals("Expected total test cases ", 14, run.getRunTestCases().length);
+        recs = JudgementUtilites.getLastTestCaseArray(contest, run);
+        
+        // TODO 701 change from expected 7 files to 10 files
+//        assertEquals("Expected test cases ", 10, recs.length);
+        assertEquals("Expected test cases ", 7, recs.length);
+        
+        // Test that all judgements are WA
+        for (RunTestCase runTestCase : recs) {
+            ElementId judgementId = runTestCase.getJudgementId();
+            Judgement judgement = contest.getJudgement(judgementId);
+            assertEquals("Expecting WA judgement", Judgement.ACRONYM_WRONG_ANSWER, judgement.getAcronym());
+        }
+    }
+    /**
+     * Add a small sample of judgements including AC and WA
+     * @param contest
+     */
+    private void addJudgements(IInternalContest contest) {
+        Judgement judgementYes = new Judgement("Yes.", Judgement.ACRONYM_ACCEPTED);
+        contest.addJudgement(judgementYes);
+        Judgement judgement = new Judgement("Yes.", Judgement.ACRONYM_WRONG_ANSWER);
+        contest.addJudgement(judgement);
+    }
+    /**
+     * Find judgement in model for the input acronym.
+     * @param contest
+     * @param acronym
+     * @return null if no judgement found, else the judgement with the acronym
+     */
+    private Judgement getJudgement(IInternalContest contest, String acronym) {
+        Judgement[] list = contest.getJudgements();
+        for (Judgement judgement : list) {
+            if (acronym.equals(judgement.getAcronym())) {
+                return judgement;
+            }
+        }
+        return null;
+    }
+    /**
+     * Add Run Test case to run.
+     *
+     * @param contest
+     * @param run
+     * @param testNumber
+     * @param judgement
+     * @param judgerClientId
+     */
+    private void addRunTestCase(IInternalContest contest, Run run, int testNumber, Judgement judgement, ClientId judgerClientId) {
+        boolean solved = judgement.getAcronym().equals(Judgement.ACRONYM_ACCEPTED);
+        JudgementRecord record = new JudgementRecord(judgement.getElementId(), judgerClientId, solved, true, true);
+        RunTestCase runTestCase = new RunTestCase(run, record, testNumber, solved);
+        run.addTestCase(runTestCase);
+    }
+
+    
 }

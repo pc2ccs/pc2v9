@@ -42,6 +42,7 @@ import javax.swing.table.TableRowSorter;
 
 import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -236,7 +237,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         for (String key : currentJudgementMap.keySet()) {
             
             ShadowJudgementInfo curJudgementInfo = currentJudgementMap.get(key);
-            data[row][0] = curJudgementInfo.getTeamID();
+            data[row][0] = new Integer(Utilities.nullSafeToInt(curJudgementInfo.getTeamID(), 0));
             data[row][1] = curJudgementInfo.getProblemID();
             data[row][2] = curJudgementInfo.getLanguageID();
             data[row][3] = new Integer(key);

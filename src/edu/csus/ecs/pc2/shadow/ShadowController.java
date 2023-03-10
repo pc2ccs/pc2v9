@@ -605,9 +605,11 @@ public class ShadowController {
      * Returns a Map which maps submissionIds to {@link ShadowJudgementInfo} objects for every submission (run) in the
      * specified array of PC2 Runs.
      */
-    private Map<String, ShadowJudgementInfo> getJudgementsMap(Run[] pc2Runs) {
+    protected Map<String, ShadowJudgementInfo> getJudgementsMap(Run[] pc2Runs) {
 
         Map<String, ShadowJudgementInfo> pc2JudgementInfoMap = new HashMap<String, ShadowJudgementInfo>();
+        
+        log = getLog();
 
         // check each PC2 run (submission)
         for (Run run : pc2Runs) {
@@ -688,13 +690,34 @@ public class ShadowController {
                             pc2JudgementInfoMap.put(submissionId, info);
 
                         } else {
-                            // we've exhausted methods of obtaining an acronym
-                            log.warning("Null judgement acronym for run " + run.getNumber() + ", judgement string " + judgementString + "; skipping");
+                            // we've exhausted methods of obtaining an acronym from the validator judgement string
+
+                            Judgement judgement = localContest.getJudgement(jr.getJudgementId());
+                            if (judgement == null) {
+                                log.warning("Null judgement for run " + run.getNumber() + ", Judgement not found in model for run");
+                            } else {
+
+                                /**
+                                 * Acronym for run judgement
+                                 */
+                                String acronymnName = judgement.getAcronym().toString();
+
+                                // Add ShadowJudgementInfo for run into pc2JudgementInfoMap 
+                                ClientId judgerClientID = jr.getJudgerClientId();
+                                ShadowJudgementPair pair = new ShadowJudgementPair(submissionId, acronymnName, "<pending>");
+                                ShadowJudgementInfo info = new ShadowJudgementInfo(submissionId, teamID, problemID, languageID, judgerClientID, pair);
+                                pc2JudgementInfoMap.put(submissionId, info);
+
+                                log.info("Null judgement acronym for run " + run.getNumber() + ", judgement string " + judgementString + "; not skipped assigned acronym = " + acronymnName);
+                            }
+
                         }
 
                     } else {
                         // we got a null judgment record from the run, but it's supposedly been judged -- error!
                         log.severe("Error: found a (supposedly) judged PC2 run with no PC2 JudgementRecord!" + " (Submission id = " + run.getNumber() + ")");
+                        
+                        
                     }
 
                 } else {
