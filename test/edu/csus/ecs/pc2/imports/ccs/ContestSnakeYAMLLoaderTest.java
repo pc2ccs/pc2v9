@@ -2630,9 +2630,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     }
 
     /**
-     * Load all sample contests/cdps.
-     * 
-     * 
+     * Test loading all sample contests, a type of smoke test.
      * 
      * @throws Throwable
      */
@@ -2656,7 +2654,21 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
             
             try {
-                IInternalContest contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
+                
+                IInternalContest contest = null;
+
+                String teamsTSVFilename = directoryName + File.separator + IContestLoader.CONFIG_DIRNAME + //
+                        File.separator + LoadICPCTSVData.TEAMS_FILENAME;
+
+                if (new File(teamsTSVFilename).isFile()) {
+                    // Test load with tsv files
+                    File cdpDir = new File(directoryName);
+                    contest = loadFullSampleContest(null, cdpDir);
+                } else {
+                    // test yaml without tsv files
+
+                    contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
+                }
 
                 Problem[] problems = contest.getProblems();
                 assertTrue("Expecting at least one problem in contest in " + directoryName, problems.length > 0);

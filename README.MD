@@ -21,7 +21,7 @@ A wide variety of configurable options allow the contest administrator to tailor
 PC2 was developed at California State University, Sacramento (CSUS), and is Copyright (C) by the PC2 Development Team: John Clevenger,
 Doug Lane, Samir Ashoo, and Troy Boudreau.  
 
-# Getting Started
+# Getting Started  
 
 To install PC2, go to https://pc2ccs.github.io/, download the latest distribution (either the .zip or .tar.gz), and unzip that file in any 
 folder on your machine.  That's it -- PC2 is now installed and ready to run.
