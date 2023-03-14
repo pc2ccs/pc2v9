@@ -296,4 +296,17 @@ public final class StringUtilities implements Serializable {
         return null;
     }
     
+    /**
+     * Removes the last character from the given String and returns the resulting String.
+     * If the given String is null or empty, returns null.
+     * 
+     * @param s the String whose last char is to be removed.
+     * @return a String identical to the input String except with the last character removed, or null.
+     */
+    public static String removeLastChar(String s) {
+        return (s == null || s.length() == 0) ? null : (s.substring(0, s.length()-1));
+    }
+    
+
+    
 }
