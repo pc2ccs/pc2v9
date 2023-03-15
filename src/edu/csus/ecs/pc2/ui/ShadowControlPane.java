@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -66,7 +66,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  */
 
-// $HeadURL$
 public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStatus {
 
     private static final long serialVersionUID = 1;
@@ -751,6 +750,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (shadowController==null) {
                         showErrorMessage("No shadow controller available; cannot show runs comparison", "Missing Controller"); 
+                    } else if (!ShadowController.SHADOW_CONTROLLER_STATUS.SC_RUNNING.equals(shadowController.getStatus())) {
+                        showErrorMessage("Cannot compare runs, shadow not running","Shadow not running");
                     } else {
                         JFrame shadowCompareRunsFrame = new ShadowCompareRunsFrame(shadowController);
                         shadowCompareRunsFrame.setSize(600,700);
@@ -782,6 +783,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                 		
                             if (shadowController==null) {
                                 showErrorMessage("No shadow controller available; cannot show scoreboard comparison", "Missing Controller"); 
+                            } else if (!ShadowController.SHADOW_CONTROLLER_STATUS.SC_RUNNING.equals(shadowController.getStatus())) {
+                                showErrorMessage("Cannot compare scoreboard, shadow not running","Shadow not running");
                             } else {
                                 JFrame shadowCompareScoreboardFrame = new ShadowCompareScoreboardFrame(shadowController);
                                 shadowCompareScoreboardFrame.setSize(600,700);
