@@ -278,6 +278,7 @@ public final class StringUtilities implements Serializable {
     }
     
     /**
+<<<<<<< HEAD
      * Return a list of integers for input string.
      * 
      * Input string is a list of comma delimited numbers or ranges.
@@ -354,6 +355,26 @@ public final class StringUtilities implements Serializable {
         }
 
         return number;
+    }
+    
+    /**
+     *  get team number from login string.
+     * 
+     * @param user team login in form team#, team102
+     * @return null if no team number found or string after team is not a number.
+     */
+    public static Integer getTeamNumber(String userLogin) {
+        int idx = userLogin.lastIndexOf("team");
+        if (idx != -1) {
+            String numstring = userLogin.substring(idx + 4);
+            try {
+                int num = Integer.parseInt(numstring);
+                return num;
+            } catch (Exception e) {
+                // ignore Num parse error, will return null
+            }
+        }
+        return null;
     }
     
 }

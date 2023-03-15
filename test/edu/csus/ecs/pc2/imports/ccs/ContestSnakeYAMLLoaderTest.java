@@ -64,6 +64,8 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 
+    private static final String MINI_CONTEST_DIR = "mini";
+
     private static final String YYYY_MM_DD_FORMAT1 = "yyyy-MM-dd HH:mm";
 
     private String dateTimeFormat = "EEE MMM dd HH:mm:ss yyyy";
@@ -2628,9 +2630,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     }
 
     /**
-     * Load all sample contests/cdps.
-     * 
-     * 
+     * Test loading all sample contests, a type of smoke test.
      * 
      * @throws Throwable
      */
@@ -2654,7 +2654,21 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
             
             try {
-                IInternalContest contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
+                
+                IInternalContest contest = null;
+
+                String teamsTSVFilename = directoryName + File.separator + IContestLoader.CONFIG_DIRNAME + //
+                        File.separator + LoadICPCTSVData.TEAMS_FILENAME;
+
+                if (new File(teamsTSVFilename).isFile()) {
+                    // Test load with tsv files
+                    File cdpDir = new File(directoryName);
+                    contest = loadFullSampleContest(null, cdpDir);
+                } else {
+                    // test yaml without tsv files
+
+                    contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
+                }
 
                 Problem[] problems = contest.getProblems();
                 assertTrue("Expecting at least one problem in contest in " + directoryName, problems.length > 0);
@@ -2869,7 +2883,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         ContestInformation info = contest.getContestInformation();
         assertNotNull("Expecting ContestInformation ", info);
-        assertEquals("Expected max file size ",128000,info.getMaxFileSize());
+        assertEquals("Expected max file size ",128*1024,info.getMaxOutputSizeInBytes());
     }
 
     
@@ -3784,5 +3798,24 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
         }
     }
-}
+    
+    public void testLoadSampleFiles() throws Exception {
 
+        IInternalContest contest = loadFullSampleContest(null, MINI_CONTEST_DIR);
+        assertNotNull(contest);
+
+        int totalTestCases = 0;
+
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+
+            totalTestCases += problem.getNumberTestCases();
+//            for (int i = 0; i < problem.getNumberTestCases(); i++) {
+//                System.out.println("debug "+problem.getDataFileName(i+1));
+//            }
+        }
+
+        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 10, totalTestCases);
+
+    }
+}

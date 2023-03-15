@@ -79,6 +79,7 @@ public class WebServer {
 			//create a new Jetty server
 			logger.info("Creating Jetty server");
 			Server server = new Server(ini.getPortNum());
+			System.out.println("Starting on port "+ini.getPortNum());
 
 			//install the endpoint handlers in Jetty
 			logger.info("Installing service handlers in Jetty");
