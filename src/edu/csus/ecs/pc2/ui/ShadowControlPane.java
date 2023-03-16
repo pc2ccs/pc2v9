@@ -2,9 +2,14 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
@@ -35,6 +40,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -122,7 +128,18 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private String lastToken = null;
     
     private SimpleDateFormat lastDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    
+    // Lightish green for success
+    private Color statusColorSuccess = new Color(128, 255, 128);
+    // Lightish red for failure
+    private Color statusColorFailure = new Color(255, 128, 128);
 
+    // Status column for JTable notifications
+    enum ShadowStatus {
+        SUCCESS,
+        FAILURE,
+        INFO
+    };
 
     /**
      * Constructs a new ShadowControlPane using the specified Contest and Controller.
@@ -385,13 +402,47 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         if (centerPanel == null) {
             centerPanel = new JPanel();
             
-            centerPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+           /*
+             * We use a GridBagLayout instead of a FlowLayout since we want to make
+             * the notification JTable resize as the window gets bigger so you can see more
+             * entries.  FlowLayout doesn't work that way.  Being there are 3 other panes involved
+             * GridBag seemed the way to go.  The GridBagLayout is one column wide by 4 rows high:
+             * Row 0 - Indicator if shadowing is on or off pane
+             * Row 1 - Shadow settings pane
+             * Row 2 - Event ID information pane
+             * Row 3 - Status table (Expands to fill window)
+             */
+            centerPanel.setLayout(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
             
-            centerPanel.add(getShadowingOnOffStatusPane());
-            centerPanel.add(getShadowSettingsPane());
-            centerPanel.add(getLastEventIDPane());
-            centerPanel.add(getConnectStatusPane());
+            // Each pane uses exactly one cell in the layout
+            c.gridwidth = 1;
+            c.gridheight = 1;
+            // Since it's only 1 column wide, all cells start in the first column
+            c.gridx = 0;
             
+            c.fill = GridBagConstraints.NONE;
+            c.gridy = 0;
+            centerPanel.add(getShadowingOnOffStatusPane(), c);
+            
+            c.gridy = 1;
+            centerPanel.add(getShadowSettingsPane(), c);
+            
+            // Fill horizontally or it will chop it off.
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.gridy = 2;
+            // This is needed due to the way the pane is created.  We have to 
+            // allow the height to expand a tiny bit, or it chops the pane off.
+            c.weighty = 0.01;
+            centerPanel.add(getLastEventIDPane(), c);
+            
+            // Fill both width and height as needed as display area expands
+            c.fill = GridBagConstraints.BOTH;
+            c.gridy = 3;
+            c.weighty = 0.5;
+            // Was bumping up against the edge, so leave some elbow room
+            c.insets = new Insets(0, 20, 0, 20);
+            centerPanel.add(getConnectStatusPane(), c);          
         }
         return centerPanel;
     }
@@ -478,7 +529,6 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private JScrollPane getConnectStatusPane() {
         if (connectStatusPane == null) {
             connectStatusPane = new JScrollPane(getConnectStatusTable());
-            connectStatusPane.setPreferredSize(new java.awt.Dimension(600,150));
 
             // make it so it always scrolls to the bottom of the pane
             connectStatusPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
@@ -496,7 +546,35 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     }
     
     private JTableCustomized getConnectStatusTable() {
-        connectStatusTable = new JTableCustomized();
+    
+        connectStatusTable = new JTableCustomized() {
+            private static final long serialVersionUID = 1L;
+
+            // override JTable's default renderer to set the background color based on the ShadowStatus
+            // Essentially stolen from ShadowCompareScoreboardPane.  Thank you JohnC.
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component c = super.prepareRenderer(renderer, row, column);
+
+                //default to normal background
+                c.setBackground(getBackground());
+              
+                if(connectStatusTableModel != null) {
+                    //map the specified row index number to the corresponding model row (index numbers can change due
+                    // to sorting/scrolling; model row numbers never change).
+                    int modelRow = convertRowIndexToModel(row);
+                    ShadowStatus stat = (ShadowStatus)connectStatusTableModel.getValueAt(modelRow, 1);
+                    switch(stat) {
+                        case SUCCESS: c.setBackground(statusColorSuccess); break;
+                        case FAILURE: c.setBackground(statusColorFailure); break;
+                        case INFO: c.setBackground(getBackground()); break;
+                    }
+                }
+                
+                
+                return(c);
+            }
+        };
         
         return(connectStatusTable);
     }
@@ -563,7 +641,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
     private void setupConnectionStatusTable() {
 
-        Object[] columns = { "Time             ", "Description               " };
+        Object[] columns = { "Time             ", "Status", "Description               " };
         connectStatusTable.removeAll();
         
         connectStatusTableModel = new DefaultTableModel(columns, 0) {
@@ -594,8 +672,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         // These are in sort order
         // Time
         sortList.add(new RowSorter.SortKey(idx++, SortOrder.ASCENDING));
-        // Description
-        sortList.add(new RowSorter.SortKey(idx++, SortOrder.ASCENDING));
+        // Description - sorting on description is not really useful.  If you want it someday, it's easily re-added.
+//      sortList.add(new RowSorter.SortKey(idx++, SortOrder.ASCENDING));
         trs.setSortKeys(sortList);
         resizeColumnWidth(connectStatusTable);
     }
@@ -823,17 +901,17 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                     boolean isConnected = remoteContestAPIAdapter.testConnection();
                                     if (isConnected) {
                                         showMessage ("Connection to remote CCS is successful");
-                                        addConnectTableEntry("Test connection to remote CCS successful");
+                                        addConnectTableEntry(ShadowStatus.SUCCESS, "Test connection to remote CCS");
                                     } else {
                                         showErrorMessage("Connection to remote CCS failed", "Connection failed");
-                                        addConnectTableEntry("Test connection to remote CCS failed");
+                                        addConnectTableEntry(ShadowStatus.FAILURE, "Test connection to remote CCS");
                                     }
                                     
                                     // Try to get the remote API version
                                     String infoStr = getRemoteAPIVersionInfo(remoteURLString, remoteLogin, remotePW);
                                     // infoStr is supposed to be non-null all the time, but let's be sure
                                     if(infoStr != null && !infoStr.isEmpty()) {
-                                        addConnectTableEntry(infoStr);
+                                        addConnectTableEntry(ShadowStatus.INFO, infoStr);
                                         getController().getLog().info("Shadow EventFeed: " + infoStr);
                                     }
                                 } catch (Exception e) {
@@ -882,11 +960,11 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         }
     }
 
-    private void addConnectTableEntry(String msg)
+    private void addConnectTableEntry(ShadowStatus stat, String msg)
     {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                Object[] objects = new Object[2];
+                Object[] objects = new Object[3];
                 
                 try {
                     GregorianCalendar cal = new GregorianCalendar();
@@ -896,10 +974,11 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                 } catch(Exception e) {
                     objects[0] = "Unknown";
                 }
+                objects[1] = stat;
                 if(msg == null || msg.isEmpty()) {
-                    objects[1] = "<Empty Message>";
+                    objects[2] = "<Empty Message>";
                 } else {
-                    objects[1] = msg;
+                    objects[2] = msg;
                 }
                 connectStatusTableModel.addRow(objects);
                 resizeColumnWidth(connectStatusTable);
@@ -958,9 +1037,9 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     public void connectFailed(String token)
     {
         if(token == null || token.isEmpty()) {
-            addConnectTableEntry("Connection failed");
+            addConnectTableEntry(ShadowStatus.FAILURE, "Connect");
         } else {
-            addConnectTableEntry("Connection failed starting at token " + token);
+            addConnectTableEntry(ShadowStatus.FAILURE, "Connection starting at token " + token);
         }
     }
 
@@ -970,9 +1049,9 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     public void connectSucceeded(String token)
     {
         if(token == null || token.isEmpty()) {
-            addConnectTableEntry("Connected successfully");
+            addConnectTableEntry(ShadowStatus.SUCCESS, "Connected");
         } else {
-            addConnectTableEntry("Connected successfully starting at token " + token);
+            addConnectTableEntry(ShadowStatus.SUCCESS, "Connected starting at token " + token);
         }
     }
     
@@ -990,7 +1069,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             updateContestInformation();
             msg += " at token " + lastToken;
         }
-        addConnectTableEntry(msg);
+        addConnectTableEntry(ShadowStatus.INFO, msg);
     }
     
     /**
@@ -1001,7 +1080,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         if(errMsg == null || errMsg.isEmpty()) {
             errMsg = "Unexpected disconnect";
         }
-        addConnectTableEntry(errMsg);
+        addConnectTableEntry(ShadowStatus.FAILURE, errMsg);
         
         // Save last token on disconnect
         if(lastToken != null && !lastToken.isEmpty()) {
