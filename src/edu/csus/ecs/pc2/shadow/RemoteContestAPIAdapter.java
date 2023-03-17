@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.IFileImpl;
 import edu.csus.ecs.pc2.shadow.AbstractRemoteConfigurationObject.REMOTE_CONFIGURATION_ELEMENT;
@@ -244,14 +245,30 @@ public class RemoteContestAPIAdapter implements IRemoteContestAPIAdapter {
      * {@link #getRemoteSubmissionFiles(URL)} with that URL, returning the result
      * of that method call.
      * 
+     * Note that if the "Primary CCS URL" ends with a "/" character then this method
+     * avoids adding a duplicate "/" when concatenating the "submissions" endpoint to the URL;
+     * see https://github.com/pc2ccs/pc2v9/issues/528.
+     * 
      * @param submissionID a String representation of the submission ID from the remote system
      * @return the result of calling {@link #getRemoteSubmissionFiles(URL)} with the constructed URL,
      *         or null if an exception is thrown during URL construction
      */
     @Override
     public List<IFile> getRemoteSubmissionFiles(String submissionID) {
+        
+        //define the CLICS endpoint for fetching the files associated with a submission
         String endpoint = "/submissions/" + submissionID + "/files";
-        String urlString = remoteURL.toString() + endpoint;
+        
+        //get the configured Primary CCS URL
+        String urlString = remoteURL.toString();
+        //ensure the URL doesn't end with "/" (because we're going to add a "/" as part of the "endpoint")
+        if (urlString.endsWith("/")){
+            urlString = StringUtilities.removeLastChar(urlString);
+        }
+        
+        //build the full URL to the submissions/files endpoint
+        urlString = urlString + endpoint;
+        
         URL url;
         try {
             url = new URL(urlString);
