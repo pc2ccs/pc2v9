@@ -496,7 +496,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         int expectedMismatches = 0;
 
         assertEquals("Expecting mis matched names ", expectedMismatches, mismatches);
-        assertEquals("Expecting matching names ", 77, teamStandings.size() - expectedMismatches);
+        assertEquals("Expecting matching names ", 78, teamStandings.size() - expectedMismatches);
     }
 
 }
