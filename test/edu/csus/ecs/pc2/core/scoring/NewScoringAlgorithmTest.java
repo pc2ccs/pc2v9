@@ -493,10 +493,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
 //                    assertEquals("Expected team based on "+teamScoreboardDisplayForamtString, expectedDisplayName, teamStanding.getTeamName());
         }
 
-        /**
-         * One team, team 203 has special characters which do not match.
-         */
-        int expectedMismatches = 1;
+        int expectedMismatches = 0;
 
         assertEquals("Expecting mis matched names ", expectedMismatches, mismatches);
         assertEquals("Expecting matching names ", 77, teamStandings.size() - expectedMismatches);

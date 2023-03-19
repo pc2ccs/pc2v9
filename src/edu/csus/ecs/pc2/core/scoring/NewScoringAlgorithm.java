@@ -529,7 +529,6 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         Account account = contest.getAccount(standingsRecord.getClientId());
  
         standingsRecordMemento.putString("teamName", ScoreboardVariableReplacer.substituteDisplayNameVariables(teamVarDisplayString, account, group));
-//        standingsRecordMemento.putString("teamName", account.getDisplayName());
         
         standingsRecordMemento.putInteger("teamId", account.getClientId().getClientNumber());
         standingsRecordMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
