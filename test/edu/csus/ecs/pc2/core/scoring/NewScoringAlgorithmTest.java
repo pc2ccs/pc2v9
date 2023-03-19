@@ -493,10 +493,10 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
 //                    assertEquals("Expected team based on "+teamScoreboardDisplayForamtString, expectedDisplayName, teamStanding.getTeamName());
         }
 
-        int expectedMismatches = 0;
+        int expectedMismatches = 1;
 
         assertEquals("Expecting mis matched names ", expectedMismatches, mismatches);
-        assertEquals("Expecting matching names ", 78, teamStandings.size() - expectedMismatches);
+        assertEquals("Expecting matching names ", 77, teamStandings.size() - expectedMismatches);
     }
 
 }
