@@ -604,23 +604,31 @@ public class RemoteEventFeedMonitor implements Runnable {
                     if(monitorStatus != null) {
                         monitorStatus.errorDisconnect(msg);
                     }
-                    if(!attemptConnectRetries) {
-                        logAndDebugPrint(log, Level.INFO, "Remote connection retry attempts is not enabled");
-                        break;
-                    }
-                    if(retryConnectDelay > 0) {
-                        logAndDebugPrint(log, Level.INFO, "Attempted to reconnect to remote in " + retryConnectDelay + "ms");
-                        try {
-                            Thread.sleep(retryConnectDelay);
-                        } catch(Exception e) {
-                            logAndDebugPrint(log, Level.INFO, "Retry sleep interrupted", e);
-                        }
-                    }
                 } catch (Exception e) {
                     // TODO design error handling reporting (logging?)
                     logAndDebugPrint(log, Level.SEVERE, "Exception reading event from stream: " + event, e); 
                 }
             } // end else
+            
+            // In all cases of a connection disconnect or exception or other failure, we want
+            // to see if connect retries are indicated, and if so, then pause a bit and retry, otherwise
+            // we break out and give up.  We have to delay here if we are retrying or we'll just go into
+            // an tight retry loop which affects performance substantially.
+            if(!attemptConnectRetries) {
+                logAndDebugPrint(log, Level.INFO, "Remote connection retry attempts are not enabled");
+                if(monitorStatus != null) {
+                    monitorStatus.connectClosed("Remote connection retry attempts are not enabled");
+                }
+                break;
+            }
+            if(retryConnectDelay > 0) {
+                logAndDebugPrint(log, Level.INFO, "Attempted to reconnect to remote in " + retryConnectDelay + "ms");
+                try {
+                    Thread.sleep(retryConnectDelay);
+                } catch(Exception e) {
+                    logAndDebugPrint(log, Level.INFO, "Retry sleep interrupted", e);
+                }
+            }
         } // keepRunning
     }
     
