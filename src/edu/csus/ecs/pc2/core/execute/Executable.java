@@ -230,6 +230,34 @@ public class Executable extends Plugin implements IExecutable {
     }
 
     /**
+     * Legacy contructor only used by CLICS JUnit tests, and referenced as "super(...)"
+     * Does not support GUI since there is no frame for it.
+     * @deprecated
+     * This constructor should not be used in any new code.
+     * 
+     * @param inContest
+     * @param inController
+     * @param run
+     * @param runFiles
+     */
+    @Deprecated
+    public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
+        super();
+        super.setContestAndController(inContest, inController);
+
+        this.contest = inContest;
+        this.controller = inController;
+        this.runFiles = runFiles;
+        this.run = run;
+        language = inContest.getLanguage(run.getLanguageId());
+        problem = inContest.getProblem(run.getProblemId());
+        executionFrame = null;
+        usingGUI = false;
+        
+        initialize();
+    }
+
+    /**
      * initialize class variables.
      */
     private void initialize() {
