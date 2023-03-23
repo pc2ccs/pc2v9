@@ -7,6 +7,8 @@ package edu.csus.ecs.pc2.core.execute;
  */
 public interface IExecuteFrameNotify {
 
-    // Terminate button pressed
+    /**
+     * called when the user presses the terminate button
+     */
     public void executeFrameTerminated();
 }

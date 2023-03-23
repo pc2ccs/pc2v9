@@ -13,22 +13,44 @@ import java.awt.Color;
  *
  */
 public interface IExecuteTimerFrame {
-
-    // sets the frame to it "known" state
+   
+    /**
+     * sets the following frame components to their initial "reset" states
+     * Timer label
+     * Timer counter
+     * Timer terminate button
+     */
     public void resetFrame();
     
-    // controls whether the frame is visible or not.
+    /**
+     * show or hide the timer frame
+     * 
+     * @param bVis
+     */
     public void setTimerFrameVisible(boolean bVis);
     
-    // change the color of the timer text (Test button if execute time gets too big
+    /**
+     * change the color of the timer text (for the "Test" button if execute time gets too big)
+     * @param fg
+     */
     public void setTimerCountLabelColor(Color fg);
     
-    // change the timer text
+    /**
+     * change the timer text label
+     * @param msg
+     */
     public void setTimerCountLabelText(String msg);
     
-    // change the label indicating what we are doing
+    /**
+     * change the label indicating what is currently being done:
+     * executing, compiling, validating, etc.
+     * @param msg
+     */
     public void setExecuteTimerLabel(String msg);
     
-    // set who gets notified if the Terminate button is pressed (null to clear)
+    /**
+     * set who gets notified if the Terminate button is pressed (null to clear)
+     * @param ntfy
+     */
     public void setTerminateButtonNotify(IExecuteFrameNotify ntfy);
 }

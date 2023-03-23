@@ -246,7 +246,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
     @Override
     public void setTimerFrameVisible(boolean bHow)
     {
-        // The AJ Status frame is not controlled by the execution timer, but the AJ itself
+        // The AJ Status frame is not controlled by the execution timer, but by the AJ itself
         return;
     }
     
