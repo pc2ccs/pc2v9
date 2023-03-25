@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2013 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.admin;
 
 import java.awt.BorderLayout;
@@ -64,6 +64,7 @@ import edu.csus.ecs.pc2.ui.PlaybackPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
+import edu.csus.ecs.pc2.ui.QuickJudgePane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.RunsTablePane;
 import edu.csus.ecs.pc2.ui.SitesPane;
@@ -76,10 +77,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * Administrator GUI.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public class AdministratorView extends JFrame implements UIPlugin, ChangeListener {
 
     private static final long serialVersionUID = 1L;
@@ -365,6 +363,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                         logException(e);
                     }
                 }
+                
+                QuickJudgePane quickJudgePane = new QuickJudgePane();
+                addUIPlugin(getRunContestTabbedPane(), "Quick Judge", quickJudgePane);
 
                 ReportPane reportPane = new ReportPane();
                 addUIPlugin(getRunContestTabbedPane(), "Reports", reportPane);
