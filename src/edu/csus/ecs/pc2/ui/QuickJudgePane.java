@@ -49,7 +49,8 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
  * Quick Judge Pane.
  * 
  * This pane shows the list of runs in the system and
- * allows the user to multi select and judge those runs. 
+ * allows the user to multi select and judge those runs.
+ * Also allows the user to rejudge runs. 
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
@@ -86,6 +87,11 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
 
     private Random randomVar = null;
 
+    /**
+     * A list of pending judgements for runs.
+     * 
+     * When the run is checked out to this client, use the judgement in this list to assign a judgement.  
+     */
     public Hashtable<ElementId, JudgementRecord> pendingJudgements = new Hashtable<ElementId, JudgementRecord>();
 
     private ViewJudgementsPane viewJudgementsPane = null;
@@ -254,6 +260,9 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
                 Run run = event.getRun();
                 JudgementRecord judgementRecord = pendingJudgements.get(run.getElementId());
                 if (judgementRecord != null) {
+                    
+                    // Found a judgement for this run in pendingJudgements, send the judgement to the server.
+                    
                     getController().submitRunJudgement(run, judgementRecord, null);
                     pendingJudgements.remove(run.getElementId());
                 }
@@ -556,7 +565,6 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
         if (judgementComboBox == null) {
             judgementComboBox = new JComboBox<Judgement>();
             judgementComboBox.setPreferredSize(new java.awt.Dimension(201, 25));
-            judgementComboBox.setPreferredSize(new java.awt.Dimension(201, 25));
 
         }
         return judgementComboBox;
@@ -626,14 +634,14 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
                 // Create judgement and save it in pendingJudgements
                 JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), judgedAsSolved, false);
                 pendingJudgements.put(run.getElementId(), judgementRecord);
-                System.out.println("Stored/Pending " + run);
+                getLog().info("Stored Run in list of runs pending judgement " + run+" judgement="+judgement);
 
                 getController().checkOutRun(run, false, false);
 
                 numJudged++;
 
             } else {
-                slog("Ignoring " + id + " already judged (or in wrong state) (State: " + state + ")");
+                slog("Ignoring " + id + " already judged (or in wrong run state) (State: " + state + ")");
             }
         }
 
@@ -652,8 +660,9 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
     }
 
     private void slog(String string, Exception e, boolean isShowMessage) {
+        
+        // TODO REFACTOR replace this method with a future pc2 standard log method. 
 
-        System.out.println(string);
         if (e != null) {
             getLog().log(Level.WARNING, string, e);
         } else {
@@ -670,7 +679,6 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
      */
     private void slog(String string, boolean isShowMessage) {
 
-        System.out.println(string);
         getLog().info(string);
         if (isShowMessage) {
             showMessage(string);
@@ -803,7 +811,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
                 rejudgeChangeStatus.put(run, RunStates.NEW);
             }
 
-            System.out.println("Run " + run.getNumber() + " change to " + rejudgeChangeStatus.get(run) + " for " + run);
+            getLog().info("Run " + run.getNumber() + " change to " + rejudgeChangeStatus.get(run) + " for " + run);
         }
 
         int result = FrameUtilities.yesNoCancelDialog(this,
