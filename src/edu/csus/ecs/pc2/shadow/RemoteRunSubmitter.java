@@ -52,6 +52,22 @@ public class RemoteRunSubmitter {
      * @param overrideRunId - override run id
      */
     public void submitRun(String clientIdString, String problemID, String languageID, IFile mainFile, List<IFile> auxFiles, long overrideTimeMS, long overrideRunId) {
+        submitRun(clientIdString, problemID, languageID, null, mainFile, auxFiles, overrideTimeMS, overrideRunId);
+    }
+    
+    /**
+     * Submit a run to the server.
+     * 
+     * @param clientIdString - "teamN" client name
+     * @param problemID - problem id
+     * @param languageID - CLICS language id
+     * @param entry_point - java/kotlin entry point, null if default or none
+     * @param mainFile - main file name
+     * @param auxFiles - other submittted files 
+     * @param overrideTimeMS - override submission time in MS
+     * @param overrideRunId - override run id
+     */
+    public void submitRun(String clientIdString, String problemID, String languageID, String entry_point, IFile mainFile, List<IFile> auxFiles, long overrideTimeMS, long overrideRunId) {
 
         isEmptyString(clientIdString, "ClientId parameter is null");
         isEmptyString(problemID, "Parameter problemID is null or empty");
@@ -108,7 +124,7 @@ public class RemoteRunSubmitter {
             }
         }
 
-        controller.submitRun(submitter, problem, language, mainSubmissionFile, additionalFiles, overrideTimeMS, overrideRunId);
+        controller.submitRun(submitter, problem, language, entry_point, mainSubmissionFile, additionalFiles, overrideTimeMS, overrideRunId);
     }
 
     private Language getLanguageByName(IInternalContest contest2, String languageName) {

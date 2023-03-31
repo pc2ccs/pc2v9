@@ -1812,6 +1812,15 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             log.log(Log.DEBUG, "before substitution: " + cmdline);
+
+            /**
+             * Special substitution for entry_point
+             */
+            if (run.getEntryPoint() != null) {
+                // change {:basename} to entry_point rather than basename from {:mainfile} before
+                // other substitutions (overrides :mainfile)
+                cmdline = replaceString(cmdline, "{:basename}", run.getEntryPoint());
+            }
             cmdline = substituteAllStrings(run, cmdline, dataSetNumber+1);
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 

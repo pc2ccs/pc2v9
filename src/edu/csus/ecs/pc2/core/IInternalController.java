@@ -761,4 +761,17 @@ public interface IInternalController {
      */
     void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId);
 
+    /**
+     * Submit a run to the server for a different client with entry_point
+     * 
+     * @param submitter - override submitter, if used the logged in client must have  Permission.Type.SHADOW_PROXY_TEAM selected.
+     * @param problem
+     * @param language
+     * @param entry_point Java/Kotlin main class entry point
+     * @param mainSubmissionFile
+     * @param additionalFiles
+     * @param overrideTimeMS
+     * @param overrideRunId
+     */
+    void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId);
 }
