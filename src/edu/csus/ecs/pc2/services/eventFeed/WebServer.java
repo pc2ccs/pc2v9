@@ -64,6 +64,7 @@ import edu.csus.ecs.pc2.services.web.StarttimeService;
 import edu.csus.ecs.pc2.services.web.StateService;
 import edu.csus.ecs.pc2.services.web.SubmissionService;
 import edu.csus.ecs.pc2.services.web.TeamService;
+import edu.csus.ecs.pc2.services.web.VersionService;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -179,6 +180,8 @@ public class WebServer implements UIPlugin {
 
         try {
             int port = getIntegerProperty(PORT_NUMBER_KEY, DEFAULT_WEB_SERVER_PORT_NUMBER);
+            
+            showMessage("Binding to port "+port);
 
             File keystoreFile = new File(PC2_KEYSTORE_FILE);
 
@@ -365,6 +368,9 @@ public class WebServer implements UIPlugin {
             showMessage("Starting /contest/event-feed web service");
             resConfig.register(new StateService(getContest(), getController()));
             showMessage("Starting /contest/state web service");
+            resConfig.register(new VersionService(getContest(), getController()));
+            showMessage("Starting /contest/version web service");
+            
         }
         
         return resConfig;
