@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -683,7 +683,7 @@ public class EditLanguagePane extends JPanePlugin {
             getAutoPopulateLanguageComboBox().setSelectedIndex(0);
             getDeleteLanguageCheckbox().setSelected(!language2.isActive());
             getInterpretedLanguageCheckBox().setSelected(language2.isInterpreted());
-
+            getExecutableFilenameTextField().setEnabled(!language2.isInterpreted());
             chckbxJudgesCommandLine.setSelected(language2.isUsingJudgeProgramExecuteCommandLine());
             judgeCommandLineTextBox.setText(language2.getJudgeProgramExecuteCommandLine());
             getIDTextField().setText(language2.getID());
@@ -701,6 +701,7 @@ public class EditLanguagePane extends JPanePlugin {
 
             getDeleteLanguageCheckbox().setSelected(false);
             getInterpretedLanguageCheckBox().setSelected(false);
+            getExecutableFilenameTextField().setEnabled(true);
             getAutoPopulateLanguageComboBox().setSelectedIndex(0);
             getIDTextField().setText("");
 
@@ -765,7 +766,7 @@ public class EditLanguagePane extends JPanePlugin {
 
     protected void toggleExecutable() {
         boolean intLang = getInterpretedLanguageCheckBox().isSelected();
-        getExecutableFilenameTextField().setEnabled(intLang);
+        getExecutableFilenameTextField().setEnabled(!intLang);
         enableUpdateButton();
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
