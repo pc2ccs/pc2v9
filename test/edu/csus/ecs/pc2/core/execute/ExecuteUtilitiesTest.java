@@ -538,4 +538,29 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         }
     }
 
+    /**
+     * test {:ifsuff=xxx} substitution.
+     * 
+     * @throws Exception
+     */
+    public void testReplaceStringConditional() throws Exception {
+        
+        // tests detection suffix at start of string and do not duplicate it
+        String actual = ExecuteUtilities.replaceStringConditional("foo{:ifsuffix=foo}", "{:ifsuffix=}");
+        
+        assertEquals("Expected substitution", "foo", actual);
+        
+        // tests missing suffix and adds it
+        actual = ExecuteUtilities.replaceStringConditional("ISumit{:ifsuffix=Kt}", "{:ifsuffix=}");
+        
+        assertEquals("Expected substitution", "ISumitKt", actual);
+        
+        // tests that evaluation is right to left and we do not use a conditional
+        // substitute suffix as a comparision for the another conditional suffix
+        // also tests longer suffix string matching
+        actual = ExecuteUtilities.replaceStringConditional("kotlin ISumit{:ifsuffix=Kt}{:ifsuffix=Kt} ISumit{:ifsuffix=ISumit}{:ifsuffix=Kt}", "{:ifsuffix=}");
+        
+        assertEquals("Expected substitution", "kotlin ISumitKtKt ISumitKt", actual);
+    }
+    
 }

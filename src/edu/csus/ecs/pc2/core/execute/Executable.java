@@ -2438,72 +2438,6 @@ public class Executable extends Plugin implements IExecutable {
 
         return buf.toString();
     }
-
-    /**
-     * Perform conditional subtititions
-     * 
-     * @param origString
-     * @param condVar
-     * @return - possibly modified string
-     */
-    public String replaceStringConditional(String origString, String condVar) {
-        
-        int subStartIdx, endIdx, suffLen;
-        String suffString;
-        
-        if (origString == null || condVar == null) {
-            return origString;
-        }
-        // if substitute variable has an = sign, we try to match the substring up to and including the
-        // equals sign, eg: {:ifsuffix=Kt}, we want to match: {:ifsuffix=
-        int subIdx = condVar.indexOf('=');
-        
-        // Need at least two chars to left of =
-        if(subIdx < 2) {
-            return origString;
-        }
-        
-
-        // don't care about anything after the =
-        String subMatch = condVar.substring(0, subIdx+1);
-        
-        int startIdx = origString.lastIndexOf(subMatch);
-
-        if (startIdx == -1) {
-            return origString;
-        }
-
-        StringBuffer buf = new StringBuffer(origString);
-
-        while (startIdx != -1) {
-            subStartIdx = startIdx + subMatch.length();
-            endIdx = origString.indexOf('}', subStartIdx);
-            
-            // Missing closing } for substitute variable?
-            if(endIdx == -1) {
-                log.warning("Missing closing brace for conditional subtitution variable in " + origString);
-                break;
-            }
-            
-            // this is the string we may have to add, but first see if it's there already
-            suffString = origString.substring(subStartIdx, endIdx);
-            suffLen = suffString.length();
-            
-            // if there are not enough chars before the substitute var to compare, or, the trailing characters
-            // don't match, then we have to replace the substitute var with the new suffix string, otherwise, we
-            // we just delete the substitute var altogether
-            if(startIdx < suffLen || origString.substring(startIdx - suffLen, startIdx).compareTo(suffString) != 0) {
-                // suffix does not match, so we have to insert it
-                buf.replace(startIdx,  endIdx+1, suffString);
-            } else {
-                buf.delete(startIdx,  endIdx+1);
-            }
-            
-            startIdx = origString.lastIndexOf(subMatch, startIdx - 1);
-        }
-
-        return buf.toString();
-    }
     
     /**
      * Replace beforeString with int.
@@ -2678,7 +2612,7 @@ public class Executable extends Plugin implements IExecutable {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
             // Check for conditional suffix (that is, the previous chars match), if not, add them
-            newString = replaceStringConditional(newString, Constants.CMDSUB_COND_SUFFIX);
+            newString = ExecuteUtilities.replaceStringConditional(newString, Constants.CMDSUB_COND_SUFFIX);
             
         } catch (Exception e) {
             log.log(Log.CONFIG, "Exception substituting strings ", e);

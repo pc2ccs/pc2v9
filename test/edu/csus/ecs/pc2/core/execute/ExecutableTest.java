@@ -1196,7 +1196,7 @@ public class ExecutableTest extends AbstractTestCase {
         
         String actual = executable.substituteAllStrings(run, "foo {files}");
         
-        assertEquals("Expected substitution", actual, "foo ISumit.java");
+        assertEquals("Expected substitution", "foo ISumit.java", actual);
     }
     
     /**
@@ -1224,15 +1224,15 @@ public class ExecutableTest extends AbstractTestCase {
         
         String actual = executable.substituteAllStrings(run, "foo {:basename}{:ifsuffix=it}");
         
-        assertEquals("Expected substitution", actual, "foo ISumit");
+        assertEquals("Expected substitution", "foo ISumit", actual);
         
         actual = executable.substituteAllStrings(run, "{:basename}{:ifsuffix=Kt}");
         
-        assertEquals("Expected substitution", actual, "ISumitKt");
+        assertEquals("Expected substitution", "ISumitKt", actual);
         
         actual = executable.substituteAllStrings(run, "kotlin {:basename}{:ifsuffix=Kt}{:ifsuffix=Kt} {:basename}{:ifsuffix=ISumit}{:ifsuffix=Kt}");
         
-        assertEquals("Expected substitution", actual, "kotlin ISumitKtKt ISumitKt");
+        assertEquals("Expected substitution", "kotlin ISumitKtKt ISumitKt", actual);
     }
 
     private String stripSpace(String cmdline) throws IOException {
