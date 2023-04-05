@@ -2189,13 +2189,27 @@ public class Executable extends Plugin implements IExecutable {
 
             packageName = "";
             packagePath = "";
-            String programName = replaceString(language.getExecutableIdentifierMask(), "{:basename}", removeExtension(runFiles.getMainFile().getName()));
+            
+            String programName = language.getExecutableIdentifierMask();
+            
+            // the "executable" program name is the entry point, if one exists, so try to substitute that first
+            if (run.getEntryPoint() != null) {
+                // change Constants.CMDSUB_BASENAME_VARNAME to entry_point rather than basename from {:mainfile} before
+                // other substitutions (overrides :mainfile)
+                programName = replaceString(programName, Constants.CMDSUB_BASENAME_VARNAME, run.getEntryPoint());
+            }
+
+            // This used to just replace the {:basename}, but there is no reason not to run it
+            // through the substituteAllStrings() especially since we now have conditional suffix
+            // substitution string.
+            programName = substituteAllStrings(run, programName);
+            
             if (runFiles.getMainFile().getName().endsWith("java")) {
                 packageName = searchForPackage(prefixExecuteDirname(runFiles.getMainFile().getName()));
                 packagePath = replaceString(packageName, ".", File.separator);
             }
 
-            // Check whether the team submitted a executable, if they did remove
+            // Check whether the team submitted an executable, if they did remove
             // it.
             File program = new File(prefixExecuteDirname(programName));
             if (program.exists()) {
