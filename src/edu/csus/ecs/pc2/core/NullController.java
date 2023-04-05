@@ -534,25 +534,21 @@ public class NullController implements IInternalController {
 
     @Override
     public IInternalContest getContest() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public void submitJudgeRun(Problem problem, Language language, SerializedFile mainFile, SerializedFile[] otherFiles, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
-        // TODO Auto-generated method stub
         
     }
 
