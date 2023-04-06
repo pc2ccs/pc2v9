@@ -368,7 +368,7 @@ public class WebServer implements UIPlugin {
             resConfig.register(new StateService(getContest(), getController()));
             showMessage("Starting /contest/state web service");
             resConfig.register(new VersionService(getContest(), getController()));
-            showMessage("Starting /version web service");
+            showMessage("Starting / endpoint for version web service");
             
         }
         

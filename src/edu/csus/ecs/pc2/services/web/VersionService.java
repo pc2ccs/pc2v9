@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.core.util.CLICSVerionInfo;
  * @author pc2@ecs.csus.edu
  *
  */
-@Path("/version")
+@Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
