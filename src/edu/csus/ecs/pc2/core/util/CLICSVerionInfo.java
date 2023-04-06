@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,10 +15,13 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
  */
 public class CLICSVerionInfo {
 
-    public CLICSVerionInfo(VersionInfo versionInfo) {
-        version = versionInfo.getPC2Version() + " build " + versionInfo.getBuildNumber();
-        version_url = "https://ccs-specs.icpc.io/2022-07/contest_api";
-    }
+    /**
+     * The CLICS version number.
+     */
+    public  static final String CLICS_VERSION_NUMBER = "2022-07";
+
+    @JsonProperty
+    private String ccs_version;
 
     @JsonProperty
     private String version;
@@ -27,6 +31,13 @@ public class CLICSVerionInfo {
 
     @JsonProperty
     private String name;
+    
+    public CLICSVerionInfo(VersionInfo versionInfo) {
+        version = CLICS_VERSION_NUMBER;
+        version_url = "https://ccs-specs.icpc.io/2022-07/contest_api";
+        ccs_version = versionInfo.getPC2Version() + " build " + versionInfo.getBuildNumber(); 
+        name = "pc2";
+    }
 
     // TODO Add logo when we have olne to supply
     //    @JsonProperty
@@ -54,7 +65,5 @@ public class CLICSVerionInfo {
         } catch (Exception e) {
             return "Error creating JSON for version info " + e.getMessage();
         }
-
     }
-
 }

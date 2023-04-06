@@ -22,14 +22,16 @@ import edu.csus.ecs.pc2.core.util.CLICSVerionInfo;
  * @author pc2@ecs.csus.edu
  *
  */
-@Path("/contest/version")
+@Path("/version")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
 public class VersionService implements Feature {
 
+    @SuppressWarnings("unused")
     private IInternalContest model;
 
+    @SuppressWarnings("unused")
     private IInternalController controller;
 
     private CLICSVerionInfo clicsVerionInfo = new CLICSVerionInfo(new VersionInfo());
