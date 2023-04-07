@@ -322,6 +322,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 
                 FinalizePane finalizePane = new FinalizePane();
                 addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
+                
+                QuickJudgePane quickJudgePane = new QuickJudgePane();
+                addUIPlugin(getRunContestTabbedPane(), "Judging Utilities", quickJudgePane);
 
                 if (!controller.isSuppressLoginsPaneDisplay()) {
                     LoginsTablePane loginsTablePane = new LoginsTablePane();
@@ -364,8 +367,6 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                     }
                 }
                 
-                QuickJudgePane quickJudgePane = new QuickJudgePane();
-                addUIPlugin(getRunContestTabbedPane(), "Quick Judge", quickJudgePane);
 
                 ReportPane reportPane = new ReportPane();
                 addUIPlugin(getRunContestTabbedPane(), "Reports", reportPane);
