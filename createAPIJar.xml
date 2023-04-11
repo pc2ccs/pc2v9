@@ -93,7 +93,7 @@ dal
 
 	<target name="compile" depends="init" description="compile the source ">
 		<!-- Compile the java code from ${src.dir} into ${build.dir} -->
-		<javac srcdir="${test.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
+		<javac srcdir="${test.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" classpath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
 			<compilerarg line="${compilerArg}" compiler="${build.compiler}" />
 			<!-- classpath refid="project.classpath" /> -->
 			<!-- <compilerarg value="" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/> -->

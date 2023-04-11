@@ -1,27 +1,47 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.RowSorter.SortKey;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
@@ -39,6 +59,8 @@ import edu.csus.ecs.pc2.shadow.RemoteContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.shadow.ShadowController.SHADOW_CONTROLLER_STATUS;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * This class provides a GUI for configuring and starting Shadowing operations on a remote CCS.
  * 
@@ -50,10 +72,14 @@ import edu.csus.ecs.pc2.shadow.ShadowController.SHADOW_CONTROLLER_STATUS;
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  */
 
-// $HeadURL$
 public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStatus {
 
     private static final long serialVersionUID = 1;
+    
+    private static final int VERT_PAD = 2;
+    private static final int HORZ_PAD = 20;
+    
+    private static final String CCS_API_ENDPOINT = "/";
 
     private JPanel buttonPanel = null;
 
@@ -74,6 +100,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private JPanel lastEventIDPane;
 
     private JPanel shadowingOnOffStatusPane;
+    
+    private JScrollPane connectStatusPane;
 
     private JLabel shadowingStatusValueLabel;
 
@@ -89,12 +117,29 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     
     private JTextField lastEventTimeTextField;
     
+    private JTableCustomized connectStatusTable;
+    
+    private DefaultTableModel connectStatusTableModel;
+    
+    private int statusScrollBarMax = 0;
+    
     private int numRecord = 0;
     
     private String lastToken = null;
     
     private SimpleDateFormat lastDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    
+    // Lightish green for success
+    private Color statusColorSuccess = new Color(128, 255, 128);
+    // Lightish red for failure
+    private Color statusColorFailure = new Color(255, 128, 128);
 
+    // Status column for JTable notifications
+    enum ShadowStatus {
+        SUCCESS,
+        FAILURE,
+        INFO
+    };
 
     /**
      * Constructs a new ShadowControlPane using the specified Contest and Controller.
@@ -125,6 +170,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         this.add(getButtonPanel(), BorderLayout.SOUTH);
         this.add(getCenterPanel(), BorderLayout.CENTER);
 
+        setupConnectionStatusTable();
         updateGUI();
     }
 
@@ -356,13 +402,47 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         if (centerPanel == null) {
             centerPanel = new JPanel();
             
-            centerPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+           /*
+             * We use a GridBagLayout instead of a FlowLayout since we want to make
+             * the notification JTable resize as the window gets bigger so you can see more
+             * entries.  FlowLayout doesn't work that way.  Being there are 3 other panes involved
+             * GridBag seemed the way to go.  The GridBagLayout is one column wide by 4 rows high:
+             * Row 0 - Indicator if shadowing is on or off pane
+             * Row 1 - Shadow settings pane
+             * Row 2 - Event ID information pane
+             * Row 3 - Status table (Expands to fill window)
+             */
+            centerPanel.setLayout(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
             
-            centerPanel.add(getShadowingOnOffStatusPane());
-            centerPanel.add(getShadowSettingsPane());
-            centerPanel.add(getLastEventIDPane());
-
+            // Each pane uses exactly one cell in the layout
+            c.gridwidth = 1;
+            c.gridheight = 1;
+            // Since it's only 1 column wide, all cells start in the first column
+            c.gridx = 0;
             
+            c.fill = GridBagConstraints.NONE;
+            c.gridy = 0;
+            centerPanel.add(getShadowingOnOffStatusPane(), c);
+            
+            c.gridy = 1;
+            centerPanel.add(getShadowSettingsPane(), c);
+            
+            // Fill horizontally or it will chop it off.
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.gridy = 2;
+            // This is needed due to the way the pane is created.  We have to 
+            // allow the height to expand a tiny bit, or it chops the pane off.
+            c.weighty = 0.01;
+            centerPanel.add(getLastEventIDPane(), c);
+            
+            // Fill both width and height as needed as display area expands
+            c.fill = GridBagConstraints.BOTH;
+            c.gridy = 3;
+            c.weighty = 0.5;
+            // Was bumping up against the edge, so leave some elbow room
+            c.insets = new Insets(0, 20, 0, 20);
+            centerPanel.add(getConnectStatusPane(), c);          
         }
         return centerPanel;
     }
@@ -446,6 +526,62 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     /**
      * @return
      */
+    private JScrollPane getConnectStatusPane() {
+        if (connectStatusPane == null) {
+            connectStatusPane = new JScrollPane(getConnectStatusTable());
+
+            // make it so it always scrolls to the bottom of the pane
+            connectStatusPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+                public void adjustmentValueChanged(AdjustmentEvent e) {
+                    if(statusScrollBarMax == e.getAdjustable().getMaximum()) {
+                        return;
+                    }
+                    statusScrollBarMax = e.getAdjustable().getMaximum();
+                    e.getAdjustable().setValue(statusScrollBarMax);  
+                }
+            });
+        }
+        
+        return connectStatusPane;
+    }
+    
+    private JTableCustomized getConnectStatusTable() {
+    
+        connectStatusTable = new JTableCustomized() {
+            private static final long serialVersionUID = 1L;
+
+            // override JTable's default renderer to set the background color based on the ShadowStatus
+            // Essentially stolen from ShadowCompareScoreboardPane.  Thank you JohnC.
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component c = super.prepareRenderer(renderer, row, column);
+
+                //default to normal background
+                c.setBackground(getBackground());
+              
+                if(connectStatusTableModel != null) {
+                    //map the specified row index number to the corresponding model row (index numbers can change due
+                    // to sorting/scrolling; model row numbers never change).
+                    int modelRow = convertRowIndexToModel(row);
+                    ShadowStatus stat = (ShadowStatus)connectStatusTableModel.getValueAt(modelRow, 1);
+                    switch(stat) {
+                        case SUCCESS: c.setBackground(statusColorSuccess); break;
+                        case FAILURE: c.setBackground(statusColorFailure); break;
+                        case INFO: c.setBackground(getBackground()); break;
+                    }
+                }
+                
+                
+                return(c);
+            }
+        };
+        
+        return(connectStatusTable);
+    }
+
+    /**
+     * @return
+     */
     private JPanel getShadowingOnOffStatusPane() {
         if (shadowingOnOffStatusPane==null) {
             shadowingOnOffStatusPane = new JPanel();
@@ -503,6 +639,54 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         return newShadowInfo;
     }
 
+    private void setupConnectionStatusTable() {
+
+        Object[] columns = { "Time             ", "Status", "Description               " };
+        connectStatusTable.removeAll();
+        
+        connectStatusTableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                return false;
+            }
+        };
+
+        connectStatusTable.setModel(connectStatusTableModel);
+
+        // Sorters
+        TableRowSorter<DefaultTableModel> trs = new TableRowSorter<DefaultTableModel>(connectStatusTableModel);
+        
+        connectStatusTable.setRowSorter(trs);
+        connectStatusTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        
+        ArrayList<SortKey> sortList = new ArrayList<SortKey>();
+        
+        /*
+         * Column headers left justified
+         */
+        ((DefaultTableCellRenderer)connectStatusTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
+        connectStatusTable.setRowHeight(connectStatusTable.getRowHeight() + VERT_PAD);
+                     
+        int idx = 0;
+
+        // These are in sort order
+        // Time
+        sortList.add(new RowSorter.SortKey(idx++, SortOrder.ASCENDING));
+        // Description - sorting on description is not really useful.  If you want it someday, it's easily re-added.
+//      sortList.add(new RowSorter.SortKey(idx++, SortOrder.ASCENDING));
+        trs.setSortKeys(sortList);
+        resizeColumnWidth(connectStatusTable);
+    }
+    
+    private void resizeColumnWidth(JTableCustomized table) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
+                tca.adjustColumns();
+            }
+        });
+    }
+    
     /**
      * Updates the GUI to correspond to the current state.
      */
@@ -644,6 +828,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (shadowController==null) {
                         showErrorMessage("No shadow controller available; cannot show runs comparison", "Missing Controller"); 
+                    } else if (!ShadowController.SHADOW_CONTROLLER_STATUS.SC_RUNNING.equals(shadowController.getStatus())) {
+                        showErrorMessage("Cannot compare runs, shadow not running","Shadow not running");
                     } else {
                         JFrame shadowCompareRunsFrame = new ShadowCompareRunsFrame(shadowController);
                         shadowCompareRunsFrame.setSize(600,700);
@@ -675,6 +861,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                 		
                             if (shadowController==null) {
                                 showErrorMessage("No shadow controller available; cannot show scoreboard comparison", "Missing Controller"); 
+                            } else if (!ShadowController.SHADOW_CONTROLLER_STATUS.SC_RUNNING.equals(shadowController.getStatus())) {
+                                showErrorMessage("Cannot compare scoreboard, shadow not running","Shadow not running");
                             } else {
                                 JFrame shadowCompareScoreboardFrame = new ShadowCompareScoreboardFrame(shadowController);
                                 shadowCompareScoreboardFrame.setSize(600,700);
@@ -713,13 +901,22 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                     boolean isConnected = remoteContestAPIAdapter.testConnection();
                                     if (isConnected) {
                                         showMessage ("Connection to remote CCS is successful");
+                                        addConnectTableEntry(ShadowStatus.SUCCESS, "Test connection to remote CCS");
                                     } else {
                                         showErrorMessage("Connection to remote CCS failed", "Connection failed");
+                                        addConnectTableEntry(ShadowStatus.FAILURE, "Test connection to remote CCS");
                                     }
-
+                                    
+                                    // Try to get the remote API version
+                                    String infoStr = getRemoteAPIVersionInfo(remoteURLString, remoteLogin, remotePW);
+                                    // infoStr is supposed to be non-null all the time, but let's be sure
+                                    if(infoStr != null && !infoStr.isEmpty()) {
+                                        addConnectTableEntry(ShadowStatus.INFO, infoStr);
+                                        getController().getLog().info("Shadow EventFeed: " + infoStr);
+                                    }
                                 } catch (Exception e) {
-                                    showErrorMessage("Exception attempting to connect to remote system:\n" + e, "Exception in connecting");
-                                    getController().getLog().log(Log.SEVERE, "Exception attempting to connect to remote system: " + e.getMessage(), e);
+                                    showErrorMessage("Exception attempting to test connection to remote system:\n" + e, "Exception in connecting");
+                                    getController().getLog().log(Log.SEVERE, "Exception attempting to test connection to remote system: " + e.getMessage(), e);
                                     
                                 } finally {
                                     if (remoteContestAPIAdapter != null) {
@@ -736,6 +933,60 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         return testConnectionButton;
     }
 
+    /**
+     * Returns a Map containing the key/value elements in the specified JSON string.
+     * This method uses the Jackson {@link ObjectMapper} to perform the conversion from the JSON
+     * string to a Map.  Note that the ObjectMapper recurses for nested JSON elements, returning
+     * a appropriate Object in the Map under the corresponding key string.
+     * 
+     * @param jsonString a JSON string to be converted to a Map
+     * @return a Map mapping the keys in the JSON string to corresponding values, or null if the input
+     *          String is null or if an exception occurs while converting the JSON to a Map.
+     */
+    @SuppressWarnings("unchecked")
+    protected static Map<String, Object> getMap(String jsonString) {
+        
+        if (jsonString == null){
+            return null;
+        }
+        
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            Map<String, Object> map = mapper.readValue(jsonString, Map.class);
+            return map;
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+            return null;
+        }
+    }
+
+    private void addConnectTableEntry(ShadowStatus stat, String msg)
+    {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                Object[] objects = new Object[3];
+                
+                try {
+                    GregorianCalendar cal = new GregorianCalendar();
+                    
+                    lastDateFormat.setCalendar(cal);
+                    objects[0] = lastDateFormat.format(cal.getTime());
+                } catch(Exception e) {
+                    objects[0] = "Unknown";
+                }
+                objects[1] = stat;
+                if(msg == null || msg.isEmpty()) {
+                    objects[2] = "<Empty Message>";
+                } else {
+                    objects[2] = msg;
+                }
+                connectStatusTableModel.addRow(objects);
+                resizeColumnWidth(connectStatusTable);
+            }
+        });
+        
+    }
+    
     /*
      * IShadowMonitorStatus implementaiton
      */
@@ -785,7 +1036,11 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      */
     public void connectFailed(String token)
     {
-        // TODO: Update JTable - future commit/PR
+        if(token == null || token.isEmpty()) {
+            addConnectTableEntry(ShadowStatus.FAILURE, "Connect");
+        } else {
+            addConnectTableEntry(ShadowStatus.FAILURE, "Connection starting at token " + token);
+        }
     }
 
     /**
@@ -793,7 +1048,28 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      */
     public void connectSucceeded(String token)
     {
-        // TODO: Update JTable - future commit/PR
+        if(token == null || token.isEmpty()) {
+            addConnectTableEntry(ShadowStatus.SUCCESS, "Connected");
+        } else {
+            addConnectTableEntry(ShadowStatus.SUCCESS, "Connected starting at token " + token);
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void connectClosed(String msg)
+    {
+        if(msg == null || msg.isEmpty()) {
+            msg = "Connection closed";
+        }
+        
+        // Save last token on disconnect
+        if(lastToken != null && !lastToken.isEmpty()) {
+            updateContestInformation();
+            msg += " at token " + lastToken;
+        }
+        addConnectTableEntry(ShadowStatus.INFO, msg);
     }
     
     /**
@@ -801,14 +1077,18 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      */
     public void errorDisconnect(String errMsg)
     {
-        // TODO: Update JTable - future commit/PR
+        if(errMsg == null || errMsg.isEmpty()) {
+            errMsg = "Unexpected disconnect";
+        }
+        addConnectTableEntry(ShadowStatus.FAILURE, errMsg);
         
         // Save last token on disconnect
         if(lastToken != null && !lastToken.isEmpty()) {
             updateContestInformation();
         }
     }
-   
+
+    
     private IRemoteContestAPIAdapter createRemoteContestAPIAdapter(URL url, String login, String password) {
 
         boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow.usemockcontestadapter"), false);
@@ -819,5 +1099,105 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             return new RemoteContestAPIAdapter(url, login, password);
         }
     }
+    
+    /**
+     * Returns a String containing the URL of the remote version endpoint, or null if the string can not be formed
+     * from the supplied remoteURLString
+     * This endpoint is distinctly different from the /contest/xxxx endpoints in that it is the same for all contests
+     * provided by that server; it is contest independent.  Therefore, it does not appear as a /contest/ endpoint but a
+     * server endpoint.
+     * eg: https://judge.gehack.nl/api/contests/bapc2022 -> https://judge.gehack.nl/api
+     * @return a String with the remote URL Version API endpoint
+     */
+    private String getRemoteAPIVersionURLString(String remoteURLString)
+    {
+        String remoteAPIVersionURLString = null;
+    
+        // API (Version) endpoint is right before /contests/ in the URL, so find that, if it's there
+        int iApi = remoteURLString.lastIndexOf("/contests/");
+        if(iApi != -1) {
+            // eg: https://judge.gehack.nl/api/contests/bapc2022 -> https://judge.gehack.nl/api
+            remoteAPIVersionURLString = remoteURLString.substring(0, iApi);
+            if(remoteAPIVersionURLString.isEmpty()) {
+                remoteAPIVersionURLString = null;
+            }
+        }
+        return(remoteAPIVersionURLString);
+    }
+    
+    /**
+     * Returns a new IRemoteContestAPIAdapter object suitable for connecting to the VERSION api endpoint of the remote CCS
+     * This endpoint is distinctly different from the /contest/xxxx endpoints in that it is the same for all contests
+     * provided by that server; it is contest independent.  Therefore, it does not appear as a /contest/ endpoint but a
+     * server endpoint.
+     * eg: https://judge.gehack.nl/api/contests/bapc2022 -> https://judge.gehack.nl/api
+     * @return a IRemoteContestAPIAdapter object
+     */
+    private IRemoteContestAPIAdapter createRemoteContestVersionAPIAdapter(String remoteURLString, String login, String password) throws MalformedURLException {
 
+        boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow.usemockcontestadapter"), false);
+        
+        String remoteAPIVersionURLString = getRemoteAPIVersionURLString(remoteURLString);
+        if(remoteAPIVersionURLString != null) {
+            // If we have a valid URL to try, let's do it.
+            if (useMockAdapter)
+            {
+                return new MockContestAPIAdapter(new URL(remoteAPIVersionURLString), login, password);
+            } else {
+                return new RemoteContestAPIAdapter(new URL(remoteAPIVersionURLString), login, password);
+            }
+        }
+        return(null);
+    }
+
+    /**
+     * Returns a String suitable for display in a log indicating the CLICS API version supported by the remote.
+     * A valid string will always be returned as follows:
+     * Can not form API Version URL from xxxxx - If the remote URL string does not contain a contest URL path, eg. /contests/
+     * No API version available at  - If the remote did not return valid information for the version API
+     * API Version: N/A - A response was returned by the remote, but it did not contain version information (version)
+     * API Version: 2022-07 by XXXXX - A valid version and provider was returned by the remote
+     * API Version: 2022-07 (unknown provider) - A valid version was returned by the remote, but no provider (name)
+     * No version API endpoint available for contest URL: xxxxx - An exception occurred due to a bad URL supplied for the contest(s)
+     * @return a non-null String representing log-ready version info of the remote API
+     */
+    private String getRemoteAPIVersionInfo(String remoteURLString, String login, String password)
+    {
+        String infoStr;
+        
+        try {
+            // get the special API adapter for version info
+            IRemoteContestAPIAdapter remoteAPI = createRemoteContestVersionAPIAdapter(remoteURLString, login, password);
+            if(remoteAPI != null) {
+                Map<String, Object> map = getMap(remoteAPI.getRemoteJSON(CCS_API_ENDPOINT));
+                if(map != null) {
+                    // ex. {"version":"2022-07","version_url":"https://ccs-specs.icpc.io/2022-07/contest_api","name":"domjudge"}
+                    String verstr = (String)map.get("version");
+                    String provider = (String)map.get("name");
+                    
+                    infoStr = "API Version: ";
+                    
+                    // Try to make an intelligent looking string if stuff is missing
+                    if(verstr == null || verstr.isEmpty()) {
+                        infoStr += "N/A";
+                    } else {
+                        infoStr += verstr;
+                    }
+                    if(provider != null && !provider.isEmpty()) {
+                        infoStr += " by " + provider;
+                    } else {
+                        infoStr += " (unknown provider)";
+                    }
+                } else {
+                    // getRemoteAPIVersionURLString will always return non-null here for those wondering, or remoteAPI would be null!
+                    infoStr = "No API version available at " + getRemoteAPIVersionURLString(remoteURLString);                                                   
+                }
+            } else {
+                infoStr = "Can not form API Version URL from " + remoteURLString;
+            }
+        } catch(Exception e) {
+            infoStr = "No version API endpoint available for contest URL: " + remoteURLString;
+        }
+        return(infoStr);
+    }
 }
