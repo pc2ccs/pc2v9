@@ -10,7 +10,7 @@
 DEBUG=
 
 INSTALL_SCRIPT_PATH=/usr/pc2/bin/pc2installsandbox
-SERVICE_NAME=icpc_cgroup.service
+SERVICE_NAME=pc2_cgroup.service
 SERVICE_FILE=/usr/pc2/support/system_cgroup/${SERVICE_NAME}
 
 euid=`id -u`

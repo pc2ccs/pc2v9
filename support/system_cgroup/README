@@ -1,25 +1,21 @@
-04/11/2023 -- John Buck
+01/30/2023 -- John Buck
 
 In order to support executing submissions in a sandbox on Linux, we use CGROUPs V2.  Therefore,
 the system you are running this on must support that.  Most newer Linux systems do.
 
 The cgroup used for pc2 judging, /sys/fs/cgroup/pc2. must be created and set up with the proper
-permissions every time the system boots (cgroups are not persistent across reboots).  The icpc_cgroup.service
+permissions every time the system boots (cgroups are not persistent across reboots).  The pc2_cgroup.service
 systemd service arranges for this to happen.  It is a "one-shot" service, and all it does is execute
 the /usr/pc2/bin/pc2installsandbox shell script.  Right now, it is hardcoded to execute the script in that
 location.  We will need a more definitive way for it track down the install script.
 
-To add this service to your system (as root), you can run the script:
+To add this service to your system (as root):
 
-$(PC2HOME)/bin/pc2installservice
-
-or manually, you can do the following:
-
-1) copy the icpc_cgroup.service file to /etc/systemd/system
-2) systemctl enable icpc_cgroup.service
-3) systemctl start icpc_cgroup.service (not necessary if you plan on rebooting right away).
+1) copy the pc2_cgroup.service file to /etc/systemd/system
+2) systemctl enable pc2_cgroup.service
+3) systemctl start pc2_cgroup.service (not necessary if you plan on rebooting right away).
 
 To see the completion status of the service:
 
-systemctl status icpc_cgroup.service
+systemctl status pc2_cgroup.service
 
