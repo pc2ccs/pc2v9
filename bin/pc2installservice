@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# This script installs a Linux service that runs the script to create
+# the CGroup necessary for PC2 sandboxes.  The service is a one-shot service
+# that simply runs the /usr/pc2/bin/pc2installsandbox shell script
+
+# Author: John Buck
+
+#DEBUG="echo Would"
+DEBUG=
+
+INSTALL_SCRIPT_PATH=/usr/pc2/bin/pc2installsandbox
+SERVICE_NAME=icpc_cgroup.service
+SERVICE_FILE=/usr/pc2/support/system_cgroup/${SERVICE_NAME}
+
+euid=`id -u`
+if test "$euid" -ne 0
+then
+	echo $0: This script must be run as super user
+	exit 1
+fi
+if test ! -s ${SERVICE_FILE}
+then
+	echo $0: Can not find service file: ${SERVICE_FILE}
+	echo $0: Service not installed.
+	exit 2
+fi
+
+if test ! -x ${INSTALL_SCRIPT_PATH}
+then
+	echo $0: The script ${INSTALL_SCRIPT_PATH} must be present and executable
+	echo $0: Service not installed
+	exit 3
+fi
+
+$DEBUG cp -a ${SERVICE_FILE} /etc/systemd/system
+$DEBUG systemctl enable ${SERVICE_NAME}
+$DEBUG systemctl start ${SERVICE_NAME}
+$DEBUG systemctl status ${SERVICE_NAME}
+exit 0

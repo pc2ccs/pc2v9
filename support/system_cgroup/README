@@ -1,4 +1,4 @@
-01/30/2023 -- John Buck
+04/11/2023 -- John Buck
 
 In order to support executing submissions in a sandbox on Linux, we use CGROUPs V2.  Therefore,
 the system you are running this on must support that.  Most newer Linux systems do.
@@ -9,7 +9,11 @@ systemd service arranges for this to happen.  It is a "one-shot" service, and al
 the /usr/pc2/bin/pc2installsandbox shell script.  Right now, it is hardcoded to execute the script in that
 location.  We will need a more definitive way for it track down the install script.
 
-To add this service to your system (as root):
+To add this service to your system (as root), you can run the script:
+
+$(PC2HOME)/bin/pc2installservice
+
+or manually, you can do the following:
 
 1) copy the icpc_cgroup.service file to /etc/systemd/system
 2) systemctl enable icpc_cgroup.service
