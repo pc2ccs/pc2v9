@@ -377,7 +377,7 @@ public class ExecuteUtilities extends Plugin {
             return origString;
         }
         // if substitute variable has an = sign, we try to match the substring up to and including the
-        // equals sign, eg: {:ifsuffix=Kt}, we want to match: {:ifsuffix=
+        // equals sign, eg: {:ensuresuffix=Kt}, we want to match: {:ensuresuffix=
         int subIdx = condVar.indexOf('=');
         
         // Need at least two chars to left of =

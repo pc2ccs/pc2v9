@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedInputStream;
@@ -2479,7 +2479,7 @@ public class Executable extends Plugin implements IExecutable {
      *              {:outfile}
      *              {:ansfile}
      *              {:pc2home}
-     *              {:ifsuffix=...} - add supplied suffix if not present already
+     *              {:ensuresuffix=...} - add supplied suffix if not present already
      * </pre>
      * 
      * @param dataSetNumber

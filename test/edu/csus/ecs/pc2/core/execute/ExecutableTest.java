@@ -1222,15 +1222,15 @@ public class ExecutableTest extends AbstractTestCase {
         executable.setExecuteDirectoryName(executeDirectoryName);
         executable.setUsingGUI(false);
         
-        String actual = executable.substituteAllStrings(run, "foo {:basename}{:ifsuffix=it}");
+        String actual = executable.substituteAllStrings(run, "foo {:basename}{:ensuresuffix=it}");
         
         assertEquals("Expected substitution", "foo ISumit", actual);
         
-        actual = executable.substituteAllStrings(run, "{:basename}{:ifsuffix=Kt}");
+        actual = executable.substituteAllStrings(run, "{:basename}{:ensuresuffix=Kt}");
         
         assertEquals("Expected substitution", "ISumitKt", actual);
         
-        actual = executable.substituteAllStrings(run, "kotlin {:basename}{:ifsuffix=Kt}{:ifsuffix=Kt} {:basename}{:ifsuffix=ISumit}{:ifsuffix=Kt}");
+        actual = executable.substituteAllStrings(run, "kotlin {:basename}{:ensuresuffix=Kt}{:ensuresuffix=Kt} {:basename}{:ensuresuffix=ISumit}{:ensuresuffix=Kt}");
         
         assertEquals("Expected substitution", "kotlin ISumitKtKt ISumitKt", actual);
     }
