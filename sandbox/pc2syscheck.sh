@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 #  
 # File:    pc2syscheck.sh
 # Purpose: Check host system to make sure it's setup properly for sandbox usage

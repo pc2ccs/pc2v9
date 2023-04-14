@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 #  
 # File:    pc2sandbox.sh 
 # Purpose: a sandbox for pc2 using Linux CGroups v2.

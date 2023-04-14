@@ -1,8 +1,9 @@
 #!/bin/bash
-
-# This script installs a Linux CGroup V2 sandbox for pc2.
-
+# Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+#
+# Purpose: install a Linux cgroup v2 sandbox for PC2
 # Author: John Buck, based on original version by John Clevenger
+#
 
 FAIL_EXIT_CODE=43
 FAIL_NO_ARGS_ALLOWED_EXIT_CODE=44
@@ -69,6 +70,9 @@ if test -d $PC2_CGROUP_PATH
 then
 	rmdir $PC2_CGROUP_PATH
 fi
+
+# Errors will cause script to stop
+set -e
 
 # Create a pc2 cgroup to be managed by the pc2 user and group 
 echo Creating PC2 CGroup structure...
