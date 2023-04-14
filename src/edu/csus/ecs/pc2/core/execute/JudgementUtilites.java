@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Pluralize;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
@@ -196,9 +197,9 @@ public final class JudgementUtilites {
 
             int numberOfTestCases = problem.getNumberTestCases();
             log.info(prefixString + " Dumping for " + run + " judge id=" + judgeId);
-            String verb = numberOfTestCases > 1 ? " are " : " is " ;
-            String pluralform = numberOfTestCases > 1 ? " testcases " : " testcase ";
-            log.info(prefixString + " There" + verb + numberOfTestCases + pluralform +  "for problem " + problem.getDisplayName() + " '" + problem.getShortName() + "'");
+            log.info(prefixString + " There " + Pluralize.pluralize("is", numberOfTestCases) + " "
+                    + numberOfTestCases + Pluralize.simplePluralize(" testcase", numberOfTestCases)
+                    +  " for problem " + problem.getDisplayName() + " '" + problem.getShortName() + "'");
 
             String[] otherFiles = { "cstderr.pc2", "cstdout.pc2", "estderr.pc2", "estdout.pc2" };
 

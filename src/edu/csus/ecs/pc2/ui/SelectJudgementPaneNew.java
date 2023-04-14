@@ -884,6 +884,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
             //TODO: the following assignment and 'if' don't make sense (the assignment inside the 'if' is 
             //     the same as the one preceding the 'if').   jlc
+            // JB - I *think* the intent was to call lang.getProgramExecuteCommandLine() if the judge
+            //      command line is null.  That is, if no specific judge command, use
+            //      the default.
             String command = lang.getJudgeProgramExecuteCommandLine();
             if (command == null) {
                 command = lang.getJudgeProgramExecuteCommandLine();

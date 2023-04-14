@@ -4,16 +4,15 @@
 package edu.csus.ecs.pc2.util;
 
 import java.io.File;
-import java.lang.System;
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.report.EventFeedJSONReport;
-import edu.csus.ecs.pc2.core.report.ExtractPlaybackLoadFilesReport;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.SandboxType;
 
@@ -40,7 +39,7 @@ public class OSCompatibilityUtilities {
      */
     public static boolean isSandboxNeeded(IInternalContest contest)
     {
-        boolean bNeeded = false;
+        boolean isNeeded = false;
         
         if(contest != null) {
             Problem [] problems = contest.getProblems();
@@ -48,13 +47,13 @@ public class OSCompatibilityUtilities {
             // scan problems to see if any one needs a sandbox
             for (Problem problem : problems) {
                 if(needsSandbox(problem)) {
-                    bNeeded = true;
+                    isNeeded = true;
                     break;
                 }
             }
         }
         
-        return(bNeeded);
+        return(isNeeded);
     }
     
     /**
@@ -119,7 +118,7 @@ public class OSCompatibilityUtilities {
      */
     public static boolean areSandboxesSupported(IInternalContest contest, Log log)
     {
-        boolean bCanRun = true;
+        boolean canRun = false;
                     
         String sysCheckSandboxScript;
         // determine if system is set up to run a sandbox.  First determine
@@ -141,7 +140,7 @@ public class OSCompatibilityUtilities {
             log.info("Checking for sandbox support: executing " + sysCheckSandboxScriptFullName + " to verify OS compatibilty");
         }
         try {
-            //check if the script exists
+            // script must exist in order to execute it; we want a separate error if it's not there vs. not executable
             File f = new File(sysCheckSandboxScriptFullName);
             if (f.exists()) {
                 
@@ -152,16 +151,16 @@ public class OSCompatibilityUtilities {
                     if(log != null) {
                         log.warning("Can not execute " + sysCheckSandboxScriptFullName);
                     }
-                    bCanRun = false;
                 } else {
                     int exitCode = checkProcess.waitFor();
                     
                     if(log != null) {
                         log.info("Execution of " + sysCheckSandboxScriptFullName + " returns exit code " + exitCode);
                     }
-                    if(exitCode != 0) {
+                    if(exitCode == 0) {
+                        canRun = true;
+                    } else {
                         log.info("This system does not support sandbox execution");
-                        bCanRun = false;
                     }
                 }
                 
@@ -170,20 +169,21 @@ public class OSCompatibilityUtilities {
                     log.warning("Can not find " + sysCheckSandboxScriptFullName + " - sandboxes are not supported");
                 }
                 // absence of script indicates the system can not support sandboxes
-                bCanRun = false;
             }
         } catch(Exception e)
         {
-            // no matter what happened to cause the exception, we return false
-            bCanRun = false;
+            // no matter what happened to cause the exception, it means no sandbox support
             if(log != null) {
                 log.log(Log.INFO, "Exception during areSandboxesSupported() ", e);
             } else {
-                e.printStackTrace();
+                if(Utilities.isDebugMode()){
+                    e.printStackTrace();
+                }
+                StaticLog.getLog().log(Log.INFO, "Exception during areSandboxesSupported() ", e);
             }
         }
         
-        return(bCanRun);
+        return(canRun);
     }
     
     /**
@@ -200,12 +200,12 @@ public class OSCompatibilityUtilities {
      */
     public static boolean canRunAllSubmissions(IInternalContest contest, Log log)
     {
-        boolean bCanRun = true;
+        boolean canRun = true;
         
         if(isSandboxNeeded(contest)){
-            bCanRun = areSandboxesSupported(contest, log);
+            canRun = areSandboxesSupported(contest, log);
         }
-        return(bCanRun);
+        return(canRun);
     }
     
     /**
