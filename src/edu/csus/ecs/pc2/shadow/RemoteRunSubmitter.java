@@ -61,7 +61,7 @@ public class RemoteRunSubmitter {
      * @param clientIdString - "teamN" client name
      * @param problemID - problem id
      * @param languageID - CLICS language id
-     * @param entry_point - java/kotlin entry point, null if default or none
+     * @param entry_point - entry point, null if default or none
      * @param mainFile - main file name
      * @param auxFiles - other submittted files 
      * @param overrideTimeMS - override submission time in MS
