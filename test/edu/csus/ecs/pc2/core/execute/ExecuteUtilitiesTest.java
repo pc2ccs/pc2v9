@@ -539,7 +539,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
     }
 
     /**
-     * test {:ifsuff=xxx} substitution.
+     * test {:ensuresuffix=xxx} substitution.
      * 
      * @throws Exception
      */
