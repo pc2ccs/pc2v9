@@ -1818,7 +1818,7 @@ public class Executable extends Plugin implements IExecutable {
              * We only do this substition for execution of the run, not compiles or validators, so it can't
              * be done by substitutionAllStrings without refactoring.
              */
-            if (run.getEntryPoint() != null) {
+            if (!StringUtilities.isEmpty(run.getEntryPoint())) {
                 // change Constants.CMDSUB_BASENAME_VARNAME to entry_point rather than basename from {:mainfile} before
                 // other substitutions (overrides :mainfile)
                 cmdline = replaceString(cmdline, Constants.CMDSUB_BASENAME_VARNAME, run.getEntryPoint());
@@ -2193,7 +2193,7 @@ public class Executable extends Plugin implements IExecutable {
             String programName = language.getExecutableIdentifierMask();
             
             // the "executable" program name is the entry point, if one exists, so try to substitute that first
-            if (run.getEntryPoint() != null) {
+            if (!StringUtilities.isEmpty(run.getEntryPoint())) {
                 // change Constants.CMDSUB_BASENAME_VARNAME to entry_point rather than basename from {:mainfile} before
                 // other substitutions (overrides :mainfile)
                 programName = replaceString(programName, Constants.CMDSUB_BASENAME_VARNAME, run.getEntryPoint());
