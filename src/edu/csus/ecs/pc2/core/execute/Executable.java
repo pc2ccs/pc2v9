@@ -2201,7 +2201,7 @@ public class Executable extends Plugin implements IExecutable {
 
         if (executionData.isRunTimeLimitExceeded()) {
 
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "TLE");
+            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, Judgement.ACRONYM_TIME_LIMIT_EXCEEDED);
             String judgementString = "No - Time Limit Exceeded"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
@@ -2211,7 +2211,7 @@ public class Executable extends Plugin implements IExecutable {
             executionData.setValidationSuccess(true);
             proceedToValidation = false;
         } else if(executionData.isMemoryLimitExceeded()) {
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "MLE");
+            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, Judgement.ACRONYM_MEMORY_LIMIT_EXCEEDED);
             String judgementString = "No - Memory Limit Exceeded"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
@@ -2222,7 +2222,7 @@ public class Executable extends Plugin implements IExecutable {
             proceedToValidation = false;
             
         } else if(bSandboxSystemError) {
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "OCS");
+            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, Judgement.ACRONYM_OTHER_CONTACT_STAFF);
             String judgementString = "No - contact staff"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
