@@ -8,30 +8,38 @@
 #
 # Author: John Buck
 
-#DEBUG="echo Would"
+SCRIPTNAME="$0"
+
 DEBUG=
+#DEBUG="echo Would"
 
 INSTALL_SCRIPT_PATH=/usr/pc2/bin/pc2installsandbox
 SERVICE_NAME=pc2_cgroup.service
 SERVICE_FILE=/usr/pc2/support/system_cgroup/${SERVICE_NAME}
 
+ServiceError()
+{
+	echo $SCRIPTNAME: $*
+	echo $SCRIPTNAME: Service not installed.
+	echo $SCRIPTNAME: For help, please refer to the '"Running in a Sandbox"' Appendix
+	echo $SCRIPTNAME: in the \"PC2 Contest Administrator\'s Installation and Configuration Guide\"
+}
+
 euid=`id -u`
 if test "$euid" -ne 0
 then
-	echo $0: This script must be run as super user
+	echo $SCRIPTNAME: This script must be run as super user
 	exit 1
 fi
 if test ! -s ${SERVICE_FILE}
 then
-	echo $0: Can not find service file: ${SERVICE_FILE}
-	echo $0: Service not installed.
+	ServiceError Can not find service file: ${SERVICE_FILE}
 	exit 2
 fi
 
 if test ! -x ${INSTALL_SCRIPT_PATH}
 then
-	echo $0: The script ${INSTALL_SCRIPT_PATH} must be present and executable
-	echo $0: Service not installed
+	ServiceError The script ${INSTALL_SCRIPT_PATH} must be present and executable
 	exit 3
 fi
 
