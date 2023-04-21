@@ -1196,7 +1196,43 @@ public class ExecutableTest extends AbstractTestCase {
         
         String actual = executable.substituteAllStrings(run, "foo {files}");
         
-        assertEquals("Expected substitution", actual, "foo ISumit.java");
+        assertEquals("Expected substitution", "foo ISumit.java", actual);
+    }
+    
+    /**
+     * test {:ensuresuffix=xxx} substitution.
+     * 
+     * @throws Exception
+     */
+    public void testCondSuffixSubstitute() throws Exception {
+        
+        String executeDirectoryName = getOutputDataDirectory(getName());
+        ensureDirectory(executeDirectoryName);
+        
+        String sumitFilename = getSamplesSourceFilename("ISumit.java");
+        ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
+        Problem problem = createHelloProblemNoJudgesData(contest);
+        
+        Run run = createRun(submitter, javaLanguage, problem, 2, 2);
+        assertFileExists(sumitFilename);
+        
+        RunFiles runFiles = new RunFiles(run, sumitFilename);
+        
+        Executable executable = new Executable(contest, controller, run, runFiles);
+        executable.setExecuteDirectoryName(executeDirectoryName);
+        executable.setUsingGUI(false);
+        
+        String actual = executable.substituteAllStrings(run, "foo {:basename}{:ensuresuffix=it}");
+        
+        assertEquals("Expected substitution", "foo ISumit", actual);
+        
+        actual = executable.substituteAllStrings(run, "{:basename}{:ensuresuffix=Kt}");
+        
+        assertEquals("Expected substitution", "ISumitKt", actual);
+        
+        actual = executable.substituteAllStrings(run, "kotlin {:basename}{:ensuresuffix=Kt}{:ensuresuffix=Kt} {:basename}{:ensuresuffix=ISumit}{:ensuresuffix=Kt}");
+        
+        assertEquals("Expected substitution", "kotlin ISumitKtKt ISumitKt", actual);
     }
 
     private String stripSpace(String cmdline) throws IOException {
