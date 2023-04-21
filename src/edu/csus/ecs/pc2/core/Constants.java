@@ -200,4 +200,9 @@ public final class Constants {
      */
     public static final String WINDOWS_CHECK_SANDBOX_SCRIPT = "pc2syscheck.cmd";
     public static final String UNIX_CHECK_SANDBOX_SCRIPT = "pc2syscheck.sh";
+
+    /**
+     * Prefix for deleted runs.
+     */
+    public static final String DEL_RUN_PREFIX = "DEL ";   
 }
