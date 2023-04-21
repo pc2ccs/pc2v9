@@ -186,5 +186,10 @@ public final class Constants {
     
     public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";
 
-    public static final int BYTES_PER_KIBIBYTE = 1024;   
+    public static final int BYTES_PER_KIBIBYTE = 1024;
+
+    /**
+     * Prefix for deleted runs.
+     */
+    public static final String DEL_RUN_PREFIX = "DEL ";   
 }
