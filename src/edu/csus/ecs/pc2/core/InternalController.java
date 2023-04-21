@@ -4657,11 +4657,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     @Override
     public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
         
+        submitRun(submitter, problem, language, null, mainSubmissionFile, additionalFiles, overrideTimeMS, overrideRunId);
+    }
+
+    @Override
+    public void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideSubmissionId) {
+        
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Run run = new Run(submitter, language, problem);
+        run.setEntryPoint(entry_point);
         RunFiles runFiles = new RunFiles(run, mainSubmissionFile, additionalFiles);
 
-        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideRunId);
+        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideSubmissionId);
         sendToLocalServer(packet);
         
     }

@@ -2261,6 +2261,10 @@ public class RunsTablePane extends JPanePlugin {
                             MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + run.getSiteNumber() + " Run " + run.getNumber());
                             mfv.setContestAndController(getContest(), getController());
     
+                            // if entry point was specified, add a tab for it
+                            if(run.getEntryPoint() != null) {
+                                mfv.addTextPane("Entry Point", run.getEntryPoint());
+                            }
                             // add any other files to the MFV (these are added first so that the mainFile will appear at index 0)
                             boolean otherFilesPresent = false;
                             boolean otherFilesLoadedOK = false;

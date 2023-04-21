@@ -484,11 +484,12 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                 logAndDebugPrint(log, Level.INFO, "Invoking submitter.submitRun() for team " + runSubmission.getTeam_id() 
                                                     + " problem " + runSubmission.getProblem_id() 
                                                     + " language " +  runSubmission.getLanguage_id()
+                                                    + " entry_point " + runSubmission.getEntry_point()
                                                     + " time " + overrideTimeMS 
                                                     + " submissionID " + overrideSubmissionID);
                                                 try {
-                                                    submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(), mainFile, auxFiles,
-                                                            overrideTimeMS, overrideSubmissionID);
+                                                    submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(),
+                                                            runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
                                                 } catch (Exception e) {
                                                     // TODO design error handling reporting
                                                     logAndDebugPrint(log, Level.WARNING, "Exception submitting run for event: " + event, e);
