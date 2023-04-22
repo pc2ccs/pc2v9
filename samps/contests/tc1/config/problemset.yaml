@@ -1,0 +1,54 @@
+#
+# problemset.yaml - list of CCS problem definitions
+#
+# created on: Thu Feb  2 12:31:17 PST 2023
+# created by: $Id: mkprobset,v 1.8 2017/04/29 00:19:22 laned Exp $
+# updated Wed Feb 15 04:03:41 PM UTC 2023
+#
+problems:
+  - letter:     A
+    short-name: HelloD1-1
+    color:      Black
+    rgb:        '#000000'
+
+  - letter:     D
+    short-name: ISumitD1-1
+    color:      Dark blue
+    rgb:        '#0967db'
+
+  - letter:     D
+    short-name: ISumitD1Sec-1
+    color:      Dark blue
+    rgb:        '#0967db'
+
+  - letter:     B
+    short-name: HelloD2-2
+    color:      White
+    rgb:        '#fbfbfb'
+
+  - letter:     E
+    short-name: ISumitD2-2
+    color:      Dark green
+    rgb:        '#399956'
+
+  - letter:     E
+    short-name: ISumitD2Sec-2
+    color:      Dark green
+    rgb:        '#399956'
+
+  - letter:     C
+    short-name: HelloRM-3
+    color:      Red
+    rgb:        '#df1328'
+
+  - letter:     F
+    short-name: ISumitRM-3
+    color:      Orange
+    rgb:        '#e38c3e'
+
+  - letter:     F
+    short-name: ISumitRMSec-3
+    color:      Orange
+    rgb:        '#e38c3e'
+
+# eof

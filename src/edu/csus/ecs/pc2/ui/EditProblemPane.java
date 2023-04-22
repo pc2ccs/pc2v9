@@ -225,6 +225,10 @@ public class EditProblemPane extends JPanePlugin {
     private JComboBox<String> pc2ValidatorOptionComboBox;
     private JCheckBox pc2ValidatorIgnoreCaseCheckBox;
     private JLabel lblWhatsThisCLICSValidator;
+    
+    private JTextField maxOutputSizeTextfield;
+    private JLabel lblMaxOutputSizeKB;
+    private JLabel lblWhatsThisMaxOutputSize;
 
     // a temporary variables to track changes in the command line
     private String localPC2InterfaceCustomValidatorCommandLine;
@@ -236,6 +240,10 @@ public class EditProblemPane extends JPanePlugin {
     private boolean showMissingInputValidatorProgramNameOnUpdateProblem = true;
 
     private Log log;
+
+    private JLabel lblShortName;
+
+    private JLabel problemLetterLabel;
 
 
     /**
@@ -545,6 +553,23 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
+     * This method returns a Long value parsed from the specified input String.
+     * It does not do any data validation on the input String; it presumes the String
+     * consists solely of digits which can be parsed into a Long value.
+     * If any Exception occurs during parsing then the method returns zero.
+     * 
+     * @param s the input String to be parsed.
+     * @return a Long whose value corresponds to the input String.
+     */
+    private long getLongValue(String s) {
+        try {
+            return Long.parseLong(s);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+   /**
      * Enable or disable Update button based on comparison of current problem to GUI fields.
      * 
      */
@@ -1068,6 +1093,15 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setLetter(getProblemLetterTextField().getText());
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
         checkProblem.setShortName(getShortNameTextfield().getText());
+        
+        //set checkProblem's max output to either the current problem's value (which is in KB), 
+        // or if that's zero, set it to the global value (which is in BYTES and must be converted to KB)
+        long maxOutputKB = getLongValue(getMaxOutputTextField().getText());
+        if (maxOutputKB == 0) {
+            //no per-problem value; get global value, which is in BYTES so convert it to KB
+            maxOutputKB = getContest().getContestInformation().getMaxOutputSizeInBytes() / 1024L;
+        }
+        checkProblem.setMaxOutputSizeKB(maxOutputKB);
 
         if (!checkProblem.isValidShortName()) {
             throw new InvalidFieldValue("Invalid problem short name");
@@ -1726,6 +1760,32 @@ public class EditProblemPane extends JPanePlugin {
             showMessage("Enter a problem name (\"General\" tab)");
             return false;
         }
+        
+        // verify that the max output value is a non-negative number
+        try {
+            long maxOutput = Long.parseLong(getMaxOutputTextField().getText().trim());
+            if (maxOutput < 0) {
+                showMessage("Maximum output value must be non-negative");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showMessage("Maximum output value must be a number");
+            return false;
+        }
+        
+        // verify that the time limit is a positive number (code added as "continuous improvement")
+        try {
+            int timeLimit = Integer.parseInt(getTimeOutTextField().getText().trim());
+            if (timeLimit <= 0) {
+                showMessage("Time limit must be a positive integer");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showMessage("Time limit must be a number");
+            return false;
+        }
+        
+        
 
         // verify that if the PC2 Validator is selected, an option has been chosen
         if (getUsePC2ValidatorRadioButton().isSelected()) {
@@ -2314,12 +2374,15 @@ public class EditProblemPane extends JPanePlugin {
      */
     private void initializeGeneralTabFields(Problem inProblem, ProblemDataFiles inProblemDataFiles) {
 
-        // initialize problem description fields:
+        // initialize problem identifier fields:
         getProblemNameTextField().setText(inProblem.getDisplayName());
-        getTimeOutTextField().setText(inProblem.getTimeOutInSeconds() + "");
         getShortNameTextfield().setText(inProblem.getShortName());
         getProblemLetterTextField().setText(inProblem.getLetter()); // note: Problem Letter is currently not displayed in the GUI!
 
+        //initialize problem limit fields
+        getTimeOutTextField().setText(inProblem.getTimeOutInSeconds() + "");
+        getMaxOutputTextField().setText(inProblem.getMaxOutputSizeKB() + "");
+        
         // input data fields:
         problemRequiresDataCheckBox.setSelected(inProblem.getDataFileName() != null);
         if (inProblem.isReadInputDataFromSTDIN()) {
@@ -2819,51 +2882,42 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes generalPane
+     * This method initializes the generalPane which contains general problem description components
+     * such as problem name, limits, input data and judging files, etc.
      * 
-     * @return javax.swing.JPanel
+     * @return a JPanel containing general problem description components.
      */
     private JPanel getGeneralPane() {
         if (generalPane == null) {
-            timeoutLabel = new JLabel();
-            timeoutLabel.setBounds(new Rectangle(23, 46, 150, 16));
-            timeoutLabel.setText("Run Timeout Limit (Secs)");
-            problemNameLabel = new JLabel();
-            problemNameLabel.setBounds(new Rectangle(23, 14, 150, 16));
-            problemNameLabel.setText("Problem name");
+            
             generalPane = new JPanel();
-            generalPane.setLayout(null);
+            generalPane.setLayout(null);    //TODO:  use a proper LayoutManager!
+            
+            //add the problem identifier components -- name, shortname, letter
+            generalPane.add(getProblemNameLabel(), null);
             generalPane.add(getProblemNameTextField(), null);
+            generalPane.add(getShortNameLabel());
+            generalPane.add(getShortNameTextField(), null);
+            generalPane.add(getProblemLetterLabel(), null);
+            generalPane.add(getProblemLetterTextField(), null);      
+            
+            //add the problem limit components
             generalPane.add(getTimeOutTextField(), null);
             generalPane.add(getProblemRequiresDataCheckBox(), null);
             generalPane.add(getDataProblemPane(), null);
             generalPane.add(getJudgesHaveAnswerFilesCheckbox(), null);
             generalPane.add(getAnswerFilePane(), null);
-            generalPane.add(problemNameLabel, null);
-            generalPane.add(timeoutLabel, null);
+            generalPane.add(getTimeoutLabel(), null);
             generalPane.add(getShowCompareCheckBox(), null);
             generalPane.add(getDoShowOutputWindowCheckBox(), null);
             generalPane.add(getDeleteProblemCheckBox(), null);
-
-            generalPane.add(getProblemLetterTextField(), null);
-
-            JLabel lblShortName = new JLabel();
-            lblShortName.setText("Short Name");
-            lblShortName.setBounds(new Rectangle(23, 14, 179, 16));
-            lblShortName.setBounds(285, 46, 84, 16);
-            generalPane.add(lblShortName);
-
-            shortNameTextfield = new JTextField();
-            shortNameTextfield.setPreferredSize(new Dimension(120, 20));
-            shortNameTextfield.setBounds(new Rectangle(220, 44, 120, 20));
-            shortNameTextfield.setBounds(379, 44, 97, 20);
-            shortNameTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyReleased(java.awt.event.KeyEvent e) {
-                    enableUpdateButton();
-                }
-            });
-            generalPane.add(shortNameTextfield);
-
+            
+            //add "problem-specific output size limit" components
+            generalPane.add(getLblMaxOutputSizeKB());
+            generalPane.add(getMaxOutputTextField());
+            generalPane.add(getLblWhatsThisMaxOutputSize());
+            
+           
             JLabel lblBalloonColor = new JLabel();
             lblBalloonColor.setText("Balloon Color");
             lblBalloonColor.setBounds(new Rectangle(23, 14, 179, 16));
@@ -2902,18 +2956,32 @@ public class EditProblemPane extends JPanePlugin {
         }
         return generalPane;
     }
+    
+    /**
+     * This method initializes the label for the Problem Name textfield.
+     * 
+     * @return a JLabel containing the name string for the Problem Name textfield label.
+     */
+    private JLabel getProblemNameLabel() {
+        if (problemNameLabel == null) {
+            problemNameLabel = new JLabel();
+            problemNameLabel.setBounds(new Rectangle(23, 14, 150, 16));
+            problemNameLabel.setText("Problem name:");
+        }
+        return problemNameLabel;
+    }
 
     /**
-     * This method initializes problemNameTextField
+     * This method initializes problemNameTextField.
      * 
-     * @return javax.swing.JTextField
+     * @return a JTextField for holding the problem name.
      */
     protected JTextField getProblemNameTextField() {
         if (problemNameTextField == null) {
             problemNameTextField = new JTextField();
             problemNameTextField.setPreferredSize(new java.awt.Dimension(120, 20));
-            problemNameTextField.setSize(new Dimension(293, 20));
-            problemNameTextField.setLocation(new Point(183, 12));
+            problemNameTextField.setSize(new Dimension(240, 20));
+            problemNameTextField.setLocation(new Point(120, 12));
             problemNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -2924,7 +2992,86 @@ public class EditProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes the timeOut textfield
+     * This method returns the label for the Short Name textfield.
+     * 
+     * @return a JLabel containing the string to be used to label the Short Name textfield.
+     */
+    private JLabel getShortNameLabel() {
+        if (lblShortName == null) {
+            lblShortName = new JLabel();
+            lblShortName.setText("Short Name:");
+            lblShortName.setBounds(380, 14, 84, 16);
+        }
+        return lblShortName;
+    }
+
+    /**
+     * This method initializes the textfield used to display the problem Short name.
+     * 
+     * @return a JTextField for holding the problem short name.
+     */
+    private JTextField getShortNameTextField() {
+        if (shortNameTextfield == null) {
+            shortNameTextfield = new JTextField();
+            shortNameTextfield.setPreferredSize(new Dimension(120, 20));
+            shortNameTextfield.setBounds(465, 12, 97, 20);
+            shortNameTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return shortNameTextfield;
+    }
+    
+    /**
+     * This method initializes the label for the Problem Letter textfield.
+     * 
+     * @return a JLabel containing the name string for the Problem Letter textfield label.
+     */
+    private JLabel getProblemLetterLabel() {
+        if (problemLetterLabel == null) {
+            problemLetterLabel = new JLabel();
+            problemLetterLabel.setBounds(new Rectangle(580, 12, 60, 16));
+            problemLetterLabel.setText("Letter: ");
+        }
+        return problemLetterLabel;
+    }
+
+    /**
+     * This method initializes the text field holding the problem letter.
+     * 
+     * @return a JTextField used to hold the problem letter.
+     */
+    private JTextField getProblemLetterTextField() {
+        if (problemLetterTextField == null) {
+            problemLetterTextField = new JTextField();
+            problemLetterTextField.setBounds(630, 10, 25, 20);
+            problemLetterTextField.setEditable(false);
+            problemLetterTextField.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+            problemLetterTextField.setToolTipText("The letter associated with a problem is set when the problem is created and cannot be changed.");
+        }
+        return problemLetterTextField;
+    }
+
+
+
+    /**
+     * This method initializes the label for the timeout limit textfield.
+     * 
+     * @return a JLabel containing the name string for the timeout textfield.
+     */
+    private JLabel getTimeoutLabel() {
+        if (timeoutLabel == null) {
+            timeoutLabel = new JLabel();
+            timeoutLabel.setBounds(new Rectangle(23, 46, 150, 16));
+            timeoutLabel.setText("Run Timeout Limit (Secs):");
+        }
+        return timeoutLabel;
+    }
+
+    /**
+     * This method initializes the timeOut textfield.
      * 
      * @return javax.swing.JTextField holding the timeOut
      */
@@ -2941,14 +3088,6 @@ public class EditProblemPane extends JPanePlugin {
             });
         }
         return timeOutSecondTextField;
-    }
-
-    public JTextField getProblemLetterTextField() {
-        // SOMEDAY - add field to form, define and make visible.
-        if (problemLetterTextField == null) {
-            problemLetterTextField = new JTextField();
-        }
-        return problemLetterTextField;
     }
 
     /**
@@ -3554,6 +3693,72 @@ public class EditProblemPane extends JPanePlugin {
 
     private JTextField rgbTextField;
 
+    /**
+     * This method returns the label for the Maxmimum Output Size textfield.
+     */
+    private JLabel getLblMaxOutputSizeKB() {
+        if (lblMaxOutputSizeKB==null) {
+            lblMaxOutputSizeKB = new JLabel();
+            lblMaxOutputSizeKB.setText("Max output size (KB):");
+            lblMaxOutputSizeKB.setBounds(285, 46, 138, 16);
+        }
+        return lblMaxOutputSizeKB;
+    }
+
+    /**
+     * This method initializes the maximum output size textfield.
+     * 
+     * @return javax.swing.JTextField holding the maximum allowed output size for this problem.
+     */
+    private JTextField getMaxOutputTextField() {
+        if (maxOutputSizeTextfield == null) {
+            maxOutputSizeTextfield = new JTextField();
+            maxOutputSizeTextfield.setBounds(new Rectangle(415, 44, 74, 20));
+            maxOutputSizeTextfield.setPreferredSize(new java.awt.Dimension(120, 20));
+            maxOutputSizeTextfield.setDocument(new IntegerDocument());
+            maxOutputSizeTextfield.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return maxOutputSizeTextfield;
+    }
+
+    private JLabel getLblWhatsThisMaxOutputSize() {
+        if (lblWhatsThisMaxOutputSize == null) {
+            Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+            if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                lblWhatsThisMaxOutputSize = new JLabel("<What's This?>");
+                lblWhatsThisMaxOutputSize.setForeground(Color.blue);
+            } else {
+                Image image = ((ImageIcon) questionIcon).getImage();
+                lblWhatsThisMaxOutputSize = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            }
+
+            lblWhatsThisMaxOutputSize.setToolTipText("What's This? (click for additional information)");
+            lblWhatsThisMaxOutputSize.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, whatsThisMaxOutputMessage, "Maximum Allowed Output", JOptionPane.INFORMATION_MESSAGE, null);
+                }
+            });
+            lblWhatsThisMaxOutputSize.setBorder(new EmptyBorder(0, 15, 0, 0));
+            
+            //TODO: the General pane (on which this component is placed) should use a Layout Manager instead of using absolute coordinates.
+            //  Until such a change is made, this component needs to have absolute coordinates for consistency with the rest of the pane.
+            lblWhatsThisMaxOutputSize.setBounds(480, 42, 30, 25);
+        }
+        return lblWhatsThisMaxOutputSize;
+    }
+
+    private String whatsThisMaxOutputMessage = "This textbox allows you to specify the maximum allowed output (in KB) for this problem."
+
+            + "\nSpecifying a value of zero indicates that the global maximum output limit (as specified on the \"Team Settings\" panel"
+            + "\n on the Contest Administrator's Configure Contest > Settings tab) should be used for the problem."
+            ;
+
     protected void enableCustomValidatorComponents(boolean enableComponents) {
         getCustomValidatorOptionsSubPanel().setEnabled(enableComponents);
         getChooseCustomOutputValidatorProgramButton().setEnabled(enableComponents);
@@ -4108,9 +4313,15 @@ public class EditProblemPane extends JPanePlugin {
         // initialize the General Tab fields:
 
         // Problem description components:
-        problemNameTextField.setText("");
-        timeOutSecondTextField.setText(Integer.toString(Problem.DEFAULT_TIMEOUT_SECONDS));
-        shortNameTextfield.setText("");
+        getProblemNameTextField().setText("");
+        getTimeOutTextField().setText(Integer.toString(Problem.DEFAULT_TIMEOUT_SECONDS));
+        getShortNameTextfield().setText("");
+        getMaxOutputTextField().setText("0");
+        
+        //show the next letter (which would be used if the problem is eventually saved)
+        int numberProblems = getContest().getProblems().length;
+        String nextLetter = Utilities.getProblemLetter(numberProblems + 1);
+        getProblemLetterTextField().setText(nextLetter);
 
         // input data options:
         getProblemRequiresDataCheckBox().setSelected(false);

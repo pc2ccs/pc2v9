@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api;
 
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
@@ -13,10 +13,8 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
  * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
  *  
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public interface IContest {
 
     /**
@@ -487,5 +485,12 @@ public interface IContest {
      * @return an IRun object describing the requested run
      */
     IRun getRun(int siteNumber, int runNumber);
+    
+    /**
+     * Provide version information for system.
+     * 
+     * @return an IVersionInfo object describing the system version information.
+     */
+    IVersionInfo getVersionInfo();
 
 }
