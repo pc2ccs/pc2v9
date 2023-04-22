@@ -2258,12 +2258,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     }
 
     protected int getIntegerValue(String string, int defaultNumber) {
-        // TODO REFACTOR replace getIntegerValue with StringUtilities.getIntegerValue
         return StringUtilities.getIntegerValue(string, defaultNumber);
     }
 
     protected int[] getNumberList(String numberString) {
-        // TODO REFACTOR replace getNumberList with StringUtilities.getNumberList
         return StringUtilities.getNumberList(numberString);
     }
 
