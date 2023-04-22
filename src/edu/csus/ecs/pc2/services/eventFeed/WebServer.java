@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.eventFeed;
 
 import java.io.File;
@@ -64,6 +64,7 @@ import edu.csus.ecs.pc2.services.web.StarttimeService;
 import edu.csus.ecs.pc2.services.web.StateService;
 import edu.csus.ecs.pc2.services.web.SubmissionService;
 import edu.csus.ecs.pc2.services.web.TeamService;
+import edu.csus.ecs.pc2.services.web.VersionService;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -72,7 +73,6 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * This server listens on the input port and when a connection is made it creates a service that for each contest event will do REST web services.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 public class WebServer implements UIPlugin {
 
@@ -179,6 +179,8 @@ public class WebServer implements UIPlugin {
 
         try {
             int port = getIntegerProperty(PORT_NUMBER_KEY, DEFAULT_WEB_SERVER_PORT_NUMBER);
+            
+            showMessage("Binding to port "+port);
 
             File keystoreFile = new File(PC2_KEYSTORE_FILE);
 
@@ -365,6 +367,9 @@ public class WebServer implements UIPlugin {
             showMessage("Starting /contest/event-feed web service");
             resConfig.register(new StateService(getContest(), getController()));
             showMessage("Starting /contest/state web service");
+            resConfig.register(new VersionService(getContest(), getController()));
+            showMessage("Starting / endpoint for version web service");
+            
         }
         
         return resConfig;
