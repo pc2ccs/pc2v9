@@ -655,6 +655,13 @@ public class NullController implements IInternalController{
     }
 
     @Override
+    public void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainFile, SerializedFile[] auxFiles, long overrideTimeMS,
+            long overrideSubmissionID) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
     public void submitJudgeRun(Problem problem, Language language, SerializedFile mainFile, SerializedFile[] otherFiles, long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
         // TODO Auto-generated method stub
         

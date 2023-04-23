@@ -558,6 +558,8 @@ public class ContestController extends MainController {
 		try {
 			logger.info("Standings requested by team " + userInformation.getMyClient().getLoginName());
 			
+			xlog(logger, "debug 22 Start" );
+			
 			//insure that only one browser client at a time can attempt to use the DSA to update standings
 			synchronized (updateStandingsMutex) {
 				
@@ -602,6 +604,7 @@ public class ContestController extends MainController {
 					// we got the internal contest; pass it to the DefaultScoringAlgorithm and get back updated standings
 					try {
 						Properties props = internalContest.getContestInformation().getScoringProperties();
+
 
 						if (props != null) {
 						       Set<Object> set = props.keySet();
@@ -674,7 +677,7 @@ public class ContestController extends MainController {
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 	}
-
+ 
 	/**
 	 * Logs to logger and stdout.
 	 * 

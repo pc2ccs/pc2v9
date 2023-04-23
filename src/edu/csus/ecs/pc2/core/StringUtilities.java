@@ -1,7 +1,8 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -277,7 +278,86 @@ public final class StringUtilities implements Serializable {
     }
     
     /**
-     * get team number from login string.
+     * Return a list of integers for input string.
+     * 
+     * Input string is a list of comma delimited numbers or ranges.
+     * 
+     * Invalid number conditions
+     * <li> range end must be greater than or equal to start number in range
+     * <li> all numbers must be greater than 0
+     * <li> missing start range number, ex -12
+     * <li> missing end range number, ex. 22-
+     * <li> missing number, ex 1,2,,5
+     * <li> too many dashes in a range, ex 1-5-6-7
+     * 
+     * @throws RuntimeException if invalid range
+     * @param numberString
+     * @return raw (not sorted, not unique) list of numbers 
+     */
+    public static int[] getNumberList(String numberString) {
+
+        // TODO REFACTOR replace ContestSnakeYAMLLoader.getNumberList with this method
+        
+        String[] list = numberString.split(",");
+        List<Integer> outList = new ArrayList<Integer>();
+        
+        for (String numberItem : list) {
+
+            String trimmed = numberItem.replaceAll(" ", ""); // remove all spaces
+            trimmed = trimmed.replaceAll("^0", ""); // remove left padding zero
+            
+            if (0 == trimmed.length()) {
+                throw new RuntimeException("Invalid/missing number in range, '" + trimmed + "' input: '" + numberString + "'");
+            }
+            
+            if (trimmed.indexOf('-') > -1) {
+                if (trimmed.startsWith("-")) {
+                    throw new RuntimeException("Invalid range, missing range start number '" + trimmed + "' input: '" + numberString + "'");
+                }
+                if (trimmed.endsWith("-")) {
+                    throw new RuntimeException("Invalid range, missing range end number '" + trimmed + "' input: '" + numberString + "'");
+                }
+
+                String[] ranges = trimmed.split("-");
+                if (ranges.length != 2) {
+                    throw new RuntimeException("Invalid range format (too many dashes?) '" + trimmed + "' input: '" + numberString + "'");
+                }
+
+                int startRange = getIntegerValue(ranges[0], 0);
+                int endRange = getIntegerValue(ranges[1], 0);
+
+                if (endRange < startRange) {
+                    throw new RuntimeException("Invalid range range end number must be >= start range'" + trimmed + "' input: '" + numberString + "'");
+                }
+
+                for (int i = startRange; i <= endRange; i++) {
+                    outList.add(i);
+                }
+
+            } else {
+                outList.add(getIntegerValue(trimmed, 0));
+            }
+        }
+        int [] outArray = outList.stream() //
+                .mapToInt(Integer::intValue) //
+                .toArray();
+        return outArray;
+    }
+    
+    public static int getIntegerValue(String string, int defaultNumber) {
+        // TODO REFACTOR replace ContestSnakeYAMLLoader.getIntegerValue with this method
+
+        int number = defaultNumber;
+
+        if (string != null && string.length() > 0) {
+            number = Integer.parseInt(string.trim());
+        }
+
+        return number;
+    }
+    
+    /**
+     *  get team number from login string.
      * 
      * @param user team login in form team#, team102
      * @return null if no team number found or string after team is not a number.
@@ -295,5 +375,18 @@ public final class StringUtilities implements Serializable {
         }
         return null;
     }
+    
+    /**
+     * Removes the last character from the given String and returns the resulting String.
+     * If the given String is null or empty, returns null.
+     * 
+     * @param s the String whose last char is to be removed.
+     * @return a String identical to the input String except with the last character removed, or null.
+     */
+    public static String removeLastChar(String s) {
+        return (s == null || s.length() == 0) ? null : (s.substring(0, s.length()-1));
+    }
+    
+
     
 }

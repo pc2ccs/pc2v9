@@ -410,7 +410,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setCcsTestMode(contest, ccsTestMode);
         }
         
-        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, true);
+        // TODO 701 change LOAD_SAMPLE_JUDGES_DATA, false); to , true);
+        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, false);
         setLoadSampleJudgesData(contest, loadSamples);
         
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
@@ -2258,38 +2259,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     }
 
     protected int getIntegerValue(String string, int defaultNumber) {
-
-        int number = defaultNumber;
-
-        if (string != null && string.length() > 0) {
-            number = Integer.parseInt(string.trim());
-        }
-
-        return number;
+        return StringUtilities.getIntegerValue(string, defaultNumber);
     }
 
     protected int[] getNumberList(String numberString) {
-
-        String[] list = numberString.split(",");
-        if (list.length == 1) {
-            int[] out = new int[1];
-            out[0] = getIntegerValue(list[0], 0);
-            // if (out[0] < 1) {
-            // // SOMEDAY 669 throw invalid number in list exception
-            // }
-            return out;
-        } else {
-            int[] out = new int[list.length];
-            int i = 0;
-            for (String n : list) {
-                out[i] = getIntegerValue(n, 0);
-                // if (out[i] < 1) {
-                // // SOMEDAY 669 throw invalid number in list exception
-                // }
-                i++;
-            }
-            return out;
-        }
+        return StringUtilities.getNumberList(numberString);
     }
 
     @SuppressWarnings("unchecked")

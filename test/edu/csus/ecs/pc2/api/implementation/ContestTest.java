@@ -14,9 +14,11 @@ import edu.csus.ecs.pc2.api.IProblemDetails;
 import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.api.ITeam;
+import edu.csus.ecs.pc2.api.IVersionInfo;
 import edu.csus.ecs.pc2.api.RunStates;
 import edu.csus.ecs.pc2.api.ServerConnection;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.NullController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
@@ -675,6 +677,36 @@ public class ContestTest extends AbstractTestCase {
             println("Problem name = " + problem.getDisplayName() + " ele = " + problem.getElementId()+" newstr '"+stripped+"'");
         }
         
+    }
+    
+    /**
+     * Test IVersionInfo.
+     * 
+     * @throws Exception
+     */
+    public void testGetIVersionInfo() throws Exception {
+
+        IInternalContest internal = sampleContest.createContest(1, 3, 170, 12, true);
+        assertNotNull(internal);
+
+        IInternalController controller = new NullController();
+        Log log = createLog(getName());
+
+        Account team151 = internal.getAccount(new ClientId(1, Type.TEAM, 151));
+        assertNotNull(team151);
+        internal.setClientId(team151.getClientId());
+
+        Contest contest = new Contest(internal, controller, log);
+
+        IVersionInfo verinfo = contest.getVersionInfo();
+        assertNotNull(verinfo);
+
+        assertEquals("expected getContactEMail ", "mailto:pc2@ecs.csus.edu", verinfo.getContactEMail());
+        assertEquals("expected getSystemName ", "CSUS Programming Contest Control System", verinfo.getSystemName());
+        assertEquals("expected getSystemURL ", "http://pc2.ecs.csus.edu/", verinfo.getSystemURL());
+
+        //        System.out.println("debug  "+JSONUtilities.prettyPrint(verinfo));
+        //        System.out.println("debug " + version info = "+verinfo);
     }
         
 }
