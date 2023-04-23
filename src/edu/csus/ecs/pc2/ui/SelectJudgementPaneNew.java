@@ -882,10 +882,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             Exception ex = executionData.getExecutionException();
             Language lang = getContest().getLanguage(run.getLanguageId());
 
-            String command = lang.getJudgeProgramExecuteCommandLine();
-            if (command == null) {
-                command = lang.getJudgeProgramExecuteCommandLine();
-            }
+            String command = lang.getActiveProgramExecuteCommandLine();
             String commandLine = executable.substituteAllStrings(run, command);
             log.warning("Error executing command: " + commandLine);
             log.warning("Error is: " + ex.getMessage());

@@ -1805,7 +1805,7 @@ public class Executable extends Plugin implements IExecutable {
                     /**
                      * Use Judge execution command line (override).
                      */
-                    cmdline = language.getJudgeProgramExecuteCommandLine();
+                    cmdline = language.getActiveProgramExecuteCommandLine();
                     log.info("Using judge command line " + cmdline);
                 }
 

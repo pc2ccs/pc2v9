@@ -63,7 +63,7 @@ public class LanguagesReport implements IReport {
         printWriter.println("    executable mask     : " + language.getExecutableIdentifierMask());
         printWriter.println("    program execute cmd : " + language.getProgramExecuteCommandLine());
         printWriter.println("   using judges exe cmd : " + Utilities.yesNoString(language.isUsingJudgeProgramExecuteCommandLine()));
-        printWriter.println("     judges execute cmd : " + language.getJudgeProgramExecuteCommandLine());
+        printWriter.println("     judges execute cmd : " + language.getActiveProgramExecuteCommandLine());
         
     }
 

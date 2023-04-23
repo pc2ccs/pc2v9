@@ -172,7 +172,7 @@ public class LanguagesPane extends JPanePlugin {
         c[4] = Utilities.yesNoString(language.isInterpreted());
         
         c[5] = Utilities.yesNoString(language.isUsingJudgeProgramExecuteCommandLine());
-        c[6] = language.getJudgeProgramExecuteCommandLine();
+        c[6] = language.getActiveProgramExecuteCommandLine();
         c[7] = language.getID();
         return c;
     }

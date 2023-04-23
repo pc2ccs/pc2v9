@@ -231,7 +231,7 @@ public class EditLanguagePane extends JPanePlugin {
         checkForEmptyField(existingLanguage.getProgramExecuteCommandLine(), "Enter a execute command line");
 
         if (existingLanguage.isUsingJudgeProgramExecuteCommandLine()) {
-            checkForEmptyField(existingLanguage.getJudgeProgramExecuteCommandLine(), "Judge execution command line");
+            checkForEmptyField(existingLanguage.getActiveProgramExecuteCommandLine(), "Judge execution command line");
         }
 
         return existingLanguage;
@@ -705,7 +705,7 @@ public class EditLanguagePane extends JPanePlugin {
             getInterpretedLanguageCheckBox().setSelected(language2.isInterpreted());
             getExecutableFilenameTextField().setEnabled(!language2.isInterpreted());
             chckbxJudgesCommandLine.setSelected(language2.isUsingJudgeProgramExecuteCommandLine());
-            judgeCommandLineTextBox.setText(language2.getJudgeProgramExecuteCommandLine());
+            judgeCommandLineTextBox.setText(language2.getActiveProgramExecuteCommandLine());
             getIDTextField().setText(language2.getID());
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);

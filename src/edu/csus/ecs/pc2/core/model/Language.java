@@ -188,7 +188,7 @@ public class Language implements IElementObject {
             if (! StringUtilities.stringSame(programExecuteCommandLine, language.getProgramExecuteCommandLine())) {
                 return false;
             }
-            if (!StringUtilities.stringSame(judgeProgramExecuteCommandLine, language.getJudgeProgramExecuteCommandLine())){
+            if (!StringUtilities.stringSame(judgeProgramExecuteCommandLine, language.getActiveProgramExecuteCommandLine())){
                 return false;
             }
             if (!StringUtilities.stringSame(executableIdentifierMask,  language.getExecutableIdentifierMask())) {
@@ -232,7 +232,7 @@ public class Language implements IElementObject {
         return interpreted;
     }
 
-    public String getJudgeProgramExecuteCommandLine() {
+    public String getActiveProgramExecuteCommandLine() {
         if (usingJudgeProgramExecuteCommandLine){
             return judgeProgramExecuteCommandLine;
         } else {

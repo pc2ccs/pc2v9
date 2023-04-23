@@ -23,14 +23,14 @@ public class LanguageTest extends AbstractTestCase {
         
          Language language = LanguageAutoFill.createAutoFilledLanguage(LanguageAutoFill.JAVATITLE);
          
-         assertNotNull("Expecting judge exe ", language.getJudgeProgramExecuteCommandLine());
+         assertNotNull("Expecting judge exe ", language.getActiveProgramExecuteCommandLine());
          
-         assertEquals("Expecting team and judge exec to be identical ",language.getProgramExecuteCommandLine(), language.getJudgeProgramExecuteCommandLine());
+         assertEquals("Expecting team and judge exec to be identical ",language.getProgramExecuteCommandLine(), language.getActiveProgramExecuteCommandLine());
          
          language.setJudgeProgramExecuteCommandLine("security wrapper");
          language.setUsingJudgeProgramExecuteCommandLine(true);
          
-         assertNotEquals("Expecting team dn judge exec to be different",language.getProgramExecuteCommandLine(), language.getJudgeProgramExecuteCommandLine());
+         assertNotEquals("Expecting team dn judge exec to be different",language.getProgramExecuteCommandLine(), language.getActiveProgramExecuteCommandLine());
          
     }
     
@@ -53,17 +53,17 @@ public class LanguageTest extends AbstractTestCase {
 
         assertFalse("Since setJudgeProgramExecuteCommandLine to be false", language.isUsingJudgeProgramExecuteCommandLine());
 
-        assertEquals("Expecting team exec and judge exec to be same ", language.getProgramExecuteCommandLine(), language.getJudgeProgramExecuteCommandLine());
+        assertEquals("Expecting team exec and judge exec to be same ", language.getProgramExecuteCommandLine(), language.getActiveProgramExecuteCommandLine());
 
         /**
          * Expecting team and judge command lines equal becauase isUsingJudgeProgramExecuteCommandLine is false.
          */
-        assertEquals("Expecting team exec and judge exec to be same ", language.getProgramExecuteCommandLine(), language.getJudgeProgramExecuteCommandLine());
+        assertEquals("Expecting team exec and judge exec to be same ", language.getProgramExecuteCommandLine(), language.getActiveProgramExecuteCommandLine());
         
-        language.setJudgeProgramExecuteCommandLine(language2.getJudgeProgramExecuteCommandLine());
+        language.setJudgeProgramExecuteCommandLine(language2.getActiveProgramExecuteCommandLine());
         assertTrue("language expected to be the same",language.isSameAs(language2));
 
-        assertEquals("Expecting team exec and judge exec NOT to be same ", language.getProgramExecuteCommandLine(), language.getJudgeProgramExecuteCommandLine());
+        assertEquals("Expecting team exec and judge exec NOT to be same ", language.getProgramExecuteCommandLine(), language.getActiveProgramExecuteCommandLine());
 
         language.setUsingJudgeProgramExecuteCommandLine(true);
         
@@ -72,9 +72,9 @@ public class LanguageTest extends AbstractTestCase {
         language.setJudgeProgramExecuteCommandLine("security_wrapper ./{:basename}");
         
         System.out.println("exec "+language.getProgramExecuteCommandLine());
-        System.out.println("J "+language.getJudgeProgramExecuteCommandLine());
+        System.out.println("J "+language.getActiveProgramExecuteCommandLine());
         
-        assertNotEquals("Expecting team exec and judge exec NOT to be same ", language.getProgramExecuteCommandLine(), language.getJudgeProgramExecuteCommandLine());
+        assertNotEquals("Expecting team exec and judge exec NOT to be same ", language.getProgramExecuteCommandLine(), language.getActiveProgramExecuteCommandLine());
     }
 
    public void testSameAssetUsingJudgeProgramExecuteCommandLine() throws Exception {
