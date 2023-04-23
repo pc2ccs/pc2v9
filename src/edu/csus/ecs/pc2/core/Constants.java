@@ -100,6 +100,22 @@ public final class Constants {
     
     
     /**
+     * Command substitution variable for name of thing to execute (basename of source file)
+     */
+    public static final String CMDSUB_BASENAME_VARNAME = "{:basename}";
+    
+    /**
+     * Command substitution variable for conditional suffix
+     * This can be used for languages (such as Kotlin), that has a different main class name than the basename of
+     * the source.  eg.  MyClass.kt  uses MyClassKt as the main class name.  This is conditional in that if the
+     * trailing string (suffix) isn't already immediately to the left of the operand of this substitution variable, then it gets added.
+     * eg. {:basename}{:ensuresuffix=Kt}  if {:basename} is MyClassKt then, the {:ensuresuffix=Kt} is a no-op (empty string).  If
+     * {:basename} is MyClass then the {:ensuresuffix=Kt} evaluates to "Kt" making the result: MyClassKt.
+     * Use of this is not just restricted to executables or basename; it can be used anywhere in the string.
+     */
+    public static final String CMDSUB_COND_SUFFIX = "{:ensuresuffix=}";
+    
+    /**
      * Default file name for judgement ini file.
      */
     public static final String JUDGEMENT_INIT_FILENAME = "reject.ini";
@@ -170,5 +186,10 @@ public final class Constants {
     
     public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";
 
-    public static final int BYTES_PER_KIBIBYTE = 1024;   
+    public static final int BYTES_PER_KIBIBYTE = 1024;
+
+    /**
+     * Prefix for deleted runs.
+     */
+    public static final String DEL_RUN_PREFIX = "DEL ";   
 }
