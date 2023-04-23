@@ -278,7 +278,6 @@ public final class StringUtilities implements Serializable {
     }
     
     /**
-<<<<<<< HEAD
      * Return a list of integers for input string.
      * 
      * Input string is a list of comma delimited numbers or ranges.
