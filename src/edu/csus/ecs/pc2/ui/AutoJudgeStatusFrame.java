@@ -143,7 +143,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
     private JButton getStopAutoJudgingButton() {
         if (stopAutoJudgingButton == null) {
             stopAutoJudgingButton = new JButton();
-            stopAutoJudgingButton.setText("Stop Auto Judging");
+            stopAutoJudgingButton.setText("Stop AutoJudging");
             stopAutoJudgingButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if(notifyFrame != null) {
@@ -160,7 +160,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
     protected void startStopAutoJudging() {
         if (autoJudgingMonitor.isAutoJudgeDisabledLocally()) {
             // Locally turned off, turn it ON
-            getStopAutoJudgingButton().setText("Stop Auto Judging");
+            getStopAutoJudgingButton().setText("Stop AutoJudging");
             new Thread(new Runnable() {
                 public void run() {
                     autoJudgingMonitor.setAutoJudgeDisabledLocally(false);
@@ -281,7 +281,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
             this.getStopAutoJudgingButton().setText("Terminate");
         } else {
             // We had to be auto-judging to get here
-            this.getStopAutoJudgingButton().setText("Stop Auto Judging");
+            this.getStopAutoJudgingButton().setText("Stop AutoJudging");
         }
         
     }
