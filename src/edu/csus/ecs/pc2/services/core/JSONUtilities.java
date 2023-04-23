@@ -7,7 +7,10 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -51,6 +54,8 @@ public class JSONUtilities {
     public static final String AWARD_KEY = "awards";
     
     public static final String ORGANIZATION_KEY = "organizations";
+    
+    public static ObjectMapper mapper = null;
 
     /**
      * ISO 8601 Date format for SimpleDateFormat.
@@ -367,5 +372,36 @@ public class JSONUtilities {
             return null;
         }
     }
-    
+
+    /**
+     * Get an object mapper.
+     * 
+     * SerializationFeature.WRAP_ROOT_VALUE is false which means that the classname will
+     * not preceed the rest of the object values.
+     * 
+     * @return oibject mapper with no FAIL_ON_UNKNOWN_PROPERTIES and no WRAP_ROOT_VALUE
+     */
+    public final static ObjectMapper getObjectMapper() {
+        if (mapper == null) {
+            mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+            mapper.disableDefaultTyping();
+
+        }
+        return mapper;
+    }
+
+    /**
+     * Pretty print json object.
+     * 
+     * @param JSONObject
+     * @return formatted listing for input json object.
+     * @throws JsonProcessingException
+     */
+    public static String prettyPrint(Object JSONObject) throws JsonProcessingException {
+        String json = getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(JSONObject);
+        return json;
+    }
+
 }
