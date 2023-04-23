@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2;
 
 /**
@@ -22,6 +22,8 @@ public class AppConstants {
     public static final String FIRST_SERVER_OPTION_STRING = "--first";
     
     public static final String HELP_OPTION_STRING = "--help";
+    
+    public static final String CONSOLE_OPTION_STRING = "--console";
 
     public static final String CONTEST_ID_OPTION_STRING = "--id";
 
@@ -36,7 +38,7 @@ public class AppConstants {
     public static final String NO_SAVE_OPTION_STRING = "--nosave";
 
     public static final String PASSWORD_OPTION_STRING = "--password";
-
+    
     public static final String PORT_OPTION_STRING = "--port";
 
     public static final String PROFILE_OPTION_STRING = "--profile";
@@ -114,6 +116,7 @@ public class AppConstants {
         NO_CONNECTIONS_PANE_OPTION_STRING,
         NOLOGGING_OPTION_STRING,
         NO_LOGINS_PANE_OPTION_STRING,
+        CONSOLE_OPTION_STRING, //
         NOSTANDINGS_OPTION_STRING
     };
     /*
