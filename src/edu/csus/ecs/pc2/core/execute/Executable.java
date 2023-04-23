@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedInputStream;
@@ -1812,6 +1812,17 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             log.log(Log.DEBUG, "before substitution: " + cmdline);
+
+            /**
+             * Special substitution for entry_point.
+             * We only do this substition for execution of the run, not compiles or validators, so it can't
+             * be done by substitutionAllStrings without refactoring.
+             */
+            if (!StringUtilities.isEmpty(run.getEntryPoint())) {
+                // change Constants.CMDSUB_BASENAME_VARNAME to entry_point rather than basename from {:mainfile} before
+                // other substitutions (overrides :mainfile)
+                cmdline = replaceString(cmdline, Constants.CMDSUB_BASENAME_VARNAME, run.getEntryPoint());
+            }
             cmdline = substituteAllStrings(run, cmdline, dataSetNumber+1);
             log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
@@ -2178,13 +2189,27 @@ public class Executable extends Plugin implements IExecutable {
 
             packageName = "";
             packagePath = "";
-            String programName = replaceString(language.getExecutableIdentifierMask(), "{:basename}", removeExtension(runFiles.getMainFile().getName()));
+            
+            String programName = language.getExecutableIdentifierMask();
+            
+            // the "executable" program name is the entry point, if one exists, so try to substitute that first
+            if (!StringUtilities.isEmpty(run.getEntryPoint())) {
+                // change Constants.CMDSUB_BASENAME_VARNAME to entry_point rather than basename from {:mainfile} before
+                // other substitutions (overrides :mainfile)
+                programName = replaceString(programName, Constants.CMDSUB_BASENAME_VARNAME, run.getEntryPoint());
+            }
+
+            // This used to just replace the {:basename}, but there is no reason not to run it
+            // through the substituteAllStrings() especially since we now have conditional suffix
+            // substitution string.
+            programName = substituteAllStrings(run, programName);
+            
             if (runFiles.getMainFile().getName().endsWith("java")) {
                 packageName = searchForPackage(prefixExecuteDirname(runFiles.getMainFile().getName()));
                 packagePath = replaceString(packageName, ".", File.separator);
             }
 
-            // Check whether the team submitted a executable, if they did remove
+            // Check whether the team submitted an executable, if they did remove
             // it.
             File program = new File(prefixExecuteDirname(programName));
             if (program.exists()) {
@@ -2413,7 +2438,7 @@ public class Executable extends Plugin implements IExecutable {
 
         return buf.toString();
     }
-
+    
     /**
      * Replace beforeString with int.
      * 
@@ -2454,6 +2479,7 @@ public class Executable extends Plugin implements IExecutable {
      *              {:outfile}
      *              {:ansfile}
      *              {:pc2home}
+     *              {:ensuresuffix=...} - add supplied suffix if not present already
      * </pre>
      * 
      * @param dataSetNumber
@@ -2585,6 +2611,9 @@ public class Executable extends Plugin implements IExecutable {
             if (pc2home != null && pc2home.length() > 0) {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
+            // Check for conditional suffix (that is, the previous chars match), if not, add them
+            newString = ExecuteUtilities.replaceStringConditional(newString, Constants.CMDSUB_COND_SUFFIX);
+            
         } catch (Exception e) {
             log.log(Log.CONFIG, "Exception substituting strings ", e);
             // carrying on not required to save exception

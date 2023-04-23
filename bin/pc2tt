@@ -1,7 +1,7 @@
 #!/bin/sh
 # Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 #
-# Purpose: show report UI 
+# Purpose: start the Testing Tool UI 
 # Author : pc2@ecs.csus.edu
 #
 
@@ -15,6 +15,6 @@ else
   PC2XOPS=""
 fi
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp $pc2_classpath edu.csus.ecs.pc2.Starter --ui edu.csus.ecs.pc2.ui.admin.ReportsView $*
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp $pc2_classpath edu.csus.ecs.pc2.Starter --ui edu.csus.ecs.pc2.ui.admin.TestingToolView $*
 
 # eof pc2rui $Id$ 
