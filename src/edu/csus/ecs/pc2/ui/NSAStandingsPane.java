@@ -321,8 +321,7 @@ public class NSAStandingsPane extends JPanePlugin {
     public class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            // TODO Auto-generated method stub
-            // ignore
+            // ignored
         }
 
         public void refreshRuns(RunEvent event) {
@@ -330,14 +329,12 @@ public class NSAStandingsPane extends JPanePlugin {
         }
 
         public void runChanged(RunEvent event) {
-            // TODO Auto-generated method stub
             if (event.getAction().equals(Action.CHANGED)) {
                 refreshStandings();
             }
         }
 
         public void runRemoved(RunEvent event) {
-            // TODO Auto-generated method stub
             refreshStandings();
         }
 
@@ -387,8 +384,7 @@ public class NSAStandingsPane extends JPanePlugin {
         }
 
         public void contestInformationRemoved(ContestInformationEvent event) {
-            // TODO Auto-generated method stub
-
+            // ignored
         }
 
         public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
