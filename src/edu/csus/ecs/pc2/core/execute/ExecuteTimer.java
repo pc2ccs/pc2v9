@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 // TODO recreate in VE.
 // TODO rename to ExecutionTimer
 public class ExecuteTimer extends Thread implements
-    IExecuteFrameNotify, java.awt.event.ActionListener {
+    java.awt.event.ActionListener {
 
     private long maxTime = 120; // time in seconds when display turns Red
 
@@ -118,10 +118,10 @@ public class ExecuteTimer extends Thread implements
     /**
      * This terminates the process that this timer is working
      */
-    public void executeFrameTerminated() {
+    public void terminateExecution() {
         try {
             if (doAutoStop) {
-                log.info("ExecuteTimer - User hit terminate a submission was being judged");
+                log.info("ExecuteTimer - User hit terminate while a submission was being judged");
                 setOtherContactStaff(true);
             }
     
@@ -254,9 +254,6 @@ public class ExecuteTimer extends Thread implements
      * the JFrame containing the timer GUI components (counter text value and "terminate" button) visible.
      */
     public void startTimer() {
-        if (usingGUI) {
-            ivjExecuteTimerFrame.setTerminateButtonNotify(this);
-        }
         setStartTime();
         timer.start();
     }
@@ -289,9 +286,6 @@ public class ExecuteTimer extends Thread implements
      * and then disposes it.
      */
     public void stopTimer() {
-        if (usingGUI) {
-            ivjExecuteTimerFrame.setTerminateButtonNotify(null);
-        }
         timer.stop();
     }
     
