@@ -170,7 +170,7 @@ public class Executable extends Plugin implements IExecutable {
 
     private Log log;
     
-    private IExecuteTimerFrame executionFrame = null;
+    private IExecutableMonitor executionFrame = null;
 
     /**
      * The directory where files are unpacked and the program is executed.
@@ -214,7 +214,7 @@ public class Executable extends Plugin implements IExecutable {
 
     private String packagePath = "";
 
-    public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, IExecuteTimerFrame msgFrame) {
+    public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, IExecutableMonitor msgFrame) {
         super();
         super.setContestAndController(inContest, inController);
 

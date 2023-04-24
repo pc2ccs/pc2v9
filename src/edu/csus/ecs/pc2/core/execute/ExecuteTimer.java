@@ -27,7 +27,7 @@ public class ExecuteTimer extends Thread implements
 
     private Timer timer; // a timer to generate 1-sec interrupts
 
-    private IExecuteTimerFrame ivjExecuteTimerFrame = null;
+    private IExecutableMonitor ivjExecuteTimerFrame = null;
 
     private GregorianCalendar startTime = now();
 
@@ -49,7 +49,7 @@ public class ExecuteTimer extends Thread implements
 
     private boolean usingGUI = true;
     
-    public ExecuteTimer(Log log, int timeLimit, ClientId clientId, IExecuteTimerFrame eFrame) {
+    public ExecuteTimer(Log log, int timeLimit, ClientId clientId, IExecutableMonitor eFrame) {
         super();
         this.log = log;
         this.clientId = clientId;

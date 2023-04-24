@@ -1,6 +1,6 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
- * IExecuteTimerFrame interface
+ * IExecutableMonitor interface
  * This interface should be implemented by classes that use the Executable class.
  * Typically, this is a Frame, such as AutoJudgeStatusFrame or ExecuteTimerFrame
  */
@@ -12,7 +12,7 @@ import java.awt.Color;
  * @author John Buck
  *
  */
-public interface IExecuteTimerFrame {
+public interface IExecutableMonitor {
    
     /**
      * sets the following frame components to their initial "reset" states

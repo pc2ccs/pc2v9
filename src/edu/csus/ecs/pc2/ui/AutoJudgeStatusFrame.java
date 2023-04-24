@@ -11,7 +11,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.IExecuteFrameNotify;
-import edu.csus.ecs.pc2.core.execute.IExecuteTimerFrame;
+import edu.csus.ecs.pc2.core.execute.IExecutableMonitor;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  */
 
 // $HeadURL$
-public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudgeNotifyMessages, IExecuteTimerFrame {
+public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudgeNotifyMessages, IExecutableMonitor {
 
     /**
      * 

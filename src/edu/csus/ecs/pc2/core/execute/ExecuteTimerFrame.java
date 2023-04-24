@@ -1,7 +1,7 @@
 // Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
  * ExecuteTimerFrame
- * This frame can be used to display status of executing a run.  It implements the IExecuteTimerFrame
+ * This frame can be used to display status of executing a run.  It implements the IExecutableMonitor
  * interface used by the Executable class.
  */
 package edu.csus.ecs.pc2.core.execute;
@@ -18,7 +18,7 @@ import javax.swing.JPanel;
  * @author John Buck
  *
  */
-public class ExecuteTimerFrame extends JFrame implements IExecuteTimerFrame {
+public class ExecuteTimerFrame extends JFrame implements IExecutableMonitor {
     private JLabel ivjExecuteTimerLabel = null;
 
     private JPanel ivjJFrameContentPane = null;
