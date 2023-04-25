@@ -23,7 +23,7 @@ public class ExecuteTimerFrame extends JFrame implements IExecutableMonitor {
 
     private JPanel ivjJFrameContentPane = null;
 
-    private JLabel ivjTimerCount = null;
+    private JLabel ivjTimerCountLabel = null;
 
     private JButton ivjbtnTerminate = null;
 
@@ -101,32 +101,8 @@ public class ExecuteTimerFrame extends JFrame implements IExecutableMonitor {
 
     public void resetFrame()
     {
-        if(ivjExecuteTimerLabel != null) {
-            ivjExecuteTimerLabel.setText("Execution Time");
-            ivjExecuteTimerLabel
-                    .setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-            ivjExecuteTimerLabel
-                    .setFont(new java.awt.Font("dialog", 1, 18));
-            ivjExecuteTimerLabel
-                    .setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-            ivjExecuteTimerLabel
-                    .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            ivjExecuteTimerLabel.setCursor(new java.awt.Cursor(
-                    java.awt.Cursor.DEFAULT_CURSOR));
-        }
-        if(ivjTimerCount != null) {
-            ivjTimerCount.setForeground(java.awt.Color.black);
-            ivjTimerCount.setFont(new java.awt.Font("monospaced", 1, 48));
-            ivjTimerCount.setText(" ");
-            ivjTimerCount
-                    .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            ivjTimerCount.setCursor(new java.awt.Cursor(
-                    java.awt.Cursor.DEFAULT_CURSOR));
-        }
-        if(ivjbtnTerminate != null) {
-            ivjbtnTerminate.setMnemonic('t');
-            ivjbtnTerminate.setText("Terminate");           
-        }
+        initializeExecuteTimerLabel();
+        initializeTimerCountLabel();
     }
     
     public void setTimerFrameVisible(boolean bVis)
@@ -144,17 +120,7 @@ public class ExecuteTimerFrame extends JFrame implements IExecutableMonitor {
             try {
                 ivjExecuteTimerLabel = new javax.swing.JLabel();
                 ivjExecuteTimerLabel.setName("ExecuteTimerLabel");
-                ivjExecuteTimerLabel.setText("Execution Time");
-                ivjExecuteTimerLabel
-                        .setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-                ivjExecuteTimerLabel
-                        .setFont(new java.awt.Font("dialog", 1, 18));
-                ivjExecuteTimerLabel
-                        .setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-                ivjExecuteTimerLabel
-                        .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-                ivjExecuteTimerLabel.setCursor(new java.awt.Cursor(
-                        java.awt.Cursor.DEFAULT_CURSOR));
+                initializeExecuteTimerLabel();
             } catch (java.lang.Throwable ivjExc) {
                 handleException(ivjExc);
             }
@@ -168,21 +134,16 @@ public class ExecuteTimerFrame extends JFrame implements IExecutableMonitor {
      * @return javax.swing.JLabel
      */
     private JLabel getTimerCountLabel() {
-        if (ivjTimerCount == null) {
+        if (ivjTimerCountLabel == null) {
             try {
-                ivjTimerCount = new javax.swing.JLabel();
-                ivjTimerCount.setName("TimerCount");
-                ivjTimerCount.setFont(new java.awt.Font("monospaced", 1, 48));
-                ivjTimerCount.setText(" ");
-                ivjTimerCount
-                        .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-                ivjTimerCount.setCursor(new java.awt.Cursor(
-                        java.awt.Cursor.DEFAULT_CURSOR));
+                ivjTimerCountLabel = new javax.swing.JLabel();
+                ivjTimerCountLabel.setName("TimerCount");
+                initializeTimerCountLabel();
             } catch (java.lang.Throwable ivjExc) {
                 handleException(ivjExc);
             }
         }
-        return ivjTimerCount;
+        return ivjTimerCountLabel;
     }
 
     /**
@@ -211,6 +172,42 @@ public class ExecuteTimerFrame extends JFrame implements IExecutableMonitor {
         return ivjbtnTerminate;
     }
 
+    /**
+     * Perform common initialization of the execute timer label
+     */
+    private void initializeExecuteTimerLabel()
+    {
+        if(ivjExecuteTimerLabel != null) {
+            ivjExecuteTimerLabel.setText("Execution Time");
+            ivjExecuteTimerLabel
+                    .setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+            ivjExecuteTimerLabel
+                    .setFont(new java.awt.Font("dialog", 1, 18));
+            ivjExecuteTimerLabel
+                    .setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+            ivjExecuteTimerLabel
+                    .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            ivjExecuteTimerLabel.setCursor(new java.awt.Cursor(
+                    java.awt.Cursor.DEFAULT_CURSOR));
+        }
+    }
+    
+    /**
+     * Perform common initialization of the timer counter
+     */
+    private void initializeTimerCountLabel()
+    {
+        if(ivjTimerCountLabel != null) {
+            ivjTimerCountLabel.setForeground(java.awt.Color.black);
+            ivjTimerCountLabel.setFont(new java.awt.Font("monospaced", 1, 48));
+            ivjTimerCountLabel.setText(" ");
+            ivjTimerCountLabel
+                    .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            ivjTimerCountLabel.setCursor(new java.awt.Cursor(
+                    java.awt.Cursor.DEFAULT_CURSOR));
+        }
+    }
+    
     @Override
     public void setTimerCountLabelColor(Color fg) {
         getTimerCountLabel().setForeground(fg);

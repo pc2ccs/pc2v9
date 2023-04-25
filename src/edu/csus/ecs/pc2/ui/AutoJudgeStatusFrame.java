@@ -233,14 +233,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
 
     @Override
     public void resetFrame() {
-        if(bigAutoJudgeStatusLabel != null) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    bigAutoJudgeStatusLabel.setForeground(Color.black);
-                }
-            });
-           
-        }
+        setTimerCountLabelColor(Color.black);
     }
 
     @Override
