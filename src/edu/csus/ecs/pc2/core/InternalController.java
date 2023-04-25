@@ -2693,6 +2693,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), clientId.getName(), clientId.getName());
 
+            if (parseArguments.isOptPresent(AppConstants.CONSOLE_OPTION_STRING)) {
+                addConsoleLogging();
+            }
+
             boolean isServer = clientId.getClientType().equals(ClientType.Type.SERVER);
 
             if (isServer && isContactingRemoteServer()) {

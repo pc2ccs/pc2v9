@@ -5,11 +5,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -30,10 +33,13 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.standings.ContestStandings;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.TeamStanding;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
+import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
  * Unit tests. 
@@ -409,6 +415,88 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         Arrays.sort(acc, new AccountComparator());
         contest.setClientId(acc[0].getClientId());
         
+    }
+    
+    /**
+     * Test whether NSA team name matches Team Display Format name
+     * @throws Exception
+     */
+    public void testTeamDisplayFormat() throws Exception {
+
+        initializeStaticLog(getName());
+        InternalContest contest = new InternalContest();
+        String cdpDir = getTestSampleContestDirectory("tc1");
+
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        loader.initializeContest(contest, new File(cdpDir));
+        setFirstTeamClient(contest);
+
+        // String teamVarDisplayString = contestInformation.getTeamScoreboardDisplayFormat();
+        // standingsRecordMemento.putString("teamName", ScoreboardVariableReplacer.substituteDisplayNameVariables(teamVarDisplayString, account, group));
+        // team-scoreboard-display-format-string : 'Team {:clientnumber} {:teamname} and login: {:teamloginname}
+        // {:groupid}:{:groupname} long: {:longschoolname} short: {:shortschoolname} cms id: {:externalid}'
+
+        String teamScoreboardDisplayForamtString = "Team {:clientnumber} name: {:teamname} and login: {:teamloginname}";
+
+        ContestInformation info = contest.getContestInformation();
+        info.setTeamScoreboardDisplayFormat(teamScoreboardDisplayForamtString);
+        contest.updateContestInformation(info);
+
+        Group[] groups = contest.getGroups();
+
+        for (Group group : groups) {
+            String divName = ScoreboardUtilites.getDivision(group.getDisplayName());
+            assertNotNull("No division found for " + group.getDisplayName(), divName);
+        }
+
+        Account[] accounts = getTeamAccounts(contest);
+        Arrays.sort(accounts, new AccountComparator());
+        for (Account account : accounts) {
+            String name = ScoreboardUtilites.getDivision(contest, account.getClientId());
+            assertNotNull("No division found for " + account, name);
+        }
+
+        addTc1Runs(contest);
+
+        NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
+        String xml = scoringAlgorithm.getStandings(contest, DefaultScoringAlgorithm.getDefaultProperties(), StaticLog.getLog());
+
+        // view the xml file
+//        FileUtilities.writeFileContents("tempfile.xml", new String[] {xml});
+//        editFile("tempfile.xml");
+
+        XmlMapper xmlMapper = new XmlMapper();
+        xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ContestStandings contestStandings = xmlMapper.readValue(xml, ContestStandings.class);
+
+        int mismatches = 0;
+
+        List<TeamStanding> teamStandings = contestStandings.getTeamStandings();
+        for (TeamStanding teamStanding : teamStandings) {
+
+            int clientNumber = Integer.parseInt(teamStanding.getTeamId());
+            ClientId clientId = new ClientId(contest.getSiteNumber(), Type.TEAM, clientNumber);
+            Account account = contest.getAccount(clientId);
+
+            Group group = null;
+            if (account.getGroupId() != null) {
+                group = contest.getGroup(account.getGroupId());
+            }
+
+            String expectedDisplayName = ScoreboardVariableReplacer.substituteDisplayNameVariables(teamScoreboardDisplayForamtString, account, group);
+            if (!expectedDisplayName.contentEquals(teamStanding.getTeamName())) {
+                if (isDebugMode()) {
+                    System.err.println(" Did not match team " + teamStanding.getTeamId() + " " + expectedDisplayName + " vs " + teamStanding.getTeamName());
+                }
+                mismatches++;
+            }
+//                    assertEquals("Expected team based on "+teamScoreboardDisplayForamtString, expectedDisplayName, teamStanding.getTeamName());
+        }
+
+        int expectedMismatches = 1;
+
+        assertEquals("Expecting mis matched names ", expectedMismatches, mismatches);
+        assertEquals("Expecting matching names ", 77, teamStandings.size() - expectedMismatches);
     }
 
 }

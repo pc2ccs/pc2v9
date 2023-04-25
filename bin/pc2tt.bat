@@ -1,7 +1,7 @@
 @echo off
-REM Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+REM Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 
-rem Purpose: run a report about pc2 information
+rem Purpose: start the Testing Tool UI 
 rem Author : pc2@ecs.csus.edu
 
 rem Windows 2000 and beyond syntax
@@ -27,9 +27,7 @@ goto :end
 
 :continue
 call %PC2BIN%\pc2env.bat
-
-java -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "%libdir%\*"  edu.csus.ecs.pc2.core.report.Reports %1 %2 %3 %4 %5 %6 %7 %8 %9
+javaw -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "%libdir%\*" edu.csus.ecs.pc2.Starter --ui edu.csus.ecs.pc2.ui.admin.TestingToolView %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :end
-rem eof pc2report.bat 
-
+rem eof pc2rui.bat $Id$
