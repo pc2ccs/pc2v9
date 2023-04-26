@@ -2282,7 +2282,7 @@ public class Executable extends Plugin implements IExecutable {
      */
     private boolean isUsingSandbox() throws Exception {
         
-        log.info("Checking problem sandbox usage...");
+        log.info("Checking problem sandbox usage for " + problem.getShortName() + " Sandbox Type " + problem.getSandboxType().toString());
         
         if (problem.isUsingSandbox() && !isTeam()) {
             
