@@ -6,22 +6,36 @@
 #
 
 FAIL_EXIT_CODE=43
-FAIL_NO_ARGS_ALLOWED_EXIT_CODE=44
+FAIL_BAD_ARGS_ALLOWED_EXIT_CODE=44
 FAIL_MISSING_CGROUP_CONTROLLERS_FILE=45
 FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE=46
 FAIL_CPU_CONTROLLER_NOT_ENABLED=47
 FAIL_MEMORY_CONTROLLER_NOT_ENABLED=48
+FAIL_BAD_USER_GROUP=49
 
 CGROUP_PATH=/sys/fs/cgroup
 PC2_CGROUP_PATH=$CGROUP_PATH/pc2
 
 # ------------------------------------------------------------
 
-
-if [ "$#" -gt 0 ] ; then
+if [ "$#" -ne 2 ] ; then
    echo $0: Unknown command line arguments: $*
-   exit $FAIL_NO_ARGS_ALLOWED_EXIT_CODE
+   echo Usage: $0 pc2user pc2group
+   exit $FAIL_BAD_ARGS_ALLOWED_EXIT_CODE
 fi 
+
+JUDGE_USER="$1"
+JUDGE_GROUP="$2"
+if ! getent passwd "$JUDGE_USER" >/dev/null 2>&1
+then
+   echo $0: No such user $JUDGE_USER.  The pc2user must be a valid login id.
+   exit $FAIL_BAD_USER_GROUP
+fi
+if ! getent group "$JUDGE_GROUP" >/dev/null 2>&1
+then
+   echo $0: No such group $JUDGE_USER.  The pc2group must be a valid group in /etc/group.
+   exit $FAIL_BAD_USER_GROUP
+fi
 
 # make sure CGroups v2 is installed
 echo Verifying CGroup v2 installation...
@@ -74,23 +88,23 @@ fi
 # Errors will cause script to stop
 set -e
 
-# Create a pc2 cgroup to be managed by the pc2 user and group 
+# Create a pc2 cgroup to be managed by the JUDGE user and group 
 echo Creating PC2 CGroup structure...
 sudo mkdir $PC2_CGROUP_PATH
-sudo chown pc2:pc2 $PC2_CGROUP_PATH
+sudo chown $JUDGE_USER:$JUDGE_GROUP $PC2_CGROUP_PATH
 sudo chmod 775 $PC2_CGROUP_PATH
 
-# allow the pc2 user and group to manage the pc2 cgroup files and subgroups.
+# allow the JUDGE user and group to manage the pc2 cgroup files and subgroups.
 # note we do NOT change ownership of the "resource control" interface files, like cpu.max;
 # those must remain under control of the PARENT -- root -- cgroup
-# judge accounts use group pc2 so everything must be group write as well.
-sudo chown pc2:pc2 $PC2_CGROUP_PATH/cgroup.procs
-sudo chown pc2:pc2 $PC2_CGROUP_PATH/cgroup.subtree_control
-#sudo chown pc2:pc2 $PC2_CGROUP_PATH/memory.max
+# judge accounts use group JUDGE_GROUP so everything must be group write as well.
+sudo chown $JUDGE_USER:$JUDGE_GROUP $PC2_CGROUP_PATH/cgroup.procs
+sudo chown $JUDGE_USER:$JUDGE_GROUP $PC2_CGROUP_PATH/cgroup.subtree_control
+#sudo chown $JUDGE_USER:$JUDGE_GROUP $PC2_CGROUP_PATH/memory.max
 sudo chmod 664 $PC2_CGROUP_PATH/cgroup.procs $PC2_CGROUP_PATH/cgroup.subtree_control
 
 # Have to allow PC2 to write to the ancestor tree cgroup.procs
-sudo chown root.pc2  $CGROUP_PATH/cgroup.procs
+sudo chown root.$JUDGE_GROUP  $CGROUP_PATH/cgroup.procs
 sudo chmod 664 $CGROUP_PATH/cgroup.procs 
 
 # Enable the cpu and memory controllers for the pc2 cgroup.

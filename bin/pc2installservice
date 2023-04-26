@@ -8,10 +8,28 @@
 #
 # Author: John Buck
 
+#DEBUG=
+DEBUG="echo Would"
+
 SCRIPTNAME="$0"
 
-DEBUG=
-#DEBUG="echo Would"
+if test $# -ne 2
+then
+	echo Usage: $SCRIPTNAME pc2user pc2group
+	exit 4
+fi
+JUDGE_USER="$1"
+JUDGE_GROUP="$2"
+if ! getent passwd $JUDGE_USER >/dev/null 2>&1
+then
+	echo $SCRIPTNAME: No such user $JUDGE_USER.  The pc2user must be a valid login id.
+	exit 5
+fi
+if ! getent group $JUDGE_GROUP >/dev/null 2>&1
+then
+	echo $SCRIPTNAME: No such group $JUDGE_USER.  The pc2group must be a valid group in /etc/group.
+	exit 6
+fi
 
 INSTALL_SCRIPT_PATH=/usr/pc2/bin/pc2installsandbox
 SERVICE_NAME=pc2_cgroup.service
@@ -44,6 +62,7 @@ then
 fi
 
 $DEBUG cp -a ${SERVICE_FILE} /etc/systemd/system
+$DEBUG sed -i -e "s/%JUDGEUSER%/$JUDGE_USER/" -e "s/%JUDGEGROUP%/$JUDGE_GROUP/" /etc/systemd/system/${SERVICE_NAME}
 $DEBUG systemctl enable ${SERVICE_NAME}
 $DEBUG systemctl start ${SERVICE_NAME}
 $DEBUG systemctl status ${SERVICE_NAME}
