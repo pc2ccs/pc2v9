@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
 import java.io.ByteArrayInputStream;
@@ -1564,6 +1564,32 @@ public class AbstractTestCase extends TestCase {
      */
     public void assertNoPermssion(edu.csus.ecs.pc2.core.security.Permission.Type type, Account account) {
         assertFalse("Expected for  " + account + " Permission " + type, account.isAllowed(type));
+    }
+    
+    /**
+     * Load sample contest into contest model
+     * 
+     * @param contest model, if null will create contest model
+     * @param sampleName name of contest under samps/contest, ex mini
+     * @return contest model 
+     * @throws Exception
+     */
+    public IInternalContest loadContestFromSampleContsts(IInternalContest contest, String sampleName) throws Exception {
+
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        if (contest == null) {
+            contest = new InternalContest();
+        }
+
+        try {
+            String cdpDir = getTestSampleContestDirectory(sampleName);
+            loader.initializeContest(contest, new File( cdpDir));
+            return contest;
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw e;
+        }
     }
     
 }

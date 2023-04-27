@@ -1,10 +1,11 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.team;
 
 import java.io.File;
 import java.util.List;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.LanguageUtilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
@@ -88,7 +89,7 @@ public class QuickSubmitterTest extends AbstractTestCase {
         };
 
         for (String string : filenames) {
-            Language lang = submitter.guessLanguage(contest, string);
+            Language lang = LanguageUtilities.guessLanguage(contest, string);
             assertNotNull("Expected to match extension for file " + string, lang);
         }
 
