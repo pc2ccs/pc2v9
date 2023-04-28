@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.execute.IExecuteFrameNotify;
+import edu.csus.ecs.pc2.core.execute.IExecutableNotify;
 import edu.csus.ecs.pc2.core.execute.IExecutableMonitor;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
@@ -45,7 +45,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
     
     private AutoJudgingMonitor autoJudgingMonitor = null;
 
-    private IExecuteFrameNotify notifyFrame = null;
+    private IExecutableNotify notifyFrame = null;
     
     /**
      * This method initializes
@@ -268,7 +268,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
     }
 
     @Override
-    public void setTerminateButtonNotify(IExecuteFrameNotify ntfy) {
+    public void setTerminateButtonNotify(IExecutableNotify ntfy) {
         notifyFrame = ntfy;
         if(ntfy != null) {
             this.getStopAutoJudgingButton().setText("Terminate");

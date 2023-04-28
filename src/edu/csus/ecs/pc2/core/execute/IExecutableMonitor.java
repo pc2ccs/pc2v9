@@ -1,8 +1,12 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
  * IExecutableMonitor interface
- * This interface should be implemented by classes that use the Executable class.
- * Typically, this is a Frame, such as AutoJudgeStatusFrame or ExecuteTimerFrame
+ * This interface may be implemented by classes that use the Executable class and
+ * desire ongoing status of Executable operations.
+ * 
+ * The current implementations of this interface, AutoJudgeStatusFrame and ExecuteTimerFrame
+ * are JFrames and update GUI components with the Executable status.
+ * 
  */
 package edu.csus.ecs.pc2.core.execute;
 
@@ -52,5 +56,5 @@ public interface IExecutableMonitor {
      * set who gets notified if the Terminate button is pressed (null to clear)
      * @param ntfy
      */
-    public void setTerminateButtonNotify(IExecuteFrameNotify ntfy);
+    public void setTerminateButtonNotify(IExecutableNotify ntfy);
 }

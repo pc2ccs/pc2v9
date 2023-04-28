@@ -68,7 +68,7 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 // SOMEDAY design decision how to handle MultipleFileViewer, display here, on TeamClient??
 
 // $HeadURL$
-public class Executable extends Plugin implements IExecutable, IExecuteFrameNotify {
+public class Executable extends Plugin implements IExecutable, IExecutableNotify {
 
     /**
      * 

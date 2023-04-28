@@ -27,7 +27,7 @@ public class ExecuteTimerFrame extends JFrame implements IExecutableMonitor {
 
     private JButton ivjbtnTerminate = null;
 
-    private IExecuteFrameNotify iNotifyClient = null;
+    private IExecutableNotify iNotifyClient = null;
     
     public ExecuteTimerFrame()
     {
@@ -36,9 +36,8 @@ public class ExecuteTimerFrame extends JFrame implements IExecutableMonitor {
     }
     
     /**
-     * Return the ExecuteTimerFrame property value.
-     *
-     * @return javax.swing.JFrame
+     * Initialize the GUI components
+     * 
      */
     private void initialize() {
         try {
@@ -227,7 +226,7 @@ public class ExecuteTimerFrame extends JFrame implements IExecutableMonitor {
     }
 
     @Override
-    public void setTerminateButtonNotify(IExecuteFrameNotify ntfy) {
+    public void setTerminateButtonNotify(IExecutableNotify ntfy) {
         iNotifyClient = ntfy;   
     }
 
