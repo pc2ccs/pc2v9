@@ -126,7 +126,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
             messageLabel = new JLabel();
             messageLabel.setText("## - Problem Title  (Run NN, Site YY)");
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 18));
+            messageLabel.setFont(new java.awt.Font("monospaced", java.awt.Font.BOLD, 18));
             messagePanel = new JPanel();
             messagePanel.setLayout(new BorderLayout());
             messagePanel.setPreferredSize(new java.awt.Dimension(45, 45));

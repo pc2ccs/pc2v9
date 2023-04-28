@@ -986,14 +986,14 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             if (problem.isShowValidationToJudges()) {
                 msg = "Validating";
             }
-            msg += " test case " + testCase;
 
             //added per bug 1668
             validatorExecutionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI() ? executionMonitor : null);
 
             log.info("constructed new validator ExecuteTimer " + validatorExecutionTimer.toString());
             long startTime = System.currentTimeMillis();
-            Process validatorProcess = runProgram(cmdLine, msg, false, validatorExecutionTimer);
+            
+            Process validatorProcess = runProgram(cmdLine, formatTestCasePhase(msg, testCase), false, validatorExecutionTimer);
 
             if (validatorProcess == null) {
                 log.warning("validator process is null; stopping ExecuteTimer");
@@ -1913,7 +1913,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             //start the program executing.  Note that runProgram() sets the "startTimeNanos" timestamp 
             /// immediately prior to actually "execing" the process.
             log.info("starting team program...");
-            process = runProgram(cmdline, "Executing test case " + testSetNumber + "...", autoStop, executionTimer);
+            process = runProgram(cmdline, formatTestCasePhase("Executing", testSetNumber), autoStop, executionTimer);
             
             //make sure we succeeded in getting the external process going
             if (process == null) {
@@ -3091,5 +3091,23 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private int getValidationTimeLimit() {
         
         return DEFAULT_VALIDATION_TIME_LIMIT_SECS ;
+    }
+    
+    /**
+     * Returns a string indicating the phase of execution.
+     * Ex. " Executing test case 3..."
+     *     "Validating test case 3..."
+     *     "Working on test case 3..."
+     *     
+     * The goal is to return a fixed length string so it doesn't jump around
+     * when displayed in a GUI control. 
+     * 
+     * @return Formatted string that does not fluctuate in length.
+     * @param runPhase A string indicating the phase of execution: Executing, Validating, etc.
+     * @param testCase The test case number (1 ... 99999)
+     */
+    private String formatTestCasePhase(String runPhase, int testCase)
+    {
+        return(String.format("%10s test case %s", runPhase, StringUtilities.rpad(' ', 5, Integer.toString(testCase) + "...")));
     }
 }

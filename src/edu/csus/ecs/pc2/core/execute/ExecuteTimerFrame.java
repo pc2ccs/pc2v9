@@ -181,7 +181,7 @@ public class ExecuteTimerFrame extends JFrame implements IExecutableMonitor {
             ivjExecuteTimerLabel
                     .setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
             ivjExecuteTimerLabel
-                    .setFont(new java.awt.Font("dialog", 1, 18));
+                    .setFont(new java.awt.Font("monospaced", 1, 18));
             ivjExecuteTimerLabel
                     .setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
             ivjExecuteTimerLabel
