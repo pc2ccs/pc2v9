@@ -460,7 +460,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         System.gc();
 
-        executable = new Executable(contest, controller, fetchedRun, fetchedRunFiles);
+        executable = new Executable(contest, controller, fetchedRun, fetchedRunFiles, autoJudgeStatusFrame);
 
         // Suppress pop up messages on errors
         executable.setShowMessageToUser(false);
