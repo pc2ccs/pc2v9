@@ -72,7 +72,7 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 // SOMEDAY design decision how to handle MultipleFileViewer, display here, on TeamClient??
 
 // $HeadURL$
-public class Executable extends Plugin implements IExecutable {
+public class Executable extends Plugin implements IExecutable, IExecutableNotify {
 
     /**
      * 
@@ -106,7 +106,12 @@ public class Executable extends Plugin implements IExecutable {
     private ExecutionData executionData = new ExecutionData();
 
     private ExecuteTimer executionTimer;
-
+    
+    /**
+     * If something is actually being executed, then this is the ExecuteTimer being used
+     */
+    private ExecuteTimer activeExecutionTimer = null;
+    
     private IFileViewer fileViewer = null;
 
     /**
@@ -197,6 +202,8 @@ public class Executable extends Plugin implements IExecutable {
     private IInternalController controller;
 
     private Log log;
+    
+    private IExecutableMonitor executionMonitor = null;
 
     /**
      * The directory where files are unpacked and the program is executed.
@@ -246,6 +253,33 @@ public class Executable extends Plugin implements IExecutable {
     private boolean debugAllowSandboxInvocationOnWindows = true;
 
 
+    public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, IExecutableMonitor msgFrame) {
+        super();
+        super.setContestAndController(inContest, inController);
+
+        this.contest = inContest;
+        this.controller = inController;
+        this.runFiles = runFiles;
+        this.run = run;
+        language = inContest.getLanguage(run.getLanguageId());
+        problem = inContest.getProblem(run.getProblemId());
+        executionMonitor = msgFrame;
+        
+        initialize();
+    }
+
+    /**
+     * Legacy contructor only used by CLICS JUnit tests, and referenced as "super(...)"
+     * Does not support GUI since there is no frame for it.
+     * @deprecated
+     * This constructor should not be used in any new code.
+     * 
+     * @param inContest
+     * @param inController
+     * @param run
+     * @param runFiles
+     */
+    @Deprecated
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
         super.setContestAndController(inContest, inController);
@@ -256,7 +290,9 @@ public class Executable extends Plugin implements IExecutable {
         this.run = run;
         language = inContest.getLanguage(run.getLanguageId());
         problem = inContest.getProblem(run.getProblemId());
-
+        executionMonitor = null;
+        usingGUI = false;
+        
         initialize();
     }
 
@@ -315,9 +351,10 @@ public class Executable extends Plugin implements IExecutable {
 
         if (usingGUI) {
             fileViewer = new MultipleFileViewer(log);
-        } else {
+            
+       } else {
             fileViewer = new NullViewer();
-        }
+       }
 
         try {
             executionData = new ExecutionData();
@@ -351,6 +388,13 @@ public class Executable extends Plugin implements IExecutable {
                 }
 
             }
+            
+            if(usingGUI) {
+                activeExecutionTimer = null;
+                executionMonitor.setTimerFrameVisible(true);
+                executionMonitor.setTerminateButtonNotify(this);
+            }
+            
             // Extract source file to name in Problem.getDataFileName().
 
             if (runFiles.getMainFile() != null) {
@@ -609,6 +653,10 @@ public class Executable extends Plugin implements IExecutable {
         } catch (Exception e) {
             log.log(Log.INFO, "Exception during execute() ", e);
             fileViewer.addTextPane("Error during execute", "Exception during execute, check log " + e.getMessage());
+        }
+        if(isUsingGUI()) {
+            executionMonitor.setTerminateButtonNotify(null);
+            executionMonitor.setTimerFrameVisible(false);
         }
 
         return fileViewer;
@@ -968,17 +1016,18 @@ public class Executable extends Plugin implements IExecutable {
             stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME), false));
             stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(VALIDATOR_STDERR_FILENAME), false));
 
-            String msg = "Working...";
+            String msg = "Working on";
             if (problem.isShowValidationToJudges()) {
-                msg = "Validating...";
+                msg = "Validating";
             }
 
             //added per bug 1668
-            validatorExecutionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI());
+            validatorExecutionTimer = new ExecuteTimer(log, getValidationTimeLimit(), executorId, isUsingGUI() ? executionMonitor : null);
 
             log.info("constructed new validator ExecuteTimer " + validatorExecutionTimer.toString());
             long startTime = System.currentTimeMillis();
-            Process validatorProcess = runProgram(cmdLine, msg, false, validatorExecutionTimer);
+            
+            Process validatorProcess = runProgram(cmdLine, formatTestCasePhase(msg, testCase), false, validatorExecutionTimer);
 
             if (validatorProcess == null) {
                 log.warning("validator process is null; stopping ExecuteTimer");
@@ -991,6 +1040,8 @@ public class Executable extends Plugin implements IExecutable {
             } else {
                 log.info("created validator process " + getProcessID(validatorProcess));
             }
+            //validator is now running, so it is now able to be terminated
+            activeExecutionTimer = validatorExecutionTimer;
 
             // This reads from the stdout of the child process
             BufferedInputStream childOutput = new BufferedInputStream(validatorProcess.getInputStream());
@@ -1038,6 +1089,9 @@ public class Executable extends Plugin implements IExecutable {
             stdoutCollector.join();
             stderrCollector.join();
 
+            //no longer can terminate since it is already finished.
+            activeExecutionTimer = null;
+            
             // if(isJudge && executionTimer != null) {
             if (validatorExecutionTimer != null) {
                 log.info("stopping validator ExecuteTimer");
@@ -1721,7 +1775,7 @@ public class Executable extends Plugin implements IExecutable {
             }
 
             log.info("Constructing ExecuteTimer...");
-            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
+            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI() ? executionMonitor : null);
             log.info("Created new ExecuteTimer: " + executionTimer.toString());
             
             if (problem.getDataFileName() != null) {
@@ -1928,7 +1982,7 @@ public class Executable extends Plugin implements IExecutable {
             //start the program executing.  Note that runProgram() sets the "startTimeNanos" timestamp 
             /// immediately prior to actually "execing" the process.
             log.info("starting team program...");
-            process = runProgram(cmdline, "Executing...", autoStop, executionTimer);
+            process = runProgram(cmdline, formatTestCasePhase("Executing", testSetNumber), autoStop, executionTimer);
             
             //make sure we succeeded in getting the external process going
             if (process == null) {
@@ -1942,6 +1996,9 @@ public class Executable extends Plugin implements IExecutable {
             } else {
                 log.info("created new team process " + getProcessID(process));
             }
+            
+            //allow process to be terminated by button
+            activeExecutionTimer = executionTimer;
             
             //create a Timer to run the TLE kill task
             log.info("constructing new TLE-Timer...");
@@ -2064,6 +2121,9 @@ public class Executable extends Plugin implements IExecutable {
             stdoutCollector.join();
             stderrCollector.join();
 
+            //no longer able to terminate with button since it is finished
+            activeExecutionTimer = null;
+            
             //when we reach here we know that both IOCollectors have terminated, which means one (or more) of the three conditions above
             // is true: either the child has stopped producing output (generated EOF on both stdout and stderr), the timer has terminated the
             // IOCollectors due to either a time limit or the operator pressing the "Terminate" button, or the IOCollector reached maximum
@@ -2469,7 +2529,7 @@ public class Executable extends Plugin implements IExecutable {
             BufferedOutputStream stdoutlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false));
             BufferedOutputStream stderrlog = new BufferedOutputStream(new FileOutputStream(prefixExecuteDirname(COMPILER_STDERR_FILENAME), false));
 
-            executionTimer = new ExecuteTimer(log, getCompilationTimeLimit(), executorId, isUsingGUI());
+            executionTimer = new ExecuteTimer(log, getCompilationTimeLimit(), executorId, isUsingGUI() ? executionMonitor : null);
 //            executionTimer.startTimer();    //TODO: why is this here, when method runProgram() invokes startTimer()?  (it should only be done in runProgram...)
 
             long startSecs = System.currentTimeMillis();
@@ -2485,6 +2545,9 @@ public class Executable extends Plugin implements IExecutable {
                 executionData.setCompileResultCode(1);
                 return false;
             }
+            //allow compile to be terminated by button
+            activeExecutionTimer = executionTimer;
+            
             // This reads from the stdout of the child process
             BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());
             // The reads from the stderr of the child process
@@ -2505,6 +2568,9 @@ public class Executable extends Plugin implements IExecutable {
             stdoutCollector.join();
             stderrCollector.join();
 
+            //no longer can terminate by button since it is finished
+            activeExecutionTimer = null;
+            
             // if(isJudge && executionTimer != null) {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
@@ -2991,6 +3057,16 @@ public class Executable extends Plugin implements IExecutable {
 
         return newProcess;
     }
+    
+    /**
+     * This terminates the process by telling the ExecutionTimer to stop
+     */
+    public void executeFrameTerminated() {
+        if(activeExecutionTimer != null) {
+            activeExecutionTimer.terminateExecution();
+            activeExecutionTimer = null;
+        }
+    }
 
     /**
      * This method receives a {@link Process} object and returns the id of that Process.
@@ -3281,5 +3357,23 @@ public class Executable extends Plugin implements IExecutable {
     private int getValidationTimeLimit() {
         
         return DEFAULT_VALIDATION_TIME_LIMIT_SECS ;
+    }
+    
+    /**
+     * Returns a string indicating the phase of execution.
+     * Ex. " Executing test case 3..."
+     *     "Validating test case 3..."
+     *     "Working on test case 3..."
+     *     
+     * The goal is to return a fixed length string so it doesn't jump around
+     * when displayed in a GUI control. 
+     * 
+     * @return Formatted string that does not fluctuate in length.
+     * @param runPhase A string indicating the phase of execution: Executing, Validating, etc.
+     * @param testCase The test case number (1 ... 99999)
+     */
+    private String formatTestCasePhase(String runPhase, int testCase)
+    {
+        return(String.format("%10s test case %s", runPhase, StringUtilities.rpad(' ', 5, Integer.toString(testCase) + "...")));
     }
 }
