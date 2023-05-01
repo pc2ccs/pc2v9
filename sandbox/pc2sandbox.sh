@@ -71,6 +71,17 @@ HandleTerminateFromPC2()
 	exit $FAIL_WALL_TIME_LIMIT_EXCEEDED 
 }
 
+GetTimeInMicros()
+{
+        set `date "+%s %6N"`
+        sec=$1
+        us=$2
+        us=$((10#$us))
+        ret=$((sec*1000000))
+        ret=$((ret+$us))
+        echo $ret
+}
+
 # ------------------------------------------------------------
 
 if [ "$#" -lt 1 ] ; then
@@ -193,11 +204,15 @@ DEBUG echo Executing $COMMAND $*
 # Set up trap handler to catch wall-clock time exceeded and getting killed by PC2's execute timer
 trap HandleTerminateFromPC2 15
 
+starttime=`GetTimeInMicros`
+
 $COMMAND $* <&0 &
 # Remember child's PID for possible killing off later
 submissionpid=$!
 # Wait for child
 wait $submissionpid
+
+endtime=`GetTimeInMicros`
 
 COMMAND_EXIT_CODE=$?
 
@@ -219,6 +234,9 @@ else
 	elif test "$COMMAND_EXIT_CODE" -ge 128
 	then
 		DEBUG echo The command terminated abnormally with exit code $COMMAND_EXIT_CODE
+	else
+		walltime=$((endtime-starttime))
+		DEBUG echo The command terminated normally and took $cputime / $TIMELIMIT_US us and $walltime us wall time
 	fi
 fi
 DEBUG echo Finished executing $COMMAND $*
