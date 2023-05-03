@@ -938,6 +938,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     private void setScoreboardFreezeTime(IInternalContest contest, String scoreboardFreezeTime) {
         ContestInformation contestInformation = contest.getContestInformation();
+        // adapted from core.util.JSONTool
+        // seems the yaml is converting the 1:00:00 into 3600
+        if (scoreboardFreezeTime.length() > 2) {
+            if (!scoreboardFreezeTime.contains(":")) {
+                try {
+                    long seconds = Long.parseLong(scoreboardFreezeTime);
+                    scoreboardFreezeTime = ContestTime.formatTime(seconds);
+                } catch (NumberFormatException e) {
+                    syntaxError("Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds "+ e.getMessage());
+                }
+            }
+        }
         contestInformation.setFreezeTime(scoreboardFreezeTime);
         contest.updateContestInformation(contestInformation);
     }
