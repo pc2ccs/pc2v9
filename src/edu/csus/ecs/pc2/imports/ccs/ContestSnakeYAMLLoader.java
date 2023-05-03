@@ -946,7 +946,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     long seconds = Long.parseLong(scoreboardFreezeTime);
                     scoreboardFreezeTime = ContestTime.formatTime(seconds);
                 } catch (NumberFormatException e) {
-                    throw new YamlLoadException("Syntax error: Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds "+ e.getMessage());
+                    syntaxError("Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds "+ e.getMessage());
                 }
             }
         }
