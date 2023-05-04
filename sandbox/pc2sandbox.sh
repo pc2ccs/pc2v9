@@ -26,6 +26,11 @@ FAIL_MEMORY_CONTROLLER_NOT_ENABLED=$((FAIL_RETCODE_BASE+50))
 FAIL_MEMORY_LIMIT_EXCEEDED=$((FAIL_RETCODE_BASE+51))
 FAIL_TIME_LIMIT_EXCEEDED=$((FAIL_RETCODE_BASE+52))
 FAIL_WALL_TIME_LIMIT_EXCEEDED=$((FAIL_RETCODE_BASE+53))
+FAIL_SANDBOX_ERROR=$((FAIL_RETCODE_BASE+54))
+
+# Maximum number of sub-processes before we will kill it due to fork bomb
+# This gets added to the current number of executing processes for this user.
+MAXPROCS=32
 
 # Process ID of submission
 submissionpid=""
@@ -156,7 +161,7 @@ fi
 DEBUG echo Creating sandbox $PC2_SANDBOX_CGROUP_PATH
 if ! mkdir $PC2_SANDBOX_CGROUP_PATH
 then
-	DEBUG echo Can not create $PC2_SANDBOX_CGROUP_PATH
+	DEBUG echo Cannot create $PC2_SANDBOX_CGROUP_PATH
 	exit $FAIL_INVALID_CGROUP_INSTALLATION
 fi
 
@@ -174,22 +179,25 @@ else
   echo "max" > $PC_SANDBOX_CGROUP_PATH/memory.swap.max  
 fi
 
-# set the specified CPU time limit - input is in secs, cgroup v2 requires usec, so multiply by 1M.
-# cgroup v2 expects two parameters:  absolute time and "period", but if only one is provided it is "absolute time"
-DEBUG echo setting cpu limit to $TIMELIMIT seconds
-ulimit -t $TIMELIMIT
+# We use ulimit to limit CPU time, not cgroups.  Time is supplied in seconds.  This may have to
+# be reworked if ms accuracy is needed.  The problem is, cgroups do not kill off a process that
+# exceeds the time limit, ulimit does.
 TIMELIMIT_US=$((TIMELIMIT * 1000000))
-#echo $TIMELIMIT_US  > $PC2_SANDBOX_RUN_CGROUP_PATH/cpu.max
+DEBUG echo setting cpu limit to $TIMELIMIT_US microseconds "("ulimit -t $TIMELIMIT ")"
+ulimit -t $TIMELIMIT
 
-DEBUG echo setting maximum user processes to 32 + whatever the user is currently using
-ulimit -u $((32+`ps -T -u $USER | wc -l`))
+DEBUG echo setting maximum user processes to $MAXPROCS + whatever the user is currently using
+ulimit -u $((MAXPROCS+`ps -T -u $USER | wc -l`))
+
+# Remember wall time when we started
+starttime=`GetTimeInMicros`
 
 #put the current process (and implicitly its children) into the pc2sandbox cgroup.
 DEBUG echo putting $$ into $PC2_SANDBOX_CGROUP_PATH cgroup
 if ! echo $$ > $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
 then
-	echo Failed. quitting.
-	exit 1
+	echo $0: Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs - not executing submission.
+	exit $FAIL_SANDBOX_ERROR
 fi
 
 # run the command
@@ -204,15 +212,12 @@ DEBUG echo Executing $COMMAND $*
 # Set up trap handler to catch wall-clock time exceeded and getting killed by PC2's execute timer
 trap HandleTerminateFromPC2 15
 
-starttime=`GetTimeInMicros`
 
 $COMMAND $* <&0 &
 # Remember child's PID for possible killing off later
 submissionpid=$!
 # Wait for child
 wait $submissionpid
-
-endtime=`GetTimeInMicros`
 
 COMMAND_EXIT_CODE=$?
 
@@ -227,23 +232,26 @@ then
 else
 	# Get cpu time
 	cputime=`grep usage_usec $PC2_SANDBOX_CGROUP_PATH/cpu.stat | cut -d ' ' -f 2`
+	# Get wall time - we want it as close as possible to when we fetch the cpu time so they stay close
+	# since the cpu.stat includes the time this script takes AFTER the submission finishes.
+	endtime=`GetTimeInMicros`
 	if test "$cputime" -gt "$TIMELIMIT_US"
 	then
-		DEBUG echo The command was killed due to out of CPU Time "($cputime > $TIMELIMIT_US)"
+		DEBUG echo The command was killed because it exceeded the CPU Time limit "(${cputime}us > ${TIMELIMIT_US}us)"
 		COMMAND_EXIT_CODE=${FAIL_TIME_LIMIT_EXCEEDED}
 	elif test "$COMMAND_EXIT_CODE" -ge 128
 	then
 		DEBUG echo The command terminated abnormally with exit code $COMMAND_EXIT_CODE
 	else
 		walltime=$((endtime-starttime))
-		DEBUG echo The command terminated normally and took $cputime / $TIMELIMIT_US us and $walltime us wall time
+		DEBUG echo The command terminated normally and took ${cputime}us / ${TIMELIMIT_US}us and ${walltime}us wall time
 	fi
 fi
 DEBUG echo Finished executing $COMMAND $*
 DEBUG echo $COMMAND exited with exit code $COMMAND_EXIT_CODE
 DEBUG echo
 
-# TODO: determine how to pass pc2sandbox.sh results back to PC2...
+# TODO: determine how to pass more detailed pc2sandbox.sh results back to PC2... Perhaps in a file...
 
 # return the exit code of the command as our exit code
 exit $COMMAND_EXIT_CODE

@@ -1,7 +1,7 @@
 @echo off
 REM Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 
-rem Purpose: start the team module
+rem Purpose: Check host system to see if it's setup properly for sandbox usage
 rem Author : pc2@ecs.csus.edu
 rem $HeadURL$
 
@@ -21,5 +21,6 @@ set FAIL_MEMORY_LIMIT_EXCEEDED=245
 set FAIL_TIME_LIMIT_EXCEEDED=246
 set FAIL_WALL_TIME_LIMIT_EXCEEDED=247
 
+rem Windows does not currently support sandbox's.  Simply return failure indicating that.
 exit /b %FAIL_EXIT_CODE%
  
