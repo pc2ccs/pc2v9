@@ -269,9 +269,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
     
-    private void setMemoryLimit(IInternalContest contest, int memoryLimit) {
+    private void setMemoryLimitMB(IInternalContest contest, int memoryLimitMB) {
         ContestInformation contestInformation = contest.getContestInformation();
-        contestInformation.setMemoryLimitInMeg(memoryLimit);
+        contestInformation.setMemoryLimitInMeg(memoryLimitMB);
         contest.updateContestInformation(contestInformation);
     }
 
@@ -1398,7 +1398,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
         
         Integer memoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, Problem.DEFAULT_MEMORY_LIMIT_MB);
-        problem.setMemoryLimit(memoryLimit);
+        problem.setMemoryLimitMB(memoryLimit);
         
         String sandboxCommandLine = fetchValue(content, SANDBOX_COMMAND_LINE_KEY, "");
         problem.setSandboxCmdLine(sandboxCommandLine);
@@ -1468,7 +1468,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
             
             Integer clicsMemoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, Problem.DEFAULT_MEMORY_LIMIT_MB);
-            problem.setMemoryLimit(clicsMemoryLimit);
+            problem.setMemoryLimitMB(clicsMemoryLimit);
         }
         
         if (!usingCustomValidator) {

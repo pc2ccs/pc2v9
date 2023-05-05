@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
@@ -469,7 +469,7 @@ public class Problem implements IElementObject {
         }
         
         clone.setSandboxType(this.getSandboxType());
-        clone.setMemoryLimit(this.getMemoryLimitMB());
+        clone.setMemoryLimitMB(this.getMemoryLimitMB());
         
         return clone;
     }
@@ -2074,7 +2074,7 @@ public class Problem implements IElementObject {
      * 
      * @param memLimitInMB the memory limit for the problem, in MB; must be >= 0, where 0=unlimited.
      */
-    public void setMemoryLimit(int memLimitInMB) {
+    public void setMemoryLimitMB(int memLimitInMB) {
         if (memLimitInMB < 0) {
             this.memoryLimitMB = 0;
             //TODO: pass a Log into the Problem constructor so conditions like this can be logged properly.

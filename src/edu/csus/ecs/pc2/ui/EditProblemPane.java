@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -1450,7 +1450,7 @@ public class EditProblemPane extends JPanePlugin {
         } else if (getProblemSandboxPane().getUsePC2SandboxRadioButton().isSelected()) {
             try {
                 int memLimit = Integer.parseInt(getProblemSandboxPane().getPC2SandboxOptionMemLimitTextbox().getText());
-                checkProblem.setMemoryLimit(memLimit);
+                checkProblem.setMemoryLimitMB(memLimit);
                 checkProblem.setSandboxType(SandboxType.PC2_INTERNAL_SANDBOX);
             } catch (NumberFormatException e) {
                 log.warning("Invalid memory limit value :" + e);
