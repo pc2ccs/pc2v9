@@ -248,9 +248,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private String packagePath = "";
     
     //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
-    // Note that THIS IS FOR DEBUGGING PURPOSES; it does NOT imply any support for Windows sandboxing.
+    // Note that THIS IS FOR DEBUGGING PURPOSES only, since most debugging is done on Windows.
+    // It does NOT imply any support for Windows sandboxing at the moment.
     //TODO: change this variable to FALSE before generating a production distribution.
-    private boolean debugAllowSandboxInvocationOnWindows = true;
+    private boolean debugAllowSandboxInvocationOnWindows = false;
 
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, IExecutableMonitor msgFrame) {
@@ -1901,19 +1902,20 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             }
 
             //determine whether the Problem is configured to use a sandbox 
-            try {
-                usingSandbox = isUsingSandbox();
-            } catch (Exception e) {
-                //an exception means there is something wrong about sandbox usage (e.g. not allowed on this platform)
-                log.severe("Exception during sandbox usage check: " + e.getMessage());
-                stderrlog.close();
-                stdoutlog.close();
-                executionData.setExecuteSucess(false);
-                executionData.setExecutionException(e);
-                return false;
-            }
+            usingSandbox = isUsingSandbox();
+            if(usingSandbox) {
+                try {
+                    setupSandbox();
+                } catch (Exception e) {
+                    //an exception means there is something wrong about sandbox usage (e.g. not allowed on this platform)
+                    log.severe("Exception during sandbox setup: " + e.getMessage());
+                    stderrlog.close();
+                    stdoutlog.close();
+                    executionData.setExecuteSucess(false);
+                    executionData.setExecutionException(e);
+                    return false;
+                }
             
-            if (usingSandbox) {
                 //insert the command for invoking the sandbox at the front of the command line
                 cmdline = problem.getSandboxCmdLine() + " " + cmdline ;
             }
@@ -1971,6 +1973,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 autoStop = true;
             }
 
+            //We do NOT disable the ExecutionTimer here for sandbox mode as the original comment suggests.
+            // The reason is, we use the ExecutionTimer as a watchdog in the event that the sandbox script hangs for some reason.
+            // We do bump the time up limit up a bit, though, so it doesn't prematurely terminate the run. JB 05/03/2023
+            //
             //if a sandbox is being used, disable both the ExecutionTimer's actionPerformed() ability to stop the process
             // as well as the TimerTask's ability to stop the process
 //            if (usingSandbox) {
@@ -2324,73 +2330,73 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     }
 
     /**
-     * Returns true if the current Problem is configured to use a sandbox, sandbox usage is supported on the current platform, 
-     * and the current client is not a Team; false otherwise.
-     * If the returned value is True, the sandbox for the problem will have been copied into the Execute directory.
+     * Check if the problem for this submission requires a sandbox.
+     * Note: teams currently do not use a sandbox for the test button.
      * 
-     *TODO: this is a query method with a side-effect (copying the sandbox into the execute directory); that's not good style...
-     *TODO:  Need to refactor this into two steps:  a query (without side effects) asking whether the problem is supposed to use
-     *TODO:    a sandbox, and then if that returns True, a call to a separate method which installs the sandbox.  This is tricky
-     *TODO:    because we want to get the proper exception back to the caller...
+     * @return true if a sandbox should be used for the current Problem; false if not.
+     */
+    private boolean isUsingSandbox() {
+        
+        log.info("Checking problem sandbox usage for " + problem.getShortName() + " Sandbox Type " + problem.getSandboxType().toString());
+        
+        return (problem.isUsingSandbox() && !isTeam());
+    }
+
+    /**
+     * Setup the environment needed for to run the current submission in a sandbox.  This involves making sure that
+     * the system supports sandbox's and, the copying of any necessary files to create the sandbox succeeded.  This
+     * does NOT imply creating will work when it comes time to run the submission.
      * 
-     * @return true if the Problem is to use a sandbox; false if not.  If True is returned, the sandbox will have been copied into 
-     *              the Execute directory.
+     * If this routine returns normally, then the files necessary for running in a sandbox have been copied successfully.
      * 
      * @throws Exception if there is a sandbox configuration issue, such as 
      *          we're running on an OS platform where sandbox isn't supported, or
      *          the specified sandbox can't be loaded into the execute directory.
      */
-    private boolean isUsingSandbox() throws Exception {
+    private void setupSandbox() throws Exception {
         
-        log.info("Checking problem sandbox usage for " + problem.getShortName() + " Sandbox Type " + problem.getSandboxType().toString());
-        
-        if (problem.isUsingSandbox() && !isTeam()) {
+        log.info("Setting up problem sandbox for " + problem.getShortName() + " Sandbox Type " + problem.getSandboxType().toString());
             
-            //check the OS to be sure we have a sandbox supported
-            if (OSCompatibilityUtilities.isRunningOnWindows() && !debugAllowSandboxInvocationOnWindows) {
+        //check the OS to be sure we have a sandbox supported
+        if (OSCompatibilityUtilities.isRunningOnWindows() && !debugAllowSandboxInvocationOnWindows) {
+            
+            log.severe("Attempt to execute a problem configured with a sandbox on a Windows system: not supported");
+            throw new Exception ("Sandbox not supported on Windows OS");
+            
+        } else {
+            
+            //OS supported (non-Windows values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
+            //check if we're supposed to use the PC2 internal sandbox
+            SandboxType sbType = problem.getSandboxType();
+            if (sbType == SandboxType.PC2_INTERNAL_SANDBOX) {
                 
-                log.severe("Attempt to execute a problem configured with a sandbox on a Windows system: not supported");
-                throw new Exception ("Sandbox not supported on Windows OS");
+                log.info("Copying PC2 sandbox into Execute directory");
+                try {
+                    //copy the PC2 internal sandbox into the execution directory
+                    copyPC2Sandbox();
+                } catch (Exception e) {
+                    log.severe("Unable to copy PC2 Internal Sandbox to execute directory; cannot execute submission");
+                    throw e;
+                }
+
+            } else if (sbType == SandboxType.EXTERNAL_SANDBOX) {
+
+                //TODO: replace this block with whatever code is necessary to properly set up the specified external sandbox
+                log.severe("Unsupported sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
+                throw new Exception ("Unsupported sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
                 
             } else {
                 
-                //OS supported (non-Windows values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
-                //check if we're supposed to use the PC2 internal sandbox
-                SandboxType sbType = problem.getSandboxType();
-                if (sbType == SandboxType.PC2_INTERNAL_SANDBOX) {
-                    
-                    log.info("Copying PC2 sandbox into Execute directory");
-                    try {
-                        //copy the PC2 internal sandbox into the execution directory
-                        copyPC2Sandbox();
-                    } catch (Exception e) {
-                        log.severe("Unable to copy PC2 Internal Sandbox to execute directory; cannot execute submission");
-                        throw e;
-                    }
-
-                } else if (sbType == SandboxType.EXTERNAL_SANDBOX) {
-
-                    //TODO: replace this block with whatever code is necessary to properly set up the specified external sandbox
-                    log.severe("Unsupported sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
-                    throw new Exception ("Unsupported sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
-                    
-                } else {
-                    
-                    //unknown sandbox type
-                    log.severe("Unknown sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
-                    throw new Exception ("Unknown sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
-                }
+                //unknown sandbox type
+                log.severe("Unknown sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
+                throw new Exception ("Unknown sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
             }
-            
-            log.info("Using sandbox type '" + problem.getSandboxType() + "'; problem memory limit = " + problem.getMemoryLimitMB() + "MB");
-            
-            //Problem has a properly-configured sandbox and we're not running a Team client
-            return true;
-            
-        } else {
-            //either the problem has no sandbox configured, or we are executing on a Team client; in either case we don't use a sandbox
-            return false;
         }
+        
+        log.info("Using sandbox type '" + problem.getSandboxType() + "'; problem memory limit = " + problem.getMemoryLimitMB() + "MB");
+        
+        //Problem has a properly-configured sandbox and we're not running a Team client
+        return;
     }
 
     /**
