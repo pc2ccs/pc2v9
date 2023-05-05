@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.util.ArrayList;
@@ -171,11 +171,14 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     
     /**
-     * Get a list of auto-judge problems the OS does not supported judging, likely due
-     * to missing OS features needed for sandbox running.  eg. cgroups on Linux
+     * Get a list of problems that can not be auto-judged by the current judge.
+     * The list will contain all the problems that require a sandbox or other
+     * OS features that are not supported on the current OS.
+     * As an example: if the system is Linux, and cgroups v2 are not configured properly,
+     * all problems that require a sandbox will be on the returned list.
      * 
      * @return List<Problem> of problems that can't be judged on this system
-     *            due to OS mis-configuration or incomplete configuration.
+     *            due to OS mis-configuration, OS incompatibilty or incomplete configuration.
      */
     public List<Problem> getOSUnsupportedAutojudgeProblemList()
     {
