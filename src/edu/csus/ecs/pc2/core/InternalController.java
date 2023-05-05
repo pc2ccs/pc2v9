@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -32,6 +32,8 @@ import edu.csus.ecs.pc2.core.exception.ProfileException;
 import edu.csus.ecs.pc2.core.exception.ServerProcessException;
 import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.LogType;
+import edu.csus.ecs.pc2.core.log.PC2LogManager;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
@@ -3410,8 +3412,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             directoryName = getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME);
             Utilities.insureDir(directoryName);
         }
+        
+        if (PC2LogManager.getLogType() == LogType.ONE_LOG_FOR_ALL_CLIENTS) {
+            log = PC2LogManager.createSingleLog();
+        } else {
+            log = new Log(directoryName, logFileName);
+        }
 
-        log = new Log(directoryName, logFileName);
         StaticLog.setLog(log);
 
         info("");
