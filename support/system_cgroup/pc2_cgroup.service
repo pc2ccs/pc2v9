@@ -1,7 +1,7 @@
 # Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 #
 # Purpose: Execute the pc2installsandbox script which sets up the cgroup v2 required by pc2 sandboxes.
-#   This is only dones once at boot time.
+#   This is only done once every time the system is booted.
 # Author: John Buck
 #
 

@@ -1,7 +1,7 @@
 01/30/2023 -- John Buck
 
-In order to support executing submissions in a sandbox on Linux, we use CGROUPs V2.  Therefore,
-the system you are running this on must support that.  Most newer Linux systems do.
+In order to support executing submissions in a sandbox on Linux, we use cgroups v2.  Therefore,
+the systems that are doing judging must support that.  Most newer Linux systems do.
 
 The cgroup used for pc2 judging, /sys/fs/cgroup/pc2. must be created and set up with the proper
 permissions every time the system boots (cgroups are not persistent across reboots).  The pc2_cgroup.service
