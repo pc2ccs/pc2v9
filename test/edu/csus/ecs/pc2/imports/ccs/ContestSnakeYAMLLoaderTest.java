@@ -399,7 +399,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals(18000, time.getContestLengthSecs());
 
         // scoreboard-freeze: 4:00:00
-        assertEquals("14400", info.getFreezeTime());
+        assertEquals("4:00:00", info.getFreezeTime());
 
         Language[] languages = contest.getLanguages();
 
@@ -504,7 +504,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals(18000, time.getContestLengthSecs());
 
         // scoreboard-freeze: 4:00:00
-        assertEquals("14400", info.getFreezeTime());
+        assertEquals("4:00:00", info.getFreezeTime());
     }
 
     /**
