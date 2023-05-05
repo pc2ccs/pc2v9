@@ -143,7 +143,7 @@ public class ProblemsPane extends JPanePlugin {
             problemListBox = new MCLB();
 
             Object[] cols = { "Problem Name", "Test Cases", "Input Method", "Judging Type", "Short", "Time Limit(Secs)",
-                    "Max Output (KB)", "Mem Limit(MB)", "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
+                    "Max Output(KB)", "Mem Limit(MB)", "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
             problemListBox.addColumns(cols);
 
             problemListBox.getColumnInfo(0).setAlignment(Alignment.CENTER);
@@ -231,8 +231,7 @@ public class ProblemsPane extends JPanePlugin {
         // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", "Groups" };
         // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
         // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit(secs)", "Max Output(KB)", "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
-        // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
-        // Object[] cols = { "Problem Name", "Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Max Output(KB)", "Mem Limit(MB)",
+        // Object[] cols = { "Problem Name", "Test Cases", "Input Method", "Judging Type", "Short", "Time Limit(secs)", "Max Output(KB)", "Mem Limit(MB)",
         //                      "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
 
 
