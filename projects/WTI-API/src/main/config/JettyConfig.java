@@ -1,6 +1,8 @@
 package config;
 
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
+import edu.csus.ecs.pc2.core.log.LogType;
+import edu.csus.ecs.pc2.core.log.PC2LogManager;
 
 /**
  * This class is the main starting point for the WTI project's server.  It creates and initializes a Jetty server
@@ -14,6 +16,13 @@ public class JettyConfig {
 	public static void main(String[] args)  {
 		
 		try {
+		    
+		    // TODO 746 provide a way to provide ONE_LOG_PER_CLIENT, thus
+//		    if (option to use individual logs per client){
+//		        new PC2LogManager(LogType.ONE_LOG_PER_CLIENT);
+//		    }
+		    new PC2LogManager(LogType.ONE_LOG_FOR_ALL_CLIENTS);
+		    
 			//create an initial configuration for the WTI Jetty server, including logging and reading/caching pc2v9.ini properties
 			ServerInit serverInit = ServerInit.createServerInit();
 			
