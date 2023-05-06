@@ -17,7 +17,7 @@ public class PC2LogManager {
     /**
      * Default name for single pc2 log file.
      */
-    public static final String PC2_SINGLE_LOG_FILENAME = "pc2log.log";
+    public static final String PC2_SINGLE_LOG_FILENAME = "wtiAllTeams.log";
 
     /**
      * The single log
@@ -29,7 +29,7 @@ public class PC2LogManager {
      */
     private static Map<ClientId, Log> clientLogs = new HashMap<ClientId, Log>();
 
-    private static LogType logType = LogType.ONE_LOG_PER_CLIENT;
+    private static LogType logType = LogType.ONE_LOG_FOR_ALL_CLIENTS;
 
     private static String directoryName = Log.LOG_DIRECTORY_NAME;
 
