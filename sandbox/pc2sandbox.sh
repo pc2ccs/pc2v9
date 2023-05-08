@@ -244,7 +244,7 @@ else
 		DEBUG echo The command terminated abnormally with exit code $COMMAND_EXIT_CODE
 	else
 		walltime=$((endtime-starttime))
-		DEBUG echo The command terminated normally and took ${cputime}us / ${TIMELIMIT_US}us and ${walltime}us wall time
+		DEBUG echo The command terminated normally and took ${cputime}us of CPU time "(out of the CPU limit of ${TIMELIMIT_US}us)" and ${walltime}us wall time
 	fi
 fi
 DEBUG echo Finished executing $COMMAND $*
