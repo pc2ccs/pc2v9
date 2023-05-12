@@ -175,8 +175,8 @@ if [ "$MEMLIMIT" -gt "0" ] ; then
   echo 1  > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max
 else
   DEBUG echo setting memory limit to max, meaning no limit
-  echo "max" > $PC_SANDBOX_CGROUP_PATH/memory.max  
-  echo "max" > $PC_SANDBOX_CGROUP_PATH/memory.swap.max  
+  echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.max  
+  echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max  
 fi
 
 # We use ulimit to limit CPU time, not cgroups.  Time is supplied in seconds.  This may have to
