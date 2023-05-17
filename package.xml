@@ -93,7 +93,7 @@
                 <include name="**/pc2syscheck.cmd"/>
             </zipfileset>
             <zipfileset dir="${support.dir}" filemode="644" prefix="${release}/support">
-                <include name="system_cgroup/icpc_cgroup.service"/>
+                <include name="system_cgroup/pc2_cgroup.service"/>
                 <include name="system_cgroup/README"/>
             </zipfileset>
             <zipfileset dir="${projects.dir}" filemode="755" prefix="${release}/projects">
