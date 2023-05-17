@@ -143,6 +143,7 @@ public class ResultsFileTest extends AbstractTestCase {
 
         IContestLoader loader = new ContestSnakeYAMLLoader();
         IInternalContest contest = loader.fromYaml(null, getDataDirectory()+File.separator+"wf2017"+File.separator+"config", true);
+        ensureStaticLog();
         loader.initializeContest(contest, new File(getDataDirectory()+File.separator+"wf2017"));
         // Hmm, no judgements
         Judgement[] judgements = contest.getJudgements();

@@ -1,6 +1,6 @@
+# Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 #
-# Sumit Sample multiple test cases
-# Fri Nov 04 12:02:43 2016
+# Sumit Sample multiple test cases ("mini" contest)
 #
 --- 
 
@@ -36,6 +36,16 @@ default-validator: /home/judge/cdp/config/validefault {:infile} {:outfile} {:ans
 
 # Load data files into pc2 as SerializedFiles, not using CDP external files
 load-data-files: false
+
+# Loader will automatically load accounts file CDPDIRconfig/accounts_load.tsv
+
+# To load a different load accounts file use key load-accounts-file 
+# load file from config/ dir 
+# load-accounts-file : 'mini.load.accounts.up.tsv'
+# load file from /home/ubuntu/current/config
+# load-accounts-file : '/home/ubuntu/current/config/mini.load.accounts.up.tsv'
+# with new accounts too
+# load-accounts-file : mini.load.accounts02.up.tsv
 
 # load sample files then load secret data files, default is true
 # load-sample-judges-data : false

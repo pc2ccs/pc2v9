@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
@@ -17,10 +17,8 @@ import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
  * Contest-wide Information/settings.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class ContestInformation implements Serializable{
 
     /**
@@ -185,6 +183,8 @@ public class ContestInformation implements Serializable{
      */
     private boolean stopOnFirstFailedtestCase = false;
 
+    private String overrideLoadAccountsFilename = null;
+    
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
      * This value is null if no scheduled start time has been set,
@@ -802,6 +802,13 @@ public class ContestInformation implements Serializable{
         this.teamScoreboardDisplayFormat = teamScoreboardDisplayFormat;
     }
     
+    public String getOverrideLoadAccountsFilename() {
+        return overrideLoadAccountsFilename;
+    }
+    
+    public void setOverrideLoadAccountsFilename(String overrideLoadAccountsFilename) {
+        this.overrideLoadAccountsFilename = overrideLoadAccountsFilename;
+    }
     public boolean isLoadSampleJudgesData() {
         return loadSampleJudgesData;
     }
@@ -809,4 +816,5 @@ public class ContestInformation implements Serializable{
     public void setLoadSampleJudgesData(boolean loadSampleJudgesData) {
         this.loadSampleJudgesData = loadSampleJudgesData;
     }
+
 }
