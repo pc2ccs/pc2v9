@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -3820,5 +3820,54 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 10, totalTestCases);
         assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 7, totalTestCases);
 
+    }
+    
+    /**
+     * Test creating and loading accounts from tsv file.
+     * 
+     * @throws Exception
+     */
+    public void testloadAccountLoadFile() throws Exception {
+        
+        String dataDir = getDataDirectory(this.getName());
+      
+      ensureDirectory(dataDir);
+//      startExplorer(dataDir);
+      
+      ensureStaticLog();
+
+      IInternalContest contest = loadFullSampleContest(null, "mini");
+      assertNotNull(contest);
+      
+      assertEquals("Team accounts ", 151, contest.getAccounts(ClientType.Type.TEAM).size());
+
+      ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
+      assertNotNull(loader);
+      
+      String accountLoadFilename = dataDir + File.separator + "mini.load.accounts.up.tsv";
+//      editFile(accountLoadFilename);
+
+      loader.loadAccountLoadFile(contest, accountLoadFilename);
+      assertEquals("Team accounts ", 201, contest.getAccounts(ClientType.Type.TEAM).size());
+      
+      Vector<Account> teams = contest.getAccounts(ClientType.Type.TEAM);
+      Account[] teamArr = (Account[]) teams.toArray(new Account[teams.size()]);
+      
+      // Test all added accounts from mini.load.accounts.up.tsv
+      
+      for (Account account : teamArr) {
+          
+          int num = account.getClientId().getClientNumber();
+          
+          if ( num < 51 ) {
+              // teams 1 - 50 loaded from mini.load.accounts.up.tsv, only test those accounts
+              
+              assertEquals("TeamName " + num, account.getDisplayName());
+              assertEquals("USA", account.getCountryCode());
+              assertEquals("pass" + num, account.getPassword());
+              num++;
+          }
+      }
+        
     }
 }
