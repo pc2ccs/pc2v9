@@ -10,6 +10,21 @@ import edu.csus.ecs.pc2.core.model.Language;
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
 public class LanguageUtilities {
+    
+    /**
+     * List of language extensions and their full or partial language display name
+     */
+    public static final  String[][] LANGUAGE_LIST = { //
+            { "cpp", "C++" }, //
+            { "cc", "C++" }, //
+            { "C", "C++" }, //
+            { "c++", "C++" }, //
+            { "py", "Python" }, //
+            { "cs", "Mono" }, //
+            { "pl", "Perl" }, //
+
+    };
+
 
     /**
      * get file extension.
@@ -47,39 +62,24 @@ public class LanguageUtilities {
     public static Language matchFirstLanguage(IInternalContest inContest, String extension) {
         Language[] lang = inContest.getLanguages();
 
-        // Alas guessing 
-        if ("cpp".equals(extension)) {
-            extension = "C++";
+        /**
+         * Partial or complete display name
+         */
+        String displayName = extension;
+
+        for (String[] row : LANGUAGE_LIST) {
+            String fileExtension = row[0];
+            String dispName = row[1];
+            
+            if (fileExtension.equals(extension)) {
+                displayName = dispName;
+            }
         }
 
-        if ("cc".equals(extension)) {
-            extension = "C++";
-        }
-
-        if ("C".equals(extension)) {
-            extension = "C++";
-        }
-
-        if ("c++".equals(extension)) {
-            extension = "C++";
-        }
-
-        if ("py".equals(extension)) {
-            extension = "Python";
-        }
-
-        if ("cs".equals(extension)) {
-            extension = "Mono";
-        }
-
-        if ("pl".equals(extension)) {
-            extension = "Perl";
-        }
-
-        extension = extension.toLowerCase();
+        displayName = displayName.toLowerCase();
 
         for (Language language : lang) {
-            if (language.getDisplayName().toLowerCase().indexOf(extension) != -1) {
+            if (language.getDisplayName().toLowerCase().indexOf(displayName) != -1) {
                 return language;
             }
         }
