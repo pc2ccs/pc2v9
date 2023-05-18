@@ -93,39 +93,44 @@ public class QuickSubmitter implements UIPlugin {
     }
 
     /**
-     * submit runs for all input files.
+     * submit runs for all input files.  Guesses language and problem from file path and extension.
      * 
      * Will guess langauge and problem based on path
      * 
      * @see #guessLanguage(IInternalContest, String)
      * @see #guessProblem(IInternalContest, String)
      * 
-     * @param someSubmitFiles
+     * @param a list of files to submit
+     * @return count of files sucessfully submitted/added.
      */
-    public void sendSubmissions(List<File> someSubmitFiles) {
+    public int sendSubmissions(List<File> filesToSubmit) {
 
-        for (File file : someSubmitFiles) {
+        int numberSubmitted = 0;
+        
+        for (File file : filesToSubmit) {
             try {
 
                 Language language = LanguageUtilities.guessLanguage(getContest(), file.getAbsolutePath());
                 if (language == null) {
                     String ext = LanguageUtilities.getExtension(file.getAbsolutePath());
-                    System.err.println("Cannot identify language for ext= " + ext + " = Can not send submission for file " + file.getAbsolutePath());
+                    log.log(Level.WARNING, "Cannot identify language for ext= " + ext + " = Can not send submission for file " + file.getAbsolutePath());
                 } else {
                     Problem problem = guessProblem(getContest(), file.getAbsolutePath());
                     try {
                         controller.submitJudgeRun(problem, language, file.getAbsolutePath(), null);
-                        System.out.println("submitted run send with language " + language + " and problem " + problem);
+                        log.log(Level.INFO, "submitted run send with language " + language + " and problem " + problem);
+                        numberSubmitted++;
                     } catch (Exception e) {
-                        System.err.println("Warning problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage());
-                        log.log(Level.WARNING, "problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage(), e);
+                        log.log(Level.SEVERE, "problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage(), e);
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                log.log(Level.WARNING, "problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage(), e);
+                log.log(Level.SEVERE, "problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage(), e);
             }
         }
+        
+        return numberSubmitted;
     }
 
     /**

@@ -6,11 +6,16 @@ import java.util.List;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.LanguageUtilities;
+import edu.csus.ecs.pc2.core.MockController;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
+import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Unit test.
@@ -116,23 +121,41 @@ public class QuickSubmitterTest extends AbstractTestCase {
 
     }
 
-    //    /**
-    //     * Actually submit runs from cdp path
-    //     * @throws Exception
-    //     */
-    //    public void testSubmit() throws Exception {
-    //        
-    //        ContestSnakeYAMLLoader snake = new ContestSnakeYAMLLoader();
-    //        
-    //        String  cdpPath = "/test/cdps/ka/config";
-    //        IInternalContest contest = snake.fromYaml(null, cdpPath);
-    //        
-    //        QuickSubmitter submitter = new QuickSubmitter();
-    //        submitter.setContestAndController(contest, null);
-    //        
-    //        List<File> files = submitter.getAllCDPsubmissionFileNames(contest,cdpPath);
-    //        
-    //        submitter.sendSubmissions(files);
-    //    }
+    /**
+     * Test QuickSubmitter send/add submissions.
+     * 
+     * @throws Exception
+     */
+    public void testsendSubmissions() throws Exception {
+
+        ContestSnakeYAMLLoader snake = new ContestSnakeYAMLLoader();
+
+        /**
+         * Sample contest to submit from.
+         */
+        String sampleContestName = "tenprobs";
+
+        String cdpRootPath = getTestSampleContestDirectory(sampleContestName);
+        String cdpConfig = cdpRootPath + File.separator + IContestLoader.CONFIG_DIRNAME;
+
+        IInternalContest contest = snake.fromYaml(null, cdpConfig);
+        loadFullSampleContest(contest, sampleContestName);
+
+        QuickSubmitter submitter = new QuickSubmitter();
+
+        MockController controller = new MockController();
+        contest.setClientId(new ClientId(contest.getSiteNumber(), Type.TEAM, 1));
+        controller.setContest(contest);
+
+        submitter.setContestAndController(contest, controller);
+
+        int expectedFiles = 40;
+
+        List<File> files = submitter.getAllCDPsubmissionFileNames(contest, cdpConfig);
+        assertEquals(expectedFiles, files.size());
+
+        int totSubmit = submitter.sendSubmissions(files);
+        assertEquals(expectedFiles, totSubmit);
+    }
 
 }
