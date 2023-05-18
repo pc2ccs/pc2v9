@@ -4,18 +4,37 @@
 # Purpose:
 #   This script installs a Linux service that runs the script to create
 #   the cgroup necessary for PC2 sandboxes.  The service is a one-shot service
-#   that simply runs the /usr/pc2/bin/pc2installsandbox shell script
+#   that simply runs the PC2INSTALL_DIR/bin/pc2installsandbox shell script
+#   After running this script, there is no need to reboot the system if the script
+#   completes successfully.
+#
+# Arguments:
+#   pc2user - Linux login name of the user that will be doing judging or auto-judging
+#   pc2group - Linux group name of the user that will be doing judging or auto-judging
+#     You can determine the group name of the user 'pc2user' by issuing the following command at
+#     the Linux command prompt:
+#       id -gn pc2user
+#  The pc2user and pc2group are used to set ownership of the cgroup v2 for so the
+#  judge can use the sandbox.
 #
 # Author: John Buck
 
-#DEBUG=
-DEBUG="echo Would"
+DEBUG=
+#DEBUG="echo Would"
 
 SCRIPTNAME="$0"
+
+# This will set basedir to the pc2 home installation folder
+. `dirname $0`/pc2env
 
 if test $# -ne 2
 then
 	echo Usage: $SCRIPTNAME pc2user pc2group
+	echo "    pc2user - Linux login name of the user that will be doing judging or auto-judging"
+	echo "    pc2group - Linux group name of the user that will be doing judging or auto-judging"
+	echo "      You can determine the group name of the user 'pc2user' by issuing the following command at"
+	echo "      the Linux command prompt:"
+	echo "        id -gn pc2user"
 	exit 4
 fi
 JUDGE_USER="$1"
@@ -31,9 +50,9 @@ then
 	exit 6
 fi
 
-INSTALL_SCRIPT_PATH=/usr/pc2/bin/pc2installsandbox
+INSTALL_SCRIPT_PATH=${basedir}/bin/pc2installsandbox
 SERVICE_NAME=pc2_cgroup.service
-SERVICE_FILE=/usr/pc2/support/system_cgroup/${SERVICE_NAME}
+SERVICE_FILE=${basedir}/support/system_cgroup/${SERVICE_NAME}
 
 ServiceError()
 {
