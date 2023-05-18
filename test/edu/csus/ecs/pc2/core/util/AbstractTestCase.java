@@ -33,8 +33,6 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import junit.framework.TestCase;
-
 import org.junit.ComparisonFailure;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -47,6 +45,7 @@ import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.LogFormatter;
+import edu.csus.ecs.pc2.core.log.LogUtilities;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -62,6 +61,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
+import junit.framework.TestCase;
 
 /**
  * Test utility methods.
@@ -1565,5 +1565,14 @@ public class AbstractTestCase extends TestCase {
     public void assertNoPermssion(edu.csus.ecs.pc2.core.security.Permission.Type type, Account account) {
         assertFalse("Expected for  " + account + " Permission " + type, account.isAllowed(type));
     }
-    
+
+    /**
+     * Ensure static log is initialized.
+     * 
+     * If not used then an NPE will occur if StaticLog is used.
+     * 
+     */
+    public void ensureStaticLog() {
+        LogUtilities.ensureStaticLog();
+    }
 }

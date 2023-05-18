@@ -41,4 +41,20 @@ public class LogUtilities {
             log.log(Log.WARNING, prefixString + " Unable to add file contents, filename = "+filename+" "+e.getMessage());
         }
     }
+    /**
+     * 
+     * Ensure static log is initialized.
+     * 
+     * If not used then an NPE will occur if StaticLog is used.
+     */
+    public static void ensureStaticLog() {
+        
+        if (StaticLog.getLog() == null) {
+            String testDirectory = "logs";
+            StaticLog.setLog(new Log(testDirectory, "LogUtilities.log"));
+        }
+    }
+    
+    
+    
 }
