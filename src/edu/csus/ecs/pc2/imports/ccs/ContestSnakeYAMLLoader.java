@@ -269,6 +269,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
     
+    private int getMemoryLimitMB(IInternalContest contest) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        return(contestInformation.getMemoryLimitInMeg());
+    }
+
     private void setMemoryLimitMB(IInternalContest contest, int memoryLimitMB) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setMemoryLimitInMeg(memoryLimitMB);
@@ -479,6 +484,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         Integer defaultTimeout = fetchIntValue(content, TIMEOUT_KEY, DEFAULT_TIME_OUT);
         
+        int currentGlobalMemoryLimit = getMemoryLimitMB(contest);
+        Integer globalMemoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, currentGlobalMemoryLimit);
+        if(currentGlobalMemoryLimit != globalMemoryLimit) {
+            setMemoryLimitMB(contest, globalMemoryLimit);
+        }
         
         for (String line : yamlLines) {
             if (line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
