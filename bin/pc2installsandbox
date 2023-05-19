@@ -4,6 +4,14 @@
 # Purpose: install a Linux cgroup v2 sandbox for PC2
 # Author: John Buck, based on original version by John Clevenger
 #
+# Description:
+# In order to support executing submissions in a sandbox on Linux, we use cgroups v2.  Therefore,
+# the systems that are doing judging must support that.  Most newer Linux systems do.
+# 
+# The cgroup used for pc2 judging, /sys/fs/cgroup/pc2. must be created and set up with the proper
+# permissions every time the system boots (cgroups are not persistent across reboots).  The pc2_cgroup.service
+# systemd service arranges for this to happen.  It is a "one-shot" service, and all it does is execute
+# this shell script.   The bin/pc2installservice shell script will install this service for you.
 
 FAIL_EXIT_CODE=43
 FAIL_BAD_ARGS_ALLOWED_EXIT_CODE=44
@@ -72,11 +80,11 @@ fi
 echo ...done.
 
 # First, remove any existing remnants
-for dir in `ls $PC2_CGROUP_PATH/sandbox* 2>/dev/null`
+for dir in `ls -d $PC2_CGROUP_PATH/sandbox* 2>/dev/null`
 do
 	if test -d "$dir"
 	then
-		DEBUG echo Removing existing $dir
+		$DEBUG echo Removing existing $dir
 		rmdir "$dir"
 	fi
 done
