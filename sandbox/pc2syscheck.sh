@@ -39,9 +39,9 @@ usage()
 {
   echo Usage: pc2syscheck.sh [--help]
   echo "   Exit code of 0 means success, system supports pc2 sandbox"
-  echo "   Exit code of $FAIL_INVALID_CGROUP_INSTALLATION  - cgroups not installed on system"
-  echo "   Exit code of $FAIL_MISSING_CGROUP_CONTROLLERS_FILE - missing cgroups controller file"
-  echo "   Exit code of $FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE - missing cgroups subtree file"
+  echo "   Exit code of $FAIL_INVALID_CGROUP_INSTALLATION  - cgroup not installed on system"
+  echo "   Exit code of $FAIL_MISSING_CGROUP_CONTROLLERS_FILE - missing cgroup controller file"
+  echo "   Exit code of $FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE - missing cgroup subtree file"
   echo "   Exit code of $FAIL_CPU_CONTROLLER_NOT_ENABLED - CPU cgroup controller is not enabled"
   echo "   Exit code of $FAIL_MEMORY_CONTROLLER_NOT_ENABLED - MEMORY cgroup controller is not enabled"
   echo "   Exit code of 1 indicates the --help option was specified"
@@ -53,42 +53,42 @@ then
 	exit 1
 fi
 
-# make sure we have CGroups V2 properly installed on this system, including a PC2 structure
+# make sure we have cgroup V2 properly installed on this system, including a PC2 structure
 
-DEBUG echo checking CGroup V2 installation...
+DEBUG echo checking cgroup V2 installation...
 if [ ! -d "$CGROUP_PATH" ]; then
-   echo $0: expected CGroups v2 installation in /sys/fs/cgroup
+   echo $0: Failed to find expected cgroup v2 installation in /sys/fs/cgroup
    exit $FAIL_INVALID_CGROUP_INSTALLATION
 fi
 
-DEBUG echo checking PC2 CGroup V2 installation...
+DEBUG echo checking PC2 cgroup V2 installation...
 if [ ! -d "$PC2_CGROUP_PATH" ]; then
-   echo $0: expected pc2sandbox CGroups v2 installation in $PC2_CGROUP_PATH 
+   echo $0: Failed to find expected "'pc2'" sandbox cgroup v2 installation in $PC2_CGROUP_PATH 
    exit $FAIL_INVALID_CGROUP_INSTALLATION
 fi
 
 if [ ! -f "$CGROUP_PATH/cgroup.controllers" ]; then
-   echo $0: missing file cgroup.controllers in $CGROUP_PATH
+   echo $0: Failure: The cgroup.controllers file is missing in $CGROUP_PATH
    exit $FAIL_MISSING_CGROUP_CONTROLLERS_FILE
 fi
 
 if [ ! -f "$CGROUP_PATH/cgroup.subtree_control" ]; then
-   echo $0: missing file cgroup.subtree_control in $CGROUP_PATH
+   echo $0: Failure: The cgroup.subtree_control file is missing in $CGROUP_PATH
    exit $FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE
 fi
 
 # make sure the cpu and memory controllers are enabled
 if ! grep -q -F "cpu" "$CGROUP_PATH/cgroup.subtree_control"; then
-   echo $0: cgroup.subtree_control in $CGROUP_PATH does not enable cpu controller
+   echo $0: Failure: The cgroup.subtree_control file in $CGROUP_PATH does not enable cpu controller
    exit $FAIL_CPU_CONTROLLER_NOT_ENABLED
 fi
 
 if ! grep -q -F "memory" "$CGROUP_PATH/cgroup.subtree_control"; then
-   echo $0: cgroup.subtree_control in $CGROUP_PATH does not enable memory controller
+   echo $0: Failure: The cgroup.subtree_control file in $CGROUP_PATH does not enable memory controller
    exit $FAIL_MEMORY_CONTROLLER_NOT_ENABLED
 fi
 
 
-# we seem to have a valid CGroup installation
+# we seem to have a valid cgroup installation
 DEBUG echo ...done.
 exit 0
