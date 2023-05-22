@@ -20,6 +20,7 @@ public class LanguageUtilitiesTest extends AbstractTestCase {
      */
     public void testmatchFirstLanguage() throws Exception {
 
+        ensureStaticLog();
         IInternalContest contest = loadContestFromSampleContest(null, "mini");
         assertNotNull(contest);
 
@@ -55,6 +56,7 @@ public class LanguageUtilitiesTest extends AbstractTestCase {
      */
     public void testmatchFirstLanguageForCC() throws Exception {
 
+        ensureStaticLog();
         IInternalContest contest = loadContestFromSampleContest(null, "qanat");
         assertNotNull(contest);
 
