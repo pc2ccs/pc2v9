@@ -254,7 +254,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
         public void runChanged(RunEvent event) {
             updateRunRow(event.getRun(), event.getWhoModifiedRun());
 
-            if (event.getSentToClientId().equals(getContest().getClientId())) {
+            if (getContest().getClientId().equals(event.getSentToClientId())) {
                 // we checked out the run, let's try to judge it.
 
                 Run run = event.getRun();

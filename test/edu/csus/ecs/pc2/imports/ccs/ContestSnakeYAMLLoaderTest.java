@@ -399,7 +399,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals(18000, time.getContestLengthSecs());
 
         // scoreboard-freeze: 4:00:00
-        assertEquals("14400", info.getFreezeTime());
+        assertEquals("4:00:00", info.getFreezeTime());
 
         Language[] languages = contest.getLanguages();
 
@@ -504,7 +504,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals(18000, time.getContestLengthSecs());
 
         // scoreboard-freeze: 4:00:00
-        assertEquals("14400", info.getFreezeTime());
+        assertEquals("4:00:00", info.getFreezeTime());
     }
 
     /**
@@ -2232,7 +2232,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         String entryLocation = "ccs1";
         
         InternalContest contest = new InternalContest();
-        
+        ensureStaticLog();
+
         loader.initializeContest(contest, new File(entryLocation));
         
 //        System.out.println("Loaded CDP/config values from " + entryLocation);
