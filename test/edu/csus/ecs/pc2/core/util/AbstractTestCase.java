@@ -1574,7 +1574,7 @@ public class AbstractTestCase extends TestCase {
      * @return contest model 
      * @throws Exception
      */
-    public IInternalContest loadContestFromSampleContsts(IInternalContest contest, String sampleName) throws Exception {
+    public IInternalContest loadContestFromSampleContest(IInternalContest contest, String sampleName) throws Exception {
 
         IContestLoader loader = new ContestSnakeYAMLLoader();
         if (contest == null) {

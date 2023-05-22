@@ -118,7 +118,7 @@ public class QuickSubmitter implements UIPlugin {
                     Problem problem = guessProblem(getContest(), file.getAbsolutePath());
                     try {
                         controller.submitJudgeRun(problem, language, file.getAbsolutePath(), null);
-                        log.log(Level.INFO, "submitted run send with language " + language + " and problem " + problem);
+                        log.log(Level.INFO, "submitted run with language " + language + " and problem " + problem);
                         numberSubmitted++;
                     } catch (Exception e) {
                         log.log(Level.SEVERE, "problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage(), e);

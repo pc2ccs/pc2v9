@@ -15,21 +15,26 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 public class LanguageUtilitiesTest extends AbstractTestCase {
 
     /**
-     * Test whether in mini contest C++ extensions find C++ languages.
-     * 
+     * Test for C++, Kotlin and C language display names.
      * @throws Exception
      */
     public void testmatchFirstLanguage() throws Exception {
 
-        IInternalContest contest = loadContestFromSampleContsts(null, "mini");
+        IInternalContest contest = loadContestFromSampleContest(null, "mini");
         assertNotNull(contest);
 
         String[] data = {
                 "java;Java", //
                 "cpp;GNU C++", //
                 "c++;GNU C++", //
+                "kt;Kotlin", //
+                "c;GNU C", //
         };
 
+        // Add Kotlin/kt as a language
+        Language kotlin = new Language("Kotlin");
+        contest.addLanguage(kotlin);
+        
         for (String string : data) {
 
             String[] fields = string.split(";");
@@ -50,7 +55,7 @@ public class LanguageUtilitiesTest extends AbstractTestCase {
      */
     public void testmatchFirstLanguageForCC() throws Exception {
 
-        IInternalContest contest = loadContestFromSampleContsts(null, "qanat");
+        IInternalContest contest = loadContestFromSampleContest(null, "qanat");
         assertNotNull(contest);
 
         String cdpDir = getTestSampleContestDirectory("qanat");

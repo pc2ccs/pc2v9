@@ -15,6 +15,8 @@ public class LanguageUtilities {
      * List of language extensions and their full or partial language display name
      */
     public static final  String[][] LANGUAGE_LIST = { //
+            { "java", "Java" }, //
+            { "kt", "Kotlin" }, //
             { "cpp", "C++" }, //
             { "cc", "C++" }, //
             { "C", "C++" }, //
@@ -22,7 +24,8 @@ public class LanguageUtilities {
             { "py", "Python" }, //
             { "cs", "Mono" }, //
             { "pl", "Perl" }, //
-
+            // match c extension last, otherwisse would match C for C++ languages
+            { "c", "C" }, //
     };
 
 
@@ -33,7 +36,7 @@ public class LanguageUtilities {
      * @return file extension if no period found returns null
      */
     public static String getExtension(String filename) {
-        int idx = filename.indexOf(".");
+        int idx = filename.lastIndexOf(".");
         if (idx != -1) {
             return filename.substring(idx + 1, filename.length());
         }
@@ -73,6 +76,7 @@ public class LanguageUtilities {
             
             if (fileExtension.equals(extension)) {
                 displayName = dispName;
+                break;
             }
         }
 
