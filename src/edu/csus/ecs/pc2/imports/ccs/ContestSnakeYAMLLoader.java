@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.ByteArrayInputStream;
@@ -56,6 +56,7 @@ import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
+import edu.csus.ecs.pc2.core.model.Problem.SandboxType;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -263,6 +264,25 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
+
+    private void setSandboxCommand(IInternalContest contest, String sandboxCommandLine) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setSandboxCommandLine(sandboxCommandLine);
+        contest.updateContestInformation(contestInformation);
+    }
+    
+    private int getMemoryLimitMB(IInternalContest contest) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        return(contestInformation.getMemoryLimitInMeg());
+    }
+
+    private void setMemoryLimitMB(IInternalContest contest, int memoryLimitMB) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setMemoryLimitInMeg(memoryLimitMB);
+        contest.updateContestInformation(contestInformation);
+    }
+
+
     private void setCcsTestMode(IInternalContest contest, boolean ccsTestMode) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setCcsTestMode(ccsTestMode);
@@ -468,7 +488,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         Integer defaultTimeout = fetchIntValue(content, TIMEOUT_KEY, DEFAULT_TIME_OUT);
-
+        
+        int currentGlobalMemoryLimit = getMemoryLimitMB(contest);
+        Integer globalMemoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, currentGlobalMemoryLimit);
+        if(currentGlobalMemoryLimit != globalMemoryLimit) {
+            setMemoryLimitMB(contest, globalMemoryLimit);
+        }
+        
         for (String line : yamlLines) {
             if (line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
                 setTitle(contest, unquoteAll(line.substring(line.indexOf(DELIMIT) + 1).trim()));
@@ -1112,6 +1138,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return value;
     }
 
+    /**
+     * Fetch value from a map.
+     * 
+     * @param content
+     * @param key
+     * @return null if content does not contain a value for the key, else the value for the key.
+     */
     private String fetchValue(Map<String, Object> content, String key) {
         if (content == null) {
             return null;
@@ -1390,6 +1423,30 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (maxOutputPC2 != null) {
             problem.setMaxOutputSizeKB(maxOutputPC2);
         }
+        
+        Integer memoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, Problem.DEFAULT_MEMORY_LIMIT_MB);
+        problem.setMemoryLimitMB(memoryLimit);
+        
+        String sandboxCommandLine = fetchValue(content, SANDBOX_COMMAND_LINE_KEY, "");
+        problem.setSandboxCmdLine(sandboxCommandLine);
+        
+        String sandboxProgramName = fetchValue(content, SANDBOX_PROGRAM_NAME_KEY, "");
+        problem.setSandboxProgramName(sandboxProgramName);
+        
+        String sandboxTypeString = fetchValue(content, SANDBOX_TYPE_KEY);
+        if (sandboxTypeString != null) {
+
+            try {
+                SandboxType type = SandboxType.valueOf(sandboxTypeString);
+                problem.setSandboxType(type);
+            } catch (Exception e) {
+                throw new YamlLoadException("For problem short name " + problem.getShortName() + //
+                        ", unknown sandbox type " + sandboxTypeString + " " + e.getMessage(), e);
+            }
+
+        } else {
+            problem.setSandboxType(SandboxType.NONE);
+        }
 
         //get the map (if any) of the CLICS "limits" section in the problem.yaml file
         Map<String, Object> limitsContent = fetchMap(content, LIMITS_KEY);
@@ -1436,6 +1493,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             if (clicsMaxOutput != null) {
                 problem.setMaxOutputSizeKB(clicsMaxOutput);
             }
+            
+            Integer clicsMemoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, Problem.DEFAULT_MEMORY_LIMIT_MB);
+            problem.setMemoryLimitMB(clicsMemoryLimit);
         }
         
         if (!usingCustomValidator) {

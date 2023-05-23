@@ -80,6 +80,16 @@ public class ContestInformation implements Serializable{
     private int lastRunNumberSubmitted = 0;
     
     /**
+     * Memory Limit for team's solution (application).
+     */
+    private int memoryLimitInMeg = 0;
+    
+    /**
+     * Sandbox application or application command line.
+     */
+    private String sandboxCommandLine = "";
+    
+    /**
      * Display string for team display on standings.
      * 
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, Account, Group)
@@ -801,7 +811,23 @@ public class ContestInformation implements Serializable{
     public void setTeamScoreboardDisplayFormat(String teamScoreboardDisplayFormat) {
         this.teamScoreboardDisplayFormat = teamScoreboardDisplayFormat;
     }
-    
+
+    public int getMemoryLimitInMeg() {
+        return memoryLimitInMeg;
+    }
+
+    public void setMemoryLimitInMeg(int memoryLimitInMeg) {
+        this.memoryLimitInMeg = memoryLimitInMeg;
+    }
+
+    public String getSandboxCommandLine() {
+        return sandboxCommandLine;
+    }
+
+    public void setSandboxCommandLine(String sandboxCommandLine) {
+        this.sandboxCommandLine = sandboxCommandLine;
+    }
+        
     public String getOverrideLoadAccountsFilename() {
         return overrideLoadAccountsFilename;
     }
@@ -809,6 +835,7 @@ public class ContestInformation implements Serializable{
     public void setOverrideLoadAccountsFilename(String overrideLoadAccountsFilename) {
         this.overrideLoadAccountsFilename = overrideLoadAccountsFilename;
     }
+
     public boolean isLoadSampleJudgesData() {
         return loadSampleJudgesData;
     }

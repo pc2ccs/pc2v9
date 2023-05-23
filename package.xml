@@ -87,6 +87,15 @@
                 <include name="**/rotate*"/>
                 <include name="**/distribute_score"/>
             </zipfileset>
+            <zipfileset dir="${sandbox.dir}" filemode="755" prefix="${release}/sandbox">
+                <include name="**/pc2sandbox.sh"/>
+                <include name="**/pc2syscheck.sh"/>
+                <include name="**/pc2syscheck.cmd"/>
+            </zipfileset>
+            <zipfileset dir="${support.dir}" filemode="644" prefix="${release}/support">
+                <include name="system_cgroup/pc2_cgroup.service"/>
+                <include name="system_cgroup/README"/>
+            </zipfileset>
             <zipfileset dir="${projects.dir}" filemode="755" prefix="${release}/projects">
                 <include name="*.zip"/>
                 <exclude name="EWTeam/*"/>

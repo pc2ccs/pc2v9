@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -3680,6 +3680,44 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
         
     }
+    
+    
+    /**
+     * Test yaml import for memory-limit-in-Meg and sandbox.
+     * 
+     * @throws Exception
+     */
+    
+    public void testLoadSandboxAndMemoryLimit() throws Exception {
+
+        /**
+         * Contest to use as input
+         */
+        String sampleContestDirName = "sumitMTC";
+        
+        IInternalContest contest = new InternalContest();
+        
+        
+        loadSampleContest(contest, sampleContestDirName);
+        
+        assertNotNull(contest);
+
+        ContestInformation info = contest.getContestInformation();
+        assertEquals("title ", "Sumit multi test set", info.getContestTitle());
+
+//        startExplorer(info.getJudgeCDPBasePath());
+
+        Problem problem = getProblemByLetter(contest, "A");
+
+        int expectedLimit = 2099;
+        assertEquals("Memory limit", expectedLimit, problem.getMemoryLimitMB());
+
+        String expected = "{:sandboxprogramname} {:memlimit} {:timelimit}";
+        assertEquals("Sandbox command", expected, problem.getSandboxCmdLine());
+        
+        
+   
+    }
 
     private IInternalContest fullLoadSampleContest(String sampleName) throws Exception {
         IInternalContest contest  = new InternalContest();
@@ -3729,6 +3767,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     public void testProblemNameENTex() throws Exception {
         String testDataContestDirName = "samplecdp";
 
+
         String dirname = getTestDataDirname(testDataContestDirName);
 //        startExplorer(dirname);
 
@@ -3754,7 +3793,25 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
     }
    
-
+    /**
+     * Find/match problem in contest by problem letter
+     * @param inContest
+     * @param letter
+     * @return null if not found, else problem that is found to match letter
+     */
+    // TODO REFACTOR proomote/move getProblemByLetter into AbstractTestCase
+    private Problem getProblemByLetter(IInternalContest inContest, String letter) {
+        
+        Problem[] problems = inContest.getProblems();
+        for (Problem problem : problems) {
+            if (letter.equalsIgnoreCase(problem.getLetter())) {
+                return problem;
+            }
+            
+        }
+        return null;
+    }
+    
     
     /**
      * Test loading of output validator.
