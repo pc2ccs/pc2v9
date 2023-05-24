@@ -129,6 +129,7 @@
                 <include name="${release}/samps/sleep.exe"/>
                 <include name="${release}/samps/**/distribute_score**"/>
                 <include name="${release}/samps/**/rotate**"/>
+                <include name="${release}/sandbox/**"/>
             </tarfileset>
             <tarfileset mode="644" dir="${build.unpack.dir}">
                 <include name="${release}/samps/**"/>
