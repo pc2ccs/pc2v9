@@ -26,6 +26,8 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
+import edu.csus.ecs.pc2.ui.ShadowControlPane;
+import edu.csus.ecs.pc2.ui.ShadowControlPane.ShadowStatus;
 
 /**
  * This class listens for submission events in the event feed input stream from a remote CCS CLICS Contest API Event Feed.
@@ -491,6 +493,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                     submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(),
                                                             runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
                                                 } catch (Exception e) {
+                                                    ShadowControlPane.addToConnectTableEntry(ShadowStatus.FAILURE, "Unable to submit run "+overrideSubmissionID+" "+ e.getMessage());
                                                     // TODO design error handling reporting
                                                     logAndDebugPrint(log, Level.WARNING, "Exception submitting run for event: " + event, e);
                                                 }

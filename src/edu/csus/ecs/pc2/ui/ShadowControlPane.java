@@ -117,9 +117,9 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     
     private JTextField lastEventTimeTextField;
     
-    private JTableCustomized connectStatusTable;
+    private static JTableCustomized connectStatusTable;
     
-    private DefaultTableModel connectStatusTableModel;
+    private static DefaultTableModel connectStatusTableModel;
     
     private int statusScrollBarMax = 0;
     
@@ -127,7 +127,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     
     private String lastToken = null;
     
-    private SimpleDateFormat lastDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private static SimpleDateFormat lastDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     
     // Lightish green for success
     private Color statusColorSuccess = new Color(128, 255, 128);
@@ -135,7 +135,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private Color statusColorFailure = new Color(255, 128, 128);
 
     // Status column for JTable notifications
-    enum ShadowStatus {
+    public enum ShadowStatus {
         SUCCESS,
         FAILURE,
         INFO
@@ -678,7 +678,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         resizeColumnWidth(connectStatusTable);
     }
     
-    private void resizeColumnWidth(JTableCustomized table) {
+    private static void resizeColumnWidth(JTableCustomized table) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
@@ -960,7 +960,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         }
     }
 
-    private void addConnectTableEntry(ShadowStatus stat, String msg)
+    private static void addConnectTableEntry(ShadowStatus stat, String msg)
     {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -986,6 +986,34 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         });
         
     }
+    
+    public static void addToConnectTableEntry(ShadowStatus stat, String msg)
+    {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                Object[] objects = new Object[3];
+                
+                try {
+                    GregorianCalendar cal = new GregorianCalendar();
+                    
+                    lastDateFormat.setCalendar(cal);
+                    objects[0] = lastDateFormat.format(cal.getTime());
+                } catch(Exception e) {
+                    objects[0] = "Unknown";
+                }
+                objects[1] = stat;
+                if(msg == null || msg.isEmpty()) {
+                    objects[2] = "<Empty Message>";
+                } else {
+                    objects[2] = msg;
+                }
+                connectStatusTableModel.addRow(objects);
+                resizeColumnWidth(connectStatusTable);
+            }
+        });
+        
+    }
+    
     
     /*
      * IShadowMonitorStatus implementaiton
