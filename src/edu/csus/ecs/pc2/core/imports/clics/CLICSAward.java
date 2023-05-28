@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
@@ -83,9 +84,12 @@ public class CLICSAward {
     public String[] getTeam_ids() {
         return team_ids;
     }
-    
+
     public String toJSON() throws JsonProcessingException {
         ObjectMapper om = JSONObjectMapper.getObjectMapper();
+        om.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
+        // Older Jackson versions:
+        // om.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
         return om.writeValueAsString(this);
     }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports.clics;
 
 import java.io.FileOutputStream;
@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.xml.bind.JAXBException;
 
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.RunComparatorByElapsedRunIdSite;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -34,6 +36,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.TeamStanding;
 import edu.csus.ecs.pc2.core.standings.json.ScoreboardJsonModel;
 import edu.csus.ecs.pc2.core.standings.json.StandingScore;
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
@@ -45,6 +48,10 @@ import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
  *
  */
 public class CLICSJsonUtilities {
+
+    public static final String GROUP_WINNER_TITLE = "group-winner-";
+
+    public static final String WINNER_S_OF_GROUP_TITLE = "Winner(s) of group ";
 
     public static final String ID_WINNER = "winner";
 
@@ -67,7 +74,7 @@ public class CLICSJsonUtilities {
 // "citation": "First to solve problem housenumbering", 
 //
 // "citation": "Contest winner",     
-    
+
     /**
      * Return a list of CLICS Awards for a contest.
      * 
@@ -87,13 +94,13 @@ public class CLICSJsonUtilities {
         if (runs.length == 0) {
             return list;
         }
-        
+
         addWinner(contest, list);
 
         addFirstToSolve(contest, runs, list);
 
         addGroupWinners(contest, runs, list);
-        
+
         addMedals(contest, list);
 
         return list;
@@ -110,22 +117,30 @@ public class CLICSJsonUtilities {
             return;
         }
 
+        
         /**
          * Group Id and Client/Team Id
          */
         Map<Group, ClientId> groupWinners = new HashMap<Group, ClientId>();
+        try {
+            ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
 
-        for (Run run : runs) {
-            if (run.isSolved()) {
-                Group teamGroup = getGroupForTeam(contest, run.getSubmitter());
-
+            List<TeamStanding> teamStands = contestStandings.getTeamStandings();
+            for (TeamStanding teamStanding : teamStands) {
+                ClientId clientId = createClientId(teamStanding);
+                Group teamGroup = getGroupForTeam(contest, clientId);
                 if (teamGroup != null) {
-                    ClientId clientId = groupWinners.get(teamGroup);
-                    if (clientId == null && isActive(contest, run.getSubmitter())) {
-                        groupWinners.put(teamGroup, run.getSubmitter());
+                    ClientId foundClientId = groupWinners.get(teamGroup);
+                    if (foundClientId == null && isActive(contest,clientId)) {
+                        if (!"0".equals(teamStanding.getSolved())) {
+                            // only add if they actually have solved a problem
+                            groupWinners.put(teamGroup, clientId);
+                        }
                     }
                 }
             }
+        } catch (JAXBException | IllegalContestState | IOException e) {
+            StaticLog.getLog().log(Level.WARNING, "Error while calculating group winners DSA", e);
         }
 
         Set<Group> problemElementIds = groupWinners.keySet();
@@ -138,14 +153,25 @@ public class CLICSJsonUtilities {
 //            "citation": "Winner(s) of group University of Luxembourg", 
 //            "id": "group-winner-17"
 
-                String awardId = "group-winner-" + group.getGroupId();
-                String citation = "Winner(s) of group " + account.getDisplayName();
+                String awardId = GROUP_WINNER_TITLE + group.getGroupId();
+                String citation = WINNER_S_OF_GROUP_TITLE + group.getDisplayName();
 
                 CLICSAward groupWinner = new CLICSAward(awardId, citation, "" + clientId.getClientNumber());
                 list.add(groupWinner);
             }
-
         }
+    }
+
+    public static ClientId createClientId(TeamStanding teamStand) {
+        ClientId clientId = null;
+
+        try {
+            return new ClientId(Integer.parseInt(teamStand.getTeamSiteId()), ClientType.Type.TEAM, Integer.parseInt(teamStand.getTeamId()));
+        } catch (Exception e) {
+            ; // ignore excepion return null
+        }
+
+        return clientId;
     }
 
     private static boolean isActive(IInternalContest contest, ClientId clientId) {
@@ -160,7 +186,8 @@ public class CLICSJsonUtilities {
      * Get group for team/account.
      * 
      * @param contest
-     * @param submitter clientId for team
+     * @param submitter
+     *            clientId for team
      * @return null if not found, else the group
      */
     public static Group getGroupForTeam(IInternalContest contest, ClientId submitter) {
@@ -176,103 +203,74 @@ public class CLICSJsonUtilities {
         }
         return null;
     }
-    
-    
+
     public static void addMedals(IInternalContest contest, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
-     
-        
+
         ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
-        
+
 //        List<TeamScoreRow> rows = model.getRows();
 //        for (TeamScoreRow teamScoreRow : rows) {
 //            System.out.println("debug  srow "+getStandingsRow(teamScoreRow));
 //        }
         
+        int lastRankGolds = 4;
+        int lastRankSilver = 8;
+        int lastRankBronze = 12;
+
+        FinalizeData finalizeData = contest.getFinalizeData();
+        if (finalizeData != null) {
+            if (finalizeData.isCertified()) {
+                lastRankGolds = finalizeData.getGoldRank();
+                lastRankSilver = finalizeData.getSilverRank();
+                lastRankBronze = finalizeData.getBronzeRank();
+            }
+        }
+        
+
         TeamScoreRow teamRow = model.getRows().get(0);
         if (teamRow.getScore().getNum_solved() > 0) {
-            
-            List<TeamScoreRow> scoreRows = model.getRows();
-            
             // only assign medals to those who have solved a problem
 
-            List<String> teamList = getTeamids (0, 3, scoreRows);
-            if (teamList.size () > 0) {
-                //  "citation": "Gold Medalist", 
-                //  "id": "gold-medal"
-                CLICSAward firstToSolveAward = new CLICSAward(ID_GOLD_MEDAL,"Gold Medalist" , teamList);
+            List<TeamScoreRow> scoreRows = model.getRows();
+
+            List<String> teamList = getTeamIdsByRank(scoreRows, 0, lastRankGolds);
+            
+            if (teamList.size() > 0) {
+                // "citation": "Gold medal winner",
+                // "id": "gold-medal"
+                CLICSAward firstToSolveAward = new CLICSAward(ID_GOLD_MEDAL, "Gold medal winner", teamList);
                 list.add(firstToSolveAward);
             }
 
-
-            teamList = getTeamids (4, 7, scoreRows);
-            if (teamList.size () > 0) {
-                CLICSAward firstToSolveAward = new CLICSAward(ID_SILVER_MEDAL,"Silver Medalist" , teamList);
+             teamList = getTeamIdsByRank(scoreRows, lastRankGolds, lastRankSilver);
+            if (teamList.size() > 0) {
+                CLICSAward firstToSolveAward = new CLICSAward(ID_SILVER_MEDAL, "Silver medal winner", teamList);
                 list.add(firstToSolveAward);
             }
 
-            /**
-             * number of bronzes beyond rank 12
-             */
-            int b = 0; 
-            FinalizeData finalizeData = contest.getFinalizeData();
-            if (finalizeData != null) {
-                b = finalizeData.getBronzeRank();
-            }
-
-            teamList = getTeamids (8, scoreRows.size()-8, 12 + b, scoreRows);
-            if (teamList.size () > 0) {
-                CLICSAward firstToSolveAward = new CLICSAward(ID_BRONZE_MEDAL,"Bronze Medalist" , teamList);
+            teamList = getTeamIdsByRank(scoreRows,  lastRankSilver, lastRankBronze);
+            if (teamList.size() > 0) {
+                CLICSAward firstToSolveAward = new CLICSAward(ID_BRONZE_MEDAL, "Bronze medal winner", teamList);
                 list.add(firstToSolveAward);
             }
         }
     }
-        
+ 
+    
+    public static List<String> getTeamIdsByRank(List<TeamScoreRow> scoreRows, int lowRank, int rankInclHigh) {
 
-    /**
-     * get team list for reams who have solved at least one problem.
-     * @param startIdx
-     * @param endidx
-     * @param maxrank only include teams ids where their rank is <= maxrank
-     * @param teamRows
-     * @return
-     */
-    private static List<String>  getTeamids(int startIdx, int endidx, int maxrank, List<TeamScoreRow> teamRows) {
+        List<String> teamIds = new ArrayList<>();
 
-        
-        List<String> list = new ArrayList<String>();
+        for (TeamScoreRow teamScoreRow : scoreRows) {
 
-        for (int rowidx = startIdx; rowidx <= endidx; rowidx++) {
-
-            if (rowidx < teamRows.size()) {
-                TeamScoreRow row = teamRows.get(rowidx);
-
-                if (row.getScore().getNum_solved() > 0) {
-                    // must solve at least one to be medal winner
-
-                    if (row.getRank() <= maxrank ) {
-                        list.add("" + row.getTeam_id());
-                    }
-
-
-                }
+            if (lowRank < teamScoreRow.getRank() && teamScoreRow.getRank() <= rankInclHigh) {
+                teamIds.add(teamScoreRow.getTeam_id() + "");
             }
         }
-        
-        return list;
-    }
 
-    /**
-     * get team list for reams who have solved at least one problem.
-     * @param startIdx
-     * @param endidx
-     * @param teamRows
-     * @return
-     */
-    private static List<String> getTeamids(int startIdx, int endidx, List<TeamScoreRow> teamRows) {
-        return getTeamids(  startIdx,   endidx, Integer.MAX_VALUE, teamRows);
+        return teamIds;
     }
-
 
     /**
      * Add winner award.
@@ -286,25 +284,24 @@ public class CLICSJsonUtilities {
      * @throws IOException
      */
     public static void addWinner(IInternalContest contest, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
-        
+
         ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
-        
+
         String winnerId = null;
-        
+
         /**
          * Get teams in rank order.
          */
         List<TeamScoreRow> rows = model.getRows();
         int site = contest.getSiteNumber();
-        
+
         for (TeamScoreRow teamRow : rows) {
             int clientNumber = teamRow.getTeam_id();
             ClientId clientId = new ClientId(site, ClientType.Type.TEAM, clientNumber);
-            if (teamRow.getScore().getNum_solved() > 0 && 
-            winnerId == null & isActive(contest, clientId ) ) {
-                winnerId = Integer.toString( teamRow.getTeam_id());
-                
+            if (teamRow.getScore().getNum_solved() > 0 && winnerId == null & isActive(contest, clientId)) {
+                winnerId = Integer.toString(teamRow.getTeam_id());
+
             }
         }
 
@@ -312,14 +309,14 @@ public class CLICSJsonUtilities {
             CLICSAward firstToSolveAward = new CLICSAward(ID_WINNER, "Contest winner", winnerId);
             list.add(firstToSolveAward);
         }
-        
+
     }
 
     /**
      * Add first to solve awards to list
      * 
      * @param contest
-     * @param runs 
+     * @param runs
      * @param runs
      * @param list
      * @throws JsonParseException
@@ -336,7 +333,8 @@ public class CLICSJsonUtilities {
         for (Run run : runs) {
             if (run.isSolved()) {
                 ClientId clientId = firstToSolveTeamId.get(run.getProblemId());
-                if (clientId == null && isActive(contest, run.getSubmitter())) {;
+                if (clientId == null && isActive(contest, run.getSubmitter())) {
+                    ;
                     firstToSolveTeamId.put(run.getProblemId(), run.getSubmitter());
                 }
             }
@@ -349,8 +347,11 @@ public class CLICSJsonUtilities {
             Problem problem = contest.getProblem(eId);
             ClientId clientId = firstToSolveTeamId.get(eId);
 
+// dj { "citation": "First to solve problem C", "id": "first-to-solve-cram", "team_ids": [ "27" ] },
+//            s2 {"id":"first-to-solve-cram","citation":"First to solve problem cram","team_ids":["27"]},
+
             String awardId = "first-to-solve-" + problem.getShortName();
-            String citation = "First to solve problem " + problem.getShortName();
+            String citation = "First to solve problem " + problem.getLetter();
 
             CLICSAward firstToSolveAward = new CLICSAward(awardId, citation, "" + clientId.getClientNumber());
             list.add(firstToSolveAward);
@@ -362,9 +363,9 @@ public class CLICSJsonUtilities {
         StandingScore scoreRow = row.getScore();
 
         return row.getRank() + " " + //
-        row.getTeam_id() + " - " + //
-        scoreRow.getNum_solved() + " " + //
-        scoreRow.getTotal_time();
+                row.getTeam_id() + " - " + //
+                scoreRow.getNum_solved() + " " + //
+                scoreRow.getTotal_time();
     }
 
     /**
@@ -380,7 +381,8 @@ public class CLICSJsonUtilities {
         String[] lines = Utilities.loadFile(filename);
         String json = String.join(" ", lines);
 
-        List<CLICSAward> inList = getMapper().readValue(json, new TypeReference<List<CLICSAward>>() {});
+        List<CLICSAward> inList = getMapper().readValue(json, new TypeReference<List<CLICSAward>>() {
+        });
         if (inList != null) {
             list = inList;
         }
@@ -416,7 +418,7 @@ public class CLICSJsonUtilities {
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
         return writeAwardsJSONFile(printWriter, awards);
     }
-    
+
     /**
      * Writes awards elements to printWriter
      * 
@@ -428,12 +430,12 @@ public class CLICSJsonUtilities {
     public static int writeAwardsJSONFile(PrintWriter printWriter, List<CLICSAward> awards) throws Exception {
 
         int rowsWritten = 0;
-        
+
         int numrows = awards.size();
-        
+
         Exception ex = null;
         try {
-            
+
             printWriter.print("[");
             for (int i = 0; i < numrows; i++) {
                 CLICSAward clicsAward = awards.get(i);
@@ -442,6 +444,7 @@ public class CLICSJsonUtilities {
                     rowsWritten++;
                     if (rowsWritten < numrows) {
                         printWriter.print(",");
+                        printWriter.println();
                     }
                 } catch (Exception e) {
                     if (ex == null) {
@@ -463,7 +466,7 @@ public class CLICSJsonUtilities {
         if (ex != null) {
             throw ex;
         }
-        
+
         return rowsWritten;
     }
 

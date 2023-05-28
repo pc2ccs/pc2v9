@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.FileOutputStream;
@@ -86,7 +86,7 @@ public class CLICSAwardsReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "awards";
+        return "awards JSON";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {

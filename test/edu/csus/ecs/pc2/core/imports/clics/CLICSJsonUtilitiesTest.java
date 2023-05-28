@@ -1,19 +1,29 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports.clics;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import javax.xml.bind.JAXBException;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.standings.ContestStandings;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.TeamStanding;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -53,6 +63,37 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         assertEquals("Expecting no award rows ", 0, rowsWritten);
     }
+    
+    /**
+     * Dump standings information.
+     * 
+     * @param message
+     * @param contest
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IllegalContestState
+     * @throws IOException
+     */
+    private void dumpStandings(String message, IInternalContest contest) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
+        
+        System.out.println("dumpStandings: "+message);
+        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+
+        List<TeamStanding> teamStands = contestStandings.getTeamStandings();
+        for (TeamStanding teamStanding : teamStands) {
+            ClientId clientId = CLICSJsonUtilities.createClientId(teamStanding);
+            Group teamGroup = CLICSJsonUtilities.getGroupForTeam(contest, clientId);
+            if (teamGroup == null) {
+                System.out.println(teamStanding.getRank()+" "+teamStanding.getSolved()+" "+teamStanding.getPoints() + " " + //
+                        teamStanding.getTeamName() + " school:" + teamStanding.getShortSchoolName() + " TEAM HAS NO GROUP");
+            } else {
+                System.out.println(teamStanding.getRank()+" "+teamStanding.getSolved()+" "+teamStanding.getPoints() + " " + //
+                        teamStanding.getTeamName() + " school=" + teamStanding.getShortSchoolName() + " " + //
+                        teamGroup.getGroupId()+":"+teamGroup.getDisplayName());
+            }
+        }
+    }
 
     public void testcreateAwardsListFor5awards() throws Exception {
 
@@ -90,9 +131,10 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
 
-//        for (CLICSAward clicsAward : awards) {
-//            System.out.println("debug award "+clicsAward.toJSON());
-//        }
+//        dumpAwards ("debug DA ",System.out, awards);
+//        dumpStandings("debug XX ", contest);
+        
+        assertAwardCount(1, awards, CLICSJsonUtilities.WINNER_S_OF_GROUP_TITLE);
 
         assertEquals("Awards expected ", 6, awards.size());
 
@@ -108,6 +150,25 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
     }
     
+
+    /**
+     * If expectedCount found in citation matching searchForString. 
+     * @param expectedCount
+     * @param awards
+     * @param searchForString
+     */
+    private void assertAwardCount(int expectedCount, List<CLICSAward> awards, String searchForString) {
+
+        int count = 0;
+        for (CLICSAward clicsAward : awards) {
+            if (clicsAward.getCitation() != null && clicsAward.getCitation().contains(searchForString)) {
+                count++;
+            }
+        }
+
+        assertEquals("Expecting " + searchForString + " citation count ", expectedCount, count);
+    }
+
     /**
      * Test with runs with only No judgement runs.   No awards output.
      * 
@@ -193,6 +254,8 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
         List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+        
+        
 
         assertEquals("Awards expected ", 4, awards.size());
 
@@ -270,7 +333,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
         
-//        dumpAwards(System.out,  awards);
+//        dumpAwards("test All ", System.out,  awards);
         
         assertEquals("Awards expected ", 12, awards.size());
         
@@ -341,6 +404,8 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
         List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+        
+        dumpStandings("debug 22  Two", contest);
 
         assertTeamCount(awards, CLICSJsonUtilities.ID_WINNER, 1);
 
@@ -361,17 +426,16 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         assertTeamCount(awards, CLICSJsonUtilities.ID_GOLD_MEDAL, 4);
         assertTeamCount(awards, CLICSJsonUtilities.ID_SILVER_MEDAL, 4);
-        assertTeamCount(awards, CLICSJsonUtilities.ID_BRONZE_MEDAL, 14);
+        assertTeamCount(awards, CLICSJsonUtilities.ID_BRONZE_MEDAL, 11);
 
         assertEquals("Awards expected ", 7, awards.size());
     }
     
-    protected void dumpAwards(PrintStream out, List<CLICSAward> awards) throws JsonProcessingException {
-      for (CLICSAward clicsAward : awards) {
-          out.println("debug dump award  = " + clicsAward.toJSON());
-      }
-
-        
+    protected void dumpAwards(String message, PrintStream out, List<CLICSAward> awards) throws JsonProcessingException {
+        out.println("dumpAwards: "+message);
+        for (CLICSAward clicsAward : awards) {
+            out.println("debug dump award  = " + clicsAward.toJSON());
+        }
     }
 
     protected FinalizeData createFinalizeData(int numberGolds, int numberSilvers, int numberBronzes) {
@@ -460,15 +524,14 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         List<CLICSAward> list = new ArrayList<CLICSAward>();
         CLICSJsonUtilities.addMedals(contest, list);
         
-//        dumpAwards(System.out,  awards);
-        assertEquals("Awards expected ", 9, awards.size());
+        assertEquals("Awards expected ", 10, awards.size());
 
         String outdir = getOutputDataDirectory(getName());
         ensureDirectory(outdir);
         String awardsFile = outdir + File.separator + "awards.json";
 
         int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
-        assertEquals("Expecting no award rows ", 9, rowsWritten);
+        assertEquals("Expecting no award rows ", 10, rowsWritten);
         
 //        editFile(awardsFile, "debug A "+getName());
         
@@ -604,7 +667,6 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         assertFalse("Team account not generated", account.getClientId().equals(Type.TEAM));
 
     }
-
     /**
      * Initialize contest with teams, problems, languages, judgements.
      * 
