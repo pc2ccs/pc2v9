@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.standings;
 
 import java.io.File;
@@ -30,8 +30,13 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
+import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.standings.json.ScoreboardJsonModel;
 
@@ -174,10 +179,7 @@ public class ScoreboardUtilites {
         }
 
         return contents;
-       
     }
-    
-    
 
     public static ScoreboardJsonModel createContestStandingsFromJSON(File jsonFile) throws JAXBException, JsonParseException, JsonMappingException, IOException  {
         ObjectMapper mapper = JSONObjectMapper.getObjectMapper();
@@ -188,6 +190,115 @@ public class ScoreboardUtilites {
     public static int toInt(String string, int defaultNumber) {
         return Utilities.nullSafeToInt(string, defaultNumber);
     }
+
+    public static Run[] getRunsForUserDivision(ClientId clientId, IInternalContest contest) {
+
+        String division = getDivision(contest, clientId);
+        
+//        System.out.println("debug 22 getRunsForUserDivision for "+clientId+" div is "+division);
+
+        if (ClientType.Type.TEAM.equals(clientId.getClientType())) {
+
+            List<Run> theDivisionTeamRuns = new ArrayList<Run>();
+            for (Run run : contest.getRuns()) {
+
+                ClientId runClientId = run.getSubmitter();
+
+                if (runClientId.equals(clientId)) {
+                    // add team/client's own runs
+                    theDivisionTeamRuns.add(run);
+                } else {
+                    // add if submitting team in same division
+                    if (matchDivsion(contest, division, run.getSubmitter())) {
+                        theDivisionTeamRuns.add(run);
+//                        System.out.println("debug 22 Added run " + run);
+                    }
+                }
+            }
+
+            return (Run[]) theDivisionTeamRuns.toArray(new Run[theDivisionTeamRuns.size()]);
+            
+        } else {
+            return contest.getRuns();
+        }
+    }
     
-    
+    public static Run[] getRunsForDivision(IInternalContest contest, String division) {
+
+        List<Run> theDivisionTeamRuns = new ArrayList<Run>();
+        for (Run run : contest.getRuns()) {
+
+            // add if submitting team in same division
+            if (matchDivsion(contest, division, run.getSubmitter())) {
+                theDivisionTeamRuns.add(run);
+            }
+        }
+
+        return (Run[]) theDivisionTeamRuns.toArray(new Run[theDivisionTeamRuns.size()]);
+
+    }
+
+    /**
+     * Is the submitter in the inputDivision?
+     * @param contest
+     * @param inputDivision
+     * @param submitter
+     * @return true if submitter division matches inputDivision, else false
+     */
+    protected static boolean matchDivsion(IInternalContest contest, String inputDivision, ClientId submitter) {
+
+        String division = getDivision(contest, submitter);
+
+        if (inputDivision == null && division == null) {
+            return true;
+        }
+        if (inputDivision == null) {
+            return false;
+        } else {
+            return inputDivision.equals(division);
+        }
+    }
+
+    /**
+     * Return division for input clientId.
+     * 
+     * @param contest
+     * @param submitter
+     * @return null if no division, else a digit
+     */
+    public static String getDivision(IInternalContest contest, ClientId submitter) {
+        
+        ElementId groupId = contest.getAccount(submitter).getGroupId();
+        if (groupId == null) {
+            return null;
+        }
+        
+        Group group = contest.getGroup(groupId);
+        if (group == null) {
+            return null;
+        }
+        
+        String groupName = group.getDisplayName().trim();
+        
+        return getDivision(groupName);
+    }
+
+    /**
+     * Return division number from groupName
+     * @param groupName
+     * @return null if no division nubmer found, else the division number
+     */
+    // TODO REFACTOR i689 redesign how divisions are identified. 
+    public static String getDivision(String groupName) {
+
+        int idx = groupName.lastIndexOf('D');
+        if (idx != -1) {
+            // expecting D# at end of string
+            if (idx == groupName.length() - 2) {
+                return groupName.substring(idx+1);
+            }
+        }
+        return null;
+    }
+
 }

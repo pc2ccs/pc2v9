@@ -128,9 +128,14 @@ public class SubmitSubmissionsPane extends JPanePlugin {
             int result = FrameUtilities.yesNoCancelDialog(this, "Submit " + files.size() + " sample submissions?", "Submit CDP submissions");
 
             if (result == JOptionPane.YES_OPTION) {
-                submitter.sendSubmissions(files);
-                
-                showMessage("Submitted "+files.size()+" runs.");
+
+                int numberSubmitted = submitter.sendSubmissions(files);
+
+                if (numberSubmitted == files.size()) {
+                    showMessage("Submitted all (" + files.size() + ") files/runs.");
+                } else {
+                    showMessage("Submitted " + numberSubmitted + " of " + files.size() + " files/runs.");
+                }
             }
 
         } // else TODO provide way to send some of the runs, not just all.

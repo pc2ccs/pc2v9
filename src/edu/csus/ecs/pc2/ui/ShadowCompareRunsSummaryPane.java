@@ -51,7 +51,7 @@ public class ShadowCompareRunsSummaryPane extends JPanel {
      */
     public ShadowCompareRunsSummaryPane(Map<String, ShadowJudgementInfo> currentJudgementMap) {
         
-        this.setMaximumSize(new Dimension(600,40));
+        this.setMaximumSize(new Dimension(700,40));
        
         updateSummary(currentJudgementMap);
 

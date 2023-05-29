@@ -89,6 +89,7 @@ public class ContestCompareModelTest extends AbstractTestCase {
         }
         
         IContestLoader loader = new ContestSnakeYAMLLoader();
+        ensureStaticLog();
 
         // Load Configuration from CDP
         loader.initializeContest(contest, new File(entryLocation));
@@ -106,6 +107,8 @@ public class ContestCompareModelTest extends AbstractTestCase {
         
         return contest;
     }
+
+
 
     /**
      * Testing mini contest model comparison with event feed filename.

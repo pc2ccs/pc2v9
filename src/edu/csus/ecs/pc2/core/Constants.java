@@ -74,6 +74,9 @@ public final class Constants {
      * Default contest length.
      */
     public static final long DEFAULT_CONTEST_LENGTH_SECONDS = 18000; // 5 * 60 * 60
+    
+    
+    public static final int DEFAULT_MAX_OUTPUT_SIZE_K = 512;
 
     /**
      * PC<sup>2</sup> Validator Program Name.
@@ -95,6 +98,22 @@ public final class Constants {
      */
     public static final String DEFAULT_CLICS_VALIDATOR_COMMAND = "{:validator} {:infile} {:ansfile} {:feedbackdir} ";
     
+    
+    /**
+     * Command substitution variable for name of thing to execute (basename of source file)
+     */
+    public static final String CMDSUB_BASENAME_VARNAME = "{:basename}";
+    
+    /**
+     * Command substitution variable for conditional suffix
+     * This can be used for languages (such as Kotlin), that has a different main class name than the basename of
+     * the source.  eg.  MyClass.kt  uses MyClassKt as the main class name.  This is conditional in that if the
+     * trailing string (suffix) isn't already immediately to the left of the operand of this substitution variable, then it gets added.
+     * eg. {:basename}{:ensuresuffix=Kt}  if {:basename} is MyClassKt then, the {:ensuresuffix=Kt} is a no-op (empty string).  If
+     * {:basename} is MyClass then the {:ensuresuffix=Kt} evaluates to "Kt" making the result: MyClassKt.
+     * Use of this is not just restricted to executables or basename; it can be used anywhere in the string.
+     */
+    public static final String CMDSUB_COND_SUFFIX = "{:ensuresuffix=}";
     
     /**
      * Default file name for judgement ini file.
@@ -165,5 +184,25 @@ public final class Constants {
     
     public static final int INPUT_VALIDATOR_EXECUTION_ERROR_CODE = -39;
     
-    public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";   
+    public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";
+
+    public static final int BYTES_PER_KIBIBYTE = 1024;   
+    
+    /**
+     * Sandbox constants
+     */
+    public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit}";
+
+    public static final String PC2_INTERNAL_SANDBOX_PROGRAM_NAME = "pc2sandbox.sh";
+    
+    /**
+     * OS Compatibility constants
+     */
+    public static final String WINDOWS_CHECK_SANDBOX_SCRIPT = "pc2syscheck.cmd";
+    public static final String UNIX_CHECK_SANDBOX_SCRIPT = "pc2syscheck.sh";
+
+    /**
+     * Prefix for deleted runs.
+     */
+    public static final String DEL_RUN_PREFIX = "DEL ";   
 }

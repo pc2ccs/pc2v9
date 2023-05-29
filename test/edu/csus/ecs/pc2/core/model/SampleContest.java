@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.InternalControllerSpecial;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.log.LogUtilities;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
@@ -1885,6 +1886,7 @@ public class SampleContest {
      * 4 - solved, String &quot;Yes&quot; or No
      * 5 - send to teams, Yes or No
      * 6 - No Judgement index
+     * 7 - Validator judgement string
      * 
      * Example:
      * &quot;6,5,A,12,Yes&quot;
@@ -1911,6 +1913,7 @@ public class SampleContest {
         Judgement yesJudgement = contest.getJudgements()[0];
         Judgement[] judgement = contest.getJudgements();
         Judgement noJudgement = null;
+        
         for (int i = 0; i < judgement.length; i++) {
             if (judgement[i].getAcronym().equals("WA")) {
                 noJudgement = judgement[i];
@@ -1935,6 +1938,11 @@ public class SampleContest {
         if (data.length > 6) {
             noJudgement = contest.getJudgements()[getIntegerValue(data[6])];
         }
+        
+        String validatorJudgementString = null;
+        if (data.length > 7) {
+            validatorJudgementString = data[7];
+        }
 
         int problemIndex = probLet.charAt(0) - 'A';
         Problem problem = problemList[problemIndex];
@@ -1949,6 +1957,9 @@ public class SampleContest {
             judgementId = yesJudgement.getElementId();
         }
         JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, computerJudged);
+        if (validatorJudgementString != null) {
+            judgementRecord.setValidatorResultString(validatorJudgementString);
+        }
         judgementRecord.setSendToTeam(sendToTeams);
 
         try {
@@ -2035,6 +2046,7 @@ public class SampleContest {
 
         try {
             String cdpDir = getTestSampleContestDirectory(sampleName);
+            LogUtilities.ensureStaticLog();
             loader.initializeContest(contest, new File( cdpDir));
             return contest;
 
@@ -2043,5 +2055,7 @@ public class SampleContest {
             throw e;
         }
     }
+    
+
     
 }

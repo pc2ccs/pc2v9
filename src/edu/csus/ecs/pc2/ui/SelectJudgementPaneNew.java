@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -34,6 +34,7 @@ import javax.swing.border.TitledBorder;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.execute.ExecuteTimerFrame;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -859,9 +860,16 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         executeTimeMS = 0;
         System.gc();
 
-        executable = new Executable(getContest(), getController(), run, runFiles);
+        ExecuteTimerFrame executeFrame = new ExecuteTimerFrame();
 
-        // getManualRunResultsPanel().clear();
+        executable = new Executable(getContest(), getController(), run, runFiles, executeFrame);
+
+        // only if do not show output is not checked, clear the results pane
+        if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
+            getTestResultsFrame().clearData();
+        }
+        
+       // getManualRunResultsPanel().clear();
         setEnabledButtonStatus(false);
         executable.execute();
         
@@ -877,10 +885,17 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             Exception ex = executionData.getExecutionException();
             Language lang = getContest().getLanguage(run.getLanguageId());
 
+            //TODO: the following assignment and 'if' don't make sense (the assignment inside the 'if' is 
+            //     the same as the one preceding the 'if').   jlc
+            // JB - I *think* the intent was to call lang.getProgramExecuteCommandLine() if the judge
+            //      command line is null.  That is, if no specific judge command, use
+            //      the default.
             String command = lang.getJudgeProgramExecuteCommandLine();
             if (command == null) {
                 command = lang.getJudgeProgramExecuteCommandLine();
             }
+            
+            //TODO:  the command line needs to be adjusted to reflect the (possible) presence of a sandbox.  jlc
             String commandLine = executable.substituteAllStrings(run, command);
             log.warning("Error executing command: " + commandLine);
             log.warning("Error is: " + ex.getMessage());
@@ -1166,7 +1181,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     private String getExecuteDirectoryName() {
-        Executable tempEexecutable = new Executable(getContest(), getController(), run, runFiles);
+        Executable tempEexecutable = new Executable(getContest(), getController(), run, runFiles, null);
         return tempEexecutable.getExecuteDirectoryName();
     }
 

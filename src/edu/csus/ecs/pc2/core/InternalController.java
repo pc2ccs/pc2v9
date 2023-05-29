@@ -2693,6 +2693,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), clientId.getName(), clientId.getName());
 
+            if (parseArguments.isOptPresent(AppConstants.CONSOLE_OPTION_STRING)) {
+                addConsoleLogging();
+            }
+
             boolean isServer = clientId.getClientType().equals(ClientType.Type.SERVER);
 
             if (isServer && isContactingRemoteServer()) {
@@ -3291,7 +3295,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 } else if (isEventFeeder(client)) {
                     overRideUIName = "edu.csus.ecs.pc2.services.eventFeed.EventFeederModule"; 
                 } else {
-                    fatalError(AppConstants.NO_GUI_OPTION_STRING + " can only be used with a judge or server login, login '" + loginName + "' is not a judge or server login.");
+                    fatalError(AppConstants.NO_GUI_OPTION_STRING + " can only be used with a judge, server, scoreboard or event feed login, login '" + loginName + "' is not one of those.");
                 }
             }
 
@@ -4657,11 +4661,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     @Override
     public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
         
+        submitRun(submitter, problem, language, null, mainSubmissionFile, additionalFiles, overrideTimeMS, overrideRunId);
+    }
+
+    @Override
+    public void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideSubmissionId) {
+        
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Run run = new Run(submitter, language, problem);
+        run.setEntryPoint(entry_point);
         RunFiles runFiles = new RunFiles(run, mainSubmissionFile, additionalFiles);
 
-        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideRunId);
+        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideSubmissionId);
         sendToLocalServer(packet);
         
     }

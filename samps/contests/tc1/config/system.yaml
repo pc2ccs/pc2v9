@@ -1,0 +1,62 @@
+#
+# system.yaml - language definitions
+#
+# Updated :  Thu Feb 02 22:46:18 PST 2023
+# Per: Spring2023TechNotes.pdf
+#
+
+languages:
+  - name: 'Java'
+    active: true
+    compilerCmd: '/usr/bin/javac -encoding UTF-8 -sourcepath . -d . {files}'
+    exemask: '{:basename}.class'
+    execCmd: '/usr/bin/java -XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m {:basename}'
+    runner: '/usr/bin/java'
+    runner-args: '-XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m {:basename}'
+    interpreted: false
+    use-judge-cmd: false
+    judge-exec-cmd: '/usr/bin/java -Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m {:basename}'
+
+  - name: 'C++'
+    active: true
+    compilerCmd: '/usr/bin/g++ -x c++ -g -O2 -std=gnu++20 -static {files}'
+    exemask: 'a.out'
+    execCmd: './a.out'
+    runner: './a.out'
+    runner-args: ''
+    interpreted: false
+    use-judge-cmd: false
+    judge-exec-cmd: './a.out'
+
+  - name: 'C'
+    active: true
+    compilerCmd: '/usr/bin/gcc -x c -g -O2 -std=gnu11 -static {files} -lm'
+    exemask: 'a.out'
+    execCmd: './a.out'
+    runner: './a.out'
+    runner-args: ''
+    interpreted: false
+    use-judge-cmd: false
+    judge-exec-cmd: './a.out'
+
+  - name: 'Python 3'
+    active: true
+    compilerCmd: '/usr/bin/pypy3 -m py_compile {files}'
+    execCmd: '/usr/bin/pypy3 {files}'
+    runner: '/usr/bin/pypy3'
+    runner-args: '{files}'
+    interpreted: true
+    use-judge-cmd: false
+    judge-exec-cmd: '/usr/bin/pypy3 {files}'
+
+  - name: 'Kotlin'
+    active: true
+    compilerCmd: 'kotlinc {:mainfile} -include-runtime -d {:basename}.jar'
+    exemask: '{:basename}.jar'
+    execCmd: 'java -XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m -jar {:basename}.jar'
+    runner: 'java'
+    runner-args: '-XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m -jar {:basename}.jar'
+    interpreted: false
+    use-judge-cmd: false
+    judge-exec-cmd: 'java -XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m -jar {:basename}.jar'
+

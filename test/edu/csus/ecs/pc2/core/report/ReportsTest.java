@@ -278,6 +278,7 @@ public class ReportsTest extends AbstractTestCase {
                 "Problem Group Assignment", //
                 "Compare Primary with model Report", //
                 "Awards Report", //
+                "Standings XML (NSA) Report", //
         };
 
         IReport [] reportList = Reports.getReports();

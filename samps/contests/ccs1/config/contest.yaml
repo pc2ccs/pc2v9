@@ -13,6 +13,9 @@ output-private-score-dir: super_secret
 output-public-score-dir: public_html_dir
 
 auto-stop-clock-at-end: true
+memory-limit-in-Meg: 8086
+
+sandbox: 'linux_sandbox --verbose'
 
 default-clars:
   - No comment, read problem statement.

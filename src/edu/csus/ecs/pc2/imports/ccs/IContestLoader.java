@@ -41,6 +41,13 @@ public interface IContestLoader {
     
     String CONFIG_DIRNAME = "config";
 
+    // Sandbox fields
+    
+    final String SANDBOX_PROGRAM_NAME_KEY = "sandbox-program-name";
+
+    final String SANDBOX_COMMAND_LINE_KEY = "sandbox-command-line";
+
+    final String SANDBOX_TYPE_KEY = "sandbox-type";
 
     // Other constants.
 
@@ -61,6 +68,12 @@ public interface IContestLoader {
     String CONTEST_START_TIME_KEY = "start-time";
     
     String MAX_OUTPUT_SIZE_K_KEY = "max-output-size-K";
+    
+    String CLICS_MAX_OUTPUT_KEY = "output";
+    
+    String CLICS_TIME_MULTIPLIER_KEY = "time_multiplier";
+    
+    String CLICS_TIME_SAFETY_MARGIN_KEY = "time_safety_margin";
     
     final String OUTPUT_PRIVATE_SCORE_DIR_KEY = "output-private-score-dir";
 
@@ -103,7 +116,11 @@ public interface IContestLoader {
     String JUDGE_CONFIG_PATH_KEY = "judge-config-path";
 
     String TIMEOUT_KEY = "timeout";
-
+    
+    final String MEMORY_LIMIT_IN_MEG_KEY = "memory-limit-in-Meg";
+    
+    final String MEMORY_LIMIT_CLICS = "memory";
+    
     String LIMITS_KEY = "limits";
 
     String PROBLEM_NAME_KEY = "title";
@@ -113,7 +130,9 @@ public interface IContestLoader {
     String AUTO_JUDGE_KEY = "auto-judging";
 
     String CCS_TEST_MODE = "ccs-test-mode";
-
+    
+    String LOAD_SAMPLE_JUDGES_DATA = "load-sample-judges-data";
+    
     String INPUT_KEY = "input";
 
     String PROBLEM_LOAD_DATA_FILES_KEY = "load-data-files";
@@ -195,6 +214,8 @@ public interface IContestLoader {
     
     String ALLOW_MULTIPLE_TEAM_LOGINS_KEY = "allow-multiple-team-logins";
     
+    String LOAD_ACCOUNTS_FILE_KEY = "load-accounts-file";
+
     /**
      * 
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, IInternalContest, edu.csus.ecs.pc2.core.model.Account)
@@ -250,9 +271,14 @@ public interface IContestLoader {
 
     Problem[] getProblems(String[] contents, int defaultTimeOut);
 
+    Problem[] getProblems(String[] contents, int defaultTimeOut, long defaultMaxOutputSizeInBytes);
+
     Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine);
 
     Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
+            boolean manualReviewOverride);
+
+    Problem[] getProblems(String[] yamlLines, int seconds, long maxOutputSizeInBytes, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
             boolean manualReviewOverride);
 
     Problem[] getProblemsFromLetters(Problem[] contestProblems, String string);

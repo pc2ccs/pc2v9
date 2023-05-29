@@ -73,7 +73,8 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  *   (returned by {@link #getCenterPane()}), plus a button bar.  The sub-panes displaying the Contest Information
  *   Settings are added to the center pane (within the scroll pane) in the method {@link #getCenterPane()}.
  *   
- *   Method {@link #initialize()} also invokes method {@link #populateGUI()}, which in turn invokes 
+ *   Method {@link #setContestAndController()} (which is expected to be invoked by any client instantiating 
+ *   this ContestInformationPane class) invokes method {@link #populateGUI()}, which in turn invokes 
  *   {@link IInternalController.getContest().getContestInformation()} to obtain the current contest information settings from
  *   the server; it then uses the returned values to initialize the GUI display settings.
  *   
@@ -665,7 +666,7 @@ public class ContestInformationPane extends JPanePlugin {
            labelMaxOutputSize = new JLabel();
            labelMaxOutputSize.setHorizontalAlignment(SwingConstants.RIGHT);
            labelMaxOutputSize.setBorder(new EmptyBorder(0,10,5,5));
-           labelMaxOutputSize.setText("Maximum output size (in KB): ");
+           labelMaxOutputSize.setText("Default max output size (in KB): ");
        }
         return labelMaxOutputSize ;
     }
@@ -971,7 +972,7 @@ public class ContestInformationPane extends JPanePlugin {
         //fill in additional field values
         String maxFileSizeString = "0" + getMaxOutputSizeInKTextField().getText();
         long maximumFileSize = Long.parseLong(maxFileSizeString);
-        newContestInformation.setMaxFileSize(maximumFileSize * 1000);
+        newContestInformation.setMaxOutputSizeInBytes(maximumFileSize * 1024);
         newContestInformation.setAllowMultipleLoginsPerTeam(getAllowMultipleTeamLoginsCheckbox().isSelected());
         newContestInformation.setTeamScoreboardDisplayFormat(getTeamScoreboardDisplayFormatTextfield().getText());
 
@@ -1049,7 +1050,7 @@ public class ContestInformationPane extends JPanePlugin {
                 getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
                 
-                getMaxOutputSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
+                getMaxOutputSizeInKTextField().setText((contestInformation.getMaxOutputSizeInBytes() / 1024) + "");
                 getAllowMultipleTeamLoginsCheckbox().setSelected(contestInformation.isAllowMultipleLoginsPerTeam());
                 getTeamScoreboardDisplayFormatTextfield().setText(contestInformation.getTeamScoreboardDisplayFormat());
                 getContestFreezeLengthtextField().setText(contestInformation.getFreezeTime());
@@ -1415,7 +1416,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField getMaxOutputSizeInKTextField() {
         if (textfieldMaxOutputSizeInK == null) {
             
-            textfieldMaxOutputSizeInK = new JTextField(5);
+            textfieldMaxOutputSizeInK = new JTextField(6);
             
             textfieldMaxOutputSizeInK.setDocument(new IntegerDocument());
 

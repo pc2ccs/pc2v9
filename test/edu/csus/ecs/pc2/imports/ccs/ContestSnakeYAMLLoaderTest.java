@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -63,6 +63,8 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  * @author John Clevenger, PC^2 Team (pc2@ecs.csus.edu)
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
+
+    private static final String MINI_CONTEST_DIR = "mini";
 
     private static final String YYYY_MM_DD_FORMAT1 = "yyyy-MM-dd HH:mm";
 
@@ -397,7 +399,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals(18000, time.getContestLengthSecs());
 
         // scoreboard-freeze: 4:00:00
-        assertEquals("14400", info.getFreezeTime());
+        assertEquals("4:00:00", info.getFreezeTime());
 
         Language[] languages = contest.getLanguages();
 
@@ -502,7 +504,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals(18000, time.getContestLengthSecs());
 
         // scoreboard-freeze: 4:00:00
-        assertEquals("14400", info.getFreezeTime());
+        assertEquals("4:00:00", info.getFreezeTime());
     }
 
     /**
@@ -2230,7 +2232,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         String entryLocation = "ccs1";
         
         InternalContest contest = new InternalContest();
-        
+        ensureStaticLog();
+
         loader.initializeContest(contest, new File(entryLocation));
         
 //        System.out.println("Loaded CDP/config values from " + entryLocation);
@@ -2628,9 +2631,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     }
 
     /**
-     * Load all sample contests/cdps.
-     * 
-     * 
+     * Test loading all sample contests, a type of smoke test.
      * 
      * @throws Throwable
      */
@@ -2654,7 +2655,21 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
             
             try {
-                IInternalContest contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
+                
+                IInternalContest contest = null;
+
+                String teamsTSVFilename = directoryName + File.separator + IContestLoader.CONFIG_DIRNAME + //
+                        File.separator + LoadICPCTSVData.TEAMS_FILENAME;
+
+                if (new File(teamsTSVFilename).isFile()) {
+                    // Test load with tsv files
+                    File cdpDir = new File(directoryName);
+                    contest = loadFullSampleContest(null, cdpDir);
+                } else {
+                    // test yaml without tsv files
+
+                    contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
+                }
 
                 Problem[] problems = contest.getProblems();
                 assertTrue("Expecting at least one problem in contest in " + directoryName, problems.length > 0);
@@ -2869,7 +2884,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         ContestInformation info = contest.getContestInformation();
         assertNotNull("Expecting ContestInformation ", info);
-        assertEquals("Expected max file size ",128000,info.getMaxFileSize());
+        assertEquals("Expected max file size ",128*1024,info.getMaxOutputSizeInBytes());
     }
 
     
@@ -3665,6 +3680,44 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
         
     }
+    
+    
+    /**
+     * Test yaml import for memory-limit-in-Meg and sandbox.
+     * 
+     * @throws Exception
+     */
+    
+    public void testLoadSandboxAndMemoryLimit() throws Exception {
+
+        /**
+         * Contest to use as input
+         */
+        String sampleContestDirName = "sumitMTC";
+        
+        IInternalContest contest = new InternalContest();
+        
+        
+        loadSampleContest(contest, sampleContestDirName);
+        
+        assertNotNull(contest);
+
+        ContestInformation info = contest.getContestInformation();
+        assertEquals("title ", "Sumit multi test set", info.getContestTitle());
+
+//        startExplorer(info.getJudgeCDPBasePath());
+
+        Problem problem = getProblemByLetter(contest, "A");
+
+        int expectedLimit = 2099;
+        assertEquals("Memory limit", expectedLimit, problem.getMemoryLimitMB());
+
+        String expected = "{:sandboxprogramname} {:memlimit} {:timelimit}";
+        assertEquals("Sandbox command", expected, problem.getSandboxCmdLine());
+        
+        
+   
+    }
 
     private IInternalContest fullLoadSampleContest(String sampleName) throws Exception {
         IInternalContest contest  = new InternalContest();
@@ -3714,6 +3767,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     public void testProblemNameENTex() throws Exception {
         String testDataContestDirName = "samplecdp";
 
+
         String dirname = getTestDataDirname(testDataContestDirName);
 //        startExplorer(dirname);
 
@@ -3739,7 +3793,25 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
     }
    
-
+    /**
+     * Find/match problem in contest by problem letter
+     * @param inContest
+     * @param letter
+     * @return null if not found, else problem that is found to match letter
+     */
+    // TODO REFACTOR proomote/move getProblemByLetter into AbstractTestCase
+    private Problem getProblemByLetter(IInternalContest inContest, String letter) {
+        
+        Problem[] problems = inContest.getProblems();
+        for (Problem problem : problems) {
+            if (letter.equalsIgnoreCase(problem.getLetter())) {
+                return problem;
+            }
+            
+        }
+        return null;
+    }
+    
     
     /**
      * Test loading of output validator.
@@ -3784,5 +3856,26 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
         }
     }
-}
+    
+    public void testLoadSampleFiles() throws Exception {
 
+        IInternalContest contest = loadFullSampleContest(null, MINI_CONTEST_DIR);
+        assertNotNull(contest);
+
+        int totalTestCases = 0;
+
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+
+            totalTestCases += problem.getNumberTestCases();
+//            for (int i = 0; i < problem.getNumberTestCases(); i++) {
+//                System.out.println("debug "+problem.getDataFileName(i+1));
+//            }
+        }
+
+        // TODO 701 change from expected 7 files to 10 files
+//        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 10, totalTestCases);
+        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 7, totalTestCases);
+
+    }
+}
