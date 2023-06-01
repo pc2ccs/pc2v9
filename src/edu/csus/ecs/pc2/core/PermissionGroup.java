@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -142,7 +142,6 @@ public class PermissionGroup {
         feederPermissionList.addPermission(Type.TEST_RUN);
         feederPermissionList.addPermission(Type.VIEW_CLARIFICATIONS);
         feederPermissionList.addPermission(Type.VIEW_RUNS);
-        feederPermissionList.addPermission(Type.ANSWER_CLARIFICATION);
         feederPermissionList.addPermission(Type.SUBMIT_CLARIFICATION);
         feederPermissionList.addPermission(Type.VIEW_ALL_JUDGEMENTS);
         feederPermissionList.addPermission(Type.VIEW_STANDINGS);
