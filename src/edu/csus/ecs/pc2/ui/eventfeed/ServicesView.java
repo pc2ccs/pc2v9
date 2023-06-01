@@ -1,7 +1,8 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.eventfeed;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -23,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.AboutPane;
+import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.EventFeedServerPane;
@@ -34,7 +36,6 @@ import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ShadowControlPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import edu.csus.ecs.pc2.ui.WebServerPane;
-import java.awt.Dimension;
 
 /**
  * This class presents a graphical user interface for controlling the services exposed to external clients.
@@ -206,6 +207,19 @@ public class ServicesView extends JFrame implements UIPlugin {
                         }
                     }
                 }
+               
+               
+               try {
+                   ClarificationsPane pane = new ClarificationsPane();
+                   addUIPlugin(getMainTabbedPane(), "Clarifications", pane);
+               } catch (Exception e) {
+                   if (StaticLog.getLog() != null) {
+                       StaticLog.getLog().log(Log.WARNING, "Exception", e);
+                       e.printStackTrace(System.err);
+                   } else {
+                       e.printStackTrace(System.err);
+                   }
+               }
                 
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
