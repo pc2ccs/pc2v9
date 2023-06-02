@@ -16,6 +16,6 @@ fi
 
 CLASS_NAME=edu.csus.ecs.pc2.tools.PC2Tools
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true "$PC2XOPS" -Xms64M -Xmx768M -cp "$pc2_classpath" "$CLASS_NAME" "$@"
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp "$pc2_classpath" "$CLASS_NAME" "$@"
 
 # eof pc2tools

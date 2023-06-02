@@ -45,6 +45,6 @@ if [ $JAVA32 = "1" ]; then
   fi
 fi
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true "$PC2XOPS" "-Xmx$HEAPPARAM" -cp "$libdir/*" edu.csus.ecs.pc2.Starter --server "$@"
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS "-Xmx$HEAPPARAM" -cp "$libdir/*" edu.csus.ecs.pc2.Starter --server "$@"
 
 # eof pc2team $Id$

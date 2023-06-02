@@ -14,6 +14,6 @@ if [ -f /mach_kernel ]; then
   PC2XOPS="-Xdock:name=$(basename "$0")"
 fi
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true "$PC2XOPS" -Xms64M -Xmx768M -cp "$pc2_classpath" edu.csus.ecs.pc2.Starter --ui edu.csus.ecs.pc2.ui.admin.ReportsView "$@"
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp "$pc2_classpath" edu.csus.ecs.pc2.Starter --ui edu.csus.ecs.pc2.ui.admin.ReportsView "$@"
 
 # eof pc2rui $Id$
