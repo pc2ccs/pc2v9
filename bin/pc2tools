@@ -5,18 +5,17 @@
 # Author : Douglas A. Lane <pc2@ecs.csus.edu>
 #
 
-. `dirname $0`/pc2env
+. "$(dirname "$0")"/pc2env
 
-# MacOS or not
+PC2XOPS=""
+# MacOS?
 if [ -f /mach_kernel ]; then
   # set our dock name (otherwise defaults to Starter)
-  PC2XOPS="-Xdock:name=`basename $0`"
-else
-  PC2XOPS=""
+  PC2XOPS="-Xdock:name=$(basename "$0")"
 fi
 
 CLASS_NAME=edu.csus.ecs.pc2.tools.PC2Tools
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp $pc2_classpath $CLASS_NAME $*
+java -Djdk.crypto.KeyAgreement.legacyKDF=true "$PC2XOPS" -Xms64M -Xmx768M -cp "$pc2_classpath" "$CLASS_NAME" "$@"
 
-# eof pc2tools 
+# eof pc2tools

@@ -6,8 +6,8 @@
 # $HeadURL$
 #
 
-. `dirname $0`/pc2env
+. "$(dirname "$0")"/pc2env
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "$libdir/*" edu.csus.ecs.pc2.tools.Netcat $*
+java -Djdk.crypto.KeyAgreement.legacyKDF=true -Xms64M -Xmx768M -cp "$libdir/*" edu.csus.ecs.pc2.tools.Netcat "$@"
 
-# eof pc2nc $Id$ 
+# eof pc2nc $Id$
