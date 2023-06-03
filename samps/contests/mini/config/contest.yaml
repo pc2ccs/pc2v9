@@ -52,7 +52,7 @@ load-data-files: false
 # load-sample-judges-data : true
 
 # judge's data path
-judge-config-path: /home/judge/cdp/config
+# judge-config-path: /home/judge/cdp/config
 
 languages:
   - name: 'Java'
