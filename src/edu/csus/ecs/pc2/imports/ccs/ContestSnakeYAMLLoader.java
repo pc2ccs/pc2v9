@@ -2936,34 +2936,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             // Load all secret files
             loadDataFiles(problem, dataFiles, answerFiles, dataFileBaseDirectory, loadExternalFile);
 
-            // TODO 701 remove old code 
-//            old code
-//            // Sort secret files before loading into file list(s).
-//            Arrays.sort(inputFileNames);
-//            Arrays.sort(answerFileNames);
-//            
-//            for (int idx = 0; idx < inputFileNames.length; idx++) {
-//
-//                problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
-//
-//                String dataFileName = dataFileBaseDirectory + File.separator + inputFileNames[idx];
-//                String answerFileName = dataFileName.replaceAll(".in$", ".ans");
-//
-//                if (idx == 0) {
-//                    problem.setDataFileName(Utilities.basename(dataFileName));
-//                    problem.setAnswerFileName(Utilities.basename(answerFileName));
-//                }
-//
-//                String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
-//
-//                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
-//                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
-//
-//                dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
-//                answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
-//
-//            }
-
             if (dataFiles.size() > 0) {
 
                 SerializedFile[] data = (SerializedFile[]) dataFiles.toArray(new SerializedFile[dataFiles.size()]);
