@@ -10,8 +10,10 @@ import java.util.Date;
 import java.util.List;
 
 import edu.csus.ecs.pc2.core.Utilities.DataFileType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
@@ -516,4 +518,35 @@ public class UtilitiesTest extends AbstractTestCase {
         
     }
     
+    
+    public void testLocatingSampleFiles() throws Exception {
+
+        IInternalContest contest = loadFullSampleContest(null, "mini");
+        assertNotNull(contest);
+        
+        ContestInformation info = contest.getContestInformation();
+        
+        String judgeCDP = info.getJudgeCDPBasePath();
+        
+        Problem[] problems = contest.getProblems();
+        
+        int totFiles = 0;
+        for (Problem problem : problems) {
+            totFiles += problem.getNumberTestCases();
+        }
+        
+        assertEquals("Expecting total data and sample files",10, totFiles);
+        
+        for (Problem problem : problems) {
+
+            ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
+
+            SerializedFile[] judgeFiles = problemDataFiles.getJudgesDataFiles();
+            for (SerializedFile judgeDataFile : judgeFiles) {
+
+                String dataFileLocation = Utilities.locateJudgesDataFile(problem, judgeDataFile, judgeCDP, DataFileType.JUDGE_DATA_FILE);
+                assertFileExists(dataFileLocation, "Could not find datafile");
+            }
+        }
+    }
 }
