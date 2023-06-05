@@ -26,6 +26,12 @@ PC2_CGROUP_PATH=$CGROUP_PATH/pc2
 
 # ------------------------------------------------------------
 
+euid=$(id -u)
+if [ "$euid" -ne 0 ]; then
+  printf '%s\n' "$0: This script must be run as super user" >&2
+  exit 1
+fi
+
 if [ "$#" -ne 2 ]; then
   printf '%s\n' "$0: Unknown command line arguments: $*"
   printf '%s\n' "Usage: $0 pc2user pc2group"
