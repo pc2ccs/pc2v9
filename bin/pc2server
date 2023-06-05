@@ -31,17 +31,19 @@ if [ $JAVA32 = "1" ]; then
   # now check the OS, checking for 64 bit
   if uname -m 2>&1 | grep -q "x86_64"; then
     clear
-    printf '%s\n' "WARNING: We detected a 32 bit java running on a 64 bit OS."
-    printf '%s\n' ""
-    printf '%s\n' "We recommend that you run PC^2 Server using a 64 bit version of Java to allow"
-    printf '%s\n' "for the best results."
-    printf '%s\n' ""
-    printf '%s\n' "Note: We have set the Java Heap size to $HEAPPARAM for your 32-bit Java system,"
-    printf '%s\n' "but this may be too small to run the PC^2 Server."
-    printf '%s\n' ""
-    printf '%s\n' "You can increase the Heap size to whatever the maximum allowed on your machine"
-    printf '%s\n' "is by editing the JAVA32BIT_HEAPSIZE constant at the start of the"
-    printf '%s\n' "'pc2server' file."
+    cat <<-EOF
+		WARNING: We detected a 32 bit java running on a 64 bit OS.
+		
+		We recommend that you run PC^2 Server using a 64 bit version of Java to allow
+		for the best results.
+		
+		Note: We have set the Java Heap size to $HEAPPARAM for your 32-bit Java system,
+		but this may be too small to run the PC^2 Server.
+		
+		You can increase the Heap size to whatever the maximum allowed on your machine
+		is by editing the JAVA32BIT_HEAPSIZE constant at the start of the
+		'pc2server' file.
+EOF
   fi
 fi
 
