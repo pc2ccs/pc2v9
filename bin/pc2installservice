@@ -19,7 +19,7 @@
 #
 # Author: John Buck
 
-DEBUG=(echo)
+DEBUG=()
 #DEBUG=(echo Would)
 
 SCRIPTNAME="$0"
