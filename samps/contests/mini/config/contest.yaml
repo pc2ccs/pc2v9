@@ -15,6 +15,10 @@ duration:  2:00:00
 
 max-output-size-K: 142
 
+
+# Load sample data 
+load-sample-judges-data: true
+
 # freeze time before end of contest
 scoreboard-freeze: 01:00:00
 # scoreboard-freeze-length in CCS, but has it de facto changed to scoreboard-freeze in pc2?

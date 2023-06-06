@@ -289,7 +289,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
 
-    private void setLoadSampleJudgesData(IInternalContest contest, boolean loadSampleFiles) {
+    protected void setLoadSampleJudgesData(IInternalContest contest, boolean loadSampleFiles) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setLoadSampleJudgesData(loadSampleFiles);
         contest.updateContestInformation(contestInformation);
@@ -432,7 +432,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setCcsTestMode(contest, ccsTestMode);
         }
         
-        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, true);
+        // TODO samples - At this time loading samples is not the default, there is a plan to load by default
+        // at a later date.   This would be done to avoid a configuration mistake of not loading sample data
+        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, false);
         setLoadSampleJudgesData(contest, loadSamples);
         
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
