@@ -28,64 +28,64 @@ PC2_CGROUP_PATH=$CGROUP_PATH/pc2
 
 euid=$(id -u)
 if [ "$euid" -ne 0 ]; then
-  printf '%s\n' "$0: This script must be run as super user" >&2
+  echo "$0: This script must be run as super user" >&2
   exit 1
 fi
 
 if [ "$#" -ne 2 ]; then
-  printf '%s\n' "$0: Unknown command line arguments: $*"
-  printf '%s\n' "Usage: $0 pc2user pc2group"
+  echo "$0: Unknown command line arguments: $*"
+  echo "Usage: $0 pc2user pc2group"
   exit "$FAIL_BAD_ARGS_ALLOWED_EXIT_CODE"
 fi
 
 JUDGE_USER="$1"
 JUDGE_GROUP="$2"
 if ! getent passwd "$JUDGE_USER" >/dev/null 2>&1; then
-  printf '%s\n' "$0: No such user $JUDGE_USER. The pc2user must be a valid login id."
+  echo "$0: No such user $JUDGE_USER. The pc2user must be a valid login id."
   exit "$FAIL_BAD_USER_GROUP"
 fi
 if ! getent group "$JUDGE_GROUP" >/dev/null 2>&1; then
-  printf '%s\n' "$0: No such group $JUDGE_USER. The pc2group must be a valid group in /etc/group."
+  echo "$0: No such group $JUDGE_USER. The pc2group must be a valid group in /etc/group."
   exit "$FAIL_BAD_USER_GROUP"
 fi
 
 # make sure CGroups v2 is installed
-printf '%s\n' "Verifying CGroup v2 installation..."
+echo "Verifying CGroup v2 installation..."
 if [ ! -f "$CGROUP_PATH/cgroup.controllers" ]; then
-  printf '%s\n' "$0: It appears CGroups v2 is not installed (missing file 'cgroup.controllers' in $CGROUP_PATH)."
-  printf '%s\n' "CGroups v2 must be installed before a PC2 sandbox can be installed"
-  printf '%s\n' "(or if CGroups v2 is installed elsewhere from $CGROUP_PATH, edit the CGroup Path in $0)."
+  echo "$0: It appears CGroups v2 is not installed (missing file 'cgroup.controllers' in $CGROUP_PATH)."
+  echo "CGroups v2 must be installed before a PC2 sandbox can be installed"
+  echo "(or if CGroups v2 is installed elsewhere from $CGROUP_PATH, edit the CGroup Path in $0)."
   exit "$FAIL_MISSING_CGROUP_CONTROLLERS_FILE"
 fi
 
 if ! [ -f "$CGROUP_PATH/cgroup.subtree_control" ]; then
-  printf '%s\n' "$0: It appears CGroups v2 is not installed (missing file 'cgroup.subtree_control' in $CGROUP_PATH)."
-  printf '%s\n' "CGroups v2 must be installed before a PC2 sandbox can be installed"
-  printf '%s\n' "(or if CGroups v2 is installed elsewhere from $CGROUP_PATH, edit the CGroup Path in $0)."
+  echo "$0: It appears CGroups v2 is not installed (missing file 'cgroup.subtree_control' in $CGROUP_PATH)."
+  echo "CGroups v2 must be installed before a PC2 sandbox can be installed"
+  echo "(or if CGroups v2 is installed elsewhere from $CGROUP_PATH, edit the CGroup Path in $0)."
   exit "$FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE"
 fi
 
 # make sure the cpu and memory controllers are enabled
 
 if ! grep -q -F "cpu" "$CGROUP_PATH/cgroup.subtree_control"; then
-  printf '%s\n' "$0: cgroup.subtree_control in $CGROUP_PATH does not enable cpu controller"
-  #   printf '%s\n' "$0: Perhaps you have: printf '%s\n' +cpu >$CGROUP_PATH/cgroup.subtree_control"
-  printf '%s\n' "$0: Executing: printf '%s\n' +cpu >\"$CGROUP_PATH/cgroup.subtree_control\""
-  printf '%s\n' +cpu >"$CGROUP_PATH/cgroup.subtree_control"
+  echo "$0: cgroup.subtree_control in $CGROUP_PATH does not enable cpu controller"
+  #   echo "$0: Perhaps you have: echo +cpu >$CGROUP_PATH/cgroup.subtree_control"
+  echo "$0: Executing: echo +cpu >\"$CGROUP_PATH/cgroup.subtree_control\""
+  echo +cpu >"$CGROUP_PATH/cgroup.subtree_control"
 fi
 
 if ! grep -q -F "memory" "$CGROUP_PATH/cgroup.subtree_control"; then
-  printf '%s\n' "$0: cgroup.subtree_control in $CGROUP_PATH does not enable memory controller"
+  echo "$0: cgroup.subtree_control in $CGROUP_PATH does not enable memory controller"
   exit "$FAIL_MEMORY_CONTROLLER_NOT_ENABLED"
 fi
 
 # we seem to have a valid CGroup installation
-printf '%s\n' ...done.
+echo ...done.
 
 # First, remove any existing remnants
 for dir in "$PC2_CGROUP_PATH/sandbox"*; do
   if [ -d "$dir" ]; then
-    printf '%s\n' "Removing existing $dir"
+    echo "Removing existing $dir"
     rmdir "$dir"
   fi
 done
@@ -97,7 +97,7 @@ fi
 set -e
 
 # Create a pc2 cgroup to be managed by the JUDGE user and group
-printf '%s\n' "Creating PC2 CGroup structure..."
+echo "Creating PC2 CGroup structure..."
 sudo mkdir "$PC2_CGROUP_PATH"
 sudo chown "$JUDGE_USER:$JUDGE_GROUP" "$PC2_CGROUP_PATH"
 sudo chmod 775 "$PC2_CGROUP_PATH"
@@ -117,6 +117,6 @@ sudo chmod 664 "$CGROUP_PATH/cgroup.procs"
 
 # Enable the cpu and memory controllers for the pc2 cgroup.
 # Note that this must be done BEFORE creating the pc2sandbox subgroup, so that the subgroup inherits the controllers.
-printf '%s\n' "+cpu +memory" >"$PC2_CGROUP_PATH/cgroup.subtree_control"
+echo "+cpu +memory" >"$PC2_CGROUP_PATH/cgroup.subtree_control"
 
-printf '%s\n' "...done."
+echo "...done."

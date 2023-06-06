@@ -29,7 +29,7 @@ SERVICE_PATH=/etc/systemd/system/$SERVICE_NAME
 
 euid=$(id -u)
 if [ "$euid" -ne 0 ]; then
-  printf '%s\n' "$SCRIPTNAME: This script must be run as super user" >&2
+  echo "$SCRIPTNAME: This script must be run as super user" >&2
   exit 1
 fi
 
@@ -56,27 +56,27 @@ JUDGE_GROUP="$2"
 # Optionally override installation folder if supplied
 if [ -n "$3" ]; then
   PC2HOME="$3"
-  printf '%s\n' "$SCRIPTNAME: Using user supplied PC2 installation folder: $PC2HOME"
+  echo "$SCRIPTNAME: Using user supplied PC2 installation folder: $PC2HOME"
 fi
 
 if ! getent passwd "$JUDGE_USER" >/dev/null 2>&1; then
-  printf '%s\n' "$SCRIPTNAME: No such user $JUDGE_USER. The pc2user must be a valid login id." >&2
+  echo "$SCRIPTNAME: No such user $JUDGE_USER. The pc2user must be a valid login id." >&2
   exit 5
 fi
 if ! getent group "$JUDGE_GROUP" >/dev/null 2>&1; then
-  printf '%s\n' "$SCRIPTNAME: No such group $JUDGE_USER. The pc2group must be a valid group in /etc/group." >&2
+  echo "$SCRIPTNAME: No such group $JUDGE_USER. The pc2group must be a valid group in /etc/group." >&2
   exit 6
 fi
 
 if ! [ -d "$PC2HOME" ]; then
-  printf '%s\n' "$SCRIPTNAME: The installation folder $PC2HOME is not a directory" >&2
+  echo "$SCRIPTNAME: The installation folder $PC2HOME is not a directory" >&2
   exit 7
 fi
 
 INSTALL_SCRIPT_PATH=$PC2HOME/bin/pc2installsandbox
 if ! [ -x "$INSTALL_SCRIPT_PATH" ]; then
-  printf '%s\n' "$SCRIPTNAME: The ${INSTALL_SCRIPT_PATH} is not an executable file. This script must exist" >&2
-  printf '%s\n' "$SCRIPTNAME: since the service requires it." >&2
+  echo "$SCRIPTNAME: The ${INSTALL_SCRIPT_PATH} is not an executable file. This script must exist" >&2
+  echo "$SCRIPTNAME: since the service requires it." >&2
   exit 8
 fi
 

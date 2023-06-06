@@ -15,7 +15,7 @@ elif [ -f "$basedir"/lib/pc2.jar ]; then
   # then try the distribution locations
   libdir="$basedir/lib"
 else
-  printf "%s " Could not find pc2.jar, please check your installation >&2
+  echo "Could not find pc2.jar, please check your installation" >&2
   exit 1
 fi
 
@@ -26,7 +26,7 @@ elif [ -f "$basedir/lib/mclb.jar" ]; then
   # then try the distribution locations
   mclbdir="$basedir/lib"
 else
-  echo Could not find mclb.jar, please check your installation >&2
+  echo "Could not find mclb.jar, please check your installation" >&2
   exit 1
 fi
 
