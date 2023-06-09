@@ -292,7 +292,7 @@ public class ProblemsPane extends JPanePlugin {
         long outputLimit = problem.getMaxOutputSizeKB();
         if (outputLimit == 0) {
             //use global value
-            outputLimit = getContest().getContestInformation().getMaxOutputSizeInBytes();
+            outputLimit = getContest().getContestInformation().getMaxOutputSizeInBytes() / 1024;
         }
         c[i++] = Long.toString(outputLimit);
 
