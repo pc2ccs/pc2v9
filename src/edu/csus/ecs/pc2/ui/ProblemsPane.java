@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -550,7 +550,12 @@ public class ProblemsPane extends JPanePlugin {
             addButton.setToolTipText("Add new Problem definition");
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    addProblem();
+                    try {
+                        addProblem();
+                    } catch (Exception eAdd) {
+                        log.log(Log.SEVERE, "Unable to add new problem ", eAdd);
+                        showMessage("Unable to add new problem, check log (" + eAdd.getMessage() + ")");
+                    }
                 }
             });
         }
