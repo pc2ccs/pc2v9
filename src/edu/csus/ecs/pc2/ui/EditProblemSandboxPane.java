@@ -131,33 +131,12 @@ public class EditProblemSandboxPane extends JPanePlugin {
         return "Edit Problem Sandbox Pane";
     }
     
+    /**
+     * Set's problem specific data fields
+     * @param problem - the problem to use for the sandbox data (may be null)
+     */
     public void setProblem(Problem problem) {
-        
-        // If adding a problem, we have to determine a default sandbox type
-        if(problem == null) {
-            // If sandboxes are desried and supported, we make the internal sandbox the default
-            if(Problem.DEFAULT_SANDBOX_TYPE == SandboxType.PC2_INTERNAL_SANDBOX && isCheckSandboxSupport()) {
-                getUsePC2SandboxRadioButton().setSelected(true);
-            } else {
-                getUseNoSandboxRadioButton().setSelected(true);
-            }
-            getPC2SandboxOptionMemLimitTextbox().setText(Integer.toString(Problem.DEFAULT_MEMORY_LIMIT_MB));
-       } else {
-            //activate the appropriate sandbox selection button (the buttons are in a group so selecting one will deselect the others)
-            if (problem.getSandboxType() == SandboxType.NONE) {
-                getUseNoSandboxRadioButton().setSelected(true);
-                
-            } else if (problem.getSandboxType() == SandboxType.PC2_INTERNAL_SANDBOX) {
-                isCheckSandboxSupport();
-                getUsePC2SandboxRadioButton().setSelected(true);
-                getPC2SandboxOptionMemLimitTextbox().setText(Integer.toString(problem.getMemoryLimitMB()));
-                
-            } else if (problem.getSandboxType() == SandboxType.EXTERNAL_SANDBOX) {
-                getLog().severe("Problem has 'Custom sandbox' selected -- should not be possible in this version of PC^2!");
-                //default to "None"
-                getUseNoSandboxRadioButton().setSelected(true);
-            }
-        }
+        populateGUI(problem);
     }
 
     public void setParentPane(EditProblemPane editProblemPane) {
@@ -199,6 +178,40 @@ public class EditProblemSandboxPane extends JPanePlugin {
             } else {
                 getLog().warning("EditProblemSandboxPane.initializeFields() called with Problem containing unknown sandbox type '" 
                                     + sandboxType + "'; cannot initialize pane");
+            }
+        }
+    }
+    
+    /**
+     * Populate controls with problem's sandbox information
+     * 
+     * @param problem - the problem to use to populate the controls.  If null, uses defaults
+     */
+    private void populateGUI(Problem problem) {
+        
+        // If adding a problem, we have to determine a default sandbox type
+        if(problem == null) {
+            // If sandboxes are desired and supported, we make the internal sandbox the default
+            if(Problem.DEFAULT_SANDBOX_TYPE == SandboxType.PC2_INTERNAL_SANDBOX && isCheckSandboxSupport()) {
+                getUsePC2SandboxRadioButton().setSelected(true);
+            } else {
+                getUseNoSandboxRadioButton().setSelected(true);
+            }
+            getPC2SandboxOptionMemLimitTextbox().setText(Integer.toString(Problem.DEFAULT_MEMORY_LIMIT_MB));
+       } else {
+            //activate the appropriate sandbox selection button (the buttons are in a group so selecting one will deselect the others)
+            if (problem.getSandboxType() == SandboxType.NONE) {
+                getUseNoSandboxRadioButton().setSelected(true);
+                
+            } else if (problem.getSandboxType() == SandboxType.PC2_INTERNAL_SANDBOX) {
+                isCheckSandboxSupport();
+                getUsePC2SandboxRadioButton().setSelected(true);
+                getPC2SandboxOptionMemLimitTextbox().setText(Integer.toString(problem.getMemoryLimitMB()));
+                
+            } else if (problem.getSandboxType() == SandboxType.EXTERNAL_SANDBOX) {
+                getLog().severe("Problem has 'Custom sandbox' selected -- should not be possible in this version of PC^2!");
+                //default to "None"
+                getUseNoSandboxRadioButton().setSelected(true);
             }
         }
     }
