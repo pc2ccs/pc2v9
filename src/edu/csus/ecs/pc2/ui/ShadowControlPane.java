@@ -34,14 +34,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.RowSorter;
+import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.RowSorter.SortKey;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
@@ -58,8 +60,6 @@ import edu.csus.ecs.pc2.shadow.MockContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.RemoteContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.shadow.ShadowController.SHADOW_CONTROLLER_STATUS;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This class provides a GUI for configuring and starting Shadowing operations on a remote CCS.
@@ -117,9 +117,9 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     
     private JTextField lastEventTimeTextField;
     
-    private static JTableCustomized connectStatusTable;
+    private JTableCustomized connectStatusTable;
     
-    private static DefaultTableModel connectStatusTableModel;
+    private DefaultTableModel connectStatusTableModel;
     
     private int statusScrollBarMax = 0;
     
@@ -127,7 +127,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     
     private String lastToken = null;
     
-    private static SimpleDateFormat lastDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private SimpleDateFormat lastDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     
     // Lightish green for success
     private Color statusColorSuccess = new Color(128, 255, 128);
@@ -135,7 +135,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private Color statusColorFailure = new Color(255, 128, 128);
 
     // Status column for JTable notifications
-    public enum ShadowStatus {
+    enum ShadowStatus {
         SUCCESS,
         FAILURE,
         INFO
@@ -172,6 +172,20 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
         setupConnectionStatusTable();
         updateGUI();
+
+        /**
+         * Add message listener to add errors into the connectStatusTable.
+         */
+        MessageManager.addMessageListener(new IMessageRecordListener() {
+
+            @Override
+            public void messageAdded(MessageRecord record) {
+                addConnectTableEntry(ShadowStatus.FAILURE, record.getMessage());
+                if (record.getException() != null) {
+                    logException(record.getMessage(), record.getException());
+                }
+            }
+        });
     }
 
     @Override
@@ -678,7 +692,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         resizeColumnWidth(connectStatusTable);
     }
     
-    private static void resizeColumnWidth(JTableCustomized table) {
+    private void resizeColumnWidth(JTableCustomized table) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
@@ -960,7 +974,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         }
     }
 
-    private static void addConnectTableEntry(ShadowStatus stat, String msg)
+    public void addConnectTableEntry(ShadowStatus stat, String msg)
     {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -986,34 +1000,6 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         });
         
     }
-    
-    public static void addToConnectTableEntry(ShadowStatus stat, String msg)
-    {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                Object[] objects = new Object[3];
-                
-                try {
-                    GregorianCalendar cal = new GregorianCalendar();
-                    
-                    lastDateFormat.setCalendar(cal);
-                    objects[0] = lastDateFormat.format(cal.getTime());
-                } catch(Exception e) {
-                    objects[0] = "Unknown";
-                }
-                objects[1] = stat;
-                if(msg == null || msg.isEmpty()) {
-                    objects[2] = "<Empty Message>";
-                } else {
-                    objects[2] = msg;
-                }
-                connectStatusTableModel.addRow(objects);
-                resizeColumnWidth(connectStatusTable);
-            }
-        });
-        
-    }
-    
     
     /*
      * IShadowMonitorStatus implementaiton
