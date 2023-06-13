@@ -17,6 +17,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.execute.ExecuteTimerFrame;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -584,7 +585,8 @@ public class SubmitRunPane extends JPanePlugin {
             Run run = new Run(getContest().getClientId(), language, problem);
             RunFiles runFiles = new RunFiles(run, new SerializedFile(filename), additionalFiles);
 
-            executable = new Executable(getContest(), getController(), run, runFiles);
+            ExecuteTimerFrame executeFrame = new ExecuteTimerFrame();
+            executable = new Executable(getContest(), getController(), run, runFiles, executeFrame);
             if (! isTeam()){
                 executable.setExecuteDirectoryNameSuffix("SR");
             }

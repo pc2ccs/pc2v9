@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
 import java.io.ByteArrayInputStream;
@@ -33,8 +33,6 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import junit.framework.TestCase;
-
 import org.junit.ComparisonFailure;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -47,6 +45,7 @@ import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.LogFormatter;
+import edu.csus.ecs.pc2.core.log.LogUtilities;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -62,6 +61,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
+import junit.framework.TestCase;
 
 /**
  * Test utility methods.
@@ -1159,6 +1159,25 @@ public class AbstractTestCase extends TestCase {
         }
     }
     
+    /**
+     * Compares path, directory path in-sensitive.
+     * 
+     * @param message
+     * @param expected 
+     * @param actual
+     */
+    public void asserPathEqual(String message, String expected, String actual) {
+        
+        // convert \ to /
+        String actualPath = actual.replaceAll("\\\\", "/");
+        String expectedPath = expected.replaceAll("\\\\", "/");
+        
+        if (!actualPath.equals(expectedPath)){
+            throw new ComparisonFailure(message, expectedPath, actualPath);
+        }
+    }
+    
+    
 
     public Account getFirstJudge(IInternalContest contest) {
         Account[] accounts = new SampleContest().getJudgeAccounts(contest);
@@ -1528,5 +1547,57 @@ public class AbstractTestCase extends TestCase {
     public IInternalContest loadFullSampleContest(IInternalContest contest, String sampleName) throws Exception {
         return loadFullSampleContest (contest, new File(getTestSampleContestDirectory(sampleName)));
     }
-    
+
+    /**
+     * Test whether account HAS permission
+     * @param type permission 
+     * @param account
+     */
+    public void assertHasPermssion(edu.csus.ecs.pc2.core.security.Permission.Type type, Account account) {
+        assertTrue("Expected for " + account + " Permission " + type, account.isAllowed(type));
+    }
+
+    /**
+     * Test wether account does NOT have permission
+     * @param type permission
+     * @param account
+     */
+    public void assertNoPermssion(edu.csus.ecs.pc2.core.security.Permission.Type type, Account account) {
+        assertFalse("Expected for  " + account + " Permission " + type, account.isAllowed(type));
+    }
+    /**
+     * Load sample contest into contest model
+     * 
+     * @param contest model, if null will create contest model
+     * @param sampleName name of contest under samps/contest, ex mini
+     * @return contest model 
+     * @throws Exception
+     */
+    public IInternalContest loadContestFromSampleContest(IInternalContest contest, String sampleName) throws Exception {
+
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        if (contest == null) {
+            contest = new InternalContest();
+        }
+
+        try {
+            String cdpDir = getTestSampleContestDirectory(sampleName);
+            loader.initializeContest(contest, new File( cdpDir));
+            return contest;
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw e;
+        }
+    }
+
+    /**
+     * Ensure static log is initialized.
+     * 
+     * If not used then an NPE will occur if StaticLog is used.
+     * 
+     */
+    public void ensureStaticLog() {
+        LogUtilities.ensureStaticLog();
+    }
 }

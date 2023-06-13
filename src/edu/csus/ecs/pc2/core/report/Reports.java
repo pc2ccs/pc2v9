@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
@@ -161,6 +161,11 @@ public final class Reports {
         reports.add(new ProblemsGroupReport());
         
         reports.add(new ProblemGroupAssignmentReport());
+        reports.add(new ScoreboardJSONReport());
+        
+        reports.add(new ContestCompareReport());
+        
+        reports.add(new StandingsNSAReport());
         
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 

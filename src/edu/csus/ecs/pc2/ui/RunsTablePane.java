@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -73,6 +74,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
+import edu.csus.ecs.pc2.util.OSCompatibilityUtilities;
 
 /**
  * View runs panel.
@@ -182,6 +184,10 @@ public class RunsTablePane extends JPanePlugin {
     private Run fetchedRun;
 
     private RunFiles fetchedRunFiles;
+    
+    private Run requestedRun;
+    
+    private boolean showSourceActive = false;
 
     protected int viewSourceThreadCounter;
 
@@ -560,38 +566,57 @@ public class RunsTablePane extends JPanePlugin {
                 getController().getLog().log(Log.INFO, "RunsPane.RunListener: Action=" + action + "; DetailedAction=" + details + "; msg=" + msg
                                         + "; run=" + aRun + "; runFiles=" + aRunFiles);
 
-                
-                if (event.getRun() != null) {
-                        
+                if (aRun != null) {
+                    // make local reference for consistency in case requestedRun gets cleared - avoids synchronization
+                    Run locRun = requestedRun;
+                    
+                    // we are only interested in the run we may have requested from View Source - all other run changes are ignored.
+                    if(locRun != null && aRun.getNumber() == locRun.getNumber() && aRun.getSiteNumber() == locRun.getSiteNumber()) {
+
                         // RUN_NOT_AVAILABLE is undirected (sentToClient is null)
                         if (event.getAction().equals(Action.RUN_NOT_AVAILABLE)) {
                             
                             getController().getLog().log(Log.WARNING, "Reply from server: requested run not available");
-                            
+                            serverReplied = true;                                 
                         } else {
-                            
-                            //make sure this RunEvent was meant for me
-                            if (event.getSentToClientId() != null && event.getSentToClientId().equals(getContest().getClientId())) {
-                                
-                                getController().getLog().log(Log.INFO, "Reply from server: " + "Run Status=" + event.getAction()
-                                                        + "; run=" + event.getRun() + ";  runFiles=" + event.getRunFiles());
-                                
-                                fetchedRun = event.getRun();
-                                fetchedRunFiles = event.getRunFiles();    
-                                
-                            } else {
-                                
+                            // Only interested in the first reply (we don't want fetchedRun changing once its been set - it really shouldn't)
+                            if(fetchedRun == null) {
                                 ClientId toClient = event.getSentToClientId() ;
                                 ClientId myID = getContest().getClientId();
-
-                                getController().getLog().log(Log.INFO, "Event not for me: sent to " + toClient + " but my ID is " + myID);
-
-                                //TODO:  this needs to be reconsidered; why are we continuing when the event wasn't sent to us?  (Why wasn't it sent to us?)
-                                fetchedRun = event.getRun();
-                                fetchedRunFiles = event.getRunFiles();
+                                
+                                // see if the event was directed to me explicitly, which it should be (see PacketHandler.handleFetchedRun())
+                                // but isn't due to the way updateRun() works.  We'll leave this code here in case someday that changes.
+                                if (toClient != null && toClient.equals(myID)) {
+                                    
+                                    getController().getLog().log(Log.INFO, "Reply from server: " + "Run Status=" + event.getAction()
+                                                            + "; run=" + event.getRun() + ";  runFiles=" + event.getRunFiles());
+                                    
+                                    fetchedRun = aRun;
+                                    fetchedRunFiles = aRunFiles;    
+                                    serverReplied = true;     
+                                  
+                                } else {
+                                    
+                                    // The FETCHED_REQUESTED_RUN reply is sent with a a SentToClientID of null as found in
+                                    // InternalContest.updateRun().  the RunEvent's sentToClientId member is only set when the run
+                                    // is being checked out for BEING_JUDGED, BEING_RE_JUDGED, CHECKED_OUT, HOLD, otherwise it is
+                                    // is not set (null), and winds up here in the case of "View Source" but not from a being-judged dialog.
+                                    
+                                    getController().getLog().log(Log.INFO, "Event not directed to me: sent to " + toClient + " but my ID is " + myID);
+                                    
+                                    if(toClient == null) {
+                                        fetchedRun = aRun;
+                                        fetchedRunFiles = aRunFiles;    
+                                        serverReplied = true;     
+                                    }
+                                }
                             }
                         }
-                        
+                    } else {
+                        // changed run was not the one we wanted
+                        getController().getLog().log(Log.INFO, "Run event not for requested run: " + "Run Status=" + event.getAction()
+                            + "; run=" + aRun + " requested=" + locRun);                        
+                    }
                 } else {
                     //run from server was null
                     getController().getLog().log(Log.WARNING, "Run received from server was null");
@@ -600,7 +625,6 @@ public class RunsTablePane extends JPanePlugin {
                 }
                 
                 
-                serverReplied = true;     
                 
         }
 
@@ -1945,8 +1969,25 @@ public class RunsTablePane extends JPanePlugin {
         if (!bUseAutoJudgemonitor) {
             return;
         }
+        
         if (isAutoJudgingEnabled()) {
             showMessage("");
+            
+            // make sure the OS supports judging of all problems this judge
+            // is set up to autojudge BEFORE starting autojudging.
+            List<Problem> plist = autoJudgingMonitor.getOSUnsupportedAutojudgeProblemList();
+            if(!plist.isEmpty()) {
+                StringBuffer message = new StringBuffer();
+                message.append("Cannot perform autojudging for the following problems due to missing OS features:\n");
+                for(Problem prob: plist) {
+                    message.append("   Problem " + prob.getLetter() + " - " + prob.getDisplayName() + "\n");
+                }
+                message.append("You must either remove these problems from this autojudge's list of problems or\n");
+                message.append("you must make sure your OS supports features needed to judge these problems.\n");
+                message.append("One possiblity is the problems require a sandbox and your OS does not support it (cgroups?).");
+                FrameUtilities.showMessage(this,  message.toString(), "Judging Not Supported");
+                return;
+            }
             // Keep this off the AWT thread.
             new Thread(new Runnable() {
                 public void run() {
@@ -1956,9 +1997,22 @@ public class RunsTablePane extends JPanePlugin {
             }).start();
         } else {
             showMessage("Administrator has turned off Auto Judging");
+            
+            List<Problem> plist = OSCompatibilityUtilities.getUnableToJudgeList(getContest(), log);
+            if(!plist.isEmpty()) {
+                StringBuffer message = new StringBuffer();
+                message.append("Cannot perform judging for the following problems due to missing OS features:\n");
+                for(Problem prob: plist) {
+                    message.append("   Problem " + prob.getLetter() + " - " + prob.getDisplayName() + "\n");
+                }
+                message.append("In order to judge these problems, you must make sure your OS supports features\n");
+                message.append("needed to judge these problems.\n");
+                message.append("One possiblity is the problems require a sandbox and your OS does not support it (cgroups?).");
+                FrameUtilities.showMessage(this, "Judging Not Availalbe",  message.toString());
+            }
+
         }
     }
-
     public boolean isMakeSoundOnOneRun() {
         return makeSoundOnOneRun;
     }
@@ -2017,11 +2071,69 @@ public class RunsTablePane extends JPanePlugin {
         }
     }
 
+    /**
+     * @author pc2@ecs.csus.edu
+     *
+     * Don't let any more View Source's to be issued
+     */
+    private void BlockViewSource()
+    {
+        showSourceActive = true;
+    }
+    
+    /**
+     * @author pc2@ecs.csus.edu
+     *
+     * Allow View Source to be issued
+     */
+    private void AllowViewSource()
+    {
+        showSourceActive = false;
+    }
+    
+    private boolean IsAllowedViewSource()
+    {
+        return (showSourceActive == false);
+    }
+    
     private JButton getViewSourceButton() {
         if (viewSourceButton == null) {
             viewSourceButton = new JButton("View Source");
             viewSourceButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
+
+                    // For now, only allow one View Source to be outstanding at-a-time
+                    // TODO: this has to be re-evaluated so that multiple outstanding View Source
+                    //       requests will work.
+                    if(!IsAllowedViewSource()) {
+                        if(requestedRun != null) {
+                            showMessage("There is already a View Source pending for Run " + requestedRun.getNumber() + " at site " + requestedRun.getSiteNumber());
+                            getController().getLog().log(Log.INFO, "There is already a View Source pending for Run " + requestedRun.getNumber() + " at site " + requestedRun.getSiteNumber());
+                       } else {
+                            // This could mean that the requestedRun's info just came in.
+                            showMessage("There is already a View Source pending");                           
+                            getController().getLog().log(Log.INFO, "There is already a View Source pending but no requestedRun");
+                        }
+                        return;
+                    }
+                    
+                    // make sure we're allowed to fetch a run
+                    if (!isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN)) {
+                        getController().getLog().log(Log.WARNING, "Account does not have the permission ALLOWED_TO_FETCH_RUN; cannot view run source.");
+                        showMessage("Unable to fetch run, check log");
+                        return;
+                    }
+
+                    // make sure there's exactly one run selected in the grid
+                    int[] selectedIndexes = runTable.getSelectedRows();
+
+                    if (selectedIndexes.length < 1) {
+                        showMessage("Please select a run ");
+                        return;
+                    } else if (selectedIndexes.length > 1) {
+                        showMessage("Please select exactly ONE run in order to view source ");
+                        return;
+                    }
 
 //                    SwingUtilities.invokeLater(new Runnable() {
 //                        public void run() {
@@ -2031,9 +2143,11 @@ public class RunsTablePane extends JPanePlugin {
 
                     Thread viewSourceThread = new Thread() {
                         public void run() {
-                            showSourceForSelectedRun();
+                            showSourceForSelectedRun(selectedIndexes[0]);
                         }
                     };
+                    // only one View Source active at-a-time
+                    BlockViewSource();
                     viewSourceThread.setName("ViewSourceThread-" + viewSourceThreadCounter++);
                     viewSourceThread.start();
                 }
@@ -2049,30 +2163,14 @@ public class RunsTablePane extends JPanePlugin {
      * If no run is selected, or more than one run is selected, prompts the user to select just one run (row) in the grid
      * and does nothing else.
      */
-    private void showSourceForSelectedRun() {
+    private void showSourceForSelectedRun(int nSelectedRunIndex) {
 
-        // make sure we're allowed to fetch a run
-        if (!isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN)) {
-            getController().getLog().log(Log.WARNING, "Account does not have the permission ALLOWED_TO_FETCH_RUN; cannot view run source.");
-            showMessage("Unable to fetch run, check log");
-            return;
-        }
-
-        // make sure there's exactly one run selected in the grid
-        int[] selectedIndexes = runTable.getSelectedRows();
-
-        if (selectedIndexes.length < 1) {
-            showMessage("Please select a run ");
-            return;
-        } else if (selectedIndexes.length > 1) {
-            showMessage("Please select exactly ONE run in order to view source ");
-            return;
-        }
-
+        boolean bFetchError = false;
+        
         // we are allowed to view source and there's exactly one run selected; try to obtain the run source and display it in a MFV 
         try {
 
-            Run run = getContest().getRun(runTable.getElementIdFromTableRow(selectedIndexes[0]));
+            Run run = getContest().getRun(runTable.getElementIdFromTableRow(nSelectedRunIndex));
 
             // make sure we found the currently selected run
             if (run != null) {
@@ -2087,7 +2185,12 @@ public class RunsTablePane extends JPanePlugin {
                 //check if we already have the RunFiles for the run
                 if (!getContest().isRunFilesPresent(run)) {
                     
-                    //we don't have the files; request them from the server
+                    // this is the run we're after
+                    requestedRun = run;
+                    // reset this each time so we be sure to get the first new reply
+                    fetchedRun = null;
+                    
+                    //we don't have the files; request them from the server (this is NOT a checkout, but a read-only fetch)
                     getController().fetchRun(run);
 
                     // wait for the server to reply (i.e., to make a callback to the run listener) -- but only for up to 30 sec
@@ -2097,6 +2200,8 @@ public class RunsTablePane extends JPanePlugin {
                         Thread.sleep(100);
                         waitedMS += 100;
                     }
+                    // no longer interested in getting updates for this run.
+                    requestedRun = null;
                 
                     //check if we got a reply from the server
                     if (serverReplied) {
@@ -2106,87 +2211,99 @@ public class RunsTablePane extends JPanePlugin {
                             
                             //we got some RunFiles from the server; put them into the contest model
                             getContest().updateRunFiles(run, fetchedRunFiles);
-                            
                         } else {
                             
                             //we got a reply from the server but we didn't get any RunFiles
                             getController().getLog().log(Log.WARNING, "Server failed to return RunFiles in response to fetch run request");
-                            getController().getLog().log(Log.WARNING, "Unable to fetch source files for run " + run.getNumber() + " from server");
-                            showMessage("Unable to fetch selected run; check log");
-                            return;
+                            bFetchError = true;
                         }
                         
                     } else {
                         
                         // the server failed to reply to the fetchRun request within the time limit
                         getController().getLog().log(Log.WARNING, "No response from server to fetch run request after " + waitedMS + "ms");
-                        getController().getLog().log(Log.WARNING, "Unable to fetch run " + run.getNumber() + " from server");
-                        showMessage("Unable to fetch selected run; check log");
-                        return;
+                        bFetchError = true;
                     }
                 }
                 
-                //if we get here we know there should be RunFiles in the contest model -- but let's sanity-check that
-                if (!getContest().isRunFilesPresent(run)) {
-                    
-                    //something bad happened -- we SHOULD have RunFiles at this point!
-                    getController().getLog().log(Log.SEVERE, "Unable to find RunFiles for run " + run.getNumber() + " -- server error?");
+                // OK to now start another view source
+                AllowViewSource();
+               
+                // if any type of error occurred requesting the run to view, log a summary message and finish
+                if(bFetchError) {
+                    getController().getLog().log(Log.WARNING, "Unable to fetch run " + run.getNumber() + " at site " + run.getSiteNumber() + " from server");
                     showMessage("Unable to fetch selected run; check log");
-                    return;
-
                 } else {
-                    
-                    //get the RunFiles
-                    RunFiles runFiles = getContest().getRunFiles(run);
-
-                    if (runFiles != null) {
-
-                        // get the (serialized) source files out of the RunFiles
-                        SerializedFile mainFile = runFiles.getMainFile();
-                        SerializedFile[] otherFiles = runFiles.getOtherFiles();
-
-                        // create a MultiFileViewer in which to display the runFiles
-                        MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + fetchedRun.getSiteNumber() + " Run " + fetchedRun.getNumber());
-                        mfv.setContestAndController(getContest(), getController());
-
-                        // add any other files to the MFV (these are added first so that the mainFile will appear at index 0)
-                        boolean otherFilesPresent = false;
-                        boolean otherFilesLoadedOK = false;
-                        if (otherFiles != null) {
-                            otherFilesPresent = true;
-                            otherFilesLoadedOK = true;
-                            for (SerializedFile otherFile : otherFiles) {
-                                otherFilesLoadedOK &= mfv.addFilePane(otherFile.getName(), otherFile);
-                            }
-                        }
-
-                        // add the mainFile to the MFV
-                        boolean mainFilePresent = false;
-                        boolean mainFileLoadedOK = false;
-                        if (mainFile != null) {
-                            mainFilePresent = true;
-                            mainFileLoadedOK = mfv.addFilePane("Main File" + " (" + mainFile.getName() + ")", mainFile);
-                        }
-
-                        // if we successfully added all files, show the MFV
-                        if ((!mainFilePresent || (mainFilePresent && mainFileLoadedOK)) 
-                                && (!otherFilesPresent || (otherFilesPresent && otherFilesLoadedOK))) {
-                            mfv.setSelectedIndex(0);  //always make leftmost selected; normally this will be MainFile
-                            mfv.setVisible(true);
-                            showMessage("");
-                        } else {
-                            getController().getLog().log(Log.WARNING, "Unable to load run source files into MultiFileViewer");
-                            showMessage("Unable to load run source files into MultiFileViewer");
-                        }
-
-                    } else {
-                        // runfiles is null
-                        getController().getLog().log(Log.WARNING, "Unable to obtain RunFiles for Site " + run.getSiteNumber() + " run " + run.getNumber());
-                        showMessage("Unable to obtain RunFiles for selected run");
-                    }
-                    
-                }
                 
+                    //if we get here we know there should be RunFiles in the contest model -- but let's sanity-check that
+                    if (!getContest().isRunFilesPresent(run)) {
+                        
+                        //something bad happened -- we SHOULD have RunFiles at this point!
+                        getController().getLog().log(Log.SEVERE, "Unable to find RunFiles for run " + run.getNumber() + " at site " + run.getSiteNumber() + " -- server error?");
+                        showMessage("Unable to fetch selected run; check log");    
+                    } else {
+                        
+                        //get the RunFiles
+                        RunFiles runFiles = getContest().getRunFiles(run);
+    
+                        if (runFiles != null) {
+    
+                            // get the (serialized) source files out of the RunFiles
+                            SerializedFile mainFile = runFiles.getMainFile();
+                            SerializedFile[] otherFiles = runFiles.getOtherFiles();
+    
+                            // create a MultiFileViewer in which to display the runFiles
+                            // Note: previously used 'fetchedRun' here for site/number; it is possible that those values are not
+                            // correct if the run files are already present; in that case, we would have never asked for them to be
+                            // retrieved, and would have used whatever was in fetchedRun.  An NPE was also possible if fetchedRun was null;
+                            // that is, the runfiles were already present from an edit run or judge run on the current client, so no
+                            // server request was ever made for a run's files.
+                            MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + run.getSiteNumber() + " Run " + run.getNumber());
+                            mfv.setContestAndController(getContest(), getController());
+    
+                            // if entry point was specified, add a tab for it
+                            if(run.getEntryPoint() != null) {
+                                mfv.addTextPane("Entry Point", run.getEntryPoint());
+                            }
+                            // add any other files to the MFV (these are added first so that the mainFile will appear at index 0)
+                            boolean otherFilesPresent = false;
+                            boolean otherFilesLoadedOK = false;
+                            if (otherFiles != null) {
+                                otherFilesPresent = true;
+                                otherFilesLoadedOK = true;
+                                for (SerializedFile otherFile : otherFiles) {
+                                    otherFilesLoadedOK &= mfv.addFilePane(otherFile.getName(), otherFile);
+                                }
+                            }
+    
+                            // add the mainFile to the MFV
+                            boolean mainFilePresent = false;
+                            boolean mainFileLoadedOK = false;
+                            if (mainFile != null) {
+                                mainFilePresent = true;
+                                mainFileLoadedOK = mfv.addFilePane("Main File" + " (" + mainFile.getName() + ")", mainFile);
+                            }
+    
+                            // if we successfully added all files, show the MFV
+                            if ((!mainFilePresent || (mainFilePresent && mainFileLoadedOK)) 
+                                    && (!otherFilesPresent || (otherFilesPresent && otherFilesLoadedOK))) {
+                                mfv.setSelectedIndex(0);  //always make leftmost selected; normally this will be MainFile
+                                mfv.setVisible(true);
+                                showMessage("");
+                            } else {
+                                getController().getLog().log(Log.WARNING, "Unable to load run source files into MultiFileViewer");
+                                showMessage("Unable to load run source files into MultiFileViewer");
+                            }
+    
+                        } else {
+                            // runfiles is null
+                            getController().getLog().log(Log.WARNING, "Unable to obtain RunFiles for Site " + run.getSiteNumber() + " run " + run.getNumber());
+                            showMessage("Unable to obtain RunFiles for selected run");
+                        }
+                        
+                    }
+                }
+                return;
             } else {
                 // getContest().getRun() returned null
                 getController().getLog().log(Log.WARNING, "Selected run not found");
@@ -2196,8 +2313,13 @@ public class RunsTablePane extends JPanePlugin {
         } catch (Exception e) {
             getController().getLog().log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to show run source, check log");
+            
+            //make sure this is clear in case of exception
+            requestedRun = null;
         }
-
+        
+        // OK to now start another view source now
+        AllowViewSource();
     }
 
 }

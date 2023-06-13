@@ -17,13 +17,11 @@ import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 /**
  * Contest Loader interface and Constants.
  * 
- * Constants and methods used in loading YAML.
+ * Constants and methods used in loading YAML into contest/model.
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public interface IContestLoader {
-
-    // default filenames
 
     String DEFAULT_CONTEST_YAML_FILENAME = "contest.yaml";
 
@@ -32,6 +30,8 @@ public interface IContestLoader {
     String DEFAULT_PROBLEM_SET_YAML_FILENAME = "problemset.yaml";
     
     String DEFAULT_PROBLEM_LATEX_FILENAME = "problem.tex";
+    
+    String DEFAULT_ENGLISH_PROBLEM_LATEX_FILENAME = "problem.en.tex";
 
     String DEFAULT_SYSTEM_YAML_FILENAME = "system.yaml";
     
@@ -41,6 +41,13 @@ public interface IContestLoader {
     
     String CONFIG_DIRNAME = "config";
 
+    // Sandbox fields
+    
+    final String SANDBOX_PROGRAM_NAME_KEY = "sandbox-program-name";
+
+    final String SANDBOX_COMMAND_LINE_KEY = "sandbox-command-line";
+
+    final String SANDBOX_TYPE_KEY = "sandbox-type";
 
     // Other constants.
 
@@ -61,6 +68,12 @@ public interface IContestLoader {
     String CONTEST_START_TIME_KEY = "start-time";
     
     String MAX_OUTPUT_SIZE_K_KEY = "max-output-size-K";
+    
+    String CLICS_MAX_OUTPUT_KEY = "output";
+    
+    String CLICS_TIME_MULTIPLIER_KEY = "time_multiplier";
+    
+    String CLICS_TIME_SAFETY_MARGIN_KEY = "time_safety_margin";
     
     final String OUTPUT_PRIVATE_SCORE_DIR_KEY = "output-private-score-dir";
 
@@ -103,7 +116,11 @@ public interface IContestLoader {
     String JUDGE_CONFIG_PATH_KEY = "judge-config-path";
 
     String TIMEOUT_KEY = "timeout";
-
+    
+    final String MEMORY_LIMIT_IN_MEG_KEY = "memory-limit-in-Meg";
+    
+    final String MEMORY_LIMIT_CLICS = "memory";
+    
     String LIMITS_KEY = "limits";
 
     String PROBLEM_NAME_KEY = "title";
@@ -113,7 +130,9 @@ public interface IContestLoader {
     String AUTO_JUDGE_KEY = "auto-judging";
 
     String CCS_TEST_MODE = "ccs-test-mode";
-
+    
+    String LOAD_SAMPLE_JUDGES_DATA = "load-sample-judges-data";
+    
     String INPUT_KEY = "input";
 
     String PROBLEM_LOAD_DATA_FILES_KEY = "load-data-files";
@@ -149,6 +168,12 @@ public interface IContestLoader {
     String INTERPRETED_LANGUAGE_KEY = "interpreted";
 
     String READ_FROM_STDIN_KEY = "readFromSTDIN";
+
+    /**
+     * output validators directory name.
+     */
+    final String OUTPUT_VALIDATORS = "output_validators";
+
     
     //keys for YAML entries specifying data for Input Validators:
     String INPUT_VALIDATOR_KEY = "input_validator"; //the section header for Input Validator info
@@ -189,6 +214,8 @@ public interface IContestLoader {
     
     String ALLOW_MULTIPLE_TEAM_LOGINS_KEY = "allow-multiple-team-logins";
     
+    String LOAD_ACCOUNTS_FILE_KEY = "load-accounts-file";
+
     /**
      * 
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, IInternalContest, edu.csus.ecs.pc2.core.model.Account)
@@ -244,9 +271,14 @@ public interface IContestLoader {
 
     Problem[] getProblems(String[] contents, int defaultTimeOut);
 
+    Problem[] getProblems(String[] contents, int defaultTimeOut, long defaultMaxOutputSizeInBytes);
+
     Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine);
 
     Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
+            boolean manualReviewOverride);
+
+    Problem[] getProblems(String[] yamlLines, int seconds, long maxOutputSizeInBytes, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
             boolean manualReviewOverride);
 
     Problem[] getProblemsFromLetters(Problem[] contestProblems, String string);
@@ -255,6 +287,11 @@ public interface IContestLoader {
 
     Site[] getSites(String[] yamlLines);
 
+    /**
+     * Are data file contents to ba loaded into configuration?.
+     * 
+     * @return true if data files are not external
+     */
     boolean isLoadProblemDataFiles();
 
     /**
@@ -281,6 +318,7 @@ public interface IContestLoader {
 
     void setLoadProblemDataFiles(boolean loadProblemDataFiles);
 
+    // TODO REFACTOR move this into StringUtilities
     String unquote(String input, String string);
 
     /**
@@ -304,6 +342,7 @@ public interface IContestLoader {
      */
     String getCCSDataFileDirectory(String yamlDirectory, String shortDirName);
 
+    // TODO REFACTOR move this into StringUtilities
     boolean getBooleanValue(String string, boolean defaultBoolean);
 
     /**
@@ -317,9 +356,16 @@ public interface IContestLoader {
     /**
      * Locates the CDP config directory.
      * 
+     * Attempts to find CDP config directory at:
+     * <li> current directory
+     * <li> parent directory
+     * <li> samps/contests/<BASENAME> directory, ex "mini" finds samps/contests/<BASENAME>/config
+     * 
+     * If no directory found, returns null.
+     * 
      * @param entry
      *            a directory, filename or PC^2 sample CCS contest directory name.
-     * @return location for file or null if not found.
+     * @return null or the location of the CDP config/ directory.
      */
     File findCDPConfigDirectory(File entry);
 }

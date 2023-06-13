@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Pluralize;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
@@ -196,7 +197,9 @@ public final class JudgementUtilites {
 
             int numberOfTestCases = problem.getNumberTestCases();
             log.info(prefixString + " Dumping for " + run + " judge id=" + judgeId);
-            log.info(prefixString + " There are " + numberOfTestCases + " for problem " + problem.getDisplayName() + " '" + problem.getShortName() + "'");
+            log.info(prefixString + " There " + Pluralize.pluralize("is", numberOfTestCases) + " "
+                    + numberOfTestCases + Pluralize.simplePluralize(" testcase", numberOfTestCases)
+                    +  " for problem " + problem.getDisplayName() + " '" + problem.getShortName() + "'");
 
             String[] otherFiles = { "cstderr.pc2", "cstdout.pc2", "estderr.pc2", "estdout.pc2" };
 
@@ -295,6 +298,8 @@ public final class JudgementUtilites {
                 RunTestCase[] testCases = run.getRunTestCases();
                 for (RunTestCase runTestCase : testCases) {
 
+                    // JB - I think this is wrong - should be == 1, not 0 since getTestNumber() always returns
+                    // > 0, see Executable.executeAndValidateDataSet(), where testNumber is set to dataset + 1
                     if (runTestCase.getTestNumber() == 0) {
                         // if new set of test cases, start list all over again.
                         list = new ArrayList<Judgement>();
@@ -312,6 +317,35 @@ public final class JudgementUtilites {
         }
 
         return list;
+    }
+
+    /**
+     * Get test cases for last run
+     * Based on Doug Lane's code posted to Slack.
+     * 
+     * @param contest
+     * @param run
+     * @return null array if no test cases judgement in run, else the list of judgements
+     */
+    public static RunTestCase[] getLastTestCaseArray(IInternalContest contest, Run run) {
+        
+        List<RunTestCase> list = new ArrayList<RunTestCase>();
+        try {
+            
+            // Find last test case with ordinal 1 in the list of run cases
+            RunTestCase[] testCases = run.getRunTestCases();
+            for (RunTestCase runTestCase : testCases) {
+                // Found a new start of test cases, so dump old array and make new one
+                if (runTestCase.getTestNumber() == 1) {
+                    list = new ArrayList<RunTestCase>();
+                }
+                list.add(runTestCase);
+            }
+        } catch (Exception e) {
+            System.err.println("ERROR in getLastTestCaseArray "+e.getMessage());
+            e.printStackTrace();
+        }
+        return (RunTestCase[]) list.toArray(new RunTestCase[list.size()]);
     }
     
     /**

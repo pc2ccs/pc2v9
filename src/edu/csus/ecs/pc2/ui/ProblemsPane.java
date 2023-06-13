@@ -142,10 +142,11 @@ public class ProblemsPane extends JPanePlugin {
         if (problemListBox == null) {
             problemListBox = new MCLB();
 
-            Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", 
-                    "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
+            Object[] cols = { "Problem Name", "Test Cases", "Input Method", "Judging Type", "Short", "Time Limit(Secs)",
+                    "Max Output(KB)", "Mem Limit(MB)", "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
             problemListBox.addColumns(cols);
 
+            problemListBox.getColumnInfo(0).setAlignment(Alignment.CENTER);
             problemListBox.getColumnInfo(1).setAlignment(Alignment.CENTER);
             problemListBox.getColumnInfo(2).setAlignment(Alignment.CENTER);
             problemListBox.getColumnInfo(3).setAlignment(Alignment.CENTER);
@@ -156,6 +157,8 @@ public class ProblemsPane extends JPanePlugin {
             problemListBox.getColumnInfo(8).setAlignment(Alignment.CENTER);
             problemListBox.getColumnInfo(9).setAlignment(Alignment.CENTER);
             problemListBox.getColumnInfo(10).setAlignment(Alignment.CENTER);
+            problemListBox.getColumnInfo(11).setAlignment(Alignment.CENTER);
+            problemListBox.getColumnInfo(12).setAlignment(Alignment.CENTER);
 
             /**
              * No sorting at this time, the only way to know what order the problems are is to NOT sort them. Later we can add a sorter per ProblemDisplayList somehow.
@@ -223,9 +226,13 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     protected Object[] buildProblemRow(Problem problem) {
+        //the following comments document the sequence of changes made to the ProblemsPane columns
         // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", };
         // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validation", "I.V. Command", "Output Validator", "O.V. Command", "Groups" };
         // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit", "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
+        // Object[] cols = { "Problem Name", "# Test Cases", "Input Method", "Judging Type", "Short", "Time Limit(secs)", "Max Output(KB)", "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
+        // Object[] cols = { "Problem Name", "Test Cases", "Input Method", "Judging Type", "Short", "Time Limit(secs)", "Max Output(KB)", "Mem Limit(MB)",
+        //                      "Input Validator", "I.V. Status", "Output Validator", "O.V. Command", "Groups" };
 
 
         int numberColumns = problemListBox.getColumnCount();
@@ -280,6 +287,18 @@ public class ProblemsPane extends JPanePlugin {
         // problem time limit
         // c[i++] = new MCLBCenteredStringCellRenderer(Integer.toString(problem.getTimeOutInSeconds()));
         c[i++] = Integer.toString(problem.getTimeOutInSeconds());
+
+        // problem output limit
+        long outputLimit = problem.getMaxOutputSizeKB();
+        if (outputLimit == 0) {
+            //use global value
+            outputLimit = getContest().getContestInformation().getMaxOutputSizeInBytes();
+        }
+        c[i++] = Long.toString(outputLimit);
+
+        
+        // problem memory limit
+        c[i++] = Integer.toString(problem.getMemoryLimitMB());
 
         //input validator type (NONE/VIVA/CUSTOM)
         c[i++] = problem.getCurrentInputValidatorType();

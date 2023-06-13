@@ -1,10 +1,12 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -53,6 +55,7 @@ import edu.csus.ecs.pc2.core.report.CategoryReport;
 import edu.csus.ecs.pc2.core.report.ClarificationsReport;
 import edu.csus.ecs.pc2.core.report.ClientSettingsReport;
 import edu.csus.ecs.pc2.core.report.ContestAnalysisReport;
+import edu.csus.ecs.pc2.core.report.ContestCompareReport;
 import edu.csus.ecs.pc2.core.report.ContestReport;
 import edu.csus.ecs.pc2.core.report.ContestSettingsReport;
 import edu.csus.ecs.pc2.core.report.ContestSummaryReports;
@@ -95,9 +98,11 @@ import edu.csus.ecs.pc2.core.report.RunStatisticsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
 import edu.csus.ecs.pc2.core.report.RunsReport5;
+import edu.csus.ecs.pc2.core.report.ScoreboardJSONReport;
 import edu.csus.ecs.pc2.core.report.ScoreboardTSVReport;
 import edu.csus.ecs.pc2.core.report.SitesReport;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
+import edu.csus.ecs.pc2.core.report.StandingsNSAReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
 import edu.csus.ecs.pc2.core.report.SubmissionsTSVReport;
 import edu.csus.ecs.pc2.core.report.TeamsTSVReport;
@@ -107,8 +112,6 @@ import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 /**
  * Report Pane, allows picking and viewing reports.
@@ -263,6 +266,7 @@ public class ReportPane extends JPanePlugin {
         reports.add(new HTMLReport());
 
         reports.add(new ExportYamlReport());
+        reports.add(new ScoreboardJSONReport());
 
         reports.add(new CategoryReport());
 
@@ -300,12 +304,16 @@ public class ReportPane extends JPanePlugin {
         
         reports.add(new ProblemGroupAssignmentReport());
         
+        reports.add(new ContestCompareReport());
+        
         if (isServer()){
             // SOMEDAY Bug 1166 remove this isServer when added to Admin. 
             reports.add(new CDPReport());
         }
         
         reports.add(new EventFeedJSONReport());
+        
+        reports.add(new StandingsNSAReport());
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         

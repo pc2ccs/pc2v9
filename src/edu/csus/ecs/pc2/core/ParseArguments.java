@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedInputStream;
@@ -65,6 +65,8 @@ public class ParseArguments {
     private static final String NULL_VALUE = "<GAA" + Long.MAX_VALUE;
 
     private String[] requireArgOpts = null;
+    
+    private String[] allowedOptions = null;
 
     /**
      * ParseArgs constructor comment.
@@ -302,6 +304,27 @@ public class ParseArguments {
     }
 
     /**
+     * Does the value match any of the allowed options?  A null list of
+     * allowed options implies there are no restrictions for what arguments
+     * are allowed (everything accepted).  This is the default when the new
+     * 3 argument constructor is not used.
+     * 
+     * @param value
+     * @return boolean
+     */
+    public boolean isAllowedOption(String value) {
+        if(allowedOptions != null) {
+            for(String sOpt: allowedOptions) {
+                if(sOpt.equals(value)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+    
+    /**
      * Load in command line args.
      */
     public void loadArgs(String[] args) {
@@ -323,8 +346,11 @@ public class ParseArguments {
                 if (curOpt != null) {
                     argHash.put(curOpt, NULL_VALUE);
                 }
-
-                curOpt = value;
+                if(isAllowedOption(value)) {
+                    curOpt = value;
+                } else {
+                    throw new IllegalArgumentException("invalid option '" + value + "'");
+                }
             } else if (curOpt != null) {
                 // found a value (not an option)
 
@@ -449,9 +475,11 @@ public class ParseArguments {
             }
         }
     }
-
+    
     /**
      * Set options which require a value.
+     * Replaces the array of options that require an argument with the array
+     * of supplied options (newRequireArgOpts)
      *
      * @param newRequireArgOpts
      *            java.lang.String[]
@@ -462,6 +490,8 @@ public class ParseArguments {
 
     /**
      * Set option which requires a value.
+     * Replaces the array of options that require an argument with an array
+     * consisting of the single supplied option (newRequireArgOpts)
      *
      * @param newRequireArgOpts
      *            java.lang.String
@@ -469,6 +499,31 @@ public class ParseArguments {
     public void setRequireArgOpts(String newRequireArgOpts) {
         requireArgOpts = new String[1];
         requireArgOpts[0] = newRequireArgOpts;
+    }
+
+    /**
+     * Set options which are allowed.  
+     * Replaces the array of allowed options with the supplied array of
+     * allowed options (newAllowedOpts)
+     *
+     * @param newAllowedOpts
+     *            java.lang.String[]
+     */
+    public void setAllowedOpts(java.lang.String[] newAllowedOpts) {
+        allowedOptions = newAllowedOpts;
+    }
+
+    /**
+     * Set a single allowed option.
+     * This replaces the array of allowed options with an array consisting of
+     * the single supplied option (newAllowedOpt)
+     *
+     * @param newAllowedOpt
+     *            java.lang.String
+     */
+    public void setAllowedOpt(String newAllowedOpt) {
+        allowedOptions = new String[1];
+        allowedOptions[0] = newAllowedOpt;
     }
 
     /**
@@ -481,6 +536,23 @@ public class ParseArguments {
      */
     public ParseArguments(String[] args, String[] requiredArgs) {
         super();
+        setRequireArgOpts(requiredArgs);
+        loadArgs(args);
+    }
+
+    /**
+     * ParseArgs args and options requiring values making sure options supplied are allowed.
+     *
+     * @param args
+     *            java.lang.String [] - command line arguments
+     * @param requiredArgs
+     *            java.lang.String [] - options requiring args
+     * @param allowedOpts
+     *            java.lang.String [] - allowed option strings
+     */
+    public ParseArguments(String[] args, String[] requiredArgs, String[] allowedOpts) {
+        super();
+        setAllowedOpts(allowedOpts);
         setRequireArgOpts(requiredArgs);
         loadArgs(args);
     }

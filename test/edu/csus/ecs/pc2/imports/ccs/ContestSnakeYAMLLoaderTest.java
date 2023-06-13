@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -63,6 +63,8 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
  * @author John Clevenger, PC^2 Team (pc2@ecs.csus.edu)
  */
 public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
+
+    private static final String MINI_CONTEST_DIR = "mini";
 
     private static final String YYYY_MM_DD_FORMAT1 = "yyyy-MM-dd HH:mm";
 
@@ -397,7 +399,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals(18000, time.getContestLengthSecs());
 
         // scoreboard-freeze: 4:00:00
-        assertEquals("14400", info.getFreezeTime());
+        assertEquals("4:00:00", info.getFreezeTime());
 
         Language[] languages = contest.getLanguages();
 
@@ -502,7 +504,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals(18000, time.getContestLengthSecs());
 
         // scoreboard-freeze: 4:00:00
-        assertEquals("14400", info.getFreezeTime());
+        assertEquals("4:00:00", info.getFreezeTime());
     }
 
     /**
@@ -2230,7 +2232,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         String entryLocation = "ccs1";
         
         InternalContest contest = new InternalContest();
-        
+        ensureStaticLog();
+
         loader.initializeContest(contest, new File(entryLocation));
         
 //        System.out.println("Loaded CDP/config values from " + entryLocation);
@@ -2246,7 +2249,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertEquals("Number of languages", 3, languages.length);
         
         Account[] accounts = contest.getAccounts();
-        assertEquals("Number of accounts", 0, accounts.length);
+        assertEquals("Number of accounts", 80, accounts.length);
 
         Site[] sites = contest.getSites();
         assertEquals("Number of sites", 1, sites.length);
@@ -2628,9 +2631,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
     }
 
     /**
-     * Load all sample contests/cdps.
-     * 
-     * 
+     * Test loading all sample contests, a type of smoke test.
      * 
      * @throws Throwable
      */
@@ -2654,7 +2655,21 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
             }
             
             try {
-                IInternalContest contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
+                
+                IInternalContest contest = null;
+
+                String teamsTSVFilename = directoryName + File.separator + IContestLoader.CONFIG_DIRNAME + //
+                        File.separator + LoadICPCTSVData.TEAMS_FILENAME;
+
+                if (new File(teamsTSVFilename).isFile()) {
+                    // Test load with tsv files
+                    File cdpDir = new File(directoryName);
+                    contest = loadFullSampleContest(null, cdpDir);
+                } else {
+                    // test yaml without tsv files
+
+                    contest = snake.fromYaml(null, directoryName + File.separator + IContestLoader.CONFIG_DIRNAME, false);
+                }
 
                 Problem[] problems = contest.getProblems();
                 assertTrue("Expecting at least one problem in contest in " + directoryName, problems.length > 0);
@@ -2869,7 +2884,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         
         ContestInformation info = contest.getContestInformation();
         assertNotNull("Expecting ContestInformation ", info);
-        assertEquals("Expected max file size ",128000,info.getMaxFileSize());
+        assertEquals("Expected max file size ",128*1024,info.getMaxOutputSizeInBytes());
     }
 
     
@@ -3665,6 +3680,44 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
         
     }
+    
+    
+    /**
+     * Test yaml import for memory-limit-in-Meg and sandbox.
+     * 
+     * @throws Exception
+     */
+    
+    public void testLoadSandboxAndMemoryLimit() throws Exception {
+
+        /**
+         * Contest to use as input
+         */
+        String sampleContestDirName = "sumitMTC";
+        
+        IInternalContest contest = new InternalContest();
+        
+        
+        loadSampleContest(contest, sampleContestDirName);
+        
+        assertNotNull(contest);
+
+        ContestInformation info = contest.getContestInformation();
+        assertEquals("title ", "Sumit multi test set", info.getContestTitle());
+
+//        startExplorer(info.getJudgeCDPBasePath());
+
+        Problem problem = getProblemByLetter(contest, "A");
+
+        int expectedLimit = 2099;
+        assertEquals("Memory limit", expectedLimit, problem.getMemoryLimitMB());
+
+        String expected = "{:sandboxprogramname} {:memlimit} {:timelimit}";
+        assertEquals("Sandbox command", expected, problem.getSandboxCmdLine());
+        
+        
+   
+    }
 
     private IInternalContest fullLoadSampleContest(String sampleName) throws Exception {
         IInternalContest contest  = new InternalContest();
@@ -3700,7 +3753,178 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         assertNotNull("Expecting to load ccs2 contest",contest);
         assertFalse("Expected NO halt at end of contest ", contest.getContestInformation().isAutoStopContest());
     }
-   
     
-}
+    public String getTestDataDirname(String dirname) {
+        String contestConfigDir = getRootInputTestDataDirectory() +File.separator + dirname +File.separator+ IContestLoader.CONFIG_DIRNAME;
+        return contestConfigDir;
+    }
+    
+    /**
+     * Test loading problem title from problem.en.tex.
+     * 
+     * @throws Exception
+     */
+    public void testProblemNameENTex() throws Exception {
+        String testDataContestDirName = "samplecdp";
 
+
+        String dirname = getTestDataDirname(testDataContestDirName);
+//        startExplorer(dirname);
+
+        IInternalContest contest = snake.fromYaml(null, dirname, false);
+        assertNotNull(contest);
+
+        Problem[] problems = contest.getProblems();
+
+        for (Problem problem : problems) {
+            if ("ship".equals(problem.getShortName())) {
+                String expected = "Ship Traffic";
+                assertEquals("Expect problem title ", expected, problem.getDisplayName());
+            }
+            if ("tours".equals(problem.getShortName())) {
+                String expected = "Tours";
+                assertEquals("Expect problem title ", expected, problem.getDisplayName());
+            }
+
+            if ("evolution".equals(problem.getShortName())) {
+                String expected = "Evolution in Parallel";
+                assertEquals("Expect problem title ", expected, problem.getDisplayName());
+            }
+        }
+    }
+   
+    /**
+     * Find/match problem in contest by problem letter
+     * @param inContest
+     * @param letter
+     * @return null if not found, else problem that is found to match letter
+     */
+    // TODO REFACTOR proomote/move getProblemByLetter into AbstractTestCase
+    private Problem getProblemByLetter(IInternalContest inContest, String letter) {
+        
+        Problem[] problems = inContest.getProblems();
+        for (Problem problem : problems) {
+            if (letter.equalsIgnoreCase(problem.getLetter())) {
+                return problem;
+            }
+            
+        }
+        return null;
+    }
+    
+    
+    /**
+     * Test loading of output validator.
+     * 
+     * @throws Exception
+     */
+    public void testaddClicsOutputValidator() throws Exception {
+
+        String sampleContestDirName = "ccs1";
+
+        IInternalContest contest = new InternalContest();
+
+        /**
+         * Load groups data.
+         */
+        loadGroupsFromSampContest(contest, sampleContestDirName);
+        assertEquals("Number ground", 4, contest.getGroups().length);
+
+        IInternalContest internal = loadSampleContest(contest, sampleContestDirName);
+        assertNotNull(internal);
+
+        String configDir = getTestSampleContestDirectory(sampleContestDirName) + File.separator + IContestLoader.CONFIG_DIRNAME;
+        assertDirectoryExists(configDir);
+
+//        startExplorer(configDir);
+
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+
+//            String outValProgram = problem.getOutputValidatorProgramName();
+
+            if ("castles".equals(problem.getShortName())) {
+                // test validatorProg: 'yes_always.sh'
+                String expected = "samps/contests/ccs1/config/castles/output_validators/yes_always.sh";
+                asserPathEqual("Expected output validator location", expected, problem.getOutputValidatorProgramName());
+            }
+
+            if ("channel".equals(problem.getShortName())) {
+                // test validatorProg: 'samps/contests/ccs1/config/channel/output_validators/yes_always_2.sh'
+                String expected = "samps/contests/ccs1/config/channel/output_validators/yes_always_2.sh";
+                asserPathEqual("Expected output validator location", expected, problem.getOutputValidatorProgramName());
+            }
+        }
+    }
+    
+    public void testLoadSampleFiles() throws Exception {
+
+        IInternalContest contest = loadFullSampleContest(null, MINI_CONTEST_DIR);
+        assertNotNull(contest);
+
+        int totalTestCases = 0;
+
+        Problem[] problems = contest.getProblems();
+        for (Problem problem : problems) {
+
+            totalTestCases += problem.getNumberTestCases();
+//            for (int i = 0; i < problem.getNumberTestCases(); i++) {
+//                System.out.println("debug "+problem.getDataFileName(i+1));
+//            }
+        }
+
+        // TODO 701 change from expected 7 files to 10 files
+//        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 10, totalTestCases);
+        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 7, totalTestCases);
+
+    }
+    
+    /**
+     * Test creating and loading accounts from tsv file.
+     * 
+     * @throws Exception
+     */
+    public void testloadAccountLoadFile() throws Exception {
+        
+        String dataDir = getDataDirectory(this.getName());
+      
+      ensureDirectory(dataDir);
+//      startExplorer(dataDir);
+      
+      ensureStaticLog();
+
+      IInternalContest contest = loadFullSampleContest(null, "mini");
+      assertNotNull(contest);
+      
+      assertEquals("Team accounts ", 151, contest.getAccounts(ClientType.Type.TEAM).size());
+
+      ContestSnakeYAMLLoader loader = new ContestSnakeYAMLLoader();
+      assertNotNull(loader);
+      
+      String accountLoadFilename = dataDir + File.separator + "mini.load.accounts.up.tsv";
+//      editFile(accountLoadFilename);
+
+      loader.loadAccountLoadFile(contest, accountLoadFilename);
+      assertEquals("Team accounts ", 201, contest.getAccounts(ClientType.Type.TEAM).size());
+      
+      Vector<Account> teams = contest.getAccounts(ClientType.Type.TEAM);
+      Account[] teamArr = (Account[]) teams.toArray(new Account[teams.size()]);
+      
+      // Test all added accounts from mini.load.accounts.up.tsv
+      
+      for (Account account : teamArr) {
+          
+          int num = account.getClientId().getClientNumber();
+          
+          if ( num < 51 ) {
+              // teams 1 - 50 loaded from mini.load.accounts.up.tsv, only test those accounts
+              
+              assertEquals("TeamName " + num, account.getDisplayName());
+              assertEquals("USA", account.getCountryCode());
+              assertEquals("pass" + num, account.getPassword());
+              num++;
+          }
+      }
+        
+    }
+}

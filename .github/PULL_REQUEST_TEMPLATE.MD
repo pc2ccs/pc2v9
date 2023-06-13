@@ -2,7 +2,10 @@ Before submitting your Pull Request, please make sure you have read the [Guideli
 
 ### Description of what the PR does
 
-### Issue which the PR fixes
+### Issue which the PR addresses
+Put the Issue Number in this section.
+- If the PR actually COMPLETES an issue fix, _precede the Issue number by the word "Closes" or "Fixes"_.
+- If the PR is a partial fix but the Issue should remain open, put the word "partial" in front of the issue number.
 
 ### Environment in which the PR was developed (OS,IDE, Java version, etc.)
 

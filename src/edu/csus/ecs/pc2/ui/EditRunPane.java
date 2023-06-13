@@ -23,6 +23,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.execute.ExecuteTimerFrame;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -434,10 +435,26 @@ public class EditRunPane extends JPanePlugin {
 
         ElementId judgementId = null;
 
-        if (run.isJudged()) {
-            judgementId = run.getJudgementRecord().getJudgementId();
-        }
+        judgementLabel.setText("Judgement");
 
+        if (run.isJudged()) {
+            JudgementRecord jr = run.getJudgementRecord();
+            judgementId = jr.getJudgementId();
+
+            // Add judgement description to judgement tool tip
+            Judgement judgement = getContest().getJudgement(judgementId);
+            String judgementDescription = judgement.getAcronym() + " " + judgement.getDisplayName();
+
+            String valString = jr.getValidatorResultString();
+            if (valString != null) {
+                judgementDescription += " Validator returns '" + valString + "'";
+                judgementLabel.setText("Judgement*");
+            }
+
+            log.info("Edit Run " + run.getNumber() + " judgement is " + judgementDescription);
+            judgementLabel.setToolTipText(judgementDescription);
+        }
+        
         for (Judgement judgement : getContest().getJudgements()) {
             getJudgementComboBox().addItem(judgement);
             if (judgement.getElementId().equals(judgementId)) {
@@ -445,6 +462,9 @@ public class EditRunPane extends JPanePlugin {
             }
             index++;
         }
+        
+        // Select judgement in combo box
+        judgementComboBox.setSelectedIndex(selectedIndex);
         
         selectedIndex = -1;
         index = 0;
@@ -756,8 +776,10 @@ public class EditRunPane extends JPanePlugin {
     protected void executeRun() {
 
         System.gc();
-
-        executable = new Executable(getContest(), getController(), run, runFiles);
+        
+        ExecuteTimerFrame executeFrame = new ExecuteTimerFrame();
+        
+        executable = new Executable(getContest(), getController(), run, runFiles, executeFrame);
 
         IFileViewer fileViewer = executable.execute();
         
@@ -886,7 +908,7 @@ public class EditRunPane extends JPanePlugin {
 
     private void createAndViewFile(SerializedFile file, String title) {
         // TODO the executeable dir name should be from the model, eh ?
-        Executable tempEexecutable = new Executable(getContest(), getController(), run, runFiles);
+        Executable tempEexecutable = new Executable(getContest(), getController(), run, runFiles, null);
         String targetDirectory = tempEexecutable.getExecuteDirectoryName();
         Utilities.insureDir(targetDirectory);
         String targetFileName = targetDirectory + File.separator + file.getName();

@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id$ -->
-<!-- $HeadURL$ -->
+<!--  Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. -->
 <project name="package-pc2v9" default="archives" basedir=".">
     
 	<!--
@@ -88,6 +87,15 @@
                 <include name="**/rotate*"/>
                 <include name="**/distribute_score"/>
             </zipfileset>
+            <zipfileset dir="${sandbox.dir}" filemode="755" prefix="${release}/sandbox">
+                <include name="**/pc2sandbox.sh"/>
+                <include name="**/pc2syscheck.sh"/>
+                <include name="**/pc2syscheck.cmd"/>
+            </zipfileset>
+            <zipfileset dir="${support.dir}" filemode="644" prefix="${release}/support">
+                <include name="system_cgroup/pc2_cgroup.service"/>
+                <include name="system_cgroup/README"/>
+            </zipfileset>
             <zipfileset dir="${projects.dir}" filemode="755" prefix="${release}/projects">
                 <include name="*.zip"/>
                 <exclude name="EWTeam/*"/>
@@ -121,6 +129,7 @@
                 <include name="${release}/samps/sleep.exe"/>
                 <include name="${release}/samps/**/distribute_score**"/>
                 <include name="${release}/samps/**/rotate**"/>
+                <include name="${release}/sandbox/**"/>
             </tarfileset>
             <tarfileset mode="644" dir="${build.unpack.dir}">
                 <include name="${release}/samps/**"/>
@@ -141,10 +150,15 @@
     
     
    	<target name="archiveSkipTests">
-		 <property name="RUN_NO_TESTS" value="Yes"/>
-		<antcall target="archives"/>
-	</target>
+		   <property name="RUN_NO_TESTS" value="Yes"/>
+		   <antcall target="archives"/>
+      </target>
 
+   	<target name="archiveSkipTestsAndSubprojectBuilds">
+		   <property name="RUN_NO_TESTS" value="Yes"/>
+		   <property name="BUILD_NO_SUBPROJECTS" value="Yes"/>
+		   <antcall target="archives"/>
+      </target>
     
     <target name="archives" depends="init" description="public in dist, private in build">
 
@@ -158,6 +172,11 @@
         <antcall target="clean"/>
         <antcall target="apizip"/>
         <!-- bug 490 gzip depends on zip do not call explicitly -->
-        <antcall target="gzip"/> 
+        <antcall target="gzip"/>
+    	
+    	<echo message="Version ${version} ${date} ${repo.version} (${timestamp.english})${line.separator}"/>
+    	<echo message="Created  distribution ${zip.path}"/>
+    	<echo message="Created  distribution ${gzip.path}"/>
+    	<echo message="Packaging complete."/>
     </target>
 </project>

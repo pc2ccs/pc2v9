@@ -183,7 +183,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
                 "{:siteid};2", // 
                 "{:teamid};1", // 
                 "{files};Sumit.java", // 
-                "{:timelimit};30", // 
+                "{:timelimit};10", // 
                 "{:validator};edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
                 "{:pc2home};"+ExecuteUtilities.getPC2Home(), // 
         };
@@ -263,7 +263,7 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
                 "{:problemletter};F", // 
                 "{:siteid};2", // 
                 "{:teamid};12", // 
-                "{:timelimit};30", // 
+                "{:timelimit};10", // 
                 "{:validator};edu.csus.ecs.pc2.validator.pc2Validator.PC2Validator", // 
                 "{:pc2home};"+ExecuteUtilities.getPC2Home(), //
         };
@@ -538,4 +538,29 @@ public class ExecuteUtilitiesTest extends AbstractTestCase {
         }
     }
 
+    /**
+     * test {:ensuresuffix=xxx} substitution.
+     * 
+     * @throws Exception
+     */
+    public void testReplaceStringConditional() throws Exception {
+        
+        // tests detection suffix at start of string and do not duplicate it
+        String actual = ExecuteUtilities.replaceStringConditional("foo{:ensuresuffix=foo}", "{:ensuresuffix=}");
+        
+        assertEquals("Expected substitution", "foo", actual);
+        
+        // tests missing suffix and adds it
+        actual = ExecuteUtilities.replaceStringConditional("ISumit{:ensuresuffix=Kt}", "{:ensuresuffix=}");
+        
+        assertEquals("Expected substitution", "ISumitKt", actual);
+        
+        // tests that evaluation is right to left and we do not use a conditional
+        // substitute suffix as a comparision for the another conditional suffix
+        // also tests longer suffix string matching
+        actual = ExecuteUtilities.replaceStringConditional("kotlin ISumit{:ensuresuffix=Kt}{:ensuresuffix=Kt} ISumit{:ensuresuffix=ISumit}{:ensuresuffix=Kt}", "{:ensuresuffix=}");
+        
+        assertEquals("Expected substitution", "kotlin ISumitKtKt ISumitKt", actual);
+    }
+    
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.FileOutputStream;
@@ -12,7 +12,6 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.exports.ccs.StandingsJSON;
 import edu.csus.ecs.pc2.exports.ccs.StandingsJSON2016;
 
 /**
@@ -92,8 +91,8 @@ public class JSON2016Report implements IReportFile {
     }
 
     public void writeReport(PrintWriter printWriter) throws Exception {
-        StandingsJSON standingsJSON = new StandingsJSON();
-        printWriter.print(standingsJSON.createJSON(contest));
+        StandingsJSON2016 standingsJSON = new StandingsJSON2016();
+        printWriter.print(standingsJSON.createJSON(contest, controller));
         standingsJSON = null;
     }
 

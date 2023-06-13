@@ -153,7 +153,6 @@ public class SubmitSubmissionsPane extends JPanePlugin {
                     int failureCount = files.size() - submittedFiles.size();
                     showMessage("Only submitted " + submittedFiles.size() + " of " + files.size() + " runs, check log for details of " + failureCount + " failures.");
                 }
-
             }
         }
     }

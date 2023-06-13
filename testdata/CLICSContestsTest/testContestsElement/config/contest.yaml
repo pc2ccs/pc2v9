@@ -1,0 +1,71 @@
+
+#
+# contest.yaml - shadow 2022 Benelux Algorithm Programming Contest
+#
+# Tue Oct 18 11:35:43 EST5EDT 2022
+# 
+
+name: Benelux Algorithm Programming Contest 2022
+short-name: bapc2022
+
+penalty-time: 20
+
+# TODO update start time 
+#start-time:        2022-05-30T07:00:00-07:00
+start-time: 2022-10-22T12:30:00+02:00
+
+# TODO update both duration/contest length
+duration:  05:00:00
+# freeze time before end of contest
+scoreboard-freeze: 01:00:00
+scoreboard-freeze-length: 01:00:00
+
+# pc2 specific contest time settings
+elapsed: 0:00:00
+remaining: 5:00:00
+running: false
+
+# TODO  does the Primary stop on first fail ?  Should we ?
+# Stop at end automatically
+auto-stop-clock-at-end: true
+
+# Stop on first failed test case
+stop-on-first-failed-test-case: true
+
+shadow-mode: true
+# ccs-url: https://open.kattis.com/clics-api/contests/prognova20/
+# ccs-url: https://nac22.kattis.com/clics-api/contests/nac22test/
+# ccs-url: https://nac22.kattis.com/clics-api/contests/nac22dress/
+
+#ccs-url: https://nac22.kattis.com/clics-api/contests/nac22/
+
+# Primary CCS API settings/auth
+ccs-url: https://judge.gehack.nl/api/contests/bapc2022
+ccs-login: pc2
+ccs-password: OVERPASS-TABLEFUL-flame-REFUTE
+
+# test mode is required to allow non-team users to submit/add runs
+ccs-test-mode: true
+
+# pc2 judging types 
+computer-judged: true
+manual-review: false
+send-prelim-judgement: false
+
+# if true - load files into pc2 config, if false use CDP files on disk
+load-data-files: false
+
+# judge's data path
+judge-config-path: /home/ubuntu/repos/ccsconfig-bapc2022/bapc2022
+
+allow-multiple-team-logins: false
+
+# 10M = 10 000
+max-output-size-K: 10000
+
+# set FEEDER 1 as proxy
+team-proxy-accounts:
+  - account: FEEDER
+    number: 1
+
+# EOF contest.yaml - Contest Configuration

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import junit.framework.TestCase;
@@ -18,22 +18,19 @@ public class ParseArgumentsTest extends TestCase {
         try {
             @SuppressWarnings("unused")
             ParseArguments parseArguments = new ParseArguments(null);
+            fail("Expecting IllegalArgumentException for ParseArguments(null) ");
         } catch (IllegalArgumentException e) {
-            nullFakeRoutine("Passed test threw IllegalArgumentException");
+            String expected = "args is null";
+            assertEquals("Expected exception message", expected, e.getMessage());
         }
 
     }
 
     public void testEmpty() {
-        @SuppressWarnings("unused")
         ParseArguments parseArguments = new ParseArguments(new String[0]);
+        assertNotNull(parseArguments);
     }
 
-    private void nullFakeRoutine(String reason) {
-        // TODO Auto-generated method stub
-
-    }
-    
     public void testOptHasValue() {
 
         String opt = "--login";
@@ -48,6 +45,29 @@ public class ParseArgumentsTest extends TestCase {
         assertEquals(value, parseArguments.getOptValue(opt));
 
         assertFalse("Option should not have value ", parseArguments.optHasValue("--bogus"));
+    }
+
+    public void testInvalidOption() {
+        String opt = "--login";
+        String opt3 = "--nogui";
+        String optp = "-pass";
+        String value = "name";
+        String opt4 = "--bill";
+
+        String[] required = { opt, optp };
+        String[] args = { opt, value, opt3, opt4, optp };
+        String[] allowOpts = { opt, opt3, optp };
+        
+        // --bill is not allowed (opt4)
+        try {
+            @SuppressWarnings("unused")
+            ParseArguments parseArguments = new ParseArguments(args, required, allowOpts);
+            fail("Expecting IllegalArgumentException for ParseArguments(args, required, allowOpts) ");
+            
+        } catch (IllegalArgumentException exc) {
+            String expected = "invalid option '--bill'";
+            assertEquals("Expected exception message", expected, exc.getMessage());
+        }
     }
     
     public void testIsOptPresent() {
@@ -72,6 +92,37 @@ public class ParseArgumentsTest extends TestCase {
         assertNull(opt2+" option should be null value", parseArguments.getOptValue(opt2));
     }
     
+    public void testAreOptsValid() {
+
+        String opt = "--login";
+        String opt2 = "--debad";
+        String opt3 = "--nogui";
+        String optp = "-pass";
+        String value = "name";
+        String opt4 = "--bill";
+
+        String[] required = { opt, optp };
+        String[] args = { opt, value, opt3, opt4, optp };
+        String[] allowedOpts = { opt, opt3, optp };
+        ParseArguments parseArguments = null;
+        
+        try {
+            parseArguments = new ParseArguments(args, required);
+        } catch (IllegalArgumentException exc) {
+            fail("Un-expected IllegalArgumentException for ParseArguments(args, required)");
+        }
+//        parseArguments.dumpArgs(System.out);
+
+        parseArguments.setAllowedOpts(allowedOpts);
+        assertTrue(opt + " option should be allowed", parseArguments.isAllowedOption(opt));
+        assertFalse(opt2 + " option should not be allowed", parseArguments.isAllowedOption(opt2));
+        assertTrue(optp + " option should be allowed", parseArguments.isAllowedOption(optp));
+        assertFalse(value + " option should not be allowed ", parseArguments.isAllowedOption(value));
+        
+        assertFalse(opt4 + " option should not be allowed", parseArguments.isAllowedOption(opt4));
+        assertTrue(opt3 + " option should be allowed", parseArguments.isAllowedOption(opt3));
+    }
+    
     /**
      * main test routine for ParseArgs <br>
      *
@@ -79,24 +130,9 @@ public class ParseArgumentsTest extends TestCase {
      *            java.lang.String[]
      */
     public static void main(String[] args) {
-        ParseArguments pa = new ParseArguments();
-        pa.loadArgs(args);
-        pa.dumpArgs(System.out);
-        System.out.println();
-        
-        String [] reqArgs = { "--l", "--file" };
-
-        System.out.print("Using required arguments:");
-        for (String s : reqArgs){
-            System.out.print(" "+s);
-        }
-        System.out.println();
-        
-        pa = new ParseArguments();
-        pa.setRequireArgOpts(reqArgs);
-        pa.loadArgs(args);
-        pa.dumpArgs(System.out);
-
+        ParseArgumentsTest t = new ParseArgumentsTest();
+        t.testIsOptPresent();
+        t.testAreOptsValid();
     }
 
 }
