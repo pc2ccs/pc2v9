@@ -161,6 +161,7 @@ public final class Reports {
         reports.add(new ProblemsGroupReport());
         
         reports.add(new ProblemGroupAssignmentReport());
+        reports.add(new ScoreboardJSONReport());
         
         reports.add(new ContestCompareReport());
         
