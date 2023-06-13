@@ -186,7 +186,20 @@ public final class Constants {
     
     public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";
 
-    public static final int BYTES_PER_KIBIBYTE = 1024;
+    public static final int BYTES_PER_KIBIBYTE = 1024;   
+    
+    /**
+     * Sandbox constants
+     */
+    public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit}";
+
+    public static final String PC2_INTERNAL_SANDBOX_PROGRAM_NAME = "pc2sandbox.sh";
+    
+    /**
+     * OS Compatibility constants
+     */
+    public static final String WINDOWS_CHECK_SANDBOX_SCRIPT = "pc2syscheck.cmd";
+    public static final String UNIX_CHECK_SANDBOX_SCRIPT = "pc2syscheck.sh";
 
     /**
      * Prefix for deleted runs.

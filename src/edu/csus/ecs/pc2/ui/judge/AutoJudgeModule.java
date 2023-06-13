@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui.judge;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -13,6 +14,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.ui.AutoJudgingMonitor;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
@@ -64,6 +66,22 @@ public class AutoJudgeModule implements UIPlugin {
             if (ci != null) {
                 String cdpPath = ci.getJudgeCDPBasePath();
                 Utilities.validateCDP(contest, cdpPath);
+            }
+            // make sure the OS supports judging of all problems this judge
+            // is set up to autojudge.
+            List<Problem> plist = autoJudgingMonitor.getOSUnsupportedAutojudgeProblemList();
+            if(!plist.isEmpty()) {
+                StringBuffer message = new StringBuffer();
+                message.append("Cannot perform autojudging for the following problems due to missing OS features:\n");
+                for(Problem prob: plist) {
+                    message.append("   Problem " + prob.getLetter() + " - " + prob.getDisplayName() + "\n");
+                }
+                message.append("You must either remove these problems from this autojudge's list of problems or\n");
+                message.append("you must make sure your OS supports features needed to judge these problems.\n");
+                message.append("One possiblity is the problems require a sandbox and your OS does not support it (cgroups?).");
+                System.err.println(message);
+                // rudely exit after printing a helpful(?) message.
+                System.exit(1);
             }
         } catch(MultipleIssuesException e) {
             System.err.println("Cannot perform Judging");
