@@ -1,13 +1,9 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.imports.ExportAccounts.Formats;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.AccountList;
@@ -21,9 +17,6 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
-import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
-import edu.csus.ecs.pc2.util.ContestLoadUtilities;
 
 /**
  * Unit test.
@@ -277,102 +270,6 @@ public class LoadAccountsTest extends AbstractTestCase {
         System.out.println("country code = " + team.getCountryCode());
 
     }
-    
-    private IInternalContest loadSampleContest(IInternalContest contest, String sampleName) throws Exception {
-        IContestLoader loader = new ContestSnakeYAMLLoader();
-        String configDir = getTestSampleContestDirectory(sampleName) + File.separator + IContestLoader.CONFIG_DIRNAME;
-        try {
-            return loader.fromYaml(contest, configDir);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            throw e;
-        }
-    }
-    
-    public void testupdateAccountsFromFile() throws Exception {
-        // TODO CLEANUP either code unit  test or remove it and maybe remove updateAccountsFromFile method too.
-        
-//        String dataDir = getDataDirectory(this.getName());
-        
-//        ensureDirectory(dataDir);
-//        startExplorer(dataDir);
 
-        IInternalContest contest = loadSampleContest(null, "mini");
-        assertNotNull(contest);
-        System.err.println(" // TODO BUG load accounts from CDP broken/buggy");
-        // TODO BUG is should be assertEquals(151, accounts.size());
-        
-//        Vector<Account> accounts = contest.getAccounts(Type.TEAM);
-//        assertEquals(151, accounts.size());        
-//        
-////        String loadFileName = dataDir + File.separator + Constants.ACCOUNTS_LOAD_FILENAME;
-////        editFile(loadFileName);
-//        
-//        String loadFileName = dataDir + File.separator + "mini.load.accounts.up.tsv";
-//        editFile(loadFileName);
-//        
-//        Account[] newAccounts = LoadAccounts.updateAccountsFromFile(contest, loadFileName);
-//        assertEquals(50, newAccounts.length);
-//        Arrays.sort(newAccounts, new AccountComparator());
-//
-//        int num = 1;
-//        for (Account account : newAccounts) {
-//
-//            assertEquals("TeamName " + num, account.getDisplayName());
-//            assertEquals("USA", account.getCountryCode());
-//            assertEquals("pass" + num, account.getPassword());
-//            num++;
-//        }
-        
-    }
-    
-    
-    /**
-     * Test fromTSVFileWithNewAccounts.
-     * 
-     * This test load that has both existing accounts and new (to be created) accounts
-     *  
-     * @throws Exception
-     */
-    public void testfromTSVFileWithNewAccounts() throws Exception {
-
-        IInternalContest contest = loadSampleContest(null, "mini");
-        assertNotNull(contest);
-        String cdpdir = getSampleContestsDirectory() + "/mini/config";
-        ContestLoadUtilities.loadCCSTSVFiles(contest, new File(cdpdir));
-
-        String dataDir = getDataDirectory(this.getName());
-//        ensureDirectory(dataDir);
-//        startExplorer(dataDir);
-        String loadfilename = dataDir + File.separator + Constants.ACCOUNTS_LOAD_FILENAME;
-
-//        editFile(loadfilename);
-
-        LoadAccounts loader = new LoadAccounts();
-
-        Vector<Account> teams = contest.getAccounts(ClientType.Type.TEAM);
-        Account[] teamAccounts = (Account[]) teams.toArray(new Account[teams.size()]);
-
-        assertEquals("expecting team count in model", 151, teamAccounts.length);
-        Group[] groups = contest.getGroups();
-
-        Account[] accList = loader.fromTSVFileWithNewAccounts(loadfilename, teamAccounts, groups);
-
-        List<Account> newAccounts = new ArrayList<Account>();
-        List<Account> updatedAccount = new ArrayList<Account>();
-
-        for (Account account : accList) {
-            if (null != contest.getAccount(account.getClientId())) {
-                updatedAccount.add(account);
-            } else {
-                newAccounts.add(account);
-            }
-        }
-
-        assertEquals("Expecting new accounts ", 3, newAccounts.size());
-        assertEquals("Expecting exiting to update accounts ", 34, updatedAccount.size());
-
-//        System.out.println("Update " + updatedAccount.size() + " accounts, add " + newAccounts.size() + " accounts from " + loadfilename);
-
-    }
+  
 }

@@ -99,6 +99,7 @@ import edu.csus.ecs.pc2.core.report.RunStatisticsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
 import edu.csus.ecs.pc2.core.report.RunsReport5;
+import edu.csus.ecs.pc2.core.report.ScoreboardJSONReport;
 import edu.csus.ecs.pc2.core.report.ScoreboardTSVReport;
 import edu.csus.ecs.pc2.core.report.SitesReport;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
@@ -266,6 +267,7 @@ public class ReportPane extends JPanePlugin {
         reports.add(new HTMLReport());
 
         reports.add(new ExportYamlReport());
+        reports.add(new ScoreboardJSONReport());
 
         reports.add(new CategoryReport());
 
