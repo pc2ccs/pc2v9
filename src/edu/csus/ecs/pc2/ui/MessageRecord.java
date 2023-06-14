@@ -10,21 +10,33 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
 
 /**
- * A message
+ * A message.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
 public class MessageRecord {
 
+    /**
+     * The message text.
+     */
     @JsonProperty
     private String message;
 
+    /**
+     * An optional Exception for this message.
+     */
     @JsonProperty
     private Exception exception;
 
+    /**
+     * A logging level.
+     */
     @JsonProperty
     private Level level = Level.INFO;
 
+    /**
+     * Scope for the message.
+     */
     @JsonProperty
     private MessageScope scope = MessageScope.NONE;
 

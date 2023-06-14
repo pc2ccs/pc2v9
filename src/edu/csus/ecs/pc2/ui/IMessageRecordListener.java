@@ -2,10 +2,9 @@
 package edu.csus.ecs.pc2.ui;
 
 /**
- * Listener for message records
+ * A set of methods for message listeners.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
- *
  */
 public interface IMessageRecordListener {
 

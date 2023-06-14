@@ -4,26 +4,36 @@ package edu.csus.ecs.pc2.ui;
 import java.util.Vector;
 
 /**
- * A set of methods that manage messages.
- * 
- * Implements Observable design pattern for messages.
+ * Manage a set of message listeners.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
 public class MessageManager {
 
+    /**
+     * The list of message listeners.
+     */
     private static Vector<IMessageRecordListener> messageListenerList = new Vector<IMessageRecordListener>();
 
     /**
-     * Add a listener.
+     * Add a listener into listener list
      */
     public static void addMessageListener(IMessageRecordListener listener) {
         messageListenerList.addElement(listener);
     }
+    
+    /**
+     * Remove  a listener into listener list
+     */
+    public static void deleteMessageListener(IMessageRecordListener listener) {
+        messageListenerList.removeElement(listener);
+    }
+
 
     /**
-     * Fire/use all listeners
+     * Send message to all listeners.
+     * 
      * @param record - message
      */
     public static void fireMessageListener(MessageRecord record) throws Exception {
