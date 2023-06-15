@@ -70,6 +70,7 @@ import edu.csus.ecs.pc2.ui.RunsTablePane;
 import edu.csus.ecs.pc2.ui.SitesPane;
 import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
 import edu.csus.ecs.pc2.ui.StandingsTablePane;
+import edu.csus.ecs.pc2.ui.SubmitSampleRunsPane;
 import edu.csus.ecs.pc2.ui.TeamStatusPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
@@ -325,6 +326,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 
                 QuickJudgePane quickJudgePane = new QuickJudgePane();
                 addUIPlugin(getRunContestTabbedPane(), "Judging Utilities", quickJudgePane);
+                
 
                 if (!controller.isSuppressLoginsPaneDisplay()) {
                     LoginsTablePane loginsTablePane = new LoginsTablePane();
@@ -384,6 +386,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                     StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
                     addUIPlugin(getRunContestTabbedPane(), "Standings HTML", standingsHTMLPane);
                 }
+                
+                SubmitSampleRunsPane submitSampleRunsPane = new SubmitSampleRunsPane();
+                addUIPlugin(getRunContestTabbedPane(), "Submitter", submitSampleRunsPane);
 
                 TeamStatusPane teamStatusPane = new TeamStatusPane();
                 addUIPlugin(getRunContestTabbedPane(), "Team Status", teamStatusPane);

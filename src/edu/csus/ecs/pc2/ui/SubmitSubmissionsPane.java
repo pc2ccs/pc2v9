@@ -31,7 +31,9 @@ import edu.csus.ecs.pc2.ui.team.QuickSubmitter;
  * 
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+ * @deprecated Use {@link SubmitSampleRunsPane}
  */
+@Deprecated 
 public class SubmitSubmissionsPane extends JPanePlugin {
 
     private static final long serialVersionUID = -8862440024499524533L;
