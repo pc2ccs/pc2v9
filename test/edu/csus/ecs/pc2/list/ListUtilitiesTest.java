@@ -25,7 +25,7 @@ public class ListUtilitiesTest extends AbstractTestCase {
     public void testfilterByJudgingTypesAccepted() throws Exception {
 
         String contestDir = "tenprobs";
-        String cdpDir = getSampleCDPDir(contestDir);
+        String cdpDir = getContestSampleCDPDirname(contestDir);
         
 //        startExplorer(cdpDir);
 
@@ -53,7 +53,7 @@ public class ListUtilitiesTest extends AbstractTestCase {
     public void testfilterByAcceptedJudgingTypes() throws Exception {
 
         String contestDir = "problemflagtest";
-        String cdpDir = getSampleCDPDir(contestDir);
+        String cdpDir = getContestSampleCDPDirname(contestDir);
 
         IInternalContest contest = loadFullSampleContest(null, new File(cdpDir));
 
@@ -79,7 +79,7 @@ public class ListUtilitiesTest extends AbstractTestCase {
     public void testfilterByJudgingTypes() throws Exception {
 
         String contestDir = "problemflagtest";
-        String cdpDir = getSampleCDPDir(contestDir);
+        String cdpDir = getContestSampleCDPDirname(contestDir);
 
         IInternalContest contest = loadFullSampleContest(null, new File(cdpDir));
 
@@ -100,21 +100,4 @@ public class ListUtilitiesTest extends AbstractTestCase {
         assertEquals("Expecting total judging type sample file count for " + contestDir, 264, newFiles.size());
     }
 
-    /**
-     * Temporary getSampleContestYaml dir
-     * @param contestDir
-     * @return
-     */
-    // TODO REFACTOR rename getSampleContesYaml to getSampleContestYaml
-    // TODO REFACTOR replace this with getSampleContestYaml when integrated into pc2v9
-    private String getSampleCDPDir(String contestDir) {
-        String cdpDir = getSampleContesYaml(contestDir);
-        String altCdpDir = "c:\\test\\current\\samps\\contests\\" + contestDir;// TODO debug 22 remove this string when integrated into pc2v9
-        if (!new File(cdpDir).isDirectory() && new File(altCdpDir).isDirectory()) {
-            cdpDir = altCdpDir;
-        }
-
-        return cdpDir;
-
-    }
 }
