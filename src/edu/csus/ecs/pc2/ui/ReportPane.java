@@ -93,6 +93,7 @@ import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
 import edu.csus.ecs.pc2.core.report.ProfilesReport;
 import edu.csus.ecs.pc2.core.report.ResolverEventFeedReport;
+import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
 import edu.csus.ecs.pc2.core.report.RunJudgementNotificationsReport;
 import edu.csus.ecs.pc2.core.report.RunStatisticsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
@@ -314,6 +315,8 @@ public class ReportPane extends JPanePlugin {
         reports.add(new EventFeedJSONReport());
         
         reports.add(new StandingsNSAReport());
+        
+        reports.add(new ResultsCompareReport());
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         

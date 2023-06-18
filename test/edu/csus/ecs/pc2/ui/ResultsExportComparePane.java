@@ -1,13 +1,17 @@
 // Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
-import javax.swing.border.TitledBorder;
 import java.awt.BorderLayout;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
+
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
 
 /**
  * Results epxort and compare pane. 
@@ -90,12 +94,11 @@ public class ResultsExportComparePane extends JPanePlugin {
 
     protected void exportAndCompare() {
         
-        // TODO code select dir
-        System.out.println("debug 22 TODO code exportAndCompare");
+        // TODO code export
 
-        
+        ResultsCompareReport report = new ResultsCompareReport();
+        Utilities.viewReport(report, "Results Coparison", getContest(), getController(), true);
     }
-
 
     @Override
     public String getPluginTitle() {
