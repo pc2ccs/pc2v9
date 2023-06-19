@@ -1,17 +1,26 @@
 // Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.logging.Level;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
+import edu.csus.ecs.pc2.core.FileUtilities;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
+import edu.csus.ecs.pc2.core.report.ResultsExportReport;
 
 /**
  * Results epxort and compare pane. 
@@ -19,71 +28,69 @@ import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
 public class ResultsExportComparePane extends JPanePlugin {
-    
-    
-    /**
-     * 
-     */
+
     private static final long serialVersionUID = -2726716271169661000L;
+
     private JTextField exportDirectoryTextField;
-    private JTextField primaryCCSResultsDirectoryTtextFidld;
-    
-    public ResultsExportComparePane()
-    {
+
+    private JTextField primaryCCSResultsDirectoryTextField;
+
+    private JLabel exportDirectoryLabel;
+
+    private JLabel primaryCCSresultsDirectoryLabel;
+
+    public ResultsExportComparePane() {
         setBorder(new TitledBorder(null, "Export and Compare Contest Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         setLayout(new BorderLayout(0, 0));
-        
+
         JPanel centerPane = new JPanel();
         add(centerPane, BorderLayout.CENTER);
-        
-        JLabel lblNewLabel = new JLabel("Export Directory");
-        centerPane.add(lblNewLabel);
-        
+
+        exportDirectoryLabel = new JLabel("Export Directory");
+        centerPane.add(exportDirectoryLabel);
+
         exportDirectoryTextField = new JTextField();
         centerPane.add(exportDirectoryTextField);
-        exportDirectoryTextField.setColumns(10);
-        
+        exportDirectoryTextField.setColumns(40);
+
         JButton selectExportDirectoryButton = new JButton("...");
         selectExportDirectoryButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO code select dir
-                System.out.println("debug 22 TODO code select dir selectExportDirectoryButton");
+                selectUpdateExportDirectory(exportDirectoryTextField);
             }
         });
         selectExportDirectoryButton.setToolTipText("Select export Directory");
         centerPane.add(selectExportDirectoryButton);
-        
-        JLabel lblNewLabel_1 = new JLabel("Result compare to directory");
-        centerPane.add(lblNewLabel_1);
-        
-        primaryCCSResultsDirectoryTtextFidld = new JTextField();
-        centerPane.add(primaryCCSResultsDirectoryTtextFidld);
-        primaryCCSResultsDirectoryTtextFidld.setColumns(10);
-        
+
+        primaryCCSresultsDirectoryLabel = new JLabel("Result compare to directory");
+        centerPane.add(primaryCCSresultsDirectoryLabel);
+
+        primaryCCSResultsDirectoryTextField = new JTextField();
+        primaryCCSResultsDirectoryTextField.setColumns(40);
+
         JButton selectPrimaryCCSResultsDirectoryButton = new JButton("...");
         selectPrimaryCCSResultsDirectoryButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO code select dir
-                System.out.println("debug 22 TODO code select dir selectPrimaryCCSResultsDirectoryButton");
+
+                selectAndUpdatePrimaryCCSResultsDirectory(primaryCCSResultsDirectoryTextField);
             }
         });
         selectPrimaryCCSResultsDirectoryButton.setToolTipText("Select results directory to compare with");
         centerPane.add(selectPrimaryCCSResultsDirectoryButton);
-        
+
         JButton exportResultsButton = new JButton("Export Results");
         exportResultsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO code select dir
-                System.out.println("debug 22 TODO code select dir exportResultsButton");
-                
+                exportResults();
+
             }
         });
         centerPane.add(exportResultsButton);
-        
+
         JButton compartResultsButton = new JButton("Compare Result");
         compartResultsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                
+
                 exportAndCompare();
 
             }
@@ -92,16 +99,105 @@ public class ResultsExportComparePane extends JPanePlugin {
         centerPane.add(compartResultsButton);
     }
 
-    protected void exportAndCompare() {
-        
-        // TODO code export
+    @Override
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        super.setContestAndController(inContest, inController);
 
-        ResultsCompareReport report = new ResultsCompareReport();
-        Utilities.viewReport(report, "Results Coparison", getContest(), getController(), true);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                populateGUI();
+            }
+        });
+    }
+
+    protected void populateGUI() {
+
+        ClientSettings clientSet = getClientSettings(getContest());
+        String exportDir = clientSet.getProperty(ClientSettings.PC2_RESULTS_DIR);
+        exportDirectoryTextField.setText(exportDir);
+        exportDirectoryLabel.setToolTipText(exportDir);
+
+        String primaryResultsDir = clientSet.getProperty(ClientSettings.PRIMARY_CCS_RESULTS_DIR);
+        primaryCCSResultsDirectoryTextField.setText(primaryResultsDir);
+
+        // primaryCCSResultsDirectoryTextField
+    }
+
+    protected void selectAndUpdatePrimaryCCSResultsDirectory(JTextField textField) {
+
+        String initDirectory = textField.getText();
+
+        try {
+            File newFile = FileUtilities.selectDirectory(initDirectory, textField, exportDirectoryLabel, "Select primary CCS results directory");
+            updateClientSettings(ClientSettings.PRIMARY_CCS_RESULTS_DIR, newFile.getCanonicalFile().toString());
+
+        } catch (Exception e) {
+            getLog().log(Level.WARNING, "Exception trying to select or update primary CCS dir" + e.getMessage(), e);
+            showMessage(this, "Problem with primary results dir", "Problem selecting or updating primary CCS results dir " + e.getMessage());
+        }
+
+    }
+
+    protected void selectUpdateExportDirectory(JTextField textField) {
+
+        String initDirectory = textField.getText();
+
+        try {
+            File newFile = FileUtilities.selectDirectory(initDirectory, textField, exportDirectoryLabel, "Select pc2 results directory");
+            updateClientSettings(ClientSettings.PC2_RESULTS_DIR, newFile.getCanonicalFile().toString());
+
+        } catch (Exception e) {
+            getLog().log(Level.WARNING, "Exception trying to select or pc2 results dir" + e.getMessage(), e);
+            showMessage(this, "Problem with primary results dir", "Problem selecting or updating pc2 results dir " + e.getMessage());
+        }
+
+    }
+
+    protected void exportResults() {
+        ResultsExportReport report = new ResultsExportReport();
+        Utilities.viewReport(report, "Results Export Fies Report", getContest(), getController(), true);
+
+    }
+
+    protected void exportAndCompare() {
+
+        try {
+            // Export pc2 results
+            String filename = Utilities. createReport(new ResultsExportReport()    , getContest(), getController(), true);
+            
+            // compare primary and pc2 rsults
+            ResultsCompareReport report = new ResultsCompareReport();
+            Utilities.viewReport(report, "Results Coparison", getContest(), getController(), true);
+        } catch (Exception e) {
+            getLog().log(Level.WARNING, "Exception trying export and compare results" + e.getMessage(), e);
+            showMessage(this, "Problem comparing results", "Error writing or comparing results " + e.getMessage());
+        }
     }
 
     @Override
     public String getPluginTitle() {
         return "Results Export and Compare";
     }
+
+    private ClientSettings getClientSettings(IInternalContest inContest) {
+        ClientSettings clientSettings = inContest.getClientSettings(inContest.getClientId());
+        if (clientSettings == null) {
+            clientSettings = new ClientSettings(inContest.getClientId());
+        }
+        return clientSettings;
+    }
+
+    /**
+     * Update settings (sent to server)
+     * 
+     * @param newClientSettings
+     * @param name
+     * @param value
+     */
+    private void updateClientSettings(String name, String value) {
+        ClientSettings clientSettings = getClientSettings(getContest());
+        clientSettings.put(name, value);
+        getController().updateClientSettings(clientSettings);
+    }
+
 }

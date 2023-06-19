@@ -5,24 +5,30 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * Compare results report
+ * Export Results files report.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
-public class ResultsCompareReport implements IReport {
-
-    private String primaryCCSResultsDir = null;
+public class ResultsExportReport implements IReport {
 
     private String pc2ResultsDir = null;
 
@@ -39,14 +45,13 @@ public class ResultsCompareReport implements IReport {
      */
     private static final long serialVersionUID = -796328654541676730L;
 
-    public ResultsCompareReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir) {
+    public ResultsExportReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir) {
         super();
-        this.primaryCCSResultsDir = primaryCCSResultsDir;
         this.pc2ResultsDir = pc2ResultsDir;
         setContestAndController(contest, controller);
     }
 
-    public ResultsCompareReport() {
+    public ResultsExportReport() {
         ;
     }
 
@@ -65,12 +70,6 @@ public class ResultsCompareReport implements IReport {
             String pc2rsdir = settings.getProperty(ClientSettings.PC2_RESULTS_DIR);
             pc2ResultsDir = pc2rsdir;
         }
-
-        if (primaryCCSResultsDir == null) {
-            String primaryResDir = settings.getProperty(ClientSettings.PRIMARY_CCS_RESULTS_DIR);
-            primaryCCSResultsDir = primaryResDir;
-        }
-
     }
 
     @Override
@@ -80,6 +79,15 @@ public class ResultsCompareReport implements IReport {
 
     @Override
     public void createReportFile(String filename, Filter inFilter) throws IOException {
+        
+        if (pc2ResultsDir == null) {
+            // write to reports dir, if no dir specified and noe dir from ClientSettings
+            File outFile = new File(filename);
+            
+            pc2ResultsDir = outFile.getParent();
+            ExecuteUtilities.ensureDirectory(pc2ResultsDir);
+        }
+        
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
         filter = inFilter;
 
@@ -104,27 +112,105 @@ public class ResultsCompareReport implements IReport {
             log.log(Log.INFO, "Exception writing report", e);
             printWriter.println("Exception generating report " + e.getMessage());
         }
-
     }
 
+    
+    public String getReportFileName (IReport selectedReport, String extension) {
+       
+        return getReportBaseFileName(selectedReport, "txt");
+    }
+    
+    public String getAltReportDirname (IReport selectedReport, String extension) {
+        
+        return getReportBaseFileName(selectedReport, "files");
+    }
+    
+    public String getReportBaseFileName(IReport selectedReport, String extension) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
+        // "yyMMdd HHmmss.SSS");
+        String reportName = selectedReport.getReportTitle();
+
+        while (reportName.indexOf(' ') > -1) {
+            reportName = reportName.replace(" ", "_");
+        }
+        
+        if (extension != null &&  extension.length() >= 0) {
+            extension = "." + extension;
+        }
+            
+        return "report." + reportName + "." + simpleDateFormat.format(new Date()) + extension;
+    }
+    
     @Override
     public String[] createReport(Filter filter) {
+        
+        List<String> outList = new ArrayList<String>();
 
         // TODO print filter?
 
+        /**
+         * Export   results.tsv
+         */
+        
+        String outputFilename = pc2ResultsDir + File.separator + "results.tsv";
+        IReport report = new ResultsTSVReport();
+        String reportMessage = writeReportFile (report, outputFilename);
+        outList.add(reportMessage);
+        
+        //scoreboard.json
+        outputFilename = pc2ResultsDir + File.separator + "scoreboard.json";
+        
+        report = new ScoreboardJSONReport();
+        reportMessage = writeReportFile(report, outputFilename);
+        outList.add(reportMessage);
+        
+        // TODO 760 output results.tsv
+        
+        // TODO 760 results.csv file if/when available Issue 351
+        // TODO 351 results.csv file if/when available Issue 351
+        
+        // TODO 760 awards.json add when available Issue 383, CLICS Add awards.json file/report #383
+        
+        String finalizedStatus = "No.  (Warning - contest is not filalized)";
+        
+        FinalizeData finalizedDAta = contest.getFinalizeData();
+        if (finalizedDAta != null) {
+            if ( finalizedDAta.isCertified() ) {
+                
+                finalizedStatus = "Yes.  Finalized at "+
+                        finalizedDAta.getCertificationDate();
+            }
+        }
+        
+        
+        
         String[] reportLinss = { //
 
-                "Primary CCS Results dir: " + getPrimaryCCSResultsDir(), //
-                "pc2 results dir        : " + getPc2ResultsDir(), //
+                "pc2 results dir       : " + getPc2ResultsDir(), //
                 "", //
-
-                "Comparison Summary:   FAILED - comparison code not written  TODO ", //
-
+                "Contest finalized     : "+finalizedStatus, //
                 "", //
 
         };
+        
+        outList.addAll(0, Arrays.asList(reportLinss));
+        return (String[]) outList.toArray(new String[outList.size()]);
 
-        return reportLinss;
+    }
+
+    private String writeReportFile(IReport report, String outputFilename) {
+
+        try {
+
+            report.setContestAndController(contest, controller);
+            report.createReportFile(outputFilename, filter);
+
+            return "Wrote " + report.getReportTitle() + " to " + outputFilename;
+
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Error writing report " + report.getPluginTitle() + e.getMessage(), e);
+            return "Unable to write report " + report.getPluginTitle() + " " + e.getMessage();
+        }
 
     }
 
@@ -137,11 +223,6 @@ public class ResultsCompareReport implements IReport {
     public void writeReport(PrintWriter printWriter) throws Exception {
 
         try {
-
-
-            if (primaryCCSResultsDir == null || !(new File(primaryCCSResultsDir).isDirectory())) {
-                throw new RuntimeException("Primary CCS Results directory not defined or not a directory");
-            }
 
             if (pc2ResultsDir == null || !(new File(pc2ResultsDir).isDirectory())) {
                 throw new RuntimeException("pc2 Results directory not defined or not a directory");
@@ -191,10 +272,6 @@ public class ResultsCompareReport implements IReport {
         printWriter.println();
         printWriter.println("end report: " + getReportTitle());
 
-    }
-
-    public String getPrimaryCCSResultsDir() {
-        return primaryCCSResultsDir;
     }
 
     public String getPc2ResultsDir() {
