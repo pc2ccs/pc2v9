@@ -119,9 +119,10 @@ public class CLICSJsonUtilities {
 
         
         /**
-         * Group Id and Client/Team Id
+         * This map contains the group/regional winner.  (The first team to solve a problem in a group/region)
          */
         Map<Group, ClientId> groupWinners = new HashMap<Group, ClientId>();
+        
         try {
             ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
 
@@ -130,10 +131,19 @@ public class CLICSJsonUtilities {
                 ClientId clientId = createClientId(teamStanding);
                 Group teamGroup = getGroupForTeam(contest, clientId);
                 if (teamGroup != null) {
+                    
+                    /**
+                     * Find group winner (or foundClientId will be null if no winner found yet)
+                     */
                     ClientId foundClientId = groupWinners.get(teamGroup);
+                    
                     if (foundClientId == null && isActive(contest,clientId)) {
+                        // found no group winner so if thie team is active it is the group winner
+                        
                         if (!"0".equals(teamStanding.getSolved())) {
-                            // only add if they actually have solved a problem
+                            /**
+                             * Team has to solve at least one problem to be the group winner 
+                             */
                             groupWinners.put(teamGroup, clientId);
                         }
                     }
