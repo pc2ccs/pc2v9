@@ -45,7 +45,7 @@ public class ResultsExportReport implements IReport {
      */
     private static final long serialVersionUID = -796328654541676730L;
 
-    public ResultsExportReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir) {
+    public ResultsExportReport(IInternalContest contest, IInternalController controller, String pc2ResultsDir) {
         super();
         this.pc2ResultsDir = pc2ResultsDir;
         setContestAndController(contest, controller);
@@ -149,13 +149,17 @@ public class ResultsExportReport implements IReport {
         // TODO print filter?
 
         /**
-         * Export   results.tsv
+         * Export results.tsv
          */
         
         String outputFilename = pc2ResultsDir + File.separator + "results.tsv";
         IReport report = new ResultsTSVReport();
         String reportMessage = writeReportFile (report, outputFilename);
         outList.add(reportMessage);
+        
+        /**
+         * Export scoreboard.json
+         */
         
         //scoreboard.json
         outputFilename = pc2ResultsDir + File.separator + "scoreboard.json";
@@ -171,7 +175,7 @@ public class ResultsExportReport implements IReport {
         
         // TODO 760 awards.json add when available Issue 383, CLICS Add awards.json file/report #383
         
-        String finalizedStatus = "No.  (Warning - contest is not filalized)";
+        String finalizedStatus = "No.  (Warning - contest is not finalized)";
         
         FinalizeData finalizedDAta = contest.getFinalizeData();
         if (finalizedDAta != null) {
