@@ -1600,4 +1600,19 @@ public class AbstractTestCase extends TestCase {
     public void ensureStaticLog() {
         LogUtilities.ensureStaticLog();
     }
+
+    /**
+     * Add runs to contest from list of run data, using SampleContest#addRunFromInfo.
+     * 
+     * @see  SampleContest#addRunFromInfo(IInternalContest, String, boolean)
+     * 
+     * @param contest
+     * @param runsData String run info, see See {@link SampleContest#addRunFromInfo(IInternalContest, String, boolean)} for content/format 
+     * @throws Exception
+     */
+    public void addRuns(IInternalContest contest, String[] runsData) throws Exception {
+        for (String runInfoLine : runsData) {
+            SampleContest.addRunFromInfo(contest, runInfoLine);
+        }
+    }
 }
