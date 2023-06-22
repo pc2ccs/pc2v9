@@ -1370,11 +1370,28 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problemLaTexFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_ENGLISH_PROBLEM_LATEX_FILENAME;
             problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
         }
-
-        Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
+        
         boolean usingCustomValidator = false;
+        Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
         if (validatorContent != null) {
             usingCustomValidator = fetchBooleanValue(validatorContent, IContestLoader.USING_CUSTOM_VALIDATOR, false);
+        }
+        
+        // check for CLICS "validation" property; provides an alternate way to specify a customer validator and,
+        // also if the problem is interactive.
+        String validationType = fetchValue(content, VALIDATION_TYPE);
+        boolean isInteractive = false;
+        if (validationType != null) {
+            // validationType is a list of validation options
+            String[] valOpts = validationType.split("\\s");
+            // Must be one of: "default", "custom", "custom interactive"
+            if (valOpts.length >= 1 && valOpts[0].equals("custom")) {
+                usingCustomValidator = true;
+                if(valOpts.length >= 2 && valOpts[1].equals("interactive")) {
+                    // Note that interactive requires a customer validator
+                    isInteractive = true;
+                }
+            }
         }
 
         boolean pc2FormatProblemYamlFile = false;
@@ -1388,6 +1405,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             pc2FormatProblemYamlFile = true;
         }
 
+        // JB: I am not sure why this test is contingent on pc2FormatProblemYamlFile.  Anybody?
         if (problemTitle == null && (pc2FormatProblemYamlFile)) {
             problemTitle = fetchValue(content, "name");
         }
@@ -1413,6 +1431,33 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         //
         assignValidatorSettings(content, problem);
+        
+        // Make sure the validator settings are acceptable for interactive problems
+        if(isInteractive) {
+            if(!problem.isUsingCustomValidator()) {
+                throw new YamlLoadException("For problem short name " + problem.getShortName() + 
+                        ", a custom validator is required for an interactive problem");
+                
+            }
+            if(!problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface()) {
+                throw new YamlLoadException("For problem short name " + problem.getShortName() + 
+                        ", the custom validator must be a CLICS compliant for an interactive problem");
+                
+            }
+            // A note here about how interactive validation works.  The interactive validator is CLICS
+            // compliant and returns an exit code of 42 or 43, and possibly generating a feedback file for
+            // each test case.  PC2 is nominally aware of interactive validators and only knows enough to
+            // call a script (pc2sandbox_interactive.sh or pc2_interactive.sh) to perform a testcase run.
+            // The results of that testcase are written to a known results file (and feedback directory) by
+            // the pc2sandbox_interactive.sh/pc2_interactive.sh script (be it accepted, wrong answer, RTE, TLE, MLE etc).
+            // PC2 then knows to call a special validator during the validation phase (pc2validate_interactive.sh) to
+            // copy the results file/feedback dir into the place that pc2 expects it so it can determine if the
+            // submission is correct or not.  This special validator is a PC2 compliant (not CLICS) so we can
+            // return complete result info in one XML file, other than AC or WA.  CLICS validators do not allow that
+            // without munging the feedback dir.  The important thing is, the actual testcase is validated by a CLICS
+            // validator.
+            problem.setInteractive(true);
+        }
         
         //read any PC2-format limits specified at the top level of the problem.yaml file
         Integer timeoutSecs = fetchIntValue(content, TIMEOUT_KEY);

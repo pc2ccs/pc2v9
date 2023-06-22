@@ -272,6 +272,11 @@ public class Problem implements IElementObject {
      */
     private boolean prelimaryNotification = false;
     
+    /**
+     * should the problem be judged interactively.  requires a custom CLICS compliant validator
+     */
+    private boolean interactiveProblem = false;
+
     private String shortName = "";
     
     private String letter = null;
@@ -447,6 +452,7 @@ public class Problem implements IElementObject {
         clone.setComputerJudged(isComputerJudged());
         clone.setManualReview(isManualReview());
         clone.setPrelimaryNotification(isPrelimaryNotification());
+        clone.setInteracive(interactiveProblem);
         clone.letter = StringUtilities.cloneString(letter);
         clone.shortName = StringUtilities.cloneString(shortName);
         
@@ -552,6 +558,7 @@ public class Problem implements IElementObject {
         retStr += "; computerJudged=" + computerJudged;
         retStr += "; manualReview=" + manualReview;
         retStr += "; prelimaryNotification=" + prelimaryNotification;
+        retStr += "; interactiveProblem=" + interactiveProblem;
         retStr += "; shortName=" + shortName;
         retStr += "; letter=" + letter;
         retStr += "; colorName=" + colorName;
@@ -1188,6 +1195,9 @@ public class Problem implements IElementObject {
             if (prelimaryNotification != otherProblem.isPrelimaryNotification()) {
                 return false;
             }
+            if (interactiveProblem != otherProblem.isInteractive()) {
+                return false;
+            }
             
             if (getSiteNumber() != otherProblem.getSiteNumber()){
                 return false;
@@ -1290,6 +1300,14 @@ public class Problem implements IElementObject {
 
     public void setPrelimaryNotification(boolean prelimaryNotification) {
         this.prelimaryNotification = prelimaryNotification;
+    }
+
+    public boolean isInteractive() {
+        return interactiveProblem;
+    }
+
+    public void setInteractive(boolean interactiveProblem) {
+        this.interactiveProblem = interactiveProblem;
     }
 
     /**
