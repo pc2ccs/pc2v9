@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -23,6 +24,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -971,9 +973,15 @@ public class EditProblemSandboxPane extends JPanePlugin {
     {
         boolean bSupported = OSCompatibilityUtilities.areSandboxesSupported(getContest(), getLog());
         if(!bSupported){
-            if(!noSandboxNagMessage) {        
-                JOptionPane.showMessageDialog(getParentPane(), "You should be aware of the fact that this system does not support sandboxes.\nTherefore, you are not able to configure problems that do require a sandbox.", "Sandbox Not Available Notice", JOptionPane.WARNING_MESSAGE);
-                noSandboxNagMessage = true;
+            if(!noSandboxNagMessage) {
+                String msgWarning = "You should be aware of the fact that this system does not support sandboxes.\n"
+                        + "Therefore, you are not able to configure problems that do require a sandbox.";
+                JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+
+                Object [] oMsg = { msgWarning, checkbox };
+                checkbox.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10));
+                JOptionPane.showMessageDialog(getParentPane(), oMsg, "Sandbox Not Available Notice", JOptionPane.WARNING_MESSAGE);
+                noSandboxNagMessage = checkbox.isSelected();
            }
         }
         return(bSupported);

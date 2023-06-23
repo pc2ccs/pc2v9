@@ -2118,8 +2118,6 @@ public class EditProblemPane extends JPanePlugin {
         this.newProblemDataFiles = null;
         originalProblemDataFiles = problemDataFiles;
         
-        getProblemSandboxPane().setProblem(inProblem);
-
         if (debug22EditProblem) {
             fileNameOne = createProblemReport(inProblem, problemDataFiles, "stuf1");
             Utilities.dump(originalProblemDataFiles, "debug   ORIGINAL  setProblem");
@@ -2272,8 +2270,6 @@ public class EditProblemPane extends JPanePlugin {
         this.newProblemDataFiles = null;
         this.originalProblemDataFiles = null;
         
-        getProblemSandboxPane().setProblem(problem);
-
         if (debug22EditProblem) {
             fileNameOne = createProblemReport(problem, originalProblemDataFiles, "stuf1");
         }
