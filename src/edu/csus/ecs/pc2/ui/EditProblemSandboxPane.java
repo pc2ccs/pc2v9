@@ -100,7 +100,7 @@ public class EditProblemSandboxPane extends JPanePlugin {
     
     //setting this to True will override the prohibition on selecting a Sandbox when running on Windows.
     // Note that THIS IS FOR DEBUGGING PURPOSES; it does NOT imply any support for Windows sandboxing.
-    private boolean debugAllowSandboxSelectionOnWindows = false;
+    private boolean debugAllowSandboxSelectionOnWindows = true;
 
 
 
