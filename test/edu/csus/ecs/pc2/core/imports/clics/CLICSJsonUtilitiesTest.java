@@ -75,7 +75,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
      * @throws IllegalContestState
      * @throws IOException
      */
-    private void dumpStandings(String message, IInternalContest contest) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
+    public void dumpStandings(String message, IInternalContest contest) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
         
         System.out.println("dumpStandings: "+message);
         ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
@@ -405,7 +405,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
         
-        dumpStandings("debug 22  Two", contest);
+//        dumpStandings("debug Two", contest);
 
         assertTeamCount(awards, CLICSJsonUtilities.ID_WINNER, 1);
 

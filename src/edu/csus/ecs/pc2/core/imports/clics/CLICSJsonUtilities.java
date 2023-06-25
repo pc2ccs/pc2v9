@@ -244,31 +244,31 @@ public class CLICSJsonUtilities {
 
             List<TeamScoreRow> scoreRows = model.getRows();
 
-            List<String> teamList = getTeamIdsByRank(scoreRows, 0, lastRankGolds);
+            String[] teams = getTeamIdsByRank(scoreRows, 0, lastRankGolds);
             
-            if (teamList.size() > 0) {
+            if (teams.length > 0) {
                 // "citation": "Gold medal winner",
                 // "id": "gold-medal"
-                CLICSAward firstToSolveAward = new CLICSAward(ID_GOLD_MEDAL, "Gold medal winner", teamList);
+                CLICSAward firstToSolveAward = new CLICSAward(ID_GOLD_MEDAL, "Gold medal winner", teams);
                 list.add(firstToSolveAward);
             }
 
-             teamList = getTeamIdsByRank(scoreRows, lastRankGolds, lastRankSilver);
-            if (teamList.size() > 0) {
-                CLICSAward firstToSolveAward = new CLICSAward(ID_SILVER_MEDAL, "Silver medal winner", teamList);
+             teams = getTeamIdsByRank(scoreRows, lastRankGolds, lastRankSilver);
+            if (teams.length > 0) {
+                CLICSAward firstToSolveAward = new CLICSAward(ID_SILVER_MEDAL, "Silver medal winner", teams);
                 list.add(firstToSolveAward);
             }
 
-            teamList = getTeamIdsByRank(scoreRows,  lastRankSilver, lastRankBronze);
-            if (teamList.size() > 0) {
-                CLICSAward firstToSolveAward = new CLICSAward(ID_BRONZE_MEDAL, "Bronze medal winner", teamList);
+            teams = getTeamIdsByRank(scoreRows,  lastRankSilver, lastRankBronze);
+            if (teams.length > 0) {
+                CLICSAward firstToSolveAward = new CLICSAward(ID_BRONZE_MEDAL, "Bronze medal winner", teams);
                 list.add(firstToSolveAward);
             }
         }
     }
  
     
-    public static List<String> getTeamIdsByRank(List<TeamScoreRow> scoreRows, int lowRank, int rankInclHigh) {
+    public static String[] getTeamIdsByRank(List<TeamScoreRow> scoreRows, int lowRank, int rankInclHigh) {
 
         List<String> teamIds = new ArrayList<>();
 
@@ -278,8 +278,8 @@ public class CLICSJsonUtilities {
                 teamIds.add(teamScoreRow.getTeam_id() + "");
             }
         }
-
-        return teamIds;
+        
+        return (String[]) teamIds.toArray(new String[teamIds.size()]);
     }
 
     /**

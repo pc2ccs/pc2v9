@@ -1,7 +1,5 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports.clics;
-
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -52,11 +50,11 @@ public class CLICSAward {
      * @param citation ex. Contest winner
      * @param team_ids lsit of ids
      */
-    public CLICSAward(String id, String citation, List<String> team_ids) {
+    public CLICSAward(String id, String citation, String [] team_ids) {
         super();
         this.id = id;
         this.citation = citation;
-        this.team_ids = (String[]) team_ids.toArray(new String[team_ids.size()]);
+        this.team_ids = team_ids;
     }
     
     /**
