@@ -238,6 +238,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      */
     private ArrayList<String> validatorStderrFilesnames = new ArrayList<String>();
 
+    // Where to put the execute results.  This is an ndjson file created by sandbox and interactive execution scripts
+    // Each line in the file are the results for a single test case run
+    private String executeInfoFileName = null;
+
+
     private long startTimeNanos;
     private long endTimeNanos;
 
@@ -471,6 +476,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 int dataSetNumber = 0;
                 boolean passed = true;
 
+                // create somewhat secure ndjson file name for per testcase execution results.
+                // format of the name is: RSSexecuteinfo.ndjson where R = run number, SS = current clock seconds
+                // eg: for run 453 at 12:00:09:   4539executeinfo.ndjson
+                executeInfoFileName = run.getNumber() + Long.toString((new Date().getTime()) % 100) + Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX;
+                
                 /**
                  * Did at least one test case fail flag.
                  */
@@ -845,7 +855,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         // get the appropriate command pattern for invoking the validator attached to the problem
         String commandPattern = "";
 
-        if (problem.isUsingPC2Validator()) {
+        if (problem.isInteractive()) {
+            // We use a special validator for interactive problems.  The validator will look in the
+            // execute folder for the results of the interactive run, and place them in the file(s) that
+            // pc2 wants them in.
+            commandPattern = Constants.PC2_INTERACIVE_VALIDATE_COMMAND;
+        } else if (problem.isUsingPC2Validator()) {
 
             commandPattern = getPC2ValidatorCommandPattern();
 
@@ -1762,7 +1777,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         String inputDataFileName = null;
         boolean usingSandbox = false ;
         boolean bSandboxSystemError = false;
-
+        boolean isInteractive = false;
+        
         // a one-based test data set number
         int testSetNumber = dataSetNumber + 1;
 
@@ -1795,6 +1811,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                  * Team executing run
                  */
 
+                // Something has to be done for interactive problems here.  JB
+                
                 if (inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
                     selectAndCopyDataFile(inputDataFileName);
                 } else if (inputDataFileName != null) {
@@ -1901,25 +1919,32 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             }
 
-            //determine whether the Problem is configured to use a sandbox 
+            //determine whether the Problem is configured to use a sandbox
             usingSandbox = isUsingSandbox();
-            if(usingSandbox) {
-                try {
-                    setupSandbox();
-                } catch (Exception e) {
-                    //an exception means there is something wrong about sandbox usage (e.g. not allowed on this platform)
-                    log.severe("Exception during sandbox setup: " + e.getMessage());
-                    stderrlog.close();
-                    stdoutlog.close();
-                    executionData.setExecuteSucess(false);
-                    executionData.setExecutionException(e);
-                    return false;
+            
+            // we do not do sandboxes or interactive for test runs
+            if(!isTestRunOnly()) {
+                if(usingSandbox) {
+                    try {
+                        setupSandbox();
+                    } catch (Exception e) {
+                        //an exception means there is something wrong about sandbox usage (e.g. not allowed on this platform)
+                        log.severe("Exception during sandbox setup: " + e.getMessage());
+                        stderrlog.close();
+                        stdoutlog.close();
+                        executionData.setExecuteSucess(false);
+                        executionData.setExecutionException(e);
+                        return false;
+                    }
+                
+                    //insert the command for invoking the sandbox at the front of the command line
+                    //note that if the problem is interactive, this is handled in getSandboxCmdLine() since
+                    //there is a different sandbox command line and program (script) for interactive in a sandbox
+                    cmdline = problem.getSandboxCmdLine() + " " + cmdline ;
+                } else if(problem.isInteractive()) {
+                    cmdline = problem.getInteractiveCommandLine() + " " + cmdline;
                 }
-            
-                //insert the command for invoking the sandbox at the front of the command line
-                cmdline = problem.getSandboxCmdLine() + " " + cmdline ;
             }
-            
             log.log(Log.DEBUG, "cmdline before substitution: " + cmdline);
 
             /**
@@ -2052,6 +2077,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 log.info ("scheduling kill task with TLE-Timer with " + delay + " msec delay");
                 timeLimitKillTimer.schedule(task, delay);
             }
+            
+            // Note for the future: The IOCollectors are probably not needed for interactive problems since
+            // the I/O is redirected between the submission and the interactive validator. JB
             
             log.info("creating IOCollectors...");
             // Create a stream that reads from the stdout of the child process
@@ -2215,7 +2243,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             stderrlog.close();
 
             executionData.setExecuteSucess(true);
-                        
+            
+            // for interactive problem, might be nice to use the interactive validator output as the
+            // program output so the judge's can see what happened.  JB  TODO
             executionData.setExecuteProgramOutput(new SerializedFile(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME)));
             executionData.setExecuteStderr(new SerializedFile(prefixExecuteDirname(EXECUTE_STDERR_FILENAME)));
 
@@ -2896,6 +2926,15 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     newString = replaceString(newString, "{:ansfile}", nullArgument);
                 }
                 
+                newString = replaceString(newString, "{:testcase}", Integer.toString(dataSetNumber));
+                
+                if(executeInfoFileName != null) {
+                    newString = replaceString(newString, "{:executeinfofilename}", executeInfoFileName);
+                } else {
+                    // can't happen, but if it does, just use default basename
+                    newString = replaceString(newString, "{:executeinfofilename}", Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
+                    log.config("substituteAllStrings() executeInfoFileName is null, using default basename" + Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
+                }
                 String fileName = problem.getDataFileName(dataSetNumber);
                 if (fileName != null && !fileName.equals("")) {
                     newString = replaceString(newString, "{:infilename}", fileName);

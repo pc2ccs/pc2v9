@@ -355,8 +355,13 @@ public class Problem implements IElementObject {
     
     private int memoryLimitMB = DEFAULT_MEMORY_LIMIT_MB;
     private SandboxType sandboxType = DEFAULT_SANDBOX_TYPE;
-    private String sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_COMMAND_LINE;
-    private String sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME;
+    private String sandboxCmdLine = null;
+    private String sandboxProgramName = null;
+    
+    /**
+     * For interactive problems - this is a read-only property, so, no mutator
+     */
+    private static final String interactiveCommandLine = Constants.PC2_INTERACTIVE_COMMAND_LINE;
     
     /**
      * Create a problem with the display name.
@@ -374,6 +379,7 @@ public class Problem implements IElementObject {
         this.customInputValidationStatus = InputValidationStatus.UNKNOWN;
         this.customInputValidationResults = new Vector<InputValidationResult>();
         this.vivaSettings = new VivaInputValidatorSettings();
+        updateSandboxInfo();
     }
 
     public Problem copy(String newDisplayName) {
@@ -452,7 +458,7 @@ public class Problem implements IElementObject {
         clone.setComputerJudged(isComputerJudged());
         clone.setManualReview(isManualReview());
         clone.setPrelimaryNotification(isPrelimaryNotification());
-        clone.setInteracive(interactiveProblem);
+        clone.setInteractive(interactiveProblem);
         clone.letter = StringUtilities.cloneString(letter);
         clone.shortName = StringUtilities.cloneString(shortName);
         
@@ -558,7 +564,6 @@ public class Problem implements IElementObject {
         retStr += "; computerJudged=" + computerJudged;
         retStr += "; manualReview=" + manualReview;
         retStr += "; prelimaryNotification=" + prelimaryNotification;
-        retStr += "; interactiveProblem=" + interactiveProblem;
         retStr += "; shortName=" + shortName;
         retStr += "; letter=" + letter;
         retStr += "; colorName=" + colorName;
@@ -568,8 +573,13 @@ public class Problem implements IElementObject {
         retStr += "; state=" + state;
         
         retStr += "; sandboxType=" + this.getSandboxType();
+        retStr += "; sandboxCmdLine=" + this.getSandboxCmdLine();
+        retStr += "; sandboxProgramName=" + this.getSandboxProgramName();
         retStr += "; memoryLimit=" + this.getMemoryLimitMB();
       
+        retStr += "; interactiveProblem=" + interactiveProblem;
+        retStr += "; interactiveCommandLine=" + this.getInteractiveCommandLine();
+
         retStr += "]";
         return retStr;
     }
@@ -2103,6 +2113,28 @@ public class Problem implements IElementObject {
     }
 
     /**
+     * Update sandbox command line program names based on whether the problem
+     * is using the internal sandbox and if it's interactive
+     * This routine makes sure that if we're using the internal sandbox, that the sandbox command line
+     * and sandbox program (script name) are correct.
+     */
+    private void updateSandboxInfo()
+    {
+        // we only set the sandbox program and command line if we're using the internal sandbox
+        // or, we haven't set anything yet.  We do the latter to prevent NPE's for someone requesting
+        // the sandbox name or command line even if the sandbox strings have not been defined yet
+        if(this.getSandboxType() == SandboxType.PC2_INTERNAL_SANDBOX || sandboxProgramName == null) {
+            if(isInteractive()) {
+                sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_INTERACTIVE_NAME;
+                sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_INTERACTIVE_COMMAND_LINE;
+            } else {
+                sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME;                
+                sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_COMMAND_LINE;
+            }
+        }
+    }
+    
+    /**
      * Returns a String containing the name of the sandbox program associated with this Problem.
      * Note that the value returned by this method is only relevant if the value returned by
      * {@link #getSandboxType()} is something other than {@link SandboxType#NONE}.
@@ -2110,9 +2142,7 @@ public class Problem implements IElementObject {
      * @return the currently-defined sandbox program name.
      */
     public String getSandboxProgramName() {
-        if (sandboxProgramName == null) {
-            sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME;
-        }
+        updateSandboxInfo();
         return sandboxProgramName;
     }
 
@@ -2134,9 +2164,7 @@ public class Problem implements IElementObject {
      * @return the command line used to invoke the sandbox for this problem, when sandbox usage is enabled.
      */
     public String getSandboxCmdLine() {
-        if (sandboxCmdLine == null) {
-            sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_COMMAND_LINE;
-        }
+        updateSandboxInfo();
         return sandboxCmdLine;
     }
 
@@ -2187,10 +2215,14 @@ public class Problem implements IElementObject {
         this.sandboxType = sandboxType;
         
         //if we're setting the PC2 internal sandbox, also set the sandbox command line and program name
-        if (sandboxType == SandboxType.PC2_INTERNAL_SANDBOX) {
-            sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_COMMAND_LINE;
-            sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME;
-        }
+        updateSandboxInfo();
     }
 
+    /**
+     * Gets the command line to use to run interactive problems.  Currently, this is a read-only
+     * value since it does not make sense to change it at this time.
+     */
+    public String getInteractiveCommandLine() {
+        return interactiveCommandLine;
+    }
 }
