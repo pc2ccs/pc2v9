@@ -29,8 +29,6 @@ import edu.csus.ecs.pc2.ui.MessageManager;
 import edu.csus.ecs.pc2.ui.MessageRecord;
 import edu.csus.ecs.pc2.ui.MessageScope;
 import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
-//import edu.csus.ecs.pc2.ui.ShadowControlPane;
-//import edu.csus.ecs.pc2.ui.ShadowControlPane.ShadowStatus;
 
 /**
  * This class listens for submission events in the event feed input stream from a remote CCS CLICS Contest API Event Feed.

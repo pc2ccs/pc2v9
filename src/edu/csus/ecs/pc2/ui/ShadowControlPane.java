@@ -974,7 +974,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         }
     }
 
-    public void addConnectTableEntry(ShadowStatus stat, String msg)
+    private void addConnectTableEntry(ShadowStatus stat, String msg)
     {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
