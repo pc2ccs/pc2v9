@@ -386,6 +386,7 @@ public class Problem implements IElementObject {
         clone.setActive(isActive());
         clone.setReadInputDataFromSTDIN(isReadInputDataFromSTDIN());
         clone.setTimeOutInSeconds(getTimeOutInSeconds());
+        clone.setMaxOutputSizeKB(getMaxOutputSizeKB());
         
         //output validator settings
         clone.setValidatorType(this.getValidatorType());
