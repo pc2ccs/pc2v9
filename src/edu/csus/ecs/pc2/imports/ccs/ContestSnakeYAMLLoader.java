@@ -1434,7 +1434,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         
         // Make sure the validator settings are acceptable for interactive problems
         if(isInteractive) {
-            if(!problem.isUsingCustomValidator()) {
+            if(!usingCustomValidator) {
                 throw new YamlLoadException("For problem short name " + problem.getShortName() + 
                         ", a custom validator is required for an interactive problem");
                 
@@ -3295,12 +3295,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         boolean loaded = false;
 
         String teamsTSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.TEAMS_FILENAME;
+        String teamsTSV2File = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.TEAMS2_TSV;
 
         String groupsTSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.GROUPS_FILENAME;
 
         // only load if both tsv files are present.
 
-        if (new File(teamsTSVFile).isFile() && new File(groupsTSVFile).isFile()) {
+        if ((new File(teamsTSVFile).isFile() || new File(teamsTSV2File).isFile()) && new File(groupsTSVFile).isFile()) {
 
             LoadICPCTSVData loadTSVData = new LoadICPCTSVData();
             loadTSVData.setContestAndController(contest, null);
