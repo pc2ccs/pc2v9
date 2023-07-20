@@ -524,14 +524,14 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         List<CLICSAward> list = new ArrayList<CLICSAward>();
         CLICSJsonUtilities.addMedals(contest, list);
         
-        assertEquals("Awards expected ", 10, awards.size());
+        assertEquals("Awards expected ", 9, awards.size());
 
         String outdir = getOutputDataDirectory(getName());
         ensureDirectory(outdir);
         String awardsFile = outdir + File.separator + "awards.json";
 
         int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
-        assertEquals("Expecting no award rows ", 10, rowsWritten);
+        assertEquals("Expecting no award rows ", 9, rowsWritten);
         
 //        editFile(awardsFile, "debug A "+getName());
         

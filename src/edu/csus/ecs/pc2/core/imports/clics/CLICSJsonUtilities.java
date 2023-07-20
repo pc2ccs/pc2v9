@@ -244,7 +244,7 @@ public class CLICSJsonUtilities {
 
             List<TeamScoreRow> scoreRows = model.getRows();
 
-            String[] teams = getTeamIdsByRank(scoreRows, 0, lastRankGolds);
+            String[] teams = getTeamIdsByRankWhereSolved(scoreRows, 0, lastRankGolds, 1);
             
             if (teams.length > 0) {
                 // "citation": "Gold medal winner",
@@ -253,13 +253,13 @@ public class CLICSJsonUtilities {
                 list.add(firstToSolveAward);
             }
 
-             teams = getTeamIdsByRank(scoreRows, lastRankGolds, lastRankSilver);
+             teams = getTeamIdsByRankWhereSolved(scoreRows, lastRankGolds, lastRankSilver, 1);
             if (teams.length > 0) {
                 CLICSAward firstToSolveAward = new CLICSAward(ID_SILVER_MEDAL, "Silver medal winner", teams);
                 list.add(firstToSolveAward);
             }
 
-            teams = getTeamIdsByRank(scoreRows,  lastRankSilver, lastRankBronze);
+            teams = getTeamIdsByRankWhereSolved(scoreRows,  lastRankSilver, lastRankBronze, 1);
             if (teams.length > 0) {
                 CLICSAward firstToSolveAward = new CLICSAward(ID_BRONZE_MEDAL, "Bronze medal winner", teams);
                 list.add(firstToSolveAward);
@@ -268,19 +268,42 @@ public class CLICSJsonUtilities {
     }
  
     
+    /**
+     * Get all teams ids between lowRank and rankInclHigh (inclusive)
+     * @param scoreRows
+     * @param lowRank
+     * @param rankInclHigh
+     * @return all teams from scoreRows where team rank is >= lowRank and rank is <= rankInclHigh
+     */
     public static String[] getTeamIdsByRank(List<TeamScoreRow> scoreRows, int lowRank, int rankInclHigh) {
+        return getTeamIdsByRankWhereSolved(scoreRows, lowRank, rankInclHigh, 0);
+    }
+
+    /**
+     * Get all teams ids between lowRank and rankInclHigh (inclusive) where team has solved >= minProblemsSolvedCount.
+     * @param scoreRows
+     * @param lowRank
+     * @param rankInclHigh
+     * @param minProblemsSolvedCount only return teams with problem solve count >= minProblemsSolvedCount
+     * @return all teams from scoreRows where team rank is >= lowRank and rank is <= rankInclHigh and team has solved >= minProblemsSolvedCount.
+     */
+    public static String[] getTeamIdsByRankWhereSolved(List<TeamScoreRow> scoreRows, int lowRank, int rankInclHigh, int minProblemsSolvedCount) {
 
         List<String> teamIds = new ArrayList<>();
 
         for (TeamScoreRow teamScoreRow : scoreRows) {
+            if (teamScoreRow.getScore().getNum_solved() >= minProblemsSolvedCount) {
+                // only include teams that have minProblemsSolvedCount or more problems solved
 
-            if (lowRank < teamScoreRow.getRank() && teamScoreRow.getRank() <= rankInclHigh) {
-                teamIds.add(teamScoreRow.getTeam_id() + "");
+                if (lowRank < teamScoreRow.getRank() && teamScoreRow.getRank() <= rankInclHigh) {
+                    teamIds.add(teamScoreRow.getTeam_id() + "");
+                }
             }
         }
-        
+
         return (String[]) teamIds.toArray(new String[teamIds.size()]);
     }
+
 
     /**
      * Add winner award.
