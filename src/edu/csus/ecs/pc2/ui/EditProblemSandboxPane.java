@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -5,6 +6,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -22,6 +24,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,16 +45,12 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.SandboxType;
+import edu.csus.ecs.pc2.util.OSCompatibilityUtilities;
 
 public class EditProblemSandboxPane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * The problem to which this Edit Problem Sandbox pane relates.
-     */
-    private Problem problem;
-    
     /**
      * The EditProblemPane which is the parent holding this Sandbox pane.
      */
@@ -97,6 +96,9 @@ public class EditProblemSandboxPane extends JPanePlugin {
     
     //setting this to True will cause the Sandbox Pane GUI panels to show boundary borders... useful for layout debugging.
     private boolean debugShowPanelBorders = false;
+
+    // remember if we told the user this system does not support sandboxes so we don't keep nagging
+    private boolean noSandboxNagMessage = false;
     
     //setting this to True will override the prohibition on selecting a Sandbox when running on Windows.
     // Note that THIS IS FOR DEBUGGING PURPOSES; it does NOT imply any support for Windows sandboxing.
@@ -131,22 +133,12 @@ public class EditProblemSandboxPane extends JPanePlugin {
         return "Edit Problem Sandbox Pane";
     }
     
+    /**
+     * Set's problem specific data fields
+     * @param problem - the problem to use for the sandbox data (may be null)
+     */
     public void setProblem(Problem problem) {
-        this.problem = problem;
-        
-        //activate the appropriate sandbox selection button (the buttons are in a group so selecting one will deselect the others)
-        if (this.problem.getSandboxType() == SandboxType.NONE) {
-            getUseNoSandboxRadioButton().setSelected(true);
-            
-        } else if (this.problem.getSandboxType() == SandboxType.PC2_INTERNAL_SANDBOX) {
-            getUsePC2SandboxRadioButton().setSelected(true);
-            getPC2SandboxOptionMemLimitTextbox().setText(Integer.toString(problem.getMemoryLimitMB()));
-            
-        } else if (this.problem.getSandboxType() == SandboxType.EXTERNAL_SANDBOX) {
-            getLog().severe("Problem has 'Custom sandbox' selected -- should not be possible in this version of PC^2!");
-            //default to "None"
-            getUseNoSandboxRadioButton().setSelected(true);
-        }
+        populateGUI(problem);
     }
 
     public void setParentPane(EditProblemPane editProblemPane) {
@@ -188,6 +180,40 @@ public class EditProblemSandboxPane extends JPanePlugin {
             } else {
                 getLog().warning("EditProblemSandboxPane.initializeFields() called with Problem containing unknown sandbox type '" 
                                     + sandboxType + "'; cannot initialize pane");
+            }
+        }
+    }
+    
+    /**
+     * Populate controls with problem's sandbox information
+     * 
+     * @param problem - the problem to use to populate the controls.  If null, uses defaults
+     */
+    private void populateGUI(Problem problem) {
+        
+        // If adding a problem, we have to determine a default sandbox type
+        if(problem == null) {
+            // If sandboxes are desired and supported, we make the internal sandbox the default
+            if(Problem.DEFAULT_SANDBOX_TYPE == SandboxType.PC2_INTERNAL_SANDBOX && isCheckSandboxSupport()) {
+                getUsePC2SandboxRadioButton().setSelected(true);
+            } else {
+                getUseNoSandboxRadioButton().setSelected(true);
+            }
+            getPC2SandboxOptionMemLimitTextbox().setText(Integer.toString(Problem.DEFAULT_MEMORY_LIMIT_MB));
+       } else {
+            //activate the appropriate sandbox selection button (the buttons are in a group so selecting one will deselect the others)
+            if (problem.getSandboxType() == SandboxType.NONE) {
+                getUseNoSandboxRadioButton().setSelected(true);
+                
+            } else if (problem.getSandboxType() == SandboxType.PC2_INTERNAL_SANDBOX) {
+                isCheckSandboxSupport();
+                getUsePC2SandboxRadioButton().setSelected(true);
+                getPC2SandboxOptionMemLimitTextbox().setText(Integer.toString(problem.getMemoryLimitMB()));
+                
+            } else if (problem.getSandboxType() == SandboxType.EXTERNAL_SANDBOX) {
+                getLog().severe("Problem has 'Custom sandbox' selected -- should not be possible in this version of PC^2!");
+                //default to "None"
+                getUseNoSandboxRadioButton().setSelected(true);
             }
         }
     }
@@ -943,6 +969,23 @@ public class EditProblemSandboxPane extends JPanePlugin {
         return horizontalStrut_2;
     }
 
+    private boolean isCheckSandboxSupport()
+    {
+        boolean bSupported = OSCompatibilityUtilities.areSandboxesSupported(getContest(), getLog());
+        if(!bSupported){
+            if(!noSandboxNagMessage) {
+                String msgWarning = "You should be aware of the fact that this system does not support sandboxes.\n"
+                        + "Therefore, you are not able to configure problems that do require a sandbox.";
+                JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+
+                Object [] oMsg = { msgWarning, checkbox };
+                checkbox.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10));
+                JOptionPane.showMessageDialog(getParentPane(), oMsg, "Sandbox Not Available Notice", JOptionPane.WARNING_MESSAGE);
+                noSandboxNagMessage = checkbox.isSelected();
+           }
+        }
+        return(bSupported);
+    }
 
     //main() method for testing only
     public static void main (String [] args) {
