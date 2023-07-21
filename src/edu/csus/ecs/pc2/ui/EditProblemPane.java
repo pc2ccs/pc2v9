@@ -7,6 +7,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -27,6 +28,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
+import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -248,7 +251,30 @@ public class EditProblemPane extends JPanePlugin {
     
     private EditProblemSandboxPane editProblemSandboxPane;
 
-
+    /**
+     * This enum defines the specification followed by the custom validator
+     */
+    private enum CUSTOM_VALIDATOR_TYPE {
+        /**
+         * The Problem has no associated custom validator type (eg it is bad)
+         */
+        CV_NONE, 
+        /**
+         * The Custom validator uses the PC2 Validator interface, also known as the "Internal" Validator.
+         */
+        CV_PC2, 
+        /**
+         * The Custom validator uses the CLICS Validator specification return values.
+         */
+        CV_CLICS, 
+        /**
+         * The Custom validator is an interactive validator using the CLICS validator specification return values.
+         */
+        CV_INTERACTIVE_CLICS
+        }
+    
+    private CUSTOM_VALIDATOR_TYPE customValidatorType = CUSTOM_VALIDATOR_TYPE.CV_NONE;
+    
     /**
      * Constructs an EditProblemPane with default settings.
      * 
@@ -1494,15 +1520,32 @@ public class EditProblemPane extends JPanePlugin {
         return validatorType;
     }
 
+    private CUSTOM_VALIDATOR_TYPE getCustomValidatorTypeFromUI() {
+        CUSTOM_VALIDATOR_TYPE cvt = CUSTOM_VALIDATOR_TYPE.CV_NONE;
+        
+        if(getUsePC2ValStdRadioButton().isSelected()) {
+            cvt = CUSTOM_VALIDATOR_TYPE.CV_PC2;
+        } else if(getUseClicsValStdRadioButton().isSelected()) {
+            cvt = CUSTOM_VALIDATOR_TYPE.CV_CLICS;
+        } else if(getUseInteractiveRadioButton().isSelected()) {
+            cvt = CUSTOM_VALIDATOR_TYPE.CV_INTERACTIVE_CLICS;
+        }
+        return(cvt);
+    }
+    
     /**
      * Makes a copy of the current Custom Validator Command line so that it can be restored if the user switches back and forth between "PC2 Validator Interface" mode and "CLICS Validator Interface"
      * mode.
      */
     private void updateLocalCustomValidatorCommandLine() {
-        if (this.getUsePC2ValStdRadioButton().isSelected()) {
-            localPC2InterfaceCustomValidatorCommandLine = this.getCustomValidatorCommandLineTextField().getText();
-        } else if (this.getUseClicsValStdRadioButton().isSelected()) {
-            localClicsInterfaceCustomValidatorCommandLine = this.getCustomValidatorCommandLineTextField().getText();
+        switch(getCustomValidatorTypeFromUI()) {
+            case CV_PC2:
+                localPC2InterfaceCustomValidatorCommandLine = this.getCustomValidatorCommandLineTextField().getText();
+                break;
+            case CV_CLICS:
+            case CV_INTERACTIVE_CLICS:
+                localClicsInterfaceCustomValidatorCommandLine = this.getCustomValidatorCommandLineTextField().getText();
+                break;
         }
     }
 
@@ -1919,7 +1962,7 @@ public class EditProblemPane extends JPanePlugin {
 
         // verify that if a Custom Output Validator has been selected, exactly one Validator Interface has been specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
-            if (!(getUseClicsValStdRadioButton().isSelected() ^ getUsePC2ValStdRadioButton().isSelected())) { // ^ == XOR
+            if (getCustomValidatorTypeFromUI() == CUSTOM_VALIDATOR_TYPE.CV_NONE) {
                 showMessage("\"Use Custom Validator\" is selected; you must select exactly one Validator Interface (\"Output Validator\" tab)");
                 return false;
             }
@@ -2609,6 +2652,7 @@ public class EditProblemPane extends JPanePlugin {
             // set the radio buttons indicating which Validator Standard the Problem uses
             getUsePC2ValStdRadioButton().setSelected(customSettings.isUsePC2ValidatorInterface());
             getUseClicsValStdRadioButton().setSelected(customSettings.isUseClicsValidatorInterface());
+            getUseInteractiveRadioButton().setSelected(customSettings.isUseInteractiveValidatorInterface());
 
             // set the custom validator command line based on which standard is being used (the CustomValidatorSettings object
             // stores command lines for both cases; the active one needs to be put into the GUI as well as into the local (temp) storage
@@ -3764,7 +3808,33 @@ public class EditProblemPane extends JPanePlugin {
             + "\n be used by PC^2 to display additional information to the Judges and/or Teams."
 
             + "\n\nFor more information, see the PC^2 Contest Administrator's Guide; in particular, the Appendix on Validators."
-            + "\nSee also the CLICS specification at https://clics.ecs.baylor.edu/index.php/Problem_format#Validators.";
+            + "\nSee also the CLICS specification at https://icpc.io/problem-package-format/spec/problem_package_format#output-validators.";
+
+    private String whatsThisInteractiveMessage = "Selecting this option indicates that your Validator is an Interactive Validator using the \"CLICS Validator Standard\"."
+
+            + "\n\nCLICS is the Competitive Learning Initiative Contest System specification, used among other things to define "
+            + "\nrequirements for Contest Control Systems used at the ICPC World Finals. "
+
+            + "\n\n In this mode, PC^2 passes to the Interactive Validator program a set of three string parameters, in the following order: "
+            + "\n  (1) the name of the input data file which was used to test the program whose output is being validated; "
+            + "\n  (2) the name of an \"answer file\" which is input to the Validator (typically, the \"correct answer\" for the problem); and"
+            + "\n  (3) the name of a \"feedback directory\" into which the Validator can place \"feedback files\" in order to report additional information"
+            + "\n      on the validation of the output of the program being validated.  The \"feedback directory\" name will end with a \"path separator\" character ('/' or '\\')."
+
+            + "\n\n When using an Interactive Validator, PC^2 arranges that the output produced by the program being validated "
+            + "\n is sent to the \"standard input\" of the Interactive Validator program and the output of the interactive Validator "
+            + "\n is sent to the program being validated.  This creates a dialog between the program being validated and the "
+            + "\n Interactive Validator."
+
+            + "\n\n When the program being validated completes, the CLICS Validator Standard specifies that the Validator must "
+            + "\n exit with an exit code of 42 if the submission is to be accepted (i.e., judged \"Yes\"), or exit with an exit "
+            + "\n code of 43 if the submission is to be rejected (i.e., judged \"No - Wrong Answer\")."
+
+            + "\n\n The Validator may also write additional feedback information into files in the \"feedback directory\"; these files can under certain conditions"
+            + "\n be used by PC^2 to display additional information to the Judges and/or Teams."
+
+            + "\n\nFor more information, see the PC^2 Contest Administrator's Guide; in particular, the Appendix on Validators."
+            + "\nSee also the CLICS specification at https://icpc.io/problem-package-format/spec/problem_package_format#output-validators.";
 
     private JPanel clicsOptionButtonPanel;
 
@@ -3773,12 +3843,16 @@ public class EditProblemPane extends JPanePlugin {
     private JRadioButton rdbtnUsePcStandard;
 
     private JRadioButton rdbtnUseClicsStandard;
+    
+    private JRadioButton rdbtnUseInteractive;
 
     private final ButtonGroup validatorStandardButtonGroup = new ButtonGroup();
 
     private JLabel lblWhatsThisPC2ValStd;
 
     private JLabel lblWhatsThisCLICSValStd;
+    
+    private JLabel lblWhatsThisInteractive;
 
     private InputValidatorPane inputValidatorPane;
 
@@ -3866,6 +3940,7 @@ public class EditProblemPane extends JPanePlugin {
         getCustomValidatorInterfaceLabel().setEnabled(enableComponents);
         getUsePC2ValStdRadioButton().setEnabled(enableComponents);
         getUseClicsValStdRadioButton().setEnabled(enableComponents);
+        getUseInteractiveRadioButton().setEnabled(enableComponents);
     }
 
     protected void enableClicsValidatorComponents(boolean enableComponents) {
@@ -5114,7 +5189,8 @@ public class EditProblemPane extends JPanePlugin {
 
             // add the "Use PC2 Validator Interface" radio button to the subpanel
             GridBagConstraints gbc_rdbtnUsePc2Standard = new GridBagConstraints();
-            gbc_rdbtnUsePc2Standard.insets = new Insets(0, 0, 5, 5);
+            gbc_rdbtnUsePc2Standard.anchor = GridBagConstraints.WEST;
+            gbc_rdbtnUsePc2Standard.insets = new Insets(0, 8, 5, 5);
             gbc_rdbtnUsePc2Standard.gridx = 1;
             gbc_rdbtnUsePc2Standard.gridy = 2;
             customValidatorOptionsSubPanel.add(getUsePC2ValStdRadioButton(), gbc_rdbtnUsePc2Standard);
@@ -5129,7 +5205,8 @@ public class EditProblemPane extends JPanePlugin {
 
             // add the "Use CLICS Validator Interface" radio button to the subpanel
             GridBagConstraints gbc_rdbtnUseClicsStandard = new GridBagConstraints();
-            gbc_rdbtnUseClicsStandard.insets = new Insets(0, 0, 0, 5);
+            gbc_rdbtnUseClicsStandard.anchor = GridBagConstraints.WEST;
+            gbc_rdbtnUseClicsStandard.insets = new Insets(0, 8, 5, 5);
             gbc_rdbtnUseClicsStandard.gridx = 1;
             gbc_rdbtnUseClicsStandard.gridy = 3;
             customValidatorOptionsSubPanel.add(getUseClicsValStdRadioButton(), gbc_rdbtnUseClicsStandard);
@@ -5140,7 +5217,23 @@ public class EditProblemPane extends JPanePlugin {
             gbc_labelWhatsThisCLICSValStd.gridx = 2;
             gbc_labelWhatsThisCLICSValStd.gridy = 3;
             customValidatorOptionsSubPanel.add(getLabelWhatsThisCLICSValStd(), gbc_labelWhatsThisCLICSValStd);
-        }
+            
+            // add the "This is an interactive problem" checkbox to the subpanel
+            GridBagConstraints gbc_rdbtnBoxInteractive = new GridBagConstraints();
+            gbc_rdbtnBoxInteractive.anchor = GridBagConstraints.WEST;
+            gbc_rdbtnBoxInteractive.insets = new Insets(0, 8, 5, 5);
+            gbc_rdbtnBoxInteractive.gridx = 1;
+            gbc_rdbtnBoxInteractive.gridy = 4;
+            customValidatorOptionsSubPanel.add(getUseInteractiveRadioButton(), gbc_rdbtnBoxInteractive);
+
+            // add the "What's This" icon for the CLICS Validator Standard Interface radio button to the subpanel
+            GridBagConstraints gbc_labelWhatsThisInteractive = new GridBagConstraints();
+            gbc_labelWhatsThisInteractive.anchor = GridBagConstraints.WEST;
+            gbc_labelWhatsThisInteractive.gridx = 2;
+            gbc_labelWhatsThisInteractive.gridy = 4;
+            customValidatorOptionsSubPanel.add(getLabelWhatsThisInteractive(), gbc_labelWhatsThisInteractive);
+
+       }
         return customValidatorOptionsSubPanel;
     }
 
@@ -5340,8 +5433,10 @@ public class EditProblemPane extends JPanePlugin {
      */
     private CustomValidatorSettings getCustomValidatorSettingsFromFields() {
 
+        CUSTOM_VALIDATOR_TYPE cvt = getCustomValidatorTypeFromUI();
+        
         // make sure exactly one of the Interface mode buttons is selected
-        if (!(this.getUsePC2ValStdRadioButton().isSelected() ^ this.getUseClicsValStdRadioButton().isSelected())) {
+        if (cvt == CUSTOM_VALIDATOR_TYPE.CV_NONE) {
             showMessage("Invalid settings for Validator Interface radio buttons");
             throw new InvalidFieldValue("Invalid settings for Validator Interface radio buttons.");
         }
@@ -5359,14 +5454,21 @@ public class EditProblemPane extends JPanePlugin {
         settings.setValidatorCommandLine(this.localPC2InterfaceCustomValidatorCommandLine);
 
         // put the settings object into "CLICS Interface" mode and copy the current CLICS Validator Command line to it
+        // Note: interactive uses the same command line as CLICS.
         settings.setUseClicsValidatorInterface();
         settings.setValidatorCommandLine(this.localClicsInterfaceCustomValidatorCommandLine);
 
         // put the settings object into the Validator Interface mode indicated in the GUI
-        if (this.getUsePC2ValStdRadioButton().isSelected()) {
-            settings.setUsePC2ValidatorInterface();
-        } else {
-            settings.setUseClicsValidatorInterface();
+        switch(cvt) {
+            case CV_PC2:
+                settings.setUsePC2ValidatorInterface();
+                break;
+            case CV_CLICS:
+                settings.setUseClicsValidatorInterface();
+                break;
+            case CV_INTERACTIVE_CLICS:
+                settings.setUseInteractiveValidatorInterface();
+                break;
         }
 
         return settings;
@@ -5523,6 +5625,37 @@ public class EditProblemPane extends JPanePlugin {
         return rdbtnUseClicsStandard;
     }
 
+    private JRadioButton getUseInteractiveRadioButton() {
+        if (rdbtnUseInteractive == null) {
+            rdbtnUseInteractive = new JRadioButton("Uses CLICS Interactive Problem Interface");
+            rdbtnUseInteractive.setSelected(false);
+            rdbtnUseInteractive.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    // switching to Use Clics Interactive Interface for this Custom Validator;
+                    // check to see if we are editing a problem which might already have a Clics Interface Validator Command Line
+                    if (problem != null && problem.getCustomOutputValidatorSettings() != null && problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface()
+                            && problem.getOutputValidatorCommandLine() != null && problem.getOutputValidatorCommandLine().trim().length() > 0) {
+                        // we are editing a problem which has a Custom Validator which is using the Clics Interface Standard and has a
+                        // Custom Validator Command Line which is not empty; put that command line in the GUI
+                        getCustomValidatorCommandLineTextField().setText(problem.getOutputValidatorCommandLine().trim());
+
+                    } else if (localClicsInterfaceCustomValidatorCommandLine != null) {
+                        // we have a local version of the Clics command line; fill that into the command line on the GUI
+                        getCustomValidatorCommandLineTextField().setText(localClicsInterfaceCustomValidatorCommandLine);
+
+                    } else {
+                        // there's currently no definition for the Validator Command Line in any current problem or locally;
+                        // put the default in the command line GUI
+                        getCustomValidatorCommandLineTextField().setText(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
+                    }
+                    enableUpdateButton();
+                }
+            });
+            validatorStandardButtonGroup.add(rdbtnUseInteractive);
+        }
+        return rdbtnUseInteractive;
+    }
+
     private JLabel getLabelWhatsThisPC2ValStd() {
         if (lblWhatsThisPC2ValStd == null) {
 
@@ -5572,6 +5705,31 @@ public class EditProblemPane extends JPanePlugin {
             lblWhatsThisCLICSValStd.setBorder(new EmptyBorder(0, 15, 0, 0));
         }
         return lblWhatsThisCLICSValStd;
+    }
+
+    private JLabel getLabelWhatsThisInteractive() {
+        if (lblWhatsThisInteractive == null) {
+
+            Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+            if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                lblWhatsThisInteractive = new JLabel("<What's This?>");
+                lblWhatsThisInteractive.setForeground(Color.blue);
+            } else {
+                Image image = ((ImageIcon) questionIcon).getImage();
+                lblWhatsThisInteractive = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            }
+
+            lblWhatsThisInteractive.setToolTipText("What's This? (click for additional information)");
+            lblWhatsThisInteractive.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, whatsThisInteractiveMessage, "CLICS Interactive Validator", JOptionPane.INFORMATION_MESSAGE, null);
+                }
+            });
+            lblWhatsThisInteractive.setBorder(new EmptyBorder(0, 15, 0, 0));
+        }
+        return lblWhatsThisInteractive;
     }
 
     protected InputValidatorPane getInputValidatorPane() {
