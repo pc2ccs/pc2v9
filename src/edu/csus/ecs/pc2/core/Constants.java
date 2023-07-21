@@ -205,4 +205,7 @@ public final class Constants {
      * Prefix for deleted runs.
      */
     public static final String DEL_RUN_PREFIX = "DEL ";   
+    
+    public static final String NL = System.getProperty("line.separator");
+
 }

@@ -21,6 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -29,10 +31,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -590,7 +594,75 @@ public final class FrameUtilities {
         button.setBorder(new EmptyBorder(0, 15, 0, 0));
         return button;
     }
+    
+    /**
+     * return list of stack trace elements that match pattern
+     * 
+     */
+    public static List<String> fetchStackTraceElements(Throwable e, String pattern) {
 
+        List<String> list = new ArrayList<String>();
 
+        StackTraceElement[] stackTraceElements = e.getStackTrace();
+        for (StackTraceElement stackTraceElement : stackTraceElements) {
+
+            String className = stackTraceElement.getClassName();
+
+            if (className.indexOf(pattern) != -1) {
+                list.add("    at " + //
+                        className + "." + //
+                        stackTraceElement.getMethodName() + "(" + //
+                        stackTraceElement.getFileName() + ":" + //
+                        stackTraceElement.getLineNumber() + ")" //
+                );
+            }
+        }
+
+        return list;
+    }
+
+    /**
+     * Provides information about exception with only pc2 code "csus" stack trace elements.
+     * @param ex
+     * @param delimiter
+     * @return
+     */
+    public static String getExceptionMessageAndStackTrace(Exception ex, String delimiter) {
+
+        StringBuffer buff = new StringBuffer();
+        
+        if (ex != null) {
+            buff.append("Message: " + ex.getMessage());
+            buff.append(Constants.NL);
+            buff.append("Class: " + ex.getClass().getName());
+            buff.append(Constants.NL);
+            
+            List<String> stackTraceLines = fetchStackTraceElements(ex, "csus");
+            for (String string : stackTraceLines) {
+                buff.append(string);
+                buff.append(Constants.NL);
+            }
+        }
+
+        return buff.toString();
+    }
+
+    /**
+     * Shows users information about exception with only pc2 code "csus" stack trace elements. 
+     * @param component
+     * @param message
+     * @param ex
+     */
+    public static void showExceptionMessage(Component component, final String message, Exception ex) {
+        
+        // TODO CI improve this  to create a dialog that allows copying of stack trace into clipboard
+        // TODO CI improve this to create a dialog that allows copying all the dialog lines into clipboard
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog(null, message + Constants.NL + getExceptionMessageAndStackTrace(ex, Constants.NL));
+            }
+        });
+    }
 
 }
