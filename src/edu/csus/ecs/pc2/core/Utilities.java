@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
@@ -1978,5 +1978,63 @@ public final class Utilities {
     public static boolean isShowStandingsPanes() {
         return showStandingsPanes;
     }
+    
+    /**
+     * Concatenate Arrays.
+     * 
+     * This is null-safe, arrays can be null and will return 
+     * an array.
+     * 
+     * @param one first array
+     * @param two secodn array
+     * @return a new array which contains contents of one and two arrays
+     */
+    public static String[] copyArray(String[] one, String[] two) {
+
+        if (one == null) {
+            one = new String[0];
+        }
+
+        if (two == null) {
+            two = new String[0];
+        }
+
+        String[] newArray = new String[one.length + two.length];
+
+        System.arraycopy(one, 0, newArray, 0, one.length);
+        System.arraycopy(two, 0, newArray, one.length, two.length);
+
+        return newArray;
+    }
+    
+    
+    /**
+     * Concatenate Arrays.
+     * 
+     * This is null-safe, arrays can be null and will return 
+     * an array.
+     * 
+     * @param one first array
+     * @param two secodn array
+     * @return a new array which contains contents of one and two arrays
+     */
+    public static SerializedFile[] copyArray(SerializedFile[] one, SerializedFile[] two) {
+
+        if (one == null) {
+            one = new SerializedFile[0];
+        }
+
+        if (two == null) {
+            two = new SerializedFile[0];
+        }
+
+        SerializedFile[] newArray = new SerializedFile[one.length + two.length];
+
+        System.arraycopy(one, 0, newArray, 0, one.length);
+        System.arraycopy(two, 0, newArray, one.length, two.length);
+
+        return newArray;
+    }
+
 
 }
