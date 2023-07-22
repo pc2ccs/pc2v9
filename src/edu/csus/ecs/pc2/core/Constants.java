@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 /**
@@ -205,4 +205,7 @@ public final class Constants {
      * Prefix for deleted runs.
      */
     public static final String DEL_RUN_PREFIX = "DEL ";   
+    
+    public static final String NL = System.getProperty("line.separator");
+
 }

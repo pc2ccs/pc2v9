@@ -1,10 +1,17 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -14,15 +21,22 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -494,6 +508,161 @@ public final class FrameUtilities {
         }
         
         return false;
+    }
+    
+
+
+    private static Image getScaledImage(Image srcImg, int w, int h) {
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+
+        return resizedImg;
+    }
+
+    /**
+     * create a label with question mark and on click shows a message dialog.
+     * 
+     * @param messageTitle dialog title
+     * @param messageLines dialog message lines
+     * @return @return a What's this? label.
+     */
+    public static JLabel getWhatsThisLabel(String messageTitle, String[] messageLines) {
+        return getToolTipLabel("<What's This?>", "What's This? (click for additional information)", messageTitle,
+                String.join("\n", messageLines));
+    }
+
+    /**
+     * create a label with question mark and on click shows a message dialog.
+     * 
+     * @param messageTitle dialog title
+     * @param message      dialog message
+     * @return a What's this JLabel
+     */
+    // TODO REFACTOR use a getWhatsThisLabel where other What's up labels, search for getIcon("OptionPane.questionIcon")
+    public static JLabel getWhatsThisLabel(String messageTitle, String message) {
+        return getToolTipLabel("<What's This?>", "What's This? (click for additional information)", messageTitle,
+                message);
+    }
+
+    /**
+     * create a label with question mark and on click shows a message dialog.
+     * 
+     * @param buttonName
+     * @param toolTip
+     * @param messageTitle
+     * @param messageLines
+     */
+    public static JLabel getToolTipLabel(String buttonName, String toolTip, String messageTitle,
+            String[] messageLines) {
+        return getToolTipLabel(buttonName, toolTip, messageTitle, String.join("\n", messageLines));
+    }
+
+    /**
+     * create a label with question mark and on click shows a message dialog.
+     * 
+     * @param buttonName   name for button
+     * @param toolTip      tooltip for button
+     * @param messageTitle
+     * @param message
+     */
+    public static JLabel getToolTipLabel(String buttonName, String toolTip, String messageTitle, String message) {
+
+        JLabel button = new JLabel(buttonName);
+
+        Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+        if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+            // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+
+            button.setForeground(Color.blue);
+        } else {
+            Image image = ((ImageIcon) questionIcon).getImage();
+            button = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+        }
+
+        button.setToolTipText(toolTip);
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+                JOptionPane.showMessageDialog(null, message, messageTitle, JOptionPane.INFORMATION_MESSAGE, null);
+            }
+        });
+        button.setBorder(new EmptyBorder(0, 15, 0, 0));
+        return button;
+    }
+    
+    /**
+     * return list of stack trace elements that match pattern
+     * 
+     */
+    public static List<String> fetchStackTraceElements(Throwable e, String pattern) {
+
+        List<String> list = new ArrayList<String>();
+
+        StackTraceElement[] stackTraceElements = e.getStackTrace();
+        for (StackTraceElement stackTraceElement : stackTraceElements) {
+
+            String className = stackTraceElement.getClassName();
+
+            if (className.indexOf(pattern) != -1) {
+                list.add("    at " + //
+                        className + "." + //
+                        stackTraceElement.getMethodName() + "(" + //
+                        stackTraceElement.getFileName() + ":" + //
+                        stackTraceElement.getLineNumber() + ")" //
+                );
+            }
+        }
+
+        return list;
+    }
+
+    /**
+     * Provides information about exception with only pc2 code "csus" stack trace elements.
+     * @param ex
+     * @param delimiter
+     * @return
+     */
+    public static String getExceptionMessageAndStackTrace(Exception ex, String delimiter) {
+
+        StringBuffer buff = new StringBuffer();
+        
+        if (ex != null) {
+            buff.append("Message: " + ex.getMessage());
+            buff.append(Constants.NL);
+            buff.append("Class: " + ex.getClass().getName());
+            buff.append(Constants.NL);
+            
+            List<String> stackTraceLines = fetchStackTraceElements(ex, "csus");
+            for (String string : stackTraceLines) {
+                buff.append(string);
+                buff.append(Constants.NL);
+            }
+        }
+
+        return buff.toString();
+    }
+
+    /**
+     * Shows users information about exception with only pc2 code "csus" stack trace elements. 
+     * @param component
+     * @param message
+     * @param ex
+     */
+    public static void showExceptionMessage(Component component, final String message, Exception ex) {
+        
+        // TODO CI improve this  to create a dialog that allows copying of stack trace into clipboard
+        // TODO CI improve this to create a dialog that allows copying all the dialog lines into clipboard
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog(null, message + Constants.NL + getExceptionMessageAndStackTrace(ex, Constants.NL));
+            }
+        });
     }
 
 }
