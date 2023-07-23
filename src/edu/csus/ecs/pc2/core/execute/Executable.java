@@ -1944,6 +1944,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 } else if(problem.isInteractive()) {
                     cmdline = problem.getInteractiveCommandLine() + " " + cmdline;
                 }
+                // This will copy anything that is needed for the interactive validator that was not copied above.
+                setupInteractiveValidator();
             }
             log.log(Log.DEBUG, "cmdline before substitution: " + cmdline);
 
@@ -2438,15 +2440,21 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      */
     private void copyPC2Sandbox() throws Exception {
         
+        String sandboxScriptName;
+        if(problem.isInteractive()) {
+            sandboxScriptName = Constants.PC2_INTERNAL_SANDBOX_INTERACTIVE_NAME;
+        } else {
+            sandboxScriptName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME;
+        }
         //point to the file that we want to create
-        String targetFileName = prefixExecuteDirname(Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME);
+        String targetFileName = prefixExecuteDirname(sandboxScriptName);
 
         //use the VersionInfo class to get the PC2 installation directory
         VersionInfo versionInfo = new VersionInfo();
         String home = versionInfo.locateHome();
         
         //point to the PC2 Internal Sandbox file (under "/sandbox" in the home, i.e. installation, directory)
-        String srcFileName = home + File.separator + "sandbox" + File.separator + Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME ;
+        String srcFileName = home + File.separator + Constants.PC2_SCRIPT_DIRECTORY + File.separator + sandboxScriptName ;
         
         try {
             //copy the PC2 internal sandbox program into the execute directory
@@ -2459,7 +2467,92 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             throw e;  
         }
     }
+    
 
+    /**
+     * Setup the environment needed for to run the current submission using an interactive validator.  This involves making sure that
+     * the system supports interactive validators and, the copying of any necessary files succeeded  This
+     * does NOT imply creating will work when it comes time to run the submission.
+     * 
+     * If this routine returns normally, then the files necessary for running in an interactive submission have been copied successfully.
+     * 
+     * @throws Exception if there is a interactive validator configuration issue, such as 
+     *          we're running on an OS platform where interactive validators aren't supported, or
+     *          the specified scripts for interactive validation can't be loaded into the execute directory.
+     */
+    private void setupInteractiveValidator() throws Exception {
+        
+        log.info("Setting up problem " + problem.getShortName() + " for interactive validation");
+            
+        //check the OS to be sure we have a sandbox supported
+        if (OSCompatibilityUtilities.isRunningOnWindows() && !debugAllowSandboxInvocationOnWindows) {
+            
+            log.severe("Attempt to execute a problem configured with an interactive validator on a Windows system: not supported");
+            throw new Exception ("Interactive Validators are not supported on Windows OS");
+            
+        } else {
+            
+            //OS supported (non-Windows values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
+                
+            log.info("Copying PC2 interactive validator scripts into Execute directory");
+            try {
+                //copy the PC2 interactive validator scripts into the execution directory
+                copyPC2InteractiveValidatorScripts();
+            } catch (Exception e) {
+                log.severe("Unable to copy PC2 interactive validator scripts to execute directory; cannot execute submission");
+                throw e;
+            }
+        }
+        
+        //Problem has a properly-configured interactive validator and we're not running a Team client
+        return;
+    }
+
+    /**
+     * Copies the PC2 interactive validator script files into the execution directory.
+     * 
+     * @throws Exception if creation of the script files in the execution directory failed.  
+     *          The Exception which is thrown is whatever Exception occurred during execution
+     *          of the file copy operation.
+     */
+    private void copyPC2InteractiveValidatorScripts() throws Exception {
+        
+        ArrayList<String> scriptNames = new ArrayList<String>();
+       
+        //If a sandbox is being used, the interactive validator sandbox script was copied already by setupSandbox(). If not
+        // using a sandbox, we have to copy the non-sandbox version of the interactive validator script here.
+        SandboxType sbType = problem.getSandboxType();
+        if (sbType == SandboxType.NONE) {
+            scriptNames.add(Constants.PC2_INTERACTIVE_NAME);
+        }
+        // Add in the PC2 final validator that validates the results of the interactive validator
+        scriptNames.add(Constants.PC2_INTERACTIVE_VALIDATOR_NAME);
+        
+        //use the VersionInfo class to get the PC2 installation directory
+        VersionInfo versionInfo = new VersionInfo();
+        String home = versionInfo.locateHome();      
+        
+        // Now, copy the files one at-a-time from the list
+        for(String scriptName : scriptNames) {
+            //point to the file that we want to create
+            String targetFileName = prefixExecuteDirname(scriptName);
+    
+            //point to the PC2 Internal Sandbox file (under "/sandbox" in the home, i.e. installation, directory)
+            String srcFileName = home + File.separator + Constants.PC2_SCRIPT_DIRECTORY + File.separator + scriptName ;
+            
+            try {
+                //copy the script into the execute directory
+                Files.copy(new File(srcFileName).toPath(), new File(targetFileName).toPath());
+            } catch (FileAlreadyExistsException ae) {
+                // this is OK, just use the one there.
+            } catch (Exception e){
+                log.severe("Exception copying PC2 interactive validator script to execute directory: " + e.getMessage());
+                executionData.setExecutionException(e);
+                throw e;  
+            }
+        }
+    }
+    
     /**
      * Returns an indication of whether the currently executing client is a Team (as opposed to a Judge, Admin, or Scoreboard for example).
      * 

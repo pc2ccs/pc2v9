@@ -213,7 +213,7 @@ DEBUG echo Executing $COMMAND $*
 trap HandleTerminateFromPC2 15
 
 
-$COMMAND $* <&0 &
+taskset 0x20 $COMMAND $* <&0 &
 # Remember child's PID for possible killing off later
 submissionpid=$!
 # Wait for child

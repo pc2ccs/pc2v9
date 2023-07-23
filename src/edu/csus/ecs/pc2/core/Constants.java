@@ -189,6 +189,12 @@ public final class Constants {
     public static final int BYTES_PER_KIBIBYTE = 1024;   
     
     /**
+     * Directory where scripts go that PC2 executes for sandbox and interactive submissions.
+     * This folder is in the PC2 home folder (install folder).
+     */
+    public static final String PC2_SCRIPT_DIRECTORY = "scripts";
+    
+    /**
      * Sandbox constants
      */
     public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit}";
@@ -198,10 +204,11 @@ public final class Constants {
     /**
      * Constants for interactive problems
      */
-    public static final String PC2_INTERNAL_SANDBOX_INTERACTIVE_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit}" +
-        "{:validator} {:infilename} {:ansfilename} {:testcase}";
+    public static final String PC2_INTERNAL_SANDBOX_INTERACTIVE_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit} {:validator} {:infilename} {:ansfilename} {:testcase}";
     public static final String PC2_INTERNAL_SANDBOX_INTERACTIVE_NAME = "pc2sandbox_interactive.sh";
+    public static final String PC2_INTERACTIVE_NAME = "pc2_interactive.sh";
     public static final String PC2_INTERACTIVE_COMMAND_LINE = "./pc2_interactive.sh {:validator} {:infilename} {:ansfilename} {:testcase}";
+    public static final String PC2_INTERACTIVE_VALIDATOR_NAME = "pc2validate_interactive.sh";
     public static final String PC2_INTERACIVE_VALIDATE_COMMAND = "./pc2validate_interactive.sh {:resfile} {:feedbackdir} {:testcase}";
     
     /**
