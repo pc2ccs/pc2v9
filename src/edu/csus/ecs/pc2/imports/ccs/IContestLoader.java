@@ -59,6 +59,18 @@ public interface IContestLoader {
 
     String MTSV_PROGRAM_NAME = "mtsv";
 
+    // CLICS (2022-07) compliant contest.yaml property names - these work for the latest draft (2023-06) as well
+    final String CLICS_CONTEST_ID = "id";
+    final String CLICS_CONTEST_NAME = "name";
+    final String CLICS_CONTEST_START_TIME = "start_time";
+    final String CLICS_CONTEST_DURATION = "duration";
+    final String CLICS_CONTEST_FREEZE_DURATION = "scoreboard_freeze_duration";
+    final String CLICS_CONTEST_SCOREBOARD_TYPE = "scoreboard_type";
+    // This is not currently used, but penalty_time SHOULD be used instead of
+    // reading it from properties. It is here for completeness, and, it happens
+    // to be a required value in the yaml, but we do not enforce that.
+    final String CLICS_CONTEST_PENALTY_TIME = "penalty_time";
+    
     // Section Names
     
     String CONTEST_NAME_KEY = "name";
