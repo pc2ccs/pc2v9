@@ -900,10 +900,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                     remoteContestAPIAdapter = createRemoteContestAPIAdapter(remoteURL, remoteLogin, remotePW);
                                     boolean isConnected = remoteContestAPIAdapter.testConnection();
                                     if (isConnected) {
-                                        showMessage ("Connection to remote CCS is successful");
                                         addConnectTableEntry(ShadowStatus.SUCCESS, "Test connection to remote CCS");
                                     } else {
-                                        showErrorMessage("Connection to remote CCS failed", "Connection failed");
                                         addConnectTableEntry(ShadowStatus.FAILURE, "Test connection to remote CCS");
                                     }
                                     

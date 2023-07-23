@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -42,11 +42,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
  * A submit run pane.
  * 
  * @see edu.csus.ecs.pc2.Starter
- * @version $Id$
- * @author pc2@ecs.csus.edu
  */
-
-// $HeadURL$
 public class SubmitRunPane extends JPanePlugin {
 
     /**
@@ -925,42 +921,36 @@ public class SubmitRunPane extends JPanePlugin {
             addAdditionalFilesButton.setToolTipText("Add an additional file");
             addAdditionalFilesButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    addFile();
+                    addAuxillaryFiles();
                 }
             });
         }
         return addAdditionalFilesButton;
     }
 
-    protected void addFile() {
+    protected void addAuxillaryFiles() {
 
         JFileChooser chooser = new JFileChooser(lastOpenedFile);
         try {
-            chooser.setDialogTitle("Open Additional Source Code File");
+            chooser.setDialogTitle("Open Additional Source Code File(s)");
+            chooser.setMultiSelectionEnabled(true);
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File newFile = chooser.getSelectedFile().getCanonicalFile();
-                boolean newFileProblem = true;
-                if (newFile.exists()) {
-                    if (newFile.isFile()) {
-                        if (newFile.canRead()) {
-                            lastOpenedFile = chooser.getCurrentDirectory().toString();
-                            String[] cols = new String[1];
-                            cols[0] = newFile.getCanonicalFile().toString();
-                            additionalFilesMCLB.addRow(cols);
-                            additionalFilesMCLB.autoSizeAllColumns();
-                            newFileProblem = false;
-                        }
+                File [] newFiles = chooser.getSelectedFiles();
+
+                for (File newFile : newFiles) {
+                    if (newFile.exists() && newFile.isFile()) {
+                        String[] cols = new String[1];
+                        cols[0] = newFile.getCanonicalFile().toString();
+                        additionalFilesMCLB.addRow(cols);
                     }
                 }
-                if (newFileProblem) {
-                    log.warning("Problem reading additional file selection " + newFile.getCanonicalPath() + ", file not added");
-                    JOptionPane.showMessageDialog(getParentFrame(), "File not added, could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
-                }
+
+                additionalFilesMCLB.autoSizeAllColumns();
             }
         } catch (Exception e) {
-            System.err.println("Error getting selected file, try again.");
             e.printStackTrace(System.err);
+            showMessage("Unable to add file(s) " + e.getMessage());
         }
         chooser = null;
     }
