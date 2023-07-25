@@ -252,6 +252,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     private String packagePath = "";
     
+    enum JudgeFileType {
+        INPUT,
+        ANSWER
+    };
+    
     //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
     // Note that THIS IS FOR DEBUGGING PURPOSES only, since most debugging is done on Windows.
     // It does NOT imply any support for Windows sandboxing at the moment.
@@ -872,33 +877,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             commandPattern = getCustomValidatorCommandPattern();
 
-            // for a custom validator we also need to obtain the SerializedFile for the validator
-            if (problemDataFiles != null && problemDataFiles.getOutputValidatorFile() != null) {
-
-                // get Validation Program
-                String validatorFileName = problemDataFiles.getOutputValidatorFile().getName();
-                String validatorUnpackName = prefixExecuteDirname(validatorFileName);
-
-                // create the validator program file
-                if (!createFile(problemDataFiles.getOutputValidatorFile(), validatorUnpackName)) {
-                    log.warning("Unable to create custom validator program " + validatorUnpackName);
-                    setException("Unable to create custom validator program " + validatorUnpackName);
-
-                    throw new SecurityException("Unable to create custom validator, check logs");
-                }
-
-                if (!validatorFileName.endsWith(".jar")) {
-                    // Unix validator programs must set the execute bit to be able to execute the program.
-                    setExecuteBit(prefixExecuteDirname(validatorFileName));
-                }
-            } else {
-
-                log.warning("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
-                setException("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
-                throw new IllegalStateException("IllegalStateException: Problem is marked as having a Custom Validator but no "
-                        + "SerializedFile for the validator could be obtained from the ProblemDataFiles");
-            }
-
+            createValidatorProgram();
+            
         } else {
 
             log.warning("Problem is marked as validated but has no defined Validator");
@@ -2498,6 +2478,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             try {
                 //copy the PC2 interactive validator scripts into the execution directory
                 copyPC2InteractiveValidatorScripts();
+                createValidatorProgram();
             } catch (Exception e) {
                 log.severe("Unable to copy PC2 interactive validator scripts to execute directory; cannot execute submission");
                 throw e;
@@ -3028,13 +3009,19 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     newString = replaceString(newString, "{:executeinfofilename}", Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
                     log.config("substituteAllStrings() executeInfoFileName is null, using default basename" + Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
                 }
-                String fileName = problem.getDataFileName(dataSetNumber);
+                String fileName = getJudgeFileName(JudgeFileType.INPUT, dataSetNumber);
+                if(fileName == null) {
+                    problem.getDataFileName(dataSetNumber);
+                }
                 if (fileName != null && !fileName.equals("")) {
                     newString = replaceString(newString, "{:infilename}", fileName);
                 } else {
                     newString = replaceString(newString, "{:infilename}", nullArgument);
                 }
-                fileName = problem.getAnswerFileName(dataSetNumber);
+                fileName = getJudgeFileName(JudgeFileType.ANSWER, dataSetNumber);
+                if(fileName == null) {
+                        problem.getAnswerFileName(dataSetNumber);
+                }
                 if (fileName != null && !fileName.equals("")) {
                     newString = replaceString(newString, "{:ansfilename}", fileName);
                 } else {
@@ -3513,5 +3500,82 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private String formatTestCasePhase(String runPhase, int testCase)
     {
         return(String.format("%10s test case %s", runPhase, StringUtilities.rpad(' ', 5, Integer.toString(testCase) + "...")));
+    }
+    
+    /**
+     * Get the filename of a judge's file.  This could be a full path if the data files are external.  If the
+     * files are internal, then we return the first one's name since that each dataset will get copied to the name
+     * of the first item.
+     * 
+     * @return filename of a judge's file
+     * @param wantInput - boolean indicating if we want the input file (true).  If false, we want the answer file
+     * @param setNumber - Which dataset number are we interested in
+     */
+    private String getJudgeFileName(JudgeFileType type, int setNumber)
+    {
+        String result = null;
+        
+        try {
+            // it's a little more work for external files
+            if (problem.isUsingExternalDataFiles()) {
+                SerializedFile serializedFile;
+                
+                if(type == JudgeFileType.INPUT) {
+                    serializedFile = problemDataFiles.getJudgesDataFiles()[setNumber];
+                } else {
+                    serializedFile = problemDataFiles.getJudgesAnswerFiles()[setNumber];               
+                }
+                result = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
+            } else {
+                // For internal files, the appropriate data files are copied to the FIRST datafile's name in the
+                // execute folder, so we always return that one.
+                if(type == JudgeFileType.INPUT) {
+                    result = prefixExecuteDirname(problem.getDataFileName());
+                } else {
+                    result = prefixExecuteDirname(problem.getAnswerFileName());
+                }
+            }
+        } catch (Exception e)
+        {
+            log.log(Log.WARNING, "Can not get " + type.toString() + " filename for dataset " + setNumber + ": " + e.getMessage(), e);            
+        }
+        return(result);
+    }
+    
+    /**
+     * Unpacks and creates a custom validator program.  If any error happens, an exception is thrown
+     * 
+     * @throws SecurityException - if the copy of the output validator can not be generated in the execute folder
+     * @throws IllegalStateException - if not output validator is available
+     */
+    void createValidatorProgram()
+    {
+        // for a custom validator we also need to obtain the SerializedFile for the validator
+        if (problemDataFiles != null && problemDataFiles.getOutputValidatorFile() != null) {
+
+            // get Validation Program
+            String validatorFileName = problemDataFiles.getOutputValidatorFile().getName();
+            String validatorUnpackName = prefixExecuteDirname(validatorFileName);
+
+            // create the validator program file
+            if (!createFile(problemDataFiles.getOutputValidatorFile(), validatorUnpackName)) {
+                log.warning("Unable to create custom validator program " + validatorUnpackName);
+                setException("Unable to create custom validator program " + validatorUnpackName);
+
+                throw new SecurityException("Unable to create custom validator, check logs");
+            }
+
+            if (!validatorFileName.endsWith(".jar")) {
+                // Unix validator programs must set the execute bit to be able to execute the program.
+                setExecuteBit(prefixExecuteDirname(validatorFileName));
+            }
+        } else {
+
+            log.warning("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
+            setException("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
+            throw new IllegalStateException("IllegalStateException: Problem is marked as having a Custom Validator but no "
+                    + "SerializedFile for the validator could be obtained from the ProblemDataFiles");
+        }
+        
     }
 }
