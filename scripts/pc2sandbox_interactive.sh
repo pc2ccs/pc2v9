@@ -224,6 +224,15 @@ if ! grep -q -F "memory" "$CGROUP_PATH/cgroup.subtree_control"; then
    exit $FAIL_MEMORY_CONTROLLER_NOT_ENABLED
 fi
 
+if [ ! -e "$VALIDATOR" ]; then
+   echo $0: The interactive validator \'"$VALIDATOR"\' was not found
+   exit $FAIL_INTERACTIVE_ERROR
+fi
+
+if [ ! -x "$VALIDATOR" ]; then
+   echo $0: The interactive validator \'"$VALIDATOR"\' is not an executable file
+   exit $FAIL_INTERACTIVE_ERROR
+fi
 
 # we seem to have a valid CGroup installation
 DEBUG echo ...done.
@@ -335,7 +344,7 @@ do
 	# A return code 127 indicates there are no more children.  How did that happen?
 	if test $wstat -eq 127
 	then
-		echo No more children found while waiting
+		REPORT No more children found while waiting: Submission PID was $submissionpid and Interactive Validator PID was $intv_pid
 		break
 	fi
 	# If interactive validator finishes

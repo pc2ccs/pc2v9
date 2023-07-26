@@ -969,7 +969,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             }
         }
 
-        cmdLine = substituteAllStrings(run, cmdLine);
+        cmdLine = substituteAllStrings(run, cmdLine, testCase);
 
         log.log(Log.DEBUG, "command pattern after substitution: " + cmdLine);
 
@@ -1057,8 +1057,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             // // waiting for the process to finish execution...
             // executionData.setValidationReturnCode(process.waitFor());
 
-            // if CLICS-style validator interface, redirect team output to STDIN
-            if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface())) {
+            // if CLICS-style validator interface, redirect team output to STDIN.
+            // We only do this if NOT an interactive problem because currently, the validation
+            // phase is always pc2 validator format.
+            if (!problem.isInteractive() &&
+                (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface()))) {
 
                 String teamOutputFileName = getTeamOutputFilename(dataSetNumber);
                 if (teamOutputFileName != null && new File(teamOutputFileName).exists()) {
@@ -1144,7 +1147,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         validatorStderrFilesnames.add(validatorStderrFilename);
 
         //check if the validator is using the "PC2 Validator Interface" Standard
-        if (problem.isUsingPC2Validator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUsePC2ValidatorInterface())) {
+        // Interactive problems always use the pc2 validator format since the validator is a
+        // private pc2 script which generates pc2 validator output for now.
+        if (problem.isUsingPC2Validator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUsePC2ValidatorInterface()) ||
+                problem.isInteractive()) {
 
             //it was using the PC2 Validator Interface, check the results file
             boolean fileThere = new File(prefixExecuteDirname(pc2InterfaceResultsFileName)).exists();
@@ -2901,6 +2907,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      *              {:sandboxprogramname} - the sandbox program name as defined in the Problem
      *              {:sandboxcommandline} - the command line used to invoke the sandbox as defined in the Problem 
      *              {:ensuresuffix=...} - add supplied suffix if not present already
+     *              {:testcase} - testcase number
+     *              {:executeinfofilename} - filename of NDJson to put execute/validation info in
+     *              {:infilename} - full path to judges input data
+     *              {:ansfilename} - full path to judges answer file
+     *              {:timelimit} - CPU time limit in seconds
+     *              {:memlimit} - memory limit in MB
      * </pre>
      * 
      * @param dataSetNumber
@@ -3009,7 +3021,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     newString = replaceString(newString, "{:executeinfofilename}", Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
                     log.config("substituteAllStrings() executeInfoFileName is null, using default basename" + Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
                 }
-                String fileName = getJudgeFileName(JudgeFileType.INPUT, dataSetNumber);
+                String fileName = getJudgeFileName(JudgeFileType.INPUT, dataSetNumber-1);
                 if(fileName == null) {
                     problem.getDataFileName(dataSetNumber);
                 }
@@ -3018,7 +3030,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 } else {
                     newString = replaceString(newString, "{:infilename}", nullArgument);
                 }
-                fileName = getJudgeFileName(JudgeFileType.ANSWER, dataSetNumber);
+                fileName = getJudgeFileName(JudgeFileType.ANSWER, dataSetNumber-1);
                 if(fileName == null) {
                         problem.getAnswerFileName(dataSetNumber);
                 }
@@ -3509,9 +3521,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * 
      * @return filename of a judge's file
      * @param wantInput - boolean indicating if we want the input file (true).  If false, we want the answer file
-     * @param setNumber - Which dataset number are we interested in
+     * @param setIndex - Which dataset element number are we interested in [0, #datasets-1]
      */
-    private String getJudgeFileName(JudgeFileType type, int setNumber)
+    private String getJudgeFileName(JudgeFileType type, int setIndex)
     {
         String result = null;
         
@@ -3521,9 +3533,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 SerializedFile serializedFile;
                 
                 if(type == JudgeFileType.INPUT) {
-                    serializedFile = problemDataFiles.getJudgesDataFiles()[setNumber];
+                    serializedFile = problemDataFiles.getJudgesDataFiles()[setIndex];
                 } else {
-                    serializedFile = problemDataFiles.getJudgesAnswerFiles()[setNumber];               
+                    serializedFile = problemDataFiles.getJudgesAnswerFiles()[setIndex];               
                 }
                 result = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
             } else {
@@ -3537,7 +3549,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             }
         } catch (Exception e)
         {
-            log.log(Log.WARNING, "Can not get " + type.toString() + " filename for dataset " + setNumber + ": " + e.getMessage(), e);            
+            log.log(Log.WARNING, "Can not get " + type.toString() + " filename for dataset " + (setIndex+1) + ": " + e.getMessage(), e);            
         }
         return(result);
     }

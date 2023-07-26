@@ -8,8 +8,9 @@
 # Adds the feedbackdir files and result xml file to the per-testcase log file (reports/testcase_###.log)
 # Also see pc2sandbox_interactive.sh for the definitions of these variables.
 #
-TMP_FEEDBACKDIR=tmp_feedback
-TMP_RESULTFILE=tmp_results.xml
+# Where the interim results are saved
+INT_FEEDBACKDIR=interactive_feedback
+INT_RESULTFILE=interactive_results.xml
 REPORTDIR=reports
 
 resxml="$1"
@@ -28,30 +29,30 @@ fi
 # Where to log per-testcase results
 REPORTFILE=`printf "$REPORTDIR/testcase_%03d.log" $testcase`
 
-if ! /usr/bin/sed -e "s/$TMP_RESULTFILE/$resxml/" < $TMP_RESULTFILE > $resxml
+if ! /usr/bin/sed -e "s/$INT_RESULTFILE/$resxml/" < $INT_RESULTFILE > $resxml
 then
-	echo $0: Can not copy $TMP_RESULTFILE to $resxml
+	echo $0: Can not copy $INT_RESULTFILE to $resxml
 	exit 1
 fi
 
 # Copy results file, and any feedback files to pc2 desired locations
 (
 	echo ""
-	echo "-----------------"
-	echo "Results XML File:"
-	echo "-----------------"
+	echo "----------------------------------"
+	echo "Results XML File for testcase #$testcase:"
+	echo "----------------------------------"
 	cat "$resxml"
-	if test -d "$TMP_FEEDBACKDIR"
+	if test -d "$INT_FEEDBACKDIR"
 	then
-		for file in `ls "$TMP_FEEDBACKDIR"`
+		for file in `ls "$INT_FEEDBACKDIR"`
 		do
-			f="$TMP_FEEDBACKDIR/$file"
+			f="$INT_FEEDBACKDIR/$file"
 			if test -f "$f"
 			then
 				echo ""
-				echo "-----------------------"
-				echo "Feedback file $f:"
-				echo "-----------------------"
+				echo "-----------------------------------------"
+				echo "Feedback file for testcase #$testcase $f:"
+				echo "-----------------------------------------"
 				cat "$f"
 			fi
 		done
@@ -61,8 +62,8 @@ fi
 # If the feedback directory exists, copy all the stuff from the interactive validator there
 if test -d "$feedbackdir"
 then
-	mv "$TMP_FEEDBACKDIR"/* "$feedbackdir"
+	mv "$INT_FEEDBACKDIR"/* "$feedbackdir"
 fi
 
-rm -rf "$TMP_RESULTFILE" "$TMP_FEEDBACKDIR"
+rm -rf "$INT_RESULTFILE" "$INT_FEEDBACKDIR"
 exit 0
