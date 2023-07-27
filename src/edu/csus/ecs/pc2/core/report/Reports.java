@@ -165,6 +165,7 @@ public final class Reports {
         
         reports.add(new ContestCompareReport());
         
+        reports.add(new CLICSAwardsReport());
         reports.add(new StandingsNSAReport());
         
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
