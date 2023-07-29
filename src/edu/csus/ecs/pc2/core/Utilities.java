@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
@@ -1989,7 +1989,7 @@ public final class Utilities {
      * @param two secodn array
      * @return a new array which contains contents of one and two arrays
      */
-    public static String[] copyArray(String[] one, String[] two) {
+    public static String[] concatArrays(String[] one, String[] two) {
 
         if (one == null) {
             one = new String[0];
@@ -2018,7 +2018,7 @@ public final class Utilities {
      * @param two secodn array
      * @return a new array which contains contents of one and two arrays
      */
-    public static SerializedFile[] copyArray(SerializedFile[] one, SerializedFile[] two) {
+    public static SerializedFile[] concatArrays(SerializedFile[] one, SerializedFile[] two) {
 
         if (one == null) {
             one = new SerializedFile[0];

@@ -9,6 +9,7 @@ import java.util.List;
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
+// TODO NOW 232 improve comment per PR 
 public interface ISelectedListsSetter  {
 
 	/**

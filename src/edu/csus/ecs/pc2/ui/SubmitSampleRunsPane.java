@@ -718,7 +718,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 	        FrameUtilities.showMessage(this, "Trying to use an invalid CDP?", warningMessage);
 	    }
 
-        List<File> allFiles = ListUtilities.getAllCDPsubmissionFileNames(getContest(), cdpTextField.getText());
+        List<File> allFiles = ListUtilities.getAllJudgeSampleSubmissionFilenamesFromCDP(getContest(), cdpTextField.getText());
 
         if (allFiles.size() == 0) {
             FrameUtilities.showMessage(this, "No Runs", "No Runs found under " + cdpTextField.getText());

@@ -38,7 +38,14 @@ public class JListFrame extends JFrame {
 		FrameUtilities.centerFrame(this);
 	}
 	
+	/**
+	 * Used for unit testing.
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
+	    
+	    
 		Object[] items2 = { "One", "Two", "Three", "Four" };
 
 		JListFrame f = new JListFrame("hi", items2, new int[0], new ISelectedListsSetter() {

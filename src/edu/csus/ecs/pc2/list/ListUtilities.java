@@ -25,7 +25,7 @@ public class ListUtilities {
      * Returns list of files that match the SubmissionSolutionList (judging types location/list)
      * 
      * @param files list of files to be filtered
-     * @param submissionList list of SubmissionSampleLocation
+     * @param submissionList a class that manages a number of SubmissionSampleLocation
      * @return
      */
     public static List<File> filterByJudgingTypes(List<File> files, SubmissionSolutionList submissionSolutionList) {
@@ -83,7 +83,7 @@ public class ListUtilities {
 	 * @return list of judges sample submissions
 	 */
 	// TODO REFACTOR remove getAllCDPsubmissionFileNames from QuickSubmitter
-	public static List<File> getAllCDPsubmissionFileNames(IInternalContest mycontest, String directoryName) {
+	public static List<File> getAllJudgeSampleSubmissionFilenamesFromCDP(IInternalContest mycontest, String directoryName) {
 
 		Problem[] problems = mycontest.getProblems();
 		List<File> files = new ArrayList<>();
@@ -128,6 +128,8 @@ public class ListUtilities {
     /**
      * Find all accepted/Yes filenames with  "accepted" in file list. 
      * 
+     * @param files list of files
+     * @return list of files that have a directory name of "accepted" embedded in their path.
      */
     public static List<File> filterYesJudgingType (List<File> files) {
         

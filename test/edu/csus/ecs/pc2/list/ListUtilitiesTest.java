@@ -36,7 +36,7 @@ public class ListUtilitiesTest extends AbstractTestCase {
 
         assertEquals("Expecting judging type location count ", 1, submissionSolutionList.size());
 
-        List<File> files = ListUtilities.getAllCDPsubmissionFileNames(contest, cdpDir);
+        List<File> files = ListUtilities.getAllJudgeSampleSubmissionFilenamesFromCDP(contest, cdpDir);
         assertEquals("Expecting total judge sample sources file count for " + contestDir, 20, files.size());
 
         List<File> newFiles = ListUtilities.filterByJudgingTypes(files, submissionSolutionList);
@@ -62,7 +62,7 @@ public class ListUtilitiesTest extends AbstractTestCase {
 
         assertEquals("Expecting judging type location count ", 1, submissionSolutionList.size());
 
-        List<File> files = ListUtilities.getAllCDPsubmissionFileNames(contest, cdpDir);
+        List<File> files = ListUtilities.getAllJudgeSampleSubmissionFilenamesFromCDP(contest, cdpDir);
         assertEquals("Expecting total judge sample sources file count for " + contestDir, 264, files.size());
 
         List<File> newFiles = ListUtilities.filterByJudgingTypes(files, submissionSolutionList);
@@ -87,7 +87,7 @@ public class ListUtilitiesTest extends AbstractTestCase {
 
         assertEquals("Expecting judging type location count ", 5, submissionSolutionList.size());
 
-        List<File> files = ListUtilities.getAllCDPsubmissionFileNames(contest, cdpDir);
+        List<File> files = ListUtilities.getAllJudgeSampleSubmissionFilenamesFromCDP(contest, cdpDir);
         assertEquals("Expecting total judge sample sources file count for " + contestDir, 264, files.size());
 
         List<File> newFiles = ListUtilities.filterByJudgingTypes(files, submissionSolutionList);

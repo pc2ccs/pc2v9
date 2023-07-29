@@ -481,7 +481,6 @@ public class MultipleDataSetPane extends JPanePlugin {
         try {
 
             String sampleBaseDirectoryName = new File(baseDirectoryName).getParent() + File.separator +"sample";
-            boolean ishere = new File(sampleBaseDirectoryName).isDirectory();
             
             if (loadSamplesFirstCheckbox.isSelected() && new File(sampleBaseDirectoryName).isDirectory()) {
 
@@ -596,7 +595,7 @@ public class MultipleDataSetPane extends JPanePlugin {
              * Existing files present, concatenate files
              */
             
-            Object[] newFiles = Utilities.copyArray(existingFiles, inputFiles);
+            Object[] newFiles = Utilities.concatArrays(existingFiles, inputFiles);
             inputFiles = (SerializedFile[]) newFiles;
         }
         
@@ -606,7 +605,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             /**
              * Existing files present, concatenate files
              */
-            Object[] newFiles = Utilities.copyArray(existingFiles, answertFiles);
+            Object[] newFiles = Utilities.concatArrays(existingFiles, answertFiles);
             answertFiles = (SerializedFile[]) newFiles;
         }
 
