@@ -1427,7 +1427,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             if (valOpts.length >= 1 && valOpts[0].equals("custom")) {
                 usingCustomValidator = true;
                 if(valOpts.length >= 2 && valOpts[1].equals("interactive")) {
-                    // Note that interactive requires a customer validator
+                    // Note that interactive problems require a custom validator
                     isInteractive = true;
                 }
             }
@@ -1444,7 +1444,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             pc2FormatProblemYamlFile = true;
         }
 
-        // JB: I am not sure why this test is contingent on pc2FormatProblemYamlFile.  Anybody?
+        // TODO: I am not sure why this test is contingent on pc2FormatProblemYamlFile. (JB)
         if (problemTitle == null && (pc2FormatProblemYamlFile)) {
             problemTitle = fetchValue(content, "name");
         }
@@ -1483,8 +1483,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                         ", the custom validator must be a CLICS compliant for an interactive problem");
                 
             } else {
-                // A note here about how interactive validation works.  The interactive validator is CLICS
-                // compliant and returns an exit code of 42 or 43, and possibly generating a feedback file for
+                // A note here about how interactive validation works.  The interactive validator must be CLICS
+                // compliant and return an exit code of 42 or 43, and possibly generating a feedback file for
                 // each test case.  PC2 is nominally aware of interactive validators and only knows enough to
                 // call a script (pc2sandbox_interactive.sh or pc2_interactive.sh) to perform a testcase run.
                 // The results of that testcase are written to a known results file (and feedback directory) by
@@ -1497,8 +1497,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // validator.
                 
                 // We set the custom output validator settings for interactive.  The CLICS spec does not have
-                // a validator section in the YAML, as such, we first verified that the custom validator is CLICS compliant
-                // then we set output validator type to clics interactive.
+                // a validator section in the YAML, as such, we first verified that the custom validator is CLICS compliant.
+                // We then we set output validator type to clics interactive.
                 problem.getCustomOutputValidatorSettings().setUseInteractiveValidatorInterface();
             }
         }

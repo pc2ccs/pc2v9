@@ -239,7 +239,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private ArrayList<String> validatorStderrFilesnames = new ArrayList<String>();
 
     // Where to put the execute results.  This is an ndjson file created by sandbox and interactive execution scripts
-    // Each line in the file are the results for a single test case run
+    // Each line in the file is the result for a single test case run
+    // TODO: make this file visible from the judge/admin GUI when viewing judgement results.
     private String executeInfoFileName = null;
 
 
@@ -252,6 +253,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     private String packagePath = "";
     
+    // Indicates which specific judge file is desired.
+    // Used by the method to lookup the filename of a judge's file
     enum JudgeFileType {
         INPUT,
         ANSWER
@@ -481,7 +484,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 int dataSetNumber = 0;
                 boolean passed = true;
 
-                // create somewhat secure ndjson file name for per testcase execution results.
+                // create somewhat secure ndjson file name for per test case execution results.
                 // format of the name is: RSSexecuteinfo.ndjson where R = run number, SS = current clock seconds
                 // eg: for run 453 at 12:00:09:   4539executeinfo.ndjson
                 executeInfoFileName = run.getNumber() + Long.toString((new Date().getTime()) % 100) + Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX;
@@ -863,7 +866,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         if (problem.isInteractive()) {
             // We use a special validator for interactive problems.  The validator will look in the
             // execute folder for the results of the interactive run, and place them in the file(s) that
-            // pc2 wants them in.
+            // pc2 wants them in.  It has to be done this way, because validation of the run is already completed
+            // by the time PC2 calls the output validator.  As a result, we just have to copy back the results from
+            // the interactive run.
             commandPattern = Constants.PC2_INTERACIVE_VALIDATE_COMMAND;
         } else if (problem.isUsingPC2Validator()) {
 
@@ -1057,7 +1062,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             // // waiting for the process to finish execution...
             // executionData.setValidationReturnCode(process.waitFor());
 
-            // if CLICS-style validator interface, redirect team output to STDIN.
+            // if using a CLICS-style validator interface, redirect team output to STDIN.
             // We only do this if NOT an interactive problem because currently, the validation
             // phase is always pc2 validator format.
             if (!problem.isInteractive() &&
@@ -1797,7 +1802,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                  * Team executing run
                  */
 
-                // Something has to be done for interactive problems here.  JB
+                // TODO: Something (probably?) has to be done for interactive problems here. (JB)
                 
                 if (inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
                     selectAndCopyDataFile(inputDataFileName);
@@ -2066,8 +2071,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 timeLimitKillTimer.schedule(task, delay);
             }
             
-            // Note for the future: The IOCollectors are probably not needed for interactive problems since
-            // the I/O is redirected between the submission and the interactive validator. JB
+            // TODO: The IOCollectors are probably not needed for interactive problems since
+            // the I/O is redirected between the submission and the interactive validator in the scripts. (JB)
+            // It doesn't hurt to create them, but nothing will every be written to them or read from them. 
             
             log.info("creating IOCollectors...");
             // Create a stream that reads from the stdout of the child process
@@ -2456,9 +2462,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     
 
     /**
-     * Setup the environment needed for to run the current submission using an interactive validator.  This involves making sure that
-     * the system supports interactive validators and, the copying of any necessary files succeeded  This
-     * does NOT imply creating will work when it comes time to run the submission.
+     * Setup the environment needed to run the current submission using an interactive validator.  This involves making sure that
+     * the system supports interactive validators and, the copying of any necessary files succeeds.  This
+     * does NOT imply the validator will work when it comes time to run the submission.
      * 
      * If this routine returns normally, then the files necessary for running in an interactive submission have been copied successfully.
      * 
@@ -2471,6 +2477,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         log.info("Setting up problem " + problem.getShortName() + " for interactive validation");
             
         //check the OS to be sure we have a sandbox supported
+        //double-up on the use of the debugAllowSandboxInvocationOnWindows debug flag.
+        //TODO: refactor name of debugAllowSandboxInvocationOnWindows to something more general (JB)
         if (OSCompatibilityUtilities.isRunningOnWindows() && !debugAllowSandboxInvocationOnWindows) {
             
             log.severe("Attempt to execute a problem configured with an interactive validator on a Windows system: not supported");
@@ -3516,7 +3524,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     
     /**
      * Get the filename of a judge's file.  This could be a full path if the data files are external.  If the
-     * files are internal, then we return the first one's name since that each dataset will get copied to the name
+     * files are internal, then we return the first one's name since each dataset will get copied to the name
      * of the first item.
      * 
      * @return filename of a judge's file

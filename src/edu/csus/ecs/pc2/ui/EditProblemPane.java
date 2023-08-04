@@ -3747,6 +3747,10 @@ public class EditProblemPane extends JPanePlugin {
         return lblWhatsThisCLICSValidator;
     }
 
+    /*
+     * TODO: All these strings have to be moved out of the source code and into files or resources or something.  This stuff does
+     * not belong in source code. (JB)
+     */
     private String whatsThisCLICSValidatorMessage = "Selecting this option allows you to use the PC^2 implementation of the \"CLICS Validator\"."
 
             + "\n\nCLICS is the Competitive Learning Initiative Contest System specification, used among other things to define "
