@@ -792,6 +792,22 @@ public class AbstractTestCase extends TestCase {
         }
     }
     
+    public void editFile(String filename, String comment) {
+        
+        System.err.println("editFile: "+comment+" file: "+filename);
+
+        String viFile = findViExecutable();
+
+        String[] command = { viFile, filename };
+        try {
+            Runtime.getRuntime().exec(command);
+        } catch (IOException e) {
+            System.out.println("Could not run command " + Arrays.toString(command));
+            e.printStackTrace(System.err);
+        }
+    }
+
+    
     private String findViExecutable() {
 
         String[] names = //
