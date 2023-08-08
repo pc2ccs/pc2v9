@@ -195,26 +195,43 @@ public final class Constants {
     public static final String PC2_SCRIPT_DIRECTORY = "scripts";
     
     /**
-     * Sandbox constants
+     * Command line to run submission in a sandbox
      */
     public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit}";
 
+    /**
+     * File name of script to run submission in sandbox ({:sandboxprogramname} if non-interactive)
+     */
     public static final String PC2_INTERNAL_SANDBOX_PROGRAM_NAME = "pc2sandbox.sh";
     
     /**
-     * Constants for interactive problems
+     * Filename of the script to run submission for an interactive problem in a sandbox ({:sandboxprogramname} if interactive)
      */
-    // Filename of the script to run for an interactive problem in a sandbox 
     public static final String PC2_INTERNAL_SANDBOX_INTERACTIVE_NAME = "pc2sandbox_interactive.sh";
-    // Command to execute to run an interactive problem in a sandbox
+    
+    /**
+     *  Command to execute to run an interactive problem in a sandbox
+     */
     public static final String PC2_INTERNAL_SANDBOX_INTERACTIVE_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit} {:validator} {:infilename} {:ansfilename} {:testcase}";
-    // Filename of the script to run for an interactive problem when not using a sandbox
+    
+    /**
+     *  Filename of the script to run for an interactive problem when not using a sandbox
+     */
     public static final String PC2_INTERACTIVE_NAME = "pc2_interactive.sh";
-    // Command to execute to run an interactive problem when not using a sandbox
+    
+    /**
+     *  Command to execute to run an interactive problem when not using a sandbox
+     */
     public static final String PC2_INTERACTIVE_COMMAND_LINE = "./pc2_interactive.sh {:validator} {:infilename} {:ansfilename} {:testcase}";
-    // Filename of the script to run during the validate phase AFTER the interactive validator has completed
+    
+    /**
+     *  Filename of the script to run during the validate phase AFTER the interactive validator has completed
+     */
     public static final String PC2_INTERACTIVE_VALIDATOR_NAME = "pc2validate_interactive.sh";
-    // Command to execute to validate results of an interactive run AFTER the interactive validator has completed
+    
+    /**
+     *  Command to execute to validate results of an interactive run AFTER the interactive validator has completed
+     */
     public static final String PC2_INTERACIVE_VALIDATE_COMMAND = "./pc2validate_interactive.sh {:resfile} {:feedbackdir} {:testcase}";
     
     /**
