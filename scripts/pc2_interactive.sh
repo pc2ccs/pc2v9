@@ -87,6 +87,8 @@ interactive-validator, judge's program to execute to provide interactive respons
 judgein, judges input file
 judgeans, judges answer file
 testcase, test case number (for logging)
+command, the submission program being judged (eg. ./a.out, /usr/bin/pypy3 a.py, /usr/bin/java Prob, etc.)
+command_args, arguments, if any to be passed to the submission command
 
 SAGE
 }
@@ -144,7 +146,7 @@ EOF
 # ------------------------------------------------------------
 
 if [ "$#" -lt 1 ] ; then
-   echo $0: No command line arguments
+   echo $0: Missing command line arguments. Try '"'"$0 --help"'"' for help.
    exit $FAIL_NO_ARGS_EXIT_CODE
 fi 
 
