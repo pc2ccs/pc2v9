@@ -253,13 +253,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     private String packagePath = "";
     
-    // Indicates which specific judge file is desired.
-    // Used by the method to lookup the filename of a judge's file
-    enum JudgeFileType {
-        INPUT,
-        ANSWER
-    };
-    
     //The following two members are for debugging Linux specific functionality on Windows.
     // Note that THESE ARE FOR DEBUGGING PURPOSES only, since most debugging is done on Windows.
     // Setting either of these to "true" does NOT imply the functionality is supported on Windows at the moment.
@@ -911,12 +904,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 /**
                  * Set filenames if external files.
                  */
-
-                SerializedFile serializedFile = problemDataFiles.getJudgesDataFiles()[dataSetNumber];
-                judgeDataFilename = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
-
-                serializedFile = problemDataFiles.getJudgesAnswerFiles()[dataSetNumber];
-                judgeAnswerFilename = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
+                judgeDataFilename = getJudgeFileName(Utilities.DataFileType.JUDGE_DATA_FILE, dataSetNumber);
+                judgeAnswerFilename = getJudgeFileName(Utilities.DataFileType.JUDGE_ANSWER_FILE, dataSetNumber);
 
             } else {
 
@@ -3034,7 +3023,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     newString = replaceString(newString, "{:executeinfofilename}", Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
                     log.config("substituteAllStrings() executeInfoFileName is null, using default basename" + Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
                 }
-                String fileName = getJudgeFileName(JudgeFileType.INPUT, dataSetNumber-1);
+                String fileName = getJudgeFileName(Utilities.DataFileType.JUDGE_DATA_FILE, dataSetNumber-1);
                 if(fileName == null) {
                     problem.getDataFileName(dataSetNumber);
                 }
@@ -3043,7 +3032,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 } else {
                     newString = replaceString(newString, "{:infilename}", nullArgument);
                 }
-                fileName = getJudgeFileName(JudgeFileType.ANSWER, dataSetNumber-1);
+                fileName = getJudgeFileName(Utilities.DataFileType.JUDGE_ANSWER_FILE, dataSetNumber-1);
                 if(fileName == null) {
                         problem.getAnswerFileName(dataSetNumber);
                 }
@@ -3536,25 +3525,26 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * @param wantInput - boolean indicating if we want the input file (true).  If false, we want the answer file
      * @param setIndex - Which dataset element number are we interested in [0, #datasets-1]
      */
-    private String getJudgeFileName(JudgeFileType type, int setIndex)
+    private String getJudgeFileName(Utilities.DataFileType type, int setIndex)
     {
         String result = null;
+        SerializedFile serializedFile = null;
         
         try {
             // it's a little more work for external files
             if (problem.isUsingExternalDataFiles()) {
-                SerializedFile serializedFile;
                 
-                if(type == JudgeFileType.INPUT) {
+                if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
                     serializedFile = problemDataFiles.getJudgesDataFiles()[setIndex];
                 } else {
                     serializedFile = problemDataFiles.getJudgesAnswerFiles()[setIndex];               
                 }
-                result = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
+                //Note: last argument (type) is unused in locateJudgesDataFile
+                result = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), type);
             } else {
                 // For internal files, the appropriate data files are copied to the FIRST datafile's name in the
                 // execute folder, so we always return that one.
-                if(type == JudgeFileType.INPUT) {
+                if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
                     result = prefixExecuteDirname(problem.getDataFileName());
                 } else {
                     result = prefixExecuteDirname(problem.getAnswerFileName());
@@ -3562,7 +3552,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             }
         } catch (Exception e)
         {
-            log.log(Log.WARNING, "Can not get " + type.toString() + " filename for dataset " + (setIndex+1) + ": " + e.getMessage(), e);            
+            //if we got far enough to get the serialized file, show the expected name in the log message
+            if(serializedFile != null) {
+                log.log(Log.WARNING, "Can not get " + type.toString() + " expected filename (" + serializedFile.getName() + ") for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
+            } else {
+                log.log(Log.WARNING, "Can not get " + type.toString() + " filename for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
+            }
         }
         return(result);
     }
