@@ -240,7 +240,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     // Where to put the execute results.  This is an ndjson file created by sandbox and interactive execution scripts
     // Each line in the file is the result for a single test case run
-    // TODO: make this file visible from the judge/admin GUI when viewing judgement results.
+    // TODO: future enhancement: make this file visible from the judge/admin GUI when viewing judgement results.
     private String executeInfoFileName = null;
 
 
@@ -260,11 +260,15 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         ANSWER
     };
     
+    //The following two members are for debugging Linux specific functionality on Windows.
+    // Note that THESE ARE FOR DEBUGGING PURPOSES only, since most debugging is done on Windows.
+    // Setting either of these to "true" does NOT imply the functionality is supported on Windows at the moment.
+    // TODO: Make sure BOTH of these are set to "false" for a production distribution.
+    
     //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
-    // Note that THIS IS FOR DEBUGGING PURPOSES only, since most debugging is done on Windows.
-    // It does NOT imply any support for Windows sandboxing at the moment.
-    //TODO: change this variable to FALSE before generating a production distribution.
     private boolean debugAllowSandboxInvocationOnWindows = false;
+    //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
+    private boolean debugAllowInteractiveInvocationOnWindows = false;
 
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, IExecutableMonitor msgFrame) {
@@ -432,7 +436,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     executeProgram(0); // execute with first data set.
                 } else {
                     /**
-                     * compileProgram returns false if 1) runProgram failed (errorString set) 2) compiler fails to create expecte output file (errorString empty) If there is compiler stderr or stdout
+                     * compileProgram returns false if 1) runProgram failed (errorString set) 2) compiler fails to create expected output file (errorString empty) If there is compiler stderr or stdout
                      * we should not add the textPane saying there was an error.
                      */
                     if (!executionData.isCompileSuccess()) {
@@ -1768,7 +1772,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         String inputDataFileName = null;
         boolean usingSandbox = false ;
         boolean bSandboxSystemError = false;
-        boolean isInteractive = false;
         
         // a one-based test data set number
         int testSetNumber = dataSetNumber + 1;
@@ -1802,7 +1805,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                  * Team executing run
                  */
 
-                // TODO: Something (probably?) has to be done for interactive problems here. (JB)
+                // TODO: Future development: Something (probably?) has to be done for interactive problems here,
+                // even if it is to issue an error message indicating that testing of interactive problems can not be done.
+                // It is unclear what CAN be done without providing access to the interactive validator.  For
+                // interactive problems, it is up to the contestant to test their own submission with their
+                // own interactive validator, IMHO -- JB
                 
                 if (inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
                     selectAndCopyDataFile(inputDataFileName);
@@ -2071,7 +2078,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 timeLimitKillTimer.schedule(task, delay);
             }
             
-            // TODO: The IOCollectors are probably not needed for interactive problems since
+            // TODO: Future investigation: The IOCollectors are probably not needed for interactive problems since
             // the I/O is redirected between the submission and the interactive validator in the scripts. (JB)
             // It doesn't hurt to create them, but nothing will every be written to them or read from them. 
             
@@ -2238,8 +2245,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             executionData.setExecuteSucess(true);
             
-            // for interactive problem, might be nice to use the interactive validator output as the
-            // program output so the judge's can see what happened.  JB  TODO
+            // TODO: Future development: for interactive problems, it might be nice to use the interactive validator output as the
+            // program output so the judge's can see what happened. JB
             executionData.setExecuteProgramOutput(new SerializedFile(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME)));
             executionData.setExecuteStderr(new SerializedFile(prefixExecuteDirname(EXECUTE_STDERR_FILENAME)));
 
@@ -2476,10 +2483,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         
         log.info("Setting up problem " + problem.getShortName() + " for interactive validation");
             
-        //check the OS to be sure we have a sandbox supported
-        //double-up on the use of the debugAllowSandboxInvocationOnWindows debug flag.
-        //TODO: refactor name of debugAllowSandboxInvocationOnWindows to something more general (JB)
-        if (OSCompatibilityUtilities.isRunningOnWindows() && !debugAllowSandboxInvocationOnWindows) {
+        //check the OS to be sure we support interactive problems
+        if (OSCompatibilityUtilities.isRunningOnWindows() && !debugAllowInteractiveInvocationOnWindows) {
             
             log.severe("Attempt to execute a problem configured with an interactive validator on a Windows system: not supported");
             throw new Exception ("Interactive Validators are not supported on Windows OS");
