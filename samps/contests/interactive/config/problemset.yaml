@@ -1,0 +1,16 @@
+
+problems:
+  - letter:     A
+    short-name: amazing
+    color:      light blue
+    rgb:        '#58a2d1'
+
+  - letter:     B
+    short-name: guess
+    color:      dark purple
+    rgb:        '#7c54aa'
+
+  - letter:     C
+    short-name: pollution
+    color:      orange
+    rgb:        '#fc6d3e'

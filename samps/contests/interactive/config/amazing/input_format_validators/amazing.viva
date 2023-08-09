@@ -1,0 +1,5 @@
+rows cols r c (1 <= rows <= 100, 1 <= cols <= 100, 1 <= r <= rows, 1 <= c <= cols);
+l:string (l %% "[_.]+", length(l) == cols*2+1);
+{[*rows]
+   l:string (l %% "[|._]+", length(l) == cols*2+1);
+}
