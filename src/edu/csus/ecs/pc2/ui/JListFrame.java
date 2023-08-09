@@ -53,9 +53,9 @@ public class JListFrame extends JFrame {
 			@Override
 			public void setSelectedValuesList(List<Object> selectedValuesList, int[] selectedIndices) {
 				for (Object object : selectedValuesList) {
-					System.out.println("debug 22 values " + object.toString());
+					System.out.println("values " + object.toString());
 				}
-				System.out.println("debug 22 ind " + Arrays.toString(selectedIndices));
+				System.out.println("ind " + Arrays.toString(selectedIndices));
 			}
 		});
 		f.setVisible(true);

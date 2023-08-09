@@ -4,16 +4,15 @@ package edu.csus.ecs.pc2.ui;
 import java.util.List;
 
 /**
- * Set/Return selected valuea or indexes.
+ * Interface for callbacks/observers.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
-// TODO NOW 232 improve comment per PR 
 public interface ISelectedListsSetter  {
 
 	/**
-	 * Callback containing list of selected values and indexes.
+	 * Provide observers a list of selected values. 
 	 * 
 	 * @param selectedValuesList list of selected values
 	 * @param selectedIndices list of selected indexes

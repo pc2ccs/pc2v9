@@ -532,9 +532,6 @@ public class SubmitSampleRunsPane extends JPanePlugin {
             
             selectedLanguageList = new ArrayList<Language>();
             valuesList.forEach((lang) -> {selectedLanguageList.add((Language)lang);});
-            
-            // TODO huh debug 22
-            
         }
 	}
 
