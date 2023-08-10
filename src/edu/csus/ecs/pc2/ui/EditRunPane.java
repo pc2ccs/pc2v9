@@ -270,7 +270,39 @@ public class EditRunPane extends JPanePlugin {
 
             RunStates prevState = run.getStatus();
             RunStates newRunState = (Run.RunStates) runStatusComboBox.getSelectedItem();
-
+            String errMsg = null;
+            
+            // Make sure it's safe to change the runstate
+            switch(newRunState) {
+            case JUDGED:
+            case MANUAL_REVIEW:
+            case REJUDGE:           // TODO: remove REJUDGE state completely since nobody appears to use it -- JB
+                // All the above states imply that the run was previously judged and has a JudgementRecord (or more)
+                // If not, then the state can not be set.
+                if(newRun.getJudgementRecord() == null) {
+                    errMsg = "The run does not have any judgment records";
+                }
+                break;
+                
+            case BEING_RE_JUDGED:
+                // It is completely unreasonable to set a run's status to being re-judged
+                errMsg = "You are not allowed to set the Run Status to BEING_RE_JUDGED";
+                break;
+                
+            case NEW:
+            case QUEUED_FOR_COMPUTER_JUDGEMENT:
+                // It is unclear if it's OK to change from, say, JUDGED to NEW since there would
+                // be JudgementRecords.  What happens if the state is NEW/QFCJ and there are already
+                // JudgementRecords and Result Test Cases?  It *seems* like this is OK with some
+                // minimal testing.  JB
+                break;
+            }
+            // notify user on bad status change
+            if(errMsg != null) {
+                FrameUtilities.showMessage(this, "Can not set Run Status", errMsg);
+                enableUpdateButton();
+                return;                
+            }
             int result = FrameUtilities.yesNoCancelDialog(this, "Are you sure you want to change status from " + //
                     prevState.toString() + " to " + newRunState.toString() + "?", "Update/Change run status?");
 
