@@ -1928,11 +1928,15 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     //note that if the problem is interactive, this is handled in getSandboxCmdLine() since
                     //there is a different sandbox command line and program (script) for interactive in a sandbox
                     cmdline = problem.getSandboxCmdLine() + " " + cmdline ;
+                    if(problem.isInteractive()) {
+                        // This will copy anything that is needed for the interactive validator that was not copied above.
+                        setupInteractiveValidator();
+                    }
                 } else if(problem.isInteractive()) {
                     cmdline = problem.getInteractiveCommandLine() + " " + cmdline;
+                    // Copy necessary files for interactive validation
+                    setupInteractiveValidator();
                 }
-                // This will copy anything that is needed for the interactive validator that was not copied above.
-                setupInteractiveValidator();
             }
             log.log(Log.DEBUG, "cmdline before substitution: " + cmdline);
 
