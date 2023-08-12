@@ -9,7 +9,7 @@ for _ in range(n):
     correct = False
     while not correct:
         guess = (low + high) / 2
-        sys.stdout.write('{}\n'.format(int(guess)))
+        sys.stdout.write('{}\n'.format(guess))
         sys.stdout.flush()
 
         response = sys.stdin.readline().strip()
