@@ -354,7 +354,7 @@ public class LoadAccounts {
     /**
      * Returns a list of accounts updated from the input load accounts file.
      * 
-     * @see #fromTSVFile(String, Account[], Group[])
+     * @see #fromTSVFile(IInternalContest, String)
      * 
      * @param contest
      * @param filename updates model accounts from file 
@@ -562,6 +562,20 @@ public class LoadAccounts {
         return accountMap.values().toArray(new Account[accountMap.size()]);
     }
 
+    /**
+     * Legacy routine for unit tests.  Does not take an IInternalContest, meaning, institution codes will not work since we
+     * have to validate them.
+     *  
+     * @param filename
+     * @param existingAccounts
+     * @param groupList
+     * @return
+     * @throws Exception
+     */
+    public Account[] fromTSVFile(String filename, Account[] existingAccounts, Group[] groupList) throws Exception  {
+        return(fromTSVFile(null, filename, existingAccounts, groupList));
+    }
+    
     /**
      * Update accounts from accounts load file.
      * 
@@ -789,12 +803,19 @@ public class LoadAccounts {
         return(found);
     }
     
+    /**
+     * Load the cdp institutions.tsv file, if present.  This is so we can validate institution codes supplied.
+     * 
+     * @param contest - may be null, in which case we do not load institutions, and any attempt to change/set a new institution code will fail later
+     */
     public static void loadInstitutions(IInternalContest contest) {
-        if(!loadInstitutions(contest.getContestInformation().getAdminCDPBasePath() + File.separator + LoadICPCTSVData.INSTITUTIONS_FILENAME)) {
-            if(!loadInstitutions(contest.getContestInformation().getJudgeCDPBasePath() + File.separator + LoadICPCTSVData.INSTITUTIONS_FILENAME)) {
-                StaticLog.warning("Can not load " + LoadICPCTSVData.INSTITUTIONS_FILENAME + " from "
-                    + contest.getContestInformation().getAdminCDPBasePath() + "or "
-                    + contest.getContestInformation().getJudgeCDPBasePath());
+        if(contest != null) {
+            if(!loadInstitutions(contest.getContestInformation().getAdminCDPBasePath() + File.separator + LoadICPCTSVData.INSTITUTIONS_FILENAME)) {
+                if(!loadInstitutions(contest.getContestInformation().getJudgeCDPBasePath() + File.separator + LoadICPCTSVData.INSTITUTIONS_FILENAME)) {
+                    StaticLog.warning("Can not load " + LoadICPCTSVData.INSTITUTIONS_FILENAME + " from "
+                        + contest.getContestInformation().getAdminCDPBasePath() + "or "
+                        + contest.getContestInformation().getJudgeCDPBasePath());
+                }
             }
         }
     }
