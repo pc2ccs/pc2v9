@@ -79,17 +79,17 @@ public final class Utilities {
     public static final String ISO_8601_TIMEDATE_FORMAT_WITH_MS = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     /**
-     * CLICS directory where judge's (secret) data file are stored
+     * CLICS path where judge's (secret) data file are stored
      * 
      * @see #getSecretDataPath(String, Problem)
      * @see #getSecretDataPath(String, String)
      */
-    public static final String SECRET_DATA_DIR = "data" + File.separator + ExportYAML.SECRET_DIRECTORY_NAME;
+    public static final String SECRET_DATA_PATH = "data" + File.separator + ExportYAML.SECRET_DIRECTORY_NAME;
     
     /**
      * CLICS directory where judge's sample data file are stored
      */
-    public static final String SAMPLE_DATA_DIR = "data" + File.separator + ExportYAML.SAMPLE_DIRECTORY_NAME;
+    public static final String SAMPLE_DATA_PATH = "data" + File.separator + ExportYAML.SAMPLE_DIRECTORY_NAME;
 
     private static SimpleDateFormat format = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
 
@@ -157,7 +157,7 @@ public final class Utilities {
      * Return CCS path for input data and answer file names.
      */
     public static String getSecretDataPath(String baseCDPPath, String problemShortName) {
-        return baseCDPPath + File.separator + problemShortName + File.separator + SECRET_DATA_DIR;
+        return baseCDPPath + File.separator + problemShortName + File.separator + SECRET_DATA_PATH;
     }
 
     /**
@@ -171,7 +171,7 @@ public final class Utilities {
      * Return CLICS path for sample data and answer file names.
      */
     public static String getSampleDataPath(String baseCDPPath, String problemShortName) {
-        return baseCDPPath + File.separator + problemShortName + File.separator + SAMPLE_DATA_DIR;
+        return baseCDPPath + File.separator + problemShortName + File.separator + SAMPLE_DATA_PATH;
     }
 
     /**
@@ -1306,7 +1306,7 @@ public final class Utilities {
      */
     public static String findDataBasePath(String filePath) {
 
-        int idx = filePath.indexOf(SECRET_DATA_DIR);
+        int idx = filePath.indexOf(SECRET_DATA_PATH);
         if (idx != -1) {
             return filePath.substring(0, idx);
         }
