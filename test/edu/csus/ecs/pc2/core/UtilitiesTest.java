@@ -147,7 +147,7 @@ public class UtilitiesTest extends AbstractTestCase {
 
     public void testfindDataBasePath() throws Exception {
 
-        String secretDir = Utilities.SECRET_DATA_DIR;
+        String secretDir = Utilities.SECRET_DATA_PATH;
 
         String expected = "cdp/config/problema/";
         String input = expected + secretDir;
