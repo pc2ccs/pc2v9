@@ -32,6 +32,9 @@ FAIL_SANDBOX_ERROR=$((FAIL_RETCODE_BASE+54))
 # This gets added to the current number of executing processes for this user.
 MAXPROCS=32
 
+# taskset cpu mask for running submission on single processor
+CPUMASK=0x01
+
 # Process ID of submission
 submissionpid=""
 
@@ -212,8 +215,7 @@ DEBUG echo Executing $COMMAND $*
 # Set up trap handler to catch wall-clock time exceeded and getting killed by PC2's execute timer
 trap HandleTerminateFromPC2 15
 
-
-taskset 0x20 $COMMAND $* <&0 &
+taskset $CPUMASK $COMMAND $* <&0 &
 # Remember child's PID for possible killing off later
 submissionpid=$!
 # Wait for child
