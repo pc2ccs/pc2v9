@@ -153,13 +153,6 @@ public class ContestService implements Feature {
             return Response.status(Status.BAD_REQUEST).entity("Missing 'starttime' key in /contest request").build();
         }
 
-        // verify the JSON didn't contain any OTHER key/value information
-        if (requestMap.size() != 2) {
-            controller.getLog().log(Log.WARNING, "Contest Service PATCH: JSON input contains illegal extra data: '" + jsonInputString + "'");
-            // return HTTP 400 response code per CLICS spec
-            return Response.status(Status.BAD_REQUEST).entity("Extra data in contest patch request").build();
-        }
-
         // if we get here the JSON is valid and contains exactly one element: starttime
         // get the Object corresponding to "start_time"
         String startTimeValueString = requestMap.get("start_time");
