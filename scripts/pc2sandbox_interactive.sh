@@ -38,7 +38,7 @@ FAIL_INTERACTIVE_ERROR=$((FAIL_RETCODE_BASE+55))
 MAXPROCS=32
 
 # taskset cpu mask for running submission on single processor
-CPUMASK=0x08
+CPUMASK=0x01
 
 # Process ID of submission
 submissionpid=""
