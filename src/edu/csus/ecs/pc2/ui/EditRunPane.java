@@ -288,13 +288,9 @@ public class EditRunPane extends JPanePlugin {
                 // It is completely unreasonable to set a run's status to being re-judged
                 errMsg = "You are not allowed to set the Run Status to BEING_RE_JUDGED";
                 break;
-                
-            case NEW:
-            case QUEUED_FOR_COMPUTER_JUDGEMENT:
-                // It is unclear if it's OK to change from, say, JUDGED to NEW since there would
-                // be JudgementRecords.  What happens if the state is NEW/QFCJ and there are already
-                // JudgementRecords and Result Test Cases?  It *seems* like this is OK with some
-                // minimal testing.  JB
+
+            default:
+                // all other states should be ok and not cause any issues.
                 break;
             }
             // notify user on bad status change
