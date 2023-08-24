@@ -153,9 +153,6 @@ public final class Utilities {
         return iso8601formatterWithMS;
     }
 
-    /**
-     * Return CCS path for input data and answer file names.
-     */
     public static String getSecretDataPath(String baseCDPPath, String problemShortName) {
         return baseCDPPath + File.separator + problemShortName + File.separator + SECRET_DATA_PATH;
     }
@@ -174,9 +171,6 @@ public final class Utilities {
         return baseCDPPath + File.separator + problemShortName + File.separator + SAMPLE_DATA_PATH;
     }
 
-    /**
-     * Return CLICS path for input data and answer file names.
-     */
     public static String getSampleDataPath(String baseCDPPath, Problem problem) {
         return getSampleDataPath(baseCDPPath, problem.getShortName());
     }
@@ -973,15 +967,6 @@ public final class Utilities {
         return totsecs;
     }
 
-    /**
-     * Locate judges data file on disk.
-     * 
-     * @see Utilities#locateJudgesDataFile(Problem, String, String, DataFileType)
-     * @param problem
-     * @param serializedFile
-     * @param alternateCDPPath
-     * @param judgeDataFile
-     */
     public static String locateJudgesDataFile(Problem problem, SerializedFile serializedFile, String alternateCDPPath, DataFileType judgeDataFile) {
 
         String testFileName = locateJudgesDataFile(problem, serializedFile.getName(), alternateCDPPath);
@@ -999,14 +984,6 @@ public final class Utilities {
         return null;
     }
     
-    /**
-     * find judges data file under secret/ or samples/.
-     * 
-     * @param problem
-     * @param baseFileName
-     * @param alternateCDPPath
-     * @param judgeDataFile
-     */
     public static String locateJudgesDataFile(Problem problem,  String baseFileName, String alternateCDPPath) {
 
         String testFileName = null;

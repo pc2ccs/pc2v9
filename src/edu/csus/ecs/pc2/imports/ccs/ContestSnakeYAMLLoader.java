@@ -2931,7 +2931,6 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
             
             if (loadSamples) {
-                // Load all sample files first, before loading files from sample dir.
                 loadDataFiles(problem, dataFiles, answerFiles, sampleDataDirectory, loadExternalFile);
             }
             
