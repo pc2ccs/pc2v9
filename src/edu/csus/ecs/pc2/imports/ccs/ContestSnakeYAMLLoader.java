@@ -440,8 +440,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setCcsTestMode(contest, ccsTestMode);
         }
         
-        // TODO 701 change LOAD_SAMPLE_JUDGES_DATA, false); to , true);
-        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, false);
+        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, true);
         setLoadSampleJudgesData(contest, loadSamples);
         
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
