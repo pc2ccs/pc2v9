@@ -160,7 +160,7 @@ if [ "$#" -lt 5 ] ; then
    exit $FAIL_INSUFFICIENT_ARGS_EXIT_CODE
 fi 
 
-VALIDATOR="$1"
+VALIDATOR=./"$1"
 JUDGEIN="$2"
 JUDGEANS="$3"
 TESTCASE="$4"
