@@ -1526,10 +1526,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 problem.setTimeOutInSeconds(clicsTimeout);
             }
             
-            //check for a CLICS maxoutput limit
+            //check for a CLICS maxoutput limit - the value is in MiB
             Integer clicsMaxOutput = fetchIntValue(limitsContent, CLICS_MAX_OUTPUT_KEY);
             if (clicsMaxOutput != null) {
-                problem.setMaxOutputSizeKB(clicsMaxOutput);
+                problem.setMaxOutputSizeKB(clicsMaxOutput * Constants.KIBIBYTE_PER_MEBIBYTE);
             }
             
             Integer clicsMemoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, Problem.DEFAULT_MEMORY_LIMIT_MB);
