@@ -1,0 +1,42 @@
+
+max-output-size-K: 137
+
+sites:
+ - number: 1
+   name: Site 1
+   IP: localhost
+   port: 50002
+
+accounts:
+  - account: TEAM
+    site: 1
+    count: 22
+
+  - account: JUDGE
+    site: 1
+    count: 12
+
+  - account: SCOREBOARD
+    site: 1
+    count: 1
+    
+auto-judging:
+  - account: JUDGE
+    site: 1
+    number: 3
+    letters: A, B
+    enabled: yes
+
+  - account: JUDGE
+    site: 1
+    number: 4
+    letters: A, B
+    enabled: yes
+
+  - account: JUDGE
+    site: 1
+    number: 5
+    letters: B
+    enabled: yes
+
+# EOF Contest Configuration

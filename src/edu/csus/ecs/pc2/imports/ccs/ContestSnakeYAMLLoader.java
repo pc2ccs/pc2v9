@@ -216,7 +216,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @Override
     public String getContestTitle(String contestYamlFilename) throws IOException {
-        return fetchValue(new File(contestYamlFilename), IContestLoader.CONTEST_NAME_KEY);
+        File contestYaml = new File(contestYamlFilename);
+        
+        // Try CLICS name first.  Fun fact: CLICS_CONTEST_NAME == CONTEST_NAME_KEY, but may not someday
+        String contestTitle = fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_NAME);
+        // only if the CLICS name isn't there do we try the old one.  non-null means it is there.
+        if(contestTitle == null) {
+            contestTitle = fetchValue(contestYaml, IContestLoader.CONTEST_NAME_KEY);
+        }
+        return(contestTitle);
     }
 
     protected String fetchValue(File file, String key) {
@@ -432,8 +440,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setCcsTestMode(contest, ccsTestMode);
         }
         
-        // TODO 701 change LOAD_SAMPLE_JUDGES_DATA, false); to , true);
-        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, false);
+        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, true);
         setLoadSampleJudgesData(contest, loadSamples);
         
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
@@ -496,7 +503,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
         
         for (String line : yamlLines) {
-            if (line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
+            if (line.startsWith(CLICS_CONTEST_NAME + DELIMIT) || line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
                 setTitle(contest, unquoteAll(line.substring(line.indexOf(DELIMIT) + 1).trim()));
 
             }
@@ -504,8 +511,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         loadDataFileContents = fetchBooleanValue(content, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
 
-        String shortContestName = fetchValue(content, SHORT_NAME_KEY);
-        if (shortContestName != null) {
+        String shortContestName = fetchValue(content, CLICS_CONTEST_ID);
+        // only if CLICS id is not present do we try the older short-name
+        if(shortContestName == null) {
+            shortContestName = fetchValue(content, SHORT_NAME_KEY);
+        }
+        // only set short name if string is present AND not empty
+        if (!StringUtilities.isEmpty(shortContestName)) {
             setShortContestName(contest, shortContestName);
         }
 
@@ -516,7 +528,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setAutoStopClockAtEnd(contest, autoStopClockAtEnd);
         }
 
-        String contestLength = fetchValue(content, CONTEST_DURATION_KEY);
+        String contestLength = fetchValue(content, CLICS_CONTEST_DURATION);
+        // if CLICS duration not present, try old duration.
+        // note as of CLICS spec 2022-07, the CLICS key is the same as the old one
+        // we leave the old test here in case the CLICS key changes at some point.
+        if(contestLength == null) {
+            contestLength = fetchValue(content, CONTEST_DURATION_KEY);
+        }
         if (contestLength != null) {
             setContestLength(contest, contestLength);
         }
@@ -532,26 +550,42 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             contest.updateContestTime(time);
         }
 
-        // Old yaml name
-        String scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_KEY);
-        if (scoreboardFreezeTime != null) {
+        // There are several ways to specify the freeze length.  We try them here
+        // in order of preference: CLICS, old, new  (does that make sense? shouldn't
+        // new be tried before old? -- JB)
+        String scoreboardFreezeTime = fetchValue(content, CLICS_CONTEST_FREEZE_DURATION);
+        
+        // This is absolutely ridiculous, but backward compatible *sigh*
+        if(scoreboardFreezeTime == null) {
+            // Old yaml name
+            scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_KEY);
+    
+            if(scoreboardFreezeTime == null) {
+                // New yaml name
+                scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_LENGTH_KEY);
+            }
+        }
+        // Only set time if not null or empty
+        if (!StringUtilities.isEmpty(scoreboardFreezeTime)) {
             setScoreboardFreezeTime(contest, scoreboardFreezeTime);
         }
 
-        // New yaml name
-        scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_LENGTH_KEY);
-        if (scoreboardFreezeTime != null) {
-            setScoreboardFreezeTime(contest, scoreboardFreezeTime);
+        Object startTimeObject = fetchObjectValue(content, CLICS_CONTEST_START_TIME);
+        // if clics start time not present(!), try the old one
+        if(startTimeObject == null) {
+            startTimeObject = fetchObjectValue(content, CONTEST_START_TIME_KEY);
         }
-
-        Object startTimeObject = fetchObjectValue(content, CONTEST_START_TIME_KEY);
 
         Date date = null;
         if (startTimeObject != null && startTimeObject instanceof Date) {
             setContestStartDateTime(contest, (Date) startTimeObject);
         } else {
 
-            String startTime = fetchValue(content, CONTEST_START_TIME_KEY);
+            String startTime = fetchValue(content, CLICS_CONTEST_START_TIME);
+            // only if CLICS start time is NOT there do we try the old one
+            if(startTime == null) {
+                startTime = fetchValue(content, CONTEST_START_TIME_KEY);
+            }
 
             if (startTime != null) {
 
@@ -587,7 +621,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
         
-        
+        // If the contest type is present in contest.yaml, verify it
+        String scoreType = fetchValue(content, CLICS_CONTEST_SCOREBOARD_TYPE);
+        if(scoreType != null && !scoreType.equals("pass-fail")) {
+            throw new YamlLoadException("Invalid " + CLICS_CONTEST_SCOREBOARD_TYPE + ": " + scoreType + ", expected pass-fail");
+        }
         Object privatehtmlOutputDirectory = fetchObjectValue(content, OUTPUT_PRIVATE_SCORE_DIR_KEY);
         if (privatehtmlOutputDirectory != null) {
             if (privatehtmlOutputDirectory instanceof String) {

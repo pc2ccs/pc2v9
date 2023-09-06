@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.IOException;
@@ -33,6 +33,9 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 import edu.csus.ecs.pc2.services.core.ScoreboardJson;
+import edu.csus.ecs.pc2.ui.MessageManager;
+import edu.csus.ecs.pc2.ui.MessageRecord;
+import edu.csus.ecs.pc2.ui.MessageScope;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
@@ -259,8 +262,15 @@ public class ShadowController {
             remoteCCSURL = new URL(remoteCCSURLString);
         } catch (MalformedURLException e) {
             log.log(Level.WARNING, "Malformed Remote CCS URL: \"" + remoteCCSURLString + "\" ", e);
-            e.printStackTrace();
             controllerStatus = SHADOW_CONTROLLER_STATUS.SC_CONNECTION_FAILED ;
+            
+            try {
+                // Send message to Shaodow connectStatusTable so user can view error
+                MessageManager.fireMessageListener(new MessageRecord("Malformed Remote CCS URL: \"" + remoteCCSURLString + "\" ", MessageScope.SHADOW_UI, e));
+            } catch (Exception e2) {
+                log.log(Level.WARNING, "Exception while attempting to sent message update: " + e.getMessage(), e2);
+            }
+            
             return false;
         }
         
@@ -480,6 +490,14 @@ public class ShadowController {
             pc2Json = sbJsonObject.createJSON(localContest, log);
         } catch (IllegalContestState | JAXBException | IOException e) {
             log.log(Log.WARNING,"Exception creating PC2 scoreboard JSON: " + e.getMessage(), e);
+            
+            try {
+                // Send message to Shaodow connectStatusTable so user can view error
+                MessageManager.fireMessageListener(new MessageRecord("Exception creating PC2 scoreboard JSON: " + e.getMessage(), MessageScope.SHADOW_UI, e));
+            } catch (Exception e2) {
+                log.log(Level.WARNING, "Exception while attempting to sent message update: "+e.getMessage(), e2);
+            }
+
             return null;
         }
         

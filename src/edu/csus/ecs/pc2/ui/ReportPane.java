@@ -51,6 +51,7 @@ import edu.csus.ecs.pc2.core.report.BalloonDeliveryReport;
 import edu.csus.ecs.pc2.core.report.BalloonSettingsReport;
 import edu.csus.ecs.pc2.core.report.BalloonSummaryReport;
 import edu.csus.ecs.pc2.core.report.CDPReport;
+import edu.csus.ecs.pc2.core.report.CLICSAwardsReport;
 import edu.csus.ecs.pc2.core.report.CategoryReport;
 import edu.csus.ecs.pc2.core.report.ClarificationsReport;
 import edu.csus.ecs.pc2.core.report.ClientSettingsReport;
@@ -306,6 +307,8 @@ public class ReportPane extends JPanePlugin {
         reports.add(new ProblemGroupAssignmentReport());
         
         reports.add(new ContestCompareReport());
+        
+        reports.add(new CLICSAwardsReport());
         
         if (isServer()){
             // SOMEDAY Bug 1166 remove this isServer when added to Admin. 
