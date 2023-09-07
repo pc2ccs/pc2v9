@@ -47,7 +47,7 @@ import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
-public class CLICSJsonUtilities {
+public class CLICSAwardUtilities {
 
     public static final String GROUP_WINNER_TITLE = "group-winner-";
 

@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
-import edu.csus.ecs.pc2.core.imports.clics.CLICSJsonUtilities;
+import edu.csus.ecs.pc2.core.imports.clics.CLICSAwardUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -35,8 +35,8 @@ public class CLICSAwardsReport implements IReport {
     private Filter filter;
 
     public void writeReport(PrintWriter printWriter) throws Exception {
-        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
-        CLICSJsonUtilities.writeAwardsJSONFile(printWriter, awards);
+        List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
+        CLICSAwardUtilities.writeAwardsJSONFile(printWriter, awards);
     }
 
     public void printHeader(PrintWriter printWriter) {
