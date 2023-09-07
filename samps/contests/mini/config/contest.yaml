@@ -2,6 +2,7 @@
 #
 # Sumit Sample multiple test cases ("mini" contest)
 #
+# TODO remove wrapper_* from all other sample contest yaml
 --- 
 
 name: Pac NW Mini Contest
@@ -67,7 +68,6 @@ languages:
     runner: 'java'
     runner-args: '{:basename}'
     use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_java {:timelimit} {:basename}'
 
   - name: 'GNU C'
     active: true
@@ -77,7 +77,6 @@ languages:
     runner: './a.out'
     runner-args: ''
     use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_c {:timelimit}'
 
   - name: 'GNU C++'
     active: true
@@ -87,7 +86,6 @@ languages:
     runner: './a.out'
     runner-args: ''
     use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_c {:timelimit}'
 
   - name: 'Python2'
     active: true
@@ -98,7 +96,6 @@ languages:
     runner: 'python'
     runner-args: '{:mainfile}'
     use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_python {:timelimit} {:mainfile}'
 
   - name: 'Python3'
     active: true
@@ -109,7 +106,6 @@ languages:
     runner: 'python3'
     runner-args: '{:mainfile}'
     use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_python3 {:timelimit} {:mainfile}'
 
   - name: 'C#'
     active: true
@@ -120,7 +116,6 @@ languages:
     runner: 'mono'
     runner-args: '{:basename}.exe'
     use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_cs {:timelimit} {:basename}.exe'
 
 #
 # problemset.yaml - list of CCS problem definitions
