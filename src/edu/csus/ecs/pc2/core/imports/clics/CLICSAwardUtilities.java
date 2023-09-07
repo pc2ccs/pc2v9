@@ -150,11 +150,11 @@ public class CLICSAwardUtilities {
                 }
             }
         } catch (JAXBException | IllegalContestState | IOException e) {
-            StaticLog.getLog().log(Level.WARNING, "Error while calculating group winners DSA", e);
+            StaticLog.getLog().log(Level.WARNING, "Error while calculating group winners", e);
         }
 
-        Set<Group> problemElementIds = groupWinners.keySet();
-        for (Group group : problemElementIds) {
+        Set<Group> groupElementIds = groupWinners.keySet();
+        for (Group group : groupElementIds) {
             // first to solve for group
             ClientId clientId = groupWinners.get(group);
             if (clientId != null) {
