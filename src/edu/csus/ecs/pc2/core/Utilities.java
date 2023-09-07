@@ -1099,6 +1099,8 @@ public final class Utilities {
 
         ArrayList<String> output = new ArrayList<String>();
 
+        String originalJudgeDataPath = getJudgeCDPLocation(contest);
+        
         if (problem.isUsingExternalDataFiles()) {
             ClientId id = contest.getClientId();
             if (id == null) {
@@ -1110,6 +1112,7 @@ public final class Utilities {
             if (!"".equals(judgeDataFilesPath)) {
                 judgeDataFilesPath = Utilities.getSecretDataPath(judgeDataFilesPath, problem) + File.separator;
                 File judgeDir = new File(judgeDataFilesPath);
+                
                 if (!judgeDir.isDirectory()) {
                     judgeDataFilesPath = judgeDataFilesPath.replaceFirst(".data.secret", "");
                 }
@@ -1122,14 +1125,20 @@ public final class Utilities {
 
                 } else {
 
-                    // if we have a judgeDataFilesPath use it, otherwise continue with the normal handling
-                    if (!"".equals(judgeDataFilesPath)) {
-                        String filename = judgeDataFilesPath + serializedFile.getName();
-                        output.add(filename);
-                    } else if (executableDir == null) {
-                        output.add(serializedFile.getName());
+                    String theFileName = Utilities.locateJudgesDataFile(problem, serializedFile, originalJudgeDataPath, null);
+
+                    if (Utilities.fileExists(theFileName)) {
+                        output.add(theFileName);
                     } else {
-                        output.add(executableDir + File.separator + serializedFile.getName());
+                        // if we have a judgeDataFilesPath use it, otherwise continue with the normal handling
+                        if (!"".equals(judgeDataFilesPath)) {
+                            String filename = judgeDataFilesPath + serializedFile.getName();
+                            output.add(filename);
+                        } else if (executableDir == null) {
+                            output.add(serializedFile.getName());
+                        } else {
+                            output.add(executableDir + File.separator + serializedFile.getName());
+                        }
                     }
                 }
             }

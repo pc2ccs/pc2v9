@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -546,6 +546,30 @@ public class UtilitiesTest extends AbstractTestCase {
 
                 String dataFileLocation = Utilities.locateJudgesDataFile(problem, judgeDataFile, judgeCDP, DataFileType.JUDGE_DATA_FILE);
                 assertFileExists(dataFileLocation, "Could not find datafile");
+            }
+        }
+    }
+    
+    /**
+     * Test whether fullJudgesDataFilenames finds data files, esp. samples.
+     */
+    public void testfullJudgesDataFilenames() throws Exception {
+
+        String contestName = "mini";
+        IInternalContest contest = loadFullSampleContest(null, contestName);
+        String cdpPath = contest.getContestInformation().getJudgeCDPBasePath();
+        Utilities.validateCDP(contest, cdpPath);
+
+        Problem[] problems = contest.getProblems();
+
+        assertEquals("Expecting number of problems in " + contestName, 1, problems.length);
+
+        for (Problem problem : problems) {
+            ProblemDataFiles pdf = contest.getProblemDataFile(problem);
+
+            String[] names = Utilities.fullJudgesDataFilenames(contest, pdf, "execute");
+            for (String string : names) {
+                assertFileExists(string);
             }
         }
     }
