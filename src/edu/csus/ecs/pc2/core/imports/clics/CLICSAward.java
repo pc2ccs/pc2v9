@@ -83,6 +83,18 @@ public class CLICSAward {
         return team_ids;
     }
 
+    /**
+     * Adds an additional team to the current list of teams getting this CLICSAward.
+     * @param newTeamId  the id of the additional team to be added to the award list.
+     */
+    public void addTeamToAwardList(String newTeamId) {
+
+        String[] newTeamIds = new String[team_ids.length + 1];
+        System.arraycopy(team_ids, 0, newTeamIds, 0, team_ids.length);
+        newTeamIds[team_ids.length] = newTeamId;
+        team_ids = newTeamIds;
+    }
+
     public String toJSON() throws JsonProcessingException {
         ObjectMapper om = JSONObjectMapper.getObjectMapper();
         om.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
@@ -90,5 +102,7 @@ public class CLICSAward {
         // om.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
         return om.writeValueAsString(this);
     }
+    
+    
 
 }

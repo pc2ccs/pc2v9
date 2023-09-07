@@ -1010,7 +1010,6 @@ public final class Utilities {
 
         testFileName = alternateCDPPath + File.separator + problem.getShortName() + File.separator + baseFileName;
         if (fileExists(testFileName)) {
-            // try to find filename under shortname/ path
             return testFileName;
         }
 
