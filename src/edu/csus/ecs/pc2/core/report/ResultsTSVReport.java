@@ -2,7 +2,6 @@ package edu.csus.ecs.pc2.core.report;
 
 import java.io.PrintWriter;
 
-import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
@@ -27,12 +26,7 @@ public class ResultsTSVReport extends AbstractReport {
 
     @Override
     public String[] createReport(Filter filter) {
-        try {
-            return resultsFile.createTSVFileLines(getContest());
-        } catch (IllegalContestState e) {
-            e.printStackTrace();
-            return new String[0];
-        }
+        return resultsFile.createTSVFileLines(getContest());
     }
 
     @Override

@@ -157,7 +157,7 @@ public class ScoreboardCommon {
                     outputFile.write(createTSVFileLines[i] + System.getProperty("line.separator"));
                 }
                 outputFile.close();
-            } catch (IllegalContestState | IOException e) {
+            } catch (IOException e) {
                 log.log(Log.WARNING, "Trouble creating results.tsv", e);
             }
             try {

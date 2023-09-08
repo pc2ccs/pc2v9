@@ -55,8 +55,8 @@ public class ResultsFile {
      * @return
      * @throws IllegalContestState
      */
-    public String[] createTSVFileLines(IInternalContest contest) throws IllegalContestState {
-        return createTSVFileLines(contest,DEFAULT_RESULT_FIELD_NAME);
+    public String[] createTSVFileLines(IInternalContest contest) {
+        return createTSVFileLines(contest, DEFAULT_RESULT_FIELD_NAME);
     }
     
     /**
@@ -96,16 +96,12 @@ public class ResultsFile {
      * @return
      * @throws IllegalContestState
      */
-    public String[] createTSVFileLines(IInternalContest contest, String resultFileTitleFieldName) throws IllegalContestState {
+    public String[] createTSVFileLines(IInternalContest contest, String resultFileTitleFieldName)  {
 
         Vector<String> lines = new Vector<String>();
 
         finalizeData = contest.getFinalizeData();
         
-        if (finalizeData == null){
-            throw new IllegalContestState("Contest not Finalized, can not create results file");
-        }
-
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
         scoringAlgorithm.setContest(contest);
 
@@ -118,7 +114,13 @@ public class ResultsFile {
         lines.addElement(resultFileTitleFieldName + TAB + "1");
 
         // return ranked teams
-        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
+        StandingsRecord[] standingsRecords = null;
+        try {
+            standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to generate statndings ", e.getCause());
+        }
+        
         int median = getMedian(standingsRecords);
         // TODO finalizeData really needs a B instead of getBronzeRank
         int lastMedalRank = finalizeData.getBronzeRank();

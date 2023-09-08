@@ -7,6 +7,10 @@ package edu.csus.ecs.pc2.core;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public final class Constants {
+    
+    public static final String AWARDS_JSON_FILENAME = "awards.json";
+    
+    public final static String SCOREBOARD_JSON_FILENAME = "scoreboard.json";
 
     public static final long HOURS_PER_DAY = 24;
 
