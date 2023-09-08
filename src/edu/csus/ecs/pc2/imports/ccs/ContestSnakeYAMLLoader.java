@@ -1417,19 +1417,32 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
         
         // check for CLICS "validation" property; provides an alternate way to specify a customer validator and,
-        // also if the problem is interactive.
+        // the ONLY way to specify if the problem is interactive.
         String validationType = fetchValue(content, VALIDATION_TYPE);
         boolean isInteractive = false;
         if (validationType != null) {
             // validationType is a list of validation options
             String[] valOpts = validationType.split("\\s");
             // Must be one of: "default", "custom", "custom interactive"
-            if (valOpts.length >= 1 && valOpts[0].equals("custom")) {
-                usingCustomValidator = true;
-                if(valOpts.length >= 2 && valOpts[1].equals("interactive")) {
-                    // Note that interactive problems require a custom validator
-                    isInteractive = true;
+            // PC2 does not support "custom score", which IS spec compliant; we issue a different error for that
+            if (valOpts.length >= 1) {
+                if(valOpts[0].equals(Constants.VALIDATION_CUSTOM)) {
+                    usingCustomValidator = true;
+                    if(valOpts.length >= 2) {
+                        if(valOpts[1].equals(Constants.VALIDATION_INTERACTIVE)) {
+                            // Note that interactive problems require a custom validator
+                            isInteractive = true;
+                        } else if(valOpts[1].equals(Constants.VALIDATION_SCORE)) {
+                            syntaxError("Unsupported validation type: custom score");
+                        } else {
+                            syntaxError("Unknown valudation type: custom " + valOpts[1]);
+                        }
+                    }
+                } else if(!valOpts[0].equals(Constants.VALIDATION_DEFAULT)) {
+                    syntaxError("Unknown validation type " + valOpts[0] + " specified");
                 }
+            } else {
+                syntaxError(VALIDATION_TYPE + " property found but no type was specified");
             }
         }
 

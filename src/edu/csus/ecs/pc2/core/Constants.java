@@ -246,6 +246,14 @@ public final class Constants {
     public static final String UNIX_CHECK_SANDBOX_SCRIPT = "pc2syscheck.sh";
 
     /**
+     * CLICS validation Types
+     */
+    public static final String VALIDATION_CUSTOM = "custom";
+    public static final String VALIDATION_DEFAULT = "default";
+    public static final String VALIDATION_INTERACTIVE = "interactive";
+    public static final String VALIDATION_SCORE = "score";
+    
+    /**
      * Prefix for deleted runs.
      */
     public static final String DEL_RUN_PREFIX = "DEL ";   
