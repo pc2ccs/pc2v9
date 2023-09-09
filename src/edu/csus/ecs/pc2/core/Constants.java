@@ -186,7 +186,9 @@ public final class Constants {
     
     public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";
 
-    public static final int BYTES_PER_KIBIBYTE = 1024;   
+    public static final int BYTES_PER_KIBIBYTE = 1024;
+    
+    public static final int KIBIBYTE_PER_MEBIBYTE = 1024;
     
     /**
      * Directory where scripts go that PC2 executes for sandbox and interactive submissions.
