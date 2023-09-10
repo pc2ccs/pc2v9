@@ -208,5 +208,10 @@ public final class Constants {
     /**
      * Prefix for deleted runs.
      */
-    public static final String DEL_RUN_PREFIX = "DEL ";   
+    public static final String DEL_RUN_PREFIX = "DEL ";
+    
+    /**
+     * output directory for reports.
+     */
+    public static final String REPORT_DIRECTORY_NAME = "reports";
 }

@@ -386,7 +386,17 @@ public final class StringUtilities implements Serializable {
     public static String removeLastChar(String s) {
         return (s == null || s.length() == 0) ? null : (s.substring(0, s.length()-1));
     }
-    
 
+    public static String removeUpTo(String source, String stringToRemove) {
+
+        int index = source.indexOf(stringToRemove);
+
+        if (index > 0) {
+            String shorterString = source.substring(index);
+            return shorterString;
+        } else {
+            return source;
+        }
+    }
     
 }

@@ -41,6 +41,7 @@ public class ExportFilesUtiltiites {
             FileUtilities.writeFileContents(resultsFilename, resultTSVLines);
 
         } catch (Exception e) {
+            e.printStackTrace(System.out); // TODO 760 remove once fixed so stack trace shown for source of RunTimeException
             throw new RuntimeException("Problem generating " + resultsFilename, e.getCause());
         }
 
@@ -51,7 +52,8 @@ public class ExportFilesUtiltiites {
             FileUtilities.writeFileContents(scoreboardJsonFilename, scoreboardJsonLines);
 
         } catch (Exception e) {
-            throw new RuntimeException("Problem generating " + resultsFilename, e.getCause());
+            e.printStackTrace(System.out); // TODO 760 remove once fixed so stack trace shown for source of RunTimeException
+            throw new RuntimeException("Problem generating " + scoreboardJsonFilename, e.getCause());
         }
 
         try {
@@ -61,7 +63,8 @@ public class ExportFilesUtiltiites {
             printWriter.close();
 
         } catch (Exception e) {
-            throw new RuntimeException("Problem generating " + resultsFilename, e.getCause());
+            e.printStackTrace(System.out); // TODO 760 remove once fixed so stack trace shown for source of RunTimeException
+            throw new RuntimeException("Problem generating " + awardsFileName, e.getCause());
         }
 
     }

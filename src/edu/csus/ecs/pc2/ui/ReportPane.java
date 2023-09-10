@@ -95,6 +95,7 @@ import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
 import edu.csus.ecs.pc2.core.report.ProfilesReport;
 import edu.csus.ecs.pc2.core.report.ResolverEventFeedReport;
 import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
+import edu.csus.ecs.pc2.core.report.ResultsExportReport;
 import edu.csus.ecs.pc2.core.report.RunJudgementNotificationsReport;
 import edu.csus.ecs.pc2.core.report.RunStatisticsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
@@ -320,6 +321,8 @@ public class ReportPane extends JPanePlugin {
         reports.add(new StandingsNSAReport());
         
         reports.add(new ResultsCompareReport());
+        
+        reports.add(new ResultsExportReport());
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         

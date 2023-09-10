@@ -10,15 +10,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -31,9 +30,7 @@ import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
  *
  */
 public class ResultsExportReport implements IReport {
-
-    private String pc2ResultsDir = null;
-
+    
     private IInternalContest contest;
 
     private IInternalController controller;
@@ -41,6 +38,10 @@ public class ResultsExportReport implements IReport {
     private Log log;
 
     private Filter filter = new Filter();
+
+    private String pc2ResultsDir = null;
+
+//    private String pc2ResultsDir = Constants.REPORT_DIRECTORY_NAME;
 
     /**
      * 
@@ -63,15 +64,6 @@ public class ResultsExportReport implements IReport {
         this.controller = inController;
         log = controller.getLog();
 
-        /**
-         * Fetch directories from ClientSettings.
-         */
-        ClientSettings settings = contest.getClientSettings(contest.getClientId());
-
-        if (pc2ResultsDir == null) {
-            String pc2rsdir = settings.getProperty(ClientSettings.PC2_RESULTS_DIR);
-            pc2ResultsDir = pc2rsdir;
-        }
     }
 
     @Override
@@ -81,14 +73,6 @@ public class ResultsExportReport implements IReport {
 
     @Override
     public void createReportFile(String filename, Filter inFilter) throws IOException {
-        
-        if (pc2ResultsDir == null) {
-            // write to reports dir, if no dir specified and noe dir from ClientSettings
-            File outFile = new File(filename);
-            
-            pc2ResultsDir = outFile.getParent();
-            ExecuteUtilities.ensureDirectory(pc2ResultsDir);
-        }
         
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
         filter = inFilter;
@@ -110,6 +94,17 @@ public class ResultsExportReport implements IReport {
             
         }
 
+        catch (RuntimeException rte) {
+            // TODO REFACTOR move this entire catch handling of rte into a Utility class
+            Throwable throwable = rte;
+            if (rte.getCause() != null) {
+                throwable = rte.getCause();
+            }
+            log.log(Log.INFO, "Exception writing report", throwable);
+            printWriter.println("Exception generating report " + rte.getMessage());
+            throwable.printStackTrace(printWriter);
+        }
+        
         catch (Exception e) {
             log.log(Log.INFO, "Exception writing report", e);
             printWriter.println("Exception generating report " + e.getMessage());
@@ -143,40 +138,28 @@ public class ResultsExportReport implements IReport {
         return "report." + reportName + "." + simpleDateFormat.format(new Date()) + extension;
     }
     
+    public String getFileName(IReport selectedReport, String extension) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS"); // or maybe? "yyMMdd HHmmss.SSS");
+        String reportName = selectedReport.getReportTitle();
+
+        while (reportName.indexOf(' ') > -1) {
+            reportName = reportName.replace(" ", "_");
+        }
+        return "report." + reportName + "." + simpleDateFormat.format(new Date()) + "." + extension;
+    }
+    
     @Override
     public String[] createReport(Filter filter) {
         
         List<String> outList = new ArrayList<String>();
         
+        
         String resultsFilename = getPc2ResultsDir() + File.separator + ResultsFile.RESULTS_FILENAME;
+        String scoreboardJsonFilename = getPc2ResultsDir() + File.separator + Constants.SCOREBOARD_JSON_FILENAME;
+        String awardsFileName = getPc2ResultsDir() + File.separator + Constants.AWARDS_JSON_FILENAME;
+        
+        ExportFilesUtiltiites.writeResultsFiles(contest, getPc2ResultsDir());
 
-        String scoreboardJsonFilename = pc2ResultsDir + File.separator + Constants.SCOREBOARD_JSON_FILENAME;
-
-        String awardsFileName = pc2ResultsDir + File.separator + Constants.AWARDS_JSON_FILENAME;
-
-        /**
-         * Export results.tsv
-         */
-        
-        IReport report = new ResultsTSVReport();
-        String reportMessage = writeReportFile (report, resultsFilename);
-        outList.add(reportMessage);
-        
-        /**
-         * Export scoreboard.json
-         */
-        
-        report = new ScoreboardJSONReport();
-        reportMessage = writeReportFile(report, scoreboardJsonFilename);
-        outList.add(reportMessage);
-        
-        // TODO 760 output results.tsv
-        
-        // TODO 760 results.csv file if/when available Issue 351
-        // TODO 351 results.csv file if/when available Issue 351
-        
-        // TODO 760 awards.json add when available Issue 383, CLICS Add awards.json file/report #383
-        
         String finalizedStatus = "No.  (Warning - contest is not finalized)";
         
         FinalizeData finalizedDAta = contest.getFinalizeData();
@@ -188,36 +171,22 @@ public class ResultsExportReport implements IReport {
             }
         }
         
-        
-        
         String[] reportLinss = { //
 
                 "pc2 results dir       : " + getPc2ResultsDir(), //
                 "", //
                 "Contest finalized     : "+finalizedStatus, //
                 "", //
+                "Wrote results files to:", //
+                resultsFilename, //
+                scoreboardJsonFilename, //
+                awardsFileName, //
+                "", //
 
         };
         
         outList.addAll(0, Arrays.asList(reportLinss));
         return (String[]) outList.toArray(new String[outList.size()]);
-
-    }
-
-    private String writeReportFile(IReport report, String outputFilename) {
-
-        try {
-
-            report.setContestAndController(contest, controller);
-            report.createReportFile(outputFilename, filter);
-
-            return "Wrote " + report.getReportTitle() + " to " + outputFilename;
-
-        } catch (Exception e) {
-            log.log(Level.WARNING, "Error writing report " + report.getPluginTitle() + e.getMessage(), e);
-            return "Unable to write report " + report.getPluginTitle() + " " + e.getMessage();
-        }
-
     }
 
     @Override
@@ -230,10 +199,6 @@ public class ResultsExportReport implements IReport {
 
         try {
 
-            if (pc2ResultsDir == null || !(new File(pc2ResultsDir).isDirectory())) {
-                throw new RuntimeException("pc2 Results directory not defined or not a directory");
-            }
-
             String[] lines = createReport(filter);
 
             for (String line : lines) {
@@ -241,15 +206,16 @@ public class ResultsExportReport implements IReport {
             }
 
         }
-        catch (RuntimeException rte) {
-            log.log(Log.INFO, "Exception writing report", rte);
-            printWriter.println("Error/problem generating report " + rte.getMessage());
+        catch (Exception e) {
+            log.log(Log.INFO, "Exception writing report", e);
+            printWriter.println("Error/problem generating report " + e.getMessage());
+            e.printStackTrace(printWriter);
         }
     }
 
     @Override
     public String getReportTitle() {
-        return "Results Compare Report";
+        return "Results Export Files";
     }
 
     @Override
@@ -279,8 +245,23 @@ public class ResultsExportReport implements IReport {
         printWriter.println("end report: " + getReportTitle());
 
     }
-
+    
     public String getPc2ResultsDir() {
+        if (pc2ResultsDir == null) {
+//            ExecuteUtilities.ensureDirectory(Constants.REPORT_DIRECTORY_NAME);
+            pc2ResultsDir = Constants.REPORT_DIRECTORY_NAME + File.separator +getOutputDirectoryName();
+            ExecuteUtilities.ensureDirectory(pc2ResultsDir);
+        }
         return pc2ResultsDir;
     }
+
+    /**
+     * Report output directory name.
+     */
+    public String getOutputDirectoryName() {
+        String reportFilename = getFileName(this, "txt");
+        String string = StringUtilities.removeUpTo(reportFilename, Constants.REPORT_DIRECTORY_NAME +File.separator) + ".files";;
+        return string;
+    }
+ 
 }
