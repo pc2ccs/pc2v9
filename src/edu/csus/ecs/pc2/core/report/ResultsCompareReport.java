@@ -5,13 +5,17 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
@@ -27,6 +31,8 @@ public class ResultsCompareReport implements IReport {
 
     private String pc2ResultsDir = null;
 
+    private String cdpResultsDirectory = null;
+
     private IInternalContest contest;
 
     private IInternalController controller;
@@ -40,10 +46,11 @@ public class ResultsCompareReport implements IReport {
      */
     private static final long serialVersionUID = -796328654541676730L;
 
-    public ResultsCompareReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir) {
+    public ResultsCompareReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir, String cdpResultsDirectory) {
         super();
         this.primaryCCSResultsDir = primaryCCSResultsDir;
         this.pc2ResultsDir = pc2ResultsDir;
+        this.cdpResultsDirectory = cdpResultsDirectory;
         setContestAndController(contest, controller);
     }
 
@@ -123,13 +130,44 @@ public class ResultsCompareReport implements IReport {
         System.out.println("debug 22 scoreboardJsonFilename = " + scoreboardJsonFilename);
         System.out.println("debug 22 awardsFileName = " + awardsFileName);
 
-        String[] filesToCompare = { // 
+        String[] filesToCompare = { //
                 ResultsFile.RESULTS_FILENAME, //
                 Constants.SCOREBOARD_JSON_FILENAME, //
                 Constants.AWARDS_JSON_FILENAME, //
         };
 
-        // TODO 760  create comparison summary/output
+        String sourceDir = pc2ResultsDir;
+        String targetDir = getCdpResultsDirectory();
+
+        String compareMessage = "Comparison Summary:   FAILED - no such directory (cdp directory not set) " + targetDir;
+
+        if (new File(targetDir).isDirectory()) {
+
+            FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir);
+            FileComparison awardsFileCompare = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir);
+            FileComparison scoreboardJsonCompare = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir);
+
+            List<String> compareInfo = new ArrayList<String>();
+
+            // TODO 760 write createCompareSummary
+//            String summaryCompareString = createCompareSummary(ResultsFile.RESULTS_FILENAME, resultsCompare);
+
+            if (resultsCompare.getNumberDifferences() == 0 && resultsCompare.getComparedFields().size() > 0) {
+                compareInfo.add(ResultsFile.RESULTS_FILENAME + ": IDENTICAL");
+            } else if (resultsCompare.getNumberDifferences() != 0 && resultsCompare.getComparedFields().size() > 0) {
+                compareInfo.add(ResultsFile.RESULTS_FILENAME + ": DIFFERENT " + resultsCompare.getNumberDifferences() + " differences");
+            } else if (resultsCompare.getComparedFields().size() == 0) {
+                compareInfo.add(ResultsFile.RESULTS_FILENAME + ": ERROR - Zero records were compared");
+            } else {
+                compareInfo.add(ResultsFile.RESULTS_FILENAME + ": WORSE ERROR - contact progreammers");
+            }
+
+            // TODO 760 write comp for awardsFileCompare
+            // TODO 760 write comp for scoreboardJsonCompare
+
+            compareMessage = String.join("\n", (String[]) compareInfo.toArray(new String[compareInfo.size()]));
+
+        }
 
         String[] reportLinss = { //
 
@@ -137,16 +175,12 @@ public class ResultsCompareReport implements IReport {
                 "pc2 results dir        : " + getPc2ResultsDir(), //
                 "compared files         : " + String.join(", ", filesToCompare), //
                 "", //
-
-                // TODO 760 insert comparison
-                
-                "Comparison Summary:   FAILED - comparison code not written  TODO 760 ", //
-
+                compareMessage, //
                 "", //
-
         };
 
         return reportLinss;
+
     }
 
     @Override
@@ -167,10 +201,10 @@ public class ResultsCompareReport implements IReport {
                 throw new RuntimeException("pc2 Results directory not defined or not a directory");
             }
 
-//            results.tsv
-//            (results.csv file if/when available #351)
-//            scoreboard.json
-//            awards.json
+            // results.tsv
+            // (results.csv file if/when available #351)
+            // scoreboard.json
+            // awards.json
 
             String[] lines = createReport(filter);
 
@@ -208,6 +242,23 @@ public class ResultsCompareReport implements IReport {
         printWriter.println();
         printWriter.println(getReportTitle() + " Report");
 
+    }
+
+    public String getCdpResultsDirectory() {
+        if (cdpResultsDirectory == null) {
+            ContestInformation info = contest.getContestInformation();
+            if (info != null) {
+                String resultsDir = info.getJudgeCDPBasePath() + File.separator + Constants.CDP_RESULTS_DIR;
+                if (new File(resultsDir).isDirectory()) {
+                    return resultsDir;
+                }
+            }
+        }
+        return cdpResultsDirectory;
+    }
+
+    public void setCdpResultsDirectory(String cdpResultsDirectory) {
+        this.cdpResultsDirectory = cdpResultsDirectory;
     }
 
     @Override

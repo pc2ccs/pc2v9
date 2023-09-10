@@ -214,4 +214,9 @@ public final class Constants {
      * output directory for reports.
      */
     public static final String REPORT_DIRECTORY_NAME = "reports";
+    
+    /**
+     * default results directory for CDP.
+     */
+    public static final String CDP_RESULTS_DIR ="results";
 }

@@ -14,13 +14,17 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.FileUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.report.FileComparisonUtilities;
 import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
 import edu.csus.ecs.pc2.core.report.ResultsExportReport;
+import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
 /**
  * Results epxort and compare pane. 
@@ -168,6 +172,18 @@ public class ResultsExportComparePane extends JPanePlugin {
             // compare primary and pc2 rsults
             ResultsCompareReport report = new ResultsCompareReport();
             Utilities.viewReport(report, "Results Coparison", getContest(), getController(), true);
+            
+            String sourceDir = "" ; // TODO 760 assign source dir
+            String targetDir = ""; // TODO 760 assign traget dir
+
+            String compareMessage = "Comparison Summary:   FAILED - no such directory (cdp directory not set) " + targetDir;
+
+            FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir);
+            FileComparison awardsFileCompare = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir);
+            FileComparison scoreboardJsonCompare = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir);
+
+            // TODO 760 Update GUi with comparison information
+            
         } catch (Exception e) {
             getLog().log(Level.WARNING, "Exception trying export and compare results" + e.getMessage(), e);
             showMessage(this, "Problem comparing results", "Error writing or comparing results " + e.getMessage());
