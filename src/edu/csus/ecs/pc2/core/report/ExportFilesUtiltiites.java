@@ -8,7 +8,7 @@ import java.util.List;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.FileUtilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
-import edu.csus.ecs.pc2.core.imports.clics.CLICSJsonUtilities;
+import edu.csus.ecs.pc2.core.imports.clics.CLICSAwardUtilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.services.core.ScoreboardJson;
@@ -55,9 +55,9 @@ public class ExportFilesUtiltiites {
         }
 
         try {
-            List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+            List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
             PrintWriter printWriter = new PrintWriter(new FileOutputStream(awardsFileName, false), true);
-            CLICSJsonUtilities.writeAwardsJSONFile(printWriter, awards);
+            CLICSAwardUtilities.writeAwardsJSONFile(printWriter, awards);
             printWriter.close();
 
         } catch (Exception e) {
