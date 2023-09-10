@@ -5,27 +5,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.Constants;
-import edu.csus.ecs.pc2.core.FileUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
-import edu.csus.ecs.pc2.core.imports.clics.CLICSJsonUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
-import edu.csus.ecs.pc2.services.core.ScoreboardJson;
 
 /**
- * Compare results report
+ * Compare contest results files report.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
- *
  */
 public class ResultsCompareReport implements IReport {
 
@@ -117,93 +111,42 @@ public class ResultsCompareReport implements IReport {
     @Override
     public String[] createReport(Filter filter) {
 
-        String resultsFilename = getPc2ResultsDir() + File.separator + ResultsFile.RESULTS_FILENAME;
+        String resultsFilename = pc2ResultsDir + File.separator + ResultsFile.RESULTS_FILENAME;
 
         String scoreboardJsonFilename = pc2ResultsDir + File.separator + Constants.SCOREBOARD_JSON_FILENAME;
 
         String awardsFileName = pc2ResultsDir + File.separator + Constants.AWARDS_JSON_FILENAME;
 
-        try {
+        ExportFilesUtiltiites.writeResultsFiles(contest, getPc2ResultsDir());
 
-            // TODO print filter?
+        System.out.println("debug 22 resultsFilename = " + resultsFilename);
+        System.out.println("debug 22 scoreboardJsonFilename = " + scoreboardJsonFilename);
+        System.out.println("debug 22 awardsFileName = " + awardsFileName);
 
-            // TODO create results.tsv
+        String[] filesToCompare = { // 
+                ResultsFile.RESULTS_FILENAME, //
+                Constants.SCOREBOARD_JSON_FILENAME, //
+                Constants.AWARDS_JSON_FILENAME, //
+        };
 
-            try {
-                ResultsFile resultsFile = new ResultsFile();
-                String[] resultTSVLines = resultsFile.createTSVFileLines(contest);
+        // TODO 760  create comparison summary/output
 
-                FileUtilities.writeFileContents(resultsFilename, resultTSVLines);
+        String[] reportLinss = { //
 
-            } catch (Exception e) {
-                // TODO provide context
-                throw e;
-            }
+                "Primary CCS Results dir: " + getPrimaryCCSResultsDir(), //
+                "pc2 results dir        : " + getPc2ResultsDir(), //
+                "compared files         : " + String.join(", ", filesToCompare), //
+                "", //
 
-            // TODO create scoreboard.json
+                // TODO 760 insert comparison
+                
+                "Comparison Summary:   FAILED - comparison code not written  TODO 760 ", //
 
-            try {
+                "", //
 
-            } catch (Exception e) {
-                // TODO provide context
-                throw e;
+        };
 
-                // TODO: handle exception
-            }
-
-            try {
-                ScoreboardJson scoreboardJson = new ScoreboardJson();
-                String json = scoreboardJson.createJSON(contest);
-                String[] scoreboardJsonLines = { json };
-                FileUtilities.writeFileContents(scoreboardJsonFilename, scoreboardJsonLines);
-
-            } catch (Exception e) {
-                // TODO provide context
-                throw e;
-            }
-
-            try {
-                List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
-                PrintWriter printWriter = new PrintWriter(new FileOutputStream(awardsFileName, false), true);
-                CLICSJsonUtilities.writeAwardsJSONFile(printWriter, awards);
-                printWriter.close();
-
-            } catch (Exception e) {
-                // TODO provide context
-                throw e;
-            }
-
-            System.out.println("debug 22 resultsFilename = " + resultsFilename);
-            System.out.println("debug 22 scoreboardJsonFilename = " + scoreboardJsonFilename);
-            System.out.println("debug 22 awardsFileName = " + awardsFileName);
-
-            String[] filesToCompare = { ResultsFile.RESULTS_FILENAME, //
-                    Constants.SCOREBOARD_JSON_FILENAME, //
-                    Constants.AWARDS_JSON_FILENAME, //
-            };
-
-            // TODO create comparison summary/output
-
-            String[] reportLinss = { //
-
-                    "Primary CCS Results dir: " + getPrimaryCCSResultsDir(), //
-                    "pc2 results dir        : " + getPc2ResultsDir(), //
-                    "compared files         : " + String.join(", ", filesToCompare), //
-                    "", //
-
-                    // TODO insert comparison
-                    "Comparison Summary:   FAILED - comparison code not written  TODO ", //
-
-                    "", //
-
-            };
-
-            return reportLinss;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Exception creating results files", e.getCause());
-        }
-
+        return reportLinss;
     }
 
     @Override

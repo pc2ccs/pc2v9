@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
@@ -21,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
 /**
  * Export Results files report.
@@ -145,27 +147,27 @@ public class ResultsExportReport implements IReport {
     public String[] createReport(Filter filter) {
         
         List<String> outList = new ArrayList<String>();
+        
+        String resultsFilename = getPc2ResultsDir() + File.separator + ResultsFile.RESULTS_FILENAME;
 
-        // TODO print filter?
+        String scoreboardJsonFilename = pc2ResultsDir + File.separator + Constants.SCOREBOARD_JSON_FILENAME;
+
+        String awardsFileName = pc2ResultsDir + File.separator + Constants.AWARDS_JSON_FILENAME;
 
         /**
          * Export results.tsv
          */
         
-        String outputFilename = pc2ResultsDir + File.separator + "results.tsv";
         IReport report = new ResultsTSVReport();
-        String reportMessage = writeReportFile (report, outputFilename);
+        String reportMessage = writeReportFile (report, resultsFilename);
         outList.add(reportMessage);
         
         /**
          * Export scoreboard.json
          */
         
-        //scoreboard.json
-        outputFilename = pc2ResultsDir + File.separator + "scoreboard.json";
-        
         report = new ScoreboardJSONReport();
-        reportMessage = writeReportFile(report, outputFilename);
+        reportMessage = writeReportFile(report, scoreboardJsonFilename);
         outList.add(reportMessage);
         
         // TODO 760 output results.tsv
