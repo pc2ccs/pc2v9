@@ -7,6 +7,7 @@ import java.util.List;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.FileUtilities;
+import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAwardUtilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -41,8 +42,9 @@ public class ExportFilesUtiltiites {
             FileUtilities.writeFileContents(resultsFilename, resultTSVLines);
 
         } catch (Exception e) {
-            e.printStackTrace(System.out); // TODO 760 remove once fixed so stack trace shown for source of RunTimeException
-            throw new RuntimeException("Problem generating " + resultsFilename, e.getCause());
+            e.printStackTrace(System.out); // TODO 760 add context to exception message
+//            throw new RuntimeException("Problem generating " + resultsFilename, e.getCause());
+            throw ExecuteUtilities.rethrow(e);
         }
 
         try {
@@ -52,8 +54,9 @@ public class ExportFilesUtiltiites {
             FileUtilities.writeFileContents(scoreboardJsonFilename, scoreboardJsonLines);
 
         } catch (Exception e) {
-            e.printStackTrace(System.out); // TODO 760 remove once fixed so stack trace shown for source of RunTimeException
-            throw new RuntimeException("Problem generating " + scoreboardJsonFilename, e.getCause());
+            e.printStackTrace(System.out); // TODO 760 add context to exception message
+//            throw new RuntimeException("Problem generating " + scoreboardJsonFilename, e.getCause());
+            throw ExecuteUtilities.rethrow(e);
         }
 
         try {
@@ -63,8 +66,9 @@ public class ExportFilesUtiltiites {
             printWriter.close();
 
         } catch (Exception e) {
-            e.printStackTrace(System.out); // TODO 760 remove once fixed so stack trace shown for source of RunTimeException
-            throw new RuntimeException("Problem generating " + awardsFileName, e.getCause());
+            e.printStackTrace(System.out); // TODO 760 add context to exception message
+//            throw new RuntimeException("Problem generating " + awardsFileName, e.getCause());
+            throw ExecuteUtilities.rethrow(e);
         }
 
     }
