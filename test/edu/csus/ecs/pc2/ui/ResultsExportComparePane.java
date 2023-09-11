@@ -78,9 +78,8 @@ public class ResultsExportComparePane extends JPanePlugin {
             public void keyTyped(KeyEvent e) {
                 
                 if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
-
-                    System.out.println("Save pc2 results dir");
-                    // TODO 760 Save if CR pressed
+                    System.out.println("Save pc2 results dir"); // TODO 760 debugging
+                    updateUserSetting(ClientSettings.PC2_RESULTS_DIR, pc2ResultsDirectoryTextField.getText());
                 }
 
             }
@@ -106,8 +105,8 @@ public class ResultsExportComparePane extends JPanePlugin {
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
 
-                    System.out.println("Save ccs results dir");
-                    // TODO 760 Save if CR pressed
+                    System.out.println("Save ccs results dir"); // TODO 760 debugging
+                    updateUserSetting(ClientSettings.PRIMARY_CCS_RESULTS_DIR, pc2ResultsDirectoryTextField.getText());
                 }
             }
         });
@@ -223,6 +222,17 @@ public class ResultsExportComparePane extends JPanePlugin {
 
         // primaryCCSResultsDirectoryTextField
     }
+    
+    private void updateUserSetting(String key, String value) {
+
+        try {
+            updateClientSettings(key, value);
+        } catch (Exception e) {
+            e.printStackTrace(); // TODO 760 error handle this better
+        }
+
+    }
+    
 
     protected void selectAndUpdatePrimaryCCSResultsDirectory(JTextField textField) {
 
@@ -230,7 +240,7 @@ public class ResultsExportComparePane extends JPanePlugin {
 
         try {
             File newFile = FileUtilities.selectDirectory(initDirectory, textField, exportDirectoryLabel, "Select primary CCS results directory");
-            updateClientSettings(ClientSettings.PRIMARY_CCS_RESULTS_DIR, newFile.getCanonicalFile().toString());
+            updateUserSetting(ClientSettings.PRIMARY_CCS_RESULTS_DIR, newFile.getCanonicalFile().toString());
             textField.setText(newFile.getAbsolutePath());
             textField.setToolTipText(newFile.getAbsolutePath());
 
@@ -247,7 +257,7 @@ public class ResultsExportComparePane extends JPanePlugin {
 
         try {
             File newFile = FileUtilities.selectDirectory(initDirectory, textField, exportDirectoryLabel, "Select pc2 results directory");
-            updateClientSettings(ClientSettings.PC2_RESULTS_DIR, newFile.getCanonicalFile().toString());
+            updateUserSetting(ClientSettings.PC2_RESULTS_DIR, newFile.getCanonicalFile().toString());
 
         } catch (Exception e) {
             getLog().log(Level.WARNING, "Exception trying to select or pc2 results dir" + e.getMessage(), e);
@@ -367,7 +377,7 @@ public class ResultsExportComparePane extends JPanePlugin {
     }
 
     /**
-     * Update settings (sent to server)
+     * Update user settings (sent to server)
      * 
      * @param newClientSettings
      * @param name
