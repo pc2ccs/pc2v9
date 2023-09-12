@@ -219,4 +219,6 @@ public final class Constants {
      * default results directory for CDP.
      */
     public static final String CDP_RESULTS_DIR ="results";
+
+    public static final String TAB = "\t";
 }

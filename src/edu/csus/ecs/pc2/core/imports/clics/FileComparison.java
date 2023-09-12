@@ -7,13 +7,11 @@ import java.util.logging.Level;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
 import edu.csus.ecs.pc2.core.report.ComparisonState;
+import edu.csus.ecs.pc2.core.report.FileComparisonUtilities;
 
 /**
  * Comparison information between two files.
@@ -97,11 +95,7 @@ public class FileComparison {
     // TODO REFACTOR Move into a JSON Utility class
     public String toJSON() {
 
-        // TODO REFACTOR Update getObjectMapper to use configs below.
-        ObjectMapper objectMapper = JSONObjectMapper.getObjectMapper();
-        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectMapper objectMapper = FileComparisonUtilities.getObjectMapper();
 
         try {
             String jsonString = objectMapper.writeValueAsString(this);
@@ -114,4 +108,5 @@ public class FileComparison {
             return null;
         }
     }
+
 }
