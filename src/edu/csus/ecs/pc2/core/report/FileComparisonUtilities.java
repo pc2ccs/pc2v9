@@ -78,7 +78,7 @@ public class FileComparisonUtilities {
                         String fieldName = secondLineFields[0];
                         for (int i = 1; i < columnList.length; i++) {
                             String valueTwo = secondLineFields[i];
-                            FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, null, valueTwo, null);
+                            FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, null, valueTwo, null, key);
                             fileComparison.addfieldCompareRecord(fieldCompareRecord);
                         }
                     } else {
@@ -90,7 +90,7 @@ public class FileComparisonUtilities {
                         for (int i = 1; i < columnList.length; i++) {
                             String valueOne = firstLineFields[i];
                             String valueTwo = secondLineFields[i];
-                            FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null);
+                            FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                             fileComparison.addfieldCompareRecord(fieldCompareRecord);
                         }
                     }

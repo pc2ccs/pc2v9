@@ -22,6 +22,9 @@ public class FieldCompareRecord {
     private ComparisonState state = ComparisonState.UNDEFINED;
 
     @JsonProperty
+    private String key = null;
+
+    @JsonProperty
     private String fieldName;
 
     @JsonProperty
@@ -34,11 +37,16 @@ public class FieldCompareRecord {
     private String details;
 
     public FieldCompareRecord(String fieldName, String valueOne, String valueTwo, String details) {
+        this(fieldName, valueOne, valueTwo, details, null);
+    }
+    
+    public FieldCompareRecord(String fieldName, String valueOne, String valueTwo, String details, String key) {
         super();
         this.fieldName = fieldName;
         this.valueOne = valueOne;
         this.valueTwo = valueTwo;
         this.details = details;
+        this.key = key;
 
         createComparisonState(valueOne, valueTwo);
     }
@@ -98,6 +106,14 @@ public class FieldCompareRecord {
     public void setDetails(String details) {
         this.details = details;
     }
+    
+    public String getKey() {
+        return key;
+    }
+    
+    public void setKey(String key) {
+        this.key = key;
+    }
 
     /**
      * Returns a JSON string representation of this SerializedFile object.
@@ -120,6 +136,11 @@ public class FieldCompareRecord {
             }
             return null;
         }
+    }
+    
+    @Override
+    public String toString() {
+        return toJSON();
     }
 
 }
