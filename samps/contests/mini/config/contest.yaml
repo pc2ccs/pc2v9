@@ -2,7 +2,6 @@
 #
 # Sumit Sample multiple test cases ("mini" contest)
 #
-# TODO remove wrapper_* from all other sample contest yaml
 --- 
 
 name: Pac NW Mini Contest
@@ -67,7 +66,6 @@ languages:
     execCmd: 'java -Xss8m -Xmx1024m {:basename}'
     runner: 'java'
     runner-args: '{:basename}'
-    use-judge-cmd: true
 
   - name: 'GNU C'
     active: true
@@ -76,7 +74,6 @@ languages:
     execCmd: './a.out'
     runner: './a.out'
     runner-args: ''
-    use-judge-cmd: true
 
   - name: 'GNU C++'
     active: true
@@ -85,7 +82,6 @@ languages:
     execCmd: './a.out'
     runner: './a.out'
     runner-args: ''
-    use-judge-cmd: true
 
   - name: 'Python2'
     active: true
@@ -95,7 +91,6 @@ languages:
     execCmd: 'python {:mainfile}'
     runner: 'python'
     runner-args: '{:mainfile}'
-    use-judge-cmd: true
 
   - name: 'Python3'
     active: true
@@ -105,7 +100,6 @@ languages:
     execCmd: 'python3 {:mainfile}'
     runner: 'python3'
     runner-args: '{:mainfile}'
-    use-judge-cmd: true
 
   - name: 'C#'
     active: true
@@ -115,7 +109,6 @@ languages:
     execCmd: 'mono {:basename}.exe'
     runner: 'mono'
     runner-args: '{:basename}.exe'
-    use-judge-cmd: true
 
 #
 # problemset.yaml - list of CCS problem definitions

@@ -549,8 +549,6 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
         //        ensureDirectory(dataDir);
 //                startExplorer(dataDir);
-        
-        System.out.println("debug 22 AA "+dataDir);
 
         String awardsFile = dataDir + File.separator + "bapc2020.awards.json";
         assertFileExists(awardsFile);
