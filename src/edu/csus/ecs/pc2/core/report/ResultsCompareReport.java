@@ -18,6 +18,9 @@ import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.AwardKey;
+import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.ResultTSVKey;
+import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.ScoreboardKey;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
 /**
@@ -143,9 +146,16 @@ public class ResultsCompareReport implements IReport {
 
         if (new File(targetDir).isDirectory()) {
 
-            FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir);
-            FileComparison awardsFileCompare = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir);
-            FileComparison scoreboardJsonCompare = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir);
+            ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
+
+            AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
+
+            ScoreboardKey scoreboardKey = new FileComparisonUtilities.ScoreboardKey();
+
+
+            FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
+            FileComparison awardsFileCompare = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
+            FileComparison scoreboardJsonCompare = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
 
             List<String> compareInfo = new ArrayList<String>();
 

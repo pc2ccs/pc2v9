@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.imports.clics.FieldCompareRecord;
@@ -23,8 +24,10 @@ import edu.csus.ecs.pc2.exports.ccs.ResultRow;
  * @author Douglas A. Lane, PC^2 team pc2@ecs.csus.edu
  */
 public class FileComparisonUtilities {
+    
+    private ObjectMapper objectMapper = FileComparisonUtilities.getObjectMapper();
 
-    public static FileComparison createJSONFileComparison(String tsvFileName, String sourceDir, String targetDir) {
+    public static FileComparison createJSONFileComparison(String tsvFileName, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
 
         String firstFilename = sourceDir + File.separator + tsvFileName;
         String secondFilename = targetDir + File.separator + tsvFileName;
@@ -35,27 +38,27 @@ public class FileComparisonUtilities {
         return fileComparison;
     }
 
-    public static FileComparison createTSVFileComparison(String tsvFilename, String sourceDir, String targetDir) {
+    public static FileComparison createTSVFileComparison(String tsvFilename, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
 
         String firstFilename = sourceDir + File.separator + tsvFilename;
         String secondFilename = targetDir + File.separator + tsvFilename;
         FileComparison fileComparison = new FileComparison(firstFilename, secondFilename);
 
         String[] columnList = { "CMS Id", "rank", "medal", "solved", "penalty", "last sovlved time" };
-        
+
         try {
 
             /**
              * Map first results lines to cms id
              */
-            Map<Integer, String> firstFileMap = new HashMap<Integer, String>();
+            Map<String, String> firstFileMap = new HashMap<String, String>();
 
             String[] lines = Utilities.loadFile(firstFilename);
             for (String line : lines) {
 
                 if (!line.trim().startsWith("result")) {
-                    ResultRow row = new ResultRow(line.trim());
-                    firstFileMap.put(row.getCmsId(), line);
+                    String key = fileComparisonKey.getKey(line);
+                    firstFileMap.put(key, line);
                 }
             }
 
@@ -67,7 +70,8 @@ public class FileComparisonUtilities {
                 if (!secondLine.trim().startsWith("result")) {
                     ResultRow row = new ResultRow(secondLine);
 
-                    String firstLine = firstFileMap.get(row.getCmsId());
+                    String key = fileComparisonKey.getKey(secondLine);
+                    String firstLine = firstFileMap.get(key);
 
                     if (firstLine == null) {
                         // found in second file but not in first
@@ -80,6 +84,7 @@ public class FileComparisonUtilities {
                     } else {
                         // found matching cms id in both files
                         String fieldName = secondLineFields[0];
+
                         String[] firstLineFields = firstLine.split(Constants.TAB);
 
                         for (int i = 1; i < columnList.length; i++) {
@@ -91,8 +96,8 @@ public class FileComparisonUtilities {
                     }
                 }
             }
-            
-            // TODO 760 handle if not in second then file.
+
+            // TODO 760 code third condition, find rows that are NOT in first file but are in second file.
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -117,5 +122,47 @@ public class FileComparisonUtilities {
         
         return objectMapper;
     }
+    
+    public static class ResultTSVKey implements IFileComparisonKey{
+
+        @Override
+        public String getKey(String line) {
+            if (StringUtilities.isEmpty(line)) {
+                return null;
+            } else {
+                String [] fields = line.split(Constants.NL);
+                return fields[0];
+            }
+        }
+    }
+    
+    public static class AwardKey implements IFileComparisonKey{
+
+        @Override
+        public String getKey(String line) {
+            if (StringUtilities.isEmpty(line)) {
+                return null;
+            } else {
+//                CLICSAward award = objectMapper.par;
+//                return award.getId();
+                return null; // TODO 760 
+            }
+        }
+    }
+    
+    public static class ScoreboardKey implements IFileComparisonKey{
+
+        @Override
+        public String getKey(String line) {
+            if (StringUtilities.isEmpty(line)) {
+                return null;
+            } else {
+//                CLICSAward award = objectMapper.par;
+//                return award.getId();
+                return null; // TODO 760 
+            }
+        }
+    }
+
     
 }

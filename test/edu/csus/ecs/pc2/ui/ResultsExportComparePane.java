@@ -32,6 +32,9 @@ import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.ExportFilesUtiltiites;
 import edu.csus.ecs.pc2.core.report.FileComparisonUtilities;
+import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.AwardKey;
+import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.ResultTSVKey;
+import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.ScoreboardKey;
 import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
 import edu.csus.ecs.pc2.core.report.ResultsExportReport;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
@@ -60,6 +63,12 @@ public class ResultsExportComparePane extends JPanePlugin {
     private JLabel resultsPassFailLabel;
 
     private FileComparison scoreboardJsonCompare;
+    
+    private ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
+
+    private AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
+
+    private ScoreboardKey scoreboardKey = new FileComparisonUtilities.ScoreboardKey();
 
     public ResultsExportComparePane() {
         setBorder(new TitledBorder(null, "Export and Compare Contest Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -364,15 +373,15 @@ public class ResultsExportComparePane extends JPanePlugin {
             String targetDir = ""; // TODO 760 assign traget dir
 
             String compareMessage = "Comparison Summary:   FAILED - no such directory (cdp directory not set) " + targetDir;
-
+            
             System.out.println("debug 22 Would have compared " + ResultsFile.RESULTS_FILENAME);
-            resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir);
+            resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
 
             System.out.println("debug 22 Would have compared " + Constants.AWARDS_JSON_FILENAME);
-            awardsFileCompare = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir);
+            awardsFileCompare = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
 
             System.out.println("debug 22 Would have compared " + Constants.SCOREBOARD_JSON_FILENAME);
-            scoreboardJsonCompare = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir);
+            scoreboardJsonCompare = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
 
             //            showComparisonResults();   // TODO 760 compare files
 
