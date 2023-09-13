@@ -91,6 +91,8 @@ public class FileComparisonUtilities {
                     }
                 }
             }
+            
+            // TODO 760 handle if not in second then file.
 
         } catch (Exception e) {
             e.printStackTrace();

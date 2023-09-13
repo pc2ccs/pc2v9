@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.csus.ecs.pc2.core.Constants;
@@ -27,8 +28,11 @@ public class ExportFilesUtiltiites {
      * @param contest
      * @param outputDirectory
      *            directory to write reports to.
+     * @return list of created files
      */
-    public static void writeResultsFiles(IInternalContest contest, String outputDirectory) {
+    public static String[] writeResultsFiles(IInternalContest contest, String outputDirectory) {
+
+        List<String> filesCreated = new ArrayList<String>();
 
         String resultsFilename = outputDirectory + File.separator + ResultsFile.RESULTS_FILENAME;
 
@@ -40,6 +44,8 @@ public class ExportFilesUtiltiites {
             ResultsFile resultsFile = new ResultsFile();
             String[] resultTSVLines = resultsFile.createTSVFileLines(contest);
             FileUtilities.writeFileContents(resultsFilename, resultTSVLines);
+
+            filesCreated.add(resultsFilename);
 
         } catch (Exception e) {
             e.printStackTrace(System.out); // TODO 760 add context to exception message
@@ -53,6 +59,8 @@ public class ExportFilesUtiltiites {
             String[] scoreboardJsonLines = { json };
             FileUtilities.writeFileContents(scoreboardJsonFilename, scoreboardJsonLines);
 
+            filesCreated.add(scoreboardJsonFilename);
+
         } catch (Exception e) {
             e.printStackTrace(System.out); // TODO 760 add context to exception message
 //            throw new RuntimeException("Problem generating " + scoreboardJsonFilename, e.getCause());
@@ -65,12 +73,14 @@ public class ExportFilesUtiltiites {
             CLICSAwardUtilities.writeAwardsJSONFile(printWriter, awards);
             printWriter.close();
 
+            filesCreated.add(awardsFileName);
+
         } catch (Exception e) {
             e.printStackTrace(System.out); // TODO 760 add context to exception message
 //            throw new RuntimeException("Problem generating " + awardsFileName, e.getCause());
             throw ExecuteUtilities.rethrow(e);
         }
 
+        return (String[]) filesCreated.toArray(new String[filesCreated.size()]);
     }
-
 }

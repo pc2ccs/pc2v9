@@ -221,4 +221,6 @@ public final class Constants {
     public static final String CDP_RESULTS_DIR ="results";
 
     public static final String TAB = "\t";
+
+    public static final String NL = System.getProperty("line.separator");
 }
