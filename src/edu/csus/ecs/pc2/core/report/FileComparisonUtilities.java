@@ -122,7 +122,12 @@ public class FileComparisonUtilities {
         
         return objectMapper;
     }
-    
+
+    /**
+     * Fetch cms id as key.
+     * 
+     * @author Douglas A. Lane, PC^2 team pc2@ecs.csus.edu
+     */
     public static class ResultTSVKey implements IFileComparisonKey{
 
         @Override

@@ -35,7 +35,6 @@ import edu.csus.ecs.pc2.core.report.FileComparisonUtilities;
 import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.AwardKey;
 import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.ResultTSVKey;
 import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.ScoreboardKey;
-import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
 import edu.csus.ecs.pc2.core.report.ResultsExportReport;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
@@ -53,8 +52,6 @@ public class ResultsExportComparePane extends JPanePlugin {
     private JTextField primaryCCSResultsDirectoryTextField;
 
     private JLabel exportDirectoryLabel;
-    
-    private JButton viewResultsDetailsButton = new JButton("View Details");
 
     private FileComparison resultsCompare;
 
@@ -69,6 +66,8 @@ public class ResultsExportComparePane extends JPanePlugin {
     private AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
 
     private ScoreboardKey scoreboardKey = new FileComparisonUtilities.ScoreboardKey();
+    
+    private JPanel southPane = new JPanel();
 
     public ResultsExportComparePane() {
         setBorder(new TitledBorder(null, "Export and Compare Contest Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -143,27 +142,6 @@ public class ResultsExportComparePane extends JPanePlugin {
         FlowLayout flowLayout = (FlowLayout) buttonPane.getLayout();
         flowLayout.setHgap(55);
         centerPane.add(buttonPane);
-
-        JButton exportResultsButton = new JButton("Export Results");
-        exportResultsButton.setToolTipText("Export Results files to pc2 results directory");
-        buttonPane.add(exportResultsButton);
-        exportResultsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                exportpc2ResultsFiles();
-
-            }
-        });
-
-        JButton compartResultsButton = new JButton("Compare Result");
-        buttonPane.add(compartResultsButton);
-        compartResultsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-
-                exportAndCompare();
-
-            }
-        });
-        compartResultsButton.setToolTipText("Compare pc2 results files to primary CCS results");
         
         JPanel resultsPane = new JPanel();
         centerPane.add(resultsPane);
@@ -174,42 +152,33 @@ public class ResultsExportComparePane extends JPanePlugin {
         resultsPassFailLabel = new JLabel("-");
         resultsPassFailLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
         resultsPane.add(resultsPassFailLabel);
+        FlowLayout flowLayout_1 = (FlowLayout) southPane.getLayout();
+        flowLayout_1.setHgap(45);
         
+        southPane.setSize(30,30);
+        add(southPane, BorderLayout.SOUTH);
         
-        viewResultsDetailsButton.setToolTipText("View the details of the compaison");
-        viewResultsDetailsButton.setEnabled(false);
-        viewResultsDetailsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+                JButton exportResultsButton = new JButton("Export Results");
+                southPane.add(exportResultsButton);
+                exportResultsButton.setToolTipText("Export Results files to pc2 results directory");
                 
-                createDetailsInfo();
-            }
-        });
-        
-        resultsPane.add(viewResultsDetailsButton);
+                        JButton compartResultsButton = new JButton("Compare Result");
+                        southPane.add(compartResultsButton);
+                        compartResultsButton.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+
+                                exportAndCompare();
+
+                            }
+                        });
+                        compartResultsButton.setToolTipText("Compare pc2 results files to primary CCS results");
+                exportResultsButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        exportpc2ResultsFiles();
+
+                    }
+                });
  
-    }
-
-    protected void createDetailsInfo() {
-
-        // TODO 760  Show comparison report(s)
-        
-        try {
-            // Export pc2 results
-            String filename = Utilities.createReport(new ResultsExportReport(), getContest(), getController(), true);
-            
-            // compare primary and pc2 rsults
-            ResultsCompareReport report = new ResultsCompareReport();
-            Utilities.viewReport(report, "Results Coparison", getContest(), getController(), true);
-            
-        } catch (Exception e) {
-            showMessage(this, "Ooops", e.getMessage());
-            e.printStackTrace();
-            
-            // TODO: handle exception
-        }
-        
-
-        
     }
 
     @Override
@@ -364,8 +333,6 @@ public class ResultsExportComparePane extends JPanePlugin {
             return;
         }
         
-//      ResultsExportReport report = new ResultsExportReport();
-//      Utilities.viewReport(report, "Results Export Fies Report", getContest(), getController(), true);
 
         try {
 
@@ -374,14 +341,18 @@ public class ResultsExportComparePane extends JPanePlugin {
 
             String compareMessage = "Comparison Summary:   FAILED - no such directory (cdp directory not set) " + targetDir;
             
-            System.out.println("debug 22 Would have compared " + ResultsFile.RESULTS_FILENAME);
-            resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
-
-            System.out.println("debug 22 Would have compared " + Constants.AWARDS_JSON_FILENAME);
-            awardsFileCompare = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
-
-            System.out.println("debug 22 Would have compared " + Constants.SCOREBOARD_JSON_FILENAME);
-            scoreboardJsonCompare = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
+//            System.out.println("debug 22 Would have compared " + ResultsFile.RESULTS_FILENAME);
+//            resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
+//
+//            System.out.println("debug 22 Would have compared " + Constants.AWARDS_JSON_FILENAME);
+//            awardsFileCompare = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
+//
+//            System.out.println("debug 22 Would have compared " + Constants.SCOREBOARD_JSON_FILENAME);
+//            scoreboardJsonCompare = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
+//            
+            
+            ResultsExportReport report = new ResultsExportReport();
+            Utilities.viewReport(report, "Results Export Fies Report", getContest(), getController(), true);
 
             //            showComparisonResults();   // TODO 760 compare files
 
@@ -394,8 +365,6 @@ public class ResultsExportComparePane extends JPanePlugin {
     }
 
     private void showComparisonResults() {
-        
-        viewResultsDetailsButton.setEnabled(true);
         
         // TODO 760 assign summary results
         
