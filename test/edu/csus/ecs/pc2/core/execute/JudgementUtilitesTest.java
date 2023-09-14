@@ -428,12 +428,10 @@ public class JudgementUtilitesTest extends AbstractTestCase {
         recs = JudgementUtilites.getLastTestCaseArray(contest, run);
         
         assertEquals("Expected test cases ", 10, recs.length);
-        
         // Add second set of test cases - all WA
         for (int testCaseNum = 1; testCaseNum <= problem.getNumberTestCases(); testCaseNum++) {
             addRunTestCase(contest, run, testCaseNum, waJudgement, judges[0].getClientId());
         }
-        
         assertEquals("Expected total test cases ", 20, run.getRunTestCases().length);
         recs = JudgementUtilites.getLastTestCaseArray(contest, run);
         

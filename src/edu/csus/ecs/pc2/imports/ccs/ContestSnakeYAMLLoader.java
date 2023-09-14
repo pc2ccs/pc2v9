@@ -297,7 +297,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
 
-    private void setLoadSampleJudgesData(IInternalContest contest, boolean loadSampleFiles) {
+    protected void setLoadSampleJudgesData(IInternalContest contest, boolean loadSampleFiles) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setLoadSampleJudgesData(loadSampleFiles);
         contest.updateContestInformation(contestInformation);
@@ -2925,40 +2925,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         if (inputFileNames.length == answerFileNames.length) {
 
-            Arrays.sort(inputFileNames);
-            Arrays.sort(answerFileNames);
-
             ArrayList<SerializedFile> dataFiles = new ArrayList<SerializedFile>();
             ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
             
             if (loadSamples) {
                 loadDataFiles(problem, dataFiles, answerFiles, sampleDataDirectory, loadExternalFile);
             }
-
             
-            // TODO REFACTOR use loadDataFiles to load secret data files.
-            
-            for (int idx = 0; idx < inputFileNames.length; idx++) {
-
-                problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
-
-                String dataFileName = dataFileBaseDirectory + File.separator + inputFileNames[idx];
-                String answerFileName = dataFileName.replaceAll(".in$", ".ans");
-
-                if (idx == 0) {
-                    problem.setDataFileName(Utilities.basename(dataFileName));
-                    problem.setAnswerFileName(Utilities.basename(answerFileName));
-                }
-
-                String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
-
-                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
-                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
-
-                dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
-                answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
-
-            }
+            // Load all secret files
+            loadDataFiles(problem, dataFiles, answerFiles, dataFileBaseDirectory, loadExternalFile);
 
             if (dataFiles.size() > 0) {
 
@@ -2996,13 +2971,23 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return problem;
     }
 
-    protected void loadDataFiles(Problem problem, ArrayList<SerializedFile> dataFiles, ArrayList<SerializedFile> answerFiles, String sampleDataDirectory, boolean loadExternalFile) {
+    /**
+     * Per problem, add files names into datafiles and answerfiles.
+     * 
+     * @param problem 
+     * @param dataFiles input data files
+     * @param answerFiles input answer files
+     * @param fileSourceDirectory - location for the secret or sample files
+     * @param loadExternalFile - load as external data fils
+     */
+    protected void loadDataFiles(Problem problem, ArrayList<SerializedFile> dataFiles, ArrayList<SerializedFile> answerFiles, String fileSourceDirectory, boolean loadExternalFile) {
         
-        String[] inputFileNames = getFileNames(sampleDataDirectory, ".in");
-        String[] answerFileNames = getFileNames(sampleDataDirectory, ".ans");
+        String[] inputFileNames = getFileNames(fileSourceDirectory, ".in");
+        String[] answerFileNames = getFileNames(fileSourceDirectory, ".ans");
         
         if (inputFileNames.length == answerFileNames.length) {
 
+            // Sort file names before loading into datafiles and answerfiles
             Arrays.sort(inputFileNames);
             Arrays.sort(answerFileNames);
 
@@ -3012,11 +2997,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
 
-                String dataFileName = sampleDataDirectory + File.separator + inputFileNames[idx];
+                String dataFileName = fileSourceDirectory + File.separator + inputFileNames[idx];
                 String answerFileName = dataFileName.replaceAll(".in$", ".ans");
 
-                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + sampleDataDirectory);
-                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + sampleDataDirectory);
+                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + fileSourceDirectory);
+                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + fileSourceDirectory);
 
                 dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
                 answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
@@ -3024,7 +3009,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         } else {
             throw new YamlLoadException("  For " + problem.getShortName() + " Missing data files -  there are " + inputFileNames.length + " .in files and " + //
-                    answerFileNames.length + " .ans files " + " in " + sampleDataDirectory);
+                    answerFileNames.length + " .ans files " + " in " + fileSourceDirectory);
         }
 
     }

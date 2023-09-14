@@ -153,7 +153,6 @@ public class ContestService implements Feature {
             return Response.status(Status.BAD_REQUEST).entity("Missing 'starttime' key in /contest request").build();
         }
 
-        // if we get here the JSON is valid and contains exactly one element: starttime
         // get the Object corresponding to "start_time"
         String startTimeValueString = requestMap.get("start_time");
 

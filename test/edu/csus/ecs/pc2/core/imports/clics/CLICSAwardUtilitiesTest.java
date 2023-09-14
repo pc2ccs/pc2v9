@@ -37,7 +37,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
-public class CLICSJsonUtilitiesTest extends AbstractTestCase {
+public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
     private SampleContest sampleContest;
 
@@ -52,14 +52,14 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         IInternalContest contest = sample.createStandardContest();
 
-        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+        List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
 
         String outdir = getOutputDataDirectory(getName());
         ensureDirectory(outdir);
 
         String awardsFile = outdir + File.separator + "awards.json";
 
-        int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        int rowsWritten = CLICSAwardUtilities.writeAwardsJSONFile(awardsFile, awards);
 
         assertEquals("Expecting no award rows ", 0, rowsWritten);
     }
@@ -82,8 +82,8 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         List<TeamStanding> teamStands = contestStandings.getTeamStandings();
         for (TeamStanding teamStanding : teamStands) {
-            ClientId clientId = CLICSJsonUtilities.createClientId(teamStanding);
-            Group teamGroup = CLICSJsonUtilities.getGroupForTeam(contest, clientId);
+            ClientId clientId = CLICSAwardUtilities.createClientId(teamStanding);
+            Group teamGroup = CLICSAwardUtilities.getGroupForTeam(contest, clientId);
             if (teamGroup == null) {
                 System.out.println(teamStanding.getRank()+" "+teamStanding.getSolved()+" "+teamStanding.getPoints() + " " + //
                         teamStanding.getTeamName() + " school:" + teamStanding.getShortSchoolName() + " TEAM HAS NO GROUP");
@@ -129,12 +129,12 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
-        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+        List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
 
 //        dumpAwards ("debug DA ",System.out, awards);
 //        dumpStandings("debug XX ", contest);
         
-        assertAwardCount(1, awards, CLICSJsonUtilities.WINNER_S_OF_GROUP_TITLE);
+        assertAwardCount(1, awards, CLICSAwardUtilities.WINNER_S_OF_GROUP_TITLE);
 
         assertEquals("Awards expected ", 6, awards.size());
 
@@ -143,7 +143,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         String awardsFile = outdir + File.separator + "awards.json";
 
-        int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        int rowsWritten = CLICSAwardUtilities.writeAwardsJSONFile(awardsFile, awards);
         assertEquals("Expecting awards elements ", 6, rowsWritten);
 
 //      editFile(awardsFile, "debug C "+getName());
@@ -209,7 +209,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
-        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+        List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
 
         assertEquals("Awards expected ", 0, awards.size());
 
@@ -217,7 +217,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         ensureDirectory(outdir);
         String awardsFile = outdir + File.separator + "awards.json";
         
-        int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        int rowsWritten = CLICSAwardUtilities.writeAwardsJSONFile(awardsFile, awards);
         assertEquals("Expecting awards elements ", 0, rowsWritten);
 
     }
@@ -253,7 +253,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
-        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+        List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
         
         
 
@@ -263,7 +263,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         ensureDirectory(outdir);
         String awardsFile = outdir + File.separator + "awards.json";
 
-        int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        int rowsWritten = CLICSAwardUtilities.writeAwardsJSONFile(awardsFile, awards);
         assertEquals("Expecting no award rows ", 4, rowsWritten);
         
 //        editFile(awardsFile, "debug A "+getName());
@@ -331,7 +331,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
-        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+        List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
         
 //        dumpAwards("test All ", System.out,  awards);
         
@@ -403,15 +403,15 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
 
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
-        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+        List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
         
 //        dumpStandings("debug Two", contest);
 
-        assertTeamCount(awards, CLICSJsonUtilities.ID_WINNER, 1);
+        assertTeamCount(awards, CLICSAwardUtilities.ID_WINNER, 1);
 
-        assertTeamCount(awards, CLICSJsonUtilities.ID_GOLD_MEDAL, 4);
-        assertTeamCount(awards, CLICSJsonUtilities.ID_SILVER_MEDAL, 4);
-        assertTeamCount(awards, CLICSJsonUtilities.ID_BRONZE_MEDAL, 11);
+        assertTeamCount(awards, CLICSAwardUtilities.ID_GOLD_MEDAL, 4);
+        assertTeamCount(awards, CLICSAwardUtilities.ID_SILVER_MEDAL, 4);
+        assertTeamCount(awards, CLICSAwardUtilities.ID_BRONZE_MEDAL, 11);
 
 //        dumpAwards (System.out, awards);
         
@@ -420,13 +420,13 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         
         FinalizeData data = createFinalizeData(4, 4, 13);
         contest.setFinalizeData(data);
-        awards = CLICSJsonUtilities.createAwardsList(contest);
+        awards = CLICSAwardUtilities.createAwardsList(contest);
         
-        assertTeamCount(awards, CLICSJsonUtilities.ID_WINNER, 1);
+        assertTeamCount(awards, CLICSAwardUtilities.ID_WINNER, 1);
 
-        assertTeamCount(awards, CLICSJsonUtilities.ID_GOLD_MEDAL, 4);
-        assertTeamCount(awards, CLICSJsonUtilities.ID_SILVER_MEDAL, 4);
-        assertTeamCount(awards, CLICSJsonUtilities.ID_BRONZE_MEDAL, 11);
+        assertTeamCount(awards, CLICSAwardUtilities.ID_GOLD_MEDAL, 4);
+        assertTeamCount(awards, CLICSAwardUtilities.ID_SILVER_MEDAL, 4);
+        assertTeamCount(awards, CLICSAwardUtilities.ID_BRONZE_MEDAL, 11);
 
         assertEquals("Awards expected ", 7, awards.size());
     }
@@ -519,10 +519,10 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
-        List<CLICSAward> awards = CLICSJsonUtilities.createAwardsList(contest);
+        List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
         
         List<CLICSAward> list = new ArrayList<CLICSAward>();
-        CLICSJsonUtilities.addMedals(contest, list);
+        CLICSAwardUtilities.addMedals(contest, list);
         
         assertEquals("Awards expected ", 9, awards.size());
 
@@ -530,7 +530,7 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         ensureDirectory(outdir);
         String awardsFile = outdir + File.separator + "awards.json";
 
-        int rowsWritten = CLICSJsonUtilities.writeAwardsJSONFile(awardsFile, awards);
+        int rowsWritten = CLICSAwardUtilities.writeAwardsJSONFile(awardsFile, awards);
         assertEquals("Expecting no award rows ", 9, rowsWritten);
         
 //        editFile(awardsFile, "debug A "+getName());
@@ -548,14 +548,14 @@ public class CLICSJsonUtilitiesTest extends AbstractTestCase {
         String dataDir = getDataDirectory(getName());
 
         //        ensureDirectory(dataDir);
-        //        startExplorer(dataDir);
+//                startExplorer(dataDir);
 
         String awardsFile = dataDir + File.separator + "bapc2020.awards.json";
         assertFileExists(awardsFile);
 
 //        editFile (awardsFile, "debug tr "+getName());
 
-        List<CLICSAward> awards = CLICSJsonUtilities.readAwardsList(awardsFile);
+        List<CLICSAward> awards = CLICSAwardUtilities.readAwardsList(awardsFile);
 
         assertEquals("Expecting same number of awards", 26, awards.size());
 

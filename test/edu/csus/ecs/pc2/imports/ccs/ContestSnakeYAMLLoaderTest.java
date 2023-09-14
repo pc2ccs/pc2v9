@@ -3857,6 +3857,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
     }
     
+    /**
+     * Test loading both sample and secret files.
+     * @throws Exception
+     */
     public void testLoadSampleFiles() throws Exception {
 
         IInternalContest contest = loadFullSampleContest(null, MINI_CONTEST_DIR);
