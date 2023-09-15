@@ -2,6 +2,7 @@
 #include "validate.h"
 #include <fstream>
 #include <algorithm>
+#include <signal.h>
 
 using namespace std;
 
@@ -78,6 +79,8 @@ void run_solution(bool solvable) {
 
 
 int main(int argc, char* argv[]) {
+	signal(SIGPIPE, SIG_IGN);
+
 	init_io(argc, argv);
 
 	read_input();

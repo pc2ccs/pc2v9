@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
+#include <signal.h>
 #include "streamcorr.h"
 
 using namespace std;
@@ -77,6 +78,8 @@ void check_case() {
 }
 
 int main(int argc, char **argv) {
+  signal(SIGPIPE, SIG_IGN);
+
   init_io(argc, argv);
 
   string line;
