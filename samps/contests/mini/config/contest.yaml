@@ -15,6 +15,10 @@ duration:  2:00:00
 
 max-output-size-K: 142
 
+
+# Load sample data 
+load-sample-judges-data: true
+
 # freeze time before end of contest
 scoreboard-freeze: 01:00:00
 # scoreboard-freeze-length in CCS, but has it de facto changed to scoreboard-freeze in pc2?
@@ -52,7 +56,7 @@ load-data-files: false
 # load-sample-judges-data : true
 
 # judge's data path
-judge-config-path: /home/judge/cdp/config
+# judge-config-path: /home/judge/cdp/config
 
 languages:
   - name: 'Java'
@@ -62,8 +66,6 @@ languages:
     execCmd: 'java -Xss8m -Xmx1024m {:basename}'
     runner: 'java'
     runner-args: '{:basename}'
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_java {:timelimit} {:basename}'
 
   - name: 'GNU C'
     active: true
@@ -72,8 +74,6 @@ languages:
     execCmd: './a.out'
     runner: './a.out'
     runner-args: ''
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_c {:timelimit}'
 
   - name: 'GNU C++'
     active: true
@@ -82,8 +82,6 @@ languages:
     execCmd: './a.out'
     runner: './a.out'
     runner-args: ''
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_c {:timelimit}'
 
   - name: 'Python2'
     active: true
@@ -93,8 +91,6 @@ languages:
     execCmd: 'python {:mainfile}'
     runner: 'python'
     runner-args: '{:mainfile}'
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_python {:timelimit} {:mainfile}'
 
   - name: 'Python3'
     active: true
@@ -104,8 +100,6 @@ languages:
     execCmd: 'python3 {:mainfile}'
     runner: 'python3'
     runner-args: '{:mainfile}'
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_python3 {:timelimit} {:mainfile}'
 
   - name: 'C#'
     active: true
@@ -115,8 +109,6 @@ languages:
     execCmd: 'mono {:basename}.exe'
     runner: 'mono'
     runner-args: '{:basename}.exe'
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_cs {:timelimit} {:basename}.exe'
 
 #
 # problemset.yaml - list of CCS problem definitions
