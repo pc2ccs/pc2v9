@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalTSVFormatException;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -235,7 +236,15 @@ public class LoadAccounts {
         account.setGroupId(existingAccount.getGroupId());
         account.setLongSchoolName(new String(existingAccount.getLongSchoolName()));
         account.setShortSchoolName(new String(existingAccount.getShortSchoolName()));
-
+        account.setInstitutionCode(existingAccount.getInstitutionCode());
+        account.setInstitutionName(existingAccount.getInstitutionName());
+        account.setInstitutionShortName(existingAccount.getInstitutionShortName());
+        String [] existingMembers = existingAccount.getMemberNames();
+        if(existingMembers != null) {
+            account.setMemberNames(StringUtilities.cloneStringArray(existingMembers));
+        }
+        
+        
         // now start updating fields
         
         if (passwordColumn != -1 && values.length > passwordColumn) {
