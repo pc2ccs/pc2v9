@@ -2530,7 +2530,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             //point to the file that we want to create
             String targetFileName = prefixExecuteDirname(scriptName);
     
-            //point to the PC2 Internal Sandbox file (under "/sandbox" in the home, i.e. installation, directory)
+            //point to the PC2 Internal Sandbox file (under "/scripts" in the home, i.e. installation, directory)
             String srcFileName = home + File.separator + Constants.PC2_SCRIPT_DIRECTORY + File.separator + scriptName ;
             
             try {
@@ -3572,7 +3572,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * @throws SecurityException - if the copy of the output validator can not be generated in the execute folder
      * @throws IllegalStateException - if not output validator is available
      */
-    void createValidatorProgram()
+    private void createValidatorProgram()
     {
         // for a custom validator we also need to obtain the SerializedFile for the validator
         if (problemDataFiles != null && problemDataFiles.getOutputValidatorFile() != null) {

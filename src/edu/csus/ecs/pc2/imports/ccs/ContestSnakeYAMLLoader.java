@@ -3336,13 +3336,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         boolean loaded = false;
 
         String teamsTSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.TEAMS_FILENAME;
-        String teamsTSV2File = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.TEAMS2_TSV;
+        String teams2TSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.TEAMS2_TSV;
 
         String groupsTSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.GROUPS_FILENAME;
 
-        // only load if both tsv files are present.
+        // only load if both a teams TSV and groups TSV files are present.
 
-        if ((new File(teamsTSVFile).isFile() || new File(teamsTSV2File).isFile()) && new File(groupsTSVFile).isFile()) {
+        if ((new File(teamsTSVFile).isFile() || new File(teams2TSVFile).isFile()) && new File(groupsTSVFile).isFile()) {
 
             LoadICPCTSVData loadTSVData = new LoadICPCTSVData();
             loadTSVData.setContestAndController(contest, null);

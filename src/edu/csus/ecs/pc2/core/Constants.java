@@ -234,7 +234,7 @@ public final class Constants {
     /**
      *  Command to execute to validate results of an interactive run AFTER the interactive validator has completed
      */
-    public static final String PC2_INTERACIVE_VALIDATE_COMMAND = "./pc2validate_interactive.sh {:resfile} {:feedbackdir} {:testcase}";
+    public static final String PC2_INTERACIVE_VALIDATE_COMMAND = "./" + PC2_INTERACTIVE_VALIDATOR_NAME + " {:resfile} {:feedbackdir} {:testcase}";
     
     /**
      * Execution info for entire run (all testcases)

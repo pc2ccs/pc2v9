@@ -251,7 +251,7 @@ public class EditProblemPane extends JPanePlugin {
     /**
      * This enum defines the specification followed by the custom validator
      */
-    private enum CUSTOM_VALIDATOR_TYPE {
+    private enum CUSTOM_VALIDATOR_INTERFACE_TYPE {
         /**
          * The Problem has no associated custom validator type (eg it is bad)
          */
@@ -270,7 +270,7 @@ public class EditProblemPane extends JPanePlugin {
         CV_INTERACTIVE_CLICS
         }
     
-    private CUSTOM_VALIDATOR_TYPE customValidatorType = CUSTOM_VALIDATOR_TYPE.CV_NONE;
+    private CUSTOM_VALIDATOR_INTERFACE_TYPE customValidatorInterfaceType = CUSTOM_VALIDATOR_INTERFACE_TYPE.CV_NONE;
     
     /**
      * Constructs an EditProblemPane with default settings.
@@ -1517,15 +1517,15 @@ public class EditProblemPane extends JPanePlugin {
         return validatorType;
     }
 
-    private CUSTOM_VALIDATOR_TYPE getCustomValidatorTypeFromUI() {
-        CUSTOM_VALIDATOR_TYPE cvt = CUSTOM_VALIDATOR_TYPE.CV_NONE;
+    private CUSTOM_VALIDATOR_INTERFACE_TYPE getCustomValidatorInterfaceTypeFromUI() {
+        CUSTOM_VALIDATOR_INTERFACE_TYPE cvt = CUSTOM_VALIDATOR_INTERFACE_TYPE.CV_NONE;
         
         if(getUsePC2ValStdRadioButton().isSelected()) {
-            cvt = CUSTOM_VALIDATOR_TYPE.CV_PC2;
+            cvt = CUSTOM_VALIDATOR_INTERFACE_TYPE.CV_PC2;
         } else if(getUseClicsValStdRadioButton().isSelected()) {
-            cvt = CUSTOM_VALIDATOR_TYPE.CV_CLICS;
+            cvt = CUSTOM_VALIDATOR_INTERFACE_TYPE.CV_CLICS;
         } else if(getUseInteractiveRadioButton().isSelected()) {
-            cvt = CUSTOM_VALIDATOR_TYPE.CV_INTERACTIVE_CLICS;
+            cvt = CUSTOM_VALIDATOR_INTERFACE_TYPE.CV_INTERACTIVE_CLICS;
         }
         return(cvt);
     }
@@ -1535,7 +1535,7 @@ public class EditProblemPane extends JPanePlugin {
      * mode.
      */
     private void updateLocalCustomValidatorCommandLine() {
-        switch(getCustomValidatorTypeFromUI()) {
+        switch(getCustomValidatorInterfaceTypeFromUI()) {
             case CV_PC2:
                 localPC2InterfaceCustomValidatorCommandLine = this.getCustomValidatorCommandLineTextField().getText();
                 break;
@@ -1959,7 +1959,7 @@ public class EditProblemPane extends JPanePlugin {
 
         // verify that if a Custom Output Validator has been selected, exactly one Validator Interface has been specified
         if (getUseCustomValidatorRadioButton().isSelected()) {
-            if (getCustomValidatorTypeFromUI() == CUSTOM_VALIDATOR_TYPE.CV_NONE) {
+            if (getCustomValidatorInterfaceTypeFromUI() == CUSTOM_VALIDATOR_INTERFACE_TYPE.CV_NONE) {
                 showMessage("\"Use Custom Validator\" is selected; you must select exactly one Validator Interface (\"Output Validator\" tab)");
                 return false;
             }
@@ -5219,7 +5219,7 @@ public class EditProblemPane extends JPanePlugin {
             gbc_labelWhatsThisCLICSValStd.gridy = 3;
             customValidatorOptionsSubPanel.add(getLabelWhatsThisCLICSValStd(), gbc_labelWhatsThisCLICSValStd);
             
-            // add the "This is an interactive problem" checkbox to the subpanel
+            // add the "This is a CLICS interactive problem" radio button to the subpanel
             GridBagConstraints gbc_rdbtnBoxInteractive = new GridBagConstraints();
             gbc_rdbtnBoxInteractive.anchor = GridBagConstraints.WEST;
             gbc_rdbtnBoxInteractive.insets = new Insets(0, 8, 5, 5);
@@ -5434,10 +5434,10 @@ public class EditProblemPane extends JPanePlugin {
      */
     private CustomValidatorSettings getCustomValidatorSettingsFromFields() {
 
-        CUSTOM_VALIDATOR_TYPE cvt = getCustomValidatorTypeFromUI();
+        CUSTOM_VALIDATOR_INTERFACE_TYPE cvt = getCustomValidatorInterfaceTypeFromUI();
         
         // make sure exactly one of the Interface mode buttons is selected
-        if (cvt == CUSTOM_VALIDATOR_TYPE.CV_NONE) {
+        if (cvt == CUSTOM_VALIDATOR_INTERFACE_TYPE.CV_NONE) {
             showMessage("Invalid settings for Validator Interface radio buttons");
             throw new InvalidFieldValue("Invalid settings for Validator Interface radio buttons.");
         }

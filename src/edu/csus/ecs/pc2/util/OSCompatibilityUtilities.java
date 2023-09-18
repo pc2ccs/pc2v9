@@ -133,7 +133,7 @@ public class OSCompatibilityUtilities {
         VersionInfo versionInfo = new VersionInfo();
         String home = versionInfo.locateHome();
         
-        //point to the PC2 Internal Sandbox file (under "/sandbox" in the home, i.e. installation, directory)
+        //point to the PC2 Internal Sandbox file (under "/scripts" in the home, i.e. installation, directory)
         String sysCheckSandboxScriptFullName = home + File.separator + Constants.PC2_SCRIPT_DIRECTORY + File.separator + sysCheckSandboxScript;
         
         if(log != null) {
