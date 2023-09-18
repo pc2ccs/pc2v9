@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage is: copy_xml_result.sh {:resfile} {:feedbackdir} {:testcase}
+# Usage is: pc2validate_interactive.sh {:resfile} {:feedbackdir} {:testcase}
 #
 # This is called from PC2 as the output validator for an interative problem.
 # Replaces the security field in the interactive validator's temporary result ($TMP_RESULTFILE) file with the :resfile
