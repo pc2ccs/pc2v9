@@ -79,7 +79,7 @@ cp -p -r * %{buildroot}/usr/pc2
 /usr/pc2/lib
 /usr/pc2/samps
 /usr/pc2/support
-/usr/pc2/sandbox
+/usr/pc2/scripts
 
 %changelog
 * Tue Nov 24 2015 - boudreat AatT ecs DdOoTt csus DdOoTt edu

@@ -1,0 +1,65 @@
+clar-categories:
+- judges
+- sysops
+- operations
+- ccs
+default-clars:
+- Read the problem statement carefully
+- No comment
+languages:
+  - name: 'Java'
+    compilerCmd: '/usr/bin/javac -encoding UTF-8 -sourcepath . -d . {files}'
+    exemask: '{:basename}.class'
+    execCmd: '/usr/bin/java -Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m {:package}{:basename}'
+    runner: '/usr/bin/java'
+    runner-args: '-Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m {:package}{:basename}'
+    interpreted: false
+    use-judge-cmd: false
+    judge-exec-cmd: '/usr/bin/java -XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m {:package}{:basename}'
+    clics-id : 'java'
+
+  - name: 'C++'
+    compilerCmd: '/usr/bin/g++ -g -O2 -std=gnu++20 -static {files}'
+    exemask: 'a.out'
+    execCmd: './a.out'
+    runner: './a.out'
+    runner-args: ''
+    interpreted: false
+    use-judge-cmd: false
+    judge-exec-cmd: './a.out'
+    clics-id : 'cpp'
+
+  - name: 'C'
+    compilerCmd: '/usr/bin/gcc -g -O2 -std=gnu11 -static {files} -lm'
+    exemask: 'a.out'
+    execCmd: './a.out'
+    runner: './a.out'
+    runner-args: ''
+    interpreted: false
+    use-judge-cmd: false
+    judge-exec-cmd: './a.out'
+    clics-id : 'c'
+
+  - name: 'Python 3'
+    compilerCmd: '/usr/bin/pypy3 -m py_compile {files}'
+    exemask: 'null'
+    execCmd: '/usr/bin/pypy3 {files}'
+    runner: '/usr/bin/pypy3'
+    runner-args: '{files}'
+    interpreted: true
+    use-judge-cmd: false
+    judge-exec-cmd: '/usr/bin/pypy3 {files}'
+    clics-id : 'python3'
+
+  - name: 'Kotlin'
+    compilerCmd: '/usr/lib/kotlinc/bin/kotlinc -d . {files}'
+    exemask: '{:basename}{:ensuresuffix=Kt}.class'
+    execCmd: '/usr/lib/kotlinc/bin/kotlin -Dfile.encoding=UTF-8 -J-XX:+UseSerialGC -J-Xss64m -J-Xms1920m -J-Xmx1920m {:basename}{:ensuresuffix=Kt}'
+    runner: '/usr/lib/kotlinc/bin/kotlin'
+    runner-args: '-Dfile.encoding=UTF-8 -J-XX:+UseSerialGC -J-Xss64m -J-Xms1920m -J-Xmx1920m {:basename}{:ensuresuffix=Kt}'
+    interpreted: false
+    use-judge-cmd: false
+    judge-exec-cmd: '/usr/bin/java -Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss64m -Xms1920m -Xmx1920m -jar {:basename}.jar'
+    clics-id : 'kotlin'
+
+

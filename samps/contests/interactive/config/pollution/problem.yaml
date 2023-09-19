@@ -1,0 +1,121 @@
+# problem.yaml
+
+# Author of the problem (default: empty string)
+# author:
+
+# Who owns the rights to the problem (default: value of author)
+rights_owner: ACM ICPC
+
+# Where the problem was first used (default: empty string)
+source: ACM International Collegiate Programming Contest World Finals 2013
+# source-url:
+
+# License (optional, default "unknown", see below for list of possible values)
+license: permission
+
+
+# Some keywords describing the problem (default: empty)
+# keywords:
+
+# Configuration of output validator (optional), used to configure how
+# output is validated.  For instance (see below for explanation):
+validator_flags: float_absolute_tolerance 1.01e-3
+
+# Configuration of limes (defaults as indicated)
+
+#limits:
+#  time_multiplier: 6
+#  time_safety_margin: 10
+#  memory: 2048                   # MB
+#  output: 8                      # MB
+#  compilation_time: 60           # seconds
+#  validation_time: 60            # seconds
+#  validation_memory: 2048        # MB
+#  validation_output: 8           # MB
+
+
+############################################################################
+# POSSIBLE VALUES FOR LICENSE:
+#
+# "unknown"				The default value. In practice means that the
+#               		problem can not be used.
+# "public domain"		There are no known copyrights on the problem,
+# 		   				anywhere in the world.
+#						http://creativecommons.org/about/pdm
+# "cc0" 				CC0, "no rights reserved"
+# 						http://creativecommons.org/about/cc0
+# "cc by"				CC attribution
+# 	  					http://creativecommons.org/licenses/by/3.0/
+# "cc by-sa"			CC attribution, share alike
+# 	  					http://creativecommons.org/licenses/by-sa/3.0/
+# "educational"			May be freely used for educational purposes
+# "permission" 			Used with permission. The author must be contacted
+# 						for every additional use.
+############################################################################
+
+
+############################################################################
+# OUTPUT VALIDATOR OPTIONS
+#
+# There is a relatively versatile default validator available that is
+# sufficient for most problems.  The validator field is essentially
+# just a list of arguments that are passed on to the validator
+# program. If the first word of the validator field in problem.yaml is
+# "custom", it indicates that the problem needs a custom output
+# validator and that the default output validator should not be
+# used. The remainder of the validator field is passed as command-line
+# arguments to the custom validator (to all of them, if several are
+# provided).
+#
+# If the first word of the validator field is not "custom" (or if the
+# validator field is not specified), the default validator is used,
+# and the entire validator field (if present) is passed as
+# command-line arguments to the default validator.
+############################################################################
+
+
+############################################################################
+# DESCRIPTION OF DEFAULT VALIDATOR OPTIONS
+#
+# The default validator is essentially a beefed-up diff. In its default
+# mode, it tokenizes the two files and compares token by token. It
+# supports the following command-line arguments to control how tokens
+# are compared.
+#
+#  o case_sensitive
+#       indicates that comparisons should be case-sensitive
+#  o space_change_sensitive
+#       indicates that changes in the amount of whitespace should
+#       be rejected (the de- fault is that any sequence of 1 or more
+#       whitespace characters are equivalent).
+#  o float_relative_tolerance eps
+#       indicates that floating-point tokens should be accepted if
+#       they are within rel- ative error ≤ eps
+#  o float_absolute_tolerance eps
+#       indicates that floating-point tokens should be accepted if
+#       they are within ab- solute error ≤ eps
+#  o float_tolerance eps
+#       short-hand for applying eps as both relative and absolute
+#       tolerance.
+#
+# Note that when supplying both a relative and an absolute tolerance,
+# the semantics are that a token is accepted if it is within either of
+# the two tolerances.
+#
+# When a floating-point tolerance has been set, any valid formatting
+# of floating point numbers is accepted for floating point tokens. So
+# for instance if a token in the answer file says 0.0314, a token of
+# 3.14000000e-2 in the output file would be accepted (but note that
+# this applies *only* to floating point tokens, so "2.0e2" would *not*
+# be a correct output if the answer file says "200"). If no floating
+# point tolerance has been set, floating point tokens are treated just
+# like any other token and has to match exactly.
+############################################################################
+
+sandbox-type: PC2_INTERNAL_SANDBOX
+
+limits:
+  time_multiplier: 1.0
+  memory: 2048
+  timeout: 1
+

@@ -967,6 +967,15 @@ public final class Utilities {
         return totsecs;
     }
 
+    /**
+     * Locate judges data file on disk.
+     * 
+     * @param problem
+     * @param serializedFile
+     * @param alternateCDPPath
+     * @param judgeDataFile (not used - may be needed in the future TODO)
+     * @return
+     */
     public static String locateJudgesDataFile(Problem problem, SerializedFile serializedFile, String alternateCDPPath, DataFileType judgeDataFile) {
 
         String testFileName = locateJudgesDataFile(problem, serializedFile.getName(), alternateCDPPath);
