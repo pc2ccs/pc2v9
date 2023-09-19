@@ -33,6 +33,9 @@ public class FileComparisonUtilities {
         String secondFilename = targetDir + File.separator + tsvFileName;
         FileComparison fileComparison = new FileComparison(firstFilename, secondFilename);
 
+//        System.out.println("debug 22 createJSONFileComparison for " + firstFilename);
+//        System.out.println("debug 22 createJSONFileComparison for " + secondFilename);
+        
         // TODO 760 code comparison
 
         return fileComparison;
