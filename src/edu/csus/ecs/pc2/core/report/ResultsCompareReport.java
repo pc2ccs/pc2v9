@@ -6,16 +6,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import javax.swing.JLabel;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.imports.clics.FieldCompareRecord;
 import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
-import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.AwardKey;
@@ -34,8 +37,6 @@ public class ResultsCompareReport implements IReport {
 
     private String pc2ResultsDir = null;
 
-    private String cdpResultsDirectory = null;
-
     private IInternalContest contest;
 
     private IInternalController controller;
@@ -44,16 +45,27 @@ public class ResultsCompareReport implements IReport {
 
     private Filter filter = new Filter();
 
+    private FileComparison resultsCompare;
+
+    //    private FileComparison awardsFileCompare;
+    //    private FileComparison scoreboardJsonCompare;
+
+    private JLabel resultsPassFailLabel;
+
+
+    //    private ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
+    //    private AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
+    //    private ScoreboardKey scoreboardKey = new FileComparisonUtilities.ScoreboardKey();
+
     /**
      * 
      */
     private static final long serialVersionUID = -796328654541676730L;
 
-    public ResultsCompareReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir, String cdpResultsDirectory) {
+    public ResultsCompareReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir) {
         super();
         this.primaryCCSResultsDir = primaryCCSResultsDir;
         this.pc2ResultsDir = pc2ResultsDir;
-        this.cdpResultsDirectory = cdpResultsDirectory;
         setContestAndController(contest, controller);
     }
 
@@ -118,6 +130,54 @@ public class ResultsCompareReport implements IReport {
 
     }
 
+    private List<String> createFileComparisonReport(String filename, FileComparison fileComparison) {
+
+        List<String> lines = new ArrayList<String>();
+
+        lines.add("File: " + filename);
+        lines.add("");
+
+        List<FieldCompareRecord> fields = fileComparison.getComparedFields();
+        long differentFields = fileComparison.getNumberDifferences();
+        int totalFieldsCompared = fields.size();
+
+        String compSummary = "NOT MATCHING " + differentFields + " differences";
+        if (differentFields == 0) {
+            if (totalFieldsCompared == 0) {
+                compSummary = "NOT MATCHING no fields compared";
+            } else {
+                compSummary = "All MATCH " + totalFieldsCompared + " match";
+            }
+        }
+        lines.add("  Summary  " + compSummary);
+
+        lines.add("");
+
+        String previousKey = "";
+
+        if (differentFields != 0) {
+
+            Collections.sort(fields, new FieldCompareRecordComparator());
+
+            for (FieldCompareRecord fieldCompareRecord : fields) {
+
+                String theKey = fieldCompareRecord.getKey();
+                if (!previousKey.equals(theKey)) {
+                    previousKey = theKey;
+                    lines.add("");
+                    lines.add("Row value: " + theKey);
+                }
+
+                if (!fieldCompareRecord.getState().equals(ComparisonState.SAME)) {
+                    lines.add(String.format("   field %-18s %8s '%s' '%s'", fieldCompareRecord.getFieldName(), fieldCompareRecord.getState().toString(), fieldCompareRecord.getValueOne(),
+                            fieldCompareRecord.getValueTwo()));
+                }
+            }
+        }
+
+        return lines;
+    }
+
     @Override
     public String[] createReport(Filter filter) {
 
@@ -140,56 +200,61 @@ public class ResultsCompareReport implements IReport {
         };
 
         String sourceDir = pc2ResultsDir;
-        String targetDir = getCdpResultsDirectory();
+        String targetDir = primaryCCSResultsDir;
+        if (targetDir == null) {
+            throw new RuntimeException("Primary CCS directory is not assigned (is null)");
+        }
 
         String compareMessage = "Comparison Summary:   FAILED - no such directory (cdp directory not set) " + targetDir;
 
-        if (new File(targetDir).isDirectory()) {
+        List<String> outList = new ArrayList<String>();
 
-            ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
-
-            AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
-
-            ScoreboardKey scoreboardKey = new FileComparisonUtilities.ScoreboardKey();
-
-            FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
-            FileComparison awardsFileCompare = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
-            FileComparison scoreboardJsonCompare = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
-
-            List<String> compareInfo = new ArrayList<String>();
-
-            // TODO 760 write createCompareSummary
-//            String summaryCompareString = createCompareSummary(ResultsFile.RESULTS_FILENAME, resultsCompare);
-
-            if (resultsCompare.getNumberDifferences() == 0 && resultsCompare.getComparedFields().size() > 0) {
-                compareInfo.add(ResultsFile.RESULTS_FILENAME + ": IDENTICAL");
-            } else if (resultsCompare.getNumberDifferences() != 0 && resultsCompare.getComparedFields().size() > 0) {
-                compareInfo.add(ResultsFile.RESULTS_FILENAME + ": DIFFERENT " + resultsCompare.getNumberDifferences() + " differences");
-            } else if (resultsCompare.getComparedFields().size() == 0) {
-                compareInfo.add(ResultsFile.RESULTS_FILENAME + ": ERROR - Zero records were compared");
-            } else {
-                compareInfo.add(ResultsFile.RESULTS_FILENAME + ": WORSE ERROR - contact progreammers");
-            }
-
-            // TODO 760 write comp for awardsFileCompare
-            // TODO 760 write comp for scoreboardJsonCompare
-
-            compareMessage = String.join("\n", (String[]) compareInfo.toArray(new String[compareInfo.size()]));
-
-        }
-
-        String[] reportLinss = { //
+        String[] headerLines = { //
 
                 "Primary CCS Results dir: " + getPrimaryCCSResultsDir(), //
                 "pc2 results dir        : " + getPc2ResultsDir(), //
                 "compared files         : " + String.join(", ", filesToCompare), //
                 "", //
                 compareMessage, //
-                "", //
-        };
+                "", };
 
-        return reportLinss;
+        // TODO 760 add header lines
 
+        outList.add(compareMessage);  // debug 22 remove
+
+        if (new File(targetDir).isDirectory()) {
+
+
+            ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
+            AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
+            ScoreboardKey scoreboardKey = new FileComparisonUtilities.ScoreboardKey();
+
+            FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
+            FileComparison awardsFileCompare = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
+            FileComparison scoreboardJsonCompare = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
+            
+            long totalDifferences = //
+                    resultsCompare.getNumberDifferences() + //
+                            awardsFileCompare.getNumberDifferences() + //
+                            scoreboardJsonCompare.getNumberDifferences();
+
+            if (totalDifferences == 0) {
+                outList.add("Summary:   All PASS - no differences found");
+            } else {
+                outList.add("Summary:   FAIL - there are " + totalDifferences + "  differences found");
+            }
+            
+            // add details to reort
+            List<String> lines = createFileComparisonReport(ResultsFile.RESULTS_FILENAME, resultsCompare);
+            outList.addAll(lines);
+            lines = createFileComparisonReport(Constants.AWARDS_JSON_FILENAME, awardsFileCompare);
+            outList.addAll(lines);
+            lines = createFileComparisonReport(Constants.SCOREBOARD_JSON_FILENAME, scoreboardJsonCompare);
+            outList.addAll(lines);
+
+        }
+
+        return (String[]) outList.toArray(new String[outList.size()]);
     }
 
     @Override
@@ -224,6 +289,7 @@ public class ResultsCompareReport implements IReport {
         } catch (RuntimeException rte) {
             log.log(Log.INFO, "Exception writing report", rte);
             printWriter.println("Error/problem generating report " + rte.getMessage());
+            rte.printStackTrace(printWriter);
         }
     }
 
@@ -251,23 +317,6 @@ public class ResultsCompareReport implements IReport {
         printWriter.println();
         printWriter.println(getReportTitle() + " Report");
 
-    }
-
-    public String getCdpResultsDirectory() {
-        if (cdpResultsDirectory == null) {
-            ContestInformation info = contest.getContestInformation();
-            if (info != null) {
-                String resultsDir = info.getJudgeCDPBasePath() + File.separator + Constants.CDP_RESULTS_DIR;
-                if (new File(resultsDir).isDirectory()) {
-                    return resultsDir;
-                }
-            }
-        }
-        return cdpResultsDirectory;
-    }
-
-    public void setCdpResultsDirectory(String cdpResultsDirectory) {
-        this.cdpResultsDirectory = cdpResultsDirectory;
     }
 
     @Override

@@ -398,5 +398,29 @@ public final class StringUtilities implements Serializable {
             return source;
         }
     }
+
+    /**
+     * null safe compare to.  Avoids NPEs.
+     * 
+     * @see {@link String#compareTo(String)}
+     * @param s1
+     * @param s2
+     * @return 0 if both strings null or strings equal.
+     */
+    public static int nullSafeCompareTo(String s1, String s2) {
+        
+        if (s1 == null && s2 == null) {
+            return 0;
+        }
+
+        if (s1 == null && s2 != null) {
+            return -1;
+        }
+        if (s1 != null && s2 == null) {
+            return 1;
+        }
+        return s1.compareTo(s2);
+
+    }
     
 }

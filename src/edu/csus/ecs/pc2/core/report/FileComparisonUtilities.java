@@ -75,8 +75,8 @@ public class FileComparisonUtilities {
 
                     if (firstLine == null) {
                         // found in second file but not in first
-                        String fieldName = secondLineFields[0];
-                        for (int i = 1; i < columnList.length; i++) {
+                        for (int i = 0; i < columnList.length; i++) {
+                            String fieldName = columnList[i];
                             String valueTwo = secondLineFields[i];
                             FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, null, valueTwo, null, key);
                             fileComparison.addfieldCompareRecord(fieldCompareRecord);
@@ -135,7 +135,7 @@ public class FileComparisonUtilities {
             if (StringUtilities.isEmpty(line)) {
                 return null;
             } else {
-                String [] fields = line.split(Constants.NL);
+                String [] fields = line.split(Constants.TAB);
                 return fields[0];
             }
         }
