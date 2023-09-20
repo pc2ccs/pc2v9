@@ -38,7 +38,13 @@ FAIL_INTERACTIVE_ERROR=$((FAIL_RETCODE_BASE+55))
 MAXPROCS=32
 
 # taskset cpu mask for running submission on single processor
-CPUMASK=0x01
+cpunum=${USER/judge/}
+if [[ "$cpunum" =~ ^[1-5]$ ]]
+then
+	CPUMASK=$((1<<(cpunum-1)))
+else
+	CPUMASK=0x08
+fi
 
 # Process ID of submission
 submissionpid=""
@@ -56,6 +62,10 @@ if ((SESSIONID))
 then
 	PC2_SANDBOX_CGROUP_PATH="${PC2_SANDBOX_CGROUP_PATH}_$((SESSIONID))"
 fi
+
+# the kill control for the cgroup
+PC2_SANDBOX_CGROUP_PATH_KILL=${PC2_SANDBOX_CGROUP_PATH}/cgroup.kill
+
 # For interactive validation
 INFIFO=fin
 OUTFIFO=fout
@@ -118,6 +128,29 @@ command_args, arguments, if any to be passed to the submission command
 SAGE
 }
 
+# Function to kill all processes in the cgroupv2 after process has exited
+KillcgroupProcs()
+{
+        if test -n ${PC2_SANDBOX_CGROUP_PATH_KILL}
+        then
+		DEBUG echo "Purging cgroup ${PC2_SANDBOX_CGROUP_PATH_KILL} of processes"
+                echo 1 > ${PC2_SANDBOX_CGROUP_PATH_KILL}
+        fi
+}
+
+# Kill active children and stragglers
+KillChildProcs()
+{
+        DEBUG echo "Killing off submission process group $submissionpid and all children"
+        # Kill off process group
+        if test -n "$submissionpid"
+        then
+                kill -9 -$submissionpid
+        fi
+        # and... extra stragglers
+        pkill -9 -P $$
+}
+
 # Kill off the validator if it is still running
 KillValidator()
 {
@@ -133,12 +166,9 @@ KillValidator()
 HandleTerminateFromPC2()
 {
 	DEBUG echo "Received TERMINATE signal from PC2"
+	DEBUG echo "Killing off submission process group $submissionpid and all children"
 	KillValidator
-	if test -n "$submissionpid" -a -d /proc/$submissionpid
-	then
-		DEBUG echo "Killing off submission process $submissionpid"
-		kill -9 "$submissionpid"
-	fi
+	KillChildProcs
 	DEBUG echo $0: Wall time exceeded - exiting with code $FAIL_WALL_TIME_LIMIT_EXCEEDED
 	exit $FAIL_WALL_TIME_LIMIT_EXCEEDED 
 }
@@ -242,7 +272,12 @@ DEBUG echo ...done.
 if test -d $PC2_SANDBOX_CGROUP_PATH
 then
 	DEBUG echo Removing existing sandbox to start clean
-	rmdir $PC2_SANDBOX_CGROUP_PATH
+	KillcgroupProcs
+	if ! rmdir $PC2_SANDBOX_CGROUP_PATH
+	then
+		DEBUG echo Cannot purge old sandbox: $PC2_SANDBOX_CGROUP_PATH
+		exit $FAIL_INVALID_CGROUP_INSTALLATION
+	fi
 fi
 
 DEBUG echo Creating sandbox $PC2_SANDBOX_CGROUP_PATH
@@ -308,8 +343,9 @@ TIMELIMIT_US=$((TIMELIMIT * 1000000))
 REPORT Setting cpu limit to $TIMELIMIT_US microseconds "("ulimit -t $TIMELIMIT ")"
 ulimit -t $TIMELIMIT
 
-REPORT Setting maximum user processes to $MAXPROCS + whatever the user is currently using
-ulimit -u $((MAXPROCS+`ps -T -u $USER | wc -l`))
+MAXPROCS=$((MAXPROCS+`ps -T -u $USER | wc -l`))
+REPORT Setting maximum user processes to $MAXPROCS 
+ulimit -u $MAXPROCS
 
 # Remember wall time when we started
 starttime=`GetTimeInMicros`
@@ -324,10 +360,10 @@ then
 fi
 
 # run the command
-REPORT_DEBUG Executing "taskset $CPUMASK $COMMAND $* < $INFIFO > $OUTFIFO"
+REPORT_DEBUG Executing "setsid taskset $CPUMASK $COMMAND $* < $INFIFO > $OUTFIFO"
 
-taskset $CPUMASK $COMMAND $* < $INFIFO > $OUTFIFO  &
-# Remember child's PID for possible killing off later
+setsid taskset $CPUMASK $COMMAND $* < $INFIFO > $OUTFIFO  &
+# Remember child's PID/PGRP for possible killing off later
 submissionpid=$!
 
 # Flag to indicate if contestant submission has terminated
@@ -359,13 +395,15 @@ do
 			if test -d /proc/$contestantpid
 			then
 				REPORT Contestant PID $submissionpid has not finished - killing it
-				kill -9 "$submissionpid"
 			fi
-			# This is just determines if the program ran, not if it's correct.
+			# This just determines if the program ran, not if it's correct.
 			# The result file has the correctness in it.
 			# We only do this if the contestant program has not finished yet.
 			COMMAND_EXIT_CODE=0
 		fi
+
+		KillChildProcs
+
 		if test "$wstat" -eq $EXITCODE_AC
 		then
 			GenXML Accepted ""
@@ -419,7 +457,15 @@ do
 				REPORT_DEBUG The command terminated abnormally due to a signal with exit code $COMMAND_EXIT_CODE
 			else
 				walltime=$((endtime-starttime))
-				REPORT_DEBUG The command terminated normally and took ${cputime}us of CPU time "(out of the CPU limit of ${TIMELIMIT_US}us)" and ${walltime}us wall time
+		                # Newer kernels support memory.peak, so we have to check if it's there.
+		                if test -e $PC2_SANDBOX_CGROUP_PATH/memory.peak
+		                then
+		                        peakmem=`cat $PC2_SANDBOX_CGROUP_PATH/memory.peak`
+		                else
+		                        peakmem="N/A"
+		                fi
+
+				REPORT_DEBUG The command terminated normally and took ${cputime}us of CPU time "(out of the CPU limit of ${TIMELIMIT_US}us)" and ${walltime}us wall time and used $peakmem bytes of RAM
 			fi
 		fi
 		REPORT_DEBUG Finished executing "$COMMAND $*"
