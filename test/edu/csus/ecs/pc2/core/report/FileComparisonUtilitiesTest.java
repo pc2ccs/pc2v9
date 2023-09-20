@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
+import edu.csus.ecs.pc2.core.imports.clics.CLICSScoreboard;
 import edu.csus.ecs.pc2.core.imports.clics.FieldCompareRecord;
 import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
@@ -137,7 +138,13 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 //            System.out.println("debug 22 2 scoreboards "+clicsScoreboard);
 //        }
 
-
+        List<CLICSScoreboard> list;
+        // TODO 760 handle domjudge format JSON
+//        list = FileComparisonUtilities.getScoreboardJSON(comp.getFirstFilename());
+        
+        list = FileComparisonUtilities.getScoreboardJSON(comp.getSecondFilename());
+        assertEquals("Expecting number of rows from "+comp.getSecondFilename(), 51, list.size());
+        
     }
 
     @Override

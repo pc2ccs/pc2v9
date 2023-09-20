@@ -2,13 +2,18 @@
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -16,6 +21,7 @@ import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
+import edu.csus.ecs.pc2.core.imports.clics.CLICSScoreboard;
 import edu.csus.ecs.pc2.core.imports.clics.FieldCompareRecord;
 import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
 import edu.csus.ecs.pc2.exports.ccs.ResultRow;
@@ -193,5 +199,25 @@ public class FileComparisonUtilities {
         }
     }
 
+    public static List<CLICSScoreboard> getCLICSScoreboardList(String filename) throws JsonParseException, JsonMappingException, IOException {
+        String [] lines = Utilities.loadFile(filename);
+        String jsonString = String.join(" ", lines);
+
+        List<CLICSScoreboard> scoreboardList = objectMapper.readValue(jsonString, new TypeReference<List<CLICSScoreboard>>() {});
+        for (CLICSScoreboard clicsScoreboard : scoreboardList) {
+            System.out.println("debug 22 2 scoreboards "+clicsScoreboard);
+        }
+        return scoreboardList;
+    }    
+
+    public static List<CLICSScoreboard> getScoreboardJSON(String filename) {
+
+        try {
+            List<CLICSScoreboard> list = getCLICSScoreboardList(filename);
+            return list;
+        } catch (Exception e) {
+            throw ExecuteUtilities.rethrow(e);
+        }
+    }
     
 }
