@@ -2,8 +2,10 @@
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -25,7 +27,7 @@ import edu.csus.ecs.pc2.exports.ccs.ResultRow;
  */
 public class FileComparisonUtilities {
     
-    private ObjectMapper objectMapper = FileComparisonUtilities.getObjectMapper();
+    private static  ObjectMapper objectMapper = null;
 
     public static FileComparison createJSONFileComparison(String tsvFileName, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
 
@@ -96,12 +98,29 @@ public class FileComparisonUtilities {
                             FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                             fileComparison.addfieldCompareRecord(fieldCompareRecord);
                         }
+
+                        firstFileMap.remove(key);
                     }
                 }
             }
 
-            // TODO 760 code third condition, find rows that are NOT in first file but are in second file.
+            /**
+             * List of lines found in first file only.
+             */
+            Set<String> remainingLinesFromFirstFileKeys = firstFileMap.keySet();
+            String[] remainingKeys = (String[]) remainingLinesFromFirstFileKeys.toArray(new String[remainingLinesFromFirstFileKeys.size()]);
+            Arrays.sort(remainingKeys);
+            for (String keyName : remainingKeys) {
+                String firstLine = firstFileMap.get(keyName);
+                String[] firstLineFields = firstLine.split(Constants.TAB);
 
+                for (int i = 0; i < columnList.length; i++) {
+                    String fieldName = columnList[i];
+                    String valueOne = firstLineFields[i];
+                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, null, null, keyName);
+                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
             ExecuteUtilities.rethrow(e); // TODO 760 handle file
@@ -117,12 +136,14 @@ public class FileComparisonUtilities {
     }
 
     public static ObjectMapper getObjectMapper() {
-        
+
         // TODO REFACTOR move this into a utility class
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        
+        if (objectMapper == null) {
+            objectMapper = new ObjectMapper();
+            objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        }
+
         return objectMapper;
     }
 
