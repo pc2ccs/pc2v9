@@ -87,7 +87,7 @@ _DEBUG="on"   # change this to anything other than "on" to disable debug/trace o
 DEBUG_FILE=sandbox.log
 function DEBUG()
 {
-  [ "$_DEBUG" == "on" ] && $@ >> $DEBUG_FILE
+  [ "$_DEBUG" == "on" ] && "$@" >> $DEBUG_FILE
 }
 
 # For per-testcase reporting/logging
@@ -95,7 +95,7 @@ function REPORT()
 {
 	if test -n "$REPORTFILE"
 	then
-		echo $* >> $REPORTFILE
+		echo "$@" >> $REPORTFILE
 	fi
 }
 
@@ -104,9 +104,9 @@ function REPORT_DEBUG()
 {
 	if test -n "$REPORTFILE"
 	then
-		echo $* >> $REPORTFILE
+		echo "$@" >> $REPORTFILE
 	fi
-	[ "$_DEBUG" == "on" ] && echo $@ >> $DEBUG_FILE
+	[ "$_DEBUG" == "on" ] && echo "$@" >> $DEBUG_FILE
 }
 
 # ------------------------------------------------------------
@@ -165,23 +165,41 @@ KillValidator()
 # is wall-time exceeded which is execute time limit + 1 second
 HandleTerminateFromPC2()
 {
-	DEBUG echo "Received TERMINATE signal from PC2"
-	DEBUG echo "Killing off submission process group $submissionpid and all children"
+	REPORT_DEBUG "Received TERMINATE signal from PC2"
+	REPORT_DEBUG "Killing off submission process group $submissionpid and all children"
 	KillValidator
 	KillChildProcs
-	DEBUG echo $0: Wall time exceeded - exiting with code $FAIL_WALL_TIME_LIMIT_EXCEEDED
+	REPORT_DEBUG Wall time exceeded - exiting with code $FAIL_WALL_TIME_LIMIT_EXCEEDED
 	exit $FAIL_WALL_TIME_LIMIT_EXCEEDED 
 }
 
 GetTimeInMicros()
 {
-        set `date "+%s %6N"`
-        sec=$1
-        us=$2
-        us=$((10#$us))
-        ret=$((sec*1000000))
-        ret=$((ret+$us))
-        echo $ret
+	set `date "+%s %6N"`
+	sec=$1
+	us=$2
+	us=$((10#$us))
+	ret=$((sec*1000000))
+	ret=$((ret+$us))
+	echo $ret
+}
+
+# Show run's resource summary in a nice format, eg.
+#   CPU ms  Limit ms    Wall ms   Memory Used   Memory Limit
+#    3.356  5000.000      4.698       1839104     2147483648
+ShowStats()
+{
+	cpuused=$1
+	cpulim=$2
+	walltime=$3
+	memused=$4
+	memlim=$5
+	REPORT_DEBUG Resources used for this run:
+	REPORT_DEBUG "$(printf '   CPU ms  Limit ms    Wall ms   Memory Used Memory Limit\n')"
+	REPORT_DEBUG "$(printf '%5d.%03d %5d.%03d %6d.%03d  %12s %12d\n' $((cpuused / 1000)) $((cpuused % 1000)) \
+		$((cpulim / 1000)) $((cpulim % 1000)) \
+		$((walltime / 1000)) $((walltime % 1000)) \
+		$((memused)) $((memlim)))"
 }
 
 sent_xml=0
@@ -429,43 +447,46 @@ do
 		# Get wall time - we want it as close as possible to when we fetch the cpu time so they stay close
 		# since the cpu.stat includes the time this script takes AFTER the submission finishes.
 		endtime=`GetTimeInMicros`
+		walltime=$((endtime-starttime))
+		# Newer kernels support memory.peak, so we have to check if it's there.
+		if test -e $PC2_SANDBOX_CGROUP_PATH/memory.peak
+		then
+			peakmem=`cat $PC2_SANDBOX_CGROUP_PATH/memory.peak`
+		else
+			peakmem="N/A"
+		fi
 
-		REPORT Contestant PID $submissionpid finished status $wstat
+
+		REPORT Contestant PID $submissionpid finished with status $wstat
 		contestant_done=1
 		COMMAND_EXIT_CODE=$wstat
+
+		ShowStats ${cputime} ${TIMELIMIT_US} ${walltime} ${peakmem} $((MEMLIMIT*1024*1024))
 
 		# See if we were killed due to memory - this is a kill 9 if it happened
 		kills=`grep oom_kill $PC2_SANDBOX_CGROUP_PATH/memory.events | cut -d ' ' -f 2`
 		
 		if test "$kills" != "0"
 		then
-			REPORT_DEBUG The command was killed due to out of memory
+			REPORT_DEBUG The command was killed because it exceeded the memory limit
 			COMMAND_EXIT_CODE=${FAIL_MEMORY_LIMIT_EXCEEDED}
 			GenXML "No - Memory limit exceeded" ""
 			KillValidator
 			break
 		else
-			if test "$cputime" -gt "$TIMELIMIT_US"
+			# See why we terminated.  137 = 128 + 9 = SIGKILL, which is what ulimit -t sends
+			if test "$COMMAND_EXIT_CODE" -eq 137 -o "$cputime" -gt "$TIMELIMIT_US"
 			then
-				REPORT_DEBUG The command was killed because it exceeded the CPU Time limit "(${cputime}us > ${TIMELIMIT_US}us)"
+				REPORT_DEBUG The command was killed because it exceeded the CPU Time limit
 				COMMAND_EXIT_CODE=${FAIL_TIME_LIMIT_EXCEEDED}
 				GenXML "No - Time limit exceeded" "${cputime}us > ${TIMELIMIT_US}us"
 				KillValidator
 				break
 			elif test "$COMMAND_EXIT_CODE" -ge 128
 			then
-				REPORT_DEBUG The command terminated abnormally due to a signal with exit code $COMMAND_EXIT_CODE
+				REPORT_DEBUG The command terminated abnormally due to a signal with exit code $COMMAND_EXIT_CODE signal $((COMMAND_EXIT_CODE - 128))
 			else
-				walltime=$((endtime-starttime))
-		                # Newer kernels support memory.peak, so we have to check if it's there.
-		                if test -e $PC2_SANDBOX_CGROUP_PATH/memory.peak
-		                then
-		                        peakmem=`cat $PC2_SANDBOX_CGROUP_PATH/memory.peak`
-		                else
-		                        peakmem="N/A"
-		                fi
-
-				REPORT_DEBUG The command terminated normally and took ${cputime}us of CPU time "(out of the CPU limit of ${TIMELIMIT_US}us)" and ${walltime}us wall time and used $peakmem bytes of RAM
+				REPORT_DEBUG The command terminated normally.
 			fi
 		fi
 		REPORT_DEBUG Finished executing "$COMMAND $*"

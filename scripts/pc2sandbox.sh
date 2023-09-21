@@ -66,7 +66,7 @@ _DEBUG="on"   # change this to anything other than "on" to disable debug/trace o
 DEBUG_FILE=sandbox.log
 function DEBUG()
 {
-  [ "$_DEBUG" == "on" ] && $@ >> $DEBUG_FILE
+  [ "$_DEBUG" == "on" ] && "$@" >> $DEBUG_FILE
 }
 
 # ------------------------------------------------------------
@@ -124,6 +124,24 @@ GetTimeInMicros()
         ret=$((sec*1000000))
         ret=$((ret+$us))
         echo $ret
+}
+
+# Show run's resource summary in a nice format, eg.
+#   CPU ms  Limit ms    Wall ms   Memory Used   Memory Limit
+#    3.356  5000.000      4.698       1839104     2147483648
+ShowStats()
+{
+	cpuused=$1
+	cpulim=$2
+	walltime=$3
+	memused=$4
+	memlim=$5
+	DEBUG echo Resources used for this run:
+	DEBUG printf "   CPU ms  Limit ms    Wall ms   Memory Used Memory Limit\n"
+	DEBUG printf "%5d.%03d %5d.%03d %6d.%03d  %12s %12d\n" $((cpuused / 1000)) $((cpuused % 1000)) \
+		$((cpulim / 1000)) $((cpulim % 1000)) \
+		$((walltime / 1000)) $((walltime % 1000)) \
+		$((memused)) $((memlim))
 }
 
 # ------------------------------------------------------------
@@ -274,33 +292,38 @@ kills=`grep oom_kill $PC2_SANDBOX_CGROUP_PATH/memory.events | cut -d ' ' -f 2`
 
 KillChildProcs
 
+# Get cpu time used.
+cputime=`grep usage_usec $PC2_SANDBOX_CGROUP_PATH/cpu.stat | cut -d ' ' -f 2`
+
+# Get wall time - we want it as close as possible to when we fetch the cpu time so they stay close
+# since the cpu.stat includes the time this script takes AFTER the submission finishes.
+endtime=`GetTimeInMicros`
+walltime=$((endtime-starttime))
+
+# Newer kernels support memory.peak, so we have to check if it's there.
+if test -e $PC2_SANDBOX_CGROUP_PATH/memory.peak
+then
+	peakmem=`cat $PC2_SANDBOX_CGROUP_PATH/memory.peak`
+else
+	peakmem="N/A"
+fi
+ShowStats ${cputime} ${TIMELIMIT_US} ${walltime} ${peakmem} $((MEMLIMIT*1024*1024))
+
 if test "$kills" != "0"
 then
-	DEBUG echo The command was killed due to out of memory
+	DEBUG echo The command was killed because it exceeded the memory limit
 	COMMAND_EXIT_CODE=${FAIL_MEMORY_LIMIT_EXCEEDED}
 else
-	# Get cpu time
-	cputime=`grep usage_usec $PC2_SANDBOX_CGROUP_PATH/cpu.stat | cut -d ' ' -f 2`
-	# Get wall time - we want it as close as possible to when we fetch the cpu time so they stay close
-	# since the cpu.stat includes the time this script takes AFTER the submission finishes.
-	endtime=`GetTimeInMicros`
-	if test "$cputime" -gt "$TIMELIMIT_US"
+	# See why we terminated.  137 = 128 + 9 = SIGKILL, which is what ulimit -t sends.
+	if test "$COMMAND_EXIT_CODE" -eq 137 -o "$cputime" -gt "$TIMELIMIT_US"
 	then
-		DEBUG echo The command was killed because it exceeded the CPU Time limit "(${cputime}us > ${TIMELIMIT_US}us)"
+		DEBUG echo The command was killed because it exceeded the CPU Time limit
 		COMMAND_EXIT_CODE=${FAIL_TIME_LIMIT_EXCEEDED}
 	elif test "$COMMAND_EXIT_CODE" -ge 128
 	then
 		DEBUG echo The command terminated abnormally with exit code $COMMAND_EXIT_CODE
 	else
-		walltime=$((endtime-starttime))
-		# Newer kernels support memory.peak, so we have to check if it's there.
-		if test -e $PC2_SANDBOX_CGROUP_PATH/memory.peak
-		then
-			peakmem=`cat $PC2_SANDBOX_CGROUP_PATH/memory.peak`
-		else
-			peakmem="N/A"
-		fi
-		DEBUG echo The command terminated normally and took ${cputime}us of CPU time "(out of the CPU limit of ${TIMELIMIT_US}us)" and ${walltime}us wall time and used $peakmem bytes of RAM
+		DEBUG echo The command terminated normally.
 	fi
 fi
 DEBUG echo Finished executing $COMMAND $*
