@@ -310,10 +310,10 @@ REPORT "________________________________________"
 rm -f "$INFIFO" "$OUTFIFO"
 
 # Kill pgrp
-kill -9 -"$submissinpid"
+kill -9 -"$submissionpid"
 
 # Kill off stragglers
-kill -9 -P $$
+pkill -9 -P $$
 
 # TODO: determine how to pass more detailed pc2sandbox.sh results back to PC2... Perhaps in a file...
 
