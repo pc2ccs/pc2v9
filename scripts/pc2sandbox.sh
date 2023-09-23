@@ -99,7 +99,7 @@ KillChildProcs()
 	# Kill off process group
 	if test -n "$submissionpid"
 	then
-		kill -9 -$submissionpid
+		pkill -9 -s $submissionpid
 	fi
 	# and... extra stragglers
 	pkill -9 -P $$

@@ -145,9 +145,9 @@ KillChildProcs()
         # Kill off process group
         if test -n "$submissionpid"
         then
-                kill -9 -$submissionpid
+                pkill -9 -s $submissionpid
         fi
-        # and... extra stragglers
+        # and... extra stragglers with us as a parent
         pkill -9 -P $$
 }
 
@@ -413,6 +413,7 @@ do
 			if test -d /proc/$contestantpid
 			then
 				REPORT Contestant PID $submissionpid has not finished - killing it
+				# TODO: We should kill and wait for it here and print out the stats
 			fi
 			# This just determines if the program ran, not if it's correct.
 			# The result file has the correctness in it.

@@ -114,7 +114,7 @@ HandleTerminateFromPC2()
 	pkill -9 -P $$
 	if test -n "$submissionpid"
 	then
-		kill -9 -"$submissionpid"
+		pkill -9 -s "$submissionpid"
 	fi
 	DEBUG echo $0: Wall time exceeded - exiting with code $FAIL_WALL_TIME_LIMIT_EXCEEDED
 	exit $FAIL_WALL_TIME_LIMIT_EXCEEDED 
@@ -254,7 +254,7 @@ do
 		fi
 
 		# Kill off submission pgrp
-		kill -9 -"$submissionpid"
+		pkill -9 -s "$submissionpid"
 
 		if test "$wstat" -eq $EXITCODE_AC
 		then
@@ -310,9 +310,9 @@ REPORT "________________________________________"
 rm -f "$INFIFO" "$OUTFIFO"
 
 # Kill pgrp
-kill -9 -"$submissionpid"
+pkill -9 -s "$submissionpid"
 
-# Kill off stragglers
+# Kill off stragglers with us as a parent
 pkill -9 -P $$
 
 # TODO: determine how to pass more detailed pc2sandbox.sh results back to PC2... Perhaps in a file...
