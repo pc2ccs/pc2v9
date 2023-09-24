@@ -9,9 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
-import edu.csus.ecs.pc2.core.imports.clics.CLICSScoreboard;
 import edu.csus.ecs.pc2.core.imports.clics.FieldCompareRecord;
 import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
+import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
@@ -28,7 +28,7 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 
     private IFileComparisonKey awardsComparisonKey = new FileComparisonUtilities.AwardKey();
 
-    private IFileComparisonKey scoreComparisonKey = new FileComparisonUtilities.ScoreboardKey();
+    private IFileComparisonKey scoreComparisonKey = new FileComparisonUtilities.ScoreboardJSONKey();
     
     private ObjectMapper objectMapper = FileComparisonUtilities.getObjectMapper();
 
@@ -72,85 +72,58 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 
     public void testJSONAwardsCompare() throws Exception {
 
+        // {"citation":"First to solve problem I","id":"first-to-solve-powerofdivisors","team_ids":["5"]},
+        
         String domjResultsDir = TESTDATA_RESULTS_DATA_DIR + "/domjudge";
         String pc2ResultsDir = TESTDATA_RESULTS_DATA_DIR + "/pc2";
 
-        FileComparison comp = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, domjResultsDir, pc2ResultsDir, awardsComparisonKey);
+        FileComparison comp = FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, domjResultsDir, pc2ResultsDir, awardsComparisonKey);
 
         assertNotNull(comp);
-//        startExplorer(TESTDATA_RESULTS_DATA_DIR);
-        
-        // {"citation":"First to solve problem I","id":"first-to-solve-powerofdivisors","team_ids":["5"]},
-
-//        CLICSAward
-
         String[] lines = Utilities.loadFile(comp.getFirstFilename());
         String firstLineString = String.join(" ", lines);
 
-        // List<MyClass> myObjects = mapper.readValue(jsonInput, new TypeReference<List<MyClass>>(){});
-        List<CLICSAward> awardList = objectMapper.readValue(firstLineString, new TypeReference<List<CLICSAward>>() {});
-//        for (CLICSAward clicsAward : awardList) {
-//            System.out.println("debug 22 1 awards "+clicsAward.toJSON());
-//        }
+        List<CLICSAward> firstAwardList = objectMapper.readValue(firstLineString, new TypeReference<List<CLICSAward>>() {});
+        assertEquals("Expecting awards lines for "+comp.getFirstFilename(), 19, firstAwardList.size());
         
         lines = Utilities.loadFile(comp.getSecondFilename());
         String seconString = String.join(" ", lines);
         
-        awardList = objectMapper.readValue(seconString, new TypeReference<List<CLICSAward>>() {});
-//        for (CLICSAward clicsAward : awardList) {
-//            System.out.println("debug 22 2 awards "+clicsAward.toJSON());
+        List<CLICSAward> secondAwardList = objectMapper.readValue(seconString, new TypeReference<List<CLICSAward>>() {});
+
+        assertEquals("Expecting awards lines for "+comp.getSecondFilename(), 19, secondAwardList.size());
+        
+        List<FieldCompareRecord> fields = comp.getComparedFields();
+        
+        assertEquals("Expecting number of comparison rows", 19, fields.size());
+        
+        assertEquals("Expecting no differences ",0,comp.getNumberDifferences());
+        
+//        for (FieldCompareRecord fieldCompareRecord : fields) {
+//            System.out.println("debug 22 field "+fieldCompareRecord.toJSON());
 //        }
-//        
+    
     }
 
-    public void testJSONScoreboardCompare() throws Exception {
+    public void testloadTeamRows() throws Exception {
 
         String domjResultsDir = "testdata/resultscompwork/results/domjudge";
         String pc2ResultsDir = "testdata/resultscompwork/results/pc2";
 
-        FileComparison comp = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, domjResultsDir, pc2ResultsDir, scoreComparisonKey);
-
-        assertNotNull(comp);
-        
-        
 //        editFile(comp.getFirstFilename());
 //        editFile(comp.getSecondFilename());
-//        
-//        String[] lines = Utilities.loadFile(comp.getFirstFilename());
-//        String firstLineString = String.join(" ", lines);
-//
-//        // List<MyClass> myObjects = mapper.readValue(jsonInput, new TypeReference<List<MyClass>>(){});
-//        List<CLICSScoreboard> scoreboardList = objectMapper.readValue(firstLineString, new TypeReference<List<CLICSScoreboard>>() {});
-//        for (CLICSScoreboard clicsScoreboard : scoreboardList) {
-//            System.out.println("debug 22 1 scoreboards "+clicsScoreboard);
-//        }
-//        
         
-//        editFile(comp.getSecondFilename());
-//
-//        String [] 
-//        lines = Utilities.loadFile(comp.getSecondFilename());
-//        String seconString = String.join(" ", lines);
-//        
-//        List<CLICSScoreboard> 
-//        scoreboardList = objectMapper.readValue(seconString, new TypeReference<List<CLICSScoreboard>>() {});
-//        for (CLICSScoreboard clicsScoreboard : scoreboardList) {
-//            System.out.println("debug 22 2 scoreboards "+clicsScoreboard);
-//        }
-
-        List<CLICSScoreboard> list;
-        // TODO 760 handle domjudge format JSON
-//        list = FileComparisonUtilities.getScoreboardJSON(comp.getFirstFilename());
+        FileComparison comp = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, domjResultsDir, pc2ResultsDir, scoreComparisonKey);
+        assertNotNull(comp);
         
-        list = FileComparisonUtilities.getScoreboardJSON(comp.getSecondFilename());
-        assertEquals("Expecting number of rows from "+comp.getSecondFilename(), 51, list.size());
+        List<TeamScoreRow> firstTeamScoreRows = FileComparisonUtilities.loadTeamRows (comp.getFirstFilename());
+        assertEquals("Expecting team score rows in "+comp.getFirstFilename(), 51, firstTeamScoreRows.size());
+        
+        List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows (comp.getSecondFilename());
+        assertEquals("Expecting team score rows in "+comp.getSecondFilename(), 51, secondTeamScoreRows.size());
+        
         
     }
 
-    @Override
-    public void testForValidXML(String xml) throws Exception {
-        // TODO Auto-generated method stub
-        super.testForValidXML(xml);
-    }
 
 }

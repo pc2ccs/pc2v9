@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.AwardKey;
 import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.ResultTSVKey;
-import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.ScoreboardKey;
+import edu.csus.ecs.pc2.core.report.FileComparisonUtilities.ScoreboardJSONKey;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
 /**
@@ -224,14 +224,13 @@ public class ResultsCompareReport implements IReport {
 
         if (new File(targetDir).isDirectory()) {
 
-
             ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
             AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
-            ScoreboardKey scoreboardKey = new FileComparisonUtilities.ScoreboardKey();
+            ScoreboardJSONKey scoreboardKey = new FileComparisonUtilities.ScoreboardJSONKey();
 
             FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
-            FileComparison awardsFileCompare = FileComparisonUtilities.createJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
-            FileComparison scoreboardJsonCompare = FileComparisonUtilities.createJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
+            FileComparison awardsFileCompare = FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
+            FileComparison scoreboardJsonCompare = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
             
             long totalDifferences = //
                     resultsCompare.getNumberDifferences() + //
@@ -244,7 +243,7 @@ public class ResultsCompareReport implements IReport {
                 outList.add("Summary:   FAIL - there are " + totalDifferences + "  differences found");
             }
             
-            // add details to reort
+            // add details to report
             List<String> lines = createFileComparisonReport(ResultsFile.RESULTS_FILENAME, resultsCompare);
             outList.addAll(lines);
             lines = createFileComparisonReport(Constants.AWARDS_JSON_FILENAME, awardsFileCompare);

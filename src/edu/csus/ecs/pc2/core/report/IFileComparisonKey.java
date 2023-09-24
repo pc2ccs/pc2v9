@@ -10,9 +10,9 @@ public interface IFileComparisonKey {
     /**
      * Get key for comparing/matching rows.
      * 
-     * @param line  
-     * @return a key unique for the line data
+     * @param object may be a String or Object
+     * @return a key unique for the object data
      */
-    public String getKey (String line);
+    public String getKey (Object object);
 
 }

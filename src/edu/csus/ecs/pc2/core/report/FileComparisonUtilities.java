@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -21,9 +22,11 @@ import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
+import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSScoreboard;
 import edu.csus.ecs.pc2.core.imports.clics.FieldCompareRecord;
 import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
+import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 import edu.csus.ecs.pc2.exports.ccs.ResultRow;
 
 /**
@@ -34,8 +37,31 @@ import edu.csus.ecs.pc2.exports.ccs.ResultRow;
 public class FileComparisonUtilities {
     
     private static  ObjectMapper objectMapper = null;
+    
+    
+    public static FileComparison createScoreboardJSONFileComparison(String tsvFileName, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
 
-    public static FileComparison createJSONFileComparison(String tsvFileName, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
+        String firstFilename = sourceDir + File.separator + tsvFileName;
+        String secondFilename = targetDir + File.separator + tsvFileName;
+        FileComparison fileComparison = new FileComparison(firstFilename, secondFilename);
+        
+        try {
+            
+            List<TeamScoreRow> firstTeamScoreRows = FileComparisonUtilities.loadTeamRows (fileComparison.getFirstFilename());
+            List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows (fileComparison.getSecondFilename());
+
+            
+            
+        } catch (Exception e) {
+            // TODO 760 handle exception
+        }
+
+        return fileComparison;
+
+    }
+//   
+
+    public static FileComparison createAwardJSONFileComparison(String tsvFileName, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
 
         String firstFilename = sourceDir + File.separator + tsvFileName;
         String secondFilename = targetDir + File.separator + tsvFileName;
@@ -44,7 +70,65 @@ public class FileComparisonUtilities {
 //        System.out.println("debug 22 createJSONFileComparison for " + firstFilename);
 //        System.out.println("debug 22 createJSONFileComparison for " + secondFilename);
         
-        // TODO 760 code comparison
+        try {
+            
+            List<CLICSAward> firstAwardRows = FileComparisonUtilities.loadAwardRows(fileComparison.getFirstFilename());
+            List<CLICSAward> secondAwardRows = FileComparisonUtilities.loadAwardRows(fileComparison.getSecondFilename());
+            
+            /**
+             * Map first awards cisation to awards class
+             */
+            Map<String, CLICSAward> firstFileMap = new HashMap<String, CLICSAward>();
+            for (CLICSAward clicsAwardOne : firstAwardRows) {
+                String key = fileComparisonKey.getKey(clicsAwardOne);
+                firstFileMap.put(key, clicsAwardOne);
+//                System.out.println("debug 22 stuf4 "+key+" "+clicsAwardOne.toJSON());
+            }
+            
+            for (CLICSAward clicsAward : secondAwardRows) {
+                String key = fileComparisonKey.getKey(clicsAward);
+                CLICSAward firstAward = firstFileMap.get(key);
+                
+                if (firstAward != null) {
+                    
+                    String valueOne = firstAward.getCitation();
+                    String fieldName = "citation";
+                    String valueTwo = clicsAward.getCitation();
+                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                    
+                    // TODO 760 compare other fields like team ids
+                    
+                    firstFileMap.remove(key);
+                } else {
+                    String fieldName = "citation";
+                    String valueTwo = clicsAward.getCitation();
+                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, null, valueTwo, null, key);
+                    fileComparison.addfieldCompareRecord(fieldCompareRecord); 
+                    
+                    // TODO 760 compare other fields like team ids
+                }
+            }
+            
+            Set<String> awardKeySet = firstFileMap.keySet();
+            String[] awardkeys = (String[]) awardKeySet.toArray(new String[awardKeySet.size()]);
+            Arrays.sort(awardkeys);
+            
+            for (String key : awardkeys) {
+                CLICSAward award = firstFileMap.get(key);
+                
+                String fieldName = "citation";
+                String valueOne = award.getCitation();
+                FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, null, null, key);
+                fileComparison.addfieldCompareRecord(fieldCompareRecord); 
+                
+                // TODO 760 compare other fields like team ids
+            }
+            
+            
+        } catch (Exception e) {
+            e.printStackTrace(); // TODO 760 handle exception
+        }
 
         return fileComparison;
     }
@@ -116,6 +200,7 @@ public class FileComparisonUtilities {
             Set<String> remainingLinesFromFirstFileKeys = firstFileMap.keySet();
             String[] remainingKeys = (String[]) remainingLinesFromFirstFileKeys.toArray(new String[remainingLinesFromFirstFileKeys.size()]);
             Arrays.sort(remainingKeys);
+            
             for (String keyName : remainingKeys) {
                 String firstLine = firstFileMap.get(keyName);
                 String[] firstLineFields = firstLine.split(Constants.TAB);
@@ -161,7 +246,8 @@ public class FileComparisonUtilities {
     public static class ResultTSVKey implements IFileComparisonKey{
 
         @Override
-        public String getKey(String line) {
+        public String getKey(Object object) {
+            String line = (String) object;
             if (StringUtilities.isEmpty(line)) {
                 return null;
             } else {
@@ -173,29 +259,23 @@ public class FileComparisonUtilities {
     
     public static class AwardKey implements IFileComparisonKey{
 
+        // [{"citation":"Contest winner","id":"winner","team_ids":["48"]},
+        
         @Override
-        public String getKey(String line) {
-            if (StringUtilities.isEmpty(line)) {
-                return null;
-            } else {
-//                CLICSAward award = objectMapper.par;
-//                return award.getId();
-                return null; // TODO 760 
-            }
+        public String getKey(Object object) {
+            CLICSAward clicsAward = (CLICSAward) object;
+            return clicsAward.getCitation();
         }
     }
     
-    public static class ScoreboardKey implements IFileComparisonKey{
+    public static class ScoreboardJSONKey implements IFileComparisonKey{
+//        {"rank":1,"team":48,"score":{"num_solved":11,"total_time":1443},"problems":[{"label":"A","num_judged":1,"num_pending":0,"solved":true,"time":25,"first_to_solve":false},{"label":"B","num_judged":1,"num_pending":0,"solved":true,"time":165,"first_to_solve":false},{"label":"C","num_judged":1,"num_pending":0,"solved":true,"time":69,"first_to_solve":false},{"label":"D","num_judged":1,"num_pending":0,"solved":false},{"label":"E","num_judged":1,"num_pending":0,"solved":true,"time":159,"first_to_solve":false},{"label":"F","num_judged":1,"num_pending":0,"solved":true,"time":94,"first_to_solve":false},{"label":"G","num_judged":1,"num_pending":0,"solved":true,"time":54,"first_to_solve":false},{"label":"H","num_judged":1,"num_pending":0,"solved":false},{"label":"I","num_judged":1,"num_pending":0,"solved":true,"time":16,"first_to_solve":false},{"label":"J","num_judged":1,"num_pending":0,"solved":true,"time":218,"first_to_solve":false},{"label":"K","num_judged":2,"num_pending":0,"solved":true,"time":88,"first_to_solve":false},{"label":"L","num_judged":1,"num_pending":0,"solved":true,"time":199,"first_to_solve":false},{"label":"M","num_judged":3,"num_pending":0,"solved":true,"time":296,"first_to_solve":false}]},
 
         @Override
-        public String getKey(String line) {
-            if (StringUtilities.isEmpty(line)) {
-                return null;
-            } else {
-//                CLICSAward award = objectMapper.par;
-//                return award.getId();
-                return null; // TODO 760 
-            }
+        public String getKey(Object object) {
+            TeamScoreRow row = (TeamScoreRow) object;
+            return row.getRank() + ":" + row.getTeam_id() +":"+row.getScore();
+            
         }
     }
 
@@ -220,4 +300,33 @@ public class FileComparisonUtilities {
         }
     }
     
+    public static  List<TeamScoreRow> loadTeamRows(String scoreboardJSONFilename) throws IOException {
+        
+        List<TeamScoreRow> rows = new ArrayList<TeamScoreRow>();
+        
+        String[] lines = Utilities.loadFile(scoreboardJSONFilename);
+        String firstLineString = String.join(" ", lines);
+
+        CLICSScoreboard clicsScoreboard = objectMapper.readValue(firstLineString, CLICSScoreboard.class);
+        if (clicsScoreboard != null)
+        {
+            rows = clicsScoreboard.getRows();
+        }
+        
+        return rows;
+    }
+
+    public static List<CLICSAward> loadAwardRows(String awardsJSONFilename) throws IOException {
+
+        List<CLICSAward> awardsList = new ArrayList<CLICSAward>();
+
+        String[] lines = Utilities.loadFile(awardsJSONFilename);
+        String jsonString = String.join(" ", lines);
+
+        awardsList = objectMapper.readValue(jsonString, new TypeReference<List<CLICSAward>>() {
+        });
+
+        return awardsList;
+    }
+
 }
