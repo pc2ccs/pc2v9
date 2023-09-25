@@ -216,7 +216,7 @@ then
 	if ! rmdir $PC2_SANDBOX_CGROUP_PATH
 	then
 		DEBUG echo Cannot remove previous sandbox: $PC2_SANDBOX_CGROUP_PATH
-		exit $FAIL_INVALID_CGROUP_INSTALLATION
+		exit $FAIL_SANDBOX_ERROR
 	fi
 fi
 
