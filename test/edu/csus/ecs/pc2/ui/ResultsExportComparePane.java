@@ -317,8 +317,7 @@ public class ResultsExportComparePane extends JPanePlugin {
         }
 
         try {
-
-            String cdpResultsDirectory = null;
+            
             ResultsCompareReport report = new ResultsCompareReport(getContest(), getController(), pc2ResultsDirectory, primaryCCSDirectory);
             Utilities.viewReport(report, report.getPluginTitle(), getContest(), getController(), true);
 

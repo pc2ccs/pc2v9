@@ -45,16 +45,22 @@ public class FileComparisonUtilities {
         String secondFilename = targetDir + File.separator + tsvFileName;
         FileComparison fileComparison = new FileComparison(firstFilename, secondFilename);
         
+        long numberRows = 0;
+        
         try {
-            
             List<TeamScoreRow> firstTeamScoreRows = FileComparisonUtilities.loadTeamRows (fileComparison.getFirstFilename());
             List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows (fileComparison.getSecondFilename());
+            
+            // TODO 760 compare rows
+            numberRows ++;
 
             
             
         } catch (Exception e) {
             // TODO 760 handle exception
         }
+        
+        fileComparison.setNumberRows(numberRows);
 
         return fileComparison;
 
@@ -69,6 +75,7 @@ public class FileComparisonUtilities {
 
 //        System.out.println("debug 22 createJSONFileComparison for " + firstFilename);
 //        System.out.println("debug 22 createJSONFileComparison for " + secondFilename);
+        long numberRows = 0;
         
         try {
             
@@ -88,6 +95,8 @@ public class FileComparisonUtilities {
             for (CLICSAward clicsAward : secondAwardRows) {
                 String key = fileComparisonKey.getKey(clicsAward);
                 CLICSAward firstAward = firstFileMap.get(key);
+                
+                numberRows++;
                 
                 if (firstAward != null) {
                     
@@ -116,6 +125,7 @@ public class FileComparisonUtilities {
             
             for (String key : awardkeys) {
                 CLICSAward award = firstFileMap.get(key);
+                numberRows++;
                 
                 String fieldName = "citation";
                 String valueOne = award.getCitation();
@@ -129,6 +139,8 @@ public class FileComparisonUtilities {
         } catch (Exception e) {
             e.printStackTrace(); // TODO 760 handle exception
         }
+        
+        fileComparison.setNumberRows(numberRows);
 
         return fileComparison;
     }
@@ -140,6 +152,8 @@ public class FileComparisonUtilities {
         FileComparison fileComparison = new FileComparison(firstFilename, secondFilename);
 
         String[] columnList = { "CMS Id", "rank", "medal", "solved", "penalty", "last sovlved time" };
+
+        long numberRows = 0;
 
         try {
 
@@ -167,6 +181,8 @@ public class FileComparisonUtilities {
 
                     String key = fileComparisonKey.getKey(secondLine);
                     String firstLine = firstFileMap.get(key);
+
+                    numberRows++;
 
                     if (firstLine == null) {
                         // found in second file but not in first
@@ -200,10 +216,12 @@ public class FileComparisonUtilities {
             Set<String> remainingLinesFromFirstFileKeys = firstFileMap.keySet();
             String[] remainingKeys = (String[]) remainingLinesFromFirstFileKeys.toArray(new String[remainingLinesFromFirstFileKeys.size()]);
             Arrays.sort(remainingKeys);
-            
+
             for (String keyName : remainingKeys) {
                 String firstLine = firstFileMap.get(keyName);
                 String[] firstLineFields = firstLine.split(Constants.TAB);
+
+                numberRows++;
 
                 for (int i = 0; i < columnList.length; i++) {
                     String fieldName = columnList[i];
@@ -216,6 +234,8 @@ public class FileComparisonUtilities {
             e.printStackTrace();
             ExecuteUtilities.rethrow(e); // TODO 760 handle file
         }
+
+        fileComparison.setNumberRows(numberRows);
 
         return fileComparison;
     }
@@ -283,7 +303,7 @@ public class FileComparisonUtilities {
         String [] lines = Utilities.loadFile(filename);
         String jsonString = String.join(" ", lines);
 
-        List<CLICSScoreboard> scoreboardList = objectMapper.readValue(jsonString, new TypeReference<List<CLICSScoreboard>>() {});
+        List<CLICSScoreboard> scoreboardList = getObjectMapper().readValue(jsonString, new TypeReference<List<CLICSScoreboard>>() {});
         for (CLICSScoreboard clicsScoreboard : scoreboardList) {
             System.out.println("debug 22 2 scoreboards "+clicsScoreboard);
         }
@@ -307,7 +327,7 @@ public class FileComparisonUtilities {
         String[] lines = Utilities.loadFile(scoreboardJSONFilename);
         String firstLineString = String.join(" ", lines);
 
-        CLICSScoreboard clicsScoreboard = objectMapper.readValue(firstLineString, CLICSScoreboard.class);
+        CLICSScoreboard clicsScoreboard = getObjectMapper().readValue(firstLineString, CLICSScoreboard.class);
         if (clicsScoreboard != null)
         {
             rows = clicsScoreboard.getRows();
@@ -323,9 +343,7 @@ public class FileComparisonUtilities {
         String[] lines = Utilities.loadFile(awardsJSONFilename);
         String jsonString = String.join(" ", lines);
 
-        awardsList = objectMapper.readValue(jsonString, new TypeReference<List<CLICSAward>>() {
-        });
-
+        awardsList = getObjectMapper().readValue(jsonString, new TypeReference<List<CLICSAward>>() {});
         return awardsList;
     }
 

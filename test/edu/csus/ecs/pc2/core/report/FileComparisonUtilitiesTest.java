@@ -32,10 +32,6 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
     
     private ObjectMapper objectMapper = FileComparisonUtilities.getObjectMapper();
 
-//    private AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
-//
-//    private ScoreboardKey scoreboardKey = new FileComparisonUtilities.ScoreboardKey();
-
     public void testcreateTSVFileComparison() throws Exception {
 
         String domjResultsDir = TESTDATA_RESULTS_DATA_DIR + "/domjudge";
@@ -52,8 +48,7 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 
         assertEquals("Expecting number of comparisons", 255, comp.getComparedFields().size());
 
-        // TODO 760 debug why there are differences in tsv compare
-//        assertEquals("Expecting no differences ", 0, comp.getNumberDifferences());
+        assertEquals("Expecting no differences ", 0, comp.getNumberDifferences());
 
     }
 
@@ -121,9 +116,34 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
         
         List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows (comp.getSecondFilename());
         assertEquals("Expecting team score rows in "+comp.getSecondFilename(), 51, secondTeamScoreRows.size());
+    }
+    
+    public void testAllDiff() throws Exception {
         
+        String domjResultsDir = "testdata/resultscompwork/results/domjudge";
+        String pc2ResultsDir = "testdata/resultscompwork/results/pc2data1";
+
+//        editFile(comp.getFirstFilename());
+//        editFile(comp.getSecondFilename());
+        
+
+        FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, domjResultsDir, pc2ResultsDir, resultComparisonKey);
+        FileComparison awardsFileCompare = FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, domjResultsDir, pc2ResultsDir, awardsComparisonKey);
+        FileComparison scoreboardJsonCompare = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, domjResultsDir, pc2ResultsDir, scoreComparisonKey);
+        
+        // TODO 760 handle equal ranks on scoreboard json ?
+        
+        System.out.println("debug 22 diff count "+resultsCompare.getNumberDifferences() + " for "+resultsCompare.getFirstFilename());
+        System.out.println("debug 22 diff count "+awardsFileCompare.getNumberDifferences() + " for "+awardsFileCompare.getFirstFilename());
+        System.out.println("debug 22 diff count "+scoreboardJsonCompare.getNumberDifferences() + " for "+scoreboardJsonCompare.getFirstFilename());
+        
+        assertEquals("results diff count ", 24,resultsCompare.getNumberDifferences());
+        
+        // TODO 760 fix bug in scoreboard ompare
+//        assertEquals("scoreboard diff count ", 3,scoreboardJsonCompare.getNumberDifferences());
+//        assertEquals("awardsdiff count ", 2,awardsFileCompare.getNumberDifferences());
+        
+//        
         
     }
-
-
 }

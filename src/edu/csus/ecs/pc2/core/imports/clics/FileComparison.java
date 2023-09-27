@@ -27,6 +27,9 @@ public class FileComparison {
     private String secondFilename;
 
     @JsonProperty
+    long numberRows;
+    
+    @JsonProperty
     long numberDifferences;
 
     @JsonProperty
@@ -86,7 +89,23 @@ public class FileComparison {
     public void setComparedFields(List<FieldCompareRecord> comparedFields) {
         this.comparedFields = comparedFields;
     }
-
+    
+    public long getNumberComparedRecorderds() {
+        return numberComparedRecorderds;
+    }
+    
+    public void setNumberComparedRecorderds(long numberComparedRecorderds) {
+        this.numberComparedRecorderds = numberComparedRecorderds;
+    }
+    
+    public long getNumberRows() {
+        return numberRows;
+    }
+    
+    public void setNumberRows(long numberRows) {
+        this.numberRows = numberRows;
+    }
+    
     /**
      * Returns a JSON string representation of this SerializedFile object.
      * 
