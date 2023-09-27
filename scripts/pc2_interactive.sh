@@ -108,11 +108,13 @@ KillValidator()
 HandleTerminateFromPC2()
 {
 	DEBUG echo "Received TERMINATE signal from PC2"
+	DEBUG echo "Killing off submission process group $submissionpid and all children"
 	KillValidator
-	if test -n "$submissionpid" -a -d /proc/$submissionpid
+	# Kill off all our kids
+	pkill -9 -P $$
+	if test -n "$submissionpid"
 	then
-		DEBUG echo "Killing off submission process $submissionpid"
-		kill -9 "$submissionpid"
+		pkill -9 -s "$submissionpid"
 	fi
 	DEBUG echo $0: Wall time exceeded - exiting with code $FAIL_WALL_TIME_LIMIT_EXCEEDED
 	exit $FAIL_WALL_TIME_LIMIT_EXCEEDED 
@@ -209,9 +211,9 @@ REPORT Started interactive validator PID $intv_pid
 starttime=`GetTimeInMicros`
 
 # run the command
-REPORT_DEBUG Executing "taskset $CPUMASK $COMMAND $* < $INFIFO > $OUTFIFO"
+REPORT_DEBUG Executing "setsid taskset $CPUMASK $COMMAND $* < $INFIFO > $OUTFIFO"
 
-taskset $CPUMASK $COMMAND $* < $INFIFO > $OUTFIFO  &
+setsid taskset $CPUMASK $COMMAND $* < $INFIFO > $OUTFIFO  &
 # Remember child's PID for possible killing off later
 submissionpid=$!
 
@@ -244,13 +246,16 @@ do
 			if test -d /proc/$contestantpid
 			then
 				REPORT Contestant PID $submissionpid has not finished - killing it
-				kill -9 "$submissionpid"
 			fi
 			# This is just determines if the program ran, not if it's correct.
 			# The result file has the correctness in it.
 			# We only do this if the contestant program has not finished yet.
 			COMMAND_EXIT_CODE=0
 		fi
+
+		# Kill off submission pgrp
+		pkill -9 -s "$submissionpid"
+
 		if test "$wstat" -eq $EXITCODE_AC
 		then
 			GenXML Accepted ""
@@ -303,6 +308,12 @@ DEBUG echo
 REPORT "________________________________________"
 
 rm -f "$INFIFO" "$OUTFIFO"
+
+# Kill pgrp
+pkill -9 -s "$submissionpid"
+
+# Kill off stragglers with us as a parent
+pkill -9 -P $$
 
 # TODO: determine how to pass more detailed pc2sandbox.sh results back to PC2... Perhaps in a file...
 
