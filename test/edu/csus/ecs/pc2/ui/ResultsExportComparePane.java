@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.ExportFilesUtiltiites;
 import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
+import javax.swing.JCheckBox;
 
 /**
  * Results epxort and compare pane.
@@ -52,6 +53,8 @@ public class ResultsExportComparePane extends JPanePlugin {
 
     private JPanel southPane = new JPanel();
 
+    private JCheckBox showDetailsCheckbox = null;
+    
     public ResultsExportComparePane() {
         setBorder(new TitledBorder(null, "Export and Compare Contest Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         setLayout(new BorderLayout(0, 0));
@@ -145,16 +148,21 @@ public class ResultsExportComparePane extends JPanePlugin {
         southPane.add(exportResultsButton);
         exportResultsButton.setToolTipText("Export Results files to pc2 results directory");
 
-        JButton compartResultsButton = new JButton("Compare Result");
+        JButton compartResultsButton = new JButton("View Compare");
         southPane.add(compartResultsButton);
         compartResultsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
-                compareFiles();
+                viewCompareResultsFiles();
 
             }
         });
         compartResultsButton.setToolTipText("Compare pc2 results files to primary CCS results");
+        
+        
+        showDetailsCheckbox = new JCheckBox("Show details");
+        showDetailsCheckbox.setToolTipText("Show full detils coparison");
+        southPane.add(showDetailsCheckbox);
         exportResultsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 exportpc2ResultsFiles();
@@ -294,7 +302,7 @@ public class ResultsExportComparePane extends JPanePlugin {
         return false;
     }
 
-    protected void compareFiles() {
+    protected void viewCompareResultsFiles() {
 
         String pc2ResultsDirectory = pc2ResultsDirectoryTextField.getText();
 
@@ -318,7 +326,8 @@ public class ResultsExportComparePane extends JPanePlugin {
 
         try {
             
-            ResultsCompareReport report = new ResultsCompareReport(getContest(), getController(), pc2ResultsDirectory, primaryCCSDirectory);
+            ResultsCompareReport report = new ResultsCompareReport(getContest(), getController(), pc2ResultsDirectory, primaryCCSDirectory, showDetailsCheckbox.isSelected());
+//            report.setFullDetails(foo);
             Utilities.viewReport(report, report.getPluginTitle(), getContest(), getController(), true);
 
             // TODO 760 Update GUi with comparison information

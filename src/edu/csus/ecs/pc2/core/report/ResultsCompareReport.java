@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -47,25 +48,20 @@ public class ResultsCompareReport implements IReport {
 
     private FileComparison resultsCompare;
 
-    //    private FileComparison awardsFileCompare;
-    //    private FileComparison scoreboardJsonCompare;
-
     private JLabel resultsPassFailLabel;
 
-
-    //    private ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
-    //    private AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
-    //    private ScoreboardKey scoreboardKey = new FileComparisonUtilities.ScoreboardKey();
+    private boolean fullDetails = false;
 
     /**
      * 
      */
     private static final long serialVersionUID = -796328654541676730L;
 
-    public ResultsCompareReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir) {
+    public ResultsCompareReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir, boolean fullDetails) {
         super();
         this.primaryCCSResultsDir = primaryCCSResultsDir;
         this.pc2ResultsDir = pc2ResultsDir;
+        this.fullDetails= fullDetails;
         setContestAndController(contest, controller);
     }
 
@@ -134,6 +130,7 @@ public class ResultsCompareReport implements IReport {
 
         List<String> lines = new ArrayList<String>();
 
+        lines.add("");
         lines.add("File: " + filename);
         lines.add("");
 
@@ -202,19 +199,7 @@ public class ResultsCompareReport implements IReport {
             throw new RuntimeException("Primary CCS directory is not assigned (is null)");
         }
 
-        String compareMessage = "Comparison Summary:   FAILED - no such directory (cdp directory not set) " + targetDir;
-
         List<String> outList = new ArrayList<String>();
-
-        String[] headerLines = { //
-
-                "Primary CCS Results dir: " + getPrimaryCCSResultsDir(), //
-                "pc2 results dir        : " + getPc2ResultsDir(), //
-                "compared files         : " + String.join(", ", filesToCompare), //
-                "", //
-                compareMessage, //
-                "", //
-        };
 
         if (new File(targetDir).isDirectory()) {
 
@@ -223,17 +208,10 @@ public class ResultsCompareReport implements IReport {
             ScoreboardJSONKey scoreboardKey = new FileComparisonUtilities.ScoreboardJSONKey();
 
             FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
-            //                List<String> lines = createFileComparisonReport(ResultsFile.RESULTS_FILENAME, resultsCompare);
-            //                outList.addAll(lines);
 
             FileComparison awardsFileCompare = FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
-            //                lines = createFileComparisonReport(Constants.AWARDS_JSON_FILENAME, awardsFileCompare);
-            //                outList.addAll(lines);
 
             FileComparison scoreboardJsonCompare = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
-            // add details to report
-            //                lines = createFileComparisonReport(Constants.SCOREBOARD_JSON_FILENAME, scoreboardJsonCompare);
-            //                outList.addAll(lines);
 
             long totalDifferences = //
                     resultsCompare.getNumberDifferences() + //
@@ -253,8 +231,27 @@ public class ResultsCompareReport implements IReport {
             }
 
 
-        } else {
-            outList.add("Failed - No target directory "+targetDir); 
+            String[] infoLines = { //
+                    "", //
+                    "Primary CCS Results dir: " + getPrimaryCCSResultsDir(), //
+                    "pc2 results dir        : " + getPc2ResultsDir(), //
+                    "", //
+            };
+            outList.addAll(Arrays.asList(infoLines));
+
+            if (fullDetails) {
+
+                List<String> lines = createFileComparisonReport(ResultsFile.RESULTS_FILENAME, resultsCompare);
+                outList.addAll(lines);
+                lines = createFileComparisonReport(Constants.AWARDS_JSON_FILENAME, awardsFileCompare);
+                outList.addAll(lines);
+                lines = createFileComparisonReport(Constants.SCOREBOARD_JSON_FILENAME, scoreboardJsonCompare);
+                outList.addAll(lines);
+
+
+            } else {
+                outList.add("Failed - No target directory "+targetDir); 
+            }
         }
 
         return (String[]) outList.toArray(new String[outList.size()]);
@@ -328,5 +325,13 @@ public class ResultsCompareReport implements IReport {
 
     public String getPc2ResultsDir() {
         return pc2ResultsDir;
+    }
+    
+    public boolean isFullDetails() {
+        return fullDetails;
+    }
+    
+    public void setFullDetails(boolean fullDetails) {
+        this.fullDetails = fullDetails;
     }
 }

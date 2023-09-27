@@ -62,7 +62,6 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
         assertEquals("Expecting number of comparisons", 255, comp.getComparedFields().size());
         List<FieldCompareRecord> compF = comp.getComparedFields();
         assertEquals("Expecting no differences ", 0, comp.getNumberDifferences());
-
     }
 
     public void testJSONAwardsCompare() throws Exception {
@@ -90,9 +89,9 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
         
         List<FieldCompareRecord> fields = comp.getComparedFields();
         
-        assertEquals("Expecting number of comparison rows", 19, fields.size());
+        assertEquals("Expecting number of comparison rows", 57, fields.size());
         
-        assertEquals("Expecting no differences ",0,comp.getNumberDifferences());
+        assertEquals("Expecting no differences ",19,comp.getNumberDifferences());
         
 //        for (FieldCompareRecord fieldCompareRecord : fields) {
 //            System.out.println("debug 22 field "+fieldCompareRecord.toJSON());
