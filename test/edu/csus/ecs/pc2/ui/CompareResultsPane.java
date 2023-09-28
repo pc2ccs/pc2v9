@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -32,14 +32,13 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.ExportFilesUtiltiites;
 import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
-import javax.swing.JCheckBox;
 
 /**
  * Results epxort and compare pane.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
-public class ResultsExportComparePane extends JPanePlugin {
+public class CompareResultsPane extends JPanePlugin {
 
     private static final long serialVersionUID = -2726716271169661000L;
 
@@ -49,13 +48,11 @@ public class ResultsExportComparePane extends JPanePlugin {
 
     private JLabel exportDirectoryLabel;
 
-    private JLabel resultsPassFailLabel;
-
     private JPanel southPane = new JPanel();
 
     private JCheckBox showDetailsCheckbox = null;
     
-    public ResultsExportComparePane() {
+    public CompareResultsPane() {
         setBorder(new TitledBorder(null, "Export and Compare Contest Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         setLayout(new BorderLayout(0, 0));
 
@@ -81,7 +78,7 @@ public class ResultsExportComparePane extends JPanePlugin {
         primarySourcePanel.add(prmaryCCSLabel);
         primarySourcePanel.add(primaryCCSResultsDirectoryTextField);
 
-        JButton selectPrimaryCCSResultsDirectoryButton = new JButton("...");
+        JButton selectPrimaryCCSResultsDirectoryButton = new JButton("Select...");
         primarySourcePanel.add(selectPrimaryCCSResultsDirectoryButton);
         selectPrimaryCCSResultsDirectoryButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -114,7 +111,7 @@ public class ResultsExportComparePane extends JPanePlugin {
         pc2ResultsDirectoryTextField.setColumns(40);
         pc2SourcePanel.add(pc2ResultsDirectoryTextField);
 
-        JButton selectExportDirectoryButton = new JButton("...");
+        JButton selectExportDirectoryButton = new JButton("Select...");
         pc2SourcePanel.add(selectExportDirectoryButton);
         selectExportDirectoryButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -122,22 +119,9 @@ public class ResultsExportComparePane extends JPanePlugin {
             }
         });
         selectExportDirectoryButton.setToolTipText("Select export Directory");
-
-        JPanel buttonPane = new JPanel();
-        buttonPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        FlowLayout flowLayout = (FlowLayout) buttonPane.getLayout();
-        flowLayout.setHgap(55);
-        centerPane.add(buttonPane);
         
         JPanel resultsPane = new JPanel();
         centerPane.add(resultsPane);
-        
-        JLabel resultsWereLabel = new JLabel("Summary");
-        resultsPane.add(resultsWereLabel);
-        
-        resultsPassFailLabel = new JLabel("-");
-        resultsPassFailLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        resultsPane.add(resultsPassFailLabel);
         FlowLayout flowLayout_1 = (FlowLayout) southPane.getLayout();
         flowLayout_1.setHgap(45);
         
@@ -148,7 +132,7 @@ public class ResultsExportComparePane extends JPanePlugin {
         southPane.add(exportResultsButton);
         exportResultsButton.setToolTipText("Export Results files to pc2 results directory");
 
-        JButton compartResultsButton = new JButton("View Compare");
+        JButton compartResultsButton = new JButton("View Comparison");
         southPane.add(compartResultsButton);
         compartResultsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -160,8 +144,8 @@ public class ResultsExportComparePane extends JPanePlugin {
         compartResultsButton.setToolTipText("Compare pc2 results files to primary CCS results");
         
         
-        showDetailsCheckbox = new JCheckBox("Show details");
-        showDetailsCheckbox.setToolTipText("Show full detils coparison");
+        showDetailsCheckbox = new JCheckBox("Include details in comparison");
+        showDetailsCheckbox.setToolTipText("Show full detils in comparison");
         southPane.add(showDetailsCheckbox);
         exportResultsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

@@ -162,7 +162,7 @@ public class ResultsCompareReport implements IReport {
                 if (!previousKey.equals(theKey)) {
                     previousKey = theKey;
                     lines.add("");
-                    lines.add("Row value: " + theKey);
+                    lines.add("Row key: " + theKey);
                 }
 
                 if (!fieldCompareRecord.getState().equals(ComparisonState.SAME)) {
