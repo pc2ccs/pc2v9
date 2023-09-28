@@ -91,7 +91,7 @@ public class CompareResultsPane extends JPanePlugin {
         JPanel pc2SourcePanel = new JPanel();
         centerPane.add(pc2SourcePanel);
 
-        exportDirectoryLabel = new JLabel("pc2 Results Directory");
+        exportDirectoryLabel = new JLabel("PC2 Results Directory");
         exportDirectoryLabel.setToolTipText("");
         pc2SourcePanel.add(exportDirectoryLabel);
 
