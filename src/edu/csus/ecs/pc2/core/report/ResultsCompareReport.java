@@ -178,14 +178,6 @@ public class ResultsCompareReport implements IReport {
     @Override
     public String[] createReport(Filter filter) {
 
-        String resultsFilename = pc2ResultsDir + File.separator + ResultsFile.RESULTS_FILENAME;
-        String scoreboardJsonFilename = pc2ResultsDir + File.separator + Constants.SCOREBOARD_JSON_FILENAME;
-        String awardsFileName = pc2ResultsDir + File.separator + Constants.AWARDS_JSON_FILENAME;
-//        ExportFilesUtiltiites.writeResultsFiles(contest, getPc2ResultsDir());
-
-        System.out.println("debug 22 resultsFilename = " + resultsFilename);
-        System.out.println("debug 22 scoreboardJsonFilename = " + scoreboardJsonFilename);
-        System.out.println("debug 22 awardsFileName = " + awardsFileName);
 
         String[] filesToCompare = { //
                 ResultsFile.RESULTS_FILENAME, //
@@ -272,11 +264,6 @@ public class ResultsCompareReport implements IReport {
         if (pc2ResultsDir == null || !(new File(pc2ResultsDir).isDirectory())) {
             throw new RuntimeException("pc2 Results directory not defined or not a directory");
         }
-
-        // results.tsv
-        // (results.csv file if/when available #351)
-        // scoreboard.json
-        // awards.json
 
         String[] lines = createReport(filter);
 

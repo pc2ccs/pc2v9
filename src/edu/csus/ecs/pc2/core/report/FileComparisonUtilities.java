@@ -68,8 +68,7 @@ public class FileComparisonUtilities {
                     FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
                     
-                    
-                    // TODO 760 handled  firstRowfirstRow.getProblems()
+                    // TODO 760 handled  firstRowfirstRow.getProblems() ?
                     
                     fieldName = "total_time";
                     valueOne = Long.toString(firstRow.getScore().getTotal_time());
@@ -106,21 +105,63 @@ public class FileComparisonUtilities {
                     FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
                     
+                    fieldName = "total_time";
+                    valueTwo = Long.toString(teamScoreRow.getScore().getTotal_time());
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                    
+                    
+                    fieldName = "num solved";
+                    valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                   
+                    fieldName = "tema_id";
+                    valueTwo = Long.toString(teamScoreRow.getTeam_id());
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
+
+                    fieldName = "tema_name";
+                    valueTwo = teamScoreRow.getTeamName();
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
                 }
                 
             }
                 
-            Set<String> awardKeySet = firstFileMap.keySet();
-            String[] awardkeys = (String[]) awardKeySet.toArray(new String[awardKeySet.size()]);
-            Arrays.sort(awardkeys);
+            Set<String> keyset = firstFileMap.keySet();
+            String[] scoreKeys = (String[]) keyset.toArray(new String[keyset.size()]);
+            Arrays.sort(scoreKeys);
 
-            for (String key : awardkeys) {
+            for (String key : scoreKeys) {
                 TeamScoreRow firstRow = firstFileMap.get(key);
 
                 String fieldName = "rank";
                 String valueOne = Integer.toString(firstRow.getRank());
                 String valueTwo = null;
                 FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                
+                
+                fieldName = "total_time";
+                valueOne = Long.toString(firstRow.getScore().getTotal_time());
+                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                
+                
+                fieldName = "num solved";
+                valueOne = Long.toString(firstRow.getScore().getNum_solved());
+                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+               
+                fieldName = "tema_id";
+                valueOne = Long.toString(firstRow.getTeam_id());
+                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+
+                fieldName = "tema_name";
+                valueOne = firstRow.getTeamName();
+                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                 numberRows++;
