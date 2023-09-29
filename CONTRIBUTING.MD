@@ -99,9 +99,9 @@ If you are interested in doing more than providing feedback -- you want to contr
 ### <a name="firstcodecontribution"></a>  Your First Code Contribution
 
 Unsure how to begin contributing to PC^2? You can start by looking through the PC^2 [Issues List](https://github.com/pc2ccs/pc2v9/issues) for
-issues labeled `beginner` and `help-wanted`.  
+issues labeled `good first issue`, `beginner` and `help-wanted`.  
 
-* `Beginner` issues should only require a few lines of code, and a test or two.
+* `Good First Issue` and `Beginner` issues should only require a few lines of code, and a test or two.
 * `Help-wanted` issues are items which are likely to be a bit more involved than `beginner` issues.
 
 You can also learn a lot about how to contribute to PC2 by spending some time looking through the [PC2V9 Wiki](https://github.com/pc2ccs/pc2v9/wiki).
