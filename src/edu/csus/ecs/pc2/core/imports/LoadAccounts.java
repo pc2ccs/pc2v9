@@ -358,7 +358,7 @@ public class LoadAccounts {
     /**
      * Returns a list of accounts updated from the input load accounts file.
      * 
-     * @see #fromTSVFile(IInternalContest, String)
+     * @see #fromTSVFile(IInternalContest, String, Account[], Group[])
      * 
      * @param contest
      * @param filename updates model accounts from file 
@@ -409,6 +409,7 @@ public class LoadAccounts {
 
      * </pre>
      * 
+     * @param contest needed if institutions are to be used
      * @param filename
      * @param existingAccounts 
      * @param groupList
@@ -839,6 +840,13 @@ public class LoadAccounts {
         }
     }
 
+    /**
+     * Set an account's institution (school) information (formal and normal names based on institution ID.
+     * 
+     * @param account The account whose institution is to be set
+     * @param instCode Institution code, eg. 1474, INST-1474 or INST-U-1474 (all work - but
+     *        what a mess.  Someone has to decide what an institution code IS.
+     */
     private static void setInstitutionInformation(Account account, String instCode) {
         try {
             String [] institutionInfo = ICPCTSVLoader.getInstitutionNames(instCode);
