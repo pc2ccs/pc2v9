@@ -423,10 +423,8 @@ public class LoadAccounts {
                 existingAccountsMap.put(existingAccounts[i].getClientId(), existingAccounts[i]);
             }
         }
-        groups.clear();
-        for (Group group : groupList) {
-            groups.put(group.toString(),group);
-        }
+        createGroupMap(groupList);
+        
         int lineCount = 0;
         String[] columns;
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF8"));
@@ -648,10 +646,8 @@ public class LoadAccounts {
                 existingAccountsMap.put(existingAccounts[i].getClientId(), existingAccounts[i]);
             }
         }
-        groups.clear();
-        for (Group group : groupList) {
-            groups.put(group.toString(),group);
-        }
+        createGroupMap(groupList);
+        
         int lineCount = 0;
         String[] columns;
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF8"));
@@ -780,6 +776,25 @@ public class LoadAccounts {
         in.close();
         in = null;
         return accountMap.values().toArray(new Account[accountMap.size()]);
+    }
+    
+    /**
+     * Creates a hash map of group ids and group display names to the group object
+     * Used for mapping TSV group column value to a group
+     * 
+     * @param groupList List of groups used to populate the map
+     * @throws NumberFormatException if getGroupId() does not return an int (should not happen)
+     */
+    private void createGroupMap(Group[] groupList)
+    {
+        groups.clear();
+        for (Group group : groupList) {
+            groups.put(group.toString(),group);
+            //accept the group ID in the TSV as well as the group display name
+            //this should never throw an exception since getGroupId() returns 'int'
+            //if it does, we want to abort the account load since something is really wrong.
+            groups.put(Integer.toString(group.getGroupId()), group);
+        }        
     }
     
     /**
