@@ -33,7 +33,7 @@ There are various types of Client modules:
   * Each contest Judge (human or automated) runs a **Judge** module.
   * Each contest Team runs either a **Team** module or interfaces with the system via a browser using a **Web Client Team** module.
   * Scoreboards are displayed by a **Scoreboard** module.
-  * An **Event Feed** module can be used to generate a [CLICS Event Feed](https://clics.ecs.baylor.edu/index.php?title=Main_Page).
+  * An **Event Feed** module can be used to generate a [CLICS Event Feed](https://ccs-specs.icpc.io/2022-07/contest_api#event-feed).
 
 Clients communicate _only_ with the Server module for their site -- never with any other client nor with any server but the one
 designated as their "site server" (which is declared via a configuration file named **pc2v9.ini**).
