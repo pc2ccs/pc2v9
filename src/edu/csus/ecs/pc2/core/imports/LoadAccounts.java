@@ -105,6 +105,10 @@ public class LoadAccounts {
         account.setInstitutionCode(new String(accountClean.getInstitutionCode()));
         account.setInstitutionName(new String(accountClean.getInstitutionName()));
         account.setInstitutionShortName(new String(accountClean.getInstitutionShortName()));
+        String [] existingMembers = accountClean.getMemberNames();
+        if(existingMembers != null) {
+            account.setMemberNames(StringUtilities.cloneStringArray(existingMembers));
+        }
         
         // now start changing
         if (passwordColumn != -1 && values.length > passwordColumn) {
