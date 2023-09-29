@@ -124,7 +124,7 @@ start by reading about the [PC2 Development Environment](https://github.com/pc2c
 
 When you have completed the above steps and come up with a bug fix or enhancement, the final step is to submit a [Pull Request](https://help.github.com/en/articles/about-pull-requests).  Pull Requests (PR's) allow you to submit a request to the PC^2 maintainers to merge your code into the PC^2 master branch and thus make it part of an upcoming public distribution of PC^2.
 
-Prior to submitting a PR, be sure that you have complied with all the preceding steps, including following the [PC^2 Coding Style Guidelines](./CodingStyle.md) and the creation of automated tests (e.g. JUnits) which demonstrate that your code works as intended (failure to adhere to these steps will almost certainly result in rejection of your PR, regardless of how "cool" the new feature might be).
+Prior to submitting a PR, be sure that you have complied with all the preceding steps, including following the [PC^2 Development Standards guidelines](https://github.com/pc2ccs/pc2v9/wiki/Development-Standards) regarding code and documentation standards as well as the creation of automated tests (e.g. JUnits) which demonstrate that your code works as intended (failure to adhere to these steps will almost certainly result in rejection of your PR, regardless of how "cool" the new feature might be).
 
 To submit a PR, follow the steps in the GitHub [Creating a Pull Request](https://help.github.com/en/articles/creating-a-pull-request-from-a-fork) guide. Specifically, these steps are:
 
