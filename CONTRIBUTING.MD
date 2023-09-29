@@ -70,7 +70,7 @@ For this reason, we have adopted a set of coding guidelines which we expect all 
 everyone on the original PC^2 core development team agreed on all the elements of our guidelines.  However, everyone did agree that
 it was more important to _have a set of standard guidelines_ than it was to have unanimous agreement on what those guidelines are.)
 
-Please see our [PC^2 Coding Style Guidelines document](./CodingStyle.md) for insight into what is expected of code contributions to PC^2.
+Please see our [PC^2 Development Standards](https://github.com/pc2ccs/pc2v9/wiki/Development-Standards) wiki page for insight into what is expected of code contributions to PC^2 -- in particular, check out the sections on [Java Code](https://github.com/pc2ccs/pc2v9/wiki/Development-Standards#java-code), [JavaDoc](https://github.com/pc2ccs/pc2v9/wiki/Development-Standards#javadoc), and [Junits](https://github.com/pc2ccs/pc2v9/wiki/Development-Standards#junits).
 
 ## <a name="feedback"></a> Providing Feedback
 
