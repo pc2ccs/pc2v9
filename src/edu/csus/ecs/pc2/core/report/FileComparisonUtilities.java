@@ -37,8 +37,7 @@ import edu.csus.ecs.pc2.exports.ccs.ResultRow;
 public class FileComparisonUtilities {
     
     private static  ObjectMapper objectMapper = null;
-    
-    
+
     public static FileComparison createScoreboardJSONFileComparison(String tsvFileName, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
 
         String firstFilename = sourceDir + File.separator + tsvFileName;
@@ -61,7 +60,6 @@ public class FileComparisonUtilities {
                 TeamScoreRow firstRow = firstFileMap.get(key);
                 numberRows ++;
                 
-                
                 if (firstRow != null) {
                     String fieldName = "rank";
                     String valueOne = Integer.toString(firstRow.getRank());
@@ -70,6 +68,11 @@ public class FileComparisonUtilities {
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
                     
                     // TODO 760 handled  firstRowfirstRow.getProblems() ?
+                    fieldName = "num solved";
+                    valueOne = Long.toString(firstRow.getScore().getNum_solved());
+                    valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
                     
                     fieldName = "total_time";
                     valueOne = Long.toString(firstRow.getScore().getTotal_time());
@@ -77,18 +80,11 @@ public class FileComparisonUtilities {
                     fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
                     
-                    
-                    fieldName = "num solved";
-                    valueOne = Long.toString(firstRow.getScore().getNum_solved());
-                    valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
+                    fieldName = "team_id";
+                    valueOne = Long.toString(firstRow.getTeam_id());
+                    valueTwo = Long.toString(teamScoreRow.getTeam_id());
                     fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                   
-//                    fieldName = "tema_id";
-//                    valueOne = Long.toString(firstRow.getTeam_id());
-//                    valueTwo = Long.toString(teamScoreRow.getTeam_id());
-//                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-//                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     fieldName = "team name";
                     valueOne = firstRow.getTeamName();
@@ -100,13 +96,16 @@ public class FileComparisonUtilities {
                     
                 } else {
                     
-                    System.out.println("debug 22 MISSING source for "+firstRow.toJSON());
-
+                    String valueOne = null;
                     
                     String fieldName = "rank";
-                    String valueOne = null;
                     String valueTwo = Integer.toString(teamScoreRow.getRank());
                     FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                    
+                    fieldName = "num solved";
+                    valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
                     
                     fieldName = "total_time";
@@ -114,12 +113,6 @@ public class FileComparisonUtilities {
                     fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
                     
-                    
-                    fieldName = "num solved";
-                    valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                   
                     fieldName = "tema_id";
                     valueTwo = Long.toString(teamScoreRow.getTeam_id());
                     fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
@@ -139,13 +132,14 @@ public class FileComparisonUtilities {
 
             for (String key : scoreKeys) {
                 TeamScoreRow firstRow = firstFileMap.get(key);
+                numberRows ++;
+                
+                String valueTwo = null;
 
                 String fieldName = "rank";
                 String valueOne = Integer.toString(firstRow.getRank());
-                String valueTwo = null;
                 FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                
                 
                 fieldName = "total_time";
                 valueOne = Long.toString(firstRow.getScore().getTotal_time());
@@ -157,7 +151,7 @@ public class FileComparisonUtilities {
                 fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
                
-                fieldName = "tema_id";
+                fieldName = "team_id";
                 valueOne = Long.toString(firstRow.getTeam_id());
                 fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
@@ -172,7 +166,7 @@ public class FileComparisonUtilities {
             
             
         } catch (Exception e) {
-            // TODO 760 handle exception
+            e.printStackTrace(); // TODO 760 handle exception
         }
         
         fileComparison.setNumberRows(numberRows);
@@ -188,8 +182,6 @@ public class FileComparisonUtilities {
         String secondFilename = targetDir + File.separator + tsvFileName;
         FileComparison fileComparison = new FileComparison(firstFilename, secondFilename);
 
-//        System.out.println("debug 22 createJSONFileComparison for " + firstFilename);
-//        System.out.println("debug 22 createJSONFileComparison for " + secondFilename);
         long numberRows = 0;
         
         try {
@@ -204,7 +196,6 @@ public class FileComparisonUtilities {
             for (CLICSAward clicsAwardOne : firstAwardRows) {
                 String key = fileComparisonKey.getKey(clicsAwardOne);
                 firstFileMap.put(key, clicsAwardOne);
-//                System.out.println("debug 22 stuf4 "+key+" "+clicsAwardOne.toJSON());
             }
             
             for (CLICSAward clicsAward : secondAwardRows) {
@@ -227,36 +218,33 @@ public class FileComparisonUtilities {
                     fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
-//                    fieldName = "team_ids";
-//                    String[] teamIds = firstAward.getTeam_ids();
-//                    Arrays.sort(teamIds);
-//                    valueOne = String.join(",", teamIds);
-//                    
-//                    teamIds = clicsAward.getTeam_ids();
-//                    Arrays.sort(teamIds);
-//                    valueTwo = String.join(",", teamIds);
-//                    
-//                    fieldCompareRecord = new FieldCompareRecord(fieldName, null, valueTwo, null, key);
-//                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                    fieldName = "team_ids";
+                    valueOne = formatTeamList(firstAward.getTeam_ids());
+                    valueTwo = formatTeamList(firstAward.getTeam_ids());
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
                     
                     firstFileMap.remove(key);
+                    
+                    
                 } else {
                     String fieldName = "citation";
+                    
+                    String valueOne = null;
+                    
                     String valueTwo = clicsAward.getCitation();
-                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, null, valueTwo, null, key);
+                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     fieldName = "id";
                     valueTwo = clicsAward.getId();
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, null, valueTwo, null, key);
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
                     
-//                    fieldName = "team_ids";
-//                    String[] teamIds = clicsAward.getTeam_ids();
-//                    Arrays.sort(teamIds);
-//                    valueTwo = String.join(",", teamIds);
-//                    fieldCompareRecord = new FieldCompareRecord(fieldName, null, valueTwo, null, key);
-//                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                    fieldName = "team_ids";
+                    valueTwo = formatTeamList(clicsAward.getTeam_ids());
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
                 }
             }
             
@@ -268,12 +256,22 @@ public class FileComparisonUtilities {
                 CLICSAward award = firstFileMap.get(key);
                 numberRows++;
                 
+                String valueTwo = null;
+                
                 String fieldName = "citation";
                 String valueOne = award.getCitation();
-                FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, null, null, key);
+                FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord); 
                 
-                // TODO 760 compare other fields like team ids
+                fieldName = "id";
+                valueTwo = award.getId();
+                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                
+                fieldName = "team_ids";
+                valueTwo = formatTeamList(award.getTeam_ids());
+                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                fileComparison.addfieldCompareRecord(fieldCompareRecord);
             }
             
             
@@ -284,6 +282,11 @@ public class FileComparisonUtilities {
         fileComparison.setNumberRows(numberRows);
 
         return fileComparison;
+    }
+
+    private static String formatTeamList(String[] teamIds) {
+        Arrays.sort(teamIds);
+        return String.join(", ", teamIds);
     }
 
     public static FileComparison createTSVFileComparison(String tsvFilename, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
@@ -435,7 +438,8 @@ public class FileComparisonUtilities {
         @Override
         public String getKey(Object object) {
             TeamScoreRow row = (TeamScoreRow) object;
-            return row.getRank() + ":" + row.getTeam_id() +":"+row.getScore();
+            return String.format("%04d", row.getRank()) + ":" + // 
+                    String.format("%04d", row.getTeam_id()) +":"+row.getScore().getNum_solved()+":"+row.getScore().getTotal_time();
             
         }
     }
@@ -446,7 +450,7 @@ public class FileComparisonUtilities {
 
         List<CLICSScoreboard> scoreboardList = getObjectMapper().readValue(jsonString, new TypeReference<List<CLICSScoreboard>>() {});
         for (CLICSScoreboard clicsScoreboard : scoreboardList) {
-            System.out.println("debug 22 2 scoreboards "+clicsScoreboard);
+            System.out.println("debug 22 sb2 scoreboards "+clicsScoreboard);
         }
         return scoreboardList;
     }    

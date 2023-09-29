@@ -47,7 +47,6 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 //        }
 
         assertEquals("Expecting number of comparisons", 255, comp.getComparedFields().size());
-
         assertEquals("Expecting no differences ", 0, comp.getNumberDifferences());
 
     }
@@ -91,7 +90,7 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
         
         assertEquals("Expecting number of comparison rows", 57, fields.size());
         
-        assertEquals("Expecting no differences ",19,comp.getNumberDifferences());
+        assertEquals("Expecting no differences ",0,comp.getNumberDifferences());
         
 //        for (FieldCompareRecord fieldCompareRecord : fields) {
 //            System.out.println("debug 22 field "+fieldCompareRecord.toJSON());
@@ -132,17 +131,14 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
         
         // TODO 760 handle equal ranks on scoreboard json ?
         
-        System.out.println("debug 22 diff count "+resultsCompare.getNumberDifferences() + " for "+resultsCompare.getFirstFilename());
-        System.out.println("debug 22 diff count "+awardsFileCompare.getNumberDifferences() + " for "+awardsFileCompare.getFirstFilename());
-        System.out.println("debug 22 diff count "+scoreboardJsonCompare.getNumberDifferences() + " for "+scoreboardJsonCompare.getFirstFilename());
+        System.out.println("debug 22 diff count res  "+resultsCompare.getNumberDifferences() + " for "+resultsCompare.getFirstFilename());
+        System.out.println("debug 22 diff count sco "+awardsFileCompare.getNumberDifferences() + " for "+awardsFileCompare.getFirstFilename());
+        System.out.println("debug 22 diff count awa "+scoreboardJsonCompare.getNumberDifferences() + " for "+scoreboardJsonCompare.getFirstFilename());
         
         assertEquals("results diff count ", 24,resultsCompare.getNumberDifferences());
+        assertEquals("awardsdiff count ", 9,awardsFileCompare.getNumberDifferences());
         
-        // TODO 760 fix bug in scoreboard ompare
+        // TODO 760 fix scoreboard diff
 //        assertEquals("scoreboard diff count ", 3,scoreboardJsonCompare.getNumberDifferences());
-//        assertEquals("awardsdiff count ", 2,awardsFileCompare.getNumberDifferences());
-        
-//        
-        
     }
 }

@@ -34,11 +34,15 @@ import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
 /**
- * Results epxort and compare pane.
+ * Results export and compare pane.
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
 public class CompareResultsPane extends JPanePlugin {
+
+    private static final String MISSING_TARGET_TITLE = "Missing from Parimary";
+
+    private static final String MISSING_SOURCE_TITLE = "MiIssing from PC2";
 
     private static final long serialVersionUID = -2726716271169661000L;
 
@@ -101,7 +105,6 @@ public class CompareResultsPane extends JPanePlugin {
             public void keyTyped(KeyEvent e) {
 
                 if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
-                    System.out.println("Save pc2 results dir"); // TODO 760 debugging
                     updateUserSetting(ClientSettings.PC2_RESULTS_DIR, pc2ResultsDirectoryTextField.getText());
                 }
 
@@ -310,16 +313,31 @@ public class CompareResultsPane extends JPanePlugin {
 
         try {
             
-            ResultsCompareReport report = new ResultsCompareReport(getContest(), getController(), pc2ResultsDirectory, primaryCCSDirectory, showDetailsCheckbox.isSelected());
-//            report.setFullDetails(foo);
+            ResultsCompareReport report = new ResultsCompareReport(getContest(), getController(), primaryCCSDirectory, pc2ResultsDirectory, showDetailsCheckbox.isSelected(), MISSING_SOURCE_TITLE, MISSING_TARGET_TITLE);
             Utilities.viewReport(report, report.getPluginTitle(), getContest(), getController(), true);
 
-            // TODO 760 Update GUi with comparison information
-
+            populateComparisonTable();
         } catch (Exception e) {
             getLog().log(Level.WARNING, "Exception trying export and compare results" + e.getMessage(), e);
             showMessage(this, "Problem comparing results", "Error writing or comparing results " + e.getMessage());
         }
+    }
+
+    private void populateComparisonTable() {
+        
+        // TODO 760 show comparison in GUI
+        
+//      ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
+//      AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
+//      ScoreboardJSONKey scoreboardKey = new FileComparisonUtilities.ScoreboardJSONKey();
+//
+//      FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
+//
+//      FileComparison awardsFileCompare = FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
+//
+//      FileComparison scoreboardJsonCompare = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
+
+        
     }
 
     private boolean directoryExists(String dirname) {
