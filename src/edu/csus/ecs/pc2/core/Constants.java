@@ -169,6 +169,8 @@ public final class Constants {
     public static final String COUNTRY_CODE_COLUMN_NAME = "countrycode";
 
     public static final String SCORING_ADJUSTMENT_COLUMN_NAME = "scoreadjustment";
+    
+    public static final String INST_CODE_COLUMN_NAME = "institution";
 
     public static final String DEFAULT_INSTITUTIONNAME = "undefined";
 

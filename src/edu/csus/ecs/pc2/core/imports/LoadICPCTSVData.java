@@ -39,6 +39,8 @@ public class LoadICPCTSVData implements UIPlugin {
     public static final String GROUPS_FILENAME = "groups.tsv";
 
     private static final String ACCOUNTS_FILENAME = "accounts.tsv";
+    
+    public static final String INSTITUTIONS_FILENAME = "institutions.tsv";
 
     private String teamsFilename = "";
 
@@ -82,7 +84,7 @@ public class LoadICPCTSVData implements UIPlugin {
 
         if (checkFiles(filename)) {
 
-            String instFilename = groupsFilename.replaceFirst(GROUPS_FILENAME,"institutions.tsv");
+            String instFilename = groupsFilename.replaceFirst(GROUPS_FILENAME, INSTITUTIONS_FILENAME);
             // this must be loaded before accounts, and no harm before groups
             ICPCTSVLoader.loadInstitutions(instFilename);
             Group[] groups = ICPCTSVLoader.loadGroups(groupsFilename, contest.getGroups());

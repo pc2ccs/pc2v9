@@ -3480,7 +3480,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         Group[] groups = contest.getGroups();
 
-        Account[] accList = loader.fromTSVFileWithNewAccounts(loadfilename, teamAccounts, groups);
+        Account[] accList = loader.fromTSVFileWithNewAccounts(contest, loadfilename, teamAccounts, groups);
 
         List<Account> newAccounts = new ArrayList<Account>();
         List<Account> updatedAccount = new ArrayList<Account>();
