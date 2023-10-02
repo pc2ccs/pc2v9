@@ -52,6 +52,7 @@ public class FileComparisonUtilities {
             for (TeamScoreRow teamScoreRow : firstTeamScoreRows) {
                 String key = fileComparisonKey.getKey(teamScoreRow);
                 firstFileMap.put(key, teamScoreRow);
+//                System.out.println("debug 22 sco key = "+key + " AA ");
             }
             
             List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows (fileComparison.getSecondFilename());
@@ -59,6 +60,8 @@ public class FileComparisonUtilities {
                 String key = fileComparisonKey.getKey(teamScoreRow);
                 TeamScoreRow firstRow = firstFileMap.get(key);
                 numberRows ++;
+                
+//                System.out.println("debug 22 sco key = "+key + " SS ");
                 
                 if (firstRow != null) {
                     String fieldName = "rank";
@@ -196,6 +199,8 @@ public class FileComparisonUtilities {
             for (CLICSAward clicsAwardOne : firstAwardRows) {
                 String key = fileComparisonKey.getKey(clicsAwardOne);
                 firstFileMap.put(key, clicsAwardOne);
+                
+              
             }
             
             for (CLICSAward clicsAward : secondAwardRows) {
@@ -438,9 +443,7 @@ public class FileComparisonUtilities {
         @Override
         public String getKey(Object object) {
             TeamScoreRow row = (TeamScoreRow) object;
-            return String.format("%04d", row.getRank()) + ":" + // 
-                    String.format("%04d", row.getTeam_id()) +":"+row.getScore().getNum_solved()+":"+row.getScore().getTotal_time();
-            
+            return String.format("%04d", row.getRank()) + ":" + row.getTeam_id(); 
         }
     }
 
