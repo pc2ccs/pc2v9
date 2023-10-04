@@ -43,135 +43,99 @@ public class FileComparisonUtilities {
         String firstFilename = sourceDir + File.separator + tsvFileName;
         String secondFilename = targetDir + File.separator + tsvFileName;
         FileComparison fileComparison = new FileComparison(firstFilename, secondFilename);
-        
+
         long numberRows = 0;
-        
+
         try {
-            List<TeamScoreRow> firstTeamScoreRows = FileComparisonUtilities.loadTeamRows (fileComparison.getFirstFilename());
-            Map<String, TeamScoreRow> firstFileMap = new HashMap<String, TeamScoreRow>();
-            for (TeamScoreRow teamScoreRow : firstTeamScoreRows) {
-                String key = fileComparisonKey.getKey(teamScoreRow);
-                firstFileMap.put(key, teamScoreRow);
-//                System.out.println("debug 22 sco key = "+key + " AA ");
+            List<TeamScoreRow> firstTeamScoreRows = FileComparisonUtilities.loadTeamRows(fileComparison.getFirstFilename());
+            List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows(fileComparison.getSecondFilename());
+
+            int minLines = firstTeamScoreRows.size();
+            if (secondTeamScoreRows.size() < minLines) {
+                minLines = secondTeamScoreRows.size();
             }
-            
-            List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows (fileComparison.getSecondFilename());
-            for (TeamScoreRow teamScoreRow : secondTeamScoreRows) {
-                String key = fileComparisonKey.getKey(teamScoreRow);
-                TeamScoreRow firstRow = firstFileMap.get(key);
-                numberRows ++;
-                
-//                System.out.println("debug 22 sco key = "+key + " SS ");
-                
-                if (firstRow != null) {
-                    String fieldName = "rank";
-                    String valueOne = Integer.toString(firstRow.getRank());
-                    String valueTwo = Integer.toString(teamScoreRow.getRank());
-                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                    
-                    // TODO 760 handled  firstRowfirstRow.getProblems() ?
-                    fieldName = "num solved";
-                    valueOne = Long.toString(firstRow.getScore().getNum_solved());
-                    valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                    
-                    fieldName = "total_time";
-                    valueOne = Long.toString(firstRow.getScore().getTotal_time());
-                    valueTwo = Long.toString(teamScoreRow.getScore().getTotal_time());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                    
-                    fieldName = "team_id";
-                    valueOne = Long.toString(firstRow.getTeam_id());
-                    valueTwo = Long.toString(teamScoreRow.getTeam_id());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
-                    fieldName = "team name";
-                    valueOne = firstRow.getTeamName();
-                    valueTwo = teamScoreRow.getTeamName();
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-
-                    firstFileMap.remove(key);
-                    
-                } else {
-                    
-                    String valueOne = null;
-                    
-                    String fieldName = "rank";
-                    String valueTwo = Integer.toString(teamScoreRow.getRank());
-                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                    
-                    fieldName = "num solved";
-                    valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                    
-                    fieldName = "total_time";
-                    valueTwo = Long.toString(teamScoreRow.getScore().getTotal_time());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                    
-                    fieldName = "tema_id";
-                    valueTwo = Long.toString(teamScoreRow.getTeam_id());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-
-                    fieldName = "team name";
-                    valueTwo = teamScoreRow.getTeamName();
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                }
-                
-            }
-                
-            Set<String> keyset = firstFileMap.keySet();
-            String[] scoreKeys = (String[]) keyset.toArray(new String[keyset.size()]);
-            Arrays.sort(scoreKeys);
-
-            for (String key : scoreKeys) {
-                TeamScoreRow firstRow = firstFileMap.get(key);
-                numberRows ++;
-                
-                String valueTwo = null;
+            for (int rowNum = 0; rowNum < minLines; rowNum++) {
+                TeamScoreRow firstRow = firstTeamScoreRows.get(rowNum);
+                TeamScoreRow teamScoreRow = firstTeamScoreRows.get(rowNum);
 
                 String fieldName = "rank";
                 String valueOne = Integer.toString(firstRow.getRank());
-                FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                String valueTwo = Integer.toString(teamScoreRow.getRank());
+                FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                
-                fieldName = "total_time";
-                valueOne = Long.toString(firstRow.getScore().getTotal_time());
-                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                fileComparison.addfieldCompareRecord(fieldCompareRecord);
-                
+
+                // TODO 760 handled  firstRowfirstRow.getProblems() ?
                 fieldName = "num solved";
                 valueOne = Long.toString(firstRow.getScore().getNum_solved());
-                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
+                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
-               
+
+                fieldName = "total_time";
+                valueOne = Long.toString(firstRow.getScore().getTotal_time());
+                valueTwo = Long.toString(teamScoreRow.getScore().getTotal_time());
+                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
+                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+
                 fieldName = "team_id";
                 valueOne = Long.toString(firstRow.getTeam_id());
-                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+                valueTwo = Long.toString(teamScoreRow.getTeam_id());
+                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
-                fieldName = "team name";
-                valueOne = firstRow.getTeamName();
-                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                // TODO 760 compare team names
+                //                fieldName = "team name";
+                //                valueOne = firstRow.getTeamName();
+                //                valueTwo = teamScoreRow.getTeamName();
+                //                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
+                //                fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
-                numberRows++;
             }
-            
-            
+
+            // TODO 760 handle if extra rows from first file
+
+            // TODO 760 handle if extra rows from second file
+
+            //            for (String key : scoreKeys) {
+            //                TeamScoreRow firstRow = firstFileMap.get(key);
+            //                numberRows ++;
+            //                
+            //                String valueTwo = null;
+            //
+            //                String fieldName = "rank";
+            //                String valueOne = Integer.toString(firstRow.getRank());
+            //                FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+            //                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+            //                
+            //                fieldName = "total_time";
+            //                valueOne = Long.toString(firstRow.getScore().getTotal_time());
+            //                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+            //                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+            //                
+            //                fieldName = "num solved";
+            //                valueOne = Long.toString(firstRow.getScore().getNum_solved());
+            //                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+            //                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+            //               
+            //                fieldName = "team_id";
+            //                valueOne = Long.toString(firstRow.getTeam_id());
+            //                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+            //                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+            //
+            //                fieldName = "team name";
+            //                valueOne = firstRow.getTeamName();
+            //                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
+            //                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+            //
+            //                numberRows++;
+            //            }
+            //            
+
         } catch (Exception e) {
             e.printStackTrace(); // TODO 760 handle exception
         }
-        
+
         fileComparison.setNumberRows(numberRows);
 
         return fileComparison;
@@ -326,7 +290,7 @@ public class FileComparisonUtilities {
                 String[] secondLineFields = secondLine.split(Constants.TAB);
 
                 if (!secondLine.trim().startsWith("result")) {
-                    ResultRow row = new ResultRow(secondLine);
+                    ResultRow row = new ResultRow(secondLine);  // TODO 760 why is row not used
 
                     String key = fileComparisonKey.getKey(secondLine);
                     String firstLine = firstFileMap.get(key);

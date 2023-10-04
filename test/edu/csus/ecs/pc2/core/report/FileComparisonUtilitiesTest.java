@@ -128,8 +128,6 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 //        editFile(scoreboardJsonCompare.getFirstFilename());
 //        editFile(scoreboardJsonCompare.getSecondFilename());
         
-        // TODO 760 handle equal ranks on scoreboard json ?
-        
 //        System.out.println("debug 22 diff count res "+resultsCompare.getNumberDifferences() + " for "+resultsCompare.getFirstFilename());
 //        System.out.println("debug 22 diff count sco "+awardsFileCompare.getNumberDifferences() + " for "+awardsFileCompare.getFirstFilename());
 //        System.out.println("debug 22 diff count awa "+scoreboardJsonCompare.getNumberDifferences() + " for "+scoreboardJsonCompare.getFirstFilename());
@@ -137,7 +135,11 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
         assertEquals("results diff count ", 24,resultsCompare.getNumberDifferences());
         assertEquals("awardsdiff count ", 9,awardsFileCompare.getNumberDifferences());
         
-        // TODO 760 fix scoreboard compare, esp the team_id int vs string, caused by which standard to use
-//        assertEquals("scoreboard diff count ", 3,scoreboardJsonCompare.getNumberDifferences());
+//        List<FieldCompareRecord> rows = scoreboardJsonCompare.getComparedFields();
+//        for (FieldCompareRecord fieldCompareRecord : rows) {
+//            System.out.println("debug 22 field "+fieldCompareRecord.toJSON());
+//        }
+        
+        assertEquals("scoreboard diff count ", 0, scoreboardJsonCompare.getNumberDifferences());
     }
 }
