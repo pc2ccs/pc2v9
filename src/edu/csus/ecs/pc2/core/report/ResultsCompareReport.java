@@ -160,6 +160,7 @@ public class ResultsCompareReport implements IReport {
         lines.add("");
 
         String previousKey = "";
+        int foundCount = 0;
 
         if (differentFields != 0) {
 
@@ -170,11 +171,16 @@ public class ResultsCompareReport implements IReport {
                 String theKey = fieldCompareRecord.getKey();
                 if (!previousKey.equals(theKey)) {
                     previousKey = theKey;
-                    lines.add("");
-                    lines.add("Row key: " + theKey);
+                    foundCount = 0;
                 }
 
                 if (!fieldCompareRecord.getState().equals(ComparisonState.SAME)) {
+                    
+                    foundCount ++;
+                    if (foundCount == 1) {
+                        lines.add("");
+                        lines.add("Row key: " + theKey);
+                    }
 
                     String stateString = fieldCompareRecord.getState().toString();
                     
@@ -232,9 +238,7 @@ public class ResultsCompareReport implements IReport {
             ScoreboardJSONKey scoreboardKey = new FileComparisonUtilities.ScoreboardJSONKey();
 
             FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
-
             FileComparison awardsFileCompare = FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
-
             FileComparison scoreboardJsonCompare = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
 
             long totalDifferences = //

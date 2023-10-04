@@ -53,13 +53,20 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 
     public void testAllpc2AndPrimary() throws Exception {
 
-        String dirOne = TESTDATA_RESULTS_DATA_DIR + "/domjudge";
-        String dirTwo = TESTDATA_RESULTS_DATA_DIR + "/pc2";
+        String domjResultsDir = TESTDATA_RESULTS_DATA_DIR + "/domjudge";
+        String pc2ResultsDir = TESTDATA_RESULTS_DATA_DIR + "/pc2";
 
-        FileComparison comp = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, dirOne, dirTwo, resultComparisonKey);
+        FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, domjResultsDir, pc2ResultsDir, resultComparisonKey);
+        FileComparison awardsFileCompare = FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, domjResultsDir, pc2ResultsDir, awardsComparisonKey);
+        FileComparison scoreboardJsonCompare = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, domjResultsDir, pc2ResultsDir, scoreComparisonKey);
 
-        assertEquals("Expecting number of fields compared ", 255, comp.getComparedFields().size());
-        assertEquals("Expecting no differences ", 0, comp.getNumberDifferences());
+        assertEquals("results diff count ", 0, resultsCompare.getNumberDifferences());
+        assertEquals("awardsdiff count ", 0, awardsFileCompare.getNumberDifferences());
+        assertEquals("scoreboard diff count ", 0, scoreboardJsonCompare.getNumberDifferences());
+
+        assertEquals("results rows count ", 51, resultsCompare.getNumberRows());
+        assertEquals("awardsdiff rows count ", 19, awardsFileCompare.getNumberRows());
+        assertEquals("scoreboard rows count ", 51, scoreboardJsonCompare.getNumberRows());
 
     }
 
@@ -140,6 +147,6 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 //            System.out.println("debug 22 field "+fieldCompareRecord.toJSON());
 //        }
         
-        assertEquals("scoreboard diff count ", 0, scoreboardJsonCompare.getNumberDifferences());
+        assertEquals("scoreboard diff count ", 96, scoreboardJsonCompare.getNumberDifferences());
     }
 }

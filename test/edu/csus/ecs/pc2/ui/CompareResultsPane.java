@@ -42,7 +42,7 @@ public class CompareResultsPane extends JPanePlugin {
 
     private static final String MISSING_TARGET_TITLE = "Missing from Parimary";
 
-    private static final String MISSING_SOURCE_TITLE = "MiIssing from PC2";
+    private static final String MISSING_SOURCE_TITLE = "MIssing from PC2";
 
     private static final long serialVersionUID = -2726716271169661000L;
 
