@@ -337,6 +337,10 @@ public class InternalContest implements IInternalContest {
                 } else if (status.equals(RunStates.BEING_RE_JUDGED)) {
                     status = RunStates.JUDGED;
                 }
+                // Can not have a judged run with no judgment records - set to NEW as above
+                if(status == RunStates.JUDGED && runs[i].getJudgementRecord() == null) {
+                    status = RunStates.NEW;                    
+                }
                 if (!runs[i].getStatus().equals(status)) {
                     StaticLog.info("Changing Run " + runs[i].getElementId() + " from " + runs[i].getStatus() + "to NEW");
 

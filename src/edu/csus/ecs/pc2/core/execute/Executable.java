@@ -238,6 +238,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      */
     private ArrayList<String> validatorStderrFilesnames = new ArrayList<String>();
 
+    // Where to put the execute results.  This is an ndjson file created by sandbox and interactive execution scripts
+    // Each line in the file is the result for a single test case run
+    // TODO: future enhancement: make this file visible from the judge/admin GUI when viewing judgement results.
+    private String executeInfoFileName = null;
+
+
     private long startTimeNanos;
     private long endTimeNanos;
 
@@ -247,11 +253,15 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     private String packagePath = "";
     
+    //The following two members are for debugging Linux specific functionality on Windows.
+    // Note that THESE ARE FOR DEBUGGING PURPOSES only, since most debugging is done on Windows.
+    // Setting either of these to "true" does NOT imply the functionality is supported on Windows at the moment.
+    // TODO: Make sure BOTH of these are set to "false" for a production distribution.
+    
     //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
-    // Note that THIS IS FOR DEBUGGING PURPOSES only, since most debugging is done on Windows.
-    // It does NOT imply any support for Windows sandboxing at the moment.
-    //TODO: change this variable to FALSE before generating a production distribution.
     private boolean debugAllowSandboxInvocationOnWindows = false;
+    //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
+    private boolean debugAllowInteractiveInvocationOnWindows = false;
 
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, IExecutableMonitor msgFrame) {
@@ -419,7 +429,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     executeProgram(0); // execute with first data set.
                 } else {
                     /**
-                     * compileProgram returns false if 1) runProgram failed (errorString set) 2) compiler fails to create expecte output file (errorString empty) If there is compiler stderr or stdout
+                     * compileProgram returns false if 1) runProgram failed (errorString set) 2) compiler fails to create expected output file (errorString empty) If there is compiler stderr or stdout
                      * we should not add the textPane saying there was an error.
                      */
                     if (!executionData.isCompileSuccess()) {
@@ -471,6 +481,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 int dataSetNumber = 0;
                 boolean passed = true;
 
+                // create somewhat secure ndjson file name for per test case execution results.
+                // format of the name is: RSSexecuteinfo.ndjson where R = run number, SS = current clock seconds
+                // eg: for run 453 at 12:00:09:   4539executeinfo.ndjson
+                executeInfoFileName = run.getNumber() + Long.toString((new Date().getTime()) % 100) + Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX;
+                
                 /**
                  * Did at least one test case fail flag.
                  */
@@ -845,7 +860,14 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         // get the appropriate command pattern for invoking the validator attached to the problem
         String commandPattern = "";
 
-        if (problem.isUsingPC2Validator()) {
+        if (problem.isInteractive()) {
+            // We use a special validator for interactive problems.  The validator will look in the
+            // execute folder for the results of the interactive run, and place them in the file(s) that
+            // pc2 wants them in.  It has to be done this way, because validation of the run is already completed
+            // by the time PC2 calls the output validator.  As a result, we just have to copy back the results from
+            // the interactive run.
+            commandPattern = Constants.PC2_INTERACIVE_VALIDATE_COMMAND;
+        } else if (problem.isUsingPC2Validator()) {
 
             commandPattern = getPC2ValidatorCommandPattern();
 
@@ -857,33 +879,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             commandPattern = getCustomValidatorCommandPattern();
 
-            // for a custom validator we also need to obtain the SerializedFile for the validator
-            if (problemDataFiles != null && problemDataFiles.getOutputValidatorFile() != null) {
-
-                // get Validation Program
-                String validatorFileName = problemDataFiles.getOutputValidatorFile().getName();
-                String validatorUnpackName = prefixExecuteDirname(validatorFileName);
-
-                // create the validator program file
-                if (!createFile(problemDataFiles.getOutputValidatorFile(), validatorUnpackName)) {
-                    log.warning("Unable to create custom validator program " + validatorUnpackName);
-                    setException("Unable to create custom validator program " + validatorUnpackName);
-
-                    throw new SecurityException("Unable to create custom validator, check logs");
-                }
-
-                if (!validatorFileName.endsWith(".jar")) {
-                    // Unix validator programs must set the execute bit to be able to execute the program.
-                    setExecuteBit(prefixExecuteDirname(validatorFileName));
-                }
-            } else {
-
-                log.warning("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
-                setException("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
-                throw new IllegalStateException("IllegalStateException: Problem is marked as having a Custom Validator but no "
-                        + "SerializedFile for the validator could be obtained from the ProblemDataFiles");
-            }
-
+            createValidatorProgram();
+            
         } else {
 
             log.warning("Problem is marked as validated but has no defined Validator");
@@ -907,12 +904,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 /**
                  * Set filenames if external files.
                  */
-
-                SerializedFile serializedFile = problemDataFiles.getJudgesDataFiles()[dataSetNumber];
-                judgeDataFilename = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
-
-                serializedFile = problemDataFiles.getJudgesAnswerFiles()[dataSetNumber];
-                judgeAnswerFilename = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), Utilities.DataFileType.JUDGE_DATA_FILE);
+                judgeDataFilename = getJudgeFileName(Utilities.DataFileType.JUDGE_DATA_FILE, dataSetNumber);
+                judgeAnswerFilename = getJudgeFileName(Utilities.DataFileType.JUDGE_ANSWER_FILE, dataSetNumber);
 
             } else {
 
@@ -974,7 +967,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             }
         }
 
-        cmdLine = substituteAllStrings(run, cmdLine);
+        cmdLine = substituteAllStrings(run, cmdLine, testCase);
 
         log.log(Log.DEBUG, "command pattern after substitution: " + cmdLine);
 
@@ -1062,8 +1055,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             // // waiting for the process to finish execution...
             // executionData.setValidationReturnCode(process.waitFor());
 
-            // if CLICS-style validator interface, redirect team output to STDIN
-            if (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface())) {
+            // if using a CLICS-style validator interface, redirect team output to STDIN.
+            // We only do this if NOT an interactive problem because currently, the validation
+            // phase is always pc2 validator format.
+            if (!problem.isInteractive() &&
+                (problem.isUsingCLICSValidator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface()))) {
 
                 String teamOutputFileName = getTeamOutputFilename(dataSetNumber);
                 if (teamOutputFileName != null && new File(teamOutputFileName).exists()) {
@@ -1149,7 +1145,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         validatorStderrFilesnames.add(validatorStderrFilename);
 
         //check if the validator is using the "PC2 Validator Interface" Standard
-        if (problem.isUsingPC2Validator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUsePC2ValidatorInterface())) {
+        // Interactive problems always use the pc2 validator format since the validator is a
+        // private pc2 script which generates pc2 validator output for now.
+        if (problem.isUsingPC2Validator() || (problem.isUsingCustomValidator() && problem.getCustomOutputValidatorSettings().isUsePC2ValidatorInterface()) ||
+                problem.isInteractive()) {
 
             //it was using the PC2 Validator Interface, check the results file
             boolean fileThere = new File(prefixExecuteDirname(pc2InterfaceResultsFileName)).exists();
@@ -1762,7 +1761,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         String inputDataFileName = null;
         boolean usingSandbox = false ;
         boolean bSandboxSystemError = false;
-
+        
         // a one-based test data set number
         int testSetNumber = dataSetNumber + 1;
 
@@ -1795,6 +1794,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                  * Team executing run
                  */
 
+                // TODO: Future development: Something (probably?) has to be done for interactive problems here,
+                // even if it is to issue an error message indicating that testing of interactive problems can not be done.
+                // It is unclear what CAN be done without providing access to the interactive validator.  For
+                // interactive problems, it is up to the contestant to test their own submission with their
+                // own interactive validator, IMHO -- JB
+                
                 if (inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
                     selectAndCopyDataFile(inputDataFileName);
                 } else if (inputDataFileName != null) {
@@ -1901,25 +1906,38 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             }
 
-            //determine whether the Problem is configured to use a sandbox 
+            //determine whether the Problem is configured to use a sandbox
             usingSandbox = isUsingSandbox();
-            if(usingSandbox) {
-                try {
-                    setupSandbox();
-                } catch (Exception e) {
-                    //an exception means there is something wrong about sandbox usage (e.g. not allowed on this platform)
-                    log.severe("Exception during sandbox setup: " + e.getMessage());
-                    stderrlog.close();
-                    stdoutlog.close();
-                    executionData.setExecuteSucess(false);
-                    executionData.setExecutionException(e);
-                    return false;
+            
+            // we do not do sandboxes or interactive for test runs
+            if(!isTestRunOnly()) {
+                if(usingSandbox) {
+                    try {
+                        setupSandbox();
+                    } catch (Exception e) {
+                        //an exception means there is something wrong about sandbox usage (e.g. not allowed on this platform)
+                        log.severe("Exception during sandbox setup: " + e.getMessage());
+                        stderrlog.close();
+                        stdoutlog.close();
+                        executionData.setExecuteSucess(false);
+                        executionData.setExecutionException(e);
+                        return false;
+                    }
+                
+                    //insert the command for invoking the sandbox at the front of the command line
+                    //note that if the problem is interactive, this is handled in getSandboxCmdLine() since
+                    //there is a different sandbox command line and program (script) for interactive in a sandbox
+                    cmdline = problem.getSandboxCmdLine() + " " + cmdline ;
+                    if(problem.isInteractive()) {
+                        // This will copy anything that is needed for the interactive validator that was not copied above.
+                        setupInteractiveValidator();
+                    }
+                } else if(problem.isInteractive()) {
+                    cmdline = problem.getInteractiveCommandLine() + " " + cmdline;
+                    // Copy necessary files for interactive validation
+                    setupInteractiveValidator();
                 }
-            
-                //insert the command for invoking the sandbox at the front of the command line
-                cmdline = problem.getSandboxCmdLine() + " " + cmdline ;
             }
-            
             log.log(Log.DEBUG, "cmdline before substitution: " + cmdline);
 
             /**
@@ -2052,6 +2070,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 log.info ("scheduling kill task with TLE-Timer with " + delay + " msec delay");
                 timeLimitKillTimer.schedule(task, delay);
             }
+            
+            // TODO: Future investigation: The IOCollectors are probably not needed for interactive problems since
+            // the I/O is redirected between the submission and the interactive validator in the scripts. (JB)
+            // It doesn't hurt to create them, but nothing will every be written to them or read from them. 
             
             log.info("creating IOCollectors...");
             // Create a stream that reads from the stdout of the child process
@@ -2215,7 +2237,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             stderrlog.close();
 
             executionData.setExecuteSucess(true);
-                        
+            
+            // TODO: Future development: for interactive problems, it might be nice to use the interactive validator output as the
+            // program output so the judge's can see what happened. JB
             executionData.setExecuteProgramOutput(new SerializedFile(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME)));
             executionData.setExecuteStderr(new SerializedFile(prefixExecuteDirname(EXECUTE_STDERR_FILENAME)));
 
@@ -2408,15 +2432,21 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      */
     private void copyPC2Sandbox() throws Exception {
         
+        String sandboxScriptName;
+        if(problem.isInteractive()) {
+            sandboxScriptName = Constants.PC2_INTERNAL_SANDBOX_INTERACTIVE_NAME;
+        } else {
+            sandboxScriptName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME;
+        }
         //point to the file that we want to create
-        String targetFileName = prefixExecuteDirname(Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME);
+        String targetFileName = prefixExecuteDirname(sandboxScriptName);
 
         //use the VersionInfo class to get the PC2 installation directory
         VersionInfo versionInfo = new VersionInfo();
         String home = versionInfo.locateHome();
         
         //point to the PC2 Internal Sandbox file (under "/sandbox" in the home, i.e. installation, directory)
-        String srcFileName = home + File.separator + "sandbox" + File.separator + Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME ;
+        String srcFileName = home + File.separator + Constants.PC2_SCRIPT_DIRECTORY + File.separator + sandboxScriptName ;
         
         try {
             //copy the PC2 internal sandbox program into the execute directory
@@ -2429,7 +2459,93 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             throw e;  
         }
     }
+    
 
+    /**
+     * Setup the environment needed to run the current submission using an interactive validator.  This involves making sure that
+     * the system supports interactive validators and, the copying of any necessary files succeeds.  This
+     * does NOT imply the validator will work when it comes time to run the submission.
+     * 
+     * If this routine returns normally, then the files necessary for running in an interactive submission have been copied successfully.
+     * 
+     * @throws Exception if there is a interactive validator configuration issue, such as 
+     *          we're running on an OS platform where interactive validators aren't supported, or
+     *          the specified scripts for interactive validation can't be loaded into the execute directory.
+     */
+    private void setupInteractiveValidator() throws Exception {
+        
+        log.info("Setting up problem " + problem.getShortName() + " for interactive validation");
+            
+        //check the OS to be sure we support interactive problems
+        if (OSCompatibilityUtilities.isRunningOnWindows() && !debugAllowInteractiveInvocationOnWindows) {
+            
+            log.severe("Attempt to execute a problem configured with an interactive validator on a Windows system: not supported");
+            throw new Exception ("Interactive Validators are not supported on Windows OS");
+            
+        } else {
+            
+            //OS supported (non-Windows values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
+                
+            log.info("Copying PC2 interactive validator scripts into Execute directory");
+            try {
+                //copy the PC2 interactive validator scripts into the execution directory
+                copyPC2InteractiveValidatorScripts();
+                createValidatorProgram();
+            } catch (Exception e) {
+                log.severe("Unable to copy PC2 interactive validator scripts to execute directory; cannot execute submission");
+                throw e;
+            }
+        }
+        
+        //Problem has a properly-configured interactive validator and we're not running a Team client
+        return;
+    }
+
+    /**
+     * Copies the PC2 interactive validator script files into the execution directory.
+     * 
+     * @throws Exception if creation of the script files in the execution directory failed.  
+     *          The Exception which is thrown is whatever Exception occurred during execution
+     *          of the file copy operation.
+     */
+    private void copyPC2InteractiveValidatorScripts() throws Exception {
+        
+        ArrayList<String> scriptNames = new ArrayList<String>();
+       
+        //If a sandbox is being used, the interactive validator sandbox script was copied already by setupSandbox(). If not
+        // using a sandbox, we have to copy the non-sandbox version of the interactive validator script here.
+        SandboxType sbType = problem.getSandboxType();
+        if (sbType == SandboxType.NONE) {
+            scriptNames.add(Constants.PC2_INTERACTIVE_NAME);
+        }
+        // Add in the PC2 final validator that validates the results of the interactive validator
+        scriptNames.add(Constants.PC2_INTERACTIVE_VALIDATOR_NAME);
+        
+        //use the VersionInfo class to get the PC2 installation directory
+        VersionInfo versionInfo = new VersionInfo();
+        String home = versionInfo.locateHome();      
+        
+        // Now, copy the files one at-a-time from the list
+        for(String scriptName : scriptNames) {
+            //point to the file that we want to create
+            String targetFileName = prefixExecuteDirname(scriptName);
+    
+            //point to the PC2 Internal Sandbox file (under "/scripts" in the home, i.e. installation, directory)
+            String srcFileName = home + File.separator + Constants.PC2_SCRIPT_DIRECTORY + File.separator + scriptName ;
+            
+            try {
+                //copy the script into the execute directory
+                Files.copy(new File(srcFileName).toPath(), new File(targetFileName).toPath());
+            } catch (FileAlreadyExistsException ae) {
+                // this is OK, just use the one there.
+            } catch (Exception e){
+                log.severe("Exception copying PC2 interactive validator script to execute directory: " + e.getMessage());
+                executionData.setExecutionException(e);
+                throw e;  
+            }
+        }
+    }
+    
     /**
      * Returns an indication of whether the currently executing client is a Team (as opposed to a Judge, Admin, or Scoreboard for example).
      * 
@@ -2797,6 +2913,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      *              {:sandboxprogramname} - the sandbox program name as defined in the Problem
      *              {:sandboxcommandline} - the command line used to invoke the sandbox as defined in the Problem 
      *              {:ensuresuffix=...} - add supplied suffix if not present already
+     *              {:testcase} - testcase number
+     *              {:executeinfofilename} - filename of NDJson to put execute/validation info in
+     *              {:infilename} - full path to judges input data
+     *              {:ansfilename} - full path to judges answer file
+     *              {:timelimit} - CPU time limit in seconds
+     *              {:memlimit} - memory limit in MB
      * </pre>
      * 
      * @param dataSetNumber
@@ -2896,13 +3018,28 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     newString = replaceString(newString, "{:ansfile}", nullArgument);
                 }
                 
-                String fileName = problem.getDataFileName(dataSetNumber);
+                newString = replaceString(newString, "{:testcase}", Integer.toString(dataSetNumber));
+                
+                if(executeInfoFileName != null) {
+                    newString = replaceString(newString, "{:executeinfofilename}", executeInfoFileName);
+                } else {
+                    // can't happen, but if it does, just use default basename
+                    newString = replaceString(newString, "{:executeinfofilename}", Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
+                    log.config("substituteAllStrings() executeInfoFileName is null, using default basename" + Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
+                }
+                String fileName = getJudgeFileName(Utilities.DataFileType.JUDGE_DATA_FILE, dataSetNumber-1);
+                if(fileName == null) {
+                    problem.getDataFileName(dataSetNumber);
+                }
                 if (fileName != null && !fileName.equals("")) {
                     newString = replaceString(newString, "{:infilename}", fileName);
                 } else {
                     newString = replaceString(newString, "{:infilename}", nullArgument);
                 }
-                fileName = problem.getAnswerFileName(dataSetNumber);
+                fileName = getJudgeFileName(Utilities.DataFileType.JUDGE_ANSWER_FILE, dataSetNumber-1);
+                if(fileName == null) {
+                        problem.getAnswerFileName(dataSetNumber);
+                }
                 if (fileName != null && !fileName.equals("")) {
                     newString = replaceString(newString, "{:ansfilename}", fileName);
                 } else {
@@ -3381,5 +3518,88 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private String formatTestCasePhase(String runPhase, int testCase)
     {
         return(String.format("%10s test case %s", runPhase, StringUtilities.rpad(' ', 5, Integer.toString(testCase) + "...")));
+    }
+    
+    /**
+     * Get the filename of a judge's file.  This could be a full path if the data files are external.  If the
+     * files are internal, then we return the first one's name since each dataset will get copied to the name
+     * of the first item.
+     * 
+     * @return filename of a judge's file
+     * @param wantInput - boolean indicating if we want the input file (true).  If false, we want the answer file
+     * @param setIndex - Which dataset element number are we interested in [0, #datasets-1]
+     */
+    private String getJudgeFileName(Utilities.DataFileType type, int setIndex)
+    {
+        String result = null;
+        SerializedFile serializedFile = null;
+        
+        try {
+            // it's a little more work for external files
+            if (problem.isUsingExternalDataFiles()) {
+                
+                if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
+                    serializedFile = problemDataFiles.getJudgesDataFiles()[setIndex];
+                } else {
+                    serializedFile = problemDataFiles.getJudgesAnswerFiles()[setIndex];               
+                }
+                //Note: last argument (type) is unused in locateJudgesDataFile
+                result = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), type);
+            } else {
+                // For internal files, the appropriate data files are copied to the FIRST datafile's name in the
+                // execute folder, so we always return that one.
+                if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
+                    result = prefixExecuteDirname(problem.getDataFileName());
+                } else {
+                    result = prefixExecuteDirname(problem.getAnswerFileName());
+                }
+            }
+        } catch (Exception e)
+        {
+            //if we got far enough to get the serialized file, show the expected name in the log message
+            if(serializedFile != null) {
+                log.log(Log.WARNING, "Can not get " + type.toString() + " expected filename (" + serializedFile.getName() + ") for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
+            } else {
+                log.log(Log.WARNING, "Can not get " + type.toString() + " filename for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
+            }
+        }
+        return(result);
+    }
+    
+    /**
+     * Unpacks and creates a custom validator program.  If any error happens, an exception is thrown
+     * 
+     * @throws SecurityException - if the copy of the output validator can not be generated in the execute folder
+     * @throws IllegalStateException - if not output validator is available
+     */
+    private void createValidatorProgram()
+    {
+        // for a custom validator we also need to obtain the SerializedFile for the validator
+        if (problemDataFiles != null && problemDataFiles.getOutputValidatorFile() != null) {
+
+            // get Validation Program
+            String validatorFileName = problemDataFiles.getOutputValidatorFile().getName();
+            String validatorUnpackName = prefixExecuteDirname(validatorFileName);
+
+            // create the validator program file
+            if (!createFile(problemDataFiles.getOutputValidatorFile(), validatorUnpackName)) {
+                log.warning("Unable to create custom validator program " + validatorUnpackName);
+                setException("Unable to create custom validator program " + validatorUnpackName);
+
+                throw new SecurityException("Unable to create custom validator, check logs");
+            }
+
+            if (!validatorFileName.endsWith(".jar")) {
+                // Unix validator programs must set the execute bit to be able to execute the program.
+                setExecuteBit(prefixExecuteDirname(validatorFileName));
+            }
+        } else {
+
+            log.warning("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
+            setException("Unable to create custom validator program: no SerializedFile available from ProblemDataFiles");
+            throw new IllegalStateException("IllegalStateException: Problem is marked as having a Custom Validator but no "
+                    + "SerializedFile for the validator could be obtained from the ProblemDataFiles");
+        }
+        
     }
 }

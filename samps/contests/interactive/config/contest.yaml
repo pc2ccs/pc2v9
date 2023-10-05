@@ -1,0 +1,8 @@
+id:                         pc2_inttest
+formal_name:                PC2 Interactive Problem Test
+name:                       PC2 Interactive Test
+start_time:                 2023-11-12T14:00:00+02:00
+duration:                   2:00:00
+scoreboard_freeze_duration: 0:30:00
+penalty_time:               20
+scoreboard_type:            pass-fail

@@ -297,7 +297,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
 
-    private void setLoadSampleJudgesData(IInternalContest contest, boolean loadSampleFiles) {
+    protected void setLoadSampleJudgesData(IInternalContest contest, boolean loadSampleFiles) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setLoadSampleJudgesData(loadSampleFiles);
         contest.updateContestInformation(contestInformation);
@@ -440,8 +440,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setCcsTestMode(contest, ccsTestMode);
         }
         
-        // TODO 701 change LOAD_SAMPLE_JUDGES_DATA, false); to , true);
-        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, false);
+        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, true);
         setLoadSampleJudgesData(contest, loadSamples);
         
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
@@ -1409,11 +1408,41 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problemLaTexFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_ENGLISH_PROBLEM_LATEX_FILENAME;
             problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
         }
-
-        Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
+        
         boolean usingCustomValidator = false;
+        Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
         if (validatorContent != null) {
             usingCustomValidator = fetchBooleanValue(validatorContent, IContestLoader.USING_CUSTOM_VALIDATOR, false);
+        }
+        
+        // check for CLICS "validation" property; provides an alternate way to specify a customer validator and,
+        // the ONLY way to specify if the problem is interactive.
+        String validationType = fetchValue(content, VALIDATION_TYPE);
+        boolean isInteractive = false;
+        if (validationType != null) {
+            // validationType is a list of validation options
+            String[] valOpts = validationType.split("\\s");
+            // Must be one of: "default", "custom", "custom interactive"
+            // PC2 does not support "custom score", which IS spec compliant; we issue a different error for that
+            if (valOpts.length >= 1) {
+                if(valOpts[0].equals(Constants.VALIDATION_CUSTOM)) {
+                    usingCustomValidator = true;
+                    if(valOpts.length >= 2) {
+                        if(valOpts[1].equals(Constants.VALIDATION_INTERACTIVE)) {
+                            // Note that interactive problems require a custom validator
+                            isInteractive = true;
+                        } else if(valOpts[1].equals(Constants.VALIDATION_SCORE)) {
+                            syntaxError("Unsupported validation type: custom score");
+                        } else {
+                            syntaxError("Unknown valudation type: custom " + valOpts[1]);
+                        }
+                    }
+                } else if(!valOpts[0].equals(Constants.VALIDATION_DEFAULT)) {
+                    syntaxError("Unknown validation type " + valOpts[0] + " specified");
+                }
+            } else {
+                syntaxError(VALIDATION_TYPE + " property found but no type was specified");
+            }
         }
 
         boolean pc2FormatProblemYamlFile = false;
@@ -1427,6 +1456,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             pc2FormatProblemYamlFile = true;
         }
 
+        // TODO: I am not sure why this test is contingent on pc2FormatProblemYamlFile. (JB)
         if (problemTitle == null && (pc2FormatProblemYamlFile)) {
             problemTitle = fetchValue(content, "name");
         }
@@ -1452,6 +1482,38 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         //
         assignValidatorSettings(content, problem);
+        
+        // Make sure the validator settings are acceptable for interactive problems
+        if(isInteractive) {
+            if(!usingCustomValidator) {
+                throw new YamlLoadException("For problem short name " + problem.getShortName() + 
+                        ", a custom validator is required for an interactive problem");
+                
+            }
+            if(!problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface()) {
+                throw new YamlLoadException("For problem short name " + problem.getShortName() + 
+                        ", the custom validator must be a CLICS compliant for an interactive problem");
+                
+            } else {
+                // A note here about how interactive validation works.  The interactive validator must be CLICS
+                // compliant and return an exit code of 42 or 43, and possibly generating a feedback file for
+                // each test case.  PC2 is nominally aware of interactive validators and only knows enough to
+                // call a script (pc2sandbox_interactive.sh or pc2_interactive.sh) to perform a testcase run.
+                // The results of that testcase are written to a known results file (and feedback directory) by
+                // the pc2sandbox_interactive.sh/pc2_interactive.sh script (be it accepted, wrong answer, RTE, TLE, MLE etc).
+                // PC2 then knows to call a special validator during the validation phase (pc2validate_interactive.sh) to
+                // copy the results file/feedback dir into the place that pc2 expects it so it can determine if the
+                // submission is correct or not.  This special validator is a PC2 compliant (not CLICS) so we can
+                // return complete result info in one XML file, other than AC or WA.  CLICS validators do not allow that
+                // without munging the feedback dir.  The important thing is, the actual testcase is validated by a CLICS
+                // validator.
+                
+                // We set the custom output validator settings for interactive.  The CLICS spec does not have
+                // a validator section in the YAML, as such, we first verified that the custom validator is CLICS compliant.
+                // We then we set output validator type to clics interactive.
+                problem.getCustomOutputValidatorSettings().setUseInteractiveValidatorInterface();
+            }
+        }
         
         //read any PC2-format limits specified at the top level of the problem.yaml file
         Integer timeoutSecs = fetchIntValue(content, TIMEOUT_KEY);
@@ -1527,10 +1589,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 problem.setTimeOutInSeconds(clicsTimeout);
             }
             
-            //check for a CLICS maxoutput limit
+            //check for a CLICS maxoutput limit - the value is in MiB
             Integer clicsMaxOutput = fetchIntValue(limitsContent, CLICS_MAX_OUTPUT_KEY);
             if (clicsMaxOutput != null) {
-                problem.setMaxOutputSizeKB(clicsMaxOutput);
+                problem.setMaxOutputSizeKB(clicsMaxOutput * Constants.KIBIBYTE_PER_MEBIBYTE);
             }
             
             Integer clicsMemoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, Problem.DEFAULT_MEMORY_LIMIT_MB);
@@ -2926,40 +2988,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         if (inputFileNames.length == answerFileNames.length) {
 
-            Arrays.sort(inputFileNames);
-            Arrays.sort(answerFileNames);
-
             ArrayList<SerializedFile> dataFiles = new ArrayList<SerializedFile>();
             ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
             
             if (loadSamples) {
                 loadDataFiles(problem, dataFiles, answerFiles, sampleDataDirectory, loadExternalFile);
             }
-
             
-            // TODO REFACTOR use loadDataFiles to load secret data files.
-            
-            for (int idx = 0; idx < inputFileNames.length; idx++) {
-
-                problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
-
-                String dataFileName = dataFileBaseDirectory + File.separator + inputFileNames[idx];
-                String answerFileName = dataFileName.replaceAll(".in$", ".ans");
-
-                if (idx == 0) {
-                    problem.setDataFileName(Utilities.basename(dataFileName));
-                    problem.setAnswerFileName(Utilities.basename(answerFileName));
-                }
-
-                String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
-
-                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
-                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
-
-                dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
-                answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
-
-            }
+            // Load all secret files
+            loadDataFiles(problem, dataFiles, answerFiles, dataFileBaseDirectory, loadExternalFile);
 
             if (dataFiles.size() > 0) {
 
@@ -2997,13 +3034,23 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return problem;
     }
 
-    protected void loadDataFiles(Problem problem, ArrayList<SerializedFile> dataFiles, ArrayList<SerializedFile> answerFiles, String sampleDataDirectory, boolean loadExternalFile) {
+    /**
+     * Per problem, add files names into datafiles and answerfiles.
+     * 
+     * @param problem 
+     * @param dataFiles input data files
+     * @param answerFiles input answer files
+     * @param fileSourceDirectory - location for the secret or sample files
+     * @param loadExternalFile - load as external data fils
+     */
+    protected void loadDataFiles(Problem problem, ArrayList<SerializedFile> dataFiles, ArrayList<SerializedFile> answerFiles, String fileSourceDirectory, boolean loadExternalFile) {
         
-        String[] inputFileNames = getFileNames(sampleDataDirectory, ".in");
-        String[] answerFileNames = getFileNames(sampleDataDirectory, ".ans");
+        String[] inputFileNames = getFileNames(fileSourceDirectory, ".in");
+        String[] answerFileNames = getFileNames(fileSourceDirectory, ".ans");
         
         if (inputFileNames.length == answerFileNames.length) {
 
+            // Sort file names before loading into datafiles and answerfiles
             Arrays.sort(inputFileNames);
             Arrays.sort(answerFileNames);
 
@@ -3013,11 +3060,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
 
-                String dataFileName = sampleDataDirectory + File.separator + inputFileNames[idx];
+                String dataFileName = fileSourceDirectory + File.separator + inputFileNames[idx];
                 String answerFileName = dataFileName.replaceAll(".in$", ".ans");
 
-                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + sampleDataDirectory);
-                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + sampleDataDirectory);
+                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + fileSourceDirectory);
+                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + fileSourceDirectory);
 
                 dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
                 answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
@@ -3025,7 +3072,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         } else {
             throw new YamlLoadException("  For " + problem.getShortName() + " Missing data files -  there are " + inputFileNames.length + " .in files and " + //
-                    answerFileNames.length + " .ans files " + " in " + sampleDataDirectory);
+                    answerFileNames.length + " .ans files " + " in " + fileSourceDirectory);
         }
 
     }
@@ -3289,12 +3336,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         boolean loaded = false;
 
         String teamsTSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.TEAMS_FILENAME;
+        String teams2TSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.TEAMS2_TSV;
 
         String groupsTSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.GROUPS_FILENAME;
 
-        // only load if both tsv files are present.
+        // only load if both a teams TSV and groups TSV files are present.
 
-        if (new File(teamsTSVFile).isFile() && new File(groupsTSVFile).isFile()) {
+        if ((new File(teamsTSVFile).isFile() || new File(teams2TSVFile).isFile()) && new File(groupsTSVFile).isFile()) {
 
             LoadICPCTSVData loadTSVData = new LoadICPCTSVData();
             loadTSVData.setContestAndController(contest, null);
@@ -3432,7 +3480,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         Group[] groups = contest.getGroups();
 
-        Account[] accList = loader.fromTSVFileWithNewAccounts(loadfilename, teamAccounts, groups);
+        Account[] accList = loader.fromTSVFileWithNewAccounts(contest, loadfilename, teamAccounts, groups);
 
         List<Account> newAccounts = new ArrayList<Account>();
         List<Account> updatedAccount = new ArrayList<Account>();

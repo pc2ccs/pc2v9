@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.BufferedReader;
@@ -25,6 +25,9 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
+import edu.csus.ecs.pc2.ui.MessageManager;
+import edu.csus.ecs.pc2.ui.MessageRecord;
+import edu.csus.ecs.pc2.ui.MessageScope;
 import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
 
 /**
@@ -491,12 +494,20 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                     submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(),
                                                             runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
                                                 } catch (Exception e) {
+                                                    
+                                                    // Send message, message will add to connectStatusTable
+                                                    MessageManager.fireMessageListener(new MessageRecord("Unable to submit run " + overrideSubmissionID + " " + e.getMessage(), MessageScope.SHADOW_UI, e));
+                                                    
                                                     // TODO design error handling reporting
                                                     logAndDebugPrint(log, Level.WARNING, "Exception submitting run for event: " + event, e);
                                                 }
                                             }
     
                                         } catch (Exception e) {
+                                            
+                                            // Send message, message will add to connectStatusTable
+                                            MessageManager.fireMessageListener(new MessageRecord("Exception processing event: " + event, MessageScope.SHADOW_UI, e));
+                                            
                                             // TODO design error handling reporting (logging?)
                                             logAndDebugPrint(log, Level.WARNING, "Exception processing event: " + event, e);
                                         }

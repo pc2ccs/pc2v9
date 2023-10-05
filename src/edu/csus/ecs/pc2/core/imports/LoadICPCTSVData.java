@@ -39,6 +39,8 @@ public class LoadICPCTSVData implements UIPlugin {
     public static final String GROUPS_FILENAME = "groups.tsv";
 
     private static final String ACCOUNTS_FILENAME = "accounts.tsv";
+    
+    public static final String INSTITUTIONS_FILENAME = "institutions.tsv";
 
     private String teamsFilename = "";
 
@@ -82,7 +84,7 @@ public class LoadICPCTSVData implements UIPlugin {
 
         if (checkFiles(filename)) {
 
-            String instFilename = groupsFilename.replaceFirst(GROUPS_FILENAME,"institutions.tsv");
+            String instFilename = groupsFilename.replaceFirst(GROUPS_FILENAME, INSTITUTIONS_FILENAME);
             // this must be loaded before accounts, and no harm before groups
             ICPCTSVLoader.loadInstitutions(instFilename);
             Group[] groups = ICPCTSVLoader.loadGroups(groupsFilename, contest.getGroups());
@@ -247,13 +249,22 @@ public class LoadICPCTSVData implements UIPlugin {
         }
         return null;
     }
-
+    
+    /**
+     * checkFiles
+     * Check the teams, groups and accounts tsv files.
+     * These files should be in the same folder, so the basename is determined
+     * and the other files are formed using path where the basename file resides.
+     * teams2.tsv is preferred over teams.tsv since it has groups in it and is otherwise identical.
+     * If teams.tsv is specified, the existence of teams2.tsv is
+     * checked.  If found, it replaces teams.tsv.
+     * Previously, if teams.tsv did not exist, then the existance of teams2.tsv was never
+     * even considered and an error was returned.  This behavior was wrong.
+     * @param filename - one of "/path-to/teams.tsv" or "/path-to/groups.tsv"
+     * @return true if needed files are present
+     * @throws Exception on error
+     */
     protected boolean checkFiles(String filename) throws Exception {
-
-        File file = new File(filename);
-        if (!file.isFile()) {
-            throw new FileNotFoundException("File not found: " + filename);
-        }
 
         if (filename.endsWith(TEAMS_FILENAME)) {
             teamsFilename = filename;
@@ -271,17 +282,18 @@ public class LoadICPCTSVData implements UIPlugin {
             throw new Exception("Must select either " + TEAMS_FILENAME + " or " + GROUPS_FILENAME);
         }
 
-        file = new File(teamsFilename);
         String teams2Filename = teamsFilename.replaceFirst(TEAMS_FILENAME, TEAMS2_TSV);
         if (new File(teams2Filename).isFile()) {
             teamsFilename = teams2Filename;
-        }
-        if (!file.isFile()) {
+        } else if (!new File(teamsFilename).isFile()) {
+            /*
+             * We only throw an exception if neither teams file is found.
+             * TEAMS_FILENAME does not have to exist of TEAMS2_TSV does.  
+             */
             throw new FileNotFoundException("File not found: " + teamsFilename);
         }
 
-        file = new File(groupsFilename);
-        if (!file.isFile()) {
+        if (!new File(groupsFilename).isFile()) {
             throw new FileNotFoundException("File not found: " + groupsFilename);
         }
 

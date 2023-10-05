@@ -3857,6 +3857,10 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         }
     }
     
+    /**
+     * Test loading both sample and secret files.
+     * @throws Exception
+     */
     public void testLoadSampleFiles() throws Exception {
 
         IInternalContest contest = loadFullSampleContest(null, MINI_CONTEST_DIR);
@@ -3873,9 +3877,7 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
 //            }
         }
 
-        // TODO 701 change from expected 7 files to 10 files
-//        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 10, totalTestCases);
-        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 7, totalTestCases);
+        assertEquals("In " + MINI_CONTEST_DIR + " expecting sample and secret data files", 10, totalTestCases);
 
     }
     

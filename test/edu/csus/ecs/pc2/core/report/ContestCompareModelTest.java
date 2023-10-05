@@ -8,9 +8,7 @@ import java.util.List;
 import edu.csus.ecs.pc2.core.InternalControllerSpecial;
 import edu.csus.ecs.pc2.core.JudgementLoader;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSEventType;
-import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Filter;
@@ -180,46 +178,6 @@ public class ContestCompareModelTest extends AbstractTestCase {
         // TODO when contest info matches then uncomment this
 //        assertTrue("Model and event feed do not match", comp.isMatch());
 
-    }
-
-    /**
-     * Test compare of pretest CDP and existing event feed file.
-     * 
-     * @throws Exception
-     */
-    public void testReport() throws Exception {
-        
-        String cdpPath = "c:\\repos\\icpc\\ccsconfig-dhaka\\contests\\pretest2";
-        
-        if (! new File(cdpPath).isDirectory()) {
-            // only test if there is a pretest dir found
-            return;
-        }
-        
-        IInternalContest contest = loadAndInitializeContest(null, cdpPath);
-        assertNotNull(contest);
-
-        // Load Accounts
-        String loadAccountFilename = "/repos/icpc/ccsconfig-dhaka/contests/pretest2/config/load_accounts_real.tsv";
-        assertFileExists(loadAccountFilename);
-        Account[] updateAccounts = LoadAccounts.updateAccountsFromFile(contest, loadAccountFilename);
-        contest.updateAccounts(updateAccounts);
-
-        InternalControllerSpecial controller = new InternalControllerSpecial(contest);
-        
-        String outDir = getOutputDataDirectory(getName());
-        ensureDirectory(outDir);
-        assertDirectoryExists(outDir);
-        
-        String efName = "stuf-event-feed.1664499410895.json";
-//        editFile(efName);
-        
-        String reportFile = createContestCompareReport(contest, controller, efName, getOutputDataDirectory(getName()));
-//        editFile(reportFile);
-//        writeReport(contest, controller,efName);
-        
-        assertFileExists(reportFile);
-        
     }
 
     private String createContestCompareReport(IInternalContest contest, InternalControllerSpecial controller,  String overRideEventFilename, String outputDataDirectory) throws IOException {

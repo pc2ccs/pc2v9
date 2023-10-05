@@ -34,14 +34,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.RowSorter;
+import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.RowSorter.SortKey;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
@@ -58,8 +60,6 @@ import edu.csus.ecs.pc2.shadow.MockContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.RemoteContestAPIAdapter;
 import edu.csus.ecs.pc2.shadow.ShadowController;
 import edu.csus.ecs.pc2.shadow.ShadowController.SHADOW_CONTROLLER_STATUS;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This class provides a GUI for configuring and starting Shadowing operations on a remote CCS.
@@ -172,6 +172,20 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
         setupConnectionStatusTable();
         updateGUI();
+
+        /**
+         * Add message listener to add errors into the connectStatusTable.
+         */
+        MessageManager.addMessageListener(new IMessageRecordListener() {
+
+            @Override
+            public void messageAdded(MessageRecord record) {
+                addConnectTableEntry(ShadowStatus.FAILURE, record.getMessage());
+                if (record.getException() != null) {
+                    logException(record.getMessage(), record.getException());
+                }
+            }
+        });
     }
 
     @Override
