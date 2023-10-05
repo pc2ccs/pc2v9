@@ -524,7 +524,7 @@ public class UtilitiesTest extends AbstractTestCase {
         String[] one = null;
         String[] two = null;
 
-        String[] newArray = Utilities.copyArray(one, two);
+        String[] newArray = Utilities.concatenateArrays(one, two);
 
         assertEquals("Expecting a zero lenght array", 0, newArray.length);
 
@@ -540,7 +540,7 @@ public class UtilitiesTest extends AbstractTestCase {
         String[] one = null;
         String[] two = { "omega", "delta" };
 
-        String[] newArray = Utilities.copyArray(one, two);
+        String[] newArray = Utilities.concatenateArrays(one, two);
 
         if (one == null) {
             one = new String[0];
@@ -560,7 +560,7 @@ public class UtilitiesTest extends AbstractTestCase {
         String[] one = { "alpha", "beta", "gamma" };
         String[] two = null;
 
-        String[] newArray = Utilities.copyArray(one, two);
+        String[] newArray = Utilities.concatenateArrays(one, two);
 
         if (two == null) {
             two = new String[0];
@@ -578,7 +578,7 @@ public class UtilitiesTest extends AbstractTestCase {
         String[] one = { "alpha", "beta", "gamma" };
         String[] two = new String[0];
 
-        String[] newArray = Utilities.copyArray(one, two);
+        String[] newArray = Utilities.concatenateArrays(one, two);
         assertEquals("Expect result array length", one.length + two.length, newArray.length);
     }
 
@@ -592,7 +592,7 @@ public class UtilitiesTest extends AbstractTestCase {
         String[] one = { "alpha", "beta", "gamma" };
         String[] two = { "omega", "delta" };
 
-        String[] newArray = Utilities.copyArray(one, two);
+        String[] newArray = Utilities.concatenateArrays(one, two);
         assertEquals("Expect result array length", one.length + two.length, newArray.length);
 
         for (int i = 0; i < one.length; i++) {

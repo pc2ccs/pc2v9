@@ -147,7 +147,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         this.problem = aProblem;
         if (aProblem != null) {
             setProblemDataFiles(aProblemDataFiles.copy(aProblem));
-            getLoadSamplesFirstCheckbox().setSelected(problem.isOnLoadDataFilesLoadSamplesFirst());
+            getLoadSamplesFirstCheckbox().setSelected(problem.isLoadDataFilesSamplesFirst());
         } else {
             getRdbtnCopyDataFiles().setSelected(true);
             clearDataFiles();
@@ -199,7 +199,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             //set the StopOnFirstFailedTestCase checkbox to match what is specified in the problem
             getChckbxStopOnFirstFailedTestCase().setSelected(problem.isStopOnFirstFailedTestCase());
             
-            getLoadSamplesFirstCheckbox().setSelected(problem.isOnLoadDataFilesLoadSamplesFirst());
+            getLoadSamplesFirstCheckbox().setSelected(problem.isLoadDataFilesSamplesFirst());
         }
 
         // TODO 917 re-add auto size columns
@@ -596,7 +596,7 @@ public class MultipleDataSetPane extends JPanePlugin {
              * Existing files present, concatenate files
              */
             
-            Object[] newFiles = Utilities.copyArray(existingFiles, inputFiles);
+            Object[] newFiles = Utilities.concatenateArrays(existingFiles, inputFiles);
             inputFiles = (SerializedFile[]) newFiles;
         }
         
@@ -606,7 +606,7 @@ public class MultipleDataSetPane extends JPanePlugin {
             /**
              * Existing files present, concatenate files
              */
-            Object[] newFiles = Utilities.copyArray(existingFiles, answertFiles);
+            Object[] newFiles = Utilities.concatenateArrays(existingFiles, answertFiles);
             answertFiles = (SerializedFile[]) newFiles;
         }
 
@@ -792,8 +792,9 @@ public class MultipleDataSetPane extends JPanePlugin {
 
     private JCheckBox getLoadSamplesFirstCheckbox() {
         if (loadSamplesFirstCheckbox == null) {
-            loadSamplesFirstCheckbox = new JCheckBox("Load Sample Data");
-            loadSamplesFirstCheckbox.setToolTipText("Load Sample datasets before other data file");
+            loadSamplesFirstCheckbox = new JCheckBox("Also load sample data");
+            loadSamplesFirstCheckbox.setToolTipText("Load Sample datasets before other data files");
+            loadSamplesFirstCheckbox.setSelected(true);
         }
         return loadSamplesFirstCheckbox;
     }

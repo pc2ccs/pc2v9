@@ -144,7 +144,7 @@ public class Problem implements IElementObject {
     /**
      * If true, when loading data sets, load sample data sets before loading other judge's test data sets.
      */
-    private boolean onLoadDataFilesLoadSamplesFirst = false;
+    private boolean loadDataFilesSamplesFirst = false;
     
     /**
      * This enum defines the types of Input Validators which a Problem can have.
@@ -2180,13 +2180,13 @@ public class Problem implements IElementObject {
             sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME;
         }
     }
-    
-    public boolean isOnLoadDataFilesLoadSamplesFirst() {
-        return onLoadDataFilesLoadSamplesFirst;
+
+    public boolean isLoadDataFilesSamplesFirst() {
+        return loadDataFilesSamplesFirst;
     }
     
-    public void setOnLoadDataFilesLoadSamplesFirst(boolean onLoadDataFilesLoadSamplesFirst) {
-        this.onLoadDataFilesLoadSamplesFirst = onLoadDataFilesLoadSamplesFirst;
+    public void setLoadDataFilesSamplesFirst(boolean loadDataFilesSamplesFirst) {
+        this.loadDataFilesSamplesFirst = loadDataFilesSamplesFirst;
     }
 
 }
