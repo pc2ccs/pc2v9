@@ -148,6 +148,7 @@ public class MultipleDataSetPane extends JPanePlugin {
         if (aProblem != null) {
             setProblemDataFiles(aProblemDataFiles.copy(aProblem));
             getLoadSamplesFirstCheckbox().setSelected(problem.isLoadDataFilesSamplesFirst());
+            populateUI();
         } else {
             getRdbtnCopyDataFiles().setSelected(true);
             clearDataFiles();
