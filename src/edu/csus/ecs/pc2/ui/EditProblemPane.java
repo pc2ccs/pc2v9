@@ -1152,6 +1152,8 @@ public class EditProblemPane extends JPanePlugin {
         checkProblem.setActive(!getDeleteProblemCheckBox().isSelected());
         checkProblem.setShortName(getShortNameTextfield().getText());
         
+        checkProblem.setLoadDataFilesSamplesFirst(multipleDataSetPane.isLoadSamplesFirst());
+        
         //set checkProblem's max output to either the current problem's value (which is in KB), 
         // or if that's zero, set it to the global value (which is in BYTES and must be converted to KB)
         long maxOutputKB = getLongValue(getMaxOutputTextField().getText());
@@ -2183,7 +2185,7 @@ public class EditProblemPane extends JPanePlugin {
                 } catch (CloneNotSupportedException e) {
                     e.printStackTrace();
                 }
-
+                
                 // this sets the tableModel files list, which is what the getProblemDataFiles uses
                 getMultipleDataSetPane().populateUI();
 
@@ -2385,7 +2387,9 @@ public class EditProblemPane extends JPanePlugin {
             getMultipleDataSetPane().setProblemDataFiles(problem, originalProblemDataFiles);
         } catch (Exception e) {
             String message = "Error loading/editing problem data files: " + e.getMessage();
-            showMessage(message + " check logs.");
+            
+//            showMessage(message + " check logs.");
+            showExceptionMessage(this, message, e);
             getLog().log(Log.WARNING, message, e);
         }
 
@@ -4754,10 +4758,8 @@ public class EditProblemPane extends JPanePlugin {
      * 
      */
     protected void loadProblemInfoFile() {
-
+        // TODO someday implement load problem info.
         showMessage("Load not implemented, yet.");
-
-        // huh
     }
 
     public File selectYAMLFileDialog(Component parent, String title, String startDirectory) {
@@ -6040,5 +6042,5 @@ public class EditProblemPane extends JPanePlugin {
 
         return array;
     }
-
+    
 }

@@ -518,6 +518,110 @@ public class UtilitiesTest extends AbstractTestCase {
         
     }
     
+    /**
+     * Test where both arrays are null.
+     * @throws Exception
+     */
+    public void testBothNull() throws Exception {
+        String[] one = null;
+        String[] two = null;
+
+        String[] newArray = Utilities.concatenateArrays(one, two);
+
+        assertEquals("Expecting a zero lenght array", 0, newArray.length);
+
+    }
+
+    /**
+     * Test where first array is null.
+     * 
+     * @throws Exception
+     */
+    public void testCopyEmptyOneNull() throws Exception {
+
+        String[] one = null;
+        String[] two = { "omega", "delta" };
+
+        String[] newArray = Utilities.concatenateArrays(one, two);
+
+        if (one == null) {
+            one = new String[0];
+        }
+
+        assertEquals("Expect result array length", one.length + two.length, newArray.length);
+
+    }
+
+    /**
+     * Test where second array is null.
+     * 
+     * @throws Exception
+     */
+    public void testCopyEmptyTwoNull() throws Exception {
+
+        String[] one = { "alpha", "beta", "gamma" };
+        String[] two = null;
+
+        String[] newArray = Utilities.concatenateArrays(one, two);
+
+        if (two == null) {
+            two = new String[0];
+        }
+
+        assertEquals("Expect result array length", one.length + two.length, newArray.length);
+    }
+
+    /**
+     * Test copy where second array is zero length.
+     * @throws Exception
+     */
+    public void testCopyEmptyTwo() throws Exception {
+
+        String[] one = { "alpha", "beta", "gamma" };
+        String[] two = new String[0];
+
+        String[] newArray = Utilities.concatenateArrays(one, two);
+        assertEquals("Expect result array length", one.length + two.length, newArray.length);
+    }
+
+    /**
+     * Test copy non-empty arrays.
+     * 
+     * @throws Exception
+     */
+    public void testCopyArrays() throws Exception {
+
+        String[] one = { "alpha", "beta", "gamma" };
+        String[] two = { "omega", "delta" };
+
+        String[] newArray = Utilities.concatenateArrays(one, two);
+        assertEquals("Expect result array length", one.length + two.length, newArray.length);
+
+        for (int i = 0; i < one.length; i++) {
+            int naOffset = i + 0;
+            assertEquals("Expected element equal one[" + i + "]", one[i], newArray[naOffset]);
+        }
+
+        for (int i = 0; i < two.length; i++) {
+            int naOffset = i + one.length;
+
+            assertEquals("Expected element equal two[" + i + "]", two[i], newArray[naOffset]);
+        }
+
+    }
+
+    public void testCopy() throws Exception {
+
+        String[] source = { "alpha", "beta", "gamma" };
+        String[] target = new String[source.length];
+
+        System.arraycopy(source, 0, target, 0, source.length);
+
+        assertEquals(source.length, target.length);
+
+    }
+
+    
     
     public void testLocatingSampleFiles() throws Exception {
 

@@ -142,6 +142,11 @@ public class Problem implements IElementObject {
     private CustomValidatorSettings customValidatorSettings ;
     
     /**
+     * If true, when loading data sets, load sample data sets before loading other judge's test data sets.
+     */
+    private boolean loadDataFilesSamplesFirst = false;
+    
+    /**
      * This enum defines the types of Input Validators which a Problem can have.
      * 
      * Note that it is possible to use more than one Input Validator to check a problem's data files;
@@ -1199,6 +1204,7 @@ public class Problem implements IElementObject {
             if (prelimaryNotification != otherProblem.isPrelimaryNotification()) {
                 return false;
             }
+            
             if (getSiteNumber() != otherProblem.getSiteNumber()){
                 return false;
             }
@@ -2203,7 +2209,7 @@ public class Problem implements IElementObject {
         //if we're setting the PC2 internal sandbox, also set the sandbox command line and program name
         updateSandboxInfo();
     }
-
+    
     /**
      * Gets the command line to use to run interactive problems.  Currently, this is a read-only
      * value since it does not make sense to change it at this time.
@@ -2211,4 +2217,13 @@ public class Problem implements IElementObject {
     public String getInteractiveCommandLine() {
         return interactiveCommandLine;
     }
+
+    public boolean isLoadDataFilesSamplesFirst() {
+        return loadDataFilesSamplesFirst;
+    }
+    
+    public void setLoadDataFilesSamplesFirst(boolean loadDataFilesSamplesFirst) {
+        this.loadDataFilesSamplesFirst = loadDataFilesSamplesFirst;
+    }
+
 }
