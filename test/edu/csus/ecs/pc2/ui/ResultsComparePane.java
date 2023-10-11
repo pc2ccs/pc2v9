@@ -38,7 +38,7 @@ import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
  * 
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
-public class CompareResultsPane extends JPanePlugin {
+public class ResultsComparePane extends JPanePlugin {
 
     private static final String MISSING_TARGET_TITLE = "Missing from Parimary";
 
@@ -56,7 +56,7 @@ public class CompareResultsPane extends JPanePlugin {
 
     private JCheckBox showDetailsCheckbox = null;
     
-    public CompareResultsPane() {
+    public ResultsComparePane() {
         setBorder(new TitledBorder(null, "Export and Compare Contest Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         setLayout(new BorderLayout(0, 0));
 
