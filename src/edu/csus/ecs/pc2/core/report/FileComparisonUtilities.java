@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -26,8 +27,8 @@ import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSScoreboard;
 import edu.csus.ecs.pc2.core.imports.clics.FieldCompareRecord;
 import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
-import edu.csus.ecs.pc2.exports.ccs.ResultRow;
 
 /**
  * Utilities for file comparison
@@ -68,7 +69,7 @@ public class FileComparisonUtilities {
                 FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
-                // TODO 760 handled  firstRowfirstRow.getProblems() ?
+                // TODO 760 Do we need to compare problems??   firstRowfirstRow.getProblems() ?
                 fieldName = "num solved";
                 valueOne = Long.toString(firstRow.getScore().getNum_solved());
                 valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
@@ -96,8 +97,6 @@ public class FileComparisonUtilities {
 
             }
 
-            // TODO 760 handle if extra rows from first file
-            
             for (int rowNum = minLines; rowNum < firstTeamScoreRows.size(); rowNum++) {
                 TeamScoreRow firstRow = firstTeamScoreRows.get(rowNum);
                 
@@ -109,7 +108,7 @@ public class FileComparisonUtilities {
                 FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
-                // TODO 760 handled  firstRowfirstRow.getProblems() ?
+                // TODO 760 Do we need to compare problems??  firstRowfirstRow.getProblems() ?
                 fieldName = "num solved";
                 valueOne = Long.toString(firstRow.getScore().getNum_solved());
                 fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
@@ -145,7 +144,7 @@ public class FileComparisonUtilities {
                 FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
-                // TODO 760 handled  firstRowfirstRow.getProblems() ?
+                // TODO 760 Do we need to compare problems??  firstRowfirstRow.getProblems() ?
                 fieldName = "num solved";
                 valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
                 fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
@@ -163,7 +162,8 @@ public class FileComparisonUtilities {
 
             }
         } catch (Exception e) {
-            e.printStackTrace(); // TODO 760 handle exception
+            StaticLog.getLog().log(Level.WARNING, "Problem comparing scoreboard data/info", e);
+            e.printStackTrace(); // TODO 760 how to report problem to user ?
         }
 
         fileComparison.setNumberRows(numberRows);
@@ -282,7 +282,8 @@ public class FileComparisonUtilities {
             
             
         } catch (Exception e) {
-            e.printStackTrace(); // TODO 760 handle exceptionE
+            StaticLog.getLog().log(Level.WARNING, "Problem comparing scoreboard data/info", e);
+            e.printStackTrace(); // TODO 760 how to report problem to user ?
             ExecuteUtilities.rethrow(e);
         }
         
@@ -327,8 +328,6 @@ public class FileComparisonUtilities {
                 String[] secondLineFields = secondLine.split(Constants.TAB);
 
                 if (!secondLine.trim().startsWith("result")) {
-                    ResultRow row = new ResultRow(secondLine);  // TODO 760 why is row not used
-
                     String key = fileComparisonKey.getKey(secondLine);
                     String firstLine = firstFileMap.get(key);
 
@@ -381,8 +380,9 @@ public class FileComparisonUtilities {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            ExecuteUtilities.rethrow(e); // TODO 760 handle file
+            StaticLog.getLog().log(Level.WARNING, "Problem comparing results tsv data/info", e);
+            e.printStackTrace(); // TODO 760 how to report problem to user ?
+            ExecuteUtilities.rethrow(e); 
         }
 
         fileComparison.setNumberRows(numberRows);
@@ -453,9 +453,9 @@ public class FileComparisonUtilities {
         String jsonString = String.join(" ", lines);
 
         List<CLICSScoreboard> scoreboardList = getObjectMapper().readValue(jsonString, new TypeReference<List<CLICSScoreboard>>() {});
-        for (CLICSScoreboard clicsScoreboard : scoreboardList) {
-            System.out.println("debug 22 sb2 scoreboards "+clicsScoreboard);
-        }
+//        for (CLICSScoreboard clicsScoreboard : scoreboardList) {
+//            System.out.println("debug sb2 scoreboards "+clicsScoreboard);
+//        }
         return scoreboardList;
     }    
 

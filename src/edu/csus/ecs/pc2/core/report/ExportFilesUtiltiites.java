@@ -5,12 +5,14 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.FileUtilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAwardUtilities;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.services.core.ScoreboardJson;
@@ -48,8 +50,8 @@ public class ExportFilesUtiltiites {
             filesCreated.add(resultsFilename);
 
         } catch (Exception e) {
-            e.printStackTrace(System.out); // TODO 760 add context to exception message
-//            throw new RuntimeException("Problem generating " + resultsFilename, e.getCause());
+            StaticLog.getLog().log(Level.WARNING, "Problem writing results file", e);
+            e.printStackTrace(); // TODO 760 how to report problem to user ?
             throw ExecuteUtilities.rethrow(e);
         }
 
@@ -62,8 +64,8 @@ public class ExportFilesUtiltiites {
             filesCreated.add(scoreboardJsonFilename);
 
         } catch (Exception e) {
-            e.printStackTrace(System.out); // TODO 760 add context to exception message
-//            throw new RuntimeException("Problem generating " + scoreboardJsonFilename, e.getCause());
+            StaticLog.getLog().log(Level.WARNING, "Problem writing scorebord file", e);
+            e.printStackTrace(); // TODO 760 how to report problem to user ?
             throw ExecuteUtilities.rethrow(e);
         }
 
@@ -76,8 +78,8 @@ public class ExportFilesUtiltiites {
             filesCreated.add(awardsFileName);
 
         } catch (Exception e) {
-            e.printStackTrace(System.out); // TODO 760 add context to exception message
-//            throw new RuntimeException("Problem generating " + awardsFileName, e.getCause());
+            StaticLog.getLog().log(Level.WARNING, "Problem writing awards file", e);
+            e.printStackTrace(); // TODO 760 how to report problem to user ?
             throw ExecuteUtilities.rethrow(e);
         }
 

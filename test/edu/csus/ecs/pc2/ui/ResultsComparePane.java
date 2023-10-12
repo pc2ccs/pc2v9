@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -18,6 +19,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -29,14 +31,13 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.ExportFilesUtiltiites;
 import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
-import javax.swing.JScrollPane;
-import java.awt.Font;
 
 /**
  * Results export and compare pane.
@@ -79,8 +80,6 @@ public class ResultsComparePane extends JPanePlugin {
             @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
-
-                    System.out.println("Save ccs results dir"); // TODO 760 debugging
                     updateUserSetting(ClientSettings.PRIMARY_CCS_RESULTS_DIR, pc2ResultsDirectoryTextField.getText());
                 }
             }
@@ -133,7 +132,7 @@ public class ResultsComparePane extends JPanePlugin {
         selectExportDirectoryButton.setToolTipText("Select export Directory");
         
         JPanel summaryResultsPane = new JPanel();
-        summaryResultsPane.setPreferredSize(new Dimension(600, 300));
+        summaryResultsPane.setPreferredSize(new Dimension(800, 300));
         summaryResultsPane.setMinimumSize(new Dimension(300, 300));
         summaryResultsPane.setBorder(new TitledBorder(null, "Compare Results Summary", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         centerPane.add(summaryResultsPane);
@@ -265,7 +264,6 @@ public class ResultsComparePane extends JPanePlugin {
     
     private void addTextAreaLine(String string) {
         textArea.append(string + Constants.NL);
-        System.out.println("debug 22 append "+string);
     }
 
     private void updateUserSetting(String key, String value) {
@@ -273,7 +271,8 @@ public class ResultsComparePane extends JPanePlugin {
         try {
             updateClientSettings(key, value);
         } catch (Exception e) {
-            e.printStackTrace(); // TODO 760 error handle this better
+            StaticLog.getLog().log(Level.WARNING, "Problem updating settings?", e);
+            e.printStackTrace(); // TODO 760 how to report problem to user ?
         }
 
     }

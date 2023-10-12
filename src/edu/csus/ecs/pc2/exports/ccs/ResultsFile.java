@@ -123,10 +123,9 @@ public class ResultsFile {
         
         int median = getMedian(standingsRecords);
         
-        // TODO 760 fix must have medals ot generate awards
         if (finalizeData == null) {
             String [] badbad = {"Contest not finalized cannot create awards"};
-            return badbad;  // debug 22
+            return badbad;  
         }
         
         // TODO finalizeData really needs a B instead of getBronzeRank

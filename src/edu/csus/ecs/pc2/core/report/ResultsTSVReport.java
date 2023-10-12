@@ -9,7 +9,6 @@ import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 /**
  * results.tsv report.
  */
-// TODO 760 add to reportpane list
 public class ResultsTSVReport extends AbstractReport {
 
     /**
