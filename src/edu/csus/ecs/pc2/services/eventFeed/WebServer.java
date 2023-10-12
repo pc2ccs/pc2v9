@@ -124,6 +124,8 @@ public class WebServer implements UIPlugin {
         return pair;
     }
 
+    // based on https://stackoverflow.com/questions/43960761/how-to-store-and-reuse-keypair-in-java/43965528#43965528
+    // which was based on https://stackoverflow.com/questions/29852290/self-signed-x509-certificate-with-bouncy-castle-in-java
     public static Certificate selfSign(KeyPair keyPair, String subjectDN) throws OperatorCreationException, CertificateException, IOException
     {
         long now = System.currentTimeMillis();
@@ -161,8 +163,6 @@ public class WebServer implements UIPlugin {
         return selfSignedCert;
     }
 
-    // based on https://stackoverflow.com/questions/43960761/how-to-store-and-reuse-keypair-in-java/43965528#43965528
-    // which was based on https://stackoverflow.com/questions/29852290/self-signed-x509-certificate-with-bouncy-castle-in-java
     private void createKeyStoreAndKey(File keystoreFile) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, NoSuchProviderException {
         
         try {
