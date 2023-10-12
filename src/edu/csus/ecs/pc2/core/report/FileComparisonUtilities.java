@@ -47,6 +47,7 @@ public class FileComparisonUtilities {
         long numberRows = 0;
 
         try {
+            
             List<TeamScoreRow> firstTeamScoreRows = FileComparisonUtilities.loadTeamRows(fileComparison.getFirstFilename());
             List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows(fileComparison.getSecondFilename());
 
@@ -476,6 +477,7 @@ public class FileComparisonUtilities {
         String firstLineString = String.join(" ", lines);
 
         CLICSScoreboard clicsScoreboard = getObjectMapper().readValue(firstLineString, CLICSScoreboard.class);
+        
         if (clicsScoreboard != null)
         {
             rows = clicsScoreboard.getRows();

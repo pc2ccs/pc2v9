@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,6 +18,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
@@ -28,10 +30,13 @@ import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.ExportFilesUtiltiites;
 import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
+import javax.swing.JScrollPane;
+import java.awt.Font;
 
 /**
  * Results export and compare pane.
@@ -39,6 +44,8 @@ import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
 public class ResultsComparePane extends JPanePlugin {
+
+    private static final String SHOW_COMPARISON_BUTTON_TITLE = "Show Comparison";
 
     private static final String MISSING_TARGET_TITLE = "Missing from Parimary";
 
@@ -55,6 +62,8 @@ public class ResultsComparePane extends JPanePlugin {
     private JPanel southPane = new JPanel();
 
     private JCheckBox showDetailsCheckbox = null;
+    
+    private JTextArea textArea = new JTextArea();
     
     public ResultsComparePane() {
         setBorder(new TitledBorder(null, "Export and Compare Contest Results", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -123,8 +132,41 @@ public class ResultsComparePane extends JPanePlugin {
         });
         selectExportDirectoryButton.setToolTipText("Select export Directory");
         
-        JPanel resultsPane = new JPanel();
-        centerPane.add(resultsPane);
+        JPanel summaryResultsPane = new JPanel();
+        summaryResultsPane.setPreferredSize(new Dimension(600, 300));
+        summaryResultsPane.setMinimumSize(new Dimension(300, 300));
+        summaryResultsPane.setBorder(new TitledBorder(null, "Compare Results Summary", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        centerPane.add(summaryResultsPane);
+        summaryResultsPane.setLayout(new BorderLayout(0, 0));
+        
+        JPanel resCenterPane = new JPanel();
+        summaryResultsPane.add(resCenterPane, BorderLayout.CENTER);
+        resCenterPane.setLayout(new BorderLayout(0, 0));
+        textArea.setFont(new Font("Courier New", Font.PLAIN, 13));
+        
+        
+//        resCenterPane.add(textArea);
+        
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        resCenterPane.add(scrollPane, BorderLayout.CENTER);
+        
+        JPanel resButtonPane = new JPanel();
+        FlowLayout flowLayout = (FlowLayout) resButtonPane.getLayout();
+        flowLayout.setHgap(45);
+        summaryResultsPane.add(resButtonPane, BorderLayout.SOUTH);
+        
+        JButton viewReportButton = new JButton("View Report");
+        viewReportButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                viewCompareResultsFiles();
+            }
+        });
+        resButtonPane.add(viewReportButton);
+        
+        
+        showDetailsCheckbox = new JCheckBox("Include details in comparison");
+        resButtonPane.add(showDetailsCheckbox);
+        showDetailsCheckbox.setToolTipText("Show full detils in comparison");
         FlowLayout flowLayout_1 = (FlowLayout) southPane.getLayout();
         flowLayout_1.setHgap(45);
         
@@ -135,21 +177,14 @@ public class ResultsComparePane extends JPanePlugin {
         southPane.add(exportResultsButton);
         exportResultsButton.setToolTipText("Export Results files to pc2 results directory");
 
-        JButton compartResultsButton = new JButton("View Comparison");
+        JButton compartResultsButton = new JButton(SHOW_COMPARISON_BUTTON_TITLE);
         southPane.add(compartResultsButton);
         compartResultsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
-                viewCompareResultsFiles();
-
+                updateSummary();
             }
         });
         compartResultsButton.setToolTipText("Compare pc2 results files to primary CCS results");
-        
-        
-        showDetailsCheckbox = new JCheckBox("Include details in comparison");
-        showDetailsCheckbox.setToolTipText("Show full detils in comparison");
-        southPane.add(showDetailsCheckbox);
         exportResultsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 exportpc2ResultsFiles();
@@ -157,6 +192,49 @@ public class ResultsComparePane extends JPanePlugin {
             }
         });
  
+    }
+
+    protected void updateSummary() {
+        
+        clearResults();
+        
+        String pc2ResultsDirectory = pc2ResultsDirectoryTextField.getText();
+
+        String primaryCCSDirectory = primaryCCSResultsDirectoryTextField.getText();
+
+        if (showErrorMessage("Enter a primary CCS results directory", StringUtilities.isEmpty(primaryCCSDirectory))) {
+            return;
+        }
+
+        if (showErrorMessage("Primary CCS directory does not exist, pick an existing results directory", !directoryExists(primaryCCSDirectory))) {
+            return;
+        }
+
+        if (showErrorMessage("Enter a pc2 results directory", StringUtilities.isEmpty(pc2ResultsDirectory))) {
+            return;
+        }
+        
+        if (showErrorMessage("Missing pc2 directory - use Export Results to create results files", !directoryExists(pc2ResultsDirectory))) {
+            return;
+        }
+
+        try {
+            
+            ResultsCompareReport report = new ResultsCompareReport(getContest(), getController(), primaryCCSDirectory, pc2ResultsDirectory, showDetailsCheckbox.isSelected(), MISSING_SOURCE_TITLE, MISSING_TARGET_TITLE);
+            String[] lines = report.createReport(new Filter());
+            for (String string : lines) {
+                addTextAreaLine(string);
+            }
+
+        } catch (Exception e) {
+            getLog().log(Level.WARNING, "Exception trying export and compare results" + e.getMessage(), e);
+            showMessage(this, "Problem comparing results", "Error writing or comparing results " + e.getMessage());
+        }
+        
+    }
+
+    protected void clearResults() {
+        textArea.setText(null);
     }
 
     @Override
@@ -179,10 +257,17 @@ public class ResultsComparePane extends JPanePlugin {
 
         String primaryResultsDir = clientSet.getProperty(ClientSettings.PRIMARY_CCS_RESULTS_DIR);
         primaryCCSResultsDirectoryTextField.setText(primaryResultsDir);
-
-        // primaryCCSResultsDirectoryTextField
+        
+        textArea.removeAll();
+        
+        addTextAreaLine("Click "+SHOW_COMPARISON_BUTTON_TITLE+" to show comparison");
     }
     
+    private void addTextAreaLine(String string) {
+        textArea.append(string + Constants.NL);
+        System.out.println("debug 22 append "+string);
+    }
+
     private void updateUserSetting(String key, String value) {
 
         try {
@@ -315,30 +400,12 @@ public class ResultsComparePane extends JPanePlugin {
             
             ResultsCompareReport report = new ResultsCompareReport(getContest(), getController(), primaryCCSDirectory, pc2ResultsDirectory, showDetailsCheckbox.isSelected(), MISSING_SOURCE_TITLE, MISSING_TARGET_TITLE);
             Utilities.viewReport(report, report.getPluginTitle(), getContest(), getController(), true);
-
-            populateComparisonTable();
         } catch (Exception e) {
             getLog().log(Level.WARNING, "Exception trying export and compare results" + e.getMessage(), e);
             showMessage(this, "Problem comparing results", "Error writing or comparing results " + e.getMessage());
         }
     }
 
-    private void populateComparisonTable() {
-        
-        // TODO 760 show comparison in GUI
-        
-//      ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
-//      AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
-//      ScoreboardJSONKey scoreboardKey = new FileComparisonUtilities.ScoreboardJSONKey();
-//
-//      FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
-//
-//      FileComparison awardsFileCompare = FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
-//
-//      FileComparison scoreboardJsonCompare = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
-
-        
-    }
 
     private boolean directoryExists(String dirname) {
         // TODO REFACTOR move this to a utility class

@@ -142,7 +142,6 @@ public class ResultsCompareReport implements IReport {
 
         lines.add("");
         lines.add("File: " + filename);
-        lines.add("");
 
         List<FieldCompareRecord> fields = fileComparison.getComparedFields();
         long differentFields = fileComparison.getNumberDifferences();
@@ -157,13 +156,14 @@ public class ResultsCompareReport implements IReport {
             }
         }
         lines.add("  Comparision summary " + compSummary);
-        lines.add("");
 
         String previousKey = "";
         int foundCount = 0;
 
         if (differentFields != 0) {
 
+            lines.add("");
+            
             Collections.sort(fields, new FieldCompareRecordComparator());
 
             for (FieldCompareRecord fieldCompareRecord : fields) {
@@ -212,16 +212,9 @@ public class ResultsCompareReport implements IReport {
 
         return lines;
     }
-
+    
     @Override
     public String[] createReport(Filter filter) {
-
-
-        String[] filesToCompare = { //
-                ResultsFile.RESULTS_FILENAME, //
-                Constants.SCOREBOARD_JSON_FILENAME, //
-                Constants.AWARDS_JSON_FILENAME, //
-        };
 
         String sourceDir = pc2ResultsDir;
         String targetDir = primaryCCSResultsDir;
