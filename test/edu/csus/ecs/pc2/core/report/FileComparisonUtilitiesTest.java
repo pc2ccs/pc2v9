@@ -22,14 +22,14 @@ import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
  */
 public class FileComparisonUtilitiesTest extends AbstractTestCase {
 
-    private static final String TESTDATA_RESULTS_DATA_DIR = "testdata/resultscompwork/results";
+    private static final String TESTDATA_RESULTS_DATA_DIR = "samps/prdata//resultscompwork/results";
 
     private IFileComparisonKey resultComparisonKey = new FileComparisonUtilities.ResultTSVKey();
 
     private IFileComparisonKey awardsComparisonKey = new FileComparisonUtilities.AwardKey();
 
     private IFileComparisonKey scoreComparisonKey = new FileComparisonUtilities.ScoreboardJSONKey();
-    
+
     private ObjectMapper objectMapper = FileComparisonUtilities.getObjectMapper();
 
     public void testcreateTSVFileComparison() throws Exception {
@@ -38,13 +38,6 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
         String pc2ResultsDir = TESTDATA_RESULTS_DATA_DIR + "/pc2";
 
         FileComparison comp = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, domjResultsDir, pc2ResultsDir, resultComparisonKey);
-
-//        int count = 0;
-//        List<FieldCompareRecord> compF = comp.getComparedFields();
-//        for (FieldCompareRecord fieldCompareRecord : compF) {
-//            count++;
-//            System.out.println("debug 22 #" + count + " for field " + fieldCompareRecord.toJSON());
-//        }
 
         assertEquals("Expecting number of comparisons", 255, comp.getComparedFields().size());
         assertEquals("Expecting no differences ", 0, comp.getNumberDifferences());
@@ -72,8 +65,6 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 
     public void testJSONAwardsCompare() throws Exception {
 
-        // {"citation":"First to solve problem I","id":"first-to-solve-powerofdivisors","team_ids":["5"]},
-        
         String domjResultsDir = TESTDATA_RESULTS_DATA_DIR + "/domjudge";
         String pc2ResultsDir = TESTDATA_RESULTS_DATA_DIR + "/pc2";
 
@@ -83,70 +74,63 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
         String[] lines = Utilities.loadFile(comp.getFirstFilename());
         String firstLineString = String.join(" ", lines);
 
-        List<CLICSAward> firstAwardList = objectMapper.readValue(firstLineString, new TypeReference<List<CLICSAward>>() {});
-        assertEquals("Expecting awards lines for "+comp.getFirstFilename(), 19, firstAwardList.size());
-        
+        List<CLICSAward> firstAwardList = objectMapper.readValue(firstLineString, new TypeReference<List<CLICSAward>>() {
+        });
+        assertEquals("Expecting awards lines for " + comp.getFirstFilename(), 19, firstAwardList.size());
+
         lines = Utilities.loadFile(comp.getSecondFilename());
         String seconString = String.join(" ", lines);
-        
-        List<CLICSAward> secondAwardList = objectMapper.readValue(seconString, new TypeReference<List<CLICSAward>>() {});
 
-        assertEquals("Expecting awards lines for "+comp.getSecondFilename(), 19, secondAwardList.size());
-        
+        List<CLICSAward> secondAwardList = objectMapper.readValue(seconString, new TypeReference<List<CLICSAward>>() {
+        });
+
+        assertEquals("Expecting awards lines for " + comp.getSecondFilename(), 19, secondAwardList.size());
+
         List<FieldCompareRecord> fields = comp.getComparedFields();
-        
+
         assertEquals("Expecting number of comparison rows", 57, fields.size());
-        
-        assertEquals("Expecting no differences ",0,comp.getNumberDifferences());
-        
-//        for (FieldCompareRecord fieldCompareRecord : fields) {
-//            System.out.println("debug 22 field "+fieldCompareRecord.toJSON());
-//        }
-    
+
+        assertEquals("Expecting no differences ", 0, comp.getNumberDifferences());
+
+        //        for (FieldCompareRecord fieldCompareRecord : fields) {
+        //            System.out.println("debug 22 field "+fieldCompareRecord.toJSON());
+        //        }
+
     }
 
     public void testloadTeamRows() throws Exception {
 
-        String domjResultsDir = "testdata/resultscompwork/results/domjudge";
-        String pc2ResultsDir = "testdata/resultscompwork/results/pc2";
+        String domjResultsDir = TESTDATA_RESULTS_DATA_DIR + "/domjudge";
+        String pc2ResultsDir = TESTDATA_RESULTS_DATA_DIR + "/pc2";
 
         FileComparison comp = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, domjResultsDir, pc2ResultsDir, scoreComparisonKey);
         assertNotNull(comp);
-        
-//        editFile(comp.getSecondFilename());
-//        editFile(comp.getFirstFilename());
-        
-        List<TeamScoreRow> firstTeamScoreRows = FileComparisonUtilities.loadTeamRows (comp.getFirstFilename());
-        assertEquals("Expecting team score rows in "+comp.getFirstFilename(), 51, firstTeamScoreRows.size());
-        
-        List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows (comp.getSecondFilename());
-        assertEquals("Expecting team score rows in "+comp.getSecondFilename(), 51, secondTeamScoreRows.size());
+
+        //        editFile(comp.getSecondFilename());
+        //        editFile(comp.getFirstFilename());
+
+        List<TeamScoreRow> firstTeamScoreRows = FileComparisonUtilities.loadTeamRows(comp.getFirstFilename());
+        assertEquals("Expecting team score rows in " + comp.getFirstFilename(), 51, firstTeamScoreRows.size());
+
+        List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows(comp.getSecondFilename());
+        assertEquals("Expecting team score rows in " + comp.getSecondFilename(), 51, secondTeamScoreRows.size());
     }
-    
+
     public void testDiffComparison() throws Exception {
-        
-        String domjResultsDir = "testdata/resultscompwork/results/domjudge";
-        String pc2ResultsDir = "testdata/resultscompwork/results/pc2data1";
+
+        String domjResultsDir = TESTDATA_RESULTS_DATA_DIR + "/domjudge";
+        String pc2ResultsDir = TESTDATA_RESULTS_DATA_DIR + "/pc2data1";
 
         FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, domjResultsDir, pc2ResultsDir, resultComparisonKey);
         FileComparison awardsFileCompare = FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, domjResultsDir, pc2ResultsDir, awardsComparisonKey);
         FileComparison scoreboardJsonCompare = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, domjResultsDir, pc2ResultsDir, scoreComparisonKey);
-        
-//        editFile(scoreboardJsonCompare.getFirstFilename());
-//        editFile(scoreboardJsonCompare.getSecondFilename());
-        
-//        System.out.println("debug 22 diff count res "+resultsCompare.getNumberDifferences() + " for "+resultsCompare.getFirstFilename());
-//        System.out.println("debug 22 diff count sco "+awardsFileCompare.getNumberDifferences() + " for "+awardsFileCompare.getFirstFilename());
-//        System.out.println("debug 22 diff count awa "+scoreboardJsonCompare.getNumberDifferences() + " for "+scoreboardJsonCompare.getFirstFilename());
-        
-        assertEquals("results diff count ", 24,resultsCompare.getNumberDifferences());
-        assertEquals("awardsdiff count ", 9,awardsFileCompare.getNumberDifferences());
-        
-//        List<FieldCompareRecord> rows = scoreboardJsonCompare.getComparedFields();
-//        for (FieldCompareRecord fieldCompareRecord : rows) {
-//            System.out.println("debug 22 field "+fieldCompareRecord.toJSON());
-//        }
-        
-        assertEquals("scoreboard diff count ", 96, scoreboardJsonCompare.getNumberDifferences());
+
+        //        editFile(scoreboardJsonCompare.getFirstFilename());
+        //        editFile(scoreboardJsonCompare.getSecondFilename());
+
+        assertEquals("results diff count ", 24, resultsCompare.getNumberDifferences());
+        assertEquals("awardsdiff count ", 9, awardsFileCompare.getNumberDifferences());
+
+        assertEquals("scoreboard diff count ", 40, scoreboardJsonCompare.getNumberDifferences());
     }
 }
