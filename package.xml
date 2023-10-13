@@ -87,10 +87,14 @@
                 <include name="**/rotate*"/>
                 <include name="**/distribute_score"/>
             </zipfileset>
-            <zipfileset dir="${sandbox.dir}" filemode="755" prefix="${release}/sandbox">
+            <zipfileset dir="${intscripts.dir}" filemode="755" prefix="${release}/scripts">
                 <include name="**/pc2sandbox.sh"/>
                 <include name="**/pc2syscheck.sh"/>
                 <include name="**/pc2syscheck.cmd"/>
+                <include name="**/pc2_interactive.sh"/>
+                <include name="**/pc2sandbox_interactive.sh"/>
+                <include name="**/pc2validate_interactive.sh"/>
+                <include name="**/README.txt"/>
             </zipfileset>
             <zipfileset dir="${support.dir}" filemode="644" prefix="${release}/support">
                 <include name="system_cgroup/pc2_cgroup.service"/>
@@ -122,14 +126,15 @@
         <delete  dir="${build.unpack.dir}" />
         <mkdir dir="${build.unpack.dir}" />
         <unzip src="${zip.path}" dest="${build.unpack.dir}"/>
-        <tar destfile="${gzip.path}" basedir="${build.unpack.dir}" compression="gzip" excludes="${release}/bin/**,${release}/samps/**,${release}/projects/**">
+        <tar destfile="${gzip.path}" basedir="${build.unpack.dir}" compression="gzip" excludes="${release}/bin/**,${release}/samps/**,${release}/projects/**,${release}/scripts/**">
             <tarfileset mode="755" dir="${build.unpack.dir}">
                 <include name="${release}/bin/**"/>
                 <include name="${release}/samps/scripts/**"/>
                 <include name="${release}/samps/sleep.exe"/>
                 <include name="${release}/samps/**/distribute_score**"/>
                 <include name="${release}/samps/**/rotate**"/>
-                <include name="${release}/sandbox/**"/>
+                <include name="${release}/scripts/*.sh"/>
+                <include name="${release}/scripts/*.cmd"/>
             </tarfileset>
             <tarfileset mode="644" dir="${build.unpack.dir}">
                 <include name="${release}/samps/**"/>
@@ -137,6 +142,7 @@
                 <exclude name="${release}/samps/sleep.exe"/>
                 <exclude name="${release}/samps/**/distribute_score**"/>
                 <exclude name="${release}/samps/**/rotate**"/>
+                <include name="${release}/scripts/README.txt"/>
             </tarfileset>
             <tarfileset dir="${projects.dir}" filemode="644" prefix="${release}/projects">
                 <include name="*.tar.gz"/>

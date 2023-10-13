@@ -158,8 +158,8 @@ public final class ICPCTSVLoader {
         String institutionFormalName = "";
         if (fields.length == TEAM2_TSV_FIELDS) {
             institutionCode = fields[fieldnum++];
-            if (institutionsMap.containsKey(institutionCode)) {
-                String[] fieldArray = institutionsMap.get(institutionCode);
+            String[] fieldArray = getInstitutionNames(institutionCode);
+            if (fieldArray != null) {
                 institutionFormalName = fieldArray[1];
                 institutionName = fieldArray[2];
             }
@@ -396,6 +396,35 @@ public final class ICPCTSVLoader {
         }
     }
     
+    /**
+     * Returns the corresponding institution information for the supplied institution code.
+     * If the code is not recognized, a null array is returned.
+     * Due to the non-specificity of the format of an institution code, we have to check if
+     * it has the INST-U- or INST- prefixes, if so, remove them and try again.
+     * The map must be filled in via loadInstitutions() first or it will always return false.
+     * 
+     * @param instCode (number, INST-U-number or INST-number)
+     * @return array of 3 strings: [0]=code, [1]=formal name [2]=short name, or null if not found
+     */
+    public static String[] getInstitutionNames(String instCode) {
+        String[] names = null;
+        
+        if(institutionsMap.containsKey(instCode)) {
+            names = institutionsMap.get(instCode);
+        } else {
+            // ugh.  because no one can decide on what an institution ID is, we have this nonsense.
+            if (instCode.startsWith("INST-U-")) {
+                instCode = instCode.substring(7);
+            }
+            if (instCode.startsWith("INST-")) {
+                instCode = instCode.substring(5);
+            }
+            if(institutionsMap.containsKey(instCode)) {
+                names = institutionsMap.get(instCode);
+            }
+        }
+        return(names);
+    }
     
     public static HashMap<Integer, String> loadPasswordsFromAccountsTSV(String filename) throws Exception {
         String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));

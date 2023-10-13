@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.FileOutputStream;
@@ -9,10 +9,12 @@ import java.util.GregorianCalendar;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.imports.clics.CLICSScoreboard;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.services.core.ScoreboardJson;
+import edu.csus.ecs.pc2.core.standings.ContestStandings;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
 
 /**
  * Print CLICS API Scoreboard JSON
@@ -95,8 +97,9 @@ public class ScoreboardJSONReport implements IReport {
 
     public String[] createReport(Filter inFilter) {
         try {
-            ScoreboardJson scoreboardJson = new ScoreboardJson();
-            String json = scoreboardJson.createJSON(contest);
+            ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+            CLICSScoreboard clicsScoreboard = new CLICSScoreboard(contestStandings);
+            String json = clicsScoreboard.toString();
             String[] sa = { json };
             return sa;
         } catch (Exception e) {

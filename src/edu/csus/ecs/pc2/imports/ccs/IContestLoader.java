@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -196,6 +196,8 @@ public interface IContestLoader {
     String VIVA_PATTERN_FILE_KEY = "vivaPatternFile";   //the key for specifying a file containing a VIVA pattern
 
     // per problem problem.yaml settings
+    String VALIDATION_TYPE = "validation";
+            
     String SHOW_OUTPUT_WINDOW = "showOutputWindow";
 
     String SHOW_COMPARE_WINDOW = "showCompare";

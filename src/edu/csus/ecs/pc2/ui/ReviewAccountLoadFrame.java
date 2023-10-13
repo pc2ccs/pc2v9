@@ -252,7 +252,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         getAcceptButton().setEnabled(false);
         getShowAllAccountsCheckBox().setSelected(false);
         try {
-            accounts = loadAccounts.fromTSVFile(filename, getAllAccounts(), contest.getGroups());
+            accounts = loadAccounts.fromTSVFile(contest, filename, getAllAccounts(), contest.getGroups());
             refreshList();
         } catch (Exception e) {
             log.warning(e.getMessage());

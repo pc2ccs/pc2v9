@@ -151,15 +151,14 @@ public class CLICSAwardUtilities {
             }
         } catch (JAXBException | IllegalContestState | IOException e) {
             StaticLog.getLog().log(Level.WARNING, "Error while calculating group winners DSA", e);
+            throw new RuntimeException("Error while calculating group winners", e);
         }
 
-        Set<Group> problemElementIds = groupWinners.keySet();
-        for (Group group : problemElementIds) {
+        Set<Group> groupElementIds = groupWinners.keySet();
+        for (Group group : groupElementIds) {
             // first to solve for group
             ClientId clientId = groupWinners.get(group);
             if (clientId != null) {
-                Account account = contest.getAccount(clientId);
-
 //            "citation": "Winner(s) of group University of Luxembourg", 
 //            "id": "group-winner-17"
 
@@ -173,15 +172,11 @@ public class CLICSAwardUtilities {
     }
 
     public static ClientId createClientId(TeamStanding teamStand) {
-        ClientId clientId = null;
-
         try {
             return new ClientId(Integer.parseInt(teamStand.getTeamSiteId()), ClientType.Type.TEAM, Integer.parseInt(teamStand.getTeamId()));
         } catch (Exception e) {
-            ; // ignore excepion return null
+            throw new RuntimeException("Could not create team with teamStand = "+teamStand, e.getCause());
         }
-
-        return clientId;
     }
 
     private static boolean isActive(IInternalContest contest, ClientId clientId) {

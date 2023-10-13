@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
@@ -32,6 +32,7 @@ import javax.swing.JOptionPane;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.exception.MultipleIssuesException;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
+import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -79,12 +80,17 @@ public final class Utilities {
     public static final String ISO_8601_TIMEDATE_FORMAT_WITH_MS = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     /**
-     * CCS directory where data files are stored (under problem short name).
+     * CLICS path where judge's (secret) data file are stored
      * 
      * @see #getSecretDataPath(String, Problem)
      * @see #getSecretDataPath(String, String)
      */
-    public static final String SECRET_DATA_DIR = "data" + File.separator + "secret";
+    public static final String SECRET_DATA_PATH = "data" + File.separator + ExportYAML.SECRET_DIRECTORY_NAME;
+    
+    /**
+     * CLICS directory where judge's sample data file are stored
+     */
+    public static final String SAMPLE_DATA_PATH = "data" + File.separator + ExportYAML.SAMPLE_DIRECTORY_NAME;
 
     private static SimpleDateFormat format = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
 
@@ -115,11 +121,7 @@ public final class Utilities {
     /**
      * File Types.
      * 
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
      */
-
-    // $HeadURL$
     public enum DataFileType {
         /**
          * Judge's input/test data file.
@@ -152,18 +154,26 @@ public final class Utilities {
         return iso8601formatterWithMS;
     }
 
-    /**
-     * Return CCS path for input data and answer file names.
-     */
     public static String getSecretDataPath(String baseCDPPath, String problemShortName) {
-        return baseCDPPath + File.separator + problemShortName + File.separator + SECRET_DATA_DIR;
+        return baseCDPPath + File.separator + problemShortName + File.separator + SECRET_DATA_PATH;
     }
 
     /**
-     * Return CCS path for input data and answer file names.
+     * Return CLICS path for sample data and answer file names.
      */
     public static String getSecretDataPath(String baseCDPPath, Problem problem) {
         return getSecretDataPath(baseCDPPath, problem.getShortName());
+    }
+    
+    /**
+     * Return CLICS path for sample data and answer file names.
+     */
+    public static String getSampleDataPath(String baseCDPPath, String problemShortName) {
+        return baseCDPPath + File.separator + problemShortName + File.separator + SAMPLE_DATA_PATH;
+    }
+
+    public static String getSampleDataPath(String baseCDPPath, Problem problem) {
+        return getSampleDataPath(baseCDPPath, problem.getShortName());
     }
 
     /**
@@ -985,56 +995,64 @@ public final class Utilities {
      * 
      * @param problem
      * @param serializedFile
-     * @param judgeDataFile
+     * @param alternateCDPPath
+     * @param judgeDataFile (not used - may be needed in the future TODO)
      * @return
      */
     public static String locateJudgesDataFile(Problem problem, SerializedFile serializedFile, String alternateCDPPath, DataFileType judgeDataFile) {
 
-        if (serializedFile.isExternalFile()) {
+        String testFileName = locateJudgesDataFile(problem, serializedFile.getName(), alternateCDPPath);
+        
+        if (testFileName != null && fileExists(testFileName)) {
+            return testFileName;
+        }
+        
+        testFileName = serializedFile.getAbsolutePath();
 
-            String testFileName;
+        if (fileExists(testFileName)) {
+            return testFileName;
+        }
 
-            if (alternateCDPPath != null && alternateCDPPath.trim().length() > 0) {
+        return null;
+    }
+    
+    public static String locateJudgesDataFile(Problem problem,  String baseFileName, String alternateCDPPath) {
 
-                testFileName = getSecretDataPath(alternateCDPPath, problem) + File.separator + serializedFile.getName();
-                if (fileExists(testFileName)) {
-                    return testFileName;
-                }
-            }
+        String testFileName = null;
 
-            String secretPathPattern = File.separator + SECRET_DATA_DIR + File.separator;
-            String fullPathName = serializedFile.getAbsolutePath();
+        if (alternateCDPPath != null && alternateCDPPath.trim().length() > 0) {
+            
+            // Try to find data file under secret directory
 
-            secretPathPattern = secretPathPattern.replace('\\', '.');
-
-            if (fullPathName.matches(secretPathPattern)) {
-
-                // return filename if source file under /data/secret/ somewhere
-                testFileName = getSecretDataPath(problem.getCCSfileDirectory(), problem) + File.separator + serializedFile.getName();
-                if (fileExists(testFileName)) {
-                    return testFileName;
-                }
-            }
-
-            testFileName = alternateCDPPath + File.separator + problem.getShortName() + File.separator + serializedFile.getName();
-            if (fileExists(testFileName)) {
-                // return filename if under shortname/ path
-                return testFileName;
-            }
-
-            testFileName = problem.getExternalDataFileLocation() + File.separator + serializedFile.getName();
+            testFileName = getSecretDataPath(alternateCDPPath, problem) + File.separator + baseFileName;
             if (fileExists(testFileName)) {
                 return testFileName;
             }
+        }
+        
+        if (alternateCDPPath != null && alternateCDPPath.trim().length() > 0) {
+            
+            // Try to find data file under sample directory
 
-            testFileName = serializedFile.getAbsolutePath();
-
+            testFileName = getSampleDataPath(alternateCDPPath, problem) + File.separator + baseFileName;
             if (fileExists(testFileName)) {
                 return testFileName;
             }
         }
 
+        testFileName = alternateCDPPath + File.separator + problem.getShortName() + File.separator + baseFileName;
+        if (fileExists(testFileName)) {
+            return testFileName;
+        }
+
+        testFileName = problem.getExternalDataFileLocation() + File.separator + baseFileName;
+        if (fileExists(testFileName)) {
+            return testFileName;
+        }
+
+
         return null;
+
     }
 
     public static boolean fileExists(String filename) {
@@ -1112,6 +1130,8 @@ public final class Utilities {
 
         ArrayList<String> output = new ArrayList<String>();
 
+        String originalJudgeDataPath = getJudgeCDPLocation(contest);
+        
         if (problem.isUsingExternalDataFiles()) {
             ClientId id = contest.getClientId();
             if (id == null) {
@@ -1123,6 +1143,7 @@ public final class Utilities {
             if (!"".equals(judgeDataFilesPath)) {
                 judgeDataFilesPath = Utilities.getSecretDataPath(judgeDataFilesPath, problem) + File.separator;
                 File judgeDir = new File(judgeDataFilesPath);
+                
                 if (!judgeDir.isDirectory()) {
                     judgeDataFilesPath = judgeDataFilesPath.replaceFirst(".data.secret", "");
                 }
@@ -1135,14 +1156,20 @@ public final class Utilities {
 
                 } else {
 
-                    // if we have a judgeDataFilesPath use it, otherwise continue with the normal handling
-                    if (!"".equals(judgeDataFilesPath)) {
-                        String filename = judgeDataFilesPath + serializedFile.getName();
-                        output.add(filename);
-                    } else if (executableDir == null) {
-                        output.add(serializedFile.getName());
+                    String theFileName = Utilities.locateJudgesDataFile(problem, serializedFile, originalJudgeDataPath, null);
+
+                    if (Utilities.fileExists(theFileName)) {
+                        output.add(theFileName);
                     } else {
-                        output.add(executableDir + File.separator + serializedFile.getName());
+                        // if we have a judgeDataFilesPath use it, otherwise continue with the normal handling
+                        if (!"".equals(judgeDataFilesPath)) {
+                            String filename = judgeDataFilesPath + serializedFile.getName();
+                            output.add(filename);
+                        } else if (executableDir == null) {
+                            output.add(serializedFile.getName());
+                        } else {
+                            output.add(executableDir + File.separator + serializedFile.getName());
+                        }
                     }
                 }
             }
@@ -1296,11 +1323,23 @@ public final class Utilities {
      */
     public static String findDataBasePath(String filePath) {
 
-        int idx = filePath.indexOf(SECRET_DATA_DIR);
+        int idx = filePath.indexOf(SECRET_DATA_PATH);
         if (idx != -1) {
             return filePath.substring(0, idx);
         }
         return filePath;
+    }
+    
+    
+    /**
+     * If file has extension replaces with replacement.
+     * @param fullName
+     * @param extension
+     * @param replacement
+     * @return string/filename with replacement IF filename has file extension extension
+     */
+    public static String replaceExtension(String fullName, String extension, String replacement) {
+        return fullName.replaceFirst(extension + "$", replacement);
     }
 
     /**
@@ -1356,18 +1395,29 @@ public final class Utilities {
                         dataPath = dataPath.replaceFirst(".data.secret", "");
                     }
                     if (!isDirThere(dataPath)) {
+                        // If no secret directory - done, show Missing data directory message
                         messages.add(problemTitle + "\tMissing data directory, expected at: " + dataPath + " or (" + dataPath + File.separator + "data" + File.separator + "secret)");
                     } else {
-
+                        
                         int missingData = 0;
                         int missingAnswer = 0;
 
                         for (int i = 0; i < problem.getNumberTestCases(); i++) {
+                            
                             String dataFile = problem.getDataFileName(i + 1);
                             String ansFile = problem.getAnswerFileName(i + 1);
 
                             String judgeFileName = dataPath + File.separator + dataFile;
                             String answerFilename = dataPath + File.separator + ansFile;
+                            
+                            if (dataFile != null && !isFileThere(judgeFileName)) {
+                                // Try to find file under samples
+                                String testFile = locateJudgesDataFile(problem, dataFile, cdpPath);
+                                if (isFileThere(testFile)) {
+                                    judgeFileName = testFile;
+                                    answerFilename = replaceExtension(testFile, "in", "ans");  
+                                }
+                            }
 
                             if (dataFile != null && !isFileThere(judgeFileName)) {
                                 messages.add(problemTitle + "\tMissing judge file '" + dataFile + "' in " + dataPath);
@@ -2001,5 +2051,63 @@ public final class Utilities {
     public static boolean isShowStandingsPanes() {
         return showStandingsPanes;
     }
+    
+    /**
+     * Concatenate Arrays.
+     * 
+     * This is null-safe, arrays can be null and will return 
+     * an array.
+     * 
+     * @param one first array
+     * @param two secodn array
+     * @return a new array which contains contents of one and two arrays
+     */
+    public static String[] concatenateArrays(String[] one, String[] two) {
+
+        if (one == null) {
+            one = new String[0];
+        }
+
+        if (two == null) {
+            two = new String[0];
+        }
+
+        String[] newArray = new String[one.length + two.length];
+
+        System.arraycopy(one, 0, newArray, 0, one.length);
+        System.arraycopy(two, 0, newArray, one.length, two.length);
+
+        return newArray;
+    }
+    
+    
+    /**
+     * Concatenate Arrays.
+     * 
+     * This is null-safe, arrays can be null and will return 
+     * an array.
+     * 
+     * @param one first array
+     * @param two secodn array
+     * @return a new array which contains contents of one and two arrays
+     */
+    public static SerializedFile[] concatenateArrays(SerializedFile[] one, SerializedFile[] two) {
+
+        if (one == null) {
+            one = new SerializedFile[0];
+        }
+
+        if (two == null) {
+            two = new SerializedFile[0];
+        }
+
+        SerializedFile[] newArray = new SerializedFile[one.length + two.length];
+
+        System.arraycopy(one, 0, newArray, 0, one.length);
+        System.arraycopy(two, 0, newArray, one.length, two.length);
+
+        return newArray;
+    }
+
 
 }

@@ -81,14 +81,14 @@
 	-->
 <div class="tail">
 <span class="right">
-<A HREF="http://www.ecs.csus.edu/pc2/">PC^2 Homepage</A><br/>
+<A HREF="https://pc2ccs.github.io/">PC^2 Homepage</A><br/>
 CSS by Tomas Cerny and Ray Holder
 </span>
 <xsl:variable name="version">
 <xsl:value-of select="/contestStandings/standingsHeader/@systemVersion"/>
 </xsl:variable>
-Created by <A HREF="http://www.ecs.csus.edu/pc2">CSUS PC^2 <xsl:value-of select="substring($version,0,6)"/></A><br/>
-<A HREF="http://www.ecs.csus.edu/pc2/">http://www.ecs.csus.edu/pc2/</A><br/>
+Created by <A HREF="https://pc2ccs.github.io/">CSUS PC^2 <xsl:value-of select="substring($version,0,6)"/></A><br/>
+<A HREF="https://pc2ccs.github.io/">https://pc2ccs.github.io/</A><br/>
 Last updated
 <xsl:value-of select="/contestStandings/standingsHeader/@currentDate"/>
 </div>

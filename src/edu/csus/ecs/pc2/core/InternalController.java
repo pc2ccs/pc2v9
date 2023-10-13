@@ -2860,7 +2860,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     
                     
                 } catch (Exception e) {
-                    fatalError("Error loading from " + entryLocation, e);
+                    String szMsg = e.getMessage();
+                    if(szMsg == null) {
+                        szMsg = "(no further details supplied by exception)";
+                    }
+                    fatalError("Error loading from " + entryLocation + "\n" + szMsg + " ", e);
                 } finally {
                     loader = null;
                 }

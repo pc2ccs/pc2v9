@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 /**
@@ -173,6 +173,8 @@ public final class Constants {
     public static final String COUNTRY_CODE_COLUMN_NAME = "countrycode";
 
     public static final String SCORING_ADJUSTMENT_COLUMN_NAME = "scoreadjustment";
+    
+    public static final String INST_CODE_COLUMN_NAME = "institution";
 
     public static final String DEFAULT_INSTITUTIONNAME = "undefined";
 
@@ -190,14 +192,60 @@ public final class Constants {
     
     public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";
 
-    public static final int BYTES_PER_KIBIBYTE = 1024;   
+    public static final int BYTES_PER_KIBIBYTE = 1024;
+    
+    public static final int KIBIBYTE_PER_MEBIBYTE = 1024;
     
     /**
-     * Sandbox constants
+     * Directory where scripts go that PC2 executes for sandbox and interactive submissions.
+     * This folder is in the PC2 home folder (install folder).
+     */
+    public static final String PC2_SCRIPT_DIRECTORY = "scripts";
+    
+    /**
+     * Command line to run submission in a sandbox
      */
     public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit}";
 
+    /**
+     * File name of script to run submission in sandbox ({:sandboxprogramname} if non-interactive)
+     */
     public static final String PC2_INTERNAL_SANDBOX_PROGRAM_NAME = "pc2sandbox.sh";
+    
+    /**
+     * Filename of the script to run submission for an interactive problem in a sandbox ({:sandboxprogramname} if interactive)
+     */
+    public static final String PC2_INTERNAL_SANDBOX_INTERACTIVE_NAME = "pc2sandbox_interactive.sh";
+    
+    /**
+     *  Command to execute to run an interactive problem in a sandbox
+     */
+    public static final String PC2_INTERNAL_SANDBOX_INTERACTIVE_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit} {:validator} {:infilename} {:ansfilename} {:testcase}";
+    
+    /**
+     *  Filename of the script to run for an interactive problem when not using a sandbox
+     */
+    public static final String PC2_INTERACTIVE_NAME = "pc2_interactive.sh";
+    
+    /**
+     *  Command to execute to run an interactive problem when not using a sandbox
+     */
+    public static final String PC2_INTERACTIVE_COMMAND_LINE = "./pc2_interactive.sh {:validator} {:infilename} {:ansfilename} {:testcase}";
+    
+    /**
+     *  Filename of the script to run during the validate phase AFTER the interactive validator has completed
+     */
+    public static final String PC2_INTERACTIVE_VALIDATOR_NAME = "pc2validate_interactive.sh";
+    
+    /**
+     *  Command to execute to validate results of an interactive run AFTER the interactive validator has completed
+     */
+    public static final String PC2_INTERACIVE_VALIDATE_COMMAND = "./" + PC2_INTERACTIVE_VALIDATOR_NAME + " {:resfile} {:feedbackdir} {:testcase}";
+    
+    /**
+     * Execution info for entire run (all testcases)
+     */
+    public static final String PC2_EXECUTION_RESULTS_NAME_SUFFIX = "executeinfo.ndjson";
     
     /**
      * OS Compatibility constants
@@ -205,6 +253,14 @@ public final class Constants {
     public static final String WINDOWS_CHECK_SANDBOX_SCRIPT = "pc2syscheck.cmd";
     public static final String UNIX_CHECK_SANDBOX_SCRIPT = "pc2syscheck.sh";
 
+    /**
+     * CLICS validation Types
+     */
+    public static final String VALIDATION_CUSTOM = "custom";
+    public static final String VALIDATION_DEFAULT = "default";
+    public static final String VALIDATION_INTERACTIVE = "interactive";
+    public static final String VALIDATION_SCORE = "score";
+    
     /**
      * Prefix for deleted runs.
      */
@@ -223,4 +279,5 @@ public final class Constants {
     public static final String TAB = "\t";
 
     public static final String NL = System.getProperty("line.separator");
+
 }

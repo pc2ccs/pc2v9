@@ -1,0 +1,36 @@
+\problemname{Guess the Number}
+
+I am thinking of a number between $1$ and $1\,000$; can you guess what
+it is?  Given a guess, I will tell you whether it is too
+low, too high, or correct.  But you only get $10$ guesses per game, so
+use them wisely!
+
+\vspace{-0.1in}
+
+\section*{Interaction}
+
+We will play several games. The first thing your submission should do is read an
+integer $n$ (where $1\le n\le 100$), indicating the number of games that follow.
+
+For each game, your submission should output guesses for the correct number, in
+the form of an integer between $1$ and $1\,000$ on a line on its own.
+
+After each guess, your submission should read a response on standard input.
+This response is a line with one of the following:
+
+\vspace{-8pt}
+\begin{itemize}
+\itemsep=-2pt
+\item ``\texttt{lower}'' if the number I am thinking of is lower than your guess;
+\item ``\texttt{higher}'' if the number I am thinking of is higher than your guess; or
+\item ``\texttt{correct}'' if your guess is correct.
+\end{itemize}
+\vspace{-2pt}
+
+After guessing correctly, you should move on to the next
+game (if any remain), or exit immediately (otherwise).
+Within each game, if you guess incorrectly $10$ times, you won't
+get any more chances.
+%and your program will be terminated.
+
+\emph{Note: Do not forget to flush output buffers after writing. See the Addendum to Judging Notes for details.}
