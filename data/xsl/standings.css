@@ -1,0 +1,117 @@
+// $Id$
+table {
+	border: 1px solid #ccc; 
+	border-bottom: 0;
+	width: 52.7em;
+	margin-bottom: 2em;
+}
+body {
+   font-family: verdana, arial, tahoma, sans-serif;
+}
+table th {
+	text-align: center;
+	background: #247eca;
+	color: white;
+	padding: 0em; 
+	border: outset 2px #eee8aa;
+}
+table td {
+	border-bottom: 1px solid #DDD; 
+	padding: .0em .0em .0em .5em;
+}
+table tr td.rank {
+	background: transparent; 
+	border: 2px outset #ffffff;
+}
+table tr.gold td.rank {
+	background: #f9d923;
+	border: outset 2px #ffd700;
+}
+table tr.silver td.rank {
+	background: Silver;
+	border: 2px outset sILVER;
+}
+table tr.bronze td.rank {
+	background: #c08e55; 
+	border: outset 2px #c9960c;
+}
+table td.name {
+	padding-left: 2em;
+}
+table th.name{
+	padding-left: 3em; 
+}
+table tr.even td {
+	background: #F7F7F7;
+}
+table tr td.r10 {
+	background: #e9d923;
+	border: 2px outset #DCDCDC;
+}
+table tr td.r9 {
+	background: #e1d963;
+	border: 2px outset #DCDCDC;
+}
+table tr td.r8 {
+	background: #DDD7AA;
+	border: 2px outset #DCDCDC;
+}
+table tr td.r7 {
+	background: #d2d2d2;
+	border: 2px outset #DCDCDC;
+}
+table tr td.r6 {
+	background: #DDCDBD;
+	border: 2px outset #DCDCDC;
+}
+table tr td.r5 {
+	background: #e6e6e6;
+	border: 2px outset #DCDCDC;
+}
+table tr td.r4 {
+	background: #eee;
+	border: 2px outset #f3f3f3;
+}
+table tr td.r3 {
+	background: #F7f7f7;
+	border: 2px outset #f7f7f7;
+}
+div.tail {
+       font-size: .8em;
+       color: #888;
+//width: 65.875em;
+width: 80%;
+ border: 1px solid #ccc;
+margin-left: auto;
+margin-right: auto;
+}
+span.right {
+     float: right;
+}
+
+// troy additions
+table tr.odd {
+        background-color: #0; color: black;
+}
+table tr.even {
+        background-color: #EEEEFF; color: black;
+}
+table tr td.yes {
+        background-color: #00ff00; color: black;
+        text-align: center;
+}
+table tr td.pending {
+        background-color: #ffff00; color: black;
+        text-align: center;
+}
+table tr td.no {
+        background-color: #ff0000; color: black;
+        text-align: center;
+}
+table tr td.center {
+        text-align: center;
+}
+table tr td.right {
+        text-align: right;
+}
+
