@@ -21,8 +21,8 @@ import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
  * @author Douglas A. Lane, PC^2 team pc2@ecs.csus.edu
  */
 public class FileComparisonUtilitiesTest extends AbstractTestCase {
-
-    private static final String TESTDATA_RESULTS_DATA_DIR = "samps/prdata//resultscompwork/results";
+    
+    private static final String TESTDATA_RESULTS_DATA_DIR = "testdata/FileComparisonUtilitiesTest/resultscompwork/results";
 
     private IFileComparisonKey resultComparisonKey = new FileComparisonUtilities.ResultTSVKey();
 
@@ -102,7 +102,7 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 
         String domjResultsDir = TESTDATA_RESULTS_DATA_DIR + "/domjudge";
         String pc2ResultsDir = TESTDATA_RESULTS_DATA_DIR + "/pc2";
-
+        
         FileComparison comp = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, domjResultsDir, pc2ResultsDir, scoreComparisonKey);
         assertNotNull(comp);
 

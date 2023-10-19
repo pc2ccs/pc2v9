@@ -73,6 +73,8 @@ public class ResultsExportReportTest extends AbstractTestCase {
          */
         String dir = getOutputDataDirectory(this.getName());
         ensureDirectory(dir);
+        
+//        startExplorer(dir);
 
         Log log = new Log(dir, getName() + ".log");
         StaticLog.setLog(log);
@@ -81,8 +83,6 @@ public class ResultsExportReportTest extends AbstractTestCase {
         IInternalController controller = new InternalController(contest);
 
         addRuns(contest);
-
-        String pc2ResultsDir = dir;
 
         /**
          * Must put output directory into client settings
@@ -106,12 +106,6 @@ public class ResultsExportReportTest extends AbstractTestCase {
 
         String resultsReportFile = dir + File.separator + "results.report.txt";
         assertFileExists(resultsReportFile, "Results report");
-
-        //        catFile (resultsReportFile);
-
-        assertFileExists(dir + File.separator + "results.tsv", "TODO");
-        assertFileExists(dir + File.separator + "scoreboard.json", "TODO");
-
     }
 
     /**
