@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import javax.swing.JOptionPane;
+
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
