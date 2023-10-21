@@ -182,6 +182,18 @@ public class WebServer implements UIPlugin {
                 fos.close();
             }
         } catch (Exception ex) {
+            if (getController().isUsingGUI()) {
+                String msg = "Warning: exception occurred during KeyStore creation: " + ex.getMessage();
+                msg += "\nStack trace:";
+                StackTraceElement[] stackTraceElements = ex.getStackTrace();
+                for (StackTraceElement line : stackTraceElements) {
+                    if (line.toString().contains("edu.csus.ecs.pc2")) {
+                        msg += "\n" + line;
+                    }
+                }
+                msg += "\n...";
+                JOptionPane.showMessageDialog(null, msg, "Error creating WebServer KeyStore", JOptionPane.WARNING_MESSAGE);
+            }
             log.throwing("WebServer", "createKeyStoreAndFile", ex);
             ex.printStackTrace();
         }
