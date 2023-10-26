@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--  Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. -->
+<!--  Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau. -->
 <project name="package-pc2v9" default="archives" basedir=".">
     
 	<!--
@@ -88,6 +88,7 @@
                 <include name="**/distribute_score"/>
             </zipfileset>
             <zipfileset dir="${intscripts.dir}" filemode="755" prefix="${release}/scripts">
+                <include name="**/dotimedcompile.sh"/>
                 <include name="**/pc2sandbox.sh"/>
                 <include name="**/pc2syscheck.sh"/>
                 <include name="**/pc2syscheck.cmd"/>
