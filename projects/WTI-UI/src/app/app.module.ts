@@ -10,6 +10,11 @@ import { SharedModule } from './modules/shared/shared.module';
 import { OptionsModule } from './modules/options/options.module';
 import { ClarificationsModule } from './modules/clarifications/clarifications.module';
 import { ScoreboardModule } from './modules/scoreboard/scoreboard.module';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule} from '@angular/material/icon';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatToolbarModule} from '@angular/material/toolbar';
 //import { DeviceDetectorModule } from 'ngx-device-detector';
 
 @NgModule({
@@ -27,6 +32,11 @@ import { ScoreboardModule } from './modules/scoreboard/scoreboard.module';
     ClarificationsModule,
     ScoreboardModule,
     BrowserAnimationsModule,
+    MatButtonModule, 
+    MatIconModule,
+    MatSidenavModule,
+    MatSnackBarModule,
+    MatToolbarModule
 //	DeviceDetectorModule.forRoot()
   ],
   providers: [],
