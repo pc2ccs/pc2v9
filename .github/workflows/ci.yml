@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     container: pc2fromecs/jdk8hugo
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -35,7 +35,7 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/download-artifact@v3
@@ -126,7 +126,7 @@ jobs:
     needs: push-release
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
         with:
           name: build
