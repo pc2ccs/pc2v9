@@ -44,9 +44,6 @@ import { AboutWtiComponent } from './components/about-wti/about-wti.component';
     MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
-  ],
-  entryComponents: [
-    AboutWtiComponent
   ]
 })
 export class SharedModule { }
