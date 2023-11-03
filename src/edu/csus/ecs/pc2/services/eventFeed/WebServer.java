@@ -63,9 +63,9 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Web Server.
- * 
+ *
  * This server listens on the input port and when a connection is made it creates a service that for each contest event will do REST web services.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class WebServer implements UIPlugin {
@@ -73,14 +73,14 @@ public class WebServer implements UIPlugin {
     private static final long serialVersionUID = -731087652687843222L;
 
     public static final int DEFAULT_WEB_SERVER_PORT_NUMBER = 50443;
-    
+
     public static final String DEFAULT_CLICS_API_VERSION = "202003";
-    
+
     public static final String DEFAULT_CLICS_API_PACKAGE_PREFIX = "edu.csus.ecs.pc2.clics";
 
     public static final String PC2_KEYSTORE_FILE = "cacerts.pc2";
-    
-    // roles 
+
+    // roles
     public static final String WEBAPI_ROLE_PUBLIC = "public";
     public static final String WEBAPI_ROLE_BALLOON = "balloon";
     public static final String WEBAPI_ROLE_ANALYST = "analyst";
@@ -88,7 +88,7 @@ public class WebServer implements UIPlugin {
     public static final String WEBAPI_ROLE_ADMIN = "admin";
     public static final String WEBAPI_ROLE_TEAM = "team";
     public static final String WEBAPI_ROLE_JUDGE = "judge";
-    
+
     private Server jettyServer = null;
 
     private String keystorePassword = "i don't care";
@@ -98,11 +98,11 @@ public class WebServer implements UIPlugin {
     private IInternalController controller;
 
     private Log log = null;
-    
+
     private WebServerPropertyUtils wsProperties = null;
 
     private ICLICSResourceConfig apiResource = null;
-    
+
     private static final Provider bcProvider = new BouncyCastleProvider();;
 
     public static KeyPair generateKeyPair() throws Exception {
@@ -153,7 +153,7 @@ public class WebServer implements UIPlugin {
     }
 
     private void createKeyStoreAndKey(File keystoreFile) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, NoSuchProviderException {
-        
+
         try {
             KeyStore store = KeyStore.getInstance("PKCS12", "BC");
             store.load(null, null);
@@ -161,7 +161,7 @@ public class WebServer implements UIPlugin {
 
             KeyPair keyPair = generateKeyPair();
             Certificate selfSign = selfSign(keyPair, "CN=pc2ef,O=PC^2,OU=PC^2");
-            
+
             Certificate[] chain = new Certificate[1];
             chain[0] = selfSign;
             store.setKeyEntry("jetty", keyPair.getPrivate(), password, chain);
@@ -218,9 +218,9 @@ public class WebServer implements UIPlugin {
             }
             // eg, edu.csus.ecs.pc2.clics.API202306.ResourceConfig202306, or, some user specified package.ResourceConfig202306
             String apiClass = apiPackage + ".ResourceConfig" + apiVer;
-            
+
             apiResource = getAPIClass(apiClass);
-            
+
             ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
             context.setContextPath("/");
 
@@ -297,13 +297,13 @@ public class WebServer implements UIPlugin {
     private SecurityHandler basicAuth() {
 
         HashLoginService l = new HashLoginService();
-        
+
         // First, load PC2 accounts into jetty - this will allow PC2 users to use the API with their login id
         //    Only teams, admins and judges
         Account[] accounts = contest.getAccounts();
         String role;
         Type clientType;
-        
+
         for (Account account: accounts) {
             clientType = account.getClientId().getClientType();
             if (clientType == Type.TEAM) {
@@ -317,7 +317,7 @@ public class WebServer implements UIPlugin {
             }
             l.putUser(account.getClientId().getName(), new Password(account.getPassword()), new String [] { role });
         }
-        
+
         // now load any special ones from the realm file
         File f = new File("realm.properties");
         if (f.exists() && f.isFile() && f.canRead()) {
@@ -337,10 +337,10 @@ public class WebServer implements UIPlugin {
         } else {
             showMessage("WARNING: Cannot read " + f.getAbsolutePath());
         }
-        
+
         Constraint constraintPublic = new Constraint();
         constraintPublic.setName(Constraint.__BASIC_AUTH);
-        constraintPublic.setRoles(new String[] { 
+        constraintPublic.setRoles(new String[] {
             WEBAPI_ROLE_PUBLIC, WEBAPI_ROLE_BALLOON, WEBAPI_ROLE_ANALYST, WEBAPI_ROLE_BLUE, WEBAPI_ROLE_ADMIN, WEBAPI_ROLE_TEAM, WEBAPI_ROLE_JUDGE
         });
 
@@ -450,7 +450,7 @@ public class WebServer implements UIPlugin {
      * String className = "edu.csus.ecs.pc2.clics.API202306";
      * ICLICSResourceConfig iRes = loadUIClass(className);
       * </pre>
-     * 
+     *
      * @param className
      * @throws ClassNotFoundException
      * @throws InstantiationException
@@ -458,7 +458,7 @@ public class WebServer implements UIPlugin {
      */
 
     private static ICLICSResourceConfig loadAPIClass(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        
+
         Class<?> newClass = Class.forName(className);
         Object object = newClass.newInstance();
         if (object instanceof ICLICSResourceConfig) {

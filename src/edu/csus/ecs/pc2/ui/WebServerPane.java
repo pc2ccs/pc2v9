@@ -26,19 +26,19 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.services.eventFeed.WebServer;
-import edu.csus.ecs.pc2.services.eventFeed.WebServerPropertyUtils;
-import edu.csus.ecs.pc2.services.web.EventFeedStreamer;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.util.CommaSeparatedValueParser;
+import edu.csus.ecs.pc2.services.eventFeed.WebServer;
+import edu.csus.ecs.pc2.services.eventFeed.WebServerPropertyUtils;
+import edu.csus.ecs.pc2.services.web.EventFeedStreamer;
 
 /**
  * This class provides a GUI for configuring the embedded Jetty webserver. It allows specifying the port on which Jetty will listen and the REST service endpoints to which Jetty will respond. (Note
  * that REST endpoints are handled using Jersey, the JAX-RS implementation.)
- * 
+ *
  * By default the Jetty webserver is configured to listen on port 50080.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -51,9 +51,9 @@ public class WebServerPane extends JPanePlugin {
     public static final int DEFAULT_WEB_SERVER_PORT_NUMBER = WebServer.DEFAULT_WEB_SERVER_PORT_NUMBER;
 
     private static final String NL = System.getProperty("line.separator");
-    
+
     private static final String CLICS_VERSIONS_KEY = "clics.apiVersionsSupported";
-    
+
     private static final String [] DEF_CLICS_API_VERSIONS = { "2023-06", "2020-03" };
 
     private JPanel buttonPanel = null;
@@ -84,7 +84,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * Constructs a new WebServerPane.
-     * 
+     *
      */
     public WebServerPane() {
         super();
@@ -93,7 +93,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes the WebServerPane.
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -111,7 +111,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes buttonPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPanel() {
@@ -129,7 +129,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes startButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getStartButton() {
@@ -139,6 +139,7 @@ public class WebServerPane extends JPanePlugin {
             startButton.setMnemonic(KeyEvent.VK_S);
             startButton.setToolTipText("Start Web Server");
             startButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     startWebServer();
                 }
@@ -150,7 +151,7 @@ public class WebServerPane extends JPanePlugin {
     /**
      * Starts a Jetty webserver running on the port specified in the GUI textfield, and registers a set of default REST (Jersey/JAX-RS) services with Jetty. TODO: need to provide support for
      * dynamically reconfiguring the registered services.
-     * 
+     *
      */
     private void startWebServer() {
 
@@ -186,7 +187,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes stopButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getStopButton() {
@@ -196,6 +197,7 @@ public class WebServerPane extends JPanePlugin {
             stopButton.setMnemonic(KeyEvent.VK_T);
             stopButton.setToolTipText("Stop Web Server");
             stopButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     stopWebServer();
                 }
@@ -216,7 +218,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes centerPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPanel() {
@@ -266,14 +268,14 @@ public class WebServerPane extends JPanePlugin {
             gbc_chckbxClicsContestApi.gridx = 1;
             gbc_chckbxClicsContestApi.gridy = 2;
             centerPanel.add(getChckbxClicsContestApi(), gbc_chckbxClicsContestApi);
-            
+
             GridBagConstraints gbc_combobxClicsContestApiVersion = new GridBagConstraints();
             gbc_combobxClicsContestApiVersion.fill = GridBagConstraints.HORIZONTAL;
             gbc_combobxClicsContestApiVersion.insets = new Insets(0, 0, 5, 5);
             gbc_combobxClicsContestApiVersion.gridx = 2;
             gbc_combobxClicsContestApiVersion.gridy = 2;
             centerPanel.add(getComboBxClicsAPIVersion(), gbc_combobxClicsContestApiVersion);
-          
+
             GridBagConstraints gbc_chckbxStarttime = new GridBagConstraints();
             gbc_chckbxStarttime.anchor = GridBagConstraints.WEST;
             gbc_chckbxStarttime.insets = new Insets(0, 0, 5, 5);
@@ -297,7 +299,7 @@ public class WebServerPane extends JPanePlugin {
 
     /**
      * This method initializes portTextField to contain the default web server port number.
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getPortTextField() {
@@ -334,7 +336,7 @@ public class WebServerPane extends JPanePlugin {
         getChckbxFetchRuns().setEnabled(!serverRunning);
         getChckbxClicsContestApi().setEnabled(!serverRunning);
     }
-    
+
     private JLabel getLblEnabledWebServices() {
         if (lblEnabledWebServices == null) {
             lblEnabledWebServices = new JLabel("Enable Web Services:");
@@ -372,6 +374,7 @@ public class WebServerPane extends JPanePlugin {
             viewJSONButton = new JButton("View Event Feed");
             viewJSONButton.setToolTipText("Show the data which will be output on the Event Feed API when the Webserver is started");
             viewJSONButton.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     viewJSONEventFeed();
                 }
@@ -410,7 +413,7 @@ public class WebServerPane extends JPanePlugin {
         }
         return chckbxClicsContestApi;
     }
-    
+
     private JComboBox<String> getComboBxClicsAPIVersion() {
         if(combobxClicsAPIVersion == null) {
             String [] choices;
