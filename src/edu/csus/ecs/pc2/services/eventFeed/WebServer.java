@@ -199,7 +199,6 @@ public class WebServer implements UIPlugin {
                 createKeyStoreAndKey(keystoreFile);
             }
 
-            // TODO: Lookup correct API ResourceConfig class
             String apiVer = wsProperties.getStringProperty(WebServerPropertyUtils.CLICS_API_VERSION, DEFAULT_CLICS_API_VERSION);
             String apiPackage = wsProperties.getStringProperty(WebServerPropertyUtils.CLICS_API_PACKAGE, DEFAULT_CLICS_API_PACKAGE_PREFIX);
             String apiClass = apiPackage + "." + "API" + apiVer + ".ResourceConfig" + apiVer;
