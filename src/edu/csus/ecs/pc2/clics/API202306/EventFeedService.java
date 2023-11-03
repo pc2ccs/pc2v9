@@ -1,5 +1,9 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+<<<<<<<< HEAD:src/edu/csus/ecs/pc2/clics/API202306/EventFeedService.java
 package edu.csus.ecs.pc2.clics.API202306;
+========
+package edu.csus.ecs.pc2.clics.API202003;
+>>>>>>>> 78682bd20 (i823 Relocate CLICS API Service endpoints):src/edu/csus/ecs/pc2/clics/API202003/EventFeedService.java
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
