@@ -26,6 +26,7 @@ import javax.swing.SwingConstants;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
+import edu.csus.ecs.pc2.services.eventFeed.WebServerPropertyUtils;
 import edu.csus.ecs.pc2.services.web.EventFeedStreamer;
 
 /**
@@ -156,10 +157,10 @@ public class WebServerPane extends JPanePlugin {
 
         Properties properties = new Properties();
 
-        properties.put(WebServer.PORT_NUMBER_KEY, portTextField.getText());
-        properties.put(WebServer.CLICS_CONTEST_API_SERVICES_ENABLED_KEY, Boolean.toString(getChckbxClicsContestApi().isSelected()));
-        properties.put(WebServer.STARTTIME_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxStarttime().isSelected()));
-        properties.put(WebServer.FETCH_RUN_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxFetchRuns().isSelected()));
+        properties.put(WebServerPropertyUtils.PORT_NUMBER_KEY, portTextField.getText());
+        properties.put(WebServerPropertyUtils.CLICS_CONTEST_API_SERVICES_ENABLED_KEY, Boolean.toString(getChckbxClicsContestApi().isSelected()));
+        properties.put(WebServerPropertyUtils.STARTTIME_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxStarttime().isSelected()));
+        properties.put(WebServerPropertyUtils.FETCH_RUN_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxFetchRuns().isSelected()));
 
         getWebServer().startWebServer(getContest(), getController(), properties);
 
