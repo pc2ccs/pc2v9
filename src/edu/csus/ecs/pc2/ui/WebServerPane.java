@@ -18,6 +18,7 @@ import java.util.logging.Level;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -72,6 +73,7 @@ public class WebServerPane extends JPanePlugin {
 
     private JButton viewJSONButton;
     private JCheckBox chckbxClicsContestApi;
+    private JComboBox<String> combobxClicsAPIVersion;
 
     /**
      * Constructs a new WebServerPane.
@@ -253,6 +255,14 @@ public class WebServerPane extends JPanePlugin {
             gbc_chckbxClicsContestApi.gridx = 1;
             gbc_chckbxClicsContestApi.gridy = 2;
             centerPanel.add(getChckbxClicsContestApi(), gbc_chckbxClicsContestApi);
+            
+            GridBagConstraints gbc_combobxClicsContestApiVersion = new GridBagConstraints();
+            gbc_combobxClicsContestApiVersion.fill = GridBagConstraints.HORIZONTAL;
+            gbc_combobxClicsContestApiVersion.insets = new Insets(0, 0, 5, 5);
+            gbc_combobxClicsContestApiVersion.gridx = 2;
+            gbc_combobxClicsContestApiVersion.gridy = 2;
+            centerPanel.add(getComboBxClicsAPIVersion(), gbc_combobxClicsContestApiVersion);
+          
             GridBagConstraints gbc_chckbxStarttime = new GridBagConstraints();
             gbc_chckbxStarttime.anchor = GridBagConstraints.WEST;
             gbc_chckbxStarttime.insets = new Insets(0, 0, 5, 5);
@@ -313,7 +323,7 @@ public class WebServerPane extends JPanePlugin {
         getChckbxFetchRuns().setEnabled(!serverRunning);
         getChckbxClicsContestApi().setEnabled(!serverRunning);
     }
-
+    
     private JLabel getLblEnabledWebServices() {
         if (lblEnabledWebServices == null) {
             lblEnabledWebServices = new JLabel("Enable Web Services:");
@@ -388,5 +398,16 @@ public class WebServerPane extends JPanePlugin {
             chckbxClicsContestApi.setSelected(true);
         }
         return chckbxClicsContestApi;
+    }
+    
+    private JComboBox<String> getComboBxClicsAPIVersion() {
+        if(combobxClicsAPIVersion == null) {
+            String[] choices = { "2023-06", "2020-03" };
+
+            combobxClicsAPIVersion = new JComboBox<String>(choices);
+            combobxClicsAPIVersion.setEditable(true);
+//            combobxClicsAPIVersion.setPreferredSize(new Dimension(40, 26));
+        }
+        return(combobxClicsAPIVersion);
     }
 }
