@@ -78,7 +78,7 @@ public class ResultsComparePane extends JPanePlugin {
         primaryCCSResultsDirectoryTextField = new JTextField();
         primaryCCSResultsDirectoryTextField.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyTyped(KeyEvent e) {
+            public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
                     updateUserSetting(ClientSettings.PRIMARY_CCS_RESULTS_DIR, pc2ResultsDirectoryTextField.getText());
                 }
@@ -110,7 +110,7 @@ public class ResultsComparePane extends JPanePlugin {
         pc2ResultsDirectoryTextField = new JTextField();
         pc2ResultsDirectoryTextField.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyTyped(KeyEvent e) {
+            public void keyPressed(KeyEvent e) {
 
                 if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
                     updateUserSetting(ClientSettings.PC2_RESULTS_DIR, pc2ResultsDirectoryTextField.getText());
@@ -266,15 +266,20 @@ public class ResultsComparePane extends JPanePlugin {
         textArea.append(string + Constants.NL);
     }
 
+    /**
+     * Update user settings, send to server.
+     *  
+     * @param key
+     * @param value
+     */
     private void updateUserSetting(String key, String value) {
 
         try {
             updateClientSettings(key, value);
         } catch (Exception e) {
-            StaticLog.getLog().log(Level.WARNING, "Problem updating settings?", e);
-            e.printStackTrace(); // TODO 760 how to report problem to user ?
+            Utilities.printStackTrace(System.out, e);
+            StaticLog.getLog().log(Level.WARNING, "Problem updating settings ", e);
         }
-
     }
     
 

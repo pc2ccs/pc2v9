@@ -1727,6 +1727,16 @@ public final class Utilities {
 
         return baseFileName;
     }
+    
+    /**
+     * Print stack trace with only elements with csus in them.
+     * @param printStream
+     * @param e
+     */
+    public static void printStackTrace(PrintStream printStream, Exception e) {
+        printStackTrace(printStream, e, "csus");
+        
+    }
 
     /**
      * Prints a stack trace, prints stack elements which only matches pattern.

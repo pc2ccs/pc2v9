@@ -49,8 +49,21 @@ public class FileComparisonUtilities {
 
         try {
             
-            List<TeamScoreRow> firstTeamScoreRows = FileComparisonUtilities.loadTeamRows(fileComparison.getFirstFilename());
-            List<TeamScoreRow> secondTeamScoreRows = FileComparisonUtilities.loadTeamRows(fileComparison.getSecondFilename());
+            List<TeamScoreRow> firstTeamScoreRows = null;
+            try {
+                firstTeamScoreRows = FileComparisonUtilities.loadTeamRows(fileComparison.getFirstFilename());
+            } catch (JsonMappingException e) {
+                Exception rte = new RuntimeException("Error reading/parsing file " + firstFilename, e);
+                ExecuteUtilities.rethrow(rte);
+            }
+
+            List<TeamScoreRow> secondTeamScoreRows = null;
+            try {
+                secondTeamScoreRows = FileComparisonUtilities.loadTeamRows(fileComparison.getSecondFilename());
+            } catch (JsonMappingException e) {
+                Exception rte = new RuntimeException("Error reading/parsing file " + firstFilename, e);
+                ExecuteUtilities.rethrow(rte);
+            }
 
             int minLines = firstTeamScoreRows.size();
             if (secondTeamScoreRows.size() < minLines) {
@@ -184,13 +197,23 @@ public class FileComparisonUtilities {
         try {
             
             List<CLICSAward> firstAwardRows = new ArrayList<CLICSAward>();
-            if (new File(firstFilename).exists()) {
-                firstAwardRows = loadAwardRows(fileComparison.getFirstFilename());
+            try {
+                if (new File(firstFilename).exists()) {
+                    firstAwardRows = loadAwardRows(fileComparison.getFirstFilename());
+                }
+            } catch (JsonMappingException e) {
+                Exception rte = new RuntimeException("Error reading/parsing file " + firstFilename, e);
+                ExecuteUtilities.rethrow(rte);
             }
-            
-            List<CLICSAward> secondAwardRows =  new ArrayList<CLICSAward>();
-            if (new File(secondFilename).exists()) {
-                secondAwardRows = FileComparisonUtilities.loadAwardRows(fileComparison.getSecondFilename());
+
+            List<CLICSAward> secondAwardRows = new ArrayList<CLICSAward>();
+            try {
+                if (new File(secondFilename).exists()) {
+                    secondAwardRows = FileComparisonUtilities.loadAwardRows(fileComparison.getSecondFilename());
+                }
+            } catch (JsonMappingException e) {
+                Exception rte = new RuntimeException("Error reading/parsing file " + secondFilename, e);
+                ExecuteUtilities.rethrow(rte);
             }
             
             /**
@@ -280,10 +303,8 @@ public class FileComparisonUtilities {
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
             }
             
-            
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Problem comparing scoreboard data/info", e);
-            e.printStackTrace(); // TODO 760 how to report problem to user ?
             ExecuteUtilities.rethrow(e);
         }
         
