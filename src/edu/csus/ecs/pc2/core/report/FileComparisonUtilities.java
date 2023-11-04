@@ -14,10 +14,8 @@ import java.util.logging.Level;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
@@ -29,6 +27,7 @@ import edu.csus.ecs.pc2.core.imports.clics.FieldCompareRecord;
 import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * Utilities for file comparison
@@ -176,7 +175,7 @@ public class FileComparisonUtilities {
             }
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Problem comparing scoreboard data/info", e);
-            e.printStackTrace(); // TODO 760 how to report problem to user ?
+            Utilities.printStackTrace(System.out, e);
         }
 
         fileComparison.setNumberRows(numberRows);
@@ -408,7 +407,7 @@ public class FileComparisonUtilities {
             }
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Problem comparing results tsv data/info", e);
-            e.printStackTrace(); // TODO 760 how to report problem to user ?
+            Utilities.printStackTrace(System.out, e);
             ExecuteUtilities.rethrow(e); 
         }
 
@@ -443,21 +442,21 @@ public class FileComparisonUtilities {
         }
     }
     public static String prettyPrint(Object JSONObject) throws JsonProcessingException {
-        String json = getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(JSONObject);
+        String json = JSONUtilities.getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(JSONObject);
         return json;
     }
 
-    public static ObjectMapper getObjectMapper() {
-
-        // TODO REFACTOR move this into a utility class
-        if (objectMapper == null) {
-            objectMapper = new ObjectMapper();
-            objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        }
-
-        return objectMapper;
-    }
+//    public static ObjectMapper getObjectMapper() {
+//
+//        // TODO REFACTOR move this into a utility class
+//        if (objectMapper == null) {
+//            objectMapper = new ObjectMapper();
+//            objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+//            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+//        }
+//
+//        return objectMapper;
+//    }
 
     /**
      * Fetch cms id as key.
@@ -503,7 +502,7 @@ public class FileComparisonUtilities {
         String [] lines = Utilities.loadFile(filename);
         String jsonString = String.join(" ", lines);
 
-        List<CLICSScoreboard> scoreboardList = getObjectMapper().readValue(jsonString, new TypeReference<List<CLICSScoreboard>>() {});
+        List<CLICSScoreboard> scoreboardList = JSONUtilities.getObjectMapper().readValue(jsonString, new TypeReference<List<CLICSScoreboard>>() {});
 //        for (CLICSScoreboard clicsScoreboard : scoreboardList) {
 //            System.out.println("debug sb2 scoreboards "+clicsScoreboard);
 //        }
@@ -527,7 +526,7 @@ public class FileComparisonUtilities {
         String[] lines = Utilities.loadFile(scoreboardJSONFilename);
         String firstLineString = String.join(" ", lines);
 
-        CLICSScoreboard clicsScoreboard = getObjectMapper().readValue(firstLineString, CLICSScoreboard.class);
+        CLICSScoreboard clicsScoreboard = JSONUtilities.getObjectMapper().readValue(firstLineString, CLICSScoreboard.class);
         
         if (clicsScoreboard != null)
         {
@@ -544,7 +543,7 @@ public class FileComparisonUtilities {
         String[] lines = Utilities.loadFile(awardsJSONFilename);
         String jsonString = String.join(" ", lines);
 
-        awardsList = getObjectMapper().readValue(jsonString, new TypeReference<List<CLICSAward>>() {});
+        awardsList = JSONUtilities.getObjectMapper().readValue(jsonString, new TypeReference<List<CLICSAward>>() {});
         return awardsList;
     }
 

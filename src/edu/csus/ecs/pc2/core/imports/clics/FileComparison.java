@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.report.ComparisonState;
-import edu.csus.ecs.pc2.core.report.FileComparisonUtilities;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * Comparison information between two files.
@@ -114,7 +114,7 @@ public class FileComparison {
     // TODO REFACTOR Move into a JSON Utility class
     public String toJSON() {
 
-        ObjectMapper objectMapper = FileComparisonUtilities.getObjectMapper();
+        ObjectMapper objectMapper = JSONUtilities.getObjectMapper();
 
         try {
             String jsonString = objectMapper.writeValueAsString(this);

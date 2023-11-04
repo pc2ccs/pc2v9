@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.imports.clics.FileComparison;
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * Unit tests.
@@ -30,7 +31,7 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 
     private IFileComparisonKey scoreComparisonKey = new FileComparisonUtilities.ScoreboardJSONKey();
 
-    private ObjectMapper objectMapper = FileComparisonUtilities.getObjectMapper();
+    private ObjectMapper objectMapper = JSONUtilities.getObjectMapper();
 
     public void testcreateTSVFileComparison() throws Exception {
 

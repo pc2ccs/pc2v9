@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
@@ -9,6 +10,7 @@ import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.FileUtilities;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAwardUtilities;
@@ -51,7 +53,7 @@ public class ExportFilesUtiltiites {
 
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Problem writing results file", e);
-            e.printStackTrace(); // TODO 760 how to report problem to user ?
+            Utilities.printStackTrace(System.out, e);
             throw ExecuteUtilities.rethrow(e);
         }
 
@@ -65,7 +67,7 @@ public class ExportFilesUtiltiites {
 
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Problem writing scorebord file", e);
-            e.printStackTrace(); // TODO 760 how to report problem to user ?
+            Utilities.printStackTrace(System.out, e);
             throw ExecuteUtilities.rethrow(e);
         }
 
@@ -79,7 +81,8 @@ public class ExportFilesUtiltiites {
 
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Problem writing awards file", e);
-            e.printStackTrace(); // TODO 760 how to report problem to user ?
+            Utilities.printStackTrace(System.out, e);
+
             throw ExecuteUtilities.rethrow(e);
         }
 
