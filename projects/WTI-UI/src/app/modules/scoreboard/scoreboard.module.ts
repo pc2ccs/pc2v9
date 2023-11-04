@@ -14,8 +14,7 @@ import { ScoreboardPageComponent } from './components/scoreboard-page/scoreboard
     ReactiveFormsModule,
     FormsModule
   ],
-  exports: [],
-  entryComponents: []
+  exports: []
 })
 export class ScoreboardModule {
 

@@ -19,11 +19,6 @@ import { TestRunDetailComponent } from './components/test-run-detail/test-run-de
     SharedModule,
     ReactiveFormsModule
   ],
-  exports: [],
-  entryComponents: [
-    NewRunComponent,
-    TestRunDetailComponent,
-    NewRunAlertComponent,
-  ]
+  exports: []
 })
 export class RunsModule { }

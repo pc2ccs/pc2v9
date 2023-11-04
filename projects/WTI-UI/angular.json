@@ -29,8 +29,7 @@
             "styles": [
               "src/styles/styles.scss"
             ],
-            "scripts": [],
-            "es5BrowserSupport": true
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -135,6 +134,5 @@
         }
       }
     }
-  },
-  "defaultProject": "WTI-UI"
+  }
 }
