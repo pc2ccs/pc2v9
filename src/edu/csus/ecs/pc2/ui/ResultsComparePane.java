@@ -323,7 +323,7 @@ public class ResultsComparePane extends JPanePlugin {
         
         if (! pc2ResultsDir.isDirectory()) {
             
-            int result = FrameUtilities.yesNoCancelDialog(this, "pc2 results directory does not exist, create it?", "Create results directory");
+            int result = FrameUtilities.yesNoCancelDialog(this, "pc2 results directory does not exist, create dir"+pc2ResultsDirectory+"?" , "Create results directory");
             if (result == JOptionPane.YES_OPTION) {
                 
                 ExecuteUtilities.ensureDirectory(pc2ResultsDirectory);

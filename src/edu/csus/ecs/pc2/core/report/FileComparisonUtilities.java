@@ -314,6 +314,9 @@ public class FileComparisonUtilities {
             Map<String, String> firstFileMap = new HashMap<String, String>();
 
             String[] lines = Utilities.loadFile(firstFilename);
+            
+            validateResultsTSVFileContents(firstFilename, lines);
+            
             for (String line : lines) {
 
                 if (!line.trim().startsWith("result")) {
@@ -323,6 +326,9 @@ public class FileComparisonUtilities {
             }
 
             String[] secondFilelines = Utilities.loadFile(secondFilename);
+            
+            validateResultsTSVFileContents(secondFilename, secondFilelines);
+            
             for (String secondLine : secondFilelines) {
 
                 String[] secondLineFields = secondLine.split(Constants.TAB);
@@ -390,7 +396,31 @@ public class FileComparisonUtilities {
         return fileComparison;
     }
 
-    
+
+    /**
+     * Validate results tsv file contents, if invalid throws exception 
+     * @param filename
+     * @param fileLines
+     */
+    public static void validateResultsTSVFileContents(String filename, String[] fileLines) {
+       
+        if (fileLines == null || fileLines.length == 0) {
+            throw new RuntimeException("Invalid results tsv file, no lines in file "+filename);
+        }
+        
+        int linenum = 1;
+        for (String line : fileLines) {
+            
+            if (! line.startsWith("results")) {
+                String[] fields = line.split(Constants.TAB);
+                
+                if (fields.length < 6) {
+                    throw new RuntimeException("Invalid results TSV line, too few fields "+fields.length+ " '"+line+"' in file "+filename);
+                }
+            }
+            linenum ++;
+        }
+    }
     public static String prettyPrint(Object JSONObject) throws JsonProcessingException {
         String json = getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(JSONObject);
         return json;

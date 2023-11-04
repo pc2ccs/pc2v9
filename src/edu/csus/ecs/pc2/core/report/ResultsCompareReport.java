@@ -218,61 +218,77 @@ public class ResultsCompareReport implements IReport {
 
         String sourceDir = pc2ResultsDir;
         String targetDir = primaryCCSResultsDir;
+        
+        /**
+         * Throw exceptions if source or target dir are null or do not exist.
+         */
+        
         if (targetDir == null) {
             throw new RuntimeException("Primary CCS directory is not assigned (is null)");
         }
 
+        if (sourceDir == null) {
+            throw new RuntimeException("PC2 directory is not assigned (is null)");
+        }
+        
+        
+        if (!Utilities.isDirThere(targetDir)) {
+            throw new RuntimeException("Primary CCS results dir: "+primaryCCSResultsDir+" does not exist");
+        }
+        
+        if (!Utilities.isDirThere(sourceDir)) {
+            throw new RuntimeException("PC2 results dir: "+sourceDir+" does not exist");
+        }
+
         List<String> outList = new ArrayList<String>();
 
-        if (new File(targetDir).isDirectory()) {
 
-            ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
-            AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
-            ScoreboardJSONKey scoreboardKey = new FileComparisonUtilities.ScoreboardJSONKey();
+        ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
+        AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
+        ScoreboardJSONKey scoreboardKey = new FileComparisonUtilities.ScoreboardJSONKey();
 
-            FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
-            FileComparison awardsFileCompare = FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
-            FileComparison scoreboardJsonCompare = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
+        FileComparison resultsCompare = FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
+        FileComparison awardsFileCompare = FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
+        FileComparison scoreboardJsonCompare = FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
 
-            long totalDifferences = //
-                    resultsCompare.getNumberDifferences() + //
-                    awardsFileCompare.getNumberDifferences() + //
-                    scoreboardJsonCompare.getNumberDifferences();
+        long totalDifferences = //
+                resultsCompare.getNumberDifferences() + //
+                awardsFileCompare.getNumberDifferences() + //
+                scoreboardJsonCompare.getNumberDifferences();
 
-            if (totalDifferences == 0) {
-                outList.add("Summary:   All PASS - no differences found");
-                outList.add("");
-                
-                outList.add(String.format("%3d", scoreboardJsonCompare.getNumberRows())+ " rows "+Constants.SCOREBOARD_JSON_FILENAME);
-                outList.add(String.format("%3d", awardsFileCompare.getNumberRows())+ " rows "+Constants.AWARDS_JSON_FILENAME);
-                outList.add(String.format("%3d", resultsCompare.getNumberRows())+ " rows "+ResultsFile.RESULTS_FILENAME);
-            } else {
-                outList.add("Summary:   FAIL - there are " + totalDifferences + "  differences found");
-                outList.add("");
+        if (totalDifferences == 0) {
+            outList.add("Summary:   All PASS - no differences found");
+            outList.add("");
 
-                outList.add(String.format("%3d", scoreboardJsonCompare.getNumberDifferences())+ " differences "+Constants.SCOREBOARD_JSON_FILENAME);
-                outList.add(String.format("%3d", awardsFileCompare.getNumberDifferences())+ " differences "+Constants.AWARDS_JSON_FILENAME);
-                outList.add(String.format("%3d", resultsCompare.getNumberDifferences())+ " differences "+ResultsFile.RESULTS_FILENAME);
-            }
+            outList.add(String.format("%3d", scoreboardJsonCompare.getNumberRows())+ " rows "+Constants.SCOREBOARD_JSON_FILENAME);
+            outList.add(String.format("%3d", awardsFileCompare.getNumberRows())+ " rows "+Constants.AWARDS_JSON_FILENAME);
+            outList.add(String.format("%3d", resultsCompare.getNumberRows())+ " rows "+ResultsFile.RESULTS_FILENAME);
+        } else {
+            outList.add("Summary:   FAIL - there are " + totalDifferences + "  differences found");
+            outList.add("");
+
+            outList.add(String.format("%3d", scoreboardJsonCompare.getNumberDifferences())+ " differences "+Constants.SCOREBOARD_JSON_FILENAME);
+            outList.add(String.format("%3d", awardsFileCompare.getNumberDifferences())+ " differences "+Constants.AWARDS_JSON_FILENAME);
+            outList.add(String.format("%3d", resultsCompare.getNumberDifferences())+ " differences "+ResultsFile.RESULTS_FILENAME);
+        }
 
 
-            String[] infoLines = { //
-                    "", //
-                    "Primary CCS results dir: " + getPrimaryCCSResultsDir(), //
-                    "PC2 results dir        : " + getPc2ResultsDir(), //
-                    "", //
-            };
-            outList.addAll(Arrays.asList(infoLines));
+        String[] infoLines = { //
+                "", //
+                "Primary CCS results dir: " + getPrimaryCCSResultsDir(), //
+                "PC2 results dir        : " + getPc2ResultsDir(), //
+                "", //
+        };
+        outList.addAll(Arrays.asList(infoLines));
 
-            if (fullDetails) {
+        if (fullDetails) {
 
-                List<String> lines = createFileComparisonReport(ResultsFile.RESULTS_FILENAME, resultsCompare);
-                outList.addAll(lines);
-                lines = createFileComparisonReport(Constants.AWARDS_JSON_FILENAME, awardsFileCompare);
-                outList.addAll(lines);
-                lines = createFileComparisonReport(Constants.SCOREBOARD_JSON_FILENAME, scoreboardJsonCompare);
-                outList.addAll(lines);
-            }
+            List<String> lines = createFileComparisonReport(ResultsFile.RESULTS_FILENAME, resultsCompare);
+            outList.addAll(lines);
+            lines = createFileComparisonReport(Constants.AWARDS_JSON_FILENAME, awardsFileCompare);
+            outList.addAll(lines);
+            lines = createFileComparisonReport(Constants.SCOREBOARD_JSON_FILENAME, scoreboardJsonCompare);
+            outList.addAll(lines);
         }
 
         return (String[]) outList.toArray(new String[outList.size()]);
