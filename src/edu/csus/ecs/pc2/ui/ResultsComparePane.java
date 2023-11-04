@@ -48,9 +48,9 @@ public class ResultsComparePane extends JPanePlugin {
 
     private static final String SHOW_COMPARISON_BUTTON_TITLE = "Show Comparison";
 
-    private static final String MISSING_TARGET_TITLE = "Missing from Parimary";
+    private static final String MISSING_TARGET_TITLE = "Missing from Primary";
 
-    private static final String MISSING_SOURCE_TITLE = "MIssing from PC2";
+    private static final String MISSING_SOURCE_TITLE = "Missing from PC2";
 
     private static final long serialVersionUID = -2726716271169661000L;
 
@@ -165,7 +165,7 @@ public class ResultsComparePane extends JPanePlugin {
         
         showDetailsCheckbox = new JCheckBox("Include details in comparison");
         resButtonPane.add(showDetailsCheckbox);
-        showDetailsCheckbox.setToolTipText("Show full detils in comparison");
+        showDetailsCheckbox.setToolTipText("Show full details in comparison");
         FlowLayout flowLayout_1 = (FlowLayout) southPane.getLayout();
         flowLayout_1.setHgap(45);
         
@@ -344,9 +344,9 @@ public class ResultsComparePane extends JPanePlugin {
             }
         }
         
-        String targetResulsTSFFile = pc2ResultsDirectory + File.separator + ResultsFile.RESULTS_FILENAME;
+        String targetResulsTSVFilename = pc2ResultsDirectory + File.separator + ResultsFile.RESULTS_FILENAME;
         
-        File resultsFile = new File(targetResulsTSFFile);
+        File resultsFile = new File(targetResulsTSVFilename);
         
         if (resultsFile.exists()) {
             int result = FrameUtilities.yesNoCancelDialog(this, "pc2 results files exist, overwrite pc2 results files?", "Overwrite pc2 results files");

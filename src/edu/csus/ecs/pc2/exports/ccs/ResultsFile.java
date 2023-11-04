@@ -94,7 +94,6 @@ public class ResultsFile {
      * @param contest
      * @param resultFileTitleFieldName override title anem {@value #DEFAULT_RESULT_FIELD_NAME}. 
      * @return
-     * @throws IllegalContestState
      */
     public String[] createTSVFileLines(IInternalContest contest, String resultFileTitleFieldName)  {
 

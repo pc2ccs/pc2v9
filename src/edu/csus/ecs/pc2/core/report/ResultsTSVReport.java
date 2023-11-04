@@ -6,9 +6,6 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
-/**
- * results.tsv report.
- */
 public class ResultsTSVReport extends AbstractReport {
 
     /**

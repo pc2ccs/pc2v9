@@ -38,10 +38,10 @@ public class FileComparisonUtilities {
     
     private static  ObjectMapper objectMapper = null;
 
-    public static FileComparison createScoreboardJSONFileComparison(String tsvFileName, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
+    public static FileComparison createScoreboardJSONFileComparison(String jsonFilename, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
 
-        String firstFilename = sourceDir + File.separator + tsvFileName;
-        String secondFilename = targetDir + File.separator + tsvFileName;
+        String firstFilename = sourceDir + File.separator + jsonFilename;
+        String secondFilename = targetDir + File.separator + jsonFilename;
         FileComparison fileComparison = new FileComparison(firstFilename, secondFilename);
 
         long numberRows = 0;
@@ -185,10 +185,10 @@ public class FileComparisonUtilities {
     }
 //   
 
-    public static FileComparison createAwardJSONFileComparison(String tsvFileName, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
+    public static FileComparison createAwardJSONFileComparison(String jsonFilename, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
 
-        String firstFilename = sourceDir + File.separator + tsvFileName;
-        String secondFilename = targetDir + File.separator + tsvFileName;
+        String firstFilename = sourceDir + File.separator + jsonFilename;
+        String secondFilename = targetDir + File.separator + jsonFilename;
         FileComparison fileComparison = new FileComparison(firstFilename, secondFilename);
 
         long numberRows = 0;
@@ -322,7 +322,7 @@ public class FileComparisonUtilities {
         String secondFilename = targetDir + File.separator + tsvFilename;
         FileComparison fileComparison = new FileComparison(firstFilename, secondFilename);
 
-        String[] columnList = { "CMS Id", "rank", "medal", "solved", "penalty", "last sovlved time" };
+        String[] columnList = { "CMS Id", "rank", "medal", "solved", "penalty", "last solved time" };
 
         long numberRows = 0;
 

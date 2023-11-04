@@ -23,12 +23,6 @@ import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
-/**
- * Export Results files report.
- * 
- * @author Douglas A. Lane <pc2@ecs.csus.edu>
- *
- */
 public class ResultsExportReport implements IReport {
     
     private IInternalContest contest;
