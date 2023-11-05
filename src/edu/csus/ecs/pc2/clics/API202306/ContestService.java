@@ -37,7 +37,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
  * WebService to handle "contests/" and "contests/<id>" REST endpoints as described by the CLICS wiki.
- * 
+ *
  * example get output:
  * {
  *  "id": "wf2014",
@@ -49,25 +49,25 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
  *  "scoreboard_type": "pass-fail",
  *  "penalty_time": 20
  * }
- * 
+ *
  * example patch request (to set contest start time):
  * {
  *  "id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45",
  *  "start_time":"2014-06-25T10:00:00+01"
  * }
- * 
+ *
  * or, to pause the countdown:
  * {
  *  "id":"wf2016",
  *  "start_time":null
  * }
- * 
+ *
  * or, to change thaw time:
  * {
  *  "id": "wf2014",
  *  "scoreboard_thaw_time": "2014-06-25T19:30:00+01"
  * }
- * 
+ *
  * @author pc2@ecs.csus.edu
  *
  */
@@ -78,21 +78,21 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 public class ContestService implements Feature {
 
     private static final String LOG_PREFIX = "Contest Service " + ResourceConfig202306.CLICS_API_VERSION + ": PATCH for ";
-    
+
     private static final String CONTEST_ID_KEY = "id";
     private static final String CONTEST_START_TIME_KEY = "start_time";
     private static final String CONTEST_COUNTDOWN_PAUSE_TIME_KEY = "countdown_pause_time";
     private static final String CONTEST_THAW_TIME = "scoreboard_thaw_time";
-            
+
     private static final long MIN_MS_TO_START_OF_CONTEST = 30 * 1000;
-    
+
     private IInternalContest model;
 
     private IInternalController controller;
 
     /**
      * List of the possible types of requests which might be received from clients.
-     * 
+     *
      * @author john
      */
     private enum StartTimeRequestType {
@@ -108,9 +108,9 @@ public class ContestService implements Feature {
     /**
      * This method resets the current contest scheduled start time according to the received (input) string, which it expects to be in JSON format as described in the CLICS Wiki "StartTime" interface
      * specification.
-     * 
+     *
      * @return a {@link Response} object indicating the status of the setStarttime request as follows (from the CLI Wiki Contest_Start_Interface spec):
-     * 
+     *
      *         <pre>
      *         // PUT HTTP body is application/json:
      *         // { &quot;starttime&quot;:1265335138.26 }
@@ -125,7 +125,7 @@ public class ContestService implements Feature {
      * // 403: if setting to new (defined) start time with less than 30s left to previous start time.
      * // 403: if the new start time is less than 30s from now.
      *         </pre>
-     *         
+     *
      * @param servletRequest
      * @param sc
      * @param contestId
@@ -140,7 +140,7 @@ public class ContestService implements Feature {
 
         // shorthand since we use this a bit
         String contestsEndpoint = "/contests/" + contestId + " PATCH request";
-        
+
         controller.getLog().log(Log.DEBUG, LOG_PREFIX + contestId + " received the following request body: " + jsonInputString);
 
         // check for empty request
@@ -166,7 +166,7 @@ public class ContestService implements Feature {
             // return HTTP 400 response code per CLICS spec
             return Response.status(Status.BAD_REQUEST).entity("Missing '" + CONTEST_ID_KEY + "' key in " + contestsEndpoint).build();
         }
-        
+
         // validate id
         // TODO can the contestIdentifier be null?  Yes, but it may be something else too.  The CDS gives 'null',
         // and it is unclear what other CCS's that we are shadowing for may provide.  It is almost
@@ -176,32 +176,32 @@ public class ContestService implements Feature {
         // enough for now.
         String jsonIdShorthand = LOG_PREFIX + contestId + ": JSON '" + CONTEST_ID_KEY + "' key ";
         String idAsk = requestMap.get(CONTEST_ID_KEY);
-        
+
         if(idAsk == null) {
-            controller.getLog().log(Log.WARNING, jsonIdShorthand + "is <null> - we are accepting this non-compliant client's request");               
+            controller.getLog().log(Log.WARNING, jsonIdShorthand + "is <null> - we are accepting this non-compliant client's request");
         } else if(idAsk == "null") {
             // We have seen a CDS supply the actual string "null", so we will make believe it is null and accept it.
-            controller.getLog().log(Log.WARNING, jsonIdShorthand + "is the word 'null' - we are accepting this non-compliant client's request");                               
+            controller.getLog().log(Log.WARNING, jsonIdShorthand + "is the word 'null' - we are accepting this non-compliant client's request");
         } else if(idAsk.equals(contestId) == false) {
-            controller.getLog().log(Log.WARNING, jsonIdShorthand + "'" + idAsk + "' does not match the URL contestId '" + contestId + "'");                                               
+            controller.getLog().log(Log.WARNING, jsonIdShorthand + "'" + idAsk + "' does not match the URL contestId '" + contestId + "'");
             // return HTTP 409 response - client is confused and sending conflicting contest id's
             return Response.status(Status.CONFLICT).entity("Invalid '" + CONTEST_ID_KEY + "' key in " + contestsEndpoint + " (non-complaint client)").build();
         } else if (!model.getContestIdentifier().equals(idAsk)) {
-            controller.getLog().log(Log.WARNING, jsonIdShorthand + "'" + idAsk + "' does not match the PC2 contest ID '" + model.getContestIdentifier() + "'");                
+            controller.getLog().log(Log.WARNING, jsonIdShorthand + "'" + idAsk + "' does not match the PC2 contest ID '" + model.getContestIdentifier() + "'");
             // return HTTP 409 - client is confused and/or non-compliant
             return Response.status(Status.CONFLICT).entity("Invalid '" + CONTEST_ID_KEY + "' key in " + contestsEndpoint + " (non-complaint client)").build();
         }
 
         // get the Object corresponding to "start_time"
-        String startTimeValueString = null;      
+        String startTimeValueString = null;
         // get the countdown_pause_time key, if there
         String countdownPauseTime = null;
         // Flag to indicate that countdown pause time was specified
         boolean sawCountdownPauseTime = false;
-        
+
         // if we get here then the JSON parsed correctly; see if it contained "start_time" as a key (that is required by spec)
         if (!requestMap.containsKey(CONTEST_START_TIME_KEY)) {
-            
+
             // check if thaw time is present
             if(!requestMap.containsKey(CONTEST_THAW_TIME)) {
                 // no, neither one is included.  This is an error.
@@ -211,10 +211,10 @@ public class ContestService implements Feature {
             }
             return(HandleContestThawTime(sc, contestId, requestMap.get(CONTEST_THAW_TIME)));
         }
-        
+
         // its either a contest start time adjustment or a countdown pause adjustment
         startTimeValueString = requestMap.get(CONTEST_START_TIME_KEY);
-            
+
         if(requestMap.containsKey(CONTEST_COUNTDOWN_PAUSE_TIME_KEY)) {
             sawCountdownPauseTime = true;
             countdownPauseTime = requestMap.get(CONTEST_COUNTDOWN_PAUSE_TIME_KEY);
@@ -232,10 +232,10 @@ public class ContestService implements Feature {
         }
         return(HandleContestStartTime(sc, contestId, startTimeValueString, sawCountdownPauseTime));
     }
-    
+
     /**
      * Process contest start time
-     * 
+     *
      * @param sc
      * @param contestId which contest
      * @param startTimeValueString new contest start time (ISO format) or null to make it undefined
@@ -243,11 +243,11 @@ public class ContestService implements Feature {
      * @return web response
      */
     private Response HandleContestStartTime(SecurityContext sc, String contestId, String startTimeValueString, boolean sawCountdownPauseTime) {
-        
+
         StartTimeRequestType requestType = StartTimeRequestType.ILLEGAL;
         GregorianCalendar requestedStartTime = null;
         String logString = LOG_PREFIX + contestId + ": received '" + CONTEST_START_TIME_KEY + "': ";
-        
+
         // check authorization (verify requester is allowed to make this request)
         if (!isContestStartAllowed(sc)) {
             controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request");
@@ -301,7 +301,7 @@ public class ContestService implements Feature {
         boolean success = false;
 
         String minSecsToStart = "" + MIN_MS_TO_START_OF_CONTEST/1000 + " seconds";
-        
+
         switch (requestType) {
 
             case SET_START_TO_UNDEFINED:
@@ -318,12 +318,12 @@ public class ContestService implements Feature {
                 } else {
 
                     // ok to set scheduled start to "undefined"
-                    controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setStarttime(): setting contest start time to \"null\".");
-                    success = setScheduledStart(null, sawCountdownPauseTime);
+                    controller.getLog().log(Log.INFO, "ContestService.setStarttime(): setting contest start time to \"null\".");
+                    success = setScheduledStart(null);
                     if (success) {
                         return Response.ok().entity("Contest start time updated to \"null\" (no scheduled start)").build();
                     } else {
-                        controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": setStarttime(): error setting contest start time to \"undefined\".");
+                        controller.getLog().log(Log.SEVERE, "ContestService.setStarttime(): error setting contest start time to \"undefined\".");
                         return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to set start time correctly").build();
                     }
                 }
@@ -360,27 +360,27 @@ public class ContestService implements Feature {
                 }
 
                 // break;
-                
+
             default:
                 // shouldn't be able to get here!
                 controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": setStarttime(): unknown default condition: request type = " + requestType);
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unknown condition in server: request type = " + requestType).build();
-        }        
+        }
     }
-    
+
     /**
      * Process Contest count down pause
-     * 
+     *
      * @param sc User information
      * @param contestId which contest
-     * @param countdownPauseTime how long before contest start should the count down pause (CLICS RELTIME value) 
+     * @param countdownPauseTime how long before contest start should the count down pause (CLICS RELTIME value)
      * @return web resposne
      */
     private Response HandleContestCountdownPauseTime(SecurityContext sc, String contestId, String countdownPauseTime) {
-        
+
         controller.getLog().log(Log.DEBUG, LOG_PREFIX + contestId + ": received '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "': " + countdownPauseTime);
-        
-        
+
+
         // check authorization (verify requester is allowed to make this request)
         if (!isContestStartAllowed(sc)) {
             controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request");
@@ -399,24 +399,24 @@ public class ContestService implements Feature {
         }
         return Response.status(Status.BAD_REQUEST).entity("Bad value for count down pause time request").build();
     }
-    
+
     /**
      * Process contest thaw time and generate response
-     * 
+     *
      * @param sc User information
      * @param contestId which contest
      * @param thawTimeValue ISO date of when the contest should unfreeze
      * @return web response
      */
     private Response HandleContestThawTime(SecurityContext sc, String contestId, String thawTimeValue) {
-        
+
         // check authorization (verify requester is allowed to make this request)
         if (!isContestThawAllowed(sc)) {
             controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request");
             // return HTTP 401 response code per CLICS spec
             return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
         }
-        
+
         // thaw time present, validate now
         GregorianCalendar thawTime = getDate(contestId, thawTimeValue);
         if (thawTime != null) {
@@ -426,12 +426,12 @@ public class ContestService implements Feature {
             return Response.status(Status.NOT_MODIFIED).entity("Unable to set contest thaw time to " + thawTime.toString()).build();
         }
         return Response.status(Status.BAD_REQUEST).entity("Bad value for contest thaw time request").build();
-        
+
     }
-    
+
     /**
      * Parses the given String and returns a {@link GregorianCalendar} object if the String represents a valid Unix Epoch date; otherwise returns null.
-     * 
+     *
      * @param contestId contest identifier
      * @param startTimeValueString
      *            a String containing a date in ISO 8601 format.
@@ -461,10 +461,10 @@ public class ContestService implements Feature {
     /**
      * This method updates the Scheduled Start Date for the contest, including causing the scheduling of a "start contest" task for the specified date (which is assumed to be a valid date in the
      * future).
-     * 
+     *
      * This is accomplished by telling the controller to update the {@link ContestInformation} with the scheduled start date. The controller then sends a packet to the server to do that; the server in
      * turn creates a task to start the contest at the specified date/time.
-     * 
+     *
      * @param theDate
      *            the date/time to which the automatic start of the contest should be set, or null if the start date/time should be set to "undefined"
      * @param unPauseCountdown tell pc2 that the countdown pause (if in effect) should be cancelled, and countdown should resume, if there's a valid start time
@@ -493,7 +493,7 @@ public class ContestService implements Feature {
 
     /**
      * Converts the input string, assumed to be a JSON string, into a {@link Map<String,String>} of JSON key-value pairs.
-     * 
+     *
      * @param contestId contest identifier
      * @param jsonRequestString
      *            a JSON string specifying a starttime request in CLICS format
@@ -524,7 +524,7 @@ public class ContestService implements Feature {
 
     /**
      * This method returns a representation of the current contest scheduled start time in JSON format as described on the CLICS wiki.
-     * 
+     *
      * @return a {@link Response} object containing a JSON String giving the scheduled contest start time as a Unix Epoch value, or as the string "undefined" if no start time is currently scheduled.
      */
     @GET
@@ -543,14 +543,14 @@ public class ContestService implements Feature {
 
     /**
      * Returns a response with the information for the specified contestId
-     * 
+     *
      * contestId contest for which information is requested
      */
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("{contestId}/")
     public Response getContest(@PathParam("contestId") String contestId) {
-        
+
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == true) {
             try {
@@ -561,13 +561,13 @@ public class ContestService implements Feature {
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for contest info " + e.getMessage()).build();
             }
         }
-        
+
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     /**
      * Check the user has a role than change contest start time
-     * 
+     *
      * @param sc Security context for the user
      * @return true if the user can perform the operation
      */
@@ -577,24 +577,24 @@ public class ContestService implements Feature {
 
     /**
      * Check the user has a role than change contest thaw time
-     * 
+     *
      * @param sc Security context for the user
      * @return true if the user can perform the operation
      */
     public static boolean isContestThawAllowed(SecurityContext sc) {
         return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
     }
-    
+
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
-     * 
+     *
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
     public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
         return(new CLICSEndpoint("contest", JSONUtilities.getJsonProperties(CLICSContestInfo.class)));
     }
-    
+
     @Override
     public boolean configure(FeatureContext arg0) {
         // TODO Auto-generated method stub

@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * WebService to handle "state" REST endpoint as described by the CLICS wiki.
- * 
+ *
  * @author pc2@ecs.csus.edu
  *
  */
@@ -42,7 +42,7 @@ public class StateService implements Feature {
 
     /**
      * This method returns a representation of the current contest state in JSON format as described on the CLICS wiki.
-     * 
+     *
      * @param sc user information
      * @param contestId The contest
      * @return a {@link Response} object containing a JSON String giving the scheduled contest start time as a Unix Epoch value, or as the string "undefined" if no start time is currently scheduled.
@@ -53,14 +53,14 @@ public class StateService implements Feature {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();        
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
         return Response.ok(new CLICSContestState(model).toJSON(), MediaType.APPLICATION_JSON).build();
     }
-    
+
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
-     * 
+     *
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
