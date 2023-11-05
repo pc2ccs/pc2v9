@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.ArrayList;
+
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -11,11 +12,12 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -44,9 +46,9 @@ public class GroupService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest groups in JSON format. 
+     * This method returns a representation of the current contest groups in JSON format.
      * The response is a JSON array with one group description per array element, complying with 2023-06
-     * 
+     *
      * @param contestId The contest id
      * @return a {@link Response} object containing the groups in JSON form
      */
@@ -56,11 +58,11 @@ public class GroupService implements Feature {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();        
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         ArrayList<CLICSGroup> glist = new ArrayList<CLICSGroup>();
-               
+
         for(Group group: model.getGroups()) {
             if (group.isDisplayOnScoreboard()) {
                 glist.add(new CLICSGroup(group));
@@ -74,12 +76,12 @@ public class GroupService implements Feature {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for groups " + e.getMessage()).build();
         }
     }
-    
+
 
     /**
-     * Returns a representation of the specified groupid in the specified contestid. 
+     * Returns a representation of the specified groupid in the specified contestid.
      * The response is a JSON object describing the group, complying with 2023-06
-     * 
+     *
      * @param contestId The contest
      * @param groupId The desired group in the contest
      * @return a {@link Response} object containing the groups in JSON form
@@ -99,10 +101,10 @@ public class GroupService implements Feature {
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
-    
+
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
-     * 
+     *
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */

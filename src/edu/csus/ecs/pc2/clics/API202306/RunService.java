@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.ArrayList;
+
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -12,11 +13,12 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -27,7 +29,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
  * WebService to handle runs
- * 
+ *
  * @author John Buck
  *
  */
@@ -57,16 +59,16 @@ public class RunService implements Feature {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRuns(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
-        
+
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();        
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-        
+
         long freezeTime = Utilities.getFreezeTime(model);
-        
+
         ArrayList<CLICSTestCase> tclist = new ArrayList<CLICSTestCase>();
-        
+
         for (Run run: model.getRuns()) {
             // If not admin or judge, can not see runs after freeze time
             if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
@@ -92,7 +94,7 @@ public class RunService implements Feature {
 
     /**
      * Returns a representation of the specified test case in the specified contest in JSON format. The returned value is compliant with 2023-06 API.
-     * 
+     *
      * @param sc User's info
      * @param contestId The contest
      * @param runId The run of interest
@@ -106,7 +108,7 @@ public class RunService implements Feature {
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == true) {
             long freezeTime = Utilities.getFreezeTime(model);
-    
+
             for (Run run: model.getRuns()) {
                 // If not admin or judge, can not see runs after freeze time
                 if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
@@ -126,10 +128,10 @@ public class RunService implements Feature {
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
-    
+
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
-     * 
+     *
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */

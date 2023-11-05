@@ -9,7 +9,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * CLICS Version Info.
- * 
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  * @author John Buck
  *
@@ -24,10 +24,10 @@ public class CLICSVerionInfo {
 
     @JsonProperty
     private CLICSProvider provider;
- 
+
     /**
      * Fill in the API version information properties
-     * 
+     *
      * @param versionInfo
      */
     public CLICSVerionInfo(VersionInfo versionInfo) {
