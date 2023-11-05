@@ -200,8 +200,12 @@ public class WebServer implements UIPlugin {
             }
 
             String apiVer = wsProperties.getStringProperty(WebServerPropertyUtils.CLICS_API_VERSION, DEFAULT_CLICS_API_VERSION);
-            String apiPackage = wsProperties.getStringProperty(WebServerPropertyUtils.CLICS_API_PACKAGE, DEFAULT_CLICS_API_PACKAGE_PREFIX);
-            String apiClass = apiPackage + "." + "API" + apiVer + ".ResourceConfig" + apiVer;
+            String apiPackage = wsProperties.getStringProperty(WebServerPropertyUtils.CLICS_API_PACKAGE, null);
+            if(apiPackage == null) {
+                apiPackage = DEFAULT_CLICS_API_PACKAGE_PREFIX + "." + "API" + apiVer;
+            }
+            // eg, edu.csus.ecs.pc2.clics.API202306.ResourceConfig202306, or, some user specified package.ResourceConfig202306
+            String apiClass = apiPackage + ".ResourceConfig" + apiVer;
             
             apiResource = getAPIClass(apiClass);
             
