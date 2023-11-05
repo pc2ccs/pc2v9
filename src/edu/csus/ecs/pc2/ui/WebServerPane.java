@@ -32,6 +32,9 @@ import edu.csus.ecs.pc2.core.util.CommaSeparatedValueParser;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 import edu.csus.ecs.pc2.services.eventFeed.WebServerPropertyUtils;
 import edu.csus.ecs.pc2.services.web.EventFeedStreamer;
+import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.util.CommaSeparatedValueParser;
 
 /**
  * This class provides a GUI for configuring the embedded Jetty webserver. It allows specifying the port on which Jetty will listen and the REST service endpoints to which Jetty will respond. (Note
@@ -51,6 +54,10 @@ public class WebServerPane extends JPanePlugin {
     public static final int DEFAULT_WEB_SERVER_PORT_NUMBER = WebServer.DEFAULT_WEB_SERVER_PORT_NUMBER;
 
     private static final String NL = System.getProperty("line.separator");
+    
+    private static final String CLICS_VERSIONS_KEY = "clics.apiVersionsSupported";
+    
+    private static final String [] DEF_CLICS_API_VERSIONS = { "2023-06", "2020-03" };
 
     private static final String CLICS_VERSIONS_KEY = "clics.apiVersionsSupported";
 
