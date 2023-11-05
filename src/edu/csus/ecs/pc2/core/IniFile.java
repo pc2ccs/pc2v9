@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
@@ -165,6 +165,7 @@ public class IniFile {
 
     /**
      * Return value for specified key.
+     * (This method is currently not used)
      * 
      * @see #getValue(String)
      * @param sectionName
@@ -172,7 +173,7 @@ public class IniFile {
      */
 
     public static String getValue(String sectionName, String keyName) {
-        String key = sectionName + ":" + keyName;
+        String key = sectionName + "." + keyName;
         return getValue(key);
     }
 
