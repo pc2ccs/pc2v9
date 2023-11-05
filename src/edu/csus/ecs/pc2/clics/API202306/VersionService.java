@@ -17,7 +17,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Web Service to handle "version" REST endpoint as described by the CLICS wiki.
- * 
+ *
  * @author pc2@ecs.csus.edu
  *
  */
@@ -43,7 +43,7 @@ public class VersionService implements Feature {
 
     /**
      * This method returns a representation of the current contest version in JSON format as described on the CLICS wiki.
-     * 
+     *
      * @return a {@link Response} object containing a JSON String with API version information
      */
     @GET
