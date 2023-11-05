@@ -505,4 +505,23 @@ public final class StringUtilities implements Serializable {
         else
             return aLength - bLength;
     }
+
+    /**
+     * Remove all occurrences of a char in a string
+     *
+     *  @param s the string to operate on
+     *  @param c all occurrences of this character will be removed from
+     *  @returns s without any character c's
+     */
+    public static String removeAllOccurrences(String s, char c) {
+        StringBuilder sWork = new StringBuilder(s);
+        int i, nLen = sWork.length();
+
+        for(i = nLen-1; i >= 0; i--) {
+            if(sWork.charAt(i) == c) {
+                sWork.deleteCharAt(i);
+            }
+        }
+        return(sWork.toString());
+    }
 }

@@ -29,6 +29,9 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 import edu.csus.ecs.pc2.services.eventFeed.WebServerPropertyUtils;
 import edu.csus.ecs.pc2.services.web.EventFeedStreamer;
+import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.util.CommaSeparatedValueParser;
 
 /**
  * This class provides a GUI for configuring the embedded Jetty webserver. It allows specifying the port on which Jetty will listen and the REST service endpoints to which Jetty will respond. (Note
@@ -48,6 +51,10 @@ public class WebServerPane extends JPanePlugin {
     public static final int DEFAULT_WEB_SERVER_PORT_NUMBER = WebServer.DEFAULT_WEB_SERVER_PORT_NUMBER;
 
     private static final String NL = System.getProperty("line.separator");
+    
+    private static final String CLICS_VERSIONS_KEY = "clics.apiVersionsSupported";
+    
+    private static final String [] DEF_CLICS_API_VERSIONS = { "2023-06", "2020-03" };
 
     private JPanel buttonPanel = null;
 
@@ -163,6 +170,10 @@ public class WebServerPane extends JPanePlugin {
         properties.put(WebServerPropertyUtils.CLICS_CONTEST_API_SERVICES_ENABLED_KEY, Boolean.toString(getChckbxClicsContestApi().isSelected()));
         properties.put(WebServerPropertyUtils.STARTTIME_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxStarttime().isSelected()));
         properties.put(WebServerPropertyUtils.FETCH_RUN_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxFetchRuns().isSelected()));
+        String apiVer = getComboBxClicsAPIVersion().getSelectedItem().toString();
+        //convert human readable api version, eg 2023-06 to 202306 since this is how we look up the package and class.
+        apiVer = StringUtilities.removeAllOccurrences(apiVer, '-');
+        properties.put(WebServerPropertyUtils.CLICS_API_VERSION,  apiVer);
 
         getWebServer().startWebServer(getContest(), getController(), properties);
 
@@ -402,11 +413,17 @@ public class WebServerPane extends JPanePlugin {
     
     private JComboBox<String> getComboBxClicsAPIVersion() {
         if(combobxClicsAPIVersion == null) {
-            String[] choices = { "2023-06", "2020-03" };
+            String [] choices;
+            // try to get supported API versions from INI file
+            try {
+                choices = CommaSeparatedValueParser.parseLine(IniFile.getValue(CLICS_VERSIONS_KEY));
+            } catch (Exception e) {
+                // use somewhat known defaults
+                choices = DEF_CLICS_API_VERSIONS;
+            }
 
             combobxClicsAPIVersion = new JComboBox<String>(choices);
             combobxClicsAPIVersion.setEditable(true);
-//            combobxClicsAPIVersion.setPreferredSize(new Dimension(40, 26));
         }
         return(combobxClicsAPIVersion);
     }
