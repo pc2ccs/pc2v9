@@ -205,7 +205,7 @@ public class ResultsComparePane extends JPanePlugin {
             return;
         }
 
-        if (showErrorMessage("Primary CCS directory does not exist, pick an existing results directory", !directoryExists(primaryCCSDirectory))) {
+        if (showErrorMessage("Primary CCS directory does not exist, pick an existing results directory", !FileUtilities.isDirectory(primaryCCSDirectory))) {
             return;
         }
 
@@ -213,7 +213,7 @@ public class ResultsComparePane extends JPanePlugin {
             return;
         }
         
-        if (showErrorMessage("Missing pc2 directory - use Export Results to create results files", !directoryExists(pc2ResultsDirectory))) {
+        if (showErrorMessage("Missing pc2 directory - use Export Results to create results files", !FileUtilities.isDirectory(pc2ResultsDirectory))) {
             return;
         }
 
@@ -390,7 +390,7 @@ public class ResultsComparePane extends JPanePlugin {
             return;
         }
 
-        if (showErrorMessage("Primary CCS directory does not exist, pick an existing results directory", !directoryExists(primaryCCSDirectory))) {
+        if (showErrorMessage("Primary CCS directory does not exist, pick an existing results directory", !FileUtilities.isDirectory(primaryCCSDirectory))) {
             return;
         }
 
@@ -398,7 +398,7 @@ public class ResultsComparePane extends JPanePlugin {
             return;
         }
         
-        if (showErrorMessage("Missing pc2 directory - use Export Results to create results files", !directoryExists(pc2ResultsDirectory))) {
+        if (showErrorMessage("Missing pc2 directory - use Export Results to create results files", !FileUtilities.isDirectory(pc2ResultsDirectory))) {
             return;
         }
 
@@ -414,14 +414,7 @@ public class ResultsComparePane extends JPanePlugin {
     }
 
 
-    private boolean directoryExists(String dirname) {
-        // TODO REFACTOR move this to a utility class
-        if (StringUtilities.isEmpty(dirname)){
-            return false;
-        }
-        
-        return new File(dirname).isDirectory();
-    }
+
 
     /**
      * Show message if showMessage is true.

@@ -394,7 +394,20 @@ public class FileUtilities {
         }
         chooser = null;
         return file;
-    }    
+    }
+    
+    /**
+     * Is dirname an existing directory?
+     * @param dirname
+     * @return true if dirname is an existing directory
+     */
+    public static boolean isDirectory(String dirname) {
+        if (StringUtilities.isEmpty(dirname)){
+            return false;
+        }
+        
+        return new File(dirname).isDirectory();
+    }
 
     
 }
