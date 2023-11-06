@@ -5630,7 +5630,7 @@ public class EditProblemPane extends JPanePlugin {
 
     private JRadioButton getUseInteractiveRadioButton() {
         if (rdbtnUseInteractive == null) {
-            rdbtnUseInteractive = new JRadioButton("Uses CLICS Interactive Problem Interface");
+            rdbtnUseInteractive = new JRadioButton("Use CLICS Interactive Problem Interface");
             rdbtnUseInteractive.setSelected(false);
             rdbtnUseInteractive.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
