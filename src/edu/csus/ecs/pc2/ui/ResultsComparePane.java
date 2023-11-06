@@ -226,8 +226,9 @@ public class ResultsComparePane extends JPanePlugin {
             }
 
         } catch (Exception e) {
-            getLog().log(Level.WARNING, "Exception trying export and compare results" + e.getMessage(), e);
-            showMessage(this, "Problem comparing results", "Error writing or comparing results " + e.getMessage());
+            StaticLog.getLog().log(Level.WARNING, "Exception compare results" + e.getMessage(), e);
+            FrameUtilities.showExceptionMessage(this, "Problem comparing results", "Error reading or comparing results " + e.getMessage(), e);
+
         }
         
     }
@@ -277,8 +278,8 @@ public class ResultsComparePane extends JPanePlugin {
         try {
             updateClientSettings(key, value);
         } catch (Exception e) {
-            Utilities.printStackTrace(System.out, e);
             StaticLog.getLog().log(Level.WARNING, "Problem updating settings ", e);
+            FrameUtilities.showExceptionMessage(this, "Problem updating settings", "Problem updating settings.", e);
         }
     }
     
@@ -294,8 +295,8 @@ public class ResultsComparePane extends JPanePlugin {
             textField.setToolTipText(newFile.getAbsolutePath());
 
         } catch (Exception e) {
-            getLog().log(Level.WARNING, "Exception trying to select or update primary CCS dir" + e.getMessage(), e);
-            showMessage(this, "Problem with primary results dir", "Problem selecting or updating primary CCS results dir " + e.getMessage());
+            StaticLog.getLog().log(Level.WARNING, "Exception trying to select or update primary CCS dir" + e.getMessage(), e);
+            FrameUtilities.showExceptionMessage(this, "Problem selecting primary CCS results dir", "Problem selecting or updating primary CCS results dir ", e);
         }
 
     }
@@ -309,8 +310,9 @@ public class ResultsComparePane extends JPanePlugin {
             updateUserSetting(ClientSettings.PC2_RESULTS_DIR, newFile.getCanonicalFile().toString());
 
         } catch (Exception e) {
-            getLog().log(Level.WARNING, "Exception trying to select or pc2 results dir" + e.getMessage(), e);
-            showMessage(this, "Problem with primary results dir", "Problem selecting or updating pc2 results dir " + e.getMessage());
+            StaticLog.getLog().log(Level.WARNING, "Exception trying to select or pc2 results dir" + e.getMessage(), e);
+            FrameUtilities.showExceptionMessage(this, "Problem selecting pc2 results dir", "Problem selecting or updating pc2 results dir ", e);
+
         }
 
     }
@@ -370,9 +372,9 @@ public class ResultsComparePane extends JPanePlugin {
              return true;
              
         } catch (Exception e) {
-            // TODO REFACTOR present error message and stacktrace to user with to be written standard error dialog
-            getController().getLog().log(Level.WARNING,"Unable to create export files to "+pc2ResultsDirectory+" "+e.getMessage(), e);
-            showErrorMessage("Unable to create export files to "+pc2ResultsDirectory+" "+e.getMessage(), true);
+            StaticLog.getLog().log(Level.WARNING,"Unable to create export files to "+pc2ResultsDirectory+" "+e.getMessage(), e);
+            FrameUtilities.showExceptionMessage(this, "Unable to write files", "Unable to create export files to dir " + Constants.NL + pc2ResultsDirectory, e);
+
         }
         
         return false;
@@ -405,8 +407,9 @@ public class ResultsComparePane extends JPanePlugin {
             ResultsCompareReport report = new ResultsCompareReport(getContest(), getController(), primaryCCSDirectory, pc2ResultsDirectory, showDetailsCheckbox.isSelected(), MISSING_SOURCE_TITLE, MISSING_TARGET_TITLE);
             Utilities.viewReport(report, report.getPluginTitle(), getContest(), getController(), true);
         } catch (Exception e) {
-            getLog().log(Level.WARNING, "Exception trying export and compare results" + e.getMessage(), e);
-            showMessage(this, "Problem comparing results", "Error writing or comparing results " + e.getMessage());
+            StaticLog.getLog().log(Level.WARNING, "Exception trying export and compare results" + e.getMessage(), e);
+            FrameUtilities.showExceptionMessage(this, "Problem comparing results", "Error reading or comparing results " + e.getMessage(), e);
+
         }
     }
 
@@ -432,7 +435,7 @@ public class ResultsComparePane extends JPanePlugin {
      */
     private boolean showErrorMessage(String message, boolean showMessage) {
         if (showMessage) {
-            showMessage(this, "Correct error, then try again", message);
+            FrameUtilities.showMessage(this, "Correct error, then try again", message);
         }
         return showMessage;
     }

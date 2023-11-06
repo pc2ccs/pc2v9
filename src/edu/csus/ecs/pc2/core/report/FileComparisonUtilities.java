@@ -15,7 +15,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
@@ -36,8 +35,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
  */
 public class FileComparisonUtilities {
     
-    private static  ObjectMapper objectMapper = null;
-
+    
     public static FileComparison createScoreboardJSONFileComparison(String jsonFilename, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
 
         String firstFilename = sourceDir + File.separator + jsonFilename;
@@ -73,30 +71,30 @@ public class FileComparisonUtilities {
 
             for (int rowNum = 0; rowNum < minLines; rowNum++) {
                 TeamScoreRow firstRow = firstTeamScoreRows.get(rowNum);
-                TeamScoreRow teamScoreRow = firstTeamScoreRows.get(rowNum);
+                TeamScoreRow secondScoreRow = secondTeamScoreRows.get(rowNum);
 
                 String fieldName = "rank";
                 String valueOne = Integer.toString(firstRow.getRank());
-                String valueTwo = Integer.toString(teamScoreRow.getRank());
+                String valueTwo = Integer.toString(secondScoreRow.getRank());
                 FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                 // TODO 760 Do we need to compare problems??   firstRowfirstRow.getProblems() ?
                 fieldName = "num solved";
                 valueOne = Long.toString(firstRow.getScore().getNum_solved());
-                valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
+                valueTwo = Long.toString(secondScoreRow.getScore().getNum_solved());
                 fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                 fieldName = "total_time";
                 valueOne = Long.toString(firstRow.getScore().getTotal_time());
-                valueTwo = Long.toString(teamScoreRow.getScore().getTotal_time());
+                valueTwo = Long.toString(secondScoreRow.getScore().getTotal_time());
                 fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                 fieldName = "team_id";
                 valueOne = Long.toString(firstRow.getTeam_id());
-                valueTwo = Long.toString(teamScoreRow.getTeam_id());
+                valueTwo = Long.toString(secondScoreRow.getTeam_id());
                 fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
@@ -201,7 +199,7 @@ public class FileComparisonUtilities {
                     firstAwardRows = loadAwardRows(fileComparison.getFirstFilename());
                 }
             } catch (JsonMappingException e) {
-                Exception rte = new RuntimeException("Error reading/parsing file " + firstFilename, e);
+                Exception rte = new RuntimeException("Error reading/parsing JSON file " + Constants.NL + firstFilename, e);
                 ExecuteUtilities.rethrow(rte);
             }
 
@@ -211,12 +209,12 @@ public class FileComparisonUtilities {
                     secondAwardRows = FileComparisonUtilities.loadAwardRows(fileComparison.getSecondFilename());
                 }
             } catch (JsonMappingException e) {
-                Exception rte = new RuntimeException("Error reading/parsing file " + secondFilename, e);
+                Exception rte = new RuntimeException("Error reading/parsing JSON file " + Constants.NL + secondFilename, e);
                 ExecuteUtilities.rethrow(rte);
             }
             
             /**
-             * Map first awards cisation to awards class
+             * Map first awards citation to awards class
              */
             Map<String, CLICSAward> firstFileMap = new HashMap<String, CLICSAward>();
             for (CLICSAward clicsAwardOne : firstAwardRows) {
@@ -425,7 +423,7 @@ public class FileComparisonUtilities {
     public static void validateResultsTSVFileContents(String filename, String[] fileLines) {
        
         if (fileLines == null || fileLines.length == 0) {
-            throw new RuntimeException("Invalid results tsv file, no lines in file "+filename);
+            throw new RuntimeException("Invalid results tsv file. "+Constants.NL+"No lines in file "+filename);
         }
         
         int linenum = 1;
@@ -435,7 +433,8 @@ public class FileComparisonUtilities {
                 String[] fields = line.split(Constants.TAB);
                 
                 if (fields.length < 6) {
-                    throw new RuntimeException("Invalid results TSV line, too few fields "+fields.length+ " '"+line+"' in file "+filename);
+                    throw new RuntimeException("Invalid results TSV line, too few fields "+fields.length+Constants.NL+ //
+                            " line: '"+line+"'"+Constants.NL+" in file "+filename);
                 }
             }
             linenum ++;
