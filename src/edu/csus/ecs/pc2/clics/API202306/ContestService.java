@@ -12,6 +12,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Feature;
@@ -32,20 +33,45 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * WebService to handle "contest" REST endpoint as described by the CLICS wiki.
+ * WebService to handle "contests/" and "contests/<id>" REST endpoints as described by the CLICS wiki.
  * 
- * example get output: {"id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45", "name":"2014 ICPC World Finals", "formal_name":"38th Annual World Finals of the ACM International Collegiate Programming Contest",
- * "start_time":"2014-06-25T10:00:00+01","duration":"5:00:00","scoreboard_freeze_duration":"1:00:00","penalty_time":20, "state":{"running":true,"frozen":false,"final":false} } example patch request
- * data: {"id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45","start_time":"2014-06-25T10:00:00+01"}
+ * example get output:
+ * {
+ *  "id": "wf2014",
+ *  "name": "2014 ICPC World Finals",
+ *  "formal_name": "38th Annual World Finals of the ACM International Collegiate Programming Contest",
+ *  "start_time": "2014-06-25T10:00:00+01",
+ *  "duration": "5:00:00",
+ *  "scoreboard_freeze_duration": "1:00:00",
+ *  "scoreboard_type": "pass-fail",
+ *  "penalty_time": 20
+ * }
  * 
- * or {"id":"wf2016","start_time":null}
+ * example patch request (to set contest start time):
+ * {
+ *  "id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45",
+ *  "start_time":"2014-06-25T10:00:00+01"
+ * }
+ * 
+ * or, to pause the countdown:
+ * {
+ *  "id":"wf2016",
+ *  "start_time":null
+ * }
+ * 
+ * or, to change thaw time:
+ * {
+ *  "id": "wf2014",
+ *  "scoreboard_thaw_time": "2014-06-25T19:30:00+01"
+ * }
  * 
  * @author pc2@ecs.csus.edu
  *
  */
-@Path("/contest")
+@Path("/contests")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
@@ -387,15 +413,35 @@ public class ContestService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getContest() {
+    public Response getContests() {
+        CLICSContestInfo [] allContests = new CLICSContestInfo[1];
+        allContests[0] = new CLICSContestInfo(model);
+        try {
+            ObjectMapper mapper = JSONUtilities.getObjectMapper();
+            String json = mapper.writeValueAsString(allContests);
+            return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for contest info " + e.getMessage()).build();
+        }
+    }
 
-        // from the CLI Wiki Contest_Start_Interface spec:
-        /*
-         * {"id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45","name":"2014 ICPC World Finals", "formal_name":"38th Annual World Finals of the ACM International Collegiate Programming Contest",
-         * "start_time":"2014-06-25T10:00:00+01","duration":"5:00:00","scoreboard_freeze_duration":"1:00:00","penalty_time":20, "state":{"running":true,"frozen":false,"final":false}}
-         */
-
-        return Response.ok(jsonTool.convertToJSON(model.getContestInformation()).toString(), MediaType.APPLICATION_JSON).build();
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("{contestId}/")
+    public Response getTeam(@PathParam("contestId") String contestId) {
+        
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == true) {
+            try {
+                ObjectMapper mapper = JSONUtilities.getObjectMapper();
+                String json = mapper.writeValueAsString(new CLICSContestInfo(model));
+                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+            } catch (Exception e) {
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for contest info " + e.getMessage()).build();
+            }
+        }
+        
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @Override
