@@ -186,8 +186,11 @@ public class ResultsComparePane extends JPanePlugin {
         compartResultsButton.setToolTipText("Compare pc2 results files to primary CCS results");
         exportResultsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                exportpc2ResultsFiles();
-
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        exportpc2ResultsFiles();
+                    }
+                });
             }
         });
  
