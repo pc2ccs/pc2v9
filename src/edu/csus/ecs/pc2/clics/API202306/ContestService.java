@@ -318,12 +318,12 @@ public class ContestService implements Feature {
                 } else {
 
                     // ok to set scheduled start to "undefined"
-                    controller.getLog().log(Log.INFO, "ContestService.setStarttime(): setting contest start time to \"null\".");
+                    controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setStarttime(): setting contest start time to \"null\".");
                     success = setScheduledStart(null);
                     if (success) {
                         return Response.ok().entity("Contest start time updated to \"null\" (no scheduled start)").build();
                     } else {
-                        controller.getLog().log(Log.SEVERE, "ContestService.setStarttime(): error setting contest start time to \"undefined\".");
+                        controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": setStarttime(): error setting contest start time to \"undefined\".");
                         return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to set start time correctly").build();
                     }
                 }
@@ -360,6 +360,12 @@ public class ContestService implements Feature {
                 }
 
                 // break;
+
+            case SET_COUNTDOWN_PAUSE_TIME:
+                // TODO: tell PC2 to stop countdown when clock is 'pauseTime' ms away from start
+                controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": countdown_pause_time not implemented");
+                return Response.status(Status.NOT_MODIFIED).entity("Unable to set countdown_pause_time to " + pauseTime + " ms").build();
+                //break;
 
             default:
                 // shouldn't be able to get here!
