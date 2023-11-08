@@ -169,32 +169,31 @@ public class ContestService implements Feature {
             controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": JSON input missing 'id' key: '" + jsonInputString + "'");
             // return HTTP 400 response code per CLICS spec
             return Response.status(Status.BAD_REQUEST).entity("Missing '" + CONTEST_ID_KEY + "' key in " + contestsEndpoint).build();
-
-        } else {
-            // validate id
-            // TODO can the contestIdentifier be null?  Yes, but it may be something else too.  The CDS gives 'null',
-            // and it is unclear what other CCS's that we are shadowing for may provide.  It is almost
-            // certainly NOT what PC2 set up as the identifier (Default-###############).  As such, until the
-            // API endpoints are fixed to include a (configurable) contest identifier, a reasonable thing to
-            // do at this point is not validate the id at all.  Just make sure one was specified (above).  That's
-            // enough for now.
-            String jsonIdShorthand = LOG_PREFIX + contestId + ": JSON '" + CONTEST_ID_KEY + "' key ";
-            String idAsk = requestMap.get(CONTEST_ID_KEY);
-            
-            if(idAsk == null) {
-                controller.getLog().log(Log.WARNING, jsonIdShorthand + "is <null> - we are accepting this non-compliant client's request");               
-            } else if(idAsk == "null") {
-                // We have seen a CDS supply the actual string "null", so we will make believe it is null and accept it.
-                controller.getLog().log(Log.WARNING, jsonIdShorthand + "is the word 'null' - we are accepting this non-compliant client's request");                               
-            } else if(idAsk.equals(contestId) == false) {
-                controller.getLog().log(Log.WARNING, jsonIdShorthand + "'" + idAsk + "' does not match the URL contestId '" + contestId + "'");                                               
-                // return HTTP 409 response - client is confused and sending conflicting contest id's
-                return Response.status(Status.CONFLICT).entity("Invalid '" + CONTEST_ID_KEY + "' key in " + contestsEndpoint + " (non-complaint client)").build();
-            } else if (!model.getContestIdentifier().equals(idAsk)) {
-                controller.getLog().log(Log.WARNING, jsonIdShorthand + "'" + idAsk + "' does not match the PC2 contest ID '" + model.getContestIdentifier() + "'");                
-                // return HTTP 409 - client is confused and/or non-compliant
-                return Response.status(Status.CONFLICT).entity("Invalid '" + CONTEST_ID_KEY + "' key in " + contestsEndpoint + " (non-complaint client)").build();
-            }
+        }
+        
+        // validate id
+        // TODO can the contestIdentifier be null?  Yes, but it may be something else too.  The CDS gives 'null',
+        // and it is unclear what other CCS's that we are shadowing for may provide.  It is almost
+        // certainly NOT what PC2 set up as the identifier (Default-###############).  As such, until the
+        // API endpoints are fixed to include a (configurable) contest identifier, a reasonable thing to
+        // do at this point is not validate the id at all.  Just make sure one was specified (above).  That's
+        // enough for now.
+        String jsonIdShorthand = LOG_PREFIX + contestId + ": JSON '" + CONTEST_ID_KEY + "' key ";
+        String idAsk = requestMap.get(CONTEST_ID_KEY);
+        
+        if(idAsk == null) {
+            controller.getLog().log(Log.WARNING, jsonIdShorthand + "is <null> - we are accepting this non-compliant client's request");               
+        } else if(idAsk == "null") {
+            // We have seen a CDS supply the actual string "null", so we will make believe it is null and accept it.
+            controller.getLog().log(Log.WARNING, jsonIdShorthand + "is the word 'null' - we are accepting this non-compliant client's request");                               
+        } else if(idAsk.equals(contestId) == false) {
+            controller.getLog().log(Log.WARNING, jsonIdShorthand + "'" + idAsk + "' does not match the URL contestId '" + contestId + "'");                                               
+            // return HTTP 409 response - client is confused and sending conflicting contest id's
+            return Response.status(Status.CONFLICT).entity("Invalid '" + CONTEST_ID_KEY + "' key in " + contestsEndpoint + " (non-complaint client)").build();
+        } else if (!model.getContestIdentifier().equals(idAsk)) {
+            controller.getLog().log(Log.WARNING, jsonIdShorthand + "'" + idAsk + "' does not match the PC2 contest ID '" + model.getContestIdentifier() + "'");                
+            // return HTTP 409 - client is confused and/or non-compliant
+            return Response.status(Status.CONFLICT).entity("Invalid '" + CONTEST_ID_KEY + "' key in " + contestsEndpoint + " (non-complaint client)").build();
         }
 
         // get the Object corresponding to "start_time"
