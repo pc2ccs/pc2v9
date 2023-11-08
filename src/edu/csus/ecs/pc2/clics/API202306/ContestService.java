@@ -201,6 +201,8 @@ public class ContestService implements Feature {
         String startTimeValueString = null;      
         // get the countdown_pause_time key, if there
         String countdownPauseTime = null;
+        // Flag to indicate that countdown pause time was specified
+        boolean sawCountdownPauseTime = false;
         
         // if we get here then the JSON parsed correctly; see if it contained "start_time" as a key (that is required by spec)
         if (!requestMap.containsKey(CONTEST_START_TIME_KEY)) {
@@ -219,6 +221,7 @@ public class ContestService implements Feature {
         startTimeValueString = requestMap.get(CONTEST_START_TIME_KEY);
             
         if(requestMap.containsKey(CONTEST_COUNTDOWN_PAUSE_TIME_KEY)) {
+            sawCountdownPauseTime = true;
             countdownPauseTime = requestMap.get(CONTEST_COUNTDOWN_PAUSE_TIME_KEY);
         }
 
@@ -232,7 +235,7 @@ public class ContestService implements Feature {
             }
             return(HandleContestCountdownPauseTime(contestId, countdownPauseTime));
         }
-        return(HandleContestStartTime(contestId, startTimeValueString));
+        return(HandleContestStartTime(contestId, startTimeValueString, sawCountdownPauseTime));
     }
     
     /**
@@ -242,7 +245,7 @@ public class ContestService implements Feature {
      * @param startTimeValueString new contest start time (ISO format) or null to make it undefined
      * @return web response
      */
-    private Response HandleContestStartTime(String contestId, String startTimeValueString) {
+    private Response HandleContestStartTime(String contestId, String startTimeValueString, boolean sawCountdownPauseTime) {
         
         StartTimeRequestType requestType = StartTimeRequestType.ILLEGAL;
         GregorianCalendar requestedStartTime = null;
@@ -314,7 +317,7 @@ public class ContestService implements Feature {
 
                     // ok to set scheduled start to "undefined"
                     controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setStarttime(): setting contest start time to \"null\".");
-                    success = setScheduledStart(null);
+                    success = setScheduledStart(null, sawCountdownPauseTime);
                     if (success) {
                         return Response.ok().entity("Contest start time updated to \"null\" (no scheduled start)").build();
                     } else {
@@ -346,7 +349,7 @@ public class ContestService implements Feature {
 
                 // ok to set scheduled start to a specific time
                 controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setStarttime(): setting contest start time to " + requestedStartTime);
-                success = setScheduledStart(requestedStartTime);
+                success = setScheduledStart(requestedStartTime, sawCountdownPauseTime);
                 if (success) {
                     return Response.ok().entity("/contests/" + contestId).build();
                 } else {
@@ -444,9 +447,10 @@ public class ContestService implements Feature {
      * 
      * @param theDate
      *            the date/time to which the automatic start of the contest should be set, or null if the start date/time should be set to "undefined"
+     * @param unPauseCountdown tell pc2 that the countdown pause (if in effect) should be cancelled, and countdown should resume, if there's a valid start time
      * @return true if the method was successful in setting the scheduled start time; false otherwise
      */
-    private boolean setScheduledStart(GregorianCalendar theDate) {
+    private boolean setScheduledStart(GregorianCalendar theDate, boolean unPauseCountdown) {
 
         // get the local model's ContestInformation
         ContestInformation ci = model.getContestInformation();
@@ -457,6 +461,7 @@ public class ContestService implements Feature {
                 // if we have a valid start date, set the contest to auto-start
                 ci.setAutoStartContest(true);
             }
+            // TODO unpause countdown - this will be a flag in "ci"
             // tell the Controller to update the ContestInformation
             controller.updateContestInformation(ci);
             return true;
