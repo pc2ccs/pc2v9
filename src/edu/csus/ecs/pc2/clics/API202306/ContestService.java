@@ -82,6 +82,7 @@ public class ContestService implements Feature {
     private static final String CONTEST_ID_KEY = "id";
     private static final String CONTEST_START_TIME_KEY = "start_time";
     private static final String CONTEST_COUNTDOWN_PAUSE_TIME_KEY = "countdown_pause_time";
+    private static final String CONTEST_THAW_TIME = "scoreboard_thaw_time";
             
     private static final long MIN_MS_TO_START_OF_CONTEST = 30 * 1000;
     
@@ -97,7 +98,7 @@ public class ContestService implements Feature {
      * @author john
      */
     private enum StartTimeRequestType {
-        ILLEGAL, SET_START_TO_UNDEFINED, SET_START_TO_SPECIFIED_DATE, SET_COUNTDOWN_PAUSE_TIME
+        ILLEGAL, SET_START_TO_UNDEFINED, SET_START_TO_SPECIFIED_DATE, SET_COUNTDOWN_PAUSE_TIME, SET_CONTEST_THAW_TIME
     };
 
     public ContestService(IInternalContest inModel, IInternalController inController) {
@@ -130,8 +131,9 @@ public class ContestService implements Feature {
      */
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     @Path("{contestId}/")
-    public Response setStartime(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
+    public Response setContestTimes(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
 
         // shorthand since we use this a bit
         String contestsEndpoint = "/contests/" + contestId + " PATCH request";
@@ -194,59 +196,65 @@ public class ContestService implements Feature {
                 return Response.status(Status.CONFLICT).entity("Invalid '" + CONTEST_ID_KEY + "' key in " + contestsEndpoint + " (non-complaint client)").build();
             }
         }
-        // if we get here then the JSON parsed correctly; see if it contained "start_time" as a key (that is required by spec)
-        if (!requestMap.containsKey(CONTEST_START_TIME_KEY)) {
-            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": JSON input missing '" + CONTEST_START_TIME_KEY + "' key: '" + jsonInputString + "'");
-            // return HTTP 400 response code
-            return Response.status(Status.BAD_REQUEST).entity("Missing '" + CONTEST_START_TIME_KEY + "' key in " + contestsEndpoint).build();
-        }
 
         // get the Object corresponding to "start_time"
-        String startTimeValueString = requestMap.get(CONTEST_START_TIME_KEY);
-        
+        String startTimeValueString = null;      
         // get the countdown_pause_time key, if there
         String countdownPauseTime = null;
+        
+        // if we get here then the JSON parsed correctly; see if it contained "start_time" as a key (that is required by spec)
+        if (!requestMap.containsKey(CONTEST_START_TIME_KEY)) {
+            
+            // check if thaw time is present
+            if(!requestMap.containsKey(CONTEST_THAW_TIME)) {
+                // no, neither one is included.  This is an error.
+                controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": JSON input missing '" + CONTEST_START_TIME_KEY + "' key or '" + CONTEST_THAW_TIME + "' key: '" + jsonInputString + "'");
+                // return HTTP 400 response code
+                return Response.status(Status.BAD_REQUEST).entity("Missing '" + CONTEST_START_TIME_KEY + "' key or '" + CONTEST_THAW_TIME + "' key in " + contestsEndpoint).build();
+            }
+            return(HandleContestThawTime(contestId, requestMap.get(CONTEST_THAW_TIME)));
+        }
+        
+        // its either a contest start time adjustment or a countdown pause adjustment
+        startTimeValueString = requestMap.get(CONTEST_START_TIME_KEY);
+            
         if(requestMap.containsKey(CONTEST_COUNTDOWN_PAUSE_TIME_KEY)) {
             countdownPauseTime = requestMap.get(CONTEST_COUNTDOWN_PAUSE_TIME_KEY);
         }
-        if(startTimeValueString != null && countdownPauseTime != null) {
-            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": only one of '" + CONTEST_START_TIME_KEY + "' key or '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "' may be specified");
-            // return HTTP 400 response
-            return Response.status(Status.BAD_REQUEST).entity("Only one of '" + CONTEST_START_TIME_KEY + "' key or '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "' may be specified for " + contestsEndpoint).build();
-        }
-        String logString = LOG_PREFIX + contestId + ": received '" + CONTEST_START_TIME_KEY + "': ";
-        
-        if(startTimeValueString == null) {
-            logString += "<null>";
-        } else {
-            logString += startTimeValueString;
-        }
-        logString += " and '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "': ";
-        if(countdownPauseTime == null) {
-            logString += "<null>";
-        } else {
-            logString += countdownPauseTime;
-        }
-        controller.getLog().log(Log.DEBUG, logString);
 
+        // check for count down pause time
+        if(countdownPauseTime != null) {
+            // can't have both a start time and count down pause time
+            if(startTimeValueString != null) {
+                controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": only one of '" + CONTEST_START_TIME_KEY + "' key or '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "' may be specified");
+                // return HTTP 400 response
+                return Response.status(Status.BAD_REQUEST).entity("Only one of '" + CONTEST_START_TIME_KEY + "' key or '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "' may be specified for " + contestsEndpoint).build();
+            }
+            return(HandleContestCountdownPauseTime(contestId, countdownPauseTime));
+        }
+        return(HandleContestStartTime(contestId, startTimeValueString));
+    }
+    
+    /**
+     * Process contest start time
+     * 
+     * @param contestId which contest
+     * @param startTimeValueString new contest start time (ISO format) or null to make it undefined
+     * @return web response
+     */
+    private Response HandleContestStartTime(String contestId, String startTimeValueString) {
+        
         StartTimeRequestType requestType = StartTimeRequestType.ILLEGAL;
         GregorianCalendar requestedStartTime = null;
-        long pauseTime = 0;
+        long pauseTime = 0;     
+        String logString = LOG_PREFIX + contestId + ": received '" + CONTEST_START_TIME_KEY + "': ";
         
         // check if we have a start_time string (really? check for "null"?)
         if (startTimeValueString == null || startTimeValueString.trim().equalsIgnoreCase("null")) {
-            if(countdownPauseTime != null) {
-                pauseTime = Utilities.convertCLICSContestTimeToMS(countdownPauseTime);
-                // MIN_VALUE is returned on format error
-                if(pauseTime != Long.MIN_VALUE) {
-                    // want to stop the countdown with this many milliseconds left
-                    requestType = StartTimeRequestType.SET_COUNTDOWN_PAUSE_TIME;
-                }
-                // else { leave requestType set to ILLEGAL in the event of a bad pause time }
-            } else {
-                requestType = StartTimeRequestType.SET_START_TO_UNDEFINED;
-            }
+            requestType = StartTimeRequestType.SET_START_TO_UNDEFINED;
+            logString += "<null>";
         } else {
+            logString += startTimeValueString;
 
             // parse the starttime value for a valid date
             requestedStartTime = getDate(contestId, startTimeValueString);
@@ -257,12 +265,12 @@ public class ContestService implements Feature {
             // // do nothing -- leaving requestType set to "ILLEGAL"
             }
         }
+        controller.getLog().log(Log.DEBUG, logString + " Request Type: " + requestType.toString());
 
         if (requestType == StartTimeRequestType.ILLEGAL) {
 
             // we can get here if the value was not "null" but also didn't parse to a valid date
             controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": JSON input contains invalid starttime value: '" + startTimeValueString + "'");
-            System.err.println("Contest Service PATCH: JSON input contains invalid starttime value: '" + startTimeValueString + "'");
             // return HTTP 400 response code per CLICS spec
             return Response.status(Status.BAD_REQUEST).entity("Bad value in starttime request").build();
 
@@ -340,28 +348,64 @@ public class ContestService implements Feature {
                 controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setStarttime(): setting contest start time to " + requestedStartTime);
                 success = setScheduledStart(requestedStartTime);
                 if (success) {
-                    return Response.ok().entity(contestsEndpoint).build();
+                    return Response.ok().entity("/contests/" + contestId).build();
                 } else {
                     controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": setStarttime(): error setting contest start time to requested date.");
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to set start time correctly").build();
                 }
 
                 // break;
-
-            case SET_COUNTDOWN_PAUSE_TIME:
-                // TODO: tell PC2 to stop countdown when clock is 'pauseTime' ms away from start
-                controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": countdown_pause_time not implemented");
-                return Response.status(Status.NOT_MODIFIED).entity("Unable to set countdown_pause_time to " + pauseTime + " ms").build();
-                //break;
                 
             default:
                 // shouldn't be able to get here!
                 controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": setStarttime(): unknown default condition: request type = " + requestType);
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unknown condition in server: request type = " + requestType).build();
-        }
-
+        }        
     }
+    
+    /**
+     * Process Contest count down pause
+     * 
+     * @param contestId which contest
+     * @param countdownPauseTime how long before contest start should the count down pause (CLICS RELTIME value) 
+     * @return web resposne
+     */
+    private Response HandleContestCountdownPauseTime(String contestId, String countdownPauseTime) {
+        
+        controller.getLog().log(Log.DEBUG, LOG_PREFIX + contestId + ": received '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "': " + countdownPauseTime);
+        
+        long pauseTime = Utilities.convertCLICSContestTimeToMS(countdownPauseTime);
 
+        // MIN_VALUE is returned on format error
+        if(pauseTime != Long.MIN_VALUE) {
+            // want to stop the countdown with this many milliseconds left
+            // TODO: tell PC2 to stop countdown when clock is 'pauseTime' ms away from start
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": countdown_pause_time not implemented");
+            return Response.status(Status.NOT_MODIFIED).entity("Unable to set countdown_pause_time to " + pauseTime + " ms").build();
+        }
+        return Response.status(Status.BAD_REQUEST).entity("Bad value for count down pause time request").build();
+    }
+    
+    /**
+     * Process contest thaw time and generate response
+     * 
+     * @param contestId which contest
+     * @param thawTimeValue ISO date of when the contest should unfreeze
+     * @return web response
+     */
+    private Response HandleContestThawTime(String contestId, String thawTimeValue) {
+        // thaw time present, validate now
+        GregorianCalendar thawTime = getDate(contestId, thawTimeValue);
+        if (thawTime != null) {
+            // Set thaw time to this time.
+            // TODO: tell PC2 to thaw the contest at the given time.
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": setting of contest thaw time is not implemented");
+            return Response.status(Status.NOT_MODIFIED).entity("Unable to set contest thaw time to " + thawTime.toString()).build();
+        }
+        return Response.status(Status.BAD_REQUEST).entity("Bad value for contest thaw time request").build();
+        
+    }
+    
     /**
      * Parses the given String and returns a {@link GregorianCalendar} object if the String represents a valid Unix Epoch date; otherwise returns null.
      * 
