@@ -443,7 +443,7 @@ public class JSONTool {
      *            - elapsed ms when submission submitted
      * @return wall time for run.
      */
-    private Calendar calculateElapsedWalltime(IInternalContest contest, long elapsedMS) {
+    public static Calendar calculateElapsedWalltime(IInternalContest contest, long elapsedMS) {
 
         ContestTime time = contest.getContestTime();
         if (time.getElapsedMins() > 0) {
