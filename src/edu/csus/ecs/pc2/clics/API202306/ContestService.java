@@ -254,7 +254,7 @@ public class ContestService implements Feature {
             }
             return(HandleContestCountdownPauseTime(contestId, countdownPauseTime));
         }
-        return(HandleContestStartTime(contestId, startTimeValueString));
+        return(HandleContestStartTime(contestId, startTimeValueString, sawCountdownPauseTime));
     }
 
     /**
@@ -341,7 +341,7 @@ public class ContestService implements Feature {
 
                     // ok to set scheduled start to "undefined"
                     controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setStarttime(): setting contest start time to \"null\".");
-                    success = setScheduledStart(null);
+                    success = setScheduledStart(null, sawCountdownPauseTime);
                     if (success) {
                         return Response.ok().entity("Contest start time updated to \"null\" (no scheduled start)").build();
                     } else {
