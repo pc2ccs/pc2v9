@@ -244,6 +244,28 @@ public class ContestService implements Feature {
      */
     private Response HandleContestStartTime(SecurityContext sc, String contestId, String startTimeValueString, boolean sawCountdownPauseTime) {
 
+        // check for count down pause time
+        if(countdownPauseTime != null) {
+            // can't have both a start time and count down pause time
+            if(startTimeValueString != null) {
+                controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": only one of '" + CONTEST_START_TIME_KEY + "' key or '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "' may be specified");
+                // return HTTP 400 response
+                return Response.status(Status.BAD_REQUEST).entity("Only one of '" + CONTEST_START_TIME_KEY + "' key or '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "' may be specified for " + contestsEndpoint).build();
+            }
+            return(HandleContestCountdownPauseTime(contestId, countdownPauseTime));
+        }
+        return(HandleContestStartTime(contestId, startTimeValueString));
+    }
+
+    /**
+     * Process contest start time
+     *
+     * @param contestId which contest
+     * @param startTimeValueString new contest start time (ISO format) or null to make it undefined
+     * @return web response
+     */
+    private Response HandleContestStartTime(String contestId, String startTimeValueString) {
+
         StartTimeRequestType requestType = StartTimeRequestType.ILLEGAL;
         GregorianCalendar requestedStartTime = null;
         String logString = LOG_PREFIX + contestId + ": received '" + CONTEST_START_TIME_KEY + "': ";
@@ -423,6 +445,49 @@ public class ContestService implements Feature {
             return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
         }
 
+        // thaw time present, validate now
+        GregorianCalendar thawTime = getDate(contestId, thawTimeValue);
+        if (thawTime != null) {
+            // Set thaw time to this time.
+            // TODO: tell PC2 to thaw the contest at the given time.
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": setting of contest thaw time is not implemented");
+            return Response.status(Status.NOT_MODIFIED).entity("Unable to set contest thaw time to " + thawTime.toString()).build();
+        }
+        return Response.status(Status.BAD_REQUEST).entity("Bad value for contest thaw time request").build();
+
+    }
+
+    /**
+     * Process Contest count down pause
+     *
+     * @param contestId which contest
+     * @param countdownPauseTime how long before contest start should the count down pause (CLICS RELTIME value)
+     * @return web resposne
+     */
+    private Response HandleContestCountdownPauseTime(String contestId, String countdownPauseTime) {
+
+        controller.getLog().log(Log.DEBUG, LOG_PREFIX + contestId + ": received '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "': " + countdownPauseTime);
+
+        long pauseTime = Utilities.convertCLICSContestTimeToMS(countdownPauseTime);
+
+        // MIN_VALUE is returned on format error
+        if(pauseTime != Long.MIN_VALUE) {
+            // want to stop the countdown with this many milliseconds left
+            // TODO: tell PC2 to stop countdown when clock is 'pauseTime' ms away from start
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": countdown_pause_time not implemented");
+            return Response.status(Status.NOT_MODIFIED).entity("Unable to set countdown_pause_time to " + pauseTime + " ms").build();
+        }
+        return Response.status(Status.BAD_REQUEST).entity("Bad value for count down pause time request").build();
+    }
+
+    /**
+     * Process contest thaw time and generate response
+     *
+     * @param contestId which contest
+     * @param thawTimeValue ISO date of when the contest should unfreeze
+     * @return web response
+     */
+    private Response HandleContestThawTime(String contestId, String thawTimeValue) {
         // thaw time present, validate now
         GregorianCalendar thawTime = getDate(contestId, thawTimeValue);
         if (thawTime != null) {
