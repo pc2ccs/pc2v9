@@ -32,7 +32,6 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
@@ -90,8 +89,6 @@ public class ContestService implements Feature {
 
     private IInternalController controller;
 
-    private JSONTool jsonTool;
-
     /**
      * List of the possible types of requests which might be received from clients.
      * 
@@ -105,7 +102,6 @@ public class ContestService implements Feature {
         super();
         this.model = inModel;
         this.controller = inController;
-        jsonTool = new JSONTool(model, controller);
     }
 
     /**
@@ -248,7 +244,6 @@ public class ContestService implements Feature {
         
         StartTimeRequestType requestType = StartTimeRequestType.ILLEGAL;
         GregorianCalendar requestedStartTime = null;
-        long pauseTime = 0;     
         String logString = LOG_PREFIX + contestId + ": received '" + CONTEST_START_TIME_KEY + "': ";
         
         // check if we have a start_time string (really? check for "null"?)

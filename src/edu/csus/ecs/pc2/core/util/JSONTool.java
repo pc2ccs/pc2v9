@@ -136,7 +136,7 @@ public class JSONTool {
         return element;
     }
 
-    public String getGroupId(Group group) {
+    public static String getGroupId(Group group) {
         String id = group.getElementId().toString();
         if (group.getGroupId() != -1) {
             id = Integer.toString(group.getGroupId());
@@ -341,7 +341,7 @@ public class JSONTool {
      * @param value
      * @return
      */
-    private boolean notEmpty(String value) {
+    public static boolean notEmpty(String value) {
         if (value != null && !value.equals("")) {
             return true;
         }
@@ -364,7 +364,7 @@ public class JSONTool {
         return element;
     }
 
-    public String getOrganizationId(Account account) {
+    public static String getOrganizationId(Account account) {
         String id = account.getInstitutionCode();
         if (id.startsWith("INST-U-")) {
             id = id.substring(7);
