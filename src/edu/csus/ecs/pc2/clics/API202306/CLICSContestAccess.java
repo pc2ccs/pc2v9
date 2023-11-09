@@ -17,7 +17,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * CLICS Contest State
- * 
+ *
  * @author John Buck
  *
  */
@@ -36,7 +36,7 @@ public class CLICSContestAccess {
     public static final String API_CAPABILITY_AWARDS_UPDATE = "awards_update";
 
     public static final String ENDPOINT_ACCESS_METHOD = "getEndpointProperties";
-    
+
     @JsonProperty
     private String [] capabilities;
 
@@ -44,10 +44,10 @@ public class CLICSContestAccess {
     private CLICSEndpoint [] endpoints;
 
     IInternalController controller = null;
-       
+
     /**
      * Fill in properties for contest state as per 2023-06 spec
-     * 
+     *
      * @param sc security info for user making request
      * @param model
      * @param controller
@@ -55,10 +55,10 @@ public class CLICSContestAccess {
      */
     public CLICSContestAccess(SecurityContext sc, IInternalContest model, IInternalController controller, String contestId) {
         this.controller = controller;
-        
+
         // For each role the connected user has, we enumerate what they can do with each endpoint.
         ArrayList<String> cap = new ArrayList<String>();
-        
+
         if(ContestService.isContestStartAllowed(sc)) {
             cap.add(API_CAPABILITY_CONTEST_START);
         }
@@ -87,7 +87,7 @@ public class CLICSContestAccess {
             cap.add(API_CAPABILITY_AWARDS_UPDATE);
         }
         capabilities = cap.toArray(new String[0]);
-        
+
         /*
          * As per the spec, here are the possible endpoints.
          * These should match the class names in this package, eg. Contest -> ContestService, Run -> RunService, etc.
@@ -96,9 +96,9 @@ public class CLICSContestAccess {
                 "Team", "Person", "Account", "State", "Submission", "Judgement", "Run", "Clarification",
                 "Scoreboard", "EventFeed", "Award", "Commentary"
         };
-        
+
         ArrayList<CLICSEndpoint> epList = new ArrayList<CLICSEndpoint>();
-        
+
         for (String service: serviceNames) {
             if(!invokeServiceEndpointAccessMethod(epList, service, sc)) {
                 System.err.println("No endpoing access for service " + service);
@@ -116,7 +116,7 @@ public class CLICSContestAccess {
      * Then call its getEndpointProperties(SecurityContext) static method to see what properties the
      * service supports for the supplied SecurityContext (user).
      * Note: If Java reflection makes you queasy, please stop here and just skip reading the code in this method.
-     * 
+     *
      * @param epList List to add the CLICSEndpointObject to, if one was returned
      * @param serviceName The service name only (excluding the trailing "Service")
      * @param sc User's security context
@@ -139,7 +139,7 @@ public class CLICSContestAccess {
                         epList.add(ep);
                         return(true);
                     } else {
-                        controller.getLog().log(Log.WARNING, "CLICS Service class " + className + "." + ENDPOINT_ACCESS_METHOD + "(SecurityContext) does not return a CLICSEndpoint");                    
+                        controller.getLog().log(Log.WARNING, "CLICS Service class " + className + "." + ENDPOINT_ACCESS_METHOD + "(SecurityContext) does not return a CLICSEndpoint");
                     }
                 }
             } catch (Exception eMethod) {
