@@ -33,6 +33,11 @@ public class Account implements IElementObject {
     private ElementId elementId;
 
     private String password;
+    
+    /**
+     * Label (workstation number)
+     */
+    private String label;
 
     /**
      * Team name.
@@ -111,6 +116,8 @@ public class Account implements IElementObject {
         elementId.setSiteNumber(siteNumber);
         displayName = getDefaultDisplayName(clientId);
         externalId = Long.toString(AccountList.generateExternalId(this));
+        // TODO - use label from json config file
+        label = "" + clientId.getClientNumber();
     }
     
     public String getDefaultDisplayName(ClientId inClientId) {
@@ -228,6 +235,9 @@ public class Account implements IElementObject {
             if (!aliasName.equals(account.getAliasName())) {
                 return false;
             }
+            if (!label.equals(account.getLabel())) {
+                return false;
+            }
             if (!externalId.equals(account.getExternalId())) {
                 return false;
             }
@@ -304,6 +314,24 @@ public class Account implements IElementObject {
     public void setAliasName(String aliasName) {
         this.aliasName = aliasName;
     }
+
+    /**
+     * label, aka workstation number
+     * 
+     * @return label (workstation number)
+     */
+    public String getLabel() {
+        // check for deserialization of old contest
+        if(label == null) {
+            label = "" + clientId.getClientNumber();
+        }
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
 
     /**
      * External id, aka ICPC Reservation Id.
@@ -417,6 +445,7 @@ public class Account implements IElementObject {
         aliasName = account.aliasName;
         countryCode = account.countryCode;
         displayName = account.displayName;
+        label = account.label;
         externalId = account.externalId;
         externalName = account.externalName;
         if(account.getGroupIds() != null) {
