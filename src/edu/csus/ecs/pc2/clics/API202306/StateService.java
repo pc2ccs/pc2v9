@@ -16,7 +16,6 @@ import javax.ws.rs.ext.Provider;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
  * WebService to handle "state" REST endpoint as described by the CLICS wiki.
