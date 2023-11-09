@@ -115,12 +115,7 @@ public class ResultsCompareReport implements IReport {
         try {
             printHeader(printWriter);
 
-            try {
-                writeReport(printWriter);
-            } catch (Exception e) {
-                printWriter.println("Exception in report: " + e.getMessage());
-                e.printStackTrace(printWriter);
-            }
+            writeReport(printWriter);
 
             printFooter(printWriter);
 
