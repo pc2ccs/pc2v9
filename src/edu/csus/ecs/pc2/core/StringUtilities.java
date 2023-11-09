@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.Serializable;
@@ -387,6 +387,23 @@ public final class StringUtilities implements Serializable {
         return (s == null || s.length() == 0) ? null : (s.substring(0, s.length()-1));
     }
     
-
+    /**
+     * Remove all occurrences of a char in a string
+     * 
+     *  @param s the string to operate on
+     *  @param c all occurrences of this character will be removed from
+     *  @returns s without any character c's
+     */
+    public static String removeAllOccurrences(String s, char c) {
+        StringBuilder sWork = new StringBuilder(s);
+        int i, nLen = sWork.length();
+        
+        for(i = nLen-1; i >= 0; i--) {
+            if(sWork.charAt(i) == c) {
+                sWork.deleteCharAt(i);
+            }
+        }
+        return(sWork.toString());
+    }
     
 }

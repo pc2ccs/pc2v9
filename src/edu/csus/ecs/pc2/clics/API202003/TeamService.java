@@ -1,7 +1,5 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-package edu.csus.ecs.pc2.services.web;
-
-import java.util.Hashtable;
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+package edu.csus.ecs.pc2.clics.API202003;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -21,6 +19,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
@@ -29,11 +28,11 @@ import edu.csus.ecs.pc2.core.util.JSONTool;
  * @author ICPC
  *
  */
-@Path("/contest/organizations")
+@Path("/contest/teams")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
-public class OrganizationService implements Feature {
+public class TeamService implements Feature {
 
     private IInternalContest model;
 
@@ -41,7 +40,7 @@ public class OrganizationService implements Feature {
 
     private JSONTool jsonTool;
 
-    public OrganizationService(IInternalContest inContest, IInternalController inController) {
+    public TeamService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
         this.controller = inController;
@@ -55,24 +54,18 @@ public class OrganizationService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getOrganizations() {
+    public Response getTeams() {
 
         // get the team accounts from the model
         Account[] accounts = model.getAccounts();
-        // keep track of which ones we have dumped
-        Hashtable<String, Account> organizations = new Hashtable<String, Account>();
 
         // get an object to map the groups descriptions into JSON form
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode childNode = mapper.createArrayNode();
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
-                String id = jsonTool.getOrganizationId(account);
-                if (!organizations.containsKey(id)) {
-                    organizations.put(id, account);
-                    childNode.add(jsonTool.convertOrganizationsToJSON(account));
-                }
+            if (account.getPermissionList().isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
+                childNode.add(jsonTool.convertToJSON(account));
             }
         }
         return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
@@ -80,15 +73,17 @@ public class OrganizationService implements Feature {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    @Path("{organizationId}/")
-    public Response getOrganization(@PathParam("organizationId") String organizationId) {
+    @Path("{teamId}/")
+    public Response getTeam(@PathParam("teamId") String teamId) {
         // get the team accounts from the model
         Account[] accounts = model.getAccounts();
 
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && jsonTool.getOrganizationId(account).equals(organizationId)) {
-                return Response.ok(jsonTool.convertOrganizationsToJSON(account).toString(), MediaType.APPLICATION_JSON).build();
+            // TODO multi-site with overlapping teamNumbers?
+            if (account.getPermissionList().isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && account.getClientId().getClientType().equals(ClientType.Type.TEAM)
+                    && new Integer(account.getClientId().getClientNumber()).toString().equals(teamId)) {
+                return Response.ok(jsonTool.convertToJSON(account).toString(), MediaType.APPLICATION_JSON).build();
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();

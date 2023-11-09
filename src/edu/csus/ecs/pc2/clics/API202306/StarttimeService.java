@@ -1,16 +1,14 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-package edu.csus.ecs.pc2.services.web;
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.GregorianCalendar;
 import java.util.Map;
 
 import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.PATCH;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -19,43 +17,35 @@ import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
+import javax.ws.rs.core.SecurityContext;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
- * WebService to handle "contest" REST endpoint as described by the CLICS wiki.
- * 
- * example get output: {"id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45", "name":"2014 ICPC World Finals", "formal_name":"38th Annual World Finals of the ACM International Collegiate Programming Contest",
- * "start_time":"2014-06-25T10:00:00+01","duration":"5:00:00","scoreboard_freeze_duration":"1:00:00","penalty_time":20, "state":{"running":true,"frozen":false,"final":false} } example patch request
- * data: {"id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45","start_time":"2014-06-25T10:00:00+01"}
- * 
- * or {"id":"wf2016","start_time":null}
+ * WebService to handle "starttime" REST endpoint as described by the CLICS wiki. Invoking REST endpoint "getStarttime()" returns the currently configured start time (or "undefined" if the contest has
+ * already been started or if there is no start time currently set). Invoking REST endpoint "setStarttime()" when the contest has not already been started sets the contest scheduled start time to
+ * either a specified future time or to "undefined". If setStarttime() is invoked after the contest has started the call is ignored (but an error is returned).
  * 
  * @author pc2@ecs.csus.edu
  *
  */
-@Path("/contest")
+@Path("/starttime")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
-public class ContestService implements Feature {
+public class StarttimeService implements Feature {
 
     private IInternalContest model;
 
     private IInternalController controller;
-
-    private JSONTool jsonTool;
 
     /**
      * List of the possible types of requests which might be received from clients.
@@ -66,11 +56,10 @@ public class ContestService implements Feature {
         ILLEGAL, SET_START_TO_UNDEFINED, SET_START_TO_SPECIFIED_DATE
     };
 
-    public ContestService(IInternalContest inModel, IInternalController inController) {
+    public StarttimeService(IInternalContest inModel, IInternalController inController) {
         super();
         this.model = inModel;
         this.controller = inController;
-        jsonTool = new JSONTool(model, controller);
     }
 
     /**
@@ -80,8 +69,8 @@ public class ContestService implements Feature {
      * @return a {@link Response} object indicating the status of the setStarttime request as follows (from the CLI Wiki Contest_Start_Interface spec):
      * 
      *         <pre>
-     *         // PUT HTTP body is application/json:
-     *         // { &quot;starttime&quot;:1265335138.26 }
+     * // PUT HTTP body is application/json:
+     * // { &quot;starttime&quot;:1265335138.26 }
      * // or:
      * // { &quot;starttime&quot;:&quot;undefined&quot; }
      * // HTTP response is:
@@ -89,31 +78,31 @@ public class ContestService implements Feature {
      * // 400: if the payload is invalid json, start time is invalid, etc.
      * // 401: if authentication failed.
      * // 403: if contest is already started
-     * // 403: if setting to 'null' with less than 30s left to previous start time.
+     * // 403: if setting to 'undefined' with less than 10s left to previous start time.
      * // 403: if setting to new (defined) start time with less than 30s left to previous start time.
      * // 403: if the new start time is less than 30s from now.
-     *         </pre>
+     * </pre>
      */
-    @PATCH
+    @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response setStartime(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, String jsonInputString) {
+    public Response setStartime(@Context SecurityContext sc, String jsonInputString) {
 
         // DEBUG:
-        // System.out.println ("Starttime PATCH: received the following request body: '" + jsonInputString + "'");
-        controller.getLog().log(Log.DEBUG, "Contest Service PATCH: received the following request body: " + jsonInputString);
+        // System.out.println ("Starttime PUT: received the following request body: '" + jsonInputString + "'");
+        controller.getLog().log(Log.DEBUG, "Starttime PUT Service: received the following request body: " + jsonInputString);
 
         // check authorization (verify requester is allowed to make this request)
         if (!sc.isUserInRole("admin")) {
-            controller.getLog().log(Log.WARNING, "Contest Service: unauthorized Contest PATCH request (user not in admin role)");
+            controller.getLog().log(Log.WARNING, "Starttime Service: unauthorized Starttime PUT request (user not in admin role)");
             // return HTTP 401 response code per CLICS spec
             return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
         }
 
         // check for empty request
         if (jsonInputString == null || jsonInputString.length() == 0) {
-            controller.getLog().log(Log.WARNING, "Contest Service: received invalid (empty) JSON string");
+            controller.getLog().log(Log.WARNING, "Starttime Service: received invalid (empty) JSON starttime string");
             // return HTTP 400 response code per CLICS spec
-            return Response.status(Status.BAD_REQUEST).entity("Empty contest request").build();
+            return Response.status(Status.BAD_REQUEST).entity("Empty starttime request").build();
         }
 
         // we got some potentially legal input; try parsing it for valid form
@@ -121,52 +110,40 @@ public class ContestService implements Feature {
 
         // if the map is null then the parsing failed
         if (requestMap == null) {
-            controller.getLog().log(Log.WARNING, "Contest Service PATCH: unable to parse JSON starttime string");
+            controller.getLog().log(Log.WARNING, "Starttime PUT Service: unable to parse JSON starttime string");
             // return HTTP 400 response code per CLICS spec
             return Response.status(Status.BAD_REQUEST).entity("Bad JSON starttime request").build();
         }
 
         // if we get here then the JSON parsed correctly; see if it contained "starttime" as a key
-        if (!requestMap.containsKey("id")) {
-            controller.getLog().log(Log.WARNING, "Contest Service PATCH: JSON input missing 'id' key: '" + jsonInputString + "'");
+        if (!requestMap.containsKey("starttime")) {
+            controller.getLog().log(Log.WARNING, "Starttime PUT Service: JSON input missing 'starttime' key: '" + jsonInputString + "'");
             // return HTTP 400 response code per CLICS spec
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'id' key in /contest request").build();
-
-//        } else {
-//            // validate id
-//            // TODO can the contestIdentifier be null?  Yes, but it may be something else too.  The CDS gives 'null',
-//            // and it is unclear what other CCS's that we are shadowing for may provide.  It is almost
-//            // certainly NOT what PC2 set up as the identifier (Default-###############).  As such, until the
-//            // API endpoints are fixed to include a (configurable) contest identifier, a reasonable thing to
-//            // do at this point is not validate the id at all.  Just make sure one was specified (above).  That's
-//            // enough for now.            
-//            if (!model.getContestIdentifier().equals(requestMap.get("id"))) {
-//                controller.getLog().log(Log.WARNING, "Starttime PATCH Service: JSON mismatched 'id' key: '" + requestMap.get("id") + "'");
-//                // return HTTP 400 response code per CLICS spec
-//                return Response.status(Status.CONFLICT).entity("Invalid 'id' key in /contest request").build();
-//            }
-        }
-        // if we get here then the JSON parsed correctly; see if it contained "start_time" as a key
-        if (!requestMap.containsKey("start_time")) {
-            controller.getLog().log(Log.WARNING, "Contest Service PATCH: JSON input missing 'start_time' key: '" + jsonInputString + "'");
-            // return HTTP 400 response code per CLICS spec
-            return Response.status(Status.BAD_REQUEST).entity("Missing 'starttime' key in /contest request").build();
+            return Response.status(Status.BAD_REQUEST).entity("Missing 'starttime' key in starttime request").build();
         }
 
-        // get the Object corresponding to "start_time"
-        String startTimeValueString = requestMap.get("start_time");
+        // verify the JSON didn't contain any OTHER key/value information
+        if (requestMap.size() != 1) {
+            controller.getLog().log(Log.WARNING, "Starttime PUT Service: JSON input contains illegal extra data: '" + jsonInputString + "'");
+            // return HTTP 400 response code per CLICS spec
+            return Response.status(Status.BAD_REQUEST).entity("Extra data in starttime request").build();
+        }
+
+        // if we get here the JSON is valid and contains exactly one element: starttime
+        // get the Object corresponding to "starttime"
+        String startTimeValueString = requestMap.get("starttime");
 
         // DEBUG:
         // System.out.println("StarttimePut.setStartTime(): received start time value '" + startTimeValueString + "'");
-        controller.getLog().log(Log.DEBUG, "Contest Service PATCH: received start time value '" + startTimeValueString + "'");
+        controller.getLog().log(Log.DEBUG, "Starttime PUT Service: received start time value '" + startTimeValueString + "'");
 
         StartTimeRequestType requestType = StartTimeRequestType.ILLEGAL;
         GregorianCalendar requestedStartTime = null;
 
-        // check if we have a start_time string
-        if (requestMap.containsKey("start_time")) {
+        // check if we have a viable starttime string
+        if (startTimeValueString != null && startTimeValueString.length() > 0) {
 
-            if (startTimeValueString == null || startTimeValueString.trim().equalsIgnoreCase("null")) {
+            if (startTimeValueString.trim().equalsIgnoreCase("undefined")) {
 
                 requestType = StartTimeRequestType.SET_START_TO_UNDEFINED;
 
@@ -185,16 +162,15 @@ public class ContestService implements Feature {
         } else {
 
             // the starttime value was null or empty
-            controller.getLog().log(Log.WARNING, "Contest Service PATCH: JSON input does not contain empty start_time");
+            controller.getLog().log(Log.WARNING, "Starttime PUT Service: JSON input contains empty starttime value");
             // return HTTP 400 response code per CLICS spec
-            return Response.status(Status.BAD_REQUEST).entity("Missing starttime in request").build();
+            return Response.status(Status.BAD_REQUEST).entity("Empty value in starttime request").build();
         }
 
         if (requestType == StartTimeRequestType.ILLEGAL) {
 
-            // we can get here if the value was not "null" but also didn't parse to a valid date
-            controller.getLog().log(Log.WARNING, "Contest Service PATCH: JSON input contains invalid starttime value: '" + startTimeValueString + "'");
-            System.err.println("Contest Service PATCH: JSON input contains invalid starttime value: '" + startTimeValueString + "'");
+            // we can get here if the value was not "undefined" but also didn't parse to a valid date
+            controller.getLog().log(Log.WARNING, "Starttime PUT Service: JSON input contains invalid starttime value: '" + startTimeValueString + "'");
             // return HTTP 400 response code per CLICS spec
             return Response.status(Status.BAD_REQUEST).entity("Bad value in starttime request").build();
 
@@ -203,7 +179,7 @@ public class ContestService implements Feature {
         // we have a legal request; check to insure contest has not already been started
         if (model.getContestTime().isContestStarted()) {
             // contest has started, cannot set scheduled start time
-            controller.getLog().log(Log.WARNING, "Contest Service PATCH: request to set start time when contest has already started; ignored");
+            controller.getLog().log(Log.WARNING, "Starttime PUT Service: request to set start time when contest has already started; ignored");
             // return HTTP 403 (Forbidden) response code per CLICS spec
             return Response.status(Status.FORBIDDEN).entity("Contest already started").build();
         }
@@ -211,48 +187,45 @@ public class ContestService implements Feature {
         // get the scheduled start time and the current time
         GregorianCalendar scheduledStartTime = model.getContestInformation().getScheduledStartTime();
         GregorianCalendar now = new GregorianCalendar();
-        // validate scheduleStartTime
-        // if the contestTime has not started yet, but the scheduledStartTime was in the past
-        if (scheduledStartTime != null && !model.getContestTime().isContestStarted() && scheduledStartTime.before(now)) {
-            // then clear it
-            scheduledStartTime = null;
-        }
         boolean success = false;
 
         switch (requestType) {
 
             case SET_START_TO_UNDEFINED:
 
-                // check for less than 30 secs to scheduled start
-                if (scheduledStartTime != null && scheduledStartTime.getTimeInMillis() < (now.getTimeInMillis() + 30000)) {
+                // check for less than 10 secs to scheduled start
+                if (scheduledStartTime != null && scheduledStartTime.getTimeInMillis() < (now.getTimeInMillis() + 10000)) {
 
-                    // we have request to set start to "null", but we have a scheduled start and we're
+                    // we have request to set start to "undefined", but we have a scheduled start and we're
                     // within 10 secs of it; cannot set scheduled start time to undefined (per CLICS spec);
-                    controller.getLog().log(Log.WARNING, "Contest Service PATCH: received request to set start time to 'null' with less than 10 seconds to go before start; ignored");
+                    controller.getLog().log(Log.WARNING,
+                            "Starttime PUT Service: received request to set start time to 'undefined' with less than 10 seconds to go before start; ignored");
                     // return HTTP 403 (Forbidden) response code per CLICS spec
-                    return Response.status(Status.FORBIDDEN).entity("Cannot change start time to 'null' within 30 seconds of already-scheduled start").build();
+                    return Response.status(Status.FORBIDDEN).entity("Cannot change start time to 'undefined' within 10 seconds of already-scheduled start").build();
 
                 } else {
 
                     // ok to set scheduled start to "undefined"
-                    controller.getLog().log(Log.INFO, "ContestService.setStarttime(): setting contest start time to \"null\".");
+                    controller.getLog().log(Log.INFO, "StarttimeService.setStarttime(): setting contest start time to \"undefined\".");
                     success = setScheduledStart(null);
                     if (success) {
-                        return Response.ok().entity("Contest start time updated to \"null\" (no scheduled start)").build();
+                        return Response.ok().entity("Contest start time updated to \"undefined\"").build();
                     } else {
-                        controller.getLog().log(Log.SEVERE, "ContestService.setStarttime(): error setting contest start time to \"undefined\".");
+                        controller.getLog().log(Log.SEVERE, "StarttimeService.setStarttime(): error setting contest start time to \"undefined\".");
                         return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to set start time correctly").build();
                     }
                 }
 
-                // break; //can't get here, so Eclipse won't allow the explicit break
+                // break; //can't get here, but Eclipse won't allow the explicit break
 
             case SET_START_TO_SPECIFIED_DATE:
 
                 // check for less than 30 sec before scheduled start
                 if (scheduledStartTime != null && scheduledStartTime.getTimeInMillis() < (now.getTimeInMillis() + 30000)) {
+
                     // we're within 30 secs of scheduled start; cannot set scheduled start time to new value (per CLICS spec);
-                    controller.getLog().log(Log.WARNING, "Contest Service: received request to set start time with less than 30 seconds to go before start; ignored");
+                    controller.getLog().log(Log.WARNING,
+                            "Starttime Service: received request to set start time with less than 30 seconds to go before start; ignored");
                     // return HTTP 403 (Forbidden) response code per CLICS spec
                     return Response.status(Status.FORBIDDEN).entity("Cannot change to new start time within 30 seconds of already-scheduled start").build();
                 }
@@ -261,18 +234,22 @@ public class ContestService implements Feature {
                 if (requestedStartTime.getTimeInMillis() < (now.getTimeInMillis() + 30000)) {
 
                     // requested start time is less than 30sec from now; cannot set (per CLICS spec);
-                    controller.getLog().log(Log.WARNING, "Contest Service: received request to set start time less than 30 seconds in the future; ignored");
+                    controller.getLog().log(Log.WARNING,
+                            "Starttime Service: received request to set start time less than 30 seconds in the future; ignored");
                     // return HTTP 403 (Forbidden) response code per CLICS spec
                     return Response.status(Status.FORBIDDEN).entity("Cannot set start time less than 30 seconds in the future").build();
                 }
 
                 // ok to set scheduled start to a specific time
-                controller.getLog().log(Log.INFO, "ContestService.setStarttime(): setting contest start time to " + requestedStartTime);
+                controller.getLog().log(Log.INFO, "StarttimeService.setStarttime(): setting contest start time to " + requestedStartTime);
                 success = setScheduledStart(requestedStartTime);
                 if (success) {
-                    return Response.ok().entity("/contest").build();
+                    String newStartTime = new Long(requestedStartTime.getTimeInMillis() / 1000).toString();
+                    newStartTime += ".";
+                    newStartTime += new Long(requestedStartTime.getTimeInMillis() % 1000).toString();
+                    return Response.ok().entity("Contest start time updated to " + newStartTime).build();
                 } else {
-                    controller.getLog().log(Log.SEVERE, "ContestService.setStarttime(): error setting contest start time to requested date.");
+                    controller.getLog().log(Log.SEVERE, "StarttimeService.setStarttime(): error setting contest start time to requested date.");
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to set start time correctly").build();
                 }
 
@@ -280,7 +257,7 @@ public class ContestService implements Feature {
 
             default:
                 // shouldn't be able to get here!
-                controller.getLog().log(Log.SEVERE, "ContestService.setStarttime(): unknown default condition: request type = " + requestType);
+                controller.getLog().log(Log.SEVERE, "StarttimeService.setStarttime(): unknown default condition: request type = " + requestType);
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unknown condition in server: request type = " + requestType).build();
         }
 
@@ -290,26 +267,25 @@ public class ContestService implements Feature {
      * Parses the given String and returns a {@link GregorianCalendar} object if the String represents a valid Unix Epoch date; otherwise returns null.
      * 
      * @param startTimeValueString
-     *            a String containing a date in ISO 8601 format.
+     *            a String containing a date in Unix epoch form, possibly including fractional milliseconds
      * @return the GregorianCalendar date/time represented by the String, or null if the String does not represent a valid date/time
      */
     private GregorianCalendar getDate(String startTimeValueString) {
-        GregorianCalendar theDate = new GregorianCalendar();
+
+        double milliSeconds;
         try {
-            theDate.setTime(Utilities.getIso8601formatterWithMS().parse(startTimeValueString));
-        } catch (ParseException e) {
-            try {
-                controller.getLog().log(Log.DEBUG, "Re-parsing date without MS " + startTimeValueString);
-                theDate.setTime(Utilities.getIso8601formatter().parse(startTimeValueString));
-            } catch (ParseException e2) {
-                controller.getLog().throwing("ContestService", "getDate", e2);
-                return null;
-            }
+            // get the float value
+            milliSeconds = Double.parseDouble(startTimeValueString) * 1000;
+        } catch (NumberFormatException e) {
+            return null;
         }
 
+        GregorianCalendar theDate = new GregorianCalendar();
+        theDate.setTimeInMillis((long) milliSeconds);
+
         // debug
-        // System.out.println ("ContestService.getDate(): returning a GregorianCalendar with a date of " + theDate.getTimeInMillis());
-        controller.getLog().log(Log.DEBUG, "ContestService.getDate(): returning a GregorianCalendar with a start date of " + theDate.getTimeInMillis());
+        // System.out.println ("StarttimeService.getDate(): returning a GregorianCalendar with a date of " + theDate.getTimeInMillis());
+        controller.getLog().log(Log.DEBUG, "StarttimeService.getDate(): returning a GregorianCalendar with a start date of " + theDate.getTimeInMillis());
 
         return theDate;
     }
@@ -354,10 +330,11 @@ public class ContestService implements Feature {
      */
     private Map<String, String> parseJSONIntoMap(String jsonRequestString) {
 
-        controller.getLog().log(Log.INFO, "StarttimePUT.parseJSONIntoMap(): attempting to convert JSON input '" + jsonRequestString + "' into Map");
+        controller.getLog().log(Log.INFO, "StarttimePUT.parseJSONIntoMap(): attempting to convert JSON input '"
+                + jsonRequestString + "' into Map");
 
         // debug
-        // System.out.println ("ContestService.parseJSONIntoMap(): creating Map from input string '" + jsonRequestString + "'");
+        // System.out.println ("StarttimeService.parseJSONIntoMap(): creating Map from input string '" + jsonRequestString + "'");
 
         // use Jackson's ObjectMapper to construct a Map of Strings-to-Strings from the JSON input
         final ObjectMapper mapper = new ObjectMapper();
@@ -368,11 +345,13 @@ public class ContestService implements Feature {
             jsonDataMap = mapper.readValue(jsonRequestString, mapType);
         } catch (JsonMappingException e) {
             // error parsing JSON input
-            controller.getLog().log(Log.WARNING, "ContestService.parseJSONIntoMap(): JsonMappingException parsing JSON input '" + jsonRequestString + "'");
+            controller.getLog().log(Log.WARNING, "StarttimePUT.parseJSONIntoMap(): JsonMappingException parsing JSON input '"
+                    + jsonRequestString + "'");
             e.printStackTrace();
             return null;
         } catch (IOException e) {
-            controller.getLog().log(Log.WARNING, "ContestService.parseJSONIntoMap(): IOException parsing JSON input '" + jsonRequestString + "'");
+            controller.getLog().log(Log.WARNING, "StarttimePUT.parseJSONIntoMap(): IOException parsing JSON input '"
+                    + jsonRequestString + "'");
             e.printStackTrace();
             return null;
         }
@@ -387,15 +366,43 @@ public class ContestService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getContest() {
+    public Response getStartTime() {
 
         // from the CLI Wiki Contest_Start_Interface spec:
-        /*
-         * {"id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45","name":"2014 ICPC World Finals", "formal_name":"38th Annual World Finals of the ACM International Collegiate Programming Contest",
-         * "start_time":"2014-06-25T10:00:00+01","duration":"5:00:00","scoreboard_freeze_duration":"1:00:00","penalty_time":20, "state":{"running":true,"frozen":false,"final":false}}
-         */
+        // GET HTTP body returns application/json:
+        // { "starttime":1265335138.26 }
+        // or:
+        // { "starttime":"undefined" }
 
-        return Response.ok(jsonTool.convertToJSON(model.getContestInformation()).toString(), MediaType.APPLICATION_JSON).build();
+        // get the start time from the contest
+        GregorianCalendar startTime = model.getContestInformation().getScheduledStartTime();
+
+        // determine the number of seconds specified by the starttime
+        long startTimeWholeSecs, startTimeFractionSecs;
+        if (startTime == null) {
+            // there is no start time currently scheduled
+            startTimeWholeSecs = 0;
+            startTimeFractionSecs = 0;
+        } else {
+            // there IS a scheduled start time set; get its value in seconds and fractions of seconds
+            startTimeWholeSecs = startTime.getTimeInMillis() / 1000;
+            startTimeFractionSecs = startTime.getTimeInMillis() % 1000;
+        }
+
+        // build a string describing the scheduled start time
+        String timeString = "";
+        if (startTimeWholeSecs == 0 && startTimeFractionSecs == 0) {
+            timeString = "\"undefined\"";
+        } else {
+            timeString = "" + new Long(startTimeWholeSecs).toString() + "." + new Long(startTimeFractionSecs).toString();
+        }
+
+        // format the start time as JSON
+        String jsonStartTime = "{" + "\"starttime\"" + ":" + timeString + "}";
+
+        // output the starttime response to the requester (note that this actually returns it to Jersey,
+        // which forwards it to the caller as the HTTP response).
+        return Response.ok(jsonStartTime, MediaType.APPLICATION_JSON).build();
     }
 
     @Override

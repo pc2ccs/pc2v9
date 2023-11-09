@@ -1,19 +1,21 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-package edu.csus.ecs.pc2.services.web;
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+package edu.csus.ecs.pc2.clics.API202306;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
  * WebService to handle "state" REST endpoint as described by the CLICS wiki.
@@ -21,7 +23,7 @@ import edu.csus.ecs.pc2.core.util.JSONTool;
  * @author pc2@ecs.csus.edu
  *
  */
-@Path("/contest/state")
+@Path("/contests/{contestId}/state")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
@@ -31,13 +33,10 @@ public class StateService implements Feature {
 
     private IInternalController controller;
 
-    private JSONTool jsonTool;
-
     public StateService(IInternalContest inModel, IInternalController inController) {
         super();
         this.model = inModel;
         this.controller = inController;
-        jsonTool = new JSONTool(model, controller);
     }
 
     /**
@@ -47,8 +46,8 @@ public class StateService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getState() {
-        return Response.ok(jsonTool.toStateJSON(model.getContestInformation()).toString(), MediaType.APPLICATION_JSON).build();
+    public Response getState(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
+        return Response.ok(new CLICSContestState(model).toJSON(), MediaType.APPLICATION_JSON).build();
     }
 
     @Override

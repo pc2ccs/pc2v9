@@ -1,26 +1,28 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-package edu.csus.ecs.pc2.services.web;
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+package edu.csus.ecs.pc2.clics.API202306;
+
+import java.util.ArrayList;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * WebService for handling teams
@@ -28,7 +30,7 @@ import edu.csus.ecs.pc2.core.util.JSONTool;
  * @author ICPC
  *
  */
-@Path("/contest/teams")
+@Path("/contests/{contestId}/teams")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
@@ -38,13 +40,10 @@ public class TeamService implements Feature {
 
     private IInternalController controller;
 
-    private JSONTool jsonTool;
-
     public TeamService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
         this.controller = inController;
-        jsonTool = new JSONTool(model, controller);
     }
 
     /**
@@ -54,36 +53,41 @@ public class TeamService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTeams() {
+    public Response getTeams(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
 
         // get the team accounts from the model
         Account[] accounts = model.getAccounts();
 
-        // get an object to map the groups descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
+        // Array of CLICSTeams for json conversion
+        ArrayList<CLICSTeam> teams = new ArrayList<CLICSTeam>();
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
-            if (account.getPermissionList().isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
-                childNode.add(jsonTool.convertToJSON(account));
+            
+            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
+                teams.add(new CLICSTeam(model, account));
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
+        try {
+            ObjectMapper mapper = JSONUtilities.getObjectMapper();
+            String json = mapper.writeValueAsString(teams);
+            return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for teams " + e.getMessage()).build();
+        }
     }
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("{teamId}/")
-    public Response getTeam(@PathParam("teamId") String teamId) {
+    public Response getTeam(@Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("teamId") String teamId) {
         // get the team accounts from the model
         Account[] accounts = model.getAccounts();
 
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
             // TODO multi-site with overlapping teamNumbers?
-            if (account.getPermissionList().isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && account.getClientId().getClientType().equals(ClientType.Type.TEAM)
-                    && new Integer(account.getClientId().getClientNumber()).toString().equals(teamId)) {
-                return Response.ok(jsonTool.convertToJSON(account).toString(), MediaType.APPLICATION_JSON).build();
+            if(teamId.equals("" + account.getClientId().getClientNumber())) {
+                return Response.ok(new CLICSTeam(model, account).toJSON(), MediaType.APPLICATION_JSON).build();
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
