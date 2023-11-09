@@ -34,13 +34,10 @@ public class StateService implements Feature {
 
     private IInternalController controller;
 
-    private JSONTool jsonTool;
-
     public StateService(IInternalContest inModel, IInternalController inController) {
         super();
         this.model = inModel;
         this.controller = inController;
-        jsonTool = new JSONTool(model, controller);
     }
 
     /**
