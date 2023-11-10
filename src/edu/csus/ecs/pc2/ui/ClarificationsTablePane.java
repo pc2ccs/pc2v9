@@ -1136,13 +1136,18 @@ public class ClarificationsTablePane extends JPanePlugin {
                 return;
             }
             if (lastAnswered != null) {
-                int showConfirmDialog = JOptionPane.showConfirmDialog(getParentFrame(), "You are already answering a clar, do you want to return to that one (YES) or start answering the new one (NO)", "Already answering a Clarifition", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null);
-                if (showConfirmDialog == JOptionPane.CANCEL_OPTION || showConfirmDialog == JOptionPane.YES_OPTION) {
+                int showConfirmDialog = JOptionPane.showConfirmDialog(getParentFrame(), "You are asking to answer a new clarification, but you already have a clarification checked out for answering.\n" + //
+                        "\n" + //
+                        "If you want to give up the previous clarification and switch to answering the new one, click \"Yes\";\n" + //
+                        "\n" + //
+                        "otherwise, click \"No\" and go back to answering the previous clarification.\n" + //
+                        "", "Already answering a Clarifition", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null);
+                if (showConfirmDialog == JOptionPane.NO_OPTION) {
                     // try to make it visible
                     answerClarificationFrame.setVisible(true);
                     return;
                 } else {
-                    // NO option
+                    // YES option
                     getController().cancelClarification(getContest().getClarification(lastAnswered));
                     // now continue the rest of this method
                 }
