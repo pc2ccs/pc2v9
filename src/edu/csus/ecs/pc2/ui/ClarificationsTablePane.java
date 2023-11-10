@@ -1141,15 +1141,15 @@ public class ClarificationsTablePane extends JPanePlugin {
                         "If you want to give up the previous clarification and switch to answering the new one, click \"Yes\";\n" + //
                         "\n" + //
                         "otherwise, click \"No\" and go back to answering the previous clarification.\n" + //
-                        "", "Already answering a Clarification", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null);
-                if (showConfirmDialog == JOptionPane.NO_OPTION || showConfirmDialog == -1) {
+                        "", "Switch to different Clarification?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null);
+                if (showConfirmDialog == JOptionPane.YES_OPTION) {
+                    getController().cancelClarification(getContest().getClarification(lastAnswered));
+                    // now continue the rest of this method
+                } else {
+                    // NO or "X" on window
                     // try to make it visible
                     answerClarificationFrame.setVisible(true);
                     return;
-                } else if (showConfirmDialog == JOptionPane.YES_OPTION) {
-                    // YES option
-                    getController().cancelClarification(getContest().getClarification(lastAnswered));
-                    // now continue the rest of this method
                 }
             }
             lastAnswered = elementId;
