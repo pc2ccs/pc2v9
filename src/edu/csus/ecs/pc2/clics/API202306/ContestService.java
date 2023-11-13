@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
+import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
  * WebService to handle "contests/" and "contests/<id>" REST endpoints as described by the CLICS wiki.
@@ -136,13 +137,6 @@ public class ContestService implements Feature {
         
         controller.getLog().log(Log.DEBUG, LOG_PREFIX + contestId + " received the following request body: " + jsonInputString);
 
-        // check authorization (verify requester is allowed to make this request)
-        if (!sc.isUserInRole("admin")) {
-            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request (user not in admin role)");
-            // return HTTP 401 response code per CLICS spec
-            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
-        }
-
         // check for empty request
         if (jsonInputString == null || jsonInputString.length() == 0) {
             controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": received invalid (empty) JSON string");
@@ -209,7 +203,7 @@ public class ContestService implements Feature {
                 // return HTTP 400 response code
                 return Response.status(Status.BAD_REQUEST).entity("Missing '" + CONTEST_START_TIME_KEY + "' key or '" + CONTEST_THAW_TIME + "' key in " + contestsEndpoint).build();
             }
-            return(HandleContestThawTime(contestId, requestMap.get(CONTEST_THAW_TIME)));
+            return(HandleContestThawTime(sc, contestId, requestMap.get(CONTEST_THAW_TIME)));
         }
         
         // its either a contest start time adjustment or a countdown pause adjustment
@@ -228,9 +222,9 @@ public class ContestService implements Feature {
                 // return HTTP 400 response
                 return Response.status(Status.BAD_REQUEST).entity("Only one of '" + CONTEST_START_TIME_KEY + "' key or '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "' may be specified for " + contestsEndpoint).build();
             }
-            return(HandleContestCountdownPauseTime(contestId, countdownPauseTime));
+            return(HandleContestCountdownPauseTime(sc, contestId, countdownPauseTime));
         }
-        return(HandleContestStartTime(contestId, startTimeValueString, sawCountdownPauseTime));
+        return(HandleContestStartTime(sc, contestId, startTimeValueString, sawCountdownPauseTime));
     }
     
     /**
@@ -240,12 +234,18 @@ public class ContestService implements Feature {
      * @param startTimeValueString new contest start time (ISO format) or null to make it undefined
      * @return web response
      */
-    private Response HandleContestStartTime(String contestId, String startTimeValueString, boolean sawCountdownPauseTime) {
+    private Response HandleContestStartTime(SecurityContext sc, String contestId, String startTimeValueString, boolean sawCountdownPauseTime) {
         
         StartTimeRequestType requestType = StartTimeRequestType.ILLEGAL;
         GregorianCalendar requestedStartTime = null;
         String logString = LOG_PREFIX + contestId + ": received '" + CONTEST_START_TIME_KEY + "': ";
         
+        // check authorization (verify requester is allowed to make this request)
+        if (!isContestStartAllowed(sc)) {
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request");
+            // return HTTP 401 response code per CLICS spec
+            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
+        }
         // check if we have a start_time string (really? check for "null"?)
         if (startTimeValueString == null || startTimeValueString.trim().equalsIgnoreCase("null")) {
             requestType = StartTimeRequestType.SET_START_TO_UNDEFINED;
@@ -367,10 +367,18 @@ public class ContestService implements Feature {
      * @param countdownPauseTime how long before contest start should the count down pause (CLICS RELTIME value) 
      * @return web resposne
      */
-    private Response HandleContestCountdownPauseTime(String contestId, String countdownPauseTime) {
+    private Response HandleContestCountdownPauseTime(SecurityContext sc, String contestId, String countdownPauseTime) {
         
         controller.getLog().log(Log.DEBUG, LOG_PREFIX + contestId + ": received '" + CONTEST_COUNTDOWN_PAUSE_TIME_KEY + "': " + countdownPauseTime);
         
+        
+        // check authorization (verify requester is allowed to make this request)
+        if (!isContestStartAllowed(sc)) {
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request");
+            // return HTTP 401 response code per CLICS spec
+            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
+        }
+
         long pauseTime = Utilities.convertCLICSContestTimeToMS(countdownPauseTime);
 
         // MIN_VALUE is returned on format error
@@ -390,7 +398,15 @@ public class ContestService implements Feature {
      * @param thawTimeValue ISO date of when the contest should unfreeze
      * @return web response
      */
-    private Response HandleContestThawTime(String contestId, String thawTimeValue) {
+    private Response HandleContestThawTime(SecurityContext sc, String contestId, String thawTimeValue) {
+        
+        // check authorization (verify requester is allowed to make this request)
+        if (!isContestThawAllowed(sc)) {
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request");
+            // return HTTP 401 response code per CLICS spec
+            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
+        }
+        
         // thaw time present, validate now
         GregorianCalendar thawTime = getDate(contestId, thawTimeValue);
         if (thawTime != null) {
@@ -536,6 +552,26 @@ public class ContestService implements Feature {
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 
+    /**
+     * Check the user has a role than change contest start time
+     * 
+     * @param sc Security context for the user
+     * @return true if the user can perform the operation
+     */
+    public boolean isContestStartAllowed(SecurityContext sc) {
+        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
+    }
+
+    /**
+     * Check the user has a role than change contest thaw time
+     * 
+     * @param sc Security context for the user
+     * @return true if the user can perform the operation
+     */
+    public boolean isContestThawAllowed(SecurityContext sc) {
+        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
+    }
+    
     @Override
     public boolean configure(FeatureContext arg0) {
         // TODO Auto-generated method stub

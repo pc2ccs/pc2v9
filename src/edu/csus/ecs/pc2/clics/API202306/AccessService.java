@@ -40,9 +40,9 @@ public class AccessService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest state in JSON format as described on the CLICS wiki.
+     * This method returns a representation of the access that the connected user has
      * 
-     * @return a {@link Response} object containing a JSON String giving the scheduled contest start time as a Unix Epoch value, or as the string "undefined" if no start time is currently scheduled.
+     * @return a {@link Response} object containing a JSON String giving the access information for the connected user
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
