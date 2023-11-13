@@ -1,4 +1,5 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.IOException;
@@ -254,7 +255,7 @@ public class ContestService implements Feature {
             }
             return(HandleContestCountdownPauseTime(contestId, countdownPauseTime));
         }
-        return(HandleContestStartTime(contestId, startTimeValueString, sawCountdownPauseTime));
+        return(HandleContestStartTime(sc, contestId, startTimeValueString, sawCountdownPauseTime));
     }
 
     /**
@@ -487,7 +488,15 @@ public class ContestService implements Feature {
      * @param thawTimeValue ISO date of when the contest should unfreeze
      * @return web response
      */
-    private Response HandleContestThawTime(String contestId, String thawTimeValue) {
+    private Response HandleContestThawTime(SecurityContext sc, String contestId, String thawTimeValue) {
+
+        // check authorization (verify requester is allowed to make this request)
+        if (!isContestThawAllowed(sc)) {
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request");
+            // return HTTP 401 response code per CLICS spec
+            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
+        }
+
         // thaw time present, validate now
         GregorianCalendar thawTime = getDate(contestId, thawTimeValue);
         if (thawTime != null) {
