@@ -76,7 +76,16 @@ public class WebServer implements UIPlugin {
     public static final String DEFAULT_CLICS_API_PACKAGE_PREFIX = "edu.csus.ecs.pc2.clics";
 
     public static final String PC2_KEYSTORE_FILE = "cacerts.pc2";
-
+    
+    // roles 
+    public static final String WEBAPI_ROLE_PUBLIC = "public";
+    public static final String WEBAPI_ROLE_BALLOON = "balloon";
+    public static final String WEBAPI_ROLE_ANALYST = "analyst";
+    public static final String WEBAPI_ROLE_BLUE = "blue";
+    public static final String WEBAPI_ROLE_ADMIN = "admin";
+    public static final String WEBAPI_ROLE_TEAM = "team";
+    public static final String WEBAPI_ROLE_JUDGE = "judge";
+    
     private Server jettyServer = null;
 
     private String keystorePassword = "i don't care";
@@ -306,7 +315,10 @@ public class WebServer implements UIPlugin {
 
         Constraint constraintPublic = new Constraint();
         constraintPublic.setName(Constraint.__BASIC_AUTH);
-        constraintPublic.setRoles(new String[] { "public", "balloon", "analyst", "blue", "admin", "team", "judge" });
+        constraintPublic.setRoles(new String[] { 
+            WEBAPI_ROLE_PUBLIC, WEBAPI_ROLE_BALLOON, WEBAPI_ROLE_ANALYST, WEBAPI_ROLE_BLUE, WEBAPI_ROLE_ADMIN, WEBAPI_ROLE_TEAM, WEBAPI_ROLE_JUDGE
+        });
+
         constraintPublic.setAuthenticate(true);
 
         ConstraintMapping cmRoot = new ConstraintMapping();

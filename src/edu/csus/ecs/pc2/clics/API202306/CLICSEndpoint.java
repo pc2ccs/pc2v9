@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.clics.API202306;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
