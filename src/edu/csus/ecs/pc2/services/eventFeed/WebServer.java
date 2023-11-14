@@ -449,7 +449,7 @@ public class WebServer implements UIPlugin {
      * <pre>
      * String className = "edu.csus.ecs.pc2.clics.API202306";
      * ICLICSResourceConfig iRes = loadUIClass(className);
-      * </pre>
+     * </pre>
      *
      * @param className
      * @throws ClassNotFoundException

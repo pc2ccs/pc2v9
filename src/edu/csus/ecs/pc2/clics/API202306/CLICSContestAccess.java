@@ -37,6 +37,8 @@ public class CLICSContestAccess {
 
     public static final String ENDPOINT_ACCESS_METHOD = "getEndpointProperties";
 
+    public static final String ENDPOINT_ACCESS_METHOD = "getEndpointProperties";
+
     @JsonProperty
     private String [] capabilities;
 
