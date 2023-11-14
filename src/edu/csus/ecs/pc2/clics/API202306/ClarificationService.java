@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
  * WebService to handle languages
@@ -129,6 +130,37 @@ public class ClarificationService implements Feature {
 
     }
 
+    /**
+     * Tests if the supplied user context has a role to submit clarifications as a team
+     * 
+     * @param sc User's security context
+     * @return true of the user can submit clarifications
+     */
+    public static boolean isTeamSubmitClarificationAllowed(SecurityContext sc) {
+        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM));
+    }
+    
+
+    /**
+     * Tests if the supplied user context has a role to submit clarifications
+     * 
+     * @param sc User's security context
+     * @return true of the user can submit clarifications
+     */
+    public static boolean isAdminSubmitClarificationAllowed(SecurityContext sc) {
+        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
+    }
+
+    /**
+     * Tests if the supplied user context has a role to submit clarifications on behalf of a team
+     * 
+     * @param sc User's security context
+     * @return true of the user can submit clarifications on behalf of a team
+     */
+    public static boolean isProxySubmitClarificationAllowed(SecurityContext sc) {
+        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
+    }
+    
     @Override
     public boolean configure(FeatureContext arg0) {
         // TODO Auto-generated method stub
