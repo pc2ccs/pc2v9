@@ -418,14 +418,13 @@ public class WebServer implements UIPlugin {
     }
 
     /**
-     * Find and create an instance of UIPlugin from className.
+     * Find and create an instance of ICLICSResourceConfig from className.
      * <P>
      * Code snippet.
      * <pre>
-     * String uiClassName = "edu.csus.ecs.pc2.core.ui.editor.RunEditor";
-     * UIPlugin plugin = loadUIClass(uiClassName);
-     * plugin.setModelAndController(model, controller);
-     * </pre>
+     * String className = "edu.csus.ecs.pc2.clics.API202306";
+     * ICLICSResourceConfig iRes = loadUIClass(className);
+      * </pre>
      * 
      * @param className
      * @throws ClassNotFoundException

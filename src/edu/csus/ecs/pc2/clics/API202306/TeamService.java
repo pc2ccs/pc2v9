@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
+import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
  * WebService for handling teams
@@ -91,6 +92,19 @@ public class TeamService implements Feature {
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    
+    /**
+     * Retrieve access information about this endpoint for the supplied user's security context
+     * 
+     * @param sc User's security information
+     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
+     */
+    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
+        // All properties are available to anyone for now.  Maybe restrict some info like groups or organization someday?
+        String [] props = { "id", "icpc_id", "name", "label", "display_name", "organization_id", "group_ids", "hidden" };
+        
+        return(new CLICSEndpoint("teams", props));
     }
 
     @Override

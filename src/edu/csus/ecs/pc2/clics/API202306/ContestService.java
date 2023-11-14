@@ -558,7 +558,7 @@ public class ContestService implements Feature {
      * @param sc Security context for the user
      * @return true if the user can perform the operation
      */
-    public boolean isContestStartAllowed(SecurityContext sc) {
+    public static boolean isContestStartAllowed(SecurityContext sc) {
         return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
     }
 
@@ -568,8 +568,22 @@ public class ContestService implements Feature {
      * @param sc Security context for the user
      * @return true if the user can perform the operation
      */
-    public boolean isContestThawAllowed(SecurityContext sc) {
+    public static boolean isContestThawAllowed(SecurityContext sc) {
         return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
+    }
+    
+    /**
+     * Retrieve access information about this endpoint for the supplied user's security context
+     * 
+     * @param sc User's security information
+     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
+     */
+    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
+        // All properties are available to everyone
+        String [] props = { "id", "name", "formal_name", "start_time", "countdown_pause_time", "duration",
+                "scoreboard_freeze_duration", "scoreboard_thaw_time", "scoreboard_type", "penalty_time"
+        };
+        return(new CLICSEndpoint("contest", props));
     }
     
     @Override
