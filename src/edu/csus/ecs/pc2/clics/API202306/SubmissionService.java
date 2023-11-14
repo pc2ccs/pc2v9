@@ -42,6 +42,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 
@@ -304,6 +305,36 @@ public class SubmissionService implements Feature {
         }
     }
 
+    /**
+     * Check if the supplied user has a team or admin role, if so they can make team submissions
+     * 
+     * @param sc User's security context
+     * @return true if the user is allowed to make team submissions
+     */
+    public static boolean isTeamSubmitAllowed(SecurityContext sc) {
+        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM));
+    }
+
+    /**
+     * Check if the supplied user has a admin, if so they can make submissions on behalf of a team
+     * 
+     * @param sc User's security context
+     * @return true if the user is allowed to make team submissions
+     */
+    public static boolean isProxySubmitAllowed(SecurityContext sc) {
+        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
+    }
+
+    /**
+     * Check if the supplied user has the admin role, if so they can make admin submissions
+     * 
+     * @param sc User's security context
+     * @return true if the user is allowed to make team submissions
+     */
+    public static boolean isAdminSubmitAllowed(SecurityContext sc) {
+        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
+    }
+    
     @Override
     public boolean configure(FeatureContext arg0) {
         // TODO Auto-generated method stub
