@@ -58,33 +58,35 @@ public class ResourceConfig202306 implements ICLICSResourceConfig {
         if (wsPropUtilities.getBooleanProperty(WebServerPropertyUtils.CLICS_CONTEST_API_SERVICES_ENABLED_KEY, true)) {
 
             resConfig.register(new ContestService(getContest(), getController()));
-            showMessage("Starting /contest web service");
+            showMessage("Starting /contests web service");
+            resConfig.register(new AccessService(getContest(), getController()));
+            showStartingMessage("access web service");
             resConfig.register(new ScoreboardService(getContest(), getController()));
-            showMessage("Starting /contest/scoreboard web service");
+            showStartingMessage("scoreboard web service");
             resConfig.register(new LanguageService(getContest(), getController()));
-            showMessage("Starting /contest/languages web service");
+            showStartingMessage("languages web service");
             resConfig.register(new TeamService(getContest(), getController()));
-            showMessage("Starting /contest/teams web service");
+            showStartingMessage("teams web service");
             resConfig.register(new GroupService(getContest(), getController()));
-            showMessage("Starting /contest/groups web service");
+            showStartingMessage("groups web service");
             resConfig.register(new OrganizationService(getContest(), getController()));
-            showMessage("Starting /contest/organizations web service");
+            showStartingMessage("organizations web service");
             resConfig.register(new JudgementTypeService(getContest(), getController()));
-            showMessage("Starting /contest/judgement-types web service");
+            showStartingMessage("judgement-types web service");
             resConfig.register(new ClarificationService(getContest(), getController()));
-            showMessage("Starting /contest/clarifications web service");
+            showStartingMessage("clarifications web service");
             resConfig.register(new SubmissionService(getContest(), getController()));
-            showMessage("Starting /contest/submissions web service");
+            showStartingMessage("submissions web service");
             resConfig.register(new ProblemService(getContest(), getController()));
-            showMessage("Starting /contest/problems web service");
+            showStartingMessage("problems web service");
             resConfig.register(new JudgementService(getContest(), getController()));
-            showMessage("Starting /contest/judgements web service");
+            showStartingMessage("judgements web service");
             resConfig.register(new RunService(getContest(), getController()));
-            showMessage("Starting /contest/runs web service");
+            showStartingMessage("runs web service");
             resConfig.register(new EventFeedService(getContest(), getController()));
-            showMessage("Starting /contest/event-feed web service");
+            showStartingMessage("event-feed web service");
             resConfig.register(new StateService(getContest(), getController()));
-            showMessage("Starting /contest/state web service");
+            showStartingMessage("state web service");
             resConfig.register(new VersionService(getContest(), getController()));
             showMessage("Starting / endpoint for version web service");
 
@@ -110,6 +112,12 @@ public class ResourceConfig202306 implements ICLICSResourceConfig {
     private void showMessage(String message) {
         System.out.println(new Date() + " " + message);
         getLog().info(message);
+    }
+
+    private void showStartingMessage(String message) {
+        String startingMessage = "Starting /contests/" + contest.getContestIdentifier() + "/" + message;
+        System.out.println(new Date() + " " + startingMessage);
+        getLog().info(startingMessage);
     }
 
     private Logger getLog() {
