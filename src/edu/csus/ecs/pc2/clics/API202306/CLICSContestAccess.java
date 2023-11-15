@@ -14,7 +14,6 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
-import edu.csus.ecs.pc2.services.web.ICLICSResourceConfig;
 
 /**
  * CLICS Contest State
@@ -82,11 +81,13 @@ public class CLICSContestAccess {
         capabilities = cap.toArray(new String[0]);
         
         /*
-         * As per the spec, here are the possible endpoints:
+         * As per the spec, here are the possible endpoints.
+         * These should match the class names in this package, eg. Contest -> ContestService, Run -> RunService, etc.
          */
         String [] serviceNames = { "Contest", "JudgementType", "Language", "Problem", "Group", "Organization",
                 "Team", "Person", "Account", "State", "Submission", "Judgement", "Run", "Clarification", "Award", "Commentary"
         };
+        
         ArrayList<CLICSEndpoint> epList = new ArrayList<CLICSEndpoint>();
         
         for (String service: serviceNames) {

@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
+import java.util.ArrayList;
+
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -12,16 +14,16 @@ import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
@@ -30,7 +32,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
  * @author ICPC
  *
  */
-@Path("/contest/clarifications")
+@Path("/contests/{contestId}/clarifications")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
@@ -40,96 +42,113 @@ public class ClarificationService implements Feature {
 
     private IInternalController controller;
 
-    private JSONTool jsonTool;
-
     public ClarificationService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
         this.controller = inController;
-        jsonTool = new JSONTool(model, controller);
     }
 
     /**
-     * This method returns a representation of the current contest groups in JSON format. The returned value is a JSON array with one language description per array element, matching the description
+     * This method returns a representation of the current contest clarifications in JSON format. The returned value is a JSON array with one clarification description per array element, matching the description
      * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
      * 
      * @return a {@link Response} object containing the contest languages in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getClarifications(@Context SecurityContext sc) {
+    public Response getClarifications(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
 
         // get the groups from the contest
         Clarification[] clarifications = model.getClarifications();
+        
+        ArrayList<CLICSClarification> clarList = new ArrayList<CLICSClarification>();
+        
+        // these are the only 2 that have special rules.
+        boolean isStaff = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE);
+        boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM);
 
-        // get an object to map the groups descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
-        for (int i = 0; i < clarifications.length; i++) {
-            Clarification clarification = clarifications[i];
-            if (sc.isUserInRole("public")) {
-                if (clarification.isSendToAll()) {
-                    ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
-                    childNode.add(jsonTool.convertToJSON(clarification, clarAnswers[clarAnswers.length - 1]));
-                }
-            } else {
-                // dump the request
-                childNode.add(jsonTool.convertToJSON(clarification, null));
-                if (clarification.isAnswered()) {
-                    // dump the answers
-                    ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
-                    childNode.add(jsonTool.convertToJSON(clarification, clarAnswers[clarAnswers.length-1]));
-                }
+        String user = sc.getUserPrincipal().getName();
+
+        // create list of clarifications to send back
+        for (Clarification clarification: clarifications) {
+            if (clarification.isSendToAll() || isStaff || (isTeam && isClarificationForUser(clarification, user))) {
+                clarList.add(new CLICSClarification(model, clarification));
             }
         }
-
-        // output the response to the requester (note that this actually returns it to Jersey,
-        // which forwards it to the caller as the HTTP response).
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
+        try {
+            ObjectMapper mapper = JSONUtilities.getObjectMapper();
+            String json = mapper.writeValueAsString(clarList);
+            return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for clarifications " + e.getMessage()).build();
+        }
     }
 
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("{clarificationId}/")
-    public Response getClarification(@Context SecurityContext sc, @PathParam("clarificationId") String clarificationId) {
+    public Response getClarification(@Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("clarificationId") String clarificationId) {
         // get the groups from the contest
         Clarification[] clarifications = model.getClarifications();
+        
+        // these are the only 2 that have special rules.
+        boolean isStaff = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE);
+        boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM);
+
+        String user = sc.getUserPrincipal().getName();
 
         ClarificationAnswer[] clarAnswers = null;
-        for (int i = 0; i < clarifications.length; i++) {
-            Clarification clarification = clarifications[i];
-            if (sc.isUserInRole("public")) {
-                // only look for matching answers
-                if (clarification.isSendToAll()) {
-                    clarAnswers = clarification.getClarificationAnswers();
-                    if (clarAnswers != null) {
-                        for (int j = 0; j < clarAnswers.length; j++) {
-                            ClarificationAnswer clarificationAnswer = clarAnswers[j];
-                            if (clarificationAnswer.getElementId().toString().equals(clarificationId)) {
-                                return Response.ok(jsonTool.convertToJSON(clarification, clarificationAnswer).toString(), MediaType.APPLICATION_JSON).build();
+        
+        // keep track of whether the clarificationId specified was for the question, in which case this will
+        // be set to non-null
+        Clarification clarNoAnswer = null;
+        
+        // create list of clarifications to send back
+        for (Clarification clarification: clarifications) {
+            if (clarification.isSendToAll() || isStaff || (isTeam && isClarificationForUser(clarification, user))) {
+                if(clarification.getElementId().toString() .equals(clarificationId)) {
+                    clarNoAnswer = clarification;
+                }
+                clarAnswers = clarification.getClarificationAnswers();
+                if (clarAnswers != null) {
+                    for (ClarificationAnswer clarAns: clarAnswers) {
+                        if (clarAns.getElementId().toString().equals(clarificationId)) {
+                            try {
+                                ObjectMapper mapper = JSONUtilities.getObjectMapper();
+                                String json = mapper.writeValueAsString(new CLICSClarification(model, clarification, clarAns));
+                                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                            } catch (Exception e) {
+                                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for clarification " + clarificationId + " " + e.getMessage()).build();
                             }
                         }
                     }
                 }
-            } else {
-                if (clarification.getElementId().toString().equals(clarificationId)) {
-                    return Response.ok(jsonTool.convertToJSON(clarification, null).toString(), MediaType.APPLICATION_JSON).build();
-                }
-                clarAnswers = clarification.getClarificationAnswers();
-                if (clarAnswers != null) {
-                    for (int j = 0; j < clarAnswers.length; j++) {
-                        ClarificationAnswer clarificationAnswer = clarAnswers[j];
-                        if (clarificationAnswer.getElementId().toString().equals(clarificationId)) {
-                            return Response.ok(jsonTool.convertToJSON(clarification, clarificationAnswer).toString(), MediaType.APPLICATION_JSON).build();
-                        }                    
-                    }
-                }
             }
         }
+        // if set, this means the id of the clarification was specified, not the answer, so return that
+        if(clarNoAnswer != null) {
+            try {
+                ObjectMapper mapper = JSONUtilities.getObjectMapper();
+                String json = mapper.writeValueAsString(new CLICSClarification(model, clarNoAnswer, null));
+                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+            } catch (Exception e) {
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for clarification " + clarificationId + " " + e.getMessage()).build();
+            }                    
+        }
         return Response.status(Response.Status.NOT_FOUND).build();
-
     }
 
+    /**
+     * Check if the supplied clarification is from/to the supplied user
+     * 
+     * @param clarification the clarification to check
+     * @param user the user to check
+     * @return true if the user is allowed to see this clarification
+     */
+    private boolean isClarificationForUser(Clarification clarification, String user) {
+        return(clarification.getSubmitter().getName().equals(user));
+    }
+    
     /**
      * Tests if the supplied user context has a role to submit clarifications as a team
      * 
