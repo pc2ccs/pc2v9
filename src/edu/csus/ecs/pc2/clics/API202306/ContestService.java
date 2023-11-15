@@ -579,11 +579,7 @@ public class ContestService implements Feature {
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
     public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        // All properties are available to everyone
-        String [] props = { "id", "name", "formal_name", "start_time", "countdown_pause_time", "duration",
-                "scoreboard_freeze_duration", "scoreboard_thaw_time", "scoreboard_type", "penalty_time"
-        };
-        return(new CLICSEndpoint("contest", props));
+        return(new CLICSEndpoint("contest", JSONUtilities.getJsonProperties(CLICSContestInfo.class)));
     }
     
     @Override
