@@ -49,11 +49,14 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.util.security.Password;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.services.web.ICLICSResourceConfig;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -294,6 +297,28 @@ public class WebServer implements UIPlugin {
     private SecurityHandler basicAuth() {
 
         HashLoginService l = new HashLoginService();
+        
+        // First, load PC2 accounts into jetty - this will allow PC2 users to use the API with their login id
+        //    Only teams, admins and judges
+        Account[] accounts = contest.getAccounts();
+        String role;
+        Type clientType;
+        
+        for (Account account: accounts) {
+            clientType = account.getClientId().getClientType();
+            if (clientType == Type.TEAM) {
+                role = WEBAPI_ROLE_TEAM;
+            } else if (clientType == Type.ADMINISTRATOR) {
+                role = WEBAPI_ROLE_ADMIN;
+            } else if (clientType == Type.JUDGE) {
+                role = WEBAPI_ROLE_JUDGE;
+            } else {
+                continue;
+            }
+            l.putUser(account.getClientId().getName(), new Password(account.getPassword()), new String [] { role });
+        }
+        
+        // now load any special ones from the realm file
         File f = new File("realm.properties");
         if (f.exists() && f.isFile() && f.canRead()) {
             showMessage("Loading " + f.getAbsolutePath());
@@ -312,7 +337,7 @@ public class WebServer implements UIPlugin {
         } else {
             showMessage("WARNING: Cannot read " + f.getAbsolutePath());
         }
-
+        
         Constraint constraintPublic = new Constraint();
         constraintPublic.setName(Constraint.__BASIC_AUTH);
         constraintPublic.setRoles(new String[] { 
