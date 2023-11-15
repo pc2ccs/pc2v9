@@ -1,11 +1,8 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -47,21 +44,10 @@ public class CLICSClarification {
     @JsonProperty
     private String contest_time;
 
-    public CLICSClarification() {
-        // for jackson deserialize
-    }
-    
     public CLICSClarification(IInternalContest model, Clarification clar) {
         this(model, clar, null);
     }
 
-    /**
-     * Fills in the clarification properties
-     * 
-     * @param model The contest
-     * @param clar The clarification
-     * @param clarAns non-null if this is an answer
-     */
     public CLICSClarification(IInternalContest model, Clarification clar, ClarificationAnswer clarAns) {
         
         // use last answer if we were not handed the answer
@@ -74,6 +60,7 @@ public class CLICSClarification {
                 }
             }            
         }
+        ObjectMapper mapper = new ObjectMapper();
         
         // SOMEDAY change id to a original?  WTF does that mean? -- JB
         id = clar.getElementId().toString();
@@ -105,38 +92,6 @@ public class CLICSClarification {
         }
     }
     
-    public String getId() {
-        return id;
-    }
-    
-    public String getFrom_team_id() {
-        return from_team_id;
-    }
-
-    public String getTo_team_id() {
-        return to_team_id;
-    }
-
-    public String getReply_to_id() {
-        return reply_to_id;
-    }
-
-    public String getProblem_id() {
-        return problem_id;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public String getContest_time() {
-        return contest_time;
-    }
-
     public String toJSON() {
 
         try {
@@ -145,24 +100,5 @@ public class CLICSClarification {
         } catch (Exception e) {
             return "Error creating JSON for version info " + e.getMessage();
         }
-    }
-    
-    /**
-     * Create CLICSClarification object
-     * 
-     * @param json string to deserialize
-     * @return new CLICSClarification object
-     */
-    public static CLICSClarification fromJSON(String json) {
-        Log log = StaticLog.getLog();
-        
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return(mapper.readValue(json, CLICSClarification.class));
-            // deserialize exceptions
-        } catch (Exception e) {
-            log.log(Log.WARNING, "could not deserialize clarification string " + json, e);
-        }        
-        return(null);
     }
 }

@@ -24,7 +24,6 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
-import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
  * WebService for handling teams
