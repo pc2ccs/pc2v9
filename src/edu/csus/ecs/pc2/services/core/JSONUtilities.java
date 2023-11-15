@@ -2,7 +2,10 @@
 package edu.csus.ecs.pc2.services.core;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +15,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import edu.csus.ecs.pc2.clics.API202306.CLICSClarification;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -54,6 +58,8 @@ public class JSONUtilities {
     public static final String AWARD_KEY = "awards";
     
     public static final String ORGANIZATION_KEY = "organizations";
+    
+    public static final String JSON_ANNOTATION_INTERFACE = ".JsonProperty";
     
     public static ObjectMapper mapper = null;
 
@@ -403,5 +409,41 @@ public class JSONUtilities {
         String json = getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(JSONObject);
         return json;
     }
+    
+    /**
+     * Get list of @jsonProperty's for a class.  This list is used to support the Access endpoint.
+     * @param c The class to look through for jsonproperty's
+     * @return array of Stings where each one is a json property, null if none.
+     */
+    public static String [] getJsonProperties(Class c) {
+        Field [] fields = CLICSClarification.class.getDeclaredFields();
+        Field f;
+        int i, n = fields.length;
+        int ia, na;
+        Annotation [] alist = null;
+        Annotation a;
+        ArrayList<String> aResult = new ArrayList<String>();
+        for(i = 0; i < n; i++) {
+            f = fields[i];
+            alist = f.getAnnotations();
+            na = alist.length;
+            for(ia = 0; ia < na; ia++) {
+                a = alist[ia];
+                Class<? extends Annotation> ca = a.annotationType();
+                String cn = ca.getName();
+                // if the property was annotated with the jsonproperty interface from Jackson, we want it. 
+                if(cn.endsWith(JSON_ANNOTATION_INTERFACE)) {
+                    String pn = f.getName();
+                    aResult.add(pn);
+                    break;
+                }
+            }
+        }
+        if(aResult.size() == 0) {
+            return(null);
+        }
+        return(aResult.toArray(new String [0]));
+    }
+    
 
 }
