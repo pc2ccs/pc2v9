@@ -65,10 +65,7 @@ public class StateService implements Feature {
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
     public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        // All properties are available to everyone
-        String [] props = { "started", "frozen", "ended", "thawed", "finalized", "end_of_updates" };
-        
-        return(new CLICSEndpoint("state", props));
+        return(new CLICSEndpoint("state", JSONUtilities.getJsonProperties(CLICSContestState.class)));
     }
 
     /**
