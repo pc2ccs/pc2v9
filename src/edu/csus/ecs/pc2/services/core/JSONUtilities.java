@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import edu.csus.ecs.pc2.clics.API202306.CLICSClarification;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -415,7 +416,7 @@ public class JSONUtilities {
      * @return array of Stings where each one is a json property, null if none.
      */
     public static String [] getJsonProperties(Class c) {
-        Field [] fields = c.getDeclaredFields();
+        Field [] fields = CLICSClarification.class.getDeclaredFields();
         Field f;
         int i, n = fields.length;
         int ia, na;

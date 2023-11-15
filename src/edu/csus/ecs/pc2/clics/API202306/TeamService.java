@@ -119,10 +119,7 @@ public class TeamService implements Feature {
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
     public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        // All properties are available to anyone for now.  Maybe restrict some info like groups or organization someday?
-        String [] props = { "id", "icpc_id", "name", "label", "display_name", "organization_id", "group_ids", "hidden" };
-        
-        return(new CLICSEndpoint("teams", props));
+        return(new CLICSEndpoint("teams", JSONUtilities.getJsonProperties(CLICSTeam.class)));
     }
 
     /**
