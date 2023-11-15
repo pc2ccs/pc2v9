@@ -415,7 +415,7 @@ public class JSONTool {
         return element;
     }
 
-    public String getProblemId(Problem problem) {
+    public static String getProblemId(Problem problem) {
         String id = problem.getElementId().toString();
         // if we have a problem shortName use it, otherwise default to the internal id
         if (notEmpty(problem.getShortName())) {
