@@ -67,6 +67,19 @@ public class StateService implements Feature {
     public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
         return(new CLICSEndpoint("state", JSONUtilities.getJsonProperties(CLICSContestState.class)));
     }
+    
+    /**
+     * Retrieve access information about this endpoint for the supplied user's security context
+     * 
+     * @param sc User's security information
+     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
+     */
+    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
+        // All properties are available to everyone
+        String [] props = { "started", "frozen", "ended", "thawed", "finalized", "end_of_updates" };
+        
+        return(new CLICSEndpoint("state", props));
+    }
 
     @Override
     public boolean configure(FeatureContext arg0) {
