@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
+import java.util.ArrayList;
+
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -12,23 +14,24 @@ import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
+import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
  * WebService to handle problems
  * 
- * @author ICPC
+ * @author John Buck
  *
  */
-@Path("/contest/problems")
+@Path("/contests/{contestId}/problems")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
@@ -50,49 +53,68 @@ public class ProblemService implements Feature {
 
     /**
      * This method returns a representation of the current contest problems in JSON format. The returned value is a JSON array with one problems description per array element, matching the description
-     * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#.2Fproblems}.
+     * at {@link https://ccs-specs.icpc.io/2023-06/contest_api}.
      * 
      * @return a {@link Response} object containing the contest problems in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProblems(@Context SecurityContext sc) {
+    public Response getProblems(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
 
         // get the problems from the contest
         Problem[] problems = model.getProblems();
-
-        // get an object to map the problems descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
+        int ord = 1;
+        ArrayList<CLICSProblem> problist = new ArrayList<CLICSProblem>();
+        
         // public only gets the problems when the contest starts
-        if (!sc.isUserInRole("public") || model.getContestTime().isContestStarted()) {
-            for (int i = 0; i < problems.length; i++) {
-                Problem problem = problems[i];
+        if (sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) || model.getContestTime().isContestStarted()) {
+            for (Problem problem: problems) {
                 if (problem.isActive()) {
-                    childNode.add(jsonTool.convertToJSON(problem, i));
+                    problist.add(new CLICSProblem(model, problem, ord));
+                    ord++;
                 }
             }
         }
-        // output the response to the requester (note that this actually returns it to Jersey,
-        // which forwards it to the caller as the HTTP response).
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
+        try {
+            ObjectMapper mapper = JSONUtilities.getObjectMapper();
+            String json = mapper.writeValueAsString(problist);
+            return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for problems " + e.getMessage()).build();
+        }
     }
 
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("{problemId}/")
-    public Response getProblem(@Context SecurityContext sc, @PathParam("problemId") String problemId) {
+    public Response getProblem(@Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("problemId") String problemId) {
         // get the problems from the contest
         Problem[] problems = model.getProblems();
-
-        for (int i = 0; i < problems.length; i++) {
-            Problem problem = problems[i];
+        int ord = 1;
+        for (Problem problem: problems) {
             // match by ID
-            if (problem.isActive() && jsonTool.getProblemId(problem).equals(problemId)) {
-                return Response.ok(jsonTool.convertToJSON(problem, i).toString(), MediaType.APPLICATION_JSON).build();
+            if (problem.isActive()) {
+                if(JSONTool.getProblemId(problem).equals(problemId)) {
+                    try {
+                        return Response.ok(JSONUtilities.getObjectMapper().writeValueAsString(new CLICSProblem(model, problem, ord)), MediaType.APPLICATION_JSON).build();
+                    } catch(Exception e) {
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for problem " + problemId + " in contest " + contestId + ": " + e.getMessage()).build();                    
+                    }
+                }
+                ord++;
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    
+    /**
+     * Retrieve access information about this endpoint for the supplied user's security context
+     * 
+     * @param sc User's security information
+     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
+     */
+    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
+        return(new CLICSEndpoint("problems", JSONUtilities.getJsonProperties(CLICSProblem.class)));
     }
 
     @Override
