@@ -536,7 +536,7 @@ public class ContestService implements Feature {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("{contestId}/")
-    public Response getTeam(@PathParam("contestId") String contestId) {
+    public Response getContest(@PathParam("contestId") String contestId) {
         
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == true) {

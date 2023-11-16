@@ -42,18 +42,6 @@ public class ResourceConfig202306 implements ICLICSResourceConfig {
         ResourceConfig resConfig = new ResourceConfig();
         resConfig.register(RolesAllowedDynamicFeature.class);
 
-        // add each of the enabled services to the config:
-
-        if (wsPropUtilities.getBooleanProperty(WebServerPropertyUtils.STARTTIME_SERVICE_ENABLED_KEY, false)) {
-            resConfig.register(new StarttimeService(getContest(), getController()));
-            showMessage("Starting /starttime web service");
-        }
-
-        if (wsPropUtilities.getBooleanProperty(WebServerPropertyUtils.FETCH_RUN_SERVICE_ENABLED_KEY, false)) {
-            resConfig.register(new FetchRunService(getContest(), getController()));
-            showMessage("Starting /fetchRun web service");
-        }
-
         // CLICS Contest API services are collective -- either all enabled or all disabled (and default to enabled if unspecified)
         if (wsPropUtilities.getBooleanProperty(WebServerPropertyUtils.CLICS_CONTEST_API_SERVICES_ENABLED_KEY, true)) {
 

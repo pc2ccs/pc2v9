@@ -47,7 +47,12 @@ public class AccessService implements Feature {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAccess(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
-        return Response.ok(new CLICSContestAccess(sc, model, controller, contestId).toJSON(), MediaType.APPLICATION_JSON).build();
+
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == true) {
+            return Response.ok(new CLICSContestAccess(sc, model, controller, contestId).toJSON(), MediaType.APPLICATION_JSON).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();        
     }
 
     @Override
