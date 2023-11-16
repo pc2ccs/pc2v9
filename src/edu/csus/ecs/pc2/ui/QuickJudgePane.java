@@ -578,7 +578,8 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
     private JButton getJudgementSubmittedButton() {
         if (judgementSubmittedButton == null) {
             judgementSubmittedButton = new JButton();
-            judgementSubmittedButton.setText("Submit");
+            judgementSubmittedButton.setToolTipText("Update judgements on selected runs");
+            judgementSubmittedButton.setText("Update judgement");
             judgementSubmittedButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     judgeSelectedRuns();
@@ -763,6 +764,7 @@ public class QuickJudgePane extends JPanePlugin implements UIPlugin {
     private JButton getRejudgeButton() {
         if (rejudgeButton == null) {
             rejudgeButton = new JButton("Rejudge");
+            rejudgeButton.setToolTipText("Rejudge selected runs");
             rejudgeButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
 
