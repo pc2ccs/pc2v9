@@ -33,7 +33,7 @@ public class FileComparison {
     long numberDifferences;
 
     @JsonProperty
-    long numberComparedRecorderds;
+    long numberComparedRecords;
     
     @JsonProperty
     private List<FieldCompareRecord> comparedFields = new ArrayList<FieldCompareRecord>();
@@ -55,7 +55,7 @@ public class FileComparison {
         
         comparedFields.add(fieldCompareRecord);
         
-        numberComparedRecorderds ++;
+        numberComparedRecords ++;
         if (!ComparisonState.SAME.equals(fieldCompareRecord.getState())){
                 numberDifferences++;
         }
@@ -90,12 +90,12 @@ public class FileComparison {
         this.comparedFields = comparedFields;
     }
     
-    public long getNumberComparedRecorderds() {
-        return numberComparedRecorderds;
+    public long getNumberComparedRecords() {
+        return numberComparedRecords;
     }
     
-    public void setNumberComparedRecorderds(long numberComparedRecorderds) {
-        this.numberComparedRecorderds = numberComparedRecorderds;
+    public void setNumberComparedRecords(long numberComparedRecords) {
+        this.numberComparedRecords = numberComparedRecords;
     }
     
     public long getNumberRows() {
