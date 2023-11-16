@@ -55,6 +55,10 @@ public class TeamService implements Feature {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTeams(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
 
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();        
+        }
         // get the team accounts from the model
         Account[] accounts = model.getAccounts();
 
@@ -80,14 +84,18 @@ public class TeamService implements Feature {
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("{teamId}/")
     public Response getTeam(@Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("teamId") String teamId) {
-        // get the team accounts from the model
-        Account[] accounts = model.getAccounts();
 
-        for (int i = 0; i < accounts.length; i++) {
-            Account account = accounts[i];
-            // TODO multi-site with overlapping teamNumbers?
-            if(teamId.equals("" + account.getClientId().getClientNumber())) {
-                return Response.ok(new CLICSTeam(model, account).toJSON(), MediaType.APPLICATION_JSON).build();
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == true) {
+            // get the team accounts from the model
+            Account[] accounts = model.getAccounts();
+    
+            for (int i = 0; i < accounts.length; i++) {
+                Account account = accounts[i];
+                // TODO multi-site with overlapping teamNumbers?
+                if(teamId.equals("" + account.getClientId().getClientNumber())) {
+                    return Response.ok(new CLICSTeam(model, account).toJSON(), MediaType.APPLICATION_JSON).build();
+                }
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();

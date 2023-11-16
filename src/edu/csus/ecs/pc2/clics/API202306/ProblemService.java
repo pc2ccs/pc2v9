@@ -61,6 +61,10 @@ public class ProblemService implements Feature {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProblems(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
 
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();        
+        }
         // get the problems from the contest
         Problem[] problems = model.getProblems();
         int ord = 1;

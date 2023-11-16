@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,8 +9,8 @@ import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * CLICS Clarification
- * Contains information about a clarification
+ * CLICS Problem
+ * Contains information about a Problem
  * 
  * @author John Buck
  *
@@ -43,7 +44,7 @@ public class CLICSProblem {
     @JsonProperty
     private int test_data_count;
 
-// only for "score" type contests, N/A for pc2/wf type contests    
+// only for "score" type contests, N/A for pc2/wf pass-fail type contests    
 //    @JsonProperty
 //    private int max_score;
 
@@ -55,7 +56,7 @@ public class CLICSProblem {
     private CLICSFileReference [] statement;
 
     public CLICSProblem(IInternalContest model, Problem problem, int ordinal) {
-        // {"id":"asteroids","label":"A","name":"Asteroid Rangers","ordinal":1,"color":"blue","rgb":"#00f","test_data_count":10}
+        // {"id":"asteroids","label":"A","name":"Asteroid Rangers","ordinal":1,"color":"blue","rgb":"#00000f","test_data_count":10,"time_limit":2 }
         id = JSONTool.getProblemId(problem);
         label = problem.getLetter();
         name = problem.getDisplayName();
