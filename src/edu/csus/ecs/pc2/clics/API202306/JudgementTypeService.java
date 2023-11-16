@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
+import java.util.ArrayList;
+
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -10,6 +12,7 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +22,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * WebService to handle languages
@@ -26,7 +30,7 @@ import edu.csus.ecs.pc2.core.util.JSONTool;
  * @author ICPC
  *
  */
-@Path("/contest/judgement-types")
+@Path("/contests/{contestId}/judgement-types")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
@@ -36,13 +40,10 @@ public class JudgementTypeService implements Feature {
 
     private IInternalController controller;
 
-    private JSONTool jsonTool;
-
     public JudgementTypeService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
         this.controller = inController;
-        jsonTool = new JSONTool(model, controller);
     }
 
     /**
@@ -53,37 +54,47 @@ public class JudgementTypeService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getJudgementTypes() {
+    public Response getJudgementTypes(@PathParam("contestId") String contestId) {
 
-        // get the groups from the contest
-        Judgement[] judgements = model.getJudgements();
-
-        // get an object to map the groups descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
-        for (int i = 0; i < judgements.length; i++) {
-            Judgement judgement = judgements[i];
-            if (judgement.isActive()) {
-                childNode.add(jsonTool.convertToJSON(judgement));
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();        
+        }
+        
+        ArrayList<CLICSJudgmentType> jlist = new ArrayList<CLICSJudgmentType>();
+        
+        for(Judgement judgment: model.getJudgements()) {
+            if (judgment.isActive()) {
+                jlist.add(new CLICSJudgmentType(model, judgment));
             }
         }
-
-        // output the response to the requester (note that this actually returns it to Jersey,
-        // which forwards it to the caller as the HTTP response).
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
+        try {
+            ObjectMapper mapper = JSONUtilities.getObjectMapper();
+            String json = mapper.writeValueAsString(jlist);
+            return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for judgment-types " + e.getMessage()).build();
+        }
     }
 
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("{judgementId}/")
-    public Response getJudgementType(@PathParam("judgementId") String judgementType) {
-        // get the judgements from the contest
-        Judgement[] judgements = model.getJudgements();
+    @Path("{judgmentId}/")
+    public Response getJudgementType(@PathParam("contestId") String contestId, @PathParam("judgmentId") String judgmentType) {
 
-        for (int i = 0; i < judgements.length; i++) {
-            Judgement judgement = judgements[i];
-            if (jsonTool.getJudgementType(judgement).equals(judgementType) && judgement.isActive()) {
-                return Response.ok(jsonTool.convertToJSON(judgement).toString(), MediaType.APPLICATION_JSON).build();
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == true) {
+        
+            for(Judgement judgment: model.getJudgements()) {
+                if (judgment.isActive() && JSONTool.getJudgementType(judgment).equals(judgmentType)) {
+                    try {
+                        ObjectMapper mapper = JSONUtilities.getObjectMapper();
+                        String json = mapper.writeValueAsString(new CLICSJudgmentType(model, judgment));
+                        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                    } catch (Exception e) {
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for judgment-type " + judgmentType + " " + e.getMessage()).build();
+                    }
+                }
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();

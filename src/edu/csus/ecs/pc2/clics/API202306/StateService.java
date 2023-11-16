@@ -48,6 +48,11 @@ public class StateService implements Feature {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getState(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
+
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();        
+        }
         return Response.ok(new CLICSContestState(model).toJSON(), MediaType.APPLICATION_JSON).build();
     }
     
