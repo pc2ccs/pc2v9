@@ -514,11 +514,11 @@ public class JSONTool {
     /**
      * Get judgement type (acronym).
      */
-    public String getJudgementType(Judgement judgement) {
+    public static String getJudgementType(Judgement judgement) {
         return judgement.getAcronym();
     }
 
-    public String getLanguageId(Language language) {
+    public static String getLanguageId(Language language) {
         String key = language.getID();
         if (key == null || key.trim().equals("")) {
             key = language.getElementId().toString();
