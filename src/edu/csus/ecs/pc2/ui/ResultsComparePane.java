@@ -230,8 +230,7 @@ public class ResultsComparePane extends JPanePlugin {
 
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Exception compare results" + e.getMessage(), e);
-            FrameUtilities.showExceptionMessage(this, "Problem comparing results", "Error reading or comparing results " + e.getMessage(), e);
-
+            FrameUtilities.showExceptionMessage(this, "Problem comparing results", "Error reading or comparing results." + Constants.NL + e.getMessage(), e);
         }
         
     }
@@ -386,7 +385,6 @@ public class ResultsComparePane extends JPanePlugin {
     protected void viewCompareResultsFiles() {
 
         String pc2ResultsDirectory = pc2ResultsDirectoryTextField.getText();
-
         String primaryCCSDirectory = primaryCCSResultsDirectoryTextField.getText();
 
         if (showErrorMessage("Enter a primary CCS results directory", StringUtilities.isEmpty(primaryCCSDirectory))) {
@@ -404,15 +402,21 @@ public class ResultsComparePane extends JPanePlugin {
         if (showErrorMessage("Missing pc2 directory - use Export Results to create results files", !FileUtilities.isDirectory(pc2ResultsDirectory))) {
             return;
         }
-
+        
         try {
-            
             ResultsCompareReport report = new ResultsCompareReport(getContest(), getController(), primaryCCSDirectory, pc2ResultsDirectory, showDetailsCheckbox.isSelected(), MISSING_SOURCE_TITLE, MISSING_TARGET_TITLE);
-            Utilities.viewReport(report, report.getPluginTitle(), getContest(), getController(), true);
+         
+            try {
+                report.validateInput(); 
+                
+                Utilities.viewReport(report, report.getPluginTitle(), getContest(), getController(), true);
+            } catch (Exception e) {
+                throw e;
+            }
+            
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Exception trying export and compare results" + e.getMessage(), e);
-            FrameUtilities.showExceptionMessage(this, "Problem comparing results", "Error reading or comparing results " + e.getMessage(), e);
-
+            FrameUtilities.showExceptionMessage(this, "Problem comparing results", "Error reading or comparing results." + Constants.NL + e.getMessage(), e);
         }
     }
 
@@ -431,7 +435,7 @@ public class ResultsComparePane extends JPanePlugin {
      */
     private boolean showErrorMessage(String message, boolean showMessage) {
         if (showMessage) {
-            FrameUtilities.showMessage(this, "Correct error, then try again", message);
+            FrameUtilities.showMessage(this, "Correct error, then try again.  ", message);
         }
         return showMessage;
     }

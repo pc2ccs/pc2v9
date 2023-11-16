@@ -36,6 +36,8 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 public class FileComparisonUtilities {
     
     
+    private static final String CONTEST_NOT_FINALIZED_MESSAGE = "Contest not finalized cannot create awards";
+
     public static FileComparison createScoreboardJSONFileComparison(String jsonFilename, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
 
         String firstFilename = sourceDir + File.separator + jsonFilename;
@@ -414,6 +416,11 @@ public class FileComparisonUtilities {
         return fileComparison;
     }
 
+    
+    public static void validateResultsTSVFileContents(String filename) throws IOException {
+        String[] lines = Utilities.loadFile(filename);
+        validateResultsTSVFileContents(filename, lines);
+    }
 
     /**
      * Validate results tsv file contents, if invalid throws exception 
@@ -433,8 +440,12 @@ public class FileComparisonUtilities {
                 String[] fields = line.split(Constants.TAB);
                 
                 if (fields.length < 6) {
-                    throw new RuntimeException("Invalid results TSV line, too few fields "+fields.length+Constants.NL+ //
-                            " line: '"+line+"'"+Constants.NL+" in file "+filename);
+                    if (CONTEST_NOT_FINALIZED_MESSAGE.contentEquals(line)){
+                        throw new RuntimeException("Invalid results TSV file contents. " + Constants.NL + " in file " + filename);
+                    } else {
+                        throw new RuntimeException("Invalid results TSV file contents.  too few fields "+fields.length+Constants.NL+ //
+                                " line: '"+line+"'"+Constants.NL+" in file "+filename);
+                    }
                 }
             }
             linenum ++;
@@ -514,7 +525,10 @@ public class FileComparisonUtilities {
             List<CLICSScoreboard> list = getCLICSScoreboardList(filename);
             return list;
         } catch (Exception e) {
-            throw ExecuteUtilities.rethrow(e);
+            ExecuteUtilities.rethrow(e); // throws a RunTimeException, so no more code after this 
+            // compiler requires this dead code.   
+            return new ArrayList<CLICSScoreboard>(); 
+            
         }
     }
     

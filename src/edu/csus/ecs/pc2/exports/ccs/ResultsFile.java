@@ -117,7 +117,7 @@ public class ResultsFile {
         try {
             standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
         } catch (Exception e) {
-            throw new RuntimeException("Unable to generate statndings ", e.getCause());
+            throw new RuntimeException("Unable to generate standings ", e.getCause());
         }
         
         int median = getMedian(standingsRecords);

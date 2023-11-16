@@ -59,6 +59,49 @@ public class ResultsCompareReport implements IReport {
         this(contest, controller, primaryCCSResultsDir, pc2ResultsDir, fullDetails, null, null);
     }
     
+    /**
+     * Validate input for report, check parameters, check for missing dirs and invalid input files.
+     */
+    public void validateInput() {
+
+        String sourceDir = pc2ResultsDir;
+        String targetDir = primaryCCSResultsDir;
+
+        if (targetDir == null) {
+            throw new RuntimeException("Primary CCS directory is not assigned (is null)");
+        }
+
+        if (sourceDir == null) {
+            throw new RuntimeException("PC2 directory is not assigned (is null)");
+        }
+
+        if (!Utilities.isDirThere(targetDir)) {
+            throw new RuntimeException("Primary CCS results dir: " + primaryCCSResultsDir + " does not exist");
+        }
+
+        if (!Utilities.isDirThere(sourceDir)) {
+            throw new RuntimeException("PC2 results dir: " + sourceDir + " does not exist");
+        }
+
+        if (primaryCCSResultsDir == null || !(new File(primaryCCSResultsDir).isDirectory())) {
+            throw new RuntimeException("Primary CCS Results directory not defined or not a directory");
+        }
+
+        if (pc2ResultsDir == null || !(new File(pc2ResultsDir).isDirectory())) {
+            throw new RuntimeException("pc2 Results directory not defined or not a directory");
+        }
+
+        ResultTSVKey resultTSVKey = new FileComparisonUtilities.ResultTSVKey();
+        AwardKey awardsKey = new FileComparisonUtilities.AwardKey();
+        ScoreboardJSONKey scoreboardKey = new FileComparisonUtilities.ScoreboardJSONKey();
+
+        // Do comparison, will throw Exception if there are problems comparing files
+        FileComparisonUtilities.createTSVFileComparison(ResultsFile.RESULTS_FILENAME, sourceDir, targetDir, resultTSVKey);
+        FileComparisonUtilities.createAwardJSONFileComparison(Constants.AWARDS_JSON_FILENAME, sourceDir, targetDir, awardsKey);
+        FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
+
+    }
+    
     public ResultsCompareReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir, boolean fullDetails, String missingSourceMessage,
             String missingTargetMessage) {
         super();

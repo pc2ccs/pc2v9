@@ -54,7 +54,7 @@ public class ExportFilesUtiltiites {
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Problem writing results file", e);
             Utilities.printStackTrace(System.out, e);
-            throw ExecuteUtilities.rethrow(e);
+            ExecuteUtilities.rethrow(e);
         }
 
         try {
@@ -68,7 +68,7 @@ public class ExportFilesUtiltiites {
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Problem writing scorebord file", e);
             Utilities.printStackTrace(System.out, e);
-            throw ExecuteUtilities.rethrow(e);
+            ExecuteUtilities.rethrow(e);
         }
 
         try {
@@ -82,8 +82,7 @@ public class ExportFilesUtiltiites {
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Problem writing awards file", e);
             Utilities.printStackTrace(System.out, e);
-
-            throw ExecuteUtilities.rethrow(e);
+            ExecuteUtilities.rethrow(e);
         }
 
         return (String[]) filesCreated.toArray(new String[filesCreated.size()]);

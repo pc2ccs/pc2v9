@@ -722,6 +722,7 @@ public final class Utilities {
     public static void viewReport(IReport report, String title, IInternalContest contest, IInternalController controller, boolean printHeaderAndFooter) {
 
         try {
+            
             String filename = createReport(report, contest, controller, printHeaderAndFooter);
 
             MultipleFileViewer multipleFileViewer = new MultipleFileViewer(controller.getLog());
