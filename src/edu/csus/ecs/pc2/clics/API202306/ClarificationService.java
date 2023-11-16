@@ -58,6 +58,11 @@ public class ClarificationService implements Feature {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getClarifications(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
 
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();        
+        }
+        
         // get the groups from the contest
         Clarification[] clarifications = model.getClarifications();
         
