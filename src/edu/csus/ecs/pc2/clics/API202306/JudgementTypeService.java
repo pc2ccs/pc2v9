@@ -46,10 +46,10 @@ public class JudgementTypeService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest groups in JSON format. The returned value is a JSON array with one language description per array element, matching the description
-     * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
+     * This method returns a representation of the current contest groups in JSON format. The returned value is a JSON array with one judgement-type description per array element, complying with 2023-06
      * 
-     * @return a {@link Response} object containing the contest languages in JSON form
+     * @param contestId contest for which judgment types are requested
+     * @return a {@link Response} object containing the contest judgement-types in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -76,6 +76,13 @@ public class JudgementTypeService implements Feature {
         }
     }
 
+    /**
+     * Return a response describing the judgement-type information for the specified contest and judgement-type
+     * 
+     * @param contestId The contest
+     * @param judgmentType Acronym, such as RTE, TLE, AC
+     * @return
+     */
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("{judgmentId}/")

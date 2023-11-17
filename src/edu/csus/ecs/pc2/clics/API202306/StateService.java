@@ -43,6 +43,8 @@ public class StateService implements Feature {
     /**
      * This method returns a representation of the current contest state in JSON format as described on the CLICS wiki.
      * 
+     * @param sc user information
+     * @param contestId The contest
      * @return a {@link Response} object containing a JSON String giving the scheduled contest start time as a Unix Epoch value, or as the string "undefined" if no start time is currently scheduled.
      */
     @GET

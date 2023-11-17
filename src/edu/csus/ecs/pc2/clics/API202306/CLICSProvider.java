@@ -26,6 +26,11 @@ public class CLICSProvider {
 //  @JsonProperty
 //  private CLICSProviderLogo [] logos;
 
+    /**
+     * Fill in API Provider information properties (for the version endpoint)
+     * 
+     * @param versionInfo
+     */
     public CLICSProvider(VersionInfo versionInfo) {
         name = "pc2";
         version = versionInfo.getPC2Version() + " build " + versionInfo.getBuildNumber(); 

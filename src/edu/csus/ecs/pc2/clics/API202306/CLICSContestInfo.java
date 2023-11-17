@@ -50,7 +50,12 @@ public class CLICSContestInfo {
 
     @JsonProperty
     private int penalty_time;
-   
+
+    /**
+     * Fill in properties for a contest.
+     * 
+     * @param model The contest to use
+     */
     public CLICSContestInfo(IInternalContest model) {
         ContestInformation ci = model.getContestInformation();
         

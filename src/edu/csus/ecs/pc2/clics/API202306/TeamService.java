@@ -49,6 +49,8 @@ public class TeamService implements Feature {
     /**
      * This method returns a representation of the current model teams in JSON format. The returned value is a JSON array with one team description per array element.
      * 
+     * @param sc user information
+     * @param contestId the contest for which the teams are requested
      * @return a {@link Response} object containing the model teams in JSON form
      */
     @GET
@@ -80,6 +82,14 @@ public class TeamService implements Feature {
         }
     }
 
+    /**
+     * Return response to the request for information about a specific teamid in a specific contestid
+     * 
+     * @param sc user information
+     * @param contestId the contest
+     * @param teamId the team id
+     * @return response
+     */
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("{teamId}/")

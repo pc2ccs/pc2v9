@@ -102,6 +102,10 @@ public class ResourceConfig202306 implements ICLICSResourceConfig {
         getLog().info(message);
     }
 
+    /**
+     * Shorthand method to print (gack!) a message to the console indicating we are starting a service
+     * @param message The name of the service
+     */
     private void showStartingMessage(String message) {
         String startingMessage = "Starting /contests/" + contest.getContestIdentifier() + "/" + message;
         System.out.println(new Date() + " " + startingMessage);
