@@ -100,7 +100,7 @@ public class ClarificationService implements Feature {
      * @return a {@link Response} object containing the contest languages in JSON form
      */
     @GET
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{clarificationId}/")
     public Response getClarification(@Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("clarificationId") String clarificationId) {
         // get the groups from the contest
