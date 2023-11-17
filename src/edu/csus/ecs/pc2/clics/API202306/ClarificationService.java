@@ -49,9 +49,10 @@ public class ClarificationService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest clarifications in JSON format. The returned value is a JSON array with one clarification description per array element, matching the description
-     * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
+     * This method returns a representation of the current contest clarifications in JSON format. The returned value is a JSON array with one clarification description per array element, complying with 2023-06
      * 
+     * @param sc security info for the user making the request
+     * @param contestId Contest for which info is requested
      * @return a {@link Response} object containing the contest languages in JSON form
      */
     @GET
@@ -89,6 +90,15 @@ public class ClarificationService implements Feature {
         }
     }
 
+
+    /**
+     * This method returns a representation of the current contest clarification requested in JSON format. The returned value is a single clarification in json, Complying with 2023-06
+     * 
+     * @param sc security info for the user making the request
+     * @param contestId Contest for which info is requested
+     * @param clarificationId the id of the desired clarification
+     * @return a {@link Response} object containing the contest languages in JSON form
+     */
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("{clarificationId}/")
