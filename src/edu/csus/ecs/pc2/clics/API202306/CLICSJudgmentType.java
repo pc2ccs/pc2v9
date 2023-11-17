@@ -5,17 +5,9 @@ import java.util.Properties;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.model.Clarification;
-import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
-import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
-import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
