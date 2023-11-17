@@ -24,7 +24,12 @@ public class CLICSVerionInfo {
 
     @JsonProperty
     private CLICSProvider provider;
-    
+ 
+    /**
+     * Fill in the API version information properties
+     * 
+     * @param versionInfo
+     */
     public CLICSVerionInfo(VersionInfo versionInfo) {
         provider = new CLICSProvider(versionInfo);
         version = ResourceConfig202306.CLICS_API_VERSION;

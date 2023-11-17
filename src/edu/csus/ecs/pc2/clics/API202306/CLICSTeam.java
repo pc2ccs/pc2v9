@@ -49,6 +49,7 @@ public class CLICSTeam {
     /**
      * Fill in properties for team as per 2023-06 spec
      * 
+     * @param model The contest
      * @param account team information
      */
     public CLICSTeam(IInternalContest model, Account account) {

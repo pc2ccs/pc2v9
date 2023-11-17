@@ -22,6 +22,12 @@ public class CLICSEndpoint {
     @JsonProperty
     private String [] properties;
 
+    /**
+     * For use with the access endpoint.  This describes the properties of a single endpoint.
+     * 
+     * @param type String representing the name of the endpoint, eg. "teams", "groups", etc.
+     * @param properties List of supported properties
+     */
     public CLICSEndpoint(String type, String [] properties) {
         this.type = type;
         this.properties = properties;

@@ -31,6 +31,11 @@ public class CLICSJudgmentType {
     @JsonProperty
     private boolean solved;
 
+    /**
+     * Fill in properties for a judgement-type, eg. "TLE", "RTE", etc.
+     * @param model The contest
+     * @param judgment The judgment type
+     */
     public CLICSJudgmentType(IInternalContest model, Judgement judgment) {
  
         name = judgment.getDisplayName();
