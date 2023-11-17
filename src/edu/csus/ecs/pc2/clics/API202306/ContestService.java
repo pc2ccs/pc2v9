@@ -125,6 +125,12 @@ public class ContestService implements Feature {
      * // 403: if setting to new (defined) start time with less than 30s left to previous start time.
      * // 403: if the new start time is less than 30s from now.
      *         </pre>
+     *         
+     * @param servletRequest
+     * @param sc
+     * @param contestId
+     * @param jsonInputString
+     * @return
      */
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
@@ -230,8 +236,10 @@ public class ContestService implements Feature {
     /**
      * Process contest start time
      * 
+     * @param sc
      * @param contestId which contest
      * @param startTimeValueString new contest start time (ISO format) or null to make it undefined
+     * @param sawCountdownPauseTime
      * @return web response
      */
     private Response HandleContestStartTime(SecurityContext sc, String contestId, String startTimeValueString, boolean sawCountdownPauseTime) {
@@ -363,6 +371,7 @@ public class ContestService implements Feature {
     /**
      * Process Contest count down pause
      * 
+     * @param sc User information
      * @param contestId which contest
      * @param countdownPauseTime how long before contest start should the count down pause (CLICS RELTIME value) 
      * @return web resposne
@@ -394,6 +403,7 @@ public class ContestService implements Feature {
     /**
      * Process contest thaw time and generate response
      * 
+     * @param sc User information
      * @param contestId which contest
      * @param thawTimeValue ISO date of when the contest should unfreeze
      * @return web response
@@ -533,6 +543,11 @@ public class ContestService implements Feature {
         }
     }
 
+    /**
+     * Returns a response with the information for the specified contestId
+     * 
+     * contestId contest for which information is requested
+     */
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("{contestId}/")

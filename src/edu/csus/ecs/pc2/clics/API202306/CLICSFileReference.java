@@ -34,6 +34,12 @@ public class CLICSFileReference {
     @JsonProperty
     private int height;
 
+    /**
+     * Fills in properties for a CLICS FILE reference.  Currently, we only support Filename and Mime type.
+     * 
+     * @param filename
+     * @param mime
+     */
     public CLICSFileReference(String filename, String mime) {
         this.filename = filename;
         this.mime = mime;

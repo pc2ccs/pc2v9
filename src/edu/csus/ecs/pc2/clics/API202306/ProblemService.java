@@ -52,9 +52,10 @@ public class ProblemService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest problems in JSON format. The returned value is a JSON array with one problems description per array element, matching the description
-     * at {@link https://ccs-specs.icpc.io/2023-06/contest_api}.
+     * This method returns a representation of the current contest problems in JSON format. The returned value is a JSON array with one problems description per array element, compying with 2023-06
      * 
+     * @param sc User information
+     * @param contestId The contest
      * @return a {@link Response} object containing the contest problems in JSON form
      */
     @GET
@@ -88,6 +89,14 @@ public class ProblemService implements Feature {
         }
     }
 
+    /**
+     * Return the reponse to a request for a single problem's information for the specified contest and problem id.
+     * 
+     * @param sc user info
+     * @param contestId the contest
+     * @param problemId the problem id desired
+     * @return response
+     */
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("{problemId}/")
