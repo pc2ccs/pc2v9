@@ -49,6 +49,13 @@ public class CLICSClarification {
         this(model, clar, null);
     }
 
+    /**
+     * Fills in the clarification properties
+     * 
+     * @param model The contest
+     * @param clar The clarification
+     * @param clarAns non-null if this is an answer
+     */
     public CLICSClarification(IInternalContest model, Clarification clar, ClarificationAnswer clarAns) {
         
         // use last answer if we were not handed the answer

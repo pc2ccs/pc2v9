@@ -42,11 +42,14 @@ public class CLICSContestAccess {
     private CLICSEndpoint [] endpoints;
 
     IInternalController controller = null;
-    
+       
     /**
      * Fill in properties for contest state as per 2023-06 spec
      * 
-     * @param model place to get contest times from
+     * @param sc security info for user making request
+     * @param model
+     * @param controller
+     * @param contestId
      */
     public CLICSContestAccess(SecurityContext sc, IInternalContest model, IInternalController controller, String contestId) {
         this.controller = controller;
