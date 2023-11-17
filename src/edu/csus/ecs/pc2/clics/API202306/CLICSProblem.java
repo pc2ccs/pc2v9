@@ -49,7 +49,7 @@ public class CLICSProblem {
 //    private int max_score;
 
     // The next two will be 'null' for now until we implement the new json CPF
-    @JsonProperty
+    @JsonProperty("package")
     private CLICSFileReference [] packagezip;
     
     @JsonProperty
