@@ -41,6 +41,8 @@ public class CLICSJudgmentType {
         name = judgment.getDisplayName();
         solved = false;
         penalty = true;
+        id = judgment.getAcronym();
+        
         // TODO: absolutely horrendous.  this has got to go and be done a better way -- JB
         if (name.equalsIgnoreCase("yes") || name.equalsIgnoreCase("accepted") || judgment.getAcronym().equalsIgnoreCase("ac")) {
             name = "Accepted";
