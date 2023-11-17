@@ -98,7 +98,7 @@ public class ProblemService implements Feature {
      * @return response
      */
     @GET
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{problemId}/")
     public Response getProblem(@Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("problemId") String problemId) {
         // get the problems from the contest
