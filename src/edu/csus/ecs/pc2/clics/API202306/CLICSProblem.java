@@ -55,6 +55,13 @@ public class CLICSProblem {
     @JsonProperty
     private CLICSFileReference [] statement;
 
+    /**
+     * Fill in properties for a Problem description.
+     * 
+     * @param model The contest
+     * @param problem The problem 
+     * @param ordinal Order in which problem appears in display list
+     */
     public CLICSProblem(IInternalContest model, Problem problem, int ordinal) {
         // {"id":"asteroids","label":"A","name":"Asteroid Rangers","ordinal":1,"color":"blue","rgb":"#00000f","test_data_count":10,"time_limit":2 }
         id = JSONTool.getProblemId(problem);
