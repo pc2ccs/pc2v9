@@ -65,7 +65,6 @@ public class GroupService implements Feature {
         if(contestId.equals(model.getContestIdentifier()) == false) {
             return Response.status(Response.Status.NOT_FOUND).build();        
         }
-//        ArrayList<String> glist = new ArrayList<String>();
 
         Set<String> exceptProps = new HashSet<String>();
         StringJoiner grps = new StringJoiner(",");
@@ -77,18 +76,13 @@ public class GroupService implements Feature {
             if (group.isDisplayOnScoreboard()) {
                 exceptProps.clear();
                 cgroup = new CLICSGroup(group, exceptProps);
-                if((group.getGroupId() & 1) == 0){
-                    cgroup.setLocation(40.6686, 73.6119);
-                    exceptProps.clear();
-                }
 
                 try {                       
-                    // create filter to omit unused/bad properties (location, for example)
+                    // for this group, create filter to omit unused/bad properties (location, for example) 
                     SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
                     FilterProvider fp = new SimpleFilterProvider().addFilter("locFilter", filter).setFailOnUnknownId(false);
-                    // generate json with only properties we want
+                    // generate json with only properties we want and add to CSV list.
                     grps.add(mapper.writer(fp).writeValueAsString(cgroup));
-//                    glist.add(mapper.writer(fp).writeValueAsString(cgroup));
                 } catch (Exception e) {
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for group " + group.getDisplayName() + " " + e.getMessage()).build();
                 }
