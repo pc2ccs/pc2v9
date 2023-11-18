@@ -68,7 +68,6 @@ public class CLICSClarification {
                 }
             }            
         }
-        ObjectMapper mapper = new ObjectMapper();
         
         // SOMEDAY change id to a original?  WTF does that mean? -- JB
         id = clar.getElementId().toString();
