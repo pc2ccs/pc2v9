@@ -507,7 +507,7 @@ public class JSONTool {
         return judgement.getAcronym();
     }
 
-    public String getSubmissionId(Run submission) {
+    public static String getSubmissionId(Run submission) {
         return Integer.toString(submission.getNumber());
     }
 
@@ -542,7 +542,7 @@ public class JSONTool {
         // SOMEDAY get the time from the server instead of the judge
         element.put("time", Utilities.getIso8601formatterWithMS().format(run.getDate().getTime()));
         // note this is the contest_time as seen on the judge
-        element.put("contest_time", ContestTime.formatTimeMS(run.getConestTimeMS()));
+        element.put("contest_time", ContestTime.formatTimeMS(run.getContestTimeMS()));
         return element;
     }
 }

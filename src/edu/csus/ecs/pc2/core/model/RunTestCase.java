@@ -182,7 +182,7 @@ public class RunTestCase implements IElementObject, IGetDate{
         this.validated = validated;
     }
 
-    public long getConestTimeMS() {
+    public long getContestTimeMS() {
         return contestTimeMS;
     }
 
