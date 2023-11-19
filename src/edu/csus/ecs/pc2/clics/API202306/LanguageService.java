@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
+import java.util.ArrayList;
+
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -10,77 +12,87 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * WebService to handle languages
  * 
- * @author ICPC
+ * @author John Buck
  *
  */
-@Path("/contest/languages")
+@Path("/contests/{contestId}/languages")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
 public class LanguageService implements Feature {
 
+    @SuppressWarnings("unused")
     private IInternalContest model;
 
+    @SuppressWarnings("unused")
     private IInternalController controller;
-
-    private JSONTool jsonTool;
 
     public LanguageService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
         this.controller = inController;
-        jsonTool = new JSONTool(model, controller);
     }
 
     /**
-     * This method returns a representation of the current model languages in JSON format. The returned value is a JSON array with one language description per array element, matching the description
-     * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
+     * Returns a representation of the current model languages in JSON format. The returned value is a JSON array with one language description per array element, complying with 2023-06
      * 
+     * @param contestId The contest
      * @return a {@link Response} object containing the model languages in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getLanguages() {
-
-        // get the problems from the model
-        Language[] languages = model.getLanguages();
-
-        // get an object to map the language descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
-        for (int i = 0; i < languages.length; i++) {
-            Language language = languages[i];
+    public Response getLanguages(@PathParam("contestId") String contestId) {
+       
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();        
+        }
+        
+        ArrayList<CLICSLanguage> llist = new ArrayList<CLICSLanguage>();
+        
+        // get the languages, one-at-a-time from the model
+        for(Language language: model.getLanguages()) {
             if (language.isActive()) {
-                childNode.add(jsonTool.convertToJSON(language));
+                llist.add(new CLICSLanguage(language));
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
+        try {
+            ObjectMapper mapper = JSONUtilities.getObjectMapper();
+            String json = mapper.writeValueAsString(llist);
+            return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for languages " + e.getMessage()).build();
+        }
     }
 
+    /**
+     * Returns a representation of the specified language for the specified contest in JSON format. The returned value is compliant with 2023-06
+     * 
+     * @param contestId The contest
+     * @param languageId The language
+     * @return
+     */
     @GET
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{languageId}/")
-    public Response getLanguage(@PathParam("languageId") String languageId) {
-        // get the languages from the model
-        Language[] languages = model.getLanguages();
-
-        for (int i = 0; i < languages.length; i++) {
-            Language language = languages[i];
-            if (language.getElementId().toString().equals(languageId) && language.isActive()) {
-                return Response.ok(jsonTool.convertToJSON(language).toString(), MediaType.APPLICATION_JSON).build();
+    public Response getLanguage(@PathParam("contestId") String contestId, @PathParam("languageId") String languageId) {
+        
+        // get the languages, one-at-a-time from the model
+        for(Language language: model.getLanguages()) {
+            if (language.isActive() && language.getElementId().toString().equals(languageId)) {
+                return Response.ok(new CLICSLanguage(language).toJSON(), MediaType.APPLICATION_JSON).build();
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();

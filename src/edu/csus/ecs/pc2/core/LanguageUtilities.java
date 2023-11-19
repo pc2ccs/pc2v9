@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
+import java.util.ArrayList;
+
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 
@@ -99,6 +101,39 @@ public class LanguageUtilities {
             }
         }
         return null;
+    }
+
+    /**
+     * Return best guess at source code extensions for the supplied languageid
+     * TODO This should be removed when the language definition (eg. system.yaml) and/or the
+     * GUI allow the specification of extensions.
+     *
+     * @param languageId
+     * @return String array of all extensions for this language
+     */
+    public static String [] getExtensionsForLanguage(String languageId, String name) {
+
+        ArrayList<String> elist = new ArrayList<String>();
+        String dispName;
+        String rowMatch = null;
+
+        languageId = languageId.toUpperCase();
+        name = name.toUpperCase();
+
+        for (String[] row : LANGUAGE_LIST) {
+            dispName = row[1].toUpperCase();
+            if(languageId.indexOf(dispName) != -1 || name.indexOf(dispName) != -1) {
+                if(rowMatch == null) {
+                    rowMatch = row[1];
+                } else if(!rowMatch.equals(row[1])) {
+                    // If we previously matched a language, and the language just changed, don't add  any more
+                    // This prevents "C" extensions from being found for "C++".
+                    break;
+                }
+                elist.add(row[0]);
+            }
+        }
+        return(elist.toArray(new String [0]));
     }
 
 }
