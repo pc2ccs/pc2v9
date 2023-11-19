@@ -393,6 +393,11 @@ public final class ICPCTSVLoader {
 //            String formalName = fields[1];
 //            String name = fields[2];
             institutionsMap.put(icpcId, fields);
+            
+            // We also add the institution ID minus the INST- "Due to the non-specificity of the format of an inst code
+            if(icpcId.startsWith("INST-")) {
+                institutionsMap.put(icpcId.substring(5), fields);
+            }
         }
     }
     
