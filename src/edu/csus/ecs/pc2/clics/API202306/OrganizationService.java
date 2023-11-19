@@ -1,8 +1,8 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
-import java.util.Hashtable;
-
+import java.util.ArrayList;
+import java.util.HashSet;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -12,24 +12,26 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.imports.ccs.ICPCTSVLoader;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * WebService for handling teams
  * 
- * @author ICPC
+ * @author John Buck
  *
  */
-@Path("/contest/organizations")
+@Path("/contests/{contestId}/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
@@ -39,56 +41,73 @@ public class OrganizationService implements Feature {
 
     private IInternalController controller;
 
-    private JSONTool jsonTool;
-
     public OrganizationService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
         this.controller = inController;
-        jsonTool = new JSONTool(model, controller);
     }
 
     /**
-     * This method returns a representation of the current model teams in JSON format. The returned value is a JSON array with one team description per array element.
+     * Returns a representation of the current model organizations in JSON format. The returned value is a JSON array with one organization description per array element.
+     * This is compliant with 2023-06
      * 
+     * @param contestId The contest
      * @return a {@link Response} object containing the model teams in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getOrganizations() {
+    public Response getOrganizations(@PathParam("contestId") String contestId) {
 
-        // get the team accounts from the model
-        Account[] accounts = model.getAccounts();
-        // keep track of which ones we have dumped
-        Hashtable<String, Account> organizations = new Hashtable<String, Account>();
+        // keep track of which ones are being used for this contest
+        HashSet<String> orgSet = new HashSet<String>();
 
-        // get an object to map the groups descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
-        for (int i = 0; i < accounts.length; i++) {
-            Account account = accounts[i];
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();        
+        }
+        
+        ArrayList<CLICSOrganization> olist = new ArrayList<CLICSOrganization>();
+        
+        LoadAccounts.loadInstitutions(model);
+        
+        // make up a list of CLICSOrganizations in use.
+        for(Account account: model.getAccounts()) {
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
-                String id = jsonTool.getOrganizationId(account);
-                if (!organizations.containsKey(id)) {
-                    organizations.put(id, account);
-                    childNode.add(jsonTool.convertOrganizationsToJSON(account));
+                String orgId = JSONTool.getOrganizationId(account);
+                if(orgSet.add(orgId)) {
+                    String [] orgFields = ICPCTSVLoader.getInstitutionNames(orgId);
+                    if(orgFields != null) {
+                        olist.add(new CLICSOrganization(orgId, account, orgFields));
+                    }
                 }
             }
         }
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
+        try {
+            ObjectMapper mapper = JSONUtilities.getObjectMapper();
+            String json = mapper.writeValueAsString(olist);
+            return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for organizations " + e.getMessage()).build();
+        }
     }
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("{organizationId}/")
-    public Response getOrganization(@PathParam("organizationId") String organizationId) {
-        // get the team accounts from the model
-        Account[] accounts = model.getAccounts();
-
-        for (int i = 0; i < accounts.length; i++) {
-            Account account = accounts[i];
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && jsonTool.getOrganizationId(account).equals(organizationId)) {
-                return Response.ok(jsonTool.convertOrganizationsToJSON(account).toString(), MediaType.APPLICATION_JSON).build();
+    public Response getOrganization(@PathParam("contestId") String contestId, @PathParam("organizationId") String organizationId) {
+        
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == true) {
+            LoadAccounts.loadInstitutions(model);
+            
+            String [] orgFields = ICPCTSVLoader.getInstitutionNames(organizationId);
+            if(orgFields != null) {
+                // find a team who belongs to this organization
+                for(Account account: model.getAccounts()) {
+                    if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && JSONTool.getOrganizationId(account).equals(organizationId)) {
+                        return Response.ok(new CLICSOrganization(organizationId, account, orgFields).toJSON(), MediaType.APPLICATION_JSON).build();
+                    }
+                }
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
