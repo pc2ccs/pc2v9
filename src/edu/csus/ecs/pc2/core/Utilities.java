@@ -31,6 +31,7 @@ import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.exception.MultipleIssuesException;
+import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -605,8 +606,9 @@ public final class Utilities {
 
     }
 
+    
     /**
-     * Create/Write a report to file.
+     * Create/Write a report to file in {@value Constants#REPORT_DIRECTORY_NAME} 
      * 
      * @param report
      *            IReport to write
@@ -616,8 +618,29 @@ public final class Utilities {
      * @throws FileNotFoundException
      */
     public static String createReport(IReport report, IInternalContest contest, IInternalController controller, boolean printHeaderAndFooter) throws FileNotFoundException {
+        return createReport(Constants.REPORT_DIRECTORY_NAME, report, contest, controller, printHeaderAndFooter);
+    }
+    
+    /**
+     * Create/Write a report to file in outputDirectoryName, creates outputDirectoryName if dir doesnot exist. 
+     * 
+     * 
+     * @param outputDirectoryName output directory name
+     * @param report
+     *            IReport to write
+     * @param contest
+     * @param controller
+     * @return name of created report file.
+     * @throws FileNotFoundException
+     */
+    public static String createReport(String outputDirectoryName, IReport report, IInternalContest contest, IInternalController controller, boolean printHeaderAndFooter) throws FileNotFoundException {
 
         String filename = getReportFilename(report);
+        
+        if (outputDirectoryName != null && outputDirectoryName.trim().length() > 0) {
+            ExecuteUtilities.ensureDirectory(outputDirectoryName);
+            filename = outputDirectoryName + File.separator + filename;
+        }
 
         report.setContestAndController(contest, controller);
 
@@ -699,6 +722,7 @@ public final class Utilities {
     public static void viewReport(IReport report, String title, IInternalContest contest, IInternalController controller, boolean printHeaderAndFooter) {
 
         try {
+            
             String filename = createReport(report, contest, controller, printHeaderAndFooter);
 
             MultipleFileViewer multipleFileViewer = new MultipleFileViewer(controller.getLog());
@@ -1703,6 +1727,16 @@ public final class Utilities {
         }
 
         return baseFileName;
+    }
+    
+    /**
+     * Print stack trace with only elements with csus in them.
+     * @param printStream
+     * @param e
+     */
+    public static void printStackTrace(PrintStream printStream, Exception e) {
+        printStackTrace(printStream, e, "csus");
+        
     }
 
     /**

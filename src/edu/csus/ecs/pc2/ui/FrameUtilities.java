@@ -550,4 +550,12 @@ public final class FrameUtilities {
             }
         });
     }
+
+    public static void showExceptionMessage(Component component, final String title, String message, Exception ex) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog(component, message, title, JOptionPane.ERROR_MESSAGE);
+            }
+        });
+    }
 }

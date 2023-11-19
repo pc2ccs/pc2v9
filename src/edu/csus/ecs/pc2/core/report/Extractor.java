@@ -187,12 +187,7 @@ public class Extractor {
 
         @Override
         public String[] createReport(Filter filter) {
-            try {
-                return resultsFile.createTSVFileLines(getContest());
-            } catch (IllegalContestState e) {
-                e.printStackTrace();
-                return new String[0];
-            }
+            return resultsFile.createTSVFileLines(getContest());
         }
     }
 

@@ -9,6 +9,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
@@ -329,4 +333,81 @@ public class FileUtilities {
         return getAllFileEntries(directory, null);
     }
 
+    
+    
+    /**
+     * Select file and update text file, jlabel with selected file name.
+     * 
+     * @return null if no file selected, else retrn File and update textfield and jlabel
+     * @throws Exception
+     */
+    public static File selectFile(String initDirectory, JTextField textField, JLabel label, String dialogTitle) throws Exception {
+        File file = null;
+
+        JFileChooser chooser = new JFileChooser(initDirectory);
+        if (dialogTitle != null) {
+            chooser.setDialogTitle(dialogTitle);
+        }
+
+        int returnVal = chooser.showOpenDialog(null);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            file = chooser.getSelectedFile();
+            String fullName = file.getCanonicalFile().toString();
+            textField.setText(fullName);
+            if (label != null) {
+                label.setToolTipText(fullName);
+            }
+        }
+        chooser = null;
+        return file;
+    }
+    
+    /**
+     * Select directory, update text field and jlabel.
+     * 
+     * @param initDirectory
+     * @param textField
+     * @param label
+     * @param dialogTitle
+     * @return null if no directory selected
+     * @throws Exception
+     */
+    public static File selectDirectory(String initDirectory, JTextField textField, JLabel label, String dialogTitle) throws Exception {
+        File file = null;
+
+        JFileChooser chooser = new JFileChooser(initDirectory);
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        if (dialogTitle != null) {
+            chooser.setDialogTitle(dialogTitle);
+        }
+
+        int returnVal = chooser.showOpenDialog(null);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            file = chooser.getSelectedFile();
+            String fullName = file.getCanonicalFile().toString();
+            textField.setText(fullName);
+            if (label != null) {
+                label.setToolTipText(fullName);
+            }
+        }
+        chooser = null;
+        return file;
+    }
+    
+    /**
+     * Is dirname an existing directory?
+     * @param dirname
+     * @return true if dirname is an existing directory
+     */
+    public static boolean isDirectory(String dirname) {
+        if (StringUtilities.isEmpty(dirname)){
+            return false;
+        }
+        
+        return new File(dirname).isDirectory();
+    }
+
+    
 }

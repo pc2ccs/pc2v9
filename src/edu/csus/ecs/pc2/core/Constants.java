@@ -7,6 +7,10 @@ package edu.csus.ecs.pc2.core;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public final class Constants {
+    
+    public static final String AWARDS_JSON_FILENAME = "awards.json";
+    
+    public final static String SCOREBOARD_JSON_FILENAME = "scoreboard.json";
 
     public static final long HOURS_PER_DAY = 24;
 
@@ -260,8 +264,20 @@ public final class Constants {
     /**
      * Prefix for deleted runs.
      */
-    public static final String DEL_RUN_PREFIX = "DEL ";   
+    public static final String DEL_RUN_PREFIX = "DEL ";
     
+    /**
+     * output directory for reports.
+     */
+    public static final String REPORT_DIRECTORY_NAME = "reports";
+    
+    /**
+     * default results directory for CDP.
+     */
+    public static final String CDP_RESULTS_DIR ="results";
+
+    public static final String TAB = "\t";
+
     public static final String NL = System.getProperty("line.separator");
 
 }

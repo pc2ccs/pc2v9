@@ -281,6 +281,10 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         JOptionPane.showMessageDialog(component, message, title, JOptionPane.INFORMATION_MESSAGE);
     }
     
+    public void showExceptionMessage(Component component, String title, String message, Exception ex) {
+        FrameUtilities.showExceptionMessage(component, message, ex);
+    }
+    
     /**
      * Show message to user.
      * 
