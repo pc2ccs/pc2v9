@@ -49,6 +49,8 @@ public class ResourceConfig202306 implements ICLICSResourceConfig {
             showMessage("Starting /contests web service");
             resConfig.register(new AccessService(getContest(), getController()));
             showStartingMessage("access web service");
+            resConfig.register(new AccountService(getContest(), getController()));
+            showStartingMessage("accounts web service");
             resConfig.register(new ScoreboardService(getContest(), getController()));
             showStartingMessage("scoreboard web service");
             resConfig.register(new LanguageService(getContest(), getController()));
