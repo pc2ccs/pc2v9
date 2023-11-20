@@ -50,9 +50,9 @@ public class CLICSAccount {
      */
     public CLICSAccount(IInternalContest model, SecurityContext sc, Account account) {
         ClientId cid = account.getClientId();
-        id = "" + cid.getClientNumber();
+        id = cid.getName();
+        username = id;
         name = account.getDisplayName();
-        username = cid.getName();
         if(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN)) {
             password = account.getPassword();
         }
