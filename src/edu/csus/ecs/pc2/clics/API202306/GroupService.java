@@ -1,10 +1,7 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringJoiner;
-
+import java.util.ArrayList;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,10 +15,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -65,29 +58,20 @@ public class GroupService implements Feature {
             return Response.status(Response.Status.NOT_FOUND).build();        
         }
 
-        Set<String> exceptProps = new HashSet<String>();
-        StringJoiner grps = new StringJoiner(",");
-       
-        ObjectMapper mapper = JSONUtilities.getObjectMapper();
-        CLICSGroup cgroup;
-        
+        ArrayList<CLICSGroup> glist = new ArrayList<CLICSGroup>();
+               
         for(Group group: model.getGroups()) {
             if (group.isDisplayOnScoreboard()) {
-                exceptProps.clear();
-                cgroup = new CLICSGroup(group, exceptProps);
-
-                try {                       
-                    // for this group, create filter to omit unused/bad properties (location, for example) 
-                    SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
-                    FilterProvider fp = new SimpleFilterProvider().addFilter("locFilter", filter).setFailOnUnknownId(false);
-                    // generate json with only properties we want and add to CSV list.
-                    grps.add(mapper.writer(fp).writeValueAsString(cgroup));
-                } catch (Exception e) {
-                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for group " + group.getDisplayName() + " " + e.getMessage()).build();
-                }
+                glist.add(new CLICSGroup(group));
             }
         }
-        return Response.ok("[" + grps.toString() + "]", MediaType.APPLICATION_JSON).build();
+        try {
+            ObjectMapper mapper = JSONUtilities.getObjectMapper();
+            String json = mapper.writeValueAsString(glist);
+            return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for groups " + e.getMessage()).build();
+        }
     }
     
 
@@ -108,18 +92,7 @@ public class GroupService implements Feature {
         if(contestId.equals(model.getContestIdentifier()) == true) {
             for(Group group: model.getGroups()) {
                 if (group.isDisplayOnScoreboard() && JSONTool.getGroupId(group).equals(groupId)) {
-                    Set<String> exceptProps = new HashSet<String>();
-                    CLICSGroup cgroup = new CLICSGroup(group, exceptProps);
-                    try {                       
-                        ObjectMapper mapper = JSONUtilities.getObjectMapper();
-                        // create filter to omit unused/bad properties (location, for example)
-                        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
-                        FilterProvider fp = new SimpleFilterProvider().addFilter("locFilter", filter);
-                        String json = mapper.writer(fp).writeValueAsString(cgroup);
-                        return Response.ok(json, MediaType.APPLICATION_JSON).build();
-                    } catch (Exception e) {
-                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for group " + groupId + " " + e.getMessage()).build();
-                    }
+                    return Response.ok(new CLICSGroup(group).toJSON(), MediaType.APPLICATION_JSON).build();
                 }
             }
         }
