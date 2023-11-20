@@ -16,10 +16,10 @@ public class CLICSLocation {
     private static final double MAX_LATITUDE = 90.0;
     private static final double MAX_LONGITUDE = 180.0;
 
-    @JsonProperty("location.latitude")
+    @JsonProperty("latitude")
     private double latitude = MAX_LATITUDE + 1;
     
-    @JsonProperty("location.longitude")
+    @JsonProperty("longitude")
     private double longitude = MAX_LONGITUDE + 1;
 
     /**
