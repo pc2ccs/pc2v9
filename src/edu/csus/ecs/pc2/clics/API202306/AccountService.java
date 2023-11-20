@@ -30,7 +30,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
  * @author John Buck
  *
  */
-@Path("/contests/{contestId}/accounts")
+@Path("/contests/{contestId}/{svc: accounts|account}")
 @Produces(MediaType.APPLICATION_JSON)
 @Provider
 @Singleton
@@ -55,28 +55,41 @@ public class AccountService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAccounts(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
+    public Response getAccounts(@Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("svc") String svc) {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
             return Response.status(Response.Status.NOT_FOUND).build();        
         }
         
-        ArrayList<CLICSAccount> alist = new ArrayList<CLICSAccount>();
+        String myUser = sc.getUserPrincipal().getName();
         
-        for(Account account: model.getAccounts()) {   
+        if(svc.equals("accounts")) {
+            ArrayList<CLICSAccount> alist = new ArrayList<CLICSAccount>();
             
-            // Admin can see everyone, everyone else only sees themselves.
-            if (sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.getUserPrincipal().getName().equals(account.getClientId().getName())) {
-                alist.add(new CLICSAccount(model, sc, account));
+            for(Account account: model.getAccounts()) {   
+                
+                // Admin can see everyone, everyone else only sees themselves.
+                if (sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || myUser.equals(account.getClientId().getName())) {
+                    alist.add(new CLICSAccount(model, sc, account));
+                }
             }
-        }
-        try {
-            ObjectMapper mapper = JSONUtilities.getObjectMapper();
-            String json = mapper.writeValueAsString(alist);
-            return Response.ok(json, MediaType.APPLICATION_JSON).build();
-        } catch (Exception e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for accounts " + e.getMessage()).build();
+            try {
+                ObjectMapper mapper = JSONUtilities.getObjectMapper();
+                String json = mapper.writeValueAsString(alist);
+                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+            } catch (Exception e) {
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for accounts " + e.getMessage()).build();
+            }
+        } else {
+            // account endpoint - who am i, basically.
+            for(Account account: model.getAccounts()) {
+                // Looking for currently authenticated user
+                if(myUser.equals("" + account.getClientId().getName())){
+                    return Response.ok(new CLICSAccount(model, sc, account).toJSON(), MediaType.APPLICATION_JSON).build();
+                }
+            }
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
 
@@ -97,7 +110,8 @@ public class AccountService implements Feature {
         if(contestId.equals(model.getContestIdentifier()) == true) {
             
             for(Account account: model.getAccounts()) {
-                if(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || accountId.equals("" + account.getClientId().getClientNumber())) {
+                // can only see the account if this is an admin or the actual user
+                if(accountId.equals("" + account.getClientId().getName()) && (sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.getUserPrincipal().getName().equals(account.getClientId().getName()))) {
                     return Response.ok(new CLICSAccount(model, sc, account).toJSON(), MediaType.APPLICATION_JSON).build();
                 }
             }
