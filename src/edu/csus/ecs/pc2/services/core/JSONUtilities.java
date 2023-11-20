@@ -196,7 +196,7 @@ public class JSONUtilities {
      * @return array of Stings where each one is a json property, null if none.
      */
     public static String [] getJsonProperties(Class c) {
-        Field [] fields = CLICSClarification.class.getDeclaredFields();
+        Field [] fields = c.getDeclaredFields();
         Field f;
         int i, n = fields.length;
         int ia, na;
