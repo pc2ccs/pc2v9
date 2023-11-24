@@ -62,6 +62,8 @@ public class ProblemService implements Feature {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProblems(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
 
+        System.err.println("getProblems from " + sc.getUserPrincipal().getName() + " for contest " + contestId);
+        
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
             return Response.status(Response.Status.NOT_FOUND).build();        
@@ -101,23 +103,27 @@ public class ProblemService implements Feature {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{problemId}/")
     public Response getProblem(@Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("problemId") String problemId) {
-        // get the problems from the contest
-        Problem[] problems = model.getProblems();
-        int ord = 1;
-        for (Problem problem: problems) {
-            // match by ID
-            if (problem.isActive()) {
-                if(JSONTool.getProblemId(problem).equals(problemId)) {
-                    try {
-                        return Response.ok(JSONUtilities.getObjectMapper().writeValueAsString(new CLICSProblem(model, problem, ord)), MediaType.APPLICATION_JSON).build();
-                    } catch(Exception e) {
-                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for problem " + problemId + " in contest " + contestId + ": " + e.getMessage()).build();                    
+        // public only gets the problems when the contest starts
+        if (sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) || model.getContestTime().isContestStarted()) {
+            // get the problems from the contest
+            Problem[] problems = model.getProblems();
+            int ord = 1;
+            for (Problem problem: problems) {
+                // match by ID
+                if (problem.isActive()) {
+                    if(JSONTool.getProblemId(problem).equals(problemId)) {
+                        try {
+                            return Response.ok(JSONUtilities.getObjectMapper().writeValueAsString(new CLICSProblem(model, problem, ord)), MediaType.APPLICATION_JSON).build();
+                        } catch(Exception e) {
+                            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for problem " + problemId + " in contest " + contestId + ": " + e.getMessage()).build();                    
+                        }
                     }
+                    ord++;
                 }
-                ord++;
             }
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-        return Response.status(Response.Status.NOT_FOUND).build();
+        return Response.status(Response.Status.FORBIDDEN).build();
     }
     
     /**

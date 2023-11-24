@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
+import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
  * WebService to handle judgements endpoint
@@ -77,7 +78,7 @@ public class JudgementService implements Feature {
         
         for (Run run: model.getRuns()) {
             // If not admin or judge, can not see runs after freeze time
-            if (!sc.isUserInRole("admin") && !sc.isUserInRole("judge")) {
+            if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
                 // if run is after scoreboard freeze, do not return info for it
                 if (run.getElapsedMS() / 1000 > freezeTime) {
                     continue;
@@ -87,7 +88,7 @@ public class JudgementService implements Feature {
             cRun = new CLICSRun(model, run, exceptProps);
             try {
                 // for this judgment, create filter to omit unused/bad properties (max_run_time in this case)
-                SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept();
+                SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
                 FilterProvider fp = new SimpleFilterProvider().addFilter("rtFilter", filter).setFailOnUnknownId(false);
                 // generate json with only properties we want and add to CSV list.
                 allJudgments.add(mapper.writer(fp).writeValueAsString(cRun));
@@ -116,7 +117,7 @@ public class JudgementService implements Feature {
            long freezeTime = Utilities.getFreezeTime(model);
            for(Run run: model.getRuns()) {
                 // If not admin or judge, can not see runs after freeze time
-                if (!sc.isUserInRole("admin") && !sc.isUserInRole("judge")) {
+                if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
                     // if run is after scoreboard freeze, do not return info for it
                     if (run.getElapsedMS() / 1000 > freezeTime) {
                         continue;
@@ -140,6 +141,16 @@ public class JudgementService implements Feature {
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    
+    /**
+     * Retrieve access information about this endpoint for the supplied user's security context
+     * 
+     * @param sc User's security information
+     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
+     */
+    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
+        return(new CLICSEndpoint("judgements", JSONUtilities.getJsonProperties(CLICSRun.class)));
     }
 
     @Override

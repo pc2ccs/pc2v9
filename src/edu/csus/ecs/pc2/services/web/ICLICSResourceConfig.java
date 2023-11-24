@@ -13,7 +13,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.services.eventFeed.WebServerPropertyUtils;
 
 /**
- * @author john
+ * @author John Buck
  *
  */
 public interface ICLICSResourceConfig {
