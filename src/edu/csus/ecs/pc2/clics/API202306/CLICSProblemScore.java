@@ -1,18 +1,13 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestTime;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.standings.ProblemSummaryInfo;
-import edu.csus.ecs.pc2.core.standings.json.ProblemScoreRow;
 
 /**
  * CLICS Score (for a problem)

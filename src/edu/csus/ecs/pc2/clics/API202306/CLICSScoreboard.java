@@ -7,10 +7,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Properties;
-import java.util.UUID;
-
 import javax.xml.bind.JAXBException;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,18 +17,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
-import edu.csus.ecs.pc2.core.standings.ProblemSummaryInfo;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
-import edu.csus.ecs.pc2.core.standings.json.ProblemScoreRow;
-import edu.csus.ecs.pc2.core.standings.json.ScoreboardJsonUtility;
-import edu.csus.ecs.pc2.core.standings.json.StandingScore;
-import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
