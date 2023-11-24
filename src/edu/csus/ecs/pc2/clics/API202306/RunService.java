@@ -128,6 +128,16 @@ public class RunService implements Feature {
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
+    
+    /**
+     * Retrieve access information about this endpoint for the supplied user's security context
+     * 
+     * @param sc User's security information
+     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
+     */
+    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
+        return(new CLICSEndpoint("runs", JSONUtilities.getJsonProperties(CLICSTestCase.class)));
+    }
 
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
