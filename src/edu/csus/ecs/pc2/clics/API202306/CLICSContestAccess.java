@@ -88,7 +88,8 @@ public class CLICSContestAccess {
          * These should match the class names in this package, eg. Contest -> ContestService, Run -> RunService, etc.
          */
         String [] serviceNames = { "Contest", "JudgementType", "Language", "Problem", "Group", "Organization",
-                "Team", "Person", "Account", "State", "Submission", "Judgement", "Run", "Clarification", "Award", "Commentary"
+                "Team", "Person", "Account", "State", "Submission", "Judgement", "Run", "Clarification",
+                "Scoreboard", "Award", "Commentary"
         };
         
         ArrayList<CLICSEndpoint> epList = new ArrayList<CLICSEndpoint>();
