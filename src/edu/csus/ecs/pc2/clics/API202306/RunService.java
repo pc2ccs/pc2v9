@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
+import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
  * WebService to handle runs
@@ -68,7 +69,7 @@ public class RunService implements Feature {
         
         for (Run run: model.getRuns()) {
             // If not admin or judge, can not see runs after freeze time
-            if (!sc.isUserInRole("admin") && !sc.isUserInRole("judge")) {
+            if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
                 // if run is after scoreboard freeze, do not return info for it
                 if (run.getElapsedMS() / 1000 > freezeTime) {
                     continue;
@@ -108,7 +109,7 @@ public class RunService implements Feature {
     
             for (Run run: model.getRuns()) {
                 // If not admin or judge, can not see runs after freeze time
-                if (!sc.isUserInRole("admin") && !sc.isUserInRole("judge")) {
+                if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
                     // if run is after scoreboard freeze, do not return info for it
                     if (run.getElapsedMS() / 1000 > freezeTime) {
                         continue;
@@ -124,6 +125,16 @@ public class RunService implements Feature {
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    
+    /**
+     * Retrieve access information about this endpoint for the supplied user's security context
+     * 
+     * @param sc User's security information
+     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
+     */
+    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
+        return(new CLICSEndpoint("runs", JSONUtilities.getJsonProperties(CLICSTestCase.class)));
     }
 
     @Override
