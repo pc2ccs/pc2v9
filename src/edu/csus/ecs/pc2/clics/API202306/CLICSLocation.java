@@ -23,10 +23,10 @@ public class CLICSLocation {
     private double longitude = MAX_LONGITUDE + 1;
 
     /**
-     * Fill in command information properties
+     * Fill in location information properties
      * 
-     * @param command The command to execute
-     * @param args Arguments to command, null if none
+     * @param latitude The location's latitude
+     * @param longitude The location's longitude
      */
     public CLICSLocation(double latitude, double longitude) {
         this.latitude = latitude;
