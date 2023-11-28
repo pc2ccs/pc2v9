@@ -416,7 +416,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             }
 
            initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber, wantedGroups);
-           initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber, group);
 
             for (int i = 0; i < runs.length; i++) {
                 Account account = accountList.getAccount(runs[i].getSubmitter());
