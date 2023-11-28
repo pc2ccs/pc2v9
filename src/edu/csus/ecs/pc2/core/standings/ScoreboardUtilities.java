@@ -421,4 +421,6 @@ public class ScoreboardUtilities {
         }
 
         return(contest.getGroup(groupId));
+    }
+
 }
