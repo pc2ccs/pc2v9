@@ -134,7 +134,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
     @Override
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties) throws IllegalContestState {
-        return getStandingsRecords(contest, null, properties, false, null);
+        return getStandingsRecords(contest, null, null, properties, false, null);
     }
 
     private StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, List<Group> wantedGroups, Properties properties) throws IllegalContestState {
@@ -142,7 +142,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
     }
 
     /**
-     * Returns sorted and ranked StandingsRecord, if honorScoreboadFreeze is true then run results
+     * Returns sorted and ranked StandingsRecord for optional divisionNumber and/or Group, if honorScoreboadFreeze is true then run results
      * from the freeze period will be hidden,  unless the contest is unfrozen.
      *
      * @param contest
@@ -186,6 +186,12 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         Vector<Account> accountVector = new Vector<Account>();
         for(Account av : allAccountVector) {
             if(av.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                if (group != null) {
+                    // if this client is not a member of the desired group, skip it
+                    if(group != ScoreboardUtilites.getGroup(contest, av.getClientId())){
+                        continue;
+                    }
+                }
                 if (divisionNumber != null) {
                     String div = ScoreboardUtilities.getDivision(contest, av.getClientId());
                     if (! divisionNumber.toString().trim().equals(div.trim())){
@@ -284,7 +290,12 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
     @Override
     public String getStandings(IInternalContest contest, Properties properties, Log inputLog) throws IllegalContestState {
-        return getStandings(contest, null, null, properties, inputLog);
+        return getStandings(contest, null, null, null, properties, inputLog);
+    }
+
+    @Override
+    public String getStandings(IInternalContest contest, Run[] runs, Integer divisionNumber, Properties properties, Log inputLog) throws IllegalContestState {
+        return getStandings(contest, null, null, null, properties, inputLog);
     }
 
     @Override

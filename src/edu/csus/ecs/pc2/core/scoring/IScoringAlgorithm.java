@@ -36,6 +36,7 @@ public interface IScoringAlgorithm {
      * @param theContest
      *            A proxy object referencing the underlying model describing the contest
      * @param runs null use all runs, otherwise runs to be used.
+     * @param divisionNumber get standings for specified division (null if all)
      * @param properties
      *            general and implementation specific settings.
      * @param inputLog
