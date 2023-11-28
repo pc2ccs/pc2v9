@@ -7,6 +7,8 @@ import { Run } from 'src/app/modules/core/models/run';
 import { MatDialog } from '@angular/material/dialog';
 import { NewRunComponent } from '../new-run/new-run.component';
 import { TestRunDetailComponent } from '../test-run-detail/test-run-detail.component';
+import { saveCurrentPage } from 'src/app/app.component';
+import * as Constants from 'src/constants';
 
 @Component({
   templateUrl: './runs-page.component.html',
@@ -25,6 +27,9 @@ export class RunsPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.buildForm();
     this.loadRuns();
+    
+    //indicate that this Runs page is the most recently accessed page
+    saveCurrentPage(Constants.RUNS_PAGE_KEY);
 
     this.filteredRuns = this.runs;
 
