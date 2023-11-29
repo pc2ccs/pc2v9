@@ -11,25 +11,31 @@ import { ScoreboardPageComponent } from './modules/scoreboard/components/scorebo
 const routes: Routes = [
   {
     path: 'login',
+    title: 'Login to PC2',
     component: LoginPageComponent
   }, {
     path: 'runs',
+    title: 'Submit Runs',
     component: RunsPageComponent,
     canActivate: [AuthGuard]
   }, {
     path: 'options',
+    title: 'Configure Options',
     component: OptionsPageComponent,
     canActivate: [AuthGuard]
   }, {
     path: 'logout',
+    title: 'Logout of PC2',
     component: LogoutComponent,
     canActivate: [AuthGuard]
   }, {
     path: 'clarifications',
+    title: 'Submit Clarification Request',
     component: ClarificationsPageComponent,
     canActivate: [AuthGuard]
   }, {
     path: 'scoreboard',
+    title: 'View Scoreboard',
     component: ScoreboardPageComponent,
     canActivate: [AuthGuard]
   }, {
