@@ -139,6 +139,24 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
     private StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, List<Group> wantedGroups, Properties properties) throws IllegalContestState {
         return getStandingsRecords(contest, divisionNumber, wantedGroups, properties, false, null);
+
+    /**
+     * Returns sorted and ranked StandingsRecord for optional divisionNumber, if honorScoreboadFreeze is true then run results
+     * from the freeze period will be hidden,  unless the contest is unfrozen.
+     *
+     * NB. This should probably be in INewScoringAlgorithm
+     *
+     * @param contest
+     * @param divisionNumber
+     * @param properties
+     * @param honorScoreboardFreeze
+     * @param runs
+     * @return
+     * @throws IllegalContestState
+     */
+    // This should probably be in INewScoringAlgorithm
+    public StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
+        return getStandingsRecords(contest, divisionNumber, null, properties, false, runs);
     }
 
     /**
