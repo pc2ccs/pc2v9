@@ -160,7 +160,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
      */
     // This should probably be in INewScoringAlgorithm
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
-        return getStandingsRecords(contest, divisionNumber, null, properties, false, null);
+        return getStandingsRecords(contest, divisionNumber, null, properties, false, runs);
     }
 
     /**
