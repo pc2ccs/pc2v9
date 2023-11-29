@@ -7,7 +7,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
+
 import javax.xml.bind.JAXBException;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -51,14 +54,15 @@ public class CLICSScoreboard {
      * Fill in the scoreboard information
      * 
      */
-    public CLICSScoreboard(IInternalContest model, IInternalController controller)  throws IllegalContestState, JAXBException, IOException {
+    public CLICSScoreboard(IInternalContest model, IInternalController controller, Group group, Integer division)  throws IllegalContestState, JAXBException, IOException {
         
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
 
         Properties properties = ScoreboardUtilites.getScoringProperties(model);
 
         // legacy - standings are created as XML, and we convert that to JSON. 
-        String xml = scoringAlgorithm.getStandings(model, properties, StaticLog.getLog());
+        String xml = scoringAlgorithm.getStandings(model, null, division, group, properties, StaticLog.getLog());
+        
         ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(xml);
         
         // This is what we want to return:
@@ -96,9 +100,14 @@ public class CLICSScoreboard {
             probEleToShort.put(problem.getElementId().toString(), problem.getShortName());
         }
         // list of xml entries for each team's standing
-        for (TeamStanding teamStanding : contestStandings.getTeamStandings()) {
-          rowsArray.add(new CLICSScoreboardRow(probEleToShort, teamStanding));
-          rows = rowsArray.toArray(new CLICSScoreboardRow[0]);
+        List<TeamStanding> standings = contestStandings.getTeamStandings();
+        if(standings != null) {
+            for (TeamStanding teamStanding : contestStandings.getTeamStandings()) {
+              rowsArray.add(new CLICSScoreboardRow(probEleToShort, teamStanding));
+              rows = rowsArray.toArray(new CLICSScoreboardRow[0]);
+            }
+        } else {
+            rows = new CLICSScoreboardRow[0];
         }
     }
 
