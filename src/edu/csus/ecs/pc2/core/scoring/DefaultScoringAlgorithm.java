@@ -408,14 +408,19 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
            initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber, group);
             
             for (int i = 0; i < runs.length; i++) {
-                // skip runs that are deleted and
-                // skip runs whose submitter is no longer active and
-                // skip runs whose problem are no longer active
                 Account account = accountList.getAccount(runs[i].getSubmitter());
                 if (account == null) {
                     log.info("account could not be located for " + runs[i].getSubmitter());
                     continue;
                 }
+                // skip runs for accounts that are not on this scoreboard (after divisionNumber or group are applied)
+                // if division and group are null, then the account will always be in the hashtable (full scoreboard)
+                if(!standingsRecordHash.containsKey(account.getClientId().toString())) {
+                    continue;
+                }
+                // skip runs that are deleted and
+                // skip runs whose submitter is no longer active and
+                // skip runs whose problem are no longer active
                 if (!runs[i].isDeleted() && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) 
                         && problemHash.containsKey(runs[i].getProblemId().toString())) {
                     
