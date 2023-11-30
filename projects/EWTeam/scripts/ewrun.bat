@@ -4,6 +4,12 @@ REM Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, 
 rem Purpose: Start the ew Team server/java bridge 
 rem Author : pc2@ecs.csus.edu
 
+echo.
+echo Warning: EWTeam is deprecated and will be removed in an upcoming version of PC^^2.  
+echo It has been superseded by the "Web Team Interface (WTI)" project; 
+echo   see Appendix N in the PC^^2 Contest Administrator's Guide for details on using WTI as a web-based interface for teams.
+echo.
+
 rem Windows 2000 and beyond syntax
 set EWBIN=%~dp0
 if exist %EWBIN%\ewenv.bat goto :continue

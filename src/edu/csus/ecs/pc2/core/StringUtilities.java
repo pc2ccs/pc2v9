@@ -386,7 +386,7 @@ public final class StringUtilities implements Serializable {
     public static String removeLastChar(String s) {
         return (s == null || s.length() == 0) ? null : (s.substring(0, s.length()-1));
     }
-    
+  
     /**
      * Remove all occurrences of a char in a string
      * 
@@ -405,5 +405,39 @@ public final class StringUtilities implements Serializable {
         }
         return(sWork.toString());
     }
-    
+
+    public static String removeUpTo(String source, String stringToRemove) {
+
+        int index = source.indexOf(stringToRemove);
+
+        if (index > 0) {
+            String shorterString = source.substring(index);
+            return shorterString;
+        } else {
+            return source;
+        }
+    }
+
+    /**
+     * null safe compare to.  Avoids NPEs.
+     * 
+     * @see {@link String#compareTo(String)}
+     * @param s1
+     * @param s2
+     * @return 0 if both strings null or strings equal.
+     */
+    public static int nullSafeCompareTo(String s1, String s2) {
+        
+        if (s1 == null && s2 == null) {
+            return 0;
+        }
+
+        if (s1 == null && s2 != null) {
+            return -1;
+        }
+        if (s1 != null && s2 == null) {
+            return 1;
+        }
+        return s1.compareTo(s2);
+    }
 }

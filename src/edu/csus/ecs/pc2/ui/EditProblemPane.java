@@ -1883,6 +1883,17 @@ public class EditProblemPane extends JPanePlugin {
         }
         
         
+        // verify that the memory limit is a non-negative number 
+        try {
+            int memLimit = Integer.parseInt(getProblemSandboxPane().getPC2SandboxOptionMemLimitTextbox().getText().trim());
+            if (memLimit < 0) {
+                showMessage("Memory limit value must be greater than or equal to zero.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showMessage("Memory limit must be a non-negative number");
+            return false;
+        }
 
         // verify that if the PC2 Validator is selected, an option has been chosen
         if (getUsePC2ValidatorRadioButton().isSelected()) {
@@ -5630,7 +5641,7 @@ public class EditProblemPane extends JPanePlugin {
 
     private JRadioButton getUseInteractiveRadioButton() {
         if (rdbtnUseInteractive == null) {
-            rdbtnUseInteractive = new JRadioButton("Uses CLICS Interactive Problem Interface");
+            rdbtnUseInteractive = new JRadioButton("Use CLICS Interactive Problem Interface");
             rdbtnUseInteractive.setSelected(false);
             rdbtnUseInteractive.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {

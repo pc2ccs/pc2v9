@@ -150,7 +150,7 @@ public class CLICSAwardUtilities {
                 }
             }
         } catch (JAXBException | IllegalContestState | IOException e) {
-            StaticLog.getLog().log(Level.WARNING, "Error while calculating group winners", e);
+            StaticLog.getLog().log(Level.WARNING, "Error while calculating group winners DSA", e);
             throw new RuntimeException("Error while calculating group winners", e);
         }
 

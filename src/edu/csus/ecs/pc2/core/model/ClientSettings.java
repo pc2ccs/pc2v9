@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Enumeration;
@@ -22,6 +22,10 @@ public class ClientSettings implements IElementObject {
     private static final long serialVersionUID = 2225749134503510088L;
 
     public static final String LOGIN_DATE = "LoginDate";
+    
+    public static final String PRIMARY_CCS_RESULTS_DIR = "primaryCCSResultsDirectory";
+    
+    public static final String PC2_RESULTS_DIR = "pc2ResultsDirectory";
 
     private ClientId clientId;
 

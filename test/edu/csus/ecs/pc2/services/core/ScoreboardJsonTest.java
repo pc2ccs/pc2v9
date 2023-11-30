@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.core;
 
 import java.io.File;
@@ -116,12 +116,6 @@ public class ScoreboardJsonTest extends AbstractTestCase {
         writeFileContents(jsonFilename, datalines);
         assertFileExists(jsonFilename);
 //        editFile(jsonFilename); 
-    }
-
-    private void addRuns(IInternalContest contest, String[] runsData) throws Exception {
-        for (String runInfoLine : runsData) {
-            SampleContest.addRunFromInfo(contest, runInfoLine);
-        }
     }
 
     /**
