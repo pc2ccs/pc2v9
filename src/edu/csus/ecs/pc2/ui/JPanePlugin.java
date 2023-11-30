@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Component;
@@ -38,10 +38,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
  * Base class for UIPlugin panes.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
-
-// $HeadURL$
 public abstract class JPanePlugin extends JPanel implements UIPlugin {
 
     /**
@@ -284,6 +281,10 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         JOptionPane.showMessageDialog(component, message, title, JOptionPane.INFORMATION_MESSAGE);
     }
     
+    public void showExceptionMessage(Component component, String title, String message, Exception ex) {
+        FrameUtilities.showExceptionMessage(component, message, ex);
+    }
+    
     /**
      * Show message to user.
      * 
@@ -368,6 +369,14 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         }
         writer.close();
         writer = null;
+    }
+    
+    
+    /**
+     * Shows users information about exception with only pc2 code "csus" stack trace elements.
+     */
+    public static void showExceptionMessage(Component component, final String message, Exception ex) {
+        FrameUtilities.showExceptionMessage(component, message, ex);
     }
 
 }

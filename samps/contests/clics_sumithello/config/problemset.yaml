@@ -1,0 +1,11 @@
+problemset:
+  - letter: A
+    short-name: hello
+    color: red
+    rgb: "#FF0000"
+
+  - letter: B
+    short-name: sumit
+    color: yellow
+    rgb: "#FFFF00"
+

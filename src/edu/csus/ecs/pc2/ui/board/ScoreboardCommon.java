@@ -4,12 +4,20 @@
  */
 package edu.csus.ecs.pc2.ui.board;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Properties;
 
 import javax.xml.transform.TransformerConfigurationException;
@@ -31,6 +39,86 @@ import edu.csus.ecs.pc2.exports.ccs.StandingsJSON2016;
  */
 public class ScoreboardCommon {
 
+    /**
+     * This generates a SHA-256 of the given fileName.
+     *
+     * @param fileName
+     * @param log
+     * @return null if error, else a byte[] of the SHA-256 hash
+     */
+    public byte[] getSHA256Digest(File fileName, Log log) {
+        try {
+            //compute the checksum for the image file whose URL was passed to us
+            InputStream is = new FileInputStream(fileName);
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.reset();
+            //new code 27March2020 (from Tim deBoer):
+            byte[] b = new byte[1024];
+            int n = is.read(b);
+            while(n > 0) {
+                md.update(b, 0, n);   //<--this version updates the digest with exactly (and ONLY) the NEW bytes read... (thanks Tim)
+                n = is.read(b);
+            }
+
+            byte[] digested = md.digest();  //"digested" now holds the image checksum
+            is.close();
+            return(digested);
+        } catch (FileNotFoundException e1) {
+            log.throwing("ScoreboardCommon", "getSHA1digest", e1);
+        } catch (NoSuchAlgorithmException e2) {
+            log.throwing("ScoreboardCommon", "getSHA1digest", e2);
+        } catch (IOException e3) {
+            log.throwing("ScoreboardCommon", "getSHA1digest", e3);
+        }
+        return null;
+    }
+    public void copyIfNeeded(String inputDir, String file, String outputDir, Log log) {
+        try {
+            // this is copy always
+            File inputFile = new File(inputDir + File.separator + file);
+            File outputFile = new File(outputDir + File.separator + file);
+            Boolean needsCopying = false;
+            if (!outputFile.exists()) {
+                // 1. it does not currently exist
+                needsCopying = true;
+            } else {
+                long inputLength = inputFile.length();
+                long outputLength = outputFile.length();
+                if (inputLength != outputLength) {
+                    // 2. different filenames.
+                    needsCopying = true;
+                } else {
+                    byte[] inputBytes = getSHA256Digest(inputFile, log);
+                    byte[] outputBytes = getSHA256Digest(outputFile, log);
+                    if (!Arrays.equals(inputBytes, outputBytes)) {
+                        // 3. computed SHA-256 digest is different
+                        needsCopying = true;
+                    }
+                }
+            }
+
+            if (needsCopying) {
+                InputStream in = new BufferedInputStream(
+                    new FileInputStream(inputFile));
+                OutputStream out = new BufferedOutputStream(
+                    new FileOutputStream(outputFile));
+                byte[] buffer = new byte[1024];
+                int lengthRead;
+                while ((lengthRead = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, lengthRead);
+                    out.flush();
+                }
+                out.close();
+                in.close();
+                log.finest("copyied "+file+" from "+inputDir +" to "+ outputDir);
+            } else {
+                log.finest("found "+ file +" to be the same between "+inputDir + " vs "+ outputDir);
+            }
+        } catch (IOException ex ) {
+            log.throwing("ScoreboardCommon", "copyIfNeeded", ex);
+        }
+    }
+
     public void generateOutput(String xmlString, String xslDir, String outputDir, Log log) {
         // FUTUREWORK move to to a common location (currently in both Module and View)
         File inputDir = new File(xslDir);
@@ -50,7 +138,6 @@ public class ScoreboardCommon {
         } else {
             log.fine("Sending output to " + outputDirFile.getAbsolutePath());
         }
-        // TODO consider changing this to use a filenameFilter
         String[] inputFiles = inputDir.list();
         XSLTransformer transformer = new XSLTransformer();
         for (int i = 0; i < inputFiles.length; i++) {
@@ -101,6 +188,11 @@ public class ScoreboardCommon {
                     log.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
                 } catch (Exception e) {
                     log.log(Log.WARNING, "Trouble transforming " + xslFilename, e);
+                }
+            } else {
+                if (new File(xslDir + File.separator+ xslFilename).isFile()) {
+                    // not xsl, and a file, so just copy it**
+                    copyIfNeeded(xslDir, xslFilename, outputDir, log);
                 }
             }
         }
@@ -157,7 +249,7 @@ public class ScoreboardCommon {
                     outputFile.write(createTSVFileLines[i] + System.getProperty("line.separator"));
                 }
                 outputFile.close();
-            } catch (IllegalContestState | IOException e) {
+            } catch (IOException e) {
                 log.log(Log.WARNING, "Trouble creating results.tsv", e);
             }
             try {

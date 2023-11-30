@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -76,6 +76,11 @@ public class TestResultsFrame extends javax.swing.JFrame implements UIPlugin {
 
         getMultiTestSetOutputViewerPane().setData(run, runFiles, problem, problemDataFiles);
         setTitle ("Test Results for Run " + run.getNumber());
+    }
+    
+    public void clearData()
+    {
+        getMultiTestSetOutputViewerPane().resetResultsTable();
     }
     
     /**

@@ -1,14 +1,9 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import edu.csus.ecs.pc2.core.log.Log;
@@ -26,23 +21,15 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 // TODO recreate in VE.
 // TODO rename to ExecutionTimer
 public class ExecuteTimer extends Thread implements
-        java.awt.event.ActionListener {
+    java.awt.event.ActionListener {
 
     private long maxTime = 120; // time in seconds when display turns Red
 
     private Timer timer; // a timer to generate 1-sec interrupts
 
-    private JFrame ivjExecuteTimerFrame = null; // @jve:decl-index=0:visual-constraint="10,52"
-
-    private JLabel ivjExecuteTimerLabel1 = null;
-
-    private JPanel ivjJFrameContentPane = null;
-
-    private JLabel ivjTimerCount = null;
+    private IExecutableMonitor ivjExecuteTimerFrame = null;
 
     private GregorianCalendar startTime = now();
-
-    private JButton ivjbtnTerminate = null;
 
     private Process proc;
 
@@ -62,12 +49,17 @@ public class ExecuteTimer extends Thread implements
 
     private boolean usingGUI = true;
     
-    public ExecuteTimer(Log log, int timeLimit, ClientId clientId, boolean useGUI) {
+    public ExecuteTimer(Log log, int timeLimit, ClientId clientId, IExecutableMonitor eFrame) {
         super();
         this.log = log;
         this.clientId = clientId;
         maxTime = timeLimit;
-        usingGUI = useGUI;
+        ivjExecuteTimerFrame = eFrame;
+        if(eFrame != null) {
+            usingGUI = true;
+        } else {
+            usingGUI = false;
+        }
         initialize();
     }
 
@@ -106,8 +98,9 @@ public class ExecuteTimer extends Thread implements
 
         // check if time is past upper limit; if so, change text display to RED
         if (elapsedSecs > maxTime && (! isTeam())) {
-            getTimerCountLabel().setForeground(java.awt.Color.red);
-
+            if(usingGUI) {
+                ivjExecuteTimerFrame.setTimerCountLabelColor(java.awt.Color.red);
+            }
             if (doAutoStop) {
 //                System.out.println("ExecuteTimer - halting run execution, time " + elapsedSecs + " over time limit of " + maxTime + " seconds.");
                 log.info("ExecuteTimer - halting run execution, time " + elapsedSecs + " over time limit of " + maxTime + " seconds.");
@@ -116,61 +109,28 @@ public class ExecuteTimer extends Thread implements
             }
 
         }
-
         // update the on-screen display time
-        getTimerCountLabel().setText(newTime);
-
-        if (e.getSource() == getbtnTerminate()) {
-            connEtoC1(e);
+        if(usingGUI) {
+            ivjExecuteTimerFrame.setTimerCountLabelText(newTime);
         }
     }
 
     /**
      * This terminates the process that this timer is working
      */
-    public void btnTerminateActionPerformed(java.awt.event.ActionEvent actionEvent) {
-
-        if (doAutoStop) {
-            log.config("ExecuteTimer - User hit terminate while AJ'ing.");
-            setOtherContactStaff(true);
-        }
-
-        stopIOCollectors();
-    }
-
-    /**
-     * connEtoC1: (btnTerminate.action.actionPerformed(java.awt.event.ActionEvent) -->
-     * ExecuteTimer.btnTerminate_ActionPerformed(Ljava.awt.event.ActionEvent;)V)
-     *
-     * @param arg1
-     *            java.awt.event.ActionEvent
-     */
-    private void connEtoC1(java.awt.event.ActionEvent arg1) {
+    public void terminateExecution() {
         try {
-            this.btnTerminateActionPerformed(arg1);
+            if (doAutoStop) {
+                log.info("ExecuteTimer - User hit terminate while a submission was being judged");
+                setOtherContactStaff(true);
+            }
+    
+            stopIOCollectors();
         } catch (java.lang.Throwable ivjExc) {
             handleException(ivjExc);
         }
     }
 
-    /**
-     * Return the btnTerminate property value.
-     *
-     * @return javax.swing.JButton
-     */
-    private javax.swing.JButton getbtnTerminate() {
-        if (ivjbtnTerminate == null) {
-            try {
-                ivjbtnTerminate = new javax.swing.JButton();
-                ivjbtnTerminate.setName("btnTerminate");
-                ivjbtnTerminate.setMnemonic('t');
-                ivjbtnTerminate.setText("Terminate");
-            } catch (java.lang.Throwable ivjExc) {
-                handleException(ivjExc);
-            }
-        }
-        return ivjbtnTerminate;
-    }
 
     /**
      * Returns the number of seconds which have passed from the moment the timer's "startTime" was most recently set
@@ -187,98 +147,6 @@ public class ExecuteTimer extends Thread implements
     }
 
     /**
-     * Return the ExecuteTimerFrame property value.
-     *
-     * @return javax.swing.JFrame
-     */
-    private javax.swing.JFrame getExecuteTimerFrame() {
-        if (ivjExecuteTimerFrame == null) {
-            try {
-                ivjExecuteTimerFrame = new javax.swing.JFrame();
-                ivjExecuteTimerFrame.setName("ExecuteTimerFrame");
-                ivjExecuteTimerFrame
-                        .setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-                ivjExecuteTimerFrame.setTitle("Execution Timer");
-                ivjExecuteTimerFrame.setBounds(125, 30, 253, 143);
-                ivjExecuteTimerFrame.setCursor(new java.awt.Cursor(
-                        java.awt.Cursor.DEFAULT_CURSOR));
-                getExecuteTimerFrame().setContentPane(getJFrameContentPane());
-            } catch (java.lang.Throwable ivjExc) {
-                handleException(ivjExc);
-            }
-        }
-        return ivjExecuteTimerFrame;
-    }
-
-    /**
-     * Return the ExecuteTimerLabel1 property value.
-     *
-     * @return javax.swing.JLabel
-     */
-    private javax.swing.JLabel getExecuteTimerLabel1() {
-        if (ivjExecuteTimerLabel1 == null) {
-            try {
-                ivjExecuteTimerLabel1 = new javax.swing.JLabel();
-                ivjExecuteTimerLabel1.setName("ExecuteTimerLabel1");
-                ivjExecuteTimerLabel1.setText("Execution Time");
-                ivjExecuteTimerLabel1
-                        .setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-                ivjExecuteTimerLabel1
-                        .setFont(new java.awt.Font("dialog", 1, 18));
-                ivjExecuteTimerLabel1
-                        .setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-                ivjExecuteTimerLabel1
-                        .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-                ivjExecuteTimerLabel1.setCursor(new java.awt.Cursor(
-                        java.awt.Cursor.DEFAULT_CURSOR));
-            } catch (java.lang.Throwable ivjExc) {
-                handleException(ivjExc);
-            }
-        }
-        return ivjExecuteTimerLabel1;
-    }
-
-    /**
-     * Return the JFrameContentPane property value.
-     *
-     * @return javax.swing.JPanel
-     */
-    private javax.swing.JPanel getJFrameContentPane() {
-        if (ivjJFrameContentPane == null) {
-            try {
-                ivjJFrameContentPane = new javax.swing.JPanel();
-                ivjJFrameContentPane.setName("JFrameContentPane");
-                ivjJFrameContentPane
-                        .setLayout(getJFrameContentPaneBorderLayout());
-                getJFrameContentPane().add(getExecuteTimerLabel1(), "North");
-                getJFrameContentPane().add(getTimerCountLabel(), "Center");
-                getJFrameContentPane().add(getbtnTerminate(), "South");
-            } catch (java.lang.Throwable ivjExc) {
-                handleException(ivjExc);
-            }
-        }
-        return ivjJFrameContentPane;
-    }
-
-    /**
-     * Return the JFrameContentPaneBorderLayout property value.
-     *
-     * @return java.awt.BorderLayout
-     */
-    private java.awt.BorderLayout getJFrameContentPaneBorderLayout() {
-        java.awt.BorderLayout contentPaneBorderLayout = null;
-        try {
-            /* Create part */
-            contentPaneBorderLayout = new java.awt.BorderLayout();
-            contentPaneBorderLayout.setVgap(10);
-        } catch (java.lang.Throwable ivjExc) {
-            handleException(ivjExc);
-        }
-
-        return contentPaneBorderLayout;
-    }
-
-    /**
      * @return long
      */
     public long getMaxTime() {
@@ -292,34 +160,6 @@ public class ExecuteTimer extends Thread implements
         return proc;
     }
 
-    /**
-     * Return the TimerCount property value.
-     *
-     * @return javax.swing.JLabel
-     */
-    private javax.swing.JLabel getTimerCountLabel() {
-        if (ivjTimerCount == null) {
-            try {
-                ivjTimerCount = new javax.swing.JLabel();
-                ivjTimerCount.setName("TimerCount");
-                ivjTimerCount.setFont(new java.awt.Font("monospaced", 1, 48));
-                ivjTimerCount.setText(" ");
-                ivjTimerCount
-                        .setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-                ivjTimerCount.setCursor(new java.awt.Cursor(
-                        java.awt.Cursor.DEFAULT_CURSOR));
-            } catch (java.lang.Throwable ivjExc) {
-                handleException(ivjExc);
-            }
-        }
-        return ivjTimerCount;
-    }
-
-    public JFrame getTimerFrame() {
-
-        return getExecuteTimerFrame();
-    }
-
     private void handleException(Throwable exception) {
 
         /* Uncomment the following lines to print uncaught exceptions to stdout */
@@ -328,22 +168,11 @@ public class ExecuteTimer extends Thread implements
     }
 
     /**
-     * Initializes connections
-     *
-     * @exception java.lang.Exception
-     *                The exception description.
-     */
-    private void initConnections() throws java.lang.Exception {
-        getbtnTerminate().addActionListener(this);
-    }
-
-    /**
      * Initialize the class.
      */
     private void initialize() {
         try {
             timer = new javax.swing.Timer(1000, this);
-            initConnections();
         } catch (java.lang.Throwable ivjExc) {
             handleException(ivjExc);
         }
@@ -403,13 +232,18 @@ public class ExecuteTimer extends Thread implements
      * "start time" to "now()".
      */
     public void setStartTime() {
-        getTimerCountLabel().setText("00:00");
+        if(usingGUI) {
+            ivjExecuteTimerFrame.setTimerCountLabelText("00:00");
+        }
         startTime = now();
 
     }
 
     public void setTitle(String msg) {
-        getExecuteTimerLabel1().setText(msg);
+        if(usingGUI) {
+            ivjExecuteTimerFrame.resetFrame();
+            ivjExecuteTimerFrame.setExecuteTimerLabel(msg);
+        }
     }
 
     /**
@@ -422,9 +256,6 @@ public class ExecuteTimer extends Thread implements
     public void startTimer() {
         setStartTime();
         timer.start();
-        if (usingGUI) {
-            getExecuteTimerFrame().setVisible(true);
-        }
     }
 
     /**
@@ -456,14 +287,6 @@ public class ExecuteTimer extends Thread implements
      */
     public void stopTimer() {
         timer.stop();
-        if (usingGUI) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    getExecuteTimerFrame().setVisible(false);
-                    getExecuteTimerFrame().dispose();
-                }
-            });
-        }
     }
     
     private boolean isTeam (){

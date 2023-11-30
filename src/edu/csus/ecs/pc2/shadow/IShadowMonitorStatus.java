@@ -41,6 +41,13 @@ public interface IShadowMonitorStatus {
     public void connectSucceeded(String token);
     
     /**
+     * Normal close of remote
+     * 
+     * @param msg string describing what happened
+     */
+    public void connectClosed(String Msg);
+    
+    /**
      * Unexpected close of remote
      * 
      * @param errMsg string describing what happened

@@ -7,7 +7,9 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * Award JSON.
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+ * 
  */
+// TOOD REFACTOR replace AwardJSON with CLICSAward
 public class AwardJSON extends JSONUtilities {
 
     public String createJSON(IInternalContest contest) {

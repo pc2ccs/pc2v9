@@ -1,0 +1,114 @@
+#!/bin/bash
+# Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+#
+# Purpose:
+#   This script installs a Linux service that runs the script to create
+#   the cgroup necessary for PC2 sandboxes.  The service is a one-shot service
+#   that simply runs the PC2INSTALL_DIR/bin/pc2installsandbox shell script
+#   After running this script, there is no need to reboot the system if the script
+#   completes successfully.
+#
+# Arguments:
+#   pc2user - Linux login name of the user that will be doing judging or auto-judging
+#   pc2group - Linux group name of the user that will be doing judging or auto-judging
+#     You can determine the group name of the user 'pc2user' by issuing the following command at
+#     the Linux command prompt:
+#       id -gn pc2user
+#  The pc2user and pc2group are used to set ownership of the cgroup v2 for so the
+#  judge can use the sandbox.
+#
+# Author: John Buck
+
+DEBUG=
+#DEBUG="echo Would"
+
+SCRIPTNAME="$0"
+
+SERVICE_NAME=pc2_cgroup.service
+SERVICE_PATH=/etc/systemd/system/${SERVICE_NAME}
+
+euid=`id -u`
+if test "$euid" -ne 0
+then
+	echo $SCRIPTNAME: This script must be run as super user
+	exit 1
+fi
+
+# This will set basedir to the pc2 home installation folder
+. `dirname $0`/pc2env
+# Get absolute path of installation folder
+PC2HOME=`realpath ${basedir} 2>/dev/null`
+
+if test $# -lt 2 || test $# -gt 3
+then
+	echo Usage: $SCRIPTNAME pc2user pc2group "[pc2-install-path]"
+	echo "    pc2user - Linux login name of the user that will be doing judging or auto-judging"
+	echo "    pc2group - Linux group name of the user that will be doing judging or auto-judging"
+	echo "    pc2-install-path - Override full path to the installation folder of the PC2 distribution"
+	echo "      You can determine the group name of the user 'pc2user' by issuing the following command at"
+	echo "      the Linux command prompt:"
+	echo "        id -gn pc2user"
+	exit 4
+fi
+JUDGE_USER="$1"
+JUDGE_GROUP="$2"
+
+# Optionally override installation folder if supplied
+if test -n "$3" 
+then
+	PC2HOME="$3"
+	echo $SCRIPTNAME: Using user supplied PC2 installation folder: $PC2HOME
+fi
+
+
+if ! getent passwd $JUDGE_USER >/dev/null 2>&1
+then
+	echo $SCRIPTNAME: No such user $JUDGE_USER.  The pc2user must be a valid login id.
+	exit 5
+fi
+if ! getent group $JUDGE_GROUP >/dev/null 2>&1
+then
+	echo $SCRIPTNAME: No such group $JUDGE_USER.  The pc2group must be a valid group in /etc/group.
+	exit 6
+fi
+
+if test ! -d ${PC2HOME}
+then
+	echo $SCRIPTNAME: The installation folder ${PC2HOME} is not a directory
+	exit 7
+fi
+
+INSTALL_SCRIPT_PATH=${PC2HOME}/bin/pc2installsandbox
+if test ! -x ${INSTALL_SCRIPT_PATH}
+then
+	echo $SCRIPTNAME: The ${INSTALL_SCRIPT_PATH} is not an executable file.  This script must exist
+	echo $SCRIPTNAME: since the service requires it.
+	exit 8
+fi
+
+cat << EOF_HERE > ${SERVICE_PATH}
+# Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+#
+# Purpose: Execute the pc2installsandbox script which sets up the cgroup v2 required by pc2 sandboxes.
+#   This is only done once every time the system is booted.
+# Author: John Buck
+#
+
+[Unit]
+Description=Create CGROUP necessary for PC2 judging
+
+[Service]
+Type=oneshot
+ExecStart=$INSTALL_SCRIPT_PATH $JUDGE_USER $JUDGE_GROUP
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF_HERE
+
+$DEBUG chown root.root ${SERVICE_PATH}
+$DEBUG chmod 644 ${SERVICE_PATH}
+$DEBUG systemctl enable ${SERVICE_NAME}
+$DEBUG systemctl start ${SERVICE_NAME}
+$DEBUG systemctl status ${SERVICE_NAME}
+exit 0

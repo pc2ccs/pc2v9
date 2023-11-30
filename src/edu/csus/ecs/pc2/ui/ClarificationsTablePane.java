@@ -136,6 +136,11 @@ public class ClarificationsTablePane extends JPanePlugin {
     
     private String filterFrameTitle = "Clarification filter";
 
+    /*
+     * This should track the lastAnswered clar,
+     * and be reset to null when that clar is new or answered or deleted.
+     */
+    private ElementId lastAnswered = null;
     /**
      * This method initializes
      * 
@@ -751,7 +756,11 @@ public class ClarificationsTablePane extends JPanePlugin {
                     showClarificationAnswer(event.getClarification());
                 }
             }
-
+            if (event.getClarification().isAnswered() || event.getClarification().isNew() || event.getClarification().isDeleted()) {
+                if (event.getClarification().getElementId().equals(lastAnswered)) {
+                    lastAnswered = null;
+                }
+            }
         }
         
         public void refreshClarfications(ClarificationEvent event) {
@@ -771,10 +780,17 @@ public class ClarificationsTablePane extends JPanePlugin {
                     showClarificationAnswer(event.getClarification());
                 }
             }
+            if (event.getClarification().isAnswered() || event.getClarification().isNew() || event.getClarification().isDeleted()) {
+                if (event.getClarification().getElementId().equals(lastAnswered)) {
+                    lastAnswered = null;
+                }
+            }
         }
 
         public void clarificationRemoved(ClarificationEvent event) {
-            // TODO Auto-generated method stub
+            if (event.getClarification().getElementId().equals(lastAnswered)) {
+                lastAnswered = null;
+            }
         }
 
     }
@@ -1114,7 +1130,29 @@ public class ClarificationsTablePane extends JPanePlugin {
         try {
             ElementId elementId = clarificationTable.getElementIdFromTableRow(selectedIndexes[0]);
             Clarification clarificationToAnswer = getContest().getClarification(elementId);
-
+            if (elementId.equals(lastAnswered)) {
+                // try to make it visible
+                answerClarificationFrame.setVisible(true);
+                return;
+            }
+            if (lastAnswered != null) {
+                int showConfirmDialog = JOptionPane.showConfirmDialog(getParentFrame(), "You are asking to answer a new clarification, but you already have a clarification checked out for answering.\n" + //
+                        "\n" + //
+                        "If you want to give up the previous clarification and switch to answering the new one, click \"Yes\";\n" + //
+                        "\n" + //
+                        "otherwise, click \"No\" and go back to answering the previous clarification.\n" + //
+                        "", "Switch to different Clarification?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null);
+                if (showConfirmDialog == JOptionPane.YES_OPTION) {
+                    getController().cancelClarification(getContest().getClarification(lastAnswered));
+                    // now continue the rest of this method
+                } else {
+                    // NO or "X" on window
+                    // try to make it visible
+                    answerClarificationFrame.setVisible(true);
+                    return;
+                }
+            }
+            lastAnswered = elementId;
             if ((!clarificationToAnswer.getState().equals(ClarificationStates.NEW)) || clarificationToAnswer.isDeleted()) {
                 showMessage("Not allowed to request clarification, already answered");
                 return;

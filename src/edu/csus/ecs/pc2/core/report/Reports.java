@@ -161,8 +161,12 @@ public final class Reports {
         reports.add(new ProblemsGroupReport());
         
         reports.add(new ProblemGroupAssignmentReport());
+        reports.add(new ScoreboardJSONReport());
         
         reports.add(new ContestCompareReport());
+        
+        reports.add(new CLICSAwardsReport());
+        reports.add(new StandingsNSAReport());
         
         return (IReport[]) reports.toArray(new IReport[reports.size()]);
 

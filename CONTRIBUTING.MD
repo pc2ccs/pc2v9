@@ -33,7 +33,7 @@ There are various types of Client modules:
   * Each contest Judge (human or automated) runs a **Judge** module.
   * Each contest Team runs either a **Team** module or interfaces with the system via a browser using a **Web Client Team** module.
   * Scoreboards are displayed by a **Scoreboard** module.
-  * An **Event Feed** module can be used to generate a [CLICS Event Feed](https://clics.ecs.baylor.edu/index.php?title=Main_Page).
+  * An **Event Feed** module can be used to generate a [CLICS Event Feed](https://ccs-specs.icpc.io/2022-07/contest_api#event-feed).
 
 Clients communicate _only_ with the Server module for their site -- never with any other client nor with any server but the one
 designated as their "site server" (which is declared via a configuration file named **pc2v9.ini**).
@@ -70,7 +70,7 @@ For this reason, we have adopted a set of coding guidelines which we expect all 
 everyone on the original PC^2 core development team agreed on all the elements of our guidelines.  However, everyone did agree that
 it was more important to _have a set of standard guidelines_ than it was to have unanimous agreement on what those guidelines are.)
 
-Please see our [PC^2 Coding Style Guidelines document](./CodingStyle.md) for insight into what is expected of code contributions to PC^2.
+Please see our [PC^2 Development Standards](https://github.com/pc2ccs/pc2v9/wiki/Development-Standards) wiki page for insight into what is expected of code contributions to PC^2 -- in particular, check out the sections on [Java Code](https://github.com/pc2ccs/pc2v9/wiki/Development-Standards#java-code), [JavaDoc](https://github.com/pc2ccs/pc2v9/wiki/Development-Standards#javadoc), and [JUnits](https://github.com/pc2ccs/pc2v9/wiki/Development-Standards#junits).
 
 ## <a name="feedback"></a> Providing Feedback
 
@@ -99,9 +99,9 @@ If you are interested in doing more than providing feedback -- you want to contr
 ### <a name="firstcodecontribution"></a>  Your First Code Contribution
 
 Unsure how to begin contributing to PC^2? You can start by looking through the PC^2 [Issues List](https://github.com/pc2ccs/pc2v9/issues) for
-issues labeled `beginner` and `help-wanted`.  
+issues labeled `good first issue`, `beginner` and `help-wanted`.  
 
-* `Beginner` issues should only require a few lines of code, and a test or two.
+* `Good First Issue` and `Beginner` issues should only require a few lines of code, and a test or two.
 * `Help-wanted` issues are items which are likely to be a bit more involved than `beginner` issues.
 
 You can also learn a lot about how to contribute to PC2 by spending some time looking through the [PC2V9 Wiki](https://github.com/pc2ccs/pc2v9/wiki).
@@ -124,7 +124,7 @@ start by reading about the [PC2 Development Environment](https://github.com/pc2c
 
 When you have completed the above steps and come up with a bug fix or enhancement, the final step is to submit a [Pull Request](https://help.github.com/en/articles/about-pull-requests).  Pull Requests (PR's) allow you to submit a request to the PC^2 maintainers to merge your code into the PC^2 master branch and thus make it part of an upcoming public distribution of PC^2.
 
-Prior to submitting a PR, be sure that you have complied with all the preceding steps, including following the [PC^2 Coding Style Guidelines](./CodingStyle.md) and the creation of automated tests (e.g. JUnits) which demonstrate that your code works as intended (failure to adhere to these steps will almost certainly result in rejection of your PR, regardless of how "cool" the new feature might be).
+Prior to submitting a PR, be sure that you have complied with all the preceding steps, including following the [PC^2 Development Standards guidelines](https://github.com/pc2ccs/pc2v9/wiki/Development-Standards) regarding code and documentation standards as well as the creation of automated tests (e.g. JUnits) which demonstrate that your code works as intended (failure to adhere to these steps will almost certainly result in rejection of your PR, regardless of how "cool" the new feature might be).
 
 To submit a PR, follow the steps in the GitHub [Creating a Pull Request](https://help.github.com/en/articles/creating-a-pull-request-from-a-fork) guide. Specifically, these steps are:
 

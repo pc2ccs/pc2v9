@@ -1,23 +1,38 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.eventFeed;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Principal;
-import java.security.PrivateKey;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import javax.swing.JOptionPane;
+
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -39,12 +54,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import sun.security.x509.CertificateExtensions;
-import sun.security.x509.KeyIdentifier;
-import sun.security.x509.SubjectKeyIdentifierExtension;
-import sun.security.x509.X500Name;
-import sun.security.x509.X509CertImpl;
-import sun.security.x509.X509CertInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -64,6 +73,7 @@ import edu.csus.ecs.pc2.services.web.StarttimeService;
 import edu.csus.ecs.pc2.services.web.StateService;
 import edu.csus.ecs.pc2.services.web.SubmissionService;
 import edu.csus.ecs.pc2.services.web.TeamService;
+import edu.csus.ecs.pc2.services.web.VersionService;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -72,7 +82,6 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * This server listens on the input port and when a connection is made it creates a service that for each contest event will do REST web services.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 public class WebServer implements UIPlugin {
 
@@ -88,7 +97,7 @@ public class WebServer implements UIPlugin {
     // keys for web service properties
 
     public static final String PORT_NUMBER_KEY = "port";
-    
+
     public static final String CLICS_CONTEST_API_SERVICES_ENABLED_KEY = "enableCLICSContestAPI";
 
     public static final String STARTTIME_SERVICE_ENABLED_KEY = "enableStartTime";
@@ -107,78 +116,107 @@ public class WebServer implements UIPlugin {
 
     private Log log = null;
 
-    private void createKeyStoreAndKey(File keystoreFile) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, FileNotFoundException {
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        char[] password = keystorePassword.toCharArray();
-        ks.load(null, password);
+    private static final Provider bcProvider = new BouncyCastleProvider();;
+
+    public static KeyPair generateKeyPair() throws Exception {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        generator.initialize(2048, new SecureRandom());
+        KeyPair pair = generator.generateKeyPair();
+
+        return pair;
+    }
+
+    // based on https://stackoverflow.com/questions/43960761/how-to-store-and-reuse-keypair-in-java/43965528#43965528
+    // which was based on https://stackoverflow.com/questions/29852290/self-signed-x509-certificate-with-bouncy-castle-in-java
+    public static Certificate selfSign(KeyPair keyPair, String subjectDN) throws OperatorCreationException, CertificateException, IOException
+    {
+        long now = System.currentTimeMillis();
+        Date startDate = new Date(now);
+
+        X500Name dnName = new X500Name(subjectDN);
+
+        // Using the current timestamp as the certificate serial number
+        BigInteger certSerialNumber = new BigInteger(Long.toString(now));
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startDate);
+        // 1 Yr validity
+        calendar.add(Calendar.YEAR, 1);
+
+        Date endDate = calendar.getTime();
+
+        // Use appropriate signature algorithm based on your keyPair algorithm.
+        String signatureAlgorithm = "SHA256WithRSA";
+
+        SubjectPublicKeyInfo subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair
+                .getPublic().getEncoded());
+
+        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(dnName,
+                certSerialNumber, startDate, endDate, dnName, subjectPublicKeyInfo);
+
+        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(
+                bcProvider).build(keyPair.getPrivate());
+
+        X509CertificateHolder certificateHolder = certificateBuilder.build(contentSigner);
+
+        Certificate selfSignedCert = new JcaX509CertificateConverter()
+                .getCertificate(certificateHolder);
+
+        return selfSignedCert;
+    }
+
+    private void createKeyStoreAndKey(File keystoreFile) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, NoSuchProviderException {
+        
         try {
-            // taken from https://svn.forgerock.org/opendj/trunk/opends/src/server/org/opends/server/util/Platform.java
-            String certAndKeyGen;
-            // and this is why you are not suppose to use sun classes
-            if (System.getProperty("java.version").matches("^1\\.[67]\\..*")) {
-                certAndKeyGen = "sun.security.x509" + ".CertAndKeyGen";
-            } else {
-                // Java 8 moved the CertAndKeyGen class to sun.security.tools.keytool
-                certAndKeyGen = "sun.security.tools.keytool" + ".CertAndKeyGen";
+            KeyStore store = KeyStore.getInstance("PKCS12", "BC");
+            store.load(null, null);
+            char[] password = keystorePassword.toCharArray();
+
+            KeyPair keyPair = generateKeyPair();
+            Certificate selfSign = selfSign(keyPair, "CN=pc2ef,O=PC^2,OU=PC^2");
+            
+            Certificate[] chain = new Certificate[1];
+            chain[0] = selfSign;
+            store.setKeyEntry("jetty", keyPair.getPrivate(), password, chain);
+
+            try (FileOutputStream fos = new FileOutputStream(PC2_KEYSTORE_FILE)) {
+                store.store(fos, password);
+                fos.close();
             }
-            String x500Name = "sun.security.x509" + ".X500Name";
-            Class<?> certKeyGenClass = Class.forName(certAndKeyGen);
-            Class<?> x500NameClass = Class.forName(x500Name);
-            Constructor<?> certKeyGenCons = certKeyGenClass.getConstructor(String.class, String.class);
-            Constructor<?> x500NameCons = x500NameClass.getConstructor(String.class);
-            Object keypair = certKeyGenCons.newInstance("RSA", "SHA256WithRSA");
-            String dn = "CN=pc2 jetty, OU=PC^2, O=PC^2, L=Unknown, ST=Unknown, C=Unknown";
-            Object subject = x500NameCons.newInstance(dn);
-            Method certAndKeyGenGenerate = certKeyGenClass.getMethod("generate", int.class);
-            certAndKeyGenGenerate.invoke(keypair, 2048);
-            Method certAndKeyGenPrivateKey = certKeyGenClass.getMethod("getPrivateKey");
-            PrivateKey rootPrivateKey = (PrivateKey) certAndKeyGenPrivateKey.invoke(keypair);
-            Method getSelfCertificate = certKeyGenClass.getMethod("getSelfCertificate", x500NameClass, long.class);
-
-            X509Certificate[] chain = new X509Certificate[1];
-            // create with a length of 1 (non-leap) year
-            long days = (long) 365 * 24 * 3600;
-            // Generate self signed certificate
-            chain[0] = (X509Certificate) getSelfCertificate.invoke(keypair, subject, days);
-
-            Principal issuer = chain[0].getSubjectDN();
-            String issuerSigAlg = chain[0].getSigAlgName();
-            byte[] inCertBytes = chain[0].getTBSCertificate();
-            X509CertInfo info = new X509CertInfo(inCertBytes);
-            info.set(X509CertInfo.ISSUER, (X500Name) issuer);
-
-            CertificateExtensions exts = new CertificateExtensions();
-            exts.set(SubjectKeyIdentifierExtension.NAME, new SubjectKeyIdentifierExtension(new KeyIdentifier(chain[0].getPublicKey()).getIdentifier()));
-            info.set(X509CertInfo.EXTENSIONS, exts);
-
-            X509CertImpl outCert = new X509CertImpl(info);
-            outCert.sign(rootPrivateKey, issuerSigAlg);
-
-            ks.setCertificateEntry("jetty", outCert);
-            ks.setKeyEntry("jetty", rootPrivateKey, keystorePassword.toCharArray(), chain);
         } catch (Exception ex) {
+            if (getController().isUsingGUI()) {
+                String msg = "Warning: exception occurred during KeyStore creation: " + ex.getMessage();
+                msg += "\nStack trace:";
+                StackTraceElement[] stackTraceElements = ex.getStackTrace();
+                for (StackTraceElement line : stackTraceElements) {
+                    if (line.toString().contains("edu.csus.ecs.pc2")) {
+                        msg += "\n" + line;
+                    }
+                }
+                msg += "\n...";
+                JOptionPane.showMessageDialog(null, msg, "Error creating WebServer KeyStore", JOptionPane.WARNING_MESSAGE);
+            }
+            log.throwing("WebServer", "createKeyStoreAndFile", ex);
             ex.printStackTrace();
         }
-
-        // Store away the keystore
-        FileOutputStream fos = new FileOutputStream(keystoreFile);
-        ks.store(fos, password);
-        fos.close();
     }
 
     /**
      * Start Web Server.
      * <P>
-     * Starts a Jetty webserver running on the port specified in the GUI textfield, and registers a set of default REST (Jersey/JAX-RS) services with Jetty. TODO: need to provide support for
-     * dynamically reconfiguring the registered services.
-     */
+     * Starts a Jetty webserver running on the port specified in the GUI textfield, and registers a set of default REST (Jersey/JAX-RS) services with Jetty.
+     * TODO: need to provide support for dynamically reconfiguring the registered services.     */
     public void startWebServer(IInternalContest aContest, IInternalController aController, Properties properties) {
 
-        setContestAndController(aContest,aController);
+        setContestAndController(aContest, aController);
         wsProperties = properties;
 
         try {
+            Security.addProvider(bcProvider);
+
             int port = getIntegerProperty(PORT_NUMBER_KEY, DEFAULT_WEB_SERVER_PORT_NUMBER);
+
+            showMessage("Binding to port " + port);
 
             File keystoreFile = new File(PC2_KEYSTORE_FILE);
 
@@ -202,6 +240,7 @@ public class WebServer implements UIPlugin {
             // set to trustAll
             SslContextFactory sslContextFactory = new SslContextFactory(true);
             sslContextFactory.setKeyStorePath(keystoreFile.getAbsolutePath());
+            sslContextFactory.setKeyStoreType("PKCS12");
             sslContextFactory.setKeyStorePassword(keystorePassword);
             sslContextFactory.setKeyManagerPassword(keystorePassword);
             // suggestions from http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html
@@ -232,7 +271,7 @@ public class WebServer implements UIPlugin {
             // jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", getServiceClassesList());
 
             jettyServer.start();
-            showMessage("Started web server on port "+ port);
+            showMessage("Started web server on port " + port);
 
         } catch (NumberFormatException e) {
             showMessage("Unable to start web services: invalid port number: " + e.getMessage(), e);
@@ -242,22 +281,21 @@ public class WebServer implements UIPlugin {
             showMessage("Unable to start web services: " + e2.getMessage(), e2);
         }
     }
-    
+
     private void showMessage(final String message, Exception ex) {
         getLog().log(Log.INFO, message, ex);
-        System.out.println(new Date() + " " +message);
+        System.out.println(new Date() + " " + message);
         ex.printStackTrace();
     }
 
     private void showMessage(String message) {
-        System.out.println(new Date() + " " +message);
+        System.out.println(new Date() + " " + message);
         getLog().info(message);
     }
-    
+
     private Logger getLog() {
         return log;
     }
-
 
     private SecurityHandler basicAuth() {
 
@@ -333,10 +371,10 @@ public class WebServer implements UIPlugin {
             resConfig.register(new FetchRunService(getContest(), getController()));
             showMessage("Starting /fetchRun web service");
         }
-        
+
         // CLICS Contest API services are collective -- either all enabled or all disabled (and default to enabled if unspecified)
         if (getBooleanProperty(CLICS_CONTEST_API_SERVICES_ENABLED_KEY, true)) {
-            
+
             resConfig.register(new ContestService(getContest(), getController()));
             showMessage("Starting /contest web service");
             resConfig.register(new ScoreboardService(getContest(), getController()));
@@ -365,22 +403,25 @@ public class WebServer implements UIPlugin {
             showMessage("Starting /contest/event-feed web service");
             resConfig.register(new StateService(getContest(), getController()));
             showMessage("Starting /contest/state web service");
+            resConfig.register(new VersionService(getContest(), getController()));
+            showMessage("Starting / endpoint for version web service");
+
         }
-        
+
         return resConfig;
     }
 
     /**
-     * Returns the value of the specified property in the global wsProperties table, or the specified boolean value if the 
-     * specified property is not found in the wsProperties table.
-     * Property values "true", "yes", "on", and "enabled" are treated as true; any other string is considered false.
+     * Returns the value of the specified property in the global wsProperties table, or the specified boolean value if the specified property is not found in the wsProperties table. Property values
+     * "true", "yes", "on", and "enabled" are treated as true; any other string is considered false.
      * 
-     * @param key - a wsProperties table property key
-     * @param b - the value to be returned if key is not found in wsProperties
+     * @param key
+     *            - a wsProperties table property key
+     * @param b
+     *            - the value to be returned if key is not found in wsProperties
      * 
-     * @return true if key is found in wsProperties and has a value which is any of "true", "yes", "on", or "enabled"; 
-     *          false if key is found in wsProperties but has any other value;
-     *          b if key is not found in wsProperties
+     * @return true if key is found in wsProperties and has a value which is any of "true", "yes", "on", or "enabled"; false if key is found in wsProperties but has any other value; b if key is not
+     *         found in wsProperties
      */
     protected boolean getBooleanProperty(String key, boolean b) {
 
@@ -458,15 +499,15 @@ public class WebServer implements UIPlugin {
     }
 
     public boolean isServerRunning() {
-        
+
         boolean serverRunning;
-        
+
         if (jettyServer == null) {
             serverRunning = false;
         } else {
             serverRunning = jettyServer.isRunning();
         }
-        
+
         return serverRunning;
     }
 

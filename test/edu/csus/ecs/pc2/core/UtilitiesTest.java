@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -10,8 +10,10 @@ import java.util.Date;
 import java.util.List;
 
 import edu.csus.ecs.pc2.core.Utilities.DataFileType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
@@ -145,7 +147,7 @@ public class UtilitiesTest extends AbstractTestCase {
 
     public void testfindDataBasePath() throws Exception {
 
-        String secretDir = Utilities.SECRET_DATA_DIR;
+        String secretDir = Utilities.SECRET_DATA_PATH;
 
         String expected = "cdp/config/problema/";
         String input = expected + secretDir;
@@ -516,4 +518,163 @@ public class UtilitiesTest extends AbstractTestCase {
         
     }
     
+    /**
+     * Test where both arrays are null.
+     * @throws Exception
+     */
+    public void testBothNull() throws Exception {
+        String[] one = null;
+        String[] two = null;
+
+        String[] newArray = Utilities.concatenateArrays(one, two);
+
+        assertEquals("Expecting a zero lenght array", 0, newArray.length);
+
+    }
+
+    /**
+     * Test where first array is null.
+     * 
+     * @throws Exception
+     */
+    public void testCopyEmptyOneNull() throws Exception {
+
+        String[] one = null;
+        String[] two = { "omega", "delta" };
+
+        String[] newArray = Utilities.concatenateArrays(one, two);
+
+        if (one == null) {
+            one = new String[0];
+        }
+
+        assertEquals("Expect result array length", one.length + two.length, newArray.length);
+
+    }
+
+    /**
+     * Test where second array is null.
+     * 
+     * @throws Exception
+     */
+    public void testCopyEmptyTwoNull() throws Exception {
+
+        String[] one = { "alpha", "beta", "gamma" };
+        String[] two = null;
+
+        String[] newArray = Utilities.concatenateArrays(one, two);
+
+        if (two == null) {
+            two = new String[0];
+        }
+
+        assertEquals("Expect result array length", one.length + two.length, newArray.length);
+    }
+
+    /**
+     * Test copy where second array is zero length.
+     * @throws Exception
+     */
+    public void testCopyEmptyTwo() throws Exception {
+
+        String[] one = { "alpha", "beta", "gamma" };
+        String[] two = new String[0];
+
+        String[] newArray = Utilities.concatenateArrays(one, two);
+        assertEquals("Expect result array length", one.length + two.length, newArray.length);
+    }
+
+    /**
+     * Test copy non-empty arrays.
+     * 
+     * @throws Exception
+     */
+    public void testCopyArrays() throws Exception {
+
+        String[] one = { "alpha", "beta", "gamma" };
+        String[] two = { "omega", "delta" };
+
+        String[] newArray = Utilities.concatenateArrays(one, two);
+        assertEquals("Expect result array length", one.length + two.length, newArray.length);
+
+        for (int i = 0; i < one.length; i++) {
+            int naOffset = i + 0;
+            assertEquals("Expected element equal one[" + i + "]", one[i], newArray[naOffset]);
+        }
+
+        for (int i = 0; i < two.length; i++) {
+            int naOffset = i + one.length;
+
+            assertEquals("Expected element equal two[" + i + "]", two[i], newArray[naOffset]);
+        }
+
+    }
+
+    public void testCopy() throws Exception {
+
+        String[] source = { "alpha", "beta", "gamma" };
+        String[] target = new String[source.length];
+
+        System.arraycopy(source, 0, target, 0, source.length);
+
+        assertEquals(source.length, target.length);
+
+    }
+
+    
+    
+    public void testLocatingSampleFiles() throws Exception {
+
+        IInternalContest contest = loadFullSampleContest(null, "mini");
+        assertNotNull(contest);
+        
+        ContestInformation info = contest.getContestInformation();
+        
+        String judgeCDP = info.getJudgeCDPBasePath();
+        
+        Problem[] problems = contest.getProblems();
+        
+        int totFiles = 0;
+        for (Problem problem : problems) {
+            totFiles += problem.getNumberTestCases();
+        }
+        
+        assertEquals("Expecting total data and sample files",10, totFiles);
+        
+        for (Problem problem : problems) {
+
+            ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
+
+            SerializedFile[] judgeFiles = problemDataFiles.getJudgesDataFiles();
+            for (SerializedFile judgeDataFile : judgeFiles) {
+
+                String dataFileLocation = Utilities.locateJudgesDataFile(problem, judgeDataFile, judgeCDP, DataFileType.JUDGE_DATA_FILE);
+                assertFileExists(dataFileLocation, "Could not find datafile");
+            }
+        }
+    }
+    
+    /**
+     * Test whether fullJudgesDataFilenames finds data files, esp. samples.
+     */
+    public void testfullJudgesDataFilenames() throws Exception {
+
+        String contestName = "mini";
+        IInternalContest contest = loadFullSampleContest(null, contestName);
+        String cdpPath = contest.getContestInformation().getJudgeCDPBasePath();
+        Utilities.validateCDP(contest, cdpPath);
+
+        Problem[] problems = contest.getProblems();
+
+        assertEquals("Expecting number of problems in " + contestName, 1, problems.length);
+
+        for (Problem problem : problems) {
+            ProblemDataFiles pdf = contest.getProblemDataFile(problem);
+
+            String[] names = Utilities.fullJudgesDataFilenames(contest, pdf, "execute");
+            for (String string : names) {
+                assertFileExists(string);
+            }
+        }
+    }
 }

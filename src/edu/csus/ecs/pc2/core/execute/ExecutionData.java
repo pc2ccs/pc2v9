@@ -62,6 +62,8 @@ public class ExecutionData implements Serializable {
     private Exception executionException = null;
     
     private boolean runTimeLimitExceeded = false;
+    
+    private boolean memoryLimitExceeded = false;
 
     private boolean failedToCompile = false;
 
@@ -339,6 +341,18 @@ public class ExecutionData implements Serializable {
 
     public void setRunTimeLimitExceeded(boolean runTimeLimitExceeded) {
         this.runTimeLimitExceeded = runTimeLimitExceeded;
+    }
+
+    /**
+     * During execution was there a time limit exceeded?.
+     * @return
+     */
+    public boolean isMemoryLimitExceeded() {
+        return memoryLimitExceeded;
+    }
+
+    public void setMemoryLimitExceeded(boolean memoryLimitExceeded) {
+        this.memoryLimitExceeded = memoryLimitExceeded;
     }
     
     public void setAdditionalInformation(String additionalInformation) {

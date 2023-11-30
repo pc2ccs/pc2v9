@@ -1,6 +1,6 @@
+# Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 #
-# Sumit Sample multiple test cases
-# Fri Nov 04 12:02:43 2016
+# Sumit Sample multiple test cases ("mini" contest)
 #
 --- 
 
@@ -12,6 +12,12 @@ short-name: PacNW Mini
 start-time:        2016-11-04T18:30:00-07:00
 
 duration:  2:00:00
+
+max-output-size-K: 142
+
+
+# Load sample data 
+load-sample-judges-data: true
 
 # freeze time before end of contest
 scoreboard-freeze: 01:00:00
@@ -35,8 +41,22 @@ default-validator: /home/judge/cdp/config/validefault {:infile} {:outfile} {:ans
 # Load data files into pc2 as SerializedFiles, not using CDP external files
 load-data-files: false
 
+# Loader will automatically load accounts file CDPDIRconfig/accounts_load.tsv
+
+# To load a different load accounts file use key load-accounts-file 
+# load file from config/ dir 
+# load-accounts-file : 'mini.load.accounts.up.tsv'
+# load file from /home/ubuntu/current/config
+# load-accounts-file : '/home/ubuntu/current/config/mini.load.accounts.up.tsv'
+# with new accounts too
+# load-accounts-file : mini.load.accounts02.up.tsv
+
+# load sample files then load secret data files, default is true
+# load-sample-judges-data : false
+# load-sample-judges-data : true
+
 # judge's data path
-judge-config-path: /home/judge/cdp/config
+# judge-config-path: /home/judge/cdp/config
 
 languages:
   - name: 'Java'
@@ -46,8 +66,6 @@ languages:
     execCmd: 'java -Xss8m -Xmx1024m {:basename}'
     runner: 'java'
     runner-args: '{:basename}'
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_java {:timelimit} {:basename}'
 
   - name: 'GNU C'
     active: true
@@ -56,8 +74,6 @@ languages:
     execCmd: './a.out'
     runner: './a.out'
     runner-args: ''
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_c {:timelimit}'
 
   - name: 'GNU C++'
     active: true
@@ -66,8 +82,6 @@ languages:
     execCmd: './a.out'
     runner: './a.out'
     runner-args: ''
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_c {:timelimit}'
 
   - name: 'Python2'
     active: true
@@ -77,8 +91,6 @@ languages:
     execCmd: 'python {:mainfile}'
     runner: 'python'
     runner-args: '{:mainfile}'
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_python {:timelimit} {:mainfile}'
 
   - name: 'Python3'
     active: true
@@ -88,8 +100,6 @@ languages:
     execCmd: 'python3 {:mainfile}'
     runner: 'python3'
     runner-args: '{:mainfile}'
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_python3 {:timelimit} {:mainfile}'
 
   - name: 'C#'
     active: true
@@ -99,8 +109,6 @@ languages:
     execCmd: 'mono {:basename}.exe'
     runner: 'mono'
     runner-args: '{:basename}.exe'
-    use-judge-cmd: true
-    judge-exec-cmd: '/usr/bin/wrapper_cs {:timelimit} {:basename}.exe'
 
 #
 # problemset.yaml - list of CCS problem definitions

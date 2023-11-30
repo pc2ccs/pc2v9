@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.ByteArrayInputStream;
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -32,6 +33,7 @@ import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.export.MailMergeFile;
+import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
@@ -54,6 +56,7 @@ import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Problem.INPUT_VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.Problem.InputValidationStatus;
+import edu.csus.ecs.pc2.core.model.Problem.SandboxType;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -213,7 +216,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @Override
     public String getContestTitle(String contestYamlFilename) throws IOException {
-        return fetchValue(new File(contestYamlFilename), IContestLoader.CONTEST_NAME_KEY);
+        File contestYaml = new File(contestYamlFilename);
+        
+        // Try CLICS name first.  Fun fact: CLICS_CONTEST_NAME == CONTEST_NAME_KEY, but may not someday
+        String contestTitle = fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_NAME);
+        // only if the CLICS name isn't there do we try the old one.  non-null means it is there.
+        if(contestTitle == null) {
+            contestTitle = fetchValue(contestYaml, IContestLoader.CONTEST_NAME_KEY);
+        }
+        return(contestTitle);
     }
 
     protected String fetchValue(File file, String key) {
@@ -261,13 +272,37 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
+
+    private void setSandboxCommand(IInternalContest contest, String sandboxCommandLine) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setSandboxCommandLine(sandboxCommandLine);
+        contest.updateContestInformation(contestInformation);
+    }
+    
+    private int getMemoryLimitMB(IInternalContest contest) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        return(contestInformation.getMemoryLimitInMeg());
+    }
+
+    private void setMemoryLimitMB(IInternalContest contest, int memoryLimitMB) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setMemoryLimitInMeg(memoryLimitMB);
+        contest.updateContestInformation(contestInformation);
+    }
+
+
     private void setCcsTestMode(IInternalContest contest, boolean ccsTestMode) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setCcsTestMode(ccsTestMode);
         contest.updateContestInformation(contestInformation);
     }
-    
-    
+
+    protected void setLoadSampleJudgesData(IInternalContest contest, boolean loadSampleFiles) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setLoadSampleJudgesData(loadSampleFiles);
+        contest.updateContestInformation(contestInformation);
+    }
+
     private void setStopOnFirstFailedTestCase(IInternalContest contest, boolean stopOnFirstFail) {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setStopOnFirstFailedtestCase(stopOnFirstFail);
@@ -405,6 +440,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setCcsTestMode(contest, ccsTestMode);
         }
         
+        boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, true);
+        setLoadSampleJudgesData(contest, loadSamples);
+        
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
         setStopOnFirstFailedTestCase (contest, stopOnFirstFail);
         
@@ -425,6 +463,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // enable shadow mode
         boolean shadowMode = fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
         contestInformation.setShadowMode(shadowMode);
+        
+        String altAccountsLoadFilename = fetchValue(content, LOAD_ACCOUNTS_FILE_KEY, null);
+        contestInformation.setOverrideLoadAccountsFilename(altAccountsLoadFilename);
         
         // base URL for CCS REST service
         String  ccsUrl= fetchValue(content, CCS_URL_KEY, contestInformation.getPrimaryCCS_URL());
@@ -454,9 +495,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         Integer defaultTimeout = fetchIntValue(content, TIMEOUT_KEY, DEFAULT_TIME_OUT);
-
+        
+        int currentGlobalMemoryLimit = getMemoryLimitMB(contest);
+        Integer globalMemoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, currentGlobalMemoryLimit);
+        if(currentGlobalMemoryLimit != globalMemoryLimit) {
+            setMemoryLimitMB(contest, globalMemoryLimit);
+        }
+        
         for (String line : yamlLines) {
-            if (line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
+            if (line.startsWith(CLICS_CONTEST_NAME + DELIMIT) || line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
                 setTitle(contest, unquoteAll(line.substring(line.indexOf(DELIMIT) + 1).trim()));
 
             }
@@ -464,8 +511,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         loadDataFileContents = fetchBooleanValue(content, PROBLEM_LOAD_DATA_FILES_KEY, loadDataFileContents);
 
-        String shortContestName = fetchValue(content, SHORT_NAME_KEY);
-        if (shortContestName != null) {
+        String shortContestName = fetchValue(content, CLICS_CONTEST_ID);
+        // only if CLICS id is not present do we try the older short-name
+        if(shortContestName == null) {
+            shortContestName = fetchValue(content, SHORT_NAME_KEY);
+        }
+        // only set short name if string is present AND not empty
+        if (!StringUtilities.isEmpty(shortContestName)) {
             setShortContestName(contest, shortContestName);
         }
 
@@ -476,7 +528,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             setAutoStopClockAtEnd(contest, autoStopClockAtEnd);
         }
 
-        String contestLength = fetchValue(content, CONTEST_DURATION_KEY);
+        String contestLength = fetchValue(content, CLICS_CONTEST_DURATION);
+        // if CLICS duration not present, try old duration.
+        // note as of CLICS spec 2022-07, the CLICS key is the same as the old one
+        // we leave the old test here in case the CLICS key changes at some point.
+        if(contestLength == null) {
+            contestLength = fetchValue(content, CONTEST_DURATION_KEY);
+        }
         if (contestLength != null) {
             setContestLength(contest, contestLength);
         }
@@ -492,26 +550,42 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             contest.updateContestTime(time);
         }
 
-        // Old yaml name
-        String scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_KEY);
-        if (scoreboardFreezeTime != null) {
+        // There are several ways to specify the freeze length.  We try them here
+        // in order of preference: CLICS, old, new  (does that make sense? shouldn't
+        // new be tried before old? -- JB)
+        String scoreboardFreezeTime = fetchValue(content, CLICS_CONTEST_FREEZE_DURATION);
+        
+        // This is absolutely ridiculous, but backward compatible *sigh*
+        if(scoreboardFreezeTime == null) {
+            // Old yaml name
+            scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_KEY);
+    
+            if(scoreboardFreezeTime == null) {
+                // New yaml name
+                scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_LENGTH_KEY);
+            }
+        }
+        // Only set time if not null or empty
+        if (!StringUtilities.isEmpty(scoreboardFreezeTime)) {
             setScoreboardFreezeTime(contest, scoreboardFreezeTime);
         }
 
-        // New yaml name
-        scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_LENGTH_KEY);
-        if (scoreboardFreezeTime != null) {
-            setScoreboardFreezeTime(contest, scoreboardFreezeTime);
+        Object startTimeObject = fetchObjectValue(content, CLICS_CONTEST_START_TIME);
+        // if clics start time not present(!), try the old one
+        if(startTimeObject == null) {
+            startTimeObject = fetchObjectValue(content, CONTEST_START_TIME_KEY);
         }
-
-        Object startTimeObject = fetchObjectValue(content, CONTEST_START_TIME_KEY);
 
         Date date = null;
         if (startTimeObject != null && startTimeObject instanceof Date) {
             setContestStartDateTime(contest, (Date) startTimeObject);
         } else {
 
-            String startTime = fetchValue(content, CONTEST_START_TIME_KEY);
+            String startTime = fetchValue(content, CLICS_CONTEST_START_TIME);
+            // only if CLICS start time is NOT there do we try the old one
+            if(startTime == null) {
+                startTime = fetchValue(content, CONTEST_START_TIME_KEY);
+            }
 
             if (startTime != null) {
 
@@ -547,7 +621,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
         
-        
+        // If the contest type is present in contest.yaml, verify it
+        String scoreType = fetchValue(content, CLICS_CONTEST_SCOREBOARD_TYPE);
+        if(scoreType != null && !scoreType.equals("pass-fail")) {
+            throw new YamlLoadException("Invalid " + CLICS_CONTEST_SCOREBOARD_TYPE + ": " + scoreType + ", expected pass-fail");
+        }
         Object privatehtmlOutputDirectory = fetchObjectValue(content, OUTPUT_PRIVATE_SCORE_DIR_KEY);
         if (privatehtmlOutputDirectory != null) {
             if (privatehtmlOutputDirectory instanceof String) {
@@ -572,7 +650,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             if (maxOutputSize instanceof Integer) {
                 int maxSizeInK = ((Integer) maxOutputSize).intValue();
                 if (maxSizeInK > 0) {
-                    setMaxOutputSize(contest, maxSizeInK * 1000);
+                    setMaxOutputSize(contest, maxSizeInK * Constants.BYTES_PER_KIBIBYTE);
                 } else {
                     throw new YamlLoadException("Invalid max-output-size-K value '" + maxOutputSize + " size must be > 0 ", null, contestFileName);
                 }
@@ -622,7 +700,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             manualReviewOverride = fetchBooleanValue(content, MANUAL_REVIEW_KEY, false);
         }
 
-        Problem[] problems = getProblems(yamlLines, defaultTimeout, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
+        //get the current default global output size for the contest so getProblems() can use it if no
+        // Problem-specific output limit is defined
+        Long defaultMaxOutputBytes = new Long(contest.getContestInformation().getMaxOutputSizeInBytes());
+        
+        Problem[] problems = getProblems(yamlLines, defaultTimeout, defaultMaxOutputBytes, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
 
         if (loadProblemDataFiles) {
             for (Problem problem : problems) {
@@ -906,9 +988,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
 
-    private void setMaxOutputSize(IInternalContest contest, int maxFileSize) {
+    private void setMaxOutputSize(IInternalContest contest, int maxOutputBytes) {
         ContestInformation contestInformation = contest.getContestInformation();
-        contestInformation.setMaxFileSize(maxFileSize);
+        contestInformation.setMaxOutputSizeInBytes(maxOutputBytes);
         contest.updateContestInformation(contestInformation);
     }
 
@@ -925,6 +1007,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     private void setScoreboardFreezeTime(IInternalContest contest, String scoreboardFreezeTime) {
         ContestInformation contestInformation = contest.getContestInformation();
+        // adapted from core.util.JSONTool
+        // seems the yaml is converting the 1:00:00 into 3600
+        if (scoreboardFreezeTime.length() > 2) {
+            if (!scoreboardFreezeTime.contains(":")) {
+                try {
+                    long seconds = Long.parseLong(scoreboardFreezeTime);
+                    scoreboardFreezeTime = ContestTime.formatTime(seconds);
+                } catch (NumberFormatException e) {
+                    syntaxError("Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds "+ e.getMessage());
+                }
+            }
+        }
         contestInformation.setFreezeTime(scoreboardFreezeTime);
         contest.updateContestInformation(contestInformation);
     }
@@ -1082,6 +1176,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return value;
     }
 
+    /**
+     * Fetch value from a map.
+     * 
+     * @param content
+     * @param key
+     * @return null if content does not contain a value for the key, else the value for the key.
+     */
     private String fetchValue(Map<String, Object> content, String key) {
         if (content == null) {
             return null;
@@ -1232,6 +1333,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         return defaultValue;
     }
 
+    private Long fetchLongValue(Map<String, Object> map, String key, long defaultValue) {
+        Long value = null;
+        if (map != null) {
+            value = (Long) map.get(key);
+        }
+        if (value != null) {
+            try {
+                return value;
+            } catch (Exception e) {
+                syntaxError("Expecting number after " + key + ": field, found '" + value + "'");
+            }
+        }
+        return defaultValue;
+    }
+
     private Integer fetchIntValue(Map<String, Object> map, String key) {
         if (map == null) {
             // SOMEDAY figure out why map would every be null
@@ -1292,11 +1408,41 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problemLaTexFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_ENGLISH_PROBLEM_LATEX_FILENAME;
             problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
         }
-
-        Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
+        
         boolean usingCustomValidator = false;
+        Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
         if (validatorContent != null) {
             usingCustomValidator = fetchBooleanValue(validatorContent, IContestLoader.USING_CUSTOM_VALIDATOR, false);
+        }
+        
+        // check for CLICS "validation" property; provides an alternate way to specify a customer validator and,
+        // the ONLY way to specify if the problem is interactive.
+        String validationType = fetchValue(content, VALIDATION_TYPE);
+        boolean isInteractive = false;
+        if (validationType != null) {
+            // validationType is a list of validation options
+            String[] valOpts = validationType.split("\\s");
+            // Must be one of: "default", "custom", "custom interactive"
+            // PC2 does not support "custom score", which IS spec compliant; we issue a different error for that
+            if (valOpts.length >= 1) {
+                if(valOpts[0].equals(Constants.VALIDATION_CUSTOM)) {
+                    usingCustomValidator = true;
+                    if(valOpts.length >= 2) {
+                        if(valOpts[1].equals(Constants.VALIDATION_INTERACTIVE)) {
+                            // Note that interactive problems require a custom validator
+                            isInteractive = true;
+                        } else if(valOpts[1].equals(Constants.VALIDATION_SCORE)) {
+                            syntaxError("Unsupported validation type: custom score");
+                        } else {
+                            syntaxError("Unknown valudation type: custom " + valOpts[1]);
+                        }
+                    }
+                } else if(!valOpts[0].equals(Constants.VALIDATION_DEFAULT)) {
+                    syntaxError("Unknown validation type " + valOpts[0] + " specified");
+                }
+            } else {
+                syntaxError(VALIDATION_TYPE + " property found but no type was specified");
+            }
         }
 
         boolean pc2FormatProblemYamlFile = false;
@@ -1310,6 +1456,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             pc2FormatProblemYamlFile = true;
         }
 
+        // TODO: I am not sure why this test is contingent on pc2FormatProblemYamlFile. (JB)
         if (problemTitle == null && (pc2FormatProblemYamlFile)) {
             problemTitle = fetchValue(content, "name");
         }
@@ -1335,13 +1482,123 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         //
         assignValidatorSettings(content, problem);
+        
+        // Make sure the validator settings are acceptable for interactive problems
+        if(isInteractive) {
+            if(!usingCustomValidator) {
+                throw new YamlLoadException("For problem short name " + problem.getShortName() + 
+                        ", a custom validator is required for an interactive problem");
+                
+            }
+            if(!problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface()) {
+                throw new YamlLoadException("For problem short name " + problem.getShortName() + 
+                        ", the custom validator must be a CLICS compliant for an interactive problem");
+                
+            } else {
+                // A note here about how interactive validation works.  The interactive validator must be CLICS
+                // compliant and return an exit code of 42 or 43, and possibly generating a feedback file for
+                // each test case.  PC2 is nominally aware of interactive validators and only knows enough to
+                // call a script (pc2sandbox_interactive.sh or pc2_interactive.sh) to perform a testcase run.
+                // The results of that testcase are written to a known results file (and feedback directory) by
+                // the pc2sandbox_interactive.sh/pc2_interactive.sh script (be it accepted, wrong answer, RTE, TLE, MLE etc).
+                // PC2 then knows to call a special validator during the validation phase (pc2validate_interactive.sh) to
+                // copy the results file/feedback dir into the place that pc2 expects it so it can determine if the
+                // submission is correct or not.  This special validator is a PC2 compliant (not CLICS) so we can
+                // return complete result info in one XML file, other than AC or WA.  CLICS validators do not allow that
+                // without munging the feedback dir.  The important thing is, the actual testcase is validated by a CLICS
+                // validator.
+                
+                // We set the custom output validator settings for interactive.  The CLICS spec does not have
+                // a validator section in the YAML, as such, we first verified that the custom validator is CLICS compliant.
+                // We then we set output validator type to clics interactive.
+                problem.getCustomOutputValidatorSettings().setUseInteractiveValidatorInterface();
+            }
+        }
+        
+        //read any PC2-format limits specified at the top level of the problem.yaml file
+        Integer timeoutSecs = fetchIntValue(content, TIMEOUT_KEY);
+        if (timeoutSecs != null) {
+            problem.setTimeOutInSeconds(timeoutSecs);
+        }
+        Integer maxOutputPC2 = fetchIntValue(content, MAX_OUTPUT_SIZE_K_KEY);
+        if (maxOutputPC2 != null) {
+            problem.setMaxOutputSizeKB(maxOutputPC2);
+        }
+        
+        Integer memoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, Problem.DEFAULT_MEMORY_LIMIT_MB);
+        problem.setMemoryLimitMB(memoryLimit);
+        
+        String sandboxCommandLine = fetchValue(content, SANDBOX_COMMAND_LINE_KEY, "");
+        problem.setSandboxCmdLine(sandboxCommandLine);
+        
+        String sandboxProgramName = fetchValue(content, SANDBOX_PROGRAM_NAME_KEY, "");
+        problem.setSandboxProgramName(sandboxProgramName);
+        
+        String sandboxTypeString = fetchValue(content, SANDBOX_TYPE_KEY);
+        if (sandboxTypeString != null) {
 
-        Map<String, Object> limitsContent = fetchMap(content, LIMITS_KEY);
-        Integer timeOut = fetchIntValue(limitsContent, TIMEOUT_KEY);
-        if (timeOut != null) {
-            problem.setTimeOutInSeconds(timeOut);
+            try {
+                SandboxType type = SandboxType.valueOf(sandboxTypeString);
+                problem.setSandboxType(type);
+            } catch (Exception e) {
+                throw new YamlLoadException("For problem short name " + problem.getShortName() + //
+                        ", unknown sandbox type " + sandboxTypeString + " " + e.getMessage(), e);
+            }
+
+        } else {
+            problem.setSandboxType(SandboxType.NONE);
         }
 
+        //get the map (if any) of the CLICS "limits" section in the problem.yaml file
+        Map<String, Object> limitsContent = fetchMap(content, LIMITS_KEY);
+
+        //if there is a CLICS "limits" section in the problem.yaml, read any values in that section and use 
+        // them to override any PC2-formatted values (just read in, above)
+        if (limitsContent != null) {
+            
+            //check for a CLICS timeout limit
+            //NOTE:  CLICS does not support directly specifying a problem time limit (like PC2 does with the "timeout" key).
+            //Rather, the CLCIS problem package format (at https://icpc.io/problem-package-format/spec/problem_package_format#limits)
+            //specifies two time-related limit values:  "time_multiplier" and "time_safety_margin".  The overall idea is that the CCS should
+            //first read and execute all the "acccepted judge's solutions" (contained in the CDP shortname/submissions/accepted folder).
+            //Next, the CCS should apply the "time_multiplier" to the slowest of the accepted judge's solutions and use that as the "timeout"
+            //value, allowing for a variance specified by the "time-safety_margin".  PC2 needs to implement this for CLICS compatibility, but
+            //it currently doesn't have any support for reading/executing the judge's accepted solutions to get these values,
+            //so we'll reject any time_multiplier and time_safety_margin values that are present.
+            
+            //Note also:  the following code is COMMENTED OUT because some of the existing PC2 JUnits contain "limits:" sections
+            // which DO have CLICS "time_multiplier" and/or "time_saftety_margin" entries in them (even though PC2 doesn't currently
+            // support those attibutes).  The problem is that the presence of those attributes in these JUnit test files results
+            // in those JUnits throwing YamlLoadExceptions.
+//            Integer clics_time_multiplier = fetchIntValue(limitsContent, CLICS_TIME_MULTIPLIER_KEY);
+//            if (clics_time_multiplier != null) {
+//                //TODO: replace the following exception with code to properly handle the CLICS time_multiplier value.
+//                throw new YamlLoadException("Unsupported CLICS attribute in " + problemYamlFilename + " 'limits' section: " + CLICS_TIME_MULTIPLIER_KEY);
+//            }
+//            Integer clics_time_safety_margin = fetchIntValue(limitsContent, CLICS_TIME_SAFETY_MARGIN_KEY);
+//            if (clics_time_safety_margin != null) {
+//                //TODO: replace the following exception with code to properly handle the CLICS time_safety_margin value.
+//                throw new YamlLoadException("Unsupported CLICS attribute in " + problemYamlFilename + " 'limits' section: " + CLICS_TIME_SAFETY_MARGIN_KEY);
+//            }
+            
+            //check for a timeout limit within the CLICS "limits:" section. 
+            // Note that the presence of a "timeout:" entry within a CLICS
+            // "limits:" section is non-CLICS standard -- but we want to support it in PC2.
+            Integer clicsTimeout = fetchIntValue(limitsContent, TIMEOUT_KEY);
+            if (clicsTimeout != null) {
+                problem.setTimeOutInSeconds(clicsTimeout);
+            }
+            
+            //check for a CLICS maxoutput limit - the value is in MiB
+            Integer clicsMaxOutput = fetchIntValue(limitsContent, CLICS_MAX_OUTPUT_KEY);
+            if (clicsMaxOutput != null) {
+                problem.setMaxOutputSizeKB(clicsMaxOutput * Constants.KIBIBYTE_PER_MEBIBYTE);
+            }
+            
+            Integer clicsMemoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, Problem.DEFAULT_MEMORY_LIMIT_MB);
+            problem.setMemoryLimitMB(clicsMemoryLimit);
+        }
+        
         if (!usingCustomValidator) {
             if (!pc2FormatProblemYamlFile) {
                 // SOMEDAY CCS add CCS validator derived based on build script
@@ -1780,7 +2037,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Problem[] getProblems(String[] yamlLines, int seconds, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
+    public Problem[] getProblems(String[] yamlLines, int seconds, long maxOutputBytes, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator,
             boolean manualReviewOverride) {
 
         Vector<Problem> problemList = new Vector<Problem>();
@@ -1838,6 +2095,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // contains a "TIMEOUT_KEY", use the timeout value from the problem.yaml; otherwise use the passed-in default.
                 int actSeconds = fetchIntValue(problemMap, TIMEOUT_KEY, seconds);
                 problem.setTimeOutInSeconds(actSeconds);
+
+                //set problem output limit.  If the problem.yaml file for the current problem (codified in the "problemMap")
+                // contains an "OUTPUT" key, use the timeout value from the problem.yaml; otherwise use the passed-in default.
+                Long actualMaxOutputBytes = fetchLongValue(problemMap, MAX_OUTPUT_SIZE_K_KEY, maxOutputBytes);
+                problem.setMaxOutputSizeKB(actualMaxOutputBytes/Constants.BYTES_PER_KIBIBYTE);
+                
+                //TODO:  add code to check for the CLICS-compliant key "output:" in the "limits: section
+                // of problem.yaml if the PC2 "MAX_OUTPUT_SIZE_K_KEY doesn't exist
 
                 problem.setShowCompareWindow(false);
 
@@ -2172,38 +2437,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     }
 
     protected int getIntegerValue(String string, int defaultNumber) {
-
-        int number = defaultNumber;
-
-        if (string != null && string.length() > 0) {
-            number = Integer.parseInt(string.trim());
-        }
-
-        return number;
+        return StringUtilities.getIntegerValue(string, defaultNumber);
     }
 
     protected int[] getNumberList(String numberString) {
-
-        String[] list = numberString.split(",");
-        if (list.length == 1) {
-            int[] out = new int[1];
-            out[0] = getIntegerValue(list[0], 0);
-            // if (out[0] < 1) {
-            // // SOMEDAY 669 throw invalid number in list exception
-            // }
-            return out;
-        } else {
-            int[] out = new int[list.length];
-            int i = 0;
-            for (String n : list) {
-                out[i] = getIntegerValue(n, 0);
-                // if (out[i] < 1) {
-                // // SOMEDAY 669 throw invalid number in list exception
-                // }
-                i++;
-            }
-            return out;
-        }
+        return StringUtilities.getNumberList(numberString);
     }
 
     @SuppressWarnings("unchecked")
@@ -2285,17 +2523,27 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     @Override
     public Problem[] getProblems(String[] contents, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommandLine) {
-        return getProblems(contents, defaultTimeOut, loadDataFileContents, defaultValidatorCommandLine, null, false, false);
+        return getProblems(contents, defaultTimeOut, Constants.DEFAULT_MAX_OUTPUT_SIZE_K*1024, loadDataFileContents, defaultValidatorCommandLine, null, false, false);
     }
 
     @Override
     public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String directoryName) {
         return fromYaml(contest, yamlLines, directoryName, false);
     }
+    
+    @Override
+    public Problem[] getProblems(String[] yamlLines, int defaultTimeOut) {
+        return getProblems(yamlLines, defaultTimeOut, Constants.DEFAULT_MAX_OUTPUT_SIZE_K*1024);
+    }
+    
+    @Override
+    public Problem[] getProblems(String[] yamlLines, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator, boolean manualReviewOverride) {
+        return getProblems(yamlLines, defaultTimeOut, Constants.DEFAULT_MAX_OUTPUT_SIZE_K*1024, loadDataFileContents, defaultValidatorCommand, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
+    }
 
     @Override
-    public Problem[] getProblems(String[] contents, int defaultTimeOut) {
-        return getProblems(contents, defaultTimeOut, true, null, null, false, false);
+    public Problem[] getProblems(String[] contents, int defaultTimeOut, long defaultMaxOutputSize) {
+        return getProblems(contents, defaultTimeOut, defaultMaxOutputSize, true, null, null, false, false);
     }
 
     @Override
@@ -2721,6 +2969,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
          * Data files are external so data files should not be loaded into problem data files.
          */
         boolean loadExternalFile = problem.isUsingExternalDataFiles();
+        
+        boolean loadSamples = contest.getContestInformation().isLoadSampleJudgesData();
+        
+        String sampleDataDirectory = dataFileBaseDirectory.replaceAll("secret$", "sample");
 
         String[] inputFileNames = getFileNames(dataFileBaseDirectory, ".in");
 
@@ -2736,32 +2988,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         if (inputFileNames.length == answerFileNames.length) {
 
-            Arrays.sort(inputFileNames);
-
             ArrayList<SerializedFile> dataFiles = new ArrayList<SerializedFile>();
             ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
-
-            for (int idx = 0; idx < inputFileNames.length; idx++) {
-
-                problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
-
-                String dataFileName = dataFileBaseDirectory + File.separator + inputFileNames[idx];
-                String answerFileName = dataFileName.replaceAll(".in$", ".ans");
-
-                if (idx == 0) {
-                    problem.setDataFileName(Utilities.basename(dataFileName));
-                    problem.setAnswerFileName(Utilities.basename(answerFileName));
-                }
-
-                String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
-
-                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
-                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + dataFileBaseDirectory);
-
-                dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
-                answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
-
+            
+            if (loadSamples) {
+                loadDataFiles(problem, dataFiles, answerFiles, sampleDataDirectory, loadExternalFile);
             }
+            
+            // Load all secret files
+            loadDataFiles(problem, dataFiles, answerFiles, dataFileBaseDirectory, loadExternalFile);
 
             if (dataFiles.size() > 0) {
 
@@ -2797,6 +3032,49 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         validateCCSData(contest, problem);
 
         return problem;
+    }
+
+    /**
+     * Per problem, add files names into datafiles and answerfiles.
+     * 
+     * @param problem 
+     * @param dataFiles input data files
+     * @param answerFiles input answer files
+     * @param fileSourceDirectory - location for the secret or sample files
+     * @param loadExternalFile - load as external data fils
+     */
+    protected void loadDataFiles(Problem problem, ArrayList<SerializedFile> dataFiles, ArrayList<SerializedFile> answerFiles, String fileSourceDirectory, boolean loadExternalFile) {
+        
+        String[] inputFileNames = getFileNames(fileSourceDirectory, ".in");
+        String[] answerFileNames = getFileNames(fileSourceDirectory, ".ans");
+        
+        if (inputFileNames.length == answerFileNames.length) {
+
+            // Sort file names before loading into datafiles and answerfiles
+            Arrays.sort(inputFileNames);
+            Arrays.sort(answerFileNames);
+
+            for (int idx = 0; idx < inputFileNames.length; idx++) {
+
+                problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
+
+                String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
+
+                String dataFileName = fileSourceDirectory + File.separator + inputFileNames[idx];
+                String answerFileName = dataFileName.replaceAll(".in$", ".ans");
+
+                checkForFile(dataFileName, "Missing " + inputFileNames[idx] + " file for " + problem.getShortName() + " in " + fileSourceDirectory);
+                checkForFile(answerFileName, "Missing " + answerShortFileName + " file for " + problem.getShortName() + " in " + fileSourceDirectory);
+
+                dataFiles.add(new SerializedFile(dataFileName, loadExternalFile));
+                answerFiles.add(new SerializedFile(answerFileName, loadExternalFile));
+            }
+
+        } else {
+            throw new YamlLoadException("  For " + problem.getShortName() + " Missing data files -  there are " + inputFileNames.length + " .in files and " + //
+                    answerFileNames.length + " .ans files " + " in " + fileSourceDirectory);
+        }
+
     }
 
     private void validateCCSData(IInternalContest contest, Problem problem) {
@@ -3058,12 +3336,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         boolean loaded = false;
 
         String teamsTSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.TEAMS_FILENAME;
+        String teams2TSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.TEAMS2_TSV;
 
         String groupsTSVFile = cdpConfigDirectory.getAbsolutePath() + File.separator + LoadICPCTSVData.GROUPS_FILENAME;
 
-        // only load if both tsv files are present.
+        // only load if both a teams TSV and groups TSV files are present.
 
-        if (new File(teamsTSVFile).isFile() && new File(groupsTSVFile).isFile()) {
+        if ((new File(teamsTSVFile).isFile() || new File(teams2TSVFile).isFile()) && new File(groupsTSVFile).isFile()) {
 
             LoadICPCTSVData loadTSVData = new LoadICPCTSVData();
             loadTSVData.setContestAndController(contest, null);
@@ -3146,20 +3425,85 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 Site site = createFirstSite(contest.getSiteNumber(), "localhost", Constants.DEFAULT_PC2_PORT);
                 contest.addSite(site);
             }
-            
+
             if (contest.getJudgements().length == 0) {
                 // judgements not loaded from yaml
-                
+
                 String rejectIniFile = cdpConfigDirectory + File.separator + Constants.JUDGEMENT_INIT_FILENAME;
-                if (Utilities.fileExists(rejectIniFile)){
+                if (Utilities.fileExists(rejectIniFile)) {
                     String result = JudgementLoader.loadJudgements(contest, false, cdpConfigDirectory.getAbsolutePath());
                     StaticLog.info(result);
                 }
             }
 
+            // Load accounts load file
+
+            String loadAccountsFile = cdpConfigDirectory + File.separator + Constants.ACCOUNTS_LOAD_FILENAME;
+            String altFilename = contest.getContestInformation().getOverrideLoadAccountsFilename();
+            if (altFilename != null) {
+                loadAccountsFile = altFilename;
+
+                /**
+                 * If altFilename is not a full/partal path, check whether alt file is under config/
+                 */
+                if (!Utilities.fileExists(altFilename)) {
+                    String altFileInConfig = cdpConfigDirectory + File.separator + altFilename;
+                    if (Utilities.fileExists(altFileInConfig)) {
+                        loadAccountsFile = altFileInConfig;
+                    }
+                }
+
+                if (!Utilities.fileExists(loadAccountsFile)) {
+                    // if alternate file specifed - bu cannot find file - fatal error.
+
+                    StaticLog.getLog().log(Level.SEVERE, "Missing accounts load file at " + altFilename);
+                    throw new FileNotFoundException(altFilename);
+                }
+            }
+
+            if (Utilities.fileExists(loadAccountsFile)) {
+                StaticLog.info("Loading from No accounts load file " + loadAccountsFile);
+                loadAccountLoadFile(contest, loadAccountsFile);
+            } else {
+                StaticLog.getLog().log(Level.FINEST, "No accounts load file found at " + loadAccountsFile + ", ok");
+            }
         }
 
         return contest;
+    }
+
+    protected void loadAccountLoadFile(IInternalContest contest, String loadfilename) throws Exception {
+        LoadAccounts loader = new LoadAccounts();
+
+        Vector<Account> teams = contest.getAccounts(ClientType.Type.TEAM);
+        Account[] teamAccounts = (Account[]) teams.toArray(new Account[teams.size()]);
+
+        Group[] groups = contest.getGroups();
+
+        Account[] accList = loader.fromTSVFileWithNewAccounts(contest, loadfilename, teamAccounts, groups);
+
+        List<Account> newAccounts = new ArrayList<Account>();
+        List<Account> updatedAccount = new ArrayList<Account>();
+
+        for (Account account : accList) {
+            if (null != contest.getAccount(account.getClientId())) {
+                updatedAccount.add(account);
+            } else {
+                newAccounts.add(account);
+            }
+        }
+
+        for (Account account : newAccounts) {
+            contest.addAccount(account);
+        }
+        
+        for (Account account : updatedAccount) {
+            contest.updateAccount(account);
+        }
+        
+        System.out.println("Update " + updatedAccount.size() + " accounts, add " + newAccounts.size() + " accounts from " + loadfilename);
+        StaticLog.info("Update " + updatedAccount.size() + " accounts, add " + newAccounts.size() + " accounts from " + loadfilename);
+
     }
 
 }

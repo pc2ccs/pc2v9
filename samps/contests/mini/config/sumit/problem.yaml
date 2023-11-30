@@ -12,8 +12,10 @@ author: PC^2 Team
 license: 
 rights_owner: 
 
+max-output-size-K: 162
 limits: 
    timeout: 30
+   output: 1
 
 validator: 
    validatorProg: pc2.jar edu.csus.ecs.pc2.validator.Validator

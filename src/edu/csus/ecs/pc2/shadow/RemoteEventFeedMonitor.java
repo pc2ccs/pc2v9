@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.BufferedReader;
@@ -25,6 +25,9 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
+import edu.csus.ecs.pc2.ui.MessageManager;
+import edu.csus.ecs.pc2.ui.MessageRecord;
+import edu.csus.ecs.pc2.ui.MessageScope;
 import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
 
 /**
@@ -484,18 +487,27 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                 logAndDebugPrint(log, Level.INFO, "Invoking submitter.submitRun() for team " + runSubmission.getTeam_id() 
                                                     + " problem " + runSubmission.getProblem_id() 
                                                     + " language " +  runSubmission.getLanguage_id()
+                                                    + " entry_point " + runSubmission.getEntry_point()
                                                     + " time " + overrideTimeMS 
                                                     + " submissionID " + overrideSubmissionID);
                                                 try {
-                                                    submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(), mainFile, auxFiles,
-                                                            overrideTimeMS, overrideSubmissionID);
+                                                    submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(),
+                                                            runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
                                                 } catch (Exception e) {
+                                                    
+                                                    // Send message, message will add to connectStatusTable
+                                                    MessageManager.fireMessageListener(new MessageRecord("Unable to submit run " + overrideSubmissionID + " " + e.getMessage(), MessageScope.SHADOW_UI, e));
+                                                    
                                                     // TODO design error handling reporting
                                                     logAndDebugPrint(log, Level.WARNING, "Exception submitting run for event: " + event, e);
                                                 }
                                             }
     
                                         } catch (Exception e) {
+                                            
+                                            // Send message, message will add to connectStatusTable
+                                            MessageManager.fireMessageListener(new MessageRecord("Exception processing event: " + event, MessageScope.SHADOW_UI, e));
+                                            
                                             // TODO design error handling reporting (logging?)
                                             logAndDebugPrint(log, Level.WARNING, "Exception processing event: " + event, e);
                                         }
@@ -604,23 +616,31 @@ public class RemoteEventFeedMonitor implements Runnable {
                     if(monitorStatus != null) {
                         monitorStatus.errorDisconnect(msg);
                     }
-                    if(!attemptConnectRetries) {
-                        logAndDebugPrint(log, Level.INFO, "Remote connection retry attempts is not enabled");
-                        break;
-                    }
-                    if(retryConnectDelay > 0) {
-                        logAndDebugPrint(log, Level.INFO, "Attempted to reconnect to remote in " + retryConnectDelay + "ms");
-                        try {
-                            Thread.sleep(retryConnectDelay);
-                        } catch(Exception e) {
-                            logAndDebugPrint(log, Level.INFO, "Retry sleep interrupted", e);
-                        }
-                    }
                 } catch (Exception e) {
                     // TODO design error handling reporting (logging?)
                     logAndDebugPrint(log, Level.SEVERE, "Exception reading event from stream: " + event, e); 
                 }
             } // end else
+            
+            // In all cases of a connection disconnect or exception or other failure, we want
+            // to see if connect retries are indicated, and if so, then pause a bit and retry, otherwise
+            // we break out and give up.  We have to delay here if we are retrying or we'll just go into
+            // an tight retry loop which affects performance substantially.
+            if(!attemptConnectRetries) {
+                logAndDebugPrint(log, Level.INFO, "Remote connection retry attempts are not enabled");
+                if(monitorStatus != null) {
+                    monitorStatus.connectClosed("Remote connection retry attempts are not enabled");
+                }
+                break;
+            }
+            if(retryConnectDelay > 0) {
+                logAndDebugPrint(log, Level.INFO, "Attempted to reconnect to remote in " + retryConnectDelay + "ms");
+                try {
+                    Thread.sleep(retryConnectDelay);
+                } catch(Exception e) {
+                    logAndDebugPrint(log, Level.INFO, "Retry sleep interrupted", e);
+                }
+            }
         } // keepRunning
     }
     

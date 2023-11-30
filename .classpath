@@ -2,7 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry excluding="**/package.html" kind="src" path="test"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="vendor/lib/activation.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/aopalliance-repackaged-2.5.0-b42.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/cdi-api-1.1.jar"/>
@@ -57,5 +61,8 @@
 	<classpathentry kind="lib" path="vendor/lib/jackson-dataformat-xml-2.5.4.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/stax2-api-4.2.1.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/jackson-module-jaxb-annotations-2.5.4.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/bcprov-ext-jdk18on-176.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/bcpkix-jdk18on-176.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/bcutil-jdk18on-176.jar"/>
 	<classpathentry kind="output" path=".classes"/>
 </classpath>

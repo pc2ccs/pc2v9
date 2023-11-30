@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -1894,6 +1894,44 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             }
         }
     }
+
+    /**
+     * Clears the given JTable with empty test cases
+     * 
+     * @param aResultsTable - a JTable expected to already contain one row for each test case which has been executed
+     */
+    public void resetResultsTable() {
+        if(resultsTable != null) {
+            //get the table model which defines the current table contents
+            TestCaseResultsTableModel tableModel = (TestCaseResultsTableModel) resultsTable.getModel();
+            
+            //get how many test case rows are already in the table model
+            int testCasesInTableModel = tableModel.getRowCount();
+            
+            for(int row = testCasesInTableModel-1; row >= 0; row--) {
+                tableModel.removeRow(row);
+            }
+            
+            // Add exactly one row as a place holder to tell the user judging is taking place
+            //     "Awaiting Result",                          //result string
+            //      "--  ",                                     //execution time (of which there is none since the test case wasn't executed)
+            //      "",                                         //link to team output (none since it wasn't executed)
+            //      "",                                         //link to team compare-with-judge label (disabled since there's no team output)
+            //      "",                                         //link to judge's output (answer file) if any
+            //      "",                                         //link to judge's data if any
+            //      "",                                         //link to validator stdout (none)
+            //      ""                                          //link to validator stderr (none)
+            TestResultsRowData rowData = new TestResultsRowData("Judging", "--  ","", "","", "", "", "");
+            // add new row
+            tableModel.addRow(
+                    new Boolean(false),                         //selection checkbox
+                    new String("*"),                            //test case number
+                    rowData);
+            getNumFailedTestCasesLabel().setForeground(Color.cyan);
+            getNumFailedTestCasesLabel().setText("(Judging)");
+
+        }
+    }
     
     /**
      * Invoked when table data changes; checks to see if the change took place in the "Select" column and if so
@@ -2125,7 +2163,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             }
             return null;
         }
-        tempExecutable = new Executable(getContest(), getController(), currentRun, currentRunFiles);
+        tempExecutable = new Executable(getContest(), getController(), currentRun, currentRunFiles, null);
         String exeDir = tempExecutable.getExecuteDirectoryName();
         return exeDir;
     }

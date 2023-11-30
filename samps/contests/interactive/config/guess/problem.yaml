@@ -1,0 +1,26 @@
+rights_owner: Scrool AB
+source: Kattis
+license: cc by-sa
+
+validation: custom interactive
+
+
+# Override standard limits: say that the TLE solutions provided should
+# be at least 4 times above the time limit in order for us to be
+# happy.
+sandbox-type: PC2_INTERNAL_SANDBOX
+
+limits:
+  timeout: 1
+  memory: 2048
+  time_safety_margin: 4
+
+validator:
+  validatorProg: 'guess_validator/validator_out'
+  validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir}'
+  usingInternal: false
+  validatorOption: 0
+  use-internal-validator: false
+  use-clics-validator: false
+  use-custom-validator: true
+  use-clics-custom-validator-interface: true

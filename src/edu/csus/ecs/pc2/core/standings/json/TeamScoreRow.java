@@ -6,6 +6,10 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
 
 //The following annotation tells the Jackson ObjectMapper not to include "type information" when it serializes
 //objects of this class (the default is to include the fully-qualified class name as an additional JSON element).
@@ -202,4 +206,9 @@ public class TeamScoreRow implements Comparable<TeamScoreRow> {
         }
     }
     
+    
+    public String toJSON() throws JsonProcessingException {
+        ObjectMapper om = JSONObjectMapper.getObjectMapper();
+        return om.writeValueAsString(this);
+    }
 }

@@ -23,6 +23,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.execute.ExecuteTimerFrame;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -269,7 +270,35 @@ public class EditRunPane extends JPanePlugin {
 
             RunStates prevState = run.getStatus();
             RunStates newRunState = (Run.RunStates) runStatusComboBox.getSelectedItem();
+            String errMsg = null;
+            
+            // Make sure it's safe to change the runstate
+            switch(newRunState) {
+            case JUDGED:
+            case MANUAL_REVIEW:
+            case REJUDGE:           // TODO: remove REJUDGE state completely since nobody appears to use it -- JB
+                // All the above states imply that the run was previously judged and has a JudgementRecord (or more)
+                // If not, then the state can not be set.
+                if(newRun.getJudgementRecord() == null) {
+                    errMsg = "The run does not have any judgment records";
+                }
+                break;
+                
+            case BEING_RE_JUDGED:
+                // It is completely unreasonable to set a run's status to being re-judged
+                errMsg = "You are not allowed to set the Run Status to BEING_RE_JUDGED";
+                break;
 
+            default:
+                // all other states should be ok and not cause any issues.
+                break;
+            }
+            // notify user on bad status change
+            if(errMsg != null) {
+                FrameUtilities.showMessage(this, "Can not set Run Status", errMsg);
+                enableUpdateButton();
+                return;                
+            }
             int result = FrameUtilities.yesNoCancelDialog(this, "Are you sure you want to change status from " + //
                     prevState.toString() + " to " + newRunState.toString() + "?", "Update/Change run status?");
 
@@ -775,8 +804,10 @@ public class EditRunPane extends JPanePlugin {
     protected void executeRun() {
 
         System.gc();
-
-        executable = new Executable(getContest(), getController(), run, runFiles);
+        
+        ExecuteTimerFrame executeFrame = new ExecuteTimerFrame();
+        
+        executable = new Executable(getContest(), getController(), run, runFiles, executeFrame);
 
         IFileViewer fileViewer = executable.execute();
         
@@ -905,7 +936,7 @@ public class EditRunPane extends JPanePlugin {
 
     private void createAndViewFile(SerializedFile file, String title) {
         // TODO the executeable dir name should be from the model, eh ?
-        Executable tempEexecutable = new Executable(getContest(), getController(), run, runFiles);
+        Executable tempEexecutable = new Executable(getContest(), getController(), run, runFiles, null);
         String targetDirectory = tempEexecutable.getExecuteDirectoryName();
         Utilities.insureDir(targetDirectory);
         String targetFileName = targetDirectory + File.separator + file.getName();
