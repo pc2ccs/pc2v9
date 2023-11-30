@@ -17,10 +17,6 @@ import { NewClarificationAlertComponent } from './components/new-clarification-a
     SharedModule,
     ReactiveFormsModule
   ],
-  exports: [],
-  entryComponents: [
-    NewClarificationComponent,
-    NewClarificationAlertComponent,
-  ]
+  exports: []
 })
 export class ClarificationsModule { }

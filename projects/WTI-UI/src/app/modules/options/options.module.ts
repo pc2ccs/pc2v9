@@ -18,10 +18,7 @@ import { WebsocketDebugComponent } from './components/websocket-debug/websocket-
     ReactiveFormsModule,
     FormsModule
   ],
-  exports: [],
-  entryComponents: [
-    ChangePasswordComponent
-  ]
+  exports: []
 })
 export class OptionsModule {
 
