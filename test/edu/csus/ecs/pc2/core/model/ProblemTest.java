@@ -88,6 +88,11 @@ public class ProblemTest extends AbstractTestCase {
         assertFalse("Is not same as, setTimeOutInSeconds 1 ", p2.isSameAs(p1));
 
         p2 = getProblemAnew();
+        p2.setMaxOutputSizeKB(10);
+        assertFalse("Is not same as, setMaxOutputSizeKB 10 ", p1.isSameAs(p2));
+        assertFalse("Is not same as, setMaxOutputSizeKB 10 ", p2.isSameAs(p1));
+
+        p2 = getProblemAnew();
         p2.setDataFileName(null);
         checkString("setDataFileName null", p1.getDataFileName(), p2.getDataFileName(), p1, p2);
 
@@ -263,11 +268,18 @@ public class ProblemTest extends AbstractTestCase {
         Problem problem = new Problem("Foo");
 
         assertEquals("Time limit", Problem.DEFAULT_TIMEOUT_SECONDS, problem.getTimeOutInSeconds());
-        assertEquals("Time limit", 30, problem.getTimeOutInSeconds());
+        assertEquals("Time limit", 10, problem.getTimeOutInSeconds());
 
     }
     
-    /**
+    public void testDefaultMaxOutputKB() throws Exception {
+
+        Problem problem = new Problem("Bar");
+
+        assertEquals("Max output", Problem.DEFAULT_MAX_OUTPUT_FILE_SIZE_KB, problem.getMaxOutputSizeKB());
+    }
+    
+   /**
      * Test isSameas for balloon color and rgb.
      * 
      * @throws Exception

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.team;
 
 import java.io.File;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.LanguageUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -92,39 +93,44 @@ public class QuickSubmitter implements UIPlugin {
     }
 
     /**
-     * submit runs for all input files.
+     * submit runs for all input files.  Guesses language and problem from file path and extension.
      * 
      * Will guess langauge and problem based on path
      * 
      * @see #guessLanguage(IInternalContest, String)
      * @see #guessProblem(IInternalContest, String)
      * 
-     * @param someSubmitFiles
+     * @param a list of files to submit
+     * @return count of files sucessfully submitted/added.
      */
-    public void sendSubmissions(List<File> someSubmitFiles) {
+    public int sendSubmissions(List<File> filesToSubmit) {
 
-        for (File file : someSubmitFiles) {
+        int numberSubmitted = 0;
+        
+        for (File file : filesToSubmit) {
             try {
 
-                Language language = guessLanguage(getContest(), file.getAbsolutePath());
+                Language language = LanguageUtilities.guessLanguage(getContest(), file.getAbsolutePath());
                 if (language == null) {
-                    String ext = getExtension(file.getAbsolutePath());
-                    System.err.println("Cannot identify language for ext= " + ext + " = Can not send submission for file " + file.getAbsolutePath());
+                    String ext = LanguageUtilities.getExtension(file.getAbsolutePath());
+                    log.log(Level.WARNING, "Cannot identify language for ext= " + ext + " = Can not send submission for file " + file.getAbsolutePath());
                 } else {
                     Problem problem = guessProblem(getContest(), file.getAbsolutePath());
                     try {
                         controller.submitJudgeRun(problem, language, file.getAbsolutePath(), null);
-                        System.out.println("submitted run send with language " + language + " and problem " + problem);
+                        log.log(Level.INFO, "submitted run with language " + language + " and problem " + problem);
+                        numberSubmitted++;
                     } catch (Exception e) {
-                        System.err.println("Warning problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage());
-                        log.log(Level.WARNING, "problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage(), e);
+                        log.log(Level.SEVERE, "problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage(), e);
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                log.log(Level.WARNING, "problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage(), e);
+                log.log(Level.SEVERE, "problem sending run for file " + file.getAbsolutePath() + " " + e.getMessage(), e);
             }
         }
+        
+        return numberSubmitted;
     }
 
     /**
@@ -139,62 +145,6 @@ public class QuickSubmitter implements UIPlugin {
         for (Problem problem : problems) {
             if (absolutePath.indexOf(problem.getShortName()) != -1) {
                 return problem;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get extension for file
-     * @param filename
-     */
-    public String getExtension(String filename) {
-        String extension = filename;
-        int idx = filename.indexOf(".");
-        if (idx != -1) {
-            extension = filename.substring(idx + 1, filename.length());
-        }
-        return extension;
-    }
-
-    // TODO REFACTOR - move guessLanguage and guessProblem to Utilities or FileUtilities
-
-    /**
-     * Guess language based on filename.
-     */
-    public Language guessLanguage(IInternalContest myContest, String filename) {
-        String extension = getExtension(filename);
-        return matchFirstLanguage(myContest, extension);
-    }
-
-    /**
-     * Try to match the first language that may match extension.
-     */
-    private Language matchFirstLanguage(IInternalContest inContest, String extension) {
-        Language[] lang = inContest.getLanguages();
-
-        // Alas guessing 
-        if ("cpp".equals(extension)) {
-            extension = "C++";
-        }
-
-        if ("py".equals(extension)) {
-            extension = "Python";
-        }
-
-        if ("cs".equals(extension)) {
-            extension = "Mono";
-        }
-
-        if ("pl".equals(extension)) {
-            extension = "Perl";
-        }
-
-        extension = extension.toLowerCase();
-
-        for (Language language : lang) {
-            if (language.getDisplayName().toLowerCase().indexOf(extension) != -1) {
-                return language;
             }
         }
         return null;

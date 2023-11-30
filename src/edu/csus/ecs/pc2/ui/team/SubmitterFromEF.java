@@ -266,7 +266,7 @@ public class SubmitterFromEF {
 //                    Run debugRun = new Run(submitter, language, problem);
                     SerializedFile[] auxFiles = new SerializedFile[0];
 
-                    getController().submitRun(submitter, problem, language, mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
+                    getController().submitRun(submitter, problem, language, runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
                     count++;
                     System.out.println("Submission " + count + " run id = " + overrideSubmissionID);
       

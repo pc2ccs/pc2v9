@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
 import java.io.File;
@@ -53,20 +53,6 @@ public class ResultsFileTest extends AbstractTestCase {
         // }
 
         return data;
-    }
-
-    /**
-     * Add runs to contest.
-     * 
-     * @param contest
-     * @param runsData
-     * @throws Exception 
-     */
-    private void addRuns(IInternalContest contest, String[] runsData) throws Exception {
-
-        for (String runInfoLine : runsData) {
-            SampleContest.addRunFromInfo(contest, runInfoLine);
-        }
     }
 
     /**
@@ -143,6 +129,7 @@ public class ResultsFileTest extends AbstractTestCase {
 
         IContestLoader loader = new ContestSnakeYAMLLoader();
         IInternalContest contest = loader.fromYaml(null, getDataDirectory()+File.separator+"wf2017"+File.separator+"config", true);
+        ensureStaticLog();
         loader.initializeContest(contest, new File(getDataDirectory()+File.separator+"wf2017"));
         // Hmm, no judgements
         Judgement[] judgements = contest.getJudgements();

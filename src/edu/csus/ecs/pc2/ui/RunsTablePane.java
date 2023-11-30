@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -73,6 +74,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
+import edu.csus.ecs.pc2.util.OSCompatibilityUtilities;
 
 /**
  * View runs panel.
@@ -1967,8 +1969,25 @@ public class RunsTablePane extends JPanePlugin {
         if (!bUseAutoJudgemonitor) {
             return;
         }
+        
         if (isAutoJudgingEnabled()) {
             showMessage("");
+            
+            // make sure the OS supports judging of all problems this judge
+            // is set up to autojudge BEFORE starting autojudging.
+            List<Problem> plist = autoJudgingMonitor.getOSUnsupportedAutojudgeProblemList();
+            if(!plist.isEmpty()) {
+                StringBuffer message = new StringBuffer();
+                message.append("Cannot perform autojudging for the following problems due to missing OS features:\n");
+                for(Problem prob: plist) {
+                    message.append("   Problem " + prob.getLetter() + " - " + prob.getDisplayName() + "\n");
+                }
+                message.append("You must either remove these problems from this autojudge's list of problems or\n");
+                message.append("you must make sure your OS supports features needed to judge these problems.\n");
+                message.append("One possiblity is the problems require a sandbox and your OS does not support it (cgroups?).");
+                FrameUtilities.showMessage(this,  message.toString(), "Judging Not Supported");
+                return;
+            }
             // Keep this off the AWT thread.
             new Thread(new Runnable() {
                 public void run() {
@@ -1978,9 +1997,22 @@ public class RunsTablePane extends JPanePlugin {
             }).start();
         } else {
             showMessage("Administrator has turned off Auto Judging");
+            
+            List<Problem> plist = OSCompatibilityUtilities.getUnableToJudgeList(getContest(), log);
+            if(!plist.isEmpty()) {
+                StringBuffer message = new StringBuffer();
+                message.append("Cannot perform judging for the following problems due to missing OS features:\n");
+                for(Problem prob: plist) {
+                    message.append("   Problem " + prob.getLetter() + " - " + prob.getDisplayName() + "\n");
+                }
+                message.append("In order to judge these problems, you must make sure your OS supports features\n");
+                message.append("needed to judge these problems.\n");
+                message.append("One possiblity is the problems require a sandbox and your OS does not support it (cgroups?).");
+                FrameUtilities.showMessage(this, "Judging Not Availalbe",  message.toString());
+            }
+
         }
     }
-
     public boolean isMakeSoundOnOneRun() {
         return makeSoundOnOneRun;
     }
@@ -2229,6 +2261,10 @@ public class RunsTablePane extends JPanePlugin {
                             MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + run.getSiteNumber() + " Run " + run.getNumber());
                             mfv.setContestAndController(getContest(), getController());
     
+                            // if entry point was specified, add a tab for it
+                            if(run.getEntryPoint() != null) {
+                                mfv.addTextPane("Entry Point", run.getEntryPoint());
+                            }
                             // add any other files to the MFV (these are added first so that the mainFile will appear at index 0)
                             boolean otherFilesPresent = false;
                             boolean otherFilesLoadedOK = false;

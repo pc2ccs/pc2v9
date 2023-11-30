@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Component;
@@ -14,15 +14,19 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -495,5 +499,63 @@ public final class FrameUtilities {
         
         return false;
     }
+    
+    public static String getExceptionMessageAndStackTrace(Exception ex, String delimiter) {
 
+        StringBuffer buff = new StringBuffer();
+        
+        if (ex != null) {
+            buff.append("Message: " + ex.getMessage());
+            buff.append(Constants.NL);
+            buff.append("Class: " + ex.getClass().getName());
+            buff.append(Constants.NL);
+            
+            List<String> stackTraceLines = fetchStackTraceElements(ex, "csus");
+            for (String string : stackTraceLines) {
+                buff.append(string);
+                buff.append(Constants.NL);
+            }
+        }
+
+        return buff.toString();
+    }
+
+    public static List<String> fetchStackTraceElements(Throwable e, String pattern) {
+
+        List<String> list = new ArrayList<String>();
+
+        StackTraceElement[] stackTraceElements = e.getStackTrace();
+        for (StackTraceElement stackTraceElement : stackTraceElements) {
+
+            String className = stackTraceElement.getClassName();
+
+            if (className.indexOf(pattern) != -1) {
+                list.add("    at " + //
+                        className + "." + //
+                        stackTraceElement.getMethodName() + "(" + //
+                        stackTraceElement.getFileName() + ":" + //
+                        stackTraceElement.getLineNumber() + ")" //
+                );
+            }
+        }
+
+        return list;
+    }
+
+    public static void showExceptionMessage(Component component, final String message, Exception ex) {
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog(null, message + Constants.NL + getExceptionMessageAndStackTrace(ex, Constants.NL));
+            }
+        });
+    }
+
+    public static void showExceptionMessage(Component component, final String title, String message, Exception ex) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog(component, message, title, JOptionPane.ERROR_MESSAGE);
+            }
+        });
+    }
 }

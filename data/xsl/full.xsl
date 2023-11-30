@@ -19,8 +19,8 @@ Full Info - <xsl:value-of select="/contestStandings/standingsHeader/@title"/>
                 <xsl:call-template name="teamStanding"/>
             </TABLE>
 <p>
-Created by <A HREF="http://pc2.ecs.csus.edu/">CSUS PC^2 <xsl:value-of select="/contestStandings/standingsHeader/@systemVersion"/></A><br/>
-<A HREF="http://pc2.ecs.csus.edu/">http://pc2.ecs.csus.edu/</A><br/>
+Created by <A HREF="https://pc2ccs.github.io/">CSUS PC^2 <xsl:value-of select="/contestStandings/standingsHeader/@systemVersion"/></A><br/>
+<A HREF="https://pc2ccs.github.io/">https://pc2ccs.github.io/</A><br/>
 Last updated
 <xsl:value-of select="/contestStandings/standingsHeader/@currentDate"/>
 </p>

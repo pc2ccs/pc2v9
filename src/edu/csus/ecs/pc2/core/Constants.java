@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 /**
@@ -7,6 +7,10 @@ package edu.csus.ecs.pc2.core;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public final class Constants {
+    
+    public static final String AWARDS_JSON_FILENAME = "awards.json";
+    
+    public final static String SCOREBOARD_JSON_FILENAME = "scoreboard.json";
 
     public static final long HOURS_PER_DAY = 24;
 
@@ -74,6 +78,9 @@ public final class Constants {
      * Default contest length.
      */
     public static final long DEFAULT_CONTEST_LENGTH_SECONDS = 18000; // 5 * 60 * 60
+    
+    
+    public static final int DEFAULT_MAX_OUTPUT_SIZE_K = 512;
 
     /**
      * PC<sup>2</sup> Validator Program Name.
@@ -95,6 +102,22 @@ public final class Constants {
      */
     public static final String DEFAULT_CLICS_VALIDATOR_COMMAND = "{:validator} {:infile} {:ansfile} {:feedbackdir} ";
     
+    
+    /**
+     * Command substitution variable for name of thing to execute (basename of source file)
+     */
+    public static final String CMDSUB_BASENAME_VARNAME = "{:basename}";
+    
+    /**
+     * Command substitution variable for conditional suffix
+     * This can be used for languages (such as Kotlin), that has a different main class name than the basename of
+     * the source.  eg.  MyClass.kt  uses MyClassKt as the main class name.  This is conditional in that if the
+     * trailing string (suffix) isn't already immediately to the left of the operand of this substitution variable, then it gets added.
+     * eg. {:basename}{:ensuresuffix=Kt}  if {:basename} is MyClassKt then, the {:ensuresuffix=Kt} is a no-op (empty string).  If
+     * {:basename} is MyClass then the {:ensuresuffix=Kt} evaluates to "Kt" making the result: MyClassKt.
+     * Use of this is not just restricted to executables or basename; it can be used anywhere in the string.
+     */
+    public static final String CMDSUB_COND_SUFFIX = "{:ensuresuffix=}";
     
     /**
      * Default file name for judgement ini file.
@@ -150,6 +173,8 @@ public final class Constants {
     public static final String COUNTRY_CODE_COLUMN_NAME = "countrycode";
 
     public static final String SCORING_ADJUSTMENT_COLUMN_NAME = "scoreadjustment";
+    
+    public static final String INST_CODE_COLUMN_NAME = "institution";
 
     public static final String DEFAULT_INSTITUTIONNAME = "undefined";
 
@@ -165,5 +190,94 @@ public final class Constants {
     
     public static final int INPUT_VALIDATOR_EXECUTION_ERROR_CODE = -39;
     
-    public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";   
+    public static final String ACCOUNTS_LOAD_FILENAME = "accounts_load.tsv";
+
+    public static final int BYTES_PER_KIBIBYTE = 1024;
+    
+    public static final int KIBIBYTE_PER_MEBIBYTE = 1024;
+    
+    /**
+     * Directory where scripts go that PC2 executes for sandbox and interactive submissions.
+     * This folder is in the PC2 home folder (install folder).
+     */
+    public static final String PC2_SCRIPT_DIRECTORY = "scripts";
+    
+    /**
+     * Command line to run submission in a sandbox
+     */
+    public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit}";
+
+    /**
+     * File name of script to run submission in sandbox ({:sandboxprogramname} if non-interactive)
+     */
+    public static final String PC2_INTERNAL_SANDBOX_PROGRAM_NAME = "pc2sandbox.sh";
+    
+    /**
+     * Filename of the script to run submission for an interactive problem in a sandbox ({:sandboxprogramname} if interactive)
+     */
+    public static final String PC2_INTERNAL_SANDBOX_INTERACTIVE_NAME = "pc2sandbox_interactive.sh";
+    
+    /**
+     *  Command to execute to run an interactive problem in a sandbox
+     */
+    public static final String PC2_INTERNAL_SANDBOX_INTERACTIVE_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit} {:validator} {:infilename} {:ansfilename} {:testcase}";
+    
+    /**
+     *  Filename of the script to run for an interactive problem when not using a sandbox
+     */
+    public static final String PC2_INTERACTIVE_NAME = "pc2_interactive.sh";
+    
+    /**
+     *  Command to execute to run an interactive problem when not using a sandbox
+     */
+    public static final String PC2_INTERACTIVE_COMMAND_LINE = "./pc2_interactive.sh {:validator} {:infilename} {:ansfilename} {:testcase}";
+    
+    /**
+     *  Filename of the script to run during the validate phase AFTER the interactive validator has completed
+     */
+    public static final String PC2_INTERACTIVE_VALIDATOR_NAME = "pc2validate_interactive.sh";
+    
+    /**
+     *  Command to execute to validate results of an interactive run AFTER the interactive validator has completed
+     */
+    public static final String PC2_INTERACIVE_VALIDATE_COMMAND = "./" + PC2_INTERACTIVE_VALIDATOR_NAME + " {:resfile} {:feedbackdir} {:testcase}";
+    
+    /**
+     * Execution info for entire run (all testcases)
+     */
+    public static final String PC2_EXECUTION_RESULTS_NAME_SUFFIX = "executeinfo.ndjson";
+    
+    /**
+     * OS Compatibility constants
+     */
+    public static final String WINDOWS_CHECK_SANDBOX_SCRIPT = "pc2syscheck.cmd";
+    public static final String UNIX_CHECK_SANDBOX_SCRIPT = "pc2syscheck.sh";
+
+    /**
+     * CLICS validation Types
+     */
+    public static final String VALIDATION_CUSTOM = "custom";
+    public static final String VALIDATION_DEFAULT = "default";
+    public static final String VALIDATION_INTERACTIVE = "interactive";
+    public static final String VALIDATION_SCORE = "score";
+    
+    /**
+     * Prefix for deleted runs.
+     */
+    public static final String DEL_RUN_PREFIX = "DEL ";
+    
+    /**
+     * output directory for reports.
+     */
+    public static final String REPORT_DIRECTORY_NAME = "reports";
+    
+    /**
+     * default results directory for CDP.
+     */
+    public static final String CDP_RESULTS_DIR ="results";
+
+    public static final String TAB = "\t";
+
+    public static final String NL = System.getProperty("line.separator");
+
 }

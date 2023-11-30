@@ -469,9 +469,11 @@ public class Run extends Submission {
      * @param name
      */
     public void setEntryPoint(String name) {
-        name = Utilities.getFileBaseName(name);
-        if (name != null){
-            entryPoint = name.toCharArray();
+        if(name != null) {
+            name = Utilities.getFileBaseName(name);
+            if (name != null){
+                entryPoint = name.toCharArray();
+            }
         }
     }
     

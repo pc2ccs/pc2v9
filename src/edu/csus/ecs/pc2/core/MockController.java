@@ -582,6 +582,25 @@ public class MockController implements IInternalController {
         
     }
 
+    @Override
+    public void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
+        System.out.println("submitRun "+submitter+" "+problem+" "+language+" " +mainSubmissionFile.getName()+" aux file count "+additionalFiles.length+" entry_point ="+entry_point+" time ="+overrideTimeMS+" run id ="+overrideRunId);
+        
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Run run = new Run(submitter, language, problem);
+        run.setEntryPoint(entry_point);
+        
+        try {
+        
+            RunFiles runFiles = new RunFiles(run, mainSubmissionFile, additionalFiles);
+            Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideRunId);
+            handler.handlePacket(packet, null);
+
+        } catch (Exception e) {
+            rethrow (e);
+        }
+    }
+
     private void rethrow(Exception e) {
         throw new RuntimeException(e);
     }

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Color;
@@ -12,6 +12,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -50,12 +51,9 @@ import javax.swing.JCheckBox;
  * Multiple Test Data set UI.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
 // TODO 917 make font larger
-
-// $HeadURL$
 public class MultipleDataSetPane extends JPanePlugin {
 
     /**
@@ -149,6 +147,8 @@ public class MultipleDataSetPane extends JPanePlugin {
         this.problem = aProblem;
         if (aProblem != null) {
             setProblemDataFiles(aProblemDataFiles.copy(aProblem));
+            getLoadSamplesFirstCheckbox().setSelected(problem.isLoadDataFilesSamplesFirst());
+            populateUI();
         } else {
             getRdbtnCopyDataFiles().setSelected(true);
             clearDataFiles();
@@ -176,7 +176,7 @@ public class MultipleDataSetPane extends JPanePlugin {
      * tableModel, problem, and problemDataFiles fields (variables within this class).
      */
     protected void populateUI() {
-
+        
         tableModel.setFiles(problemDataFiles);
         tableModel.fireTableDataChanged();
 
@@ -199,6 +199,8 @@ public class MultipleDataSetPane extends JPanePlugin {
             
             //set the StopOnFirstFailedTestCase checkbox to match what is specified in the problem
             getChckbxStopOnFirstFailedTestCase().setSelected(problem.isStopOnFirstFailedTestCase());
+            
+            getLoadSamplesFirstCheckbox().setSelected(problem.isLoadDataFilesSamplesFirst());
         }
 
         // TODO 917 re-add auto size columns
@@ -478,7 +480,20 @@ public class MultipleDataSetPane extends JPanePlugin {
             dump(problemDataFiles, "debug before load");
         }
         try {
+
+            String sampleBaseDirectoryName = new File(baseDirectoryName).getParent() + File.separator +"sample";
+            boolean ishere = new File(sampleBaseDirectoryName).isDirectory();
+            
+            if (loadSamplesFirstCheckbox.isSelected() && new File(sampleBaseDirectoryName).isDirectory()) {
+
+                getLog().info("Loading sample files from sample dir " + sampleBaseDirectoryName);
+
+                // load sample files first 
+                problemDataFiles = loadDataFiles(problem, problemDataFiles, sampleBaseDirectoryName, ".in", ".ans", externalFiles);
+            }
+
             problemDataFiles = loadDataFiles(problem, problemDataFiles, baseDirectoryName, ".in", ".ans", externalFiles);
+   
         } catch (Exception e) {
             getController().getLog().log(Log.INFO, e.getMessage(), e);
             showMessage(this, "Import Failed", e.getMessage());
@@ -557,7 +572,6 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
 
         String[] inputFileNames = Utilities.getFileNames(dataFileBaseDirectory, dataExtension);
-
         String[] answerFileNames = Utilities.getFileNames(dataFileBaseDirectory, answerExtension);
 
         if (inputFileNames.length == 0) {
@@ -572,12 +586,33 @@ public class MultipleDataSetPane extends JPanePlugin {
             throw new RuntimeException("Mismatch: expecting the same number of  '" + dataExtension + "'  and  '" + answerExtension + "'  files in " + dataFileBaseDirectory + "\n (found "
                     + inputFileNames.length + "  '" + dataExtension + "'  files vs. " + answerFileNames.length + "  '" + answerExtension + "'  files)");
         }
-
+        
         SerializedFile[] inputFiles = Utilities.createSerializedFiles(dataFileBaseDirectory, inputFileNames, externalDataFiles);
         SerializedFile[] answertFiles = Utilities.createSerializedFiles(dataFileBaseDirectory, answerFileNames, externalDataFiles);
+
+        SerializedFile [] existingFiles = files.getJudgesDataFiles();
+        
+        if (existingFiles != null && existingFiles.length > 0){
+            /**
+             * Existing files present, concatenate files
+             */
+            
+            Object[] newFiles = Utilities.concatenateArrays(existingFiles, inputFiles);
+            inputFiles = (SerializedFile[]) newFiles;
+        }
+        
+        existingFiles = files.getJudgesAnswerFiles();
+        
+        if (existingFiles != null && existingFiles.length > 0){
+            /**
+             * Existing files present, concatenate files
+             */
+            Object[] newFiles = Utilities.concatenateArrays(existingFiles, answertFiles);
+            answertFiles = (SerializedFile[]) newFiles;
+        }
+
         files.setJudgesDataFiles(inputFiles);
         files.setJudgesAnswerFiles(answertFiles);
-
         return files;
     }
 
@@ -650,6 +685,8 @@ public class MultipleDataSetPane extends JPanePlugin {
         if (buttonPanel == null) {
             buttonPanel = new JPanel();
             buttonPanel.setPreferredSize(new Dimension(10, 50));
+            buttonPanel.add(getLoadSamplesFirstCheckbox());
+            buttonPanel.add(getHorizontalStrut_2());
             buttonPanel.add(getBtnLoad());
             buttonPanel.add(getHorizontalStrut());
             buttonPanel.add(getBtnDelete());
@@ -726,6 +763,8 @@ public class MultipleDataSetPane extends JPanePlugin {
             + "\n\nYou must choose which type of data storage you want to use for each contest problem prior to loading the data for that problem.  ";
     private Component horizontalStrut_1;
     private JCheckBox chckbxStopOnFirstFailedTestCase;
+    private JCheckBox loadSamplesFirstCheckbox;
+    private Component horizontalStrut_2;
 
     private Component getHorizontalStrut_1() {
         if (horizontalStrut_1 == null) {
@@ -751,4 +790,27 @@ public class MultipleDataSetPane extends JPanePlugin {
         }
         return chckbxStopOnFirstFailedTestCase;
     }
+
+    private JCheckBox getLoadSamplesFirstCheckbox() {
+        if (loadSamplesFirstCheckbox == null) {
+            loadSamplesFirstCheckbox = new JCheckBox("Also load sample data");
+            loadSamplesFirstCheckbox.setToolTipText("Load Sample datasets before other data files");
+            loadSamplesFirstCheckbox.setSelected(true);
+        }
+        return loadSamplesFirstCheckbox;
+    }
+
+    public boolean isLoadSamplesFirst() {
+        return getLoadSamplesFirstCheckbox().isSelected();
+    }
+    
+    private Component getHorizontalStrut_2() {
+        if (horizontalStrut_2 == null) {
+        	horizontalStrut_2 = Box.createHorizontalStrut(20);
+        	horizontalStrut_2.setPreferredSize(new Dimension(30, 0));
+        	horizontalStrut_2.setMinimumSize(new Dimension(30, 0));
+        }
+        return horizontalStrut_2;
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"

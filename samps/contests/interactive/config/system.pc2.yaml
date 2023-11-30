@@ -1,0 +1,42 @@
+#
+# File:    system.pc2.yaml
+# Purpose: pc2 setttings for a contest
+#
+
+
+# 8M
+max-output-size-K: 8192
+
+stop-on-first-failed-test-case: true
+team-scoreboard-display-format-string: "{:displayname}"
+
+load-data-files: false
+
+# Load sample data 
+load-sample-judges-data: true
+
+judge-config-path: ./samps/contests/interactive/config
+
+accounts:
+  - account: TEAM
+    site: 1
+    count: 10
+
+  - account: JUDGE
+    site: 1
+    count: 3
+
+  - account: SCOREBOARD
+    site: 1
+    count: 1
+    
+
+# TODO ASSIGN AJ's
+
+auto-judging:
+  - account: JUDGE
+    site: 1
+    number: 1
+    letters: all
+    enabled: yes
+

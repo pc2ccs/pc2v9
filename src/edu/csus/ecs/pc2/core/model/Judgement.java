@@ -39,6 +39,8 @@ public class Judgement implements IElementObject, Serializable {
     public static final String ACRONYM_OUTPUT_FORMAT_ERROR = "OFE";
 
     public static final String ACRONYM_OTHER_CONTACT_STAFF = "OCS";
+    
+    public static final String ACRONYM_MEMORY_LIMIT_EXCEEDED = "MLE";
 
     private ElementId elementId = null;
 

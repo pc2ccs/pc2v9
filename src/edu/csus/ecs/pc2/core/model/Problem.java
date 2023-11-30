@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
@@ -8,11 +8,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.inputValidation.InputValidationResult;
 import edu.csus.ecs.pc2.core.model.inputValidation.VivaInputValidatorSettings;
+import edu.csus.ecs.pc2.ui.EditProblemSandboxPane;
 import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidatorSettings;
 import edu.csus.ecs.pc2.validator.customValidator.CustomValidatorSettings;
 import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
@@ -33,8 +35,19 @@ public class Problem implements IElementObject {
 
     private static final long serialVersionUID = 1708763261096488240L;
 
-    public static final int DEFAULT_TIMEOUT_SECONDS = 30;
+    public static final int DEFAULT_TIMEOUT_SECONDS = 10;
+
+    /**
+     * The default value for the per-problem maximum output size.
+     * Zero indicates no per-problem limit has been set (and therefore the current
+     * global setting should be used).
+     */
+    public static final int DEFAULT_MAX_OUTPUT_FILE_SIZE_KB = 0; 
+
     
+    public static final int DEFAULT_MEMORY_LIMIT_MB = 0 ;   //zero memory limit = "none", i.e. the problem can use all available memory
+    
+    public static final SandboxType DEFAULT_SANDBOX_TYPE = SandboxType.NONE ;
 
     /**
      * Problem title.
@@ -90,6 +103,13 @@ public class Problem implements IElementObject {
      * Seconds per problem run.
      */
     private int timeOutInSeconds = DEFAULT_TIMEOUT_SECONDS;
+    
+    /**
+     * Maximum output allowed to be produced by a solution for this problem.
+     * Note that a value of zero indicates that this problem does not have its own
+     * problem-specific limit and that the global (contest-wide) limit should be used instead.
+     */
+    private long maxOutputSizeKB = DEFAULT_MAX_OUTPUT_FILE_SIZE_KB ;
 
     /**
      * This enum defines the types of Output Validators which a Problem can have.
@@ -120,6 +140,11 @@ public class Problem implements IElementObject {
     private PC2ValidatorSettings pc2ValidatorSettings ;
     private ClicsValidatorSettings clicsValidatorSettings ;
     private CustomValidatorSettings customValidatorSettings ;
+    
+    /**
+     * If true, when loading data sets, load sample data sets before loading other judge's test data sets.
+     */
+    private boolean loadDataFilesSamplesFirst = false;
     
     /**
      * This enum defines the types of Input Validators which a Problem can have.
@@ -208,8 +233,6 @@ public class Problem implements IElementObject {
     //VIVA Input validator settings - only relevant if the problem was saved with Viva Input Validator Settings
     private VivaInputValidatorSettings vivaSettings = null;
 
-
-    
 
     /**
      * Use international judgement method.
@@ -313,6 +336,34 @@ public class Problem implements IElementObject {
     private List<Group> groups = new ArrayList<Group>(); 
     
     /**
+     * Fields related to Sandbox support.
+     */
+    public enum SandboxType {
+        /**
+         * No sandbox being used.
+         */
+        NONE, 
+        /**
+         * Using the PC2 Internal sandbox.
+         */
+        PC2_INTERNAL_SANDBOX, 
+        /**
+         * Using an external (user-defined) sandbox.
+         */
+        EXTERNAL_SANDBOX 
+    }
+    
+    private int memoryLimitMB = DEFAULT_MEMORY_LIMIT_MB;
+    private SandboxType sandboxType = DEFAULT_SANDBOX_TYPE;
+    private String sandboxCmdLine = null;
+    private String sandboxProgramName = null;
+    
+    /**
+     * For interactive problems - this is a read-only property, so, no mutator
+     */
+    private static final String interactiveCommandLine = Constants.PC2_INTERACTIVE_COMMAND_LINE;
+    
+    /**
      * Create a problem with the display name.
      * 
      * @param displayName
@@ -328,6 +379,7 @@ public class Problem implements IElementObject {
         this.customInputValidationStatus = InputValidationStatus.UNKNOWN;
         this.customInputValidationResults = new Vector<InputValidationResult>();
         this.vivaSettings = new VivaInputValidatorSettings();
+        updateSandboxInfo();
     }
 
     public Problem copy(String newDisplayName) {
@@ -345,6 +397,7 @@ public class Problem implements IElementObject {
         clone.setActive(isActive());
         clone.setReadInputDataFromSTDIN(isReadInputDataFromSTDIN());
         clone.setTimeOutInSeconds(getTimeOutInSeconds());
+        clone.setMaxOutputSizeKB(getMaxOutputSizeKB());
         
         //output validator settings
         clone.setValidatorType(this.getValidatorType());
@@ -426,6 +479,9 @@ public class Problem implements IElementObject {
         for (Group group : groups) {
             clone.addGroup(group);
         }
+        
+        clone.setSandboxType(this.getSandboxType());
+        clone.setMemoryLimitMB(this.getMemoryLimitMB());
         
         return clone;
     }
@@ -515,7 +571,14 @@ public class Problem implements IElementObject {
         retStr += "; usingExternalDataFiles=" + usingExternalDataFiles;
         retStr += "; externalDataFileLocation=" + externalDataFileLocation;
         retStr += "; state=" + state;
+        
+        retStr += "; sandboxType=" + this.getSandboxType();
+        retStr += "; sandboxCmdLine=" + this.getSandboxCmdLine();
+        retStr += "; sandboxProgramName=" + this.getSandboxProgramName();
+        retStr += "; memoryLimit=" + this.getMemoryLimitMB();
       
+        retStr += "; interactiveCommandLine=" + this.getInteractiveCommandLine();
+
         retStr += "]";
         return retStr;
     }
@@ -613,6 +676,28 @@ public class Problem implements IElementObject {
      */
     public int getTimeOutInSeconds() {
         return timeOutInSeconds;
+    }
+
+    /**
+     * Returns the problem-specific maximum allowed output file size, in KB.
+     * A returned value of zero indicates that the problem has no problem-specific output size limit,
+     * in which case the value of the global output size limit should be used instead.
+     * 
+     * @return the problem-specific maximum allowed output size limit in KB.
+     */
+    public long getMaxOutputSizeKB() {
+        return maxOutputSizeKB;
+    }
+
+    /**
+     * Set the maximum output size (in KB) allowed by this problem.
+     * A value of zero (which is the default) indicates that no problem-specific output size limit
+     * has been set and that the global value (as returned by {@link IInternalContest#getContestInformation()}) should be used.  
+     * 
+     * @param maxOutputSizeKB the maximum output size, in KB, to set for this problem.
+     */
+    public void setMaxOutputSizeKB(long maxOutputSizeKB) {
+        this.maxOutputSizeKB = maxOutputSizeKB;
     }
 
     /**
@@ -1167,7 +1252,23 @@ public class Problem implements IElementObject {
                 return false;
             }
             
+            if (! (this.getMaxOutputSizeKB() == otherProblem.getMaxOutputSizeKB()) ) {
+                return false;
+            }
+            
+            //check for equivalence in Sandbox configuration
+            if (this.getSandboxType() != otherProblem.getSandboxType()) {
+                return false ;
+            } 
+            
+            //check for same memory limits
+            if (this.getMemoryLimitMB() != otherProblem.getMemoryLimitMB()) {
+                return false;
+            }
+            
+            //all comparisons pass; problems are equivalent
             return true;
+            
         } catch (Exception e) {
             StaticLog.getLog().log(Log.WARNING, "Exception comparing Problem "+e.getMessage(), e);
             e.printStackTrace(System.err);
@@ -1205,6 +1306,10 @@ public class Problem implements IElementObject {
 
     public void setPrelimaryNotification(boolean prelimaryNotification) {
         this.prelimaryNotification = prelimaryNotification;
+    }
+
+    public boolean isInteractive() {
+        return isUsingCustomValidator() && customValidatorSettings.isUseInteractiveValidatorInterface();
     }
 
     /**
@@ -1828,7 +1933,7 @@ public class Problem implements IElementObject {
     }
     
     /**
-     * Is this group permitted to view/use this probelm?.
+     * Is this group permitted to view/use this problem?.
      * @param group
      * @return
      */
@@ -1963,4 +2068,162 @@ public class Problem implements IElementObject {
         }
         vivaSettings.setVivaInputValidatorHasBeenRun(vivaInputValidatorHasBeenRun);
     }
+
+    /**
+     * Returns the currently configured memory limit (in MB) for this Problem.
+     * A memory limit of zero indicates "no limit".
+     * Note that memory limits are not enforced unless a sandbox has been selected 
+     * on the Edit Problem GUI (or via YAML configuration).
+     * 
+     * @return
+     */
+    public int getMemoryLimitMB() {
+        return memoryLimitMB;
+    }
+    
+    /**
+     * Sets the memory limit for this problem. Setting a memory limit of zero indicates "no limit",
+     * meaning that the problem is constrained only by the memory provided by the hardware, the OS,
+     * and the specific language runtime system.
+     * 
+     * Note that setting a memory limit does not automatically imply that such limit is enforced; 
+     * enforcing a memory limit requires selection of a problem sandbox capable of doing that.
+     * (See {@link EditProblemSandboxPane}.)
+     * 
+     * If a value less than zero is passed in the memory limit is set to zero (unlimited).
+     * 
+     * @param memLimitInMB the memory limit for the problem, in MB; must be >= 0, where 0=unlimited.
+     */
+    public void setMemoryLimitMB(int memLimitInMB) {
+        if (memLimitInMB < 0) {
+            this.memoryLimitMB = 0;
+            //TODO: pass a Log into the Problem constructor so conditions like this can be logged properly.
+//            getLog().warning("Memory limit < 0 specified; setting to 0 (unlimited)");
+        } else {
+            this.memoryLimitMB = memLimitInMB;
+        }
+    }
+
+    /**
+     * Update sandbox command line program names based on whether the problem
+     * is using the internal sandbox and if it's interactive
+     * This routine makes sure that if we're using the internal sandbox, that the sandbox command line
+     * and sandbox program (script name) are correct.
+     */
+    private void updateSandboxInfo()
+    {
+        // we only set the sandbox program and command line if we're using the internal sandbox
+        // or, we haven't set anything yet.  We do the latter to prevent NPE's for someone requesting
+        // the sandbox name or command line even if the sandbox strings have not been defined yet
+        if(this.getSandboxType() == SandboxType.PC2_INTERNAL_SANDBOX || sandboxProgramName == null) {
+            if(isInteractive()) {
+                sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_INTERACTIVE_NAME;
+                sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_INTERACTIVE_COMMAND_LINE;
+            } else {
+                sandboxProgramName = Constants.PC2_INTERNAL_SANDBOX_PROGRAM_NAME;                
+                sandboxCmdLine = Constants.PC2_INTERNAL_SANDBOX_COMMAND_LINE;
+            }
+        }
+    }
+    
+    /**
+     * Returns a String containing the name of the sandbox program associated with this Problem.
+     * Note that the value returned by this method is only relevant if the value returned by
+     * {@link #getSandboxType()} is something other than {@link SandboxType#NONE}.
+     * 
+     * @return the currently-defined sandbox program name.
+     */
+    public String getSandboxProgramName() {
+        updateSandboxInfo();
+        return sandboxProgramName;
+    }
+
+    /**
+     * Sets the name of the sandbox program used by this Problem.
+     * Note that setting a sandbox program name does NOT in and of itself cause the specified sandbox to be
+     * used; the Admin must configure/enable the sandbox using the Edit Problem dialog (or via YAML configuration).
+     * 
+     * @param sandboxProgramName the name of the sandbox program to be used by this Problem, when sandbox usage is enabled.
+     */
+    public void setSandboxProgramName(String sandboxProgram) {
+        this.sandboxProgramName = sandboxProgram;
+    }
+
+    /**
+     * Returns the String containing the command used to invoke the sandbox configured for this problem.
+     * Note that the returned value is meaningless if the Problem has not been configured to use a sandbox. 
+     * 
+     * @return the command line used to invoke the sandbox for this problem, when sandbox usage is enabled.
+     */
+    public String getSandboxCmdLine() {
+        updateSandboxInfo();
+        return sandboxCmdLine;
+    }
+
+    /**
+     * Sets the command line used to invoke the sandbox associated with this Problem.
+     * Note that setting the sandbox command line does not in and of itself enable the use of a sandbox; the
+     * Admin must enable the sandbox via the Edit Problem dialog (or via YAML configuration).
+     * Note also that the value of sandboxCmdLine is meaningless if the Problem is currently configured
+     * with {@link SandboxType#NONE}.
+     * 
+     * @param sandboxCmdLine the command line used to invoke the Problem sandbox.
+     */
+    public void setSandboxCmdLine(String sandboxCmdLine) {
+        this.sandboxCmdLine = sandboxCmdLine;
+    }
+
+    /**
+     * Returns a boolean flag which indicates whether this Problem has been configured to use a sandbox.
+     *
+     * @return false if the currently configured SandboxType for the problem is {@link Problem.SandboxType#NONE}; 
+     *          true if any other sandbox type has been configured.
+     */
+    public boolean isUsingSandbox() {
+        return sandboxType != SandboxType.NONE;
+    }
+
+    /**
+     * Returns the type of sandbox configured in this Problem; an element of {@link Problem.SandboxType} 
+     * which might be {@link SandboxType#NONE}.
+     * 
+     * @return an element of {@link Problem.SandboxType}.
+     */
+    public SandboxType getSandboxType() {
+        if (sandboxType == null) {
+            sandboxType = SandboxType.NONE;
+        }
+        return sandboxType;
+    }
+
+    /**
+     * Sets the type of sandbox being used by this Problem.  If the specified type of sandbox is
+     * {@link SandboxType#PC2_INTERNAL_SANDBOX}, also sets the Sandbox Command Line and Sandbox Program Name
+     * to their PC2 Internal Sandbox values.
+     * 
+     * @param sandboxType the type of sandbox to be used by this Problem, which might be {@link Sandbox#NONE}.
+     */
+    public void setSandboxType(SandboxType sandboxType) {
+        this.sandboxType = sandboxType;
+        
+        //if we're setting the PC2 internal sandbox, also set the sandbox command line and program name
+        updateSandboxInfo();
+    }
+    
+    /**
+     * Gets the command line to use to run interactive problems.  Currently, this is a read-only
+     * value since it does not make sense to change it at this time.
+     */
+    public String getInteractiveCommandLine() {
+        return interactiveCommandLine;
+    }
+
+    public boolean isLoadDataFilesSamplesFirst() {
+        return loadDataFilesSamplesFirst;
+    }
+    
+    public void setLoadDataFilesSamplesFirst(boolean loadDataFilesSamplesFirst) {
+        this.loadDataFilesSamplesFirst = loadDataFilesSamplesFirst;
+    }
+
 }

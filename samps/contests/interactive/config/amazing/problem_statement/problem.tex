@@ -1,0 +1,83 @@
+\problemname{A Mazing!}
+
+A maze consists of a collection of equal-sized square cells, which are typically arranged so that they
+share sides with other cells.
+There may be either a wall or a door at the cell sides.
+From each cell, you may attempt to move in one of four directions, and the move is successful
+if there is no wall in that direction.
+The maze may have no exit or multiple exits, as shown in Figure \ref{fig:amazing:maze}.
+
+\begin{figure}[!h]
+\begin{center}
+	~\hfill
+    \includegraphics[width=.9\textwidth]{amazing.png}
+	\hfill ~
+    \caption{\label{fig:amazing:maze}Some maze examples and the four directions of movement.}
+\end{center}
+\end{figure}
+
+For each maze, the starting point is someplace in the maze. In the samples above:
+
+\vspace{-8pt}
+\begin{itemize}
+\itemsep=-2pt
+\item Maze A has no way out.
+\item Maze B has an exit (solution) to the right of cell $2$.
+\item Maze C has an exit down from cell $3$ and up from cell $4$, unless the starting point is cell $5$, in which case there is no way out.
+\item Maze D has an exit up from cell $6$.
+\end{itemize}
+
+Your task is to write a program that finds an exit to a maze.
+For example, using Maze D above, if the starting point is cell $9$, one possible set of directions to get to
+the exit would be: \texttt{right}, \texttt{right}, \texttt{right}, \texttt{right}, \texttt{right}, 
+\texttt{up}, \texttt{up}, \texttt{up}.
+
+
+\section*{Interaction}
+
+Your program must operate interactively, which means the input you receive
+will depend on the previous output of your program.
+Your program will attempt a move by writing one of the directions
+(\texttt{right}, \texttt{down}, \texttt{left}, or \texttt{up}) on one output line.
+For each such line, there will be a~result to read from the standard
+input. The result is one line containing one of three possible responses:
+
+\vspace{-8pt}
+\begin{itemize}
+\itemsep=-2pt
+\item \texttt{wall} -- indicates that a wall is there and you cannot proceed in that direction.
+\item \texttt{ok} -- indicates that there is door there and you proceeded in that direction to the neighboring cell.
+\item \texttt{solved} -- indicates that you have successfully found an exit to the maze.
+\end{itemize}
+
+If your program determines there is no way out of the maze, you should send the precise string ``\texttt{no way out}'' 
+(without the quotes) instead of a direction.
+If there is indeed no way out of the maze, you will receive a
+\texttt{solved} reply.
+
+After receiving a \texttt{solved} reply, your program should exit immediately.
+Otherwise, your program should then make another move based on the response it received, as discussed above. 
+This process repeats until your program receives a \texttt{solved} response or produces
+a wrong answer. The following are also classified as wrong answer:
+
+\vspace{-8pt}
+\begin{enumerate}
+\itemsep=-2pt
+\item Your program sends ``\texttt{no way out}'', even though there is a way out.
+\item Your program makes the same move (direction) from the same cell twice.
+\end{enumerate}
+
+It is guaranteed that the maze will not be larger than $100$ rows by $100$ columns.
+
+\emph{Notes on interactive judging:}
+\vspace{-8pt}
+\begin{itemize}
+\itemsep=-2pt
+\item \emph{The evaluation is non-adversarial, meaning that the maze structure and your position are chosen
+in advance rather than in response to your queries.}
+\item \emph{Do not forget to flush output buffers after writing. See the Addendum to Judging Notes for details.}
+\item \emph{You are provided with a command-line tool for local testing, together with an input file
+corresponding to the sample interaction.
+The tool has comments at the top to explain its use.}
+\end{itemize}
+

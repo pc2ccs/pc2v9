@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
  * This class encapsulates settings for configuring a "custom validator".
  * Settings include the validator program name (that is, the program which acts as
@@ -42,6 +42,12 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
     // "Interface mode" is currently active
     private boolean usePC2ValidatorInterface ;
     private boolean useCLICSValidatorInterface ;
+    
+    /**
+     * should the problem be judged interactively.  requires a custom CLICS compliant validator
+     */
+    private boolean useInteractiveValidatorInterface;
+
 
 
     /**
@@ -57,6 +63,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
         this.customCLICSInterfaceValidatorCommandLine = Constants.DEFAULT_CLICS_VALIDATOR_COMMAND;
         this.usePC2ValidatorInterface = false ;
         this.useCLICSValidatorInterface = true;
+        this.useInteractiveValidatorInterface = false;
     }
 
 
@@ -102,7 +109,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
      * @throws {@link RuntimeException} if the settings do not contain a valid Validator Interface mode setting
      */
     public String getCustomValidatorCommandLine() {
-        if (this.isUseClicsValidatorInterface()) {
+        if (this.isUseClicsValidatorInterface() || this.isUseInteractiveValidatorInterface()) {
             return this.customCLICSInterfaceValidatorCommandLine;
         } else if (this.isUsePC2ValidatorInterface()) {
             return this.customPC2InterfaceValidatorCommandLine;
@@ -137,7 +144,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
      * 
      */
     public void setValidatorCommandLine(String commandString) {
-        if (this.isUseClicsValidatorInterface()) {
+        if (this.isUseClicsValidatorInterface() || this.isUseInteractiveValidatorInterface()) {
             this.customCLICSInterfaceValidatorCommandLine = commandString;
         } else if (this.isUsePC2ValidatorInterface()) {
             this.customPC2InterfaceValidatorCommandLine = commandString;
@@ -186,6 +193,9 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
         if (this.isUseClicsValidatorInterface() != other.isUseClicsValidatorInterface()) {
             return false;
         }
+        if (this.isUseInteractiveValidatorInterface() != other.isUseInteractiveValidatorInterface()) {
+            return false;
+        }
         
         //check the PC2 validator interface invocation command strings
         //First, check whether one is null while the other is not, using the Java XOR ("^") operator
@@ -218,7 +228,8 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
     
     @Override
     public int hashCode() {
-        return Objects.hash(customValidatorProgramName,usePC2ValidatorInterface,useCLICSValidatorInterface,customPC2InterfaceValidatorCommandLine,customCLICSInterfaceValidatorCommandLine);
+        return Objects.hash(customValidatorProgramName,usePC2ValidatorInterface,useCLICSValidatorInterface,useInteractiveValidatorInterface,
+                customPC2InterfaceValidatorCommandLine,customCLICSInterfaceValidatorCommandLine);
     }
     
     /**
@@ -235,7 +246,8 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
         //update the interface mode settings
         clone.useCLICSValidatorInterface = this.isUseClicsValidatorInterface();
         clone.usePC2ValidatorInterface = this.isUsePC2ValidatorInterface();
-
+        clone.useInteractiveValidatorInterface = this.isUseInteractiveValidatorInterface();
+        
         //update the validator command lines. (Note that this should NOT be done with accessors because the
         // getters return a string that depends on the current Validator Interface mode; we need to
         // set BOTH strings.)
@@ -290,6 +302,26 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
         this.useCLICSValidatorInterface = true;
         this.usePC2ValidatorInterface = false;
     }
+
+    
+    /**
+     * Sets the flag indicating that this validator expects to use the CLICS Interactive Validator Interface.
+     * @see {@link #setValidatorCommandLine(String)}
+     * 
+     */
+    public void setUseInteractiveValidatorInterface() {
+        this.useCLICSValidatorInterface = false;
+        this.usePC2ValidatorInterface = false;
+        this.useInteractiveValidatorInterface = true;
+    }
+
+    /**
+     * @return the useInteractiveValidatorInterface flag setting
+     */
+    public boolean isUseInteractiveValidatorInterface() {
+        return useInteractiveValidatorInterface;
+    }
+
     
     @Override
     public String toString() {
@@ -299,6 +331,7 @@ public class CustomValidatorSettings implements Serializable, Cloneable {
         
         retStr += "; usePC2ValidatorInterface=" + usePC2ValidatorInterface;
         retStr += "; useCLICSValidatorInterface=" + useCLICSValidatorInterface;
+        retStr += "; useInteractiveValidatorInterface=" + useInteractiveValidatorInterface;
 
         retStr += "; PC2InterfaceValidatorCommandLine=" + customPC2InterfaceValidatorCommandLine;
         retStr += "; CLICSInterfaceValidatorCommandLine=" + customCLICSInterfaceValidatorCommandLine;

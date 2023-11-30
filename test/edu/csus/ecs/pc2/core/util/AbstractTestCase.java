@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
 import java.io.ByteArrayInputStream;
@@ -33,8 +33,6 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import junit.framework.TestCase;
-
 import org.junit.ComparisonFailure;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -47,6 +45,7 @@ import edu.csus.ecs.pc2.core.imports.LoadICPCTSVData;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.LogFormatter;
+import edu.csus.ecs.pc2.core.log.LogUtilities;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -62,6 +61,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
+import junit.framework.TestCase;
 
 /**
  * Test utility methods.
@@ -791,6 +791,22 @@ public class AbstractTestCase extends TestCase {
             e.printStackTrace(System.err);
         }
     }
+    
+    public void editFile(String filename, String comment) {
+        
+        System.err.println("editFile: "+comment+" file: "+filename);
+
+        String viFile = findViExecutable();
+
+        String[] command = { viFile, filename };
+        try {
+            Runtime.getRuntime().exec(command);
+        } catch (IOException e) {
+            System.out.println("Could not run command " + Arrays.toString(command));
+            e.printStackTrace(System.err);
+        }
+    }
+
     
     private String findViExecutable() {
 
@@ -1565,5 +1581,54 @@ public class AbstractTestCase extends TestCase {
     public void assertNoPermssion(edu.csus.ecs.pc2.core.security.Permission.Type type, Account account) {
         assertFalse("Expected for  " + account + " Permission " + type, account.isAllowed(type));
     }
-    
+    /**
+     * Load sample contest into contest model
+     * 
+     * @param contest model, if null will create contest model
+     * @param sampleName name of contest under samps/contest, ex mini
+     * @return contest model 
+     * @throws Exception
+     */
+    public IInternalContest loadContestFromSampleContest(IInternalContest contest, String sampleName) throws Exception {
+
+        IContestLoader loader = new ContestSnakeYAMLLoader();
+        if (contest == null) {
+            contest = new InternalContest();
+        }
+
+        try {
+            String cdpDir = getTestSampleContestDirectory(sampleName);
+            loader.initializeContest(contest, new File( cdpDir));
+            return contest;
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw e;
+        }
+    }
+
+    /**
+     * Ensure static log is initialized.
+     * 
+     * If not used then an NPE will occur if StaticLog is used.
+     * 
+     */
+    public void ensureStaticLog() {
+        LogUtilities.ensureStaticLog();
+    }
+
+    /**
+     * Add runs to contest from list of run data, using SampleContest#addRunFromInfo.
+     * 
+     * @see  SampleContest#addRunFromInfo(IInternalContest, String, boolean)
+     * 
+     * @param contest
+     * @param runsData String run info, see See {@link SampleContest#addRunFromInfo(IInternalContest, String, boolean)} for content/format 
+     * @throws Exception
+     */
+    public void addRuns(IInternalContest contest, String[] runsData) throws Exception {
+        for (String runInfoLine : runsData) {
+            SampleContest.addRunFromInfo(contest, runInfoLine);
+        }
+    }
 }

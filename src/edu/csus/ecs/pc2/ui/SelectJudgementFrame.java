@@ -91,7 +91,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
     }
     
     public void setRun(Run theRun, boolean rejudgeRun) {
-        Executable tempEexecutable = new Executable(contest, controller, theRun, null);
+        Executable tempEexecutable = new Executable(contest, controller, theRun, null, null);
         // clear as soon as we start this run, so View Outputs does not show old info
         
         String temporaryExecuteableDirectory = tempEexecutable.getExecuteDirectoryName();

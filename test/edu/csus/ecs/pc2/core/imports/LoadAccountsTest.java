@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.File;
@@ -17,8 +17,6 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
-import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Unit test.
@@ -272,51 +270,6 @@ public class LoadAccountsTest extends AbstractTestCase {
         System.out.println("country code = " + team.getCountryCode());
 
     }
-    
-    private IInternalContest loadSampleContest(IInternalContest contest, String sampleName) throws Exception {
-        IContestLoader loader = new ContestSnakeYAMLLoader();
-        String configDir = getTestSampleContestDirectory(sampleName) + File.separator + IContestLoader.CONFIG_DIRNAME;
-        try {
-            return loader.fromYaml(contest, configDir);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            throw e;
-        }
-    }
-    
-    public void testupdateAccountsFromFile() throws Exception {
-        
-//        String dataDir = getDataDirectory(this.getName());
-        
-//        ensureDirectory(dataDir);
-//        startExplorer(dataDir);
 
-        IInternalContest contest = loadSampleContest(null, "mini");
-        assertNotNull(contest);
-        System.err.println(" // TODO BUG load accounts from CDP broken/buggy");
-        // TODO BUG is should be assertEquals(151, accounts.size());
-        
-//        Vector<Account> accounts = contest.getAccounts(Type.TEAM);
-//        assertEquals(151, accounts.size());        
-//        
-////        String loadFileName = dataDir + File.separator + Constants.ACCOUNTS_LOAD_FILENAME;
-////        editFile(loadFileName);
-//        
-//        String loadFileName = dataDir + File.separator + "mini.load.accounts.up.tsv";
-//        editFile(loadFileName);
-//        
-//        Account[] newAccounts = LoadAccounts.updateAccountsFromFile(contest, loadFileName);
-//        assertEquals(50, newAccounts.length);
-//        Arrays.sort(newAccounts, new AccountComparator());
-//
-//        int num = 1;
-//        for (Account account : newAccounts) {
-//
-//            assertEquals("TeamName " + num, account.getDisplayName());
-//            assertEquals("USA", account.getCountryCode());
-//            assertEquals("pass" + num, account.getPassword());
-//            num++;
-//        }
-        
-    }
+  
 }
