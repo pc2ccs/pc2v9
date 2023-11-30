@@ -545,4 +545,13 @@ public class JSONTool {
         element.put("contest_time", ContestTime.formatTimeMS(run.getContestTimeMS()));
         return element;
     }
+    
+    public Group getGroupFromNumber(String groupnum) {
+        for(Group group: model.getGroups()) {
+            if (getGroupId(group).equals(groupnum)) {
+                return(group);
+            }
+        }
+        return(null);
+    }
 }
