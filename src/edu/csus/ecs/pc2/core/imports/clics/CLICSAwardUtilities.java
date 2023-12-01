@@ -35,7 +35,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
 import edu.csus.ecs.pc2.core.standings.json.ScoreboardJsonModel;
 import edu.csus.ecs.pc2.core.standings.json.StandingScore;
@@ -124,7 +124,7 @@ public class CLICSAwardUtilities {
         Map<Group, ClientId> groupWinners = new HashMap<Group, ClientId>();
         
         try {
-            ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+            ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
 
             List<TeamStanding> teamStands = contestStandings.getTeamStandings();
             for (TeamStanding teamStanding : teamStands) {
@@ -211,7 +211,7 @@ public class CLICSAwardUtilities {
 
     public static void addMedals(IInternalContest contest, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
 
-        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
 
 //        List<TeamScoreRow> rows = model.getRows();
@@ -313,7 +313,7 @@ public class CLICSAwardUtilities {
      */
     public static void addWinner(IInternalContest contest, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
 
-        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
 
         String winnerId = null;

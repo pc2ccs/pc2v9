@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
@@ -305,7 +305,7 @@ public class StringUtilitiesTest extends AbstractTestCase {
         Group[] groups = contest.getGroups();
         
         for (Group group : groups) {
-            String divName = ScoreboardUtilites.getDivision(group.getDisplayName());
+            String divName = ScoreboardUtilities.getDivision(group.getDisplayName());
             assertNotNull("No division found for "+group.getDisplayName(), divName);
         }
         
@@ -321,23 +321,23 @@ public class StringUtilitiesTest extends AbstractTestCase {
         Run[] runlist = contest.getRuns();
         for (Run run : runlist) {
             assertNotNull("Expecting account for "+run.getSubmitter(), contest.getAccount(run.getSubmitter()));
-            String div = ScoreboardUtilites.getDivision(contest, run.getSubmitter());
+            String div = ScoreboardUtilities.getDivision(contest, run.getSubmitter());
             assertNotNull("Missing division for "+run.getSubmitter(), div);
         }
         
         ClientId client1 = accounts[5].getClientId();
         Group group = contest.getGroup(contest.getAccount(client1).getGroupId());
 
-        Run[] runs = ScoreboardUtilites.getRunsForUserDivision(client1, contest);
+        Run[] runs = ScoreboardUtilities.getRunsForUserDivision(client1, contest);
         assertEquals("Expecting runs matching group " + group, 7, runs.length);
 
         client1 = accounts[12].getClientId();
-        runs = ScoreboardUtilites.getRunsForUserDivision(client1, contest);
+        runs = ScoreboardUtilities.getRunsForUserDivision(client1, contest);
         assertEquals("Expecting runs matching group " + group, 5, runs.length);
 
         accounts[12].setGroupId(null); // test for null group
         contest.updateAccounts(accounts);
-        runs = ScoreboardUtilites.getRunsForUserDivision(client1, contest);
+        runs = ScoreboardUtilities.getRunsForUserDivision(client1, contest);
         assertEquals("Expecting runs matching group " + group, 0, runs.length);
         
     }
@@ -400,7 +400,7 @@ public class StringUtilitiesTest extends AbstractTestCase {
             String input = fields[0];
             String expected = fields[1];
 
-            String actual = ScoreboardUtilites.getDivision(input);
+            String actual = ScoreboardUtilities.getDivision(input);
             assertEquals("Expecting division for " + input, expected, actual);
         }
 

@@ -34,7 +34,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
@@ -334,14 +334,14 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         Group[] groups = contest.getGroups();
         
         for (Group group : groups) {
-            String divName = ScoreboardUtilites.getDivision(group.getDisplayName());
+            String divName = ScoreboardUtilities.getDivision(group.getDisplayName());
             assertNotNull("No division found for "+group.getDisplayName(), divName);
         }
         
         Account[] accounts = getTeamAccounts(contest);
         Arrays.sort(accounts, new AccountComparator());
         for (Account account : accounts) {
-            String name = ScoreboardUtilites.getDivision(contest, account.getClientId());
+            String name = ScoreboardUtilities.getDivision(contest, account.getClientId());
             assertNotNull("No division found for "+account, name);
         }
 
@@ -354,7 +354,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         Run[] runlist = contest.getRuns();
         for (Run run : runlist) {
             assertNotNull("Expecting account for "+run.getSubmitter(), contest.getAccount(run.getSubmitter()));
-            String div = ScoreboardUtilites.getDivision(contest, run.getSubmitter());
+            String div = ScoreboardUtilities.getDivision(contest, run.getSubmitter());
             assertNotNull("Missing division for "+run.getSubmitter(), div);
         }
         
@@ -363,11 +363,11 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         ClientId client1 = accounts[5].getClientId();
         Group group = contest.getGroup(contest.getAccount(client1).getGroupId());
 
-        Run[] runs = ScoreboardUtilites.getRunsForUserDivision(client1, contest);
+        Run[] runs = ScoreboardUtilities.getRunsForUserDivision(client1, contest);
         assertEquals("Expecting runs matching group " + group, 7, runs.length);
 
         client1 = accounts[12].getClientId();
-        runs = ScoreboardUtilites.getRunsForUserDivision(client1, contest);
+        runs = ScoreboardUtilities.getRunsForUserDivision(client1, contest);
         assertEquals("Expecting runs matching group " + group, 5, runs.length);
 
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
@@ -377,7 +377,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         Group group2 = contest.getGroup(acc.getGroupId());
         assertNotNull(group2);
         
-        String divString = ScoreboardUtilites.getDivision(contest, client1);
+        String divString = ScoreboardUtilities.getDivision(contest, client1);
         Integer division = new Integer(divString);
         ClientId id  = contest.getClientId();
         assertNotNull("No client Id for contest",id);
@@ -391,15 +391,15 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         assertEquals("Expecting standing records for client "+lastClient, 22, standingsRecords.length);
 
         division = 1;
-        Run[] divRuns = ScoreboardUtilites.getRunsForDivision(contest, division.toString());
+        Run[] divRuns = ScoreboardUtilities.getRunsForDivision(contest, division.toString());
         assertEquals("Expecting run count for division "+division, 5, divRuns.length);
         
         division = 2;
-        divRuns = ScoreboardUtilites.getRunsForDivision(contest, division.toString());
+        divRuns = ScoreboardUtilities.getRunsForDivision(contest, division.toString());
         assertEquals("Expecting run count for division "+division, 7, divRuns.length);
         
         division = 3;
-        divRuns = ScoreboardUtilites.getRunsForDivision(contest, division.toString());
+        divRuns = ScoreboardUtilities.getRunsForDivision(contest, division.toString());
         assertEquals("Expecting run count for division "+division, 9, divRuns.length);
         
         
@@ -445,14 +445,14 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         Group[] groups = contest.getGroups();
 
         for (Group group : groups) {
-            String divName = ScoreboardUtilites.getDivision(group.getDisplayName());
+            String divName = ScoreboardUtilities.getDivision(group.getDisplayName());
             assertNotNull("No division found for " + group.getDisplayName(), divName);
         }
 
         Account[] accounts = getTeamAccounts(contest);
         Arrays.sort(accounts, new AccountComparator());
         for (Account account : accounts) {
-            String name = ScoreboardUtilites.getDivision(contest, account.getClientId());
+            String name = ScoreboardUtilities.getDivision(contest, account.getClientId());
             assertNotNull("No division found for " + account, name);
         }
 

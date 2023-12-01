@@ -40,7 +40,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.standings.json.ScoreboardJsonModel;
 
-public class ScoreboardUtilites {
+public class ScoreboardUtilities {
 
     /**
      * Create x from XML StringContestStandings
@@ -88,7 +88,7 @@ public class ScoreboardUtilites {
     }
     
     public static ContestStandings createContestStandings(IInternalContest contest) throws JAXBException, IllegalContestState, JsonParseException, JsonMappingException, IOException {
-        String xmlString = ScoreboardUtilites.createScoreboardXML(contest);
+        String xmlString = ScoreboardUtilities.createScoreboardXML(contest);
         return createContestStandings(xmlString);
     }
     

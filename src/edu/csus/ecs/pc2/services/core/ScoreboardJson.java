@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.standings.json.ScoreboardJsonUtility;
 
 /**
@@ -54,7 +54,7 @@ public class ScoreboardJson {
 
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
 
-        Properties properties = ScoreboardUtilites.getScoringProperties(contest);
+        Properties properties = ScoreboardUtilities.getScoringProperties(contest);
 
         if (log == null) {
             log = StaticLog.getLog();
@@ -76,7 +76,7 @@ public class ScoreboardJson {
      * @throws IOException
      */
     public String createJSON(String xml) throws JAXBException, IOException {
-        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(xml);
+        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(xml);
         String json = ScoreboardJsonUtility.createScoreboardJSON(contestStandings);
         return json;
     }
