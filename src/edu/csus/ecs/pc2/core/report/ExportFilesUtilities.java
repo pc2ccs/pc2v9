@@ -19,7 +19,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.services.core.ScoreboardJson;
 
-public class ExportFilesUtiltiites {
+public class ExportFilesUtilities {
 
     /**
      * Write contest results files to directory.
