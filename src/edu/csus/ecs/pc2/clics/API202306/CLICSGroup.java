@@ -81,53 +81,88 @@ public class CLICSGroup {
     }
     
     /**
-     * Create Group list from a groups.json like file
+     * Create Group array from a groups.json like file
      * 
      * @param contest the contest
      * @param filename json file to deserialize
      * @param site the site to create the groups for
      * @return array of accounts to add, or null on error
      */
-    public static Group [] fromJSON(IInternalContest contest, String filename, int site) {
+    public static Group [] fromJSON(IInternalContest contest, File jsonfile, int site) {
         Group [] newgroups = null;
         Log log = StaticLog.getLog();
-        boolean error = false;
         
         try {
             ObjectMapper mapper = new ObjectMapper();
-            CLICSGroup [] cgroups = mapper.readValue(new File(filename), CLICSGroup[].class);
-            ArrayList<Group> groups = new ArrayList<Group>();
-            Group group;
-            
-            // convert each json group to a pc2 Group
-            for(CLICSGroup cgroup: cgroups) {
-                
-                if(StringUtilities.isEmpty(cgroup.name)) {
-                    log.log(Log.SEVERE, "no name property in group in file " + filename);
-                    error = true;
-                    break;
-                }
-                group = new Group(cgroup.name);
-                group.setSiteNumber(site);
-                int groupnum;
-                try {
-                    groupnum = Integer.parseInt(cgroup.id);
-                } catch(Exception e) {
-                    // Some sort of conversion error - log it and abort
-                    log.log(Log.SEVERE, "unable to get group number from id " + cgroup.id, e);
-                    error = true;
-                    break;
-                }
-                group.setGroupId(groupnum);
-                groups.add(group);
-            }
-            // if it all worked out, then create the array of accounts to be returned
-            if(!error) {
-                newgroups = groups.toArray(new Group[0]);
-            }
+            newgroups = createGroupsFromJSON(mapper.readValue(jsonfile, CLICSGroup[].class), site, log);
         } catch (Exception e) {
-            log.log(Log.WARNING, "could not deserialize group file " + filename, e);
+            log.log(Log.WARNING, "could not deserialize group file " + jsonfile.toString(), e);
         }        
         return(newgroups);
-     }
+    }
+    
+    /**
+     * Create Group array from a groups.json like file
+     * 
+     * @param contest the contest
+     * @param json json string to deserialize
+     * @param site the site to create the groups for
+     * @return array of accounts to add, or null on error
+     */
+    public static Group [] fromJSON(IInternalContest contest, String json, int site) {
+        Group [] newgroups = null;
+        Log log = StaticLog.getLog();
+        
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            newgroups = createGroupsFromJSON(mapper.readValue(json, CLICSGroup[].class), site, log);
+        } catch (Exception e) {
+            log.log(Log.WARNING, "could not deserialize group", e);
+        }        
+        return(newgroups);
+    }
+
+    /**
+     * Convert an array of CLICS Groups into a PC2 Group [] array.
+     * 
+     * @param cgroups CLICSGroup array
+     * @param site The site to use for groups
+     * @param log for error login
+     * @return array of Group converted from the supplied clics cgroups
+     */
+    private static Group [] createGroupsFromJSON(CLICSGroup [] cgroups, int site, Log log) {
+        Group [] newgroups = null;
+        ArrayList<Group> groups = new ArrayList<Group>();
+        Group group;
+        boolean error = false;
+        
+        // convert each json group to a pc2 Group
+        for(CLICSGroup cgroup: cgroups) {
+            
+            if(StringUtilities.isEmpty(cgroup.name)) {
+                log.log(Log.SEVERE, "no name property in group");
+                error = true;
+                break;
+            }
+            group = new Group(cgroup.name);
+            group.setSiteNumber(site);
+            int groupnum;
+            try {
+                groupnum = Integer.parseInt(cgroup.id);
+            } catch(Exception e) {
+                // Some sort of conversion error - log it and abort
+                log.log(Log.SEVERE, "unable to get group number from id " + cgroup.id, e);
+                error = true;
+                break;
+            }
+            group.setGroupId(groupnum);
+            groups.add(group);
+        }
+        // if it all worked out, then create the array of accounts to be returned
+        if(!error) {
+            newgroups = groups.toArray(new Group[0]);
+        }
+        
+        return newgroups;
+    }
 }
