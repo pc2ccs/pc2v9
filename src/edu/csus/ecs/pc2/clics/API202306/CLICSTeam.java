@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
@@ -104,6 +105,7 @@ public class CLICSTeam {
     /**
      * Create account list from a teams.json like file
      * 
+     * @param contest the contest (needed for groups)
      * @param filename json file to deserialize
      * @param site the site to create the accounts for
      * @return array of accounts to add, or null on error
@@ -123,43 +125,51 @@ public class CLICSTeam {
             
             // convert each team to an account
             for(CLICSTeam team: teams) {
+                int teamnum;
                 try {
-                    String teamnum;
                     if(StringUtilities.isEmpty(team.label)) {
-                        teamnum = team.id;
+                        teamnum = Integer.parseInt(team.id);
                     } else {
-                        teamnum = team.label;
+                        teamnum = Integer.parseInt(team.label);
                     }
-                    ClientId clientId = new ClientId(site, Type.TEAM, Integer.parseInt(teamnum));
-                    // create barebones account
-                    account = new Account(clientId, clientId.getName(), site);
-                    account.clearListAndLoadPermissions(teamPermissionList);
-                    account.setLabel(team.label);
-                    account.setExternalId(team.icpc_id);
-                    if(!StringUtilities.isEmpty(team.display_name)) {
-                        account.setDisplayName(team.display_name);
-                    }
-                    if(!StringUtilities.isEmpty(team.name)) {
-                        account.setTeamName(team.name);
-                    }
-                    // now fill in any other fields we can
-                    if(team.group_ids != null && team.group_ids.length > 0) {
-                        account.setGroupId(jsontool.getGroupFromNumber(team.group_ids[0]).getElementId());
-                        if(team.group_ids.length > 1) {
-                            log.log(Log.INFO, account.getDisplayName() + " has " + team.group_ids.length + " groups assigned - only using first one");
-                        }
-                    }
-                    if(team.hidden) {
-                        account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
-                    }
-                    // TODO Organization!
-                    accounts.add(account);
                 } catch(Exception e) {
                     // Some sort of conversion error - log it and abort
                     log.log(Log.SEVERE, "unable to get team number from label or id", e);
                     error = true;
                     break;
                 }
+
+                ClientId clientId = new ClientId(site, Type.TEAM, teamnum);
+                // create barebones account
+                account = new Account(clientId, clientId.getName(), site);
+                account.clearListAndLoadPermissions(teamPermissionList);
+                account.setLabel(team.label);
+                account.setExternalId(team.icpc_id);
+                if(!StringUtilities.isEmpty(team.display_name)) {
+                    account.setDisplayName(team.display_name);
+                }
+                if(!StringUtilities.isEmpty(team.name)) {
+                    account.setTeamName(team.name);
+                }
+                // now fill in any other fields we can
+                if(team.group_ids != null && team.group_ids.length > 0) {
+                    Group group = jsontool.getGroupFromNumber(team.group_ids[0]);
+                    if(group == null) {
+                        log.log(Log.SEVERE, "No group has been defined with GroupId=" + team.group_ids[0]);
+                        error = true;
+                        break;
+                    }
+                    account.setGroupId(group.getElementId());
+                    //TODO fix this when PC2 supports multiple groups per account
+                    if(team.group_ids.length > 1) {
+                        log.log(Log.INFO, account.getDisplayName() + " has " + team.group_ids.length + " groups assigned - only using first one");
+                    }
+                }
+                if(team.hidden) {
+                    account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+                }
+                // TODO Organization!
+                accounts.add(account);
             }
             // if it all worked out, then create the array of accounts to be returned
             if(!error) {
