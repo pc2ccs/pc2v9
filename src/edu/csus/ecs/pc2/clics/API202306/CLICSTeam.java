@@ -106,78 +106,114 @@ public class CLICSTeam {
      * Create account list from a teams.json like file
      * 
      * @param contest the contest (needed for groups)
-     * @param filename json file to deserialize
+     * @param jsonfile json file to deserialize
      * @param site the site to create the accounts for
      * @return array of accounts to add, or null on error
      */
-    public static Account [] fromJSON(IInternalContest contest, String filename, int site) {
+    public static Account [] fromJSON(IInternalContest contest, File jsonfile, int site) {
         Account [] newaccounts = null;
         Log log = StaticLog.getLog();
-        boolean error = false;
         
         try {
             ObjectMapper mapper = new ObjectMapper();
-            CLICSTeam [] teams = mapper.readValue(new File(filename), CLICSTeam[].class);
-            ArrayList<Account> accounts = new ArrayList<Account>();
-            Account account;
-            JSONTool jsontool = new JSONTool(contest, null);
-            PermissionList teamPermissionList = new PermissionGroup().getPermissionList (ClientType.Type.TEAM);
-            
-            // convert each team to an account
-            for(CLICSTeam team: teams) {
-                int teamnum;
-                try {
-                    if(StringUtilities.isEmpty(team.label)) {
-                        teamnum = Integer.parseInt(team.id);
-                    } else {
-                        teamnum = Integer.parseInt(team.label);
-                    }
-                } catch(Exception e) {
-                    // Some sort of conversion error - log it and abort
-                    log.log(Log.SEVERE, "unable to get team number from label or id", e);
-                    error = true;
-                    break;
-                }
-
-                ClientId clientId = new ClientId(site, Type.TEAM, teamnum);
-                // create barebones account
-                account = new Account(clientId, clientId.getName(), site);
-                account.clearListAndLoadPermissions(teamPermissionList);
-                account.setLabel(team.label);
-                account.setExternalId(team.icpc_id);
-                if(!StringUtilities.isEmpty(team.display_name)) {
-                    account.setDisplayName(team.display_name);
-                }
-                if(!StringUtilities.isEmpty(team.name)) {
-                    account.setTeamName(team.name);
-                }
-                // now fill in any other fields we can
-                if(team.group_ids != null && team.group_ids.length > 0) {
-                    Group group = jsontool.getGroupFromNumber(team.group_ids[0]);
-                    if(group == null) {
-                        log.log(Log.SEVERE, "No group has been defined with GroupId=" + team.group_ids[0]);
-                        error = true;
-                        break;
-                    }
-                    account.setGroupId(group.getElementId());
-                    //TODO fix this when PC2 supports multiple groups per account
-                    if(team.group_ids.length > 1) {
-                        log.log(Log.INFO, account.getDisplayName() + " has " + team.group_ids.length + " groups assigned - only using first one");
-                    }
-                }
-                if(team.hidden) {
-                    account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
-                }
-                // TODO Organization!
-                accounts.add(account);
-            }
-            // if it all worked out, then create the array of accounts to be returned
-            if(!error) {
-                newaccounts = accounts.toArray(new Account[0]);
-            }
+            newaccounts = createTeamsFromTeamsJSON(contest, mapper.readValue(jsonfile, CLICSTeam[].class), site, log);
         } catch (Exception e) {
-            log.log(Log.WARNING, "could not deserialize team file " + filename, e);
+            log.log(Log.WARNING, "could not deserialize team file " + jsonfile, e);
         }        
         return(newaccounts);
      }
+    
+    /**
+     * Create account list from a strings contains a teams json file
+     * 
+     * @param contest the contest (needed for groups)
+     * @param json json to deserialize
+     * @param site the site to create the accounts for
+     * @return array of accounts to add, or null on error
+     */
+    public static Account [] fromJSON(IInternalContest contest, String json, int site) {
+        Account [] newaccounts = null;
+        Log log = StaticLog.getLog();
+        
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            newaccounts = createTeamsFromTeamsJSON(contest, mapper.readValue(json, CLICSTeam[].class), site, log);
+        } catch (Exception e) {
+            log.log(Log.WARNING, "could not deserialize team string", e);
+        }        
+        return(newaccounts);
+     }
+   
+    /**
+     * Converts CLICS teams into a PC2 Account array.
+     * 
+     * @param contest The contest
+     * @param teams array of CLICS teams
+     * @param site The site to create accounts on
+     * @param log For errors
+     * @return an Account array of teams converted from the CLICS teams or null if error
+     */
+    private static Account [] createTeamsFromTeamsJSON(IInternalContest contest, CLICSTeam [] teams, int site, Log log) {
+        
+        Account [] newaccounts = null;
+        ArrayList<Account> accounts = new ArrayList<Account>();
+        Account account;
+        JSONTool jsontool = new JSONTool(contest, null);
+        PermissionList teamPermissionList = new PermissionGroup().getPermissionList (ClientType.Type.TEAM);
+        boolean error = false;
+        
+        // convert each team to an account
+        for(CLICSTeam team: teams) {
+            int teamnum;
+            try {
+                if(StringUtilities.isEmpty(team.label)) {
+                    teamnum = Integer.parseInt(team.id);
+                } else {
+                    teamnum = Integer.parseInt(team.label);
+                }
+            } catch(Exception e) {
+                // Some sort of conversion error - log it and abort
+                log.log(Log.SEVERE, "unable to get team number from label or id", e);
+                error = true;
+                break;
+            }
+
+            ClientId clientId = new ClientId(site, Type.TEAM, teamnum);
+            // create barebones account
+            account = new Account(clientId, clientId.getName(), site);
+            account.clearListAndLoadPermissions(teamPermissionList);
+            account.setLabel(team.label);
+            account.setExternalId(team.icpc_id);
+            if(!StringUtilities.isEmpty(team.display_name)) {
+                account.setDisplayName(team.display_name);
+            }
+            if(!StringUtilities.isEmpty(team.name)) {
+                account.setTeamName(team.name);
+            }
+            // now fill in any other fields we can
+            if(team.group_ids != null && team.group_ids.length > 0) {
+                Group group = jsontool.getGroupFromNumber(team.group_ids[0]);
+                if(group == null) {
+                    log.log(Log.SEVERE, "No group has been defined with GroupId=" + team.group_ids[0]);
+                    error = true;
+                    break;
+                }
+                account.setGroupId(group.getElementId());
+                //TODO fix this when PC2 supports multiple groups per account
+                if(team.group_ids.length > 1) {
+                    log.log(Log.INFO, account.getDisplayName() + " has " + team.group_ids.length + " groups assigned - only using first one");
+                }
+            }
+            if(team.hidden) {
+                account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+            }
+            // TODO Organization!
+            accounts.add(account);
+        }
+        // if it all worked out, then create the array of accounts to be returned
+        if(!error) {
+            newaccounts = accounts.toArray(new Account[0]);
+        }
+        return(newaccounts);
+    }
 }
