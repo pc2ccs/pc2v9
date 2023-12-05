@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -108,15 +109,17 @@ public class CLICSTeam {
      * @param contest the contest (needed for groups)
      * @param jsonfile json file to deserialize
      * @param site the site to create the accounts for
+     * @param institutionsMap hashmap mapping organization id to organization fields (to be removed once organizations
+     *     are part of the contest model like groups). May be null if not interested in organizations.
      * @return array of accounts to add, or null on error
      */
-    public static Account [] fromJSON(IInternalContest contest, File jsonfile, int site) {
+    public static Account [] fromJSON(IInternalContest contest, File jsonfile, int site, HashMap<String,String[]> institutionsMap) {
         Account [] newaccounts = null;
         Log log = StaticLog.getLog();
         
         try {
             ObjectMapper mapper = new ObjectMapper();
-            newaccounts = createTeamsFromTeamsJSON(contest, mapper.readValue(jsonfile, CLICSTeam[].class), site, log);
+            newaccounts = createTeamsFromTeamsJSON(contest, mapper.readValue(jsonfile, CLICSTeam[].class), site, institutionsMap, log);
         } catch (Exception e) {
             log.log(Log.WARNING, "could not deserialize team file " + jsonfile, e);
         }        
@@ -129,15 +132,17 @@ public class CLICSTeam {
      * @param contest the contest (needed for groups)
      * @param json json to deserialize
      * @param site the site to create the accounts for
+     * @param institutionsMap hashmap mapping organization id to organization fields (to be removed once organizations
+     *     are part of the contest model like groups).  May be null if not interested in organizations.
      * @return array of accounts to add, or null on error
      */
-    public static Account [] fromJSON(IInternalContest contest, String json, int site) {
+    public static Account [] fromJSON(IInternalContest contest, String json, int site, HashMap<String,String[]> institutionsMap) {
         Account [] newaccounts = null;
         Log log = StaticLog.getLog();
         
         try {
             ObjectMapper mapper = new ObjectMapper();
-            newaccounts = createTeamsFromTeamsJSON(contest, mapper.readValue(json, CLICSTeam[].class), site, log);
+            newaccounts = createTeamsFromTeamsJSON(contest, mapper.readValue(json, CLICSTeam[].class), site, institutionsMap, log);
         } catch (Exception e) {
             log.log(Log.WARNING, "could not deserialize team string", e);
         }        
@@ -153,7 +158,7 @@ public class CLICSTeam {
      * @param log For errors
      * @return an Account array of teams converted from the CLICS teams or null if error
      */
-    private static Account [] createTeamsFromTeamsJSON(IInternalContest contest, CLICSTeam [] teams, int site, Log log) {
+    private static Account [] createTeamsFromTeamsJSON(IInternalContest contest, CLICSTeam [] teams, int site, HashMap<String,String[]> institutionsMap, Log log) {
         
         Account [] newaccounts = null;
         ArrayList<Account> accounts = new ArrayList<Account>();
@@ -207,7 +212,18 @@ public class CLICSTeam {
             if(team.hidden) {
                 account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
             }
-            // TODO Organization!
+            // TODO Fix this when organizations are done correctly and built into the contest model
+            if(!StringUtilities.isEmpty(team.organization_id)) {
+                if(institutionsMap != null && institutionsMap.containsKey(team.organization_id)) {
+                    // lookup institution info [0]=id, [1]=formal name, [2] = short name
+                    String [] orgInfo = institutionsMap.get(team.organization_id);
+                    if(orgInfo != null && orgInfo.length >= 3) {                    
+                        account.setInstitutionCode(orgInfo[0]);
+                        account.setInstitutionName(orgInfo[1]);
+                        account.setInstitutionShortName(orgInfo[2]);
+                    }
+                }
+            }
             accounts.add(account);
         }
         // if it all worked out, then create the array of accounts to be returned

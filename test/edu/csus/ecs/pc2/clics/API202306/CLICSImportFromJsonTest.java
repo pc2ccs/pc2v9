@@ -53,19 +53,25 @@ public class CLICSImportFromJsonTest extends AbstractTestCase {
         IInternalContest contest = sample.createContest(1, 1, NUM_EXPECTED_TEAMS, 1, true);
         String teamsJson = AbstractTestCase.DEFAULT_PC2_TEST_DIRECTORY + File.separator + this.getClass().getSimpleName() + File.separator + TEAMS_JSON_FILE;
         String groupsJson = AbstractTestCase.DEFAULT_PC2_TEST_DIRECTORY + File.separator + this.getClass().getSimpleName() + File.separator + GROUPS_JSON_FILE;
+        String orgsJson =  AbstractTestCase.DEFAULT_PC2_TEST_DIRECTORY + File.separator + this.getClass().getSimpleName() + File.separator + ORGANIZATIONS_JSON_FILE;
         sample.createController(contest, true, false); // creates StaticLog instance
         
         Group [] groups = CLICSGroup.fromJSON(contest, new File(groupsJson), 1);
         assertNotNull("No groups were created", groups);
         contest.addGroups(groups);
         
+        // get organizations hashmap from a organizations.json type file
+        HashMap<String, String[]> orgsMap = CLICSOrganization.fromJSON(new File(orgsJson));
+        assertNotNull("No organizations were created from file " + orgsJson, orgsMap);
+        assertEquals("Expected new organizations", NUM_EXPECTED_ORGANIZATIONS, orgsMap.size());
+        
         // check creating accounts from a teams.json type file
-        Account [] accounts = CLICSTeam.fromJSON(contest, new File(teamsJson), 1);
+        Account [] accounts = CLICSTeam.fromJSON(contest, new File(teamsJson), 1, orgsMap);
         assertNotNull("No accounts were created from " + teamsJson, accounts);
         assertEquals("Expected new accounts", NUM_EXPECTED_TEAMS, accounts.length);
         
         // now try reading teams from a string
-        accounts = CLICSTeam.fromJSON(contest, String.join("",  Utilities.loadFile(teamsJson)), 1);
+        accounts = CLICSTeam.fromJSON(contest, String.join("",  Utilities.loadFile(teamsJson)), 1, orgsMap);
         assertNotNull("No accounts were created from JSON string", accounts);
         assertEquals("Expected new accounts", NUM_EXPECTED_TEAMS, accounts.length);
         
