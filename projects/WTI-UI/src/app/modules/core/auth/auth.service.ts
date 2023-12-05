@@ -4,12 +4,13 @@ import { LoginCredentials } from '../models/login-credentials';
 import { Router } from '@angular/router';
 import { ITeamsService } from '../abstract-services/i-teams.service';
 import { TeamsLoginResponse } from '../models/teams-login-response';
+import { getCurrentPage } from 'src/app/app.component';
 
 @Injectable()
 export class AuthService {
   private _token: string;
   private _userName: string;
-  get isLoggedIn(): boolean { return !!this.token; }
+  get isLoggedIn(): boolean { return (!!this.token  ||  !!getCurrentPage()) ; }
   private _defaultRoute = '/runs';
   get defaultRoute(): string { return this._defaultRoute; }
   redirectUrl: string;
