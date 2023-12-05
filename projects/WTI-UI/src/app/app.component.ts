@@ -13,7 +13,9 @@ import { Router } from '@angular/router';
 export class AppComponent implements OnInit {
   configLoaded = false;
 
-  constructor(private _httpClient: HttpClient, public router: Router) { }
+  constructor(private _httpClient: HttpClient, public router: Router) { 
+  	this.router.events.subscribe(console.log);
+  }
 
   ngOnInit(): void {
   
