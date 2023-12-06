@@ -522,7 +522,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
         List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
         
         List<CLICSAward> list = new ArrayList<CLICSAward>();
-        CLICSAwardUtilities.addMedals(contest, list);
+        CLICSAwardUtilities.addMedals(contest, list, false);
         
         assertEquals("Awards expected ", 9, awards.size());
 

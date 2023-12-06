@@ -79,9 +79,31 @@ public class ScoreboardUtilites {
         return contestStandings;
     }
 
+    /**
+     * Creates the XML scoreboard for admins (does not obey freeze time)
+     * 
+     * @param contest The contest
+     * @return unfrozen xml scoreboard
+     * @throws IllegalContestState
+     */
     public static String createScoreboardXML(IInternalContest contest) throws IllegalContestState {
 
+        return(createScoreboardXML(contest, false));
+    }
+
+    /**
+     * Creates the XML scoreboard, optionally obeying the freeze time
+     * 
+     * @param contest The contest
+     * @param obeyFreeze if true, obey freeze time from properties
+     * @return The XML scoreboard
+     * @throws IllegalContestState
+     */
+    public static String createScoreboardXML(IInternalContest contest, boolean obeyFreeze) throws IllegalContestState {
+
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
+        scoringAlgorithm.setObeyFreeze(obeyFreeze);
+        
         Properties properties = getScoringProperties(contest);
         String xml = scoringAlgorithm.getStandings(contest, properties, StaticLog.getLog());
         return xml;
@@ -92,6 +114,11 @@ public class ScoreboardUtilites {
         return createContestStandings(xmlString);
     }
     
+    public static ContestStandings createContestStandings(IInternalContest contest, boolean obeyFreeze) throws JAXBException, IllegalContestState, JsonParseException, JsonMappingException, IOException {
+        String xmlString = ScoreboardUtilites.createScoreboardXML(contest, obeyFreeze);
+        return createContestStandings(xmlString);
+    }
+   
     
     public static List <StandingsRecord> createStandingsRecords (String jsonString, String source) throws JsonProcessingException, IOException{
         List<StandingsRecord> list = new ArrayList<StandingsRecord>();
