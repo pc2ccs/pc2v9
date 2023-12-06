@@ -112,9 +112,7 @@ public class CLICSOrganization {
     /**
      * Create Organization (institution) map from a json string
      * 
-     * @param contest the contest
      * @param json string to deserialize
-     * @param site the site to create the groups for
      * @return Hashmap that maps institution id to an array[3] of Strings: id/code,formal name,name or null on error
      */
     public static HashMap<String, String[]> fromJSON(String json) {
