@@ -32,6 +32,8 @@ public class CLICSContestAccess {
     public static final String API_CAPABILITY_PROXY_CLAR = "proxy_clar";
     public static final String API_CAPABILITY_ADMIN_SUBMIT = "admin_submit";
     public static final String API_CAPABILITY_ADMIN_CLAR = "admin_clar";
+    // tentative - not official, but mentioned in the spec
+    public static final String API_CAPABILITY_AWARDS_UPDATE = "awards_update";
 
     public static final String ENDPOINT_ACCESS_METHOD = "getEndpointProperties";
     
@@ -81,6 +83,9 @@ public class CLICSContestAccess {
         if(ClarificationService.isAdminSubmitClarificationAllowed(sc)) {
             cap.add(API_CAPABILITY_ADMIN_CLAR);
         }
+        if(AwardService.isAwardsUpdateAllowed(sc)) {
+            cap.add(API_CAPABILITY_AWARDS_UPDATE);
+        }
         capabilities = cap.toArray(new String[0]);
         
         /*
@@ -89,7 +94,7 @@ public class CLICSContestAccess {
          */
         String [] serviceNames = { "Contest", "JudgementType", "Language", "Problem", "Group", "Organization",
                 "Team", "Person", "Account", "State", "Submission", "Judgement", "Run", "Clarification",
-                "Scoreboard", "Award", "Commentary"
+                "Scoreboard", "EventFeed", "Award", "Commentary"
         };
         
         ArrayList<CLICSEndpoint> epList = new ArrayList<CLICSEndpoint>();
