@@ -512,12 +512,10 @@ public class ContestService implements Feature {
             jsonDataMap = mapper.readValue(jsonRequestString, mapType);
         } catch (JsonMappingException e) {
             // error parsing JSON input
-            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": parseJSONIntoMap(): JsonMappingException parsing JSON input '" + jsonRequestString + "'");
-            e.printStackTrace();
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": parseJSONIntoMap(): JsonMappingException parsing JSON input '" + jsonRequestString + "'", e);
             return null;
         } catch (IOException e) {
-            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": parseJSONIntoMap(): IOException parsing JSON input '" + jsonRequestString + "'");
-            e.printStackTrace();
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": parseJSONIntoMap(): IOException parsing JSON input '" + jsonRequestString + "'", e);
             return null;
         }
 
