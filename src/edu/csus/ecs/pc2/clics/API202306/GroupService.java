@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * WebService to handle languages endpoint
+ * WebService to handle groups endpoint
  * @author John Buck
  *
  */
@@ -45,7 +45,7 @@ public class GroupService implements Feature {
 
     /**
      * This method returns a representation of the current contest groups in JSON format. 
-     * The response is a JSON array with one language description per array element, complying with 2023-06
+     * The response is a JSON array with one group description per array element, complying with 2023-06
      * 
      * @param contestId The contest id
      * @return a {@link Response} object containing the groups in JSON form
@@ -85,7 +85,7 @@ public class GroupService implements Feature {
      * @return a {@link Response} object containing the groups in JSON form
      */
     @GET
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{groupId}/")
     public Response getGroup(@PathParam("contestId") String contestId, @PathParam("groupId") String groupId) {
 
