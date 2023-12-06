@@ -1,10 +1,16 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -17,9 +23,13 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapType;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -37,7 +47,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 @Provider
 @Singleton
 public class ClarificationService implements Feature {
-
+   
     private IInternalContest model;
 
     private IInternalController controller;
@@ -154,6 +164,89 @@ public class ClarificationService implements Feature {
     }
 
     /**
+     * Post a new clarification
+     * 
+     * @param servletRequest details of request
+     * @param sc requesting user's authorization info
+     * @param contestId The contest
+     * @param jsonInputString For non-admin, must not include id, to_team_id, time or contest_time.  For admin, must not include id.
+     * @return json for the clarification, including the (new) id
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addNewClarification(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
+        
+        // only admin, team, or judge can create a clarification.
+        if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM)) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        
+        // check for empty request
+        if (jsonInputString == null || jsonInputString.length() == 0) {
+            // return HTTP 400 response code per CLICS spec
+            return Response.status(Status.BAD_REQUEST).entity("empty json").build();
+        }
+
+        CLICSClarification clar = CLICSClarification.fromJSON(jsonInputString);
+        if(clar == null) {
+            // return HTTP 400 response code per CLICS spec
+            return Response.status(Status.BAD_REQUEST).entity("invalid json supplied").build();
+        }
+        if(clar.getId() != null) {
+            // return HTTP 400 response code per CLICS spec
+            return Response.status(Status.BAD_REQUEST).entity("may not include id property").build();
+        }
+        if(StringUtilities.isEmpty(clar.getText())) {
+            return Response.status(Status.BAD_REQUEST).entity("text must not be empty").build();
+        }
+        
+        if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && (clar.getTo_team_id() != null || clar.getTime() != null || clar.getContest_time() != null)) {
+            return Response.status(Status.BAD_REQUEST).entity("may not include one or more properties").build();
+        }
+        
+        return Response.status(Response.Status.NOT_IMPLEMENTED).build();
+    }
+    
+    /**
+     * Put updates an existing clarification (presumably an answer)
+     * 
+     * @param servletRequest details of request
+     * @param sc requesting user's authorization info
+     * @param contestId The contest
+     * @param jsonInputString citation and team_ids json for the new award
+     * @return json for the award, including the id
+     */
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateClarification(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
+        
+        // only admin or judge can update a clarification.
+        if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        
+        // check for empty request
+        if (jsonInputString == null || jsonInputString.length() == 0) {
+            // return HTTP 400 response code per CLICS spec
+            return Response.status(Status.BAD_REQUEST).entity("empty json").build();
+        }
+
+        CLICSClarification clar = CLICSClarification.fromJSON(jsonInputString);
+        if(clar == null) {
+            // return HTTP 400 response code per CLICS spec
+            return Response.status(Status.BAD_REQUEST).entity("invalid json supplied").build();
+        }
+        
+        if(StringUtilities.isEmpty(clar.getText())) {
+            return Response.status(Status.BAD_REQUEST).entity("text must not be empty").build();
+        }
+        
+        return Response.status(Response.Status.NOT_IMPLEMENTED).build();
+    }
+
+    /**
      * Check if the supplied clarification is from/to the supplied user
      * 
      * @param clarification the clarification to check
@@ -203,6 +296,35 @@ public class ClarificationService implements Feature {
      */
     public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
         return(new CLICSEndpoint("clarifications", JSONUtilities.getJsonProperties(CLICSClarification.class)));
+    }
+
+    /**
+     * Converts the input string, assumed to be a JSON string, into a {@link Map<String,String>} of JSON key-value pairs.
+     * 
+     * @param contestId contest identifier
+     * @param jsonRequestString
+     *            a JSON string specifying a starttime request in CLICS format
+     * @return a Map of the JSON string key-to-value pairs as Strings, or null if the input JSON does not parse as a Map(String->String).
+     */
+    private Map<String, String> parseJSONIntoMap(String contestId, String jsonRequestString) {
+
+        // use Jackson's ObjectMapper to construct a Map of Strings-to-Strings from the JSON input
+        final ObjectMapper mapper = new ObjectMapper();
+        final MapType mapType = mapper.getTypeFactory().constructMapType(Map.class, String.class, String.class);
+        final Map<String, String> jsonDataMap;
+
+        try {
+            jsonDataMap = mapper.readValue(jsonRequestString, mapType);
+        } catch (JsonMappingException e) {
+            // error parsing JSON input
+            controller.getLog().log(Log.WARNING, contestId + ": parseJSONIntoMap(): JsonMappingException parsing JSON input '" + jsonRequestString + "'", e);
+            return null;
+        } catch (IOException e) {
+            controller.getLog().log(Log.WARNING, contestId + ": parseJSONIntoMap(): IOException parsing JSON input '" + jsonRequestString + "'", e);
+            return null;
+        }
+
+        return jsonDataMap;
     }
     
     @Override
