@@ -40,7 +40,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -626,9 +626,9 @@ public class ContestController extends MainController {
 							String userLogin= userInformation.getMyClient().getLoginName();
 							Integer clientNumber = StringUtilities.getTeamNumber(userLogin);
 							ClientId clientId = new ClientId(internalContest.getSiteNumber(), Type.TEAM, clientNumber);
-							runs = ScoreboardUtilites.getRunsForUserDivision(clientId, internalContest);
+							runs = ScoreboardUtilities.getRunsForUserDivision(clientId, internalContest);
 							
-							String teamDivisionStr = ScoreboardUtilites.getDivision(internalContest, clientId);
+							String teamDivisionStr = ScoreboardUtilities.getDivision(internalContest, clientId);
 							xlog(logger, "Runs for "+key+" useDivisionFilter true, total runs  = "+runs.length+" for div "+teamDivisionStr);
 							Integer teamDivision = Integer.parseInt(teamDivisionStr);
 							
