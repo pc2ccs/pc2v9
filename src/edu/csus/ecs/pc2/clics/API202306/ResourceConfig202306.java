@@ -77,6 +77,8 @@ public class ResourceConfig202306 implements ICLICSResourceConfig {
             showStartingMessage("event-feed web service");
             resConfig.register(new StateService(getContest(), getController()));
             showStartingMessage("state web service");
+            resConfig.register(new AwardService(getContest(), getController()));
+            showStartingMessage("awards web service");
             resConfig.register(new VersionService(getContest(), getController()));
             showMessage("Starting / endpoint for version web service");
 

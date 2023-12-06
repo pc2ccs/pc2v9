@@ -76,17 +76,33 @@ public class CLICSAwardUtilities {
 // "citation": "Contest winner",     
 
     /**
-     * Return a list of CLICS Awards for a contest.
+     * Return a list of CLICS Awards for a contest for an administrator only (used for comparing results)
      * 
      * @param contest
-     * @return
+     * @return a List of CLICSAward objects
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IllegalContestState
+     * @throws IOException
+     */
+    public static List<CLICSAward> createAwardsList(IInternalContest contest) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
+        return(createAwardsList(contest, false));
+    }
+    
+    /**
+     * Return a list of CLICS Awards for a contest, obeying the freeze time
+     * 
+     * @param contest the contest
+     * @param obeyFreeze when calculating scoreboard for awards, obey freeze time
+     * @return a List of CLICSAward objects 
      * @throws IOException
      * @throws IllegalContestState
      * @throws JAXBException
      * @throws JsonMappingException
      * @throws JsonParseException
      */
-    public static List<CLICSAward> createAwardsList(IInternalContest contest) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
+    public static List<CLICSAward> createAwardsList(IInternalContest contest, boolean obeyFreeze) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
         List<CLICSAward> list = new ArrayList<CLICSAward>();
 
         Run[] runs = contest.getRuns();
@@ -95,18 +111,18 @@ public class CLICSAwardUtilities {
             return list;
         }
 
-        addWinner(contest, list);
+        addWinner(contest, list, obeyFreeze);
 
-        addFirstToSolve(contest, runs, list);
+        addFirstToSolve(contest, runs, list, obeyFreeze);
 
-        addGroupWinners(contest, runs, list);
+        addGroupWinners(contest, runs, list, obeyFreeze);
 
-        addMedals(contest, list);
+        addMedals(contest, list, obeyFreeze);
 
         return list;
     }
 
-    public static void addGroupWinners(IInternalContest contest, Run[] runs, List<CLICSAward> list) {
+    public static void addGroupWinners(IInternalContest contest, Run[] runs, List<CLICSAward> list, boolean obeyFreeze) {
 
         Arrays.sort(runs, new RunComparatorByElapsedRunIdSite());
 
@@ -124,7 +140,7 @@ public class CLICSAwardUtilities {
         Map<Group, ClientId> groupWinners = new HashMap<Group, ClientId>();
         
         try {
-            ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
+            ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest, obeyFreeze);
 
             List<TeamStanding> teamStands = contestStandings.getTeamStandings();
             for (TeamStanding teamStanding : teamStands) {
@@ -209,9 +225,9 @@ public class CLICSAwardUtilities {
         return null;
     }
 
-    public static void addMedals(IInternalContest contest, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
+    public static void addMedals(IInternalContest contest, List<CLICSAward> list, boolean obeyFreeze) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
 
-        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
+        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest, obeyFreeze);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
 
 //        List<TeamScoreRow> rows = model.getRows();
@@ -311,9 +327,9 @@ public class CLICSAwardUtilities {
      * @throws IllegalContestState
      * @throws IOException
      */
-    public static void addWinner(IInternalContest contest, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
+    public static void addWinner(IInternalContest contest, List<CLICSAward> list, boolean obeyFreeze) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
 
-        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
+        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest, obeyFreeze);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
 
         String winnerId = null;
@@ -353,7 +369,7 @@ public class CLICSAwardUtilities {
      * @throws IllegalContestState
      * @throws IOException
      */
-    private static void addFirstToSolve(IInternalContest contest, Run[] runs, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
+    private static void addFirstToSolve(IInternalContest contest, Run[] runs, List<CLICSAward> list, boolean obeyFreeze) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
 
         Arrays.sort(runs, new RunComparatorByElapsedRunIdSite());
         Map<ElementId, ClientId> firstToSolveTeamId = new HashMap<ElementId, ClientId>();
