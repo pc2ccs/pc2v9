@@ -646,7 +646,7 @@ public class SubmitRunPane extends JPanePlugin {
             pickFileButton.setEnabled(true);
             pickFileButton.setMnemonic(java.awt.event.KeyEvent.VK_L);
             pickFileButton.setToolTipText("Select main file");
-            pickFileButton.setText("Select");
+            pickFileButton.setText("Select...");
             pickFileButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     selectMainFile();
