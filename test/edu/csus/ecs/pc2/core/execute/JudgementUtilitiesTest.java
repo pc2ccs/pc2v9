@@ -394,7 +394,7 @@ public class JudgementUtilitiesTest extends AbstractTestCase {
     }
 
     /**
-     * Test JudgementUtilites.getLastTestCaseArray.
+     * Test JudgementUtilities.getLastTestCaseArray.
      *
      * Added two test cases (first all judged AC, second all judged WA).
      * Test that getLastTestCaseArray returns the last ("WA") RunTestCases
