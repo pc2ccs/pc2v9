@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
+import edu.csus.ecs.pc2.core.execute.JudgementUtilities;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.Clarification;
@@ -404,7 +404,7 @@ public class EventFeedStreamer extends JSONUtilities implements Runnable, UIPlug
                         String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), EventFeedOperation.UPDATE, jsonTool.convertJudgementToJSON(run).toString());
                         sendJSON(json + NL);
                         // Now send out the runcases (test cases).  Get most recent ones for this run.
-                        RunTestCase [] testCases = JudgementUtilites.getLastTestCaseArray(contest, run);
+                        RunTestCase [] testCases = JudgementUtilities.getLastTestCaseArray(contest, run);
                         for (int j = 0; j < testCases.length; j++) {
                             json = getJSONEvent(RUN_KEY, getNextEventId(), EventFeedOperation.CREATE, jsonTool.convertToJSON(testCases, j).toString());
                             sendJSON(json + NL);

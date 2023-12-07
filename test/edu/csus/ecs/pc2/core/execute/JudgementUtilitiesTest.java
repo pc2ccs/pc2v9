@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
  * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-public class JudgementUtilitesTest extends AbstractTestCase {
+public class JudgementUtilitiesTest extends AbstractTestCase {
     
     private SampleContest sample = new SampleContest();
 //    
@@ -49,7 +49,7 @@ public class JudgementUtilitesTest extends AbstractTestCase {
          * Test Compilation error
          */
         executionData.setCompileSuccess(false);
-        JudgementRecord judgementRecord = JudgementUtilites.createJudgementRecord(contest, run, executionData, "Works for me");
+        JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, "Works for me");
         
         Judgement judgmeent = contest.getJudgement(judgementRecord.getJudgementId());
         assertEquals(Judgement.ACRONYM_COMPILATION_ERROR, judgmeent.getAcronym());
@@ -77,7 +77,7 @@ public class JudgementUtilitesTest extends AbstractTestCase {
         
         executionData.setExecutionException(new Exception("unit test M1"));
         
-        JudgementRecord judgementRecord = JudgementUtilites.createJudgementRecord(contest, run, executionData, "Works for me");
+        JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, "Works for me");
         
         Judgement judgmeent = contest.getJudgement(judgementRecord.getJudgementId());
         
@@ -112,7 +112,7 @@ public class JudgementUtilitesTest extends AbstractTestCase {
         String expected = judgement.getDisplayName();
         executionData.setValidationResults(expected);
         
-        JudgementRecord judgementRecord = JudgementUtilites.createJudgementRecord(contest, run, executionData, executionData.getValidationResults());
+        JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, executionData.getValidationResults());
         Judgement judgmeent = contest.getJudgement(judgementRecord.getJudgementId());
         assertEquals("WA2", judgmeent.getAcronym());
         
@@ -145,7 +145,7 @@ public class JudgementUtilitesTest extends AbstractTestCase {
         String expected = judgement.getDisplayName();
         executionData.setValidationResults(expected);
         
-        JudgementRecord judgementRecord = JudgementUtilites.createJudgementRecord(contest, run, executionData, "It's alright");
+        JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, "It's alright");
         
         Judgement judgmeent = contest.getJudgement(judgementRecord.getJudgementId());
         assertEquals(getDefaultJudgementAcronym(contest), judgmeent.getAcronym());
@@ -176,7 +176,7 @@ public class JudgementUtilitesTest extends AbstractTestCase {
         executionData.setExecuteSucess(false);;
         executionData.setValidationSuccess(false);
         
-        JudgementRecord judgementRecord = JudgementUtilites.createJudgementRecord(contest, run, executionData, "Works for me");
+        JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, "Works for me");
         
         Judgement judgmeent = contest.getJudgement(judgementRecord.getJudgementId());
         assertEquals(getDefaultJudgementAcronym(contest), judgmeent.getAcronym());
@@ -209,7 +209,7 @@ public class JudgementUtilitesTest extends AbstractTestCase {
         Judgement judgement22 = contest.getJudgements()[0];
         executionData.setValidationResults("accepted");
         
-        JudgementRecord judgementRecord = JudgementUtilites.createJudgementRecord(contest, run, executionData, "accepted");
+        JudgementRecord judgementRecord = JudgementUtilities.createJudgementRecord(contest, run, executionData, "accepted");
         
         Judgement newJudgment = contest.getJudgement(judgementRecord.getJudgementId());
         
@@ -261,7 +261,7 @@ public class JudgementUtilitesTest extends AbstractTestCase {
         // Add all yes, except a No at noTestCaseNumber
         addTestCases(run, problem, noTestCaseNumber, noJudgement, sample.getYesJudgement(contest));
 
-        List<Judgement> jList = JudgementUtilites.getLastTestCaseJudgementList(contest, run);
+        List<Judgement> jList = JudgementUtilities.getLastTestCaseJudgementList(contest, run);
         assertNotNull (jList);
         
         int tcn = problem.getNumberTestCases();
@@ -339,7 +339,7 @@ public class JudgementUtilitesTest extends AbstractTestCase {
 
         assertEquals("judgement count", 9, judgements.length);
 
-        List<Judgement> jList = JudgementUtilites.getSingleListofJudgements(contest);
+        List<Judgement> jList = JudgementUtilities.getSingleListofJudgements(contest);
         assertEquals("judgement count", 9, jList.size());
 
         assertEquals("judgement site number", 3, jList.get(0).getSiteNumber());
@@ -371,7 +371,7 @@ public class JudgementUtilitesTest extends AbstractTestCase {
         judgements = contest.getJudgements();
         assertEquals("judgement count", 18, judgements.length);
 
-        List<Judgement> jList = JudgementUtilites.getSingleListofJudgements(contest);
+        List<Judgement> jList = JudgementUtilities.getSingleListofJudgements(contest);
         assertEquals("judgement count", 9, jList.size());
 
         assertEquals("judgement site number", 1, jList.get(0).getSiteNumber());
@@ -419,13 +419,13 @@ public class JudgementUtilitesTest extends AbstractTestCase {
         assertNotNull("AC Judgement", acJudgement);
         Judgement waJudgement = getJudgement(contest, Judgement.ACRONYM_WRONG_ANSWER);
         assertNotNull("WA Judgement", waJudgement);
-        RunTestCase[] recs = JudgementUtilites.getLastTestCaseArray(contest, run);
+        RunTestCase[] recs = JudgementUtilities.getLastTestCaseArray(contest, run);
         assertEquals("Expected zero test cases ", 0, recs.length);
         // Add firstset of test cases - all AC
         for (int testCaseNum = 1; testCaseNum <= problem.getNumberTestCases(); testCaseNum++) {
             addRunTestCase(contest, run, testCaseNum, acJudgement, judges[0].getClientId());
         }
-        recs = JudgementUtilites.getLastTestCaseArray(contest, run);
+        recs = JudgementUtilities.getLastTestCaseArray(contest, run);
         
         assertEquals("Expected test cases ", 10, recs.length);
         // Add second set of test cases - all WA
@@ -433,7 +433,7 @@ public class JudgementUtilitesTest extends AbstractTestCase {
             addRunTestCase(contest, run, testCaseNum, waJudgement, judges[0].getClientId());
         }
         assertEquals("Expected total test cases ", 20, run.getRunTestCases().length);
-        recs = JudgementUtilites.getLastTestCaseArray(contest, run);
+        recs = JudgementUtilities.getLastTestCaseArray(contest, run);
         
         assertEquals("Expected test cases ", 10, recs.length);
         
