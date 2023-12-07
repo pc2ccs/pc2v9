@@ -56,7 +56,7 @@ public class FileComparisonUtilitiesTest extends AbstractTestCase {
 
         assertEquals("results diff count ", 0, resultsCompare.getNumberDifferences());
         assertEquals("awardsdiff count ", 0, awardsFileCompare.getNumberDifferences());
-        assertEquals("scoreboard diff count ", 51, scoreboardJsonCompare.getNumberDifferences());
+        assertEquals("scoreboard diff count ", 0, scoreboardJsonCompare.getNumberDifferences());
 
         assertEquals("results rows count ", 51, resultsCompare.getNumberRows());
         assertEquals("awardsdiff rows count ", 19, awardsFileCompare.getNumberRows());
