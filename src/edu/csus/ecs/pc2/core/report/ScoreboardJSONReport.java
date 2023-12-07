@@ -14,7 +14,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 
 /**
  * Print CLICS API Scoreboard JSON
@@ -97,7 +97,7 @@ public class ScoreboardJSONReport implements IReport {
 
     public String[] createReport(Filter inFilter) {
         try {
-            ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+            ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
             CLICSScoreboard clicsScoreboard = new CLICSScoreboard(contestStandings);
             String json = clicsScoreboard.toString();
             String[] sa = { json };

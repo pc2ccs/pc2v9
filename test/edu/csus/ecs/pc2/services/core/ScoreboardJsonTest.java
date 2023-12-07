@@ -17,7 +17,7 @@ import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
 import edu.csus.ecs.pc2.core.standings.GroupList;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.standings.ScoringGroup;
 import edu.csus.ecs.pc2.core.standings.StandingsHeader;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
@@ -130,7 +130,7 @@ public class ScoreboardJsonTest extends AbstractTestCase {
          */
         String xmlFilename = "testdata/ScoreboardJsonTest/testNADC21Prac2EF/nadcPractice-event-feed.xml";
 
-        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(new File(xmlFilename));
+        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(new File(xmlFilename));
 
         assertNotNull(contestStandings);
 

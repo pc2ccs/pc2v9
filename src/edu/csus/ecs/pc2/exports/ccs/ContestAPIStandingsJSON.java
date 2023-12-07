@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
 import edu.csus.ecs.pc2.core.scoring.ProblemSummaryInfo;
 import edu.csus.ecs.pc2.core.scoring.StandingsRecord;
 import edu.csus.ecs.pc2.core.scoring.SummaryRow;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
@@ -88,7 +88,7 @@ public class ContestAPIStandingsJSON {
                 honorScoreboardFreeze = false;
             }
             
-            Run[] runs = ScoreboardUtilites.getRunsForUserDivision(contest.getClientId(), contest);
+            Run[] runs = ScoreboardUtilities.getRunsForUserDivision(contest.getClientId(), contest);
             StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null, properties, honorScoreboardFreeze, runs);
 
             for (StandingsRecord sr : standingsRecords) {

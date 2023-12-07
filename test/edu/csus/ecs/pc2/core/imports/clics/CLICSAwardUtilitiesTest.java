@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
@@ -78,7 +78,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
     public void dumpStandings(String message, IInternalContest contest) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
         
         System.out.println("dumpStandings: "+message);
-        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
 
         List<TeamStanding> teamStands = contestStandings.getTeamStandings();
         for (TeamStanding teamStanding : teamStands) {

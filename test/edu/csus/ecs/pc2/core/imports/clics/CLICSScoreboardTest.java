@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
@@ -166,7 +166,7 @@ public class CLICSScoreboardTest extends AbstractTestCase{
         assertFileExists(inputJSONFile, "Input scoreboard.json");
 //        editFile(inputJSONFile);
 
-        String jsonString = ScoreboardUtilites.loadFileContents(new File(inputJSONFile));
+        String jsonString = ScoreboardUtilities.loadFileContents(new File(inputJSONFile));
         
         assertNotNull(jsonString);
         // TODO TODO JUNIT FIX - why JsonMappingException
