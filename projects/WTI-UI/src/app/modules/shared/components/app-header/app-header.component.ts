@@ -7,7 +7,9 @@ import { AuthService } from 'src/app/modules/core/auth/auth.service';
     styleUrls: ['./app-header.component.scss']
 })
 export class AppHeaderComponent {
+
   get showLinks(): boolean { return this._authService.isLoggedIn; }
+  get showTeamId(): boolean { return this._authService.isLoggedIn; }
 
   constructor(private _authService: AuthService) { }
 }
