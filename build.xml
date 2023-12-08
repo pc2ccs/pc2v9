@@ -336,6 +336,7 @@ TODO consider switching back to this at 9.8.0/9.9build
 		<mkdir dir="${testresults.xml.dir}"/>
 		<junit errorProperty="test.failed" failureProperty="test.failed" fork="yes">
                         <jvmarg value="-Djdk.crypto.KeyAgreement.legacyKDF=true"/>
+                        <env key="LANG" value="en_US.UTF-8"/>
 			<classpath refid="project.classpath"/>
 			<formatter type="brief" usefile="false"/>
 			<formatter type="xml"/>
