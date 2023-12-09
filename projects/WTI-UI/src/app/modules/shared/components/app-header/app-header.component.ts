@@ -11,7 +11,7 @@ export class AppHeaderComponent {
   //Return a boolean indicating whether or not to show nav-bar links in the header
   get showLinks(): boolean { return this._authService.isLoggedIn; }
   
-  //Return a boolean indicatin whether or not to show a teamId in the header
+  //Return a boolean indicating whether or not to show a teamId in the header
   get showTeamId(): boolean { return this._authService.isLoggedIn; }
   
   /* Return a string containing the "team id" -- that is, the PC2 team account number with
