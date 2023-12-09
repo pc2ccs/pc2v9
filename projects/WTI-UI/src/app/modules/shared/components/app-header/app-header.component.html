@@ -5,7 +5,7 @@
         <img src='/assets/icpc-banner.png' alt='ICPC Programming Contest Logo'>
     </div>
     <div class='teamid-container' *ngIf='showTeamId'>
-    	<P> TEAM: {{ userName }} </P>
+    	<P>TEAM {{teamId}}</P>
     </div>
     <nav *ngIf='showLinks'>
         <a routerLink='/runs' routerLinkActive='active'>Runs</a>
