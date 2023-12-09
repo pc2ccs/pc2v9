@@ -76,7 +76,6 @@ public class JSerializFilePicker extends JPanel {
     private JButton getPickFileButton() {
         if (pickFileButton == null) {
             pickFileButton = new JButton();
-            pickFileButton.setName("Select...");
             pickFileButton.setText("Select...");
             pickFileButton.setPreferredSize(new Dimension(90, 90));
             pickFileButton.addActionListener(new java.awt.event.ActionListener() {
