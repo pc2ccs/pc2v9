@@ -10,6 +10,7 @@ export class AppHeaderComponent {
 
   get showLinks(): boolean { return this._authService.isLoggedIn; }
   get showTeamId(): boolean { return this._authService.isLoggedIn; }
+  get userName(): string { return this._authService.username; }
 
   constructor(private _authService: AuthService) { }
 }
