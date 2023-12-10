@@ -372,6 +372,8 @@ public class CustomJavaPC2InterfaceValidatorTest extends AbstractTestCase {
     private Language createLanguage(String autoFillLanguageTitle) {
 
         String[] values = LanguageAutoFill.getAutoFillValues(autoFillLanguageTitle);
+        // Make sure to use correct javac for the JVM in use.
+        SampleContest.fixJavaJDKPath(values);
         Language language = new Language(values[4]);
         // displayNameTextField.setText(values[0]);
         // compileCommandLineTextField.setText(values[1]);

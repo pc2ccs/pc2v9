@@ -176,6 +176,7 @@ public class SampleContest {
         for (String langName : languages) {
             Language language = new Language(langName);
             String[] values = LanguageAutoFill.getAutoFillValues(langName);
+            fixJavaJDKPath(values);
             if (values[0].trim().length() != 0) {
                 fillLanguage(language, values);
             } else {
@@ -2056,6 +2057,116 @@ public class SampleContest {
         }
     }
     
-
+    /**
+     * Returns the java compile command if javac[.exe] exists in the folder supplied
+     * Note that the executable may or may not have a .exe extension - we try both.
+     * 
+     * @param szPath Folder to look in
+     * @javaCmd array of 1 or 2 elements, [0] = java compiler [1] optional arguments to compiler
+     * @return null if no compiler found, otherwise full path to compiler
+     */
+    private static String findJavacExe(String path, String [] javaCmd) {
+        String [] exeSuffices = { "", ".exe" };
+        String javac = path + File.separatorChar + javaCmd[0];
+        
+        // try both without and with .exe suffix
+        for(String exeExt : exeSuffices) {
+            // Build the potentional command line
+            String javacCmdLine = javac + exeExt;
+            if(new File(javacCmdLine).canExecute()) {
+                // found what we're looking for, now add args if present
+                if(javaCmd.length > 1) {
+                    javacCmdLine = javacCmdLine + ' ' + javaCmd[1];
+                }
+                return(javacCmdLine);
+            }
+        }
+        return(null);
+    }
+    
+    /**
+     * Modifies the command line to compile a java program.  This is only necessary for JUnit tests, so we do not want
+     * to put this in LanguageAutoFill, rather, we massage the results that LanguageAutoFill returns to us
+     * which is element values[1].  We essentially look for a compiler that matches the version of the current JVM in
+     * JAVA_HOME and on the PATH.  We only consider folders that have a version string IN the folder name.
+     * The version string is that of the module being run (it's Runtime class' package)
+     * eg.  1.8.0_351 -> C:\Program Files\Java\jdk1.8.0_351
+     * This is necessary because Eclipse PREPENDS it's JDK to the PATH, making its compiler be the first choice all the time.
+     * eg. 
+     * C:/Eclipse2021-12/eclipse//plugins/org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_17.0.1.v20211116-1657/jre/bin/server;
+     *       C:/Eclipse2021-12/eclipse//plugins/org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_17.0.1.v20211116-1657/jre/bin;
+     *       C:\ProgramData\Oracle\Java\javapath;
+     *       C:\Program Files (x86)\Common Files\Oracle\Java\javapath;
+     *       C:\Program Files\Java\jdk1.8.0_351\bin;
+     *       C:\Users\john\AppData\Roaming\nvm;
+     *       C:\Program Files\nodejs;C:\Eclipse2021-12\eclipse;
+     *       ... rest of path
+     * Note the first two things on the PATH, these were added by Eclipse, so it will find "javac.exe" in one of those 2 places before
+     * it finds the one we want.
+     * 
+     * Caveat: This method presupposes that the path where the java compiler we desire contains the java version string. (eg 1.8.0_351 in
+     *    the example above)
+     * 
+     * The array of values is:
+     * 0 Title for Language
+     * 1 Compiler Command Line
+     * 2 Executable Identifier Mask
+     * 3 Execute command line
+     * 4 is the Title again????
+     * 5 isInterpreted
+     * 6 is the ID
+     *
+     * @param values language definitions values
+     */
+    public static void fixJavaJDKPath(String [] values) {
+        
+        // this only applies for Java
+        if(values[0].equalsIgnoreCase(LanguageAutoFill.JAVATITLE)) {
+            // This returns something like: 1.8.0_351
+            String javaVersion = Runtime.class.getPackage().getSpecificationVersion();
+            String javaHome = System.getenv("JAVA_HOME");
+            String systemPath = System.getenv("PATH");
+            
+            // try contingency for the package not having a specified version - it SHOULD, but apparently is not required.
+            if(javaVersion == null) {
+                javaVersion = System.getProperty("java.version");
+                if(javaVersion == null) {
+                    return;
+                }
+            }
+            // crack the java command line, the compiler will be javaCmd[0]
+            String [] javaCmd = values[1].split("\\s+", 2); 
+            String javaCmdLine = null;
+            
+            if(javaCmd.length > 0) {
+                
+                // first, try the easiest - using JAVA_HOME
+                if(javaHome != null && javaHome.indexOf(javaVersion) >= 0) {
+                    // JDK executables would be in the bin folder
+                    javaCmdLine = findJavacExe(javaHome + File.separatorChar + "bin", javaCmd);
+                }
+                // if JAVA_HOME didnt work out, and we have a PATH, try each path element
+                if(javaCmdLine == null && systemPath != null) {
+                    // Look for version in each path element, if match is found, check for java compiler
+                    for(String path : systemPath.split(File.pathSeparator, 0)) {
+                        if(path.indexOf(javaVersion) >= 0) {
+                            javaCmdLine = findJavacExe(path, javaCmd);
+                            if(javaCmdLine != null) {
+                                values[1] = javaCmdLine;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            // We COULD go through each path element now, and try to execute "javac -version" and look
+            // for a match, but it's probably not worth it at this point.
+            
+            // if we found a matching java compiler, replace the command line
+            if(javaCmdLine != null) {
+                values[1] = javaCmdLine;
+            }
+        }
+    }
     
 }
