@@ -45,7 +45,7 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
@@ -1036,7 +1036,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     }
                 }
                 if (divisionNumber != null) {
-                    String div = ScoreboardUtilites.getDivision(theContest, account.getClientId());
+                    String div = ScoreboardUtilities.getDivision(theContest, account.getClientId());
                     if (!divisionNumber.toString().trim().equals(div.trim())) {
                         /**
                          * If this account is NOT in the same division as divisionNumber then do not add StandingsRecord, skip to next account.

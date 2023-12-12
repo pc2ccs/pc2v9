@@ -35,7 +35,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.report.ExportFilesUtiltiites;
+import edu.csus.ecs.pc2.core.report.ExportFilesUtilities;
 import edu.csus.ecs.pc2.core.report.ResultsCompareReport;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
@@ -360,7 +360,7 @@ public class ResultsComparePane extends JPanePlugin {
         }
         
         try {
-             String[] filesCreated = ExportFilesUtiltiites.writeResultsFiles(getContest(), pc2ResultsDirectory);
+             String[] filesCreated = ExportFilesUtilities.writeResultsFiles(getContest(), pc2ResultsDirectory);
              
              List<String> messageLines = new ArrayList<String>();
              messageLines.add(    "Created results files");
