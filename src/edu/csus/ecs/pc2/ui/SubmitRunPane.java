@@ -481,7 +481,35 @@ public class SubmitRunPane extends JPanePlugin {
             return;
         }
         
-        if (additionalFilesMCLB.getRowCount() > 0){
+        if (additionalFilesMCLB.getRowCount() > 0) {
+
+            int l = filename.lastIndexOf('/');
+            if (l == -1) l = filename.lastIndexOf('\\');
+            String mainfilename = filename;
+            if (l > -1) mainfilename = filename.substring(l + 1);
+
+            for (int i = 0; i < additionalFilesMCLB.getRowCount(); i++) {
+                String otherfilename = (String) additionalFilesMCLB.getRow(i)[0];
+                l = otherfilename.lastIndexOf('/');
+                if (l == -1) l = otherfilename.lastIndexOf('\\');
+                if (l > -1) otherfilename = otherfilename.substring(l + 1);
+                if (otherfilename.equals(mainfilename)) {
+                    showMessage("Found multiple files with same filename");
+                    return;
+                }
+                
+                for (int j = i + 1; j < additionalFilesMCLB.getRowCount(); j++) {
+                    String otherfilename2 = (String) additionalFilesMCLB.getRow(j)[0];
+                    l = otherfilename2.lastIndexOf('/');
+                    if (l == -1) l = otherfilename2.lastIndexOf('\\');
+                    if (l > -1) otherfilename2 = otherfilename2.substring(l + 1);
+                    if (otherfilename.equals(otherfilename2)) {
+                        showMessage("Found multiple files with same filename");
+                        return;
+                    }
+                }
+            }
+
             try {
                 otherFiles = getAdditionalSerializedFiles();
             } catch (Exception e) {
