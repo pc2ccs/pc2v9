@@ -434,7 +434,7 @@ public interface IInternalController {
 
     /**
      * Submit a clarification.
-     * 
+     *
      * @param clientId to submit clarification as, eg. "team99"
      * @param problem
      * @param question
