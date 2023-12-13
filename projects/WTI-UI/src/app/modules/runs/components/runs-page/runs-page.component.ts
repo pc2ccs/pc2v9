@@ -27,7 +27,7 @@ export class RunsPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 	
-	this._appTitleService.setTitleWithTeamId("Submit Run");
+	this._appTitleService.setTitleWithTeamId("Runs");
 	
     this.buildForm();
     this.loadRuns();

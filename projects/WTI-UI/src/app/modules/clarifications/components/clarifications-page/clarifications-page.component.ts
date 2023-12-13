@@ -28,7 +28,7 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 	
-	this._appTitleService.setTitleWithTeamId("Submit Clar");
+	this._appTitleService.setTitleWithTeamId("Clarifications");
 	
     this.buildForm();
     this.loadClars();
