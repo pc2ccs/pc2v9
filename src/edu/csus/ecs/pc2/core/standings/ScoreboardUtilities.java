@@ -118,7 +118,7 @@ public class ScoreboardUtilities {
     }
 
     public static ContestStandings createContestStandings(IInternalContest contest, boolean obeyFreeze) throws JAXBException, IllegalContestState, JsonParseException, JsonMappingException, IOException {
-        String xmlString = ScoreboardUtilites.createScoreboardXML(contest, obeyFreeze);
+        String xmlString = ScoreboardUtilities.createScoreboardXML(contest, obeyFreeze);
         return createContestStandings(xmlString);
     }
 

@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
@@ -58,12 +58,12 @@ public class CLICSScoreboard {
         
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
 
-        Properties properties = ScoreboardUtilites.getScoringProperties(model);
+        Properties properties = ScoreboardUtilities.getScoringProperties(model);
 
         // legacy - standings are created as XML, and we convert that to JSON. 
         String xml = scoringAlgorithm.getStandings(model, null, division, group, properties, StaticLog.getLog());
         
-        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(xml);
+        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(xml);
         
         // This is what we want to return:
         //        {
