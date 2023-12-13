@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ChangePasswordComponent } from '../change-password/change-password.component';
 import { UiHelperService } from 'src/app/modules/core/services/ui-helper.service';
 import { environment } from 'src/environments/environment';
+import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
 
 @Component({
   templateUrl: './options-page.component.html',
@@ -15,9 +16,12 @@ export class OptionsPageComponent implements OnInit {
   set runsNotificationsEnabled(newval: boolean) { this._uiHelperService.enableRunsNotifications = newval; }
 
   constructor(private _dialogSvc: MatDialog,
-              private _uiHelperService: UiHelperService) { }
+              private _uiHelperService: UiHelperService,
+			  private _appTitleService: AppTitleService) { }
 
-  ngOnInit(): void {  }
+  ngOnInit(): void {
+	this._appTitleService.setTitleWithTeamId("Options");
+  }
 
   showWebsocketDebug(): boolean {
     return !!environment.useMock;
