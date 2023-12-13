@@ -1,10 +1,12 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,6 +102,8 @@ public class SampleContest {
             "Michael", "Mohammad", "Mohammed", "Morgan", "Muhammad", "Nathan", "Noah", "Oliver", "Oscar", "Owen", "Reece", "Reuben", "Rhys", "Riley", "Robert", "Ryan", "Sam", "Samuel", "Sebastian",
             "Stanley", "Taylor", "Theo", "Thomas", "Toby", "Tyler", "William", "Zachary", };
 
+    // remember the compiler if we found it.  avoid LOTS of extra "javac -version" commands
+    private static String javaCompileCmd = null;
 
     public SampleContest() {
         super();
@@ -2058,37 +2062,10 @@ public class SampleContest {
     }
     
     /**
-     * Returns the java compile command if javac[.exe] exists in the folder supplied
-     * Note that the executable may or may not have a .exe extension - we try both.
-     * 
-     * @param szPath Folder to look in
-     * @javaCmd array of 1 or 2 elements, [0] = java compiler [1] optional arguments to compiler
-     * @return null if no compiler found, otherwise full path to compiler
-     */
-    private static String findJavacExe(String path, String [] javaCmd) {
-        String [] exeSuffices = { "", ".exe" };
-        String javac = path + File.separatorChar + javaCmd[0];
-        
-        // try both without and with .exe suffix
-        for(String exeExt : exeSuffices) {
-            // Build the potentional command line
-            String javacCmdLine = javac + exeExt;
-            if(new File(javacCmdLine).canExecute()) {
-                // found what we're looking for, now add args if present
-                if(javaCmd.length > 1) {
-                    javacCmdLine = javacCmdLine + ' ' + javaCmd[1];
-                }
-                return(javacCmdLine);
-            }
-        }
-        return(null);
-    }
-    
-    /**
      * Modifies the command line to compile a java program.  This is only necessary for JUnit tests, so we do not want
      * to put this in LanguageAutoFill, rather, we massage the results that LanguageAutoFill returns to us
      * which is element values[1].  We essentially look for a compiler that matches the version of the current JVM in
-     * JAVA_HOME and on the PATH.  We only consider folders that have a version string IN the folder name.
+     * JAVA_HOME and on the PATH.  
      * The version string is that of the module being run (it's Runtime class' package)
      * eg.  1.8.0_351 -> C:\Program Files\Java\jdk1.8.0_351
      * This is necessary because Eclipse PREPENDS it's JDK to the PATH, making its compiler be the first choice all the time.
@@ -2120,9 +2097,15 @@ public class SampleContest {
      */
     public static void fixJavaJDKPath(String [] values) {
         
-        // this only applies for Java
-        if(values[0].equalsIgnoreCase(LanguageAutoFill.JAVATITLE)) {
-            // This returns something like: 1.8.0_351
+        // this only applies for Java and if the command does not contain any specific folder
+        if(values[0].equalsIgnoreCase(LanguageAutoFill.JAVATITLE) && values[1].indexOf(File.separatorChar) == -1) {
+            
+            if(javaCompileCmd != null) {
+                values[1] = javaCompileCmd;
+                return;
+            }
+            
+            // This returns something like: 1.8.0_351 
             String javaVersion = Runtime.class.getPackage().getSpecificationVersion();
             String javaHome = System.getenv("JAVA_HOME");
             String systemPath = System.getenv("PATH");
@@ -2134,39 +2117,105 @@ public class SampleContest {
                     return;
                 }
             }
+            
             // crack the java command line, the compiler will be javaCmd[0]
+            // Note: spaces are safe to break part the compiler from args, since we checked above if the command separators
             String [] javaCmd = values[1].split("\\s+", 2); 
+            String javaCmdOnly;
             String javaCmdLine = null;
             
             if(javaCmd.length > 0) {
+
+                // Isolate compiler command from rest
+                javaCmdOnly = javaCmd[0];
                 
-                // first, try the easiest - using JAVA_HOME
-                if(javaHome != null && javaHome.indexOf(javaVersion) >= 0) {
-                    // JDK executables would be in the bin folder
-                    javaCmdLine = findJavacExe(javaHome + File.separatorChar + "bin", javaCmd);
+                // first, try the easiest - using JAVA_HOME/bin
+                if(javaHome != null) {
+                    // try to execute javac -version in JAVA_HOME/bin and see if we get what we're looking for
+                    javaCmdLine = findJavacExe(javaHome + File.separatorChar + "bin", javaCmdOnly, javaVersion);
                 }
-                // if JAVA_HOME didnt work out, and we have a PATH, try each path element
+                // if JAVA_HOME didn't work out, and we have a PATH, try each path element
                 if(javaCmdLine == null && systemPath != null) {
-                    // Look for version in each path element, if match is found, check for java compiler
+                    // Look for correct compiler version in each path element
                     for(String path : systemPath.split(File.pathSeparator, 0)) {
-                        if(path.indexOf(javaVersion) >= 0) {
-                            javaCmdLine = findJavacExe(path, javaCmd);
-                            if(javaCmdLine != null) {
-                                values[1] = javaCmdLine;
-                                break;
-                            }
+                        javaCmdLine = findJavacExe(path, javaCmdOnly, javaVersion);
+                        if(javaCmdLine != null) {
+                            break;
                         }
                     }
                 }
             }
-            // We COULD go through each path element now, and try to execute "javac -version" and look
-            // for a match, but it's probably not worth it at this point.
             
             // if we found a matching java compiler, replace the command line
             if(javaCmdLine != null) {
+                if(javaCmd.length > 1) {
+                    javaCmdLine = javaCmdLine + ' ' + javaCmd[1];
+                }
                 values[1] = javaCmdLine;
+                javaCompileCmd = javaCmdLine;
             }
         }
     }
     
+    /**
+     * Returns the java compile command if javac[.exe] exists in the folder supplied
+     * Note that the executable may or may not have a .exe extension - we try both.
+     * 
+     * @param szPath Folder to look in
+     * @javaCmd java compiler command only
+     * @javaWantedVersion desired version (eg. 1.8, 1.8.0_351, etc)
+     * @return null if no compiler found, otherwise full path to compiler, eg: "/usr/bin/Java/javac", "C:\Program Files\Java\Jdk\bin\javac.exe"
+     */
+    private static String findJavacExe(String path, String javaCmd, String javaWantedVersion) {
+        String [] exeSuffices = { "", ".exe" };
+        String javac = path + File.separatorChar + javaCmd;
+        String javacVerString;
+        
+        // try both without and with .exe suffix
+        for(String exeExt : exeSuffices) {
+            // Build the potential command by adding the extension
+            String javacCmdLine = javac + exeExt;
+            if(new File(javacCmdLine).canExecute()) {
+                // now get the version of the compiler
+                javacVerString = getCommandOutput(javacCmdLine, "-version");
+                // String returned should be something like: "javac 1.8.0_351".
+                // We need to prepend a space to the comparison to differentiate between "javac 1.8.0_351" and "java 17.1.8"
+                // It's OK  too, if the compiler decides to just return the version with no leading "javac " - we deal with that too
+                if(javacVerString != null && (javacVerString.indexOf(" " + javaWantedVersion) >= 0 || javacVerString.startsWith(javaWantedVersion))) {
+                    return(javacCmdLine);
+                }
+            }
+        }
+        return(null);
+    }
+    
+    /**
+     * Execute the given command and return the first line of output, or null on error
+     * TODO: maybe put a timer in here in case the command doesn't generate output, but just sets there.
+     *       this is not critical since this is only used for JUnits.
+     *       
+     * @param cmd to execute (eg. \Path\bin\javac.exe)
+     * @param arg argument (eg -version)
+     * @return First line of output, or null if none/error
+     */
+    private static String getCommandOutput(String cmd, String arg) {
+        String result = "";
+        
+        String [] argv = new String[2];
+        argv[0] = cmd;
+        argv[1] = arg;
+        try {
+            ProcessBuilder pb = new ProcessBuilder(argv);
+            pb.redirectErrorStream(true);
+            Process proc = pb.start();
+            BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            result = br.readLine();
+            // next 1 debug for testing
+            System.err.println("Command: " + cmd + " = " + result);
+        } catch(Exception e) {
+            // any failure means this didn't work, so we return an empty string.
+        }
+        
+        return(result);
+    }
 }
