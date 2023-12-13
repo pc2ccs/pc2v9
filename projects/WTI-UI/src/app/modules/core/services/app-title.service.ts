@@ -26,6 +26,6 @@ export class AppTitleService {
 			//pull the team number out of the PC2 account (e.g. pull "22" out of account "team22")
      		teamId = acctId.substr(4);
 		}
-    	this.setTitle("PC2 Team " + teamId + " " + newTitle);
+    	this.setTitle("PC2 Team " + teamId + " - " + newTitle);
 	}
 }
