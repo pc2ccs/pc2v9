@@ -228,7 +228,7 @@ public class CLICSAwardUtilities {
 
     public static void addMedals(IInternalContest contest, List<CLICSAward> list, boolean obeyFreeze) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
 
-        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest, obeyFreeze);
+        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest, obeyFreeze);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
 
 //        List<TeamScoreRow> rows = model.getRows();
@@ -330,7 +330,7 @@ public class CLICSAwardUtilities {
      */
     public static void addWinner(IInternalContest contest, List<CLICSAward> list, boolean obeyFreeze) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
 
-        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest, obeyFreeze);
+        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest, obeyFreeze);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
 
         String winnerId = null;
