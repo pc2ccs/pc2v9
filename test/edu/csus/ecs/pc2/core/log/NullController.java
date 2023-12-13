@@ -180,6 +180,11 @@ public class NullController implements IInternalController{
 
     }
 
+    public void submitClarification(ClientId clientId, Problem problem, String question) {
+        // TODO Auto-generated method stub
+
+    }
+
     public void stopContest(int inSiteNumber) {
         // TODO Auto-generated method stub
 
