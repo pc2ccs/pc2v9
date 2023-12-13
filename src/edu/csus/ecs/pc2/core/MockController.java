@@ -499,6 +499,11 @@ public class MockController implements IInternalController {
     }
 
     @Override
+    public void submitClarification(ClientId clientId, Problem problem, String question) {
+
+    }
+
+    @Override
     public void submitClarificationAnswer(Clarification clarification) {
 
     }
