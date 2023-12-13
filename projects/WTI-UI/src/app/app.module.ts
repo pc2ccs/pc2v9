@@ -14,7 +14,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule} from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatToolbarModule} from '@angular/material/toolbar';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
 //import { DeviceDetectorModule } from 'ngx-device-detector';
 
 @NgModule({
@@ -39,7 +40,7 @@ import { MatToolbarModule} from '@angular/material/toolbar';
     MatToolbarModule
 //	DeviceDetectorModule.forRoot()
   ],
-  providers: [],
+  providers: [AppTitleService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
