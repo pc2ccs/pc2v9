@@ -22,10 +22,10 @@ export class AppTitleService {
 	    let acctId = this._authService.username; 
 		let teamId = "";
 		//make sure we got a reasonable string back from AuthService
-    	if (!acctId==null && (typeof acctId === "string" && acctId.length>4)) {
+    	if (!(acctId==null) && (typeof acctId === "string" && acctId.length>4)) {
 			//pull the team number out of the PC2 account (e.g. pull "22" out of account "team22")
      		teamId = acctId.substr(4);
 		}
-    	this.setTitle("PC2 Team" + teamId + " " + newTitle);
+    	this.setTitle("PC2 Team " + teamId + " " + newTitle);
 	}
 }
