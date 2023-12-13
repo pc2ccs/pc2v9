@@ -397,6 +397,10 @@ public class NullController implements IInternalController {
 
     }
 
+    public void submitClarification(ClientId clientId, Problem problem, String question) {
+
+    }
+
     public void submitClarificationAnswer(Clarification clarification) {
 
     }
