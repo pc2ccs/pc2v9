@@ -439,7 +439,7 @@ public class SubmitRunPane extends JPanePlugin {
     /**
      * Submit run or test run.
      * 
-     * Validates that the user has selected problem, language and a valid filename.
+     * Validates that the user has selected problem, language, a valid filename and there are no files with duplicate name.
      * 
      * @param submitTheRun
      *            if true, submits the run.
@@ -494,7 +494,8 @@ public class SubmitRunPane extends JPanePlugin {
                 if (l == -1) l = otherfilename.lastIndexOf('\\');
                 if (l > -1) otherfilename = otherfilename.substring(l + 1);
                 if (otherfilename.equals(mainfilename)) {
-                    showMessage("Found multiple files with same filename");
+                    showMessage("You may not submit multiple files with the same name");
+                    log.warning("Found multiple files with same filename");
                     return;
                 }
                 
@@ -504,7 +505,8 @@ public class SubmitRunPane extends JPanePlugin {
                     if (l == -1) l = otherfilename2.lastIndexOf('\\');
                     if (l > -1) otherfilename2 = otherfilename2.substring(l + 1);
                     if (otherfilename.equals(otherfilename2)) {
-                        showMessage("Found multiple files with same filename");
+                        showMessage("You may not submit multiple files with the same name");
+                        log.warning("Found multiple files with same filename");
                         return;
                     }
                 }
