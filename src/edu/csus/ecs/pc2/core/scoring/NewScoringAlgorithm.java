@@ -196,7 +196,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
             if(av.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 if (group != null) {
                     // if this client is not a member of the desired group, skip it
-                    if(group != ScoreboardUtilites.getGroup(contest, av.getClientId())){
+                    if(group != ScoreboardUtilities.getGroup(contest, av.getClientId())){
                         continue;
                     }
                 }
