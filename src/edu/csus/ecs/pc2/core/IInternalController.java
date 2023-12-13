@@ -455,7 +455,7 @@ public interface IInternalController {
     public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam);
     /**
      * Submit a clarification.
-     * 
+     *
      * @param clientId to submit clarification as, eg. "team99"
      * @param problem
      * @param question
