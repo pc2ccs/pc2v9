@@ -1031,7 +1031,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
               
                 if (group != null) {
                     // if this account is not in the desired group, it does not count in the standings, so skip it
-                    if(group != ScoreboardUtilites.getGroup(theContest, account.getClientId())) {
+                    if(group != ScoreboardUtilities.getGroup(theContest, account.getClientId())) {
                         continue;
                     }
                 }
