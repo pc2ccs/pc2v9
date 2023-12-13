@@ -382,9 +382,10 @@ public class MockController implements IInternalController {
     public void sendToTeams(Packet packet) {
 
     }
-    
+
+    @Override
     public void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams) {
-        
+
     }
 
     @Override
@@ -498,14 +499,22 @@ public class MockController implements IInternalController {
 
     }
 
+    @Override
     public ElementId submitClarification(Problem problem, String question) {
         return null;
     }
 
+    @Override
     public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
-        
+
     }
 
+    @Override
+    public void submitClarification(ClientId clientId, Problem problem, String question) {
+
+    }
+
+    @Override
     public void submitClarificationAnswer(Clarification clarification) {
 
     }
