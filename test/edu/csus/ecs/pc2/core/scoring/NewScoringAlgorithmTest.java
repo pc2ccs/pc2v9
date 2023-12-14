@@ -495,8 +495,11 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
 
         int expectedMismatches;
         if (System.getenv("CI") == null) {
-           // not found
+           // not found on CI
            expectedMismatches = 0;
+        } else if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+           // running on windows (no support for utf8)
+           expectedMismatches = 1;
         } else {
            // running on GitHub
            expectedMismatches = 1;
