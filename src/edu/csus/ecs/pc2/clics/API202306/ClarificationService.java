@@ -4,6 +4,9 @@ package edu.csus.ecs.pc2.clics.API202306;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.logging.LogRecord;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +35,10 @@ import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
@@ -113,6 +119,11 @@ public class ClarificationService implements Feature {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{clarificationId}/")
     public Response getClarification(@Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("clarificationId") String clarificationId) {
+
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();        
+        }
         // get the groups from the contest
         Clarification[] clarifications = model.getClarifications();
         
@@ -176,9 +187,14 @@ public class ClarificationService implements Feature {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addNewClarification(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
+
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();        
+        }
         
-        // only admin, team, or judge can create a clarification.
-        if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM)) {
+        // only admin, hydge, or team can create a clarification.  And team can do it only if contest is started.
+        if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) && (!sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM) || !model.getContestTime().isContestStarted())) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
         
@@ -205,7 +221,37 @@ public class ClarificationService implements Feature {
             return Response.status(Status.BAD_REQUEST).entity("may not include one or more properties").build();
         }
         
-        return Response.status(Response.Status.NOT_IMPLEMENTED).build();
+        String user = sc.getUserPrincipal().getName();
+        
+        // if team specifies "from id", it must be that of the current user.
+        if(!StringUtilities.isEmpty(clar.getFrom_team_id())) {
+            String fullUser = "team" + clar.getFrom_team_id();
+            if(sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM) && !user.equals(fullUser)) {
+                return Response.status(Status.FORBIDDEN).build();
+            } else {
+                user = fullUser;
+            }
+        }
+        ClientId clientId = getClientIdFromUser(user);
+        if(clientId != null && model.getAccount(clientId) != null) {
+            Problem problem = getProblemFromId(clar.getProblem_id());
+            if(problem != null) {
+                controller.submitClarification(clientId, problem, clar.getText());
+                try {
+                    ObjectMapper mapper = JSONUtilities.getObjectMapper();
+                    String json = mapper.writeValueAsString(clar);
+                    return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                } catch (Exception e) {
+                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for clarification " + e.getMessage()).build();
+                }
+                
+            } else {
+                controller.getLog().log(Log.WARNING, "Can not find problem for id " + clar.getProblem_id());
+            }
+        } else {
+            controller.getLog().log(Log.WARNING, "Can not find client id for " + sc.getUserPrincipal().getName());
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
     
     /**
@@ -221,6 +267,11 @@ public class ClarificationService implements Feature {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateClarification(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
+        
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();        
+        }
         
         // only admin or judge can update a clarification.
         if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
@@ -242,6 +293,7 @@ public class ClarificationService implements Feature {
         if(StringUtilities.isEmpty(clar.getText())) {
             return Response.status(Status.BAD_REQUEST).entity("text must not be empty").build();
         }
+        
         
         return Response.status(Response.Status.NOT_IMPLEMENTED).build();
     }
@@ -325,6 +377,41 @@ public class ClarificationService implements Feature {
         }
 
         return jsonDataMap;
+    }
+    
+    /**
+     * Returns a ClientId based on the user supplied.  eg. "team99", "administrator1", etc.
+     * @param user eg. team99
+     * @return The ClientId created, or null if the user is bad
+     */
+    private ClientId getClientIdFromUser(String user) {
+        ClientId clientId = null;
+        
+        // basically, need to match lower case letters followed by digits
+        Matcher matcher = Pattern.compile("^([a-z]+)([0-9]+)$").matcher(user);
+        if(matcher.matches()) {
+            try {
+                clientId = new ClientId(model.getSiteNumber(), ClientType.Type.valueOf(matcher.group(1).toUpperCase()), Integer.parseInt(matcher.group(2)));
+            } catch (Exception e) {
+                controller.getLog().log(Log.WARNING, "Can not convert the supplied user " + user + " to a ClientId", e);
+            }
+        }
+        return clientId;
+    }
+    
+    /**
+     * Returns the the Problem object for supplied id (short name) or null if none found
+     * 
+     * @param id shortname of problem
+     * @return Problem object or null
+     */
+    private Problem getProblemFromId(String id) {
+        for(Problem problem : model.getProblems()) {
+            if(problem.getShortName().equals(id)) {
+                return(problem);
+            }
+        }
+        return(null);
     }
     
     @Override
