@@ -26,7 +26,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * CLICS Team object
- * 
+ *
  * @author John Buck
  *
  */
@@ -56,27 +56,27 @@ public class CLICSTeam {
 
     @JsonProperty
     private boolean hidden;
-    
-    
+
+
     // The following properties are not maintained by the CCS and therefore not included (they are optional in the spec)
     // location, photo, video, backup, key_log, tool_data, desktop, webcam, audio
-    
+
     /**
      * For Jackson deserializer
      */
     public CLICSTeam() {
     }
-   
+
     /**
      * Fill in properties for team as per 2023-06 spec
-     * 
+     *
      * @param model The contest
      * @param account team information
      */
     public CLICSTeam(IInternalContest model, Account account) {
-        
+
         id = "" + account.getClientId().getClientNumber();
-        
+
         if (JSONTool.notEmpty(account.getExternalId())) {
             icpc_id = account.getExternalId();
         }
@@ -102,10 +102,10 @@ public class CLICSTeam {
             return "Error creating JSON for team info " + e.getMessage();
         }
     }
-    
+
     /**
      * Create account list from a teams.json like file
-     * 
+     *
      * @param contest the contest (needed for groups)
      * @param jsonfile json file to deserialize
      * @param site the site to create the accounts for
@@ -116,19 +116,19 @@ public class CLICSTeam {
     public static Account [] fromJSON(IInternalContest contest, File jsonfile, int site, HashMap<String,String[]> institutionsMap) {
         Account [] newaccounts = null;
         Log log = StaticLog.getLog();
-        
+
         try {
             ObjectMapper mapper = new ObjectMapper();
             newaccounts = createTeamsFromTeamsJSON(contest, mapper.readValue(jsonfile, CLICSTeam[].class), site, institutionsMap, log);
         } catch (Exception e) {
             log.log(Log.WARNING, "could not deserialize team file " + jsonfile, e);
-        }        
+        }
         return(newaccounts);
      }
-    
+
     /**
      * Create account list from a strings contains a teams json file
-     * 
+     *
      * @param contest the contest (needed for groups)
      * @param json json to deserialize
      * @param site the site to create the accounts for
@@ -139,19 +139,19 @@ public class CLICSTeam {
     public static Account [] fromJSON(IInternalContest contest, String json, int site, HashMap<String,String[]> institutionsMap) {
         Account [] newaccounts = null;
         Log log = StaticLog.getLog();
-        
+
         try {
             ObjectMapper mapper = new ObjectMapper();
             newaccounts = createTeamsFromTeamsJSON(contest, mapper.readValue(json, CLICSTeam[].class), site, institutionsMap, log);
         } catch (Exception e) {
             log.log(Log.WARNING, "could not deserialize team string", e);
-        }        
+        }
         return(newaccounts);
      }
-   
+
     /**
      * Converts CLICS teams into a PC2 Account array.
-     * 
+     *
      * @param contest The contest
      * @param teams array of CLICS teams
      * @param site The site to create accounts on
@@ -159,14 +159,14 @@ public class CLICSTeam {
      * @return an Account array of teams converted from the CLICS teams or null if error
      */
     private static Account [] createTeamsFromTeamsJSON(IInternalContest contest, CLICSTeam [] teams, int site, HashMap<String,String[]> institutionsMap, Log log) {
-        
+
         Account [] newaccounts = null;
         ArrayList<Account> accounts = new ArrayList<Account>();
         Account account;
         JSONTool jsontool = new JSONTool(contest, null);
         PermissionList teamPermissionList = new PermissionGroup().getPermissionList (ClientType.Type.TEAM);
         boolean error = false;
-        
+
         // convert each team to an account
         for(CLICSTeam team: teams) {
             int teamnum;
@@ -217,7 +217,7 @@ public class CLICSTeam {
                 if(institutionsMap != null && institutionsMap.containsKey(team.organization_id)) {
                     // lookup institution info [0]=id, [1]=formal name, [2] = short name
                     String [] orgInfo = institutionsMap.get(team.organization_id);
-                    if(orgInfo != null && orgInfo.length >= 3) {                    
+                    if(orgInfo != null && orgInfo.length >= 3) {
                         account.setInstitutionCode(orgInfo[0]);
                         account.setInstitutionName(orgInfo[1]);
                         account.setInstitutionShortName(orgInfo[2]);
