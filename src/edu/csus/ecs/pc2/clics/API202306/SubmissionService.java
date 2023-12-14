@@ -47,7 +47,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 
 /**
- * WebService to handle languages
+ * WebService to handle submissions
  * 
  * @author ICPC
  *
