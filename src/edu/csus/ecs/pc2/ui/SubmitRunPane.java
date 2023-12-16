@@ -493,14 +493,40 @@ public class SubmitRunPane extends JPanePlugin {
         if (submitTheRun) {
             try {
                 String confirmQuestion = "<HTML><FONT SIZE=+1>Do you wish to submit run for<BR><BR>" + "Problem:  <FONT COLOR=BLUE>" + Utilities.forHTML(problem.toString()) + "</FONT><BR><BR>"
-                        + "Language:  <FONT COLOR=BLUE>" + Utilities.forHTML(language.toString()) + "</FONT><BR><BR>" + "File: <FONT COLOR=BLUE>" + Utilities.forHTML(filename)
-                        + "</FONT><BR><BR></FONT>";
+                        + "Language:  <FONT COLOR=BLUE>" + Utilities.forHTML(language.toString()) + "</FONT><BR><BR>";
+
+                if (additionalFilesMCLB.getRowCount() > 0) {
+                    confirmQuestion += "<TABLE><TBODY><TR><TD><FONT SIZE=+1>Main File:</FONT></TD><TD><FONT COLOR=BLUE SIZE=+1>" + Utilities.forHTML(filename)
+                        + "</FONT></TD></TR>";
+                    String otherfilename = (String) additionalFilesMCLB.getRow(0)[0];
+                    confirmQuestion += "<TR><TD><FONT SIZE=+1>Additional File(s):</FONT></TD><TD><FONT COLOR=BLUE SIZE=+1>" + Utilities.forHTML(otherfilename) + "</FONT></TD></TR>";
+                    for (int i = 1; i < additionalFilesMCLB.getRowCount(); i++) {
+                        otherfilename = (String) additionalFilesMCLB.getRow(i)[0]; 
+                        confirmQuestion += "<TR><TD> </TD><TD><FONT COLOR=BLUE SIZE=+1>" + Utilities.forHTML(otherfilename) + "</FONT></TD></TR>";
+                    }
+                    confirmQuestion += "</TBODY></TABLE>";
+                }
+                else {
+                    confirmQuestion += "<TABLE><TBODY><TR><TD><FONT SIZE=+1>Main File:</FONT></TD><TD><FONT COLOR=BLUE SIZE=+1>" + Utilities.forHTML(filename)
+                        + "</FONT></TD></TR></TBODY></TABLE>";
+                }
+                confirmQuestion += "<BR><BR></FONT></HTML>";
 
                 int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), confirmQuestion, "Confirm Submission");
 
                 if (result == JOptionPane.YES_OPTION) {
-
-                    log.info("submitRun for " + problem + " " + language + " file: " + filename);
+                    
+                    String logInfo = "submitRun for " + problem + " " + language + " main file: " + filename;
+                    if (additionalFilesMCLB.getRowCount() > 0) {
+                        logInfo += " additional file(s): [";
+                        for (int i = 0; i < additionalFilesMCLB.getRowCount(); i++) {
+                            String otherfilename = (String) additionalFilesMCLB.getRow(i)[0]; 
+                            logInfo += otherfilename;
+                            if (i == additionalFilesMCLB.getRowCount() - 1) logInfo += "]";
+                            else logInfo += ", ";
+                        }
+                    }
+                    log.info(logInfo);
                     getController().submitJudgeRun(problem, language, filename, otherFiles);
                 }
 
