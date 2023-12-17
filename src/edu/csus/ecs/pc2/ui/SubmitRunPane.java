@@ -522,8 +522,12 @@ public class SubmitRunPane extends JPanePlugin {
                         for (int i = 0; i < additionalFilesMCLB.getRowCount(); i++) {
                             String otherfilename = (String) additionalFilesMCLB.getRow(i)[0]; 
                             logInfo += otherfilename;
-                            if (i == additionalFilesMCLB.getRowCount() - 1) logInfo += "]";
-                            else logInfo += ", ";
+                            if (i == additionalFilesMCLB.getRowCount() - 1) {
+                                logInfo += "]";
+                            }
+                            else {
+                                logInfo += ", ";
+                            }
                         }
                     }
                     log.info(logInfo);
