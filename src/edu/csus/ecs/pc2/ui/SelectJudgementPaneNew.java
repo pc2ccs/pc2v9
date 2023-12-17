@@ -36,7 +36,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecuteTimerFrame;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
-import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
+import edu.csus.ecs.pc2.core.execute.JudgementUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -597,7 +597,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             judgementId = run.getJudgementRecord().getJudgementId();
         }
 
-        for (Judgement judgement : JudgementUtilites.getSingleListofJudgements(getContest())) {
+        for (Judgement judgement : JudgementUtilities.getSingleListofJudgements(getContest())) {
             if (judgement.isActive()) {
                 getJudgementComboBox().addItem(judgement);
                 if (judgement.getElementId().equals(judgementId)) {
@@ -874,11 +874,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         executable.execute();
         
         // Dump execution results files to log
-        String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
+        String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
         Problem juProblem = getContest().getProblem(run.getProblemId());
         ClientId clientId = getContest().getClientId();
-        List<Judgement> judgements = JudgementUtilites.getLastTestCaseJudgementList(getContest(), run);
-        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, juProblem, judgements, executable.getExecutionData(), "", new Properties());
+        List<Judgement> judgements = JudgementUtilities.getLastTestCaseJudgementList(getContest(), run);
+        JudgementUtilities.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, juProblem, judgements, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         if (executionData != null && executionData.getExecutionException() != null) {
@@ -959,7 +959,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      
             showValidatorControls(true);
             
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(getContest(), "CE");
+            Judgement judgement = JudgementUtilities.findJudgementByAcronym(getContest(), "CE");
             String judgementString = "No - Compilation Error"; // default
             ElementId elementId = null;
             if (judgement != null) {

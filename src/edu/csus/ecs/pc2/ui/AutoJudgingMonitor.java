@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
-import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
+import edu.csus.ecs.pc2.core.execute.JudgementUtilities;
 import edu.csus.ecs.pc2.core.list.RunComparatorByElapsedRunIdSite;
 import edu.csus.ecs.pc2.core.list.UnavailableRunsList;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -503,11 +503,11 @@ public class AutoJudgingMonitor implements UIPlugin {
         executable.execute();
         
         // Dump execution results files to log
-        String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
+        String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
         Problem problem = getContest().getProblem(fetchedRun.getProblemId());
         ClientId clientId = getContest().getClientId();
-        List<Judgement> judgements = JudgementUtilites.getLastTestCaseJudgementList(contest, fetchedRun);
-        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, fetchedRun, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
+        List<Judgement> judgements = JudgementUtilities.getLastTestCaseJudgementList(contest, fetchedRun);
+        JudgementUtilities.dumpJudgementResultsToLog(log, clientId, fetchedRun, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         
@@ -529,7 +529,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
                 notifyMessager.updateStatusLabel("Run failed to compile");
 
-                Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "CE");
+                Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, "CE");
                 String judgementString = "No - Compilation Error"; // default
                 ElementId elementId = null;
                 if (judgement != null) {

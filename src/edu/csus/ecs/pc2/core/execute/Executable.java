@@ -755,7 +755,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
         log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(submissionIsCorrect) + " " + reason);
 
-        JudgementRecord record = JudgementUtilites.createJudgementRecord(contest, run, executionData, executionData.getValidationResults());
+        JudgementRecord record = JudgementUtilities.createJudgementRecord(contest, run, executionData, executionData.getValidationResults());
 
         // Judgement judgement = getContest().getJudgement(record.getJudgementId());
         // log.info(" Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " judgement = " + judgement);
@@ -2302,7 +2302,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
         if (executionData.isRunTimeLimitExceeded()) {
 
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, Judgement.ACRONYM_TIME_LIMIT_EXCEEDED);
+            Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, Judgement.ACRONYM_TIME_LIMIT_EXCEEDED);
             String judgementString = "No - Time Limit Exceeded"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
@@ -2312,7 +2312,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             executionData.setValidationSuccess(true);
             proceedToValidation = false;
         } else if(executionData.isMemoryLimitExceeded()) {
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, Judgement.ACRONYM_MEMORY_LIMIT_EXCEEDED);
+            Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, Judgement.ACRONYM_MEMORY_LIMIT_EXCEEDED);
             String judgementString = "No - Memory Limit Exceeded"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
@@ -2323,7 +2323,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             proceedToValidation = false;
             
         } else if(bSandboxSystemError) {
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, Judgement.ACRONYM_OTHER_CONTACT_STAFF);
+            Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, Judgement.ACRONYM_OTHER_CONTACT_STAFF);
             String judgementString = "No - contact staff"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
@@ -2339,7 +2339,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         // TLE/MLE/OCS
         if (executionData.getExecuteExitValue() != 0  &&  !killedByTimer && proceedToValidation) {
             
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "RTE");
+            Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, "RTE");
             String judgementString = "No - Run-time Error"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
