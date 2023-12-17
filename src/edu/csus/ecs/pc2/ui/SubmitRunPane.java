@@ -483,15 +483,13 @@ public class SubmitRunPane extends JPanePlugin {
         
         if (additionalFilesMCLB.getRowCount() > 0) {
 
-            int l = filename.lastIndexOf('/');
-            if (l == -1) l = filename.lastIndexOf('\\');
             String mainfilename = filename;
+            int l = filename.lastIndexOf(File.separatorChar);
             if (l > -1) mainfilename = filename.substring(l + 1);
 
             for (int i = 0; i < additionalFilesMCLB.getRowCount(); i++) {
                 String otherfilename = (String) additionalFilesMCLB.getRow(i)[0];
-                l = otherfilename.lastIndexOf('/');
-                if (l == -1) l = otherfilename.lastIndexOf('\\');
+                l = otherfilename.lastIndexOf(File.separatorChar);
                 if (l > -1) otherfilename = otherfilename.substring(l + 1);
                 if (otherfilename.equals(mainfilename)) {
                     showMessage("You may not submit multiple files with the same name");
@@ -501,8 +499,7 @@ public class SubmitRunPane extends JPanePlugin {
                 
                 for (int j = i + 1; j < additionalFilesMCLB.getRowCount(); j++) {
                     String otherfilename2 = (String) additionalFilesMCLB.getRow(j)[0];
-                    l = otherfilename2.lastIndexOf('/');
-                    if (l == -1) l = otherfilename2.lastIndexOf('\\');
+                    l = otherfilename2.lastIndexOf(File.separatorChar);
                     if (l > -1) otherfilename2 = otherfilename2.substring(l + 1);
                     if (otherfilename.equals(otherfilename2)) {
                         showMessage("You may not submit multiple files with the same name");
