@@ -8,6 +8,7 @@ import { TeamsLoginResponse } from 'src/app/modules/core/models/teams-login-resp
 import { IWebsocketService } from 'src/app/modules/core/abstract-services/i-websocket.service';
 import { Router } from '@angular/router';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
+import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
 
 @Component({
   templateUrl: './login-page.component.html',
@@ -23,9 +24,13 @@ export class LoginPageComponent implements OnInit, OnDestroy {
               private _authService: AuthService,
               private _websocketService: IWebsocketService,
               private _router: Router,
-              private _contestService: IContestService) { }
+              private _contestService: IContestService,
+			  private _appTitleService: AppTitleService) { }
 
   ngOnInit(): void {
+	
+	this._appTitleService.setTitleWithTeamId("Login");
+		
     if (this._authService.token) { this._router.navigateByUrl(this._authService.defaultRoute); }
     this.buildForm();
   }

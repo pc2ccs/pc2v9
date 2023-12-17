@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, DoCheck } from '@angular/core';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
 
 @Component({
 	templateUrl: './scoreboard-page.component.html',
@@ -13,11 +14,15 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	teamStandings: any = [];
 
 	constructor(
-		private _contestService: IContestService
+		private _contestService: IContestService,
+		private _appTitleService: AppTitleService
 	) { }
 
 	ngOnInit(): void {
 		//console.log("Scoreboard OnInit executed.");
+		
+		this._appTitleService.setTitleWithTeamId("Scoreboard");
+		
 		this.loadStandings();
 
 		// when standings are updated, trigger a reload

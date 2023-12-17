@@ -520,7 +520,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             chooseCompareProgramPanel.add(rdbtnInternalCompareProgram);
 
             // add a button to enable selection from a list of predefined external comparators
-            rdbtnPulldownCompareList = new JRadioButton("Select");
+            rdbtnPulldownCompareList = new JRadioButton("Select...");
             chooseCompareProgramPanel.add(rdbtnPulldownCompareList);
             buttonGroup.add(rdbtnPulldownCompareList);
 
@@ -598,7 +598,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             chooseViewerProgramPanel.add(rdbtnInternalViewerProgram);
 
             // add a button to enable selection of the viewer program from a list
-            rdbtnPulldownViewerList = new JRadioButton("Select");
+            rdbtnPulldownViewerList = new JRadioButton("Select...");
             buttonGroup_1.add(rdbtnPulldownViewerList);
             chooseViewerProgramPanel.add(rdbtnPulldownViewerList);
 

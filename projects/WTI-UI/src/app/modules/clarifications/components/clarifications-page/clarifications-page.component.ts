@@ -7,6 +7,7 @@ import { Clarification } from '../../../core/models/clarification';
 import { MatDialog } from '@angular/material/dialog';
 import { NewClarificationComponent } from '../new-clarification/new-clarification.component';
 import { AuthService } from '../../../core/auth/auth.service';
+import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
 
 @Component({
   templateUrl: './clarifications-page.component.html',
@@ -22,9 +23,13 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
   constructor(private _formBuilder: FormBuilder,
               private _contestService: IContestService,
               private _modalService: MatDialog,
-              private _authService: AuthService) { }
+              private _authService: AuthService,
+			  private _appTitleService: AppTitleService) { }
 
   ngOnInit(): void {
+	
+	this._appTitleService.setTitleWithTeamId("Clarifications");
+	
     this.buildForm();
     this.loadClars();
 

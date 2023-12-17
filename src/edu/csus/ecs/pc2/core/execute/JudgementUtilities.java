@@ -29,12 +29,12 @@ import edu.csus.ecs.pc2.core.model.RunTestCase;
  */
 
 // $HeadURL$
-public final class JudgementUtilites {
+public final class JudgementUtilities {
 
     /**
      * 
      */
-    private JudgementUtilites() {
+    private JudgementUtilities() {
         super();
     }
 
@@ -74,7 +74,7 @@ public final class JudgementUtilites {
         } else if (!executionData.isCompileSuccess()) {
             // Compile failed, darn!
 
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "CE");
+            Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, "CE");
             String judgementString = "No - Compilation Error"; // default
             ElementId elementId = null;
             if (judgement != null) {
