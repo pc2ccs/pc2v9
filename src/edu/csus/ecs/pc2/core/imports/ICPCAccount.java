@@ -1,8 +1,10 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
- * 
+ *
  */
 package edu.csus.ecs.pc2.core.imports;
+
+import java.util.HashMap;
 
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -10,7 +12,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
  * ICPC Account information.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -23,45 +25,54 @@ public class ICPCAccount {
      * An external identifier, ex: an ICPC id
      */
     private String externalId = "";
-    
+
     /**
      * Group id
      */
-    private ElementId groupId;
-    
+    private HashMap<ElementId, String> groups;
+
+    /**
+     * Used for importing from an old teams.tab type file, there is one group
+     * specified in the tab file, and it is a CMS id.  We store it here and it will
+     * get converted after the account is created and placed in groups above.
+     */
+    private String externalGroupId;
+
     private ClientId clientId;
-    
-    private String groupExternalId = "";
-    
+
     private String shortSchoolName = "";
 
     private String longSchoolName = "";
 
     private String externalName = "";
     /**
-     * 
+     *
      */
     public ICPCAccount() {
         super();
     }
-    public ICPCAccount(Account account, String inGroupExternalId) {
+
+    /**
+     * Fill in an ICPCAccount.
+     *
+     * @param account The PC2 account
+     * @param groupHash Maps group element ids to
+     */
+    public ICPCAccount(Account account, HashMap<ElementId, String> groupHash) {
         accountNumber = account.getClientId().getClientNumber();
         clientId = account.getClientId();
         externalId = account.getExternalId();
         externalName = account.getExternalName();
-        if (inGroupExternalId != null) {
-        // need to convert this groupId to the externalId
-            groupExternalId = inGroupExternalId;
+        if(account.getGroupIds() != null && groupHash != null) {
+            for(ElementId elementId: account.getGroupIds()) {
+                groups.put(elementId,  groupHash.get(elementId));
+            }
         }
-        groupId = account.getGroupId();
         longSchoolName = account.getLongSchoolName();
         shortSchoolName = account.getShortSchoolName();
     }
     public void setExternalId(String id) {
         externalId = id;
-    }
-    public void setGroupExternalId(String groupExternalId) {
-        this.groupExternalId = groupExternalId;
     }
     public void setExternalName(String name) {
         externalName = name;
@@ -97,12 +108,6 @@ public class ICPCAccount {
         return externalName;
     }
     /**
-     * @return Returns the groupId.
-     */
-    public String getGroupExternalId() {
-        return groupExternalId;
-    }
-    /**
      * @return Returns the longSchoolName.
      */
     public String getLongSchoolName() {
@@ -127,23 +132,35 @@ public class ICPCAccount {
         this.clientId = clientId;
     }
     /**
-     * @return Returns the groupId.
+     * @return Returns the groups map.
      */
-    public ElementId getGroupId() {
-        return groupId;
+    public HashMap<ElementId, String> getGroups() {
+        return groups;
+    }
+    public void addGroupId(ElementId elementId, String externalGroupId) {
+        if(groups == null) {
+            groups = new HashMap<ElementId, String>();
+        }
+        groups.put(elementId, externalGroupId);
     }
     /**
-     * @param groupId The groupId to set.
+     * @param externalGroupId The CMS groupId to set after the account is created
      */
-    public void setGroupId(ElementId groupId) {
-        this.groupId = groupId;
+    public void setExternalGroupId(String groupId) {
+        this.externalGroupId = groupId;
+    }
+    /**
+     * Returns externalGroupid specified in tab file.
+     */
+    public String getExternalGroupId() {
+        return(this.externalGroupId);
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        return accountNumber+" "+groupId+" "+externalName+ " " +shortSchoolName;
+        return accountNumber+" "+groups+" "+externalName+ " " +shortSchoolName;
     }
 
 }
