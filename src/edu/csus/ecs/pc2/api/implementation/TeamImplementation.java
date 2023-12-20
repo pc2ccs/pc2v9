@@ -1,10 +1,13 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
 
+import java.util.HashMap;
+
 import edu.csus.ecs.pc2.api.IGroup;
 import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
@@ -21,7 +24,7 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
 
     private String shortName;
 
-    private IGroup group = null;
+    private HashMap<ElementId, IGroup> groups = null;
 
     public TeamImplementation(ClientId submitter, IInternalContest internalContest) {
         super(submitter, internalContest);
@@ -38,12 +41,17 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
     private void setAccountValues(Account account, IInternalContest contest) {
         displayName = account.getDisplayName();
         shortName = account.getClientId().getName();
-        if (account.getGroupId() != null) {
-            // SOMEDAY ensure that groupId is not null
-            // this happened on load of teams.tsv and groups.tsv
-            if (contest.getGroup(account.getGroupId()) != null){
-                group = new GroupImplementation(account.getGroupId(), contest);
+        if (account.getGroupIds() != null) {
+            for(ElementId elementId: account.getGroupIds()) {
+                if (contest.getGroup(elementId) != null){
+                    if(groups == null) {
+                        groups = new HashMap<ElementId, IGroup>();
+                    }
+                    groups.put(elementId, new GroupImplementation(elementId, contest));
+                }
             }
+        } else {
+            groups = null;
         }
     }
 
@@ -56,8 +64,8 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
         return displayName;
     }
 
-    public IGroup getGroup() {
-        return group;
+    public HashMap<ElementId, IGroup> getGroups() {
+        return groups;
     }
 
     public String getLoginName() {

@@ -1,5 +1,7 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
+
+import java.util.HashSet;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.StringUtilities;
@@ -50,9 +52,9 @@ public class Account implements IElementObject {
     private String externalId = "";
     
     /**
-     * Group id
+     * Group ids
      */
-    private ElementId groupId;
+    private HashSet<ElementId> groupIds;
     
     private PermissionList permissionList = new PermissionList();
     
@@ -211,13 +213,13 @@ public class Account implements IElementObject {
             if (!getClientId().equals(account.getClientId())) {
                 return false;
             }
-            if (groupId == null || account.getGroupId() == null) {
+            if (groupIds == null || account.getGroupIds() == null) {
                 // if only 1 is null then return false
-                if (!(groupId == null && account.getGroupId() == null)) {
+                if (!(groupIds == null && account.getGroupIds() == null)) {
                     return false;
                 }
             } else {
-                if (!groupId.equals(account.getGroupId())) {
+                if (!groupIds.equals(account.getGroupIds())) {
                     return false;
                 }
             }
@@ -316,14 +318,20 @@ public class Account implements IElementObject {
     }
 
     /**
-     * Group element id.
+     * Group element ids
      */
-    public ElementId getGroupId() {
-        return groupId;
+    public HashSet<ElementId> getGroupIds() {
+        return groupIds;
     }
-
-    public void setGroupId(ElementId groupId) {
-        this.groupId = groupId;
+    public boolean isGroupMember(ElementId element) {
+        return(groupIds != null && groupIds.contains(element));
+    }
+    
+    public void addGroupId(ElementId groupId) {
+        if(groupIds == null) {
+            groupIds = new HashSet<ElementId>();
+        }
+        groupIds.add(groupId);
     }
 
     public void setShortSchoolName(String shortSchoolName) {
@@ -391,13 +399,19 @@ public class Account implements IElementObject {
      * 
      * @param account
      */
+    @SuppressWarnings("unchecked")
     public void updateFrom(Account account) {
         aliasName = account.aliasName;
         countryCode = account.countryCode;
         displayName = account.displayName;
         externalId = account.externalId;
         externalName = account.externalName;
-        groupId = account.getGroupId();
+        if(account.getGroupIds() != null) {
+            // shallow clone is OK, ElementId's don't change
+            groupIds = (HashSet<ElementId>) account.getGroupIds().clone();
+        } else {
+            groupIds = null;
+        }
         longSchoolName = account.longSchoolName;
         password = account.password;
         shortSchoolName = account.shortSchoolName;

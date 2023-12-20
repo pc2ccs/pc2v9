@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 
@@ -172,8 +173,16 @@ public final class ExportAccounts {
         a[1] = account.getClientId().getName();
         a[2] = account.getDisplayName();
         a[3] = account.getPassword();
-        if (account.getGroupId() != null) {
-            a[4] = groupHash.get(account.getGroupId());
+        // for groups, we create a csv list of them
+        if (account.getGroupIds() != null) {
+            ArrayList<String> groupnames = new ArrayList<String>();
+            for(ElementId elementId: account.getGroupIds()) {
+                String groupName = groupHash.get(elementId);
+                if(groupName != null) {
+                    groupnames.add(groupName);
+                }
+            }
+            a[4] = String.join(",", groupnames);
         } else {
             a[4] = ""; //$NON-NLS-1$
         }
@@ -231,6 +240,18 @@ public final class ExportAccounts {
         accountMemento.putString("teamExternalId", account.getExternalId());
         accountMemento.putString("teamAlias", account.getAliasName().trim());
         // now the rest of the the data
+        // for groups, we create a separate tag <groups>, and a list of <group> under that
+        if (account.getGroupIds() != null) {
+            IMemento groupMemento = accountMemento.createChild("groups");
+            ArrayList<String> groupnames = new ArrayList<String>();
+            for(ElementId elementId: account.getGroupIds()) {
+                String groupName = groupHash.get(elementId);
+                if(groupName != null) {
+                    groupMemento.putString("group", groupName);
+                }
+            }
+        }
+
         String groupName = "";
         if (account.getGroupId() != null) {
             groupName = groups.get(account.getGroupId());
