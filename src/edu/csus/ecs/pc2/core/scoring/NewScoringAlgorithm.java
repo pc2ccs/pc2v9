@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.core.scoring;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -399,6 +400,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
             int groupRank = 0;
             int lastRank = 0;
             int groupId = group.getGroupId();
+            ElementId groupElementId = group.getElementId();
 
             for (StandingsRecord standingsRecord : standings) {
 
@@ -408,21 +410,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                     continue;
                 }
 
-                ElementId groupElementId = account.getGroupId();
-                if (groupElementId == null) {
-                    // TODO throw exception/indicate an error.
-                    continue;
-                }
-
-                Group teamGroup = contest.getGroup(groupElementId);
-                if (teamGroup == null) {
-                    // TODO throw exception/indicate an error.
-                    continue;
-                }
-
-                int teamGroupId = teamGroup.getGroupId();
-
-                if (groupId == teamGroupId) {
+                if(account.isGroupMember(groupElementId)) {
                     if (lastRank != standingsRecord.getRankNumber()) {
                         lastRank = standingsRecord.getRankNumber();
                         groupRank++;
@@ -512,11 +500,8 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
         
         String teamVarDisplayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
-        ElementId groupId = contest.getAccount(standingsRecord.getClientId()).getGroupId();
-        Group group = null;
-        if (groupId != null) {
-            group = contest.getGroup(groupId);    
-        }
+        Account account = contest.getAccount(standingsRecord.getClientId());
+        HashSet<ElementId> groups =account.getGroupIds();
 
         // if (standingsRecord.getNumberSolved() > 0){
         standingsRecordMemento.putLong("firstSolved", standingsRecord.getFirstSolved());
@@ -526,7 +511,6 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         standingsRecordMemento.putInteger("solved", standingsRecord.getNumberSolved());
         standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
         standingsRecordMemento.putInteger("index", indexNumber);
-        Account account = contest.getAccount(standingsRecord.getClientId());
  
         standingsRecordMemento.putString("teamName", ScoreboardVariableReplacer.substituteDisplayNameVariables(teamVarDisplayString, account, group));
         
@@ -540,14 +524,15 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
             standingsRecordMemento.putString("teamAlias", account.getAliasName().trim());
         }
 
-        ElementId elementId = account.getGroupId();
-        if (elementId != null && contest.getGroup(elementId) != null) {
-            standingsRecordMemento.putInteger("groupRank", standingsRecord.getGroupRankNumber());
-            standingsRecordMemento.putString("teamGroupName", group.getDisplayName());
-            // TODO dal CRITICAL
-            // standingsRecordMemento.putInteger("teamGroupId", group.get()+1);
-            standingsRecordMemento.putInteger("teamGroupExternalId", group.getGroupId());
+        if(groups != null) {
+            for(ElementId groupElementId: groups) {
+                Group group = contest.getGroup(groupElementId);
+                if(group != null) {
+                    this.addGroupRow(standingsRecordMemento, standingsRecord.getGroupRankNumber(), group);
+                }
+            }
         }
+
         Problem[] problems = contest.getProblems();
 
         for (int i = 0; i < problems.length; i++) {
@@ -773,6 +758,25 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         summaryInfo.setProblemId(problem.getElementId());
 
         return summaryInfo;
+    }
+
+    /**
+     * Add XML group info for a team.
+     * 
+     * @param mementoRoot xml root to add to
+     * @param index rank
+     * @param group PC2 Group
+     * @return the xml node
+     */
+    private IMemento addGroupRow(IMemento mementoRoot, int index, Group group) {
+        
+        IMemento summaryInfoMemento = mementoRoot.createChild("groupInfo");
+        summaryInfoMemento.putInteger("groupRank", index);
+        summaryInfoMemento.putString("teamGroupName", group.getDisplayName());
+        // TODO dal CRITICAL
+        // summaryInfoMemento.putInteger("teamGroupId", group.get()+1);
+        summaryInfoMemento.putInteger("teamGroupExternalId", group.getGroupId());
+        return summaryInfoMemento;
     }
 
     /**
