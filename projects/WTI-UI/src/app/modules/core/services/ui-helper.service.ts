@@ -30,7 +30,9 @@ export class UiHelperService {
 
   alert(message: string): void {
     this._matSnackBar.open(message, 'Close', {
-      duration: 4000
+      duration: 120000,   //automatically dismiss after 2 minutes
+	  horizontalPosition: 'center',
+	  verticalPosition: 'top'
     });
   }
 
