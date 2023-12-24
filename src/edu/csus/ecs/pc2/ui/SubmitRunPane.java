@@ -171,7 +171,7 @@ public class SubmitRunPane extends JPanePlugin {
     }
 
     /**
-     * Enable or disable submission buttons and Problem-list drop-down.
+     * Enable or disable submission buttons and all drop-down lists.
      * 
      * @param turnButtonsOn
      *            if true, buttons enabled.
@@ -182,6 +182,7 @@ public class SubmitRunPane extends JPanePlugin {
                 if (isTeam()) {
                     // Only turn buttons on and off if a Team
                     getProblemComboBox().setEnabled(turnButtonsOn);
+                    getLanguageComboBox().setEnabled(turnButtonsOn);
                     getSubmitRunButton().setEnabled(turnButtonsOn);
                     getPickFileButton().setEnabled(turnButtonsOn);
                     getTestButton().setEnabled(turnButtonsOn);
