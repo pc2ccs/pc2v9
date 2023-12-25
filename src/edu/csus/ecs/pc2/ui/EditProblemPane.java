@@ -1654,13 +1654,13 @@ public class EditProblemPane extends JPanePlugin {
      * 
      */
 
-    protected void updateProblem() {
+    protected boolean updateProblem() {
 
         // showStackTrace();
 
         if (!validateProblemFields()) {
             // problem defined by the GUI fields is invalid, just return ( error message was issued by validateProblemFields() )
-            return;
+            return false;
         }
 
         //warn if the problem has input data files but no Input Validator, unless the user has previously disabled this warning
@@ -1687,7 +1687,7 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorWarningOnUpdateProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
-                return;
+                return false;
             }
         }
 
@@ -1709,7 +1709,7 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorProgramNameOnUpdateProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
-                return;
+                return false;
             }
         }
         // all the GUI fields are valid; create a new Problem from them
@@ -1786,11 +1786,11 @@ public class EditProblemPane extends JPanePlugin {
         } catch (InvalidFieldValue e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
             // showMessage(e.getMessage());
-            return;
+            return false;
         } catch (Exception e) {
             showMessage("Exeception while updating Problem; see log.");
             getLog().throwing("EditProblemPane", "updateProblem()", e);
-            return;
+            return false;
         }
 
         // add a Problem Letter to the problem if it doesn't have one (note: problem letter is not displayed in the GUI)
@@ -1816,6 +1816,7 @@ public class EditProblemPane extends JPanePlugin {
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
+        return true;
     }
 
     /**
@@ -2140,7 +2141,9 @@ public class EditProblemPane extends JPanePlugin {
                 if (getAddButton().isEnabled()) {
                     addProblem();
                 } else {
-                    updateProblem();
+                    if (!updateProblem()) {
+                        return;
+                    }
                 }
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
