@@ -439,7 +439,7 @@ public class SubmitRunPane extends JPanePlugin {
     /**
      * Submit run or test run.
      * 
-     * Validates that the user has selected problem, language and a valid filename.
+     * Validates that the user has selected problem, language, a valid filename and there are no files with duplicate name.
      * 
      * @param submitTheRun
      *            if true, submits the run.
@@ -481,7 +481,40 @@ public class SubmitRunPane extends JPanePlugin {
             return;
         }
         
-        if (additionalFilesMCLB.getRowCount() > 0){
+        if (additionalFilesMCLB.getRowCount() > 0) {
+
+            String mainfilename = filename;
+            int l = filename.lastIndexOf(File.separatorChar);
+            if (l > -1) {
+                mainfilename = filename.substring(l + 1);
+            }
+
+            for (int i = 0; i < additionalFilesMCLB.getRowCount(); i++) {
+                String otherfilename = (String) additionalFilesMCLB.getRow(i)[0];
+                l = otherfilename.lastIndexOf(File.separatorChar);
+                if (l > -1) {
+                    otherfilename = otherfilename.substring(l + 1);
+                }
+                if (otherfilename.equals(mainfilename)) {
+                    showMessage("You may not submit multiple files with the same name");
+                    log.warning("Found multiple files with same filename");
+                    return;
+                }
+                
+                for (int j = i + 1; j < additionalFilesMCLB.getRowCount(); j++) {
+                    String otherfilename2 = (String) additionalFilesMCLB.getRow(j)[0];
+                    l = otherfilename2.lastIndexOf(File.separatorChar);
+                    if (l > -1) {
+                        otherfilename2 = otherfilename2.substring(l + 1);
+                    }
+                    if (otherfilename.equals(otherfilename2)) {
+                        showMessage("You may not submit multiple files with the same name");
+                        log.warning("Found multiple files with same filename");
+                        return;
+                    }
+                }
+            }
+
             try {
                 otherFiles = getAdditionalSerializedFiles();
             } catch (Exception e) {

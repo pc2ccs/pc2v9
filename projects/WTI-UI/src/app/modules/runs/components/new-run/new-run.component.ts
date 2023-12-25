@@ -122,6 +122,9 @@ export class NewRunComponent implements OnInit, OnDestroy {
 		//pop up an error dialog
 	    this._uiHelper.alert('File names may not contain spaces');
 	    console.error('One or more submitted file contains a space in its filename');
+  } else if (this.filenameContainsDuplicates(this.mainFile, this.additionalFiles)) {
+      this._uiHelper.alert('You may not submit multiple files with the same name');
+	    console.error('One or more submitted file have the same filename');
 	} else {
 		//submit the run
 	    this._teamService.submitRun(model)
@@ -196,6 +199,46 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	//none of the specified FileSubmission files contains a space in its name
 	return false;
 	}
+
+  //returns true if there are duplicate filenames among any of the specified FileSubmissions; false if all unique.
+  private filenameContainsDuplicates(mainfile: FileSubmission, additionalFiles: FileSubmission []): boolean {
+    let mainfilename = mainfile.fileName;
+    let l = mainfilename.lastIndexOf("/");
+    if (l == -1) {
+      l = mainfilename.lastIndexOf("\\");
+    }
+    if (l > -1) {
+      mainfilename = mainfilename.substring(l + 1);
+    }
+    for (let i = 0; i < additionalFiles.length; i++) {
+      let otherfilename = additionalFiles[i].fileName;
+      l = otherfilename.lastIndexOf("/");
+      if (l == -1) {
+        l = otherfilename.lastIndexOf("\\");
+      }
+      if (l > -1) {
+        otherfilename = otherfilename.substring(l + 1);
+      }
+      if (mainfilename === otherfilename) {
+        return true;
+      }
+      for (let j = i + 1; j < additionalFiles.length; j++) {
+        let otherfilename2 = additionalFiles[j].fileName;
+        l = otherfilename2.lastIndexOf("/");
+        if (l == -1) {
+          l = otherfilename2.lastIndexOf("\\");
+        }
+        if (l > -1) {
+          otherfilename2 = otherfilename2.substring(l + 1);
+        }
+        if (otherfilename2 === otherfilename) {
+          return true;
+        }
+      }
+    }
+    //none of the specified FileSubmission files contains duplicate names
+    return false;
+  }
 	
 	//returns a string intended to identify the platform on which the browser is running
 	private getOSName() : string {
