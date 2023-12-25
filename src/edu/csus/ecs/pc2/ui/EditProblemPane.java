@@ -425,11 +425,11 @@ public class EditProblemPane extends JPanePlugin {
      * message "Problem Modified - Save Changes?") and responding "Yes" to the message.
      * 
      */
-    protected void addProblem() {
+    protected boolean addProblem() {
 
         if (problemNameTextField.getText().trim().length() < 1) {
             showMessage("Enter a problem name (\"General\" tab)");
-            return;
+            return false;
         }
 
         if (!validateProblemFields()) {
@@ -437,7 +437,7 @@ public class EditProblemPane extends JPanePlugin {
             if (debug22EditProblem) {
                 System.err.println("DEBUG: validateProblemFields() returned false");
             }
-            return;
+            return false;
         }
 
         //warn if the problem has input data files but no Input Validator, unless the user has previously disabled this warning
@@ -464,7 +464,7 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorWarningOnAddProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
-                return;
+                return false;
             }
         }
 
@@ -485,7 +485,7 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorProgramNameOnAddProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
-                return;
+                return false;
             }
         }
 
@@ -532,11 +532,11 @@ public class EditProblemPane extends JPanePlugin {
             }
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
-            return;
+            return false;
         } catch (Exception e) {
             showMessage("Exeception while adding Problem; see log.");
             getLog().throwing("EditProblemPane", "addProblem()", e);
-            return;
+            return false;
         }
 
         if (!newProblem.getElementId().equals(newProblemDataFiles.getProblemId())) {
@@ -570,6 +570,7 @@ public class EditProblemPane extends JPanePlugin {
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
+        return true;
     }
 
     private int getIntegerValue(String s) {
@@ -2139,7 +2140,9 @@ public class EditProblemPane extends JPanePlugin {
 
             if (result == JOptionPane.YES_OPTION) {
                 if (getAddButton().isEnabled()) {
-                    addProblem();
+                    if (!addProblem()) {
+                        return;
+                    }
                 } else {
                     if (!updateProblem()) {
                         return;
