@@ -704,8 +704,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             Account account = accountList.getAccount(standingsRecord.getClientId());
             
             Group group = null;
-            if (account.getGroupId() != null) {
-                group = groupHash.get(account.getGroupId());
+            if (account.getPrimaryGroupId() != null) {
+                group = groupHash.get(account.getPrimaryGroupId());
             }
             
             standingsRecordMemento.putString("teamName", ScoreboardVariableReplacer.substituteDisplayNameVariables(teamVarDisplayString, account, group)); 

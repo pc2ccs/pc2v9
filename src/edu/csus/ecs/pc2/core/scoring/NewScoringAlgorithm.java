@@ -501,7 +501,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         
         String teamVarDisplayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
         Account account = contest.getAccount(standingsRecord.getClientId());
-        HashSet<ElementId> groups =account.getGroupIds();
+        HashSet<ElementId> groups = account.getGroupIds();
 
         // if (standingsRecord.getNumberSolved() > 0){
         standingsRecordMemento.putLong("firstSolved", standingsRecord.getFirstSolved());
@@ -512,6 +512,11 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
         standingsRecordMemento.putInteger("index", indexNumber);
  
+        // Figure out group for displayname substitutions.
+        Group group = null;
+        if(account.getPrimaryGroupId() != null) {
+            group = contest.getGroup(account.getPrimaryGroupId());
+        }
         standingsRecordMemento.putString("teamName", ScoreboardVariableReplacer.substituteDisplayNameVariables(teamVarDisplayString, account, group));
         
         standingsRecordMemento.putInteger("teamId", account.getClientId().getClientNumber());
@@ -526,7 +531,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
         if(groups != null) {
             for(ElementId groupElementId: groups) {
-                Group group = contest.getGroup(groupElementId);
+                group = contest.getGroup(groupElementId);
                 if(group != null) {
                     this.addGroupRow(standingsRecordMemento, standingsRecord.getGroupRankNumber(), group);
                 }

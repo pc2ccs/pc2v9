@@ -55,6 +55,7 @@ public class Account implements IElementObject {
      * Group ids
      */
     private HashSet<ElementId> groupIds;
+    private ElementId primaryGroupId;
     
     private PermissionList permissionList = new PermissionList();
     
@@ -327,11 +328,18 @@ public class Account implements IElementObject {
         return(groupIds != null && groupIds.contains(element));
     }
     
-    public void addGroupId(ElementId groupId) {
+    public void addGroupId(ElementId groupId, boolean isPrimary) {
         if(groupIds == null) {
             groupIds = new HashSet<ElementId>();
         }
+        if(isPrimary) {
+            primaryGroupId = groupId;
+        }
         groupIds.add(groupId);
+    }
+    
+    public ElementId getPrimaryGroupId() {
+        return primaryGroupId;
     }
 
     public void setShortSchoolName(String shortSchoolName) {
