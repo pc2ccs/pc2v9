@@ -386,6 +386,25 @@ public final class StringUtilities implements Serializable {
     public static String removeLastChar(String s) {
         return (s == null || s.length() == 0) ? null : (s.substring(0, s.length()-1));
     }
+  
+    /**
+     * Remove all occurrences of a char in a string
+     * 
+     *  @param s the string to operate on
+     *  @param c all occurrences of this character will be removed from
+     *  @returns s without any character c's
+     */
+    public static String removeAllOccurrences(String s, char c) {
+        StringBuilder sWork = new StringBuilder(s);
+        int i, nLen = sWork.length();
+        
+        for(i = nLen-1; i >= 0; i--) {
+            if(sWork.charAt(i) == c) {
+                sWork.deleteCharAt(i);
+            }
+        }
+        return(sWork.toString());
+    }
 
     public static String removeUpTo(String source, String stringToRemove) {
 
@@ -420,26 +439,5 @@ public final class StringUtilities implements Serializable {
             return 1;
         }
         return s1.compareTo(s2);
-
     }
-    
-    /**
-     * Remove all occurrences of a char in a string
-     * 
-     *  @param s the string to operate on
-     *  @param c all occurrences of this character will be removed from
-     *  @returns s without any character c's
-     */
-    public static String removeAllOccurrences(String s, char c) {
-        StringBuilder sWork = new StringBuilder(s);
-        int i, nLen = sWork.length();
-        
-        for(i = nLen-1; i >= 0; i--) {
-            if(sWork.charAt(i) == c) {
-                sWork.deleteCharAt(i);
-            }
-        }
-        return(sWork.toString());
-    }
-    
 }
