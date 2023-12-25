@@ -139,7 +139,7 @@ public class CLICSAwardUtilities {
         Map<Group, ClientId> groupWinners = new HashMap<Group, ClientId>();
 
         try {
-            ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest, obeyFreeze);
+            ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest, obeyFreeze);
 
             List<TeamStanding> teamStands = contestStandings.getTeamStandings();
             for (TeamStanding teamStanding : teamStands) {
