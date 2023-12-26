@@ -424,6 +424,7 @@ public class EditProblemPane extends JPanePlugin {
      * The method also gets invoked by making GUI changes to a new problem definition, then pressing "Cancel" (which displays a 
      * message "Problem Modified - Save Changes?") and responding "Yes" to the message.
      * 
+     * @return true if all GUI values are valid and problem is added successfully; false otherwise
      */
     protected boolean addProblem() {
 
@@ -1653,6 +1654,7 @@ public class EditProblemPane extends JPanePlugin {
      * then pressing "Cancel" (which displays a message "Problem Modified - Save Changes?") and responding "Yes"
      * to the message.
      * 
+     * @return true if all GUI values are valid and problem is updated successfully; false otherwise
      */
 
     protected boolean updateProblem() {
