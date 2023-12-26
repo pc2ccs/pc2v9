@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
  */
 
 // $HeadURL$
-public class JSerializFilePicker extends JPanel {
+public class JSerializedFilePicker extends JPanel {
 
     /**
      * 
@@ -45,7 +45,7 @@ public class JSerializFilePicker extends JPanel {
      * This method initializes
      * 
      */
-    public JSerializFilePicker() {
+    public JSerializedFilePicker() {
         super();
         initialize();
     }
