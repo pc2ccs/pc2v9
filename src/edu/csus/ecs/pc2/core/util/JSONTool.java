@@ -386,7 +386,8 @@ public class JSONTool {
         if (notEmpty(account.getInstitutionCode()) && !account.getInstitutionCode().equals("undefined")) {
             element.put("organization_id", getOrganizationId(account));
         }
-        if (account.getGroupId() != null) {
+        HashSet<ElementId> groups = account.getGroupIds();
+        if (groups != null) {
             ArrayNode groupIds = mapper.createArrayNode();
             // FIXME eventually accounts should have more then 1 groupId, make sure add them
             groupIds.add(getGroupId(model.getGroup(account.getGroupId())));

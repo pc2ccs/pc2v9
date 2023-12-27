@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -262,31 +263,37 @@ public class ScoreboardUtilities {
     /**
      * Return division for input clientId.
      * 
+     * TODO To be deprecated when multiple groups are fully implemented.  Although, we have to see if anyone still
+     * uses this.
+     * 
      * @param contest
      * @param submitter
      * @return null if no division, else a digit
      */
     public static String getDivision(IInternalContest contest, ClientId submitter) {
         
-        ElementId groupId = contest.getAccount(submitter).getGroupId();
-        if (groupId == null) {
-            return null;
+        HashSet<ElementId> groups = contest.getAccount(submitter).getGroupIds();
+        String groupName = null;
+        
+        if(groups != null) {
+            for(ElementId elementId: groups) {
+                Group group = contest.getGroup(elementId);
+                if(group != null) {
+                    groupName = getDivision(group.getDisplayName());
+                    if(group != null) {
+                        break;
+                    }
+                }
+            }
         }
         
-        Group group = contest.getGroup(groupId);
-        if (group == null) {
-            return null;
-        }
-        
-        String groupName = group.getDisplayName().trim();
-        
-        return getDivision(groupName);
+        return groupName;
     }
 
     /**
      * Return division number from groupName
      * @param groupName
-     * @return null if no division nubmer found, else the division number
+     * @return null if no division number found, else the division number
      */
     // TODO REFACTOR i689 redesign how divisions are identified. 
     public static String getDivision(String groupName) {
