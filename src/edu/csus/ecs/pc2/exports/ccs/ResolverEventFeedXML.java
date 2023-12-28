@@ -44,14 +44,14 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
  * ICPC Tools Resolver Event Feed XML.
  *
  * The CCS Event Feed is implemented in the {@link EventFeedXML}.
- * 
+ *
  * Mementos are the internal tags for a element, Elements are the XML Elements with
  * surrounding tag.
  * <P>
  * For example {@link #createElement(IInternalContest, Language, int)} will create
  * an element with a {@link #LANGUAGE_TAG} whereas the contents of the memento
  * {@link #addMemento(IMemento, IInternalContest, Language, int)}.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -84,17 +84,17 @@ public class ResolverEventFeedXML {
     public static final String JUDGEMENT_RECORD_TAG = "judgement_record";
 
     private RunComparator runComparator = new RunComparator();
-    
+
     private VersionInfo versionInfo = new VersionInfo();
-    
+
     private Log log = null;
-    
+
     private static String contestId = "unset";
-    
+
     public String toXML(IInternalContest contest) {
         return toXML(contest, new Filter());
     }
-    
+
     /**
      * Return freeze XML.
      * @param contest
@@ -102,14 +102,14 @@ public class ResolverEventFeedXML {
      * @return
      */
     public String toXMLFreeze(IInternalContest contest, long minutesFromEnd) {
-        
+
         long mins = contest.getContestTime().getContestLengthMins() - minutesFromEnd;
-        
+
         Filter filter = new Filter();
         filter.setFilteringDeleted(true);
         // only get XML elements for events before mins
         filter.setEndElapsedTime(mins);
-        
+
         return toXML(contest, filter);
     }
 
@@ -117,7 +117,7 @@ public class ResolverEventFeedXML {
     public String toXML(IInternalContest contest, Filter filter) {
 
         filter.setFilteringDeleted(true);
-        
+
         XMLMemento mementoRoot = XMLMemento.createWriteRoot(CONTEST_TAG);
 
         IMemento memento = mementoRoot.createChild(INFO_TAG);
@@ -136,7 +136,7 @@ public class ResolverEventFeedXML {
             memento = mementoRoot.createChild(JUDGEMENT_TAG);
             addMemento(memento, contest, judgement, sequenceNumber);
             sequenceNumber++;
-        }    
+        }
 
         Language[] languages = contest.getLanguages();
         int num = 1;
@@ -160,7 +160,7 @@ public class ResolverEventFeedXML {
 
         Vector<Account> teams = contest.getAccounts(Type.TEAM);
 
-        Account[] accounts = (Account[]) teams.toArray(new Account[teams.size()]);
+        Account[] accounts = teams.toArray(new Account[teams.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         for (Account account : accounts) {
@@ -186,7 +186,7 @@ public class ResolverEventFeedXML {
                 if (filter.matches(run)) {
                     memento = mementoRoot.createChild(RUN_TAG);
                     addMemento(memento, contest, run); // add RUN
-                    
+
                     RunTestCase[] runTestCases = getLastJudgementTestCases(run);
                     Arrays.sort(runTestCases, new RunTestCaseComparator());
                     for (RunTestCase runTestCaseResult : runTestCases) {
@@ -216,7 +216,7 @@ public class ResolverEventFeedXML {
                 addMemento(memento, contest, clarification);
             }
         }
-        
+
         FinalizeData finalizeData = contest.getFinalizeData();
         if (finalizeData != null) {
             if (finalizeData.isCertified()) {
@@ -234,7 +234,7 @@ public class ResolverEventFeedXML {
 
     /**
      * return first run for client and problem.
-     * 
+     *
      * @param contest
      * @param clientId
      * @param problemId
@@ -257,7 +257,7 @@ public class ResolverEventFeedXML {
 
     /**
      * create info XML element.
-     * 
+     *
      * @param contest
      * @param filter
      * @return
@@ -295,12 +295,12 @@ public class ResolverEventFeedXML {
                 formattedSeconds = XMLUtilities.formatSeconds(time.getContestStartTime().getTimeInMillis());
             }
         }
-        
+
         if (info.getScheduledStartDate() != null) {
             formattedSeconds = XMLUtilities.formatSeconds(info.getScheduledStartDate().getTime());
         }
 
-        XMLUtilities.addChild(memento, "length", contestLengthString); 
+        XMLUtilities.addChild(memento, "length", contestLengthString);
         XMLUtilities.addChild(memento, "penalty", DefaultScoringAlgorithm.getDefaultProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO));
         XMLUtilities.addChild(memento, "started", titleCaseBoolean(started));
         XMLUtilities.addChild(memento, "running", titleCaseBoolean(running));
@@ -313,7 +313,7 @@ public class ResolverEventFeedXML {
             shortTitle = info.getContestTitle();
         }
         XMLUtilities.addChild(memento, "short-title", shortTitle);
-        
+
         String myContestId = contest.getContestIdentifier();
         if (myContestId != null && !myContestId.equals("")) {
             contestId = myContestId;
@@ -324,10 +324,10 @@ public class ResolverEventFeedXML {
             contestId = uuid.toString();
         }
         XMLUtilities.addChild(memento, "contest-id", contestId.toLowerCase());
-        
+
         String scoreboardFreezeLength = info.getFreezeTime();
         XMLUtilities.addChild(memento, "scoreboard-freeze-length", scoreboardFreezeLength);
-        
+
         //TODO: generate a JUnit test for consistency of the entire <info> element
         return memento;
     }
@@ -346,7 +346,7 @@ public class ResolverEventFeedXML {
 
     /**
      * Add Language fields.
-     * 
+     *
      * <pre>
      * &lt;language&gt;
      * &lt;name&gt;C++&lt;/name&gt;
@@ -359,9 +359,9 @@ public class ResolverEventFeedXML {
      * @return
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, Language language, int id) {
-        
+
         // TODO CCS validate content vs demo/sample XML
-        
+
 
 //        <language>
 //        <id>1</id>
@@ -381,7 +381,7 @@ public class ResolverEventFeedXML {
 
     /**
      * Add problem fields.
-     * 
+     *
      * <pre>
      * &lt;problem id="1" state="enabled"&gt;
      * &lt;label&gt;A&lt;/label&gt;
@@ -389,7 +389,7 @@ public class ResolverEventFeedXML {
      * &lt;balloon-color rgb="#ffff00"&gt;yellow&lt;/balloon-color&gt;
      * &lt;/problem&gt;
      * </pre>
-     * 
+     *
      * @param memento
      * @param contest
      * @param problem
@@ -397,15 +397,15 @@ public class ResolverEventFeedXML {
      * @return
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, Problem problem, int id) {
-        
+
         // TODO CCS validate content vs demo/sample XML
-        
+
 
 //        <problem>
 //        <id>1</id>
 //        <name>Self-Assembly</name>
 //       </problem>
-        
+
         memento.createChildNode("id", Integer.toString(id));
         memento.createChildNode("name", problem.toString());
         // added in wf2016 version
@@ -439,9 +439,9 @@ public class ResolverEventFeedXML {
 
     /**
      * For the input number, returns an uppercase letter.
-     * 
+     *
      * 1 = A, 2 = B, etc.
-     * 
+     *
      * @param id problem number, based at one.
      * @return single upper case letter.
      */
@@ -453,9 +453,9 @@ public class ResolverEventFeedXML {
 
     /**
      * This routine checks and obeys the preliminary judgement rules.
-     * 
+     *
      * @param run
-     * @param sendNotificationsForPreliminary 
+     * @param sendNotificationsForPreliminary
      * @return true if run is judged and the state is valid
      */
     public boolean isValidJudgement(Run run, boolean sendNotificationsForPreliminary) {
@@ -481,9 +481,9 @@ public class ResolverEventFeedXML {
 
     /**
      * Should a balloon be issued for this run?
-     * 
+     *
      * @param run
-     * @param contest 
+     * @param contest
      * @return true if valid
      */
     public boolean isValidRun(IInternalContest contest, Run run) {
@@ -505,7 +505,7 @@ public class ResolverEventFeedXML {
 
     /**
      * Return list all problems that team has solved.
-     * 
+     *
      * @param contest
      * @param id
      * @return
@@ -529,7 +529,7 @@ public class ResolverEventFeedXML {
             }
         }
 
-        Problem [] problems = (Problem[]) probVector.toArray(new Problem[probVector.size()]);
+        Problem [] problems = probVector.toArray(new Problem[probVector.size()]);
         Arrays.sort(problems, new ProblemComparator(contest));
         return problems;
     }
@@ -542,7 +542,7 @@ public class ResolverEventFeedXML {
 
     /**
      * Create account memento.
-     * 
+     *
      * <pre>
      * &lt;team id="1" external-id="23412"&gt;
      * &lt;name&gt;American University of Beirut&lt;/name&gt;
@@ -557,9 +557,9 @@ public class ResolverEventFeedXML {
      * @return
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, Account account) {
-        
+
         // TODO CCS validate content vs demo/sample XML
-        
+
 //        <team>
 //        <external-id>171936</external-id>
 //        <id>107</id>
@@ -578,18 +578,18 @@ public class ResolverEventFeedXML {
 //    <region>Open Division</region>
 //    <university>University of Melbourne, Australia</university>
 //  </team>
-        
+
         int teamId =  account.getClientId().getClientNumber();
-        
+
         XMLUtilities.addChild(memento, "external-id", useDefaultIfEmpty(account.getExternalId(), "4242" + teamId));
         XMLUtilities.addChild(memento, "id", teamId);
         XMLUtilities.addChild(memento, "name", account.getDisplayName());
-        
+
         XMLUtilities.addChild(memento, "nationality", account.getCountryCode());
 
         String regionName = getRegionName(contest, account);
         XMLUtilities.addChild(memento, "region", regionName);
-        
+
         XMLUtilities.addChild(memento, "university", account.getDisplayName());
         XMLUtilities.addChild(memento, "university-short-name", account.getShortSchoolName());
         return memento;
@@ -610,20 +610,21 @@ public class ResolverEventFeedXML {
     }
 
     private String getRegionName(IInternalContest contest, Account account) {
-        
+
         /**
          * This code is in place because sometimes groupId is null.
          */
-        
+
         String regionName = "";
 
         try {
-            if (account.getGroupId() != null) {
-                Group group = contest.getGroup(account.getGroupId());
+            // Since this is a legacy event feed (XML), we only care about the primary group assigned by CMS
+            if (account.getPrimaryGroupId() != null) {
+                Group group = contest.getGroup(account.getPrimaryGroupId());
                 regionName = group.getDisplayName();
             }
         } catch (Exception e) {
-            System.out.println("Failed to lookup group for "+account+" group id = "+account.getGroupId());
+            System.out.println("Failed to lookup group for "+account+" group id = "+account.getPrimaryGroupId());
             e.printStackTrace();
         }
 
@@ -644,9 +645,9 @@ public class ResolverEventFeedXML {
      * @param run
      */
     public IMemento addMemento(IMemento memento, IInternalContest contest, RunTestCase testCase, Run run) {
-        
+
         // TODO CCS validate content vs demo/sample XML
-        
+
 
 //        <testcase>
 //        <i>3</i>
@@ -654,25 +655,25 @@ public class ResolverEventFeedXML {
         // the following is wrong; the CLICS specification requires <judgement>acronym</judgement>
 //        <judgement_id>78</judgement_id>
 //        <n>57</n>
-        
+
         Problem problem = contest.getProblem(run.getProblemId());
-        
+
         XMLUtilities.addChild(memento, "i", testCase.getTestNumber());
         XMLUtilities.addChild(memento, "judged", titleCaseBoolean(run.isJudged()));
-        
+
 //        the following statement is incorrect; see bug 1529
 //        XMLUtilities.addChild(memento, "judgement_id", run.getNumber());
-        
+
         //the following replaces the above incorrect statement:
         //output an XML memento containing "<judgement>acronym</judgement>", where "acronym" is the acronym associated with the judgement for the test case
         XMLUtilities.addChild(memento, "judgement", contest.getJudgement(testCase.getJudgementId()).getAcronym());
-        
+
         XMLUtilities.addChild(memento, "n", problem.getNumberTestCases());
-        
+
 //        <result>AC</result>
 //        <run-id>78</run-id>
 //        <solved>True</solved>
-        
+
         String result = Judgement.ACRONYM_JUDGING_ERROR;
         if (testCase.isPassed()){
             result = Judgement.ACRONYM_ACCEPTED;
@@ -680,7 +681,7 @@ public class ResolverEventFeedXML {
         XMLUtilities.addChild(memento, "result", result);
         XMLUtilities.addChild(memento, "run-id", run.getNumber());
         XMLUtilities.addChild(memento, "solved", titleCaseBoolean (testCase.isPassed()));
-        
+
 //        <time>637.307141</time>
 //        <timestamp>1372831837.31</timestamp>
 //       </testcase>
@@ -688,7 +689,7 @@ public class ResolverEventFeedXML {
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
 
         return memento;
-    }  
+    }
 
     public XMLMemento createElement(IInternalContest contest, Clarification clarification) {
         XMLMemento memento = XMLMemento.createWriteRoot(CLARIFICATION_TAG);
@@ -698,7 +699,7 @@ public class ResolverEventFeedXML {
 
     public IMemento addMemento(IMemento memento, IInternalContest contest, Clarification clarification) {
 
-        
+
 //         4/19/2015
 //    <clar>
 //    <answer>arrow</answer>
@@ -714,7 +715,7 @@ public class ResolverEventFeedXML {
         XMLUtilities.addChild(memento, "id", clarification.getNumber());
         XMLUtilities.addChild(memento, "answered", titleCaseBoolean(clarification.isAnswered()));
         XMLUtilities.addChild(memento, "question", clarification.getQuestion());
-        
+
 //    <status>done</status>
 //    <team>8</team>
 //    <time>14016.479</time>
@@ -723,19 +724,19 @@ public class ResolverEventFeedXML {
         XMLUtilities.addChild(memento, "status", status);
         XMLUtilities.addChild(memento, "team", clarification.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(clarification.getElapsedMS()));
-        
+
 //    <timestamp>1414215455.760</timestamp>
 //    <to-all>False</to-all>
-//  </clar       
+//  </clar
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
         XMLUtilities.addChild(memento, "to-all", titleCaseBoolean(clarification.isSendToAll()));
-        
+
         return memento;
     }
 
     /**
      * Returns CCS run status.
-     * 
+     *
      * @param solved
      * @return done if solved, else fresh.
      */
@@ -767,7 +768,7 @@ public class ResolverEventFeedXML {
 
     /**
      * Create RUN XML element.
-     * 
+     *
      * @param contest
      * @param run
      * @return
@@ -780,7 +781,7 @@ public class ResolverEventFeedXML {
 
     /**
      * Add RUN element.
-     * 
+     *
      * @param memento
      * @param contest
      * @param run
@@ -795,13 +796,13 @@ public class ResolverEventFeedXML {
 //    <language>C++</language>
 //    <penalty>True</penalty>
 //    <problem>2</problem>
-        
+
         XMLUtilities.addChild(memento, "id", run.getNumber());
         XMLUtilities.addChild(memento, "judged", titleCaseBoolean(run.isJudged()));
 
         Language language = contest.getLanguage(run.getLanguageId());
         XMLUtilities.addChild(memento, "language", language.getDisplayName());
-        
+
         if ((!run.isSolved()) && isYoungerThanFirstYes(contest, run)) {
             // If this a "no" run and run is younger than first yes.
             if (run.isJudged()) {
@@ -817,15 +818,15 @@ public class ResolverEventFeedXML {
         } else {
             XMLUtilities.addChild(memento, "penalty", "False");
         }
-        
+
         Problem problem = contest.getProblem(run.getProblemId());
         int problemIndex = getProblemIndex(contest, problem);
         XMLUtilities.addChild(memento, "problem", problemIndex);
-        
+
 //    <result>JE</result>
 //    <solved>false</solved>
 //    <status>done</status>
-        
+
         if (run.isJudged()){
             Judgement judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId());
             boolean isFinalResult = true;
@@ -840,19 +841,19 @@ public class ResolverEventFeedXML {
                 XMLUtilities.addChild(memento, "preliminaryResult", acronym);
             }
         }
-        
+
         if (!run.isSolved() || (problem.isManualReview() && run.getJudgementRecord().isComputerJudgement())) {
             XMLUtilities.addChild(memento, "solved", "false");
         } else {
             XMLUtilities.addChild(memento, "solved", run.isSolved());
         }
         XMLUtilities.addChild(memento, "status", getStatus(run.isJudged()));
-        
+
 //    <team>2</team>
 //    <time>2872.860</time>
 //    <timestamp>1414215455.740</timestamp>
 //  </run
-        
+
         XMLUtilities.addChild(memento, "team",  run.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(run.getElapsedMS()));
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
@@ -867,14 +868,14 @@ public class ResolverEventFeedXML {
      * @return true if run is younger than first yes or if no solution, else false.
      */
     protected boolean isYoungerThanFirstYes(IInternalContest contest, Run run) {
-        
+
         Run firstYes = findFistYes (contest, run.getSubmitter(), run.getProblemId());
-        
+
         if (firstYes == null){
             // no solution found
             return true;
         } else {
-            return run.getElapsedMS() < firstYes.getElapsedMS(); 
+            return run.getElapsedMS() < firstYes.getElapsedMS();
         }
     }
 
@@ -884,9 +885,9 @@ public class ResolverEventFeedXML {
      */
     protected Run findFistYes(IInternalContest contest, ClientId submitter, ElementId problemId) {
         Run[] runs = contest.getRuns();
-        
+
         Run lastYesRun = null;
-        
+
         for (Run run : runs) {
             if (run.isSolved()){
                 if (run.getProblemId().equals(problemId)){
@@ -903,9 +904,9 @@ public class ResolverEventFeedXML {
                 }
             }
         }
-        
+
         return lastYesRun;
-        
+
     }
 
     /**
@@ -919,7 +920,7 @@ public class ResolverEventFeedXML {
             return "";
         }
     }
-    
+
     public String createStartupXML(IInternalContest contest) {
         Filter filter = new Filter();
         filter.setFilteringDeleted(true);
@@ -928,7 +929,7 @@ public class ResolverEventFeedXML {
 
     /**
      * Starts contest XML and adds all configuration data/values.
-     * 
+     *
      * @param contest
      * @param judgement
      * @return
@@ -939,7 +940,7 @@ public class ResolverEventFeedXML {
 
         sb.append(getXMLFooterComment());
         sb.append(toXML(createInfoElement(contest, contest.getContestInformation())));
-        
+
         int idx;
 
         idx = 1;
@@ -955,7 +956,7 @@ public class ResolverEventFeedXML {
             }
             idx++;
         }
-        
+
         Group[] groups = contest.getGroups();
         Arrays.sort(groups, new GroupComparator());
         for (Group group : groups) {
@@ -994,7 +995,7 @@ public class ResolverEventFeedXML {
             if (contest.isAllowed(run.getSubmitter(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 if (filter.matches(run)) {
                     sb.append(toXML(createElement(contest, run))); // add RUN
-                    
+
                     RunTestCase[] runTestCases = getLastJudgementTestCases(run);
                     Arrays.sort(runTestCases, new RunTestCaseComparator());
                     for (RunTestCase runTestCaseResult : runTestCases) {
@@ -1026,32 +1027,32 @@ public class ResolverEventFeedXML {
      * @param run
      */
     protected RunTestCase[] getLastJudgementTestCases(Run run) {
-        
+
         ArrayList <RunTestCase> cases = new ArrayList<RunTestCase>();
-        
+
         if (run.isJudged()){
             RunTestCase[] runTestCases = run.getRunTestCases();
             JudgementRecord judgementRecord = run.getJudgementRecord();
-            
+
             for (RunTestCase runTestCaseResult : runTestCases) {
                 if (runTestCaseResult.matchesJudgement(judgementRecord)){
                     cases.add(runTestCaseResult);
                 }
             }
         }
-        
-        return (RunTestCase[]) cases.toArray(new RunTestCase[cases.size()]);
+
+        return cases.toArray(new RunTestCase[cases.size()]);
     }
 
     /**
      * Get the set of Team accounts for the specified Contest.
-     * 
+     *
      * @param inContest the Contest from which Teams are to be fetched
      * @return team accounts sorted by site, team number
      */
     public Account[] getTeamAccounts(IInternalContest inContest) {
         Vector<Account> accountVector = inContest.getAccounts(ClientType.Type.TEAM);
-        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         return accounts;
@@ -1063,7 +1064,7 @@ public class ResolverEventFeedXML {
 
         XMLMemento memento = XMLMemento.createWriteRoot(FINALIZE_TAG);
 
-        addMemento (memento, contest, data); 
+        addMemento (memento, contest, data);
 
         sb.append(toXML(memento));
 
@@ -1076,9 +1077,9 @@ public class ResolverEventFeedXML {
 
     private void addMemento(IMemento memento, IInternalContest contest, FinalizeData data) {
 
-        
+
         // TODO CCS validate content vs demo/sample XML
-        
+
 
 //        <finalized>
 //        <comment>Certified by: Gunnar</comment>
@@ -1104,9 +1105,9 @@ public class ResolverEventFeedXML {
     }
 
     public void addMemento(IMemento memento, IInternalContest contest, Group group) {
-        
+
         // TODO CCS validate content vs demo/sample XML
-        
+
 
 //        <region>
 //        <external-id>5752</external-id>
@@ -1122,7 +1123,7 @@ public class ResolverEventFeedXML {
         addMemento(memento, contest, judgement, sequenceNumber);
         return memento;
     }
-    
+
     private String getAcronym(Judgement judgement) {
 
         if (Judgement.ACRONYM_OTHER_CONTACT_STAFF.equals(judgement.getAcronym())) {
@@ -1137,10 +1138,10 @@ public class ResolverEventFeedXML {
     }
 
     public IMemento addMemento(IMemento memento, IInternalContest contest, Judgement judgement, int judgementSequence) {
-        
+
         // TODO CCS validate content vs demo/sample XML
-        
-   
+
+
 //        <judgement>
 //        <acronym>CE</acronym>
 //        <id>8</id>
@@ -1149,15 +1150,15 @@ public class ResolverEventFeedXML {
 
         String name = judgement.getDisplayName();
         String acronym = getAcronym(judgement);
-        
-        XMLUtilities.addChild(memento, "acronym", acronym); 
-        XMLUtilities.addChild(memento, "id", judgementSequence); 
+
+        XMLUtilities.addChild(memento, "acronym", acronym);
+        XMLUtilities.addChild(memento, "id", judgementSequence);
         XMLUtilities.addChild(memento, "name", name);
         return memento;
     }
 
     public XMLMemento createElement(IInternalContest contest, JudgementRecord judgementRecord) {
-        // Judgement Record 
+        // Judgement Record
         // <judgement>
         // <acronym>CE</acronym>
         // <name>Compile Error</name>

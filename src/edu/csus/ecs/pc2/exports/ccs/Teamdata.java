@@ -12,9 +12,9 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Create file for team.tsv.
- * 
+ *
  * Create lines that can be printed to team.tsv file.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id: Userdata.java 231 2011-09-03 20:20:59Z laned $
  */
@@ -26,7 +26,7 @@ public class Teamdata {
 
 //    /**
 //     * Create TeamData file for all accounts
-//     * 
+//     *
 //     * @param contest
 //     * @return
 //     */
@@ -37,7 +37,7 @@ public class Teamdata {
 //
 //    /**
 //     * Get all teams, judges and non-admins/board accounts.
-//     * 
+//     *
 //     * @param contest
 //     * @return
 //     */
@@ -66,10 +66,10 @@ public class Teamdata {
 //
 //        return getTeamData(contest, (Account[]) list.toArray(new Account[list.size()]));
 //    }
-    
+
     public String[] getTeamData(IInternalContest contest) {
         Vector<Account> accountlist = contest.getAccounts(Type.TEAM);
-        Account [] accounts = (Account[]) accountlist.toArray(new Account[accountlist.size()]); 
+        Account [] accounts = accountlist.toArray(new Account[accountlist.size()]);
         return getTeamData(contest, accounts);
     }
 
@@ -117,15 +117,17 @@ public class Teamdata {
         // 7 Country USA string ISO 3166-1 alpha-3
 
         int groupId = 0;
-        if (account.getGroupId() != null) {
-            groupId = contest.getGroup(account.getGroupId()).getGroupId();
+        // Since this is a legacy format, the user of this data is not expecting more than one group,
+        // so we use the CMS primary group.
+        if (account.getPrimaryGroupId() != null) {
+            groupId = contest.getGroup(account.getPrimaryGroupId()).getGroupId();
         }
-        
+
         String longSchoolName = setString(account.getLongSchoolName(), "undefined");
         String countryCode = setString(account.getCountryCode(), "XXX");
         String shortSchoolName = setString(account.getShortSchoolName(),"undefined");
 
-        
+
         return clientId.getClientNumber() + TAB + //
                 account.getExternalId() + TAB + //
                 groupId + TAB + //
@@ -136,13 +138,13 @@ public class Teamdata {
     }
 
     private String setString(String string, String defaultString) {
-        
+
         if (string == null || string.trim().length() == 0){
             return defaultString;
         } else {
             return string;
         }
-            
+
 //            return string;
     }
 }

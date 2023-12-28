@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -21,13 +22,13 @@ import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
  * Print summary of groups which can view/use problems.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class ProblemsGroupReport implements IReport {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 5635989177738081431L;
 
@@ -84,6 +85,7 @@ public class ProblemsGroupReport implements IReport {
     //      Group  2
     //      Group  3
 
+    @Override
     public void writeReport(PrintWriter printWriter) {
 
         Problem[] problems = contest.getProblems();
@@ -108,7 +110,7 @@ public class ProblemsGroupReport implements IReport {
             Group[] groups = contest.getGroups();
 
             for (Group group : groups) {
-                
+
 
                 String title = StringUtilities.trunc(group.getDisplayName(), maxGroupColumnLength);
                 title = StringUtilities.rpad(' ', 6, group.getGroupId()) + " " + StringUtilities.rpad(' ', maxGroupColumnLength + 1, title);
@@ -144,10 +146,10 @@ public class ProblemsGroupReport implements IReport {
 
                     }
                 }
-                
+
                 printWriter.println();
             }
-            
+
 
             printWriter.println();
 
@@ -204,12 +206,12 @@ public class ProblemsGroupReport implements IReport {
     private int teamCountPerGroup(Group group) {
         int teamCount = 0;
 
+        ElementId groupElementId = group.getElementId();
+
         Account[] teams = getTeamAccounts();
         for (Account account : teams) {
-            if (account.getGroupId() != null) {
-                if (group.getElementId().equals(account.getGroupId())) {
-                    teamCount++;
-                }
+            if (account.isGroupMember(groupElementId)) {
+                teamCount++;
             }
         }
 
@@ -221,7 +223,7 @@ public class ProblemsGroupReport implements IReport {
         if (accounts == null) {
             Type type = Type.TEAM;
             Vector<Account> accountVector = contest.getAccounts(type);
-            accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+            accounts = accountVector.toArray(new Account[accountVector.size()]);
         }
 
         return accounts;
@@ -243,6 +245,7 @@ public class ProblemsGroupReport implements IReport {
 
     }
 
+    @Override
     public void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());
         printWriter.println("Date: " + Utilities.getL10nDateTime());
@@ -253,11 +256,13 @@ public class ProblemsGroupReport implements IReport {
         writeContestTime(printWriter);
     }
 
+    @Override
     public void printFooter(PrintWriter printWriter) {
         printWriter.println();
         printWriter.println("end report");
     }
 
+    @Override
     public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
@@ -285,32 +290,39 @@ public class ProblemsGroupReport implements IReport {
         }
     }
 
+    @Override
     public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
+    @Override
     public String createReportXML(Filter inFilter) throws IOException {
         return Reports.notImplementedXML(this);
     }
 
+    @Override
     public String getReportTitle() {
         return "Groups for Problems";
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();
     }
 
+    @Override
     public String getPluginTitle() {
         return "Groups for Problems Report";
     }
 
+    @Override
     public Filter getFilter() {
         return filter;
     }
 
+    @Override
     public void setFilter(Filter filter) {
         this.filter = filter;
     }

@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
  * Problem Group Assignments.
- * 
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
 public class ProblemGroupAssignmentReport implements IReport {
@@ -32,7 +32,7 @@ public class ProblemGroupAssignmentReport implements IReport {
     private static final String PAD = "    ";
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -1889505494967631248L;
 
@@ -80,10 +80,10 @@ public class ProblemGroupAssignmentReport implements IReport {
             printWriter.println("Exception generating report " + e.getMessage());
         }
     }
-    
+
     public static Account[] getAccounts(IInternalContest contest, ClientType.Type type) {
         Vector<Account> accountVector = contest.getAccounts(type);
-        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
         return accounts;
     }
 
@@ -98,7 +98,7 @@ public class ProblemGroupAssignmentReport implements IReport {
 
         // print groups by group Id
         Arrays.sort(groups, new GroupComparatorById());
-        
+
         int longestGroupName = 0;
         for (Group group : groups) {
             if (group.getDisplayName().length() > longestGroupName) {
@@ -117,21 +117,21 @@ public class ProblemGroupAssignmentReport implements IReport {
         printWriter.println();
         printWriter.println("--- " + teamAccounts.length + " teams ---");
         printWriter.println();
-        
-        
+
+
 //        for (Account account : teamAccounts) {
 //            printWriter.println("Account "+account +" " +account.getGroupId() + " "+contest.getGroup(account.getGroupId()).getDisplayName());
 //        }
-//        
+//
         for (Group group : groups) {
 
             int teamsInGroupCount = 0;
             for (Account account : teamAccounts) {
-                if (account.getGroupId() != null && group.getElementId().equals(account.getGroupId())){
+                if (account.isGroupMember(group.getElementId()) == true){
                     teamsInGroupCount++;
                 }
 //                printWriter.println("Group "+group.getGroupId()+" vs "  +account.getGroupId() + " aka "+contest.getGroup(account.getGroupId()).getDisplayName());
-                
+
             }
 
             String paddedName = String.format("%-" + longestGroupName + "s", group.getDisplayName());
@@ -226,6 +226,7 @@ public class ProblemGroupAssignmentReport implements IReport {
         writeContestTime(printWriter);
     }
 
+    @Override
     public void printFooter(PrintWriter printWriter) {
         printWriter.println();
         printWriter.println("end report");

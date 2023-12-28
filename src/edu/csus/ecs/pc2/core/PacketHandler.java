@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -70,9 +71,9 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Process all incoming packets.
- * 
+ *
  * Process packets. In {@link #handlePacket(Packet, ConnectionHandlerID) handlePacket} a packet is unpacked, contest is updated, and controller used to send packets as needed.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -83,7 +84,7 @@ public class PacketHandler {
     private IInternalContest contest = null;
 
     private IInternalController controller = null;
-  
+
     /**
      * Message handler for conditions where attention may be needed.
      */
@@ -104,28 +105,28 @@ public class PacketHandler {
 
     /**
      * Take each input packet, update the contest, send out packets as needed.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
-     * @throws Exception 
+     * @throws Exception
      */
     public void handlePacket(Packet packet, ConnectionHandlerID connectionHandlerID) throws Exception {
 
         Type packetType = packet.getType();
-        
+
         info("handlePacket start " + packet);
         PacketFactory.dumpPacket(controller.getLog(), packet, "handlePacket");
         if (Utilities.isDebugMode()) {
             PacketFactory.dumpPacket(System.out, packet, "handlePacket");
         }
-        
+
         if (forwardedToProxy(packet)){
-            
+
             // Handled proxy packets (send/receive), no additional action necesary in this method.
             return;
         }
-        
-    
+
+
         ClientId fromId = packet.getSourceId();
 
         Clarification clarification;
@@ -143,7 +144,7 @@ public class PacketHandler {
                 runSubmission(packet, fromId, connectionHandlerID);
                 break;
             case RUN_SUBMISSION_CONFIRM_SERVER:
-                // RUN send from one server to another 
+                // RUN send from one server to another
                 handleRunSubmissionConfirmationServer (packet, fromId);
                 break;
             case CLARIFICATION_SUBMISSION:
@@ -259,28 +260,28 @@ public class PacketHandler {
                 // InternalContest Clock stopped sent from server to clients
                 clockStopped(packet);
                 break;
-         
+
             default:
                 /**
                  * To avoid the method too many lines limit, the switch
                  * for packetType is handled by this method.
                  */
                 handleOtherPacketTypes(packetType, fromId, packet, connectionHandlerID);
-        } 
-    }             
+        }
+    }
 
     /**
      * Handle proxy packets.
-     * 
+     *
      * Will forward packet from a proxy or will send a packet to a proxy.
-     * 
+     *
      * @param packet
      * @return true if packet was forwarded.
      */
     public boolean forwardedToProxy(Packet packet) {
 
         // for a server that is not us, and we are a server
-        
+
         if (contest != null && isServer() && !isThisSite(packet.getDestinationId())) {
             int siteNumber = packet.getDestinationId().getSiteNumber();
             Site destSite = contest.getSite(siteNumber);
@@ -304,13 +305,13 @@ public class PacketHandler {
 
     /**
      * Handle packets that are not handled by {@link #handlePacket(Packet, ConnectionHandlerID)}.
-     * 
-     * 
+     *
+     *
      * @param packetType
      * @param fromId
      * @param packet
      * @param connectionHandlerID
-     * @throws Exception 
+     * @throws Exception
      */
     private void handleOtherPacketTypes(Type packetType, ClientId fromId, Packet packet, ConnectionHandlerID connectionHandlerID) throws Exception {
 
@@ -424,15 +425,15 @@ public class PacketHandler {
             case REQUEST_SERVER_STATUS:
                 handleRequestServerStatus (packet, connectionHandlerID);
                 break;
-                
+
             case SERVER_STATUS:
                 handleServerStatus(packet, connectionHandlerID);
                 break;
-                
-            case SYNCHRONIZE_REMOTE_DATA: 
+
+            case SYNCHRONIZE_REMOTE_DATA:
                 handleSynchronizeRemoteData(packet, connectionHandlerID);
                 break;
-                
+
             case REQUEST_REMOTE_DATA:
                 // Update remote data from other server.
                 handleRequestRemoteData(packet, connectionHandlerID);
@@ -441,27 +442,27 @@ public class PacketHandler {
             case UPDATE_REMOTE_DATA:
                 loginSuccess(packet, connectionHandlerID, fromId);
                 break;
-                
+
             case SHUTDOWN:
                 handleServerShutdown (packet, connectionHandlerID, fromId);
                 break;
-                
+
             case SHUTDOWN_ALL:
                 handleShutdownAllServers (packet, connectionHandlerID, fromId);
                 break;
-                
+
             case START_PLAYBACK:
                 handleStartPlayback (packet, connectionHandlerID, fromId);
                 break;
-                
+
             case STOP_PLAYBACK:
                 handleStopPlayback (packet, connectionHandlerID, fromId);
                 break;
-                
+
             case AUTO_REGISTRATION_SUCCESS:
                 handleAutoRegistratioSuccess(packet, connectionHandlerID);
                 break;
-          
+
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
                 controller.getLog().log(Log.WARNING, "Unhandled Packet ", exception);
@@ -475,23 +476,23 @@ public class PacketHandler {
 
         Account account = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
         String message = account.getDisplayName() + PacketType.FIELD_DELIMIT + account.getClientId().getName() + PacketType.FIELD_DELIMIT + account.getPassword();
-        
+
         contest.addMessage(Area.AUTOREG, packet.getSourceId(), packet.getDestinationId(), message);
     }
 
     private void handleStopPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws Exception {
         // SOMEDAY  673 forward this start playback to other servers
-        
+
         securityCheck(Permission.Type.STOP_PLAYBACK, fromId, connectionHandlerID);
-        
+
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
         contest.stopReplayPlaybackInfo(playbackInfo);
     }
 
     private void handleStartPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws Exception {
-        
+
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
-        
+
         if ( isServer()) {
 
             if (playbackInfo.isStarted()) {
@@ -499,25 +500,26 @@ public class PacketHandler {
             } else {
                 securityCheck(Permission.Type.STOP_PLAYBACK, fromId, connectionHandlerID);
             }
-            
+
             PlaybackManager manager = contest.getPlaybackManager();
-            
+
             PlaybackInfo currentPlaybackInfo = manager.getPlaybackInfo();
-            
+
             if (currentPlaybackInfo.getReplayList().length == 0) {
                 currentPlaybackInfo = manager.createPlaybackInfo(playbackInfo.getFilename(), contest);
             }
-            
+
             currentPlaybackInfo.setWaitBetweenEventsMS(playbackInfo.getWaitBetweenEventsMS());
             currentPlaybackInfo.setMinimumPlaybackRecords(playbackInfo.getMinimumPlaybackRecords());
 
             contest.getPlaybackManager().insureMinimumPlaybackRecords(currentPlaybackInfo.getMinimumPlaybackRecords());
 
             if (! manager.isPlaybackRunning() && playbackInfo.isStarted()) {
-                
+
                 // start if NOT running.
                 manager.startPlayback(contest, controller, new Runnable() {
 
+                    @Override
                     public void run() {
                         PlaybackManager manager = contest.getPlaybackManager();
                         PlaybackRecord record = manager.getCurrentPlaybackRecord();
@@ -528,10 +530,10 @@ public class PacketHandler {
                     }
                 });
             }
-            
+
             if (manager.isPlaybackRunning() && (! playbackInfo.isStarted())){
                 // stop if running.
-                
+
                 manager.setPlaybackRunning(false);
                 currentPlaybackInfo.setStarted(false);
             }
@@ -550,17 +552,17 @@ public class PacketHandler {
             controller.sendToServers(updatePacket);
 
         } else {
-            
+
             contest.updatePlaybackInfo(playbackInfo);
         }
     }
 
     /**
      * Send a packet to all servers to request remote data.
-     * 
+     *
      * This will start the process for a server to synchronize
-     * its remote data by sending a request to all servers. 
-     * 
+     * its remote data by sending a request to all servers.
+     *
      * @param packet
      * @param connectionHandlerID
      */
@@ -570,12 +572,12 @@ public class PacketHandler {
     }
 
     /**
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
      */
     private void handleRequestRemoteData(Packet packet, ConnectionHandlerID connectionHandlerID) {
-       
+
         int targetSiteId = packet.getSourceId().getSiteNumber();
         info("Start send remote data to site "+targetSiteId);
 
@@ -589,9 +591,9 @@ public class PacketHandler {
     private void handleRunSubmissionConfirmationServer(Packet packet, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException  {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
-            
+
             contest.addRun(run, runFiles);
-            
+
             if (isServer()) {
                 Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), fromId, run);
                 controller.sendToJudgesAndOthers(confirmPacket, false);
@@ -602,18 +604,18 @@ public class PacketHandler {
                     controller.logWarning("Unexpected packet on client", ex);
                 }
             }
-        
+
     }
 
     /**
      * Handle switch packet.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
-     * @throws ProfileException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
-     * @throws FileSecurityException 
+     * @throws ProfileException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws FileSecurityException
      */
     private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws ProfileException, IOException, ClassNotFoundException, FileSecurityException {
 
@@ -622,7 +624,7 @@ public class PacketHandler {
 
         Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
         String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
-        
+
         if (newProfile.getSiteNumber() == 0){
             newProfile.setSiteNumber(contest.getSiteNumber());
         }
@@ -631,11 +633,11 @@ public class PacketHandler {
             // Use existing contest password if no contest password specified.
             contestPassword = contest.getContestPassword();
         }
-        
+
         if (!new File(newProfile.getProfilePath()).isDirectory()) {
-            
+
             throw new ProfileException("Unable to switch - can not find profile on disk");
-            
+
             // FIXME code up Profile does not exist on this server, so must try to switch on originating server.
 //            /**
 //             * Profile does not exist on this server, so must try to switch on originating server.
@@ -647,15 +649,15 @@ public class PacketHandler {
 //                return;
 //            }
         }
-        
+
         ProfileManager manager = new ProfileManager();
 
         if (manager.isProfileAvailable(newProfile, contest.getSiteNumber(), contestPassword.toCharArray())) {
 
-//            PacketFactory.dumpPacket(System.out, packet, "handleSwitchProfile switchProfile"); // debug 
+//            PacketFactory.dumpPacket(System.out, packet, "handleSwitchProfile switchProfile"); // debug
             IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray(), true);
             contest = newContest;
-            
+
             sendStatusToServers (packet, newProfile);
 
         } else {
@@ -665,66 +667,66 @@ public class PacketHandler {
 
     /**
      * Switch to new profile.
-     * 
+     *
      * Load new profile from disk, replace instances of old contest with new contests including all data.
-     * 
-     * @param currentContest contest switch from 
+     *
+     * @param currentContest contest switch from
      * @param newProfile profile to switch to
      * @param contestPassword contest password for newProfile
      * @param sendToOtherServers true if this is the first server switching profiles, false if not
-     * @param packet 
+     * @param packet
      * @return new contest based on newProfile
      * @throws ProfileException
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     protected IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword, boolean sendToOtherServers) throws ProfileException, IOException,
             ClassNotFoundException, FileSecurityException {
         return switchProfile( currentContest,  newProfile,  contestPassword,  sendToOtherServers, null, sendToOtherServers);
     }
-    
+
     /**
-     * Switch profile on this server then send out switch to all local clients. 
-     *  
+     * Switch profile on this server then send out switch to all local clients.
+     *
      * @param currentContest
      * @param newProfile
      * @param contestPassword
      * @param sendToOtherServers
      * @param packet
-     * @param sendToServers 
+     * @param sendToServers
      * @return
      * @throws ProfileException
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     protected IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword, boolean sendToOtherServers, Packet packet, boolean sendToServers)
             throws ProfileException, IOException, ClassNotFoundException, FileSecurityException {
-        
+
         if (contest.getProfile().getName().equals(newProfile.getName())){
             PacketFactory.dumpPacket(System.out, packet, "switch packet, tried to switch to same profile");
             throw new ProfileException("Attempted to switch to the same profile: "+newProfile.getName());
         }
-        
+
         ProfileManager manager = new ProfileManager();
-        
+
         IInternalContest newContest = new InternalContest();
 
         info("Start switching to profile "+contest.getProfile().getName()+" contest id = "+contest.getContestIdentifier());
-        
+
         newContest.setClientId(contest.getClientId());
         if (newContest.getSiteNumber() == 0){
             newContest.setSiteNumber(contest.getSiteNumber());
         }
-        
+
         info("switchProfile start - to "+newProfile+" as Site "+contest.getSiteNumber()+" as user "+newContest.getClientId());
-        
+
         IStorage storage = manager.getProfileStorage(newProfile, contest.getSiteNumber(), contestPassword);
         newContest.setStorage(storage);
-        
+
         info("switchProfile save config to "+storage.getDirectoryName());
-        
+
         newContest.setContestPassword(new String(contestPassword));
 
         try {
@@ -735,11 +737,11 @@ public class PacketHandler {
         } catch (Exception e) {
             throw new ProfileException(newProfile, "Unable to read configuration ", e);
         }
-        
+
         if (newContest.getProfile() == null){
             newContest.setProfile(newProfile);
         }
-        
+
         try {
             newContest.storeConfiguration(controller.getLog());
         } catch (Exception e) {
@@ -756,7 +758,7 @@ public class PacketHandler {
         } catch (CloneException e) {
             info(e);
         }
-        
+
         /*
          * Set new contest and add all listeners.
          */
@@ -768,12 +770,12 @@ public class PacketHandler {
             /**
              * Load configuration information from remoteServer
              */
-            
+
             updateSitesToModel(packet);
-            
+
             // This will load information and also re-log us into other servers
-            // to get the most up to date information from those servers. 
-            
+            // to get the most up to date information from those servers.
+
 
             ContestLoader loader = new ContestLoader();
             loadSettingsFromRemoteServer (loader, packet, null);
@@ -782,19 +784,19 @@ public class PacketHandler {
         }
 
         contest.fireAllRefreshEvents();
-        
+
         storeProfiles();
-        
+
         // newProfile might not have the correct elementId, so use contest.getProfile() to get the real one.
         sendOutChangeProfileToAllClients(contest, currentContest.getProfile(), contest.getProfile(), new String(contestPassword), sendToServers);
-        
+
         info("switchProfile done - to "+contest.getProfile()+" as Site "+contest.getSiteNumber()+" as user "+newContest.getClientId());
         info("Switched to profile "+contest.getProfile().getName()+" contest id = "+contest.getContestIdentifier());
 
         if ((! controller.isUsingGUI()) || Utilities.isDebugMode()){
             System.out.println(new Date() + " Switched to profile "+contest.getProfile().getName()+" contest id = "+contest.getContestIdentifier());
         }
-        
+
         Profile profile = contest.getProfile();
         if (! controller.isUsingGUI()){
             System.out.println(new Date()+" Switch to Profile: "+profile.getName()+" @ "+profile.getProfilePath());
@@ -807,18 +809,18 @@ public class PacketHandler {
 
     /**
      * Create and send current profile to all clients and servers.
-     * 
+     *
      * @param newContest
      * @param currentProfile
      * @param switchToProfile
      * @param contestPassword used to encrypt/decrypt config files.
-     * @param b 
+     * @param b
      */
     protected void sendOutChangeProfileToAllClients(IInternalContest newContest, Profile currentProfile, Profile switchToProfile, String contestPassword, boolean sendToServers) {
 
         ContestLoginSuccessData data ;
         Packet packet ;
-        
+
         if (sendToServers){
             data = createContestLoginSuccessData(newContest, getServerClientId(), contestPassword);
             packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
@@ -850,7 +852,7 @@ public class PacketHandler {
         ClientId[] teams = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
 
         for (ClientId clientId : teams) {
-            
+
             if (newContest.getAccount(clientId) != null) {
                 // Account exists in new profile/config
 
@@ -869,12 +871,12 @@ public class PacketHandler {
 
     /**
      * Send cloned packet to user class (ClientType).
-     * 
+     *
      * Will loop through all logged in users for ClientType and send packet to users.
-     * 
+     *
      * To send to only accounts/user logins that exist in the new profile/contest configuration,
      * set the confirmUserExists to true.
-     * 
+     *
      * @param packet packet to send
      * @param type class of user to send to.
      * @param newContest data used to confirm that account/clientId exists.
@@ -882,9 +884,9 @@ public class PacketHandler {
      */
     private void sendClonePacketToUsers(Packet packet, edu.csus.ecs.pc2.core.model.ClientType.Type type, IInternalContest newContest, boolean confirmUserExists) {
         ClientId[] users = contest.getLocalLoggedInClients(type);
-        
+
         for (ClientId clientId : users) {
-            
+
             try {
                 if (!confirmUserExists) {
                     // send unconditional to client
@@ -905,30 +907,30 @@ public class PacketHandler {
     }
 
     /**
-     * Update Client Profile handle new contest profile/settings. 
-     * 
+     * Update Client Profile handle new contest profile/settings.
+     *
      * @param packet
      * @param connectionHandlerID
      * @throws IOException
      * @throws ClassNotFoundException
      * @throws FileSecurityException
-     * @throws ProfileException 
-     * @throws ProfileCloneException 
+     * @throws ProfileException
+     * @throws ProfileCloneException
      */
     private void handleUpdateClientProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ProfileException,
             ProfileCloneException {
 
         if (isServer()) {
-            
+
             /**
-             * Switch Profile or create new Profile files on the server 
+             * Switch Profile or create new Profile files on the server
              */
-            
+
             //  switch/load new profile storage
-            
+
             Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
             String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
-            
+
             newProfile.setSiteNumber(contest.getSiteNumber());
 
             if (contestPassword == null) {
@@ -937,7 +939,7 @@ public class PacketHandler {
             }
 
             ProfileManager manager = new ProfileManager();
-            
+
             if (manager.createProfilesPathandFiles(newProfile, contest.getSiteNumber(), contestPassword)) {
 
                 /**
@@ -955,52 +957,52 @@ public class PacketHandler {
                  * Then save the new contest information.
                  */
                 contest2.storeConfiguration(controller.getLog());
-            } 
-            
+            }
+
             if (manager.isProfileAvailable(newProfile, contest.getSiteNumber(), contestPassword.toCharArray())) {
 
                 PacketFactory.dumpPacket(System.out, packet, "handleUpdateClientProfile switchProfile");
                 IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray(), false, packet, false);
                 contest = newContest;
-                
+
                 sendStatusToServers (packet, newProfile);
 
             } else {
                 throw new ProfileException("Can not switch profiles, invalid contest password");
             }
-            
+
 
         } else {
 
             /**
              * Client new profile.
              */
-            
+
             // All client data is reset then re-added from this packet
 
             contest.resetSubmissionData();
             contest.resetConfigurationData();
-  
+
             unRegisterPlugins();
-            
+
             ContestLoader loader = new ContestLoader();
             loader.loadDataIntoModel(contest, controller, packet, connectionHandlerID);
             loader = null;
-            
+
             reRegisterPlugins();
-            
+
             info("handleUpdateClientProfile fireAllRefreshEvents start");
             long start = new Date().getTime();
-            
+
             System.err.println("debug22 handleUpdateClientProfile fireAllRefreshEvents start "+new Date());
-            
+
             contest.fireAllRefreshEvents();
-            
+
             long elapsed = (new Date().getTime() - start) / 1000;
-            
+
             System.err.println("debug22 handleUpdateClientProfile fireAllRefreshEvents done "+new Date());
             System.err.println("debug22 handleUpdateClientProfile fireAllRefreshEvents elapsed "+elapsed);
-            
+
         }
     }
 
@@ -1008,7 +1010,7 @@ public class PacketHandler {
      * Remove all listeners from model.
      */
     private void unRegisterPlugins() {
-        contest.removeAllListeners(); 
+        contest.removeAllListeners();
 
 
     }
@@ -1034,14 +1036,14 @@ public class PacketHandler {
 
 
     private IInternalContest initializeContest(IStorage storage, int siteNumber) {
-        
+
         IInternalContest newContest = new InternalContest();
-        
+
         newContest.setSiteNumber(siteNumber);
         newContest.setStorage(storage);
-        
+
         newContest.initializeSubmissions(siteNumber);
-        
+
         return newContest;
     }
 
@@ -1058,7 +1060,7 @@ public class PacketHandler {
         if (!new File(profilePath).isDirectory()) {
             throw new ProfileCloneException("Unable to use profile dir " + profilePath);
         }
-        
+
         String databaseDirectoryName = profilePath + File.separator + "db." + contest.getSiteNumber();
 
         try {
@@ -1066,7 +1068,7 @@ public class PacketHandler {
         } catch (Exception e) {
             throw new ProfileCloneException("Unable to create DB dir " + profilePath, e);
         }
-        
+
         FileSecurity fileSecurity = new FileSecurity(databaseDirectoryName);
 
         try {
@@ -1074,49 +1076,49 @@ public class PacketHandler {
         } catch (Exception e) {
             throw new ProfileCloneException(e);
         }
-        
+
         return fileSecurity;
     }
 
     /**
      * Create profile from the input packet.
-     * 
-     * 
-     * 
+     *
+     *
+     *
      * @param newProfile the profile to store/load/create.
      * @param contest2 the contest where settings will be loaded.
      * @param packet a {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#UPDATE_CLIENT_PROFILE}.
-     * @param connectionHandlerID 
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @param connectionHandlerID
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void createProfileFromPacket(Profile newProfile, IInternalContest contest2, Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException,
             FileSecurityException {
-        
+
         if (packet.getType().equals(Type.UPDATE_CLIENT_PROFILE)){
 
             ContestLoader loader = new ContestLoader();
             loader.loadDataIntoModel(contest2, controller, packet, connectionHandlerID);
             loader = null;
-            
+
         } else {
             new ProfileException("Can not create profile from packet type "+packet.getType().toString());
         }
-        
+
     }
 
     /**
      * RunFiles from a remote site, add these to this site.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
-     * @throws Exception 
+     * @throws Exception
      */
     private void handleRunFilesList(Packet packet, ConnectionHandlerID connectionHandlerID) throws Exception {
 
         RunFiles[] files = (RunFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES_LIST);
-        
+
         if (files != null) {
 
             for (RunFiles runFiles : files) {
@@ -1134,11 +1136,11 @@ public class PacketHandler {
         } else {
             throw new Exception("RUN_FILES are null from packet "+packet);
         }
-        
+
     }
-    
+
     private void handleFetchRunFiles(Packet packet, ConnectionHandlerID connectionHandlerID) {
-        
+
         int siteNumber = packet.getSourceId().getSiteNumber();
         int lastRunId = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.RUN_ID);
         sendRunFilesToServer(siteNumber, lastRunId);
@@ -1146,80 +1148,80 @@ public class PacketHandler {
     }
 
     private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) {
-        
+
         // FIXME code security check only Admins can change profiles
-        
+
 //        prop.put(CLIENT_ID, source);
 //        ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        
+
 //        prop.put(PROFILE, profile2);
 //        Profile currentProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
-        
+
         try {
             ProfileCloneSettings settings =  (ProfileCloneSettings) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_CLONE_SETTINGS);
             boolean switchProfileNow = ((Boolean) PacketFactory.getObjectValue(packet, PacketFactory.SWITCH_PROFILE)).booleanValue();
-            
+
             Profile newProfile = cloneContest (packet, settings, switchProfileNow);
             settings.setProfilePath(newProfile.getProfilePath());
-            
+
             notifyAllOfClonedContest(packet, newProfile, settings);
         } catch (Exception e) {
             sendMessage(Area.PROFILES, "Unable to clone profile",e);
             info(e);
         }
     }
-    
+
     private Profile cloneContest (Packet packet, ProfileCloneSettings settings, boolean switchProfileNow) {
-        
+
         Profile newProfile = new Profile(settings.getName());
         newProfile.setDescription(settings.getDescription());
         newProfile.setSiteNumber(contest.getSiteNumber());
-        
+
         if (settings.getProfilePath() != null){
             newProfile.setProfilePath(settings.getProfilePath());
         }
 
         info("Start clone to profile "+newProfile.getName());
-        
+
         Profile addedProfile = contest.addProfile(newProfile);
-        
+
         InternalContest newContest = new InternalContest();
         newContest.setSiteNumber(contest.getSiteNumber());
-    
+
         try {
             /**
              * This clones the existing contest based on the settings,
              * including copying and saving all settings on disk.
              */
             contest.clone(newContest, addedProfile, settings);
-            
+
             contest.storeConfiguration(controller.getLog());
 
             storeProfiles();
-            
+
             if (switchProfileNow ){
                 switchProfile(contest, newProfile, contest.getContestPassword().toCharArray(), true);
             }
-            
+
             info("Done clone to profile "+newProfile.getName());
-            
+
         } catch (Exception e) {
             sendMessage(Area.PROFILES, "Unable to clone using packet "+packet,e);
             info("Failed to clone to profile");
             info(e);
         }
-        
+
         return newProfile;
-    
+
     }
 
 
     private void handleServerSettings(Packet packet, ConnectionHandlerID connectionHandlerID) {
-        
+
         ContestLoader loader = new ContestLoader();
         loadSettingsFromRemoteServer(loader, packet, connectionHandlerID);
         loader = null;
-        
+
         info(" handlePacket SERVER_SETTINGS - from another site -- all settings loaded " + packet);
 
         if (isServer()) {
@@ -1228,7 +1230,7 @@ public class PacketHandler {
     }
 
     /**
-     * 
+     *
      * @param packet
      */
     private void handleRunNotAvailable(Packet packet) {
@@ -1243,7 +1245,7 @@ public class PacketHandler {
             }
         }
     }
-    
+
     private void handleRunUnCheckout(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -1252,7 +1254,7 @@ public class PacketHandler {
 
     private void handleRunSubmissionConfirmation(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-        
+
          contest.addRun(run);
         if (isServer()) {
             controller.sendToJudgesAndOthers(packet, isThisSite(run));
@@ -1261,9 +1263,9 @@ public class PacketHandler {
 
     /**
      * Handles a reset all contest from admin.
-     * 
+     *
      * Checks security that allows this client (Admin hopefully) to reset this site and then send reset to all other sites.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
      * @throws ContestSecurityException
@@ -1300,10 +1302,10 @@ public class PacketHandler {
 
     /**
      * Reset the contest.
-     * 
+     *
      * Clone current profile, prepend with the name "Backup of " and mark inactive,
      * then switch to the newly cloned profile.
-     * 
+     *
      * @param packet
      * @param profile
      * @throws ProfileCloneException
@@ -1313,27 +1315,27 @@ public class PacketHandler {
      * @throws FileSecurityException
      */
     private void resetContest(Packet packet, Profile profile) throws ProfileCloneException, ProfileException, IOException, ClassNotFoundException, FileSecurityException {
-        
+
         Boolean eraseProblems = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_PROBLEM_DEFINITIONS);
         Boolean eraseLanguages = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_LANGUAGE_DEFINITIONS);
 
         if (isServer()) {
 
             ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            
+
             if (! contest.isAllowed(adminClientId, Permission.Type.SWITCH_PROFILE)){
                 info("permission is not granted to "+adminClientId+" to reset");
             } else {
                 info("permission is granted to "+adminClientId+" to reset");
             }
-            
+
             /**
              * Hide the current copy of this profile, give it a new name.
              */
             Profile updatedProfile = contest.getProfile();
             updatedProfile.setActive (false);
             updatedProfile.setName("Backup of "+updatedProfile.getName());
-            
+
             /**
              * This clears all submission data and counters.
              */
@@ -1343,57 +1345,57 @@ public class PacketHandler {
             if (newContest.getSiteNumber() == 0){
                 newContest.setSiteNumber(contest.getSiteNumber());
             }
-            
+
             newContest.addProfile(updatedProfile); // Add old hiddent profile into new profile's list
-            
+
             String title = contest.getContestInformation().getContestTitle();
             String description = profile.getDescription();
             String password = contest.getContestPassword();
             ProfileCloneSettings settings = new ProfileCloneSettings(profile.getName(), description, password.toCharArray(), contest.getProfile());
-            
+
             settings.setContestTitle(title);
-            
+
             settings.setResetContestTimes( true );
             settings.setCopyAccounts( true );
             settings.setCopyContestSettings( true );
             settings.setCopyGroups( true );
             settings.setCopyJudgements( true );
             settings.setCopyNotifications( true );
-            
+
             settings.setCopyLanguages( !eraseLanguages );
             settings.setCopyProblems( !eraseProblems );
             settings.setCopyRuns( false );
             settings.setCopyClarifications( false );
-            
+
             settings.setCopyCategories( false );
             settings.setContestPassword(contest.getContestPassword().toCharArray());
-            
+
             Profile newProfile = cloneContest (packet, settings, true);
             settings.setProfilePath(newProfile.getProfilePath());
-            
+
             notifyAllOfClonedContest(packet, newProfile, settings);
-            
-            
+
+
         } else {
-            
+
             // SOMEDAY  remove this unused code (with profiles this code is no longer used)
-            
+
             // Set Contest Profile
             contest.setProfile(profile);
-            
+
             resetContestData(eraseProblems, eraseLanguages);
-            
+
             contest.fireAllRefreshEvents();
         }
     }
-    
+
     private void notifyAllOfClonedContest(Packet packet, Profile newProfile, ProfileCloneSettings settings) {
 
         contest.addProfile(newProfile);
 
         Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, newProfile);
         controller.sendToJudgesAndOthers(addPacket, false);
-        
+
         if (isThisSite(packet.getSourceId())) {
             // Only send to other servers if this server originated the clone.
             controller.sendToServers(packet);
@@ -1403,12 +1405,12 @@ public class PacketHandler {
 
     /**
      * Clear all auto judge problems for this contest site/client.
-     * 
+     *
      */
     private void removeAllProblemsFromAutoJudging(){
         Vector <Account> vectorAccounts = contest.getAccounts(ClientType.Type.JUDGE, contest.getSiteNumber());
-        Account [] accounts = (Account[]) vectorAccounts.toArray(new Account[vectorAccounts.size()]);
-        
+        Account [] accounts = vectorAccounts.toArray(new Account[vectorAccounts.size()]);
+
         for (Account account : accounts){
             ClientSettings clientSettings = new ClientSettings(account.getClientId());
             clientSettings.setAutoJudging(false);
@@ -1416,7 +1418,7 @@ public class PacketHandler {
         }
     }
 
-    private void resetContestData(Boolean eraseProblems, Boolean eraseLanguages) { 
+    private void resetContestData(Boolean eraseProblems, Boolean eraseLanguages) {
 
         contest.resetSubmissionData();
 
@@ -1424,7 +1426,7 @@ public class PacketHandler {
             for (Problem problem : contest.getProblems()) {
                 contest.deleteProblem(problem);
             }
-            
+
             removeAllProblemsFromAutoJudging();
         }
 
@@ -1434,12 +1436,12 @@ public class PacketHandler {
             }
         }
     }
-    
+
     /**
      * Get a SERVER client id.
-     * 
+     *
      * This is a generic send to all server and clients ClientId.
-     * 
+     *
      * @return a generic all sites server client id
      */
     private ClientId getServerClientId() {
@@ -1451,15 +1453,15 @@ public class PacketHandler {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId judgeClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         RunExecutionStatus status = (RunExecutionStatus) PacketFactory.getObjectValue(packet, PacketFactory.RUN_STATUS);
-        
+
         if (isServer()) {
 
             if (!isThisSite(judgeClientId)) {
-                
+
                 // If this is not a run status from this site, then send to spectators/API only
-                
+
                 sendToSpectatorsAndSites(packet, false);
-                
+
             } else {
                 // packet from this site, send to all spectators/API and to other servers.
 
@@ -1476,13 +1478,13 @@ public class PacketHandler {
 
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId whoRequestsRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        
+
         securityCheck(Permission.Type.ALLOWED_TO_FETCH_RUN, whoRequestsRunId, connectionHandlerID);
-        
+
         if (isServer()) {
 
             if (!isThisSite(run)) {
-                
+
                 ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
                 if (contest.isLocalLoggedIn(serverClientId) || contest.isRemoteLoggedIn(serverClientId)) {
 
@@ -1531,8 +1533,8 @@ public class PacketHandler {
     private void runSubmission(Packet packet, ClientId fromId, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ContestSecurityException {
         Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
-        
-        
+
+
         Long overrideElapsedTime = (Long) PacketFactory.getObjectValue(packet, PacketFactory.ELAPSED_TIME);
         if (overrideElapsedTime != null) {
             if (contest.getContestInformation().isCcsTestMode()) {
@@ -1546,7 +1548,7 @@ public class PacketHandler {
                 throw new SecurityException("Attempted to use time override in submit run when not in CCS Test Mode");
             }
         }
-        
+
         Long overrideRunId = (Long) PacketFactory.getObjectValue(packet, PacketFactory.OVERRIDE_RUN_ID);
         if (overrideRunId != null) {
             if (contest.getContestInformation().isCcsTestMode()) {
@@ -1558,10 +1560,10 @@ public class PacketHandler {
                 throw new SecurityException("Attempted to use run id override in submit run when not in CCS Test Mode");
             }
         }
-        
+
         ClientId submitter = submittedRun.getSubmitter();
         boolean proxySubmission = ! submitter.equals(fromId);
-        
+
         if (!isServer(fromId)){
 
             if (proxySubmission) {
@@ -1585,9 +1587,9 @@ public class PacketHandler {
             }
 
         }
-        
+
         Run run = contest.acceptRun(submittedRun, runFiles);
-        
+
         /**
          * There are three conditions where a run would be added to the system but not appear on the scoreboard (or team's display):
          * 1 - past end of contest (remaining time is zero or less)
@@ -1611,7 +1613,7 @@ public class PacketHandler {
             Packet dupSubmissionPacket = PacketFactory.createRunSubmissionConfirmation(contest.getClientId(), fromId, run, runFiles);
             controller.sendToServers(dupSubmissionPacket);
         }
-        
+
         controller.sendRunToSubmissionInterface(run, runFiles);
 
     }
@@ -1642,7 +1644,7 @@ public class PacketHandler {
         } else {
             requestRun(packet, run, requestFromId, connectionHandlerID, computerJudge);
         }
-        
+
     }
 
     private void clockStopped(Packet packet) {
@@ -1672,31 +1674,31 @@ public class PacketHandler {
     }
 
     private void handlePasswordChangeResults(Packet packet) {
-        
+
         ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Boolean passwordChanged = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.PASSWORD_CHANGED);
         String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
-        
+
         String mess;
         if (passwordChanged.booleanValue()){
             mess = "Password changed "+ message;
         } else {
             mess = "Password NOT changed "+ message;
         }
-        
+
         controller.getLog().log(Log.INFO, mess);
-        
+
         contest.passwordChanged (passwordChanged.booleanValue(), clientId, message);
-        
+
     }
 
     /**
      * Change password request from client.
-     * 
+     *
      * This change assumes only that a client is changing their own password.
-     * If the client requesting is not from this site, their password will NOT 
+     * If the client requesting is not from this site, their password will NOT
      * be changed.
-     * 
+     *
      * @param packet input change password packet
      */
     private void attemptChangePassword(Packet packet) {
@@ -1735,7 +1737,7 @@ public class PacketHandler {
             sendPasswordResultsBackToClient(clientId, false, "Can not change password from site " + clientId);
 
         } else {
-            
+
             try {
                 if (contest.isValidLoginAndPassword(clientId, password)) {
 
@@ -1744,7 +1746,7 @@ public class PacketHandler {
                     Account account = contest.getAccount(clientId);
                     account.setPassword(newPassword);
                     contest.updateAccount(account);
-                    
+
                     account = contest.getAccount(clientId);
 
                     sendPasswordResultsBackToClient(clientId, true, "Password changed");
@@ -1763,13 +1765,13 @@ public class PacketHandler {
 
     /**
      * Send password results back to client.
-     * 
+     *
      * @param clientId client who requested password change.
      * @param changed was password changed?
      * @param message error or confirm message.
      */
     private void sendPasswordResultsBackToClient(ClientId clientId, boolean changed, String message) {
-        
+
         Packet passwordChangeResult = PacketFactory.createPasswordChangeResult(clientId, clientId, changed, message);
         controller.sendToClient(passwordChangeResult);
     }
@@ -1834,9 +1836,9 @@ public class PacketHandler {
 
     /**
      * Checks whether client is allowed to do particular activity +(Permission).
-     * 
+     *
      * This checks the client permissions settings and if the client does not have permission to do the permission (type) throws a security exception.
-     * 
+     *
      * @param type
      * @param clientId
      * @param connectionHandlerID
@@ -1864,12 +1866,12 @@ public class PacketHandler {
 
     /**
      * Process checkout run packets.
-     * 
+     *
      * @param packet
      * @param packetType either {@link Type.RUN_CHECKOUT} or {@link Type.RUN_CHECKOUT_NOTIFICATION}
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void runCheckout(Packet packet, Type packetType) throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -1887,12 +1889,12 @@ public class PacketHandler {
                 break;
 
             case RUN_CHECKOUT_NOTIFICATION:
-                
+
                 // only process this notification if the run was checked out by someone else
                 if (!contest.getClientId().equals(whoCheckedOut)) {
                     contest.updateRun(run, whoCheckedOut);
                 }
-                
+
                 break;
             default:
                 controller.getLog().log(Log.WARNING, "Attempted to runCheckout with packet: " + packet);
@@ -1912,22 +1914,22 @@ public class PacketHandler {
         ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         RunResultFiles[] runResultFiles = (RunResultFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
         contest.updateRun(run, runFiles, whoCheckedOut, runResultFiles);
-        
+
         // If this is the server, make sure the reply gets to the correct local client.
         if(isServer()) {
             controller.sendToClient(packet);
         }
     }
-    
+
     /**
      * Re-judge run request, parse packet, attempt to checkout run.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
      * @throws ContestSecurityException
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void requestRejudgeRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
@@ -1999,7 +2001,7 @@ public class PacketHandler {
     }
 
     private void handleMessagePacket(Packet packet) throws Exception {
-        
+
         if (isServer()){
 
             String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
@@ -2014,9 +2016,9 @@ public class PacketHandler {
                 int siteNumber = packet.getDestinationId().getSiteNumber();
                 controller.sendToRemoteServer(siteNumber, messagePacket);
             }
-            
+
             contest.addMessage(area, packet.getSourceId(), packet.getDestinationId(), message);
-            
+
         } else {
             String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
             Area area = (Area) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_AREA);
@@ -2027,12 +2029,12 @@ public class PacketHandler {
             }
         }
     }
-    
+
     /**
      * Insure that directory exists.
-     * 
+     *
      * Will use File.mkdirs() if needed to create directory.
-     * 
+     *
      * @param directoryName
      */
     private void insureDirectory(String directoryName) {
@@ -2043,7 +2045,7 @@ public class PacketHandler {
 
     /**
      * Login to server success.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
      * @param fromId
@@ -2052,7 +2054,7 @@ public class PacketHandler {
      * @throws FileSecurityException
      */
     private synchronized void loginSuccess(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException {
-        
+
         ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
         if (!contest.isLoggedIn()) {
@@ -2065,17 +2067,17 @@ public class PacketHandler {
                     System.err.println("FATAL ERROR - Contest Security Password is null ");
                     System.exit(44);
                 }
-                
+
                 Profile theProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
                 if (theProfile == null) {
                     StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR - Profile is null");
                     System.err.println("FATAL ERROR - Profile is null ");
                     System.exit(44);
                 }
-                
+
                 insureDirectory(theProfile.getProfilePath());
                 theProfile.setSiteNumber(clientId.getSiteNumber());
-                
+
                 String baseDirectoryName = theProfile.getProfilePath() + File.separator + "db." + clientId.getSiteNumber();
                 insureDirectory(baseDirectoryName);
 
@@ -2113,11 +2115,11 @@ public class PacketHandler {
             contest.setSiteNumber(clientId.getSiteNumber());
             ContestLoader loader = new ContestLoader();
             loader.loadDataIntoModel(contest, controller, packet, connectionHandlerID);
-            
+
             if (isServer()) {
-                
+
                 storeProfiles();
-                
+
                 loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.TEAM);
                 loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.JUDGE);
                 loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.SCOREBOARD);
@@ -2144,7 +2146,7 @@ public class PacketHandler {
 
                 // Send settings packet to the server we logged into
                 controller.sendToClient(createContestSettingsPacket(packet.getSourceId()));
-                
+
                 sendRequestForRunfFiles (packet, packet.getSourceId().getSiteNumber());
             }
 
@@ -2160,7 +2162,7 @@ public class PacketHandler {
             ContestLoader loader = new ContestLoader();
             loadSettingsFromRemoteServer(loader, packet, connectionHandlerID);
             loader = null;
-            
+
             contest.storeConfiguration(controller.getLog());
             controller.sendToClient(createContestSettingsPacket(packet.getSourceId()));
 
@@ -2186,7 +2188,7 @@ public class PacketHandler {
 
     /**
      * Dump both local and remote server logins.
-     * 
+     *
      * @param comment
      */
     private void dumpServerLoginLists(String comment) {
@@ -2285,12 +2287,12 @@ public class PacketHandler {
 
     /**
      * Update from admin to server.
-     * 
+     *
      * @param packet
      * @throws ContestSecurityException
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void updateRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
@@ -2337,13 +2339,13 @@ public class PacketHandler {
                 Run theRun = contest.getRun(run.getElementId());
                 Packet runUpdatedPacket = PacketFactory.createRunUpdateNotification(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoChangedRun);
                 controller.sendToJudgesAndOthers(runUpdatedPacket, true);
-                
+
                 /**
                  * Send Judgement Notification to Team or not.
                  */
 
                 if (theRun.isJudged() && theRun.getJudgementRecord().isSendToTeam()) {
-                    
+
                     Packet notifyPacket = PacketFactory.clonePacket(contest.getClientId(), run.getSubmitter(), runUpdatedPacket);
                     sendJudgementToTeam (notifyPacket, theRun);
                 }
@@ -2362,7 +2364,7 @@ public class PacketHandler {
 
     /**
      * Login from a server,
-     * 
+     *
      * @param packet
      */
     private void loginClient(Packet packet) {
@@ -2391,7 +2393,7 @@ public class PacketHandler {
                         }
                         contest.addClientSettings(clientSettings);
                     }
-                    
+
                 } else {
                     controller.getLog().log(Log.DEBUG, "LOGIN packet, server site " + whoLoggedIn + " logged onto " + packet.getSourceId() + ", already logged in on this site");
                 }
@@ -2416,20 +2418,20 @@ public class PacketHandler {
         if (isServer()) {
 
             // TODO SECURITY  code - only allow certain users to logoff other users
-            // TEST CASE - attempt to logoff client as say a team 
+            // TEST CASE - attempt to logoff client as say a team
 //            throw new SecurityException("Client " + contest.getClientId() + " attempted to logoff another client "+whoLoggedOff);
-            
+
             if (isServer(whoLoggedOff)){
 
                 // Special logic, ignore any logoff from any client about any server.
                 // Only disconnect logic will work on a server.
-                
+
                 controller.getLog().info("No logoff server allowed, logoff packet "+packet+" ignored");
-                
+
             } else if (contest.isLocalLoggedIn(whoLoggedOff)) {
                 // Logged into this server, so we log them off and send out packet.
                 controller.logoffUser(whoLoggedOff);
-                
+
             } else {
                 // Log them off, only notify local clients.
                 if (isServer(packet.getSourceId()) && whoLoggedOff.getSiteNumber() == packet.getSourceId().getSiteNumber()){
@@ -2455,11 +2457,11 @@ public class PacketHandler {
 
     /**
      * Send judgement to judges, servers, admins and boards.
-     * 
+     *
      * @param packet
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void sendJudgementUpdate(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -2498,11 +2500,11 @@ public class PacketHandler {
 
     /**
      * Update from server to everyone else.
-     * 
+     *
      * @param packet
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void sendRunUpdateNotification(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -2519,11 +2521,11 @@ public class PacketHandler {
 
     /**
      * Generate local accounts for forward this request to another server.
-     * 
+     *
      * @param packet
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void generateAccounts(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -2539,7 +2541,7 @@ public class PacketHandler {
 
                 // get vector of new accounts.
                 Vector<Account> accountVector = contest.generateNewAccounts(type.toString(), count.intValue(), startCount.intValue(), active);
-                Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+                Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
 
                 contest.storeConfiguration(controller.getLog());
 
@@ -2558,13 +2560,13 @@ public class PacketHandler {
 
     /**
      * Starts the contest clock and sends notification to other servers/clients.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
      * @throws ContestSecurityException
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void startContest(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
@@ -2604,12 +2606,12 @@ public class PacketHandler {
 
     /**
      * This stops the contest and sends notification to other servers/clients.
-     * 
+     *
      * @param connectionHandlerID
      * @throws ContestSecurityException
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void stopContest(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -2655,11 +2657,11 @@ public class PacketHandler {
 
     /**
      * Add a new setting from another server.
-     * 
+     *
      * @param packet
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void addNewSetting(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -2711,7 +2713,7 @@ public class PacketHandler {
             }
             sendToTeams = true;
         }
-        
+
         Problem [] problems = (Problem []) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_LIST);
         if (problems != null){
             addNewProblems (contest, packet, problems);
@@ -2729,12 +2731,12 @@ public class PacketHandler {
             contest.addBalloonSettings(balloonSettings);
             sendToTeams = true;
         }
-        
+
         Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
         if (profile != null) {
             contest.addProfile(profile);
         }
-        
+
         Packet updatePacket = null;
 
         Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
@@ -2742,7 +2744,7 @@ public class PacketHandler {
             if (isServer()) {
                 if (isThisSite(oneAccount)) {
                     ClientId clientId = oneAccount.getClientId();
-                    
+
                     // Add account, this assigns the new account a client number.
                     Vector<Account> accountVector = contest.generateNewAccounts(clientId.getClientType().toString(), 1, true);
                     Account addedAccount = accountVector.firstElement();
@@ -2816,11 +2818,11 @@ public class PacketHandler {
         }
 
         if (isServer()) {
-            
+
             contest.storeConfiguration(controller.getLog());
-            
+
             storeProfiles();
-            
+
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
 
             if (updatePacket != null) {
@@ -2837,9 +2839,9 @@ public class PacketHandler {
 
     /**
      * Add problems and problem data file list to contest.
-     * 
+     *
      * @param contest2
-     * @param packet contains ProblemDataFiles 
+     * @param packet contains ProblemDataFiles
      * @param problems problems to add
      */
     protected void addNewProblems(IInternalContest iContest, Packet packet, Problem[] problems) {
@@ -2860,16 +2862,16 @@ public class PacketHandler {
 
     /**
      * Handle a UPDATE_SETTING packet.
-     * 
+     *
      * @param packet
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void updateSetting(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
 
         boolean sendToTeams = false;
-        
+
         Packet oneUpdatePacket = null;
 
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
@@ -2930,7 +2932,7 @@ public class PacketHandler {
             contest.updateBalloonSettings(balloonSettings);
             sendToTeams = true;
         }
-        
+
         Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
         if (profile != null) {
             contest.updateProfile(profile);
@@ -2986,13 +2988,13 @@ public class PacketHandler {
                 }
             }
         }
-        
+
         PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
         if (playbackInfo != null) {
             if (isServer()) {
                 boolean isStarted = contest.getPlaybackManager().getPlaybackInfo().isStarted();
                 PlaybackInfo currentPlaybackInfo = updatePlaybackInfo (playbackInfo);
-                
+
                 if (isStarted != currentPlaybackInfo.isStarted()) {
                     if (currentPlaybackInfo.isStarted()) {
                         contest.startReplayPlaybackInfo(currentPlaybackInfo);
@@ -3002,7 +3004,7 @@ public class PacketHandler {
                 } else {
                     contest.updatePlaybackInfo(currentPlaybackInfo);
                 }
-                
+
             } else {
                 contest.updatePlaybackInfo(playbackInfo);
             }
@@ -3030,7 +3032,7 @@ public class PacketHandler {
                 }
             }
         }
-        
+
         FinalizeData finalizeData = (FinalizeData) PacketFactory.getObjectValue(packet, PacketFactory.FINALIZE_DATA);
         if (finalizeData != null) {
             contest.setFinalizeData(finalizeData);
@@ -3055,9 +3057,9 @@ public class PacketHandler {
         if (isServer()) {
 
             contest.storeConfiguration(controller.getLog());
-            
+
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
-            
+
             if (oneUpdatePacket != null) {
                 controller.sendToJudgesAndOthers(oneUpdatePacket, sendToOtherServers);
             } else {
@@ -3070,7 +3072,7 @@ public class PacketHandler {
             }
         }
     }
-    
+
     private boolean handleLanguageList(Language[] languages) {
         boolean sendToTeams = false;
         if (languages != null) {
@@ -3216,13 +3218,13 @@ public class PacketHandler {
 
     /**
      * UN checkout or cancel clarification checkout.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
      * @throws ContestSecurityException
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public void cancelClarificationCheckOut(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
         Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
@@ -3308,18 +3310,18 @@ public class PacketHandler {
 
     /**
      * This method sends the specified judgement to all clients that need to know about it.
-     * 
+     *
      * @param run
      * @param judgementRecord
      * @param runResultFiles
      * @param whoJudgedId
      * @param connectionHandlerID
      * @throws ContestSecurityException
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
-    protected void sendRunJudgementToClients(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, 
+    protected void sendRunJudgementToClients(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles,
             ClientId whoJudgedId, ConnectionHandlerID connectionHandlerID, Packet packet) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
         if (isServer()) {
@@ -3342,10 +3344,10 @@ public class PacketHandler {
                 Run theRun = contest.getRun(run.getElementId());
 
                 try {
-                    
+
                     //try to send the judgement to the team
                     if (judgementRecord.isComputerJudgement()) {
-                        
+
                         if (contest.getProblem(theRun.getProblemId()).isManualReview()) {
                             if (contest.getProblem(theRun.getProblemId()).isPrelimaryNotification()) {
 
@@ -3355,7 +3357,7 @@ public class PacketHandler {
                                     rrf = null;
                                 }
                                 Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
-                                
+
                                 sendJudgementToTeam (judgementPacket, theRun);
                             }
                         } else {
@@ -3379,11 +3381,11 @@ public class PacketHandler {
                         sendJudgementToTeam (judgementPacket, theRun);
                     }
                 } catch (Exception e) {
-                    
+
                     controller.getLog().log(Level.WARNING, "Exception attempting to send judgement for run " + run + " in packet " + packet + ": "+ e.getMessage(), e);
                 }
 
-                //try to send the judgement to other clients 
+                //try to send the judgement to other clients
                 Packet judgementUpdatePacket = PacketFactory.createRunJudgmentUpdate(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoJudgedId);
                 controller.sendToJudgesAndOthers(judgementUpdatePacket, true);
             }
@@ -3399,10 +3401,10 @@ public class PacketHandler {
      * @param run
      */
     private void sendJudgementToTeam(Packet judgementPacket, Run run) {
-        
+
         if (run.isJudged() && run.getJudgementRecord().isSendToTeam()) {
             JudgementNotificationsList judgementNotificationsList = contest.getContestInformation().getJudgementNotificationsList();
-            
+
             if (! RunUtilities.supppressJudgement(judgementNotificationsList, run, contest.getContestTime())){
                 // Send to team who sent it, send to other server if needed.
                 controller.sendToClient(judgementPacket);
@@ -3416,21 +3418,21 @@ public class PacketHandler {
 
     /**
      * Checkout a run.
-     * 
+     *
      * @see #checkoutRun(Packet, Run, ClientId, boolean)
      * @param packet
      * @param run
      * @param whoRequestsRunId
      * @throws ContestSecurityException
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void requestRun(Packet packet, Run run, ClientId whoRequestsRunId, ConnectionHandlerID connectionHandlerID, boolean computerJudge) throws ContestSecurityException, IOException,
             ClassNotFoundException, FileSecurityException {
         checkoutRun(packet, run, whoRequestsRunId, false, computerJudge, connectionHandlerID);
     }
-    
+
     private void requestClarification(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
         ElementId clarificationId = (ElementId) PacketFactory.getObjectValue(packet, PacketFactory.REQUESTED_CLARIFICATION_ELEMENT_ID);
         ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -3493,13 +3495,13 @@ public class PacketHandler {
 
     /**
      * Fetch a run.
-     * 
+     *
      * Either checks out run (marks as {@link edu.csus.ecs.pc2.core.contest.Run.RunStates#BEING_JUDGED BEING_JUDGED}) and send to everyone, or send a
      * {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#RUN_NOTAVAILABLE RUN_NOTAVAILABLE}.
      * <P>
      * If readOnly is false, will checkout run. <br>
      * if readOnly is true will fetch run without setting the run as "being judged".
-     * 
+     *
      * @param packet
      * @param run
      * @param whoRequestsRunId
@@ -3507,9 +3509,9 @@ public class PacketHandler {
      *            get a read only copy (aka do not checkout/select run).
      * @param connectionHandlerID
      * @throws ContestSecurityException
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     private void checkoutRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly, boolean computerJudge, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException,
             IOException, ClassNotFoundException, FileSecurityException {
@@ -3541,21 +3543,21 @@ public class PacketHandler {
                     // just get run and sent it to them.
 
                     theRun = contest.getRun(run.getElementId());
-                    
+
                     RunFiles runFiles = null;
-                    
+
                     // in case GetRunFiles throws an exception we want to deal with it separately
                     try {
-                        runFiles = contest.getRunFiles(run);  
+                        runFiles = contest.getRunFiles(run);
                     } catch (Exception e) {
                         controller.getLog().warning("contest.getRunFiles (R/O) can not get files for run " + run.getNumber() + ": " + e.getMessage());
-                        
+
                         // set status to NEW indicating there was a failure and it has to be manually taken care of
                         // the judges will be notifed of a new run.
                         theRun.setStatus(Run.RunStates.NEW);
                         Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoRequestsRunId, theRun);
                         controller.sendToJudgesAndOthers(availableRunPacket, true);
-                        
+
                         Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
                         controller.sendToClient(notAvailableRunPacket);
 
@@ -3576,13 +3578,13 @@ public class PacketHandler {
                         theRun = contest.checkoutRun(run, whoRequestsRunId, false, computerJudge);
 
                         RunFiles runFiles = null;
-                        
+
                         // in case GetRunFiles throws an exception we want to deal with it separately
                         try {
-                            runFiles = contest.getRunFiles(run);  
+                            runFiles = contest.getRunFiles(run);
                         } catch (Exception e) {
                             controller.getLog().warning("contest.getRunFiles can not get files for run " + run.getNumber() + " (settng to status NEW): " + e.getMessage());
-                            
+
                             try {
                                 // cancel the checkout and set run state to NEW to notify judges
                                 contest.cancelRunCheckOut(run, whoRequestsRunId);
@@ -3592,13 +3594,13 @@ public class PacketHandler {
                             } catch (Exception e1) {
                                 controller.getLog().severe("Problem cancelling run checkout after error getting run " + run.getNumber() + " files." + e1);
                             }
-                            
+
                             Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
                             controller.sendToClient(notAvailableRunPacket);
 
                             return;
                         }
-                        
+
                         if (runFiles == null) {
                             try {
                                 contest.cancelRunCheckOut(run, whoRequestsRunId);
@@ -3615,7 +3617,7 @@ public class PacketHandler {
 
                         Packet checkOutNotificationPacket = PacketFactory.createCheckedOutRunNotification(contest.getClientId(), whoRequestsRunId, theRun, whoRequestsRunId);
                         controller.sendToJudgesAndOthers(checkOutNotificationPacket, true);
-                        
+
                     } catch (RunUnavailableException runUnavailableException) {
                         controller.getLog().info("runUnavailableException " + runUnavailableException.getMessage());
                         theRun = contest.getRun(run.getElementId());
@@ -3650,21 +3652,21 @@ public class PacketHandler {
 
     /**
      * Loads only the settings from the remote server into this server's model.
-     * 
+     *
      * Loads settings from other server, submissions, etc. into model.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
      */
     public void loadSettingsFromRemoteServer(ContestLoader loader, Packet packet, ConnectionHandlerID connectionHandlerID) {
-        
+
         int remoteSiteNumber = packet.getSourceId().getSiteNumber();
         info("Start loading settings from remote site "+remoteSiteNumber);
 
         loader.addRemoteContestTimesToModel(contest, controller, packet, remoteSiteNumber);
 
         loader.addRemoteRunsToModel(contest, controller, packet);
-        
+
         // bug 1295 only send this request if we are a server
         if (isServer()) {
             sendRequestForRunfFiles (packet, remoteSiteNumber);
@@ -3673,7 +3675,7 @@ public class PacketHandler {
         loader.addRemoteClarificationsToModel(contest, controller, packet, remoteSiteNumber);
 
         loader.addRemoteAccountsToModel(contest, controller, packet, remoteSiteNumber);
-        
+
         loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.TEAM);
         loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.JUDGE);
         loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.SCOREBOARD);
@@ -3686,7 +3688,7 @@ public class PacketHandler {
         loader.addAllConnectionIdsToModel(contest, controller, packet);
 
         loader.addRemoteLoginsToModel(contest, controller, packet, remoteSiteNumber);
-        
+
         loader.addJudgementsToModel(contest, controller, packet);
 
         if (isServer()) {
@@ -3698,26 +3700,26 @@ public class PacketHandler {
                 controller.getLog().log(Log.WARNING, ex.getMessage(), ex);
             }
         }
-        
+
         controller.sendToJudgesAndOthers(packet, false);
-        
+
         info("Done loading settings from remote site "+remoteSiteNumber);
     }
 
     /**
      * Send request for run files, if needed.
-     * 
+     *
      * Determines whether this site has all run files for a remote site.
      * If there is a need to sync, will send a packet to sync with that
      * other site.
-     * 
+     *
      * Send a packet to the remote server to retrieve all run submissions (files) from that remote server.
-     *  
+     *
      * @param packet
      * @param remoteSiteNumber
      */
     public void sendRequestForRunfFiles(Packet packet, int remoteSiteNumber) {
-        
+
         info("sendRequestForRunfFiles for  "+remoteSiteNumber);
 
         Run[] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
@@ -3731,20 +3733,20 @@ public class PacketHandler {
                 sendRunFilesRequestToServer(remoteSiteNumber, localLastRunId);
                 info("sendRequestForRunfFiles to "+remoteSiteNumber+ " starting at run id # "+localLastRunId);
             } // else { no files to fetch
-            
+
         } // else no runs from that site, ok.
     }
-    
+
     /**
      * Get maximum run id for the site.
-     * 
+     *
      * @param runs list of runs
-     * @param siteNumber 
+     * @param siteNumber
      * @return 0 if no runs, else the last run id at the site.
      */
     private int getLastRunId(Run[] runs, int siteNumber) {
         int maxRunId = 0;
-        
+
         for (Run run : runs){
             if (run.getSiteNumber() == siteNumber){
                 maxRunId = Math.max(run.getNumber(), maxRunId);
@@ -3755,9 +3757,9 @@ public class PacketHandler {
 
     /**
      * Send a request to remote server for RunFiles.
-     * 
+     *
      * This sends a packet that request that any run id which is lastRunId or greater be sent to this server. <br>
-     * 
+     *
      * @param siteNumber
      *            site number to request RunFiles from
      * @param lastRunId
@@ -3773,7 +3775,7 @@ public class PacketHandler {
 
     /**
      * Send run files to other site server.
-     * 
+     *
      * @param siteNumber
      * @param lastRunId
      */
@@ -3787,7 +3789,7 @@ public class PacketHandler {
     }
 
     private RunFiles[] getRunFiles(Run[] runs) {
-        
+
         Vector<RunFiles> runFilesList = new Vector<RunFiles>();
 
         for (Run run : runs) {
@@ -3799,12 +3801,12 @@ public class PacketHandler {
             }
         }
 
-        return (RunFiles[]) runFilesList.toArray(new RunFiles[runFilesList.size()]);
+        return runFilesList.toArray(new RunFiles[runFilesList.size()]);
     }
 
     /**
-     * Returns local run list starting at run lastRunId. 
-     * 
+     * Returns local run list starting at run lastRunId.
+     *
      * @param lastRunId
      * @return
      */
@@ -3823,7 +3825,7 @@ public class PacketHandler {
             }
         }
 
-        return (Run[]) listOfRuns.toArray(new Run[listOfRuns.size()]);
+        return listOfRuns.toArray(new Run[listOfRuns.size()]);
     }
 
 
@@ -3889,10 +3891,10 @@ public class PacketHandler {
 
     /**
      * Update sites in model.
-     * 
+     *
      * There may be the case where more servers are defined
      * on a switch of a profile.
-     * 
+     *
      * @param packet
      */
     private void updateSitesToModel(Packet packet) {
@@ -3906,12 +3908,12 @@ public class PacketHandler {
             }
         } catch (Exception e) {
             controller.getLog().log(Log.WARNING, "Exception logged ", e);
-        } 
+        }
     }
 
     /**
      * Login to all other servers.
-     * 
+     *
      * @param packet
      *            contains list of other servers
      */
@@ -3942,7 +3944,7 @@ public class PacketHandler {
 
     /**
      * Return all accounts for all sites.
-     * 
+     *
      * @return Array of all accounts in contest.
      */
     private Account[] getAllAccounts() {
@@ -3956,13 +3958,13 @@ public class PacketHandler {
             }
         }
 
-        Account[] accountList = (Account[]) allAccounts.toArray(new Account[allAccounts.size()]);
+        Account[] accountList = allAccounts.toArray(new Account[allAccounts.size()]);
         return accountList;
     }
 
     /**
      * Return an array of all logged in users.
-     * 
+     *
      * @return array of clientId's.
      */
     private ClientId[] getAllRemoteLoggedInUsers() {
@@ -3979,14 +3981,14 @@ public class PacketHandler {
         if (clientList.size() == 0) {
             return new ClientId[0];
         } else {
-            ClientId[] clients = (ClientId[]) clientList.toArray(new ClientId[clientList.size()]);
+            ClientId[] clients = clientList.toArray(new ClientId[clientList.size()]);
             return clients;
         }
     }
 
     /**
      * Return an array of all logged in users.
-     * 
+     *
      * @return array of clientId's.
      */
     private ClientId[] getAllLocalLoggedInUsers() {
@@ -4003,7 +4005,7 @@ public class PacketHandler {
         if (clientList.size() == 0) {
             return new ClientId[0];
         } else {
-            ClientId[] clients = (ClientId[]) clientList.toArray(new ClientId[clientList.size()]);
+            ClientId[] clients = clientList.toArray(new ClientId[clientList.size()]);
             return clients;
         }
     }
@@ -4055,9 +4057,9 @@ public class PacketHandler {
             Profile profile = inContest.getProfile();
             profiles = new Profile[1];
             profiles[0] = profile;
-            
+
             problems = getProblemsForTeam (inContest, clientId);
-            
+
         } else {
             runs = inContest.getRuns();
             clarifications = inContest.getClarifications();
@@ -4080,7 +4082,7 @@ public class PacketHandler {
         contestLoginSuccessData.setGroups(inContest.getGroups());
         contestLoginSuccessData.setJudgements(inContest.getJudgements());
         contestLoginSuccessData.setLanguages(inContest.getLanguages());
-       
+
         if (ClientType.Type.ADMINISTRATOR.equals(clientId.getClientType()) ||
                 ClientType.Type.SERVER.equals(clientId.getClientType())
                 ) {
@@ -4110,7 +4112,7 @@ public class PacketHandler {
         if (isServer(clientId)) {
             contestLoginSuccessData.setContestSecurityPassword(contestSecurityPassword);
         }
-        
+
         if (inContest.getCategories() != null){
             contestLoginSuccessData.setCategories(inContest.getCategories());
         }
@@ -4120,7 +4122,7 @@ public class PacketHandler {
 
     /**
      * Get problems that only this team can use/view based on their group.
-     * 
+     *
      * @param inContest
      * @param clientId
      * @return
@@ -4129,58 +4131,40 @@ public class PacketHandler {
 
         Account account = inContest.getAccount(clientId);
 
-        ElementId groupId = account.getGroupId();
-        Group group = null;
-        if (groupId != null) {
-            group = inContest.getGroup(groupId);
-        }
+        HashSet<ElementIt> groups = account.getGroupIds();
 
-        if (group == null) {
-            /**
-             * Not assigned a group, they get all problems.
-             */
-            return inContest.getProblems();
-        }
+        if(groups != null) {
+            ArrayList<Problem> teamProblems = new ArrayList<Problem>();
 
-        Problem[] problems = inContest.getProblems();
+            for(ElementId groupId : groups) {
+                Group group = inContest.getGroup(groupId);
+                Problem[] problems = inContest.getProblems();
 
-        // count the problems that this team can view.
-        int count = 0;
-        for (Problem problem : problems) {
-            if (teamCanViewProblem(problem, group)) {
-                count++;
-            }
-        }
-
-        if (count < problems.length) {
-            /**
-             * Team can only view some of the problems.
-             */
-            Problem[] teamsProblems = new Problem[count];
-            int i = 0;
-            for (Problem problem : problems) {
-                if (teamCanViewProblem(problem, group)) {
-                    teamsProblems[i] = problem;
-                    i++;
+                // count the problems that this team can view.
+                int count = 0;
+                for (Problem problem : problems) {
+                    if (teamCanViewProblem(problem, group)) {
+                        teamProblems.add(problem);
+                    }
                 }
             }
-            return teamsProblems;
-        } else {
-            /**
-             * Team can view all of the problems.
-             */
-            return problems;
+            return(teamProblems.toArray(new Problem [0]));
         }
+        /**
+         * Not assigned a group, they get all problems.
+         */
+        return inContest.getProblems();
+
     }
-   
+
     private boolean teamCanViewProblem(Problem problem, Group group) {
         return problem.isAllView() || problem.canView(group);
     }
 
     /**
      * Create a login success packet.
-     * 
-     * 
+     *
+     *
      * @param clientId
      * @return Packet containing contest settings
      */
@@ -4192,20 +4176,20 @@ public class PacketHandler {
 
         return loginSuccessPacket;
     }
-    
+
     /**
      * Got a status from the other server.
      * @param packet
      * @param connectionHandlerID
      */
     private void handleServerStatus(Packet packet, ConnectionHandlerID connectionHandlerID) {
-        
+
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
         Status status = (Status) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_STATUS);
-        
+
         contest.updateSiteStatus(site, inProfile, status);
-        
+
         if (isServer()){
             controller.sendToJudgesAndOthers(packet, false);
         }
@@ -4213,20 +4197,20 @@ public class PacketHandler {
 
     /**
      * Handle incoming request on a server.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
      */
     private void handleRequestServerStatus(Packet packet, ConnectionHandlerID connectionHandlerID) {
-        
+
         int targetSiteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
         ClientId remoteServerId = new ClientId(targetSiteNumber, ClientType.Type.SERVER, 0);
-        
+
         if (isThisSite(targetSiteNumber)){
-            
+
             Profile expectedProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
             sendStatusToServers(packet, expectedProfile);
- 
+
         } else {
             /**
              * Send to target server.
@@ -4239,26 +4223,26 @@ public class PacketHandler {
 
     /**
      * Send a status packe to all logged in servers.
-     * 
+     *
      * @param packet
      * @param expectedProfile
      */
     private void sendStatusToServers(Packet packet, Profile expectedProfile) {
-        
+
         Status status = Status.NOTREADY;
         if (contest.getProfile().getProfilePath().equals(expectedProfile.getProfilePath())){
             status = Status.READY_TO_SWITCH;
         }
-        
+
         Site site = contest.getSite(contest.getSiteNumber());
         Packet statusPacket = PacketFactory.createServerStatusPacket(getServerClientId(), PacketFactory.ALL_SERVERS, contest.getProfile(), status, site);
-        
+
         controller.sendToServers(statusPacket);
     }
 
     /**
      * Is the input ClientId a server.
-     * 
+     *
      * @param id
      * @return
      */
@@ -4272,7 +4256,7 @@ public class PacketHandler {
 
     /**
      * Is this client a server.
-     * 
+     *
      * @return true if is a server.
      */
     private boolean isServer() {
@@ -4285,25 +4269,25 @@ public class PacketHandler {
         Utilities.debugPrint(e);
     }
 
-    
+
     public void info(String s) {
         controller.getLog().info(s);
         Utilities.debugPrint(s);
     }
-    
+
     private void handleShutdownAllServers(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {
 
         ClientId requestor = packet.getSourceId();
 
         if (contest.isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS)) {
-            
+
             controller.shutdownRemoteServers (requestor);
-            
+
             // Sleep for a couple of seconds to allow time to send
             // shutdown packets to send to other sites.
-            
+
             sleepSecs(2);
-            
+
             controller.shutdownServer(packet.getSourceId());
 
         } else {
@@ -4349,7 +4333,7 @@ public class PacketHandler {
 
     /**
      * Send message to all servers.
-     * 
+     *
      * @param area
      * @param message
      * @param ex

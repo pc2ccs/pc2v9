@@ -162,10 +162,12 @@ public class AccountsReport implements IReport {
                     first = false;
                 }
                 Group group = contest.getGroup(elementId);
+                // I'm not sure how useful it is to show the ElementId here - the CMS Group ID in parens may be more useful.
+                // But, this is what the code always did, apparently -- JB
                 if (group != null) {
-                    printWriter.print(group+" ("+groupId+")");
+                    printWriter.print(group+" ("+elementId+")");
                 } else {
-                    printWriter.print("invalid ("+groupId+")");
+                    printWriter.print("invalid ("+elementId+")");
                 }
             }
             printWriter.print("'");

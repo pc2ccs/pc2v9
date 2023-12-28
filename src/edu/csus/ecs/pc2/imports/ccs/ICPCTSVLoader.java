@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.FileNotFoundException;
@@ -11,16 +11,15 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 
 /**
  * ICPC CCS TSV File Loader.
- * 
+ *
  * Loads group and teams.tsv files into Group and Account lists.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public final class ICPCTSVLoader {
@@ -49,7 +48,7 @@ public final class ICPCTSVLoader {
     // 7 Country USA string ISO 3166-1 alpha-3
 
     private static final int TEAM_TSV_FIELDS = 7;
-    // plus 
+    // plus
     // 8 institute id "INST-" + integer
     private static final int TEAM2_TSV_FIELDS = 8;
 
@@ -79,10 +78,10 @@ public final class ICPCTSVLoader {
     private static HashMap<String,String[]> institutionsMap = new HashMap<String,String[]>();
 
     /**
-     * Load teams.tsv, use {@link #loadGroups(String)} first.
-     * 
+     * Load teams.tsv or teams2.tsv, use {@link #loadGroups(String)} first.
+     *
      * {@link #setGroups(Group[])} must be invoked before using this method so groupIds are assigned.
-     * 
+     *
      * @param filename
      * @return
      * @throws Exception
@@ -94,7 +93,7 @@ public final class ICPCTSVLoader {
         if (lines.length == 0) {
             throw new FileNotFoundException(filename);
         }
-        
+
         int i = 0;
 
         String firstLine = lines[i];
@@ -109,7 +108,7 @@ public final class ICPCTSVLoader {
         // TODO CCS check for 'teams' when tsv file contains that value.
         // validate first line
         // String[] fields = firstLine.split("\t");
-        
+
 //        if (!fields[0].trim().equals("teams")) {
 //            throw new InvalidValueException("Expecting 'teams' got '" + fields[0] + "' in " + filename);
 //        }
@@ -140,11 +139,11 @@ public final class ICPCTSVLoader {
     }
 
     private static Account accountFromFields(String[] fields, int accountCount, String originalLine) throws InvaildNumberFields, InvalidValueException {
-        
+
         if (!(fields.length == TEAM_TSV_FIELDS || fields.length == TEAM2_TSV_FIELDS)) {
             throw new InvaildNumberFields("Expected " + TEAM_TSV_FIELDS + " (or "+ TEAM2_TSV_FIELDS + ") fields, found " + fields.length + " invalid team.tsv line: " + originalLine);
         }
-        
+
         int fieldnum = 0;
         String numberStr = fields[fieldnum++];
         String reservationIdStr = fields[fieldnum++];
@@ -167,14 +166,14 @@ public final class ICPCTSVLoader {
 
         // 1 Team number 22 integer
         // 2 Reservation ID 24314 integer
-        // 3 Group ID 4 integer
+        // 3 Group IDs 3023,3025 CSV CMS groups
         // 4 Team name Hoos string
         // 5 Institution name University of Virginia string
         // 6 Institution short name U Virginia string
         // 7 Country USA string ISO 3166-1 alpha-3
 
         int number = 0;
-        
+
         if (numberStr != null && NULL_STRING.equalsIgnoreCase(numberStr.trim())){
             /**
              * If team number field is 'null' then assign a team number.
@@ -188,13 +187,6 @@ public final class ICPCTSVLoader {
             } catch (NumberFormatException e) {
                 throw new InvalidValueException("Expecting team number got '" + numberStr + "' on line " + originalLine, e);
             }
-        }
-
-        int groupNumber = 0; 
-        try {
-            groupNumber = Integer.parseInt(groupIDStr);
-        } catch (NumberFormatException e) {
-            throw new InvalidValueException("Expecting group number got '" + numberStr + "' on line " + originalLine, e);
         }
 
         ClientId clientId = new ClientId(siteNumber, ClientType.Type.TEAM, number);
@@ -216,37 +208,38 @@ public final class ICPCTSVLoader {
                 account.setInstitutionShortName(institutionName);
             }
         }
-        
-        if (groupNumber != 0){
-            /**
-             * Only lookup group number if not zero.
-             */
-            ElementId groupId = getGroupForNumber(groupNumber);
-            
-            if (groupId != null) {
-                account.setGroupId(groupId);
-            } else {
-                throw new InvalidValueException("Unknown group number '" + groupNumber + "' on line " + originalLine);
+
+        String [] cmsGroups = groupIDStr.split(",");
+        int groupNumber = 0;
+        boolean primaryGroup = true;
+
+        try {
+            for(String cmdGroup : cmsGroups) {
+                groupNumber = Integer.parseInt(cmdGroup);
+                if (groupNumber != 0){
+                    /**
+                     * Only lookup group number if not zero.
+                     */
+                    Group group = findGroupById(groups, groupNumber);
+
+                    if (group != null) {
+                        account.addGroupId(group.getElementId(), primaryGroup);
+                        primaryGroup = false;
+                    } else {
+                        throw new InvalidValueException("Unknown group number '" + groupNumber + "' on line " + originalLine);
+                    }
+                }
             }
+        } catch (NumberFormatException e) {
+            throw new InvalidValueException("Expecting group number got '" + numberStr + "' on line " + originalLine, e);
         }
 
         return account;
     }
 
-    private static ElementId getGroupForNumber(int groupId) {
-        
-        for (Group group : groups) {
-            if (group.getGroupId() == groupId) {
-                return group.getElementId();
-            }
-        }
-
-        return null;
-    }
-
     /**
      * return joe password for clientid.
-     * 
+     *
      * @param clientId
      * @return
      */
@@ -257,21 +250,21 @@ public final class ICPCTSVLoader {
     public static void setGroups(Group[] groups) {
         ICPCTSVLoader.groups = groups;
     }
-    
+
     /**
      * Merge/Add group data from filename and authoritativeGroups.
-     * 
+     *
      * @param filename name of groups.tsv file.
-     * @return list of groups 
+     * @return list of groups
      * @throws Exception
      */
     public static Group[] loadGroups(String filename) throws Exception {
         return loadGroups(filename, new Group[0]);
     }
-    
+
     /**
      * Merge/Add group data from filename and authoritativeGroups.
-     * 
+     *
      * @param filename name of groups.tsv file.
      * @param authoritativeGroups an array of groups (from contest/model)
      * @return unique groups from authoritativeGroups and filename's group list.
@@ -279,9 +272,9 @@ public final class ICPCTSVLoader {
      */
     public static Group[] loadGroups(String filename, Group[] authoritativeGroups) throws Exception {
         List<Group> groupList = new ArrayList<Group>();
-        
+
         String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));
-        
+
         if (lines.length == 0) {
             throw new FileNotFoundException(filename);
         }
@@ -325,18 +318,18 @@ public final class ICPCTSVLoader {
             } catch (NumberFormatException e) {
                 throw new InvalidValueException("Expecting group number got '" + numberStr + "' on line " + lines[i], e);
             }
-            
+
             Group group = findGroupById(authoritativeGroups, number);
             if (group == null) {
                 group = new Group(groupName);
             }
-            
+
             group.setDisplayName(groupName);
             group.setGroupId(number);
-            
+
             groupList.add(group);
         }
-        
+
         /**
          * Add groups from authoritativeGroups if missing from groupList.
          */
@@ -346,15 +339,15 @@ public final class ICPCTSVLoader {
                break;
            }
         }
-        
-        groups = (Group[]) groupList.toArray(new Group[groupList.size()]);
-        
+
+        groups = groupList.toArray(new Group[groupList.size()]);
+
         return groups;
     }
 
     /**
      * Search and return group if found.
-     * 
+     *
      * @param authoritativeGroups list of groups
      * @param groupCMSId CMS group id
      * @return null if not found, else the group
@@ -395,20 +388,20 @@ public final class ICPCTSVLoader {
             institutionsMap.put(icpcId, fields);
         }
     }
-    
+
     /**
      * Returns the corresponding institution information for the supplied institution code.
      * If the code is not recognized, a null array is returned.
      * Due to the non-specificity of the format of an institution code, we have to check if
      * it has the INST-U- or INST- prefixes, if so, remove them and try again.
      * The map must be filled in via loadInstitutions() first or it will always return false.
-     * 
+     *
      * @param instCode (number, INST-U-number or INST-number)
      * @return array of 3 strings: [0]=code, [1]=formal name [2]=short name, or null if not found
      */
     public static String[] getInstitutionNames(String instCode) {
         String[] names = null;
-        
+
         if(institutionsMap.containsKey(instCode)) {
             names = institutionsMap.get(instCode);
         } else {
@@ -425,7 +418,7 @@ public final class ICPCTSVLoader {
         }
         return(names);
     }
-    
+
     public static HashMap<Integer, String> loadPasswordsFromAccountsTSV(String filename) throws Exception {
         String[] lines = CCSListUtilities.filterOutCommentLines(Utilities.loadFile(filename));
 
@@ -445,5 +438,5 @@ public final class ICPCTSVLoader {
         return passwordMap;
     }
 
-  
+
 }
