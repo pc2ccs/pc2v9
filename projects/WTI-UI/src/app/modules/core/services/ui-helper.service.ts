@@ -31,8 +31,7 @@ export class UiHelperService {
   alert(message: string): void {
     this._matSnackBar.open(message, 'Close', {
       duration: undefined,   //no automatic dismissal; user must close
-	  horizontalPosition: 'center',
-	  verticalPosition: 'top'
+	  panelClass: 'green-snackbar'
     });
   }
 
