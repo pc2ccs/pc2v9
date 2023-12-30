@@ -74,6 +74,14 @@ button.textLink {
     align-items: center !important;
 }
 
+.mat-mdc-snack-bar-container {
+    &.green-snackbar {
+      --mdc-snackbar-container-color: lightgreen;
+      --mat-mdc-snack-bar-button-color: red;
+      --mdc-snackbar-supporting-text-color: black;
+    }
+}
+
 a { cursor: pointer; }
 
 th {
