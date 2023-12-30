@@ -2012,7 +2012,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
      */
     protected void viewFile(int row, int col) {
         //make sure the column points to one of the "file links" in the table
-        if (col != COLUMN.TEAM_OUTPUT_VIEW.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && col != COLUMN.JUDGE_DATA.ordinal() && col != COLUMN.VALIDATOR_OUTPUT.ordinal()
+        if (col != COLUMN.TEAM_OUTPUT_VIEW.ordinal() && col != COLUMN.TEAM_ERR.ordinal() && col != COLUMN.JUDGE_OUTPUT.ordinal() && col != COLUMN.JUDGE_DATA.ordinal() && col != COLUMN.VALIDATOR_OUTPUT.ordinal()
                 && col != COLUMN.VALIDATOR_ERR.ordinal()) {
             if (log != null) {
                 log.log(Log.WARNING, "TestResultsPane.viewFile(): invalid column number for file viewing request: " + col);
@@ -2049,6 +2049,8 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         String title = "<unknown>";
         if (col == COLUMN.TEAM_OUTPUT_VIEW.ordinal()) {
             title = "Team Output"; 
+        } else if (col == COLUMN.TEAM_ERR.ordinal()) {
+            title = "Team STDERR";
         } else if (col == COLUMN.JUDGE_OUTPUT.ordinal()) {
             title = "Judge's Output";
         } else if (col == COLUMN.JUDGE_DATA.ordinal()) {
@@ -2200,6 +2202,16 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
                     returnFile = null;
                 } else {
                     returnFile = currentTeamOutputFileNames[row];
+                }
+            }
+        } else if (col == COLUMN.TEAM_ERR.ordinal()) {
+            //get team output file corresponding to test case "row"
+            if (currentTeamStderrFileNames != null || currentTeamStderrFileNames.length >= row) {
+                // get the team output file name, which should be provided by the client as a full path
+                if (currentTeamStderrFileNames[row] == null) {
+                    returnFile = null;
+                } else {
+                    returnFile = currentTeamStderrFileNames[row];
                 }
             }
         } else if (col == COLUMN.JUDGE_OUTPUT.ordinal()) {
