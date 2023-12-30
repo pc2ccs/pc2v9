@@ -69,6 +69,7 @@ button.textLink {
 
 .center { text-align: center; }
 
+/*Center items in the global overlay (causes MatSnackBar alerts to be centered) */
 .cdk-global-overlay-wrapper {
     align-items: center !important;
 }
