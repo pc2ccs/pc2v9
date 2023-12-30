@@ -168,6 +168,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private List<String> savedTeamOutputFileNames = null;
 
     /**
+     * Saved team stderr names.
+     */
+    private List<String> savedTeamStderrFileNames = null;
+
+    /**
      * saved validator output names
      */
     private List<String> savedValidatorOutputFileNames = null;
@@ -907,9 +912,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
 
         savedTeamOutputFileNames = executable.getTeamsOutputFilenames();
+        savedTeamStderrFileNames = executable.getTeamsStderrFilenames();
         savedValidatorOutputFileNames = executable.getValidatorOutputFilenames();
         savedValidatorErrFileNames = executable.getValidatorErrFilenames();
         sendTeamOutputFileNames();
+        sendTeamStderrFileNames();
         sendValidatorOutputFileNames();
         sendValidatorStderrFileNames();
         // only if do not show output is not checked
@@ -1021,6 +1028,46 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             }
 
             getTestResultsFrame().setTeamOutputFileNames(teamOutputNames);
+        }
+    }
+
+    /**
+     * Send execution stderr filenames to Test Results Viewer.
+     * 
+     * Copies the names from the List of exectution stderr file names (which was saved by the execute() method)
+     * into an array, then passes the array to the Test Results frame.
+     */
+    private void sendTeamStderrFileNames() {
+
+        if (getTestResultsFrame() != null) {
+
+            String[] teamStderrNames = null;
+
+            // add entries from actual team test stderr
+            if (savedTeamStderrFileNames != null) {
+                int size = getProblemDataFiles().getJudgesDataFiles().length;
+                if (size < savedTeamStderrFileNames.size()) {
+                    size = savedTeamStderrFileNames.size();
+                }
+                if (size < 1) {
+                    size = 1;
+                }
+                teamStderrNames = new String[size];
+
+                // null out list
+                for (int i = 0; i < size; i++) {
+                    teamStderrNames[i] = null;
+                }
+
+                for (int i = 0; i < savedTeamStderrFileNames.size(); i++) {
+                    teamStderrNames[i] = savedTeamStderrFileNames.get(i);
+                    if (new File(teamStderrNames[i]).length() == 0) {
+                        teamStderrNames[i] = null; 
+                    }
+                }
+            }
+
+            getTestResultsFrame().setTeamStderrFileNames(teamStderrNames);
         }
     }
 
@@ -1454,6 +1501,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     protected void viewOutputsAndData() {
 
         sendTeamOutputFileNames();
+        sendTeamStderrFileNames();
         sendValidatorOutputFileNames();
         sendValidatorStderrFileNames();
         if (getTestResultsFrame().isVisible()) {

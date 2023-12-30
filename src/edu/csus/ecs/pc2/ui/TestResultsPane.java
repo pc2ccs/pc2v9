@@ -145,6 +145,8 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     
     private String [] currentTeamOutputFileNames ;
 
+    private String [] currentTeamStderrFileNames;
+
     private JLabel lblLanguage;
 
     private JLabel lblNumFailedTestCases;
@@ -2324,6 +2326,10 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
      */
     public void setTeamOutputFileNames(String [] filenames){
         this.currentTeamOutputFileNames = filenames ;
+    }
+
+    public void setTeamStderrFileNames(String [] filenames){
+        this.currentTeamStderrFileNames = filenames;
     }
 
     public void setValidatorOutputFileNames(String[] filenames) {

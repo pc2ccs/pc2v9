@@ -90,6 +90,10 @@ public class TestResultsFrame extends javax.swing.JFrame implements UIPlugin {
         getMultiTestSetOutputViewerPane().setTeamOutputFileNames(filenames);
     }
 
+    public void setTeamStderrFileNames(String [] filenames){
+        getMultiTestSetOutputViewerPane().setTeamStderrFileNames(filenames);
+    }
+
     public void setValidatorStderrFileNames(String[] filenames) {
         getMultiTestSetOutputViewerPane().setValidatorStderrFileNames(filenames);
     }
