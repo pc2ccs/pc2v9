@@ -12,7 +12,8 @@ public class TestResultsRowData {
     private String resultString; 
     private String time; 
     private String teamOutputViewLabel;
-    private String teamOutputCompareLabel; 
+    private String teamOutputCompareLabel;
+    private String teamStderrViewLabel; 
     private String judgesOutputViewLabel; 
     private String judgesDataViewLabel;
     private String validatorOutputViewLabel; 
@@ -22,18 +23,20 @@ public class TestResultsRowData {
      * @param time
      * @param teamOutputViewLabel
      * @param teamOutputCompareLabel
+     * @param teamStderrViewLabel
      * @param judgesOutputViewLabel
      * @param judgesDataViewLabel
      * @param validatorOutputViewLabel
      * @param validatorStderrViewLabel
      */
-    public TestResultsRowData(String resultString, String time, String teamOutputViewLabel, String teamOutputCompareLabel, String judgesOutputViewLabel, String judgesDataViewLabel,
+    public TestResultsRowData(String resultString, String time, String teamOutputViewLabel, String teamOutputCompareLabel, String teamStderrViewLabel, String judgesOutputViewLabel, String judgesDataViewLabel,
             String validatorOutputViewLabel, String validatorStderrViewLabel) {
         super();
         this.resultString = resultString;
         this.time = time;
         this.teamOutputViewLabel = teamOutputViewLabel;
         this.teamOutputCompareLabel = teamOutputCompareLabel;
+        this.teamStderrViewLabel = teamStderrViewLabel;
         this.judgesOutputViewLabel = judgesOutputViewLabel;
         this.judgesDataViewLabel = judgesDataViewLabel;
         this.validatorOutputViewLabel = validatorOutputViewLabel;
@@ -75,6 +78,12 @@ public class TestResultsRowData {
      */
     public String getTeamsOutputCompareLabel() {
         return teamOutputCompareLabel;
+    }
+    /**
+     * @return the teamOutputViewLabel
+     */
+    public String getTeamStderrViewLabel() {
+        return teamStderrViewLabel;
     }
     /**
      * @return the judgesDataViewLabel

@@ -105,13 +105,13 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
      * list of columns
      */
     protected enum COLUMN {
-        SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT_VIEW, TEAM_OUTPUT_COMPARE, 
+        SELECT_CHKBOX, DATASET_NUM, RESULT, TIME, TEAM_OUTPUT_VIEW, TEAM_OUTPUT_COMPARE, TEAM_ERR,
             JUDGE_OUTPUT, JUDGE_DATA, VALIDATOR_OUTPUT, VALIDATOR_ERR
     };
 
     // define the column headers for the table of results
     private String[] columnNames = { "Select", "Data Set #", "Result", "Time (ms)", 
-                                        "Team Output", "Compare Outputs", 
+                                        "Team Output", "Compare Outputs", "Team StdErr",
                                         "Judge's Output", "Judge's Data", "Validator StdOut",
                                         "Validator StdErr" };
 
@@ -1690,6 +1690,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         // set a LinkRenderer on those cells containing links
         localResultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT_VIEW.ordinal()]).setCellRenderer(new LinkCellRenderer());
         localResultsTable.getColumn(columnNames[COLUMN.TEAM_OUTPUT_COMPARE.ordinal()]).setCellRenderer(new LinkCellRenderer());
+        localResultsTable.getColumn(columnNames[COLUMN.TEAM_ERR.ordinal()]).setCellRenderer(new LinkCellRenderer());
         localResultsTable.getColumn(columnNames[COLUMN.JUDGE_OUTPUT.ordinal()]).setCellRenderer(new LinkCellRenderer());
         localResultsTable.getColumn(columnNames[COLUMN.JUDGE_DATA.ordinal()]).setCellRenderer(new LinkCellRenderer());
         localResultsTable.getColumn(columnNames[COLUMN.VALIDATOR_OUTPUT.ordinal()]).setCellRenderer(new LinkCellRenderer());
@@ -1879,11 +1880,12 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
 //                "--  ",                                     //execution time (of which there is none since the test case wasn't executed)
 //                "",                                         //link to team output (none since it wasn't executed)
 //                "",                                         //link to team compare-with-judge label (disabled since there's no team output)
+//                "",                                         //link to team stderr (none since it wasn't executed)
 //                viewJudgeAnswerFile,                        //link to judge's output (answer file) if any
 //                viewJudgeDataFile,                          //link to judge's data if any
 //                "",                                         //link to validator stdout (none)
 //                ""                                          //link to validator stderr (none)
-                TestResultsRowData rowData = new TestResultsRowData("Not Executed", "--  ","", "",viewJudgeAnswerFile,viewJudgeDataFile, "", "");
+                TestResultsRowData rowData = new TestResultsRowData("Not Executed", "--  ", "", "", "",viewJudgeAnswerFile,viewJudgeDataFile, "", "");
                 tableModel.addRow(
                         new Boolean(false),                         //selection checkbox
                         new String(Integer.toString(testCaseNum)),  //test case number
@@ -1915,15 +1917,16 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             }
             
             // Add exactly one row as a place holder to tell the user judging is taking place
-            //     "Awaiting Result",                          //result string
+            //     "Judging",                                   //result string
             //      "--  ",                                     //execution time (of which there is none since the test case wasn't executed)
             //      "",                                         //link to team output (none since it wasn't executed)
             //      "",                                         //link to team compare-with-judge label (disabled since there's no team output)
+            //      "",                                         //link to team stderr (none since it wasn't executed)
             //      "",                                         //link to judge's output (answer file) if any
             //      "",                                         //link to judge's data if any
             //      "",                                         //link to validator stdout (none)
             //      ""                                          //link to validator stderr (none)
-            TestResultsRowData rowData = new TestResultsRowData("Judging", "--  ","", "","", "", "", "");
+            TestResultsRowData rowData = new TestResultsRowData("Judging", "--  ", "", "", "", "", "", "", "");
             // add new row
             tableModel.addRow(
                     new Boolean(false),                         //selection checkbox
