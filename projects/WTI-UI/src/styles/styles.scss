@@ -75,10 +75,29 @@ button.textLink {
 }
 
 .mat-mdc-snack-bar-container {
+	
     &.green-snackbar {
       --mdc-snackbar-container-color: lightgreen;
-      --mat-mdc-snack-bar-button-color: red;
       --mdc-snackbar-supporting-text-color: black;
+//      --mat-mdc-snack-bar-button-color: red;   //doesn't seem to work as expected
+
+      button {
+	    background:white; 
+        font-size: 1.2rem;
+        font-weight: bold;
+      }
+    }
+
+    &.red-snackbar {
+      --mdc-snackbar-container-color: red;
+      --mdc-snackbar-supporting-text-color: white;
+//      --mat-mdc-snack-bar-button-color: black;  //doesn't seem to work as expected
+
+      button {
+	    background:white; 
+        font-size: 1.2rem;
+        font-weight: bold;
+      }
     }
 }
 
