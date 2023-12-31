@@ -123,7 +123,7 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	    this._uiHelper.alertError('File names may not contain spaces');
 	    console.error('One or more submitted file contains a space in its filename');
   } else if (this.filenameContainsDuplicates(this.mainFile, this.additionalFiles)) {
-      this._uiHelper.alert('You may not submit multiple files with the same name');
+      this._uiHelper.alertError('You may not submit multiple files with the same name');
 	    console.error('One or more submitted file have the same filename');
 	} else {
 		//submit the run
