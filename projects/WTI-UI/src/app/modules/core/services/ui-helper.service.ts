@@ -28,10 +28,17 @@ export class UiHelperService {
     }
   }
 
-  alert(message: string): void {
+  alertOk(message: string): void {
     this._matSnackBar.open(message, 'Close', {
       duration: undefined,   //no automatic dismissal; user must close
 	  panelClass: 'green-snackbar'
+    });
+  }
+
+  alertError(message: string): void {
+    this._matSnackBar.open(message, 'Close', {
+      duration: undefined,   //no automatic dismissal; user must close
+	  panelClass: 'red-snackbar'
     });
   }
 
