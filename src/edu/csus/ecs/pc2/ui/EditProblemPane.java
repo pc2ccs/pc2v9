@@ -434,7 +434,7 @@ public class EditProblemPane extends JPanePlugin {
         }
 
         if (!validateProblemFields()) {
-            // new problem is invalid, just return; message issued by validateProblemFields
+            // new problem is invalid, return false as problem was not added; message issued by validateProblemFields
             if (debug22EditProblem) {
                 System.err.println("DEBUG: validateProblemFields() returned false");
             }
@@ -465,6 +465,7 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorWarningOnAddProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
+                // return false as problem was not added
                 return false;
             }
         }
@@ -486,6 +487,7 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorProgramNameOnAddProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
+                // return false as problem was not added
                 return false;
             }
         }
@@ -533,10 +535,12 @@ public class EditProblemPane extends JPanePlugin {
             }
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
+            // return false as problem was not added
             return false;
         } catch (Exception e) {
             showMessage("Exeception while adding Problem; see log.");
             getLog().throwing("EditProblemPane", "addProblem()", e);
+            // return false as problem was not added
             return false;
         }
 
@@ -1662,7 +1666,7 @@ public class EditProblemPane extends JPanePlugin {
         // showStackTrace();
 
         if (!validateProblemFields()) {
-            // problem defined by the GUI fields is invalid, just return ( error message was issued by validateProblemFields() )
+            // problem defined by the GUI fields is invalid, return false as problem was not updated ( error message was issued by validateProblemFields() )
             return false;
         }
 
@@ -1690,6 +1694,7 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorWarningOnUpdateProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
+                // return false as problem was not updated
                 return false;
             }
         }
@@ -1712,6 +1717,7 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorProgramNameOnUpdateProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
+                // return false as problem was not updated
                 return false;
             }
         }
@@ -1789,10 +1795,12 @@ public class EditProblemPane extends JPanePlugin {
         } catch (InvalidFieldValue e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
             // showMessage(e.getMessage());
+            // return false as problem was not updated
             return false;
         } catch (Exception e) {
             showMessage("Exeception while updating Problem; see log.");
             getLog().throwing("EditProblemPane", "updateProblem()", e);
+            // return false as problem was not updated
             return false;
         }
 
