@@ -28,4 +28,11 @@ public interface ITeam extends IClient {
      * @return group information.
      */
     public HashMap<ElementId, IGroup> getGroups();
+
+    /**
+     * Get the primary (cms) group for a team
+     *
+     * @return id of the CMS supplied group (so-called primary group)
+     */
+    public IGroup getPrimaryGroup();
 }

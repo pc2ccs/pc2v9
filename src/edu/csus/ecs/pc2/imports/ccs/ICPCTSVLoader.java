@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.FileNotFoundException;
@@ -214,8 +214,8 @@ public final class ICPCTSVLoader {
         boolean primaryGroup = true;
 
         try {
-            for(String cmdGroup : cmsGroups) {
-                groupNumber = Integer.parseInt(cmdGroup);
+            for(String cmsGroup : cmsGroups) {
+                groupNumber = Integer.parseInt(cmsGroup);
                 if (groupNumber != 0){
                     /**
                      * Only lookup group number if not zero.

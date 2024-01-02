@@ -12,7 +12,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Implementation for ITeam.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -25,6 +25,7 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
     private String shortName;
 
     private HashMap<ElementId, IGroup> groups = null;
+    private IGroup primaryGroup = null;
 
     public TeamImplementation(ClientId submitter, IInternalContest internalContest) {
         super(submitter, internalContest);
@@ -47,7 +48,11 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
                     if(groups == null) {
                         groups = new HashMap<ElementId, IGroup>();
                     }
-                    groups.put(elementId, new GroupImplementation(elementId, contest));
+                    GroupImplementation group = new GroupImplementation(elementId, contest);
+                    groups.put(elementId, group);
+                    if(primaryGroup == null && account.getPrimaryGroupId() == elementId) {
+                        primaryGroup = group;
+                    }
                 }
             }
         } else {
@@ -60,16 +65,24 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
         setAccountValues(account, contest);
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
+    @Override
     public HashMap<ElementId, IGroup> getGroups() {
         return groups;
     }
 
+    @Override
     public String getLoginName() {
         return shortName;
+    }
+
+    @Override
+    public IGroup getPrimaryGroup() {
+        return primaryGroup;
     }
 
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.BufferedReader;
@@ -110,7 +110,7 @@ public class LoadAccounts {
         HashSet<ElementId> groupsClean = accountClean.getGroupIds();
         if(groupsClean != null) {
             for(ElementId elementId : groupsClean) {
-                account.addGroupId(elementId, elementId.equals(accountClean.getPrimaryGroupId());
+                account.addGroupId(elementId, elementId.equals(accountClean.getPrimaryGroupId()));
             }
         }
         String [] existingMembers = accountClean.getMemberNames();
@@ -156,7 +156,7 @@ public class LoadAccounts {
                 // may be a CSV list of CMS groups ids (to support multiple groups / team)
                 String [] cmsGroups = values[groupColumn].split(",");
                 for(String cmsGroup : cmsGroups) {
-                    if (groups.containsKey(cmsGroup) {
+                    if (groups.containsKey(cmsGroup)) {
                         account.addGroupId(groups.get(cmsGroup).getElementId(), needPrimaryGroup);
                         needPrimaryGroup = false;
                     }
@@ -275,7 +275,7 @@ public class LoadAccounts {
         HashSet<ElementId> groupsExisting = existingAccount.getGroupIds();
         if(groupsExisting != null) {
             for(ElementId elementId : groupsExisting) {
-                account.addGroupId(elementId, elementId.equals(existingAccount.getPrimaryGroupId());
+                account.addGroupId(elementId, elementId.equals(existingAccount.getPrimaryGroupId()));
             }
         }
 
@@ -323,7 +323,7 @@ public class LoadAccounts {
                 // may be a CSV list of CMS groups ids (to support multiple groups / team)
                 String [] cmsGroups = values[groupColumn].split(",");
                 for(String cmsGroup : cmsGroups) {
-                    if (groups.containsKey(cmsGroup) {
+                    if (groups.containsKey(cmsGroup)) {
                         account.addGroupId(groups.get(cmsGroup).getElementId(), needPrimaryGroup);
                         needPrimaryGroup = false;
                     }

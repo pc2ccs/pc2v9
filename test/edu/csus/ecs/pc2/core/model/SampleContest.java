@@ -41,12 +41,12 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * Create Sample contest and controller.
- * 
+ *
  * Create contest and controller and add various data values.
- * 
+ *
  * @see #createContest(int, int, int, int)
  * @see #createController(IInternalContest, boolean, boolean)
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -65,7 +65,7 @@ public class SampleContest {
     private NotificationUtilities notificationUtilities = new NotificationUtilities();
 
     private String samplesDirectory;
-    
+
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     private static final String[] W3C_COLORS = { "Alice Blue;F0F8FF", "Antique White;FAEBD7", "Aqua;00FFFF", "Aquamarine;7FFFD4", "Azure;F0FFFF", "Beige;F5F5DC", "Bisque;FFE4C4", "Black;000000",
@@ -85,7 +85,7 @@ public class SampleContest {
             "Sandy Brown;F4A460", "Sea Green;2E8B57", "Seashell;FFF5EE", "Sienna;A0522D", "Silver;C0C0C0", "Sky Blue;87CEEB", "Slate Blue;6A5ACD", "Slate Gray;708090", "Snow;FFFAFA",
             "Spring Green;00FF7F", "Steel Blue;4682B4", "Tan;D2B48C", "Teal;008080", "Thistle;D8BFD8", "Tomato;FF6347", "Turquoise;40E0D0", "Violet;EE82EE", "Wheat;F5DEB3", "White;FFFFFF",
             "White Smoke;F5F5F5", "Yellow;FFFF00", "Yellow Green;9ACD32" };
-    
+
     public static final String[] GIRL_NAMES = { "Abigail", "Aimee", "Alexandra", "Alice", "Alisha", "Amber", "Amelia", "Amelie", "Amy", "Anna", "Ava", "Bethany", "Brooke", "Caitlin", "Charlotte",
             "Chloe", "Daisy", "Eleanor", "Elizabeth", "Ella", "Ellie", "Emilia", "Emily", "Emma", "Erin", "Esme", "Eva", "Eve", "Evelyn", "Evie", "Faith", "Florence", "Francesca", "Freya", "Georgia",
             "Grace", "Gracie", "Hannah", "Harriet", "Heidi", "Hollie", "Holly", "Imogen", "Isabel", "Isabella", "Isabelle", "Isla", "Isobel", "Jasmine", "Jessica", "Julia", "Katie", "Keira", "Lacey",
@@ -107,7 +107,7 @@ public class SampleContest {
 
     /**
      * Create a new Site class instance.
-     * 
+     *
      * @param siteNumber
      *            site number
      * @param siteName
@@ -146,9 +146,9 @@ public class SampleContest {
 
     /**
      * Create an instance of contest with languages, problems, judgements, teams and judges.
-     * 
+     *
      * @param siteNumber current site number
-     * @param numSites 
+     * @param numSites
      * @param numTeams
      * @param numJudges
      * @param initAsServer initialize as server, else initalizes as admin.
@@ -163,11 +163,11 @@ public class SampleContest {
         String[] judgements = { "Stupid programming error", "Misread problem statement", "Almost there", "You have no clue", "Give up and go home", "Consider switching to another major",
                 "How did you get into this place ?", "Contact Staff - you have no hope" };
         String[] acronymns = {"CE", "WA", "TLE", "WA2", "RTE", "OFE", "WA3", "JE" };
-        
+
         InternalContest contest = new InternalContest();
 
         contest.setSiteNumber(siteNumber);
-        
+
         for (int i = 0; i < numSites; i++) {
             Site site = createSite(i + 1, "Site " + (i + 1), null, 0);
             contest.addSite(site);
@@ -191,7 +191,7 @@ public class SampleContest {
             }
             contest.addLanguage(language);
         }
-        
+
         Problem[] problems = createProblems(problemsNames, 'A', siteNumber);
         for (Problem problem : problems) {
             contest.addProblem(problem);
@@ -209,7 +209,7 @@ public class SampleContest {
             contest.addJudgement(judgement);
             i++;
         }
-        
+
         contest.generateNewAccounts(Type.ADMINISTRATOR.toString(), 1, true);
 
         if (numTeams > 0) {
@@ -267,10 +267,10 @@ public class SampleContest {
         }
         return problems;
     }
-    
+
     /**
      * Assign colors.
-     * 
+     *
      * @param contest
      */
     public void assignColors(IInternalContest contest) {
@@ -294,7 +294,7 @@ public class SampleContest {
 
     /**
      * Returns 6 character hex RGB string for input color name.
-     * 
+     *
      * @param colorName
      */
     public String lookupRGB(String colorName) {
@@ -336,7 +336,7 @@ public class SampleContest {
 
     /**
      * Create a InternalController.
-     * 
+     *
      * @param contest
      *            model for controller
      * @param isServer
@@ -352,8 +352,8 @@ public class SampleContest {
         // Start site 1
         InternalController controller = new InternalController(contest);
         controller.setUsingMainUI(false);
-        
-        controller.setLog(null); // creates and opens a default log name 
+
+        controller.setLog(null); // creates and opens a default log name
 
         if (isServer) {
             controller.setContactingRemoteServer(isRemote);
@@ -379,7 +379,7 @@ public class SampleContest {
         return controller;
     }
 
-    
+
     /**
      * Create a controller which saves packets.
      */
@@ -412,8 +412,8 @@ public class SampleContest {
 
         return controller;
     }
-    
-    
+
+
     public static String getTestDirectoryName(String subDirName) {
         String testDir = "testout" + File.separator + subDirName;
 
@@ -426,7 +426,7 @@ public class SampleContest {
 
     /**
      * Populate Language, Problems and Judgements.
-     * 
+     *
      * @param contest
      */
     public void populateContest(IInternalContest contest) {
@@ -464,30 +464,30 @@ public class SampleContest {
 
     /**
      * Get all sites' teams.
-     * 
+     *
      * @param contest
      * @return
      */
     public static Account[] getTeamAccounts(IInternalContest contest) {
         return getAccounts(contest, Type.TEAM);
     }
-    
+
     public Account[] getJudgeAccounts(IInternalContest contest) {
         return getAccounts(contest, Type.JUDGE);
     }
-    
-    
+
+
 
     /**
      * Get site's teams.
-     * 
+     *
      * @param contest
      * @param siteNumber
      * @return
      */
     public static Account[] getTeamAccounts(IInternalContest contest, int siteNumber) {
         Vector<Account> accountVector = contest.getAccounts(ClientType.Type.TEAM, siteNumber);
-        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         return accounts;
@@ -495,7 +495,7 @@ public class SampleContest {
 
     /**
      * Create N runs identical to input run, add elapsed time.
-     * 
+     *
      * @param contest
      * @param numberRuns
      * @param run
@@ -522,8 +522,8 @@ public class SampleContest {
         return runs;
     }
 
-    
-    
+
+
     public Run[] createRandomRuns(IInternalContest contest, int numberRuns, boolean randomTeam, boolean randomProblem, boolean randomLanguage, int siteNumber) {
 
         Account[] accounts = getTeamAccounts(contest);
@@ -538,11 +538,11 @@ public class SampleContest {
         }
 
         ClientId teamId = accounts[0].getClientId();
-        
+
         return createRandomRuns(contest, numberRuns, teamId, randomTeam, randomProblem, randomLanguage, siteNumber);
 
     }
-    
+
     public Run[] createRandomRuns(IInternalContest contest, int numberRuns, ClientId teamId, boolean randomTeam, boolean randomProblem, boolean randomLanguage, int siteNumber) {
 
         Run[] runs = new Run[numberRuns];
@@ -564,16 +564,16 @@ public class SampleContest {
         for (int i = 0; i < numberRuns; i++) {
             Problem problem = problems[0];
             Language language = languages[0];
-            
+
 
             if (randomLanguage) {
                 int randomLangIndex = random.nextInt(languages.length);
-                language = (Language) languages[randomLangIndex];
+                language = languages[randomLangIndex];
             }
 
             if (randomProblem) {
                 int randomProblemIndex = random.nextInt(problems.length);
-                problem = (Problem) problems[randomProblemIndex];
+                problem = problems[randomProblemIndex];
             }
 
             if (randomTeam) {
@@ -593,7 +593,7 @@ public class SampleContest {
 
     /**
      * Generate a number of new runs.
-     * 
+     *
      * @param contest
      * @param numberRuns
      * @param randomTeam
@@ -607,7 +607,7 @@ public class SampleContest {
 
     /**
      * Create new run and add to contest run list.
-     * 
+     *
      * @param contest
      * @param clientId
      * @param language
@@ -635,7 +635,7 @@ public class SampleContest {
 
     /**
      * Create new run and add to contest run list.
-     * 
+     *
      * @param contest
      * @param clientId
      * @param problem
@@ -658,9 +658,9 @@ public class SampleContest {
 
     /**
      * Create a copy of the run (not a clone, but close) and add to contest run list.
-     * 
+     *
      * This references the input run's JugementRecords instead of cloning them. This run will have a different getElementId() and a getNumber() which represents the next run number.
-     * 
+     *
      * @param contest
      * @param run
      * @param cloneJudgements
@@ -676,7 +676,7 @@ public class SampleContest {
         newRun.setNumber(contest.getRuns().length);
         newRun.setStatus(RunStates.NEW);
         newRun.setEntryPoint("Foo.class");
-        
+
         if (cloneJudgements) {
             for (JudgementRecord judgementRecord : newRun.getAllJudgementRecords()) {
                 newRun.addJudgement(judgementRecord);
@@ -724,7 +724,7 @@ public class SampleContest {
 
     /**
      * Create profiles but do not add profiles to contest.
-     * 
+     *
      * @param contest
      * @param count
      * @return
@@ -742,9 +742,9 @@ public class SampleContest {
 
     /**
      * add a judged run to list of runs in a contest.
-     * 
+     *
      * Fields in runInfoLine:
-     * 
+     *
      * <pre>
      * 0 - run id, int
      * 1 - team id, int
@@ -752,24 +752,24 @@ public class SampleContest {
      * 3 - elapsed, int
      * 4 - solved, String &quot;Yes&quot; or No (or full No judgement text)
      * 5 - send to teams, Yes or No
-     * 
+     *
      * Example:
      * &quot;6,5,A,12,Yes&quot;
      * &quot;6,5,A,12,Yes,Yes&quot;
-     * 
+     *
      * </pre>
-     * 
+     *
      * @param contest
      * @param runInfoLine
      * @throws FileSecurityException
      * @throws ClassNotFoundException
      * @throws IOException
-     * @throws RunUnavailableException 
+     * @throws RunUnavailableException
      */
     public Run addARun(IInternalContest contest, String runInfoLine) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         // get last judge
-        Account[] accounts = (Account[]) contest.getAccounts(Type.JUDGE).toArray(new Account[contest.getAccounts(Type.JUDGE).size()]);
+        Account[] accounts = contest.getAccounts(Type.JUDGE).toArray(new Account[contest.getAccounts(Type.JUDGE).size()]);
         ClientId judgeId = accounts[accounts.length - 1].getClientId();
 
         Problem[] problemList = contest.getProblems();
@@ -802,11 +802,11 @@ public class SampleContest {
         run.setSiteNumber(contest.getSiteNumber());
         run.setElapsedMins(elapsed);
         run.setEntryPoint("Foo.class");
-        
+
         JudgementRecord judgementRecord = null;
 
         if (data[4].trim().length() != 0 && (! data[4].equalsIgnoreCase("New"))){
-            
+
             // Use a default No entry
             ElementId judgementId = noJudgement.getElementId();
 
@@ -822,12 +822,12 @@ public class SampleContest {
                     }
                 }
             }
-            
+
             judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
             judgementRecord.setSendToTeam(sendToTeams);
 
         }
-        
+
         contest.addRun(run);
 
         if (judgementRecord != null){
@@ -850,7 +850,7 @@ public class SampleContest {
 
     /**
      * Add a judgement to a run.
-     * 
+     *
      * @param contest
      * @param run
      * @param judgement
@@ -859,7 +859,7 @@ public class SampleContest {
      * @throws IOException
      * @throws ClassNotFoundException
      * @throws FileSecurityException
-     * @throws RunUnavailableException 
+     * @throws RunUnavailableException
      */
     public Run addJudgement(IInternalContest contest, Run run, Judgement judgement, ClientId judgeId) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
@@ -875,22 +875,22 @@ public class SampleContest {
     }
 
     public static void checkOutRun(IInternalContest contest, Run run, ClientId judgeId) throws RunUnavailableException, IOException, ClassNotFoundException, FileSecurityException {
-        
+
             if (run == null) {
                 throw  new IllegalArgumentException("run is null");
             }
-            
+
             if (judgeId == null) {
                 throw  new IllegalArgumentException("judge id is null");
             }
-            
+
             contest.checkoutRun(run, judgeId, false, false);
     }
-    
+
 
     /**
      * Assign a color to a problem.
-     * 
+     *
      * @param contest
      * @param problem
      * @param color
@@ -910,7 +910,7 @@ public class SampleContest {
 
     /**
      * Add a ballon notification.
-     * 
+     *
      * @param contest
      * @param scoreboardClientId
      * @param run
@@ -938,7 +938,7 @@ public class SampleContest {
 
     /**
      * Add runs to contest (via acceptRun)
-     * 
+     *
      * @param contest
      * @param runs
      * @param filename
@@ -959,14 +959,14 @@ public class SampleContest {
             contest.acceptRun(run, runFiles);
         }
     }
-    
+
     /**
      * Create a sample RunFiles.
-     * 
+     *
      * Uses {@link #getSampleFile()} as the filename.
-     * 
+     *
      * @param run
-     * @return 
+     * @return
      */
     public RunFiles createSampleRunFiles (Run run) {
         return new RunFiles(run, getSampleFile());
@@ -974,7 +974,7 @@ public class SampleContest {
 
     /**
      * Print the report to the filename.
-     * 
+     *
      * @param filename
      * @param selectedReport
      * @param filter
@@ -999,7 +999,7 @@ public class SampleContest {
     }
 
     /**
-     * 
+     *
      * @param contest
      * @return Yes/Solved judgement
      */
@@ -1029,7 +1029,7 @@ public class SampleContest {
 
     /**
      * Return Sumit source file in test area.
-     * 
+     *
      * @see #getSampleFile(String)
      * @return
      */
@@ -1039,9 +1039,9 @@ public class SampleContest {
 
     /**
      * Return full filename in file test directory.
-     * 
+     *
      * Will print Exceptions if test directory is not present or if no such filename found.
-     * 
+     *
      * @param filename
      * @return filename with path to test data.
      */
@@ -1054,7 +1054,7 @@ public class SampleContest {
             }
             samplesDirectory = projectPath + File.separator + samps + File.separator;
         }
-        
+
         String testfilename = samplesDirectory + File.separator + "src" + File.separator + filename;
 
         if (!new File(testfilename).isFile()) {
@@ -1065,9 +1065,9 @@ public class SampleContest {
 
     /**
      * Create a notification if needed.
-     * 
+     *
      * Checks for existing notification, only creates a notification if no notification exists.
-     * 
+     *
      * @param contest2
      * @param run
      */
@@ -1082,7 +1082,7 @@ public class SampleContest {
 
     /**
      * Unconditionally creates a notification.
-     * 
+     *
      * @param contest2
      * @param run
      */
@@ -1097,10 +1097,10 @@ public class SampleContest {
         settings.setBalloonList(balloonList);
         contest2.updateClientSettings(settings);
     }
-    
+
     /**
      * Assigns two group names to all teams.
-     * 
+     *
      * @param contest
      * @param groupNameOne first half of teams assigned this group
      * @param groupNameTwo second half of teams assigned this group
@@ -1129,15 +1129,15 @@ public class SampleContest {
             }
         }
     }
-    
+
     /**
      * Quick load of contest with runs and groups.
-     * 
+     *
      * @param contest
      * @throws IOException
      * @throws ClassNotFoundException
      * @throws FileSecurityException
-     * @throws RunUnavailableException 
+     * @throws RunUnavailableException
      */
     public IInternalContest quickLoad(IInternalContest contest, int numberOfRuns) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
@@ -1162,9 +1162,9 @@ public class SampleContest {
 
         assignTeamGroup(contest, group1, 0, teams.length / 2);
         assignTeamGroup(contest, group2, teams.length / 2, teams.length - 1);
-        
+
         Run[] runs = sample.createRandomRuns(contest, numberOfRuns, true, true, true);
-        
+
         for (Run run : runs) {
             contest.addRun(run);
         }
@@ -1191,7 +1191,7 @@ public class SampleContest {
 
     /**
      * Assign group to team startIdx to endIdx.
-     * 
+     *
      * @param group
      * @param startIdx
      * @param endIdx
@@ -1200,7 +1200,7 @@ public class SampleContest {
     public void assignTeamGroup(IInternalContest contest2, Group group, int startIdx, int endIdx) {
         Account[] teams = getTeamAccounts(contest2);
         for (int i = startIdx; i < endIdx; i++) {
-            teams[i].setGroupId(group.getElementId());
+            teams[i].addGroupId(group.getElementId(), i == startIdx);
         }
     }
 
@@ -1233,7 +1233,7 @@ public class SampleContest {
 
     /**
      * Write array to PrintWriter.
-     * 
+     *
      * @param writer
      * @param datalines
      */
@@ -1245,7 +1245,7 @@ public class SampleContest {
 
     /**
      * Add and Write sample judge's data and answer file for problem.
-     * 
+     *
      * @param contest
      * @param problem
      * @throws FileNotFoundException
@@ -1274,7 +1274,7 @@ public class SampleContest {
 
         contest.updateProblem(problem, dataFiles);
     }
-    
+
     public String createSumitDataFile(String filename) throws FileNotFoundException {
         PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
         String[] datalines = { "25", "50", "-25", "0" };
@@ -1288,7 +1288,7 @@ public class SampleContest {
     }
 
     /**
-     * 
+     *
      * @param filename
      * @return
      * @throws FileNotFoundException
@@ -1306,24 +1306,24 @@ public class SampleContest {
     }
 
    public void addInternalValidator(IInternalContest contest, Problem problem, int optionNumber) {
-        
+
        problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
-       
+
        PC2ValidatorSettings settings = new PC2ValidatorSettings();
        settings.setWhichPC2Validator(optionNumber);
        settings.setIgnoreCaseOnValidation(true);
-       settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + settings.getWhichPC2Validator() 
+       settings.setValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + settings.getWhichPC2Validator()
                + " " + settings.isIgnoreCaseOnValidation());
        settings.setValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
        problem.setPC2ValidatorSettings(settings);
-        
+
         contest.updateProblem(problem);
     }
 
     /**
      * Add and Write sample judge's data and answer file for problem.
-     * 
+     *
      * @param contest
      * @param problem
      * @param dataFileName
@@ -1365,15 +1365,15 @@ public class SampleContest {
 
     public static Account[] getAccounts(IInternalContest contest, ClientType.Type type) {
         Vector<Account> accountVector = contest.getAccounts(type);
-        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         return accounts;
     }
-    
+
     public Account[] getAccounts(IInternalContest contest, ClientType.Type type, int siteNumber) {
         Vector<Account> accountVector = contest.getAccounts(type, siteNumber);
-        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         return accounts;
@@ -1381,7 +1381,7 @@ public class SampleContest {
 
     /**
      * Turn test mode on.
-     * 
+     *
      * @param contest
      */
     public void setCCSTestMode(IInternalContest contest) {
@@ -1395,7 +1395,7 @@ public class SampleContest {
 
     /**
      * Set for Internal CCS validation.
-     * 
+     *
      * @param contest
      * @param validatorParameters
      * @param problem
@@ -1404,7 +1404,7 @@ public class SampleContest {
 
         problem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
         problem.setOutputValidatorProgramName(Constants.CLICS_VALIDATOR_NAME);
-        
+
         problem.setReadInputDataFromSTDIN(true);
 
         if (validatorParameters == null) {
@@ -1416,7 +1416,7 @@ public class SampleContest {
 
     /**
      * Create ISumit class that reads from stdin, basename filename must be ISumit.java.
-     * 
+     *
      * @param filename
      * @return
      * @throws FileNotFoundException
@@ -1463,16 +1463,17 @@ public class SampleContest {
         return lines;
 
     }
-    
+
     /**
      * Creates sumit program, must use filename Sumit.java.
-     * 
+     *
      * @deprecated use getSamplesSourceFilename from AbstractTestCase
      * @param filename source file name.
      * @param inputFilename file name for program to read
      * @return name of filename
      * @throws FileNotFoundException
      */
+    @Deprecated
     public String createSampleSumitSource(String filename, String inputFilename) throws FileNotFoundException  {
         PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
         String[] datalines = getSumitSourceLines(inputFilename);
@@ -1481,7 +1482,7 @@ public class SampleContest {
         writer = null;
         return filename;
     }
-    
+
 
     private String[] getSumitSourceLines(String inputfilename) {
         String [] lines = {
@@ -1516,13 +1517,13 @@ public class SampleContest {
         };
         return lines;
     }
-    
-    
+
+
     /**
      * Get problem letter for input integer.
-     * 
+     *
      * getProblemLetter(1) is 'A'
-     * 
+     *
      * @param id
      *            a one based problem number.
      * @return
@@ -1535,7 +1536,7 @@ public class SampleContest {
 
     /**
      * Get list of problem letters for filter.
-     * 
+     *
      * @param contest
      * @param filter
      * @return list of letters joined by ", "
@@ -1561,7 +1562,7 @@ public class SampleContest {
 
     /**
      * Join string together.
-     * 
+     *
      * @param delimiter
      * @param list
      * @return buffer of list joined using delimiter.
@@ -1582,21 +1583,21 @@ public class SampleContest {
 
     /**
      * Create a new judged run with a Yes judgement.
-     * 
+     *
      * @param contest
      * @return
-     * @throws RunUnavailableException 
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws RunUnavailableException
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public Run createRandomJudgedRunSolved(IInternalContest contest) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
-        
+
         Run run = createRandomRuns(contest, 1, true, true, true)[0];
         ClientId judge = getRandomAccount(contest,Type.JUDGE).getClientId();
         Judgement yes = getYesJudgement(contest);
         contest.addRun(run);
-        return addJudgement(contest, run, yes, judge); 
+        return addJudgement(contest, run, yes, judge);
     }
 
     private Account getRandomAccount(IInternalContest contest, Type type) {
@@ -1604,7 +1605,7 @@ public class SampleContest {
         int randomIndex = random.nextInt(accounts.length);
         return accounts[randomIndex];
     }
-    
+
     private Account getRandomAccount(IInternalContest contest, Type type, int siteNumber) {
         Account[] accounts = getAccounts(contest, type, siteNumber);
         int randomIndex = random.nextInt(accounts.length);
@@ -1613,18 +1614,18 @@ public class SampleContest {
 
     /**
      * Add run test cases.
-     * 
+     *
      * @param inContest
      * @param run
      * @param count
      */
     public void addTestCase(IInternalContest inContest, Run run, int count) {
-        
+
         JudgementRecord judgementRecord = run.getJudgementRecord();
         if (judgementRecord == null){
             throw new RuntimeException("Run has no judgement records "+run);
         }
-        
+
         for (int i = 0; i < count; i++) {
             RunTestCase runTestCaseResult = new RunTestCase(run, judgementRecord, i+1, run.isSolved());
             run.addTestCase (runTestCaseResult);
@@ -1635,14 +1636,14 @@ public class SampleContest {
         return createContest(3, 3, 120, 12, true);
     }
 
-    
+
     public String getSampleFileName(String baseFileName) {
         return "samps" + File.separator + "src" + File.separator + baseFileName;
     }
 
     /**
      * Create judge data and answer files as internal files.
-     * 
+     *
      * @param problem
      *            problem for data files
      * @param testCases
@@ -1674,7 +1675,7 @@ public class SampleContest {
 
     /**
      * Create testCases number of data files (data and answer) as internal files.
-     * 
+     *
      * @param problem
      *            problem for data files
      * @param testCases
@@ -1732,11 +1733,11 @@ public class SampleContest {
 
     /**
      * Load data files into datafiles and problem from files in dataFileBaseDirectory.
-     * 
+     *
      *  Will remove test data sets, and add data sets from dataFileBaseDirectory.
      *  <br>
      *  Will create new ProblemDataFiles if input files == null.
-     * 
+     *
      * @param problem problem for the data files.
      * @param files input data files (null to create new ProblemDataFiles from scratch)
      * @param dataFileBaseDirectory directory for data files
@@ -1802,7 +1803,7 @@ public class SampleContest {
             outfiles.add(new SerializedFile(filename, externalFilesFlag));
         }
 
-        return (SerializedFile[]) outfiles.toArray(new SerializedFile[outfiles.size()]);
+        return outfiles.toArray(new SerializedFile[outfiles.size()]);
     }
 
     public void setAliases(IInternalContest inContest) {
@@ -1813,7 +1814,7 @@ public class SampleContest {
             idx++;
         }
     }
-    
+
     // copied from https://stackoverflow.com/questions/40074840/reading-a-csv-file-into-a-array
     public static String[] loadStringArrayFromCSV(String fileName) {
         File file= new File(fileName);
@@ -1870,14 +1871,14 @@ public class SampleContest {
         }
 
         return lines.toArray(new String[lines.size()]);
-        
+
     }
-    
+
     /**
      * add run to list of runs in a contest.
-     * 
+     *
      * Files found in runInfoLine, comma delmited
-     * 
+     *
      * <pre>
      * 0 - run id, int
      * 1 - team id, int
@@ -1887,42 +1888,42 @@ public class SampleContest {
      * 5 - send to teams, Yes or No
      * 6 - No Judgement index
      * 7 - Validator judgement string
-     * 
+     *
      * Example:
      * &quot;6,5,A,12,Yes&quot;
      * &quot;6,5,A,12,Yes,Yes&quot;
-     * 
+     *
      * </pre>
-     * 
+     *
      * @param contest
      * @param runInfoLine
-     * @param computerJudged 
-     * @throws Exception 
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @param computerJudged
+     * @throws Exception
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public static void addRunFromInfo(IInternalContest contest, String runInfoLine, boolean computerJudged) throws Exception {
 
         // get 5th judge
         ClientId judgeId = contest.getAccounts(Type.JUDGE).elementAt(4).getClientId();
-        
+
         Problem[] problemList = contest.getProblems();
         Language languageId = contest.getLanguages()[0];
 
         Judgement yesJudgement = contest.getJudgements()[0];
         Judgement[] judgement = contest.getJudgements();
         Judgement noJudgement = null;
-        
+
         for (int i = 0; i < judgement.length; i++) {
             if (judgement[i].getAcronym().equals("WA")) {
                 noJudgement = judgement[i];
                 break;
             }
         }
-        
+
         String[] data = runInfoLine.split(",");
-        
+
         // Line is: runId,teamId,problemLetter,elapsed,solved[,sendToTeamsYN]
 
         int runId = getIntegerValue(data[0]);
@@ -1930,7 +1931,7 @@ public class SampleContest {
         String probLet = data[2];
         int elapsed = getIntegerValue(data[3]);
         boolean solved = data[4].equals("Yes");
-        
+
         boolean sendToTeams = true;
         if (data.length > 5){
             sendToTeams = data[5].equals("Yes");
@@ -1938,7 +1939,7 @@ public class SampleContest {
         if (data.length > 6) {
             noJudgement = contest.getJudgements()[getIntegerValue(data[6])];
         }
-        
+
         String validatorJudgementString = null;
         if (data.length > 7) {
             validatorJudgementString = data[7];
@@ -1979,8 +1980,8 @@ public class SampleContest {
     public static void addRunFromInfo(IInternalContest contest, String runInfoLine) throws Exception {
         addRunFromInfo(contest, runInfoLine, false);
     }
-    
-    
+
+
     public static void addRunFromInfo(IInternalContest contest, String[] runInfoLines) throws Exception {
         for (String runInfoLine  : runInfoLines) {
             addRunFromInfo(contest, runInfoLine, false);
@@ -1989,9 +1990,9 @@ public class SampleContest {
 
     /**
      * Assign unique reservation id to account.
-     * 
+     *
      * Loops through team accounts and assigned external id (Reservation ID) sequential numbers/ids starting at startId
-     * 
+     *
      * @param contest
      * @param startId
      *            - start with id
@@ -2012,7 +2013,7 @@ public class SampleContest {
 
     /**
      * Get account at current site.
-     * 
+     *
      * @param contest
      * @param administrator
      * @param clientNumber
@@ -2021,7 +2022,7 @@ public class SampleContest {
     public Account getAccount(IInternalContest contest, Type type, int clientNumber) {
         return   contest.getAccount(new ClientId(contest.getSiteNumber(), type, clientNumber));
     }
-    
+
     public String getTestSampleContestDirectory(String dirname) {
         return getSampleContestsDirectory() + File.separator + dirname;
     }
@@ -2029,7 +2030,7 @@ public class SampleContest {
     public String getSampleContestsDirectory() {
         return "samps" + File.separator + "contests";
     }
-    
+
     /**
      * Load contest from sample contets
      * @param contest
@@ -2055,7 +2056,7 @@ public class SampleContest {
             throw e;
         }
     }
-    
 
-    
+
+
 }

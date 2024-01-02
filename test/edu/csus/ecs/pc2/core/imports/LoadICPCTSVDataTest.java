@@ -19,7 +19,7 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Unit Tests for LoadICPCTSVData.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 // $HeadURL$
 public class LoadICPCTSVDataTest extends AbstractTestCase {
 
-   
+
     public void testCheckFiles() throws Exception {
         LoadICPCTSVData load = new LoadICPCTSVData();
 
@@ -40,10 +40,10 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
         Account[] accounts = ICPCTSVLoader.loadAccounts(load.getTeamsFilename());
 
         assertEquals("Number of groups", 6, groups.length);
-        assertEquals("Number of acounts", 3, accounts.length);
+        assertEquals("Number of accounts", 3, accounts.length);
 
     }
-    
+
     public void testLoad() throws Exception {
         LoadICPCTSVData load = new LoadICPCTSVData();
 
@@ -56,7 +56,7 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
         Account[] accounts = ICPCTSVLoader.loadAccounts(load.getTeamsFilename());
 
         assertEquals("Number of groups", 6, groups.length);
-        assertEquals("Number of acounts", 3, accounts.length);
+        assertEquals("Number of accounts", 3, accounts.length);
 
         IInternalContest contest = new SampleContest().createContest(1, 1, 12, 12, true);
 
@@ -64,11 +64,11 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
 
         List<Group> groupList = Arrays.asList(groups);
         List<Account> accountList = Arrays.asList(accounts);
-        checkIfGroupsAssigned(accountList);
-        
+        checkIfGroupsAssigned(contest, accountList);
+
         load.updateGroupsAndAccounts(contest, groupList, accountList);
 
-        checkIfGroupsAssigned(accountList);
+        checkIfGroupsAssigned(contest, accountList);
 
         checkIfTeamAssignments(accountList);
 
@@ -78,15 +78,63 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
         assertEquals("Display Name", "University of Chile", chile.getDisplayName());
         assertEquals("Team Name", "Natural Log", chile.getTeamName());
         assertEquals("Country Code", "CL", chile.getCountryCode());
-        
+
         edu.csus.ecs.pc2.core.security.Permission.Type[] permList = getPermList(Type.TEAM);
-        
+
         assertEquals("Expecting same permissions ", 7,  permList.length);
 
-        ElementId id = chile.getGroupId();
+        ElementId id = chile.getPrimaryGroupId();
         Group groupId = lookupGroup(groupList, id);
         assertEquals("Group Id ", 206, groupId.getGroupId());
 
+    }
+
+    public void testLoadMultipleGroups() throws Exception {
+        LoadICPCTSVData load = new LoadICPCTSVData();
+
+        String groupsFilename = getTestFilename(LoadICPCTSVData.GROUPS_FILENAME);
+
+        assertFileExists(groupsFilename);
+        load.checkFiles(groupsFilename);
+
+        Group[] groups = ICPCTSVLoader.loadGroups(load.getGroupsFilename());
+        Account[] accounts = ICPCTSVLoader.loadAccounts(load.getTeamsFilename());
+
+        assertEquals("Number of groups", 6, groups.length);
+        assertEquals("Number of accounts", 3, accounts.length);
+
+        IInternalContest contest = new SampleContest().createContest(1, 1, 12, 12, true);
+
+        assertNotNull("contest", contest);
+
+        List<Group> groupList = Arrays.asList(groups);
+        List<Account> accountList = Arrays.asList(accounts);
+        checkIfGroupsAssigned(contest, accountList);
+
+        load.updateGroupsAndAccounts(contest, groupList, accountList);
+
+        checkIfGroupsAssigned(contest, accountList);
+
+        checkIfTeamAssignments(accountList);
+
+        Account co = accountList.get(1);
+
+        assertEquals("External name ", "University of Colorado", co.getExternalName());
+        assertEquals("Display Name", "University of Colorado", co.getDisplayName());
+        assertEquals("Team Name", "Rams", co.getTeamName());
+        assertEquals("Country Code", "USA", co.getCountryCode());
+
+        edu.csus.ecs.pc2.core.security.Permission.Type[] permList = getPermList(Type.TEAM);
+
+        assertEquals("Expecting same permissions ", 7,  permList.length);
+
+        // We know at least one group is assigned, or we'd assert above (checkIfGroupsAssigned)
+        for(ElementId id : co.getGroupIds()) {
+            Group groupId = lookupGroup(groupList, id);
+            assertNotNull("Group Id " + id.toString(), groupId);
+            int gid = groupId.getGroupId();
+            assertTrue("Wrong group id", gid == 202 || gid == 204 || gid == 503);
+        }
     }
 
     private Group lookupGroup(List<Group> groupList, ElementId id) {
@@ -107,15 +155,26 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
 
     }
 
-    private void checkIfGroupsAssigned(List<Account> accountList) {
+    private void checkIfGroupsAssigned(IInternalContest contest, List<Account> accountList) {
 
+        int num = 1;
         for (Account account : accountList) {
-            if (account.getGroupId() == null) {
+            if (account.getGroupIds() == null) {
                 fail("Expecting group assigned to account " + account);
+            }
+            int n = account.getGroupIds().size();
+            if(num == 1) {
+                // account index 1 has 3 groups assigned, the "A" groups (any group starting with A).
+                assertEquals("Expecting 3 groups for account", 3, n);
+                for(ElementId groupElementId : account.getGroupIds()) {
+                    assertTrue("Group for account does not start with A", contest.getGroup(groupElementId).getDisplayName().startsWith("A"));
+                }
+            } else if(n != 1) {
+                assertEquals("Expecting 1 group for account", 1, n);
             }
         }
     }
-    
+
     private IInternalContest loadSampleContest(IInternalContest contest, String sampleName) throws Exception {
         IContestLoader loader = new ContestSnakeYAMLLoader();
         String configDir = getTestSampleContestConfigDirectory(sampleName);
@@ -138,10 +197,10 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
 
     /**
      * Test loading a teams.tsv twice.
-     * 
+     *
      * The 2nd load of teams and groups, in particular groups, caused all accounts' groups to be "empty"
      * on the Accounts tab.  See https://github.com/pc2ccs/pc2v9/issues/318 for details.
-     * 
+     *
      * @throws Exception
      */
     public void testReLoadTSV() throws Exception {
@@ -153,10 +212,10 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
         IInternalContest contest = loadSampleContest(null, contestName);
         assertNotNull(contest);
         IInternalController controller = new SampleContest().createController(contest, true, false);
-        
+
         LoadICPCTSVData loader = new LoadICPCTSVData();
         loader.setContestAndController(contest, controller);
-        
+
         boolean loaded = loader.loadFiles(groupsFilename, false, false);
         assertTrue("Expecting "+contestName+" contest loaded", loaded);
 
@@ -189,8 +248,8 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
 
         // check that all accounts assigned groups in the model/contest
         for (Account account : accounts2) {
-            Group group = contest.getGroup(account.getGroupId());
-            assertNotNull("Expecting group to exist in contest/model " + account.getGroupId(), group);
+            Group group = contest.getGroup(account.getPrimaryGroupId());
+            assertNotNull("Expecting group to exist in contest/model " + account.getPrimaryGroupId(), group);
         }
     }
 }

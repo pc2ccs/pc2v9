@@ -1,7 +1,8 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.core;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
@@ -35,13 +36,13 @@ import edu.csus.ecs.pc2.services.web.EventFeedFilter;
 
 /**
  * Event feed information in the CLICS JSON format.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 // TODO for all sections pass in Key rather than hard coded inside method
 public class EventFeedJSON extends JSONUtilities {
     /**
-     * 
+     *
      */
     public EventFeedJSON(IInternalContest contest) {
         super();
@@ -54,29 +55,29 @@ public class EventFeedJSON extends JSONUtilities {
 
     /**
      * Event Id Sequence.
-     * 
+     *
      * @see #nextEventId()
      */
     protected long eventIdSequence = 0;
 
     /**
      * Start event id.
-     * 
+     *
      * /event-feed?type=<event_list>
      */
     private String startEventId = null;
 
     /**
      * List of events to output.
-     * 
+     *
      */
     private String eventTypeList = null;
 
     private JSONTool jsonTool;
 
-    private Vector<ElementId> ignoreGroup = new Vector<ElementId>();
+    private HashSet<ElementId> ignoreGroup = new HashSet<ElementId>();
 
-    private Vector<ClientId> ignoreTeam = new Vector<ClientId>();
+    private HashSet<ClientId> ignoreTeam = new HashSet<ClientId>();
 
     public String getContestJSON(IInternalContest contest) {
 
@@ -103,7 +104,7 @@ public class EventFeedJSON extends JSONUtilities {
     }
     /**
      * List of judgements.
-     * 
+     *
      */
     public String getJudgementTypeJSON(IInternalContest contest) {
 
@@ -124,7 +125,7 @@ public class EventFeedJSON extends JSONUtilities {
 
     /**
      * Get all languages JSON.
-     * 
+     *
      * @param contest
      * @return
      */
@@ -147,7 +148,7 @@ public class EventFeedJSON extends JSONUtilities {
 
     /**
      * get JSON for a language.
-     * 
+     *
      * @param contest
      * @param language
      * @param languageNumber
@@ -226,13 +227,13 @@ public class EventFeedJSON extends JSONUtilities {
 
     /**
      * Get all sites' teams.
-     * 
+     *
      * @param contest
      * @return
      */
     public Account[] getTeamAccounts(IInternalContest inContest) {
         Vector<Account> accountVector = inContest.getAccounts(ClientType.Type.TEAM);
-        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         return accounts;
@@ -247,7 +248,7 @@ public class EventFeedJSON extends JSONUtilities {
 
         for (Account account : accounts) {
 
-            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !ignoreGroup.contains(account.getGroupId())) {
+            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && isDisplayAccountGroupOnScoreboard(account)) {
                 appendJSONEvent(stringBuilder, TEAM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getTeamJSON(contest, account));
                 stringBuilder.append(NL);
             } else {
@@ -263,8 +264,32 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     /**
+     * Determine if the supplied account is to be shown on the scoreboard based on the groups it belongs to
+     *
+     * @param account to check if it has a group that can be displayed
+     * @return true if the account should be displayed, false otherwise
+     */
+    private boolean isDisplayAccountGroupOnScoreboard(Account account)
+    {
+        HashSet<ElementId> groups = account.getGroupIds();
+        boolean canDisplay = false;
+        if(groups != null) {
+            for(ElementId groupElementId : groups) {
+                if(!ignoreGroup.contains(groupElementId)) {
+                    canDisplay = true;
+                    break;
+                }
+            }
+        } else {
+            // If no groups for account, then it's ok to display
+            canDisplay = true;
+        }
+        return(canDisplay);
+    }
+
+    /**
      * Get team member info.
-     * 
+     *
      */
     public String getTeamMemberJSON(IInternalContest contest) {
 
@@ -293,7 +318,7 @@ public class EventFeedJSON extends JSONUtilities {
 
     /**
      * Get run submission.
-     * 
+     *
      * @param contest
      * @return
      */
@@ -320,7 +345,7 @@ public class EventFeedJSON extends JSONUtilities {
 
     /**
      * List of all runs' judgements..
-     * 
+     *
      */
     public String getJudgementJSON(IInternalContest contest) {
 
@@ -347,7 +372,7 @@ public class EventFeedJSON extends JSONUtilities {
 
     /**
      * Return test cases.
-     * 
+     *
      * @param contest
      */
     public String getRunJSON(IInternalContest contest) {
@@ -379,7 +404,7 @@ public class EventFeedJSON extends JSONUtilities {
 
     /**
      * Clarification Answer.
-     * 
+     *
      * @param contest
      * @return
      */
@@ -428,13 +453,13 @@ public class EventFeedJSON extends JSONUtilities {
 
         // SOMEDAY in Java 8 return String.join(NL, list) + NL;
 
-        String[] sa = (String[]) list.toArray(new String[list.size()]);
+        String[] sa = list.toArray(new String[list.size()]);
         return StringUtilities.join(NL, sa) + NL;
     }
 
     /**
      * Returns a JSON string listing the current contest event feed
-     * 
+     *
      * @param contest
      *            - the current contest
      * @return a JSON string giving event feed in JSON
@@ -529,9 +554,9 @@ public class EventFeedJSON extends JSONUtilities {
 
     /**
      * Appends named event types onto a buffer.
-     * 
+     *
      * valid events are: awards, clarifications, contests, groups, judgement-types, judgements, languages, organizations, problems, runs, submissions, team-members, teams
-     * 
+     *
      * @param contest
      * @param buffer
      * @param inEventTypeList
@@ -612,7 +637,7 @@ public class EventFeedJSON extends JSONUtilities {
 
     /**
      * get event id.
-     * 
+     *
      * @param sequenceNumber
      *            ascending number
      * @return event Id

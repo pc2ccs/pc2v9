@@ -2892,7 +2892,7 @@ public class InternalContest implements IInternalContest {
 
             if (! settings.isCopyGroups()) {
                 for (Account account : contest.getAccounts()) {
-                    account.setGroupId(null);
+                    account.clearGroups();
                 }
             }
         }  else {

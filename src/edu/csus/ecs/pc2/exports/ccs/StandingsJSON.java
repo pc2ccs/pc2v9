@@ -19,7 +19,7 @@ import edu.csus.ecs.pc2.core.util.RunStatistics;
 
 /**
  * Standings information in JSON format.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id: StandingsJSON.java 341 2013-06-21 10:53:25Z laned $
  */
@@ -35,7 +35,7 @@ public class StandingsJSON {
 
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
         scoringAlgorithm.setContest(contest);
-        
+
         ContestInformation info = contest.getContestInformation();
         Properties properties = new Properties();
         if (info != null) {
@@ -56,8 +56,10 @@ public class StandingsJSON {
             Account account = contest.getAccount(clientId);
             String universityName = account.getDisplayName();
             String groupName = "";
-            if (account.getGroupId() != null) {
-                groupName = contest.getGroup(account.getGroupId()).toString();
+            // TODO: Probably should create a JSON for each group ID for this team.  This would
+            // involve changing the Report interface to make successive calls supplying a group ID -- JB
+            if (account.getPrimaryGroupId() != null) {
+                groupName = contest.getGroup(account.getPrimaryGroupId()).toString();
             }
 
             // {"id":"<Rank>","name":"<University_name>","group":"<Group_name>"
@@ -122,8 +124,8 @@ public class StandingsJSON {
 
     /**
      * return a letter for a number.
-     * 
-     * 
+     *
+     *
      * @return 0 = A, 1 = B, etc.
      */
     public static String getProblemLetter(int id) {

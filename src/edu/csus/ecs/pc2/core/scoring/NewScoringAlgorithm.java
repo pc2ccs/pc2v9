@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
@@ -507,6 +507,10 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         standingsRecordMemento.putInteger("index", indexNumber);
 
         // Figure out group for displayname substitutions.
+        // it is probably OK to use the "primary" group ID here (the one supplied by the CMS).
+        // this is used to augment the teamName for display.  Using the CMS group should convey
+        // the desired information: eg.  Hawaii - D2  (for example).  Would we want to just show "D2" or "Hawaii" ?
+        // probably not - we want the compound group name (eg CMS name).
         Group group = null;
         if(account.getPrimaryGroupId() != null) {
             group = contest.getGroup(account.getPrimaryGroupId());

@@ -9,7 +9,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Substitute scoreboard team values for variables.
- * 
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
@@ -50,10 +50,10 @@ public class ScoreboardVariableReplacer {
 
     /**
      * Substitutes values for variables.
-     * 
-     * 
+     *
+     *
      * Variable names and examples.
-     * 
+     *
      * <pre>
      * Client/Team number - {:clientnumber} = 514
      * Country Code - {:countrycode} = CAN
@@ -66,7 +66,7 @@ public class ScoreboardVariableReplacer {
      * Team login name - {:teamloginname} = team514
      * Team name - {:teamname} = UBC!
      * </pre>
-     * 
+     *
      * @param origString original string with variables
      * @param account team account
      * @param group team group
@@ -109,17 +109,21 @@ public class ScoreboardVariableReplacer {
     }
 
     /**
-     * 
+     *
      * @see #substituteDisplayNameVariables(String, Account, Group)
-     * 
+     *
      * @param origString
      * @param contest
      * @param account
      * @return
      */
     public static String substituteDisplayNameVariables(String origString, IInternalContest contest, Account account) {
-        if (account.getGroupId() != null) {
-            return substituteDisplayNameVariables(origString, account, contest.getGroup(account.getGroupId()));
+        // it is probably OK to use the "primary" group ID here (the one supplied by the CMS).
+        // this is used to augment the teamName for display.  Using the CMS group should convey
+        // the desired information: eg.  Hawaii - D2  (for example).  Would we want to just show "D2" or "Hawaii" ?
+        // probably not - we want the compound group name (eg CMS name).
+        if (account.getPrimaryGroupId() != null) {
+            return substituteDisplayNameVariables(origString, account, contest.getGroup(account.getPrimaryGroupId()));
         } else {
             return substituteDisplayNameVariables(origString, account, null);
         }

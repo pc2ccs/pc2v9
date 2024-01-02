@@ -9,11 +9,12 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test for Problem class.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class ProblemTest extends AbstractTestCase {
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
 
@@ -21,7 +22,7 @@ public class ProblemTest extends AbstractTestCase {
 
     /**
      * Get a new populated Problem
-     * 
+     *
      * @return Problem
      */
     private Problem getProblemAnew() {
@@ -35,7 +36,7 @@ public class ProblemTest extends AbstractTestCase {
         p2.getPC2ValidatorSettings().setWhichPC2Validator(3);
         p2.getPC2ValidatorSettings().setIgnoreCaseOnValidation(true);
 
-        p2.setOutputValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator() 
+        p2.setOutputValidatorCommandLine(Constants.DEFAULT_PC2_VALIDATOR_COMMAND + " -pc2 " + p2.getWhichPC2Validator()
                 + " " + p2.getPC2ValidatorSettings().isIgnoreCaseOnValidation());
         p2.setOutputValidatorProgramName(Constants.PC2_VALIDATOR_NAME);
 
@@ -46,9 +47,9 @@ public class ProblemTest extends AbstractTestCase {
         p2.setLetter("F");
 
         p2.setSiteNumber(4);
-        
+
         assertTrue("Expecting that all can view this problem ",p2.isAllView());
-        
+
         return p2;
     }
 
@@ -152,7 +153,7 @@ public class ProblemTest extends AbstractTestCase {
 
         p2 = getProblemAnew();
         p2.getPC2ValidatorSettings().setIgnoreCaseOnValidation(false);
-        checkBoolean("setIgnoreSpacesOnValidation", p1.getPC2ValidatorSettings().isIgnoreCaseOnValidation(), 
+        checkBoolean("setIgnoreSpacesOnValidation", p1.getPC2ValidatorSettings().isIgnoreCaseOnValidation(),
                                                     p2.getPC2ValidatorSettings().isIgnoreCaseOnValidation(), p1, p2);
 
         p2 = getProblemAnew();
@@ -271,86 +272,85 @@ public class ProblemTest extends AbstractTestCase {
         assertEquals("Time limit", 10, problem.getTimeOutInSeconds());
 
     }
-    
+
     public void testDefaultMaxOutputKB() throws Exception {
 
         Problem problem = new Problem("Bar");
 
         assertEquals("Max output", Problem.DEFAULT_MAX_OUTPUT_FILE_SIZE_KB, problem.getMaxOutputSizeKB());
     }
-    
+
    /**
      * Test isSameas for balloon color and rgb.
-     * 
+     *
      * @throws Exception
      */
     public void testSameAsBalloonColors() throws Exception {
-        
+
         Problem p1 = getProblemAnew();
         Problem p2 = getProblemAnew();
 
         assertTrue("Is same As", p1.isSameAs(p2));
-        
+
         p1.setColorName("White");
         assertFalse("Expecting diff from color", p1.isSameAs(p2));
-        
+
         p1 = getProblemAnew();
         p1.setColorRGB("#444");
         assertFalse("Expecting diff from RGB", p1.isSameAs(p2));
-        
+
         assertFalse("Is not same As, null parameter", p1.isSameAs(null));
-        
+
     }
-    
+
     /**
      * Test adding groups to a problem.
-     * 
+     *
      * @throws Exception
      */
     public void testAddGroup() throws Exception {
-        
+
         SampleContest sample =new SampleContest();
         IInternalContest contest = sample.createStandardContest();
         sample.assignSampleGroups(contest, "Group Thing One", "Group Thing Two");
-        
+
         Problem[] problems = contest.getProblems();
-        
-        Problem lastProbblem = problems[problems.length - 1];
+
+        Problem lastProblem = problems[problems.length - 1];
         Group[] groups = contest.getGroups();
-        
-        
-        Group group1 = groups[0];
-        
+
         assertEquals("Number groups ", 2, groups.length);
-        
-        assertTrue (lastProbblem.isAllView());
-        lastProbblem.addGroup(group1);
-        
-        assertTrue (lastProbblem.canView(group1));
-        assertFalse (lastProbblem.canView(null));
-        assertFalse (lastProbblem.canView(groups[1]));
-        
-        lastProbblem.clearGroups();
-        assertTrue (lastProbblem.isAllView());
-        
+
+        Group group1 = groups[0];
+
+        assertTrue (lastProblem.isAllView());
+        lastProblem.addGroup(group1);
+
+        assertTrue (lastProblem.canView(group1));
+        assertFalse (lastProblem.canView(null));
+        assertFalse (lastProblem.canView(groups[1]));
+
+        lastProblem.clearGroups();
+        assertTrue (lastProblem.isAllView());
+
         Account[] teams = SampleContest.getTeamAccounts(contest);
-        
-        Group teamGroup = contest.getGroup(teams[0].getGroupId());
-        
-        lastProbblem.addGroup(teamGroup);
-        assertTrue (lastProbblem.canView(teamGroup));
-        
+
+        Group teamGroup = contest.getGroup(teams[0].getPrimaryGroupId());
+
+        lastProblem.addGroup(teamGroup);
+        assertTrue (lastProblem.canView(teamGroup));
+
         Problem middleProblem = problems[problems.length / 2];
         for (Group group : groups) {
             middleProblem.addGroup(group);
         }
-        
+
         assertFalse (middleProblem.isAllView());
         for (Group group : groups) {
             assertTrue (middleProblem.canView(group));
         }
-        
-        
+
+        // I wonder what this was for?  -- JB
 //        ProblemsReport report = new ProblemsReport();
 //        IInternalController controller = sample.createController(contest, true, false);
 //        report.setContestAndController(contest, controller);

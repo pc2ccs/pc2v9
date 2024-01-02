@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
 import java.io.IOException;
@@ -539,7 +539,7 @@ public class EventFeedXML2013 {
 
         try {
             if (account.getPrimaryGroupId() != null) {
-                Group group = contest.getGroup(account.getGroupId());
+                Group group = contest.getGroup(account.getPrimaryGroupId());
                 regionName = group.getDisplayName();
             }
         } catch (Exception e) {

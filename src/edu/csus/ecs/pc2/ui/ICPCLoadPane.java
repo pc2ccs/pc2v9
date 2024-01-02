@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Component;
@@ -34,7 +34,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * ICPC CMS Import Pane.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -43,7 +43,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 public class ICPCLoadPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 4668437987656812366L;
 
@@ -70,7 +70,7 @@ public class ICPCLoadPane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public ICPCLoadPane() {
         super();
@@ -79,7 +79,7 @@ public class ICPCLoadPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         FlowLayout flowLayout = new FlowLayout();
@@ -98,6 +98,7 @@ public class ICPCLoadPane extends JPanePlugin {
         return "ICPC Import Data Pane";
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
@@ -108,6 +109,7 @@ public class ICPCLoadPane extends JPanePlugin {
         initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 // wait for groups before enabling accounts
                 getImportAccountsButton().setEnabled(getContest().getGroups() != null);
@@ -125,7 +127,7 @@ public class ICPCLoadPane extends JPanePlugin {
 
     /**
      * This method initializes importAccountsButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getImportAccountsButton() {
@@ -134,6 +136,7 @@ public class ICPCLoadPane extends JPanePlugin {
             importAccountsButton.setText("Import CMS team tab files");
             importAccountsButton.setToolTipText("Load ICPC CMS PC2_Team.tab file");
             importAccountsButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     // load the accounts
                     loadPC2Team();
@@ -184,7 +187,7 @@ public class ICPCLoadPane extends JPanePlugin {
 
     /**
      * This method initializes changeDisplayFormatButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getChangeDisplayFormatButton() {
@@ -192,6 +195,7 @@ public class ICPCLoadPane extends JPanePlugin {
             changeDisplayFormatButton = new JButton();
             changeDisplayFormatButton.setText("Change Display Format");
             changeDisplayFormatButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     changeDisplayFormat();
                 }
@@ -213,7 +217,7 @@ public class ICPCLoadPane extends JPanePlugin {
                 }
             }
         } catch (Exception e) {
-            log.throwing("ICPCPane", "changeDisplayFormat", e);
+            log.throwing("ICPCLoadPane", "changeDisplayFormat", e);
         }
         if (importData == null && !gotData) {
             JOptionPane.showMessageDialog(this, "Please 'Import CMS team tab files' icpc account data first.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -232,7 +236,7 @@ public class ICPCLoadPane extends JPanePlugin {
 
     /**
      * This method initializes importSitesButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getImportSitesButton() {
@@ -243,6 +247,7 @@ public class ICPCLoadPane extends JPanePlugin {
             importSitesButton.setToolTipText("Load CMS PC2_Site.tab and PC2_Contest.tab");
             importSitesButton.setMnemonic(KeyEvent.VK_S);
             importSitesButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     loadPC2Site();
                 }
@@ -273,7 +278,7 @@ public class ICPCLoadPane extends JPanePlugin {
 
                             addGroups();
 
-                            
+
                         } // canRead
                     } // isFile
                 } // exists
@@ -290,13 +295,13 @@ public class ICPCLoadPane extends JPanePlugin {
     private void addGroups() throws Exception {
 
         // TODO CLEANUP move this off the swing thread, maybe into its own class
-        
+
         ICPCImportData importSiteData = LoadICPCData.loadSites(lastDir, getContest().getSites());
         Group[] importedGroups = importSiteData.getGroups();
         Group[] modelGroups = getContest().getGroups();
-        
+
         // TODO CLEANUP this is a funky location, but we do not want to add a 3rd icpc load for it
-        
+
         String contestTitle = importSiteData.getContestTitle();
         if (contestTitle != null && contestTitle.trim().length() > 0) {
             ContestInformation ci = getContest().getContestInformation();
@@ -317,7 +322,7 @@ public class ICPCLoadPane extends JPanePlugin {
                     groupMap.put(group.getDisplayName(), group);
                     groupMap.put(Integer.toString(group.getGroupId()), group);
                 }
-                
+
                 for (Group group : importedGroups) {
                     if (groupMap.containsKey(Integer.toString(group.getGroupId()))) {
                         mergeGroups(groupMap.get(Integer.toString(group.getGroupId())), group);
@@ -331,16 +336,16 @@ public class ICPCLoadPane extends JPanePlugin {
                     }
                 }
             }
-        } 
+        }
         // else
         // TODO CLEANUP odd, but is it an error if we have no groups?
         // Yes it is an error if there are no groups.
-        
+
     }
 
     /**
      * This method merges the data read from PC2_Site.tab into the model.
-     * 
+     *
      * @param destGroup
      * @param srcGroup
      */
@@ -359,7 +364,7 @@ public class ICPCLoadPane extends JPanePlugin {
 
     /**
      * This method initializes importTSVButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getImportTSVButton() {
@@ -368,6 +373,7 @@ public class ICPCLoadPane extends JPanePlugin {
             importTSVButton.setText("Import CMS tsv files");
             importTSVButton.setToolTipText("Load ICPC CMS contest.tsv, teams.tsv and groups.tsv");
             importTSVButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     loadTSVFiles();
                 }
@@ -375,8 +381,8 @@ public class ICPCLoadPane extends JPanePlugin {
         }
         return importTSVButton;
     }
-    
-    
+
+
     public File selectTSVFileDialog(Component parent, String startDirectory) {
 
         JFileChooser chooser = new JFileChooser(startDirectory);
@@ -385,11 +391,11 @@ public class ICPCLoadPane extends JPanePlugin {
 
         FileFilter filterYAML = new FileNameExtensionFilter( "TSV document (*.tsv)", "tsv");
         chooser.addChoosableFileFilter(filterYAML);
-        
+
         chooser.setAcceptAllFileFilterUsed(false);
         // bug 759 java7 requires us to select it, otherwise the default choice would be empty
         chooser.setFileFilter(filterYAML);
-        
+
         int action = chooser.showOpenDialog(parent);
 
         switch (action) {
@@ -420,19 +426,19 @@ public class ICPCLoadPane extends JPanePlugin {
 
     /**
      * Load CCS TSV CMS files.
-     * 
+     *
      */
     protected void loadTSVFiles() {
-        
+
         LoadICPCTSVData loader = new LoadICPCTSVData();
         loader.setContestAndController(getContest(), getController());
-        
+
         String filename = null;
         try {
             filename = selectFileName();
-            
+
             boolean loaded = loader.loadFiles(filename);
-            
+
             if (loaded){
                 info ("Loaded data from file "+filename);
             }
@@ -457,16 +463,18 @@ public class ICPCLoadPane extends JPanePlugin {
 
     /**
      * Account Listener Implementation.
-     * 
+     *
      * @author pc2@ecs.csus.edu
-     * @version $Id: ICPCPane.java 2275 2010-11-30 03:39:24Z laned $
+     * @version $Id: ICPCLoadPane.java 2275 2010-11-30 03:39:24Z laned $
      */
     public class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             // ignored
         }
 
+        @Override
         public void accountModified(AccountEvent accountEvent) {
             // check if is this account
             Account account = accountEvent.getAccount();
@@ -477,6 +485,7 @@ public class ICPCLoadPane extends JPanePlugin {
                 // They modified us!!
                 initializePermissions();
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         updateGUIperPermissions();
                     }
@@ -485,10 +494,12 @@ public class ICPCLoadPane extends JPanePlugin {
             }
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             // ignore
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
             for (Account account : accounts) {
@@ -500,6 +511,7 @@ public class ICPCLoadPane extends JPanePlugin {
                     // They modified us!!
                     initializePermissions();
                     SwingUtilities.invokeLater(new Runnable() {
+                        @Override
                         public void run() {
                             updateGUIperPermissions();
                         }
@@ -508,11 +520,13 @@ public class ICPCLoadPane extends JPanePlugin {
             }
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
 
             initializePermissions();
 
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     updateGUIperPermissions();
                 }
@@ -522,26 +536,30 @@ public class ICPCLoadPane extends JPanePlugin {
 
     /**
      * Group Listener for ICPC Pane.
-     * 
+     *
      * @author pc2@ecs.csus.edu
-     * @version $Id: ICPCPane.java 2275 2010-11-30 03:39:24Z laned $
+     * @version $Id: ICPCLoadPane.java 2275 2010-11-30 03:39:24Z laned $
      */
 
-    // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/ICPCPane.java $
+    // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/ICPCLoadPane.java $
     public class GroupListenerImplementation implements IGroupListener {
 
+        @Override
         public void groupAdded(GroupEvent event) {
             getImportAccountsButton().setEnabled(getContest().getGroups() != null);
         }
 
+        @Override
         public void groupChanged(GroupEvent event) {
             getImportAccountsButton().setEnabled(getContest().getGroups() != null);
         }
 
+        @Override
         public void groupRemoved(GroupEvent event) {
             // ignore
         }
 
+        @Override
         public void groupRefreshAll(GroupEvent groupEvent) {
             getImportAccountsButton().setEnabled(getContest().getGroups() != null);
         }
@@ -559,7 +577,7 @@ public class ICPCLoadPane extends JPanePlugin {
 
     /**
      * This method initializes ICPCAccountFrame
-     * 
+     *
      * @return edu.csus.ecs.pc2.ui.ICPCAccountFrame
      */
     private ICPCAccountFrame getICPCAccountFrame() {
@@ -568,8 +586,8 @@ public class ICPCLoadPane extends JPanePlugin {
         }
         return icpcAccountFrame;
     }
-    
-    
+
+
 //    private JButton getEditCDPPathButton() {
 //        if (editCDPPathButton == null) {
 //            editCDPPathButton = new JButton("Set CDP Path");
@@ -594,7 +612,7 @@ public class ICPCLoadPane extends JPanePlugin {
 //    }
 
 //    /** Returns a singleton instance of the Frame used to edit the CDP path(s).
-//     * 
+//     *
 //     * @return the EditCDPPathFrame
 //     */
 //    private EditJudgesDataFilePathFrame getEditCDPFrame() {
@@ -603,6 +621,6 @@ public class ICPCLoadPane extends JPanePlugin {
 //        }
 //        return editCDPPathFrame ;
 //    }
-    
-    
+
+
 } // @jve:decl-index=0:visual-constraint="10,10"

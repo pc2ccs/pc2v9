@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
  *
  */
@@ -56,7 +56,7 @@ public class ICPCAccount {
      * Fill in an ICPCAccount.
      *
      * @param account The PC2 account
-     * @param groupHash Maps group element ids to
+     * @param groupHash Maps group element ids to CMS group id
      */
     public ICPCAccount(Account account, HashMap<ElementId, String> groupHash) {
         accountNumber = account.getClientId().getClientNumber();
@@ -137,12 +137,21 @@ public class ICPCAccount {
     public HashMap<ElementId, String> getGroups() {
         return groups;
     }
+
+    /**
+     * Add external group ID (CMS) to the group map.  Currently, only one group is supported for the ICPCAccount
+     * since the CMS only provides one group.  It is a HashMap now for future use.  We only use one entry for now.
+     *
+     * @param elementId
+     * @param externalGroupId
+     */
     public void addGroupId(ElementId elementId, String externalGroupId) {
         if(groups == null) {
             groups = new HashMap<ElementId, String>();
         }
         groups.put(elementId, externalGroupId);
     }
+
     /**
      * @param externalGroupId The CMS groupId to set after the account is created
      */
@@ -150,7 +159,8 @@ public class ICPCAccount {
         this.externalGroupId = groupId;
     }
     /**
-     * Returns externalGroupid specified in tab file.
+     * Returns externalGroupid specified in tab file.  This is set to null AFTER an ICPCAccount is created.
+     * It is only a place holder used during account creation from a TAB file.
      */
     public String getExternalGroupId() {
         return(this.externalGroupId);

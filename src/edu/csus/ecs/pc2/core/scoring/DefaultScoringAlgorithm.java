@@ -39,12 +39,12 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
@@ -52,11 +52,11 @@ import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
  * Default Scoring Algorithm, implementation of the IScoringAlgorithm.
- * 
+ *
  * This class implements the standard (default) scoring algorithm, which ranks all teams according to number of problems solved, then according to "penalty points" computed by multiplying the number
  * of "NO" runs on solved problems by the PenaltyPoints value specified in the contest configuration, then finally according to earliest time of last solution (with ties at that level broken
  * alphabetically). This is the "standard" algorithm used in many ICPC Regional Contests.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -68,11 +68,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     public static final String POINTS_PER_YES_MINUTE = "Points per Minute (for 1st yes)";
 
     public static final String BASE_POINTS_PER_YES = "Base Points per Yes";
-    
+
     public static final String POINTS_PER_NO_COMPILATION_ERROR = "Points per Compilation Error";
-    
+
     public static final String POINTS_PER_NO_SECURITY_VIOLATION = "Points per Security Violation";
-    
+
     /**
      * Non-frozen scoreboard output directory key
      */
@@ -82,20 +82,20 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * Frozen scoreboard output directory key
      */
     public static final String PUBLIC_OUTPUT_DIR = "Output Public HTML dir";
-    
+
     /**
      * properties.
-     * 
+     *
      * key=name, value=default_value, type, min, max (colon delimited)
      */
     private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, { BASE_POINTS_PER_YES, "0:Integer" },
             { POINTS_PER_NO_COMPILATION_ERROR, "0:Integer" }, { POINTS_PER_NO_SECURITY_VIOLATION, "0:Integer" }, { JUDGE_OUTPUT_DIR, "html:String" },
             { PUBLIC_OUTPUT_DIR, "public_html:String" } };
-    
+
     private Properties props = new Properties();
 
     private Object mutex = new Object();
-    
+
     private int grandTotalAttempts;
 
     private int grandTotalSolutions;
@@ -111,23 +111,23 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private int[] problemAttempts = null;
 
     private Log log;
-    
+
     private boolean countPreliminaryJudgements = false;
 
     private PermissionList permissionList = new PermissionList();
-    
+
     /**
      * Respect Send to Team Permission.
-     * 
+     *
      * true means if {@link edu.csus.ecs.pc2.core.model.JudgementRecord#isSendToTeam()} is true then process run as a NEW run.
      * <br>
-     * false means process all records per usual. 
+     * false means process all records per usual.
      */
     private boolean respectSendToTeam = false;
     private boolean respectEOC = false;
-    
+
     private boolean obeyFreeze = false;
-    
+
 
     /**
      * @return the obeyFreeze
@@ -163,14 +163,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         AccountList accountList = new AccountList();
         Enumeration<Account> accountEnum = accountVect.elements();
         while(accountEnum.hasMoreElements()) {
-            Account a = (Account)accountEnum.nextElement();
+            Account a = accountEnum.nextElement();
             accountList.add(a);
         }
         return accountList;
     }
     /**
      * Get the Score and Statistics information for one problem.
-     * 
+     *
      * @return pc2.ex.ProblemScoreData
      * @param treeMap
      *            java.util.TreeMap
@@ -263,11 +263,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private int getPenaltyPointsPerNo() {
         return (getPropIntValue(POINTS_PER_NO));
     }
-    
+
     private int getPenaltyPointsPerNoCompilationError() {
         return (getPropIntValue(POINTS_PER_NO_COMPILATION_ERROR));
     }
-    
+
     private int getPenaltyPointsPerNoSecurityViolation() {
         return (getPropIntValue(POINTS_PER_NO_SECURITY_VIOLATION));
     }
@@ -286,15 +286,15 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     public void setProperties(Properties properties) {
         this.props = properties;
     }
-    
+
     @Override
     public String getStandings(IInternalContest theContest, Properties properties, Log inputLog) throws IllegalContestState {
            return getStandings(theContest, null, null, properties, inputLog);
     }
-    
+
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
      */
     @Override
@@ -302,11 +302,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
-        
+
         if (properties == null || properties.isEmpty()) {
             properties = getProperties();
         }
-        
+
         this.log = inputLog;
         long freezeSeconds = -1;
         boolean isThawn = false;
@@ -329,23 +329,23 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             log.fine("DEBUG: using freezeSeconds of "+freezeSeconds +" for str "+freezeTime+", with isThawn="+isThawn);
         }
 
-        
+
         // TODO properties should be validated here
         props = properties;
-        
+
         /**
-         * Settings 
+         * Settings
          */
-        
- 
+
+
         respectSendToTeam = isAllowed (theContest, theContest.getClientId(), Permission.Type.RESPECT_NOTIFY_TEAM_SETTING);
         respectEOC = isAllowed (theContest, theContest.getClientId(), Permission.Type.RESPECT_EOC_SUPPRESSION);
 
         countPreliminaryJudgements = theContest.getContestInformation().isPreliminaryJudgementsUsedByBoard();
-        
+
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
         IMemento summaryMememento = createSummaryMomento (theContest, mementoRoot);
-        
+
         AccountList accountList = getAccountList(theContest);
         Problem[] allProblems = theContest.getProblems();
         Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
@@ -360,7 +360,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Problem[] problems = new Problem[p2];
         Set<ElementId> keys = problemsIndexHash.keySet();
         for (Iterator<ElementId> iterator = keys.iterator(); iterator.hasNext();) {
-            ElementId type = (ElementId) iterator.next();
+            ElementId type = iterator.next();
             int p = Integer.valueOf(problemsIndexHash.get(type));
             problems[p-1] = theContest.getProblem(type);
         }
@@ -388,15 +388,15 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
         synchronized (mutex) {
             Account[] accounts = accountList.getList();
-            
+
             /**
              * This contains the standings records, key is ClientId.toString() value is StandingsRecord
              */
             Hashtable<String, StandingsRecord> standingsRecordHash = new Hashtable<String, StandingsRecord>();
-            
+
             RunComparatorByTeam runComparatorByTeam = new RunComparatorByTeam();
             TreeMap<Run, Run> runTreeMap = new TreeMap<Run, Run>(runComparatorByTeam);
-            
+
             Hashtable<String, Problem> problemHash = new Hashtable<String, Problem>();
             for (int i = 0; i < problems.length; i++) {
                 Problem problem = problems[i];
@@ -404,9 +404,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     problemHash.put(problem.getElementId().toString(), problem);
                 }
             }
-            
+
            initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber);
-            
+
             for (int i = 0; i < runs.length; i++) {
                 // skip runs that are deleted and
                 // skip runs whose submitter is no longer active and
@@ -416,9 +416,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     log.info("account could not be located for " + runs[i].getSubmitter());
                     continue;
                 }
-                if (!runs[i].isDeleted() && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) 
+                if (!runs[i].isDeleted() && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)
                         && problemHash.containsKey(runs[i].getProblemId().toString())) {
-                    
+
                     Run runToAdd = runs[i];
                     if ( respectSendToTeam && runToAdd.getAllJudgementRecords().length > 0 ){
                         /**
@@ -447,14 +447,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                         runToAdd = RunUtilities.createNewRun(runs[i], theContest);
                     }
                     runTreeMap.put(runToAdd, runToAdd);
-                    
+
                 }
             }
-            
+
             if (!runTreeMap.isEmpty()) {
-                
+
                 generateStandingsValues (runTreeMap, standingsRecordHash, problemsIndexHash, theContest);
-                    
+
             } // else no runs
 
             applyScoringAdjustments(standingsRecordHash, accountList);
@@ -467,11 +467,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             for (StandingsRecord record : enumeration) {
                 treeMap.put(record, record);
             }
-            
+
             createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, theContest.getContestInformation(), summaryMememento);
-            
+
         } // mutex
- 
+
         String xmlString;
         try {
             xmlString = mementoRoot.saveToString();
@@ -482,7 +482,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 //        System.out.println(xmlString);
         return xmlString;
     }
-    
+
     private void applyScoringAdjustments(Hashtable<String, StandingsRecord> standingsRecordHash, AccountList accountList) {
         Account[] accounts = accountList.getList();
         Hashtable<String, Account> accountHash = new Hashtable<String, Account>();
@@ -495,7 +495,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
         Set<String> s = standingsRecordHash.keySet();
         for (Iterator<String> iterator = s.iterator(); iterator.hasNext();) {
-            String key = (String) iterator.next();
+            String key = iterator.next();
             int scoreAdjustment = accountHash.get(key).getScoringAdjustment();
             StandingsRecord record = standingsRecordHash.get(key);
             long penaltyPoints = record.getPenaltyPoints();
@@ -526,7 +526,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
     /**
      * Is Client allowed to do permission type
-     * 
+     *
      * @param theContest
      * @param clientId
      * @param respect_notify_team_setting
@@ -570,10 +570,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
     /**
      * Ranks standings records and add standings XML to mementoRoot.
-     * 
+     *
      * Loops through the standings records and problem summary information
      * creating XML blocks: teamStanding and problemSummaryInfo.
-     * 
+     *
      * @param treeMap
      * @param mementoRoot
      * @param accountList
@@ -581,10 +581,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param problemsIndexHash
      * @param summaryMememento
      */
-    private void createStandingXML (TreeMap<StandingsRecord, StandingsRecord> treeMap, XMLMemento mementoRoot, 
+    private void createStandingXML (TreeMap<StandingsRecord, StandingsRecord> treeMap, XMLMemento mementoRoot,
             AccountList accountList, Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, Group[] groups,
             ContestInformation contestInformation, IMemento summaryMememento) {
-   
+
         // easy access
         Hashtable<ElementId, Group> groupHash = new Hashtable<ElementId, Group>();
         Hashtable<Group, Integer> groupIndexHash = new Hashtable<Group, Integer>();
@@ -625,12 +625,12 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // this is the number used in the array constructors,  bigger is ok, smaller is not.
         divisionCount = highestFound;
         String teamVarDisplayString = contestInformation.getTeamScoreboardDisplayFormat();
-        
+
         StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
-        
+
         Collection<StandingsRecord> coll = treeMap.values();
         Iterator<StandingsRecord> iterator = coll.iterator();
-        
+
         problemBestTime = new int[problems.length + 1];
         problemLastTime = new int[problems.length + 1];
         problemSolutions = new int[problems.length + 1];
@@ -638,11 +638,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         for (int p = 1; p <= problems.length; p++) {
             problemBestTime[p] = -1;
         }
-        
+
         grandTotalAttempts = 0;
         grandTotalSolutions = 0;
         grandTotalProblemAttempts = 0;
-         
+
         // assign the ranks
         long numSolved = -1, score = 0, lastSolved = 0;
         int rank = 0, indexRank = 0;
@@ -702,13 +702,17 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putInteger("overallRank", standingsRecord.getRankNumber());
             standingsRecordMemento.putInteger("index", index);
             Account account = accountList.getAccount(standingsRecord.getClientId());
-            
+
+            // it is probably OK to use the "primary" group ID here (the one supplied by the CMS).
+            // this is used to augment the teamName for display.  Using the CMS group should convey
+            // the desired information: eg.  Hawaii - D2  (for example).  Would we want to just show "D2" or "Hawaii" ?
+            // probably not - we want the compound group name (eg CMS name).
             Group group = null;
             if (account.getPrimaryGroupId() != null) {
                 group = groupHash.get(account.getPrimaryGroupId());
             }
-            
-            standingsRecordMemento.putString("teamName", ScoreboardVariableReplacer.substituteDisplayNameVariables(teamVarDisplayString, account, group)); 
+
+            standingsRecordMemento.putString("teamName", ScoreboardVariableReplacer.substituteDisplayNameVariables(teamVarDisplayString, account, group));
             standingsRecordMemento.putInteger("teamId", account.getClientId().getClientNumber());
             standingsRecordMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
             standingsRecordMemento.putString("teamKey", account.getClientId().getTripletKey());
@@ -719,14 +723,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 shortSchoolName = longSchoolName;
             }
             if (shortSchoolName != null) {
-                standingsRecordMemento.putString("shortSchoolName", shortSchoolName); 
+                standingsRecordMemento.putString("shortSchoolName", shortSchoolName);
             }
             if (account.getAliasName().trim().equals("")) {
                 standingsRecordMemento.putString("teamAlias", account.getDisplayName()+" (not aliasesd)");
             } else {
                 standingsRecordMemento.putString("teamAlias", account.getAliasName().trim());
             }
-         
+
             if (group != null ) {
                 // the group was in groupHash, so must be in groupIndexHash
                 int groupIndex = groupIndexHash.get(group).intValue();
@@ -761,7 +765,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                         // current user tied with last user, so same rank
                         standingsRecord.setDivisionRankNumber(divisionRank[divisionIndex]);
                     }
-                    
+
                     standingsRecordMemento.putInteger("divisionRank", standingsRecord.getDivisionRankNumber());
                 }
             }
@@ -795,7 +799,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                             problemLastTime[id] = new Long(psi.getSolutionTime()).intValue();
                         }
                         if (problemBestTime[id] < 0 || psi.getSolutionTime() < problemBestTime[id]) {
-                            problemBestTime[id] = new Long(psi.getSolutionTime()).intValue();                       
+                            problemBestTime[id] = new Long(psi.getSolutionTime()).intValue();
                         }
                     }
                 }
@@ -805,15 +809,15 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
             srArray[index++] = standingsRecord;
         }
-     
+
         summaryMememento.putInteger("medianProblemsSolved", getMedian(srArray));
         generateSummaryTotalsForProblem (problems, problemsIndexHash, summaryMememento);
-        
+
     }
-    
+
     /**
      * Input is a sorted ranking list.  What is the median number of problems solved.
-     * 
+     *
      * @param srArray
      * @return median number of problems solved
      */
@@ -842,7 +846,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
     /**
      * This routine checks and obeys the preliminary judgement rules.
-     * 
+     *
      * @param run
      * @return true if run is judged and the state is valid
      */
@@ -866,10 +870,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
         return result;
     }
-    
+
     /**
      * Do these long parameters match the values in the StandingsRecord?
-     * 
+     *
      * @param standingsRecord
      * @param numSolved
      * @param score
@@ -891,16 +895,16 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
     /**
      * Add Problem Summary totals/info for each problem.
-     * 
-     * Generate all "problem" blocks in "standingsHeader" block (summaryMemento) 
-     * 
+     *
+     * Generate all "problem" blocks in "standingsHeader" block (summaryMemento)
+     *
      * @param problems
      * @param problemsIndexHash
      * @param summaryMememento
      */
-    
+
     private void generateSummaryTotalsForProblem(Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, IMemento summaryMememento) {
-        
+
         for (int i = 0; i < problems.length; i++) {
             int id = i + 1;
             problemsIndexHash.put(problems[i].getElementId(), new Integer(id));
@@ -921,15 +925,15 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         summaryMememento.putInteger("totalAttempts", grandTotalAttempts);
         summaryMememento.putInteger("totalSolved", grandTotalSolutions);
         summaryMememento.putInteger("problemsAttempted", grandTotalProblemAttempts);
-        
-        
+
+
     }
 
     /**
      * Calculate standings raw data, set values into standingsRecordHash.
-     * 
+     *
      * Loops through runTreeMap and puts calculated values into standingsRecords in hash.
-     * 
+     *
      * @param runTreeMap
      * @param standingsRecordHash
      * @param problemsIndexHash
@@ -955,7 +959,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             if (!lastUser.equals(run.getSubmitter().toString()) || !lastProblem.equals(run.getProblemId().toString())) {
                 if (!problemTreeMap.isEmpty()) {
                     ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap, theContest);
-                    StandingsRecord standingsRecord = (StandingsRecord) standingsHash.get(lastUser);
+                    StandingsRecord standingsRecord = standingsHash.get(lastUser);
                     SummaryRow summaryRow = standingsRecord.getSummaryRow();
                     summaryRow.put(problemsHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
                     standingsRecord.setSummaryRow(summaryRow);
@@ -984,7 +988,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // handle last run
         if (!problemTreeMap.isEmpty()) {
             ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap, theContest);
-            StandingsRecord standingsRecord = (StandingsRecord) standingsHash.get(lastUser);
+            StandingsRecord standingsRecord = standingsHash.get(lastUser);
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             summaryRow.put(problemsHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
             standingsRecord.setSummaryRow(summaryRow);
@@ -1010,19 +1014,19 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
     /**
      * Initialize the standingsRecordHash.
-     * 
+     *
      * @param accountList
      * @param accounts
      * @param problems
      * @param standingsRecordHash
-     * @param divisionNumber 
+     * @param divisionNumber
      */
     private void initializeStandingsRecordHash(IInternalContest theContest, AccountList accountList, Account[] accounts, Problem[] problems, Hashtable<String, StandingsRecord> standingsRecordHash, Integer divisionNumber) {
 
         for (int i = 0; i < accountList.size(); i++) {
             Account account = accounts[i];
             if (account.getClientId().getClientType() == ClientType.Type.TEAM && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                
+
                 if (divisionNumber != null) {
                     String div = ScoreboardUtilities.getDivision(theContest, account.getClientId());
                     if (!divisionNumber.toString().trim().equals(div.trim())) {
@@ -1052,10 +1056,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
     /**
      * Create Summary Momento.
-     * 
+     *
      * This creates the standingsHeader block.  Later other
      * methods add problem summaries ("problem" blocks) to this block.
-     * 
+     *
      * @param mementoRoot
      */
     private IMemento createSummaryMomento(IInternalContest contest, XMLMemento mementoRoot) {
@@ -1110,7 +1114,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
         return memento;
     }
-    
+
     private String prettyFreezeTime(String freezeTime) {
         int count = freezeTime.length() - freezeTime.replace(":", "").length();
         if (count < 2) {
@@ -1144,7 +1148,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     }
 
     /**
-     * 
+     *
      * @return a list of name/value pairs for default scoring properties.
      */
     public static Properties getDefaultProperties() {
