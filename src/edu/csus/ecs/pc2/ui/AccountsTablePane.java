@@ -149,7 +149,7 @@ public class AccountsTablePane extends JPanePlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-//      Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "CMS Id", "ClientId" };
+//      Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Groups", "Alias", "CMS Id", "ClientId" };
 
         try {
             int cols = accountTableModel.getColumnCount();
@@ -231,7 +231,7 @@ public class AccountsTablePane extends JPanePlugin {
     private JTableCustomized getAccountsTable() {
         if (accountTable == null) {
             int i;
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "CMS Id", "ClientId"};
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Groups", "Alias", "CMS Id", "ClientId"};
             accountTableModel = new DefaultTableModel(cols, 0) {
                 @Override
                 public boolean isCellEditable(int row, int col) {

@@ -201,7 +201,7 @@ public class AccountsPane extends JPanePlugin {
         if (accountListBox == null) {
             accountListBox = new MCLB();
 
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias"};
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Groups", "Alias"};
             accountListBox.addColumns(cols);
 
             // Sorters

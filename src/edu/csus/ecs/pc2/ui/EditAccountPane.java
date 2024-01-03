@@ -59,6 +59,8 @@ public class EditAccountPane extends JPanePlugin {
      */
     private static final long serialVersionUID = -1572390105202179281L;
 
+    public static final String CHECKBOX_GROUP_PROPERTY = "group";
+
 // To be deleted -- JB
 //    private static final String NONE_SELECTED = "NONE SELECTED";
 
@@ -569,8 +571,7 @@ public class EditAccountPane extends JPanePlugin {
         if (inAccount == null || inAccount.getGroupIds() == null) {
 
             for (Group group : allgroups) {
-                JCheckBox checkBox = new JCheckBox(group.getDisplayName());
-                ((DefaultListModel<Object>) groupsListModel).addElement(group);
+                addGroupCheckBox(group);
             }
             getGroupsJList().setSelectedIndex(-1);
 
@@ -588,8 +589,7 @@ public class EditAccountPane extends JPanePlugin {
                 count = 0;
                 int idx = 0;
                 for (Group group : allgroups) {
-                    JCheckBox checkBox = new JCheckBox(group.getDisplayName());
-                    ((DefaultListModel<Object>) groupsListModel).addElement(group);
+                    addGroupCheckBox(group);
                     if (account.isGroupMember(group.getElementId())) {
                         indexes[count] = idx;
                         count++;
@@ -600,11 +600,16 @@ public class EditAccountPane extends JPanePlugin {
                 getGroupsJList().ensureIndexIsVisible(0);
             } else {
                 for (Group group : allgroups) {
-                    JCheckBox checkBox = new JCheckBox(group.getDisplayName());
-                    ((DefaultListModel<Object>) groupsListModel).addElement(group);
+                    addGroupCheckBox(group);
                 }
             }
         }
+    }
+
+    private void addGroupCheckBox(Group group) {
+        JCheckBox checkBox = new JCheckBox(group.getDisplayName());
+        checkBox.putClientProperty(CHECKBOX_GROUP_PROPERTY, group);
+        ((DefaultListModel<Object>) groupsListModel).addElement(checkBox);
     }
 
     private void populatePermissions(Account inAccount) {
@@ -911,7 +916,7 @@ public class EditAccountPane extends JPanePlugin {
             groupsScrollPane.setBounds(new java.awt.Rectangle(14, 291, 272, GROUPS_LIST_HEIGHT));
             groupsScrollPane.setViewportView(getGroupsJList());
         }
-        return permissionScrollPane;
+        return groupsScrollPane;
     }
 
     /**
@@ -925,7 +930,7 @@ public class EditAccountPane extends JPanePlugin {
             groupsJList.setModel(groupsListModel);
 
             // ListSelectionListeners are called before JCheckBoxes get updated
-            permissionsJList.addPropertyChangeListener("change", new PropertyChangeListener() {
+            groupsJList.addPropertyChangeListener("change", new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     enableUpdateButton();
@@ -1049,8 +1054,9 @@ public class EditAccountPane extends JPanePlugin {
 
         // find one with longest name of selected groups, also, checking if the current
         // primary group is, in fact, still selected on the GUI.
-        for (Object object : objects) {
-            Group group = (Group)object;
+        for (Object object : gobjects) {
+            JCheckBox groupCheck = (JCheckBox)object;
+            Group group = (Group)groupCheck.getClientProperty(CHECKBOX_GROUP_PROPERTY);
             if(group != null) {
                 String dispName = group.getDisplayName();
                 ElementId groupElementId = group.getElementId();
@@ -1074,8 +1080,9 @@ public class EditAccountPane extends JPanePlugin {
         // clear out the groups
         checkAccount.clearGroups();
         // now add each selected group to the account
-        for (Object object : objects) {
-            Group group = (Group)object;
+        for (Object object : gobjects) {
+            JCheckBox groupCheck = (JCheckBox)object;
+            Group group = (Group)groupCheck.getClientProperty(CHECKBOX_GROUP_PROPERTY);
             if(group != null) {
                 ElementId groupElementId = group.getElementId();
                 boolean bPrimary = (groupElementId == primaryGroup);
