@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -299,6 +300,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      */
     @Override
     public String getStandings(IInternalContest theContest, Run[] runs, Integer divisionNumber, Properties properties, Log inputLog) throws IllegalContestState {
+        return(getStandings(theContest, runs, divisionNumber, null, properties, inputLog));
+    }
+    public String getStandings(IInternalContest theContest, Run[] runs, Integer divisionNumber, ArrayList<Group> wantedGroups, Properties properties, Log inputLog) throws IllegalContestState {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
@@ -384,7 +388,24 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             }
         }
         if (runs == null) {
-            runs = theContest.getRuns();
+            if(wantedGroups != null && wantedGroups.size() > 0) {
+                Run [] allruns = theContest.getRuns();
+                ArrayList<Run> newruns = new ArrayList<Run>();
+                for(Run r : allruns) {
+                    ClientId c = r.getSubmitter();
+                    Account a = theContest.getAccount(c);
+                    if(a != null) {
+                        for(Group g : wantedGroups) {
+                            if(a.isGroupMember(g.getElementId())) {
+                                newruns.add(r);
+                            }
+                        }
+                    }
+                }
+                runs = newruns.toArray(new Run [0]);
+            } else {
+                runs = theContest.getRuns();
+            }
         }
         synchronized (mutex) {
             Account[] accounts = accountList.getList();
@@ -405,7 +426,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
             }
 
-           initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber);
+           initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber, wantedGroups);
 
             for (int i = 0; i < runs.length; i++) {
                 // skip runs that are deleted and
@@ -1021,7 +1042,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param standingsRecordHash
      * @param divisionNumber
      */
-    private void initializeStandingsRecordHash(IInternalContest theContest, AccountList accountList, Account[] accounts, Problem[] problems, Hashtable<String, StandingsRecord> standingsRecordHash, Integer divisionNumber) {
+    private void initializeStandingsRecordHash(IInternalContest theContest, AccountList accountList, Account[] accounts, Problem[] problems, Hashtable<String, StandingsRecord> standingsRecordHash, Integer divisionNumber, ArrayList<Group> wantedGroups) {
 
         for (int i = 0; i < accountList.size(); i++) {
             Account account = accounts[i];
@@ -1033,6 +1054,19 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                         /**
                          * If this account is NOT in the same division as divisionNumber then do not add StandingsRecord, skip to next account.
                          */
+                        continue;
+                    }
+                }
+                if(wantedGroups != null && wantedGroups.size() > 0) {
+                    boolean found = false;
+                    // restricted to these groups only
+                    for(Group group : wantedGroups) {
+                        if(account.isGroupMember(group.getElementId())) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(!found) {
                         continue;
                     }
                 }
