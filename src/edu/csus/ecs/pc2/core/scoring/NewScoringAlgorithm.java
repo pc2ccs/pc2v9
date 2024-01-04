@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -135,8 +136,8 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         return getStandingsRecords(contest, null, properties, false, null);
     }
 
-    private StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Properties properties) throws IllegalContestState {
-        return getStandingsRecords(contest, divisionNumber, properties, false, null);
+    private StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, List<Group> wantedGroups, Properties properties) throws IllegalContestState {
+        return getStandingsRecords(contest, divisionNumber, wantedGroups, properties, false, null);
     }
 
     /**
@@ -144,6 +145,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
      * from the freeze period will be hidden,  unless the contest is unfrozen.
      *
      * @param contest
+     * @param divisionNumber for desired standings
      * @param properties
      * @param honorScoreboardFreeze
      * @param runs
@@ -151,6 +153,23 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
      * @throws IllegalContestState
      */
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
+        return(getStandingsRecords(contest, divisionNumber, null, properties, honorScoreboardFreeze, runs));
+    }
+
+    /**
+     * Returns sorted and ranked StandingsRecord, if honorScoreboadFreeze is true then run results
+     * from the freeze period will be hidden,  unless the contest is unfrozen.
+     *
+     * @param contest
+     * @param divisionNumber for desired standings
+     * @param wantedGroups List of groups for which standings are to be returned
+     * @param properties
+     * @param honorScoreboardFreeze
+     * @param runs
+     * @return ranked StandingsRecords.
+     * @throws IllegalContestState
+     */
+    public StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, List<Group> wantedGroups, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
 
         if (contest == null){
             throw new IllegalArgumentException("contest is null");
@@ -175,6 +194,9 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                         continue;
                     }
                 }
+                if (!ScoreboardUtilities.isWantedTeam(av, wantedGroups)) {
+                    continue;
+                }
                 accountVector.add(av);
             }
         }
@@ -188,7 +210,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         comparator.setCachedAccountList(accountList);
 
         if (runs == null) {
-            runs = getContest().getRuns();
+            runs = ScoreboardUtilities.getGroupFilteredRuns(getContest(), wantedGroups);
         }
 
         respectEOC = isAllowed(getContest(), getContest().getClientId(), Permission.Type.RESPECT_EOC_SUPPRESSION);
@@ -268,8 +290,14 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
     // TODO SA SOMEDAY Move this to a SA Utility Class
     // returns XML String for standings.
     public String getStandings(IInternalContest contest, Run[] runs, Integer divisionNumber, Properties properties, Log inputLog) throws IllegalContestState {
+        return(getStandings(contest, runs, divisionNumber, null, properties, inputLog));
+    }
+    @Override
+    // TODO SA SOMEDAY Move this to a SA Utility Class
+    // returns XML String for standings.
+    public String getStandings(IInternalContest contest, Run[] runs, Integer divisionNumber, List<Group> wantedGroups, Properties properties, Log inputLog) throws IllegalContestState {
 
-        StandingsRecord[] standings = getStandingsRecords(contest, divisionNumber, properties);
+        StandingsRecord[] standings = getStandingsRecords(contest, divisionNumber, wantedGroups, properties);
 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
         IMemento summaryMememento = createSummaryMomento(contest.getContestInformation(), mementoRoot);
@@ -393,7 +421,6 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
             int groupRank = 0;
             int lastRank = 0;
-            int groupId = group.getGroupId();
             ElementId groupElementId = group.getElementId();
 
             for (StandingsRecord standingsRecord : standings) {
@@ -527,14 +554,20 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
             standingsRecordMemento.putString("teamAlias", account.getAliasName().trim());
         }
 
-        if(groups != null) {
-            for(ElementId groupElementId: groups) {
-                group = contest.getGroup(groupElementId);
-                if(group != null) {
-                    this.addGroupRow(standingsRecordMemento, standingsRecord.getGroupRankNumber(), group);
-                }
-            }
+        if(group != null) {
+            standingsRecordMemento.putInteger("groupRank", standingsRecord.getGroupRankNumber());
         }
+// TODO: should change algorithm to compute the group rank for each group the team is a member of and report
+// all of them in the standings xml.  right now we only do the "primary group Id" for groupRank.
+// This is a relatively involved code change.
+//        if(groups != null) {
+//            for(ElementId groupElementId: groups) {
+//                group = contest.getGroup(groupElementId);
+//                if(group != null) {
+//                    this.addGroupRow(standingsRecordMemento, standingsRecord.getGroupRankNumber(), group);
+//                }
+//            }
+//        }
 
         Problem[] problems = contest.getProblems();
 

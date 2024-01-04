@@ -243,7 +243,6 @@ public final class ExportAccounts {
         // for groups, we create a separate tag <groups>, and a list of <group> under that
         if (account.getGroupIds() != null) {
             IMemento groupMemento = accountMemento.createChild("groups");
-            ArrayList<String> groupnames = new ArrayList<String>();
             for(ElementId elementId: account.getGroupIds()) {
                 String groupName = groupHash.get(elementId);
                 if(groupName != null) {

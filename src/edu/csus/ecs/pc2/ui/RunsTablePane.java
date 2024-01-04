@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -21,9 +21,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
+import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
-import javax.swing.RowSorter.SortKey;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
@@ -64,8 +64,8 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
-import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -78,16 +78,16 @@ import edu.csus.ecs.pc2.util.OSCompatibilityUtilities;
 
 /**
  * View runs panel.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class RunsTablePane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 114647004580210428L;
-    
+
     private static final int VERT_PAD = 2;
     private static final int HORZ_PAD = 20;
 
@@ -126,24 +126,24 @@ public class RunsTablePane extends JPanePlugin {
     private Log log = null;
 
     private JLabel rowCountLabel = null;
-    
+
     private JScrollPane scrollPane = null;
 
     /**
      * Show huh
      */
     private boolean showNewRunsOnly = false;
-    
+
     /**
      * Filter that does not change.
-     * 
-     * Used to do things like insure only New runs or Judged runs 
+     *
+     * Used to do things like insure only New runs or Judged runs
      */
     private Filter requiredFilter = new Filter();
 
     /**
      * Show who is judging column and status.
-     * 
+     *
      */
     private boolean showJudgesInfo = true;
 
@@ -165,17 +165,17 @@ public class RunsTablePane extends JPanePlugin {
     private boolean makeSoundOnOneRun = false;
 
     private boolean bUseAutoJudgemonitor = true;
-    
+
     private EditFilterFrame editFilterFrame = null;
 
     private String filterFrameTitle = "Run filter";
-    
+
     private ExtractRuns extractRuns = null;
 
     private boolean teamClient = true;
-    
+
     private JudgementNotificationsList judgementNotificationsList = null;
-    
+
     private boolean displayConfirmation = true;
     private JButton viewSourceButton;
 
@@ -184,16 +184,16 @@ public class RunsTablePane extends JPanePlugin {
     private Run fetchedRun;
 
     private RunFiles fetchedRunFiles;
-    
+
     private Run requestedRun;
-    
+
     private boolean showSourceActive = false;
 
     protected int viewSourceThreadCounter;
 
     /**
      * This method initializes
-     * 
+     *
      */
     public RunsTablePane() {
         super();
@@ -212,7 +212,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -289,7 +289,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * Return balloon color if problem solved.
-     * 
+     *
      * @param run
      * @return
      */
@@ -372,7 +372,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * Return the judgement/status for the run.
-     * 
+     *
      * @param run
      * @return a string that represents the state of the run
      */
@@ -381,7 +381,7 @@ public class RunsTablePane extends JPanePlugin {
         String result = "";
 
         if (run.isJudged()) {
-            
+
             if (run.isSolved()) {
                 result = getContest().getJudgements()[0].getDisplayName();
                 if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
@@ -396,12 +396,12 @@ public class RunsTablePane extends JPanePlugin {
                         }
                     }
                 }
-                
+
                 // only consider changing the state to new if we are a team
                 if (isTeam(getContest().getClientId()) && !run.getJudgementRecord().isSendToTeam()) {
                     result = RunStates.NEW.toString();
                 }
-                
+
             } else {
                 result = "No";
 
@@ -420,7 +420,7 @@ public class RunsTablePane extends JPanePlugin {
                         if (!isTeam(getContest().getClientId())) {
                             result = RunStates.MANUAL_REVIEW + " (" + result + ")";
                         } else {
-                            
+
                             // Only show to team
                             if (showPreliminaryJudgementToTeam(run)) {
                                 result = "PRELIMINARY (" + result + ")";
@@ -429,7 +429,7 @@ public class RunsTablePane extends JPanePlugin {
                             }
                         }
                     }
-                    
+
                     if (isTeam(getContest().getClientId())) {
                         if (!judgementRecord.isSendToTeam()) {
                             result = RunStates.NEW.toString();
@@ -441,11 +441,11 @@ public class RunsTablePane extends JPanePlugin {
                     }
                 }
             }
-            
+
             /**
-             * 
+             *
              */
-            
+
             if (teamClient || isAllowed(Permission.Type.RESPECT_EOC_SUPPRESSION)){
                 if (RunUtilities.supppressJudgement(judgementNotificationsList, run, getContest().getContestTime())){
                     result = RunStates.NEW.toString();
@@ -459,30 +459,30 @@ public class RunsTablePane extends JPanePlugin {
                 result = RunStates.NEW.toString();
             }
         }
-        
+
         if (run.isDeleted()) {
             result = "DEL " + result;
         }
-        
-        
+
+
         return result;
     }
 
     private boolean showPreliminaryJudgementToTeam(Run run) {
-        
+
         try {
             Problem problem = getContest().getProblem(run.getProblemId());
             return problem.isPrelimaryNotification();
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception trying to get Problem  ", e);
-            return false; 
+            return false;
         }
     }
 
     private boolean isTeam(ClientId clientId) {
         return clientId == null || clientId.getClientType().equals(Type.TEAM);
     }
-    
+
 //    private boolean isServer(ClientId clientId) {
 //        return clientId == null || clientId.getClientType().equals(Type.SERVER);
 //    }
@@ -535,6 +535,7 @@ public class RunsTablePane extends JPanePlugin {
     // $HeadURL$
     public class RunListenerImplementation implements IRunListener {
 
+        @Override
         public void runAdded(RunEvent event) {
             updateRunRow(event.getRun(), event.getWhoModifiedRun(), true);
             // check if this is a team; if so, pop up a confirmation dialog
@@ -542,11 +543,13 @@ public class RunsTablePane extends JPanePlugin {
                 showResponseToTeam(event);
             }
         }
-        
+
+        @Override
         public void refreshRuns(RunEvent event) {
             reloadRunList();
         }
 
+        @Override
         public void runChanged(RunEvent event) {
             updateRunRow(event.getRun(), event.getWhoModifiedRun(), true);
 
@@ -554,60 +557,60 @@ public class RunsTablePane extends JPanePlugin {
             if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                 showResponseToTeam(event);
             }
-            
+
             //code copied from FetchRunService.RunListenerImplementation.runChanged():
-                
+
                 Action action = event.getAction();
                 Action details = event.getDetailedAction();
                 Run aRun = event.getRun();
                 RunFiles aRunFiles = event.getRunFiles();
                 String msg = event.getMessage();
-                
+
                 getController().getLog().log(Log.INFO, "RunsPane.RunListener: Action=" + action + "; DetailedAction=" + details + "; msg=" + msg
                                         + "; run=" + aRun + "; runFiles=" + aRunFiles);
 
                 if (aRun != null) {
                     // make local reference for consistency in case requestedRun gets cleared - avoids synchronization
                     Run locRun = requestedRun;
-                    
+
                     // we are only interested in the run we may have requested from View Source - all other run changes are ignored.
                     if(locRun != null && aRun.getNumber() == locRun.getNumber() && aRun.getSiteNumber() == locRun.getSiteNumber()) {
 
                         // RUN_NOT_AVAILABLE is undirected (sentToClient is null)
                         if (event.getAction().equals(Action.RUN_NOT_AVAILABLE)) {
-                            
+
                             getController().getLog().log(Log.WARNING, "Reply from server: requested run not available");
-                            serverReplied = true;                                 
+                            serverReplied = true;
                         } else {
                             // Only interested in the first reply (we don't want fetchedRun changing once its been set - it really shouldn't)
                             if(fetchedRun == null) {
                                 ClientId toClient = event.getSentToClientId() ;
                                 ClientId myID = getContest().getClientId();
-                                
+
                                 // see if the event was directed to me explicitly, which it should be (see PacketHandler.handleFetchedRun())
                                 // but isn't due to the way updateRun() works.  We'll leave this code here in case someday that changes.
                                 if (toClient != null && toClient.equals(myID)) {
-                                    
+
                                     getController().getLog().log(Log.INFO, "Reply from server: " + "Run Status=" + event.getAction()
                                                             + "; run=" + event.getRun() + ";  runFiles=" + event.getRunFiles());
-                                    
+
                                     fetchedRun = aRun;
-                                    fetchedRunFiles = aRunFiles;    
-                                    serverReplied = true;     
-                                  
+                                    fetchedRunFiles = aRunFiles;
+                                    serverReplied = true;
+
                                 } else {
-                                    
+
                                     // The FETCHED_REQUESTED_RUN reply is sent with a a SentToClientID of null as found in
                                     // InternalContest.updateRun().  the RunEvent's sentToClientId member is only set when the run
                                     // is being checked out for BEING_JUDGED, BEING_RE_JUDGED, CHECKED_OUT, HOLD, otherwise it is
                                     // is not set (null), and winds up here in the case of "View Source" but not from a being-judged dialog.
-                                    
+
                                     getController().getLog().log(Log.INFO, "Event not directed to me: sent to " + toClient + " but my ID is " + myID);
-                                    
+
                                     if(toClient == null) {
                                         fetchedRun = aRun;
-                                        fetchedRunFiles = aRunFiles;    
-                                        serverReplied = true;     
+                                        fetchedRunFiles = aRunFiles;
+                                        serverReplied = true;
                                     }
                                 }
                             }
@@ -615,7 +618,7 @@ public class RunsTablePane extends JPanePlugin {
                     } else {
                         // changed run was not the one we wanted
                         getController().getLog().log(Log.INFO, "Run event not for requested run: " + "Run Status=" + event.getAction()
-                            + "; run=" + aRun + " requested=" + locRun);                        
+                            + "; run=" + aRun + " requested=" + locRun);
                     }
                 } else {
                     //run from server was null
@@ -623,24 +626,25 @@ public class RunsTablePane extends JPanePlugin {
                     fetchedRun = null;
                     fetchedRunFiles = null;
                 }
-                
-                
-                
+
+
+
         }
 
+        @Override
         public void runRemoved(RunEvent event) {
             updateRunRow(event.getRun(), event.getWhoModifiedRun(), true);
         }
 
         /**
          * Show the Run Judgement.
-         * 
+         *
          * Checks the run in the specified run event and (potentially) displays a results dialog. If the run has been judged, has a valid judgement record, and is the "active" judgement for scoring
          * purposes, displays a modal MessageDialog to the Team containing the judgement results. This method assumes the caller has already verified this is a TEAM client; failure to do that on the
          * caller's part will cause other clients to see the Run Response dialog...
          */
         private void showResponseToTeam(RunEvent event) {
-            
+
             if (! displayConfirmation){
                 return;
             }
@@ -658,9 +662,9 @@ public class RunsTablePane extends JPanePlugin {
                 // check if there's a legit judgement
                 JudgementRecord judgementRecord = theRun.getJudgementRecord();
                 if (judgementRecord != null) {
-                    
+
                     if (! judgementRecord.isSendToTeam()){
-                        
+
                         /**
                          * Do not show this judgement to the team, the judge indicated
                          * that the team should not be notified.
@@ -699,7 +703,7 @@ public class RunsTablePane extends JPanePlugin {
                             if (theRun.getStatus().equals(RunStates.MANUAL_REVIEW)) {
                                 displayString += "<FONT SIZE='+2'>NOTE: This is a <FONT COLOR='RED'>Preliminary</FONT> Judgement</FONT><BR><BR><BR>";
                             }
-                            
+
                             if (judgeComment != null) {
                                 if (judgeComment.length() > 0) {
                                     displayString += "Judge's Comment: " + Utilities.forHTML(judgeComment) + "<BR><BR><BR>";
@@ -734,10 +738,10 @@ public class RunsTablePane extends JPanePlugin {
             }
         }
     }
-    
+
     /**
      * This method initializes scrollPane
-     * 
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getScrollPane() {
@@ -749,7 +753,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes the runTable
-     * 
+     *
      * @return JTableCustomized
      */
     private JTableCustomized getRunTable() {
@@ -757,6 +761,7 @@ public class RunsTablePane extends JPanePlugin {
             runTable = new JTableCustomized();
 
             runTable.addMouseListener(new MouseAdapter() {
+                @Override
                 public void mouseClicked(MouseEvent me) {
                    // If double-click see if we can select the run
                    if (me.getClickCount() == 2) {
@@ -770,9 +775,10 @@ public class RunsTablePane extends JPanePlugin {
         }
         return runTable;
     }
-    
+
     public void clearAllRuns() {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if(runTableModel != null) {
                     // All rows are discarded - the TM will notify the Table
@@ -790,7 +796,7 @@ public class RunsTablePane extends JPanePlugin {
         Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Balloon", "Language", "OS", "ElementID" };
         Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Balloon", "Language", "ElementID" };
         Object[] columns;
-        
+
         usingTeamColumns = false;
         usingFullColumns = false;
 
@@ -818,23 +824,23 @@ public class RunsTablePane extends JPanePlugin {
 
         // Sorters
         TableRowSorter<DefaultTableModel> trs = new TableRowSorter<DefaultTableModel>(runTableModel);
-        
+
         runTable.setRowSorter(trs);
         runTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        
+
         ArrayList<SortKey> sortList = new ArrayList<SortKey>();
- 
+
 
         /*
          * Column headers left justified
          */
         ((DefaultTableCellRenderer)runTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
         runTable.setRowHeight(runTable.getRowHeight() + VERT_PAD);
-        
-        
+
+
         StringToNumberComparator numericStringSorter = new StringToNumberComparator();
         AccountNameCaseComparator accountNameSorter = new AccountNameCaseComparator();
-            
+
         int idx = 0;
 
         if (isTeam(getContest().getClientId())) {
@@ -876,11 +882,11 @@ public class RunsTablePane extends JPanePlugin {
             sortList.add(new RowSorter.SortKey(8, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(9, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(10, SortOrder.ASCENDING));
-            
+
         } else {
 
 //            Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Balloon", "Language", "OS" };
-            
+
             // These are in column order - omitted ones are straight string compare
             trs.setComparator(0, accountNameSorter);
             trs.setComparator(1, accountNameSorter);
@@ -900,16 +906,17 @@ public class RunsTablePane extends JPanePlugin {
         trs.setSortKeys(sortList);
         resizeColumnWidth(runTable);
     }
-    
+
     private void resizeColumnWidth(JTableCustomized table) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
                 tca.adjustColumns();
             }
         });
     }
-    
+
     /**
      * Find row that contains the supplied key (in last column)
      * @param value - unique key - really, the ElementId of run
@@ -917,7 +924,7 @@ public class RunsTablePane extends JPanePlugin {
      */
     private int getRowByKey(Object value) {
         Object o;
-        
+
         if(runTableModel != null) {
             int col = runTableModel.getColumnCount() - 1;
             for (int i = runTableModel.getRowCount() - 1; i >= 0; --i) {
@@ -932,12 +939,13 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * Remove run from grid by removing the data row from the TableModel
-     * 
+     *
      * @param run
      */
     private void removeRunRow(final Run run) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
 
                 int rowNumber = getRowByKey(run.getElementId());
@@ -973,7 +981,7 @@ public class RunsTablePane extends JPanePlugin {
                 return;
             }
         }
-        
+
         if (requiredFilter != null) {
             if (!requiredFilter.matches(run)) {
                 // if run does not match requiredFilter, be sure to remove it from grid
@@ -984,6 +992,7 @@ public class RunsTablePane extends JPanePlugin {
         }
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
 
                 ClientId whoJudgedId = whoModifiedId;
@@ -1016,7 +1025,7 @@ public class RunsTablePane extends JPanePlugin {
                     updateRowCount();
                     resizeColumnWidth(runTable);
                 }
-                
+
 //                if (selectJudgementFrame != null) {
                         //TODO the selectJudgementFrame should be placed above all PC2 windows, not working when dblClicking in Windows OS
 //                }
@@ -1027,7 +1036,7 @@ public class RunsTablePane extends JPanePlugin {
     public void reloadRunList() {
 
         Run[] runs = getContest().getRuns();
-        
+
         ContestInformation contestInformation = getContest().getContestInformation();
         judgementNotificationsList = contestInformation.getJudgementNotificationsList();
 
@@ -1036,7 +1045,7 @@ public class RunsTablePane extends JPanePlugin {
         }
 
         // TODO bulk load these records, this is closer only do the count,size,sort at end
-        
+
         if (filter.isFilterOn()){
             getFilterButton().setForeground(Color.BLUE);
             getFilterButton().setToolTipText("Edit filter - filter ON");
@@ -1075,6 +1084,7 @@ public class RunsTablePane extends JPanePlugin {
             updateRunRow(run, clientId, false);
         }
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 updateRowCount();
                 resizeColumnWidth(runTable);
@@ -1125,6 +1135,7 @@ public class RunsTablePane extends JPanePlugin {
         filterButton.setVisible(true);
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
@@ -1136,14 +1147,14 @@ public class RunsTablePane extends JPanePlugin {
 
         displayTeamName = new DisplayTeamName();
         displayTeamName.setContestAndController(inContest, inController);
-        
+
         teamClient = isTeam(inContest.getClientId());
-        
+
         ContestInformation contestInformation = getContest().getContestInformation();
         judgementNotificationsList = contestInformation.getJudgementNotificationsList();
 
         initializePermissions();
-        
+
         extractRuns = new ExtractRuns(inContest);
 
         getContest().addRunListener(new RunListenerImplementation());
@@ -1152,23 +1163,24 @@ public class RunsTablePane extends JPanePlugin {
         getContest().addLanguageListener(new LanguageListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
         getContest().addBalloonSettingsListener(new BalloonSettingsListenerImplementation());
-     
+
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
-                
+
                 editRunFrame.setContestAndController(getContest(), getController());
                 viewJudgementsFrame.setContestAndController(getContest(), getController());
                 if (isAllowed(Permission.Type.JUDGE_RUN)) {
                     selectJudgementFrame.setContestAndController(getContest(), getController());
                 }
 
-                
+
                 getEditFilterFrame().setContestAndController(getContest(), getController());
-                
+
                 updateGUIperPermissions();
                 resetRunsListBoxColumns();
                 reloadRunList();
-                
+
                 if (isAllowed(Permission.Type.EXTRACT_RUNS)){
                     getRunTable().setRowSelectionAllowed(true);
                     getRunTable().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -1181,7 +1193,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes messagePanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMessagePanel() {
@@ -1205,7 +1217,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes buttonPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPanel() {
@@ -1231,7 +1243,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes requestRunButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getRequestRunButton() {
@@ -1241,6 +1253,7 @@ public class RunsTablePane extends JPanePlugin {
             requestRunButton.setToolTipText("Request the selected Run for Judging");
             requestRunButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
             requestRunButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     requestSelectedRun();
                 }
@@ -1342,7 +1355,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes filterButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getFilterButton() {
@@ -1352,6 +1365,7 @@ public class RunsTablePane extends JPanePlugin {
             filterButton.setToolTipText("Edit Filter");
             filterButton.setMnemonic(java.awt.event.KeyEvent.VK_F);
             filterButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     showFilterRunsFrame();
                 }
@@ -1364,7 +1378,7 @@ public class RunsTablePane extends JPanePlugin {
         getEditFilterFrame().addList(ListNames.PROBLEMS);
         getEditFilterFrame().addList(ListNames.JUDGEMENTS);
         getEditFilterFrame().addList(ListNames.LANGUAGES);
-              
+
         if (! usingTeamColumns) {
             getEditFilterFrame().addList(ListNames.TEAM_ACCOUNTS);
             getEditFilterFrame().addList(ListNames.RUN_STATES);
@@ -1378,7 +1392,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes editRunButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getEditRunButton() {
@@ -1388,6 +1402,7 @@ public class RunsTablePane extends JPanePlugin {
             editRunButton.setToolTipText("Edit the selected Run");
             editRunButton.setMnemonic(java.awt.event.KeyEvent.VK_E);
             editRunButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     editSelectedRun();
                 }
@@ -1419,7 +1434,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes extractButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getExtractButton() {
@@ -1428,9 +1443,10 @@ public class RunsTablePane extends JPanePlugin {
             extractButton.setText("Extract");
             extractButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             extractButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     extractRuns(getRunTable());
-                    
+
                 }
             });
         }
@@ -1489,7 +1505,7 @@ public class RunsTablePane extends JPanePlugin {
         for (int rowNumber = 0; rowNumber < totalRows; rowNumber++) {
             vector.addElement(runs.getElementIdFromTableRow(rowNumber));
         }
-        return (ElementId[]) vector.toArray(new ElementId[vector.size()]);
+        return vector.toArray(new ElementId[vector.size()]);
     }
 
     private ElementId[] getRunKeys(JTableCustomized runs, int[] selectedRows) {
@@ -1497,25 +1513,25 @@ public class RunsTablePane extends JPanePlugin {
         for (int rowNumber : selectedRows) {
             vector.addElement(runs.getElementIdFromTableRow(rowNumber));
         }
-        return (ElementId[]) vector.toArray(new ElementId[vector.size()]);
+        return vector.toArray(new ElementId[vector.size()]);
     }
 
 
     private int extractSelectedRuns(JTableCustomized runs, ElementId[] runKeys) {
         int extractCount = 0;
-        
+
         int totalRows = runKeys.length;
-        
+
         for (int i = 0; i < runKeys.length; i++) {
             try {
                 boolean extracted = extractRuns.extractRun(runKeys[i]);
-                
+
                 if (extracted){
                     extractCount ++;
                 }
-                
+
                 updateRunCount (extractCount, totalRows);
-                
+
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -1540,7 +1556,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes giveButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getGiveButton() {
@@ -1550,6 +1566,7 @@ public class RunsTablePane extends JPanePlugin {
             giveButton.setToolTipText("Give the selected Run back to Judges");
             giveButton.setMnemonic(java.awt.event.KeyEvent.VK_G);
             giveButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     giveSelectedRun();
                 }
@@ -1587,7 +1604,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes takeButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getTakeButton() {
@@ -1597,6 +1614,7 @@ public class RunsTablePane extends JPanePlugin {
             takeButton.setToolTipText("Take the selected Run from the Judges");
             takeButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             takeButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     System.out.println("TODO RunsTable.getTakeButton actionPerformed()");
                     // TODO code Take Run
@@ -1608,7 +1626,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes rejudgeRunButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getRejudgeRunButton() {
@@ -1617,6 +1635,7 @@ public class RunsTablePane extends JPanePlugin {
             rejudgeRunButton.setText("Rejudge");
             rejudgeRunButton.setToolTipText("Rejudge the selected Run");
             rejudgeRunButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     rejudgeSelectedRun();
                 }
@@ -1627,7 +1646,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes viewJudgementsButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getViewJudgementsButton() {
@@ -1636,6 +1655,7 @@ public class RunsTablePane extends JPanePlugin {
             viewJudgementsButton.setText("View Judgements");
             viewJudgementsButton.setToolTipText("View Judgements for the selected Run");
             viewJudgementsButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     viewSelectedRunJudgements();
                 }
@@ -1669,27 +1689,29 @@ public class RunsTablePane extends JPanePlugin {
         }
 
     }
-    
+
     public boolean isDisplayConfirmation() {
         return displayConfirmation;
     }
-    
+
     public void setDisplayConfirmation(boolean displayConfirmation) {
         this.displayConfirmation = displayConfirmation;
     }
 
     /**
      * Account Listener.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     public class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             // ignore doesn't affect this pane
         }
 
+        @Override
         public void accountModified(AccountEvent event) {
             // check if is this account
             Account account = event.getAccount();
@@ -1700,6 +1722,7 @@ public class RunsTablePane extends JPanePlugin {
                 // They modified us!!
                 initializePermissions();
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         updateGUIperPermissions();
                         reloadRunList();
@@ -1709,6 +1732,7 @@ public class RunsTablePane extends JPanePlugin {
             } else {
                 // not us, but update the grid anyways
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         reloadRunList();
                     }
@@ -1718,11 +1742,13 @@ public class RunsTablePane extends JPanePlugin {
 
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             // ignore, this does not affect this class
 
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             // check if it included this account
             boolean theyModifiedUs = false;
@@ -1737,6 +1763,7 @@ public class RunsTablePane extends JPanePlugin {
             }
             final boolean finalTheyModifiedUs = theyModifiedUs;
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     if (finalTheyModifiedUs) {
                         updateGUIperPermissions();
@@ -1746,6 +1773,7 @@ public class RunsTablePane extends JPanePlugin {
             });
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
             accountsModified(accountEvent);
         }
@@ -1753,63 +1781,75 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * Problem Listener.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     public class ProblemListenerImplementation implements IProblemListener {
 
+        @Override
         public void problemAdded(ProblemEvent event) {
             // ignore does not affect this pane
         }
 
+        @Override
         public void problemChanged(ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadRunList();
                 }
             });
         }
 
+        @Override
         public void problemRemoved(ProblemEvent event) {
             // ignore does not affect this pane
         }
 
+        @Override
         public void problemRefreshAll(ProblemEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadRunList();
                 }
-            }); 
+            });
         }
     }
 
     /**
      * Language Listener.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     public class LanguageListenerImplementation implements ILanguageListener {
 
+        @Override
         public void languageAdded(LanguageEvent event) {
             // ignore does not affect this pane
         }
 
+        @Override
         public void languageChanged(LanguageEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadRunList();
                 }
             });
         }
 
+        @Override
         public void languageRemoved(LanguageEvent event) {
             // ignore does not affect this pane
         }
 
+        @Override
         public void languageRefreshAll(LanguageEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadRunList();
                 }
@@ -1819,6 +1859,7 @@ public class RunsTablePane extends JPanePlugin {
         @Override
         public void languagesAdded(LanguageEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadRunList();
                 }
@@ -1828,6 +1869,7 @@ public class RunsTablePane extends JPanePlugin {
         @Override
         public void languagesChanged(LanguageEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadRunList();
                 }
@@ -1837,44 +1879,53 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * Contest Information Listener.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
 
     public class ContestInformationListenerImplementation implements IContestInformationListener {
 
+        @Override
         public void contestInformationAdded(ContestInformationEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadRunList();
                 }
             });
         }
 
+        @Override
         public void contestInformationChanged(ContestInformationEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadRunList();
                 }
             });
         }
 
+        @Override
         public void contestInformationRemoved(ContestInformationEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadRunList();
                 }
             });
         }
 
+        @Override
         public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadRunList();
                 }
             });
         }
+        @Override
         public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
             // Not used
         }
@@ -1885,6 +1936,7 @@ public class RunsTablePane extends JPanePlugin {
     private void showMessage(final String string) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(string);
                 messageLabel.setToolTipText(string);
@@ -1899,12 +1951,12 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * Shows only runs that are RunStates.NEW and RunStates.MANUAL_REVIEW.
-     * 
+     *
      * @param showNewRunsOnly
      */
     public void setShowNewRunsOnly(boolean showNewRunsOnly) {
         this.showNewRunsOnly = showNewRunsOnly;
-    
+
         if (showNewRunsOnly) {
             if (requiredFilter == null) {
                 requiredFilter = new Filter();
@@ -1926,7 +1978,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * This method initializes autoJudgeButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getAutoJudgeButton() {
@@ -1936,6 +1988,7 @@ public class RunsTablePane extends JPanePlugin {
             autoJudgeButton.setText("Auto Judge");
             autoJudgeButton.setToolTipText("Enable Auto Judging");
             autoJudgeButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     // Turn auto judging on
                     if (!bUseAutoJudgemonitor) {
@@ -1953,7 +2006,7 @@ public class RunsTablePane extends JPanePlugin {
 
     /**
      * Is Auto Judging turned On for this judge ?
-     * 
+     *
      * @return
      */
     private boolean isAutoJudgingEnabled() {
@@ -1969,10 +2022,10 @@ public class RunsTablePane extends JPanePlugin {
         if (!bUseAutoJudgemonitor) {
             return;
         }
-        
+
         if (isAutoJudgingEnabled()) {
             showMessage("");
-            
+
             // make sure the OS supports judging of all problems this judge
             // is set up to autojudge BEFORE starting autojudging.
             List<Problem> plist = autoJudgingMonitor.getOSUnsupportedAutojudgeProblemList();
@@ -1990,6 +2043,7 @@ public class RunsTablePane extends JPanePlugin {
             }
             // Keep this off the AWT thread.
             new Thread(new Runnable() {
+                @Override
                 public void run() {
 //                  RE-enable local auto judge flag
                     autoJudgingMonitor.startAutoJudging();
@@ -1997,7 +2051,7 @@ public class RunsTablePane extends JPanePlugin {
             }).start();
         } else {
             showMessage("Administrator has turned off Auto Judging");
-            
+
             List<Problem> plist = OSCompatibilityUtilities.getUnableToJudgeList(getContest(), log);
             if(!plist.isEmpty()) {
                 StringBuffer message = new StringBuffer();
@@ -2024,6 +2078,7 @@ public class RunsTablePane extends JPanePlugin {
     public EditFilterFrame getEditFilterFrame() {
         if (editFilterFrame == null){
             Runnable callback = new Runnable(){
+                @Override
                 public void run() {
                     reloadRunList();
                 }
@@ -2035,10 +2090,10 @@ public class RunsTablePane extends JPanePlugin {
         }
         return editFilterFrame;
     }
-    
+
     /**
      * Set title for the Filter Frame.
-     * 
+     *
      * @param title
      */
     public void setFilterFrameTitle (String title){
@@ -2047,25 +2102,29 @@ public class RunsTablePane extends JPanePlugin {
             editFilterFrame.setTitle(title);
         }
     }
-    
+
     /**
      * @author pc2@ecs.csus.edu
      *
      */
     public class BalloonSettingsListenerImplementation implements IBalloonSettingsListener {
 
+        @Override
         public void balloonSettingsAdded(BalloonSettingsEvent event) {
             reloadRunList();
         }
 
+        @Override
         public void balloonSettingsChanged(BalloonSettingsEvent event) {
             reloadRunList();
         }
 
+        @Override
         public void balloonSettingsRemoved(BalloonSettingsEvent event) {
             reloadRunList();
         }
 
+        @Override
         public void balloonSettingsRefreshAll(BalloonSettingsEvent balloonSettingsEvent) {
             reloadRunList();
         }
@@ -2080,7 +2139,7 @@ public class RunsTablePane extends JPanePlugin {
     {
         showSourceActive = true;
     }
-    
+
     /**
      * @author pc2@ecs.csus.edu
      *
@@ -2090,16 +2149,17 @@ public class RunsTablePane extends JPanePlugin {
     {
         showSourceActive = false;
     }
-    
+
     private boolean IsAllowedViewSource()
     {
         return (showSourceActive == false);
     }
-    
+
     private JButton getViewSourceButton() {
         if (viewSourceButton == null) {
             viewSourceButton = new JButton("View Source");
             viewSourceButton.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
 
                     // For now, only allow one View Source to be outstanding at-a-time
@@ -2111,12 +2171,12 @@ public class RunsTablePane extends JPanePlugin {
                             getController().getLog().log(Log.INFO, "There is already a View Source pending for Run " + requestedRun.getNumber() + " at site " + requestedRun.getSiteNumber());
                        } else {
                             // This could mean that the requestedRun's info just came in.
-                            showMessage("There is already a View Source pending");                           
+                            showMessage("There is already a View Source pending");
                             getController().getLog().log(Log.INFO, "There is already a View Source pending but no requestedRun");
                         }
                         return;
                     }
-                    
+
                     // make sure we're allowed to fetch a run
                     if (!isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN)) {
                         getController().getLog().log(Log.WARNING, "Account does not have the permission ALLOWED_TO_FETCH_RUN; cannot view run source.");
@@ -2142,6 +2202,7 @@ public class RunsTablePane extends JPanePlugin {
 //                    });
 
                     Thread viewSourceThread = new Thread() {
+                        @Override
                         public void run() {
                             showSourceForSelectedRun(selectedIndexes[0]);
                         }
@@ -2156,18 +2217,18 @@ public class RunsTablePane extends JPanePlugin {
         }
         return viewSourceButton;
     }
-    
+
     /**
      * Displays a {@link MultipleFileViewer} containing the source code for the run (submission) which is currently selected in the Runs grid.
-     * 
+     *
      * If no run is selected, or more than one run is selected, prompts the user to select just one run (row) in the grid
      * and does nothing else.
      */
     private void showSourceForSelectedRun(int nSelectedRunIndex) {
 
         boolean bFetchError = false;
-        
-        // we are allowed to view source and there's exactly one run selected; try to obtain the run source and display it in a MFV 
+
+        // we are allowed to view source and there's exactly one run selected; try to obtain the run source and display it in a MFV
         try {
 
             Run run = getContest().getRun(runTable.getElementIdFromTableRow(nSelectedRunIndex));
@@ -2178,18 +2239,18 @@ public class RunsTablePane extends JPanePlugin {
                 showMessage("Preparing to display source code for run " + run.getNumber() + " at site " + run.getSiteNumber());
                 getController().getLog().log(Log.INFO, "Preparing to display source code for run " + run.getNumber() + " at site " + run.getSiteNumber());
 
-                //the following forces a (read-only) checkout from the server; it makes more sense to first see if we already have the 
+                //the following forces a (read-only) checkout from the server; it makes more sense to first see if we already have the
                 // necessary RunFiles and then if not to issue a "Fetch" request rather than a "checkout" request
 //                getController().checkOutRun(run, true, false); // checkoutRun(run, isReadOnlyRequest, isComputerJudgedRequest)
 
                 //check if we already have the RunFiles for the run
                 if (!getContest().isRunFilesPresent(run)) {
-                    
+
                     // this is the run we're after
                     requestedRun = run;
                     // reset this each time so we be sure to get the first new reply
                     fetchedRun = null;
-                    
+
                     //we don't have the files; request them from the server (this is NOT a checkout, but a read-only fetch)
                     getController().fetchRun(run);
 
@@ -2202,56 +2263,56 @@ public class RunsTablePane extends JPanePlugin {
                     }
                     // no longer interested in getting updates for this run.
                     requestedRun = null;
-                
+
                     //check if we got a reply from the server
                     if (serverReplied) {
-                        
+
                         //the server replied; see if we got some RunFiles
                         if (fetchedRunFiles!=null) {
-                            
+
                             //we got some RunFiles from the server; put them into the contest model
                             getContest().updateRunFiles(run, fetchedRunFiles);
                         } else {
-                            
+
                             //we got a reply from the server but we didn't get any RunFiles
                             getController().getLog().log(Log.WARNING, "Server failed to return RunFiles in response to fetch run request");
                             bFetchError = true;
                         }
-                        
+
                     } else {
-                        
+
                         // the server failed to reply to the fetchRun request within the time limit
                         getController().getLog().log(Log.WARNING, "No response from server to fetch run request after " + waitedMS + "ms");
                         bFetchError = true;
                     }
                 }
-                
+
                 // OK to now start another view source
                 AllowViewSource();
-               
+
                 // if any type of error occurred requesting the run to view, log a summary message and finish
                 if(bFetchError) {
                     getController().getLog().log(Log.WARNING, "Unable to fetch run " + run.getNumber() + " at site " + run.getSiteNumber() + " from server");
                     showMessage("Unable to fetch selected run; check log");
                 } else {
-                
+
                     //if we get here we know there should be RunFiles in the contest model -- but let's sanity-check that
                     if (!getContest().isRunFilesPresent(run)) {
-                        
+
                         //something bad happened -- we SHOULD have RunFiles at this point!
                         getController().getLog().log(Log.SEVERE, "Unable to find RunFiles for run " + run.getNumber() + " at site " + run.getSiteNumber() + " -- server error?");
-                        showMessage("Unable to fetch selected run; check log");    
+                        showMessage("Unable to fetch selected run; check log");
                     } else {
-                        
+
                         //get the RunFiles
                         RunFiles runFiles = getContest().getRunFiles(run);
-    
+
                         if (runFiles != null) {
-    
+
                             // get the (serialized) source files out of the RunFiles
                             SerializedFile mainFile = runFiles.getMainFile();
                             SerializedFile[] otherFiles = runFiles.getOtherFiles();
-    
+
                             // create a MultiFileViewer in which to display the runFiles
                             // Note: previously used 'fetchedRun' here for site/number; it is possible that those values are not
                             // correct if the run files are already present; in that case, we would have never asked for them to be
@@ -2260,7 +2321,7 @@ public class RunsTablePane extends JPanePlugin {
                             // server request was ever made for a run's files.
                             MultipleFileViewer mfv = new MultipleFileViewer(log, "Source files for Site " + run.getSiteNumber() + " Run " + run.getNumber());
                             mfv.setContestAndController(getContest(), getController());
-    
+
                             // if entry point was specified, add a tab for it
                             if(run.getEntryPoint() != null) {
                                 mfv.addTextPane("Entry Point", run.getEntryPoint());
@@ -2275,7 +2336,7 @@ public class RunsTablePane extends JPanePlugin {
                                     otherFilesLoadedOK &= mfv.addFilePane(otherFile.getName(), otherFile);
                                 }
                             }
-    
+
                             // add the mainFile to the MFV
                             boolean mainFilePresent = false;
                             boolean mainFileLoadedOK = false;
@@ -2283,9 +2344,9 @@ public class RunsTablePane extends JPanePlugin {
                                 mainFilePresent = true;
                                 mainFileLoadedOK = mfv.addFilePane("Main File" + " (" + mainFile.getName() + ")", mainFile);
                             }
-    
+
                             // if we successfully added all files, show the MFV
-                            if ((!mainFilePresent || (mainFilePresent && mainFileLoadedOK)) 
+                            if ((!mainFilePresent || (mainFilePresent && mainFileLoadedOK))
                                     && (!otherFilesPresent || (otherFilesPresent && otherFilesLoadedOK))) {
                                 mfv.setSelectedIndex(0);  //always make leftmost selected; normally this will be MainFile
                                 mfv.setVisible(true);
@@ -2294,13 +2355,13 @@ public class RunsTablePane extends JPanePlugin {
                                 getController().getLog().log(Log.WARNING, "Unable to load run source files into MultiFileViewer");
                                 showMessage("Unable to load run source files into MultiFileViewer");
                             }
-    
+
                         } else {
                             // runfiles is null
                             getController().getLog().log(Log.WARNING, "Unable to obtain RunFiles for Site " + run.getSiteNumber() + " run " + run.getNumber());
                             showMessage("Unable to obtain RunFiles for selected run");
                         }
-                        
+
                     }
                 }
                 return;
@@ -2313,11 +2374,11 @@ public class RunsTablePane extends JPanePlugin {
         } catch (Exception e) {
             getController().getLog().log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to show run source, check log");
-            
+
             //make sure this is clear in case of exception
             requestedRun = null;
         }
-        
+
         // OK to now start another view source now
         AllowViewSource();
     }

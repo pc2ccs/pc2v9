@@ -1,15 +1,15 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
@@ -302,7 +302,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     public String getStandings(IInternalContest theContest, Run[] runs, Integer divisionNumber, Properties properties, Log inputLog) throws IllegalContestState {
         return(getStandings(theContest, runs, divisionNumber, null, properties, inputLog));
     }
-    public String getStandings(IInternalContest theContest, Run[] runs, Integer divisionNumber, ArrayList<Group> wantedGroups, Properties properties, Log inputLog) throws IllegalContestState {
+
+    @Override
+    public String getStandings(IInternalContest theContest, Run[] runs, Integer divisionNumber, List<Group> wantedGroups, Properties properties, Log inputLog) throws IllegalContestState {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
@@ -388,24 +390,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             }
         }
         if (runs == null) {
-            if(wantedGroups != null && wantedGroups.size() > 0) {
-                Run [] allruns = theContest.getRuns();
-                ArrayList<Run> newruns = new ArrayList<Run>();
-                for(Run r : allruns) {
-                    ClientId c = r.getSubmitter();
-                    Account a = theContest.getAccount(c);
-                    if(a != null) {
-                        for(Group g : wantedGroups) {
-                            if(a.isGroupMember(g.getElementId())) {
-                                newruns.add(r);
-                            }
-                        }
-                    }
-                }
-                runs = newruns.toArray(new Run [0]);
-            } else {
-                runs = theContest.getRuns();
-            }
+            // Note: we do not deal with divisionNumber here since
+            //   1) it is being deprecated
+            //   2) if a divisionNumber is passed in, the 'runs' will be non-null and pre-filtered for the division.
+            // here, we only filter the runs based on groups wanted.
+            runs = ScoreboardUtilities.getGroupFilteredRuns(theContest, wantedGroups);
         }
         synchronized (mutex) {
             Account[] accounts = accountList.getList();
@@ -1042,7 +1031,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param standingsRecordHash
      * @param divisionNumber
      */
-    private void initializeStandingsRecordHash(IInternalContest theContest, AccountList accountList, Account[] accounts, Problem[] problems, Hashtable<String, StandingsRecord> standingsRecordHash, Integer divisionNumber, ArrayList<Group> wantedGroups) {
+    private void initializeStandingsRecordHash(IInternalContest theContest, AccountList accountList, Account[] accounts, Problem[] problems, Hashtable<String, StandingsRecord> standingsRecordHash, Integer divisionNumber, List<Group> wantedGroups) {
 
         for (int i = 0; i < accountList.size(); i++) {
             Account account = accounts[i];
@@ -1057,18 +1046,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                         continue;
                     }
                 }
-                if(wantedGroups != null && wantedGroups.size() > 0) {
-                    boolean found = false;
-                    // restricted to these groups only
-                    for(Group group : wantedGroups) {
-                        if(account.isGroupMember(group.getElementId())) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if(!found) {
-                        continue;
-                    }
+                if(!ScoreboardUtilities.isWantedTeam(account, wantedGroups)) {
+                    continue;
                 }
                 StandingsRecord standingsRecord = new StandingsRecord();
                 SummaryRow summaryRow = standingsRecord.getSummaryRow();

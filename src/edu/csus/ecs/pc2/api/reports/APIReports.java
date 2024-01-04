@@ -1,6 +1,8 @@
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.reports;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.api.BaseClient;
@@ -12,10 +14,11 @@ import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
  * Print API Info.
- * 
+ *
  * @author Douglas A. Lane <laned@ecs.csus.edu>
  */
 public class APIReports extends BaseClient {
@@ -34,16 +37,16 @@ public class APIReports extends BaseClient {
         return defaultNumber;
 
     }
-    
+
     public void println(String s) {
         System.out.println(s);
     }
-    
+
     public void print(String s) {
         System.out.print(s);
 
     }
-    
+
     private void printRuns() {
 
         if (getContest().getRuns().length == 0) {
@@ -80,35 +83,35 @@ public class APIReports extends BaseClient {
     }
 
     public void printDefaultInfo() {
-        
+
         println("Contest title: '" + getContest().getContestTitle() + "'");
 
         println("Site Name = " + getContest().getSiteName());
-        
+
         printClockInfo();
-        
+
         println("Contacted: host=" + getContest().getServerHostName() + " port=" + getContest().getServerPort());
-        
+
         println();
-        
+
         printRunSummary();
-        
+
         println();
-        
+
         printRuns();
-        
+
         println();
-        
+
 //        printClarSummary();
-        
+
 //        printTeamSummary();
 //        new PrintTeams(), //
-        
+
         printTeamInfo();
-        
+
         println();
     }
-    
+
     private void printRunSummary() {
 
         print("Run summary: ");
@@ -153,21 +156,33 @@ public class APIReports extends BaseClient {
         print(" remaining=" + clock.getRemainingSecs() + " (" + ContestTime.formatTime(clock.getRemainingSecs()) + ")");
         print(" elapsed=" + clock.getElapsedSecs() + " (" + ContestTime.formatTime(clock.getElapsedSecs()) + ")");
         println();
-        
-        
+
+
     }
 
     private void printTeamInfo() {
         println("There are " + getContest().getTeams().length + " team ");
         for (ITeam team : getContest().getTeams()) {
-            IGroup group = team.getGroup();
-            String name = "(no group assigned)";
-            if (group != null) {
-                name = group.getName();
+            HashMap<ElementId, IGroup> groups = team.getGroups();
+            String name = "";
+            boolean first = true;
+            for(ElementId groupElementId : groups.keySet()) {
+                IGroup group = groups.get(groupElementId);
+                if(group != null) {
+                    if(first) {
+                        first = false;
+                    } else {
+                        name = name + ",";
+                    }
+                    name = name + group.getName();
+                }
             }
-            println(team.getLoginName() + " title: " + team.getLoginName() + " group: " + name);
+            if(name.isEmpty()) {
+                name = "(no groups assigned)";
+            }
+            println(team.getLoginName() + " title: " + team.getLoginName() + " groups: " + name);
         }
-        
+
     }
 
     @Override
@@ -232,24 +247,24 @@ public class APIReports extends BaseClient {
     @Override
     public void printProgramUsageInformation() {
 
-        String[] lines = { // 
+        String[] lines = { //
         "Usage: APIReports [--help] [-F optionsfile] [--all] --login user [--password pass] reportLIst ", //
-                "", // 
-                "Purpose: Print contest reports/information", // 
-                "", // 
-                "Ex. APIReports --login a3 ", // 
-                "", // 
+                "", //
+                "Purpose: Print contest reports/information", //
+                "", //
+                "Ex. APIReports --login a3 ", //
+                "", //
                 "--help    this message", //
-                "--all     print all reports", 
-                "", // 
-                "reportList - list of report numbers, see below. ", // 
-                "", // 
+                "--all     print all reports",
+                "", //
+                "reportList - list of report numbers, see below. ", //
+                "", //
         };
 
         for (String s : lines) {
             System.out.println(s);
         }
-        
+
         System.out.println("##  Title");
         printReportsList();
 
@@ -258,7 +273,7 @@ public class APIReports extends BaseClient {
     }
 
     public static void main(String[] args)  {
-        
+
         APIReports reports = new APIReports();
         try {
             reports.login(args);
