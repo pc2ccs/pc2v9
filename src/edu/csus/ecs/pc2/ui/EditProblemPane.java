@@ -424,20 +424,21 @@ public class EditProblemPane extends JPanePlugin {
      * The method also gets invoked by making GUI changes to a new problem definition, then pressing "Cancel" (which displays a 
      * message "Problem Modified - Save Changes?") and responding "Yes" to the message.
      * 
+     * @return true if all GUI values are valid and problem is added successfully; false otherwise
      */
-    protected void addProblem() {
+    protected boolean addProblem() {
 
         if (problemNameTextField.getText().trim().length() < 1) {
             showMessage("Enter a problem name (\"General\" tab)");
-            return;
+            return false;
         }
 
         if (!validateProblemFields()) {
-            // new problem is invalid, just return; message issued by validateProblemFields
+            // new problem is invalid, return false as problem was not added; message issued by validateProblemFields
             if (debug22EditProblem) {
                 System.err.println("DEBUG: validateProblemFields() returned false");
             }
-            return;
+            return false;
         }
 
         //warn if the problem has input data files but no Input Validator, unless the user has previously disabled this warning
@@ -464,7 +465,8 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorWarningOnAddProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
-                return;
+                // return false as problem was not added
+                return false;
             }
         }
 
@@ -485,7 +487,8 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorProgramNameOnAddProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
-                return;
+                // return false as problem was not added
+                return false;
             }
         }
 
@@ -532,11 +535,13 @@ public class EditProblemPane extends JPanePlugin {
             }
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
-            return;
+            // return false as problem was not added
+            return false;
         } catch (Exception e) {
             showMessage("Exeception while adding Problem; see log.");
             getLog().throwing("EditProblemPane", "addProblem()", e);
-            return;
+            // return false as problem was not added
+            return false;
         }
 
         if (!newProblem.getElementId().equals(newProblemDataFiles.getProblemId())) {
@@ -570,6 +575,7 @@ public class EditProblemPane extends JPanePlugin {
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
+        return true;
     }
 
     private int getIntegerValue(String s) {
@@ -1652,15 +1658,16 @@ public class EditProblemPane extends JPanePlugin {
      * then pressing "Cancel" (which displays a message "Problem Modified - Save Changes?") and responding "Yes"
      * to the message.
      * 
+     * @return true if all GUI values are valid and problem is updated successfully; false otherwise
      */
 
-    protected void updateProblem() {
+    protected boolean updateProblem() {
 
         // showStackTrace();
 
         if (!validateProblemFields()) {
-            // problem defined by the GUI fields is invalid, just return ( error message was issued by validateProblemFields() )
-            return;
+            // problem defined by the GUI fields is invalid, return false as problem was not updated ( error message was issued by validateProblemFields() )
+            return false;
         }
 
         //warn if the problem has input data files but no Input Validator, unless the user has previously disabled this warning
@@ -1687,7 +1694,8 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorWarningOnUpdateProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
-                return;
+                // return false as problem was not updated
+                return false;
             }
         }
 
@@ -1709,7 +1717,8 @@ public class EditProblemPane extends JPanePlugin {
                 showMissingInputValidatorProgramNameOnUpdateProblem = false;
             }
             if (!(response == JOptionPane.YES_OPTION)) {
-                return;
+                // return false as problem was not updated
+                return false;
             }
         }
         // all the GUI fields are valid; create a new Problem from them
@@ -1786,11 +1795,13 @@ public class EditProblemPane extends JPanePlugin {
         } catch (InvalidFieldValue e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
             // showMessage(e.getMessage());
-            return;
+            // return false as problem was not updated
+            return false;
         } catch (Exception e) {
             showMessage("Exeception while updating Problem; see log.");
             getLog().throwing("EditProblemPane", "updateProblem()", e);
-            return;
+            // return false as problem was not updated
+            return false;
         }
 
         // add a Problem Letter to the problem if it doesn't have one (note: problem letter is not displayed in the GUI)
@@ -1816,6 +1827,7 @@ public class EditProblemPane extends JPanePlugin {
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
+        return true;
     }
 
     /**
@@ -2138,9 +2150,13 @@ public class EditProblemPane extends JPanePlugin {
 
             if (result == JOptionPane.YES_OPTION) {
                 if (getAddButton().isEnabled()) {
-                    addProblem();
+                    if (!addProblem()) {
+                        return;
+                    }
                 } else {
-                    updateProblem();
+                    if (!updateProblem()) {
+                        return;
+                    }
                 }
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
