@@ -69,6 +69,38 @@ button.textLink {
 
 .center { text-align: center; }
 
+/*Center items in the global overlay (causes MatSnackBar alerts to be centered) */
+.cdk-global-overlay-wrapper {
+    align-items: center !important;
+}
+
+.mat-mdc-snack-bar-container {
+	
+    &.green-snackbar {
+      --mdc-snackbar-container-color: lightgreen;
+      --mdc-snackbar-supporting-text-color: black;
+//      --mat-mdc-snack-bar-button-color: red;   //doesn't seem to work as expected
+
+      button {
+	    background:white; 
+        font-size: 1.2rem;
+        font-weight: bold;
+      }
+    }
+
+    &.red-snackbar {
+      --mdc-snackbar-container-color: red;
+      --mdc-snackbar-supporting-text-color: white;
+//      --mat-mdc-snack-bar-button-color: black;  //doesn't seem to work as expected
+
+      button {
+	    background:white; 
+        font-size: 1.2rem;
+        font-weight: bold;
+      }
+    }
+}
+
 a { cursor: pointer; }
 
 th {

@@ -120,10 +120,10 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	//make sure no file names contain blanks (the PC2 server chokes on such filenames)
 	if (this.filenameContainsBlanks(this.mainFile, this.additionalFiles, this.testFiles)){
 		//pop up an error dialog
-	    this._uiHelper.alert('File names may not contain spaces');
+	    this._uiHelper.alertError('File names may not contain spaces');
 	    console.error('One or more submitted file contains a space in its filename');
   } else if (this.filenameContainsDuplicates(this.mainFile, this.additionalFiles)) {
-      this._uiHelper.alert('You may not submit multiple files with the same name');
+      this._uiHelper.alertError('You may not submit multiple files with the same name');
 	    console.error('One or more submitted file have the same filename');
 	} else {
 		//submit the run
@@ -132,10 +132,10 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	      .subscribe(_ => {
 	        this.clearNewSubmission();
 	        this.close();
-	        this._uiHelper.alert('Run has been submitted successfully!');
+	        this._uiHelper.alertOk('Run has been submitted successfully!');
 	        this._teamService.runsUpdated.next();
 	      }, (error: any) => {
-	        this._uiHelper.alert('Error submitting problem! Check console for details');
+	        this._uiHelper.alertError('Error submitting problem! Check console for details');
 	        console.error(error);
 	      });
 	}
@@ -147,7 +147,7 @@ export class NewRunComponent implements OnInit, OnDestroy {
     try {
       fileSubmission.byteData = btoa(fileContents);
     } catch (error) {
-      this._uiHelper.alert('Binary files are not allowed!');
+      this._uiHelper.alertError('Binary files are not allowed!');
       fileSubmission.byteData = fileContents;
       // window.location.href = 'http://amishrakefight.org/gfy/';
     }
