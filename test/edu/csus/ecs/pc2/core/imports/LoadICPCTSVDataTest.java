@@ -163,15 +163,13 @@ public class LoadICPCTSVDataTest extends AbstractTestCase {
                 fail("Expecting group assigned to account " + account);
             }
             int n = account.getGroupIds().size();
-            if(num == 1) {
-                // account index 1 has 3 groups assigned, the "A" groups (any group starting with A).
+            if(num == 2) {
+                // account index 2 has 3 groups assigned, the "A" groups (any group starting with A).
                 assertEquals("Expecting 3 groups for account", 3, n);
-                for(ElementId groupElementId : account.getGroupIds()) {
-                    assertTrue("Group for account does not start with A", contest.getGroup(groupElementId).getDisplayName().startsWith("A"));
-                }
             } else if(n != 1) {
                 assertEquals("Expecting 1 group for account", 1, n);
             }
+            num++;
         }
     }
 

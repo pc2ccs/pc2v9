@@ -422,8 +422,10 @@ public class Account implements IElementObject {
         if(account.getGroupIds() != null) {
             // shallow clone is OK, ElementId's don't change
             groupIds = (HashSet<ElementId>) account.getGroupIds().clone();
+            primaryGroupId = account.primaryGroupId;
         } else {
             groupIds = null;
+            primaryGroupId = null;
         }
         longSchoolName = account.longSchoolName;
         password = account.password;

@@ -1200,7 +1200,7 @@ public class SampleContest {
     public void assignTeamGroup(IInternalContest contest2, Group group, int startIdx, int endIdx) {
         Account[] teams = getTeamAccounts(contest2);
         for (int i = startIdx; i < endIdx; i++) {
-            teams[i].addGroupId(group.getElementId(), i == startIdx);
+            teams[i].addGroupId(group.getElementId(), true);
         }
     }
 
