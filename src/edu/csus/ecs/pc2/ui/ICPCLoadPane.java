@@ -465,7 +465,6 @@ public class ICPCLoadPane extends JPanePlugin {
      * Account Listener Implementation.
      *
      * @author pc2@ecs.csus.edu
-     * @version $Id: ICPCLoadPane.java 2275 2010-11-30 03:39:24Z laned $
      */
     public class AccountListenerImplementation implements IAccountListener {
 
@@ -538,7 +537,6 @@ public class ICPCLoadPane extends JPanePlugin {
      * Group Listener for ICPC Pane.
      *
      * @author pc2@ecs.csus.edu
-     * @version $Id: ICPCLoadPane.java 2275 2010-11-30 03:39:24Z laned $
      */
 
     // $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/ICPCLoadPane.java $

@@ -157,7 +157,7 @@ public class AccountsReport implements IReport {
             boolean first = true;
             for(ElementId elementId: account.getGroupIds()) {
                 if(first == false) {
-                    printWriter.print(",");;
+                    printWriter.print(",");
                 } else {
                     first = false;
                 }

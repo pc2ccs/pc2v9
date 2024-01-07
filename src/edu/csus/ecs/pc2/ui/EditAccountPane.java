@@ -61,9 +61,6 @@ public class EditAccountPane extends JPanePlugin {
 
     public static final String CHECKBOX_GROUP_PROPERTY = "group";
 
-// To be deleted -- JB
-//    private static final String NONE_SELECTED = "NONE SELECTED";
-
     // the original height of the jcombobox was 22.  the groups jlist is 3 lines, so we added 46(?)
     // this makes it easier to make the groups list box bigger without having to change all the
     // control offsets below it.
@@ -120,9 +117,6 @@ public class EditAccountPane extends JPanePlugin {
     private JLabel jLabel = null;
 
     private JLabel groupTitleLabel = null;
-
-// To be deleted -- JB
-//    private JComboBox<Serializable> groupComboBox = null;
 
     private boolean populatingGUI = false;
 
@@ -454,8 +448,6 @@ public class EditAccountPane extends JPanePlugin {
             getPasswordTextField().setText("");
             getPasswordConfirmField().setText("");
             populateGroupsList(null);
-// To be deleted -- JB
-//            populateGroupComboBox(null);
 
             getAddButton().setVisible(true);
             getUpdateButton().setVisible(false);
@@ -477,8 +469,6 @@ public class EditAccountPane extends JPanePlugin {
             getPasswordConfirmField().setText(account2.getPassword());
 
             populateGroupsList(account2);
-// To be deleted -- JB
-//            populateGroupComboBox(account2.getGroupId());
             getAliasTextField().setText(account2.getAliasName());
 
             populatePermissions(account2);
@@ -539,26 +529,6 @@ public class EditAccountPane extends JPanePlugin {
             getSiteSelectionComboBox().setSelectedIndex(selectedIndex);
         }
     }
-
-// To be deleted -- JB
-//    private void populateGroupComboBox(ElementId elementId) {
-//        int groupIndex = 0;
-//        int selectedIndex = 0;
-//        Group[] groups = getContest().getGroups();
-//
-//        getGroupComboBox().removeAllItems();
-//        getGroupComboBox().addItem(NONE_SELECTED);
-//        for (Group group : groups) {
-//            groupIndex++;
-//            getGroupComboBox().addItem(group);
-//            if (elementId != null) {
-//                if (group.getElementId().equals(elementId)) {
-//                    selectedIndex = groupIndex;
-//                }
-//            }
-//        }
-//        getGroupComboBox().setSelectedIndex(selectedIndex);
-//    }
 
     private void populateGroupsList(Account inAccount) {
 
@@ -754,8 +724,6 @@ public class EditAccountPane extends JPanePlugin {
             accountDetailPane.add(jLabel, null);
             accountDetailPane.add(groupTitleLabel, null);
             accountDetailPane.add(getGroupsScrollPane());
-// To be deleted -- JB
-//            accountDetailPane.add(getGroupComboBox(), null);
             accountDetailPane.add(jLabel1, null);
             accountDetailPane.add(getAccountTypeComboBox(), null);
             accountDetailPane.add(accountLabel, null);
@@ -940,26 +908,6 @@ public class EditAccountPane extends JPanePlugin {
         return groupsJList;
     }
 
-// To be deleted -- JB
-//    /**
-//     * This method initializes jTextField
-//     *
-//     * @return javax.swing.JTextField
-//     */
-//    private JComboBox<Serializable> getGroupComboBox() {
-//        if (groupComboBox == null) {
-//            groupComboBox = new JComboBox<Serializable>();
-//            groupComboBox.setBounds(new java.awt.Rectangle(14, 291, 272, 22));
-//            groupComboBox.addActionListener(new java.awt.event.ActionListener() {
-//                @Override
-//                public void actionPerformed(java.awt.event.ActionEvent e) {
-//                    enableUpdateButton();
-//                }
-//            });
-//        }
-//        return groupComboBox;
-//    }
-
     public void enableUpdateButton() {
 
         if (populatingGUI) {
@@ -1089,14 +1037,6 @@ public class EditAccountPane extends JPanePlugin {
                 checkAccount.addGroupId(groupElementId, bPrimary);
             }
         }
-
-// To be deleted -- JB
-//        if (getGroupComboBox().getSelectedIndex() > 0) {
-//            Group group = (Group) getGroupComboBox().getSelectedItem();
-//            checkAccount.setGroupId(group.getElementId());
-//        } else {
-//            checkAccount.setGroupId(null);
-//        }
 
         checkAccount.setSiteNumber(site.getSiteNumber());
 
