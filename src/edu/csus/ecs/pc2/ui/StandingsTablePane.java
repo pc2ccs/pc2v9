@@ -346,7 +346,6 @@ public class StandingsTablePane extends JPanePlugin {
             messagePane.setLayout(new BorderLayout());
             messagePane.setPreferredSize(new java.awt.Dimension(25, 25));
             messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
-//            messagePane.add(getGroupsPane(), java.awt.BorderLayout.SOUTH);
         }
         return messagePane;
     }
@@ -586,7 +585,6 @@ public class StandingsTablePane extends JPanePlugin {
         if (groupPane == null) {
             groupPane = new JScrollPane();
             groupPane.setPreferredSize(new Dimension(180, 200));
-//            groupPane.setBounds(new java.awt.Rectangle(14, 14, 200, 200));
             groupPane.setViewportView(getGroupsJList());
         }
         return groupPane;
