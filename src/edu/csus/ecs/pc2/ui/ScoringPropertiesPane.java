@@ -21,8 +21,10 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
  *
  */
 public class ScoringPropertiesPane extends JPanel {
-    private static final long serialVersionUID = -8131372758010937976L;
     
+
+    private static final long serialVersionUID = 147946474651407431L;
+
     private MCLB propertyListBox = null;
 
     private Properties originalProperties = new Properties(); // @jve:decl-index=0:
