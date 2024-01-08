@@ -1,10 +1,9 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
@@ -47,7 +46,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
-
 import edu.csus.ecs.pc2.core.CommandVariableReplacer;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
@@ -153,8 +151,6 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JTextField textfieldMaxOutputSizeInK = null;
 
-    private JButton scoringPropertiesButton = null;
-
     private Properties savedScoringProperties = null; // @jve:decl-index=0:
 
     private Properties changedScoringProperties = null;
@@ -184,6 +180,8 @@ public class ContestInformationPane extends JPanePlugin {
     private JPanel judgesDefaultAnswerPane;
 
     private JPanel judgingOptionsPane;
+    
+    private ScoringPropertiesPane scoringPropertiesPane;
 
     private JPanel teamSettingsPane;
 
@@ -501,9 +499,9 @@ public class ContestInformationPane extends JPanePlugin {
             judgeSettingsPane = new JPanel();
             
             judgeSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
-            judgeSettingsPane.setMaximumSize(new Dimension(750, 250));
-            judgeSettingsPane.setMinimumSize(new Dimension(750, 250));
-            judgeSettingsPane.setPreferredSize(new Dimension(750,250));
+            judgeSettingsPane.setMaximumSize(new Dimension(800, 400));
+            judgeSettingsPane.setMinimumSize(new Dimension(800, 400));
+            judgeSettingsPane.setPreferredSize(new Dimension(800,350));
 
             if (showPaneOutlines) {
                 
@@ -527,8 +525,9 @@ public class ContestInformationPane extends JPanePlugin {
             
             judgeSettingsPane.add(getJudgingOptionsPane(),LEFT_ALIGNMENT);
             
+            judgeSettingsPane.add(getScoringPropertiesPane(),LEFT_ALIGNMENT);
+            
             judgeSettingsPane.add(Box.createHorizontalStrut(20));
-            judgeSettingsPane.add(getScoringPropertiesButton(),LEFT_ALIGNMENT);
 
         }
         return judgeSettingsPane;
@@ -703,7 +702,19 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return teamInformationDisplaySettingsPane;
     }
+    private JPanel getScoringPropertiesPane() {
+        if (scoringPropertiesPane == null) {
+            scoringPropertiesPane = new ScoringPropertiesPane(getUpdateButton(),getCancelButton());
 
+            scoringPropertiesPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Scoring Properties", 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            
+        }
+        return scoringPropertiesPane;
+    }
+
+    
     private JPanel getJudgingOptionsPane() {
         if (judgingOptionsPane == null) {
             
@@ -994,7 +1005,7 @@ public class ContestInformationPane extends JPanePlugin {
             newContestInformation.setAutoStartContest(savedContestInformation.isAutoStartContest());
         }
 
-        newContestInformation.setScoringProperties(changedScoringProperties);
+        newContestInformation.setScoringProperties(scoringPropertiesPane.getProperties());
         
         newContestInformation.setFreezeTime(contestFreezeLengthTextField.getText());
 
@@ -1074,6 +1085,7 @@ public class ContestInformationPane extends JPanePlugin {
 
                 getUnfreezeScoreboardButton().setSelected(contestInformation.isUnfrozen());
                 setContestInformation(contestInformation);
+                ((ScoringPropertiesPane) getScoringPropertiesPane()).setProperties(changedScoringProperties);
                 setEnableButtons(false);
             }
 
@@ -1443,60 +1455,6 @@ public class ContestInformationPane extends JPanePlugin {
         return allowMultipleTeamLoginsCheckbox ;
     }
 
-    /**
-     * This method initializes scoringPropertiesButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getScoringPropertiesButton() {
-        if (scoringPropertiesButton == null) {
-            
-            scoringPropertiesButton = new JButton();
-            scoringPropertiesButton.setHorizontalAlignment(SwingConstants.LEFT);
-            scoringPropertiesButton.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-
-            scoringPropertiesButton.setAlignmentX(LEFT_ALIGNMENT);
-            scoringPropertiesButton.setToolTipText("Edit Scoring Properties");
-            scoringPropertiesButton.setMnemonic(KeyEvent.VK_S);
-            scoringPropertiesButton.setText("Edit Scoring Properties");
-            scoringPropertiesButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showContestPropertiesEditor();
-                }
-            });
-        }
-        return scoringPropertiesButton;
-    }
-
-    protected void showContestPropertiesEditor() {
-
-        PropertiesEditFrame propertiesEditFrame = new PropertiesEditFrame();
-        propertiesEditFrame.setTitle("Edit Scoring Properties");
-        propertiesEditFrame.setProperties(changedScoringProperties, new UpdateScoreProperties());
-        propertiesEditFrame.setVisible(true);
-    }
-
-    /**
-     * Update the edited properties.
-     * 
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-
-    // $HeadURL$
-    protected class UpdateScoreProperties implements IPropertyUpdater {
-
-        public void updateProperties(Properties properties) {
-            changedScoringProperties = properties;
-            enableUpdateButton();
-        }
-    }
-
-    /**
-     * This method initializes ccsTestModeCheckbox
-     * 
-     * @return javax.swing.JCheckBox
-     */
     private JCheckBox getCcsTestModeCheckbox() {
         if (ccsTestModeCheckbox == null) {
             
