@@ -533,13 +533,13 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
         standingsRecordMemento.putInteger("index", indexNumber);
 
-        // Figure out group for displayname substitutions.
         // it is probably OK to use the "primary" group ID here (the one supplied by the CMS).
-        // this is used to augment the teamName for display.  Using the CMS group should convey
-        // the desired information: eg.  Hawaii - D2  (for example).  Would we want to just show "D2" or "Hawaii" ?
-        // probably not - we want the compound group name (eg CMS name).
+        // this is used to augment the teamName for display {:groupname, :groupid}.  Using the CMS group should convey
+        // the desired information: eg.  Hawaii - D2  (for example).  Would we want to just show "D2" or "Hawaii" as a default?
+        // perhaps - but for now we want the compound group name (eg CMS name).
+        // TODO add a "Settings" option to decide which type of group to use for :groupname?
         Group group = null;
-        if(account.getPrimaryGroupId() != null) {
+        if (account.getPrimaryGroupId() != null) {
             group = contest.getGroup(account.getPrimaryGroupId());
         }
         standingsRecordMemento.putString("teamName", ScoreboardVariableReplacer.substituteDisplayNameVariables(teamVarDisplayString, account, group));

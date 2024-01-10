@@ -600,10 +600,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Hashtable<Group, Integer> groupIndexHash = new Hashtable<Group, Integer>();
         int groupCount = 0;
         for (Group group : groups) {
-            // no reference to groups that should not be displayed on scoreboard
-            if (!group.isDisplayOnScoreboard()) {
-                continue;
-            }
             groupHash.put(group.getElementId(), group);
             groupIndexHash.put(group, Integer.valueOf(groupCount));
             groupCount++;
@@ -714,9 +710,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             Account account = accountList.getAccount(standingsRecord.getClientId());
 
             // it is probably OK to use the "primary" group ID here (the one supplied by the CMS).
-            // this is used to augment the teamName for display.  Using the CMS group should convey
-            // the desired information: eg.  Hawaii - D2  (for example).  Would we want to just show "D2" or "Hawaii" ?
-            // probably not - we want the compound group name (eg CMS name).
+            // this is used to augment the teamName for display {:groupname, :groupid}.  Using the CMS group should convey
+            // the desired information: eg.  Hawaii - D2  (for example).  Would we want to just show "D2" or "Hawaii" as a default?
+            // perhaps - but for now we want the compound group name (eg CMS name).
+            // TODO add a "Settings" option to decide which type of group to use for :groupname?
             Group group = null;
             if (account.getPrimaryGroupId() != null) {
                 group = groupHash.get(account.getPrimaryGroupId());
