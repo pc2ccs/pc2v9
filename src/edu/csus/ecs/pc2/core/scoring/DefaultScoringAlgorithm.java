@@ -358,7 +358,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         int p2 = 0;
         for (int p=1; p <= allProblems.length ; p++) {
             Problem prob = allProblems[p-1];
-            if (prob.isActive()) {
+            if (prob.isActive() && prob.canView(wantedGroups)) {
                 p2++;
                 problemsIndexHash.put(prob.getElementId(), new Integer(p2));
             }

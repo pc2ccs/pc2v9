@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -304,7 +305,15 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
         dumpGroupList(contest.getGroups(), mementoRoot);
 
-        Problem[] problems = contest.getProblems();
+        ArrayList<Problem> probArray = new ArrayList<Problem>();
+
+        for(Problem prob : contest.getProblems()) {
+            if (prob.isActive() && prob.canView(wantedGroups)) {
+                probArray.add(prob);
+            }
+        }
+        Problem[] problems = probArray.toArray(new Problem[0]);
+
         summaryMememento.putLong("problemCount", problems.length);
         Site[] sites = contest.getSites();
         summaryMememento.putInteger("siteCount", sites.length);
@@ -319,7 +328,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
             indexNumber++;
         }
 
-        GrandTotals grandTotals = addProblemSummaryMememento(summaryMememento, standings, contest, contest.getProblems());
+        GrandTotals grandTotals = addProblemSummaryMememento(summaryMememento, standings, contest, problems);
 
         addGrandTotals(summaryMememento, grandTotals);
 
