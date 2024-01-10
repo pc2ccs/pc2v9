@@ -1,6 +1,6 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
- * 
+ *
  */
 package edu.csus.ecs.pc2.ui.board;
 
@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.util.XSLTransformer;
@@ -120,6 +121,10 @@ public class ScoreboardCommon {
     }
 
     public void generateOutput(String xmlString, String xslDir, String outputDir, Log log) {
+        generateOutput(xmlString, null, xslDir, outputDir, log);
+    }
+
+    public void generateOutput(String xmlString, String groupName, String xslDir, String outputDir, Log log) {
         // FUTUREWORK move to to a common location (currently in both Module and View)
         File inputDir = new File(xslDir);
         if (!inputDir.isDirectory()) {
@@ -143,22 +148,41 @@ public class ScoreboardCommon {
         for (int i = 0; i < inputFiles.length; i++) {
             String xslFilename = inputFiles[i];
             if (xslFilename.endsWith(".xsl")) {
-                String outputFilename = xslFilename.substring(0, xslFilename.length() - 4) + ".html";
+                // file name minus ".xls"
+                String baseFilename = xslFilename.substring(0, xslFilename.length() - 4);
                 try {
                     File output = File.createTempFile("__t", ".htm", outputDirFile);
                     FileOutputStream outputStream = new FileOutputStream(output);
+                    String outputFilename;
+
                     transformer.transform(xslDir + File.separator + xslFilename, new ByteArrayInputStream(xmlString.getBytes()), outputStream);
                     outputStream.close();
                     if (output.length() > 0) {
-                        File outputFile = new File(outputDir + File.separator + outputFilename);
+                        File outputFile = null;
                         if (xslFilename.equals("pc2export.xsl")) {
                             // change that, we want the pc2export written as a
                             // .dat in the cwd
                             outputFile = new File("pc2export.dat");
-                        }
-                        // dump json and tsv and csv files in the html directory
-                        if (xslFilename.endsWith(".json.xsl") || xslFilename.endsWith(".tsv.xsl") || xslFilename.endsWith(".csv.xsl") || xslFilename.endsWith(".php.xsl")) {
-                            outputFile = new File(outputDir + File.separator + xslFilename.substring(0, xslFilename.length() - 4));
+                        } else {
+                            String ext = null;
+                            int trimLength = 0;
+                            // dump json and tsv and csv files in the html directory
+                            if(baseFilename.endsWith(".json")){
+                                trimLength = 5;
+                                ext = ".json";
+                            } else if(baseFilename.endsWith(".tsv") || baseFilename.endsWith(".csv") || baseFilename.endsWith(".php")) {
+                                trimLength = 4;
+                                ext = baseFilename.substring(baseFilename.length() - 4);
+                            } else {
+                                ext = ".html";
+                            }
+                            outputFilename = outputDir + File.separator + baseFilename.substring(0, baseFilename.length() - trimLength);
+                            if(groupName != null) {
+                                outputFilename = outputFilename + "_" + groupName;
+                            }
+                            outputFilename = outputFilename + ext;
+
+                            outputFile = new File(outputFilename);
                         }
                         // behaviour of renameTo is platform specific, try the
                         // possibly atomic 1st
@@ -199,14 +223,27 @@ public class ScoreboardCommon {
     }
 
     public void generateResults(IInternalContest contest, IInternalController controller, String xmlString, String xslDir, Log log) {
+        generateResults(contest, controller, xmlString, null, xslDir, log);
+    }
+
+    public void generateResults(IInternalContest contest, IInternalController controller, String xmlString, Group group, String xslDir, Log log) {
+
+        String groupName = null;
+        if(group != null) {
+            groupName = group.getDisplayName();
+        }
+        String resultsFilename = makeGroupFilename("results.xml", groupName);
+
         try {
             File output = File.createTempFile("__t", ".tmp", new File("."));
             FileOutputStream outputXML = new FileOutputStream(output);
             outputXML.write(xmlString.getBytes());
             outputXML.close();
+
             if (output.length() > 0) {
-                File outputFile = new File("results.xml");
-                // behaviour of renameTo is platform specific, try the possibly
+
+                File outputFile = new File(resultsFilename);
+                // Behavior of renameTo is platform specific, try the possibly
                 // atomic 1st
                 if (!output.renameTo(outputFile)) {
                     // otherwise fallback to the delete then rename
@@ -217,14 +254,14 @@ public class ScoreboardCommon {
                 }
             } else {
                 // 0 length file
-                log.warning("New results.xml is empty, not updating");
+                log.warning("New " + resultsFilename + " is empty, not updating");
                 output.delete();
             }
             output = null;
         } catch (FileNotFoundException e1) {
-            log.log(Log.WARNING, "Could not write to " + "results.xml", e1);
+            log.log(Log.WARNING, "Could not write to " + resultsFilename, e1);
         } catch (IOException e) {
-            log.log(Log.WARNING, "Problem writing to " + "results.xml", e);
+            log.log(Log.WARNING, "Problem writing to " + resultsFilename, e);
         }
         FinalizeData finalizeData = contest.getFinalizeData();
         String outputDir = ".";
@@ -243,8 +280,8 @@ public class ScoreboardCommon {
             }
             try {
                 ResultsFile resultsFile = new ResultsFile();
-                String[] createTSVFileLines = resultsFile.createTSVFileLines(contest);
-                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + "results.tsv");
+                String[] createTSVFileLines = resultsFile.createTSVFileLines(contest, group);
+                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + makeGroupFilename("results.tsv", groupName));
                 for (int i = 0; i < createTSVFileLines.length; i++) {
                     outputFile.write(createTSVFileLines[i] + System.getProperty("line.separator"));
                 }
@@ -254,8 +291,8 @@ public class ScoreboardCommon {
             }
             try {
                 ScoreboardFile scoreboardFile = new ScoreboardFile();
-                String[] createTSVFileLines = scoreboardFile.createTSVFileLines(contest);
-                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + "scoreboard.tsv");
+                String[] createTSVFileLines = scoreboardFile.createTSVFileLines(contest, group);
+                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + makeGroupFilename("scoreboard.tsv", groupName));
                 for (int i = 0; i < createTSVFileLines.length; i++) {
                     outputFile.write(createTSVFileLines[i] + System.getProperty("line.separator"));
                 }
@@ -265,14 +302,40 @@ public class ScoreboardCommon {
             }
             StandingsJSON2016 standingsJson = new StandingsJSON2016();
             try {
-                String createJSON = standingsJson.createJSON(contest, controller);
-                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + "scoreboard.json");
+                String createJSON = standingsJson.createJSON(contest, controller, group);
+                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + makeGroupFilename("scoreboard.json", groupName));
                 outputFile.write(createJSON);
                 outputFile.close();
             } catch (IllegalContestState | IOException e) {
                 log.log(Log.WARNING, "Trouble creating scoreboard.json", e);
             }
         }
+    }
+
+    /**
+     * Create a filename that has the groupname embedded in it, just before the extension.
+     * eg.  scoreboard.json -> scoreboard_D1.json for example.
+     * If no extension is on the original filename, the groupname is appended.
+     * eg. scoreboard ->scoreboard_D1
+     *
+     * @param filename to add group to
+     * @param groupName if null, then returns filename, otherwise adds the groupname to filename as described above
+     * @return filename that possibly contains the group name
+     */
+    private String makeGroupFilename(String filename, String groupName) {
+        if(groupName == null || groupName.isEmpty()) {
+            return(filename);
+        }
+
+        String newFilename;
+        int extIndex = filename.lastIndexOf('.');
+        if(extIndex >= 0) {
+             newFilename = filename.substring(0, extIndex) + "_" + groupName + filename.substring(extIndex);
+
+        } else {
+            newFilename = filename + "_" + groupName;
+        }
+        return(newFilename);
     }
 
     protected Properties getScoringProperties(Properties properties) {
@@ -285,7 +348,7 @@ public class ScoreboardCommon {
         /**
          * Fill in with default properties if not using them.
          */
-        String[] keys = (String[]) defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
+        String[] keys = defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
         for (String key : keys) {
             if (!properties.containsKey(key)) {
                 properties.put(key, defProperties.get(key));

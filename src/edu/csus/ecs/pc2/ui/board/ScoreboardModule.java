@@ -1,8 +1,9 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.board;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Properties;
@@ -17,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.BalloonSettingsEvent;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
@@ -33,13 +35,13 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * A non-GUI Scoreboard Module.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class ScoreboardModule implements UIPlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 5352802558674673586L;
 
@@ -52,7 +54,7 @@ public class ScoreboardModule implements UIPlugin {
     private String xslDir;
 
     private DefaultScoringAlgorithm algo = new DefaultScoringAlgorithm();
-    
+
     /*
      * We set setObeyFrozen = true on this one.
      */
@@ -60,6 +62,7 @@ public class ScoreboardModule implements UIPlugin {
 
     private ScoreboardCommon scoreboardCommon = new ScoreboardCommon();
 
+    @Override
     public String getPluginTitle() {
         return "Scoreboard (non-GUI)";
     }
@@ -74,6 +77,7 @@ public class ScoreboardModule implements UIPlugin {
         System.out.println();
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         contest = inContest;
         controller = inController;
@@ -124,27 +128,49 @@ public class ScoreboardModule implements UIPlugin {
     }
 
     private void generateOutput() {
-
         try {
             log.info(" generateOutput() - create HTML ");
-            Properties scoringProperties = scoreboardCommon.getScoringProperties(getContest().getContestInformation().getScoringProperties());
-            String saXML = algo.getStandings(getContest(), scoringProperties, log);
+            Properties scoringProperties = scoreboardCommon.getScoringProperties(contest.getContestInformation().getScoringProperties());
+            String saXML = algo.getStandings(contest, scoringProperties, log);
             generateOutput(saXML);
+            ArrayList<Group> groupListOfOne = new ArrayList<Group>();
+            for(Group group : contest.getGroups()) {
+                if(group.isDisplayOnScoreboard()) {
+                    groupListOfOne.clear();
+                    groupListOfOne.add(group);
+                    saXML = algo.getStandings(contest,  null,  null, groupListOfOne, scoringProperties, log);
+                    generateOutput(saXML, group);
+                }
+            }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception generating scoreboard output " + e.getMessage(), e);
         }
     }
 
     private void generateOutput(String xmlString) {
+        generateOutput(xmlString, null);
+    }
+
+    private void generateOutput(String xmlString, Group group) {
         String outputDir = contest.getContestInformation().getScoringProperties().getProperty(DefaultScoringAlgorithm.JUDGE_OUTPUT_DIR, "html");
-        scoreboardCommon.generateOutput(xmlString, xslDir, outputDir, log);
-        scoreboardCommon.generateResults(contest, controller, xmlString, xslDir, log);
+        String groupName = null;
+
+        if(group != null) {
+            groupName = group.getDisplayName();
+        }
+        scoreboardCommon.generateOutput(xmlString, groupName, xslDir, outputDir, log);
+        scoreboardCommon.generateResults(contest, controller, xmlString, group, xslDir, log);
         try {
             Properties scoringProperties = scoreboardCommon.getScoringProperties(getContest().getContestInformation().getScoringProperties());
             String frozenOutputDir = scoringProperties.getProperty(DefaultScoringAlgorithm.PUBLIC_OUTPUT_DIR);
             if (frozenOutputDir != null && frozenOutputDir.trim().length() > 0 && !frozenOutputDir.equals(outputDir)) {
-                String frozenXML = algoFrozen.getStandings(getContest(), scoringProperties, log);
-                scoreboardCommon.generateOutput(frozenXML, xslDir, frozenOutputDir, log);
+                ArrayList<Group> groupOfOneList = null;
+                if(group != null) {
+                    groupOfOneList = new ArrayList<Group>();
+                    groupOfOneList.add(group);
+                }
+                String frozenXML = algoFrozen.getStandings(contest, null, null, groupOfOneList,scoringProperties, log);
+                scoreboardCommon.generateOutput(frozenXML, groupName, xslDir, frozenOutputDir, log);
             }
         } catch (Exception e) {
             log.warning("Exception generating frozen html");
@@ -157,24 +183,28 @@ public class ScoreboardModule implements UIPlugin {
 
     /**
      * Problem listener
-     * 
+     *
      * @author ICPC
      *
      */
     public class ProblemListenerImplementation implements IProblemListener {
 
+        @Override
         public void problemAdded(ProblemEvent event) {
             generateOutput();
         }
 
+        @Override
         public void problemChanged(ProblemEvent event) {
             generateOutput();
         }
 
+        @Override
         public void problemRemoved(ProblemEvent event) {
             generateOutput();
         }
 
+        @Override
         public void problemRefreshAll(ProblemEvent event) {
             generateOutput();
         }
@@ -183,28 +213,33 @@ public class ScoreboardModule implements UIPlugin {
 
     /**
      * Account Listener
-     * 
+     *
      * @author ICPC
      *
      */
     public class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             generateOutput();
         }
 
+        @Override
         public void accountModified(AccountEvent event) {
             generateOutput();
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             generateOutput();
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             generateOutput();
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
             generateOutput();
         }
@@ -212,20 +247,23 @@ public class ScoreboardModule implements UIPlugin {
 
     /**
      * ContestTime listener
-     * 
+     *
      * @author ICPC
      *
      */
     class ContestTimeListenerImplementation implements IContestTimeListener {
 
+        @Override
         public void contestTimeAdded(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestTimeRemoved(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestTimeChanged(ContestTimeEvent event) {
             ContestTime contestTime = event.getContestTime();
             if (isThisSite(contestTime.getSiteNumber())) {
@@ -233,14 +271,17 @@ public class ScoreboardModule implements UIPlugin {
             }
         }
 
+        @Override
         public void contestStarted(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestStopped(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void refreshAll(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
@@ -257,24 +298,28 @@ public class ScoreboardModule implements UIPlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      *
      */
     public class RunListenerImplementation implements IRunListener {
 
+        @Override
         public void runAdded(RunEvent event) {
             generateOutput();
         }
 
+        @Override
         public void refreshRuns(RunEvent event) {
             generateOutput();
         }
 
+        @Override
         public void runChanged(RunEvent event) {
             generateOutput();
         }
 
+        @Override
         public void runRemoved(RunEvent event) {
             generateOutput();
         }
@@ -282,24 +327,28 @@ public class ScoreboardModule implements UIPlugin {
 
     /**
      * BalloonSettings listener
-     * 
+     *
      * @author ICPC
      *
      */
     public class BalloonSettingsListenerImplementation implements IBalloonSettingsListener {
 
+        @Override
         public void balloonSettingsAdded(BalloonSettingsEvent event) {
             generateOutput();
         }
 
+        @Override
         public void balloonSettingsChanged(BalloonSettingsEvent event) {
             generateOutput();
         }
 
+        @Override
         public void balloonSettingsRemoved(BalloonSettingsEvent event) {
             generateOutput();
         }
 
+        @Override
         public void balloonSettingsRefreshAll(BalloonSettingsEvent balloonSettingsEvent) {
             generateOutput();
         }
@@ -307,30 +356,35 @@ public class ScoreboardModule implements UIPlugin {
 
     /**
      * a ContestInformation Listener
-     * 
+     *
      * @author ICPC
      *
      */
     class ContestInformationListenerImplementation implements IContestInformationListener {
 
+        @Override
         public void contestInformationAdded(ContestInformationEvent event) {
             generateOutput();
 
         }
 
+        @Override
         public void contestInformationChanged(ContestInformationEvent event) {
             generateOutput();
 
         }
 
+        @Override
         public void contestInformationRemoved(ContestInformationEvent event) {
             // ignored
         }
 
+        @Override
         public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
             generateOutput();
         }
 
+        @Override
         public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
             generateOutput();
         }
@@ -360,7 +414,7 @@ public class ScoreboardModule implements UIPlugin {
 
     /**
      * a Language listener
-     * 
+     *
      * @author ICPC
      *
      */

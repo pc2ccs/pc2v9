@@ -1,11 +1,14 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -16,7 +19,7 @@ import edu.csus.ecs.pc2.core.scoring.SummaryRow;
 
 /**
  * Create scoreboard.tsv file.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id: ScoreboardFile.java 180 2011-04-11 00:36:50Z laned $
  */
@@ -28,19 +31,30 @@ public class ScoreboardFile {
 
     /**
      * Create CCS scoreboard.tsv file contents.
-     * 
+     *
      * @param contest
      * @return
      * @throws IllegalContestState
      */
     public String[] createTSVFileLines(IInternalContest contest) throws IllegalContestState {
+        return(createTSVFileLines(contest, null));
+    }
 
+    public String[] createTSVFileLines(IInternalContest contest, Group group) throws IllegalContestState {
         Vector<String> lines = new Vector<String>();
 
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
         scoringAlgorithm.setContest(contest);
 
         Properties properties = getScoringProperties(contest);
+
+        List<Group> groupList = null;
+
+        if(group != null) {
+            groupList = new ArrayList<Group>();
+            groupList.add(group);
+        }
+
 
         // Field Description Example Type
         // 1 Label scoreboard fixed string (always same value)
@@ -49,7 +63,7 @@ public class ScoreboardFile {
         lines.addElement("scoreboard" + TAB + "1");
 
         // return ranked teams
-        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
+        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null,  groupList, properties, false, null);
 
         for (StandingsRecord record : standingsRecords) {
 
@@ -105,7 +119,7 @@ public class ScoreboardFile {
             lines.addElement(line);
         }
 
-        return (String[]) lines.toArray(new String[lines.size()]);
+        return lines.toArray(new String[lines.size()]);
 
     }
 
@@ -121,7 +135,7 @@ public class ScoreboardFile {
         /**
          * Fill in with default properties if not using them.
          */
-        String[] keys = (String[]) defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
+        String[] keys = defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
         for (String key : keys) {
             if (!properties.containsKey(key)) {
                 properties.put(key, defProperties.get(key));

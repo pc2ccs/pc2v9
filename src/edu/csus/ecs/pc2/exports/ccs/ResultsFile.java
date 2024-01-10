@@ -1,7 +1,9 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -9,9 +11,10 @@ import edu.csus.ecs.pc2.core.XMLUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.model.Account;
-import edu.csus.ecs.pc2.core.model.FinalizeData;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
+import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.scoring.FinalsStandingsRecordComparator;
 import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
@@ -19,7 +22,7 @@ import edu.csus.ecs.pc2.core.scoring.StandingsRecord;
 
 /**
  * Create results.tsv file.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class ResultsFile {
@@ -43,14 +46,14 @@ public class ResultsFile {
     private FinalizeData finalizeData = null;
 
     private FinalsStandingsRecordComparator comparator;
-    
+
     public void setFinalizeData(FinalizeData finalizeData) {
         this.finalizeData = finalizeData;
     }
 
     /**
      * Create CCS restuls.tsv file contents.
-     * 
+     *
      * @param contest
      * @return
      * @throws IllegalContestState
@@ -58,7 +61,15 @@ public class ResultsFile {
     public String[] createTSVFileLines(IInternalContest contest) {
         return createTSVFileLines(contest, DEFAULT_RESULT_FIELD_NAME);
     }
-    
+
+    public String [] createTSVFileLines(IInternalContest contest, Group group) {
+        return createTSVFileLines(contest, group, DEFAULT_RESULT_FIELD_NAME);
+    }
+
+    private String [] createTSVFileLines(IInternalContest contest, String resultFileTitleFieldName) {
+        return createTSVFileLines(contest, null, resultFileTitleFieldName);
+    }
+
     /**
      * Input is a sorted ranking list.  What is the median number of problems solved.
      * copied from DefaultScoringAlgorithm, maybe it should be a common location?
@@ -90,17 +101,17 @@ public class ResultsFile {
 
     /**
      * Create CCS restuls.tsv file contents.
-     * 
+     *
      * @param contest
-     * @param resultFileTitleFieldName override title anem {@value #DEFAULT_RESULT_FIELD_NAME}. 
+     * @param resultFileTitleFieldName override title anem {@value #DEFAULT_RESULT_FIELD_NAME}.
      * @return
      */
-    public String[] createTSVFileLines(IInternalContest contest, String resultFileTitleFieldName)  {
+    public String[] createTSVFileLines(IInternalContest contest, Group group, String resultFileTitleFieldName)  {
 
         Vector<String> lines = new Vector<String>();
 
         finalizeData = contest.getFinalizeData();
-        
+
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
         scoringAlgorithm.setContest(contest);
 
@@ -115,25 +126,30 @@ public class ResultsFile {
         // return ranked teams
         StandingsRecord[] standingsRecords = null;
         try {
-            standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
+            List<Group> groupList = null;
+            if(group != null) {
+                groupList = new ArrayList<Group>();
+                groupList.add(group);
+            }
+            standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null,  groupList, properties, false, null);
         } catch (Exception e) {
             throw new RuntimeException("Unable to generate standings ", e.getCause());
         }
-        
+
         int median = getMedian(standingsRecords);
-        
+
         if (finalizeData == null) {
             String [] badbad = {"Contest not finalized cannot create awards"};
-            return badbad;  
+            return badbad;
         }
-        
+
         // TODO finalizeData really needs a B instead of getBronzeRank
         int lastMedalRank = finalizeData.getBronzeRank();
         int lastSolvedNum = 0;
         int rankNumber = 0;
         // resort standingsRecord based on lastMedalRank and median
         Vector<Account> accountVector = contest.getAccounts(Type.TEAM);
-        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
         AccountList accountList = new AccountList();
         for (Account account : accounts) {
             accountList.add(account);
@@ -177,23 +193,23 @@ public class ResultsFile {
             }
             lines.addElement(reservationId + TAB //
                     + rank + TAB //
-                    + award + TAB  // 
+                    + award + TAB  //
                     + record.getNumberSolved() //
                     + TAB + record.getPenaltyPoints() + TAB //
                     + record.getLastSolved());
         }
 
-        return (String[]) lines.toArray(new String[lines.size()]);
+        return lines.toArray(new String[lines.size()]);
     }
 
     /**
      * Determine and return award medal color.
-     * 
+     *
      * <pre>
-     * Award is a string with value "gold", "silver", "bronze", "ranked" 
+     * Award is a string with value "gold", "silver", "bronze", "ranked"
      * or "honorable" as appropriate.
      * </pre>
-     * 
+     *
      * @param rankNumber
      * @param finalizeData
      * @return
@@ -228,7 +244,7 @@ public class ResultsFile {
         /**
          * Fill in with default properties if not using them.
          */
-        String[] keys = (String[]) defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
+        String[] keys = defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
         for (String key : keys) {
             if (!properties.containsKey(key)) {
                 properties.put(key, defProperties.get(key));
@@ -237,18 +253,18 @@ public class ResultsFile {
 
         return properties;
     }
-    
+
     public String[] createTSVFileLinesTwo(IInternalContest contest) throws Exception {
 
-        finalizeData = contest.getFinalizeData(); 
+        finalizeData = contest.getFinalizeData();
 
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
 
         String xmlString = scoringAlgorithm.getStandings(contest, new Properties(), null);
 
         String xsltFileName = "results.tsv.xsl";
-        
+
         return XMLUtilities.transformToArray(xmlString, xsltFileName);
     }
- 
+
 }

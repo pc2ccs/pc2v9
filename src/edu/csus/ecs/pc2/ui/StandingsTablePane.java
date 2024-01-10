@@ -43,9 +43,11 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.BalloonSettingsEvent;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.GroupEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
+import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
@@ -130,6 +132,7 @@ public class StandingsTablePane extends JPanePlugin {
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
         getContest().addBalloonSettingsListener(new BalloonSettingsListenerImplementation());
+        getContest().addGroupListener(new GroupListenerImplementation());
 
         populateGroupsList();
         refreshStandings();
@@ -523,6 +526,45 @@ public class StandingsTablePane extends JPanePlugin {
 
     }
 
+    /**
+     * If any groups change, we need to possibly update our checkbox lists
+     *
+     * @author John Buck
+     *
+     */
+    public class GroupListenerImplementation implements IGroupListener {
+
+        @Override
+        public void groupAdded(GroupEvent event) {
+            commonGroupUpdate();
+        }
+
+        @Override
+        public void groupChanged(GroupEvent event) {
+            commonGroupUpdate();
+        }
+
+        @Override
+        public void groupRemoved(GroupEvent event) {
+            commonGroupUpdate();
+        }
+
+        @Override
+        public void groupRefreshAll(GroupEvent groupEvent) {
+            commonGroupUpdate();
+        }
+
+        @Override
+        public void groupsAdded(GroupEvent event) {
+            commonGroupUpdate();
+        }
+
+        @Override
+        public void groupsChanged(GroupEvent event) {
+            commonGroupUpdate();
+        }
+    }
+
     protected Properties getScoringProperties() {
 
         Properties properties = getContest().getContestInformation().getScoringProperties();
@@ -596,7 +638,9 @@ public class StandingsTablePane extends JPanePlugin {
         Group [] allgroups = getContest().getGroups();
         Arrays.sort(allgroups, new GroupComparator());
         for(Group group : allgroups ) {
-            addGroupCheckBox(group);
+            if(group.isDisplayOnScoreboard()) {
+                addGroupCheckBox(group);
+            }
         }
 
     }
@@ -626,6 +670,15 @@ public class StandingsTablePane extends JPanePlugin {
             });
         }
         return groupsJList;
+    }
+
+    /**
+     * Called when groups change to force regeneration of group checklists and possibly
+     * the standings if a removed group was checked.
+     */
+    private void commonGroupUpdate() {
+        populateGroupsList();
+        refreshStandings();
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
