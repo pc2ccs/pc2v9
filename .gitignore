@@ -4,9 +4,23 @@
 /profiles.properties
 /profiles/
 /testout/
+/html/
+/public_html/
+/results/
+/reports/
+/log/
+passwords.txt
+pc2export.dat
+results.xml
+results_*.xml
 
 /.classes
 /realm.properties
 /VERSION
 /pc2ws.properties
 cacerts.pc2
+
+projects/*.gz
+projects/*.zip
+projects/WTI-UI/package-lock.json
+projects/WTI-UI/.angular/
