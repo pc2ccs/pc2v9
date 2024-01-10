@@ -2,6 +2,8 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.model.Problem.VALIDATOR_TYPE;
@@ -323,11 +325,20 @@ public class ProblemTest extends AbstractTestCase {
 
         Group group1 = groups[0];
 
+        ArrayList<Group> arrayOfGroup1 = new ArrayList<Group>();
+        arrayOfGroup1.add(group1);
+        ArrayList<Group> arrayOfGroup2 = new ArrayList<Group>();
+        arrayOfGroup2.add(groups[1]);
+
         assertTrue (lastProblem.isAllView());
         lastProblem.addGroup(group1);
 
         assertTrue (lastProblem.canView(group1));
-        assertFalse (lastProblem.canView(null));
+        assertFalse (lastProblem.canView((Group)null));
+        // a null wanted group list means "any group"
+        assertTrue (lastProblem.canView((List<Group>)null));
+        assertTrue (lastProblem.canView(arrayOfGroup1));
+        assertFalse (lastProblem.canView(arrayOfGroup2));
         assertFalse (lastProblem.canView(groups[1]));
 
         lastProblem.clearGroups();

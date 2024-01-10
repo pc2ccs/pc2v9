@@ -1946,7 +1946,7 @@ public class Problem implements IElementObject {
      */
     public boolean canView (Group group){
         boolean view = (groups.size() == 0);
-        if (group != null) {
+        if (!view && group != null) {
             for (Iterator<Group> iterator = groups.iterator(); iterator.hasNext();) {
                 Group g2 = iterator.next();
                 if (group.getDisplayName().equals(g2.getDisplayName())) {
@@ -1965,7 +1965,9 @@ public class Problem implements IElementObject {
      * @return true if any group can see the problem, false otherwise
      */
     public boolean canView(List<Group> wantedGroups) {
-        boolean view = (wantedGroups == null);
+        // If no specific groups are assigned to this problem or we're not interested
+        // in specific groups, then the problem is viewable.
+        boolean view = (groups.size() == 0 || wantedGroups == null);
 
         if(!view) {
             for(Group group : wantedGroups) {
