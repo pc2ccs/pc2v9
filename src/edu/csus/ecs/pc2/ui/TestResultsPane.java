@@ -2196,7 +2196,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         
         if (col == COLUMN.TEAM_OUTPUT_VIEW.ordinal() || col == COLUMN.TEAM_OUTPUT_COMPARE.ordinal()) {
             //get team output file corresponding to test case "row"
-            if (currentTeamOutputFileNames != null || currentTeamOutputFileNames.length >= row) {
+            if (currentTeamOutputFileNames != null && currentTeamOutputFileNames.length >= row) {
                 // get the team output file name, which should be provided by the client as a full path
                 if (currentTeamOutputFileNames[row] == null) {
                     returnFile = null;
@@ -2206,7 +2206,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             }
         } else if (col == COLUMN.TEAM_ERR.ordinal()) {
             //get team output file corresponding to test case "row"
-            if (currentTeamStderrFileNames != null || currentTeamStderrFileNames.length >= row) {
+            if (currentTeamStderrFileNames != null && currentTeamStderrFileNames.length >= row) {
                 // get the team output file name, which should be provided by the client as a full path
                 if (currentTeamStderrFileNames[row] == null) {
                     returnFile = null;
