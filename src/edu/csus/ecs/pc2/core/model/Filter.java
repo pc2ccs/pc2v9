@@ -1,12 +1,17 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
@@ -14,33 +19,33 @@ import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * A filter for runs, clarifications by site, clients, problems, languages.
- * 
+ *
  * Provides a way to determine whether a run, clarification, etc. matches a list of problems, sites, etc. <br>
  * <P>
  * An example of filter to print count of matching the filter.
- * 
+ *
  * <pre>
  * IInternalContest contest;
- * 
+ *
  * Problem problem = contest.getProblems()[0];
- * 
+ *
  * Run[] runs = contest.getRuns();
- * 
+ *
  * Filter filter = new Filter();
  * filter.addProblem(problem);
- * 
+ *
  * System.out.println(&quot;Count of filtered runs : &quot; + filter.countRuns(runs));
  * System.out.println(&quot;Count of all runs      : &quot; + runs.length);
- * 
+ *
  * </pre>
- * 
+ *
  * A newly constructed instance of Filter always returns true for all <code>matches</code> methods. In this way the filter matches, like {@link #matches(Run)}, method can be used/coded
  * unconditionally and match all {@link edu.csus.ecs.pc2.core.model.Run}s, then when a criteria is added (via the Filter <code>add</code> methods) the runs will be filtered/matched appropriately.
  * <P>
- * 
+ *
  * This example shows how to use the filter unconditionally, if there are no criteria in the filter then all Runs will be processed. If there are criteria only runs matching the filter will be
  * processed.
- * 
+ *
  * <pre>
  * for (Run run : runs) {
  *     if (filter.matches(run)) {
@@ -48,7 +53,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
  *     }
  * }
  * </pre>
- * 
+ *
  * Individual classes (no pun) of criteria can be turned on and off via the <code>setUsing<Class></code> methods, for example {@link #setUsingSitesFilter(boolean)}, if set to false, then all site
  * criteria in the filter will be ignored.
  * <P>
@@ -58,19 +63,19 @@ import edu.csus.ecs.pc2.core.security.Permission;
  * There are <code>count</code> methods that can be used to determine how many items match the Filter criteria. To learn the number of matching accounts, one can use the
  * {@link #countAccounts(Account[])} method, there other <code>count</code> methods {@link #countRuns(Run[])} to count {@link edu.csus.ecs.pc2.core.model.Run}s.
  * <P>
- * 
+ *
  * Each criterial class, there are a number of methods to add, remove, clar and turn of the filter for that class.
- * <li> {@link #addSite(Site)} - add a site to the filter and activates site filter 
+ * <li> {@link #addSite(Site)} - add a site to the filter and activates site filter
  * <li> {@link #addSite(int)} - add a site by site number to the filter and activates site filter
  * <li> {@link #clearSiteList()} - clear all site filter and turn off site filter
  * <li> {@link #removeSite(Site)} - remove a site from the filter
  * <li> {@link #setUsingSitesFilter(boolean)}   to determine if site filter is on use {@link #isFilteringSites()}
- * <P> 
- * 
+ * <P>
+ *
  * Here is a list of methods that use the filter on a class:
  * <li>{@link #countRuns(Run[])} - count runs matching this Filter instance.
  * <li>{@link #matches(Run)} - return true if criteria matches the input {@link edu.csus.ecs.pc2.core.model.Run}
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -78,12 +83,17 @@ import edu.csus.ecs.pc2.core.security.Permission;
 // $HeadURL$
 public class Filter implements Serializable {
 
-    // TODO filter for permissions
-
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -8373119928926075959L;
+
+
+    private IInternalContest contest;
+
+    private IInternalController controller;
+
+    private Log log;
 
     /**
      * collection of chosen run states
@@ -120,30 +130,30 @@ public class Filter implements Serializable {
      * filtering on problem (problem id)
      */
     private boolean filteringProblems = false;
-    
+
     /**
-     * collection of problem ids
+     * collection of permission types
      */
     private Hashtable<Permission.Type, Date> permissionsHash = new Hashtable<Permission.Type, Date>();
-    
+
     private boolean filteringPermissions = false;
 
     /**
      * collection of language ids
      */
     private Hashtable<ElementId, Date> languageIdHash = new Hashtable<ElementId, Date>();
-    
+
     /**
      * Collection of site ids.
      */
     private Hashtable<Integer, Date> siteIdHash = new Hashtable<Integer, Date>();
-    
+
 
     /**
      * filtering on language (language id)
      */
     private boolean filteringLanguages = false;
-    
+
     /**
      * filtering on site (site number)
      */
@@ -169,6 +179,10 @@ public class Filter implements Serializable {
 
     private boolean filteringAccounts = false;
 
+    private HashSet<ElementId> groupIdHash = new HashSet<ElementId>();
+
+    private boolean filteringGroups = false;
+
     /**
      * filtering for this site only
      */
@@ -180,6 +194,12 @@ public class Filter implements Serializable {
 
     private boolean filteringDeleted = false;
 
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        this.contest = inContest;
+        this.controller = inController;
+        log = controller.getLog();
+    }
+
     private ElementId getJudgementId(Run run) {
         JudgementRecord judgementRecord = run.getJudgementRecord();
         if (judgementRecord != null) {
@@ -187,10 +207,10 @@ public class Filter implements Serializable {
         }
         return null;
     }
-    
+
     /**
      * Returns true ("matching") if Run matches filter criteria.
-     * 
+     *
      * @param run
      * @return true if the Run maches the filter, false otherwise.
      */
@@ -222,13 +242,13 @@ public class Filter implements Serializable {
 
     /**
      * Match criteria against a clar.
-     * 
+     *
      * @param clarification
      * @return true if the clarifications matches the filter
      */
     public boolean matches(Clarification clarification) {
         if (filterEnabled){
-            return matchesSites(clarification) && matchesAccount(clarification.getSubmitter()) && matchesClarificationState(clarification.getState()) 
+            return matchesSites(clarification) && matchesAccount(clarification.getSubmitter()) && matchesClarificationState(clarification.getState())
             && matchesProblem(clarification.getProblemId()) && matchesLanguage(clarification.getLanguageId()) && matchesElapsedTimeSubmission(clarification);
 
         } else {
@@ -238,7 +258,7 @@ public class Filter implements Serializable {
 
     /**
      * Match criteria against a clientId.
-     * 
+     *
      * @param clientId
      * @return true if the sites match
      */
@@ -281,7 +301,7 @@ public class Filter implements Serializable {
 
     /**
      * Is filtering using judgement list.
-     * 
+     *
      * @return true if filter judgements.
      */
     public boolean isFilteringJudgements() {
@@ -290,7 +310,7 @@ public class Filter implements Serializable {
 
     /**
      * Add a judgement to match against.
-     * 
+     *
      * @param judgement
      */
     public void addJudgement(Judgement judgement) {
@@ -299,9 +319,9 @@ public class Filter implements Serializable {
 
     /**
      * Add a judgement to match against.
-     * 
+     *
      * Also turns filtering on for judgement list.
-     * 
+     *
      * @param elementId
      */
     private void addJudgement(ElementId elementId) {
@@ -311,24 +331,25 @@ public class Filter implements Serializable {
 
     /**
      * Return true if judgement filter ON and matches a judgement in the filter list.
-     * 
+     *
      * @param judgement
      */
     public boolean matches(Judgement judgement) {
         return matchesJudgement(judgement.getElementId());
     }
     /**
-     * 
+     *
      * @param judgement
      * @deprecated use {@link #matches(Judgement)}
      */
+    @Deprecated
     public boolean matchesJudgement(Judgement judgement) {
         return matchesJudgement(judgement.getElementId());
     }
 
     /**
      * Return true if judgement filter ON and matches a judgement in the filter list.
-     * 
+     *
      * @param judgementId
      */
     public boolean matchesJudgement(ElementId judgementId) {
@@ -351,7 +372,7 @@ public class Filter implements Serializable {
 
     /**
      * Is filtering using problem list.
-     * 
+     *
      * @return true if filter problems.
      */
     public boolean isFilteringProblems() {
@@ -360,7 +381,7 @@ public class Filter implements Serializable {
 
     /**
      * Add a problem to match against.
-     * 
+     *
      * @param problem
      */
     public void addProblem(Problem problem) {
@@ -369,19 +390,19 @@ public class Filter implements Serializable {
 
     /**
      * Add a problem to match against.
-     * 
+     *
      * Also turns filtering on for problem list.
-     * 
+     *
      * @param elementId
      */
     private void addProblem(ElementId elementId) {
         problemIdHash.put(elementId, new Date());
         filteringProblems = true;
     }
-    
+
     /**
      * Add a permission type to match against.
-     * 
+     *
      * @param type
      */
     public void addPermission(Permission.Type type) {
@@ -391,31 +412,49 @@ public class Filter implements Serializable {
 
     /**
      * Return true if problem filter ON and matches a problem in the filter list.
-     * 
+     *
      * @param problem
      * @deprecated use {@link #matches(Problem)}
      */
+    @Deprecated
     public boolean matchesProblem(Problem problem) {
         return matches(problem);
     }
-    
+
     public boolean matches(Problem problem) {
         return matchesProblem(problem.getElementId());
     }
 
     /**
      * Return true if problem filter ON and matches a problem in the filter list.
-     * 
+     *
      * @param problemId
      */
     public boolean matchesProblem(ElementId problemId) {
+        boolean match = true;
         if (filteringProblems) {
-            return problemIdHash.containsKey(problemId);
-        } else {
-            return true;
+            match = problemIdHash.containsKey(problemId);
+            if(!match) {
+                return(false);
+            }
         }
+        if(filteringGroups) {
+            if(contest != null) {
+                Problem problem = contest.getProblem(problemId);
+                if(problem != null) {
+                    match = false;
+                    for(ElementId groupElementId : groupIdHash) {
+                       if(problem.canView(contest.getGroup(groupElementId))) {
+                           match = true;
+                           break;
+                       }
+                    }
+                }
+            }
+        }
+        return(match);
     }
-    
+
     public boolean matches(Permission.Type type) {
         if (filteringPermissions) {
             return permissionsHash.containsKey(type);
@@ -423,8 +462,8 @@ public class Filter implements Serializable {
             return true;
         }
     }
-    
- 
+
+
     public void setUsingPermissionFilter (boolean turnOn){
         filteringPermissions = turnOn;
     }
@@ -435,14 +474,14 @@ public class Filter implements Serializable {
 
     /**
      * Turn the sites filter on or off.
-     * 
+     *
      * This does not clear the sites filter information,
      * the {@link #matches(Run)} and other <code>matches</code>
      * methods will ignore the sites criteria.
      * <P>
      * The {@link #addSite(int)} and {@link #addSite(Site)} will
      * effectively invoke a setUsingSitesFilter(true).
-     * 
+     *
      * @param turnOn true means ignore site criteria
      */
     public void setUsingSitesFilter(boolean turnOn) {
@@ -452,19 +491,36 @@ public class Filter implements Serializable {
     public boolean isFilteringSites() {
         return filteringSites;
     }
-    
+
+    /**
+     * Enable or disable the filtering based on groups
+     * @param turnOn
+     */
+    public void setUsingGroupsFilter(boolean turnOn) {
+        filteringGroups = turnOn;
+    }
+
+    /**
+     * Return indicating if filtering on groups is desired
+     *
+     * @return true if filtering by groups, false otherwise
+     */
+    public boolean isFilteringGroups() {
+        return filteringGroups;
+    }
+
     /**
      * Is filtering using permissions list.
-     * 
+     *
      * @return true if filter languages.
      */
     public boolean isFilteringPermissions() {
         return filteringPermissions;
     }
-    
+
     /**
      * Is filtering using language list.
-     * 
+     *
      * @return true if filter languages.
      */
     public boolean isFilteringLanguages() {
@@ -473,7 +529,7 @@ public class Filter implements Serializable {
 
     /**
      * Add a language to match against.
-     * 
+     *
      * @param language
      */
     public void addLanguage(Language language) {
@@ -482,9 +538,9 @@ public class Filter implements Serializable {
 
     /**
      * Add a language to match against.
-     * 
+     *
      * Also turns filtering on for language list.
-     * 
+     *
      * @param elementId
      */
     private void addLanguage(ElementId elementId) {
@@ -494,22 +550,23 @@ public class Filter implements Serializable {
 
     /**
      * Return true if language filter ON and matches a language in the filter list.
-     * 
+     *
      * @param language
      * @deprecated use {@link #matches(Language)}
      */
-    
+
+    @Deprecated
     public boolean matchesLanguage(Language language) {
         return matchesLanguage(language.getElementId());
     }
-    
+
     public boolean matches(Language language) {
         return matchesLanguage(language.getElementId());
     }
 
     /**
      * Return true if language filter ON and matches a language in the filter list.
-     * 
+     *
      * @param languageId
      */
     public boolean matchesLanguage(ElementId languageId) {
@@ -522,7 +579,7 @@ public class Filter implements Serializable {
 
     /**
      * Add a site to match against.
-     * 
+     *
      * @param site
      */
     public void addSite(Site site) {
@@ -531,16 +588,16 @@ public class Filter implements Serializable {
 
     /**
      * Add a site to match against.
-     * 
+     *
      * Also turns filtering on for site list.
-     * 
+     *
      * @param siteNumber
      */
     public void addSite(int siteNumber) {
         siteIdHash.put(new Integer(siteNumber), new Date());
         filteringSites = true;
     }
-    
+
     /**
      * Returns true if submission matches sites filter.
      * @param submission a run or clarification
@@ -561,41 +618,102 @@ public class Filter implements Serializable {
 
     /**
      * Return true if site filter ON and matches a site in the filter list.
-     * 
+     *
      * @param site
      * @deprecated use {@link #matches(Site)}
      */
+    @Deprecated
     public boolean matchesSite(Site site) {
         return matches(site);
     }
-    
+
     public boolean matches(Site site) {
         return matchesSites(site.getSiteNumber());
     }
 
     /**
-     * 
+     * Add a group to match against.
+     *
+     * Also turns filtering on for groups hashset.
+     *
+     * @param group the group to add to the filter
+     */
+    public void addGroup(Group group) {
+        if(group != null) {
+            addGroup(group.getElementId());
+        }
+    }
+
+    /**
+     * Add a group element to match against.
+     *
+     * Also turns filtering on for groups hashset.
+     *
+     * @param groupElementId
+     */
+    public void addGroup(ElementId groupElementId) {
+        groupIdHash.add(groupElementId);
+        filteringGroups = true;
+    }
+
+    private boolean matchesGroups(ElementId groupElementId) {
+        if(filteringGroups) {
+            return groupIdHash.contains(groupElementId);
+        }
+        return(true);
+    }
+
+    /**
+     * Determine if any groups in the supplied set are groups in the filter.
+     *
+     * @param groups to check
+     * @return true if there is any group in groups that's allowed by the filter, false otherwise
+     */
+    public boolean matches(Collection<ElementId> groups) {
+        if(filteringGroups && groups != null) {
+            return !Collections.disjoint(groups, groupIdHash);
+        }
+        return(true);
+    }
+
+    /**
+     * Determine if the supplied group is allowed by the filter
+     *
+     * @param group
+     * @return true if the group is allowed, false otherwise
+     */
+    public boolean matches(Group group) {
+        return matchesGroups(group.getElementId());
+    }
+
+    /**
+     *
      * @param account
      * @return
      * @deprecated use {@link #matches(Account)}
      */
+    @Deprecated
     public boolean matchesAccount(Account account) {
         return matches(account);
     }
-    
-    
+
+
     public boolean matches(Account account) {
-        
+
         ClientId clientId = account.getClientId();
-        
+
         if (! matchesSites(clientId.getSiteNumber())) {
             return false;
         }
-        
+
+        if (! matches(account.getGroupIds())) {
+            return false;
+        }
+
         if (! matchesPermission(account)) {
             return false;
         }
-        
+
         if (filteringAccounts) {
             if (matches(clientId)) {
                 return matches(clientId.getClientType());
@@ -605,13 +723,13 @@ public class Filter implements Serializable {
             return true;
         }
     }
-    
+
     public Permission.Type[] getPermissionsList() {
         Permission.Type[] permList = new Permission.Type[permissionsHash.size()];
         Enumeration<Permission.Type> enumeration = permissionsHash.keys();
         int i = 0;
         while (enumeration.hasMoreElements()) {
-            Permission.Type element = (Permission.Type) enumeration.nextElement();
+            Permission.Type element = enumeration.nextElement();
             permList[i] = element;
             i++;
         }
@@ -619,12 +737,12 @@ public class Filter implements Serializable {
     }
 
     private boolean matchesPermission(Account account) {
-        
+
         if (filteringPermissions) {
 
             Enumeration<Permission.Type> enumeration = permissionsHash.keys();
             while (enumeration.hasMoreElements()) {
-                Permission.Type type = (Permission.Type) enumeration.nextElement();
+                Permission.Type type = enumeration.nextElement();
                 if (!account.isAllowed(type)) {
                     return false;
                 }
@@ -656,28 +774,32 @@ public class Filter implements Serializable {
 
     /**
      * Client Id matches both account filter and sites filter.
-     * 
+     *
      * @param clientId
      * @return true if matches filter criteria
      */
     public boolean matchesAccount(ClientId clientId) {
+        if(!matchesSites(clientId)) {
+            return false;
+        }
         if (filteringAccounts) {
             // System.out.println(new FilterFormatter().getClientsShortList(getAccountList()));
-            
-            if (matchesSites(clientId)) {
-                if (clientIdHash.size() == 0) {
-                    return true;
-                } else {
-                    return clientIdHash.containsKey(clientId);
-                }
-            } else {
+
+            if (clientIdHash.size() != 0 && !clientIdHash.containsKey(clientId)) {
                 return false;
             }
-        } else {
-            return matchesSites(clientId);
         }
+        if(filteringGroups) {
+            if(contest != null) {
+                Account account = contest.getAccount(clientId);
+                if(account != null && !matches(account.getGroupIds())) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
-    
+
     /**
      * Clear judgements and turn judgement filtering off.
      *
@@ -697,7 +819,7 @@ public class Filter implements Serializable {
         filteringAccounts = false;
         clientIdHash = new Hashtable<ClientId, Date>();
     }
-    
+
     public void clearClientTypesList() {
         clientTypeHash = new Hashtable<ClientType.Type, Date>();
     }
@@ -710,11 +832,11 @@ public class Filter implements Serializable {
         filteringProblems = false;
         problemIdHash = new Hashtable<ElementId, Date>();
     }
-    
+
     public void clearPermissionsList() {
         permissionsHash = new Hashtable<Permission.Type, Date>();
     }
-    
+
     /**
      * Clear language and turn language filtering off.
      *
@@ -723,7 +845,7 @@ public class Filter implements Serializable {
         filteringLanguages = false;
         languageIdHash = new Hashtable<ElementId, Date>();
     }
-    
+
     /**
      * Clear site and turn site filtering off.
      *
@@ -734,13 +856,21 @@ public class Filter implements Serializable {
     }
 
     /**
+     * Clear groups filter and turn of group filtering
+     */
+    public void clearGroupsList() {
+        filteringGroups = false;
+        groupIdHash.clear();
+    }
+
+    /**
      * Remove the input site from the site filter.
      * @param site
      */
     public void removeSite(Site site) {
         if (siteIdHash.containsKey(site.getSiteNumber())) {
             siteIdHash.remove(site.getSiteNumber());
-            // TODO add setUsingSitesFilter(false); 
+            // TODO add setUsingSitesFilter(false);
         }
     }
 
@@ -751,10 +881,10 @@ public class Filter implements Serializable {
     public void removeProblem(Problem problem) {
         if (problemIdHash.containsKey(problem.getElementId())) {
             problemIdHash.remove(problem.getElementId());
-            // TODO add setUsingProblemFilter(false); 
+            // TODO add setUsingProblemFilter(false);
         }
     }
-    
+
     /**
      * Remove permission from the permission filter.
      * @param permission
@@ -764,10 +894,10 @@ public class Filter implements Serializable {
             permissionsHash.remove(type);
         }
     }
-    
+
     /**
      * Remove language from the language filter.
-     * 
+     *
      * @param language
      */
     public void removeLanguage(Language language) {
@@ -776,10 +906,16 @@ public class Filter implements Serializable {
         }
     }
 
-   
+    public void removeGroup(Group group) {
+        groupIdHash.remove(group.getElementId());
+        if(filteringGroups && groupIdHash.isEmpty()) {
+            filteringGroups = false;
+        }
+    }
+
     /**
      * Get list of ElementIds for the judgement in the filter list.
-     * 
+     *
      * @return list of element ids.
      */
     public ElementId[] getJudgementIdList() {
@@ -787,17 +923,17 @@ public class Filter implements Serializable {
         Enumeration<ElementId> enumeration = judgementIdHash.keys();
         int i = 0;
         while (enumeration.hasMoreElements()) {
-            ElementId element = (ElementId) enumeration.nextElement();
+            ElementId element = enumeration.nextElement();
             elementIds[i] = element;
             i++;
         }
         return elementIds;
     }
-   
+
 
     /**
      * Get list of ElementIds for the problems in the filter list.
-     * 
+     *
      * @return list of element ids.
      */
     public ElementId[] getProblemIdList() {
@@ -805,16 +941,16 @@ public class Filter implements Serializable {
         Enumeration<ElementId> enumeration = problemIdHash.keys();
         int i = 0;
         while (enumeration.hasMoreElements()) {
-            ElementId element = (ElementId) enumeration.nextElement();
+            ElementId element = enumeration.nextElement();
             elementIds[i] = element;
             i++;
         }
         return elementIds;
     }
-    
+
     /**
      * Get list of ElementIds for the languages in the filter list.
-     * 
+     *
      * @return list of element ids.
      */
     public ElementId[] getLanguageIdList() {
@@ -822,7 +958,7 @@ public class Filter implements Serializable {
         Enumeration<ElementId> enumeration = languageIdHash.keys();
         int i = 0;
         while (enumeration.hasMoreElements()) {
-            ElementId element = (ElementId) enumeration.nextElement();
+            ElementId element = enumeration.nextElement();
             elementIds[i] = element;
             i++;
         }
@@ -831,7 +967,7 @@ public class Filter implements Serializable {
 
     /**
      * Get list of ElementIds for the sites in the filter list.
-     * 
+     *
      * @return list of element ids.
      */
     public Integer[] getSiteIdList() {
@@ -839,16 +975,16 @@ public class Filter implements Serializable {
         Enumeration<Integer> enumeration = siteIdHash.keys();
         int i = 0;
         while (enumeration.hasMoreElements()) {
-            Integer element = (Integer) enumeration.nextElement();
+            Integer element = enumeration.nextElement();
             elementIds[i] = element;
             i++;
         }
         return elementIds;
     }
-    
+
     /**
      * Get list of ClientIds for the accounts in the filter list.
-     * 
+     *
      * @return list of ClientId.
      */
     public ClientId[] getAccountList() {
@@ -856,16 +992,16 @@ public class Filter implements Serializable {
         Enumeration<ClientId> enumeration = clientIdHash.keys();
         int i = 0;
         while (enumeration.hasMoreElements()) {
-            ClientId element = (ClientId) enumeration.nextElement();
+            ClientId element = enumeration.nextElement();
             clientIds[i] = element;
             i++;
         }
         return clientIds;
     }
-    
+
     /**
      * Get list of Types in filter.
-     * 
+     *
      * @return
      */
     public ClientType.Type[] getClientTypes() {
@@ -873,14 +1009,30 @@ public class Filter implements Serializable {
         Enumeration<ClientType.Type> enumeration = clientTypeHash.keys();
         int i = 0;
         while (enumeration.hasMoreElements()) {
-            ClientType.Type value = (ClientType.Type) enumeration.nextElement();
+            ClientType.Type value = enumeration.nextElement();
             types[i] = value;
             i++;
         }
         return types;
-        
+
     }
-    
+
+
+    /**
+     * Get list of ElementIds for the groups in the filter list.
+     *
+     * @return list of element ids.
+     */
+    public ElementId [] getGroupIdList() {
+        ElementId [] elementIds = new ElementId[groupIdHash.size()];
+        int i = 0;
+        for(ElementId groupElementId : groupIdHash) {
+            elementIds[i] = groupElementId;
+            i++;
+        }
+        return elementIds;
+    }
+
     public void setUsingRunStatesFilter(boolean turnOn) {
         filteringRunStates = turnOn;
     }
@@ -888,7 +1040,7 @@ public class Filter implements Serializable {
     public boolean isFilteringRunStates() {
         return filteringRunStates;
     }
-    
+
     /**
      * Add an account to filter with.
      * @param account
@@ -939,11 +1091,12 @@ public class Filter implements Serializable {
     }
 
     /**
-     * 
+     *
      * @param runStates
      * @return
      * @deprecated use {@link #matches(RunStates)}
      */
+    @Deprecated
     public boolean matchesRunState(RunStates runStates) {
         return matches(runStates);
     }
@@ -956,7 +1109,7 @@ public class Filter implements Serializable {
         }
     }
 
-    
+
     public boolean matchesElapsedTime(Run run) {
         return matchesElapsedTimeSubmission(run);
     }
@@ -969,7 +1122,7 @@ public class Filter implements Serializable {
         long elapsedTime = submission.getElapsedMins();
         return matchesElapsedTime(elapsedTime);
     }
-    
+
     protected boolean matchesElapsedTime(long elapsedTimeMinutes) {
         if (filteringElapsedTime) {
             if (startElapsedTimeMinutes != -1) {
@@ -1013,7 +1166,7 @@ public class Filter implements Serializable {
         Enumeration<ClarificationStates> enumeration = clarificationStateHash.keys();
         int i = 0;
         while (enumeration.hasMoreElements()) {
-            clarificationStates[i] = (ClarificationStates) enumeration.nextElement();
+            clarificationStates[i] = enumeration.nextElement();
             i++;
         }
         return clarificationStates;
@@ -1024,17 +1177,18 @@ public class Filter implements Serializable {
         Enumeration<RunStates> enumeration = runStateHash.keys();
         int i = 0;
         while (enumeration.hasMoreElements()) {
-            runStates[i] = (RunStates) enumeration.nextElement();
+            runStates[i] = enumeration.nextElement();
             i++;
         }
         return runStates;
     }
     /**
-     * 
+     *
      * @param clarificationStates
      * @return
      * @deprecated use {@link #matches(ClarificationStates)}
      */
+    @Deprecated
     public boolean matchesClarificationState(ClarificationStates clarificationStates) {
         return matches(clarificationStates);
     }
@@ -1056,12 +1210,13 @@ public class Filter implements Serializable {
         clarificationStateHash = new Hashtable<ClarificationStates, Date>();
     }
 
+    @Override
     public String toString() {
 
         if (filterEnabled) {
-            
+
             String filterInfo = "Filter ON";
-            
+
             if (thisSiteOnly || filteringSites) {
                 filterInfo += " Site(s) ";
             }
@@ -1081,10 +1236,13 @@ public class Filter implements Serializable {
                 filterInfo += " clar state(s)";
             }
             if (filteringAccounts) {
-                filterInfo += " account(s))";
+                filterInfo += " account(s)";
             }
             if (filteringPermissions) {
-                filterInfo += " permissions(s))";
+                filterInfo += " permissions(s)";
+            }
+            if (filteringGroups) {
+                filterInfo += " groups(s)";
             }
 
             return filterInfo;
@@ -1146,22 +1304,23 @@ public class Filter implements Serializable {
     public void setFilter (boolean filterOn){
         filterEnabled = filterOn;
     }
-    
+
     public void setFilterOn () {
         filterEnabled = true;
     }
 
     /**
      * Is one of the filters active?.
-     * 
+     *
      * @return true if filter is on, false if not filtering.
      */
     public boolean isFilterOn() {
         if (filterEnabled) {
-            return filteringSites || filteringAccounts || filteringClarificationStates || filteringProblems 
+            return filteringSites || filteringAccounts || filteringClarificationStates || filteringProblems
                 || filteringJudgements || filteringLanguages || filteringElapsedTime || filteringRunStates
                 || filteringPermissions
-                || thisSiteOnly;
+                || thisSiteOnly
+                || filteringGroups;
         } else {
             return false;
         }
@@ -1179,10 +1338,10 @@ public class Filter implements Serializable {
         endElapsedTimeMinutes = -1;
         filteringElapsedTime = false;
     }
-    
+
     /**
      * Count the runs that match this filter.
-     * 
+     *
      * @param runs - list of runs
      * @return number of runs that match this filter.
      */
@@ -1210,7 +1369,7 @@ public class Filter implements Serializable {
         }
         return count;
     }
-    
+
     /**
      * Count the accounts that match this filter.
      * @param accounts
@@ -1225,7 +1384,7 @@ public class Filter implements Serializable {
         }
         return count;
     }
-    
+
     /**
      * Count the ClientIds that match this filter.
      * @param clientIds
@@ -1240,10 +1399,10 @@ public class Filter implements Serializable {
         }
         return count;
     }
-    
+
     /**
      * Returns list of runs for current filter.
-     * 
+     *
      * @param runs
      * @return list of runs which match this filter.
      */
@@ -1257,12 +1416,12 @@ public class Filter implements Serializable {
             }
         }
 
-        return (Run[]) listOfRuns.toArray(new Run[listOfRuns.size()]);
+        return listOfRuns.toArray(new Run[listOfRuns.size()]);
     }
 
     /**
      * Returns list of clarifications for current filter.
-     * 
+     *
      * @param clarifications
      * @return list of clarifications which match this filter.
      */
@@ -1276,7 +1435,7 @@ public class Filter implements Serializable {
             }
         }
 
-        return (Clarification[]) list.toArray(new Clarification[list.size()]);
+        return list.toArray(new Clarification[list.size()]);
     }
 
     public boolean matchesElapsedTime(RunTestCase runTestCaseResult) {
@@ -1286,7 +1445,7 @@ public class Filter implements Serializable {
 
     public void setFilteringDeleted(boolean b) {
         filteringDeleted = b;
-        
+
     }
 
 }

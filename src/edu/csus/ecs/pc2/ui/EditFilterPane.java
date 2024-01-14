@@ -19,6 +19,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.list.PermissionByDescriptionComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -30,8 +31,10 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.DisplayTeamName;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FilterFormatter;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -43,7 +46,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Edit Filter GUI.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -52,7 +55,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 public class EditFilterPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1866852944568248601L;
 
@@ -66,6 +69,8 @@ public class EditFilterPane extends JPanePlugin {
 
     private JPanel teamsPane = null;  //  @jve:decl-index=0:visual-constraint="589,115"
 
+    private JPanel groupsPane = null;  //  @jve:decl-index=0:visual-constraint="589,115"
+
     private JPanel judgementsPane = null;  //  @jve:decl-index=0:visual-constraint="349,385"
 
     private JPanel listsPanel = null;
@@ -75,6 +80,8 @@ public class EditFilterPane extends JPanePlugin {
     private JScrollPane judgementsScroll = null;
 
     private JScrollPane teamsScroll = null;
+
+    private JScrollPane groupsScroll = null;
 
     private JScrollPane problemsScroll = null;
 
@@ -87,6 +94,10 @@ public class EditFilterPane extends JPanePlugin {
     private JCheckBoxJList teamListBox = null;
 
     private DefaultListModel<WrapperJCheckBox> teamListModel = new DefaultListModel<WrapperJCheckBox>();
+
+    private JCheckBoxJList groupListBox = null;
+
+    private DefaultListModel<WrapperJCheckBox> groupListModel = new DefaultListModel<WrapperJCheckBox>();
 
     private JCheckBoxJList problemsListBox = null;
 
@@ -105,13 +116,13 @@ public class EditFilterPane extends JPanePlugin {
     private JCheckBoxJList runStatesListBox = null;
 
     private DefaultListModel<WrapperJCheckBox> runStatesListModel = new DefaultListModel<WrapperJCheckBox>();
-    
+
     private DefaultListModel<WrapperJCheckBox> clarificationStatesListModel = new DefaultListModel<WrapperJCheckBox>();
 
     private DefaultListModel<WrapperJCheckBox> sitesListModel = new DefaultListModel<WrapperJCheckBox>();
 
     private DefaultListModel<WrapperJCheckBox> permissionsListModel = new DefaultListModel<WrapperJCheckBox>();
-    
+
     private JPanel timeRangePane = null;
 
     private JLabel fromTimeLabel = null;
@@ -121,11 +132,11 @@ public class EditFilterPane extends JPanePlugin {
     private JLabel toTimeLabel = null;
 
     private JTextField toTimeTextField = null;
-    
+
     private DisplayTeamName displayTeamName = null;  //  @jve:decl-index=0:
 
     private boolean isJudgeModule = false;
-    
+
     private boolean filteringClarifications = false;
 
     private JPanel clarificationStatesPane = null;  //  @jve:decl-index=0:visual-constraint="642,361"
@@ -136,37 +147,37 @@ public class EditFilterPane extends JPanePlugin {
 
     private JPanel sitesPane = null;  //  @jve:decl-index=0:visual-constraint="649,76"
 
-    private JPanel permissionsPane = null;  
+    private JPanel permissionsPane = null;
 
     private JScrollPane sitesScroll = null;
-    
+
     private JScrollPane permissionScroll = null;
 
     private JCheckBoxJList siteListBox = null;
-    
+
     private JCheckBoxJList permissionListBox = null;
-    
+
     private JPanel accountsPane = null;
 
     private DefaultListModel<WrapperJCheckBox> accountListModel = new DefaultListModel<WrapperJCheckBox>();
 
     private JCheckBoxJList accountListBox = null;
-    
+
     private JScrollPane accountScroll = null;
 
     private JPanel clientTypePane = null;
 
     private JScrollPane clientTypeScroll = null;
-    
+
     private DefaultListModel<WrapperJCheckBox> clientTypeListModel = new DefaultListModel<WrapperJCheckBox>();
 
     private JCheckBoxJList clientTypesListBox;  //  @jve:decl-index=0:
 
     private Permission permission = new Permission();
-    
+
     /**
      * JList names in EditFilterPane.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -191,17 +202,23 @@ public class EditFilterPane extends JPanePlugin {
         /**
          * Clarification States JList.
          */
-        CLARIFICATION_STATES,        
+        CLARIFICATION_STATES,
         /**
          * Accounts JList.
          */
         ALL_ACCOUNTS,
         /**
-         * 
+         *
          */
         TEAM_ACCOUNTS,
+
         /**
-         * Elapsed Time (both From and To) 
+         *
+         */
+        GROUPS,
+
+        /**
+         * Elapsed Time (both From and To)
          */
         TIME_RANGE,
         /**
@@ -209,11 +226,11 @@ public class EditFilterPane extends JPanePlugin {
          */
         SITES,
         /**
-         * 
+         *
          */
         PERMISSIONS,
         /**
-         * 
+         *
          */
         CLIENT_TYPES,
     }
@@ -236,7 +253,7 @@ public class EditFilterPane extends JPanePlugin {
         this.setSize(new java.awt.Dimension(493, 337));
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
     }
-    
+
     @Override
     public String getPluginTitle() {
         return "Edit Filter";
@@ -244,7 +261,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes filterOnCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getFilterOnCheckBox() {
@@ -258,7 +275,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes problemFrame
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getProblemsPane() {
@@ -275,7 +292,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes bottomPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getBottomPanel() {
@@ -288,7 +305,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes languagePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getLanguagesPane() {
@@ -305,7 +322,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes teamFrame
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getTeamsPane() {
@@ -319,10 +336,27 @@ public class EditFilterPane extends JPanePlugin {
         }
         return teamsPane;
     }
-    
+
     /**
      * This method initializes teamFrame
-     * 
+     *
+     * @return javax.swing.JPanel
+     */
+    private JPanel getGroupsPane() {
+        if (groupsPane == null) {
+            groupsPane = new JPanel();
+            groupsPane.setLayout(new BorderLayout());
+            groupsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Groups", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION,
+                    null, null));
+            groupsPane.setName("groupFrame");
+            groupsPane.add(getGroupsScroll(), java.awt.BorderLayout.CENTER);
+        }
+        return groupsPane;
+    }
+
+    /**
+     * This method initializes teamFrame
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getAccountsPane() {
@@ -339,7 +373,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes judgementFrame
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getJudgementsPane() {
@@ -356,7 +390,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes otherPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getListsPanel() {
@@ -365,7 +399,7 @@ public class EditFilterPane extends JPanePlugin {
             gridLayout.setRows(1);
             listsPanel = new JPanel();
             listsPanel.setLayout(gridLayout);
-            
+
             // TODO remove this
 //            listsPanel.add(getTimeRangePane(), null);
         }
@@ -374,7 +408,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes mainPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMainPane() {
@@ -389,7 +423,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes judgementsScroll
-     * 
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getJudgementsScroll() {
@@ -402,7 +436,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes teamsScroll
-     * 
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getTeamsScroll() {
@@ -414,8 +448,21 @@ public class EditFilterPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes teamsScroll
-     * 
+     * This method initializes groupsScroll
+     *
+     * @return javax.swing.JScrollPane
+     */
+    private JScrollPane getGroupsScroll() {
+        if (groupsScroll == null) {
+            groupsScroll = new JScrollPane();
+            groupsScroll.setViewportView(getGroupListBox());
+        }
+        return groupsScroll;
+    }
+
+    /**
+     * This method initializes accountsScroll
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getAccountScroll() {
@@ -427,7 +474,7 @@ public class EditFilterPane extends JPanePlugin {
     }
     /**
      * This method initializes problemsScroll
-     * 
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getProblemsScroll() {
@@ -440,7 +487,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes languagesScroll
-     * 
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getLanguagesScroll() {
@@ -453,7 +500,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes judgementListBox
-     * 
+     *
      * @return javax.swing.JList
      */
     private JCheckBoxJList getJudgementListBox() {
@@ -465,7 +512,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes teamListBox
-     * 
+     *
      * @return javax.swing.JTextArea
      */
     private JCheckBoxJList getTeamListBox() {
@@ -474,10 +521,22 @@ public class EditFilterPane extends JPanePlugin {
         }
         return teamListBox;
     }
-    
+
+    /**
+     * This method initializes groupListBox
+     *
+     * @return javax.swing.JTextArea
+     */
+    private JCheckBoxJList getGroupListBox() {
+        if (groupListBox == null) {
+            groupListBox = new JCheckBoxJList(groupListModel);
+        }
+        return groupListBox;
+    }
+
     /**
      * This method initializes teamListBox
-     * 
+     *
      * @return javax.swing.JTextArea
      */
     private JCheckBoxJList getAccountListBox() {
@@ -486,11 +545,11 @@ public class EditFilterPane extends JPanePlugin {
         }
         return accountListBox;
     }
-    
+
 
     /**
      * This method initializes problemsListBox
-     * 
+     *
      * @return javax.swing.JList
      */
     private JCheckBoxJList getProblemsListBox() {
@@ -502,7 +561,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes languagesListBox
-     * 
+     *
      * @return javax.swing.JList
      */
     private JCheckBoxJList getLanguagesListBox() {
@@ -514,7 +573,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * Populate the values for all JLists.
-     * 
+     *
      */
     public void populateFields() {
 
@@ -530,10 +589,10 @@ public class EditFilterPane extends JPanePlugin {
                     wrapperJCheckBox.setSelected(filter.matches(category));
                 }
                 problemListModel.addElement(wrapperJCheckBox);
-                
+
             }
         }
-        
+
         for (Problem problem : getContest().getProblems()) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(problem);
             if (filter.isFilteringProblems()) {
@@ -550,7 +609,7 @@ public class EditFilterPane extends JPanePlugin {
             }
             languageListModel.addElement(wrapperJCheckBox);
         }
-        
+
         sitesListModel.removeAllElements();
         Site [] sites = getContest().getSites();
         Arrays.sort (sites, new SiteComparatorBySiteNumber());
@@ -561,8 +620,8 @@ public class EditFilterPane extends JPanePlugin {
             }
             sitesListModel.addElement(wrapperJCheckBox);
         }
-        
-        
+
+
         permissionsListModel.removeAllElements();
         Permission.Type[] types = Permission.Type.values();
         Arrays.sort(types, new PermissionByDescriptionComparator());
@@ -573,7 +632,7 @@ public class EditFilterPane extends JPanePlugin {
             }
             permissionsListModel.addElement(wrapperJCheckBox);
         }
-        
+
         clientTypeListModel.removeAllElements();
         for (Type type : Type.values()) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(type);
@@ -591,11 +650,13 @@ public class EditFilterPane extends JPanePlugin {
             }
             judgementListModel.addElement(wrapperJCheckBox);
         }
-        
+
         loadTeamNames (filter);
-        
+
+        loadGroupNames (filter);
+
         loadAccountNames(filter);
-        
+
         runStatesListModel.removeAllElements();
         RunStates[] runStates = RunStates.values();
         for (RunStates runState : runStates) {
@@ -615,7 +676,7 @@ public class EditFilterPane extends JPanePlugin {
             }
             clarificationStatesListModel.addElement(wrapperJCheckBox);
         }
-        
+
         getFromTimeTextField().setText("");
         getToTimeTextField().setText("");
         if (filter.isFilteringElapsedTime()) {
@@ -627,16 +688,16 @@ public class EditFilterPane extends JPanePlugin {
             }
         }
     }
-    
+
     /**
      * Populate the team names when with display mask.
-     * 
+     *
      * This method also retains and re-populates the teams selected
      * not based on the input filter, but based on what the user has
      * selected.
      */
     protected void populateTeamNamesWithDisplayMask(){
-        
+
         if (isJudgeModule) {
             ContestInformation contestInformation = getContest().getContestInformation();
 
@@ -668,7 +729,7 @@ public class EditFilterPane extends JPanePlugin {
 
     private void loadTeamNames(Filter inFilter) {
         Vector<Account> vector = getContest().getAccounts(ClientType.Type.TEAM);
-        Account[] accounts = (Account[]) vector.toArray(new Account[vector.size()]);
+        Account[] accounts = vector.toArray(new Account[vector.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         teamListModel.removeAllElements();
@@ -683,6 +744,22 @@ public class EditFilterPane extends JPanePlugin {
                 wrapperJCheckBox.setSelected(inFilter.matches(account));
             }
             teamListModel.addElement(wrapperJCheckBox);
+        }
+    }
+
+    private void loadGroupNames(Filter inFilter) {
+        Group [] groups = getContest().getGroups();
+        Arrays.sort(groups, new GroupComparator());
+
+        groupListModel.removeAllElements();
+        WrapperJCheckBox wrapperJCheckBox = null;
+        for (Group group : groups) {
+            ElementId groupElementId = group.getElementId();
+            wrapperJCheckBox = new WrapperJCheckBox(groupElementId, group.getDisplayName());
+            if (inFilter.isFilteringGroups()) {
+                wrapperJCheckBox.setSelected(inFilter.matches(group));
+            }
+            groupListModel.addElement(wrapperJCheckBox);
         }
     }
 
@@ -707,17 +784,18 @@ public class EditFilterPane extends JPanePlugin {
     }
 
 
-    
+
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
 
         super.setContestAndController(inContest, inController);
-        
+
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
 
         isJudgeModule = getContest().getClientId().getClientType().equals(Type.JUDGE);
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 populateFields();
             }
@@ -759,7 +837,7 @@ public class EditFilterPane extends JPanePlugin {
                 filter.addAccount((ClientId) object);
             }
         }
-        
+
         enumeration = accountListModel.elements();
         while (enumeration.hasMoreElements()) {
             WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
@@ -768,7 +846,7 @@ public class EditFilterPane extends JPanePlugin {
                 filter.addAccount((ClientId) object);
             }
         }
-        
+
 
         filter.clearRunStatesList();
         enumeration = runStatesListModel.elements();
@@ -789,7 +867,7 @@ public class EditFilterPane extends JPanePlugin {
                 filter.addClarificationState((ClarificationStates) object);
             }
         }
-        
+
         filter.clearJudgementList();
         enumeration = judgementListModel.elements();
         while (enumeration.hasMoreElements()) {
@@ -799,7 +877,7 @@ public class EditFilterPane extends JPanePlugin {
                 filter.addJudgement((Judgement) object);
             }
         }
-        
+
         filter.clearSiteList();
         enumeration = sitesListModel.elements();
         while (enumeration.hasMoreElements()) {
@@ -809,7 +887,7 @@ public class EditFilterPane extends JPanePlugin {
                 filter.addSite((Site) object);
             }
         }
-        
+
         filter.clearPermissionsList();
         enumeration = permissionsListModel.elements();
         while (enumeration.hasMoreElements()) {
@@ -819,7 +897,18 @@ public class EditFilterPane extends JPanePlugin {
                 filter.addPermission((Permission.Type) object);
             }
         }
-        
+
+        filter.clearGroupsList();
+        enumeration = groupListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addGroup((ElementId)object);
+            }
+        }
+
+
         filter.clearClientTypesList();
         enumeration = clientTypeListModel.elements();
         while (enumeration.hasMoreElements()) {
@@ -834,22 +923,23 @@ public class EditFilterPane extends JPanePlugin {
         if (getFromTimeTextField().getText().length() > 0){
             filter.setStartElapsedTime(Long.parseLong(getFromTimeTextField().getText()));
         }
-        
+
         if (getToTimeTextField().getText().length() > 0){
             filter.setEndElapsedTime(Long.parseLong(getToTimeTextField().getText()));
         }
-        
+
         return filter;
     }
 
     /**
      * Assigns filter and repopulates fields.
-     * 
+     *
      * @param filter
      */
     public void setFilter(Filter filter) {
         this.filter = filter;
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 populateFields();
             }
@@ -861,7 +951,7 @@ public class EditFilterPane extends JPanePlugin {
                 FilterFormatter.NUMBER_JUDGEMENTS_SPECIFIER, FilterFormatter.NUMBER_LANGUAGES_SPECIFIER, FilterFormatter.NUMBER_PROBLEMS_SPECIFIER, FilterFormatter.PROBLEMS_SPECIFIER,
                 FilterFormatter.SHORT_ACCOUNT_NAMES_SPECIFIER, FilterFormatter.TEAM_LIST_SPECIFIER, FilterFormatter.TEAM_LONG_LIST_SPECIFIER, FilterFormatter.START_TIME_RANGE_SPECIFIER,
                 FilterFormatter.END_TIME_RANGE_SPECIFIER };
-        
+
         Arrays.sort(names);
 
         FilterFormatter filterFormatter = new FilterFormatter();
@@ -873,7 +963,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes jScrollPane
-     * 
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getJScrollPane() {
@@ -886,7 +976,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes runStatesPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getRunStatesPane() {
@@ -902,7 +992,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes runStatesListBox
-     * 
+     *
      * @return edu.csus.ecs.pc2.ui.JCheckBoxJList
      */
     private JCheckBoxJList getRunStatesListBox() {
@@ -911,10 +1001,10 @@ public class EditFilterPane extends JPanePlugin {
         }
         return runStatesListBox;
     }
-    
+
     /**
      * Add a list to the criteria.
-     * 
+     *
      * @param listName
      */
     public void addList (ListNames listName){
@@ -924,6 +1014,9 @@ public class EditFilterPane extends JPanePlugin {
                 break;
             case TEAM_ACCOUNTS:
                 listsPanel.add(getTeamsPane(), 0);
+                break;
+            case GROUPS:
+                listsPanel.add(getGroupsPane(), 0);
                 break;
             case LANGUAGES:
               listsPanel.add(getLanguagesPane(), 0);
@@ -959,7 +1052,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes timeRangePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getTimeRangePane() {
@@ -981,7 +1074,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes fromTimeTextField
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getFromTimeTextField() {
@@ -995,7 +1088,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes toTimeTextField
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getToTimeTextField() {
@@ -1014,35 +1107,40 @@ public class EditFilterPane extends JPanePlugin {
     public void setDisplayTeamName(DisplayTeamName displayTeamName) {
         this.displayTeamName = displayTeamName;
     }
-    
+
     /**
      * Contest Listener for Edit Filter Pane.
-     * 
-     * This listens for changes in the way the team display is to 
+     *
+     * This listens for changes in the way the team display is to
      * displayed aka the  Team Information Displayed to Judges setting
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
 
     public class ContestInformationListenerImplementation implements IContestInformationListener {
 
+        @Override
         public void contestInformationAdded(ContestInformationEvent event) {
             populateTeamNamesWithDisplayMask();
         }
 
+        @Override
         public void contestInformationChanged(ContestInformationEvent event) {
             populateTeamNamesWithDisplayMask();
         }
 
+        @Override
         public void contestInformationRemoved(ContestInformationEvent event) {
             populateTeamNamesWithDisplayMask();
         }
 
+        @Override
         public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
             populateTeamNamesWithDisplayMask();
         }
 
+        @Override
         public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
             // Not used
         }
@@ -1050,7 +1148,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes clarificationsPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getClarificationStatesPane() {
@@ -1067,7 +1165,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes clarificationStateScrollPane
-     * 
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getClarificationStateScrollPane() {
@@ -1080,7 +1178,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes clarificationStatesListBox
-     * 
+     *
      * @return javax.swing.JList
      */
     private JList<?> getClarificationStatesListBox() {
@@ -1100,7 +1198,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes jPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getSitesPane() {
@@ -1115,8 +1213,8 @@ public class EditFilterPane extends JPanePlugin {
         }
         return sitesPane;
     }
-    
-    
+
+
     public JPanel getClientTypePane() {
         if (clientTypePane == null) {
             clientTypePane = new JPanel();
@@ -1146,8 +1244,8 @@ public class EditFilterPane extends JPanePlugin {
         return clientTypesListBox;
     }
 
-    
-    
+
+
     public JPanel getPermissionsPane() {
         if (permissionsPane == null) {
             permissionsPane = new JPanel();
@@ -1161,7 +1259,7 @@ public class EditFilterPane extends JPanePlugin {
 
         return permissionsPane;
     }
-    
+
     /**
      * @return javax.swing.JScrollPane
      */
@@ -1172,10 +1270,10 @@ public class EditFilterPane extends JPanePlugin {
         }
         return permissionScroll;
     }
-    
+
     /**
      * This method initializes permissionListBox
-     * 
+     *
      * @return edu.csus.ecs.pc2.ui.JCheckBoxJList
      */
     private JCheckBoxJList getPermissionsListBox() {
@@ -1184,11 +1282,11 @@ public class EditFilterPane extends JPanePlugin {
         }
         return permissionListBox;
     }
-    
+
 
     /**
      * This method initializes siteSCroll
-     * 
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getSitesScroll() {
@@ -1201,7 +1299,7 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * This method initializes siteListBox
-     * 
+     *
      * @return edu.csus.ecs.pc2.ui.JCheckBoxJList
      */
     private JCheckBoxJList getSiteListBox() {

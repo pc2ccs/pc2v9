@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -74,6 +75,8 @@ public class EventFeedJSON extends JSONUtilities {
     private String eventTypeList = null;
 
     private JSONTool jsonTool;
+
+    private Filter filter = null;
 
     private HashSet<ElementId> ignoreGroup = new HashSet<ElementId>();
 
@@ -166,7 +169,7 @@ public class EventFeedJSON extends JSONUtilities {
         Problem[] problems = contest.getProblems();
         int id = 1;
         for (Problem problem : problems) {
-            if (problem.isActive()) {
+            if (problem.isActive() && (filter == null || filter.matches(problem))) {
                 appendJSONEvent(stringBuilder, PROBLEM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getProblemJSON(contest, problem, id));
                 stringBuilder.append(NL);
                 id++;
@@ -188,7 +191,7 @@ public class EventFeedJSON extends JSONUtilities {
         Arrays.sort(groups, new GroupComparator());
         for (Group group : groups) {
 
-            if (group.isDisplayOnScoreboard()) {
+            if (group.isDisplayOnScoreboard() && (filter == null || filter.matches(group))) {
                 appendJSONEvent(stringBuilder, GROUPS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getGroupJSON(contest, group));
                 stringBuilder.append(NL);
             } else {
@@ -213,7 +216,7 @@ public class EventFeedJSON extends JSONUtilities {
         Hashtable<String, Account> organizations = new Hashtable<String, Account>();
 
         for (Account account : accounts) {
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
+            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && (filter == null || filter.matches(account)) && !account.getInstitutionCode().equals("undefined")) {
                 if (!organizations.containsKey(account.getInstitutionCode())) {
                     organizations.put(account.getInstitutionCode(), account);
                     appendJSONEvent(stringBuilder, ORGANIZATION_KEY, ++eventIdSequence, EventFeedOperation.CREATE, jsonTool.convertOrganizationsToJSON(account).toString());
@@ -248,7 +251,7 @@ public class EventFeedJSON extends JSONUtilities {
 
         for (Account account : accounts) {
 
-            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && isDisplayAccountGroupOnScoreboard(account)) {
+            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && isDisplayAccountGroupOnScoreboard(account) && (filter == null || filter.matches(account))) {
                 appendJSONEvent(stringBuilder, TEAM_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getTeamJSON(contest, account));
                 stringBuilder.append(NL);
             } else {
@@ -675,5 +678,13 @@ public class EventFeedJSON extends JSONUtilities {
 
     public void setEventIdSequence(long eventIdSequence) {
         this.eventIdSequence = eventIdSequence;
+    }
+
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
     }
 }
