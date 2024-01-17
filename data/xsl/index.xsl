@@ -41,7 +41,7 @@
 	    </center>
 	</font>
 	    <center>
-            <TABLE cellspacing="0">
+            <TABLE>
                 <tr><th><strong><u>Rank</u></strong></th>
 <th><strong><u>Name</u></strong></th>
 <th><strong><u>Solved</u></strong></th>
