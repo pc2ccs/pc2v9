@@ -499,9 +499,9 @@ public class ContestInformationPane extends JPanePlugin {
             judgeSettingsPane = new JPanel();
             
             judgeSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
-            judgeSettingsPane.setMaximumSize(new Dimension(800, 400));
-            judgeSettingsPane.setMinimumSize(new Dimension(800, 400));
-            judgeSettingsPane.setPreferredSize(new Dimension(800,350));
+            judgeSettingsPane.setMaximumSize(new Dimension(800, 425));
+            judgeSettingsPane.setMinimumSize(new Dimension(800, 425));
+            judgeSettingsPane.setPreferredSize(new Dimension(800,375));
 
             if (showPaneOutlines) {
                 
@@ -1328,7 +1328,7 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private JTextField getJudgesDefaultAnswerTextField() {
         if (judgesDefaultAnswerTextField == null) {
-            judgesDefaultAnswerTextField = new JTextField(40);
+            judgesDefaultAnswerTextField = new JTextField(50);
             judgesDefaultAnswerTextField.setText("");
 //            judgesDefaultAnswerTextField.setSize(new Dimension(280, 29));
 //            judgesDefaultAnswerTextField.setLocation(new Point(208, 214));

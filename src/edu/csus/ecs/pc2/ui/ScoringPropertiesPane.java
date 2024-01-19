@@ -35,6 +35,8 @@ public class ScoringPropertiesPane extends JPanel {
     
     private JButton cancelButton;
     
+    private int lengthOfColumns;
+    
     public ScoringPropertiesPane(JButton updateButtona,JButton cancelButtona) {
         super();
         updateButton = updateButtona;
@@ -45,14 +47,16 @@ public class ScoringPropertiesPane extends JPanel {
     
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setPreferredSize(new Dimension(275, 185));
+        this.setPreferredSize(new Dimension(350, 200));
         this.add(getPropertyListBox(), BorderLayout.CENTER);
+        this.lengthOfColumns = 167;
+        
 
     }
     
     protected void updateProperties(Properties properties) {
         propertyUpdater.updateProperties(properties);
-        propertyListBox.removeAllRows(); //WHYY??
+        propertyListBox.removeAllRows();
 
     }
     
@@ -69,8 +73,10 @@ public class ScoringPropertiesPane extends JPanel {
             HeapSorter sorter = new HeapSorter();
             propertyListBox.setColumnSorter(1, sorter, 1);
 
-            propertyListBox.autoSizeAllColumns();
-
+            propertyListBox.setColumnSize(0,this.lengthOfColumns);
+            propertyListBox.setColumnSize(1,this.lengthOfColumns);
+            propertyListBox.setResizable(false);
+            
             propertyListBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     enableButtons();
@@ -115,7 +121,8 @@ public class ScoringPropertiesPane extends JPanel {
             propertyListBox.addRow(objects);
         }
         
-        propertyListBox.autoSizeAllColumns();
+        propertyListBox.setColumnSize(0,this.lengthOfColumns);
+        propertyListBox.setColumnSize(1,this.lengthOfColumns);
 
         enableButtons();
     }
@@ -140,10 +147,8 @@ public class ScoringPropertiesPane extends JPanel {
     private JTextField createJTextField(String text, boolean passwordField) {
         JTextField textField = new JTextField();
         textField.setText(text);
-
         textField.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent e) {
-                propertyListBox.autoSizeAllColumns();
                 enableButtons();
             }
         });
