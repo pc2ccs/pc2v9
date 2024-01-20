@@ -1036,7 +1036,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
                 if (divisionNumber != null) {
                     String div = ScoreboardUtilities.getDivision(theContest, account.getClientId());
-                    if (!divisionNumber.toString().trim().equals(div.trim())) {
+                    // div may be null if the team is not a member of any division group, but is being shown on the board.
+                    if (div == null || !divisionNumber.toString().trim().equals(div.trim())) {
                         /**
                          * If this account is NOT in the same division as divisionNumber then do not add StandingsRecord, skip to next account.
                          */

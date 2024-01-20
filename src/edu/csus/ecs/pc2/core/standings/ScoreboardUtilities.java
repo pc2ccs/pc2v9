@@ -282,7 +282,7 @@ public class ScoreboardUtilities {
                 Group group = contest.getGroup(elementId);
                 if(group != null) {
                     groupName = getDivision(group.getDisplayName());
-                    if(group != null) {
+                    if(groupName != null) {
                         break;
                     }
                 }
