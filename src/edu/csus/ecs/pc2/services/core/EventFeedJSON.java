@@ -189,9 +189,13 @@ public class EventFeedJSON extends JSONUtilities {
         Group[] groups = contest.getGroups();
 
         Arrays.sort(groups, new GroupComparator());
+
+        HashSet<ElementId> usedGroups = getGroupsUsed(contest);
         for (Group group : groups) {
 
-            if (group.isDisplayOnScoreboard() && (filter == null || filter.matches(group))) {
+            // Put this group in the event feed if teams are not members of any group or one of the teams
+            // that matches the (possibly in-effect) filters used this group.
+            if (usedGroups == null || usedGroups.contains(group.getElementId())) {
                 appendJSONEvent(stringBuilder, GROUPS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getGroupJSON(contest, group));
                 stringBuilder.append(NL);
             } else {
@@ -200,6 +204,36 @@ public class EventFeedJSON extends JSONUtilities {
         }
 
         return stringBuilder.toString();
+    }
+
+    /**
+     * Returns a hashset that includes all groups that any (possibly filtered) teams are members of.
+     * We need this so we include all "used" groups in the event feed.
+     *
+     * @param contest
+     * @return Set of Group elementId's found in any matching or null if none found
+     */
+    private HashSet<ElementId> getGroupsUsed(IInternalContest contest) {
+
+        Account[] accounts = getTeamAccounts(contest);
+
+        HashSet<ElementId> usedGroups = new HashSet<ElementId>();
+
+        for (Account account : accounts) {
+
+            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && isDisplayAccountGroupOnScoreboard(account) && (filter == null || filter.matches(account))) {
+                HashSet<ElementId> groups = account.getGroupIds();
+                if(groups != null) {
+                    for(ElementId groupElementId : groups) {
+                        usedGroups.add(groupElementId);
+                    }
+                }
+            }
+        }
+        if(usedGroups.size() == 0) {
+            usedGroups = null;
+        }
+        return usedGroups;
     }
 
     protected String getGroupJSON(IInternalContest contest, Group group) {
@@ -229,10 +263,10 @@ public class EventFeedJSON extends JSONUtilities {
     }
 
     /**
-     * Get all sites' teams.
+     * Get all sites' teams in sorted order.
      *
      * @param contest
-     * @return
+     * @return array of sorted teams
      */
     public Account[] getTeamAccounts(IInternalContest inContest) {
         Vector<Account> accountVector = inContest.getAccounts(ClientType.Type.TEAM);
@@ -247,7 +281,6 @@ public class EventFeedJSON extends JSONUtilities {
         StringBuilder stringBuilder = new StringBuilder();
 
         Account[] accounts = getTeamAccounts(contest);
-        Arrays.sort(accounts, new AccountComparator());
 
         for (Account account : accounts) {
 
@@ -299,7 +332,6 @@ public class EventFeedJSON extends JSONUtilities {
         StringBuilder stringBuilder = new StringBuilder();
 
         Account[] accounts = getTeamAccounts(contest);
-        Arrays.sort(accounts, new AccountComparator());
 
         for (Account account : accounts) {
             String[] names = account.getMemberNames();
