@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -321,7 +321,7 @@ public class EditFilterPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes teamFrame
+     * This method initializes teamsFrame
      *
      * @return javax.swing.JPanel
      */
@@ -338,7 +338,7 @@ public class EditFilterPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes teamFrame
+     * This method initializes groupsFrame
      *
      * @return javax.swing.JPanel
      */
@@ -355,7 +355,7 @@ public class EditFilterPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes teamFrame
+     * This method initializes accountsFrame
      *
      * @return javax.swing.JPanel
      */
