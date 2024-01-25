@@ -49,7 +49,7 @@ public class ScoringPropertiesPane extends JPanel {
         this.setLayout(new BorderLayout());
         this.setPreferredSize(new Dimension(350, 200));
         this.add(getPropertyListBox(), BorderLayout.CENTER);
-        this.lengthOfColumns = 167;
+        lengthOfColumns = 167;
         
 
     }
@@ -73,8 +73,8 @@ public class ScoringPropertiesPane extends JPanel {
             HeapSorter sorter = new HeapSorter();
             propertyListBox.setColumnSorter(1, sorter, 1);
 
-            propertyListBox.setColumnSize(0,this.lengthOfColumns);
-            propertyListBox.setColumnSize(1,this.lengthOfColumns);
+            propertyListBox.setColumnSize(0,lengthOfColumns);
+            propertyListBox.setColumnSize(1,lengthOfColumns);
             propertyListBox.setResizable(false);
             
             propertyListBox.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -121,8 +121,8 @@ public class ScoringPropertiesPane extends JPanel {
             propertyListBox.addRow(objects);
         }
         
-        propertyListBox.setColumnSize(0,this.lengthOfColumns);
-        propertyListBox.setColumnSize(1,this.lengthOfColumns);
+        propertyListBox.setColumnSize(0,lengthOfColumns);
+        propertyListBox.setColumnSize(1,lengthOfColumns);
 
         enableButtons();
     }
