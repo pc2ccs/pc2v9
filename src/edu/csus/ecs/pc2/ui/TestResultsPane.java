@@ -57,7 +57,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.execute.ExecuteTimerFrame;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -244,6 +246,8 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     private JCheckBox showFailuresOnlyCheckBox;
 
     private JButton selectAllButton;
+
+    private JButton executeAllButton;
 
     private JButton unselectAllButton;
 
@@ -1004,6 +1008,13 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             resultsPaneButtonPanel.add(getCompareSelectedButton());
 
             //add space
+            Component horizontalStrut_4 = Box.createHorizontalStrut(20);
+            resultsPaneButtonPanel.add(horizontalStrut_4);
+            
+            // add a control button to invoke comparison of the team and judge output files for selected row(s)
+            resultsPaneButtonPanel.add(getExecuteAllButton());
+
+            //add space
             Component horizontalGlue_3 = Box.createHorizontalGlue();
             horizontalGlue_3.setPreferredSize(new Dimension(20, 20));
             resultsPaneButtonPanel.add(horizontalGlue_3);
@@ -1085,6 +1096,46 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             });
         }
         return selectAllButton;
+    }
+
+    private JButton getExecuteAllButton() {
+
+        if (executeAllButton == null) {
+
+            executeAllButton = new JButton("Execute All");
+            executeAllButton.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    new Thread(new Runnable() {
+                        public void run() {
+                            executeAllRun();
+                        }
+                    }).start();
+                }
+            });
+        }
+        return executeAllButton;
+    }
+
+    protected void executeAllRun() {
+
+        long executeTimeMS = 0;
+        System.gc();
+
+        ExecuteTimerFrame executeFrame = new ExecuteTimerFrame();
+
+        Executable executable = new Executable(getContest(), getController(), currentRun, currentRunFiles, executeFrame);
+
+        String temporaryExecuteableDirectory = executable.getExecuteDirectoryName();
+        
+        if (! new File(temporaryExecuteableDirectory).isDirectory()) {
+            // create directory if not present, needed for cleardirectory
+            log.info("Creating directory "+temporaryExecuteableDirectory);
+            Utilities.insureDir(temporaryExecuteableDirectory);
+        }
+        
+        executable.clearDirectory(temporaryExecuteableDirectory);
     }
     
     /**
