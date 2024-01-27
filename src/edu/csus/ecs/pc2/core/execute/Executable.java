@@ -229,6 +229,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private ArrayList<String> teamsOutputFilenames = new ArrayList<String>();
 
     /**
+     * List of Team's output filenames, created by execute method.
+     */
+    private ArrayList<String> teamsStderrFilenames = new ArrayList<String>();
+
+    /**
      * List of Validator output filenames, created by execute method.
      */
     private ArrayList<String> validatorOutputFilenames = new ArrayList<String>();
@@ -359,6 +364,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     public IFileViewer execute(boolean clearDirFirst) {
 
         teamsOutputFilenames = new ArrayList<String>();
+        teamsStderrFilenames = new ArrayList<String>();
 
         if (usingGUI) {
             fileViewer = new MultipleFileViewer(log);
@@ -1393,8 +1399,22 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         return optStr;
     }
 
+    /**
+     * Returns a filename specific to data set number to store team's stdout
+     * 
+     * @param dataSetNumber
+     */
     private String getTeamOutputFilename(int dataSetNumber) {
         return prefixExecuteDirname("teamoutput." + dataSetNumber + ".txt");
+    }
+
+    /**
+     * Returns a filename specific to data set number to store team's stderr
+     * 
+     * @param dataSetNumber
+     */
+    private String getTeamStderrFilename(int dataSetNumber) {
+        return prefixExecuteDirname("teamstderr." + dataSetNumber + ".txt");
     }
 
     /**
@@ -2245,12 +2265,17 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             // teams output file - single file name
             SerializedFile userOutputFile = executionData.getExecuteProgramOutput();
+            SerializedFile userStderrFile = executionData.getExecuteStderr();
             createFile(userOutputFile, prefixExecuteDirname(userOutputFile.getName()));
+            createFile(userStderrFile, prefixExecuteDirname(userStderrFile.getName()));
 
             String teamsOutputFilename = getTeamOutputFilename(dataSetNumber);
+            String teamsStderrFilename = getTeamStderrFilename(dataSetNumber);
 
             createFile(userOutputFile, teamsOutputFilename); // Create a per test case Team's output file
+            createFile(userStderrFile, teamsStderrFilename); // Create a per test case Team's stderr file
             teamsOutputFilenames.add(teamsOutputFilename); // add to list
+            teamsStderrFilenames.add(teamsStderrFilename); // add to list
             if (executionData.getExecuteExitValue() != 0) {
                 long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
 
@@ -3452,6 +3477,15 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      */
     public List<String> getTeamsOutputFilenames() {
         return teamsOutputFilenames;
+    }
+
+    /**
+     * Get filenames for each team's stderr for each test case.
+     * 
+     * @return the list of team stderr file names.
+     */
+    public List<String> getTeamsStderrFilenames() {
+        return teamsStderrFilenames;
     }
 
     /**
