@@ -70,7 +70,31 @@ public class MCLB extends MultiColumnListbox {
     public void autoSizeAllColumns() {
         autoSizeAllColumns(this);
     }
+    /**
+     * Sets column size
+     * @param columnNum index of a column from left to right (0-indexed)
+     * @param length in pixels
+     */
+    public void setColumnSize(int columnNum,int length) {
+        final MCLB theBox = this;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                theBox.getColumnInfo(columnNum).setWidth(length);
+            }
+        });
+    }
+    
+    public void setResizable (boolean resizable) {
+        final MCLB theBox = this;
 
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                for (int i = 0; i < theBox.getColumnCount(); i++) {
+                    theBox.getColumnInfo(i).setResizable(resizable);
+                }
+            }
+        });
+    }
     /**
      * Set sorter for column in listbox.
      * 
