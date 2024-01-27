@@ -303,7 +303,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
         IMemento summaryMememento = createSummaryMomento(contest.getContestInformation(), mementoRoot);
 
-        dumpGroupList(contest.getGroups(), mementoRoot);
+        dumpGroupList(contest.getGroups(), mementoRoot, wantedGroups);
 
         ArrayList<Problem> probArray = new ArrayList<Problem>();
 
@@ -319,7 +319,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         summaryMememento.putInteger("siteCount", sites.length);
         Group[] groups = contest.getGroups();
         if (groups != null) {
-            dumpGroupList(groups, summaryMememento);
+            dumpGroupList(groups, summaryMememento, wantedGroups);
         }
 
         int indexNumber = 0;
@@ -996,7 +996,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
      * @param groups
      * @param memento
      */
-    private void dumpGroupList(Group[] groups, IMemento memento) {
+    private void dumpGroupList(Group[] groups, IMemento memento, List<Group> wantedGroups) {
         memento.putInteger("groupCount", groups.length + 1);
         IMemento groupsMemento = memento.createChild("groupList");
         int id = 0;
@@ -1011,6 +1011,11 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
             groupMemento.putInteger("externalId", groups[i].getGroupId());
             if (groups[i].getSite() != null) {
                 groupMemento.putInteger("pc2Site", groups[i].getSite().getSiteNumber());
+            }
+            if(wantedGroups == null || wantedGroups.contains(groups[i])) {
+                groupMemento.putInteger("included", 1);
+            } else {
+                groupMemento.putInteger("included", 0);
             }
         }
     }

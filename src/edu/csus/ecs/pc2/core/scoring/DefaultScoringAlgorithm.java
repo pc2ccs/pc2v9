@@ -376,7 +376,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         summaryMememento.putInteger("siteCount", sites.length);
         Group[] groups = theContest.getGroups();
         if (groups != null) {
-            dumpGroupList(groups, summaryMememento);
+            dumpGroupList(groups, summaryMememento, wantedGroups);
         }
         BalloonSettings[] balloonSettings = theContest.getBalloonSettings();
         if (balloonSettings != null) {
@@ -559,7 +559,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
     }
 
-    private void dumpGroupList(Group[] groups, IMemento memento) {
+    private void dumpGroupList(Group[] groups, IMemento memento, List<Group> wantedGroups) {
         memento.putInteger("groupCount", groups.length+1);
         IMemento groupsMemento = memento.createChild("groupList");
         int id = 0;
@@ -574,6 +574,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             groupMemento.putInteger("externalId", groups[i].getGroupId());
             if (groups[i].getSite() != null) {
                 groupMemento.putInteger("pc2Site", groups[i].getSite().getSiteNumber());
+            }
+            if(wantedGroups == null || wantedGroups.contains(groups[i])) {
+                groupMemento.putInteger("included", 1);
+            } else {
+                groupMemento.putInteger("included", 0);
             }
         }
     }
