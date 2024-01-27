@@ -2,8 +2,9 @@
 table {
 	border: 1px solid #ccc; 
 	border-bottom: 0;
+	border-collapse: separate;
+	border-spacing: 5px;
 	width: 52.7em;
-	margin-bottom: 2em;
 }
 body {
    font-family: verdana, arial, tahoma, sans-serif;
@@ -12,12 +13,15 @@ table th {
 	text-align: center;
 	background: #247eca;
 	color: white;
-	padding: 0em; 
+	padding: 1px; 
 	border: outset 2px #eee8aa;
+	border-radius: 8px;
 }
 table td {
 	border-bottom: 1px solid #DDD; 
 	padding: .0em .0em .0em .5em;
+	border-radius: 8px;
+	text-align: center;
 }
 table tr td.rank {
 	background: transparent; 
@@ -81,7 +85,7 @@ div.tail {
        color: #888;
 //width: 65.875em;
 width: 80%;
- border: 1px solid #ccc;
+// border: 1px solid #ccc;
 margin-left: auto;
 margin-right: auto;
 }
@@ -97,15 +101,15 @@ table tr.even {
         background-color: #EEEEFF; color: black;
 }
 table tr td.yes {
-        background-color: #00ff00; color: black;
+        background-color: #50e050; color: black;
         text-align: center;
 }
 table tr td.pending {
-        background-color: #ffff00; color: black;
+        background-color: #e0e050; color: black;
         text-align: center;
 }
 table tr td.no {
-        background-color: #ff0000; color: black;
+        background-color: #e05050; color: black;
         text-align: center;
 }
 table tr td.center {
