@@ -2,50 +2,36 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:output method="html" indent="yes"/>
 <xsl:decimal-format decimal-separator="." grouping-separator="," />
-<xsl:variable name="groupStop" select="10"/>
-<xsl:variable name="d1Start" select="11"/>
-<xsl:variable name="group_id" select="/contestStandings/standingsHeader/groupList/group[@id &gt;= $d1Start and @included = 1]/@id"/>
-<xsl:variable name="even_or_odd" select="$group_id mod 2"/>
+<!-- change group to match the group name -->
 <xsl:template match="contestStandings">
+<xsl:variable name="group" select="standingsHeader/groupList/group[@included = 1]/@title" />
     <HTML>
         <HEAD>
 <TITLE>
-<xsl:value-of select="/contestStandings/standingsHeader/@title"/>
+<xsl:value-of select="@title"/> Full Info - <xsl:value-of select="/contestStandings/standingsHeader/@title"/>
 </TITLE>
 <link rel="stylesheet" type="text/css" href="standings.css"/>
-	<META HTTP-EQUIV="REFRESH" CONTENT="60;"/>
+  	<META HTTP-EQUIV="REFRESH" CONTENT="60;"/>
 <META HTTP-EQUIV="EXPIRES" CONTENT="0"/>
 <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE"/>
 <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE"/>
         </HEAD>
-	<BODY>
+        <BODY>
 	    <font face="verdana, arial, helvetica" align="right">
 		<center>
-<IMG  style="width: 1386px; height: 199px;" SRC="regional-header.png" align="center"/>
 		    <h2><xsl:value-of select="/contestStandings/standingsHeader/@title"/></h2>
-		    <h3><xsl:value-of select="/contestStandings/standingsHeader/groupList/group[@id = $group_id]/@title"/> per Division Standings</h3>
+		    <h3><xsl:value-of select="/contestStandings/standingsHeader/groupList/group[@title = $group]/@title"/> per Site Standings</h3>
 		    &#160;
 		    <!-- XXX probably can remove these with the full title -->
 		    <br/>
 		    <xsl:value-of select="/contestStandings/standingsHeader/@scoreboardMessage"/>
-		    <br/>
-		    <br/>
-		    <br/>
-                    <xsl:for-each select="/contestStandings/standingsHeader/groupList/group[@id &lt;= $groupStop and (@id mod 2 = $even_or_odd)]">
-                        <xsl:call-template name="groupLink">
-                        <xsl:with-param name="group" select="@title"/>
-    		    </xsl:call-template>
-		    </xsl:for-each>
-		    <br/>
-        <xsl:for-each select="/contestStandings/standingsHeader/groupList/group[@id &gt;= $d1Start and @id != $group_id]">
-<a href="index_{@title}.html"><xsl:value-of select="@title"/> Divison Standings</a>
-<br/>
-            </xsl:for-each>
-		    <br/>
 	    </center>
 	</font>
-	    <center>
-            <TABLE cellspacing="0">
+        <br/>
+	<center>
+            <xsl:variable name="division" select="substring-after($group, ' - ')"/>
+            <a href="index_{$division}.html"><xsl:value-of select="$division"/> Overall Standings</a><br/><br/>
+            <TABLE>
                 <tr><th><strong><u>Rank</u></strong></th>
 <th><strong><u>Name</u></strong></th>
 <th><strong><u>Solved</u></strong></th>
@@ -65,7 +51,7 @@
        <A HREF="https://pc2ccs.github.io/">PC^2 Homepage</A><br/>
        CSS by Tomas Cerny and Ray Holder
 </span>
-Created by <A HREF="https://pc2ccs.github.io/">CSUS PC^2</A> version <xsl:value-of select="/contestStandings/standingsHeader/@systemVersion"/>
+Created by <A HREF="https://pc2ccs.github.io/">CSUS PC^2 </A> version <xsl:value-of select="/contestStandings/standingsHeader/@systemVersion"/>
 <br/>
 Last updated
 <xsl:value-of select="/contestStandings/standingsHeader/@currentDate"/>
@@ -73,7 +59,6 @@ Last updated
         </BODY>
     </HTML>
 </xsl:template>
-
         <xsl:template name="summary">
             <xsl:for-each select="standingsHeader">
                 <tr>
@@ -86,22 +71,12 @@ Last updated
                 </tr>
             </xsl:for-each>
         </xsl:template>
-        <xsl:template name="problemsummary">
-            <xsl:for-each select="/contestStandings/standingsHeader/problem">
-<!-- <problemsummary attempts="246" bestSolutionTime="25" id="1" lastsolutionTime="283" numberSolved="81" title="A+ Consanguine Calculations"/> -->
-<td>
-<xsl:attribute name="class">center</xsl:attribute>
-<xsl:value-of select="@attempts"/>/<xsl:if test="@numberSolved &lt; '1'">--</xsl:if>
-<xsl:if test="@bestSolutionTime"><xsl:value-of select="@bestSolutionTime"/></xsl:if>/<xsl:value-of select="@numberSolved"/>
-</td>
-            </xsl:for-each>
-        </xsl:template>
         <xsl:template name="teamStanding">
             <xsl:for-each select="teamStanding">
-		<!-- index is 0 based  header and 1st team seperated by colors -->
-		<xsl:choose>
-		    <xsl:when test="@index mod 2 = 0">
-			<tr class="even">
+                <!-- index is 0 based  header and 1st team seperated by colors -->
+                <xsl:choose>
+                    <xsl:when test="@index mod 2 = 0">
+                        <tr class="even">
 <td><xsl:value-of select="@rank"/></td>
 <td><xsl:value-of select="@teamName"/></td>
 <td>
@@ -113,10 +88,10 @@ Last updated
                 <xsl:call-template name="problemSummaryInfo"/>
 <!-- <teamStanding index="1" solved="8" problemsattempted="8" rank="1" score="1405" teamName="Warsaw University" timefirstsolved="13" timelastsolved="272" totalAttempts="19" userid="84" usersiteid="1"> -->
 <td><xsl:value-of select="@totalAttempts"/>/<xsl:value-of select="@solved"/></td>
-		</tr>
-		    </xsl:when>
-		    <xsl:otherwise>
-		        <tr class="odd">
+                </tr>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <tr class="odd">
 <td><xsl:value-of select="@rank"/></td>
 <td><xsl:value-of select="@teamName"/></td>
 <td>
@@ -129,9 +104,9 @@ Last updated
 <!-- <teamStanding index="1" solved="8" problemsattempted="8" rank="1" score="1405" teamName="Warsaw University" timefirstsolved="13" timelastsolved="272" totalAttempts="19" userid="84" usersiteid="1"> -->
 <td>
 <xsl:value-of select="@totalAttempts"/>/<xsl:value-of select="@solved"/></td>
-		</tr>
-		    </xsl:otherwise>
-		</xsl:choose>
+                </tr>
+                    </xsl:otherwise>
+                </xsl:choose>
             </xsl:for-each>
         </xsl:template>
         <xsl:template name="problemSummaryInfo">
@@ -155,22 +130,33 @@ Last updated
 </td>
             </xsl:for-each>
         </xsl:template>
+        <xsl:template name="problemsummary">
+            <xsl:for-each select="/contestStandings/standingsHeader/problem">
+<!-- <problemsummary attempts="246" bestSolutionTime="25" id="1" lastsolutionTime="283" numberSolved="81" title="A+ Consanguine Calculations"/> -->
+<td>
+<xsl:attribute name="class">center</xsl:attribute>
+<xsl:value-of select="@attempts"/>/<xsl:if test="@numberSolved &lt; '1'">--</xsl:if>
+<xsl:if test="@bestSolutionTime"><xsl:value-of select="@bestSolutionTime"/></xsl:if>/<xsl:value-of select="@numberSolved"/>
+</td>
+            </xsl:for-each>
+        </xsl:template>
+
         <xsl:template name="problemTitle">
             <xsl:for-each select="/contestStandings/standingsHeader/problem">
 <th>&#160;&#160;&#160;&#160;<strong><u><xsl:number format="A" value="@id"/></u></strong>&#160;&#160;&#160;&#160;</th>
             </xsl:for-each>
         </xsl:template>
-        <xsl:template name="problemColor">
-	    <xsl:for-each select="/contestStandings/standingsHeader/colorList/colors[@siteNum = 1]/problem">
-		<td><center><xsl:choose><xsl:when test="@color"> <xsl:value-of select="@color"/></xsl:when><xsl:otherwise>Color<xsl:value-of select="@id"/></xsl:otherwise></xsl:choose></center></td>
+       <xsl:template name="problemColor">
+            <xsl:for-each select="/contestStandings/standingsHeader/colorList/colors[@siteNum = 1]/problem">
+                <td><center><xsl:choose><xsl:when test="@color"> <xsl:value-of select="@color"/></xsl:when><xsl:otherwise>Color<xsl:value-of select="@id"/></xsl:otherwise></xsl:choose></center></td>
             </xsl:for-each>
         </xsl:template>
         <xsl:template name="groupLink">
         <xsl:param name="group"/>
-        <xsl:for-each select="/contestStandings/standingsHeader/groupList/group[@title = $group]">
-<a href="group_{$group}.html"><xsl:value-of select="@title"/> Per Site Standings</a>
+        <xsl:for-each select="/contestStandings/standingsHeader/groupList/group[@id = $group]">
+<a href="group_{$group}.html"><xsl:value-of select="@title"/> Per Site Standings
+            </a>
         <br/>
             </xsl:for-each>
         </xsl:template>
-        
 </xsl:stylesheet>

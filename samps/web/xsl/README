@@ -7,20 +7,17 @@ does not exist, it falls back to the data/xsl directory under the
 pc2 installation directory.
 
 index.xsl
-  Sample index as used at the ACM-ICPC Pacific Northwest Contest.
-  Includes links to group?.html files
-group1.xsl
-groupN.xsl
-  Sample per-group(region/site) files.  group1.xsl is for the
-   1st group defined in PC^2.  Copy and replace the N with the
-   additional groups (eg the 2nd group is 2 and would be in group2.xsl)
+  Sample index as used at the ICPC Pacific Northwest Contest.
+  Includes links to group_*.html files
+group.xsl
+  Sample per-group(region/site) files (based on the groupList/group[included = 1].
 
 or
 wf.index.xsl
-   Like the summary.html, but with the ACM-ICPC World Finals ranking
+   Like the summary.html, but with the ICPC World Finals ranking
    system.  Includes links to the group?.html files
-wf.groupN.xsl
-   Like the above groupN.xsl, except with ACM-ICPC World Finals
+wf.group.xsl
+   Like the above group.xsl, except with ICPC World Finals
    ranking system.
 wf.standings.xsl
    The end of the contest final standings with Honorable Mention and
@@ -33,5 +30,3 @@ call this index.xsl/group.xsl (eg remove the "wf." part).
 
 Questions?
 email to pc2@ecs.csus.edu
-
-# $Id$
