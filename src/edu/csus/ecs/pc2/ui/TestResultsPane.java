@@ -1184,6 +1184,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         }
 
         setTeamOutputFileNames(executable.getTeamsOutputFilenames());
+        setTeamStderrFileNames(executable.getTeamsStderrFilenames());
         setValidatorOutputFileNames(executable.getValidatorOutputFilenames());
         setValidatorStderrFileNames(executable.getValidatorErrFilenames());
         // only if do not show output is not checked
@@ -2493,6 +2494,37 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         }
 
         this.currentTeamOutputFileNames = teamOutputNames;
+    }
+
+    public void setTeamStderrFileNames(List<String> savedTeamStderrFileNames) {
+
+        String[] teamStderrNames = null;
+
+        // add entries from actual team test stderr
+        if (savedTeamStderrFileNames != null) {
+            int size = getProblemDataFiles().getJudgesDataFiles().length;
+            if (size < savedTeamStderrFileNames.size()) {
+                size = savedTeamStderrFileNames.size();
+            }
+            if (size < 1) {
+                size = 1;
+            }
+            teamStderrNames = new String[size];
+
+            // null out list
+            for (int i = 0; i < size; i++) {
+                teamStderrNames[i] = null;
+            }
+
+            for (int i = 0; i < savedTeamStderrFileNames.size(); i++) {
+                teamStderrNames[i] = savedTeamStderrFileNames.get(i);
+                if (new File(teamStderrNames[i]).length() == 0) {
+                    teamStderrNames[i] = null; 
+                }
+            }
+        }
+        
+        this.currentTeamStderrFileNames = teamStderrNames;
     }
 
     public void setValidatorOutputFileNames(List<String> savedValidatorOutputFileNames) {
