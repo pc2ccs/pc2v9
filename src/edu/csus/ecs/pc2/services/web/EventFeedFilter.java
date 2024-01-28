@@ -78,7 +78,11 @@ public class EventFeedFilter {
     public EventFeedFilter(String startintEventId, String eventTypeList) {
         super();
         this.startingEventId = startintEventId;
-        this.eventTypeList = eventTypeList;
+        if(eventTypeList != null) {
+            this.eventTypeList = eventTypeList.toUpperCase();
+        } else {
+            this.eventTypeList = null;
+        }
     }
 
 
@@ -239,7 +243,7 @@ public class EventFeedFilter {
 
         if (matches && (startingEventId != null || eventTypeList != null)) {
             // we know that this event would pass through (passed group test), so we now check for event type and token
-            if(recType == null) {
+            if(recType == EventFeedType.UNDEFINED) {
                 String rec = getCleanValue(string, EF_TYPE_STRING);
                 if(rec != null) {
                     recType = parseEventFeedType(rec);
@@ -332,9 +336,9 @@ public class EventFeedFilter {
         if (strEventTypeList == null) {
             strEventTypeList = "<none set>";
         }
-        String strGroupList = wantedGroupsSet.toString();
-        if (strGroupList == null) {
-            strGroupList = "<none set>";
+        String strGroupList = "<none set>";
+        if (wantedGroupsSet != null) {
+            strGroupList = wantedGroupsSet.toString();
         }
         return "startid = " + strStartingEventId + ", event types = " + strEventTypeList + ", groupids = " + strGroupList;
     }

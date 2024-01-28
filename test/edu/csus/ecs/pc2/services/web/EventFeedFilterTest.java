@@ -19,7 +19,7 @@ public class EventFeedFilterTest extends AbstractTestCase {
 
         EventFeedFilter filter = new EventFeedFilter();
 
-        assertEquals("startid = <none set>, event types = <none set>", filter.toString());
+        assertEquals("startid = <none set>, event types = <none set>, groupids = <none set>", filter.toString());
 
         String[] lines = getStandardContestJSON();
         assertEquals("Expected line count ", 143, lines.length);
