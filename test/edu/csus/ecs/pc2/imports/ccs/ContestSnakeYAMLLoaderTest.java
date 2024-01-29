@@ -1915,6 +1915,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         Problem problem = problems[0];
         sampleContest.setClicsValidation(originalContest, null, problem);
         ElementId problemId = problem.getElementId();
+        
+        Language [] origLanguages = originalContest.getLanguages();
 
         // ExportYAML2 exportYAML = new ExportYAML2();
         ExportYAML exportYAML = new ExportYAML();
@@ -1949,7 +1951,8 @@ public class ContestSnakeYAMLLoaderTest extends AbstractTestCase {
         // runner-args: '{:basename}
 
         assertEquals("Expected language name ", "Java", languages[0].getDisplayName());
-        assertEquals("Expected language compilerCmd ", "javac {:mainfile}", languages[0].getCompileCommandLine());
+        // Since SampleContest can massage the name of the java compiler, use the original instead of canned
+        assertEquals("Expected language compilerCmd ", origLanguages[0].getCompileCommandLine(), languages[0].getCompileCommandLine());
         assertEquals("Expected language exemask ", "{:basename}.class", languages[0].getExecutableIdentifierMask());
         assertEquals("Expected language execCmd ", "java {:package}{:basename}", languages[0].getProgramExecuteCommandLine());
 
