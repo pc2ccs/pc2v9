@@ -527,8 +527,8 @@ public class EventFeedFilter {
                         matches &= problemFilter.contains(problemId);
                     }
                 }
-            } else {
-                matches &= teamIgnore.contains(toTeamId);
+            } else if(teamIgnore.contains(toTeamId)){
+                matches = false;
             }
         }
         return(matches);
