@@ -102,5 +102,18 @@ public class TestResultsFrame extends javax.swing.JFrame implements UIPlugin {
         getMultiTestSetOutputViewerPane().setValidatorOutputFileNames(filenames);
     }
 
+    /**
+     * Enables/Disables Execute All button
+    */
+    public void setExecuteAllButton(boolean b) {
+        getMultiTestSetOutputViewerPane().setExecuteAllButton(b);
+    }
+
+    /**
+     * Adds action listeners to Execute All Button
+    */
+    public void addActionListenerToExecuteAll(java.awt.event.ActionListener e) {
+        getMultiTestSetOutputViewerPane().addActionListenerToExecuteAll(e);
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

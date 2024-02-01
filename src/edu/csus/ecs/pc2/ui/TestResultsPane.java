@@ -25,8 +25,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
-import java.util.List;
-import java.util.Properties;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -60,9 +58,6 @@ import javax.swing.table.TableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.Executable;
-import edu.csus.ecs.pc2.core.execute.ExecutionData;
-import edu.csus.ecs.pc2.core.execute.ExecuteTimerFrame;
-import edu.csus.ecs.pc2.core.execute.JudgementUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -72,8 +67,6 @@ import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
-import edu.csus.ecs.pc2.core.model.Judgement;
-import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.ui.cellRenderer.CheckBoxCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.LinkCellRenderer;
 import edu.csus.ecs.pc2.ui.cellRenderer.RightJustifiedCellRenderer;
@@ -1156,95 +1149,17 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     private JButton getExecuteAllButton() {
 
         if (executeAllButton == null) {
-
             executeAllButton = new JButton("Execute All");
-            executeAllButton.addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    new Thread(new Runnable() {
-                        public void run() {
-                            executeAllRun();
-                        }
-                    }).start();
-                }
-            });
         }
         return executeAllButton;
     }
 
-    public void setEnabledButtonStatus(boolean b) {
+    public void addActionListenerToExecuteAll(java.awt.event.ActionListener e) {
+        getExecuteAllButton().addActionListener(e);
+    }
+
+    public void setExecuteAllButton(boolean b) {
         getExecuteAllButton().setEnabled(b && currentRunFiles != null);
-    }
-
-    private ProblemDataFiles getProblemDataFiles() {
-        Problem problem = getContest().getProblem(currentRun.getProblemId());
-        return getContest().getProblemDataFile(problem);
-    }
-
-    protected void executeAllRun() {
-
-        System.gc();
-
-        ExecuteTimerFrame executeFrame = new ExecuteTimerFrame();
-
-        Executable executable = new Executable(getContest(), getController(), currentRun, currentRunFiles, executeFrame);
-
-        // only if do not show output is not checked, clear the results pane
-        if (!getContest().getProblem(currentRun.getProblemId()).isHideOutputWindow()) {
-            resetResultsTable();
-        }
-
-        setEnabledButtonStatus(false);
-        // Set override to execute all testcases 
-        executable.setOverrideStopOnFirstFailedTestCase(true);
-        executable.execute();
-
-        // Dump execution results files to log
-        String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
-        Problem juProblem = getContest().getProblem(currentRun.getProblemId());
-        ClientId clientId = getContest().getClientId();
-        List<Judgement> judgements = JudgementUtilities.getLastTestCaseJudgementList(getContest(), currentRun);
-        JudgementUtilities.dumpJudgementResultsToLog(log, clientId, currentRun, executeDirctoryName, juProblem, judgements, executable.getExecutionData(), "", new Properties());
-
-        ExecutionData executionData = executable.getExecutionData();
-        if (executionData != null && executionData.getExecutionException() != null) {
-            Exception ex = executionData.getExecutionException();
-            Language lang = getContest().getLanguage(currentRun.getLanguageId());
-
-            //TODO: the following assignment and 'if' don't make sense (the assignment inside the 'if' is 
-            //     the same as the one preceding the 'if').   jlc
-            // JB - I *think* the intent was to call lang.getProgramExecuteCommandLine() if the judge
-            //      command line is null.  That is, if no specific judge command, use
-            //      the default.
-            String command = lang.getJudgeProgramExecuteCommandLine();
-            if (command == null) {
-                command = lang.getJudgeProgramExecuteCommandLine();
-            }
-            
-            //TODO:  the command line needs to be adjusted to reflect the (possible) presence of a sandbox.  jlc
-            String commandLine = executable.substituteAllStrings(currentRun, command);
-            log.warning("Error executing command: " + commandLine);
-            log.warning("Error is: " + ex.getMessage());
-
-            JOptionPane.showMessageDialog(this,  "Error executing command: " + commandLine + "\n\n" + ex.getMessage(), "Error during execute",JOptionPane.ERROR_MESSAGE);
-
-            setEnabledButtonStatus(true);
-            return;
-        }
-
-        setTeamOutputFileNames(executable.getTeamsOutputFilenames());
-        setTeamStderrFileNames(executable.getTeamsStderrFilenames());
-        setValidatorOutputFileNames(executable.getValidatorOutputFilenames());
-        setValidatorStderrFileNames(executable.getValidatorErrFilenames());
-        // only if do not show output is not checked
-        if (!getContest().getProblem(currentRun.getProblemId()).isHideOutputWindow()) {
-            // the run gets modified in Executable to have testCases, so resend the data
-            Problem problem = getContest().getProblem(currentRun.getProblemId());
-            setData(currentRun, currentRunFiles, problem, getProblemDataFiles());
-        }
-
-        setEnabledButtonStatus(true);
     }
     
     /**
@@ -2514,134 +2429,6 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
 
     public void setValidatorStderrFileNames(String[] filenames) {
         this.currentValidatorStderrFileNames = filenames ;
-    }
-
-    public void setTeamOutputFileNames(List<String> savedTeamOutputFileNames) {
-
-        String[] teamOutputNames = null;
-
-        // add entries from actual team test output
-        if (savedTeamOutputFileNames != null) {
-            int size = getProblemDataFiles().getJudgesDataFiles().length;
-            if (size < savedTeamOutputFileNames.size()) {
-                size = savedTeamOutputFileNames.size();
-            }
-            if (size < 1) {
-                size = 1;
-            }
-            teamOutputNames = new String[size];
-
-            // null out list
-            for (int i = 0; i < size; i++) {
-                teamOutputNames[i] = null;
-            }
-
-            for (int i = 0; i < savedTeamOutputFileNames.size(); i++) {
-                teamOutputNames[i] = savedTeamOutputFileNames.get(i);
-                if (new File(teamOutputNames[i]).length() == 0) {
-                    teamOutputNames[i] = null; 
-                }
-            }
-        }
-
-        this.currentTeamOutputFileNames = teamOutputNames;
-    }
-
-    public void setTeamStderrFileNames(List<String> savedTeamStderrFileNames) {
-
-        String[] teamStderrNames = null;
-
-        // add entries from actual team test stderr
-        if (savedTeamStderrFileNames != null) {
-            int size = getProblemDataFiles().getJudgesDataFiles().length;
-            if (size < savedTeamStderrFileNames.size()) {
-                size = savedTeamStderrFileNames.size();
-            }
-            if (size < 1) {
-                size = 1;
-            }
-            teamStderrNames = new String[size];
-
-            // null out list
-            for (int i = 0; i < size; i++) {
-                teamStderrNames[i] = null;
-            }
-
-            for (int i = 0; i < savedTeamStderrFileNames.size(); i++) {
-                teamStderrNames[i] = savedTeamStderrFileNames.get(i);
-                if (new File(teamStderrNames[i]).length() == 0) {
-                    teamStderrNames[i] = null; 
-                }
-            }
-        }
-        
-        this.currentTeamStderrFileNames = teamStderrNames;
-    }
-
-    public void setValidatorOutputFileNames(List<String> savedValidatorOutputFileNames) {
-
-        int arraySize = 0;
-        if (savedValidatorOutputFileNames!=null && savedValidatorOutputFileNames.size() > 0) {
-            arraySize = savedValidatorOutputFileNames.size();
-        }
-            
-        //an array to hold the validator output file names
-        String[] validatorOutputFileNames = new String[arraySize];
-
-        // null out array (probably not necessary since Java defaults object refs to null...)
-        for (int i = 0; i < validatorOutputFileNames.length; i++) {
-            validatorOutputFileNames[i] = null;
-        }
-
-        // add entries from actual team test case output validation results
-        if (savedValidatorOutputFileNames != null) {
-
-            for (int i = 0; i < savedValidatorOutputFileNames.size(); i++) {
-                
-                //save the validator output file name
-                validatorOutputFileNames[i] = savedValidatorOutputFileNames.get(i);
-                
-                //wipe out the entry if the file is empty (zero-length)
-                if (new File(validatorOutputFileNames[i]).length() == 0) {
-                    validatorOutputFileNames[i] = null; 
-                }
-            }
-        }
-
-        this.currentValidatorOutputFileNames = validatorOutputFileNames;
-    }
-
-    public void setValidatorStderrFileNames(List<String> savedValidatorErrFileNames) {
-
-        int arraySize = 0;
-        if (savedValidatorErrFileNames!=null && savedValidatorErrFileNames.size()>0) {
-            arraySize = savedValidatorErrFileNames.size();
-        }
-            
-        //an array to hold the validator stderr file names
-        String[] validatorStdErrFileNames = new String[arraySize];
-
-        // null out array (probably not necessary since Java defaults object refs to null...)
-        for (int i = 0; i < validatorStdErrFileNames.length; i++) {
-            validatorStdErrFileNames[i] = null;
-        }
-
-        // add entries from actual team test output validation stderr
-        if (savedValidatorErrFileNames != null) {
-
-            for (int i = 0; i < savedValidatorErrFileNames.size(); i++) {
-                    
-                //save the validator stderr file name
-                validatorStdErrFileNames[i] = savedValidatorErrFileNames.get(i);
-                    
-                //wipe out the entry if the file is empty (zero-length)
-                if (new File(validatorStdErrFileNames[i]).length() == 0) {
-                    validatorStdErrFileNames[i] = null; 
-                }
-            }
-        }
-
-        this.currentValidatorStderrFileNames = validatorStdErrFileNames;
     }
 
     private Component getHorizontalGlue_9() {
