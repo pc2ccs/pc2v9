@@ -69,6 +69,7 @@ public class SubmitClarificationPane extends JPanePlugin {
     private JTextArea answerTextArea = null;
     
     private boolean isJudge = false;
+    
 
     /**
      * This method initializes
@@ -84,21 +85,15 @@ public class SubmitClarificationPane extends JPanePlugin {
      * This method initializes this
      * 
      */
-    private void initialize() {
+    protected void initialize() {
         this.setLayout(null);
         this.setSize(new java.awt.Dimension(456, 285));
-        boolean isJudge = true;
-        if (isJudge) {
-            this.add(getProblemPane(), null);
-            this.add(getsubmitAnnouncement(),null);
-            this.add(getQuestionPane(), null);
-            this.add(getSubmitClarificationButton(), null);
-        }
-        else {
-            this.add(getProblemPane(), null);
-            this.add(getQuestionPane(), null);
-            this.add(getSubmitClarificationButton(), null);
-        }
+
+
+        this.add(getProblemPane(), null);
+        this.add(getQuestionPane(), null);
+        this.add(getSubmitClarificationButton(), null);
+
         
     }
 
@@ -113,7 +108,7 @@ public class SubmitClarificationPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getProblemPane() {
+    protected JPanel getProblemPane() {
         if (problemPane == null) {
             problemPane = new JPanel();
             problemPane.setLayout(new BorderLayout());
@@ -136,7 +131,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         }
         return problemComboBox;
     }
-    private JCheckBox getsubmitAnnouncement() {
+    protected JCheckBox getsubmitAnnouncement() {
         if (submitAnnouncement == null) {
             submitAnnouncement = new JCheckBox();
             submitAnnouncement.setText("Generate Announcement");
@@ -166,7 +161,7 @@ public class SubmitClarificationPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getQuestionPane() {
+    protected JPanel getQuestionPane() {
         if (questionPane == null) {
             questionPane = new JPanel();
             questionPane.setLayout(new BorderLayout());
@@ -196,7 +191,7 @@ public class SubmitClarificationPane extends JPanePlugin {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getSubmitClarificationButton() {
+    protected JButton getSubmitClarificationButton() {
         if (submitClarificationButton == null) {
             submitClarificationButton = new JButton();
             submitClarificationButton.setText("Submit Clarification");

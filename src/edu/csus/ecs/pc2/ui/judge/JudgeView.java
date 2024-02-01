@@ -204,7 +204,7 @@ public class JudgeView extends JFrame implements UIPlugin {
                 SubmitRunPane submitRunPane = new SubmitRunPane();
                 addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
                 
-                SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
+                SubmitClarificationPane submitClarificationPane = new SubmitClarificationJudgePane();
                 addUIPlugin(getMainTabbedPane(), "Generate Clarification", submitClarificationPane);
 
                 OptionsPane optionsPanel = new OptionsPane();
