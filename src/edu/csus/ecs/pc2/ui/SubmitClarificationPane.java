@@ -1,14 +1,17 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.event.ItemEvent;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
@@ -18,7 +21,10 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.CategoryEvent;
+import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ICategoryListener;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -53,13 +59,24 @@ public class SubmitClarificationPane extends JPanePlugin {
     private JTextArea questionTextArea = null;
 
     private JButton submitClarificationButton = null;
+    
+    private JCheckBox submitAnnouncement = null;
+    
+    private JPanel answerPane = null;
+    
+    private JScrollPane answerScrollPane = null;
+    
+    private JTextArea answerTextArea = null;
+    
+    private boolean isJudge = false;
 
     /**
      * This method initializes
      * 
      */
-    public SubmitClarificationPane() {
+    public SubmitClarificationPane() {      
         super();
+//        this.isJudge = isJudge;
         initialize();
     }
 
@@ -70,10 +87,19 @@ public class SubmitClarificationPane extends JPanePlugin {
     private void initialize() {
         this.setLayout(null);
         this.setSize(new java.awt.Dimension(456, 285));
-        this.add(getProblemPane(), null);
-        this.add(getQuestionPane(), null);
-
-        this.add(getSubmitClarificationButton(), null);
+        boolean isJudge = true;
+        if (isJudge) {
+            this.add(getProblemPane(), null);
+            this.add(getsubmitAnnouncement(),null);
+            this.add(getQuestionPane(), null);
+            this.add(getSubmitClarificationButton(), null);
+        }
+        else {
+            this.add(getProblemPane(), null);
+            this.add(getQuestionPane(), null);
+            this.add(getSubmitClarificationButton(), null);
+        }
+        
     }
 
 
@@ -110,6 +136,30 @@ public class SubmitClarificationPane extends JPanePlugin {
         }
         return problemComboBox;
     }
+    private JCheckBox getsubmitAnnouncement() {
+        if (submitAnnouncement == null) {
+            submitAnnouncement = new JCheckBox();
+            submitAnnouncement.setText("Generate Announcement");
+            submitAnnouncement.setBounds(19, 80, 170, 20);
+            submitAnnouncement.addItemListener(new java.awt.event.ItemListener() {
+                public void itemStateChanged(java.awt.event.ItemEvent e) {
+                    if (e.getStateChange() == ItemEvent.SELECTED) {
+                        getQuestionPane().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Answer", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                                javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+                        getSubmitClarificationButton().setText("Submit Announcement");
+                        getSubmitClarificationButton().setToolTipText("Click this button to submit your Announcement");
+                    } else {
+                        getQuestionPane().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Question", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                                javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+                        getSubmitClarificationButton().setText("Submit Clarification");
+                        getSubmitClarificationButton().setToolTipText("Click this button to submit your Clarification");
+                    }
+                    
+                }
+            });
+        }
+        return submitAnnouncement;
+    }
 
     /**
      * This method initializes questionPane
@@ -140,6 +190,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         return questionTextArea;
     }
 
+
     /**
      * This method initializes submitClarificationButton
      * 
@@ -155,12 +206,15 @@ public class SubmitClarificationPane extends JPanePlugin {
             submitClarificationButton.setToolTipText("Click this button to submit your Clarification");
             submitClarificationButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    submitClarification();
+                    submit();
+                    
                 }
             });
         }
         return submitClarificationButton;
     }
+    
+
     private void reloadProblems(){
         
         getProblemComboBox().removeAllItems();
@@ -205,7 +259,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         FrameUtilities.regularCursor(this);
     }
     
-    protected void submitClarification() {
+    protected void submit() {
 
         Problem problem = ((Problem) getProblemComboBox().getSelectedItem());
 
@@ -213,7 +267,56 @@ public class SubmitClarificationPane extends JPanePlugin {
             showMessage("Please select problem");
             return;
         }
+        if (getsubmitAnnouncement().isSelected()) {
+            submitAnnouncement(problem);
+        }
+        else {
+            submitClarification(problem);
+        }
+        
 
+    }
+    
+    protected void submitAnnouncement(Problem problem) {
+        String answerAnnouncement = questionTextArea.getText().trim();
+
+        if (answerAnnouncement.length() < 1) {
+            showMessage("Please enter a answer for announcement");
+            return;
+        }
+        String confirmAnswer = "<HTML><FONT SIZE=+1>Do you wish to submit a announcement clarification for<BR><BR>" + "Problem:  <FONT COLOR=BLUE>" + Utilities.forHTML(problem.toString()) + "</FONT><BR><BR>"
+                + "Announcement: <FONT COLOR=BLUE>" + Utilities.forHTML(answerAnnouncement)
+                + "</FONT><BR><BR></FONT>";
+        
+        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), confirmAnswer, "Submit Clarification Confirm");
+
+        if (result != JOptionPane.YES_OPTION) {
+            return;
+        }
+        
+        try {
+            log.info("submit announcement clarification for " + problem + " " + confirmAnswer);
+            
+          
+            ElementId elementId = getController().submitClarification(problem, "");
+            
+            Clarification clarificationToAnswer = getContest().getClarification(elementId);
+            getController().checkOutClarification(clarificationToAnswer, false);
+            
+            ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answerAnnouncement, getContest().getClientId(), 
+                    true, getContest().getContestTime()); //getSendToAllCheckBox().isSelected() true here is to check if needs to be sent everyone
+            clarificationToAnswer.addAnswer(clarificationAnswer);
+            getController().submitClarificationAnswer(clarificationToAnswer);
+            questionTextArea.setText("");
+
+        } catch (Exception e) {
+            // TODO need to make this cleaner
+            showMessage("Error sending announcement clar, contact staff");
+            log.log(Log.SEVERE, "Exception sending clarification ", e);
+        }
+    }
+    
+    protected void submitClarification(Problem problem) {
         String question = questionTextArea.getText().trim();
 
         if (question.length() < 1) {
@@ -241,7 +344,6 @@ public class SubmitClarificationPane extends JPanePlugin {
             showMessage("Error sending clar, contact staff");
             log.log(Log.SEVERE, "Exception sending clarification ", e);
         }
-
     }
     
     /**

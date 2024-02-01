@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -3696,7 +3696,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     }
 
-    public void submitClarification(Problem problem, String question) {
+    public ElementId submitClarification(Problem problem, String question) {
 
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Clarification clarification = new Clarification(contest.getClientId(), problem, question);
@@ -3704,6 +3704,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
 
         sendToLocalServer(packet);
+        
+        return clarification.getElementId();
     }
 
     public void checkOutClarification(Clarification clarification, boolean readOnly) {

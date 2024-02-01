@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -380,8 +381,9 @@ public interface IInternalController {
      * 
      * @param problem
      * @param question
+     * @return 
      */
-    void submitClarification(Problem problem, String question);
+    ElementId submitClarification(Problem problem, String question);
 
     /**
      * Request clarification to answer.
