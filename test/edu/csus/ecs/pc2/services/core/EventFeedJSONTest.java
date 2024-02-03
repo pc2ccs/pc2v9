@@ -39,14 +39,14 @@ import edu.csus.ecs.pc2.services.web.EventFeedFilter;
 
 /**
  * Unit Test.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Unit test data.
-     * 
+     *
      * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
      */
     class UnitTestData {
@@ -57,7 +57,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         /**
          * Construct contest with accounts, runs, clars, etc.
-         * 
+         *
          * @throws Exception
          */
         public UnitTestData() throws Exception {
@@ -103,7 +103,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         /**
          * Get contest populated with test data.
-         * 
+         *
          * @return
          */
         public IInternalContest getContest() {
@@ -125,7 +125,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Test every name and value that event feed JSON can output.
-     * 
+     *
      */
     public void testCompleteEventFeed() throws Exception {
 
@@ -212,7 +212,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Add team member names to account.
-     * 
+     *
      * @param contest
      * @param count
      *            number of accounts to add team names to.
@@ -235,7 +235,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
                     names.add(name);
                 }
 
-                String[] newNames = (String[]) names.toArray(new String[names.size()]);
+                String[] newNames = names.toArray(new String[names.size()]);
                 account.setMemberNames(newNames);
             }
             contest.updateAccount(account);
@@ -265,7 +265,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Expect count of elementName in JSON.
-     * 
+     *
      * @param exepectedCount
      * @param eleementName
      * @param json
@@ -278,7 +278,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Return count of events in json.
-     * 
+     *
      * @param eleementName
      *            element to match
      * @param json
@@ -306,7 +306,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Generate a clarification for every team accounts.
-     * 
+     *
      * @param contest
      * @param problem
      * @param judgeId
@@ -365,7 +365,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         // SOMEDAY move getAllAccounts into AccountsUtility class
 
         Vector<Account> accountVector = contest.getAccounts(type);
-        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         return accounts;
@@ -373,7 +373,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Test single teams JSON line.
-     * 
+     *
      * @throws Exception
      */
     public void testTeamJSON() throws Exception {
@@ -402,7 +402,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * TEst single teams JSON line.
-     * 
+     *
      * @throws Exception
      */
     public void testGroupJSON() throws Exception {
@@ -430,7 +430,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Wrap with brackets
-     * 
+     *
      * @param teamJSON
      * @return
      */
@@ -440,7 +440,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Test single clarification JSON line.
-     * 
+     *
      * @throws Exception
      */
     public void testClarificationJSON() throws Exception {
@@ -470,9 +470,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         assertEqualJSON(json, "text", "Why #2? from team5");
         assertEqualJSON(json, "reply_to_id", "null");
-        assertEqualJSON(json, "problem_id", jsonTool.getProblemId(contest.getProblem(clarification.getProblemId())));
+        assertEqualJSON(json, "problem_id", JSONTool.getProblemId(contest.getProblem(clarification.getProblemId())));
 
-        assertJSONStringValue(json, "problem_id", jsonTool.getProblemId(contest.getProblem(clarification.getProblemId())));
+        assertJSONStringValue(json, "problem_id", JSONTool.getProblemId(contest.getProblem(clarification.getProblemId())));
         assertJSONStringValue(json, "id", clarification.getElementId().toString());
         assertJSONStringValue(json, "from_team_id", "5");
         assertJSONNullValue(json, "to_team_id");
@@ -485,9 +485,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Tests whether value for field is a string and value matches exptectedFieldValue.
-     * 
+     *
      * Surround field and value with double quotes, make into JSON.
-     * 
+     *
      * @param matchCount
      *            number of expected match for field and value
      * @param fieldname
@@ -578,7 +578,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
         String json = eventFeedJSON.getLanguageJSON(contest, language);
 
 //        System.out.println("debug lang json = "+json);
-        
+
 //        editFile(writeFile(new File("/tmp/stuf." + System.currentTimeMillis() + ".json"), json));
 
         // {"id":3, "name":"Java"}
@@ -590,9 +590,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Assert that JSON field has value.
-     * 
+     *
      * Parses JSON, compares expected valu eot actual value.
-     * 
+     *
      * @param json
      * @param fieldName
      *            - field name
@@ -638,9 +638,9 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Assert that JSON field has a value/is preent
-     * 
+     *
      * Parses JSON, compares expected valu eot actual value.
-     * 
+     *
      * @param json
      * @param fieldName
      *            - field name
@@ -746,7 +746,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Test bad event type names, ensure method throws an exception.
-     * 
+     *
      * @throws Exception
      */
     public void testInvalidEventTypes() throws Exception {
@@ -778,7 +778,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Test valid event types.
-     * 
+     *
      * @throws Exception
      */
     public void testValidEventTypes() throws Exception {
@@ -799,7 +799,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
     /**
      * Test valid event types.
-     * 
+     *
      * @throws Exception
      */
     public void testLotsOfValidTypes() throws Exception {
