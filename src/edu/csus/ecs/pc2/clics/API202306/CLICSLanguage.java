@@ -11,9 +11,9 @@ import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * CLICS Judgment test case
- * Contains information about a single test case (run)
- * 
+ * CLICS Language
+ * Contains information about a language
+ *
  * @author John Buck
  *
  */
@@ -43,7 +43,7 @@ public class CLICSLanguage {
 
     /**
      * Fills in the test case properties
-     * 
+     *
      * @param language The language being serialized
      */
     public CLICSLanguage(Language language) {
@@ -58,7 +58,7 @@ public class CLICSLanguage {
         }
         extensions = LanguageUtilities.getExtensionsForLanguage(id, name);
     }
-    
+
     public String toJSON() {
 
         try {

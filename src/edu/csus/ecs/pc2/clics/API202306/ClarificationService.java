@@ -42,9 +42,9 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
- * WebService to handle languages
+ * WebService to handle clarifications
  *
- * @author ICPC
+ * @author John Buck
  *
  */
 @Path("/contests/{contestId}/clarifications")

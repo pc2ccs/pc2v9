@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -12,11 +13,12 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -27,8 +29,8 @@ import edu.csus.ecs.pc2.imports.ccs.ICPCTSVLoader;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * WebService for handling teams
- * 
+ * WebService for handling organizations
+ *
  * @author John Buck
  *
  */
@@ -51,7 +53,7 @@ public class OrganizationService implements Feature {
     /**
      * Returns a representation of the current model organizations in JSON format. The returned value is a JSON array with one organization description per array element.
      * This is compliant with 2023-06
-     * 
+     *
      * @param contestId The contest
      * @return a {@link Response} object containing the model teams in JSON form
      */
@@ -64,13 +66,13 @@ public class OrganizationService implements Feature {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();        
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-        
+
         ArrayList<CLICSOrganization> olist = new ArrayList<CLICSOrganization>();
-        
+
         LoadAccounts.loadInstitutions(model);
-        
+
         // make up a list of CLICSOrganizations in use.
         for(Account account: model.getAccounts()) {
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
@@ -96,11 +98,11 @@ public class OrganizationService implements Feature {
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("{organizationId}/")
     public Response getOrganization(@PathParam("contestId") String contestId, @PathParam("organizationId") String organizationId) {
-        
+
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == true) {
             LoadAccounts.loadInstitutions(model);
-            
+
             String [] orgFields = ICPCTSVLoader.getInstitutionNames(organizationId);
             if(orgFields != null) {
                 // find a team who belongs to this organization
@@ -113,10 +115,10 @@ public class OrganizationService implements Feature {
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
-    
+
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
-     * 
+     *
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
