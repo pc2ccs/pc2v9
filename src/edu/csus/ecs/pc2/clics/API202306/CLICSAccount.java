@@ -28,7 +28,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
- * CLICS Team object
+ * CLICS Account object
  *
  * @author John Buck
  *
