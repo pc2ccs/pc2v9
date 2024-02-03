@@ -136,7 +136,7 @@ public class JSONTool {
         return element;
     }
 
-    public String getGroupId(Group group) {
+    public static String getGroupId(Group group) {
         String id = group.getElementId().toString();
         if (group.getGroupId() != -1) {
             id = Integer.toString(group.getGroupId());
@@ -341,7 +341,7 @@ public class JSONTool {
      * @param value
      * @return
      */
-    private boolean notEmpty(String value) {
+    public static boolean notEmpty(String value) {
         if (value != null && !value.equals("")) {
             return true;
         }
@@ -364,7 +364,7 @@ public class JSONTool {
         return element;
     }
 
-    public String getOrganizationId(Account account) {
+    public static String getOrganizationId(Account account) {
         String id = account.getInstitutionCode();
         if (id.startsWith("INST-U-")) {
             id = id.substring(7);
@@ -415,7 +415,7 @@ public class JSONTool {
         return element;
     }
 
-    public String getProblemId(Problem problem) {
+    public static String getProblemId(Problem problem) {
         String id = problem.getElementId().toString();
         // if we have a problem shortName use it, otherwise default to the internal id
         if (notEmpty(problem.getShortName())) {
@@ -434,7 +434,7 @@ public class JSONTool {
      *            - elapsed ms when submission submitted
      * @return wall time for run.
      */
-    private Calendar calculateElapsedWalltime(IInternalContest contest, long elapsedMS) {
+    public static Calendar calculateElapsedWalltime(IInternalContest contest, long elapsedMS) {
 
         ContestTime time = contest.getContestTime();
         if (time.getElapsedMins() > 0) {
@@ -507,18 +507,18 @@ public class JSONTool {
         return judgement.getAcronym();
     }
 
-    public String getSubmissionId(Run submission) {
+    public static String getSubmissionId(Run submission) {
         return Integer.toString(submission.getNumber());
     }
 
     /**
      * Get judgement type (acronym).
      */
-    public String getJudgementType(Judgement judgement) {
+    public static String getJudgementType(Judgement judgement) {
         return judgement.getAcronym();
     }
 
-    public String getLanguageId(Language language) {
+    public static String getLanguageId(Language language) {
         String key = language.getID();
         if (key == null || key.trim().equals("")) {
             key = language.getElementId().toString();
@@ -542,7 +542,16 @@ public class JSONTool {
         // SOMEDAY get the time from the server instead of the judge
         element.put("time", Utilities.getIso8601formatterWithMS().format(run.getDate().getTime()));
         // note this is the contest_time as seen on the judge
-        element.put("contest_time", ContestTime.formatTimeMS(run.getConestTimeMS()));
+        element.put("contest_time", ContestTime.formatTimeMS(run.getContestTimeMS()));
         return element;
+    }
+    
+    public Group getGroupFromNumber(String groupnum) {
+        for(Group group: model.getGroups()) {
+            if (getGroupId(group).equals(groupnum)) {
+                return(group);
+            }
+        }
+        return(null);
     }
 }

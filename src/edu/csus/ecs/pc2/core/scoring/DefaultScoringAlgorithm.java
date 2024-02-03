@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
@@ -289,16 +289,16 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     
     @Override
     public String getStandings(IInternalContest theContest, Properties properties, Log inputLog) throws IllegalContestState {
-           return getStandings(theContest, null, null, properties, inputLog);
+           return getStandings(theContest, null, null, null, properties, inputLog);
     }
     
-    /*
-     * (non-Javadoc)
-     * 
-     * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
-     */
     @Override
     public String getStandings(IInternalContest theContest, Run[] runs, Integer divisionNumber, Properties properties, Log inputLog) throws IllegalContestState {
+           return getStandings(theContest, null, divisionNumber, null, properties, inputLog);
+    }
+    
+    @Override
+    public String getStandings(IInternalContest theContest, Run[] runs, Integer divisionNumber, Group group, Properties properties, Log inputLog) throws IllegalContestState {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
@@ -405,17 +405,22 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
             }
             
-           initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber);
+           initializeStandingsRecordHash (theContest, accountList, accounts, problems, standingsRecordHash, divisionNumber, group);
             
             for (int i = 0; i < runs.length; i++) {
-                // skip runs that are deleted and
-                // skip runs whose submitter is no longer active and
-                // skip runs whose problem are no longer active
                 Account account = accountList.getAccount(runs[i].getSubmitter());
                 if (account == null) {
                     log.info("account could not be located for " + runs[i].getSubmitter());
                     continue;
                 }
+                // skip runs for accounts that are not on this scoreboard (after divisionNumber or group are applied)
+                // if division and group are null, then the account will always be in the hashtable (full scoreboard)
+                if(!standingsRecordHash.containsKey(account.getClientId().toString())) {
+                    continue;
+                }
+                // skip runs that are deleted and
+                // skip runs whose submitter is no longer active and
+                // skip runs whose problem are no longer active
                 if (!runs[i].isDeleted() && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) 
                         && problemHash.containsKey(runs[i].getProblemId().toString())) {
                     
@@ -1015,14 +1020,21 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param accounts
      * @param problems
      * @param standingsRecordHash
-     * @param divisionNumber 
+     * @param divisionNumber filter on division number
+     * @param group filter on group 
      */
-    private void initializeStandingsRecordHash(IInternalContest theContest, AccountList accountList, Account[] accounts, Problem[] problems, Hashtable<String, StandingsRecord> standingsRecordHash, Integer divisionNumber) {
+    private void initializeStandingsRecordHash(IInternalContest theContest, AccountList accountList, Account[] accounts, Problem[] problems, Hashtable<String, StandingsRecord> standingsRecordHash, Integer divisionNumber, Group group) {
 
         for (int i = 0; i < accountList.size(); i++) {
             Account account = accounts[i];
             if (account.getClientId().getClientType() == ClientType.Type.TEAM && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                
+              
+                if (group != null) {
+                    // if this account is not in the desired group, it does not count in the standings, so skip it
+                    if(group != ScoreboardUtilities.getGroup(theContest, account.getClientId())) {
+                        continue;
+                    }
+                }
                 if (divisionNumber != null) {
                     String div = ScoreboardUtilities.getDivision(theContest, account.getClientId());
                     if (!divisionNumber.toString().trim().equals(div.trim())) {
@@ -1032,6 +1044,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                         continue;
                     }
                 }
+              
                 StandingsRecord standingsRecord = new StandingsRecord();
                 SummaryRow summaryRow = standingsRecord.getSummaryRow();
                 // populate summaryRow with problems

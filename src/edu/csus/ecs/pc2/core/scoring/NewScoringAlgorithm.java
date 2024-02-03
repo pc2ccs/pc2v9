@@ -137,25 +137,48 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
     @Override
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties) throws IllegalContestState {
-        return getStandingsRecords(contest, null, properties, false, null);
+        return getStandingsRecords(contest, null, null, properties, false, null);
     }
     
-    private StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Properties properties) throws IllegalContestState {
-        return getStandingsRecords(contest, divisionNumber, properties, false, null);
+    private StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Group group, Properties properties) throws IllegalContestState {
+        return getStandingsRecords(contest, divisionNumber, group, properties, false, null);
+    }
+    
+    /**
+     * Returns sorted and ranked StandingsRecord for optional divisionNumber, if honorScoreboadFreeze is true then run results
+     * from the freeze period will be hidden,  unless the contest is unfrozen.
+     * 
+     * NB. This should probably be in INewScoringAlgorithm
+     * 
+     * @param contest
+     * @param divisionNumber
+     * @param properties
+     * @param honorScoreboardFreeze
+     * @param runs
+     * @return
+     * @throws IllegalContestState
+     */
+    // This should probably be in INewScoringAlgorithm
+    public StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
+        return getStandingsRecords(contest, divisionNumber, null, properties, true, runs);
     }
 
     /**
-     * Returns sorted and ranked StandingsRecord, if honorScoreboadFreeze is true then run results
+     * Returns sorted and ranked StandingsRecord for optional divisionNumber and/or Group, if honorScoreboadFreeze is true then run results
      * from the freeze period will be hidden,  unless the contest is unfrozen.
      * 
+     * NB. This should probably be in INewScoringAlgorithm
+     * 
      * @param contest
+     * @param divisionNumber get standings for this division, null for all
+     * @param group get standings for this group, null for all
      * @param properties
      * @param honorScoreboardFreeze
      * @param runs 
      * @return ranked StandingsRecords.
      * @throws IllegalContestState
      */
-    public StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
+    public StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Group group, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
         
         if (contest == null){
             throw new IllegalArgumentException("contest is null");
@@ -171,6 +194,12 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         Vector<Account> accountVector = new Vector<Account>();
         for(Account av : allAccountVector) {
             if(av.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                if (group != null) {
+                    // if this client is not a member of the desired group, skip it
+                    if(group != ScoreboardUtilities.getGroup(contest, av.getClientId())){
+                        continue;
+                    }
+                }
                 if (divisionNumber != null) {
                     String div = ScoreboardUtilities.getDivision(contest, av.getClientId());
                     if (! divisionNumber.toString().trim().equals(div.trim())){
@@ -266,15 +295,20 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
     
     @Override
     public String getStandings(IInternalContest contest, Properties properties, Log inputLog) throws IllegalContestState {
-        return getStandings(contest, null, null, properties, inputLog);
+        return getStandings(contest, null, null, null, properties, inputLog);
+    }
+    
+    @Override
+    public String getStandings(IInternalContest contest, Run[] runs, Integer divisionNumber, Properties properties, Log inputLog) throws IllegalContestState {
+        return getStandings(contest, null, null, null, properties, inputLog);
     }
     
     @Override
     // TODO SA SOMEDAY Move this to a SA Utility Class
     // returns XML String for standings.
-    public String getStandings(IInternalContest contest, Run[] runs, Integer divisionNumber, Properties properties, Log inputLog) throws IllegalContestState {
+    public String getStandings(IInternalContest contest, Run[] runs, Integer divisionNumber, Group group, Properties properties, Log inputLog) throws IllegalContestState {
 
-        StandingsRecord[] standings = getStandingsRecords(contest, divisionNumber, properties);
+        StandingsRecord[] standings = getStandingsRecords(contest, divisionNumber, group, properties);
 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
         IMemento summaryMememento = createSummaryMomento(contest.getContestInformation(), mementoRoot);

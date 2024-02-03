@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.Utilities;
@@ -117,6 +118,8 @@ public class Run extends Submission {
      * Short/basename for submitted file.
      */
     private char[] entryPoint;
+    
+    private Date judgeStartDate = null;
 
     public Run(ClientId submitter, Language languageId, Problem problemId) {
         super();
@@ -162,6 +165,11 @@ public class Run extends Submission {
      *            The status to set.
      */
     public void setStatus(Run.RunStates status) {
+        // TODO: what about Runstates.BEING_RE_JUDGED ? 
+        // TODO: what about Runstates.BEING_COMPUTER_JUDGED - this is never set by anyone, but we'll check it anyway since other code does
+        if(status == RunStates.BEING_JUDGED || status == RunStates.BEING_COMPUTER_JUDGED) {
+            setJudgeStartDate();
+        }
         this.status = status;
     }
 
@@ -409,6 +417,10 @@ public class Run extends Submission {
             if (getStatus() != run.getStatus()) {
                 return false;
             }
+            if (getJudgeStartDate().equals(run.getJudgeStartDate())) {
+                return false;
+            }
+            
             if (!getJudgementRecord().equals(run.getJudgementRecord())) {
                 return false;
             }
@@ -487,5 +499,21 @@ public class Run extends Submission {
         }
         
         return null;
+    }
+
+    /**
+     * When a judge starts judging (set's state to being judged), this date gets set to the current time
+     * 
+     */
+    public void setJudgeStartDate() {
+        judgeStartDate = new Date();
+    }
+
+    /**
+     * 
+     * @return date when judge started judging
+     */
+    public Date getJudgeStartDate() {
+        return judgeStartDate;
     }
 }

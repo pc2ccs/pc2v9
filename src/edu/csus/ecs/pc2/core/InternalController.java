@@ -3698,8 +3698,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void submitClarification(Problem problem, String question) {
 
+        submitClarification(new ClientId(contest.getSiteNumber(), Type.SERVER, 0), problem, question);
+    }
+
+    public void submitClarification(ClientId clientId, Problem problem, String question) {
+
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-        Clarification clarification = new Clarification(contest.getClientId(), problem, question);
+        
+        Clarification clarification = new Clarification(clientId, problem, question);
 
         Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
 
