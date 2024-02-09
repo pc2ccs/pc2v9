@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.File;
@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 
@@ -23,7 +24,7 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 
 /**
  * Provide a class that will save the accounts in various formats.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -35,11 +36,11 @@ public final class ExportAccounts {
      */
     public static final String[] COLUMN_TITLES = { "site", "account", "displayname", "password", "group", "permdisplay", //
         "permlogin", "externalid", "alias", "permpassword", //
-        
+
         Constants.LONGSCHOOLNAME_COLUMN_NAME,  Constants.SHORTSCHOOLNAME_COLUMN_NAME, Constants.COUNTRY_CODE_COLUMN_NAME,
-        
+
         };
-    
+
     private static Hashtable<ElementId, String> groupHash;
     private static Exception exception = null;
 
@@ -49,7 +50,7 @@ public final class ExportAccounts {
 
     /**
      * Output file formats.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      */
     public enum Formats {
@@ -69,8 +70,8 @@ public final class ExportAccounts {
 
     /**
      * Save accounts for filename based on format.
-     * 
-     * @param outputFile 
+     *
+     * @param outputFile
      * @return true on success, otherwise returns false and getException() can be used to get the error
      */
     public static boolean saveAccounts(Formats format, Account[] accounts, Group[] groups, File outputFile) {
@@ -172,8 +173,16 @@ public final class ExportAccounts {
         a[1] = account.getClientId().getName();
         a[2] = account.getDisplayName();
         a[3] = account.getPassword();
-        if (account.getGroupId() != null) {
-            a[4] = groupHash.get(account.getGroupId());
+        // for groups, we create a csv list of them
+        if (account.getGroupIds() != null) {
+            ArrayList<String> groupnames = new ArrayList<String>();
+            for(ElementId elementId: account.getGroupIds()) {
+                String groupName = groupHash.get(elementId);
+                if(groupName != null) {
+                    groupnames.add(groupName);
+                }
+            }
+            a[4] = String.join(",", groupnames);
         } else {
             a[4] = ""; //$NON-NLS-1$
         }
@@ -187,7 +196,7 @@ public final class ExportAccounts {
         a[10] = account.getLongSchoolName();
         a[11] = account.getShortSchoolName();
         a[12] = account.getCountryCode();
-        
+
         return a;
     }
 
@@ -218,24 +227,29 @@ public final class ExportAccounts {
         return xmlString;
 
     }
-    
+
     public static void addSingleAccountXML(Account account, Hashtable<ElementId,String> groups, XMLMemento mementoRoot) {
         // titles = { "site", "account", "displayname", "password", "group", "permdisplay", "permlogin", "externalid", "alias", "permpassword" };
 
         // XXX these 1st ones are from teamStanding of the scoreboard xml
         IMemento accountMemento = mementoRoot.createChild("account");
-        accountMemento.putString("teamName", account.getDisplayName()); 
+        accountMemento.putString("teamName", account.getDisplayName());
         accountMemento.putInteger("teamId", account.getClientId().getClientNumber());
         accountMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
         accountMemento.putString("teamKey", account.getClientId().getTripletKey());
         accountMemento.putString("teamExternalId", account.getExternalId());
         accountMemento.putString("teamAlias", account.getAliasName().trim());
         // now the rest of the the data
-        String groupName = "";
-        if (account.getGroupId() != null) {
-            groupName = groups.get(account.getGroupId());
+        // for groups, we create a separate tag <groups>, and a list of <group> under that
+        if (account.getGroupIds() != null) {
+            IMemento groupMemento = accountMemento.createChild("groups");
+            for(ElementId elementId: account.getGroupIds()) {
+                String groupName = groupHash.get(elementId);
+                if(groupName != null) {
+                    groupMemento.putString("group", groupName);
+                }
+            }
         }
-        accountMemento.putString("groupName", groupName);
         accountMemento.putString("accountName", account.getClientId().getName());
         accountMemento.putInteger("siteId", account.getSiteNumber());
         accountMemento.putString("password", account.getPassword());

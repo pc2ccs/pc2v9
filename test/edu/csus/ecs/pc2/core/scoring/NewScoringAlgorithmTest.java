@@ -42,7 +42,7 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
- * Unit tests. 
+ * Unit tests.
  * @author pc2@ecs.csus.edu
  */
 
@@ -75,7 +75,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         }
 
     }
-    
+
     public void testScoringAdjustments() throws Exception {
         SampleContest sampleContest = new SampleContest();
 
@@ -88,7 +88,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
         account.setScoringAdjustment(-2);
         contest.updateAccount(account);
-        
+
         StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, new Properties());
         assertEquals("scoring adjustment -2", 10, standingsRecords[0].getPenaltyPoints());
         account.setScoringAdjustment(-15);
@@ -128,7 +128,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         StandingsRecord standingsRecord = standingsRecords[1];
         JsonNode rootNode = mapper.readTree(standingsRecord.toString());
         for (Iterator<JsonNode> iterator = rootNode.findValue("listOfSummaryInfo").elements(); iterator.hasNext();) {
-            JsonNode type = (JsonNode) iterator.next();
+            JsonNode type = iterator.next();
             long pendingRunCount = type.get("pendingRunCount").asLong();
             long numberSubmitted = type.get("numberSubmitted").asLong();
             assertEquals("for team 2 number submitted should equal pending run count", numberSubmitted, pendingRunCount);
@@ -143,7 +143,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         rootNode = mapper.readTree(standingsRecord.toString());
 
         for (Iterator<Entry<String, JsonNode>> iterator = rootNode.findValue("listOfSummaryInfo").fields(); iterator.hasNext();) {
-            Entry<String, JsonNode> type = (Entry<String, JsonNode>) iterator.next();
+            Entry<String, JsonNode> type = iterator.next();
             if (type.getKey().equals("2")) {
                 long pendingRunCount = type.getValue().get("pendingRunCount").asLong();
                 long numberSubmitted = type.getValue().get("numberSubmitted").asLong();
@@ -155,7 +155,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Submit and judge a run.
-     * 
+     *
      * @param contest
      * @param judgementIndex
      * @param solved
@@ -187,7 +187,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Create a new run in the contest.
-     * 
+     *
      * @param contest
      * @param elapsedMinutes
      * @return created run.
@@ -237,7 +237,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         if (debugMode){
             System.out.println("debug records " + standingsRecords.length);
         }
-        
+
         assertEquals("Expecting one team per group", teamsPerGroup * groupNames.length, standingsRecords.length);
 
         for (Group group : contest.getGroups()) {
@@ -250,7 +250,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         }
 
         // TODO CCS figure out assertNull fails below
-        
+
 //        Run aRun = createJudgedRun(contest, 0, true, 12);
 //        aRun.setSubmitter(getTeamAccounts(contest)[0].getClientId()); // assign to team 1
 //
@@ -276,16 +276,16 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
     private void assignGroups(IInternalContest contest, Group group, int startr, int count) {
         Account[] accounts = getTeamAccounts(contest);
         for (int i = startr; i < startr + count; i++) {
-            accounts[i].setGroupId(group.getElementId());
+            accounts[i].addGroupId(group.getElementId(), (i == startr));
             if (debugMode) {
-                System.out.println("debug Account  " + accounts[i].getClientId() + " " + accounts[i].getGroupId());
+                System.out.println("debug Account  " + accounts[i].getClientId() + " " + accounts[i].getGroupIds().toString());
             }
         }
     }
-    
-    
+
+
     protected Run [] addTc1Runs(IInternalContest contest) throws Exception {
-        
+
         String [] runsDataList = { //
                 "1,101,B,1,Yes", //
                 "2,151,C,1,Yes", //
@@ -316,28 +316,28 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
 
         return contest.getRuns();
     }
-    
+
     private void initializeStaticLog(String name) {
         StaticLog.setLog(new Log("logs", name + ".log"));
     }
-    
+
     public void testWithTestContest1() throws Exception {
-        
+
         initializeStaticLog(getName());
         InternalContest contest = new InternalContest();
         String cdpDir = getTestSampleContestDirectory("tc1");
-  
+
         IContestLoader loader = new ContestSnakeYAMLLoader();
         loader.initializeContest(contest, new File( cdpDir));
         setFirstTeamClient(contest);
-        
+
         Group[] groups = contest.getGroups();
-        
+
         for (Group group : groups) {
             String divName = ScoreboardUtilities.getDivision(group.getDisplayName());
             assertNotNull("No division found for "+group.getDisplayName(), divName);
         }
-        
+
         Account[] accounts = getTeamAccounts(contest);
         Arrays.sort(accounts, new AccountComparator());
         for (Account account : accounts) {
@@ -350,18 +350,18 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         assertEquals("Expecting # jugements", 10, judgements.length);
 
         addTc1Runs(contest);
-        
+
         Run[] runlist = contest.getRuns();
         for (Run run : runlist) {
             assertNotNull("Expecting account for "+run.getSubmitter(), contest.getAccount(run.getSubmitter()));
             String div = ScoreboardUtilities.getDivision(contest, run.getSubmitter());
             assertNotNull("Missing division for "+run.getSubmitter(), div);
         }
-        
+
         assertEquals("Expecting # runs", 21, runlist.length);
-        
+
         ClientId client1 = accounts[5].getClientId();
-        Group group = contest.getGroup(contest.getAccount(client1).getGroupId());
+        Group group = contest.getGroup(contest.getAccount(client1).getPrimaryGroupId());
 
         Run[] runs = ScoreboardUtilities.getRunsForUserDivision(client1, contest);
         assertEquals("Expecting runs matching group " + group, 7, runs.length);
@@ -371,12 +371,12 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         assertEquals("Expecting runs matching group " + group, 5, runs.length);
 
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
-        
+
         Account acc = contest.getAccount(client1);
-        assertNotNull(acc.getGroupId());
-        Group group2 = contest.getGroup(acc.getGroupId());
+        assertNotNull(acc.getPrimaryGroupId());
+        Group group2 = contest.getGroup(acc.getPrimaryGroupId());
         assertNotNull(group2);
-        
+
         String divString = ScoreboardUtilities.getDivision(contest, client1);
         Integer division = new Integer(divString);
         ClientId id  = contest.getClientId();
@@ -384,7 +384,7 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, division,DefaultScoringAlgorithm.getDefaultProperties(), false, runs);
         assertEquals("Expecting standing records for client "+client1, 18, standingsRecords.length);
 
-        
+
         ClientId lastClient = accounts[accounts.length-1].getClientId();
         division = 3;
         standingsRecords = scoringAlgorithm.getStandingsRecords(contest, division, DefaultScoringAlgorithm.getDefaultProperties(), false, runs);
@@ -393,30 +393,30 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
         division = 1;
         Run[] divRuns = ScoreboardUtilities.getRunsForDivision(contest, division.toString());
         assertEquals("Expecting run count for division "+division, 5, divRuns.length);
-        
+
         division = 2;
         divRuns = ScoreboardUtilities.getRunsForDivision(contest, division.toString());
         assertEquals("Expecting run count for division "+division, 7, divRuns.length);
-        
+
         division = 3;
         divRuns = ScoreboardUtilities.getRunsForDivision(contest, division.toString());
         assertEquals("Expecting run count for division "+division, 9, divRuns.length);
-        
-        
+
+
     }
 
     /**
      * Assign client for contest to first team.
-     * 
+     *
      * @param contest
      */
     private void setFirstTeamClient(IInternalContest contest) {
         Account[] acc = getTeamAccounts(contest);
         Arrays.sort(acc, new AccountComparator());
         contest.setClientId(acc[0].getClientId());
-        
+
     }
-    
+
     /**
      * Test whether NSA team name matches Team Display Format name
      * @throws Exception
@@ -479,8 +479,8 @@ public class NewScoringAlgorithmTest extends AbstractTestCase {
             Account account = contest.getAccount(clientId);
 
             Group group = null;
-            if (account.getGroupId() != null) {
-                group = contest.getGroup(account.getGroupId());
+            if (account.getPrimaryGroupId() != null) {
+                group = contest.getGroup(account.getPrimaryGroupId());
             }
 
             String expectedDisplayName = ScoreboardVariableReplacer.substituteDisplayNameVariables(teamScoreboardDisplayForamtString, account, group);

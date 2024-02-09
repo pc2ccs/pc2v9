@@ -11,7 +11,7 @@ import edu.csus.ecs.pc2.core.model.Group;
 
 /**
  * ICPC Import Data.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -26,7 +26,7 @@ public class ICPCImportData {
     private ICPCAccount[] accounts;
 
     /**
-     * 
+     *
      */
     public ICPCImportData() {
         super();
@@ -43,8 +43,8 @@ public class ICPCImportData {
         accounts = new ICPCAccount[inAccounts.size()];
         int accountCount = 0;
         while (accountsEnum.hasMoreElements()) {
-            Account account = (Account) accountsEnum.nextElement();
-            ICPCAccount icpcAccount = new ICPCAccount(account, groupHash.get(account.getGroupId()));
+            Account account = accountsEnum.nextElement();
+            ICPCAccount icpcAccount = new ICPCAccount(account, groupHash);
             accounts[accountCount] = icpcAccount;
             accountCount++;
         }

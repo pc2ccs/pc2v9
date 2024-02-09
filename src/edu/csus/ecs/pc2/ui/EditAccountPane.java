@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -10,7 +10,6 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.Serializable;
 import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
@@ -30,6 +29,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.PermissionGroup;
+import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.list.PermissionByDescriptionComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -46,7 +46,7 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Add/Edit Account Pane
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -55,11 +55,16 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
 public class EditAccountPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -1572390105202179281L;
 
-    private static final String NONE_SELECTED = "NONE SELECTED";
+    public static final String CHECKBOX_GROUP_PROPERTY = "group";
+
+    // the original height of the jcombobox was 22.  the groups jlist is 3 lines, so we added 46(?)
+    // this makes it easier to make the groups list box bigger without having to change all the
+    // control offsets below it.
+    private static final int GROUPS_LIST_HEIGHT = 68;
 
     private JPanel messagePane = null;
 
@@ -77,6 +82,8 @@ public class EditAccountPane extends JPanePlugin {
 
     private ListModel<Object> defaultListModel = new DefaultListModel<Object>();
 
+    private ListModel<Object> groupsListModel = new DefaultListModel<Object>();
+
     private Log log = null;
 
     private JSplitPane mainSplitPane = null;
@@ -93,6 +100,10 @@ public class EditAccountPane extends JPanePlugin {
 
     private JLabel permissionCountLabel = null;
 
+    private JScrollPane groupsScrollPane = null;
+
+    private JCheckBoxJList groupsJList = null;
+
     private JLabel displayNameLabel = null;
 
     private JTextField displayNameTextField = null;
@@ -106,8 +117,6 @@ public class EditAccountPane extends JPanePlugin {
     private JLabel jLabel = null;
 
     private JLabel groupTitleLabel = null;
-
-    private JComboBox<Serializable> groupComboBox = null;
 
     private boolean populatingGUI = false;
 
@@ -138,7 +147,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public EditAccountPane() {
         super();
@@ -147,7 +156,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * Class to verify numbers.
-     * 
+     *
      * @author Troy
      *
      */
@@ -172,7 +181,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -183,6 +192,7 @@ public class EditAccountPane extends JPanePlugin {
         this.add(getMainSplitPane(), java.awt.BorderLayout.CENTER);
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         log = getController().getLog();
@@ -191,9 +201,11 @@ public class EditAccountPane extends JPanePlugin {
 
     private void addWindowCloserListener() {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if (getParentFrame() != null) {
                     getParentFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override
                         public void windowClosing(java.awt.event.WindowEvent e) {
                             handleCancelButton();
                         }
@@ -203,13 +215,14 @@ public class EditAccountPane extends JPanePlugin {
         });
     }
 
+    @Override
     public String getPluginTitle() {
         return "Edit Account Pane";
     }
 
     /**
      * This method initializes messagePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMessagePane() {
@@ -227,7 +240,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes buttonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -245,7 +258,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes addButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getAddButton() {
@@ -254,6 +267,7 @@ public class EditAccountPane extends JPanePlugin {
             addButton.setText("Add");
             addButton.setEnabled(false);
             addButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     addAccount();
                 }
@@ -289,7 +303,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes updateButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getUpdateButton() {
@@ -299,6 +313,7 @@ public class EditAccountPane extends JPanePlugin {
             updateButton.setEnabled(false);
             updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
             updateButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     updateAccount();
                 }
@@ -345,7 +360,7 @@ public class EditAccountPane extends JPanePlugin {
             showMessage("Select a site");
             return false;
         }
-        
+
         if (getDisplayNameTextField().getText().length() == 0){
             showMessage("Enter a display name");
             return false;
@@ -356,7 +371,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes cancelButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getCancelButton() {
@@ -365,6 +380,7 @@ public class EditAccountPane extends JPanePlugin {
             cancelButton.setText("Cancel");
             cancelButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     handleCancelButton();
                 }
@@ -411,6 +427,7 @@ public class EditAccountPane extends JPanePlugin {
         this.account = account;
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 populateGUI(account);
                 enableUpdateButtons(false);
@@ -430,14 +447,14 @@ public class EditAccountPane extends JPanePlugin {
             getDisplayNameTextField().setText("");
             getPasswordTextField().setText("");
             getPasswordConfirmField().setText("");
-            populateGroupComboBox(null);
+            populateGroupsList(null);
 
             getAddButton().setVisible(true);
             getUpdateButton().setVisible(false);
 
             getAccountTypeComboBox().setSelectedIndex(0);
             getAccountTypeComboBox().setEnabled(true);
-            
+
             loadSiteComboBox (getContest().getSiteNumber());
             getSiteSelectionComboBox().setEnabled(true);
 
@@ -451,7 +468,7 @@ public class EditAccountPane extends JPanePlugin {
             getPasswordTextField().setText(account2.getPassword());
             getPasswordConfirmField().setText(account2.getPassword());
 
-            populateGroupComboBox(account2.getGroupId());
+            populateGroupsList(account2);
             getAliasTextField().setText(account2.getAliasName());
 
             populatePermissions(account2);
@@ -464,7 +481,7 @@ public class EditAccountPane extends JPanePlugin {
             edu.csus.ecs.pc2.core.model.ClientType.Type accountType = account2.getClientId().getClientType();
 
             for (int i = 0; i < getAccountTypeComboBox().getItemCount(); i++) {
-                ClientType.Type type = (ClientType.Type) getAccountTypeComboBox().getItemAt(i);
+                ClientType.Type type = getAccountTypeComboBox().getItemAt(i);
                 if (accountType.equals(type)) {
                     getAccountTypeComboBox().setSelectedIndex(i);
                 }
@@ -490,11 +507,11 @@ public class EditAccountPane extends JPanePlugin {
     }
 
     private void loadSiteComboBox(int siteNumber) {
-        
+
         int selectedIndex = getSiteSelectionComboBox().getSelectedIndex();
-        
+
         getSiteSelectionComboBox().removeAllItems();
-        
+
         Site[] sites = getContest().getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
         for (int i = 0; i < sites.length; i++) {
@@ -510,32 +527,65 @@ public class EditAccountPane extends JPanePlugin {
 
         if (selectedIndex != -1) {
             getSiteSelectionComboBox().setSelectedIndex(selectedIndex);
-        } 
+        }
     }
 
-    private void populateGroupComboBox(ElementId elementId) {
-        int groupIndex = 0;
-        int selectedIndex = 0;
-        Group[] groups = getContest().getGroups();
+    private void populateGroupsList(Account inAccount) {
 
-        getGroupComboBox().removeAllItems();
-        getGroupComboBox().addItem(NONE_SELECTED);
-        for (Group group : groups) {
-            groupIndex++;
-            getGroupComboBox().addItem(group);
-            if (elementId != null) {
-                if (group.getElementId().equals(elementId)) {
-                    selectedIndex = groupIndex;
+        ((DefaultListModel<Object>) groupsListModel).removeAllElements();
+
+        Group [] allgroups = getContest().getGroups();
+        Arrays.sort(allgroups, new GroupComparator());
+
+        // No account, or no groups, just show unchecked list
+        if (inAccount == null || inAccount.getGroupIds() == null) {
+
+            for (Group group : allgroups) {
+                addGroupCheckBox(group);
+            }
+            getGroupsJList().setSelectedIndex(-1);
+
+        } else {
+
+            int count = 0;
+            for (Group group : allgroups) {
+                if (account.isGroupMember(group.getElementId())) {
+                    count++;
+                }
+            }
+
+            if (count > 0) {
+                int[] indexes = new int[count];
+                count = 0;
+                int idx = 0;
+                for (Group group : allgroups) {
+                    addGroupCheckBox(group);
+                    if (account.isGroupMember(group.getElementId())) {
+                        indexes[count] = idx;
+                        count++;
+                    }
+                    idx++;
+                }
+                getGroupsJList().setSelectedIndices(indexes);
+                getGroupsJList().ensureIndexIsVisible(0);
+            } else {
+                for (Group group : allgroups) {
+                    addGroupCheckBox(group);
                 }
             }
         }
-        getGroupComboBox().setSelectedIndex(selectedIndex);
+    }
+
+    private void addGroupCheckBox(Group group) {
+        JCheckBox checkBox = new JCheckBox(group.getDisplayName());
+        checkBox.putClientProperty(CHECKBOX_GROUP_PROPERTY, group);
+        ((DefaultListModel<Object>) groupsListModel).addElement(checkBox);
     }
 
     private void populatePermissions(Account inAccount) {
 
         ((DefaultListModel<Object>) defaultListModel).removeAllElements();
-        
+
         Permission.Type[] types = Permission.Type.values();
         Arrays.sort(types, new PermissionByDescriptionComparator());
 
@@ -594,6 +644,7 @@ public class EditAccountPane extends JPanePlugin {
 
     public void showMessage(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(message);
             }
@@ -602,6 +653,7 @@ public class EditAccountPane extends JPanePlugin {
 
     public void showPermissionCount(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 permissionCountLabel.setText(message);
             }
@@ -610,7 +662,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes mainSplitPane
-     * 
+     *
      * @return javax.swing.JSplitPane
      */
     private JSplitPane getMainSplitPane() {
@@ -618,21 +670,21 @@ public class EditAccountPane extends JPanePlugin {
             mainSplitPane = new JSplitPane();
             mainSplitPane.setOneTouchExpandable(true);
             mainSplitPane.setDividerLocation(300);
-            mainSplitPane.setLeftComponent(getPermissionPane());
-            mainSplitPane.setRightComponent(getAccountPane());
+            mainSplitPane.setLeftComponent(getAccountPane());
+            mainSplitPane.setRightComponent(getPermissionPane());
         }
         return mainSplitPane;
     }
 
     /**
      * This method initializes permissionPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
-    private JPanel getPermissionPane() {
+    private JPanel getAccountPane() {
         if (accountDetailPane == null) {
             aliasLabel = new JLabel();
-            aliasLabel.setBounds(new Rectangle(15, 326, 133, 16));
+            aliasLabel.setBounds(new Rectangle(15, 304 + GROUPS_LIST_HEIGHT, 133, 16));
             aliasLabel.setText("Alias");
             siteLabel = new JLabel();
             siteLabel.setBounds(new java.awt.Rectangle(155, 221, 128, 16));
@@ -646,7 +698,7 @@ public class EditAccountPane extends JPanePlugin {
             jLabel1.setLocation(new java.awt.Point(15, 220));
             jLabel1.setSize(new java.awt.Dimension(134, 16));
             groupTitleLabel = new JLabel();
-            groupTitleLabel.setText("Group");
+            groupTitleLabel.setText("Groups");
             groupTitleLabel.setLocation(new java.awt.Point(15, 270));
             groupTitleLabel.setSize(new java.awt.Dimension(191, 16));
             jLabel = new JLabel();
@@ -671,7 +723,7 @@ public class EditAccountPane extends JPanePlugin {
             accountDetailPane.add(getPasswordConfirmField(), null);
             accountDetailPane.add(jLabel, null);
             accountDetailPane.add(groupTitleLabel, null);
-            accountDetailPane.add(getGroupComboBox(), null);
+            accountDetailPane.add(getGroupsScrollPane());
             accountDetailPane.add(jLabel1, null);
             accountDetailPane.add(getAccountTypeComboBox(), null);
             accountDetailPane.add(accountLabel, null);
@@ -682,7 +734,7 @@ public class EditAccountPane extends JPanePlugin {
             accountDetailPane.add(getAliasTextField(), null);
 
             scoringAdjustmentLabel = new JLabel("Scoring Adjustment");
-            scoringAdjustmentLabel.setBounds(15, 380, 271, 20);
+            scoringAdjustmentLabel.setBounds(15, 358 + GROUPS_LIST_HEIGHT, 271, 20);
             accountDetailPane.add(scoringAdjustmentLabel);
 
             accountDetailPane.add(getScoringAdjustmentTextField(), null);
@@ -693,9 +745,10 @@ public class EditAccountPane extends JPanePlugin {
     private JTextField getScoringAdjustmentTextField() {
         if (scoringAdjustmentTextField == null) {
             scoringAdjustmentTextField = new JTextField();
-            scoringAdjustmentTextField.setBounds(15, 405, 271, 22);
+            scoringAdjustmentTextField.setBounds(15, 383 + GROUPS_LIST_HEIGHT, 271, 22);
             scoringAdjustmentTextField.setInputVerifier(new NumberVerifier());
             scoringAdjustmentTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -706,10 +759,10 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes accountPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
-    private JPanel getAccountPane() {
+    private JPanel getPermissionPane() {
         if (permissionPane == null) {
             permissionCountLabel = new JLabel();
             permissionCountLabel.setText("XX Permissions Selected");
@@ -731,7 +784,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes permissionScrollPane
-     * 
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getPermissionScrollPane() {
@@ -744,7 +797,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes permissionsJList
-     * 
+     *
      * @return javax.swing.JList
      */
     private JCheckBoxJList getPermissionsJList() {
@@ -753,6 +806,7 @@ public class EditAccountPane extends JPanePlugin {
             permissionsJList.setModel(defaultListModel);
             // ListSelectionListeners are called before JCheckBoxes get updated
             permissionsJList.addPropertyChangeListener("change", new PropertyChangeListener() {
+                @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     showPermissionCount(permissionsJList.getSelectedIndices().length + " permissions selected");
                     enableUpdateButton();
@@ -764,7 +818,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes displayNameTextField
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getDisplayNameTextField() {
@@ -772,6 +826,7 @@ public class EditAccountPane extends JPanePlugin {
             displayNameTextField = new JTextField();
             displayNameTextField.setBounds(new java.awt.Rectangle(14, 88, 272, 22));
             displayNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -782,7 +837,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes passwordTextField
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getPasswordTextField() {
@@ -790,6 +845,7 @@ public class EditAccountPane extends JPanePlugin {
             passwordTextField = new JTextField();
             passwordTextField.setBounds(new Rectangle(14, 140, 272, 22));
             passwordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -800,7 +856,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes jTextField
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getPasswordConfirmField() {
@@ -808,6 +864,7 @@ public class EditAccountPane extends JPanePlugin {
             passwordConfirmField = new JTextField();
             passwordConfirmField.setBounds(new Rectangle(14, 191, 272, 22));
             passwordConfirmField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -817,21 +874,38 @@ public class EditAccountPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes jTextField
-     * 
-     * @return javax.swing.JTextField
+     * This method initializes groups ScrollPane
+     *
+     * @return javax.swing.JScrollPane
      */
-    private JComboBox<Serializable> getGroupComboBox() {
-        if (groupComboBox == null) {
-            groupComboBox = new JComboBox<Serializable>();
-            groupComboBox.setBounds(new java.awt.Rectangle(14, 291, 272, 22));
-            groupComboBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
+    private JScrollPane getGroupsScrollPane() {
+        if (groupsScrollPane == null) {
+            groupsScrollPane = new JScrollPane();
+            groupsScrollPane.setBounds(new java.awt.Rectangle(14, 291, 272, GROUPS_LIST_HEIGHT));
+            groupsScrollPane.setViewportView(getGroupsJList());
+        }
+        return groupsScrollPane;
+    }
+
+    /**
+     * This method initializes groupsJList
+     *
+     * @return javax.swing.JList
+     */
+    private JCheckBoxJList getGroupsJList() {
+        if (groupsJList == null) {
+            groupsJList = new JCheckBoxJList();
+            groupsJList.setModel(groupsListModel);
+
+            // ListSelectionListeners are called before JCheckBoxes get updated
+            groupsJList.addPropertyChangeListener("change", new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
                     enableUpdateButton();
                 }
             });
         }
-        return groupComboBox;
+        return groupsJList;
     }
 
     public void enableUpdateButton() {
@@ -881,7 +955,7 @@ public class EditAccountPane extends JPanePlugin {
     private Account getAccountFromFields(Account checkAccount) {
 
         Site site = (Site) getSiteSelectionComboBox().getSelectedItem();
-        
+
         if (checkAccount == null) {
             if (account == null) {
                 ClientType.Type clientType = (ClientType.Type) getAccountTypeComboBox().getSelectedItem();
@@ -911,11 +985,57 @@ public class EditAccountPane extends JPanePlugin {
 
         // get display name and group
         checkAccount.setDisplayName(getDisplayNameTextField().getText());
-        if (getGroupComboBox().getSelectedIndex() > 0) {
-            Group group = (Group) getGroupComboBox().getSelectedItem();
-            checkAccount.setGroupId(group.getElementId());
-        } else {
-            checkAccount.setGroupId(null);
+
+        // Currently selected groups on the GUI
+        Object[] gobjects = getGroupsJList().getSelectedValues();
+
+        // remember primary group from account, if any
+        ElementId primaryGroup = checkAccount.getPrimaryGroupId();
+
+        // We need a heuristic here to determine what to use as the primary group if
+        // there was none to start with.  Perhaps the one with the longest display name.
+        // Yes, we'll go with that for now, but it is a bit of a hack.
+        // This next block of code is here just to handle this. -- JB
+        int maxGroupNameLen = 0;
+        ElementId pickPrimaryGroup = null;
+        boolean primaryFound = false;
+
+        // find one with longest name of selected groups, also, checking if the current
+        // primary group is, in fact, still selected on the GUI.
+        for (Object object : gobjects) {
+            JCheckBox groupCheck = (JCheckBox)object;
+            Group group = (Group)groupCheck.getClientProperty(CHECKBOX_GROUP_PROPERTY);
+            if(group != null) {
+                String dispName = group.getDisplayName();
+                ElementId groupElementId = group.getElementId();
+
+                // Keep track of longest group name for picking a primary group if needed.
+                if(dispName.length() > maxGroupNameLen) {
+                    maxGroupNameLen = dispName.length();
+                    pickPrimaryGroup = groupElementId;
+                }
+
+                if(groupElementId == primaryGroup) {
+                    primaryFound = true;
+                }
+            }
+        }
+        // if no primary group, then use the one we picked, if any
+        if(!primaryFound) {
+            primaryGroup = pickPrimaryGroup;
+        }
+
+        // clear out the groups
+        checkAccount.clearGroups();
+        // now add each selected group to the account
+        for (Object object : gobjects) {
+            JCheckBox groupCheck = (JCheckBox)object;
+            Group group = (Group)groupCheck.getClientProperty(CHECKBOX_GROUP_PROPERTY);
+            if(group != null) {
+                ElementId groupElementId = group.getElementId();
+                boolean bPrimary = (groupElementId == primaryGroup);
+                checkAccount.addGroupId(groupElementId, bPrimary);
+            }
         }
 
         checkAccount.setSiteNumber(site.getSiteNumber());
@@ -933,7 +1053,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * Return Permission Type from description string.
-     * 
+     *
      * @param string
      * @return
      */
@@ -948,7 +1068,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * Intialize Account Type combo box
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<edu.csus.ecs.pc2.core.model.ClientType.Type> getAccountTypeComboBox() {
@@ -969,7 +1089,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes accountTextField
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getAccountTextField() {
@@ -984,7 +1104,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes siteSelectionComboBox
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<Site> getSiteSelectionComboBox() {
@@ -997,15 +1117,16 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes aliasTextField
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getAliasTextField() {
         if (aliasTextField == null) {
             aliasTextField = new JTextField();
-            aliasTextField.setLocation(new Point(14, 351));
+            aliasTextField.setLocation(new Point(14, 329 + GROUPS_LIST_HEIGHT));
             aliasTextField.setSize(new Dimension(272, 22));
             aliasTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
@@ -1016,7 +1137,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes permButtonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getPermButtonPane() {
@@ -1034,7 +1155,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * This method initializes resetPermissionsButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getResetPermissionsButton() {
@@ -1044,6 +1165,7 @@ public class EditAccountPane extends JPanePlugin {
             resetPermissionsButton.setToolTipText("Reset Default Permission");
             resetPermissionsButton.setMnemonic(KeyEvent.VK_R);
             resetPermissionsButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     resetPermissions();
                 }
@@ -1054,7 +1176,7 @@ public class EditAccountPane extends JPanePlugin {
 
     /**
      * Get default permissions and set them into listbox.
-     * 
+     *
      */
     protected void resetPermissions() {
         Account fakeAccount = new Account(account.getClientId(), account.getPassword(), account.getSiteNumber());

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.File;
@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Unit test.
- * 
+ *
  * @author Troy
  */
 public class LoadAccountsTest extends AbstractTestCase {
@@ -28,7 +28,7 @@ public class LoadAccountsTest extends AbstractTestCase {
     private Site[] sites = new Site[2];
 
     private AccountList accountList = new AccountList();
-    
+
     private SampleContest sample = new SampleContest();
 
     public LoadAccountsTest() {
@@ -39,8 +39,9 @@ public class LoadAccountsTest extends AbstractTestCase {
         super(arg0);
     }
 
+    @Override
     protected void setUp() throws Exception {
-        
+
         sites[0] = new Site("SOUTH", 2);
         sites[1] = new Site("NORTH", 1);
         accountList.generateNewAccounts(ClientType.Type.TEAM, 45, PasswordType.JOE, 1, true);
@@ -49,15 +50,16 @@ public class LoadAccountsTest extends AbstractTestCase {
     }
 
     public void testOne() throws Exception {
-            
+
             String testDataDir = getRootInputTestDataDirectory();
             String accountsFilename = testDataDir + File.separator +  "loadaccount" + File.separator + "accounts.txt";
             assertFileExists(accountsFilename);
-            
+
             LoadAccounts loadAccounts = new LoadAccounts();
             Account account = accountList.getAccount(new ClientId(1, ClientType.Type.TEAM, 1));
             Group group = new Group("Group 1");
-            account.setGroupId(group.getElementId());
+            account.clearGroups();
+            account.addGroupId(group.getElementId(), true);
             // these were broken in 1052
             account.setLongSchoolName("California State University, Sacramento");
             account.setShortSchoolName("CSUS");
@@ -73,15 +75,16 @@ public class LoadAccountsTest extends AbstractTestCase {
     }
 
     public void testTwo() throws Exception {
-        
+
             String testDataDir = getRootInputTestDataDirectory();
             String accountsFilename = testDataDir + File.separator + File.separator + "loadaccount" + File.separator + "accounts.min.txt";
             assertFileExists(accountsFilename);
-            
+
             LoadAccounts loadAccounts = new LoadAccounts();
             Account account = accountList.getAccount(new ClientId(1, ClientType.Type.TEAM, 1));
             Group group = new Group("Group 1");
-            account.setGroupId(group.getElementId());
+            account.clearGroups();
+            account.addGroupId(group.getElementId(), true);
             // these were broken in 1052
             account.setLongSchoolName("California State University, Sacramento");
             account.setShortSchoolName("CSUS");
@@ -98,12 +101,12 @@ public class LoadAccountsTest extends AbstractTestCase {
     }
 
     public void testThree() throws Exception {
-        
+
         String testDataDir = getRootInputTestDataDirectory();
         String accountsFilename = testDataDir + File.separator + File.separator + "loadaccount" + File.separator + "accounts.perm1.txt";
         assertFileExists(accountsFilename);
-        
-        
+
+
             LoadAccounts loadAccounts = new LoadAccounts();
             Account teamAccount = accountList.getAccount(new ClientId(1, ClientType.Type.TEAM, 1));
             accountList.update(teamAccount);
@@ -117,34 +120,34 @@ public class LoadAccountsTest extends AbstractTestCase {
             checkPermissions(accounts);
     }
     public void testFour() throws Exception {
-        
+
         String testDataDir = getRootInputTestDataDirectory();
         String accountsFilename = testDataDir + File.separator + "loadaccount" + File.separator + "accounts.649.txt";
         assertFileExists(accountsFilename);
 
-            LoadAccounts loadAccounts = new LoadAccounts();
-            Account teamAccount = accountList.getAccount(new ClientId(1, ClientType.Type.TEAM, 1));
-            accountList.update(teamAccount);
-            
-            
-            // 649 is checking group column vs externalid column
-            Group[] groups = new Group[1];
-            groups[0] = new Group("Lower");
-            Account[] accounts = loadAccounts.fromTSVFile(accountsFilename, accountList.getList(), groups);
-            for (int i = 0; i < accounts.length; i++) {
-                if (accounts[i].getClientId().equals(teamAccount.getClientId())) {
-                    assertEquals("group load",groups[0].getElementId(),accounts[i].getGroupId());
-                    assertEquals("externalId load","10", accounts[i].getExternalId());
-                    break;
-                }
+        LoadAccounts loadAccounts = new LoadAccounts();
+        Account teamAccount = accountList.getAccount(new ClientId(1, ClientType.Type.TEAM, 1));
+        accountList.update(teamAccount);
+
+
+        // 649 is checking group column vs externalid column
+        Group[] groups = new Group[1];
+        groups[0] = new Group("Lower");
+        Account[] accounts = loadAccounts.fromTSVFile(accountsFilename, accountList.getList(), groups);
+        for (int i = 0; i < accounts.length; i++) {
+            if (accounts[i].getClientId().equals(teamAccount.getClientId())) {
+                assertTrue("group load",accounts[i].isGroupMember(groups[0].getElementId()));
+                assertEquals("externalId load","10", accounts[i].getExternalId());
+                break;
             }
+        }
     }
     public void testScoreAdjustment() throws Exception {
-        
+
         String testDataDir = getRootInputTestDataDirectory();
         String accountsFilename = testDataDir + File.separator + "loadaccount" + File.separator + "accounts.scoreadjustment.txt";
         assertFileExists(accountsFilename);
-        
+
         LoadAccounts loadAccounts = new LoadAccounts();
         Account teamAccount = accountList.getAccount(new ClientId(1, ClientType.Type.TEAM, 1));
         accountList.update(teamAccount);
@@ -162,7 +165,7 @@ public class LoadAccountsTest extends AbstractTestCase {
                 }
             }
     }
-    
+
     public void checkPermissions(Account[] accounts) {
         for (Account account : accounts) {
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
@@ -175,28 +178,28 @@ public class LoadAccountsTest extends AbstractTestCase {
         }
 
     }
-    
+
     protected void generateFile(IInternalContest contest,  Formats format, String outputFile) throws Exception {
-        
+
         Group[] groups = contest.getGroups();
         Account[] accounts = SampleContest.getTeamAccounts(contest);
-        
+
         assertEquals("Team accounts ", 120, accounts.length);
         assertEquals("Groups ", 2, groups.length);
-        
+
         ExportAccounts.saveAccounts(format, accounts, groups, new File(outputFile));
-        
+
         if (ExportAccounts.getException() != null){
             throw ExportAccounts.getException();
         }
-        
+
     }
-    
+
     /**
      * Test load for 3 new institution fields.
-     * 
+     *
      * Bug 1067 test.
-     * 
+     *
      * @throws Exception
      */
     public void testLoadTXTFile() throws Exception {
@@ -234,12 +237,12 @@ public class LoadAccountsTest extends AbstractTestCase {
     }
 
     private void testAccountFields( IInternalContest contest, int teamNumber, String longInst, String shortInst, String countryCode) {
-        
+
         Account[] accounts = SampleContest.getTeamAccounts(contest, 3);
         Arrays.sort(accounts, new AccountComparator());
-        
+
         Account team = accounts[teamNumber - 1];
-        
+
         testAccountFields(team, longInst, shortInst, countryCode);
 
 //        dumpTeam(team);
@@ -247,7 +250,7 @@ public class LoadAccountsTest extends AbstractTestCase {
 //        assertEquals("int long name, " +teamId, longInst, team.getLongSchoolName());
 //        assertEquals("int short name, team " + teamId, shortInst, team.getShortSchoolName());
 //        assertEquals("country code, team " + teamId, countryCode, team.getCountryCode());
-        
+
     }
 
     private void testAccountFields(Account team, String longInst, String shortInst, String countryCode) {
@@ -271,5 +274,5 @@ public class LoadAccountsTest extends AbstractTestCase {
 
     }
 
-  
+
 }

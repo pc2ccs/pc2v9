@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.BufferedReader;
@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 
 /**
  * Load ICPC CSV Data.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -35,7 +35,7 @@ public final class LoadICPCData {
 
     /**
      * Caller is responsible for merging groups from ICPCImportData with the model grouplist and updating the ContestTitle.
-     * 
+     *
      * @param directory
      * @param sites
      * @return ICPCImportData populated with contestTitle and groups
@@ -70,7 +70,7 @@ public final class LoadICPCData {
 
     /**
      * This will load the PC2_Team.tab, including populating ICPCAccount group and client (if sufficient data is provided).
-     * 
+     *
      * @param directory
      * @param groups
      * @param existingAccounts
@@ -79,6 +79,7 @@ public final class LoadICPCData {
      */
     public static ICPCImportData loadAccounts(String directory, Group[] groups, Account[] existingAccounts) throws Exception {
         ICPCImportData accountData = new ICPCImportData();
+        // Map of CMS Group ID's to PC2 Groups
         HashMap<String, Group> groupMap = new HashMap<String, Group>();
         if (groups != null) {
             for (Group group : groups) {
@@ -108,10 +109,15 @@ public final class LoadICPCData {
         ICPCAccount[] accounts = accountData.getAccounts();
         if (accounts != null && accounts.length > 0) {
             for (ICPCAccount account : accounts) {
-                if (account.getGroupExternalId().length() > 0) {
-                    if (groupMap.containsKey(account.getGroupExternalId())) {
-                        Group group = groupMap.get(account.getGroupExternalId());
-                        account.setGroupId(group.getElementId());
+                // the external CMS group is was squirreled away when we processed the tab file in readFile above
+                // It needs to be converted to an ElementId and added to the groups map for the account
+                String extGroupId = account.getExternalGroupId();
+                if (extGroupId != null && extGroupId.length() > 0) {
+                    if (groupMap.containsKey(extGroupId)) {
+                        Group group = groupMap.get(account.getExternalGroupId());
+                        account.addGroupId(group.getElementId(), extGroupId);
+                        // external group id string is no longer valid since we only support the hashmap
+                        account.setExternalGroupId(null);
                         if (group.getSite() != null) {
                             int siteNum = group.getSite().getSiteNumber();
                             int accountNum = account.getAccountNumber();
@@ -196,7 +202,7 @@ public final class LoadICPCData {
 
     /**
      * This processes a PC2_Team.tab entry.
-     * 
+     *
      * @param values
      * @return file populated ICPCAccount
      */
@@ -227,10 +233,11 @@ public final class LoadICPCData {
             account.setAccountNumber(clientNumber);
         }
         account.setExternalId(values[1 + offset]);
+
         String groupId = values[2 + offset];
 
         if (groupId != null && groupId.trim().length() > 0) {
-            account.setGroupExternalId(groupId.trim());
+            account.setExternalGroupId(groupId.trim());
         }
         account.setExternalName(values[4 + offset]);
         account.setLongSchoolName(values[5 + offset]);
@@ -240,7 +247,7 @@ public final class LoadICPCData {
 
     /**
      * This processes a PC2_Site.tab entry, if their are 9 fields it will associate the Group to a Site based on the referenced pc2 site number.
-     * 
+     *
      * @param values
      * @param sites
      * @return populated (pc2) Group
@@ -270,7 +277,7 @@ public final class LoadICPCData {
 
     /**
      * This will process the PC2_Contest.tab line to pull out the title.
-     * 
+     *
      * @param values
      * @return InternalContest Title
      */
@@ -283,7 +290,7 @@ public final class LoadICPCData {
     }
 
     /**
-     * 
+     *
      */
     private LoadICPCData() {
         super();

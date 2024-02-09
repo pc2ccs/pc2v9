@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.util;
 
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Unit tests.
- * 
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
@@ -19,7 +19,7 @@ public class ScoreboardVariableReplacerTest extends AbstractTestCase {
 
     /**
      * Test substituteDisplayNameVariables with var string, account and group.
-     * 
+     *
      * @throws Exception
      */
     public void testSubstituteDisplayNameVariablesStringAccountGroup() throws Exception {
@@ -34,7 +34,7 @@ public class ScoreboardVariableReplacerTest extends AbstractTestCase {
         Arrays.sort(accounts, new AccountComparator());
 
         Account account3 = accounts[2];
-        Group group = contest.getGroup(account3.getGroupId());
+        Group group = contest.getGroup(account3.getPrimaryGroupId());
 
         String inputString = "Team Name: " + ScoreboardVariableReplacer.TEAM_NAME + //
                 ", number" + ScoreboardVariableReplacer.CLIENT_NUMBER + //
@@ -54,7 +54,7 @@ public class ScoreboardVariableReplacerTest extends AbstractTestCase {
 
     /**
      * Print all display variables and their values
-     * 
+     *
      * @param contest
      * @param account
      */
@@ -70,7 +70,7 @@ public class ScoreboardVariableReplacerTest extends AbstractTestCase {
 
     /**
      * Test substituteDisplayNameVariables with contest and account.
-     * 
+     *
      * @throws Exception
      */
     public void testSubstituteDisplayNameVariablesStringIInternalContestAccount() throws Exception {
@@ -104,8 +104,8 @@ public class ScoreboardVariableReplacerTest extends AbstractTestCase {
         assertEquals("Expecting sub string ", expected, actual);
 
         /**
-         * 
-         * 
+         *
+         *
          * GROUP_ID, // SHORT_SCHOOL_NAME, // LONG_SCHOOL_NAME, // COUNTRY_CODE, //
          */
 

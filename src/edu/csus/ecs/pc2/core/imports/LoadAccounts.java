@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.BufferedReader;
@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import edu.csus.ecs.pc2.core.Constants;
@@ -17,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -25,16 +27,16 @@ import edu.csus.ecs.pc2.imports.ccs.ICPCTSVLoader;
 
 /**
  * Methods that provide updated accounts for an input model and load account TSV file.
- *  
+ *
  * @author Troy pc2@ecs.csus.edu
  */
 public class LoadAccounts {
-    
+
     /**
      * List of existing groups
      */
     private Map<String,Group> groups = new HashMap<String,Group>();
-    
+
     /**
      * List of existing Accounts
      */
@@ -53,11 +55,11 @@ public class LoadAccounts {
     private int permDisplayColumn = -1;
 
     private int permLoginColumn = -1;
-    
+
     private int aliasColumn = -1;
-    
+
     private int externalIdColumn = -1;
-    
+
     private int permPasswordColumn = -1;
 
     /*
@@ -69,9 +71,9 @@ public class LoadAccounts {
     private int teamNameColumn = -1;
     private int scoreAdjustmentColumn = -1;
     private int institutionCodeColumn = -1;
-    
+
     /**
-     * 
+     *
      */
     public LoadAccounts() {
         super();
@@ -94,22 +96,28 @@ public class LoadAccounts {
         // TODO SOMEDAY would be nice if Account had a deep clone
         Account account = new Account(accountClean.getClientId(), accountClean.getPassword(), accountClean.getClientId().getSiteNumber());
         account.clearListAndLoadPermissions(accountClean.getPermissionList());
-        account.setGroupId(accountClean.getGroupId());
         account.setDisplayName(new String(accountClean.getDisplayName()));
         account.setAliasName(new String(accountClean.getAliasName()));
         account.setExternalId(new String(accountClean.getExternalId()));
         account.setExternalName(new String(accountClean.getExternalName()));
-        account.setGroupId(accountClean.getGroupId());
         account.setLongSchoolName(new String(accountClean.getLongSchoolName()));
         account.setShortSchoolName(new String(accountClean.getShortSchoolName()));
         account.setInstitutionCode(new String(accountClean.getInstitutionCode()));
         account.setInstitutionName(new String(accountClean.getInstitutionName()));
         account.setInstitutionShortName(new String(accountClean.getInstitutionShortName()));
+
+        // Copy groups to new account
+        HashSet<ElementId> groupsClean = accountClean.getGroupIds();
+        if(groupsClean != null) {
+            for(ElementId elementId : groupsClean) {
+                account.addGroupId(elementId, elementId.equals(accountClean.getPrimaryGroupId()));
+            }
+        }
         String [] existingMembers = accountClean.getMemberNames();
         if(existingMembers != null) {
             account.setMemberNames(StringUtilities.cloneStringArray(existingMembers));
         }
-        
+
         // now start changing
         if (passwordColumn != -1 && values.length > passwordColumn) {
             account.setPassword(values[passwordColumn]);
@@ -135,11 +143,23 @@ public class LoadAccounts {
         if (teamNameColumn != -1 && values.length > teamNameColumn) {
             account.setExternalName(values[teamNameColumn]);
         }
-        
+
         if (groups.size() > 0) {
             if (groupColumn != -1 && values.length > groupColumn && values[groupColumn].length() > 0) {
-                if (groups.containsKey(values[groupColumn])) {
-                    account.setGroupId(groups.get(values[groupColumn]).getElementId());
+                boolean needPrimaryGroup = true;
+
+                // only set primary group if it is not already set.
+                if(account.getPrimaryGroupId() != null) {
+                    needPrimaryGroup = false;
+                }
+
+                // may be a CSV list of CMS groups ids (to support multiple groups / team)
+                String [] cmsGroups = values[groupColumn].split(",");
+                for(String cmsGroup : cmsGroups) {
+                    if (groups.containsKey(cmsGroup)) {
+                        account.addGroupId(groups.get(cmsGroup).getElementId(), needPrimaryGroup);
+                        needPrimaryGroup = false;
+                    }
                 }
             }
         }
@@ -208,11 +228,11 @@ public class LoadAccounts {
         }
         return account;
     }
-    
-    
+
+
     /**
      * Create a new account or update an existing account given input values from load accounts file.
-     * 
+     *
      * @param values
      * @return
      * @throws IllegalTSVFormatException
@@ -237,27 +257,34 @@ public class LoadAccounts {
                 throw new IllegalTSVFormatException("Password required for new account for " + clientId);
             }
         }
-        
+
         Account account = new Account(existingAccount.getClientId(), existingAccount.getPassword(), existingAccount.getClientId().getSiteNumber());
-        
+
         account.clearListAndLoadPermissions(existingAccount.getPermissionList());
-        account.setGroupId(existingAccount.getGroupId());
         account.setDisplayName(new String(existingAccount.getDisplayName()));
         account.setAliasName(new String(existingAccount.getAliasName()));
         account.setExternalId(new String(existingAccount.getExternalId()));
         account.setExternalName(new String(existingAccount.getExternalName()));
-        account.setGroupId(existingAccount.getGroupId());
         account.setLongSchoolName(new String(existingAccount.getLongSchoolName()));
         account.setShortSchoolName(new String(existingAccount.getShortSchoolName()));
         account.setInstitutionCode(existingAccount.getInstitutionCode());
         account.setInstitutionName(existingAccount.getInstitutionName());
         account.setInstitutionShortName(existingAccount.getInstitutionShortName());
+
+        // Copy groups to new account
+        HashSet<ElementId> groupsExisting = existingAccount.getGroupIds();
+        if(groupsExisting != null) {
+            for(ElementId elementId : groupsExisting) {
+                account.addGroupId(elementId, elementId.equals(existingAccount.getPrimaryGroupId()));
+            }
+        }
+
         String [] existingMembers = existingAccount.getMemberNames();
         if(existingMembers != null) {
             account.setMemberNames(StringUtilities.cloneStringArray(existingMembers));
         }
         // now start updating fields
-        
+
         if (passwordColumn != -1 && values.length > passwordColumn) {
             account.setPassword(values[passwordColumn]);
         }
@@ -282,11 +309,24 @@ public class LoadAccounts {
         if (teamNameColumn != -1 && values.length > teamNameColumn) {
             account.setExternalName(values[teamNameColumn]);
         }
-        
+
+
         if (groups.size() > 0) {
             if (groupColumn != -1 && values.length > groupColumn && values[groupColumn].length() > 0) {
-                if (groups.containsKey(values[groupColumn])) {
-                    account.setGroupId(groups.get(values[groupColumn]).getElementId());
+                boolean needPrimaryGroup = true;
+
+                // only set primary group if it is not already set.
+                if(account.getPrimaryGroupId() != null) {
+                    needPrimaryGroup = false;
+                }
+
+                // may be a CSV list of CMS groups ids (to support multiple groups / team)
+                String [] cmsGroups = values[groupColumn].split(",");
+                for(String cmsGroup : cmsGroups) {
+                    if (groups.containsKey(cmsGroup)) {
+                        account.addGroupId(groups.get(cmsGroup).getElementId(), needPrimaryGroup);
+                        needPrimaryGroup = false;
+                    }
                 }
             }
         }
@@ -357,11 +397,11 @@ public class LoadAccounts {
     }
     /**
      * Returns a list of accounts updated from the input load accounts file.
-     * 
+     *
      * @see #fromTSVFile(IInternalContest, String, Account[], Group[])
-     * 
+     *
      * @param contest
-     * @param filename updates model accounts from file 
+     * @param filename updates model accounts from file
      * @return a list of accounts to update.
      * @throws Exception
      */
@@ -374,27 +414,27 @@ public class LoadAccounts {
         // we need to get them now since we have the contest object and these are all static methods that deal
         // with institutions
         loadInstitutions(contest);
-        
+
         Account[] updatedAccounts = new LoadAccounts().fromTSVFile(contest, filename, curAccounts, curGroups);
         return updatedAccounts;
     }
-   
+
     /**
      * Read a tab-separated values from a file.
-     * 
+     *
      * File must have a header of field names.  The fields can appear in any order.
-     * 
+     *
      * Reads TSV file, updates existing accounts in model, returns only a list
      * of accounts that should be updated.
-     * 
+     *
      * <P>
-     * 
+     *
      * All accounts that are specified in the tsv file must exist, if an account
      * does not exist then a IllegalTSVFormatException will be thrown.
-     * 
+     *
      * <P>
-     * 
-     * 
+     *
+     *
      * 1st line should contain the column headers.   Columns can appear in any order.
      * Supported column headers are:
      * <pre>
@@ -408,28 +448,28 @@ public class LoadAccounts {
      * site (required)
 
      * </pre>
-     * 
+     *
      * @param contest needed if institutions are to be used
      * @param filename
-     * @param existingAccounts 
+     * @param existingAccounts
      * @param groupList
      * @return an array of accounts
      * @throws Exception
      */
     public Account[] fromTSVFile(IInternalContest contest, String filename, Account[] existingAccounts, Group[] groupList) throws Exception  {
-        
+
         /**
          * Output accounts
          */
         Map<ClientId, Account> accountMap = new HashMap<ClientId, Account>();
-        
+
         if (existingAccounts != null && existingAccounts.length > 0) {
             for (int i = 0; i < existingAccounts.length; i++) {
                 existingAccountsMap.put(existingAccounts[i].getClientId(), existingAccounts[i]);
             }
         }
         createGroupMap(groupList);
-        
+
         int lineCount = 0;
         String[] columns;
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF8"));
@@ -460,9 +500,9 @@ public class LoadAccounts {
             countryCodeColumn = -1;
             teamNameColumn = -1;
             institutionCodeColumn = -1;
-            
+
             for (int i = 0; i < columns.length; i++) {
-                
+
                 if (Constants.SITE_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     siteColumn = i;
                 }
@@ -518,12 +558,12 @@ public class LoadAccounts {
                 throw new IllegalTSVFormatException(msg);
             }
         }
-        
+
         // only need to load institutions if the column is specified
         if(institutionCodeColumn != -1) {
             loadInstitutions(contest);
         }
-        
+
         line = in.readLine();
         lineCount++;
         while (line != null) {
@@ -535,7 +575,7 @@ public class LoadAccounts {
                     continue;
                 }
                 String[] values = TabSeparatedValueParser.parseLine(line);
-                
+
                 if (!values[accountColumn].equals("")) {
                     // No such account in contest model
                     Account account = getAccount(values);
@@ -568,7 +608,7 @@ public class LoadAccounts {
     /**
      * Legacy routine for unit tests.  Does not take an IInternalContest, meaning, institution codes will not work since we
      * have to validate them.
-     *  
+     *
      * @param filename
      * @param existingAccounts
      * @param groupList
@@ -578,12 +618,12 @@ public class LoadAccounts {
     public Account[] fromTSVFile(String filename, Account[] existingAccounts, Group[] groupList) throws Exception  {
         return(fromTSVFile(null, filename, existingAccounts, groupList));
     }
-    
+
     /**
      * Update accounts from accounts load file.
-     * 
+     *
      * @param loadFilename - accounts load filename.
-     * @throws Exception 
+     * @throws Exception
      */
     public static void updateAccountsFromLoadAccountsFile(IInternalContest contest, String loadAccountFilename) throws Exception {
         if (Utilities.fileExists(loadAccountFilename)) {
@@ -592,33 +632,33 @@ public class LoadAccounts {
             // we need to get them now since we have the contest object and these are all static methods that deal
             // with institutions
             loadInstitutions(contest);
-            
+
             Account[] updateAccounts = LoadAccounts.updateAccountsFromFile(contest, loadAccountFilename);
             contest.updateAccounts(updateAccounts);
             contest.storeConfiguration(StaticLog.getLog());
         }
     }
-    
-    
-    
+
+
+
     /**
      * Create a list of updated accounts, if account in TSV file does not exist will create a new Account.
-     * 
+     *
      * Intention is a list of all accounts in the TSV files that need to be updated or added.
-     * 
+     *
      * File must have a header of field names.  The fields can appear in any order.
-     * 
+     *
      * Reads TSV file, updates existing accounts in model, returns only a list
      * of accounts that should be updated.
-     * 
+     *
      * <P>
-     * 
+     *
      * All accounts that are specified in the tsv file must exist, if an account
      * does not exist then a IllegalTSVFormatException will be thrown.
-     * 
+     *
      * <P>
-     * 
-     * 
+     *
+     *
      * 1st line should contain the column headers.   Columns can appear in any order.
      * Supported column headers are:
      * <pre>
@@ -632,27 +672,27 @@ public class LoadAccounts {
      * site (required)
 
      * </pre>
-     * 
+     *
      * @param filename
-     * @param existingAccounts 
+     * @param existingAccounts
      * @param groupList
      * @return an array of accounts
      * @throws Exception
      */
     public Account[] fromTSVFileWithNewAccounts(IInternalContest contest, String filename, Account[] existingAccounts, Group[] groupList) throws Exception  {
-        
+
         /**
          * Output accounts
          */
         Map<ClientId, Account> accountMap = new HashMap<ClientId, Account>();
-        
+
         if (existingAccounts != null && existingAccounts.length > 0) {
             for (int i = 0; i < existingAccounts.length; i++) {
                 existingAccountsMap.put(existingAccounts[i].getClientId(), existingAccounts[i]);
             }
         }
         createGroupMap(groupList);
-        
+
         int lineCount = 0;
         String[] columns;
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF8"));
@@ -675,7 +715,7 @@ public class LoadAccounts {
             permLoginColumn = -1;
             permPasswordColumn = -1;
             scoreAdjustmentColumn = -1;
-            
+
             /*
              * These correspond to columns found in the icpc data
              */
@@ -684,9 +724,9 @@ public class LoadAccounts {
             countryCodeColumn = -1;
             teamNameColumn = -1;
             institutionCodeColumn = -1;
-            
+
             for (int i = 0; i < columns.length; i++) {
-                
+
                 if (Constants.SITE_COLUMN_NAME.equalsIgnoreCase(columns[i])) {
                     siteColumn = i;
                 }
@@ -742,7 +782,7 @@ public class LoadAccounts {
                 throw new IllegalTSVFormatException(msg);
             }
         }
-        
+
         // only load institutions if column is specified in file
         if(institutionCodeColumn != -1) {
             loadInstitutions(contest);
@@ -760,10 +800,10 @@ public class LoadAccounts {
                 String[] values = TabSeparatedValueParser.parseLine(line);
 
                 Account account = getAccountFromFields(values);
-                
-                
+
+
                 accountMap.put(account.getClientId(), account);
-                
+
             } catch (IllegalTSVFormatException e2) {
                 // already a properly formatted exception
                 in.close();
@@ -782,11 +822,11 @@ public class LoadAccounts {
         in = null;
         return accountMap.values().toArray(new Account[accountMap.size()]);
     }
-    
+
     /**
      * Creates a hash map of group ids and group display names to the group object
      * Used for mapping TSV group column value to a group
-     * 
+     *
      * @param groupList List of groups used to populate the map
      * @throws NumberFormatException if getGroupId() does not return an int (should not happen)
      */
@@ -799,18 +839,18 @@ public class LoadAccounts {
             //this should never throw an exception since getGroupId() returns 'int'
             //if it does, we want to abort the account load since something is really wrong.
             groups.put(Integer.toString(group.getGroupId()), group);
-        }        
+        }
     }
-    
+
     /**
      * Attempt to load the institutions from the supplied file.
-     * 
+     *
      * @param file probable location of the institutions.tsv file
      * @return true if loaded, false if error (file not found, etc)
      */
     public static boolean loadInstitutions(String file) {
         boolean found = false;
-        
+
         try {
             // have to check existance of file since loadInstitutions() doesn't care if it exists or not
             if(new File(file).exists()) {
@@ -822,10 +862,10 @@ public class LoadAccounts {
         }
         return(found);
     }
-    
+
     /**
      * Load the cdp institutions.tsv file, if present.  This is so we can validate institution codes supplied.
-     * 
+     *
      * @param contest - may be null, in which case we do not load institutions, and any attempt to change/set a new institution code will fail later
      */
     public static void loadInstitutions(IInternalContest contest) {
@@ -842,7 +882,7 @@ public class LoadAccounts {
 
     /**
      * Set an account's institution (school) information (formal and normal names based on institution ID.
-     * 
+     *
      * @param account The account whose institution is to be set
      * @param instCode Institution code, eg. 1474, INST-1474 or INST-U-1474 (all work - but
      *        what a mess.  Someone has to decide what an institution code IS.
@@ -866,6 +906,6 @@ public class LoadAccounts {
             StaticLog.warning(message);
             System.out.println("WARNING: " + message);
         }
-        
+
     }
 }

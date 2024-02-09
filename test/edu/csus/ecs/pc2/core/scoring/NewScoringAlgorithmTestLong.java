@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
@@ -45,7 +45,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Unit tests.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id: NewScoringAlgorithmTestLong.java 161 2010-03-14 06:37:02Z laned $
  */
@@ -77,6 +77,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
     // alt4: 5 0 20
     private Properties alt4 = populateProperties(5, 0, 20);
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
 
@@ -129,9 +130,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Initialize the contest.
-     * 
+     *
      * Initialize with problems, languages, accounts, judgements.
-     * 
+     *
      * @param contest
      */
     private void initContestData(IInternalContest contest) {
@@ -165,7 +166,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Create and return a new scoreboard client.
-     * 
+     *
      * @param contest
      * @return a ClientId for newly created scoreboard account.
      */
@@ -176,7 +177,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Insure that there is one team and one judge in the contest model.
-     * 
+     *
      * @param contest
      */
     private void checkForJudgeAndTeam(IInternalContest contest) {
@@ -192,7 +193,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Initialize contest with teams, problems, languages, judgements.
-     * 
+     *
      * @param contest
      * @param numTeams
      * @param numProblems
@@ -231,7 +232,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Create a new run in the contest.
-     * 
+     *
      * @param contest
      * @return created run.
      */
@@ -249,7 +250,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Create a new run in the contest.
-     * 
+     *
      * @param contest
      * @param elapsedMinutes
      * @return created run.
@@ -268,7 +269,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Verify XML created for a single unjudged run.
-     * 
+     *
      * @throws FileSecurityException
      * @throws ClassNotFoundException
      * @throws IOException
@@ -288,7 +289,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Verify XML created for a single unjudged run.
-     * 
+     *
      * @throws FileSecurityException
      * @throws ClassNotFoundException
      * @throws IOException
@@ -315,7 +316,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Create a judged run
-     * 
+     *
      * @param contest
      * @param judgementIndex
      *            - the judgement list index
@@ -344,7 +345,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Submit and judge a run.
-     * 
+     *
      * @param contest
      * @param judgementIndex
      * @param solved
@@ -372,7 +373,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Get XML from ScoringAlgorithm and test whether it can be parsed.
-     * 
+     *
      * @param contest
      */
     public void checkOutputXML(IInternalContest contest) {
@@ -400,7 +401,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Verify XML created for a single judged run.
-     * 
+     *
      * @throws FileSecurityException
      * @throws ClassNotFoundException
      * @throws IOException
@@ -418,7 +419,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Verify XML created for 5 judged runs, one solved, four no's.
-     * 
+     *
      * @throws FileSecurityException
      * @throws ClassNotFoundException
      * @throws IOException
@@ -455,9 +456,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * CASE (1): "When Solved, all runs before Yes".
-     * 
+     *
      * Created from testing/boardtest.html
-     * 
+     *
      */
     public void testScoreboardCaseOne() {
         // RunID TeamID Prob Time Result
@@ -486,9 +487,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * CASE (1): "When Solved, all runs before Yes" - test group ranks.
-     * 
+     *
      * Created from testing/boardtest.html
-     * 
+     *
      */
     public void testScoreboardCaseOneGroupRanks() {
         // RunID TeamID Prob Time Result
@@ -532,7 +533,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Tests for cases where Yes is before No, and multiple yes at same elapsed time.
-     * 
+     *
      * Both runs have same elapsed time, the tie breaker is runId. Also tests when one or more Yes are after first yes
      */
     public void testNoBeforeYesSameElapsed() {
@@ -550,9 +551,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
                 "30,2,C,22,Yes", };
 
         /**
-         * 
-         * 
-         * 
+         *
+         *
+         *
          */
 
         // Rank TeamId Solved Penalty
@@ -563,7 +564,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * CASE (2): "When Solved, all No Runs".
-     * 
+     *
      * Created from testing/boardtest.html
      */
     public void testScoreboardCaseTwo() {
@@ -610,7 +611,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * CASE (3): "When Solved, All Runs"
-     * 
+     *
      * Created from testing/boardtest.html
      */
     public void testScoreboardCaseThree() {
@@ -656,7 +657,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * CASE (4): "All Runs"
-     * 
+     *
      * Created from testing/boardtest.html
      */
     public void testScoreboardCaseFour() {
@@ -704,7 +705,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
     }
 
     /**
-     * 
+     *
      */
     public void testScoreboard55() {
 
@@ -750,7 +751,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
     }
 
     /**
-     * 
+     *
      */
     public void testScoreboard55Groups() {
 
@@ -836,13 +837,13 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Have run that has a BEING_JUDGED state and should show same standing as the state were JUDGED.
-     * 
+     *
      * Test for Bug 407 - The SA fails to reflect prelim judgements.
-     * 
+     *
      * based on CASE (1): "When Solved, all runs before Yes".
-     * 
+     *
      * Created from testing/boardtest.html
-     * 
+     *
      */
     public void testScoreboardForBeingJudgedState() {
         // RunID TeamID Prob Time Result
@@ -894,7 +895,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Test tie breaker down to last yes submission time.
-     * 
+     *
      */
     public void testTieBreakerSubmissionTime() {
 
@@ -1038,7 +1039,8 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
                 ClientId clientId = new ClientId(contest.getSiteNumber(), Type.TEAM, teamNumber);
                 Account account = contest.getAccount(clientId);
-                account.setGroupId(group.getElementId());
+                account.clearGroups();
+                account.addGroupId(group.getElementId(), true);
             }
         }
 
@@ -1127,7 +1129,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
         int rankIndex = 0;
 
         for (int i = 0; i < list.getLength(); i++) {
-            Node node = (Node) list.item(i);
+            Node node = list.item(i);
             String name = node.getNodeName();
             if (name.equals("teamStanding")) {
                 String[] standingsRow = fetchStanding(node, compareGroupRanks);
@@ -1259,9 +1261,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Test the SA given a list of runs and outcomes.
-     * 
+     *
      * rankDataList array is array of string, thus: Rank TeamDisplayName Solved Penalty, for example: "1,team5,2,74",
-     * 
+     *
      * @param numTeams
      * @param runsDataList
      * @param rankDataList
@@ -1295,9 +1297,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * add run to list of runs in a contest.
-     * 
+     *
      * Files found in runInfoLine, comma delmited
-     * 
+     *
      * <pre>
      * 0 - run id, int
      * 1 - team id, int
@@ -1305,13 +1307,13 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
      * 3 - elapsed, int
      * 4 - solved, String &quot;Yes&quot; or No
      * 5 - send to teams, Yes or No
-     * 
+     *
      * Example:
      * &quot;6,5,A,12,Yes&quot;
      * &quot;6,5,A,12,Yes,Yes&quot;
-     * 
+     *
      * </pre>
-     * 
+     *
      * @param contest
      * @param runInfoLine
      * @throws FileSecurityException
@@ -1400,7 +1402,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Fetch string from nodes.
-     * 
+     *
      * @param node
      * @param fetchGroupRank
      *            if true, fetch the group rank
@@ -1444,11 +1446,11 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Confirms ranks between runs in contest and rankData.
-     * 
+     *
      * rankdata is a array of string, each string contains comma delimited fields: rank,teamid,solved,points
      * <p>
      * rankdata is compared with XML from DefaultScoringAlgorithm and if all ranks/fields match, passes the test.
-     * 
+     *
      * @param contest
      * @param rankData
      * @param compareGroupRanks
@@ -1459,9 +1461,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Confirms ranks between runs in contest and rankData.
-     * 
+     *
      * @see #confirmGroupRanks(InternalContest, String[])
-     * 
+     *
      * @param contest
      * @param rankData
      */
@@ -1471,9 +1473,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Compares a standings Row with an expected row.
-     * 
+     *
      * Each row contains: rank, name, number solved, points.
-     * 
+     *
      * @param rankIndex
      * @param standingsRow
      * @param expectedRow
@@ -1519,9 +1521,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Test getRuns method.
-     * 
+     *
      * Test whether runs from getRuns(runs,clientId,problem) method returns proper number of runs.
-     * 
+     *
      * @throws Exception
      */
     public void testgetRuns() throws Exception {
@@ -1604,9 +1606,9 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Test get methods in ProblemSummary.
-     * 
+     *
      * Bug 1028.
-     * 
+     *
      * @throws Exception
      */
     public void testRankings1028() throws Exception {
@@ -1655,7 +1657,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
         /**
          * Representation of a StandingRecord
-         * 
+         *
          * name, rank, solved, lastsolved, points; then for each problem: problem#, numRuns, points, judgedCount, pendingCount ;
          */
         String[] rep = { //
@@ -1697,7 +1699,7 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Prints test data representation for standingsRecord.
-     * 
+     *
      * @param standingsRecord
      */
     protected void dumpStandingsRecordSampleData(StandingsRecord standingsRecord) {
@@ -1710,10 +1712,10 @@ public class NewScoringAlgorithmTestLong extends AbstractTestCase {
 
     /**
      * Returns sample/test data.
-     * 
+     *
      * name, rank, solved, lastsolvedtime, penalty then <br>
      * probbNum, points, judgecount, pendingcount
-     * 
+     *
      * @param standingsRecord
      * @return
      */

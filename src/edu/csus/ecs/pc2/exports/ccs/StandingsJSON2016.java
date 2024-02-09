@@ -1,6 +1,7 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -9,6 +10,7 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.scoring.NewScoringAlgorithm;
@@ -19,7 +21,7 @@ import edu.csus.ecs.pc2.core.util.RunStatistics;
 
 /**
  * Standings information in CLI 2016 JSON format.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id: StandingsJSON.java 341 2013-06-21 10:53:25Z laned $
  */
@@ -29,7 +31,7 @@ public class StandingsJSON2016 {
     /**
      * Returns a JSON string describing the current contest standings in the format defined by the 2016 CLI JSON Scoreboard.
      * The format follows this JSON example, from the CLI Wiki JSON Scoreboard page:
-     * 
+     *
      * <pre>
      *  [ {
      *     "rank":1,"team":42,"score":{"num_solved":3,"total_time":340},
@@ -44,13 +46,17 @@ public class StandingsJSON2016 {
      *    ...
      *  ]
      * </pre>
-     * 
+     *
      * @param contest - the current contest
      * @param controller - the current contest controller
      * @return a JSON string giving contest standings in 2016 format
      * @throws IllegalContestState
      */
     public String createJSON(IInternalContest contest, IInternalController controller) throws IllegalContestState {
+        return(createJSON(contest, controller, null));
+    }
+
+    public String createJSON(IInternalContest contest, IInternalController controller, Group group) throws IllegalContestState {
 
         if (contest == null) {
             return "[]";
@@ -58,16 +64,24 @@ public class StandingsJSON2016 {
 
         NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
         scoringAlgorithm.setContest(contest);
-        
+
         ContestInformation info = contest.getContestInformation();
         Properties properties = new Properties();
+
         if (info != null) {
             if (info.getScoringProperties() != null) {
                 properties = info.getScoringProperties();
             }
         }
-        
-        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
+
+        List<Group> groupList = null;
+
+        if(group != null) {
+            groupList = new ArrayList<Group>();
+            groupList.add(group);
+        }
+
+        StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null,  groupList, properties, false, null);
 
         RunStatistics runStatistics = new RunStatistics(contest);
 
@@ -75,7 +89,7 @@ public class StandingsJSON2016 {
 
         int rank = 1;
         for (StandingsRecord sr : standingsRecords) {
-            
+
             //start a new JSON element for the current standings record
             //if it's not the first rank being output, add a comma separator
             if (rank!=1) {
@@ -83,7 +97,7 @@ public class StandingsJSON2016 {
             }
             rank++ ;
             buffer.append('{');
-            
+
             ClientId clientId = sr.getClientId();
             Account account = contest.getAccount(clientId);
             int teamNum = account.getClientId().getClientNumber();
@@ -95,12 +109,12 @@ public class StandingsJSON2016 {
             long numSolved = sr.getNumberSolved();
             long totalTime = sr.getPenaltyPoints();
             buffer.append( "\"score\":{" + pair("num_solved",numSolved) + "," + pair("total_time",totalTime) + "},");
-            
+
             //add the "problems" array to the buffer
             buffer.append("\"problems\":[");
 
             SummaryRow row = sr.getSummaryRow();
-            
+
             //for each problem
             for (int i = 0; i < contest.getProblems().length; i++) {
                 int problemIndex = i + 1;
@@ -122,14 +136,14 @@ public class StandingsJSON2016 {
                     int numSubmitted = summaryInfo.getNumberSubmitted();
                     int numPending = summaryInfo.getPendingRunCount();
                     int numJudged = summaryInfo.getJudgedRunCount();
-                    
+
 //                    //debug:
-//                    System.out.println ("StandingsJSON2016: " 
-//                            + "Team: "+ teamNum + "  problem: '" + letter + "'" 
+//                    System.out.println ("StandingsJSON2016: "
+//                            + "Team: "+ teamNum + "  problem: '" + letter + "'"
 //                            + "  numSubmitted: " + numSubmitted
-//                            + "  numPending: " + numPending 
+//                            + "  numPending: " + numPending
 //                            + "  numJudged: " + numJudged);
-                    
+
                     //verify data makes sense
                     if ((numPending+numJudged) != numSubmitted) {
                         System.err.println ("StandingsJSON2016: mismatch: numPendingRuns+numJudgedRuns!=numSubmittedRuns ("
@@ -140,17 +154,17 @@ public class StandingsJSON2016 {
 
                     // add the number of judging-completed runs to the buffer
                     buffer.append(pair("num_judged", numJudged) + ",");
-                    
+
                     //add the number of pending runs to the buffer
                     buffer.append(pair("num_pending",numPending) + ",");
-                    
+
                     //add the field indicating whether the problem has been solved
                     String isSolved = "false";
                     if (summaryInfo.isSolved()) {
                         isSolved = "true";
                     }
                     buffer.append("\"solved\":" + isSolved);
-                    
+
                     //if the problem was solved, add the fields showing solution time and whether the solution was the first-to-solve
                     if (summaryInfo.isSolved()) {
                         long solutionTime = summaryInfo.getSolutionTime();
@@ -162,7 +176,7 @@ public class StandingsJSON2016 {
                         }
                         buffer.append("," + "\"first_to_solve\":" + fts);
                     }
-                    
+
                     //close the problem description
                     buffer.append("}");
 
@@ -172,12 +186,12 @@ public class StandingsJSON2016 {
             }
             //close the "problems" array
             buffer.append("]");
-            
+
             //close the entry for the current StandingsRecord (team)
             buffer.append('}');
 
         }
-        
+
         //return the collected standings as elements of a JSON array
         return "[" + buffer.toString() + "]";
     }
@@ -199,8 +213,8 @@ public class StandingsJSON2016 {
 
     /**
      * return a letter for a number.
-     * 
-     * 
+     *
+     *
      * @return 0 = A, 1 = B, etc.
      */
     public static String getProblemLetter(int id) {

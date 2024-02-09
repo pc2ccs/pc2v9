@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -119,14 +119,14 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 /**
  * Report Pane, allows picking and viewing reports.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 
 public class ReportPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -5165297328068331675L;
 
@@ -180,7 +180,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method can change the directory that the reports will be written to. The default is "reports".
-     * 
+     *
      * @param reportDirectory
      *            what directory to write the reports to
      */
@@ -190,7 +190,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public ReportPane() {
         super();
@@ -199,7 +199,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -303,37 +303,40 @@ public class ReportPane extends JPanePlugin {
         reports.add(new JudgingAnalysisReport());
 
         reports.add(new JSON2016Report());
-        
+
         reports.add(new ProblemsGroupReport());
-        
+
         reports.add(new ProblemGroupAssignmentReport());
-        
+
         reports.add(new ContestCompareReport());
-        
+
         reports.add(new CLICSAwardsReport());
-        
+
         if (isServer()){
-            // SOMEDAY Bug 1166 remove this isServer when added to Admin. 
+            // SOMEDAY Bug 1166 remove this isServer when added to Admin.
             reports.add(new CDPReport());
         }
-        
+
         reports.add(new EventFeedJSONReport());
-        
+
         reports.add(new StandingsNSAReport());
-        
+
         reports.add(new ResultsCompareReport());
-        
+
         reports.add(new ResultsExportReport());
-        
+
         reports.add(new ResultsTSVReport());
 
-        listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
-        
+        listOfReports = reports.toArray(new IReport[reports.size()]);
+
         Arrays.sort(listOfReports,new ReportComparator());
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
+
+        filter.setContestAndController(inContest, inController);
 
         this.log = getController().getLog();
 
@@ -347,6 +350,7 @@ public class ReportPane extends JPanePlugin {
         initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 getEditFilterFrame().setContestAndController(getContest(), getController());
                 populateReports();
@@ -365,6 +369,7 @@ public class ReportPane extends JPanePlugin {
     protected void refreshGUI() {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 refreshReportComboBox();
                 showXMLCheckbox();
@@ -375,7 +380,7 @@ public class ReportPane extends JPanePlugin {
     private void refreshReportComboBox() {
 
         getReportsComboBox().removeAllItems();
-        
+
         Arrays.sort(listOfReports,new ReportComparator());
 
         for (IReport report : listOfReports) {
@@ -393,7 +398,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes topPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getTopPane() {
@@ -411,7 +416,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes buttonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -430,7 +435,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes mainPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMainPane() {
@@ -448,7 +453,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes viewReportButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getViewReportButton() {
@@ -458,6 +463,7 @@ public class ReportPane extends JPanePlugin {
             viewReportButton.setToolTipText("View the selected Report");
             viewReportButton.setMnemonic(java.awt.event.KeyEvent.VK_V);
             viewReportButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (getBreakdownBySiteCheckbox().isSelected()) {
                         generateSelectedReportBySite();
@@ -547,6 +553,8 @@ public class ReportPane extends JPanePlugin {
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
         filter = inFilter;
 
+        filter.setContestAndController(getContest(), getController());
+
         try {
 
             if (!suppressHeaderFooter) {
@@ -600,11 +608,11 @@ public class ReportPane extends JPanePlugin {
             if (writeXML) {
                 extension = "xml";
             }
-            
+
             if (selectedReport.getReportTitle().toLowerCase().indexOf("json") != -1) {
                 extension = "json";
             }
-            
+
             String filename = getFileName(selectedReport, extension);
 
             File reportDirectoryFile = new File(getReportDirectory());
@@ -633,7 +641,7 @@ public class ReportPane extends JPanePlugin {
                     IReportFile reportFile = (IReportFile) selectedReport;
                     suppressHeaderFooter = reportFile.suppressHeaderFooter();
                 }
-                
+
                 if (! includeHeaderFooter) {
                     suppressHeaderFooter = true;
                 }
@@ -798,12 +806,13 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * show message to user
-     * 
+     *
      * @param string
      */
     private void showMessage(final String string) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(string);
             }
@@ -813,7 +822,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes thisSiteCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getBreakdownBySiteCheckbox() {
@@ -824,6 +833,7 @@ public class ReportPane extends JPanePlugin {
             breakdownBySiteCheckbox.setToolTipText("Break down by site");
             breakdownBySiteCheckbox.setText("Breakdown by site");
             breakdownBySiteCheckbox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     changeSiteFiltering();
                 }
@@ -846,7 +856,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes reportChoicePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getReportChoicePane() {
@@ -863,13 +873,14 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes reportsComboBox
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<String> getReportsComboBox() {
         if (reportsComboBox == null) {
             reportsComboBox = new JComboBox<String>();
             reportsComboBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
                         if (getBreakdownBySiteCheckbox().isSelected()) {
@@ -886,7 +897,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes thisClientFilterButton
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getThisClientFilterButton() {
@@ -897,6 +908,7 @@ public class ReportPane extends JPanePlugin {
             thisClientFilterButton.setText("Filter for this client only");
             thisClientFilterButton.setVisible(false);
             thisClientFilterButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     changeThisClientFiltering();
                 }
@@ -920,7 +932,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes filterPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getFilterPane() {
@@ -941,7 +953,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes filterButtonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getFilterButtonPane() {
@@ -954,7 +966,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes editReportFilter
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getEditReportFilter() {
@@ -964,6 +976,7 @@ public class ReportPane extends JPanePlugin {
             editReportFilter.setMnemonic(KeyEvent.VK_F);
             editReportFilter.setToolTipText("Edit Filter");
             editReportFilter.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     showReportFilter();
                 }
@@ -980,6 +993,7 @@ public class ReportPane extends JPanePlugin {
         getEditFilterFrame().addList(ListNames.TEAM_ACCOUNTS);
         getEditFilterFrame().addList(ListNames.RUN_STATES);
         getEditFilterFrame().addList(ListNames.JUDGEMENTS);
+        getEditFilterFrame().addList(ListNames.GROUPS);
         getEditFilterFrame().addList(ListNames.SITES);
 
         getEditFilterFrame().setFilter(filter);
@@ -991,6 +1005,7 @@ public class ReportPane extends JPanePlugin {
     public EditFilterFrame getEditFilterFrame() {
         if (editFilterFrame == null) {
             Runnable callback = new Runnable() {
+                @Override
                 public void run() {
                     refreshFilterLabel();
                 };
@@ -1006,7 +1021,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes xmlOutputCheckbox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getXmlOutputCheckbox() {
@@ -1021,7 +1036,7 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * This method initializes generateSummaryButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getGenerateSummaryButton() {
@@ -1031,6 +1046,7 @@ public class ReportPane extends JPanePlugin {
             generateSummaryButton.setMnemonic(KeyEvent.VK_G);
             generateSummaryButton.setToolTipText("Generate Summary Reports");
             generateSummaryButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     generateSummaryReport();
                 }
@@ -1054,16 +1070,18 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * Account Listener Implementation.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     public class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             // ignored
         }
 
+        @Override
         public void accountModified(AccountEvent accountEvent) {
             // check if is this account
             Account account = accountEvent.getAccount();
@@ -1074,6 +1092,7 @@ public class ReportPane extends JPanePlugin {
                 // They modified us!!
                 initializePermissions();
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         updateGUIperPermissions();
                     }
@@ -1082,10 +1101,12 @@ public class ReportPane extends JPanePlugin {
             }
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             // ignore
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
             for (Account account : accounts) {
@@ -1097,6 +1118,7 @@ public class ReportPane extends JPanePlugin {
                     // They modified us!!
                     initializePermissions();
                     SwingUtilities.invokeLater(new Runnable() {
+                        @Override
                         public void run() {
                             updateGUIperPermissions();
                         }
@@ -1105,11 +1127,13 @@ public class ReportPane extends JPanePlugin {
             }
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
 
             initializePermissions();
 
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     updateGUIperPermissions();
                 }
@@ -1121,7 +1145,8 @@ public class ReportPane extends JPanePlugin {
         if (exportDataButton == null) {
         	exportDataButton = new JButton("Export Report Contents");
         	exportDataButton.addActionListener(new ActionListener() {
-        	    public void actionPerformed(ActionEvent e) {
+        	    @Override
+                public void actionPerformed(ActionEvent e) {
         	        generateSelectedReport(false);
         	    }
         	});

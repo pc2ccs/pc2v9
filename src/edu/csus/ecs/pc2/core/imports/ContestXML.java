@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -447,8 +448,12 @@ public class ContestXML {
         IMemento accountMemento = mementoRoot.createChild(ACCOUNT_TAG);
         ClientId clientId = account.getClientId();
         accountMemento.putString("name", account.getDisplayName());
-        if (account.getGroupId() != null) {
-            accountMemento.putString("group", contest.getGroup(account.getGroupId()).toString());
+        if (account.getGroupIds() != null) {
+            int gcnt = 1;
+            for(ElementId elementId: account.getGroupIds()) {
+                accountMemento.putString("group" + gcnt, contest.getGroup(elementId).toString());
+                gcnt++;
+            }
         }
 
         accountMemento.putString("type", clientId.getClientType().toString());

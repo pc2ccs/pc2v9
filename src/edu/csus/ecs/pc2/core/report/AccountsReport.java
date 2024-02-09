@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.FileOutputStream;
@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Print all account info.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -34,7 +34,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 public class AccountsReport implements IReport {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -8628612595677727400L;
 
@@ -43,7 +43,7 @@ public class AccountsReport implements IReport {
     private IInternalController controller;
 
     private Log log;
-    
+
     private Filter accountFilter = new Filter();
 
     private Filter filter;
@@ -51,7 +51,7 @@ public class AccountsReport implements IReport {
     private void writeSummaryRow(PrintWriter printWriter, int site) {
 
         int total = 0;
-        
+
         ClientType.Type[] types = ClientType.Type.values();
         for (ClientType.Type type : types) {
             Vector<Account> vector = contest.getAccounts(type, site);
@@ -65,7 +65,7 @@ public class AccountsReport implements IReport {
         printWriter.format("%7s", total);
         printWriter.println();
     }
-    
+
     private void printAccountSummaryBySite (PrintWriter printWriter){
 
         Site[] sites = contest.getSites();
@@ -88,6 +88,7 @@ public class AccountsReport implements IReport {
         }
     }
 
+    @Override
     public void writeReport(PrintWriter printWriter) {
         printAccountSummaryBySite (printWriter);
         printAccountsByGroup (printWriter);
@@ -115,30 +116,30 @@ public class AccountsReport implements IReport {
                 }
                 printWriter.println();
 
-                Account [] sortedAccounts = (Account[]) accounts.toArray(new Account[accounts.size()]);
-                
+                Account [] sortedAccounts = accounts.toArray(new Account[accounts.size()]);
+
                 Arrays.sort(sortedAccounts, new AccountComparator());
 
                 for (Account account : sortedAccounts){
-                    
+
                     printAccount(printWriter, account);
                 }
             }
         }
     }
-    
+
     private void printAccount(PrintWriter printWriter, Account account) {
         printWriter.print("   Site " + account.getSiteNumber());
         printWriter.format(" %-15s", account.getClientId().getName());
         printWriter.println(" id=" + account.getElementId());
-        
+
         printWriter.format("%22s"," ");
         printWriter.print("'"+account.getDisplayName()+"' ");
-        
+
         if (contest.isAllowed (edu.csus.ecs.pc2.core.security.Permission.Type.VIEW_PASSWORDS)) {
             printWriter.print("password '" + account.getPassword() + "' ");
         }
-        
+
         Permission.Type type = Permission.Type.LOGIN;
         if (account.isAllowed(type)){
             printWriter.print(type+" ");
@@ -151,16 +152,27 @@ public class AccountsReport implements IReport {
 
         printWriter.format("%22s"," ");
         printWriter.print("alias '" + account.getAliasName()+"' ");
-        ElementId groupId = account.getGroupId();
-        if (groupId != null) {
-            Group group = contest.getGroup(groupId);
-            if (group != null) {
-                printWriter.print("group '"+group+"' ("+groupId+")");
-            } else {
-                printWriter.print("group invalid ("+groupId+")");
+        if(account.getGroupIds() != null) {
+            printWriter.print("groups '");
+            boolean first = true;
+            for(ElementId elementId: account.getGroupIds()) {
+                if(first == false) {
+                    printWriter.print(",");
+                } else {
+                    first = false;
+                }
+                Group group = contest.getGroup(elementId);
+                // I'm not sure how useful it is to show the ElementId here - the CMS Group ID in parens may be more useful.
+                // But, this is what the code always did, apparently -- JB
+                if (group != null) {
+                    printWriter.print(group+" ("+elementId+")");
+                } else {
+                    printWriter.print("invalid ("+elementId+")");
+                }
             }
+            printWriter.print("'");
         } else {
-            printWriter.print("group ''");
+            printWriter.print("groups ''");
         }
         printWriter.println();
         if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
@@ -172,16 +184,16 @@ public class AccountsReport implements IReport {
             printWriter.println();
         }
         String pad7 = "       ";
-        
+
         printWriter.println(pad7 + "Country code '" + account.getCountryCode() + "'");
         printWriter.print(pad7 + "Institution name '" + account.getInstitutionName() + "'");
         printWriter.print(" Institution code '" + account.getInstitutionCode() + "'");
         printWriter.println(" Institution short name '" + account.getInstitutionShortName() + "'");
 
         printWriter.print(pad7 + "Member Names: ");
-        
+
         String [] names = account.getMemberNames();
-        
+
         if (names.length == 0) {
             printWriter.print(" NO member names assigned ");
         } else {
@@ -201,6 +213,7 @@ public class AccountsReport implements IReport {
         return buffer.toString();
     }
 
+    @Override
     public void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());
         printWriter.println("Date: " + Utilities.getL10nDateTime());
@@ -209,11 +222,13 @@ public class AccountsReport implements IReport {
         printWriter.println(getReportTitle() + " Report");
     }
 
+    @Override
     public void printFooter(PrintWriter printWriter) {
         printWriter.println();
         printWriter.println("end report");
     }
 
+    @Override
     public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
@@ -240,32 +255,39 @@ public class AccountsReport implements IReport {
         }
     }
 
+    @Override
     public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
+    @Override
     public String createReportXML(Filter inFilter) throws IOException {
         return Reports.notImplementedXML(this);
     }
 
+    @Override
     public String getReportTitle() {
         return "Accounts";
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();
     }
 
+    @Override
     public String getPluginTitle() {
         return "Accounts Report";
     }
 
+    @Override
     public Filter getFilter() {
         return filter;
     }
 
+    @Override
     public void setFilter(Filter filter) {
         this.filter = filter;
     }

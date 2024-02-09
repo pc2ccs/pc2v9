@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.FileOutputStream;
@@ -17,13 +17,13 @@ import edu.csus.ecs.pc2.services.core.EventFeedJSON;
 
 /**
  * Event Feed JSON report.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class EventFeedJSONReport implements IReport {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -3444824680719793748L;
 
@@ -34,7 +34,7 @@ public class EventFeedJSONReport implements IReport {
     private Log log;
 
     private Filter filter = new Filter();
-    
+
     private void writeContestTime(PrintWriter printWriter) {
         printWriter.println();
         GregorianCalendar resumeTime = contest.getContestTime().getResumeTime();
@@ -46,31 +46,38 @@ public class EventFeedJSONReport implements IReport {
         }
     }
 
+    @Override
     public void writeReport(PrintWriter printWriter) throws IllegalContestState {
-      
+
         EventFeedJSON efEventFeedJSON = new EventFeedJSON(contest);
-        
+
+        if(filter != null) {
+            efEventFeedJSON.setFilter(filter);
+        }
         String s = efEventFeedJSON.createJSON(contest, null, null);
-        
+
         printWriter.print(s);
     }
 
+    @Override
     public void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());
         printWriter.println("Date: " + Utilities.getL10nDateTime());
         printWriter.println(new VersionInfo().getSystemVersionInfo());
         printWriter.println();
         printWriter.println(getReportTitle() + " Report");
-        
+
         writeContestTime(printWriter);
         printWriter.println();
     }
 
+    @Override
     public void printFooter(PrintWriter printWriter) {
         printWriter.println();
         printWriter.println("end report");
     }
 
+    @Override
     public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
@@ -79,11 +86,11 @@ public class EventFeedJSONReport implements IReport {
 
             try {
                 printHeader(printWriter);
-                
+
                 writeReport(printWriter);
-                
+
                 printFooter(printWriter);
-                
+
             } catch (Exception e) {
                 printWriter.println("Exception in report: " + e.getMessage());
                 e.printStackTrace(printWriter);
@@ -99,32 +106,39 @@ public class EventFeedJSONReport implements IReport {
         }
     }
 
+    @Override
     public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
+    @Override
     public String createReportXML(Filter inFilter) throws IOException {
         return Reports.notImplementedXML(this);
     }
 
+    @Override
     public String getReportTitle() {
         return "Event Feed JSON";
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();
     }
 
+    @Override
     public String getPluginTitle() {
         return  getReportTitle() + " Report";
     }
 
+    @Override
     public Filter getFilter() {
         return filter;
     }
 
+    @Override
     public void setFilter(Filter filter) {
         this.filter = filter;
     }

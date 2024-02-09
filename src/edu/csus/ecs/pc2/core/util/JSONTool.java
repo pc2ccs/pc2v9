@@ -1,8 +1,9 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -37,11 +38,11 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
  * JSON for pc2 classes.
- * 
+ *
  * @author Troy Boudreau <boudreat@ecs.csus.edu>
  */
 public class JSONTool {
-    
+
     /**
      * A default localhost location.
      */
@@ -64,7 +65,7 @@ public class JSONTool {
 
     /**
      * Create JSON for submissions.
-     * 
+     *
      * @param submission
      */
     public ObjectNode convertToJSON(Run submission, HttpServletRequest servletRequest, SecurityContext sc) {
@@ -78,19 +79,19 @@ public class JSONTool {
         if (submission.getEntryPoint() != null) {
             element.put("entry_point", new String(submission.getEntryPoint()));
         }
-        
-        
-        
+
+
+
         // FIXME we need separate event feeds for public and admin/analyst
         // FIXME perhaps change sc to a boolean for public or not?
         // if (servletRequest != null && (sc != null && sc.isUserInRole("admin") || sc.isUserInRole("analyst"))) {
-        
-        
+
+
         // TODO shadow add time and mime elements to submission
 //        element.put("mime","application/zip");
-        
+
         String pathValue = "/contest/submissions/" + submission.getNumber() + "/files";
-        
+
         ObjectMapper mymapper = new ObjectMapper();
         ArrayNode arrayNode = mymapper.createArrayNode();
         ObjectNode objectNode = mymapper.createObjectNode();
@@ -106,22 +107,22 @@ public class JSONTool {
      * @return empty string if settings is null or empty string, otherwise API base url
      */
     private String getAPIURL() {
-        
+
         String url = "";
         ContestInformation contestInformation = model.getContestInformation();
         String primaryCCS_URL = contestInformation.getPrimaryCCS_URL();
         if (! StringUtilities.isEmpty(primaryCCS_URL)){
             url = primaryCCS_URL.trim();
         }
-        
+
         return url;
     }
 
     private void logWarn(String string, Exception e) {
-        
+
         System.err.println(string);
         e.printStackTrace(System.err);
-        
+
         Log log = controller.getLog();
         log.log(Level.WARNING, string, e);
     }
@@ -200,7 +201,7 @@ public class JSONTool {
 
     /**
      * This converts ContestInformation to a /state object
-     * 
+     *
      * @param ci
      * @return
      */
@@ -248,7 +249,7 @@ public class JSONTool {
 
     /**
      * This converts ContestInformation to a /contest object
-     * 
+     *
      * @param ci
      * @return
      */
@@ -337,7 +338,7 @@ public class JSONTool {
 
     /**
      * returns true if the value is not null and is not the empty string
-     * 
+     *
      * @param value
      * @return
      */
@@ -386,10 +387,12 @@ public class JSONTool {
         if (notEmpty(account.getInstitutionCode()) && !account.getInstitutionCode().equals("undefined")) {
             element.put("organization_id", getOrganizationId(account));
         }
-        if (account.getGroupId() != null) {
+        HashSet<ElementId> groups = account.getGroupIds();
+        if (groups != null) {
             ArrayNode groupIds = mapper.createArrayNode();
-            // FIXME eventually accounts should have more then 1 groupId, make sure add them
-            groupIds.add(getGroupId(model.getGroup(account.getGroupId())));
+            for(ElementId elementId : groups) {
+                groupIds.add(getGroupId(model.getGroup(elementId)));
+            }
             element.set("group_ids", groupIds);
         }
         return element;
@@ -459,7 +462,7 @@ public class JSONTool {
 
     /**
      * Create JSON for judgement.
-     * 
+     *
      * @param submission
      */
     public ObjectNode convertJudgementToJSON(Run submission) {
@@ -474,14 +477,14 @@ public class JSONTool {
         if (submission.isJudged()) {
 
             JudgementRecord judgementRecord = submission.getJudgementRecord();
-            
+
             // only output its judgement and end times if this is the final judgement
             if (!judgementRecord.isPreliminaryJudgement()) {
 
                 // Fetch judgement_type_id from judgement acronym
                 String judgmentAcronym = getJudgementAcronymn(judgementRecord);
                 element.put("judgement_type_id", judgmentAcronym);
-                
+
                 Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime() * 60000);
                 if (wallElapsed != null) {
                     element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
@@ -490,18 +493,18 @@ public class JSONTool {
                 element.put("end_contest_time", ContestTime.formatTimeMS(judgementRecord.getWhenJudgedTime() * 60000));
             }
         }
-        
+
         return element;
     }
 
     /**
      * Fetch Judgement Acronym for run judgement.
-     * 
+     *
      * @param judgementRecord
      * @return judgement acronym.
      */
     private String getJudgementAcronymn(JudgementRecord judgementRecord) {
-        
+
         ElementId judgementId = judgementRecord.getJudgementId();
         Judgement judgement = model.getJudgement(judgementId);
         return judgement.getAcronym();

@@ -1,10 +1,12 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.standings;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -30,6 +32,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -44,13 +47,13 @@ public class ScoreboardUtilities {
 
     /**
      * Create x from XML StringContestStandings
-     * 
+     *
      * @param xmlString
      * @return
      * @throws JAXBException
-     * @throws IOException 
-     * @throws JsonMappingException 
-     * @throws JsonParseException 
+     * @throws IOException
+     * @throws JsonMappingException
+     * @throws JsonParseException
      */
     public static ContestStandings createContestStandings(String xmlString) throws JAXBException, JsonParseException, JsonMappingException, IOException {
 
@@ -58,7 +61,7 @@ public class ScoreboardUtilities {
 //        JAXBContext jaxbContext = JAXBContext.newInstance(ContestStandings.class);
 //        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 //        ContestStandings contestStandings = (ContestStandings) jaxbUnmarshaller.unmarshal(new InputSource(new StringReader(xmlString)));
-        
+
         XmlMapper xmlMapper = new XmlMapper();
         ContestStandings standings = xmlMapper.readValue(xmlString, ContestStandings.class);
         return standings;
@@ -66,7 +69,7 @@ public class ScoreboardUtilities {
 
     /**
      * Create ContestStandings from file
-     * 
+     *
      * @param xmlFile
      * @return
      * @throws JAXBException
@@ -86,19 +89,19 @@ public class ScoreboardUtilities {
         String xml = scoringAlgorithm.getStandings(contest, properties, StaticLog.getLog());
         return xml;
     }
-    
+
     public static ContestStandings createContestStandings(IInternalContest contest) throws JAXBException, IllegalContestState, JsonParseException, JsonMappingException, IOException {
         String xmlString = ScoreboardUtilities.createScoreboardXML(contest);
         return createContestStandings(xmlString);
     }
-    
-    
+
+
     public static List <StandingsRecord> createStandingsRecords (String jsonString, String source) throws JsonProcessingException, IOException{
         List<StandingsRecord> list = new ArrayList<StandingsRecord>();
-        
+
         ObjectMapper mapper = JSONObjectMapper.getObjectMapper();
         JsonNode tree = mapper.readTree(jsonString);
-        
+
         for (JsonNode jsonNode : tree) {
             if (jsonNode.isArray())
             {
@@ -121,20 +124,20 @@ public class ScoreboardUtilities {
 
                     record.setSolved(scoreNode.get("num_solved").asInt());
                     record.setPoints(scoreNode.get("total_time").asInt());
-                    
+
                     if (record.getTeamId() != 0) {
                         list.add(record);
                     }
                 }
             }
         }
-        
+
         return list;
     }
 
     /**
      * Get the scoring properties from the model.
-     * 
+     *
      * @return scoring properties
      */
     public static Properties getScoringProperties(IInternalContest contest) {
@@ -149,7 +152,7 @@ public class ScoreboardUtilities {
         /**
          * Fill in with default properties if not using them.
          */
-        String[] keys = (String[]) defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
+        String[] keys = defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
         for (String key : keys) {
             if (!properties.containsKey(key)) {
                 properties.put(key, defProperties.get(key));
@@ -170,9 +173,9 @@ public class ScoreboardUtilities {
     }
 
     public static String loadFileContents(File file) throws IOException {
-        
+
         String[] lines = Utilities.loadFile(file.getAbsolutePath());
-        
+
         String contents = lines[0];
         if (lines.length > 1) {
             contents = String.join("", lines);
@@ -194,7 +197,7 @@ public class ScoreboardUtilities {
     public static Run[] getRunsForUserDivision(ClientId clientId, IInternalContest contest) {
 
         String division = getDivision(contest, clientId);
-        
+
 //        System.out.println("debug 22 getRunsForUserDivision for "+clientId+" div is "+division);
 
         if (ClientType.Type.TEAM.equals(clientId.getClientType())) {
@@ -216,13 +219,13 @@ public class ScoreboardUtilities {
                 }
             }
 
-            return (Run[]) theDivisionTeamRuns.toArray(new Run[theDivisionTeamRuns.size()]);
-            
+            return theDivisionTeamRuns.toArray(new Run[theDivisionTeamRuns.size()]);
+
         } else {
             return contest.getRuns();
         }
     }
-    
+
     public static Run[] getRunsForDivision(IInternalContest contest, String division) {
 
         List<Run> theDivisionTeamRuns = new ArrayList<Run>();
@@ -234,7 +237,7 @@ public class ScoreboardUtilities {
             }
         }
 
-        return (Run[]) theDivisionTeamRuns.toArray(new Run[theDivisionTeamRuns.size()]);
+        return theDivisionTeamRuns.toArray(new Run[theDivisionTeamRuns.size()]);
 
     }
 
@@ -261,34 +264,40 @@ public class ScoreboardUtilities {
 
     /**
      * Return division for input clientId.
-     * 
+     *
+     * TODO To be deprecated when multiple groups are fully implemented.  Although, we have to see if anyone still
+     * uses this.
+     *
      * @param contest
      * @param submitter
      * @return null if no division, else a digit
      */
     public static String getDivision(IInternalContest contest, ClientId submitter) {
-        
-        ElementId groupId = contest.getAccount(submitter).getGroupId();
-        if (groupId == null) {
-            return null;
+
+        HashSet<ElementId> groups = contest.getAccount(submitter).getGroupIds();
+        String groupName = null;
+
+        if(groups != null) {
+            for(ElementId elementId: groups) {
+                Group group = contest.getGroup(elementId);
+                if(group != null) {
+                    groupName = getDivision(group.getDisplayName());
+                    if(groupName != null) {
+                        break;
+                    }
+                }
+            }
         }
-        
-        Group group = contest.getGroup(groupId);
-        if (group == null) {
-            return null;
-        }
-        
-        String groupName = group.getDisplayName().trim();
-        
-        return getDivision(groupName);
+
+        return groupName;
     }
 
     /**
      * Return division number from groupName
      * @param groupName
-     * @return null if no division nubmer found, else the division number
+     * @return null if no division number found, else the division number
      */
-    // TODO REFACTOR i689 redesign how divisions are identified. 
+    // TODO REFACTOR i689 redesign how divisions are identified.
     public static String getDivision(String groupName) {
 
         int idx = groupName.lastIndexOf('D');
@@ -301,4 +310,73 @@ public class ScoreboardUtilities {
         return null;
     }
 
+    /**
+     * Get the runs that are only for the desired groups.
+     * If null, then all runs are returned.
+     *
+     * @param theContest (used for getting accounts and runs for the contest)
+     * @param wantedGroups
+     * @return array of Run filtered by division and groups
+     */
+    public static Run [] getGroupFilteredRuns(IInternalContest theContest, List<Group> wantedGroups) {
+
+        Run [] runs = theContest.getRuns();
+        if(wantedGroups != null && wantedGroups.size() > 0) {
+
+            // hash map to speed up looking up Account from client id.  theContest.getAccount() is grossly inefficient
+            HashMap<String, Account> clientToAccount = new HashMap<String, Account>();
+            ArrayList<Run> newruns = new ArrayList<Run>();
+            ClientId runClient;
+            String cKey;
+            Account runAccount;
+
+            // build a new ArrayList of runs that satisify the wanted group filter
+            for(Run r : runs) {
+                runClient = r.getSubmitter();
+                cKey = runClient.getTripletKey();
+                runAccount = clientToAccount.get(cKey);
+                if(runAccount == null) {
+                    // not in hash table, so we must look it up, then add it to hash table
+                    runAccount = theContest.getAccount(runClient);
+                    if(runAccount == null) {
+                        // sanity check - there better be an account for the run, or we'll just ignore the run.
+                        continue;
+                    }
+                    clientToAccount.put(cKey, runAccount);
+                }
+                for(Group group : wantedGroups) {
+                    if(runAccount.isGroupMember(group.getElementId())) {
+                        newruns.add(r);
+                    }
+                }
+            }
+            // convert to Run [] */
+            runs = newruns.toArray(new Run [0]);
+        }
+        return(runs);
+    }
+
+    /**
+     * Checks if the supplied account is a member of any of the groups in the supplied List of groups
+     *
+     * @param account to check
+     * @param wantedGroups
+     * @return true if the account is in one of the wanted groups, false otherwise
+     */
+    public static boolean isWantedTeam(Account account, List<Group> wantedGroups) {
+        // Assume we want this account
+        boolean ret = true;
+        if(wantedGroups != null && wantedGroups.size() > 0) {
+            boolean found = false;
+            // restricted to these groups only
+            for(Group group : wantedGroups) {
+                if(account.isGroupMember(group.getElementId())) {
+                    found = true;
+                    break;
+                }
+            }
+            ret = found;
+        }
+        return(ret);
+    }
 }

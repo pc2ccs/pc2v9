@@ -1,10 +1,11 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.board;
 
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.swing.JButton;
@@ -24,6 +25,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -43,14 +45,14 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * This class is the default scoreboard view (frame).
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 
 public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -8071477348056424178L;
 
@@ -83,9 +85,9 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     private JPanel clockPanel = null;
 
     private ScoreboardCommon scoreboardCommon = new ScoreboardCommon();
-    
+
     private DefaultScoringAlgorithm algo = new DefaultScoringAlgorithm();
-    
+
     /*
      * We set setObeyFrozen = true on this one.
      */
@@ -93,7 +95,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public ScoreboardView() {
         super();
@@ -101,7 +103,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -109,12 +111,16 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     // $HeadURL$
     public class PropertyChangeListenerImplementation implements PropertyChangeListener {
 
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if (evt.getPropertyName().equalsIgnoreCase("standings")) {
                 if (evt.getNewValue() != null && !evt.getNewValue().equals(evt.getOldValue())) {
                     // standings have changed
                     // TODO take this off the awt thread
-                    generateOutput((String) evt.getNewValue());
+//                    generateOutput((String) evt.getNewValue());
+                    // we no longer use the XML passed in since we have no idea what it was for (which group?)
+                    // rather, we just recompute all the boards
+                    generateOutput();
                 }
             }
         }
@@ -122,7 +128,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(800, 450));
@@ -131,6 +137,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         this.setTitle("Scoreboard");
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 promptAndExit();
             }
@@ -160,6 +167,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         }
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
@@ -182,6 +190,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         controller.register(contestClockDisplay);
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
 
@@ -192,7 +201,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 StandingsTablePane standingsTablePane = new StandingsTablePane();
                 addUIPlugin(getMainTabbedPane(), "Standings", standingsTablePane);
                 standingsTablePane.addPropertyChangeListener("standings", new PropertyChangeListenerImplementation());
-                
+
                 NSAStandingsPane nsaStandingsPane = new NSAStandingsPane();
                 addUIPlugin(getMainTabbedPane(), "Standings New", nsaStandingsPane);
 
@@ -238,6 +247,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         });
     }
 
+    @Override
     public String getPluginTitle() {
         return "Scoreboard View";
     }
@@ -248,7 +258,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         plugin.setContestAndController(contest, controller);
         tabbedPane.add(plugin, tabTitle);
     }
-    
+
     private void generateOutput() {
 
         try {
@@ -256,21 +266,44 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             Properties scoringProperties = scoreboardCommon.getScoringProperties(contest.getContestInformation().getScoringProperties());
             String saXML = algo.getStandings(contest, scoringProperties, log);
             generateOutput(saXML);
+            ArrayList<Group> groupListOfOne = new ArrayList<Group>();
+            for(Group group : contest.getGroups()) {
+                if(group.isDisplayOnScoreboard()) {
+                    groupListOfOne.clear();
+                    groupListOfOne.add(group);
+                    saXML = algo.getStandings(contest,  null,  null, groupListOfOne, scoringProperties, log);
+                    generateOutput(saXML, group);
+                }
+            }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception generating scoreboard output " + e.getMessage(), e);
         }
     }
 
     private void generateOutput(String xmlString) {
+        generateOutput(xmlString, null);
+    }
+
+    private void generateOutput(String xmlString, Group group) {
         String outputDir = contest.getContestInformation().getScoringProperties().getProperty(DefaultScoringAlgorithm.JUDGE_OUTPUT_DIR, "html");
-        scoreboardCommon.generateOutput(xmlString, xslDir, outputDir, log);
-        scoreboardCommon.generateResults(contest, controller, xmlString, xslDir, log);
+        String groupName = null;
+
+        if(group != null) {
+            groupName = group.getDisplayName();
+        }
+        scoreboardCommon.generateOutput(xmlString, groupName, xslDir, outputDir, log);
+        scoreboardCommon.generateResults(contest, controller, xmlString, group, xslDir, log);
         try {
             String frozenOutputDir = contest.getContestInformation().getScoringProperties().getProperty(DefaultScoringAlgorithm.PUBLIC_OUTPUT_DIR);
             if (frozenOutputDir != null && frozenOutputDir.trim().length() > 0 && !frozenOutputDir.equals(outputDir)) {
                 Properties scoringProperties = scoreboardCommon.getScoringProperties(contest.getContestInformation().getScoringProperties());
-                String frozenXML = algoFrozen.getStandings(contest, scoringProperties, log);
-                scoreboardCommon.generateOutput(frozenXML, xslDir, frozenOutputDir, log);
+                ArrayList<Group> groupOfOneList = null;
+                if(group != null) {
+                    groupOfOneList = new ArrayList<Group>();
+                    groupOfOneList.add(group);
+                }
+                String frozenXML = algoFrozen.getStandings(contest, null, null, groupOfOneList,scoringProperties, log);
+                scoreboardCommon.generateOutput(frozenXML, groupName, xslDir, frozenOutputDir, log);
             }
         } catch (Exception e) {
             log.warning("Exception generating frozen html");
@@ -280,7 +313,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes mainTabbedPane
-     * 
+     *
      * @return javax.swing.JTabbedPane
      */
     private JTabbedPane getMainTabbedPane() {
@@ -292,7 +325,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes mainViewPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMainViewPane() {
@@ -307,7 +340,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes jPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getNorthPane() {
@@ -331,7 +364,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes jPanel1
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getEastPane() {
@@ -345,7 +378,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes jButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getExitButton() {
@@ -355,6 +388,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             exitButton.setToolTipText("Click here to Shutdown PC^2");
             exitButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             exitButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     promptAndExit();
                 }
@@ -366,6 +400,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     private void setFrameTitle(final boolean contestStarted) {
         final JFrame thisFrame = this;
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
 
                 FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contestStarted, new VersionInfo());
@@ -389,21 +424,24 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
 
     class ContestTimeListenerImplementation implements IContestTimeListener {
 
+        @Override
         public void contestTimeAdded(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestTimeRemoved(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestTimeChanged(ContestTimeEvent event) {
             ContestTime contestTime = event.getContestTime();
             if (isThisSite(contestTime.getSiteNumber())) {
@@ -411,14 +449,17 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             }
         }
 
+        @Override
         public void contestStarted(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestStopped(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void refreshAll(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
@@ -437,6 +478,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     private void showMessage(final String string) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(string);
                 messageLabel.setToolTipText(string);
@@ -447,7 +489,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes refreshButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getRefreshButton() {
@@ -458,8 +500,10 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             refreshButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
             refreshButton.setText("Refresh");
             refreshButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     new Thread(new Runnable() {
+                        @Override
                         public void run() {
                             generateOutput();
                         }
@@ -482,7 +526,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes clockPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getClockPanel() {

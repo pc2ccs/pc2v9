@@ -1,12 +1,15 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.reports;
+
+import java.util.HashMap;
 
 import edu.csus.ecs.pc2.api.IGroup;
 import edu.csus.ecs.pc2.api.ITeam;
+import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
  * Teams.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -16,12 +19,24 @@ public class PrintTeams extends APIAbstractTest {
     public void printTest() {
         println("There are " + getContest().getTeams().length + " team ");
         for (ITeam team : getContest().getTeams()) {
-            IGroup group = team.getGroup();
-            String name = "(no group assigned)";
-            if (group != null) {
-                name = group.getName();
+            HashMap<ElementId, IGroup> groups = team.getGroups();
+            String name = "";
+            boolean first = true;
+            for(ElementId groupElementId : groups.keySet()) {
+                IGroup group = groups.get(groupElementId);
+                if(group != null) {
+                    if(first) {
+                        first = false;
+                    } else {
+                        name = name + ",";
+                    }
+                    name = name + group.getName();
+                }
             }
-            println(team.getLoginName() + " title: " + team.getLoginName() + " group: " + name);
+            if(name.isEmpty()) {
+                name = "(no groups assigned)";
+            }
+            println(team.getLoginName() + " title: " + team.getLoginName() + " groups: " + name);
         }
         println("");
         println();

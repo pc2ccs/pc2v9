@@ -1,14 +1,17 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api;
+
+import java.util.HashMap;
 
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
  * Sample Code for API.
- * 
+ *
  * This class is not intended as a JUnit test, it is a syntax check for the API samples in the Java doc in the API classes.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -42,7 +45,7 @@ public class APISampleCode {
 
     /**
      * getTeams() sample.
-     * 
+     *
      * @param contest The contest from which team samples are to be drawn
      */
     public void getTeamsSample(IContest contest) {
@@ -50,15 +53,32 @@ public class APISampleCode {
         for (ITeam team : contest.getTeams()) {
             String teamName = team.getDisplayName();
             int siteNumber = team.getSiteNumber();
-            String groupName = team.getGroup().getName();
-            System.out.println(teamName + " Site: " + siteNumber + " Group: " + groupName);
+
+            HashMap<ElementId, IGroup> groups = team.getGroups();
+            String groupName = "";
+            boolean first = true;
+            for(ElementId groupElementId : groups.keySet()) {
+                IGroup group = groups.get(groupElementId);
+                if(group != null) {
+                    if(first) {
+                        first = false;
+                    } else {
+                        groupName = groupName + ",";
+                    }
+                    groupName = groupName + group.getName();
+                }
+            }
+            if(groupName.isEmpty()) {
+                groupName = "(no groups assigned)";
+            }
+            System.out.println(teamName + " Site: " + siteNumber + " Groups: " + groupName);
         }
 
     }
 
     /**
      * getLanguages() sample.
-     * 
+     *
      * @param contest The contest from which language samples are to be drawn
      */
     public void getLanguagesSample(IContest contest) {
@@ -71,7 +91,7 @@ public class APISampleCode {
 
     /**
      * getProblems() sample.
-     * 
+     *
      * @param contest The contest from which problem samples are to be drawn
      */
     public void getProblemSample(IContest contest) {
@@ -84,7 +104,7 @@ public class APISampleCode {
 
     /**
      * getJudgements() sample.
-     * 
+     *
      * @param contest The contest from which judgement samples are to be drawn
      */
     public void getJudgmentsSample(IContest contest) {
@@ -97,7 +117,7 @@ public class APISampleCode {
 
     /**
      * getRuns() sample.
-     * 
+     *
      * @param contest The contest from which run samples are to be drawn
      */
     public void getRunsSample(IContest contest) {
@@ -119,7 +139,7 @@ public class APISampleCode {
 
     /**
      * getStandings() samples.
-     * 
+     *
      * @param contest The contest from which Standings samples are to be drawn
      */
     public void getStandingsSample(IContest contest) {
