@@ -21,10 +21,8 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.CategoryEvent;
-import edu.csus.ecs.pc2.core.model.Clarification;
-import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ICategoryListener;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -68,7 +66,7 @@ public class SubmitClarificationPane extends JPanePlugin {
     
     private JTextArea answerTextArea = null;
     
-    private boolean isJudge = false;
+    private boolean isTeam = false;
     
 
     /**
@@ -77,7 +75,6 @@ public class SubmitClarificationPane extends JPanePlugin {
      */
     public SubmitClarificationPane() {      
         super();
-//        this.isJudge = isJudge;
         initialize();
     }
 
@@ -88,11 +85,21 @@ public class SubmitClarificationPane extends JPanePlugin {
     protected void initialize() {
         this.setLayout(null);
         this.setSize(new java.awt.Dimension(456, 285));
-
-
-        this.add(getProblemPane(), null);
-        this.add(getQuestionPane(), null);
-        this.add(getSubmitClarificationButton(), null);
+        SubmitClarificationPane current = this;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                isTeam = getContest().getClientId().getClientType().equals(ClientType.Type.TEAM);
+                if (!isTeam) {
+                    current.add(getsubmitAnnouncement(),null);
+                }
+                current.add(getProblemPane(), null);
+                current.add(getQuestionPane(), null);
+                current.add(getSubmitClarificationButton(), null);
+            }
+        });
+                
+        
+        
 
         
     }
@@ -165,7 +172,12 @@ public class SubmitClarificationPane extends JPanePlugin {
         if (questionPane == null) {
             questionPane = new JPanel();
             questionPane.setLayout(new BorderLayout());
-            questionPane.setBounds(new java.awt.Rectangle(19,80,406,125));
+            if (isTeam) {
+                questionPane.setBounds(new java.awt.Rectangle(19,80,406,125));
+            }
+            else {
+                questionPane.setBounds(new java.awt.Rectangle(19,100,406,125));
+            }
             questionPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Question", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             questionPane.add(getQuestionTextArea(), java.awt.BorderLayout.CENTER);
@@ -196,7 +208,12 @@ public class SubmitClarificationPane extends JPanePlugin {
             submitClarificationButton = new JButton();
             submitClarificationButton.setText("Submit Clarification");
             submitClarificationButton.setPreferredSize(new Dimension(200, 26));
-            submitClarificationButton.setLocation(new Point(20, 219));
+            if (isTeam) {
+                submitClarificationButton.setLocation(new Point(20, 219));
+            }
+            else {
+                submitClarificationButton.setLocation(new Point(20, 239));
+            }
             submitClarificationButton.setSize(new Dimension(200, 34));
             submitClarificationButton.setToolTipText("Click this button to submit your Clarification");
             submitClarificationButton.addActionListener(new java.awt.event.ActionListener() {
@@ -293,15 +310,17 @@ public class SubmitClarificationPane extends JPanePlugin {
             log.info("submit announcement clarification for " + problem + " " + confirmAnswer);
             
           
-            ElementId elementId = getController().submitClarification(problem, "");
+//            ElementId elementId = getController().submitClarification(problem, "");
+//            
+//            Clarification clarificationToAnswer = getContest().getClarification(elementId);
+//            getController().checkOutClarification(clarificationToAnswer, false);
+//            
+//            ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answerAnnouncement, getContest().getClientId(), 
+//                    true, getContest().getContestTime()); //getSendToAllCheckBox().isSelected() true here is to check if needs to be sent everyone
+//            clarificationToAnswer.addAnswer(clarificationAnswer);
+//            getController().submitClarificationAnswer(clarificationToAnswer);
             
-            Clarification clarificationToAnswer = getContest().getClarification(elementId);
-            getController().checkOutClarification(clarificationToAnswer, false);
-            
-            ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answerAnnouncement, getContest().getClientId(), 
-                    true, getContest().getContestTime()); //getSendToAllCheckBox().isSelected() true here is to check if needs to be sent everyone
-            clarificationToAnswer.addAnswer(clarificationAnswer);
-            getController().submitClarificationAnswer(clarificationToAnswer);
+            getController().submitAnnouncement(problem, answerAnnouncement);
             questionTextArea.setText("");
 
         } catch (Exception e) {

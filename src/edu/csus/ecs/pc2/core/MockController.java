@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
@@ -409,9 +409,11 @@ public class MockController implements IInternalController {
     }
 
     public ElementId submitClarification(Problem problem, String question) {
-
+        return null;
     }
-
+    public void submitAnnouncement(Problem problem, String answer) {
+        
+    }
     public void submitClarificationAnswer(Clarification clarification) {
 
     }

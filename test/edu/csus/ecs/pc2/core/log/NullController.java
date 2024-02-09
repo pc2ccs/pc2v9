@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.log;
 
 import java.io.IOException;
@@ -165,6 +165,11 @@ public class NullController implements IInternalController{
         // TODO Auto-generated method stub
 
     }
+    
+    public void submitAnnouncement(Problem problem, String answer) {
+        // TODO Auto-generated method stub
+        
+    }
 
     public void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS) throws Exception {
         // TODO Auto-generated method stub
@@ -178,6 +183,7 @@ public class NullController implements IInternalController{
 
     public ElementId submitClarification(Problem problem, String question) {
         // TODO Auto-generated method stub
+        return null;
 
     }
 
@@ -677,4 +683,6 @@ public class NullController implements IInternalController{
     public boolean isSuppressLoginsPaneDisplay() {
         return false;
     }
+
+
 }

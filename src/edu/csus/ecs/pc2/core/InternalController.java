@@ -3707,7 +3707,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         return clarification.getElementId();
     }
-
+    
+    public void submitAnnouncement(Problem problem, String answer) {
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Clarification clarification = new Clarification(contest.getClientId(), problem, "");
+        clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), true);
+        Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
+        sendToLocalServer(packet);
+        
+        Packet tpacket = PacketFactory.createClarificationRequest(contest.getClientId(), serverClientId, clarification.getElementId(), contest.getClientId());
+        sendToLocalServer(tpacket);
+        
+        clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), true);
+        Packet newpacket = PacketFactory.createAnsweredClarification(contest.getClientId(), serverClientId, clarification, clarification.getAnswer());
+        sendToLocalServer(newpacket);
+    }
+    
+    
     public void checkOutClarification(Clarification clarification, boolean readOnly) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Packet packet = PacketFactory.createClarificationRequest(contest.getClientId(), serverClientId, clarification.getElementId(), contest.getClientId());

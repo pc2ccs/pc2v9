@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
@@ -381,9 +381,18 @@ public interface IInternalController {
      * 
      * @param problem
      * @param question
-     * @return 
+     * @return ElementId of the newly created clarification
      */
     ElementId submitClarification(Problem problem, String question);
+    
+    /**
+     * Submit a announcement clarification.
+     * 
+     * @param problem
+     * @param answer
+     * @return 
+     */
+    void submitAnnouncement(Problem problem, String answer);
 
     /**
      * Request clarification to answer.
@@ -776,4 +785,6 @@ public interface IInternalController {
      * @param overrideRunId
      */
     void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId);
+
+    
 }
