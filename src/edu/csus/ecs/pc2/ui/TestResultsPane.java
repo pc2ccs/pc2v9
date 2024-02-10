@@ -1154,11 +1154,17 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         return executeAllButton;
     }
 
-    public void addActionListenerToExecuteAll(java.awt.event.ActionListener e) {
+    /**
+     * Adds action listeners to Execute All Button
+    */
+    public void addActionListenerToExecuteAllButton(java.awt.event.ActionListener e) {
         getExecuteAllButton().addActionListener(e);
     }
 
-    public void setExecuteAllButton(boolean b) {
+    /**
+     * Enables/Disables Execute All button
+    */
+    public void enableExecuteAllButton(boolean b) {
         getExecuteAllButton().setEnabled(b && currentRunFiles != null);
     }
     

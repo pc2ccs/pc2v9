@@ -105,15 +105,15 @@ public class TestResultsFrame extends javax.swing.JFrame implements UIPlugin {
     /**
      * Enables/Disables Execute All button
     */
-    public void setExecuteAllButton(boolean b) {
-        getMultiTestSetOutputViewerPane().setExecuteAllButton(b);
+    public void enableExecuteAllButton(boolean b) {
+        getMultiTestSetOutputViewerPane().enableExecuteAllButton(b);
     }
 
     /**
      * Adds action listeners to Execute All Button
     */
-    public void addActionListenerToExecuteAll(java.awt.event.ActionListener e) {
-        getMultiTestSetOutputViewerPane().addActionListenerToExecuteAll(e);
+    public void addActionListenerToExecuteAllButton(java.awt.event.ActionListener e) {
+        getMultiTestSetOutputViewerPane().addActionListenerToExecuteAllButton(e);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

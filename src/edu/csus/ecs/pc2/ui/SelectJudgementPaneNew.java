@@ -628,7 +628,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         getAcceptValidatorJudgementButton().setEnabled(b);
         // getViewOutputsButton().setEnabled(b);
         getAcceptChosenSelectionButton().setEnabled(b && getJudgementComboBox().getSelectedIndex() != -1);
-        getTestResultsFrame().setExecuteAllButton(b);
+        getTestResultsFrame().enableExecuteAllButton(b);
     }
 
     /**
@@ -1529,7 +1529,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (testResultsFrame == null) {
             testResultsFrame = new TestResultsFrame();
             // Add action listener whether Test results pane button is clicked
-            testResultsFrame.addActionListenerToExecuteAll(new ActionListener() {
+            testResultsFrame.addActionListenerToExecuteAllButton(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     new Thread(new Runnable() {
