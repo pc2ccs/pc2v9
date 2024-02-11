@@ -241,11 +241,6 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
 
     private JPanel resultsPaneButtonPanel;
 
-    // Separate the close button to readily add buttons in between
-    private JPanel resultsPaneButtonPanelLeft;
-
-    private JPanel resultsPaneButtonPanelRight;
-
     private JCheckBox showFailuresOnlyCheckBox;
 
     private JButton selectAllButton;
@@ -260,8 +255,6 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
 
     // Horizotal Strut to be added/removed before execute all button
     private Component executeAllHorizontalStrut;
-
-    private boolean isExecuteAllButtonVisible = false;
 
     private JButton resultsPaneCloseButton;
     private JLabel lblTotalTestCases;
@@ -983,7 +976,6 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
     
     /**
      * Returns a JPanel containing control buttons for the Results Pane.
-     * Separated into Left and Right Button Panels
      * @return the resultsPaneButtonPanel
      */
     private JPanel getResultsPaneButtonPanel() {
@@ -992,109 +984,57 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             
             resultsPaneButtonPanel = new JPanel();
 
-            // Add Left end buttons of resultsPaneButtonPanel
-            resultsPaneButtonPanel.add(getResultsPaneButtonPanelLeft());
+            //add a checkbox to allow filtering between all test cases and only failed test cases
+            resultsPaneButtonPanel.add(getShowFailuresOnlyCheckbox());
 
-            // Add Right end buttons of resultsPaneButtonPanel
-            resultsPaneButtonPanel.add(getResultsPaneButtonPanelRight());
+            //add space
+            Component horizontalStrut_1 = Box.createHorizontalStrut(20);
+            resultsPaneButtonPanel.add(horizontalStrut_1);
+
+            //add a button to select all test cases in the grid
+            resultsPaneButtonPanel.add(getSelectAllButton());
+            
+            //add space
+            Component horizontalStrut_3 = Box.createHorizontalStrut(20);
+            resultsPaneButtonPanel.add(horizontalStrut_3);
+            
+            //add a button to unselect all the test cases in the grid
+            resultsPaneButtonPanel.add(getUnselectAllButton());
+
+            //add space
+            Component horizontalStrut_2 = Box.createHorizontalStrut(20);
+            resultsPaneButtonPanel.add(horizontalStrut_2);
+            
+            // add a control button to invoke comparison of the team and judge output files for selected row(s)
+            resultsPaneButtonPanel.add(getCompareSelectedButton());
+
+            //add space specific for Execute All Button
+            resultsPaneButtonPanel.add(getExecuteAllHorizontalStrut());
+            
+            // add a control button to execute all test cases
+            resultsPaneButtonPanel.add(getExecuteAllButton());
+
+            //add space
+            Component horizontalGlue_3 = Box.createHorizontalGlue();
+            horizontalGlue_3.setPreferredSize(new Dimension(20, 20));
+            resultsPaneButtonPanel.add(horizontalGlue_3);
+
+            // add a control button to dismiss the frame
+            resultsPaneButtonPanel.add(getResultsPaneCloseButton());
         }
         return resultsPaneButtonPanel;
     }
 
     /**
-     * Returns a JPanel containing control buttons for the left end of Results Pane.
-     * @return the resultsPaneButtonPanelLeft
+     * Sets the visibility of Execute All Button based on condition
      */
-    private JPanel getResultsPaneButtonPanelLeft() {
-        
-        if (resultsPaneButtonPanelLeft == null) {
-            
-            resultsPaneButtonPanelLeft = new JPanel();
+    private void setExecuteAllButtonVisible(boolean b) {
 
-            //add a checkbox to allow filtering between all test cases and only failed test cases
-            resultsPaneButtonPanelLeft.add(getShowFailuresOnlyCheckbox());
-
-            //add space
-            Component horizontalStrut_1 = Box.createHorizontalStrut(20);
-            resultsPaneButtonPanelLeft.add(horizontalStrut_1);
-
-            //add a button to select all test cases in the grid
-            resultsPaneButtonPanelLeft.add(getSelectAllButton());
-            
-            //add space
-            Component horizontalStrut_3 = Box.createHorizontalStrut(20);
-            resultsPaneButtonPanelLeft.add(horizontalStrut_3);
-            
-            //add a button to unselect all the test cases in the grid
-            resultsPaneButtonPanelLeft.add(getUnselectAllButton());
-
-            //add space
-            Component horizontalStrut_2 = Box.createHorizontalStrut(20);
-            resultsPaneButtonPanelLeft.add(horizontalStrut_2);
-            
-            // add a control button to invoke comparison of the team and judge output files for selected row(s)
-            resultsPaneButtonPanelLeft.add(getCompareSelectedButton());
-        }
-        return resultsPaneButtonPanelLeft;
-    }
-
-    /**
-     * Returns a JPanel containing control buttons for the right end Results Pane.
-     * @return the resultsPaneButtonPanelLeft
-     */
-    private JPanel getResultsPaneButtonPanelRight() {
-        
-        if (resultsPaneButtonPanelRight == null) {
-            
-            resultsPaneButtonPanelRight = new JPanel();
-
-            //add space
-            Component horizontalGlue_3 = Box.createHorizontalGlue();
-            horizontalGlue_3.setPreferredSize(new Dimension(20, 20));
-            resultsPaneButtonPanelRight.add(horizontalGlue_3);
-
-            // add a control button to dismiss the frame
-            resultsPaneButtonPanelRight.add(getResultsPaneCloseButton());
-        }
-        return resultsPaneButtonPanelRight;
-    }
-
-    /**
-     * refreshes the resultspane button panel left
-     * includes/removes execute all button based on stop-on-first-failure
-     */
-    private void updateResultsPaneButtonPanelLeft() {
-
-        if (currentProblem != null && currentProblem.isStopOnFirstFailedTestCase()) {
-
-            if (!isExecuteAllButtonVisible) {
-                //add space
-                getResultsPaneButtonPanelLeft().add(getExecuteAllHorizontalStrut());
+        // Set the space visible/invisible based on condition
+        getExecuteAllHorizontalStrut().setVisible(b);
                 
-                // add a control button to execute all test cases
-                getResultsPaneButtonPanelLeft().add(getExecuteAllButton());
-
-                getResultsPaneButtonPanelLeft().revalidate();
-                getResultsPaneButtonPanelLeft().repaint();
-
-                isExecuteAllButtonVisible = true;
-            }
-        }
-        else {
-
-            if (isExecuteAllButtonVisible) {
-                //Remove space
-                getResultsPaneButtonPanelLeft().remove(getExecuteAllHorizontalStrut());
-                
-                // Remove control button to execute all test cases
-                getResultsPaneButtonPanelLeft().remove(getExecuteAllButton());
-
-                getResultsPaneButtonPanelLeft().revalidate();
-                getResultsPaneButtonPanelLeft().repaint();
-
-                isExecuteAllButtonVisible = false;
-            }
-        }
+        // Set the Execute All Button visible/invisible based on condition
+        getExecuteAllButton().setVisible(b);
     }
     
     /**
@@ -1177,6 +1117,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
 
         if (executeAllButton == null) {
             executeAllButton = new JButton("Execute All");
+            executeAllButton.setVisible(false);
         }
         return executeAllButton;
     }
@@ -1188,6 +1129,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
 
         if (executeAllHorizontalStrut == null) {
             executeAllHorizontalStrut = Box.createHorizontalStrut(20);
+            executeAllHorizontalStrut.setVisible(false);
         }
         return executeAllHorizontalStrut;
     }
@@ -2438,7 +2380,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         this.currentRunFiles = runFiles;
         this.currentProblem = problem;
         this.currentProblemDataFiles = problemDataFiles;
-        updateResultsPaneButtonPanelLeft();
+        setExecuteAllButtonVisible(currentProblem != null && currentProblem.isStopOnFirstFailedTestCase());
         executableDir = getExecuteDir();
         populateGUI();
         try {
