@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedInputStream;
@@ -92,6 +92,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private ClientId executorId = null;
     
     private boolean killedByTimer ;
+
+    /**
+     * If true override stopOnFirstFailedTestCase and run all testcases
+     */
+    private boolean overrideStopOnFirstFailedTestCase = false;
 
     /**
      * Directory where main file is found
@@ -355,6 +360,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         return (result);
     }
 
+    public void setOverrideStopOnFirstFailedTestCase(boolean b) {
+        overrideStopOnFirstFailedTestCase = b;
+    }
+
     @Override
     public IFileViewer execute() {
         return execute(true);
@@ -519,7 +528,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
                     // execute the judged run against each test data set until either all test cases are run
                     // or (if the problem indicates stop on first failed test case) a test case fails
-                    while ((dataSetNumber < dataFiles.length) && ( !(stopOnFirstFailedTestCase && atLeastOneTestFailed))) {
+                    while ((dataSetNumber < dataFiles.length) && (overrideStopOnFirstFailedTestCase || !(stopOnFirstFailedTestCase && atLeastOneTestFailed))) {
 
                         // execute against one specific data set
                         passed = executeAndValidateDataSet(dataSetNumber);
