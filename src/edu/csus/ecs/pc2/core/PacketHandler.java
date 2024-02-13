@@ -1623,13 +1623,17 @@ public class PacketHandler {
         Clarification submittedClarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
         Clarification clarification = contest.acceptClarification(submittedClarification);
 
-        // Send to team
+        // Send to judge rather than team
         Packet confirmPacket = PacketFactory.createClarSubmissionConfirm(contest.getClientId(), fromId, clarification);
         controller.sendToClient(confirmPacket);
 
         // Send to clients and other servers
         if (isServer()) {
             controller.sendToJudgesAndOthers(confirmPacket, true);
+        }
+        //check if clarification is actually an announcement clarification.
+        if (clarification.getQuestion().equals("") && clarification.isAnswered()) {
+            controller.sendToTeams(confirmPacket);
         }
     }
 

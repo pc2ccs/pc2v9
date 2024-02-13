@@ -3714,13 +3714,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), true);
         Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
         sendToLocalServer(packet);
-        
-        Packet tpacket = PacketFactory.createClarificationRequest(contest.getClientId(), serverClientId, clarification.getElementId(), contest.getClientId());
-        sendToLocalServer(tpacket);
-        
-        clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), true);
-        Packet newpacket = PacketFactory.createAnsweredClarification(contest.getClientId(), serverClientId, clarification, clarification.getAnswer());
-        sendToLocalServer(newpacket);
     }
     
     

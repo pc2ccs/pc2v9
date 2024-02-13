@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -143,6 +144,8 @@ public class SubmitClarificationPane extends JPanePlugin {
             submitAnnouncement = new JCheckBox();
             submitAnnouncement.setText("Generate Announcement");
             submitAnnouncement.setBounds(19, 80, 170, 20);
+            ToolTipManager.sharedInstance().setDismissDelay(6000);
+            submitAnnouncement.setToolTipText("Announcement clarification is a clarification that directly goes to teams with an answer but without question.");
             submitAnnouncement.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(java.awt.event.ItemEvent e) {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -308,18 +311,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         
         try {
             log.info("submit announcement clarification for " + problem + " " + confirmAnswer);
-            
-          
-//            ElementId elementId = getController().submitClarification(problem, "");
-//            
-//            Clarification clarificationToAnswer = getContest().getClarification(elementId);
-//            getController().checkOutClarification(clarificationToAnswer, false);
-//            
-//            ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answerAnnouncement, getContest().getClientId(), 
-//                    true, getContest().getContestTime()); //getSendToAllCheckBox().isSelected() true here is to check if needs to be sent everyone
-//            clarificationToAnswer.addAnswer(clarificationAnswer);
-//            getController().submitClarificationAnswer(clarificationToAnswer);
-            
+
             getController().submitAnnouncement(problem, answerAnnouncement);
             questionTextArea.setText("");
 
