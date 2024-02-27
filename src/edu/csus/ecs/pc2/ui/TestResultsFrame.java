@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -90,6 +90,10 @@ public class TestResultsFrame extends javax.swing.JFrame implements UIPlugin {
         getMultiTestSetOutputViewerPane().setTeamOutputFileNames(filenames);
     }
 
+    public void setTeamStderrFileNames(String [] filenames){
+        getMultiTestSetOutputViewerPane().setTeamStderrFileNames(filenames);
+    }
+
     public void setValidatorStderrFileNames(String[] filenames) {
         getMultiTestSetOutputViewerPane().setValidatorStderrFileNames(filenames);
     }
@@ -98,5 +102,18 @@ public class TestResultsFrame extends javax.swing.JFrame implements UIPlugin {
         getMultiTestSetOutputViewerPane().setValidatorOutputFileNames(filenames);
     }
 
+    /**
+     * Enables/Disables Execute All button
+    */
+    public void enableExecuteAllButton(boolean b) {
+        getMultiTestSetOutputViewerPane().enableExecuteAllButton(b);
+    }
+
+    /**
+     * Adds action listeners to Execute All Button
+    */
+    public void addActionListenerToExecuteAllButton(java.awt.event.ActionListener e) {
+        getMultiTestSetOutputViewerPane().addActionListenerToExecuteAllButton(e);
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

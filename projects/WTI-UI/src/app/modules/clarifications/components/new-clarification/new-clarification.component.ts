@@ -43,7 +43,7 @@ export class NewClarificationComponent implements OnInit, OnDestroy {
         this.newClarificationForm.reset();
         this.close();
         this._contestService.clarificationsUpdated.next();
-        this._uiHelper.alert('Clarification has been submitted successfully!');
+        this._uiHelper.alertOk('Clarification has been submitted successfully!');
       }, (error: any) => {
         console.error('error submitting new clarification');
         console.error(error);

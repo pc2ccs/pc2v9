@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -189,7 +189,7 @@ public class SubmitClarificationPane extends JPanePlugin {
     }
 
     /**
-     * Enable or disable submission buttons.
+     * Enable or disable submission buttons, Question pane and Problem drop-down list.
      * 
      * @param turnButtonsOn
      *            if true, buttons enabled.
@@ -197,6 +197,8 @@ public class SubmitClarificationPane extends JPanePlugin {
     private void setButtonsActive(final boolean turnButtonsOn) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                getProblemComboBox().setEnabled(turnButtonsOn);
+                getQuestionTextArea().setEnabled(turnButtonsOn);
                 getSubmitClarificationButton().setEnabled(turnButtonsOn);
             }
         });

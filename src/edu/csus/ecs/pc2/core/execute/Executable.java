@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedInputStream;
@@ -92,6 +92,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private ClientId executorId = null;
     
     private boolean killedByTimer ;
+
+    /**
+     * If true override stopOnFirstFailedTestCase and run all testcases
+     */
+    private boolean overrideStopOnFirstFailedTestCase = false;
 
     /**
      * Directory where main file is found
@@ -229,6 +234,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private ArrayList<String> teamsOutputFilenames = new ArrayList<String>();
 
     /**
+     * List of Team's output filenames, created by execute method.
+     */
+    private ArrayList<String> teamsStderrFilenames = new ArrayList<String>();
+
+    /**
      * List of Validator output filenames, created by execute method.
      */
     private ArrayList<String> validatorOutputFilenames = new ArrayList<String>();
@@ -350,6 +360,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         return (result);
     }
 
+    public void setOverrideStopOnFirstFailedTestCase(boolean b) {
+        overrideStopOnFirstFailedTestCase = b;
+    }
+
     @Override
     public IFileViewer execute() {
         return execute(true);
@@ -359,6 +373,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     public IFileViewer execute(boolean clearDirFirst) {
 
         teamsOutputFilenames = new ArrayList<String>();
+        teamsStderrFilenames = new ArrayList<String>();
 
         if (usingGUI) {
             fileViewer = new MultipleFileViewer(log);
@@ -513,7 +528,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
                     // execute the judged run against each test data set until either all test cases are run
                     // or (if the problem indicates stop on first failed test case) a test case fails
-                    while ((dataSetNumber < dataFiles.length) && ( !(stopOnFirstFailedTestCase && atLeastOneTestFailed))) {
+                    while ((dataSetNumber < dataFiles.length) && (overrideStopOnFirstFailedTestCase || !(stopOnFirstFailedTestCase && atLeastOneTestFailed))) {
 
                         // execute against one specific data set
                         passed = executeAndValidateDataSet(dataSetNumber);
@@ -755,7 +770,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
         log.info("  Test case " + testNumber + " passed = " + Utilities.yesNoString(submissionIsCorrect) + " " + reason);
 
-        JudgementRecord record = JudgementUtilites.createJudgementRecord(contest, run, executionData, executionData.getValidationResults());
+        JudgementRecord record = JudgementUtilities.createJudgementRecord(contest, run, executionData, executionData.getValidationResults());
 
         // Judgement judgement = getContest().getJudgement(record.getJudgementId());
         // log.info(" Test case " + testNumber + " passed = " + Utilities.yesNoString(passed) + " judgement = " + judgement);
@@ -1393,8 +1408,22 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         return optStr;
     }
 
+    /**
+     * Returns a filename specific to data set number to store team's stdout
+     * 
+     * @param dataSetNumber
+     */
     private String getTeamOutputFilename(int dataSetNumber) {
         return prefixExecuteDirname("teamoutput." + dataSetNumber + ".txt");
+    }
+
+    /**
+     * Returns a filename specific to data set number to store team's stderr
+     * 
+     * @param dataSetNumber
+     */
+    private String getTeamStderrFilename(int dataSetNumber) {
+        return prefixExecuteDirname("teamstderr." + dataSetNumber + ".txt");
     }
 
     /**
@@ -2245,12 +2274,17 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             // teams output file - single file name
             SerializedFile userOutputFile = executionData.getExecuteProgramOutput();
+            SerializedFile userStderrFile = executionData.getExecuteStderr();
             createFile(userOutputFile, prefixExecuteDirname(userOutputFile.getName()));
+            createFile(userStderrFile, prefixExecuteDirname(userStderrFile.getName()));
 
             String teamsOutputFilename = getTeamOutputFilename(dataSetNumber);
+            String teamsStderrFilename = getTeamStderrFilename(dataSetNumber);
 
             createFile(userOutputFile, teamsOutputFilename); // Create a per test case Team's output file
+            createFile(userStderrFile, teamsStderrFilename); // Create a per test case Team's stderr file
             teamsOutputFilenames.add(teamsOutputFilename); // add to list
+            teamsStderrFilenames.add(teamsStderrFilename); // add to list
             if (executionData.getExecuteExitValue() != 0) {
                 long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
 
@@ -2302,7 +2336,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
         if (executionData.isRunTimeLimitExceeded()) {
 
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, Judgement.ACRONYM_TIME_LIMIT_EXCEEDED);
+            Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, Judgement.ACRONYM_TIME_LIMIT_EXCEEDED);
             String judgementString = "No - Time Limit Exceeded"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
@@ -2312,7 +2346,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             executionData.setValidationSuccess(true);
             proceedToValidation = false;
         } else if(executionData.isMemoryLimitExceeded()) {
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, Judgement.ACRONYM_MEMORY_LIMIT_EXCEEDED);
+            Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, Judgement.ACRONYM_MEMORY_LIMIT_EXCEEDED);
             String judgementString = "No - Memory Limit Exceeded"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
@@ -2323,7 +2357,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             proceedToValidation = false;
             
         } else if(bSandboxSystemError) {
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, Judgement.ACRONYM_OTHER_CONTACT_STAFF);
+            Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, Judgement.ACRONYM_OTHER_CONTACT_STAFF);
             String judgementString = "No - contact staff"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
@@ -2339,7 +2373,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         // TLE/MLE/OCS
         if (executionData.getExecuteExitValue() != 0  &&  !killedByTimer && proceedToValidation) {
             
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(contest, "RTE");
+            Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, "RTE");
             String judgementString = "No - Run-time Error"; // default
             if (judgement != null) {
                 judgementString = judgement.getDisplayName();
@@ -3452,6 +3486,15 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      */
     public List<String> getTeamsOutputFilenames() {
         return teamsOutputFilenames;
+    }
+
+    /**
+     * Get filenames for each team's stderr for each test case.
+     * 
+     * @return the list of team stderr file names.
+     */
+    public List<String> getTeamsStderrFilenames() {
+        return teamsStderrFilenames;
     }
 
     /**

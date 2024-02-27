@@ -7,6 +7,8 @@ import { Run } from 'src/app/modules/core/models/run';
 import { MatDialog } from '@angular/material/dialog';
 import { NewRunComponent } from '../new-run/new-run.component';
 import { TestRunDetailComponent } from '../test-run-detail/test-run-detail.component';
+import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
+
 
 @Component({
   templateUrl: './runs-page.component.html',
@@ -20,9 +22,13 @@ export class RunsPageComponent implements OnInit, OnDestroy {
 
   constructor(private _formBuilder: FormBuilder,
               private _teamService: ITeamsService,
-              private _matDialog: MatDialog) { }
+              private _matDialog: MatDialog,
+			  private _appTitleService: AppTitleService) { }
 
   ngOnInit(): void {
+	
+	this._appTitleService.setTitleWithTeamId("Runs");
+	
     this.buildForm();
     this.loadRuns();
 

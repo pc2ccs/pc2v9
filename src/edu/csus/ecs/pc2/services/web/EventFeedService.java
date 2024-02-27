@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.web;
 
 import java.io.ByteArrayOutputStream;
@@ -32,7 +32,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Implementation of CLICS REST event-feed.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 @Path("/contest/event-feed")
@@ -61,12 +61,13 @@ public class EventFeedService implements Feature {
 
     /**
      * a JSON stream representation of the events occurring in the contest.
-     * 
+     *
      * @param type
      *            a comma-separated query parameter identifying the type(s) of events being requested (if empty or null, indicates ALL event types)
      * @param id
      *            the event-id of the earliest event being requested (i.e., an indication of the requested starting point in the event stream)
-     * 
+     * @param groupids
+     *            a comma-separated list of group ids to return events for
      * @return a {@link Response} object whose body contains the JSON event feed
      * @param asyncResponse
      * @param servletRequest
@@ -74,7 +75,7 @@ public class EventFeedService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public void streamEventFeed(@QueryParam("types") String eventTypeList, @QueryParam("id") String startintEventId, @Suspended
+    public void streamEventFeed(@QueryParam("types") String eventTypeList, @QueryParam("id") String startintEventId, @QueryParam("groupids") String wantedGroupIds, @Suspended
     final AsyncResponse asyncResponse, @Context HttpServletRequest servletRequest, @Context HttpServletResponse response, @Context SecurityContext sc) throws IOException {
 
         response.setContentType("json");
@@ -90,23 +91,40 @@ public class EventFeedService implements Feature {
         }
 
         EventFeedFilter filter = new EventFeedFilter();
-        
+        boolean bEventFeedContraints = false;
+
+        info("starting event feed from " + servletRequest.getRemoteAddr() + " user:" + sc.getUserPrincipal().getName());
         if (eventTypeList != null) {
             filter.addEventTypeList(eventTypeList);
-            System.out.println("starting event feed, sending only event types '" + eventTypeList + "'");
+            info("  sending only event types '" + eventTypeList + "'");
+            bEventFeedContraints = true;
+        }
+
+        // a Comma-separated list of groupids to return events for.
+        if(wantedGroupIds != null) {
+            if(filter.addGroups(contest, wantedGroupIds) == false) {
+                log.log(Level.WARNING, "NOT starting event feed: invalid group(s) specified: " + wantedGroupIds);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid group(s): `" + wantedGroupIds + "`");
+                return;
+            } else {
+                info("  sending only events appropriate for group(s): " + wantedGroupIds);
+                bEventFeedContraints = true;
+            }
         }
 
         if (startintEventId != null) {
             if (startintEventId.startsWith("pc2-") && Utilities.isIntegerNumber(startintEventId.substring(4))) {
                 filter.addStartintEventId(startintEventId);
-                System.out.println("starting event feed, Feed starting after id " + startintEventId);
+                info(" feed starting after id: " + startintEventId);
+                bEventFeedContraints = true;
             } else {
-                System.err.println("NOT starting event feed (invalid startingEventId "+startintEventId+")");
+                log.log(Level.WARNING, "NOT starting event feed (invalid startingEventId "+startintEventId+")");
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid id: `"+startintEventId+"`");
                 return;
             }
-        } else {
-            System.out.println("starting event feed (no args) ");
+        }
+        if(!bEventFeedContraints) {
+            info(  "entire feed being sent (no filtering)");
         }
         filter.setClient(servletRequest.getRemoteUser() + "@" + servletRequest.getRemoteAddr() + ":" + servletRequest.getRemotePort());
 
@@ -147,10 +165,10 @@ public class EventFeedService implements Feature {
         // TODO Auto-generated method stub
         return false;
     }
-    
+
     /**
      * Create a snapshot of the JSON event feed.
-     * 
+     *
      * @param contest
      * @param controller
      * @return

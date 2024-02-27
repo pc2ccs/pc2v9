@@ -3,35 +3,36 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Vector;
 
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Pluralize;
-import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.security.Permission;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-
-import java.awt.Dimension;
 
 /**
  * Review Account Load Frame
- * 
+ *
  * 1st line of load file are the column headers.
  * Required columns are:  account, site, and password
  * Optional columns are: displayname, group, permdisplay, and permlogin
@@ -44,7 +45,7 @@ import java.awt.Dimension;
 public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -172535000039944166L;
 
@@ -76,10 +77,10 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     private String loadedFileName;
 
     private JCheckBox showAllAccountsCheckBox = null;
-    
+
     /**
      * This method initializes
-     * 
+     *
      */
     public ReviewAccountLoadFrame() {
         super();
@@ -88,7 +89,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         getContentPane().setLayout(new BorderLayout());
@@ -98,17 +99,18 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getJPanel());
         this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 handleCancel();
             }
         });
-        
+
         FrameUtilities.centerFrameTop(this);
     }
 
     /**
      * This method initializes languageButtonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -127,7 +129,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes languageListBox
-     * 
+     *
      * @return edu.csus.ecs.pc2.core.log.MCLB
      */
     private MCLB getAccountListBox() {
@@ -161,6 +163,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         return accountListBox;
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         contest = inContest;
         controller = inController;
@@ -170,7 +173,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes messagePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMessagePane() {
@@ -189,12 +192,13 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     /**
      * show message to user
-     * 
+     *
      * @param string
      */
     private void showMessage(final String string) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(string);
                 messageLabel.setToolTipText(string);
@@ -207,6 +211,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     private void showMessage(final String string, final Color color) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(string);
                 messageLabel.setToolTipText(string);
@@ -214,9 +219,10 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             }
         });
     }
-    
-    
-    
+
+
+
+    @Override
     public String getPluginTitle() {
         return "Review Account Load Frame";
     }
@@ -224,7 +230,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     /**
      * Return all accounts for all sites.
      * TODO: consider making getAllAccounts public in controller
-     * 
+     *
      * @return Array of all accounts in contest.
      */
     private Account[] getAllAccounts() {
@@ -238,12 +244,12 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             }
         }
 
-        Account[] accountList = (Account[]) allAccounts.toArray(new Account[allAccounts.size()]);
+        Account[] accountList = allAccounts.toArray(new Account[allAccounts.size()]);
         return accountList;
     }
 
     public void setFile(String filename) {
-        
+
         loadedFileName = filename;
         showMessage("Loaded " + filename);
         getAccountListBox().removeAllRows();
@@ -280,7 +286,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             }
         }
     }
-    
+
     private void showErrorMessage(String msg){
         showMessage(msg, Color.RED);
     }
@@ -289,6 +295,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     public void updateAccountRow(final Account account) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 Object[] objects = buildAccountRow(account);
                 int rowNumber = accountListBox.getIndexByKey(account.getClientId());
@@ -334,21 +341,34 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
                 perms = perms + "CHANGE_PASSWORD ";
             }
             s[5] = perms.trim();
-            if (accountOrig.getGroupId() == null && account.getGroupId() == null) {
+
+            HashSet<ElementId> groupsOrig = accountOrig.getGroupIds();
+            HashSet<ElementId> groupsNew = account.getGroupIds();
+
+            if (groupsOrig == null && groupsNew == null) {
                 s[6] = "";
             } else {
-                if (account.getGroupId() == null) {
+                if (groupsNew == null) {
                     s[6] = CHANGE_BEGIN + "<removed>" + CHANGE_END;
                 } else {
-                    if (accountOrig.getGroupId() == null) {
-                        s[6] = CHANGE_BEGIN + contest.getGroup(account.getGroupId()).toString() + CHANGE_END;
-                    } else {
-                        // neither are null
-                        if (account.getGroupId().equals(accountOrig.getGroupId())) {
-                            s[6] = contest.getGroup(account.getGroupId()).toString();
+                    // we're going to always need the new accounts list of groups, so compute it once first
+                    String allGroups = "";
+                    boolean firstString = true;
+
+                    for(ElementId groupElementId : groupsNew) {
+                        if(!firstString) {
+                            allGroups = allGroups + ',';
                         } else {
-                            s[6] = CHANGE_BEGIN + contest.getGroup(account.getGroupId()).toString() + CHANGE_END;
+                            firstString = false;
                         }
+                        allGroups = allGroups + contest.getGroup(groupElementId).getDisplayName();
+                    }
+
+                    // groupsOrig may be null here, but groupsNew will always be non-null
+                    if (groupsNew.equals(groupsOrig)) {
+                        s[6] = allGroups;
+                    } else {
+                        s[6] = CHANGE_BEGIN + allGroups + CHANGE_END;
                     }
                 }
             }
@@ -414,7 +434,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes acceptButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getAcceptButton() {
@@ -425,6 +445,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             acceptButton.setEnabled(false);
             acceptButton.setPreferredSize(new java.awt.Dimension(100, 26));
             acceptButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     handleAccept();
                 }
@@ -441,7 +462,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes jPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getJPanel() {
@@ -458,7 +479,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes cancelButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getCancelButton() {
@@ -468,6 +489,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             cancelButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             cancelButton.setPreferredSize(new java.awt.Dimension(100, 26));
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     handleCancel();
                 }
@@ -482,7 +504,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes showAllAccountsCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getShowAllAccountsCheckBox() {
@@ -491,6 +513,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             showAllAccountsCheckBox.setText("Include unchanged accounts");
             showAllAccountsCheckBox.setPreferredSize(new Dimension(250, 24));
             showAllAccountsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     refreshList();
                 }

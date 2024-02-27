@@ -1,8 +1,9 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IStorage;
@@ -20,14 +21,14 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
  * Tests for InternalContest.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
 public class InternalContestTest extends AbstractTestCase {
-    
+
     private boolean debugMode = false;
 
     private static final String CONFIG_ACCOUNTS = "ACCOUNTS";
@@ -71,36 +72,40 @@ public class InternalContestTest extends AbstractTestCase {
     private static final String CONFIG_CONTEST_PASSWORD = "CONTEST_PASSWORD";
 
     private static final String CONFIG_CLIENTID = "CLIENTID";
-    
+
     private SampleContest sampleContest = new SampleContest();
-    
+
     public InternalContestTest(String name) {
         super(name);
     }
 
+    @Override
     public boolean isDebugMode() {
         return debugMode;
     }
 
+    @Override
     public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
     }
 
+    @Override
     protected void tearDown() throws Exception {
         super.tearDown();
     }
-    
+
     protected IStorage createStorage(String name, int siteNumber){
         Profile profile = new Profile(name);
         profile.setSiteNumber(siteNumber);
         String testdirName = getOutputDataDirectory() + File.separator + profile.getProfilePath();
         return new FileStorage(testdirName);
     }
-    
+
     /**
      * Test that General is a default category.
      */
@@ -108,21 +113,21 @@ public class InternalContestTest extends AbstractTestCase {
         IInternalContest contest = new InternalContest();
         int siteNumber = 3;
         contest.setSiteNumber(siteNumber);
-        
+
         contest.setStorage(createStorage("testGeneral", siteNumber));
-  
+
         contest.initializeStartupData(siteNumber);
         contest.initializeSubmissions(siteNumber);
-        
+
         Category[] categories = contest.getCategories();
         assertEquals("No categories expected", 0, categories.length);
-        
+
         // normally this is done when the 1st server logins in
         contest.setupDefaultCategories();
         categories = contest.getCategories();
-        
+
         assertEquals("Missing general category", 1, categories.length);
-        
+
         Category defaultCat = categories[0];
         assertEquals("Default category not General", "General", defaultCat.getDisplayName());
 
@@ -134,19 +139,19 @@ public class InternalContestTest extends AbstractTestCase {
 
     /**
      * Simple clone test.
-     * 
+     *
      * @throws Exception
      */
     public void testClone() throws Exception {
 
         InternalContest contest1 = new InternalContest();
         InternalContest contest2 = new InternalContest();
-        
+
         int siteNumber = 4;
         ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
         contest1.setClientId(serverId);
         contest1.setSiteNumber(siteNumber);
-        
+
         contest2.setClientId(contest1.getClientId());
         contest2.setSiteNumber(siteNumber);
 
@@ -159,30 +164,30 @@ public class InternalContestTest extends AbstractTestCase {
 
         contestsEqual("testClone identical", contest1, contest2, false);
     }
-    
+
     /**
-     * 
+     *
      */
     public void testCloneJudgementsBug849() throws Exception {
-        
+
         InternalContest contest1 = new InternalContest();
         InternalContest contest2 = new InternalContest();
-        
+
         int siteNumber = 4;
         ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
         contest1.setClientId(serverId);
         contest1.setSiteNumber(siteNumber);
-        
+
         contest2.setClientId(contest1.getClientId());
         contest2.setSiteNumber(siteNumber);
 
         contestsEqual("testClone identical", contest1, contest2, true);
-        
+
         IInternalContest standardContest = new SampleContest().createStandardContest();
-        
+
         contestsEqual("Expecting contests to be different", contest1, standardContest, false);
     }
-    
+
     protected Profile createProfile (String name){
         Profile profile = new Profile(name);
         profile.setDescription("Contest "+name);
@@ -196,7 +201,7 @@ public class InternalContestTest extends AbstractTestCase {
         Profile profile4 = createProfile("Profile 4");
         Profile origProfile = new Profile("Orig profile");
         ProfileCloneSettings cloneSettings = new ProfileCloneSettings("clone4", "new title", contest3.getContestPassword().toCharArray(), origProfile);
-        
+
         IInternalContest contest4 = contest3.clone(contest3, profile4, cloneSettings);
 
         /**
@@ -205,10 +210,10 @@ public class InternalContestTest extends AbstractTestCase {
         contestsEqual("testCloneComplex", contest3, contest4, true);
 
     }
-    
+
     /**
      * Create profile directory and security/encryption information.
-     * 
+     *
      * @param profile
      * @param password
      * @throws FileSecurityException
@@ -217,22 +222,22 @@ public class InternalContestTest extends AbstractTestCase {
     private void createProfileFilesAndDirs(Profile profile, String password) throws FileSecurityException {
 
         String profileDirectory = profile.getProfilePath();
-        
+
         if (new File(profileDirectory).isDirectory()){
             new Exception("Directory already exists: "+profileDirectory);
         }
-        
+
         new File(profileDirectory).mkdirs();
-        
+
         FileSecurity fileSecurity = new FileSecurity(profileDirectory);
         fileSecurity.saveSecretKey(password.toCharArray());
     }
-    
+
     /**
      * Test cloning of a clone.
-     * 
+     *
      * Positive test.
-     *  
+     *
      * @throws Exception
      */
     public void testDoubleClone() throws Exception {
@@ -261,7 +266,7 @@ public class InternalContestTest extends AbstractTestCase {
         contestsEqual("testCloneComplete", contest1, contest3, true);
     }
 
-    
+
     public void testRunsClone() throws Exception {
 
         String password = "foo";
@@ -299,10 +304,10 @@ public class InternalContestTest extends AbstractTestCase {
         /**
          * Test clone with no runs
          */
-        
+
         Run[] runs = newContest.getRuns();
         assertEquals("Runs created", runs.length, 0);
-        
+
         /**
          * Test clone with 5 (numRuns) runs.
          */
@@ -325,11 +330,11 @@ public class InternalContestTest extends AbstractTestCase {
     }
     /**
      * Compares the contests and returns differences.
-     * 
+     *
      * Each line starts with the config area followed by a colon. ex. JUDGEMENTS: or LANGUAGES:
      * <P>
      * The config areas are constants starting with CONFIG_ in this class.
-     * 
+     *
      * @param contest1
      * @param contest2
      * @return
@@ -381,7 +386,7 @@ public class InternalContestTest extends AbstractTestCase {
         failures.addElement(CONFIG_CONTEST_PASSWORD + ": no_match");
 
         failures = new Vector<String>();
-        
+
         if (! contest1.getClientId().equals(contest2.getClientId())) {
             failures.addElement(CONFIG_CLIENTID + ": " + contest1.getClientId() + " vs " + contest2.getClientId());
         }
@@ -438,12 +443,12 @@ public class InternalContestTest extends AbstractTestCase {
                 failures.addElement(CONFIG_GROUPS + ": > " + group + " " + group.getElementId());
             }
         }
-        
+
         Judgement[] judgements = contest2.getJudgements();
         for (Judgement judgement : judgements) {
 
             Judgement otherJudgement = contest1.getJudgement(judgement.getElementId());
-            
+
             if (otherJudgement == null) {
                 failures.addElement(CONFIG_JUDGEMENTS + ": < " + judgement + " " + judgement.getElementId());
             } else {
@@ -469,7 +474,7 @@ public class InternalContestTest extends AbstractTestCase {
                 failures.addElement(CONFIG_ACCOUNTS + ": < " + account + " " + account.getElementId());
             } else {
                 compare(failures, CONFIG_ACCOUNTS, "Display Name", account.getDisplayName(), otherAccount.getDisplayName());
-                compare(failures, CONFIG_ACCOUNTS, "Group", account.getGroupId(), otherAccount.getGroupId());
+                compare(failures, CONFIG_ACCOUNTS, "Groups", account.getGroupIds(), otherAccount.getGroupIds());
                 compare(failures, CONFIG_ACCOUNTS, "Alias", account.getAliasName(), otherAccount.getAliasName());
 
                 // TODO all the rest of the account fields.
@@ -486,8 +491,8 @@ public class InternalContestTest extends AbstractTestCase {
                 failures.addElement(CONFIG_ACCOUNTS + ": < " + account + " " + account.getElementId());
             }
         }
-        
-        String[] failureList = (String[]) failures.toArray(new String[failures.size()]);
+
+        String[] failureList = failures.toArray(new String[failures.size()]);
 //        if (failureList.length > 0) {
 //            for (String string : failureList) {
 //                System.out.println(string);
@@ -496,6 +501,32 @@ public class InternalContestTest extends AbstractTestCase {
 
         return failureList;
 
+    }
+
+    /**
+     * Add an error string to the failures vector if the sets are not equal.
+     *
+     * @param failures vector of current failures
+     * @param contestConfigArea what part of the contests are being compared
+     * @param comment more detailed comment
+     * @param set1 first set
+     * @param set2 second set
+     */
+    private void compare(Vector<String> failures, String contestConfigArea, String comment, HashSet<?> set1, HashSet<?> set2) {
+        if (set1 == null && set2 == null) {
+            return;
+        }
+
+        if(set1 == null) {
+            if(set2 == null) {
+                return;
+            }
+            failures.add(contestConfigArea + ": " + comment + " (null vs " + set2.toString() + ")");
+        } else if(set2 == null) {
+            failures.add(contestConfigArea + ": " + comment + " (" + set1.toString() + " vs " + "null)");
+        } else if(!set1.equals(set2)) {
+            failures.add(contestConfigArea + ": " + comment + " (" + set1.toString() + " vs " + set2.toString() + ")");
+        }
     }
 
     private void compare(Vector<String> failures, String contestConfigArea, String comment, ElementId elementId, ElementId elementId2) {
@@ -518,18 +549,18 @@ public class InternalContestTest extends AbstractTestCase {
 
     private void compare(Vector<String> vector, String contestConfigArea, String comment, String string1, String string2) {
 
-        if (string2 == null) {
+        if (string1 == null) {
             vector.add(contestConfigArea + ": " + comment + " (null" + " vs " + string2 + ")");
         } else if (!string1.equals(string2)) {
             vector.add(contestConfigArea + ": " + comment + " (" + string1 + " vs " + string2 + ")");
         }
     }
-    
+
     private void compare(Vector<String> vector, String contestConfigArea, String comment, int int1, int int2) {
 
         String string1 = Integer.toString(int1);
         String string2 = Integer.toString(int2);
-        
+
         compare(vector, contestConfigArea, comment, string1,  string2);
     }
 
@@ -537,30 +568,30 @@ public class InternalContestTest extends AbstractTestCase {
 
         String string1 = Boolean.toString(boolean1);
         String string2 = Boolean.toString(boolean2);
-        
+
         compare(vector, contestConfigArea, comment, string1,  string2);
     }
 
 
     /**
      * Ensure judgement acronyms are automatically created.
-     * 
+     *
      * @throws Exception
      */
     public void testJudgementAcronymsPopulated() throws Exception {
 
         String testDirectory = getOutputDataDirectory();
-        
+
         Log log = createLog(getName());
-        
+
         StaticLog.setLog(log);
-        
+
         InternalContest contest = new InternalContest();
         contest.setContestPassword(getName());
-        
+
         Profile profile = new Profile (getName());
         profile.setProfilePath(testDirectory);
-        
+
         InternalController internalController = new InternalController(contest);
         internalController.setContactingRemoteServer(false);
         internalController.setLog(log);
@@ -568,23 +599,23 @@ public class InternalContestTest extends AbstractTestCase {
 //        internalController.addConsoleLogging();
         internalController.setUsingGUI(false);
         internalController.initializeServer(contest);
-        
+
         Judgement[] judgements = contest.getJudgements();
-        
+
         assertEquals("Expecting judgement count ", 8, judgements.length);
-        
+
         for (Judgement judgement : judgements) {
 //            System.out.println(" judgements "+judgement+" "+judgement.getAcronym());
             assertNotNull("Expected acronym "+judgement.getAcronym());
         }
-        
+
     }
-    
+
     /**
      * Compare InternContests.
-     * 
-     * Fails assert if contest are not equal and expectingSame is true. 
-     * 
+     *
+     * Fails assert if contest are not equal and expectingSame is true.
+     *
      * @param comment
      * @param contest1
      * @param contest2
@@ -593,12 +624,12 @@ public class InternalContestTest extends AbstractTestCase {
     private void contestsEqual(String comment, IInternalContest contest1, IInternalContest contest2, boolean expectingSame) {
         String[] differences = rawCompareContests(contest1, contest2);
         if (differences.length > 0) {
-            
+
             if (expectingSame){
                 System.out.println("There were differences in: '" + comment + "' use debugMode to see details.");
 //                new Exception("There were differences in: '" + comment + "'").printStackTrace();
             }
-            
+
             if (debugMode){
                 for (String line : differences) {
                     System.err.println(line);
@@ -610,7 +641,7 @@ public class InternalContestTest extends AbstractTestCase {
             assertTrue("Contests NOT the same " + comment, differences.length == 0);
         }
     }
-    
+
     String toString(ContestTime contestTime) {
 
         StringBuffer buffer = new StringBuffer().append(", getConestLengthMins=" + contestTime.getContestLengthMins()) //

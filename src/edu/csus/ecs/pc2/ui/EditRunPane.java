@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecuteTimerFrame;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
-import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
+import edu.csus.ecs.pc2.core.execute.JudgementUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -812,11 +812,11 @@ public class EditRunPane extends JPanePlugin {
         IFileViewer fileViewer = executable.execute();
         
         // Dump execution results files to log
-        String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
+        String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
         Problem problem = getContest().getProblem(run.getProblemId());
         ClientId clientId = getContest().getClientId();
-        List<Judgement> judgements = JudgementUtilites.getLastTestCaseJudgementList(getContest(), run);
-        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
+        List<Judgement> judgements = JudgementUtilities.getLastTestCaseJudgementList(getContest(), run);
+        JudgementUtilities.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
         
         fileViewer.setVisible(true);
     }

@@ -120,8 +120,11 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	//make sure no file names contain blanks (the PC2 server chokes on such filenames)
 	if (this.filenameContainsBlanks(this.mainFile, this.additionalFiles, this.testFiles)){
 		//pop up an error dialog
-	    this._uiHelper.alert('File names may not contain spaces');
+	    this._uiHelper.alertError('File names may not contain spaces');
 	    console.error('One or more submitted file contains a space in its filename');
+  } else if (this.filenameContainsDuplicates(this.mainFile, this.additionalFiles)) {
+      this._uiHelper.alertError('You may not submit multiple files with the same name');
+	    console.error('One or more submitted file have the same filename');
 	} else {
 		//submit the run
 	    this._teamService.submitRun(model)
@@ -129,10 +132,10 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	      .subscribe(_ => {
 	        this.clearNewSubmission();
 	        this.close();
-	        this._uiHelper.alert('Run has been submitted successfully!');
+	        this._uiHelper.alertOk('Run has been submitted successfully!');
 	        this._teamService.runsUpdated.next();
 	      }, (error: any) => {
-	        this._uiHelper.alert('Error submitting problem! Check console for details');
+	        this._uiHelper.alertError('Error submitting problem! Check console for details');
 	        console.error(error);
 	      });
 	}
@@ -144,7 +147,7 @@ export class NewRunComponent implements OnInit, OnDestroy {
     try {
       fileSubmission.byteData = btoa(fileContents);
     } catch (error) {
-      this._uiHelper.alert('Binary files are not allowed!');
+      this._uiHelper.alertError('Binary files are not allowed!');
       fileSubmission.byteData = fileContents;
       // window.location.href = 'http://amishrakefight.org/gfy/';
     }
@@ -196,6 +199,46 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	//none of the specified FileSubmission files contains a space in its name
 	return false;
 	}
+
+  //returns true if there are duplicate filenames among any of the specified FileSubmissions; false if all unique.
+  private filenameContainsDuplicates(mainfile: FileSubmission, additionalFiles: FileSubmission []): boolean {
+    let mainfilename = mainfile.fileName;
+    let l = mainfilename.lastIndexOf("/");
+    if (l == -1) {
+      l = mainfilename.lastIndexOf("\\");
+    }
+    if (l > -1) {
+      mainfilename = mainfilename.substring(l + 1);
+    }
+    for (let i = 0; i < additionalFiles.length; i++) {
+      let otherfilename = additionalFiles[i].fileName;
+      l = otherfilename.lastIndexOf("/");
+      if (l == -1) {
+        l = otherfilename.lastIndexOf("\\");
+      }
+      if (l > -1) {
+        otherfilename = otherfilename.substring(l + 1);
+      }
+      if (mainfilename === otherfilename) {
+        return true;
+      }
+      for (let j = i + 1; j < additionalFiles.length; j++) {
+        let otherfilename2 = additionalFiles[j].fileName;
+        l = otherfilename2.lastIndexOf("/");
+        if (l == -1) {
+          l = otherfilename2.lastIndexOf("\\");
+        }
+        if (l > -1) {
+          otherfilename2 = otherfilename2.substring(l + 1);
+        }
+        if (otherfilename2 === otherfilename) {
+          return true;
+        }
+      }
+    }
+    //none of the specified FileSubmission files contains duplicate names
+    return false;
+  }
 	
 	//returns a string intended to identify the platform on which the browser is running
 	private getOSName() : string {

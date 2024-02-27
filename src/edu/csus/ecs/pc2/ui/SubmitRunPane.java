@@ -171,7 +171,7 @@ public class SubmitRunPane extends JPanePlugin {
     }
 
     /**
-     * Enable or disable submission buttons.
+     * Enable or disable submission buttons and all drop-down lists.
      * 
      * @param turnButtonsOn
      *            if true, buttons enabled.
@@ -181,6 +181,8 @@ public class SubmitRunPane extends JPanePlugin {
             public void run() {
                 if (isTeam()) {
                     // Only turn buttons on and off if a Team
+                    getProblemComboBox().setEnabled(turnButtonsOn);
+                    getLanguageComboBox().setEnabled(turnButtonsOn);
                     getSubmitRunButton().setEnabled(turnButtonsOn);
                     getPickFileButton().setEnabled(turnButtonsOn);
                     getTestButton().setEnabled(turnButtonsOn);
@@ -439,7 +441,7 @@ public class SubmitRunPane extends JPanePlugin {
     /**
      * Submit run or test run.
      * 
-     * Validates that the user has selected problem, language and a valid filename.
+     * Validates that the user has selected problem, language, a valid filename and there are no files with duplicate name.
      * 
      * @param submitTheRun
      *            if true, submits the run.
@@ -481,7 +483,40 @@ public class SubmitRunPane extends JPanePlugin {
             return;
         }
         
-        if (additionalFilesMCLB.getRowCount() > 0){
+        if (additionalFilesMCLB.getRowCount() > 0) {
+
+            String mainfilename = filename;
+            int l = filename.lastIndexOf(File.separatorChar);
+            if (l > -1) {
+                mainfilename = filename.substring(l + 1);
+            }
+
+            for (int i = 0; i < additionalFilesMCLB.getRowCount(); i++) {
+                String otherfilename = (String) additionalFilesMCLB.getRow(i)[0];
+                l = otherfilename.lastIndexOf(File.separatorChar);
+                if (l > -1) {
+                    otherfilename = otherfilename.substring(l + 1);
+                }
+                if (otherfilename.equals(mainfilename)) {
+                    showMessage("You may not submit multiple files with the same name");
+                    log.warning("Found multiple files with same filename");
+                    return;
+                }
+                
+                for (int j = i + 1; j < additionalFilesMCLB.getRowCount(); j++) {
+                    String otherfilename2 = (String) additionalFilesMCLB.getRow(j)[0];
+                    l = otherfilename2.lastIndexOf(File.separatorChar);
+                    if (l > -1) {
+                        otherfilename2 = otherfilename2.substring(l + 1);
+                    }
+                    if (otherfilename.equals(otherfilename2)) {
+                        showMessage("You may not submit multiple files with the same name");
+                        log.warning("Found multiple files with same filename");
+                        return;
+                    }
+                }
+            }
+
             try {
                 otherFiles = getAdditionalSerializedFiles();
             } catch (Exception e) {
@@ -493,14 +528,44 @@ public class SubmitRunPane extends JPanePlugin {
         if (submitTheRun) {
             try {
                 String confirmQuestion = "<HTML><FONT SIZE=+1>Do you wish to submit run for<BR><BR>" + "Problem:  <FONT COLOR=BLUE>" + Utilities.forHTML(problem.toString()) + "</FONT><BR><BR>"
-                        + "Language:  <FONT COLOR=BLUE>" + Utilities.forHTML(language.toString()) + "</FONT><BR><BR>" + "File: <FONT COLOR=BLUE>" + Utilities.forHTML(filename)
-                        + "</FONT><BR><BR></FONT>";
+                        + "Language:  <FONT COLOR=BLUE>" + Utilities.forHTML(language.toString()) + "</FONT><BR><BR>";
+
+                if (additionalFilesMCLB.getRowCount() > 0) {
+                    confirmQuestion += "<TABLE><TBODY><TR><TD><FONT SIZE=+1>Main File:</FONT></TD><TD><FONT COLOR=BLUE SIZE=+1>" + Utilities.forHTML(filename)
+                        + "</FONT></TD></TR>";
+                    String otherfilename = (String) additionalFilesMCLB.getRow(0)[0];
+                    confirmQuestion += "<TR><TD><FONT SIZE=+1>Additional File(s):</FONT></TD><TD><FONT COLOR=BLUE SIZE=+1>" + Utilities.forHTML(otherfilename) + "</FONT></TD></TR>";
+                    for (int i = 1; i < additionalFilesMCLB.getRowCount(); i++) {
+                        otherfilename = (String) additionalFilesMCLB.getRow(i)[0]; 
+                        confirmQuestion += "<TR><TD> </TD><TD><FONT COLOR=BLUE SIZE=+1>" + Utilities.forHTML(otherfilename) + "</FONT></TD></TR>";
+                    }
+                    confirmQuestion += "</TBODY></TABLE>";
+                }
+                else {
+                    confirmQuestion += "<TABLE><TBODY><TR><TD><FONT SIZE=+1>Main File:</FONT></TD><TD><FONT COLOR=BLUE SIZE=+1>" + Utilities.forHTML(filename)
+                        + "</FONT></TD></TR></TBODY></TABLE>";
+                }
+                confirmQuestion += "<BR><BR></FONT></HTML>";
 
                 int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), confirmQuestion, "Confirm Submission");
 
                 if (result == JOptionPane.YES_OPTION) {
-
-                    log.info("submitRun for " + problem + " " + language + " file: " + filename);
+                    
+                    String logInfo = "submitRun for " + problem + " " + language + " main file: " + filename;
+                    if (additionalFilesMCLB.getRowCount() > 0) {
+                        logInfo += " additional file(s): [";
+                        for (int i = 0; i < additionalFilesMCLB.getRowCount(); i++) {
+                            String otherfilename = (String) additionalFilesMCLB.getRow(i)[0]; 
+                            logInfo += otherfilename;
+                            if (i == additionalFilesMCLB.getRowCount() - 1) {
+                                logInfo += "]";
+                            }
+                            else {
+                                logInfo += ", ";
+                            }
+                        }
+                    }
+                    log.info(logInfo);
                     getController().submitJudgeRun(problem, language, filename, otherFiles);
                 }
 
@@ -646,7 +711,7 @@ public class SubmitRunPane extends JPanePlugin {
             pickFileButton.setEnabled(true);
             pickFileButton.setMnemonic(java.awt.event.KeyEvent.VK_L);
             pickFileButton.setToolTipText("Select main file");
-            pickFileButton.setText("Select");
+            pickFileButton.setText("Select...");
             pickFileButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     selectMainFile();

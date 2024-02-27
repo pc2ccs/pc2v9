@@ -1,8 +1,11 @@
-<!-- Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.  --> 
-<!-- $Id$ -->
+<!-- Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.  -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:output method="html" indent="yes"/>
 <xsl:decimal-format decimal-separator="." grouping-separator="," />
+<xsl:variable name="groupStop" select="10"/>
+<xsl:variable name="d1Start" select="11"/>
+<xsl:variable name="group_id" select="/contestStandings/standingsHeader/groupList/group[@id &gt;= $d1Start and @included = 1]/@id"/>
+<xsl:variable name="even_or_odd" select="$group_id mod 2"/>
 <xsl:template match="contestStandings">
     <HTML>
         <HEAD>
@@ -17,10 +20,10 @@
         </HEAD>
 	<BODY>
 	    <font face="verdana, arial, helvetica" align="right">
-		<IMG SRC="acm-icpc.gif" align="left" width="130" height="120"/><IMG SRC="acm.gif" align="right" width="100" height="100"/>
 		<center>
+<IMG  style="width: 1386px; height: 199px;" SRC="regional-header.png" align="center"/>
 		    <h2><xsl:value-of select="/contestStandings/standingsHeader/@title"/></h2>
-		    <h3></h3>
+		    <h3><xsl:value-of select="/contestStandings/standingsHeader/groupList/group[@id = $group_id]/@title"/> per Division Standings</h3>
 		    &#160;
 		    <!-- XXX probably can remove these with the full title -->
 		    <br/>
@@ -28,11 +31,16 @@
 		    <br/>
 		    <br/>
 		    <br/>
-		    <xsl:for-each select="/contestStandings/standingsHeader/groupList/group">
-		    <xsl:call-template name="groupLink">
-		    <xsl:with-param name="group" select="@id"/>
-		    </xsl:call-template>
+                    <xsl:for-each select="/contestStandings/standingsHeader/groupList/group[@id &lt;= $groupStop and (@id mod 2 = $even_or_odd)]">
+                        <xsl:call-template name="groupLink">
+                        <xsl:with-param name="group" select="@title"/>
+    		    </xsl:call-template>
 		    </xsl:for-each>
+		    <br/>
+        <xsl:for-each select="/contestStandings/standingsHeader/groupList/group[@id &gt;= $d1Start and @id != $group_id]">
+<a href="index_{@title}.html"><xsl:value-of select="@title"/> Divison Standings</a>
+<br/>
+            </xsl:for-each>
 		    <br/>
 	    </center>
 	</font>
@@ -159,9 +167,8 @@ Last updated
         </xsl:template>
         <xsl:template name="groupLink">
         <xsl:param name="group"/>
-        <xsl:for-each select="/contestStandings/standingsHeader/groupList/group[@id = $group]">
-<a href="group{$group}.html"><xsl:value-of select="@title"/> Per Site Standings
-            </a>
+        <xsl:for-each select="/contestStandings/standingsHeader/groupList/group[@title = $group]">
+<a href="group_{$group}.html"><xsl:value-of select="@title"/> Per Site Standings</a>
         <br/>
             </xsl:for-each>
         </xsl:template>

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.web;
 
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * Unit Test.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class EventFeedFilterTest extends AbstractTestCase {
@@ -19,7 +19,7 @@ public class EventFeedFilterTest extends AbstractTestCase {
 
         EventFeedFilter filter = new EventFeedFilter();
 
-        assertEquals("startid = <none set>, event types = <none set>", filter.toString());
+        assertEquals("startid = <none set>, event types = <none set>, groupids = <none set>", filter.toString());
 
         String[] lines = getStandardContestJSON();
         assertEquals("Expected line count ", 143, lines.length);
@@ -71,10 +71,10 @@ public class EventFeedFilterTest extends AbstractTestCase {
 
     }
 
-    public void testgetEventFeedEequence() throws Exception {
+    public void testgetEventFeedSequence() throws Exception {
 
         EventFeedFilter filter = new EventFeedFilter();
         String string = "{\"event\":\"judgement-types\", \"id\":\"pc2-9\", \"op\":\"create\", \"data\": {\"id\":\"WA3\", \"name\":\"How did you get into this place ?\", \"penalty\":true, \"solved\":false}}";
-        assertEquals("pc2-9", filter.getEventFeedEequence(string));
+        assertEquals("pc2-9", filter.getEventFeedSequence(string));
     }
 }

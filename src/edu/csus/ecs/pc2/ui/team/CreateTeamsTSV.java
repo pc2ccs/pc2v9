@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.team;
 
 import java.io.File;
@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.core.imports.clics.TeamAccount;
 
 /**
  * Read teams.json write teams.tsv
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -38,9 +38,9 @@ public class CreateTeamsTSV {
     public static final String TEAMS_JSON_FILENAME = "teams.json";
 
     private static final String OUTPUT_FILE_KEY = "--of";
-    
+
     private static final String INPUT_FILE_KEY = "--if";
-    
+
     private static final String OVERWRITE_FILE_KEY = "-f";
 
     /**
@@ -55,7 +55,7 @@ public class CreateTeamsTSV {
     private static final int FAILURE_EXIT_CODE = 4;
 
     private boolean debugMode = false;
-    
+
     private boolean allowOverWrite = false;
 
     /**
@@ -92,10 +92,10 @@ public class CreateTeamsTSV {
         }
 
         debugMode = arguments.isOptPresent("--debug");
-        
-        
+
+
         allowOverWrite = arguments.isOptPresent(OVERWRITE_FILE_KEY);
-        
+
 
         if (debugMode) {
             arguments.dumpArgs(System.err);
@@ -104,11 +104,11 @@ public class CreateTeamsTSV {
         if (arguments.isOptPresent(OUTPUT_FILE_KEY)) {
             outputFileName = arguments.getOptValue(OUTPUT_FILE_KEY);
         }
-        
+
         if (arguments.isOptPresent(INPUT_FILE_KEY)) {
             inputFileName = arguments.getOptValue(INPUT_FILE_KEY);
         }
-        
+
 
     }
 
@@ -162,17 +162,19 @@ public class CreateTeamsTSV {
             // TODO write teams.tsv output file
             //            System.out.println(" debug 22 " + teamAccount.toJSON());
 
+            // No special support for multiple groups as this is a legacy feed and specifies
+            // only one group
             String groupId = "1";
             if (teamAccount.getGroup_ids().size() > 0) {
                 groupId = teamAccount.getGroup_ids().get(0);
             }
-            
+
             Integer value = groupMap.get(groupId);
             if (value == null) {
                 value = 0;
             }
             groupMap.put(groupId, value.intValue()+1);
-            
+
             /**
                      1  Team Number     22  integer
 2   External ID     24314   integer
@@ -180,7 +182,7 @@ public class CreateTeamsTSV {
 4   Team name   Hoos    string
 5   Institution name    University of Virginia  string
 6   Institution short name  U Virginia  string
-7   Country Code    USA     string ISO 3166-1 alpha-3 
+7   Country Code    USA     string ISO 3166-1 alpha-3
              */
             String [] fields = { //
                     ""+teamAccount.getId(),
@@ -205,14 +207,14 @@ public class CreateTeamsTSV {
         if (! new File(jsonFilename).exists()) {
             throw new FileNotFoundException(jsonFilename);
         }
-        
+
         ObjectMapper mapper = new ObjectMapper();
         String[] lines = Utilities.loadFile(jsonFilename);
         List<TeamAccount> list = Arrays.asList(mapper.readValue(lines[0], TeamAccount[].class));
 
         return list;
     }
-    
+
     protected void updateGroupsTSV() throws IOException {
 
         String outDir = new File(outputFileName).getParent();
@@ -221,28 +223,28 @@ public class CreateTeamsTSV {
         }
         String outGroupName = outDir + File.separator + GROUPS_TSV_FILENAME;
         FileWriter writer = (new FileWriter(new File(outGroupName)));
-        
+
         String[] groupHeaerFields = { "groups", "1" };
 
         writer.write(String.join(TAB, groupHeaerFields) + NL);
 
         Set<String> groupIds = groupMap.keySet();
-        String[] ids = (String[]) groupIds.toArray(new String[groupIds.size()]);
+        String[] ids = groupIds.toArray(new String[groupIds.size()]);
         Arrays.sort(ids);
-        
+
         for (String id : ids) {
             writer.write(id + TAB + "Group " + id + NL);
         }
-        
+
         writer.close();
         writer = null;
 
     }
-    
+
     public String getOutputFileName() {
         return outputFileName;
     }
-    
+
     public String getInputFileName() {
         return inputFileName;
     }
@@ -264,5 +266,5 @@ public class CreateTeamsTSV {
         }
     }
 
- 
+
 }

@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 
 /**
  * Test for Notifications XML.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -35,13 +35,14 @@ public class NotificationXMLTest extends AbstractTestCase {
     private final boolean debugMode = false;
 
     private IInternalContest contest = null;
-    
+
     private SampleContest sample = null;
 
     private ClientId scoreboardClient;
-    
+
     private ClientId judgeId = null;
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
 
@@ -76,7 +77,7 @@ public class NotificationXMLTest extends AbstractTestCase {
          * Add Run Judgements.
          */
         judgeId = contest.getAccounts(Type.JUDGE).firstElement().getClientId();
-        
+
         Judgement judgement;
         String sampleFileName = sample.getSampleFile();
 
@@ -86,7 +87,7 @@ public class NotificationXMLTest extends AbstractTestCase {
             contest.acceptRun(run, runFiles);
 
             run.setElapsedMins((run.getNumber() - 1) * 9);
-            
+
             judgement = sample.getRandomJudgement(contest, run.getNumber() % 2 == 0); // ever other run is judged Yes.
             sample.addJudgement(contest, run, judgement, judgeId);
         }
@@ -94,7 +95,7 @@ public class NotificationXMLTest extends AbstractTestCase {
 
     /**
      * Assign group to team startIdx to endIdx.
-     * 
+     *
      * @param group
      * @param startIdx
      * @param endIdx
@@ -102,18 +103,19 @@ public class NotificationXMLTest extends AbstractTestCase {
     private void assignTeamGroup(Group group, int startIdx, int endIdx) {
         Account[] teams = getTeamAccounts();
         for (int i = startIdx; i < endIdx; i++) {
-            teams[i].setGroupId(group.getElementId());
+            teams[i].clearGroups();
+            teams[i].addGroupId(group.getElementId(), true);
         }
     }
 
     /**
      * Return list of accounts sorted by team id.
-     * 
+     *
      * @return
      */
     private Account[] getTeamAccounts() {
         Vector<Account> teams = contest.getAccounts(Type.TEAM);
-        Account[] accounts = (Account[]) teams.toArray(new Account[teams.size()]);
+        Account[] accounts = teams.toArray(new Account[teams.size()]);
         Arrays.sort(accounts, new AccountComparator());
         return accounts;
     }
@@ -123,13 +125,13 @@ public class NotificationXMLTest extends AbstractTestCase {
                 "Teal", "Violet", "White", "Yellow" };
         return listOColors;
     }
-    
+
     private Run getRunByIndex(int index) {
         Run[] runs = contest.getRuns();
         Arrays.sort(runs, new RunComparator());
         return runs[index];
     }
-    
+
     public void testNotification() throws Exception {
 
         NotificationXML notificationXML = new NotificationXML();
@@ -176,7 +178,7 @@ public class NotificationXMLTest extends AbstractTestCase {
         } catch (Exception e) {
             pass();
         }
-        
+
         // TODO CCS add code to handle judgements and notifications
 
 //        Judgement judgement = sample.getYesJudgement(contest);
@@ -187,7 +189,7 @@ public class NotificationXMLTest extends AbstractTestCase {
          */
 
         sample.addBalloonNotification(contest, run);
-        
+
         // TODO CCS add code to handle judgements and notifications
 //        Notification notification = contest.getNotification(run.getSubmitter(), run.getProblemId());
 //        assertNotNull("Expected notification for "+run, notification);
@@ -198,15 +200,15 @@ public class NotificationXMLTest extends AbstractTestCase {
 //        }
 
     }
-    
+
     /**
      * a pass.
-     * 
+     *
      * Passes a test, the opposite of fail().
-     * 
+     *
      */
     private void pass() {
-        
+
     }
 
 

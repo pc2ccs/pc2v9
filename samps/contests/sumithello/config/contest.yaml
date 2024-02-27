@@ -60,7 +60,7 @@ accounts:
 
   - account: SCOREBOARD
     site: 1
-    count: 1
+    count: 2
     
 auto-judging:
   - account: JUDGE

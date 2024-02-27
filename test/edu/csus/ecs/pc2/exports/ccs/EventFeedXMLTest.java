@@ -52,7 +52,7 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 
 /**
  * Test Event Feed XML.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -67,9 +67,9 @@ public class EventFeedXMLTest extends AbstractTestCase {
     private final boolean debugMode = false;
 
     private IInternalContest contest = null;
-    
+
     private SampleContest sample = new SampleContest();
-    
+
     private NotificationUtilities notificationUtilities = new NotificationUtilities();
 
     private boolean exitingServer = false;
@@ -80,9 +80,9 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
         int siteNumber = 1;
         contest = sample.createContest(siteNumber, 1, 22, 12, true);
-        
+
         addContestInfo (contest, "Contest Title");
-        
+
         Group group1 = new Group("Mississippi");
         group1.setGroupId(1024);
         contest.addGroup(group1);
@@ -99,20 +99,20 @@ public class EventFeedXMLTest extends AbstractTestCase {
         /**
          * Add random runs
          */
-        
+
         Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
-        
+
         /**
          * Add Run Judgements.
          */
         addRunJudgements(contest, runs);
-     
+
     }
- 
+
     private void addRunJudgements (IInternalContest inContest, Run[] runs) throws Exception {
         addRunJudgements(inContest, runs, 0);
     }
-    
+
     private void addRunJudgements (IInternalContest inContest, Run[] runs, int numberOfTestCases) throws Exception {
 
         ClientId judgeId = inContest.getAccounts(Type.JUDGE).firstElement().getClientId();
@@ -143,7 +143,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
     /**
      * Assign group to team startIdx to endIdx.
-     * 
+     *
      * @param group
      * @param startIdx
      * @param endIdx
@@ -151,7 +151,8 @@ public class EventFeedXMLTest extends AbstractTestCase {
     private void assignTeamGroup(Group group, int startIdx, int endIdx) {
         Account[] teams = getTeamAccounts(contest);
         for (int i = startIdx; i < endIdx; i++) {
-            teams[i].setGroupId(group.getElementId());
+            teams[i].clearGroups();
+            teams[i].addGroupId(group.getElementId(), true);
         }
     }
 
@@ -161,10 +162,10 @@ public class EventFeedXMLTest extends AbstractTestCase {
         EventFeedXML eventFeedXML = new EventFeedXML();
 
         InternalContest internalContest = new InternalContest();
-        
+
         ContestInformation info = new ContestInformation();
         info.setContestTitle("Title One");
-        
+
         /**
          * Check info tag, if there is no contest data in InternalContest.
          */
@@ -177,7 +178,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
             System.out.println(xml);
             System.out.println();
         }
-            
+
         /**
          * Check complete EventFeed XML,  if there is no contest data in InternalContest.
          */
@@ -192,21 +193,21 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
         assertXMLCounts(xml, EventFeedXML.CONTEST_TAG, 1);
         assertXMLCounts(xml, EventFeedXML.INFO_TAG, 1);
-        
+
     }
 
     /**
      * Test <info> tag.
-     * 
+     *
      * @throws Exception
      */
     public void testInfoElement() throws Exception {
 
         EventFeedXML eventFeedXML = new EventFeedXML();
-        
+
         ContestInformation info = new ContestInformation();
         info.setContestTitle("Title One");
-        
+
         String xml = toContestXML(eventFeedXML.createInfoElement(contest, info));
 
         if (debugMode){
@@ -222,7 +223,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
         if (debugMode){
             System.out.println(xml);
         }
-        
+
         testForValidXML (xml);
     }
 
@@ -246,7 +247,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
     /**
      * Create Contest XML.
-     * 
+     *
      * @param memento
      * @return
      */
@@ -296,13 +297,13 @@ public class EventFeedXMLTest extends AbstractTestCase {
             testForValidXML (xml);
         }
     }
-    
+
     public void testCreateBalloonElement() throws Exception {
 
         if (debugMode){
             System.out.println(" -- testCreateBalloonElement ");
         }
-        
+
         EventFeedXML eventFeedXML = new EventFeedXML();
         for (Problem problem : contest.getProblems()) {
             String xml = toContestXML(eventFeedXML.createBalloonElement(contest, problem));
@@ -313,19 +314,19 @@ public class EventFeedXMLTest extends AbstractTestCase {
             testForValidXML (xml);
         }
     }
-    
+
     private Run [] getSortedRuns() {
         Run[] runs = contest.getRuns();
         Arrays.sort(runs, new RunComparator());
         return runs;
     }
-    
+
     public void testNotification() throws Exception {
 
         // Create notifications
 
         addNotifications(contest);
-        
+
         /**
          * Solved runs is used to only count one solved run per team and problem.
          */
@@ -345,35 +346,35 @@ public class EventFeedXMLTest extends AbstractTestCase {
         BalloonDeliveryInfo[] deliveries = notificationUtilities.getBalloonDeliveries(contest);
         Arrays.sort(deliveries, new BalloonDeliveryComparator(contest));
         int notificationSequenceNumber = 1;
-        
+
         solved = solvedRuns.keySet().size();
-        
+
         assertEquals("Expected notifications for all solved", solved, deliveries.length);
-        
+
         for (BalloonDeliveryInfo balloonDeliveryInfo : deliveries) {
 
             String xml = toContestXML(evenFeedXML.createElement(contest, balloonDeliveryInfo, notificationSequenceNumber));
-            
+
             if (debugMode){
                 System.out.println(xml);
             }
             testForValidXML (xml);
             notificationSequenceNumber++;
         }
-        
+
         assertEquals("Expected notifification for all solved.", notificationSequenceNumber-1, deliveries.length);
     }
-    
+
     /**
      * For all solved runs insure that each has a notification.
-     * 
+     *
      * @param contest2
      * @return
      */
     private int addNotifications(IInternalContest contest2) {
-        
+
         int count = 0;
-        
+
         for (Run run : getSortedRuns()) {
             if (run.isSolved()) {
 
@@ -383,17 +384,17 @@ public class EventFeedXMLTest extends AbstractTestCase {
                 }
             }
         }
-        
+
         return count;
     }
-    
-    
+
+
     /**
      * Create a notification if needed.
-     * 
+     *
      * Checks for existing notification, only creates
      * a notification if no notification exists.
-     * 
+     *
      * @param contest2
      * @param run
      */
@@ -415,7 +416,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
         return "Notification: "+info.getKey()+" "+info.getTimeSent();
     }
 
-  
+
 
     public void testProblemElement() throws Exception {
 
@@ -513,13 +514,13 @@ public class EventFeedXMLTest extends AbstractTestCase {
     public void testFinalizedElement() throws Exception {
 
         EventFeedXML eventFeedXML = new EventFeedXML();
-        
+
         FinalizeData data = new FinalizeData();
         data.setGoldRank(8);
         data.setBronzeRank(20);
         data.setSilverRank(16);
         data.setComment("Finalized by the Ultimiate Finalizer role");
-        
+
         String xml = eventFeedXML.createFinalizeXML(contest, data);
         if (debugMode){
             System.out.println(" -- testFinalizedElement ");
@@ -540,7 +541,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
         }
         xml = xml + CONTEST_END_TAG;
         testForValidXML (xml);
-                
+
         assertXMLCounts(xml, EventFeedXML.CONTEST_TAG, 1);
         assertXMLCounts(xml, EventFeedXML.INFO_TAG, 1);
         assertXMLCounts(xml, EventFeedXML.JUDGEMENT_TAG, 9);
@@ -548,10 +549,10 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
     }
 
-    
+
     /**
      * Print counts in xml string for EventFeed elements.
-     * 
+     *
      * @param comment
      * @param xmlString
      * @throws ParserConfigurationException
@@ -565,13 +566,13 @@ public class EventFeedXMLTest extends AbstractTestCase {
         System.out.println("printElemntCounts " + comment);
 
         String[] tagnames = getAllEventFeedTagNames();
-        
+
         Arrays.sort(tagnames);
         for (String tagName : tagnames) {
             System.out.println(tagName + " count = " + getTagCount(xmlString, tagName));
         }
     }
-    
+
     public String [] getAllEventFeedTagNames (){
         String[] tagnames = { //
         EventFeedXML.CONTEST_TAG, EventFeedXML.INFO_TAG, EventFeedXML.REGION_TAG, EventFeedXML.PROBLEM_TAG, EventFeedXML.LANGUAGE_TAG, EventFeedXML.TEAM_TAG, EventFeedXML.CLARIFICATION_TAG,
@@ -592,7 +593,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
         }
         testForValidXML (xml);
     }
-    
+
     protected void startEventFeed(int port) throws IOException {
 
         ServerSocket server = new ServerSocket(port);
@@ -620,128 +621,41 @@ public class EventFeedXMLTest extends AbstractTestCase {
                 server.close();
             }
         }
-        
+
         server = null;
 
     }
 
     public void testTestCase() throws Exception {
-        
+
         EventFeedXML eventFeedXML = new EventFeedXML();
-        
+
         int siteNumber = 2;
-        
+
          IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
-        
+
         /**
          * Add random runs
          */
-        
+
         Run[] runs = sample.createRandomRuns(testCaseContest, 12, true, true, true);
-        
+
         createDataFilesForContest (testCaseContest);
-        
+
         /**
          * Add Run Judgements.
          */
         addRunJudgements(testCaseContest, runs, 5);
-        
+
         int expectedTeamTags = getTeamAccounts(testCaseContest).length  + testCaseContest.getRuns().length;
-        
+
         String xml = eventFeedXML.toXML(testCaseContest);
         if (debugMode){
             System.out.println(" -- testTestCase ");
             System.out.println(xml);
         }
         testForValidXML (xml);
-        
-        assertXMLCounts(xml, EventFeedXML.CONTEST_TAG, 1);
-        assertXMLCounts(xml, EventFeedXML.INFO_TAG, 1);
-        assertXMLCounts(xml, EventFeedXML.JUDGEMENT_TAG, 9);
-        assertXMLCounts(xml, EventFeedXML.LANGUAGE_TAG, 18);
-        assertXMLCounts(xml, EventFeedXML.NOTIFICATION_TAG, 0);
-        assertXMLCounts(xml, EventFeedXML.PROBLEM_TAG, 18);
-        assertXMLCounts(xml, EventFeedXML.REGION_TAG, 22);
-        assertXMLCounts(xml, EventFeedXML.RUN_TAG, 12);
-        assertXMLCounts(xml, EventFeedXML.TEAM_TAG, expectedTeamTags);
-        assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, 12 * 5); 
 
-        /**
-         * Test FINALIZE
-         */
-        
-        FinalizeData data = new FinalizeData();
-        data.setCertified(true);
-        data.setComment(getName()+" test");
-        testCaseContest.setFinalizeData(data);
-        
-        xml = eventFeedXML.toXML(testCaseContest);
-        
-        testForValidXML (xml);
-        
-        assertXMLCounts(xml, EventFeedXML.FINALIZE_TAG, 1);
-        assertXMLCounts(xml, "comment", 1);
-        
-
-        for (Run run : runs) {
-            run.setElapsedMins(100); /// set all runs to elapsed time 100
-        }
-        
-        int numruns = 5;
-        
-        for (int i = runs.length - numruns; i < runs.length; i++) {
-            runs[i].setElapsedMins(300); /// set all runs to elapsed time 100
-            RunTestCase[] testCases = runs[i].getRunTestCases();
-            for (RunTestCase runTestCaseResult : testCases) {
-                runTestCaseResult.setElapsedMS(300 * Constants.MS_PER_MINUTE);
-            }
-        }
-        
-         Filter filter = new Filter();
-         filter.setStartElapsedTime(200);
-        xml = eventFeedXML.toXML(testCaseContest, filter);
-        
-        assertXMLCounts(xml, EventFeedXML.RUN_TAG, numruns);
-        assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, numruns * 5); 
-
-    }
-
-    /**
-     * Test to ensure that DISPLAY_ON_SCOREBOARD teams are not present in the event feed.
-     * 
-     * @throws Exception
-     */
-    public void testTeamsNotOnScoreboard() throws Exception {
-        
-        EventFeedXML eventFeedXML = new EventFeedXML();
-        
-        int siteNumber = 2;
-        
-         IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
-        
-        /**
-         * Add random runs
-         */
-        
-        Run[] runs = sample.createRandomRuns(testCaseContest, 12, true, true, true);
-        
-        createDataFilesForContest (testCaseContest);
-        
-        /**
-         * Add Run Judgements.
-         */
-        addRunJudgements(testCaseContest, runs, 5);
-        
-        int expectedTeamTags = getTeamAccounts(testCaseContest).length  + testCaseContest.getRuns().length;
-
-        String xml = eventFeedXML.toXML(testCaseContest);
-        
-        if (debugMode){
-            System.out.println(" -- testTestCase ");
-            System.out.println(xml);
-        }
-        testForValidXML (xml);
-        
         assertXMLCounts(xml, EventFeedXML.CONTEST_TAG, 1);
         assertXMLCounts(xml, EventFeedXML.INFO_TAG, 1);
         assertXMLCounts(xml, EventFeedXML.JUDGEMENT_TAG, 9);
@@ -752,19 +666,106 @@ public class EventFeedXMLTest extends AbstractTestCase {
         assertXMLCounts(xml, EventFeedXML.RUN_TAG, 12);
         assertXMLCounts(xml, EventFeedXML.TEAM_TAG, expectedTeamTags);
         assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, 12 * 5);
-        
+
+        /**
+         * Test FINALIZE
+         */
+
+        FinalizeData data = new FinalizeData();
+        data.setCertified(true);
+        data.setComment(getName()+" test");
+        testCaseContest.setFinalizeData(data);
+
+        xml = eventFeedXML.toXML(testCaseContest);
+
+        testForValidXML (xml);
+
+        assertXMLCounts(xml, EventFeedXML.FINALIZE_TAG, 1);
+        assertXMLCounts(xml, "comment", 1);
+
+
+        for (Run run : runs) {
+            run.setElapsedMins(100); /// set all runs to elapsed time 100
+        }
+
+        int numruns = 5;
+
+        for (int i = runs.length - numruns; i < runs.length; i++) {
+            runs[i].setElapsedMins(300); /// set all runs to elapsed time 100
+            RunTestCase[] testCases = runs[i].getRunTestCases();
+            for (RunTestCase runTestCaseResult : testCases) {
+                runTestCaseResult.setElapsedMS(300 * Constants.MS_PER_MINUTE);
+            }
+        }
+
+         Filter filter = new Filter();
+         filter.setStartElapsedTime(200);
+        xml = eventFeedXML.toXML(testCaseContest, filter);
+
+        assertXMLCounts(xml, EventFeedXML.RUN_TAG, numruns);
+        assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, numruns * 5);
+
+    }
+
+    /**
+     * Test to ensure that DISPLAY_ON_SCOREBOARD teams are not present in the event feed.
+     *
+     * @throws Exception
+     */
+    public void testTeamsNotOnScoreboard() throws Exception {
+
+        EventFeedXML eventFeedXML = new EventFeedXML();
+
+        int siteNumber = 2;
+
+         IInternalContest testCaseContest = sample.createContest(siteNumber, 1, 22, 12, true);
+
+        /**
+         * Add random runs
+         */
+
+        Run[] runs = sample.createRandomRuns(testCaseContest, 12, true, true, true);
+
+        createDataFilesForContest (testCaseContest);
+
+        /**
+         * Add Run Judgements.
+         */
+        addRunJudgements(testCaseContest, runs, 5);
+
+        int expectedTeamTags = getTeamAccounts(testCaseContest).length  + testCaseContest.getRuns().length;
+
+        String xml = eventFeedXML.toXML(testCaseContest);
+
+        if (debugMode){
+            System.out.println(" -- testTestCase ");
+            System.out.println(xml);
+        }
+        testForValidXML (xml);
+
+        assertXMLCounts(xml, EventFeedXML.CONTEST_TAG, 1);
+        assertXMLCounts(xml, EventFeedXML.INFO_TAG, 1);
+        assertXMLCounts(xml, EventFeedXML.JUDGEMENT_TAG, 9);
+        assertXMLCounts(xml, EventFeedXML.LANGUAGE_TAG, 18);
+        assertXMLCounts(xml, EventFeedXML.NOTIFICATION_TAG, 0);
+        assertXMLCounts(xml, EventFeedXML.PROBLEM_TAG, 18);
+        assertXMLCounts(xml, EventFeedXML.REGION_TAG, 22);
+        assertXMLCounts(xml, EventFeedXML.RUN_TAG, 12);
+        assertXMLCounts(xml, EventFeedXML.TEAM_TAG, expectedTeamTags);
+        assertXMLCounts(xml, EventFeedXML.TESTCASE_TAG, 12 * 5);
+
         Vector<Account> vector = testCaseContest.getAccounts(Type.TEAM);
-        Account[] accounts = (Account[]) vector.toArray(new Account[vector.size()]);
+        Account[] accounts = vector.toArray(new Account[vector.size()]);
         Arrays.sort(accounts,new AccountComparator());
-        
+
         int dontShowCount = 7;
-        
+
         assertEquals("Expecting number of runs ", 12, testCaseContest.getRuns().length);
-        
+
         /**
          * Team 16 - Team 22 should not show on event feed.
          */
-        
+
         for (int i = 0; i < dontShowCount; i++) {
             Account account = accounts[accounts.length - 1 - i];
             account.removePermission(edu.csus.ecs.pc2.core.security.Permission.Type.DISPLAY_ON_SCOREBOARD);
@@ -773,18 +774,18 @@ public class EventFeedXMLTest extends AbstractTestCase {
             assertTrue("Expecting one run to be created", runs.length == 1);
             testCaseContest.addRun(runs[0]);
         }
-        
+
         int numberTeamsToDisplay = getNumberOfTeamsTodisplay(testCaseContest);
-        
+
         int numberOfRunsToDisplay = getNumberOfRunsToDisplay (testCaseContest);
-        
+
         assertEquals ("Expeced teams to be displayed/included", getTeamAccounts(testCaseContest).length - dontShowCount, numberTeamsToDisplay);
-        
+
         xml = eventFeedXML.toXML(testCaseContest);
         assertXMLCounts(xml, EventFeedXML.TEAM_TAG, numberTeamsToDisplay + numberOfRunsToDisplay);
         assertXMLCounts(xml, EventFeedXML.RUN_TAG, numberOfRunsToDisplay);
     }
-    
+
     private int getNumberOfRunsToDisplay(IInternalContest testCaseContest) {
         Run[] runs = testCaseContest.getRuns();
         int count = 0;
@@ -800,7 +801,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
         return inContest.isAllowed(clientId, Permission.Type.DISPLAY_ON_SCOREBOARD);
     }
 
-    
+
     private int getNumberOfTeamsTodisplay(IInternalContest testCaseContest) {
         Account[] accounts = getTeamAccounts(testCaseContest);
         int count = 0;
@@ -820,7 +821,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
     /**
      * A very simple
-     * 
+     *
      * @param xml
      * @param string
      * @param i
@@ -830,12 +831,12 @@ public class EventFeedXMLTest extends AbstractTestCase {
     private void assertXMLCounts(String xmlString, String string, int count) throws Exception {
         assertEquals("Expecting occurances (for" + string + ")", count, getTagCount(xmlString, string));
     }
-    
+
     /**
      * Finds name in xml string, compares node/element values against expectedValue.
      * @param xmlString
      * @param name XML tag name
-     * @param expectedValue 
+     * @param expectedValue
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
@@ -847,20 +848,20 @@ public class EventFeedXMLTest extends AbstractTestCase {
             System.out.println("xml = "+xmlString);
             fail("Expecting to find nodes for name "+name);
         }
-        
+
 //        System.out.println("Nodes length = "+nodes.getLength());
 //        for (int i = 0; i < nodes.getLength(); i++) {
 //            Node node = nodes.item(i);
 //            System.out.println("Looking for "+name+", found node "+node.getNodeName()+" "+node.getNodeValue()+" child is: "+node.getChildNodes().item(0).getNodeValue());
 //        }
-        
+
         String childValue = nodes.item(0).getChildNodes().item(0).getNodeValue();
         if (! expectedValue.equals(childValue)){
             System.out.println("xml = "+xmlString);
             assertEquals("Expecting value for "+name, expectedValue, childValue);
         }
     }
-    
+
     private int getTagCount(String xmlString, String string) throws ParserConfigurationException, SAXException, IOException {
 
         Document document = getDocument(xmlString);
@@ -870,7 +871,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
 
     /**
      * Creates a single sample testcase (data and answer file) for each problem.
-     * 
+     *
      * @param inContest
      * @throws FileNotFoundException
      */
@@ -913,8 +914,8 @@ public class EventFeedXMLTest extends AbstractTestCase {
             }
         }
     }
-    
-    
+
+
     public void testgetColorSettings() throws Exception {
 
         EventFeedXML eventFeedXML = new EventFeedXML();
@@ -931,36 +932,36 @@ public class EventFeedXMLTest extends AbstractTestCase {
             assertNotNull("Expecting RGB for " + problem, colorRGB);
 //            System.out.println(problem.getShortName()+"TAB"+color+" ATAB"+colorRGB);
         }
-        
+
         eventFeedXML = new EventFeedXML();
 
         aContest = new InternalContest();
-        
+
         for (Problem problem : problems) {
             aContest.addProblem(problem);
         }
-        
+
         settings = eventFeedXML.getColorSettings(aContest);
-        
+
         assertNull("Not expecting balloon settings ", settings);
-        
+
         ensureDirectory(getDataDirectory());
-        
+
         String colorFile = getTestFilename("colors.txt");
 //        editFile(colorFile);
         assertFileExists(colorFile);
-        
+
         eventFeedXML.setColorsFilename(colorFile);
         settings = eventFeedXML.getColorSettings(aContest);
-        
+
         assertNotNull("Expecting color settings from "+colorFile, settings);
-        
+
         String [] data = { //
                 "sumit;Alice Blue A;F0F8FF", //
                 "quadrangles;Antique White A;FAEBD7", //
                 "finnigans;Beige A;F5F5DC", //
         };
-        
+
         for (Problem problem : problems) {
 
             String color = settings.getColor(problem);
@@ -978,17 +979,17 @@ public class EventFeedXMLTest extends AbstractTestCase {
                 }
             }
         }
-        
+
 //        File schemaFile = new File(getSchemaFilename(CCS_EVENT_FEED_SCHEMA_2013));
 //        String xmlString = eventFeedXML.toXML(aContest);
-        
+
 //        xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + xmlString;
 //        xmlString = "<contest></contest>";
-        
+
 //        editTempFile(xmlString);
-        
+
 //        System.out.println("xml="+xmlString);
-        
+
 //        try {
 //            testForValidXML(xmlString, schemaFile);
 //        } catch (Exception e) {
@@ -998,20 +999,20 @@ public class EventFeedXMLTest extends AbstractTestCase {
     }
 
     public void testIsYounger() throws Exception {
-        
+
         String [] runsData = {
 
                 "1,1,A,1,No",  //20
                 "2,1,A,3,Yes",  //3 (first yes counts Minutes only)
                 "3,1,A,5,No",  //20
-                "4,1,A,7,Yes",  //20  
+                "4,1,A,7,Yes",  //20
                 "5,1,A,9,No",  //20
-                
+
                 "6,1,B,11,No",  //20  (all runs count)
                 "7,1,B,13,No",  //20  (all runs count)
-                
+
                 "8,2,A,30,Yes",  //30
-                
+
                 "9,2,B,35,No",  //20 (all runs count)
                 "10,2,B,40,No",  //20 (all runs count)
                 "11,2,B,45,No",  //20 (all runs count)
@@ -1024,11 +1025,11 @@ public class EventFeedXMLTest extends AbstractTestCase {
                 "16,2,A,330,Yes",  // doesn't count, yes after yes
 
         };
-        
+
         IInternalContest testContest = sample.createStandardContest();
-        
+
         for (String runInfoLine : runsData) {
-            sample.addARun(testContest, runInfoLine);      
+            sample.addARun(testContest, runInfoLine);
         }
 
         Run[] runs = testContest.getRuns();
@@ -1046,12 +1047,12 @@ public class EventFeedXMLTest extends AbstractTestCase {
         Run laterRun = feed.getFirstSolvedRun(testContest, runs[15].getSubmitter(), runs[15].getProblemId());
         Run earliest = runs[7];
         assertEquals("Expecting first solved run to be " + earliest, earliest, laterRun);
-        
+
     }
 
     /**
      * Create socket server on port.
-     * 
+     *
      * @param args
      */
     public static void main(String[] args) {
@@ -1065,7 +1066,7 @@ public class EventFeedXMLTest extends AbstractTestCase {
         }
 
     }
-    
+
     public void exitServer(){
         this.exitingServer = true;
     }

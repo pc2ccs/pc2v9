@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.File;
@@ -46,16 +46,16 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Test Scoring Algorithm.
- * 
+ *
  * The inital tests were to insure that proper XML
  * is created on startup.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class DefaultScoringAlgorithmTest extends AbstractTestCase {
-    
+
     private static Log log = null;
-    
+
     private boolean debugMode = false;
     // alt1: 0 0 200 0 0
     private Properties alt1 = populateProperties(0, 0, 200, 0, 0);
@@ -70,6 +70,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     private File loadData;
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
 
@@ -91,7 +92,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             System.err.println("could not find " + loadFile);
             throw new Exception("Unable to locate "+loadFile);
         }
-        
+
     }
 
     private Properties populateProperties(int perNo, int perMin, int baseYes, int perCE, int perSV) {
@@ -129,7 +130,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     public void testNoData() {
 
         InternalContest contest = new InternalContest();
-        
+
         // Add scoreboard account and set the scoreboard account for this client (in contest)
         contest.setClientId(createBoardAccount (contest));
 
@@ -138,9 +139,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Initialize the contest.
-     * 
+     *
      * Initialize with problems, languages, accounts, judgements.
-     * 
+     *
      * @param contest
      */
     private void initContestData(IInternalContest contest) {
@@ -148,36 +149,36 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         // Add accounts
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
-        
+
         contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 1, true);
 
         // Add scoreboard account and set the scoreboard account for this client (in contest)
         contest.setClientId(createBoardAccount (contest));
-        
+
         // Add Problem
         Problem problem = new Problem("Problem One");
         contest.addProblem(problem);
-        
+
         // Add Language
         Language language = new Language("Language One");
         contest.addLanguage(language);
-        
+
         String[] judgementNames = { "Yes", "No - compilation error", "No - incorrect output", "No - It's just really bad",
                 "No - judges enjoyed a good laugh", "You've been bad - contact staff", "No - Illegal Function" };
-        
+
         String[] acronyms = { "AC", "CE", "WA", "WA", "WA", "WA", "SV" };
-        
+
         for (int i = 0; i < judgementNames.length; i++) {
             Judgement judgement = new Judgement(judgementNames[i], acronyms[i]);
             contest.addJudgement(judgement);
         }
-        
+
         checkForJudgeAndTeam(contest);
     }
 
     /**
      * Create and return a new scoreboard client.
-     * 
+     *
      * @param contest
      * @return a ClientId for newly created scoreboard account.
      */
@@ -188,14 +189,14 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Insure that there is one team and one judge in the contest model.
-     * 
+     *
      * @param contest
      */
     private void checkForJudgeAndTeam(IInternalContest contest) {
         Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
         assertFalse("Team account not generated", account == null);
         assertFalse("Team account not generated", account.getClientId().equals(Type.TEAM));
-        
+
         account = contest.getAccounts(ClientType.Type.JUDGE).firstElement();
         assertFalse("Judge account not generated", account == null);
         assertFalse("Team account not generated", account.getClientId().equals(Type.TEAM));
@@ -213,12 +214,12 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         // Add accounts
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), numTeams, true);
         contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 6, true);
-        
+
         // Add scoreboard account and set the scoreboard account for this client (in contest)
         contest.setClientId(createBoardAccount (contest));
-        
+
         checkForJudgeAndTeam(contest);
-        
+
         // Add Problem
         for (int i = 0; i < numProblems; i ++){
             char letter = 'A';
@@ -232,7 +233,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         contest.addLanguage(language);
 
         String[] judgementNames = { "Yes", "No - incorrect output", "No - compilation error", "Contact staff", "No - Security Violation" };
-      
+
         String[] acronyms = { "AC", "WA", "CE", "WA", "SV" };
 
         for (int i = 0; i < judgementNames.length; i++) {
@@ -243,14 +244,14 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Create a new run in the contest.
-     * 
+     *
      * @param contest
      * @return created run.
      */
     private Run getARun(IInternalContest contest) {
         Problem problem = contest.getProblems()[0];
         Language language = contest.getLanguages()[0];
-        
+
         Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
 
         ClientId id = account.getClientId();
@@ -261,7 +262,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Create a new run in the contest.
-     * 
+     *
      * @param contest
      * @param elapsedMinutes
      * @return created run.
@@ -269,7 +270,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     private Run getARun(IInternalContest contest, int elapsedMinutes) {
         Problem problem = contest.getProblems()[0];
         Language language = contest.getLanguages()[0];
-        
+
         Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
 
         ClientId id = account.getClientId();
@@ -280,14 +281,14 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Verify XML created for a single unjudged run.
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public void testOneRunUnjudged() throws IOException, ClassNotFoundException, FileSecurityException {
 
         InternalContest contest = new InternalContest();
-        
+
         initContestData(contest);
         Run run = getARun(contest);
         // Directory where test data is
@@ -298,39 +299,39 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 //        }
 
         RunFiles runFiles = new RunFiles(run, loadData.getAbsolutePath());
-        
+
         contest.addRun(run, runFiles, null);
-        
+
         checkOutputXML(contest);
     }
 
     /**
      * Verify XML created for a single unjudged run.
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
-     * @throws RunUnavailableException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws RunUnavailableException
      */
     public void testMixedjudged() throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         InternalContest contest = new InternalContest();
-        
+
         initContestData(contest);
         Run run = getARun(contest, 5);
         RunFiles runFiles = new RunFiles(run, loadData.getAbsolutePath());
-        
+
         contest.addRun(run, runFiles, null);
 
         createJudgedRun(contest, 0, false, 7);
-        
+
         run = getARun(contest, 10);
         contest.addRun(run, runFiles, null);
 
         createJudgedRun(contest, 0, true, 15);
-       
+
         checkOutputXML(contest);
     }
-    
+
     public void testCESVNoJudgements() throws Exception {
 
         String [] runsData = {
@@ -347,14 +348,14 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "11,2,B,35,No,No,1",  // zero -- not solved
                 "12,2,B,40,No,No,1",  // zero -- not solved
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 "1,team1,1,23",
                 "2,team2,1,50"
         };
-        
+
         String [] rankData5 = {
                 "1,team1,1,33", // +7 for SV + 3 for CE
                 "2,team2,1,57" // +7 for SV
@@ -364,63 +365,63 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         scoreboardTest(2, runsData, rankData);
         scoreboardTest(2, runsData, rankData5, alt5);
 
-    } 
-    
+    }
+
     /**
      * Create a judged run
-     * 
+     *
      * @param contest
      * @param judgementIndex - the judgement list index
      * @param solved - was this run solved/Yes judgement
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
-     * @throws RunUnavailableException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws RunUnavailableException
      */
     public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
         Run run = getARun(contest);
         RunFiles runFiles = new RunFiles(run, loadData.getAbsolutePath());
-        
+
         contest.addRun(run, runFiles, null);
-        
+
         ClientId who = contest.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
-        
+
         SampleContest.checkOutRun(contest, run, who);
-        
+
         Judgement judgement = contest.getJudgements()[judgementIndex]; // Judge as No
-        
+
         JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), who, solved, false);
         contest.addRunJudgement(run, judgementRecord, null, who);
-        
+
     }
 
     /**
      * Submit and judge a run.
-     * 
+     *
      * @param contest
      * @param judgementIndex
      * @param solved
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
-     * @throws RunUnavailableException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws RunUnavailableException
      */
     public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved, int elapsedMinutes) throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException{
         Run run = getARun(contest, elapsedMinutes);
         RunFiles runFiles = new RunFiles(run, loadData.getAbsolutePath());
-        
+
         contest.addRun(run, runFiles, null);
-        
+
         ClientId who = contest.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
         assertFalse ("Could not retrieve first judge ", who == null);
-        
+
         SampleContest.checkOutRun(contest, run, who);
-        
+
         Judgement judgement = contest.getJudgements()[judgementIndex]; // Judge as No
-        
+
         JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), who, solved, false);
         contest.addRunJudgement(run, judgementRecord, null, who);
-        
+
     }
     /**
      * Get XML from ScoringAlgorithm and test whether it can be parsed.
@@ -435,20 +436,20 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
      * @param obeyFreeze
      */
     public void checkOutputXML (IInternalContest contest, boolean obeyFreeze) {
-       
+
         try {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
             defaultScoringAlgorithm.setObeyFreeze(obeyFreeze);
             String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
-            
+
             // getStandings should always return a well-formed xml
             assertFalse("getStandings returned null ", xmlString == null);
             assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
-            
+
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
-            
+
             // getStandings should always return a well-formed xml
             assertFalse("getStandings returned null ", xmlString == null);
             assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
@@ -466,36 +467,36 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Verify XML created for a single judged run.
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
-     * @throws RunUnavailableException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws RunUnavailableException
      */
     public void testOneRunJudged() throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         InternalContest contest = new InternalContest();
-        
+
         initContestData(contest);
-        
+
         createJudgedRun(contest, 2, false);
 
         checkOutputXML(contest);
-        
+
     }
-    
+
     /**
      * Verify XML created for 5 judged runs, one solved, four no's.
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
-     * @throws RunUnavailableException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws RunUnavailableException
      */
     public void testFiveRunsJudged() throws IOException, ClassNotFoundException, FileSecurityException, RunUnavailableException {
 
         InternalContest contest = new InternalContest();
-        
+
         initContestData(contest);
-        
+
         createJudgedRun(contest, 2, false);
         createJudgedRun(contest, 0, true);
         createJudgedRun(contest, 3, false);
@@ -503,19 +504,19 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
         checkOutputXML(contest);
     }
-    
 
-    
+
+
     /**
      * CASE (1): "When Solved, all runs before Yes".
-     * 
+     *
      * Created from testing/boardtest.html
-     * @throws Exception 
-     * 
+     * @throws Exception
+     *
      */
     public void testScoreboardCaseOne () throws Exception {
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
                 "1,1,A,1,No",  // 20 (a No before first yes)
                 "2,1,A,3,Yes",  // 3 (first yes counts Minute points but never Run Penalty points)
@@ -531,21 +532,21 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "12,2,B,50,No",  // zero -- not solved
                 "13,2,B,55,No",  // zero -- not solved
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 "1,team1,1,23",
                 "2,team2,1,30"
         };
-        
+
         scoreboardTest (2, runsData, rankData);
     }
-    
+
     public void testScoreboardCaseOneA() throws Exception{
-        
+
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
                 "2,8,C,1,No",
                 "15,8,D,1,Yes",
@@ -556,9 +557,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "52,8,C,1,Yes",
                 "65,8,B,2,Yes",
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 "1,team8,4,45",
                 "2,team1,0,0",
@@ -569,45 +570,45 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "2,team6,0,0",
                 "2,team7,0,0",
         };
-        
+
         scoreboardTest (8, runsData, rankData);
     }
-    
-    
+
+
 
     /**
      * Tests for cases where Yes is before No, and multiple yes at same elapsed time.
-     * 
+     *
      * Both runs have same elapsed time, the tie breaker is runId.
-     * Also tests when one or more Yes are after first yes 
-     * @throws Exception 
+     * Also tests when one or more Yes are after first yes
+     * @throws Exception
      */
     public void testNoBeforeYesSameElapsed() throws Exception{
-        
+
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
                 "15,8,D,12,Yes",
                 "16,8,D,12,No",
-                
+
                 "24,4,B,15,Yes",
                 "25,4,B,15,No",
                 "26,4,B,15,No",
-                
+
                 "28,2,C,22,Yes",
                 "29,2,C,22,No",
                 "30,2,C,22,Yes",
                 "30,2,C,22,Yes",
         };
-        
+
         /**
-         * 
-         * 
-         * 
+         *
+         *
+         *
          */
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 "1,team8,1,12",
                 "2,team4,1,15",
@@ -618,78 +619,78 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "4,team6,0,0",
                 "4,team7,0,0",
         };
-        
+
         scoreboardTest (8, runsData, rankData);
     }
-    
+
     /**
      * CASE (2): "When Solved, all No Runs".
      *
      * Created from testing/boardtest.html
-     * @throws Exception 
+     * @throws Exception
      */
     public void testScoreboardCaseTwo () throws Exception{
-        
+
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
                 "1,1,A,1,No", // 20
                 "2,1,A,3,Yes", // 3 (Minute points for 1st Yes count)
                 "3,1,A,5,No", // 20 (a No on a solved problem)
                 "4,1,A,7,Yes", // zero (only "No's" count)
                 "5,1,A,9,No", // 20 (another No on the solved problem)
-                
+
                 "6,1,B,11,No", // zero (problem has not been solved)
                 "7,1,B,13,No", // zero (problem has not been solved)
-                
+
                 "8,2,A,30,Yes", // 30 (Minute points for 1st Yes)
-                
+
                 "9,2,B,35,No", // zero -- not solved
                 "10,2,B,40,No", // zero -- not solved
                 "11,2,B,45,No", // zero -- not solved
                 "12,2,B,50,No", // zero -- not solved
                 "13,2,B,55,No", // zero -- not solved
         };
-        
+
 
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 "1,team1,1,23",
                 "2,team2,1,30",
         };
-        
+
         // TODO when SA supports count all runs, replace rankData
-        
+
         /**
          * Case 2 tests when all no runs are counted, the current SA
          * does not support this scoring method.  The commented
          * rankData is the proper results
          */
 
-//      Team 2 -- 30     <-- Team 2 is now winning with a lower score 
+//      Team 2 -- 30     <-- Team 2 is now winning with a lower score
 //      Team 1 -- 63           (same database; different scoring method)
-        
+
 //        String [] rankData = {
 //                "1,team2,1,30",
 //                "2,team1,1,63",
 //        };
-        
-        
+
+
         scoreboardTest (2, runsData, rankData);
-        
+
     }
-    
+
     /**
      * CASE (3):  "When Solved, All Runs"
-     * 
+     *
      * Created from testing/boardtest.html
-     * @throws Exception 
+     * @throws Exception
      */
     public void testScoreboardCaseThree () throws Exception {
-        
+
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
 
                 "1,1,A,1,No",   // 20
@@ -709,53 +710,53 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "12,2,B,50,No",   // zero -- not solved
                 "13,2,B,55,No",   // zero -- not solved
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 "1,team1,1,23",
                 "2,team2,1,30"
         };
-        
+
         // TODO when SA supports count all runs, replace rankData
-        
+
         /**
          * Case 3 tests when all runs are counted, the current SA
          * does not support this scoring method.  The commented
          * rankData is the proper results
          */
-        
+
 //        String [] rankData = {
 //                "1,team2,1,30"
 //                "2,team1,1,83",
 //        };
-        
+
         scoreboardTest (2, runsData, rankData);
     }
-    
+
     /**
      * CASE (4): "All Runs"
-     * 
+     *
      * Created from testing/boardtest.html
-     * @throws Exception 
+     * @throws Exception
      */
     public void testScoreboardCaseFour () throws Exception {
-        
+
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
 
                 "1,1,A,1,No",  //20
                 "2,1,A,3,Yes",  //3 (first yes counts Minutes only)
                 "3,1,A,5,No",  //20
-                "4,1,A,7,Yes",  //20  
+                "4,1,A,7,Yes",  //20
                 "5,1,A,9,No",  //20
-                
+
                 "6,1,B,11,No",  //20  (all runs count)
                 "7,1,B,13,No",  //20  (all runs count)
-                
+
                 "8,2,A,30,Yes",  //30
-                
+
                 "9,2,B,35,No",  //20 (all runs count)
                 "10,2,B,40,No",  //20 (all runs count)
                 "11,2,B,45,No",  //20 (all runs count)
@@ -763,37 +764,37 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "13,2,B,55,No",  //20 (all runs count)
 
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 "1,team1,1,23",
                 "2,team2,1,30"
         };
-        
+
         // TODO when SA supports count all runs, replace rankData
-        
+
         /**
          * Case 4 tests when all runs are counted, the current SA
          * does not support this scoring method.  The commented
          * rankData is the proper results
          */
-        
+
 //        Team 1 -- 123   <-- Team 1 is winning again
 //        Team 2 -- 130
-        
+
 //        String [] rankData = {
 //                "1,team1,1,123",
 //                "2,team2,1,130"
 //        };
-        
+
         scoreboardTest (2, runsData, rankData);
     }
 
 
     /**
-     * @throws Exception 
-     * 
+     * @throws Exception
+     *
      */
     public void testScoreboard55 () throws Exception{
 
@@ -887,11 +888,11 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "87,17,C,2,No",
                 "88,7,A,2,New",
                 "89,20,B,2,No",
-                "90,12,C,2,No" 
+                "90,12,C,2,No"
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 "1,team8,3,4",
                 "2,team20,2,2",
@@ -916,49 +917,49 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "13,team17,0,0",
                 "13,team22,0,0",
         };
-        
+
         scoreboardTest (22, runsData, rankData);
     }
-  
+
     /**
      * Test a No before a Yes, both runs same elapsed time.
-     * @throws Exception 
+     * @throws Exception
      */
     public void testNoYes () throws Exception{
 
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
                 "5,2,A,12,No",
                 "6,2,A,12,Yes",
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 "1,team2,1,32",
                 "2,team1,0,0",
         };
-        
+
         scoreboardTest (2, runsData, rankData);
     }
-    
-    
+
+
     /**
      * Have run that has a BEING_JUDGED state and should show same standing
      * as the state were JUDGED.
-     * 
+     *
      * Test for Bug 407 - The SA fails to reflect prelim judgements.
-     * 
+     *
      * based on CASE (1): "When Solved, all runs before Yes".
-     * 
+     *
      * Created from testing/boardtest.html
-     * @throws Exception 
-     * 
+     * @throws Exception
+     *
      */
     public void testScoreboardForBeingJudgedState () throws Exception {
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
                 "1,1,A,1,No",  // 20 (a No before first yes)
                 "2,1,A,3,Yes",  // 3 (first yes counts Minute points but never Run Penalty points)
@@ -974,28 +975,28 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "12,2,B,50,No",  // zero -- not solved
                 "13,2,B,55,No",  // zero -- not solved
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 "1,team1,1,23",
                 "2,team2,1,30"
         };
-        
+
 //        startExplorer(getOutputDataDirectory());
-        
+
         InternalContest contest = new InternalContest();
-        
+
         int numTeams = 2;
 
         initData(contest, numTeams, 5);
-        
+
         for (String runInfoLine : runsData) {
             SampleContest.addRunFromInfo(contest, runInfoLine);
         }
 
         Run [] runs = contest.getRuns();
-        
+
         for (Run run : runs){
             run.setStatus(RunStates.BEING_JUDGED);
         }
@@ -1006,9 +1007,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     }
 
     /**
-     * Test tie breaker down to last yes submission time. 
-     * @throws Exception 
-     * 
+     * Test tie breaker down to last yes submission time.
+     * @throws Exception
+     *
      */
     public void testTieBreakerSubmissionTime() throws Exception{
 
@@ -1018,30 +1019,30 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         // Tertiary Sort = earliest submittal of last submission (low to high)
         // Forth Sort = teamName (low to high)
         // Fifth Sort = clientId (low to high)
-        
+
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
                 "5,5,A,12,No",
-                "6,5,A,12,Yes", 
-                
+                "6,5,A,12,Yes",
+
                 "7,6,A,12,No",
                 "8,6,A,12,Yes",
-                
+
                 // Both solve 1 score 32  (no for 20, 12 min)
 
                 "15,5,B,21,No",
-                "16,5,B,22,Yes",  
-                
+                "16,5,B,22,Yes",
+
                 "25,6,B,21,No",
-                "26,6,B,22,Yes",  
-                
+                "26,6,B,22,Yes",
+
                 // Both solve 2 score 42  (no for 20 and 22 min)
                 // total 74 each
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 // must identical score, sort by team display name, identical ranks.
                 "1,team5,2,74",
@@ -1051,13 +1052,13 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "3,team3,0,0",
                 "3,team4,0,0",
         };
-        
+
         scoreboardTest (6, runsData, rankData);
     }
 
     /**
-     * Test whether SA respects send to team 
-     * @throws Exception 
+     * Test whether SA respects send to team
+     * @throws Exception
      */
     public void testSendToTeams() throws Exception{
 
@@ -1067,33 +1068,33 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         // Tertiary Sort = earliest submittal of last submission (low to high)
         // Forth Sort = teamName (low to high)
         // Fifth Sort = clientId (low to high)
-        
+
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
                 "5,5,A,12,No",
-                "6,5,A,12,Yes", 
+                "6,5,A,12,Yes",
 
                 // t5 solves A, 32 pts = 20 + 12
-                
+
                 "7,6,A,12,No,Yes",
                 "8,6,A,12,Yes,No",
-                
+
                 // t6 does not solve, 0 solve, 0 pts
 
                 "15,5,B,21,No",
-                "16,5,B,22,Yes,No",  
-                
+                "16,5,B,22,Yes,No",
+
                 // t5 does solve B, but not sent to team/used 0 pts 0 solved
-                
+
                 "25,6,B,21,No,No",
                 "26,6,B,22,Yes,Yes",
-                
+
                 // t6 solves B, 22 pts because No at 21 is NOT counted.
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 // rank, team, solved, pts
                 "1,team6,1,22",
@@ -1103,12 +1104,12 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "3,team3,0,0",
                 "3,team4,0,0",
         };
-        
+
         scoreboardTest (6, runsData, rankData, true);
     }
 
     public void testShortSchoolName() throws Exception {
-        
+
         try {
             InternalContest contest = new InternalContest();
 
@@ -1126,11 +1127,11 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
             defaultScoringAlgorithm.setObeyFreeze(false);
             String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
-          
+
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
-            
+
             // getStandings should always return a well-formed xml
             NodeList byTagName = document.getElementsByTagName("teamStanding");
             Node team1 = byTagName.item(0).getAttributes().getNamedItem("shortSchoolName");
@@ -1148,68 +1149,68 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     }
     public void testAltScoring() throws Exception {
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
                 "1,1,A,1,No", // 20
                 "2,1,A,3,Yes", // 3 (Minute points for 1st Yes count)
                 "3,1,A,5,No", // 20 (a No on a solved problem)
                 "4,1,A,7,Yes", // zero (only "No's" count)
                 "5,1,A,9,No", // 20 (another No on the solved problem)
-                
+
                 "6,1,B,11,No", // zero (problem has not been solved)
                 "7,1,B,13,No", // zero (problem has not been solved)
-                
+
                 "8,2,A,30,Yes", // 30 (Minute points for 1st Yes)
-                
+
                 "9,2,B,35,No", // zero -- not solved
                 "10,2,B,40,No", // zero -- not solved
                 "11,2,B,45,No", // zero -- not solved
                 "12,2,B,50,No", // zero -- not solved
                 "13,2,B,55,No", // zero -- not solved
         };
-        
+
 
         // Rank  TeamId Solved Penalty
-        
+
         // alt1: 0 0 200
-        
+
         String[] alt1rankData = {
                 "1,team1,1,200",
                 "2,team2,1,200", // tie-breaker causes rank 2
         };
-        
+
         scoreboardTest (2, runsData, alt1rankData, alt1);
         // alt2: 30 5 0
         String[] alt2rankData = {
                 "1,team1,1,45",  // 1 no@30 each + 3 min * 5
                 "2,team2,1,150", // 5*30
         };
-        
+
         scoreboardTest (2, runsData, alt2rankData, alt2);
-        
+
         // alt3: 0 10 0
         String[] alt3rankData = {
                 "1,team1,1,30", // 3 min * 10
                 "2,team2,1,300", // 30 min * 10
         };
-        
+
         scoreboardTest (2, runsData, alt3rankData, alt3);
-        
+
         // alt4: 5 0 20
         String[] alt4rankData = {
                 "1,team2,1,20", // base yes
                 "2,team1,1,25", // base yes + 1 no
         };
-        
+
         scoreboardTest (2, runsData, alt4rankData, alt4);
 
     }
     /**
      * This is a test for bug 691
-     * @throws Exception 
+     * @throws Exception
      */
     public void testDeletedProblem() throws Exception {
- 
+
         InternalContest contest = new InternalContest();
 
         int numTeams = 2;
@@ -1219,14 +1220,14 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "1,1,A,1,No",  //20
                 "2,1,A,3,Yes",  //3 (first yes counts Minutes only)
                 "3,1,A,5,No",  //20
-                "4,1,A,7,Yes",  //20  
+                "4,1,A,7,Yes",  //20
                 "5,1,A,9,No",  //20
-                
+
                 "6,1,B,11,No",  //20  (all runs count)
                 "7,1,B,13,No",  //20  (all runs count)
-                
+
                 "8,2,A,30,Yes",  //30
-                
+
                 "9,2,B,35,No",  //20 (all runs count)
                 "10,2,B,40,No",  //20 (all runs count)
                 "11,2,B,45,No",  //20 (all runs count)
@@ -1234,9 +1235,9 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 "13,2,B,55,No",  //20 (all runs count)
 
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 "1,team1,0,0",
                 "1,team2,0,0"
@@ -1274,14 +1275,14 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             assertTrue("Error in XML output " + e.getMessage(), true);
             e.printStackTrace();
         }
-        
+
         // skip past nodes to find teamStanding node
         NodeList list = document.getDocumentElement().getChildNodes();
-        
+
         int rankIndex = 0;
-        
+
         for(int i=0; i<list.getLength(); i++) {
-            Node node = (Node)list.item(i);
+            Node node = list.item(i);
             String name = node.getNodeName();
             if (name.equals("teamStanding")){
                 String [] standingsRow = fetchStanding (node);
@@ -1294,7 +1295,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                     System.out.println();
                     System.out.flush();
                 }
-                
+
                 compareRanking (rankIndex+1, standingsRow, cols);
                 rankIndex++;
             } else if(name.equals("standingsHeader")) {
@@ -1303,7 +1304,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 NodeList list2 =  node.getChildNodes();
                 int foundProblemCount = -1;
                 for(int j=0; j<list2.getLength(); j++) {
-                    Node node2 = (Node)list2.item(j);
+                    Node node2 = list2.item(j);
                     String name2 = node2.getNodeName();
                     if (name2.equals("problem")){
                         int id = Integer.valueOf(node2.getAttributes().getNamedItem("id").getNodeValue());
@@ -1318,13 +1319,13 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         }
 
     }
-    
+
     public void testScoreAdjustment() {
         try {
             InternalContest contest = new InternalContest();
-            
+
             initContestData(contest);
-            
+
             createJudgedRun(contest, 0, true);
 
             Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
@@ -1332,11 +1333,11 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             try {
                 DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
                 String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
-                
+
                 // getStandings should always return a well-formed xml
                 assertFalse("getStandings returned null ", xmlString == null);
                 assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
-                
+
                 DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
                 Document doc = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
@@ -1357,7 +1358,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     public void testDivisonRank() {
         try {
             InternalContest contest = new InternalContest();
-            
+
             initContestData(contest);
             String base = "Oregon D";
             Group[] groups = new Group[4];
@@ -1373,18 +1374,19 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 groups[i+1] = group;
             }
             for (Account account : getAccounts(contest, ClientType.Type.TEAM)) {
-                account.setGroupId(groups[3].getElementId());
+                account.clearGroups();
+                account.addGroupId(groups[3].getElementId(), true);
                 contest.updateAccount(account);
             }
             createJudgedRun(contest, 0, true);
             try {
                 DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
                 String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
-                
+
                 // getStandings should always return a well-formed xml
                 assertFalse("getStandings returned null ", xmlString == null);
                 assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
-                
+
                 DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
                 Document doc = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
@@ -1401,14 +1403,14 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             e.printStackTrace();
             assertTrue("exception", false);
         }
-        
+
     }
     public void testScoreAdjustment0() {
         try {
             InternalContest contest = new InternalContest();
-            
+
             initContestData(contest);
-            
+
             createJudgedRun(contest, 0, true);
 
             Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
@@ -1416,11 +1418,11 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             try {
                 DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
                 String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
-                
+
                 // getStandings should always return a well-formed xml
                 assertFalse("getStandings returned null ", xmlString == null);
                 assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
-                
+
                 DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
                 Document doc = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
@@ -1440,15 +1442,15 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     private void scoreboardTest(int numTeams, String[] runsData, String[] rankData, Properties scoreProps) throws Exception {
         scoreboardTest (numTeams, runsData, rankData, false, scoreProps);
-         
+
     }
-    
+
     private void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList, boolean respectSendTo, Properties scoreProps) throws Exception {
-        
+
         InternalContest contest = new InternalContest();
 
         initData(contest, numTeams, 5);
-        
+
         if (respectSendTo){
             /**
              * Set permission that will respect the {@link JudgementRecord#isSendToTeam()}
@@ -1456,14 +1458,14 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             Account account = contest.getAccount(contest.getClientId());
             account.addPermission(edu.csus.ecs.pc2.core.security.Permission.Type.RESPECT_NOTIFY_TEAM_SETTING);
         }
-        
+
         for (String runInfoLine : runsDataList) {
             SampleContest.addRunFromInfo(contest, runInfoLine);
 
         }
 
         confirmRanks(contest, rankDataList, scoreProps);
-        
+
     }
 
     private void confirmRanks(InternalContest contest, String[] rankData, Properties scoreProps) {
@@ -1479,13 +1481,13 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             System.out.flush();
 
         }
-        
+
         // Rank  Solved Penalty TeamId
-        
+
         try {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
             String xmlString = defaultScoringAlgorithm.getStandings(contest, scoreProps, log);
-            
+
             // getStandings should always return a well-formed xml
             assertFalse("getStandings returned null ", xmlString == null);
             assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
@@ -1498,14 +1500,14 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             assertTrue("Error in XML output " + e.getMessage(), true);
             e.printStackTrace();
         }
-        
+
         // skip past nodes to find teamStanding node
         NodeList list = document.getDocumentElement().getChildNodes();
-        
+
         int rankIndex = 0;
-        
+
         for(int i=0; i<list.getLength(); i++) {
-            Node node = (Node)list.item(i);
+            Node node = list.item(i);
             String name = node.getNodeName();
             if (name.equals("teamStanding")){
                 String [] standingsRow = fetchStanding (node);
@@ -1518,7 +1520,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                     System.out.println();
                     System.out.flush();
                 }
-                
+
                 compareRanking (rankIndex+1, standingsRow, cols);
                 rankIndex++;
             }
@@ -1526,8 +1528,8 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     }
 
     /**
-     * Test whether SA respects obeyFreeze boolean 
-     * @throws Exception 
+     * Test whether SA respects obeyFreeze boolean
+     * @throws Exception
      */
     public void testObeyFreeze() throws Exception{
 
@@ -1537,18 +1539,18 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         // Tertiary Sort = earliest submittal of last submission (low to high)
         // Forth Sort = teamName (low to high)
         // Fifth Sort = clientId (low to high)
-        
+
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
                 "1,1,A,250,No",
-                "2,1,A,290,Yes", 
+                "2,1,A,290,Yes",
 
                 // t5 solves A, 310 pts = 20 + 290
                 // but with ECO settings, yes is not seen, so 0
-                
+
         };
-               
+
         InternalContest contest = new InternalContest();
 
         initData(contest, 1, 5);
@@ -1574,8 +1576,8 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
     }
 
     /**
-     * Test whether SA respects send to team 
-     * @throws Exception 
+     * Test whether SA respects send to team
+     * @throws Exception
      */
     public void testZZZZEOCSettings() throws Exception{
 
@@ -1585,20 +1587,20 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         // Tertiary Sort = earliest submittal of last submission (low to high)
         // Forth Sort = teamName (low to high)
         // Fifth Sort = clientId (low to high)
-        
+
         // RunID    TeamID  Prob    Time    Result
-        
+
         String [] runsData = {
                 "1,1,A,250,No",
-                "2,1,A,290,Yes", 
+                "2,1,A,290,Yes",
 
                 // t5 solves A, 310 pts = 20 + 290
                 // but with ECO settings, yes is not seen, so 0
-                
+
         };
-        
+
         // Rank  TeamId Solved Penalty
-        
+
         String [] rankData = {
                 // rank, team, solved, pts
                 "1,team1,0,0",
@@ -1608,7 +1610,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
                 // rank, team, solved, pts
                 "1,team1,1,310",
         };
-        
+
         InternalContest contest = new InternalContest();
 
         initData(contest, 1, 5);
@@ -1641,29 +1643,29 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
         confirmRanks(contest, rankData);
     }
-    
-    
+
+
     /**
      * Test the SA given a list of runs and outcomes.
-     * 
+     *
      * rankDataList array is array of string, thus: Rank  TeamDisplayName Solved Penalty,
      * for example: "1,team5,2,74",
-     * 
+     *
      * @param numTeams
      * @param runsDataList
      * @param rankDataList
-     * @throws Exception 
+     * @throws Exception
      */
     public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList) throws Exception {
         scoreboardTest(numTeams, runsDataList, rankDataList, false);
     }
-    
+
     public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList, boolean respectSendTo) throws Exception  {
 
         InternalContest contest = new InternalContest();
 
         initData(contest, numTeams, 5);
-        
+
         if (respectSendTo){
             /**
              * Set permission that will respect the {@link JudgementRecord#isSendToTeam()}
@@ -1671,7 +1673,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
             Account account = contest.getAccount(contest.getClientId());
             account.addPermission(edu.csus.ecs.pc2.core.security.Permission.Type.RESPECT_NOTIFY_TEAM_SETTING);
         }
-        
+
         for (String runInfoLine : runsDataList) {
             SampleContest.addRunFromInfo(contest, runInfoLine);
         }
@@ -1681,16 +1683,16 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
         confirmRanks(contest, rankDataList);
     }
 
-    
+
 
     /**
      * Fetch string from nodes.
-     * 
+     *
      * @param node
      * @return
      */
     private String[] fetchStanding(Node node) {
-        
+
 //        Object[] cols = { "Rank", "Name", "Solved", "Points" };
 
         String[] outArray = new String[4];
@@ -1716,13 +1718,13 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Confirms ranks between runs in contest and rankData.
-     * 
+     *
      * rankdata is a array of string, each string contains
      * comma delimited fields: rank,teamid,solved,points
      * <p>
      * rankdata is compared with XML from DefaultScoringAlgorithm
      * and if all ranks/fields match, passes the test.
-     * 
+     *
      * @param contest
      * @param rankData
      */
@@ -1732,17 +1734,17 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 
     /**
      * Compares a standings Row with an expected row.
-     * 
+     *
      * Each row contains: rank, name, number solved, points.
-     * 
+     *
      * @param rankIndex
      * @param standingsRow
      * @param expectedRow
      */
     private void compareRanking(int rankIndex, String[] standingsRow, String [] expectedRow) {
-        
+
 //        Object[] cols = { "Rank", "Name", "Solved", "Points" };
-     
+
         int idx = 0;
         assertEquals("Standings row "+rankIndex+" rank incorrect, ", expectedRow[idx], standingsRow[idx]);
 //        assertTrue ("Standings row "+rankIndex+" rank wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
@@ -1757,6 +1759,7 @@ public class DefaultScoringAlgorithmTest extends AbstractTestCase {
 //        assertTrue ("Standings row "+rankIndex+" points wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
     }
 
+    @Override
     protected void tearDown() throws Exception {
         super.tearDown();
     }

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports.clics;
 
 import java.io.File;
@@ -18,23 +18,23 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.standings.ContestStandings;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
-import edu.csus.ecs.pc2.core.standings.TeamStanding;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.standings.ContestStandings;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
+import edu.csus.ecs.pc2.core.standings.TeamStanding;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Unit tests.
- * 
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
 public class CLICSAwardUtilitiesTest extends AbstractTestCase {
@@ -43,7 +43,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
     /**
      * Test no awards (no runs) in awards.json
-     * 
+     *
      * @throws Exception
      */
     public void testWithNoRuns() throws Exception {
@@ -63,10 +63,10 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
         assertEquals("Expecting no award rows ", 0, rowsWritten);
     }
-    
+
     /**
      * Dump standings information.
-     * 
+     *
      * @param message
      * @param contest
      * @throws JsonParseException
@@ -76,21 +76,31 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
      * @throws IOException
      */
     public void dumpStandings(String message, IInternalContest contest) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
-        
+
         System.out.println("dumpStandings: "+message);
-        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
 
         List<TeamStanding> teamStands = contestStandings.getTeamStandings();
         for (TeamStanding teamStanding : teamStands) {
             ClientId clientId = CLICSAwardUtilities.createClientId(teamStanding);
-            Group teamGroup = CLICSAwardUtilities.getGroupForTeam(contest, clientId);
-            if (teamGroup == null) {
+            List<Group> teamGroups = CLICSAwardUtilities.getGroupsForTeam(contest, clientId);
+            if (teamGroups == null) {
                 System.out.println(teamStanding.getRank()+" "+teamStanding.getSolved()+" "+teamStanding.getPoints() + " " + //
-                        teamStanding.getTeamName() + " school:" + teamStanding.getShortSchoolName() + " TEAM HAS NO GROUP");
+                        teamStanding.getTeamName() + " school:" + teamStanding.getShortSchoolName() + " TEAM HAS NO GROUPS");
             } else {
+                String allgroups = "";
+                boolean firstGroup = true;
+                for(Group group : teamGroups) {
+                    if(!firstGroup) {
+                        allgroups = allgroups + ",";
+                    } else {
+                        firstGroup = false;
+                    }
+                    allgroups = allgroups + group.getGroupId() + ":" + group.getDisplayName();
+                }
                 System.out.println(teamStanding.getRank()+" "+teamStanding.getSolved()+" "+teamStanding.getPoints() + " " + //
                         teamStanding.getTeamName() + " school=" + teamStanding.getShortSchoolName() + " " + //
-                        teamGroup.getGroupId()+":"+teamGroup.getDisplayName());
+                        allgroups);
             }
         }
     }
@@ -99,7 +109,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
         /**
          * runsData columns.
-         * 
+         *
          * 0 - run id, int
          * 1 - team id, int
          * 2 - problem letter, char
@@ -109,31 +119,31 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
          * 6 - No Judgement index
          */
         String[] runsData = { //
-                "1,1,A,1,No,No,4",// 
+                "1,1,A,1,No,No,4",//
                 "2,1,A,1,No,No,2", //
-                "3,1,A,1,No,No,1", // 
-                "4,1,A,3,Yes,No,0", // 
-                "5,1,A,5,No,No,1", 
-                "6,1,A,7,Yes,No,0", 
-                "7,1,A,9,No,No,1", 
-                "8,1,B,11,No,No,1", 
-                "9,2,A,48,No,No,4", 
-                "10,2,A,50,Yes,No,0", 
-                "11,2,C,35,Yes,No,0", 
-                "12,2,D,40,Yes,No,0", 
+                "3,1,A,1,No,No,1", //
+                "4,1,A,3,Yes,No,0", //
+                "5,1,A,5,No,No,1",
+                "6,1,A,7,Yes,No,0",
+                "7,1,A,9,No,No,1",
+                "8,1,B,11,No,No,1",
+                "9,2,A,48,No,No,4",
+                "10,2,A,50,Yes,No,0",
+                "11,2,C,35,Yes,No,0",
+                "12,2,D,40,Yes,No,0",
         };
 
         InternalContest contest = createContestWithJudgedRuns(12, runsData, 8);
 
         assertNotNull(contest);
-        
+
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
         List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
 
 //        dumpAwards ("debug DA ",System.out, awards);
 //        dumpStandings("debug XX ", contest);
-        
+
         assertAwardCount(1, awards, CLICSAwardUtilities.WINNER_S_OF_GROUP_TITLE);
 
         assertEquals("Awards expected ", 6, awards.size());
@@ -149,10 +159,10 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 //      editFile(awardsFile, "debug C "+getName());
 
     }
-    
+
 
     /**
-     * If expectedCount found in citation matching searchForString. 
+     * If expectedCount found in citation matching searchForString.
      * @param expectedCount
      * @param awards
      * @param searchForString
@@ -171,14 +181,14 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
     /**
      * Test with runs with only No judgement runs.   No awards output.
-     * 
+     *
      * @throws Exception
      */
     public void testWithNoAwards() throws Exception {
 
         /**
          * runsData columns.
-         * 
+         *
          * 0 - run id, int
          * 1 - team id, int
          * 2 - problem letter, char
@@ -206,7 +216,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
         InternalContest contest = createContestWithJudgedRuns(12, runsData, 8);
 
         assertNotNull(contest);
-        
+
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
         List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
@@ -216,7 +226,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
         String outdir = getOutputDataDirectory(getName());
         ensureDirectory(outdir);
         String awardsFile = outdir + File.separator + "awards.json";
-        
+
         int rowsWritten = CLICSAwardUtilities.writeAwardsJSONFile(awardsFile, awards);
         assertEquals("Expecting awards elements ", 0, rowsWritten);
 
@@ -224,14 +234,14 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
     /**
      * Test with two awards.
-     * 
+     *
      * @throws Exception
      */
     public void testWithTwoAwards() throws Exception {
 
         /**
          * runsData columns.
-         * 
+         *
          * 0 - run id, int
          * 1 - team id, int
          * 2 - problem letter, char
@@ -240,7 +250,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
          * 5 - send to teams, Yes or No
          * 6 - No Judgement index
          */
-        
+
         String[] runsData = { //
                 "1,2,A,1,Yes,No,0", //
                 "2,1,A,1,No,No,2", //
@@ -250,12 +260,12 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
         InternalContest contest = createContestWithJudgedRuns(12, runsData, 8);
 
         assertNotNull(contest);
-        
+
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
         List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
-        
-        
+
+
 
         assertEquals("Awards expected ", 4, awards.size());
 
@@ -265,15 +275,15 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
         int rowsWritten = CLICSAwardUtilities.writeAwardsJSONFile(awardsFile, awards);
         assertEquals("Expecting no award rows ", 4, rowsWritten);
-        
+
 //        editFile(awardsFile, "debug A "+getName());
     }
-    
+
     public void testAllAwards() throws Exception {
-        
+
         /**
          * runsData columns.
-         * 
+         *
          * 0 - run id, int
          * 1 - team id, int
          * 2 - problem letter, char
@@ -282,12 +292,12 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
          * 5 - send to teams, Yes or No
          * 6 - No Judgement index
          */
-        
+
         String[] runsData = { //
-                "1,1,A,1,No,No,4",// 
+                "1,1,A,1,No,No,4",//
                 "2,1,A,1,No,No,2", //
-                "3,1,A,1,No,No,1", // 
-                "4,1,A,3,Yes,No,0", // 
+                "3,1,A,1,No,No,1", //
+                "4,1,A,3,Yes,No,0", //
                 "5,1,A,5,No,No,1",  //
                 "6,1,A,7,Yes,No,0",  //
                 "7,1,A,9,No,No,1",  //
@@ -312,15 +322,15 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
                 "25,17,F,266,Yes,No,0",  //
                 "26,18,F,366,Yes,No,0",  //
                 "27,19,F,866,Yes,No,0",  //
-                
+
                 "28,12,F,1466,Yes,No,0",  //
                 "20,11,A, 123,Yes,No,0",  //
-                
+
                 "21,22,F,1466,Yes,No,0",  //
                 "22,22,A, 123,Yes,No,0",  //
                 "28,23,F,1466,Yes,No,0",  //
                 "24,24,A, 123,Yes,No,0",  //
-                
+
 
         };
 
@@ -328,24 +338,24 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
         InternalContest contest = createContestWithJudgedRuns(30, runsData, numProbs);
 
         assertNotNull(contest);
-        
+
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
         List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
-        
+
 //        dumpAwards("test All ", System.out,  awards);
-        
+
         assertEquals("Awards expected ", 12, awards.size());
-        
-        
+
+
     }
-    
+
     public void testAwardsTwo() throws Exception {
 
-        
+
         /**
          * runsData columns.
-         * 
+         *
          * 0 - run id, int
          * 1 - team id, int
          * 2 - problem letter, char
@@ -354,19 +364,19 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
          * 5 - send to teams, Yes or No
          * 6 - No Judgement index
          */
-        
+
         String[] runsData = { //
                 "1,1,A,1,Yes,No,0", //
                 "2,2,A,2,Yes,No,0", //
                 "3,3,A,3,Yes,No,0", //
                 "4,4,A,4,Yes,No,0", //
-                
+
                 "5,5,A,5,Yes,No,0", //
                 "6,6,A,6,Yes,No,0", //
                 "7,7,A,7,Yes,No,0", //
                 "8,8,A,8,Yes,No,0", //
-                
-                
+
+
                 "9,9,A,9,Yes,No,0", //
                 "10,10,A,13,Yes,No,0", //
                 "11,11,A,13,Yes,No,0", //
@@ -378,7 +388,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
                 "17,17,A,13,Yes,No,0", //
                 "18,18,A,13,Yes,No,0", //
                 "19,19,A,13,Yes,No,0", //
-                
+
                 "20,20,A,23,Yes,No,0", //
                 "21,21,A,21,Yes,No,0", //
                 "22,22,A,22,Yes,No,0", //
@@ -394,7 +404,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 //                "24,24,A,32,Yes,No,0", //
 
         };
-        
+
 
         int numProbs = 8;
         InternalContest contest = createContestWithJudgedRuns(40, runsData, numProbs);
@@ -404,7 +414,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
         List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
-        
+
 //        dumpStandings("debug Two", contest);
 
         assertTeamCount(awards, CLICSAwardUtilities.ID_WINNER, 1);
@@ -414,14 +424,14 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
         assertTeamCount(awards, CLICSAwardUtilities.ID_BRONZE_MEDAL, 11);
 
 //        dumpAwards (System.out, awards);
-        
+
         assertEquals("Awards expected ", 7, awards.size());
-        
-        
+
+
         FinalizeData data = createFinalizeData(4, 4, 13);
         contest.setFinalizeData(data);
         awards = CLICSAwardUtilities.createAwardsList(contest);
-        
+
         assertTeamCount(awards, CLICSAwardUtilities.ID_WINNER, 1);
 
         assertTeamCount(awards, CLICSAwardUtilities.ID_GOLD_MEDAL, 4);
@@ -430,7 +440,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
         assertEquals("Awards expected ", 7, awards.size());
     }
-    
+
     protected void dumpAwards(String message, PrintStream out, List<CLICSAward> awards) throws JsonProcessingException {
         out.println("dumpAwards: "+message);
         for (CLICSAward clicsAward : awards) {
@@ -446,7 +456,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
         data.setComment("Finalized by Director of Operations, no, really!");
         return data;
     }
-    
+
     /**
      * Expect team count for awards id to be the same as expectedNumber
      * @param awards
@@ -469,14 +479,14 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
     /**
      * Test with 23 runs and 8 awards.
-     * 
+     *
      * @throws Exception
      */
     public void testEightAwards() throws Exception {
-        
+
         /**
          * runsData columns.
-         * 
+         *
          * 0 - run id, int
          * 1 - team id, int
          * 2 - problem letter, char
@@ -485,12 +495,12 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
          * 5 - send to teams, Yes or No
          * 6 - No Judgement index
          */
-        
+
         String[] runsData = { //
-                "1,1,A,1,No,No,4",// 
+                "1,1,A,1,No,No,4",//
                 "2,1,A,1,No,No,2", //
-                "3,1,A,1,No,No,1", // 
-                "4,1,A,3,Yes,No,0", // 
+                "3,1,A,1,No,No,1", //
+                "4,1,A,3,Yes,No,0", //
                 "5,1,A,5,No,No,1",  //
                 "6,1,A,7,Yes,No,0",  //
                 "7,1,A,9,No,No,1",  //
@@ -516,14 +526,14 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
         InternalContest contest = createContestWithJudgedRuns(12, runsData, numProbs);
 
         assertNotNull(contest);
-        
+
         assertEquals("Expecting groups", 2, contest.getGroups().length);
 
         List<CLICSAward> awards = CLICSAwardUtilities.createAwardsList(contest);
-        
+
         List<CLICSAward> list = new ArrayList<CLICSAward>();
         CLICSAwardUtilities.addMedals(contest, list);
-        
+
         assertEquals("Awards expected ", 9, awards.size());
 
         String outdir = getOutputDataDirectory(getName());
@@ -532,15 +542,15 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
         int rowsWritten = CLICSAwardUtilities.writeAwardsJSONFile(awardsFile, awards);
         assertEquals("Expecting no award rows ", 9, rowsWritten);
-        
+
 //        editFile(awardsFile, "debug A "+getName());
-        
-        
+
+
     }
-    
+
     /**
      * Test load awards.json from file.
-     * 
+     *
      * @throws Exception
      */
     public void testreadAwardsList() throws Exception {
@@ -603,7 +613,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
     /**
      * Compare award for id with team number
-     * 
+     *
      * @param awards
      * @param id
      *            the name of the award
@@ -625,7 +635,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
     /**
      * Find award in awards list
-     * 
+     *
      * @param awards
      * @param id the award id
      * @return
@@ -643,7 +653,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
     /**
      * Create and return a new scoreboard client.
-     * 
+     *
      * @param contest
      * @return a ClientId for newly created scoreboard account.
      */
@@ -654,7 +664,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
     /**
      * Insure that there is one team and one judge in the contest model.
-     * 
+     *
      * @param contest
      */
     private void checkForJudgeAndTeam(IInternalContest contest) {
@@ -669,7 +679,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
     }
     /**
      * Initialize contest with teams, problems, languages, judgements.
-     * 
+     *
      * @param contest
      * @param numTeams
      * @param numProblems
@@ -679,10 +689,10 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
         // Add accounts
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), numTeams, true);
         contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 6, true);
-        
+
         sampleContest = new SampleContest();
         sampleContest.assignSampleGroups(contest, "Group Thing One", "Group Thing Two");
-        
+
         // Add scoreboard account and set the scoreboard account for this client (in contest)
         contest.setClientId(createBoardAccount(contest));
 
@@ -714,7 +724,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
     /**
      * Create contest with judged runs.
-     * 
+     *
      * @param numTeams
      *            number of teams to create
      * @param runsDataList
@@ -728,7 +738,7 @@ public class CLICSAwardUtilitiesTest extends AbstractTestCase {
 
     /**
      * Create contest with judged runs.
-     * 
+     *
      * @param numTeams
      *            number of teams to create
      * @param runsDataList

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -19,11 +19,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
-import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
@@ -43,6 +43,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
@@ -53,7 +54,7 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 /**
  * Account Pane list.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -62,7 +63,7 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 public class AccountsTablePane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -1932790185807184681L;
 
@@ -74,7 +75,7 @@ public class AccountsTablePane extends JPanePlugin {
     private static final String CSV_DESCRIPTION = "CSV (comma delimited) (*.csv)";
 
     private static final String TEXT_DESCRIPTION = "Text (tab delimited) (*.txt,*.tab)";
-    
+
     private static final int VERT_PAD = 2;
     private static final int HORZ_PAD = 20;
 
@@ -108,11 +109,11 @@ public class AccountsTablePane extends JPanePlugin {
     private JButton generateAccountsButton = null;
 
     private JButton saveButton = null;
-    
+
     private EditFilterFrame editFilterFrame = null;
 
     private JScrollPane scrollPane = null;
-    
+
     /**
      * User filter
      */
@@ -123,7 +124,7 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public AccountsTablePane() {
         super();
@@ -132,7 +133,7 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -148,7 +149,7 @@ public class AccountsTablePane extends JPanePlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-//      Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "CMS Id", "ClientId" };
+//      Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Groups", "Alias", "CMS Id", "ClientId" };
 
         try {
             int cols = accountTableModel.getColumnCount();
@@ -160,7 +161,7 @@ public class AccountsTablePane extends JPanePlugin {
             s[2] = "" + clientId.getClientNumber();
 
             s[3] = getTeamDisplayName(account);
-            s[4] = getGroupName(account);
+            s[4] = getGroupNames(account);
             s[5] = getTeamAlias(account);
             s[6] = getExternalId(account);
             // This column is invisible for the "unique" ID
@@ -172,13 +173,17 @@ public class AccountsTablePane extends JPanePlugin {
         return null;
     }
 
-    private String getGroupName(Account account) {
+    private String getGroupNames(Account account) {
         String groupName = "";
-        if (account.getGroupId() != null) {
-            Group group = getContest().getGroup(account.getGroupId());
-            if (group != null) {
-                groupName = group.getDisplayName();
+        if (account.getGroupIds() != null) {
+            ArrayList<String> allGroups = new ArrayList<String>();
+            for(ElementId groupElementId : account.getGroupIds()) {
+                Group group = getContest().getGroup(groupElementId);
+                if (group != null) {
+                    allGroups.add(group.getDisplayName());
+                }
             }
+            groupName = String.join(",", allGroups);
         }
         return groupName;
     }
@@ -194,7 +199,7 @@ public class AccountsTablePane extends JPanePlugin {
 
         return "Invalid Account";
     }
-    
+
 
     private String getTeamAlias(Account account) {
         if (account != null) {
@@ -220,13 +225,13 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * This method initializes accountTable and accountTableModel
-     * 
+     *
      * @return JTableCustomized
      */
     private JTableCustomized getAccountsTable() {
         if (accountTable == null) {
             int i;
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias", "CMS Id", "ClientId"};
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Groups", "Alias", "CMS Id", "ClientId"};
             accountTableModel = new DefaultTableModel(cols, 0) {
                 @Override
                 public boolean isCellEditable(int row, int col) {
@@ -234,9 +239,10 @@ public class AccountsTablePane extends JPanePlugin {
                 }
             };
             TableRowSorter<DefaultTableModel> trs = new TableRowSorter<DefaultTableModel>(accountTableModel);
-            
+
             accountTable = new JTableCustomized(accountTableModel);
             accountTable.addMouseListener(new MouseAdapter() {
+                @Override
                 public void mouseClicked(MouseEvent me) {
                     if (me.getClickCount() == 2) {     // to detect double click events
                        JTable target = (JTable)me.getSource();
@@ -252,10 +258,10 @@ public class AccountsTablePane extends JPanePlugin {
              */
             TableColumnModel tcm = accountTable.getColumnModel();
             tcm.removeColumn(tcm.getColumn(cols.length - 1));
-            
+
             accountTable.setRowSorter(trs);
             accountTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-            
+
             ArrayList<SortKey> sortList = new ArrayList<SortKey>();
             sortList.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
             sortList.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
@@ -267,17 +273,17 @@ public class AccountsTablePane extends JPanePlugin {
              */
             ((DefaultTableCellRenderer)accountTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
             accountTable.setRowHeight(accountTable.getRowHeight() + VERT_PAD);
-            
+
             // Set special compare routines for Account ID, Display Name and CMS Id
             trs.setComparator(2, new StringToNumberComparator());
             trs.setComparator(3, new AccountNameCaseComparator());
             trs.setComparator(6, new StringToNumberComparator());
-           
+
             resizeColumnWidth(accountTable);
         }
         return accountTable;
     }
-    
+
     /**
      * Find row that contains the supplied key (in last column)
      * @param value - unique key - really, the ClientId of run
@@ -285,7 +291,7 @@ public class AccountsTablePane extends JPanePlugin {
      */
     private int getRowByKey(Object value) {
         Object o;
-        
+
         if(accountTableModel != null) {
             int col = accountTableModel.getColumnCount() - 1;
             for (int i = accountTableModel.getRowCount() - 1; i >= 0; --i) {
@@ -302,7 +308,7 @@ public class AccountsTablePane extends JPanePlugin {
      * Looks up the unique ID for the account at the supplied table row.
      * Have to map the row to the underlying tablemodel data first.
      * The ClientId is stored in the last (invisible) column
-     * 
+     *
      * @param nRow - selected row
      */
     private ClientId getClientIdFromTableRow(JTableCustomized table, int nRow) {
@@ -311,7 +317,7 @@ public class AccountsTablePane extends JPanePlugin {
         ClientId clientId = (ClientId) tm.getValueAt(modelIndex,  tm.getColumnCount()-1);
         return(clientId);
     }
-   
+
     public void updateAccountRow(final Account account) {
         updateAccountRow(account, true);
     }
@@ -319,6 +325,7 @@ public class AccountsTablePane extends JPanePlugin {
     public void updateAccountRow(final Account account, final boolean autoSizeAndSort) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 Object[] objects = buildAccountRow(account);
                 int rowNumber = getRowByKey(account.getClientId());
@@ -329,7 +336,7 @@ public class AccountsTablePane extends JPanePlugin {
                         accountTableModel.setValueAt(objects[i],  rowNumber, i);
                     }
                 }
-                
+
                 if (autoSizeAndSort) {
                     resizeColumnWidth(accountTable);
                 }
@@ -339,7 +346,7 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * Return all accounts for all sites.
-     * 
+     *
      * @return Array of all accounts in model.
      */
     private Account[] getAllAccounts() {
@@ -353,7 +360,7 @@ public class AccountsTablePane extends JPanePlugin {
             }
         }
 
-        Account[] accountList = (Account[]) allAccounts.toArray(new Account[allAccounts.size()]);
+        Account[] accountList = allAccounts.toArray(new Account[allAccounts.size()]);
         return accountList;
     }
 
@@ -361,11 +368,11 @@ public class AccountsTablePane extends JPanePlugin {
 
         JTableCustomized at = getAccountsTable();
         accountTableModel.setNumRows(0);
-        
+
         Account[] accounts = getAllAccounts();
 
         // TODO bulk load these record
-        
+
         for (Account account : accounts) {
             if (! filter.isFilterOn() ){
                 updateAccountRow(account, false);
@@ -373,7 +380,7 @@ public class AccountsTablePane extends JPanePlugin {
                 updateAccountRow(account, false);
             }
         }
-        
+
         if (filter.isFilterOn()){
             getFilterButton().setForeground(Color.BLUE);
             getFilterButton().setToolTipText("Edit filter - filter ON");
@@ -381,10 +388,10 @@ public class AccountsTablePane extends JPanePlugin {
             getFilterButton().setForeground(Color.BLACK);
             getFilterButton().setToolTipText("Edit filter");
         }
-        
+
         resizeColumnWidth(at);
     }
-    
+
     protected void dumpFilter(Filter filter2) {
 
         try {
@@ -416,6 +423,7 @@ public class AccountsTablePane extends JPanePlugin {
         getFilterButton().setVisible(true);
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
@@ -428,8 +436,9 @@ public class AccountsTablePane extends JPanePlugin {
         generateAccountsFrame.setContestAndController(inContest, inController);
 
         getEditFilterFrame().setContestAndController(inContest, inController);
-        
+
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 reloadAccountList();
                 updateGUIperPermissions();
@@ -439,17 +448,19 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * Account Listener Implementation
-     * 
+     *
      * @author pc2@ecs.csus.edu
-     * 
+     *
      */
 
     public class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             updateAccountRow(accountEvent.getAccount());
         }
 
+        @Override
         public void accountModified(AccountEvent accountEvent) {
             updateAccountRow(accountEvent.getAccount());
 
@@ -462,6 +473,7 @@ public class AccountsTablePane extends JPanePlugin {
                 // They modified us!!
                 initializePermissions();
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         updateGUIperPermissions();
                     }
@@ -470,6 +482,7 @@ public class AccountsTablePane extends JPanePlugin {
             }
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
             for (Account account : accounts) {
@@ -478,6 +491,7 @@ public class AccountsTablePane extends JPanePlugin {
             sortAccountsTable();
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
             for (Account account : accounts) {
@@ -490,6 +504,7 @@ public class AccountsTablePane extends JPanePlugin {
                     // They modified us!!
                     initializePermissions();
                     SwingUtilities.invokeLater(new Runnable() {
+                        @Override
                         public void run() {
                             updateGUIperPermissions();
                         }
@@ -501,23 +516,25 @@ public class AccountsTablePane extends JPanePlugin {
             sortAccountsTable();
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
 
             initializePermissions();
 
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadAccountList();
                     updateGUIperPermissions();
                 }
             });
-            
+
         }
     }
 
     /**
      * This method initializes jPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -539,7 +556,7 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * This method initializes jButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     // TODO enable the Add button when add account works.
@@ -551,6 +568,7 @@ public class AccountsTablePane extends JPanePlugin {
             addButton.setEnabled(true);
             addButton.setToolTipText("Add new account");
             addButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                      addAccount();
                 }
@@ -566,7 +584,7 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * This method initializes jButton1
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getEditButton() {
@@ -576,6 +594,7 @@ public class AccountsTablePane extends JPanePlugin {
             editButton.setMnemonic(KeyEvent.VK_E);
             editButton.setToolTipText("Edit account");
             editButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     editSelectedAccount();
                 }
@@ -594,7 +613,7 @@ public class AccountsTablePane extends JPanePlugin {
 
         try {
             Account accountToEdit = getContest().getAccount(getClientIdFromTableRow(accountTable, selectedIndex));
-            
+
             if(accountToEdit != null) {
                 editAccountFrame.setAccount(accountToEdit);
                 editAccountFrame.setVisible(true);
@@ -607,7 +626,7 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * This method initializes filterButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getFilterButton() {
@@ -616,6 +635,7 @@ public class AccountsTablePane extends JPanePlugin {
             filterButton.setText("Filter");
             filterButton.setMnemonic(KeyEvent.VK_F);
             filterButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     showFilterAccountsFrame();
                 }
@@ -623,10 +643,11 @@ public class AccountsTablePane extends JPanePlugin {
         }
         return filterButton;
     }
-    
+
     public EditFilterFrame getEditFilterFrame() {
         if (editFilterFrame == null){
             Runnable callback = new Runnable(){
+                @Override
                 public void run() {
                     reloadAccountList();
                 }
@@ -635,7 +656,7 @@ public class AccountsTablePane extends JPanePlugin {
         }
         return editFilterFrame;
     }
-    
+
     protected void showFilterAccountsFrame() {
         getEditFilterFrame().addList(ListNames.SITES);
         getEditFilterFrame().addList(ListNames.CLIENT_TYPES);
@@ -648,7 +669,7 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * This method initializes loadButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getLoadButton() {
@@ -658,6 +679,7 @@ public class AccountsTablePane extends JPanePlugin {
             loadButton.setMnemonic(KeyEvent.VK_L);
             loadButton.setToolTipText("Load Account Information from file");
             loadButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     loadAccountsFromDisk();
                 }
@@ -720,7 +742,7 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * This method initializes jPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMessagePanel() {
@@ -739,6 +761,7 @@ public class AccountsTablePane extends JPanePlugin {
     private void showMessage(final String string) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(string);
             }
@@ -748,6 +771,7 @@ public class AccountsTablePane extends JPanePlugin {
     private void showMessage(final String string, final Color color) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(string);
                 messageLabel.setForeground(color);
@@ -755,7 +779,7 @@ public class AccountsTablePane extends JPanePlugin {
             }
         });
     }
-    
+
     /**
      * This method invokes resizeColumnWidth - sorting is automatic.
      * for the AccountsTable on the awt thread.
@@ -763,6 +787,7 @@ public class AccountsTablePane extends JPanePlugin {
      */
     private void sortAccountsTable() {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 resizeColumnWidth(getAccountsTable());
             }
@@ -771,7 +796,7 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * This method initializes generateAccountsButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getGenerateAccountsButton() {
@@ -781,6 +806,7 @@ public class AccountsTablePane extends JPanePlugin {
             generateAccountsButton.setMnemonic(KeyEvent.VK_G);
             generateAccountsButton.setToolTipText("Generate multiple new accounts");
             generateAccountsButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     generateAccountsFrame.setVisible(true);
                 }
@@ -791,7 +817,7 @@ public class AccountsTablePane extends JPanePlugin {
 
     /**
      * This method initializes saveButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getSaveButton() {
@@ -801,6 +827,7 @@ public class AccountsTablePane extends JPanePlugin {
             saveButton.setText("Save");
             saveButton.setMnemonic(KeyEvent.VK_S);
             saveButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     saveAccountsToDisk();
                 }
@@ -808,10 +835,10 @@ public class AccountsTablePane extends JPanePlugin {
         }
         return saveButton;
     }
-    
+
     /**
      * This method initializes scrollPane
-     * 
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getScrollPane() {
@@ -820,16 +847,17 @@ public class AccountsTablePane extends JPanePlugin {
         }
         return scrollPane;
     }
-    
+
     private void resizeColumnWidth(JTableCustomized table) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
                 tca.adjustColumns();
             }
         });
     }
-    
+
     protected void saveAccountsToDisk() {
         JFileChooser chooser = new JFileChooser(lastDir);
         chooser.setDialogTitle("Save accounts to file");
@@ -848,7 +876,7 @@ public class AccountsTablePane extends JPanePlugin {
          *  the selected file filter.
          */
         FileFilter selectedFilter = null;
-        
+
         while (true) {
             showMessage("");
             int returnVal = chooser.showSaveDialog(this);

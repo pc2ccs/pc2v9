@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.exports.ccs;
 
 import java.io.File;
@@ -52,7 +52,7 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 
 /**
  * Unit Test.
- * 
+ *
  * @author Douglas A. Lane, PC^2 team pc2@ecs.csus.edu
  */
 public class ResolverEventFeedXMLTest extends AbstractTestCase {
@@ -138,7 +138,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     /**
      * Assign group to team startIdx to endIdx.
-     * 
+     *
      * @param group
      * @param startIdx
      * @param endIdx
@@ -146,18 +146,19 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
     private void assignTeamGroup(Group group, int startIdx, int endIdx) {
         Account[] teams = getTeamAccounts();
         for (int i = startIdx; i < endIdx; i++) {
-            teams[i].setGroupId(group.getElementId());
+            teams[i].clearGroups();
+            teams[i].addGroupId(group.getElementId(), true);
         }
     }
 
     /**
      * Return list of accounts sorted by team id.
-     * 
+     *
      * @return
      */
     private Account[] getTeamAccounts() {
         Vector<Account> teams = contest.getAccounts(Type.TEAM);
-        Account[] accounts = (Account[]) teams.toArray(new Account[teams.size()]);
+        Account[] accounts = teams.toArray(new Account[teams.size()]);
         Arrays.sort(accounts, new AccountComparator());
         return accounts;
     }
@@ -199,7 +200,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     /**
      * Test &lt;info&gt; tag.
-     * 
+     *
      * @throws Exception
      */
     public void testInfoElement() throws Exception {
@@ -225,7 +226,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         debugPrintln(xml);
 
         testForValidXML(xml);
-        
+
 //        System.out.println (xml);
 //        assertXMLNodeValueEquals(xml, ", expectedValue);
     }
@@ -246,7 +247,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     /**
      * Create Contest XML.
-     * 
+     *
      * @param memento
      * @return
      */
@@ -412,16 +413,16 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         assertXMLCounts(xml, ResolverEventFeedXML.INFO_TAG, 1);
         assertXMLCounts(xml, ResolverEventFeedXML.JUDGEMENT_TAG, 9);
         assertXMLCounts(xml, ResolverEventFeedXML.REGION_TAG, 24);
-        
+
         assertFirstValueFound(xml,"starttime", "undefined");
-        
+
 //        System.out.println("xml  = "+xml);
     }
 
-   
+
     /**
      * Print counts in xml string for EventFeed elements.
-     * 
+     *
      * @param comment
      * @param xmlString
      * @throws ParserConfigurationException
@@ -494,7 +495,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         final int NUM_RUNS = 12 ;
         final int NUM_TESTCASES_PER_RUN = 5 ;
-        
+
         ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
         int siteNumber = 2;
@@ -583,7 +584,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
     private void validateUsingSchema(String xml) throws Exception {
 
         // startExplorer(getSchemaDirectory());
-        
+
         String testDir = getOutputDataDirectory(this.getName());
         ensureDirectory(testDir);
 
@@ -594,7 +595,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         String newXML = prolog + xml;
         String[] contents = { newXML };
-        
+
         String outfilename = testDir + File.separator + "testing.ef.xml";
         writeFileContents(outfilename, contents);
 
@@ -611,14 +612,14 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     /**
      * Counts number of XML elements found in XML String
-     * 
+     *
      * @param xmlString
      * @param elementName
      * @param count
      * @throws Exception
      */
     private void assertXMLCounts(String xmlString, String elementName, int count) throws Exception {
-        
+
         int actualCount = getTagCount(xmlString, elementName);
 //        System.out.println("debug assertXMLCounts expecting "+count+" for "+elementName+" actual is "+actualCount);
         assertEquals("Expecting occurances (for" + elementName + ")", count, actualCount);
@@ -626,7 +627,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     /**
      * Finds name in xml string, compares node/element values against expectedValue.
-     * 
+     *
      * @param xmlString
      * @param name
      *            XML tag name
@@ -655,36 +656,36 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
             assertEquals("Expecting value for " + name, expectedValue, childValue);
         }
     }
-    
+
     /**
      * Test all info elements in XML.
-     * 
+     *
      * Bug 1080
-     * 
+     *
      * @throws Exception
      */
     public void testAllInfoElements() throws Exception {
-        
+
         final int NUM_RUNS = 12;
         final int NUM_TESTCASES_PER_RUN = 5;
-        
+
         ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
-        
+
         IInternalContest standardContest = new SampleContest().createStandardContest();
-        
+
         Run[] runs = sample.createRandomRuns(standardContest, NUM_RUNS, true, true, true);
         addRunJudgements(standardContest, runs, NUM_TESTCASES_PER_RUN);
 
         String xml = eventFeedXML.toXML(standardContest);
-        
+
 //        System.out.println(xml);
 
         testForValidXML(xml);
-        
+
 //        String f = "/tmp/stuf33.xml";
 //        printXMLToFile(f, xml);
 //        editFile(f);
-        
+
         assertXMLCounts(xml, ResolverEventFeedXML.CONTEST_TAG, 1);
         assertXMLCounts(xml, ResolverEventFeedXML.INFO_TAG, 1);
         assertXMLCounts(xml, ResolverEventFeedXML.JUDGEMENT_TAG, NUM_RUNS*NUM_TESTCASES_PER_RUN + 9); //9 judgement defs + 1 judgement per test case per run
@@ -694,7 +695,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         assertXMLCounts(xml, ResolverEventFeedXML.RUN_TAG, 12);
         assertXMLCounts(xml, ResolverEventFeedXML.TEAM_TAG, 132); // both teams and team tag in submissions
         assertXMLCounts(xml, ResolverEventFeedXML.TESTCASE_TAG, NUM_RUNS*NUM_TESTCASES_PER_RUN);
-        
+
 
         //    <info>
         //    <length>5:00:00</length>
@@ -705,9 +706,9 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         //    <contest-id>default.--7840082699249977062</contest-id>
         //    <scoreboard-freeze-length>01:00:00</scoreboard-freeze-length>
         //  </info>
-        
+
         String contestId = standardContest.getContestIdentifier().toLowerCase();
-        
+
         assertXMLNodeValueEquals(xml, "length", "5:00:00");
         assertXMLNodeValueEquals(xml, "started", "False");
         assertXMLNodeValueEquals(xml, "starttime", "undefined");
@@ -717,21 +718,21 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
         assertXMLNodeValueEquals(xml, "scoreboard-freeze-length", "01:00:00");
         assertXMLNodeValueEquals(xml, "starttime", "undefined");
-        
+
         ContestInformation info = standardContest.getContestInformation();
-        
+
         // define starttime, change freeze time
-        
+
         GregorianCalendar newScheduledStartTime = new GregorianCalendar();
-        
+
         newScheduledStartTime.add(Calendar.HOUR_OF_DAY, 1);
         info.setScheduledStartTime(newScheduledStartTime);
         info.setFreezeTime("04:00:00");
         standardContest.updateContestInformation(info);
-        
+
         xml = eventFeedXML.toXML(standardContest);
         String startTime = XMLUtilities.formatSeconds(info.getScheduledStartDate().getTime());
-        
+
         assertXMLNodeValueEquals(xml, "scoreboard-freeze-length", "04:00:00");
         assertXMLNodeValueEquals(xml, "starttime", startTime);
     }
@@ -740,7 +741,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
      * Write string to file.
      * @param filename
      * @param string
-     * @throws FileNotFoundException 
+     * @throws FileNotFoundException
      */
     public void printXMLToFile(String filename, String string) throws FileNotFoundException {
         String[] lines = { string };
@@ -748,9 +749,9 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
     }
 
     public void testScheduledStartTime() throws Exception {
-        
+
     }
-    
+
     private int getTagCount(String xmlString, String string) throws ParserConfigurationException, SAXException, IOException {
 
         Document document = getDocument(xmlString);
@@ -760,7 +761,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     /**
      * Creates a single sample testcase (data and answer file) for each problem.
-     * 
+     *
      * @param inContest
      * @throws FileNotFoundException
      */
@@ -975,7 +976,7 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
 
     /**
      * Create socket server on port.
-     * 
+     *
      * @param args
      */
     public static void main(String[] args) {
@@ -989,17 +990,17 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         }
 
     }
-    
+
 
     /**
      * Test for started and running values.
-     * 
+     *
      * Bug 1118.
-     * 
+     *
      * @throws Exception
      */
     public void testInfoStartedRunning() throws Exception {
-        
+
         ResolverEventFeedXML eventFeedXML = new ResolverEventFeedXML();
 
         IInternalContest standardContest = new SampleContest().createStandardContest();
@@ -1007,38 +1008,38 @@ public class ResolverEventFeedXMLTest extends AbstractTestCase {
         String xml = eventFeedXML.toXML(standardContest);
 
         testForValidXML(xml);
-        
+
         assertXMLCounts(xml, ResolverEventFeedXML.CONTEST_TAG, 1);
         assertXMLCounts(xml, ResolverEventFeedXML.INFO_TAG, 1);
 
         assertXMLCounts(xml, "started", 1);
         assertXMLCounts(xml, "running", 1);
-        
+
         assertXMLNodeValueEquals(xml, "length", "5:00:00");
         assertXMLNodeValueEquals(xml, "started", "False");
         assertXMLNodeValueEquals(xml, "running", "False");
         assertXMLNodeValueEquals(xml, "starttime", "undefined");
-        
+
         assertFalse(standardContest.getContestTime().isContestRunning());
-        
+
         standardContest.startContest(standardContest.getSiteNumber());
-        
+
         xml = eventFeedXML.toXML(standardContest);
         testForValidXML(xml);
-        
+
         assertTrue(standardContest.getContestTime().isContestRunning());
-        
+
         assertXMLNodeValueEquals(xml, "length", "5:00:00");
         assertXMLNodeValueEquals(xml, "started", "True");
         assertXMLNodeValueEquals(xml, "running", "True");
-        
+
         standardContest.stopContest(standardContest.getSiteNumber());
-        
+
         xml = eventFeedXML.toXML(standardContest);
         testForValidXML(xml);
-        
+
         assertFalse(standardContest.getContestTime().isContestRunning());
-        
+
         assertXMLNodeValueEquals(xml, "length", "5:00:00");
         assertXMLNodeValueEquals(xml, "started", "True");
         assertXMLNodeValueEquals(xml, "running", "False");

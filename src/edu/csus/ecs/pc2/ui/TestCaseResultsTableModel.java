@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.util.Vector;
@@ -89,6 +89,9 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
                 // link for viewing team output (which must exist - even if empty - since the test case was executed)
                 JLabel teamOutputViewLabel = new JLabel("View");
 
+                // link for viewing team stderr (which must exist - even if empty - since the test case was executed)
+                JLabel teamStderrViewLabel = new JLabel("View");
+
                 // links for comparing team output with corresponding judge's output (but only if the problem has judge's data)
                 JLabel teamOutputCompareLabel = new JLabel("");                
                 JLabel judgesOutputViewLabel = new JLabel("");
@@ -139,7 +142,7 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
 
                 // build the row object and add it to the model
                 Object[] rowData = new Object[] { selected, testCaseNum, resultLabel, time,
-                        teamOutputViewLabel, teamOutputCompareLabel, judgesOutputViewLabel,
+                        teamOutputViewLabel, teamOutputCompareLabel, teamStderrViewLabel, judgesOutputViewLabel,
                         judgesDataViewLabel, validatorOutputViewLabel, validatorStderrViewLabel };
 
                 super.addRow(rowData);
@@ -247,6 +250,9 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
         
         //link for comparing team output with corresponding judge's output
         JLabel teamOutputCompareJLabel = new JLabel(data.getTeamsOutputCompareLabel());
+
+        //link for viewing team stderr
+        JLabel teamStderrViewJLabel = new JLabel(data.getTeamStderrViewLabel());
         
         //link for viewing judge's output
         JLabel judgesOutputViewJLabel = new JLabel(data.getJudgesOutputViewLabel());
@@ -261,7 +267,7 @@ public class TestCaseResultsTableModel extends DefaultTableModel {
 
         //build the row object and add it to the model
         Object [] rowData = new Object [] {selected, testCaseNum, resultLabel, data.getTime(), 
-                teamOutputViewJLabel, teamOutputCompareJLabel, judgesOutputViewJLabel, 
+                teamOutputViewJLabel, teamOutputCompareJLabel, teamStderrViewJLabel, judgesOutputViewJLabel, 
                 judgesDataViewJLabel, validatorOutputViewJLabel, validatorStderrViewJLabel };
 
         super.addRow(rowData);

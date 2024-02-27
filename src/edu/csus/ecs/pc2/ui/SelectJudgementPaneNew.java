@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -36,7 +36,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecuteTimerFrame;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
-import edu.csus.ecs.pc2.core.execute.JudgementUtilites;
+import edu.csus.ecs.pc2.core.execute.JudgementUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -166,6 +166,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * Saved team output names.
      */
     private List<String> savedTeamOutputFileNames = null;
+
+    /**
+     * Saved team stderr names.
+     */
+    private List<String> savedTeamStderrFileNames = null;
 
     /**
      * saved validator output names
@@ -597,7 +602,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             judgementId = run.getJudgementRecord().getJudgementId();
         }
 
-        for (Judgement judgement : JudgementUtilites.getSingleListofJudgements(getContest())) {
+        for (Judgement judgement : JudgementUtilities.getSingleListofJudgements(getContest())) {
             if (judgement.isActive()) {
                 getJudgementComboBox().addItem(judgement);
                 if (judgement.getElementId().equals(judgementId)) {
@@ -623,6 +628,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         getAcceptValidatorJudgementButton().setEnabled(b);
         // getViewOutputsButton().setEnabled(b);
         getAcceptChosenSelectionButton().setEnabled(b && getJudgementComboBox().getSelectedIndex() != -1);
+        getTestResultsFrame().enableExecuteAllButton(b);
     }
 
     /**
@@ -802,7 +808,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     new Thread(new Runnable() {
                         public void run() {
-                            executeRun();
+                            executeRun(false);
                         }
                     }).start();
                 }
@@ -854,8 +860,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         showMessage("Would have extracted run");
         // TODO code extract run
     }
-
-    protected void executeRun() {
+    
+    /**
+     * Takes a boolean condition whether to override stop on first failure condition
+     */
+    protected void executeRun(boolean overrideStopOnFirstFailedTestCase) {
 
         executeTimeMS = 0;
         System.gc();
@@ -871,14 +880,19 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         
        // getManualRunResultsPanel().clear();
         setEnabledButtonStatus(false);
+
+        // Set override to execute all testcases
+        if (overrideStopOnFirstFailedTestCase) {
+            executable.setOverrideStopOnFirstFailedTestCase(true);
+        }
         executable.execute();
         
         // Dump execution results files to log
-        String executeDirctoryName = JudgementUtilites.getExecuteDirectoryName(getContest().getClientId());
+        String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
         Problem juProblem = getContest().getProblem(run.getProblemId());
         ClientId clientId = getContest().getClientId();
-        List<Judgement> judgements = JudgementUtilites.getLastTestCaseJudgementList(getContest(), run);
-        JudgementUtilites.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, juProblem, judgements, executable.getExecutionData(), "", new Properties());
+        List<Judgement> judgements = JudgementUtilities.getLastTestCaseJudgementList(getContest(), run);
+        JudgementUtilities.dumpJudgementResultsToLog(log, clientId, run, executeDirctoryName, juProblem, judgements, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
         if (executionData != null && executionData.getExecutionException() != null) {
@@ -907,9 +921,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
 
         savedTeamOutputFileNames = executable.getTeamsOutputFilenames();
+        savedTeamStderrFileNames = executable.getTeamsStderrFilenames();
         savedValidatorOutputFileNames = executable.getValidatorOutputFilenames();
         savedValidatorErrFileNames = executable.getValidatorErrFilenames();
         sendTeamOutputFileNames();
+        sendTeamStderrFileNames();
         sendValidatorOutputFileNames();
         sendValidatorStderrFileNames();
         // only if do not show output is not checked
@@ -959,7 +975,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      
             showValidatorControls(true);
             
-            Judgement judgement = JudgementUtilites.findJudgementByAcronym(getContest(), "CE");
+            Judgement judgement = JudgementUtilities.findJudgementByAcronym(getContest(), "CE");
             String judgementString = "No - Compilation Error"; // default
             ElementId elementId = null;
             if (judgement != null) {
@@ -1021,6 +1037,46 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             }
 
             getTestResultsFrame().setTeamOutputFileNames(teamOutputNames);
+        }
+    }
+
+    /**
+     * Send execution stderr filenames to Test Results Viewer.
+     * 
+     * Copies the names from the List of exectution stderr file names (which was saved by the execute() method)
+     * into an array, then passes the array to the Test Results frame.
+     */
+    private void sendTeamStderrFileNames() {
+
+        if (getTestResultsFrame() != null) {
+
+            String[] teamStderrNames = null;
+
+            // add entries from actual team test stderr
+            if (savedTeamStderrFileNames != null) {
+                int size = getProblemDataFiles().getJudgesDataFiles().length;
+                if (size < savedTeamStderrFileNames.size()) {
+                    size = savedTeamStderrFileNames.size();
+                }
+                if (size < 1) {
+                    size = 1;
+                }
+                teamStderrNames = new String[size];
+
+                // null out list
+                for (int i = 0; i < size; i++) {
+                    teamStderrNames[i] = null;
+                }
+
+                for (int i = 0; i < savedTeamStderrFileNames.size(); i++) {
+                    teamStderrNames[i] = savedTeamStderrFileNames.get(i);
+                    if (new File(teamStderrNames[i]).length() == 0) {
+                        teamStderrNames[i] = null; 
+                    }
+                }
+            }
+
+            getTestResultsFrame().setTeamStderrFileNames(teamStderrNames);
         }
     }
 
@@ -1454,6 +1510,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     protected void viewOutputsAndData() {
 
         sendTeamOutputFileNames();
+        sendTeamStderrFileNames();
         sendValidatorOutputFileNames();
         sendValidatorStderrFileNames();
         if (getTestResultsFrame().isVisible()) {
@@ -1471,6 +1528,17 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private TestResultsFrame getTestResultsFrame() {
         if (testResultsFrame == null) {
             testResultsFrame = new TestResultsFrame();
+            // Add action listener whether Test results pane button is clicked
+            testResultsFrame.addActionListenerToExecuteAllButton(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    new Thread(new Runnable() {
+                        public void run() {
+                            executeRun(true);
+                        }
+                    }).start();
+                }
+            });
             testResultsFrame.setContestAndController(getContest(), getController());
             FrameUtilities.centerFrame(testResultsFrame);
         }

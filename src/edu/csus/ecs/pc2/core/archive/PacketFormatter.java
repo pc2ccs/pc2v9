@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.Properties;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -26,6 +27,7 @@ import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -307,9 +309,20 @@ public final class PacketFormatter {
             
             child = new DefaultMutableTreeNode("     Name: " + account.getDisplayName());
             node.add(child);
-
-            child = new DefaultMutableTreeNode("    Group: " + account.getGroupId());
-            node.add(child);
+            
+            HashSet<ElementId> groups = account.getGroupIds();
+            if(groups == null) {
+                child = new DefaultMutableTreeNode("    Group list: 0 Groups");
+                node.add(child);
+            } else {
+                DefaultMutableTreeNode groupsnode = new DefaultMutableTreeNode(key + "Group list: " + groups.size() + " Groups");
+    
+                for (ElementId elementId: groups) {
+                    child = new DefaultMutableTreeNode("    Group list: " + elementId.toString());
+                    groupsnode.add(child);
+                }
+                node.add(groupsnode);;
+            }
 
             child = new DefaultMutableTreeNode("     Site: " + account.getSiteNumber());
             node.add(child);

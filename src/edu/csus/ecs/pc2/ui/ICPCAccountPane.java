@@ -1,15 +1,27 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
- * 
+ *
  */
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+import com.ibm.webrunner.j2mclb.util.HeapSorter;
+import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.imports.ICPCAccount;
@@ -18,20 +30,9 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.SwingUtilities;
-
-import com.ibm.webrunner.j2mclb.util.HeapSorter;
-import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
-
-import java.awt.FlowLayout;
-import javax.swing.JCheckBox;
-import java.awt.Dimension;
 
 /**
  * @author pc2@ecs.csus.edu
@@ -42,7 +43,7 @@ import java.awt.Dimension;
 public class ICPCAccountPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -94109299290020550L;
 
@@ -57,46 +58,52 @@ public class ICPCAccountPane extends JPanePlugin {
     private JButton cancelButton = null;
 
     private ICPCAccount[] icpcAccounts;
-    
+
     private String displayChoice = "SHORTSCHOOLNAME";
-    
+
     private Vector<Account> updatedAccountVector = new Vector<Account>();  //  @jve:decl-index=0:
 
-    private JCheckBox showAllCheckBox = null;  
+    private JCheckBox showAllCheckBox = null;
     /**
      * @author pc2@ecs.csus.edu
      *
      */
     public class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             changeDisplayName(displayChoice);
         }
 
+        @Override
         public void accountModified(AccountEvent event) {
             changeDisplayName(displayChoice);
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             changeDisplayName(displayChoice);
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             changeDisplayName(displayChoice);
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
             changeDisplayName(displayChoice);
         }
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
-     * 
+     *
      */
     public class PropertyChangeListenerImplementation implements PropertyChangeListener {
 
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if (evt.getNewValue() != null && !evt.getNewValue().equals(evt.getOldValue())) {
                 // display choice has changed
@@ -108,7 +115,7 @@ public class ICPCAccountPane extends JPanePlugin {
     }
 
     /**
-     * 
+     *
      */
     public ICPCAccountPane() {
         super();
@@ -147,20 +154,20 @@ public class ICPCAccountPane extends JPanePlugin {
         }
         return null;
     }
-    
+
     protected void changeDisplayName(String string) {
         if (string != null && string.length() > 0) {
             updatedAccountVector.clear();
             getAccountListBox().removeAllRows();
             String newDisplayName;
-            
+
             Hashtable<ClientId,ICPCAccount> icpcAccountsHash = new Hashtable<ClientId,ICPCAccount>();
             for (ICPCAccount account : icpcAccounts) {
                 if (account.getClientId() != null) {
                     icpcAccountsHash.put(account.getClientId(), account);
                 }
             }
-            
+
             // update all the accounts, if they have the icpc data
             // note, the icpcAccount (if available) will be merged in updateDisplayName
             for(Account account : getContest().getAccounts(ClientType.Type.TEAM)) {
@@ -208,7 +215,7 @@ public class ICPCAccountPane extends JPanePlugin {
                     updateDisplayName(account, icpcAccount, newDisplayName);
                 } // else skip this account, no icpc data
             }
-            
+
             if (updatedAccountVector.size() > 0) {
                 cancelButton.setText("Cancel");
             } else {
@@ -223,7 +230,7 @@ public class ICPCAccountPane extends JPanePlugin {
      * This method will update the Account if the newDisplayName does not
      * equal the account2.getDisplayName().  If an update is required
      * the Account will be added to the updateAccountVector.
-     * 
+     *
      * @param account2
      * @param newDisplayName
      */
@@ -233,7 +240,14 @@ public class ICPCAccountPane extends JPanePlugin {
             // a deep clone of the string fields
             Account account = new Account(account2.getClientId(), account2.getPassword(), account2.getClientId().getSiteNumber());
             account.clearListAndLoadPermissions(account2.getPermissionList());
-            account.setGroupId(account2.getGroupId());
+
+            // Copy groups to new account
+            HashSet<ElementId> groupsClean = account2.getGroupIds();
+            if(groupsClean != null) {
+                for(ElementId elementId : groupsClean) {
+                    account.addGroupId(elementId, account2.getPrimaryGroupId() == elementId);
+                }
+            }
             account.setAliasName(new String(account2.getAliasName()));
             account.setDisplayName(new String(account2.getDisplayName()));
             account.setExternalId(new String(account2.getExternalId()));
@@ -246,7 +260,15 @@ public class ICPCAccountPane extends JPanePlugin {
                     account.setExternalName(icpcAccount.getExternalName());
                     account.setLongSchoolName(icpcAccount.getLongSchoolName());
                     account.setShortSchoolName(icpcAccount.getShortSchoolName());
-                    account.setGroupId(icpcAccount.getGroupId());
+
+                    HashMap<ElementId, String> groups = icpcAccount.getGroups();
+                    if(groups != null) {
+                        for(ElementId groupElementId : groups.keySet()) {
+                            // TODO: when/if CMS supports multiple group ID's,
+                            // then 'true' should only be used for the primary group (main)
+                            account.addGroupId(groupElementId, true);
+                        }
+                    }
                 }
                 String oldDisplayName = account.getDisplayName();
                 account.setDisplayName(newDisplayName);
@@ -262,7 +284,7 @@ public class ICPCAccountPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -280,7 +302,7 @@ public class ICPCAccountPane extends JPanePlugin {
 
     /**
      * This method initializes displayNameFormatterPane
-     * 
+     *
      * @return edu.csus.ecs.pc2.ui.DisplayNameFormatterPane
      */
     private DisplayNameFormatterPane getDisplayNameFormatterPane() {
@@ -294,7 +316,7 @@ public class ICPCAccountPane extends JPanePlugin {
 
     /**
      * This method initializes accountListbox
-     * 
+     *
      * @return com.ibm.webrunner.j2mclb.MultiColumnListbox
      */
     private MCLB getAccountListBox() {
@@ -319,7 +341,7 @@ public class ICPCAccountPane extends JPanePlugin {
 
             // Display Name
             accountListBox.setColumnSorter(3, sorter, 4);
-            
+
             // new Display Name
             accountListBox.setColumnSorter(4, sorter, 5);
 
@@ -333,7 +355,7 @@ public class ICPCAccountPane extends JPanePlugin {
 
     /**
      * This method initializes buttonPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPanel() {
@@ -351,7 +373,7 @@ public class ICPCAccountPane extends JPanePlugin {
 
     /**
      * This method initializes updateButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getUpdateButton() {
@@ -361,6 +383,7 @@ public class ICPCAccountPane extends JPanePlugin {
             // let changeDisplayName() changes to enabled as needed
             updateButton.setEnabled(false);
             updateButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     handleUpdateButton();
                 }
@@ -383,7 +406,7 @@ public class ICPCAccountPane extends JPanePlugin {
 
     /**
      * This method initializes cancelButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getCancelButton() {
@@ -391,6 +414,7 @@ public class ICPCAccountPane extends JPanePlugin {
             cancelButton = new JButton();
             cancelButton.setText("Cancel");
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     handleCancelButton();
                 }
@@ -401,9 +425,11 @@ public class ICPCAccountPane extends JPanePlugin {
 
     private void addWindowCloserListener() {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if (getParentFrame() != null) {
                     getParentFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override
                         public void windowClosing(java.awt.event.WindowEvent e) {
                             handleCancelButton();
                         }
@@ -413,6 +439,7 @@ public class ICPCAccountPane extends JPanePlugin {
         });
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         addWindowCloserListener();
@@ -423,9 +450,9 @@ public class ICPCAccountPane extends JPanePlugin {
     protected void handleCancelButton() {
         if (updatedAccountVector.size() > 0) {
             // Something changed, are they sure ?
-    
+
             int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Accounts modified, save changes?", "Confirm Choice");
-            
+
             if (result == JOptionPane.YES_OPTION) {
                 // pretend that hit update in that case
                 handleUpdateButton();
@@ -450,7 +477,7 @@ public class ICPCAccountPane extends JPanePlugin {
 
     /**
      * This method initializes showAllCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getShowAllCheckBox() {
@@ -459,6 +486,7 @@ public class ICPCAccountPane extends JPanePlugin {
             showAllCheckBox.setText("Included unchanged accounts");
             showAllCheckBox.setPreferredSize(new Dimension(250, 24));
             showAllCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     changeDisplayName(displayChoice);
                 }

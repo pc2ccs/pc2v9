@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports.clics;
 
 import java.io.FileOutputStream;
@@ -35,7 +35,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
-import edu.csus.ecs.pc2.core.standings.ScoreboardUtilites;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.core.standings.TeamStanding;
 import edu.csus.ecs.pc2.core.standings.json.ScoreboardJsonModel;
 import edu.csus.ecs.pc2.core.standings.json.StandingScore;
@@ -43,7 +43,7 @@ import edu.csus.ecs.pc2.core.standings.json.TeamScoreRow;
 
 /**
  * A set of methods for CLICS API JSON
- * 
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
@@ -65,19 +65,19 @@ public class CLICSAwardUtilities {
 
     // {"id":"group-winner-4","citation":"Winner(s) of group Eindhoven University of Technology","team_ids":["28"]},
 
-//  "citation": "Winner(s) of group Delft University of Technology", 
-// "citation": "Winner(s) of group Eindhoven University of Technology", 
+//  "citation": "Winner(s) of group Delft University of Technology",
+// "citation": "Winner(s) of group Eindhoven University of Technology",
 //
 //
-// "citation": "First to solve problem crashingcompetitioncomputer", 
-// "citation": "First to solve problem grindinggravel", 
-// "citation": "First to solve problem housenumbering", 
+// "citation": "First to solve problem crashingcompetitioncomputer",
+// "citation": "First to solve problem grindinggravel",
+// "citation": "First to solve problem housenumbering",
 //
-// "citation": "Contest winner",     
+// "citation": "Contest winner",
 
     /**
      * Return a list of CLICS Awards for a contest.
-     * 
+     *
      * @param contest
      * @return
      * @throws IOException
@@ -117,32 +117,32 @@ public class CLICSAwardUtilities {
             return;
         }
 
-        
+
         /**
          * This map contains the group/regional winner.  (The first team to solve a problem in a group/region)
          */
         Map<Group, ClientId> groupWinners = new HashMap<Group, ClientId>();
-        
+
         try {
-            ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+            ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
 
             List<TeamStanding> teamStands = contestStandings.getTeamStandings();
             for (TeamStanding teamStanding : teamStands) {
                 ClientId clientId = createClientId(teamStanding);
-                Group teamGroup = getGroupForTeam(contest, clientId);
-                if (teamGroup != null) {
-                    
+
+                List<Group> teamGroups = getGroupsForTeam(contest, clientId);
+                for(Group teamGroup : teamGroups) {
                     /**
                      * Find group winner (or foundClientId will be null if no winner found yet)
                      */
                     ClientId foundClientId = groupWinners.get(teamGroup);
-                    
+
                     if (foundClientId == null && isActive(contest,clientId)) {
-                        // found no group winner so if thie team is active it is the group winner
-                        
+                        // found no group winner so if this team is active it is the group winner
+
                         if (!"0".equals(teamStanding.getSolved())) {
                             /**
-                             * Team has to solve at least one problem to be the group winner 
+                             * Team has to solve at least one problem to be the group winner
                              */
                             groupWinners.put(teamGroup, clientId);
                         }
@@ -159,7 +159,7 @@ public class CLICSAwardUtilities {
             // first to solve for group
             ClientId clientId = groupWinners.get(group);
             if (clientId != null) {
-//            "citation": "Winner(s) of group University of Luxembourg", 
+//            "citation": "Winner(s) of group University of Luxembourg",
 //            "id": "group-winner-17"
 
                 String awardId = GROUP_WINNER_TITLE + group.getGroupId();
@@ -189,36 +189,38 @@ public class CLICSAwardUtilities {
 
     /**
      * Get group for team/account.
-     * 
+     *
      * @param contest
      * @param submitter
      *            clientId for team
-     * @return null if not found, else the group
+     * @return List of Group for a team, if no groups, the List is empty (but non-null)!
      */
-    public static Group getGroupForTeam(IInternalContest contest, ClientId submitter) {
+    public static List<Group> getGroupsForTeam(IInternalContest contest, ClientId submitter) {
+        ArrayList<Group> groups = new ArrayList<Group>();
         Account account = contest.getAccount(submitter);
         if (account != null) {
-            ElementId groupElementId = account.getGroupId();
-            if (groupElementId != null) {
-                Group group = contest.getGroup(groupElementId);
-                if (group != null) {
-                    return group;
+            if(account.getGroupIds() != null) {
+                for(ElementId groupElementId : account.getGroupIds()) {
+                    Group group = contest.getGroup(groupElementId);
+                    if (group != null) {
+                        groups.add(group);
+                    }
                 }
             }
         }
-        return null;
+        return groups;
     }
 
     public static void addMedals(IInternalContest contest, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
 
-        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
 
 //        List<TeamScoreRow> rows = model.getRows();
 //        for (TeamScoreRow teamScoreRow : rows) {
 //            System.out.println("debug  srow "+getStandingsRow(teamScoreRow));
 //        }
-        
+
         int lastRankGolds = 4;
         int lastRankSilver = 8;
         int lastRankBronze = 12;
@@ -231,7 +233,7 @@ public class CLICSAwardUtilities {
                 lastRankBronze = finalizeData.getBronzeRank();
             }
         }
-        
+
 
         TeamScoreRow teamRow = model.getRows().get(0);
         if (teamRow.getScore().getNum_solved() > 0) {
@@ -240,7 +242,7 @@ public class CLICSAwardUtilities {
             List<TeamScoreRow> scoreRows = model.getRows();
 
             String[] teams = getTeamIdsByRankWhereSolved(scoreRows, 0, lastRankGolds, 1);
-            
+
             if (teams.length > 0) {
                 // "citation": "Gold medal winner",
                 // "id": "gold-medal"
@@ -261,8 +263,8 @@ public class CLICSAwardUtilities {
             }
         }
     }
- 
-    
+
+
     /**
      * Get all teams ids between lowRank and rankInclHigh (inclusive)
      * @param scoreRows
@@ -296,13 +298,13 @@ public class CLICSAwardUtilities {
             }
         }
 
-        return (String[]) teamIds.toArray(new String[teamIds.size()]);
+        return teamIds.toArray(new String[teamIds.size()]);
     }
 
 
     /**
      * Add winner award.
-     * 
+     *
      * @param contest
      * @param list
      * @throws JsonParseException
@@ -313,7 +315,7 @@ public class CLICSAwardUtilities {
      */
     public static void addWinner(IInternalContest contest, List<CLICSAward> list) throws JsonParseException, JsonMappingException, JAXBException, IllegalContestState, IOException {
 
-        ContestStandings contestStandings = ScoreboardUtilites.createContestStandings(contest);
+        ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
         ScoreboardJsonModel model = new ScoreboardJsonModel(contestStandings);
 
         String winnerId = null;
@@ -342,7 +344,7 @@ public class CLICSAwardUtilities {
 
     /**
      * Add first to solve awards to list
-     * 
+     *
      * @param contest
      * @param runs
      * @param runs
@@ -398,7 +400,7 @@ public class CLICSAwardUtilities {
 
     /**
      * Load list of CLICS awards json from file.
-     * 
+     *
      * @param filename
      * @return
      * @throws IOException
@@ -420,7 +422,7 @@ public class CLICSAwardUtilities {
 
     /**
      * Get an object mapper that ignores unknown properties.
-     * 
+     *
      * @return an object mapper that ignores unknown properties
      */
     public static final ObjectMapper getMapper() {
@@ -436,7 +438,7 @@ public class CLICSAwardUtilities {
 
     /**
      * Writes awards elements to file.
-     * 
+     *
      * @param filename
      * @param awards
      * @return numnber of award elements written
@@ -449,7 +451,7 @@ public class CLICSAwardUtilities {
 
     /**
      * Writes awards elements to printWriter
-     * 
+     *
      * @param printWriter
      * @param awards
      * @return number of award elements written

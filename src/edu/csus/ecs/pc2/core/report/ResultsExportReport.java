@@ -152,7 +152,7 @@ public class ResultsExportReport implements IReport {
         String scoreboardJsonFilename = getPc2ResultsDir() + File.separator + Constants.SCOREBOARD_JSON_FILENAME;
         String awardsFileName = getPc2ResultsDir() + File.separator + Constants.AWARDS_JSON_FILENAME;
         
-        ExportFilesUtiltiites.writeResultsFiles(contest, getPc2ResultsDir());
+        ExportFilesUtilities.writeResultsFiles(contest, getPc2ResultsDir());
 
         String finalizedStatus = "No.  (Warning - contest is not finalized)";
         
