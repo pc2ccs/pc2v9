@@ -286,12 +286,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
     public String getStandings(IInternalContest contest, Properties properties, Log inputLog) throws IllegalContestState {
         return getStandings(contest, null, null, properties, inputLog);
     }
-    
-    @Override
-    public String getStandings(IInternalContest contest, Properties properties, Log inputLog) throws IllegalContestState {
-        return getStandings(contest, null, null, properties, inputLog);
-    }
-    
+
     @Override
     // TODO SA SOMEDAY Move this to a SA Utility Class
     // returns XML String for standings.
@@ -533,13 +528,6 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
     private IMemento addTeamMemento(IMemento mementoRoot, IInternalContest contest, StandingsRecord standingsRecord, int indexNumber) {
 
         IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
-        
-        String teamVarDisplayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
-        ElementId groupId = contest.getAccount(standingsRecord.getClientId()).getGroupId();
-        Group group = null;
-        if (groupId != null) {
-            group = contest.getGroup(groupId);    
-        }
 
         String teamVarDisplayString = contest.getContestInformation().getTeamScoreboardDisplayFormat();
         Account account = contest.getAccount(standingsRecord.getClientId());

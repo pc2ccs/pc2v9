@@ -103,13 +103,6 @@ public class Problem implements IElementObject {
      * Seconds per problem run.
      */
     private int timeOutInSeconds = DEFAULT_TIMEOUT_SECONDS;
-    
-    /**
-     * Maximum output allowed to be produced by a solution for this problem.
-     * Note that a value of zero indicates that this problem does not have its own
-     * problem-specific limit and that the global (contest-wide) limit should be used instead.
-     */
-    private long maxOutputSizeKB = DEFAULT_MAX_OUTPUT_FILE_SIZE_KB ;
 
     /**
      * Maximum output allowed to be produced by a solution for this problem.
@@ -153,11 +146,6 @@ public class Problem implements IElementObject {
      */
     private boolean loadDataFilesSamplesFirst = false;
 
-    /**
-     * If true, when loading data sets, load sample data sets before loading other judge's test data sets.
-     */
-    private boolean loadDataFilesSamplesFirst = false;
-    
     /**
      * This enum defines the types of Input Validators which a Problem can have.
      *
@@ -375,34 +363,6 @@ public class Problem implements IElementObject {
      */
     private static final String interactiveCommandLine = Constants.PC2_INTERACTIVE_COMMAND_LINE;
 
-    /**
-     * Fields related to Sandbox support.
-     */
-    public enum SandboxType {
-        /**
-         * No sandbox being used.
-         */
-        NONE, 
-        /**
-         * Using the PC2 Internal sandbox.
-         */
-        PC2_INTERNAL_SANDBOX, 
-        /**
-         * Using an external (user-defined) sandbox.
-         */
-        EXTERNAL_SANDBOX 
-    }
-    
-    private int memoryLimitMB = DEFAULT_MEMORY_LIMIT_MB;
-    private SandboxType sandboxType = DEFAULT_SANDBOX_TYPE;
-    private String sandboxCmdLine = null;
-    private String sandboxProgramName = null;
-    
-    /**
-     * For interactive problems - this is a read-only property, so, no mutator
-     */
-    private static final String interactiveCommandLine = Constants.PC2_INTERACTIVE_COMMAND_LINE;
-    
     /**
      * Create a problem with the display name.
      *

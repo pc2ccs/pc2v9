@@ -318,14 +318,6 @@ public class ReportPane extends JPanePlugin {
         }
 
         reports.add(new EventFeedJSONReport());
-        
-        reports.add(new StandingsNSAReport());
-        
-        reports.add(new ResultsCompareReport());
-        
-        reports.add(new ResultsExportReport());
-        
-        reports.add(new ResultsTSVReport());
 
         reports.add(new StandingsNSAReport());
 
