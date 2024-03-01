@@ -101,10 +101,6 @@
                 <include name="system_cgroup/pc2_cgroup.service"/>
                 <include name="system_cgroup/README"/>
             </zipfileset>
-            <zipfileset dir="${projects.dir}" filemode="755" prefix="${release}/projects">
-                <include name="*.zip"/>
-                <exclude name="EWTeam/*"/>
-            </zipfileset>
             <zipfileset dir="${data.dir}" filemode="755" prefix="${release}/samps/data"/>
             <!-- bug 353: copy api and other docs to release -->
             <zipfileset dir="${docs.api.dir}" filemode="755" prefix="${release}/doc/api"/>
