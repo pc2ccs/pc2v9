@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IPacketListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -177,7 +178,13 @@ public interface IInternalController {
      * @param packet
      */
     void sendToTeams(Packet packet);
-
+    
+    /**
+     * Send to groups and or individual teams specified by ultimateDestination.
+     * @param packet
+     * @param ultimateDestination
+     */
+    void sendToGroupsandIndividualTeams(Packet packet,IElementObject[] ultimateDestination);
     /**
      * Send to all spectator/API clients
      * 
@@ -386,13 +393,15 @@ public interface IInternalController {
     ElementId submitClarification(Problem problem, String question);
     
     /**
-     * Submit a announcement clarification.
+     * Submit an announcement clarification. Possibly to certain groups teams only
      * 
      * @param problem
      * @param answer
+     * @param ultimateDestination arraylist of where the answer for the clarification should ultimately go.
+     * such as certain groups,certain teams.
      * @return 
      */
-    void submitAnnouncement(Problem problem, String answer);
+    void submitAnnouncement(Problem problem, String answer,IElementObject[] ultimateDestination);
 
     /**
      * Request clarification to answer.

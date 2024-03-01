@@ -530,7 +530,7 @@ public class ClarificationsTablePane extends JPanePlugin {
 
         }
         
-        if (clarification.isSendToAll()) {
+        if (clarification.isSendToAll()) {//TODO perhaps it wasnt sent to everyone but groups
             displayString = displayString + "* For All Teams *" + "\n";
         }
 

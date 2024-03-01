@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IPacketListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -317,7 +318,10 @@ public class MockController implements IInternalController {
     public void sendToTeams(Packet packet) {
 
     }
-
+    
+    public void sendToGroupsandIndividualTeams(Packet packet,IElementObject[] ultimateDestination) {
+        
+    }
     public void sendValidatingMessage(Run run) {
 
     }
@@ -411,7 +415,8 @@ public class MockController implements IInternalController {
     public ElementId submitClarification(Problem problem, String question) {
         return null;
     }
-    public void submitAnnouncement(Problem problem, String answer) {
+
+    public void submitAnnouncement(Problem problem, String answer,IElementObject[] ultimateDestination) {
         
     }
     public void submitClarificationAnswer(Clarification clarification) {

@@ -47,6 +47,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IPacketListener;
@@ -2559,7 +2560,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         ClientId[] clientIds = contest.getLocalLoggedInClients(type);
         
         List<ClientId> badClients = new ArrayList<ClientId>();
-        
+       
         for (ClientId clientId : clientIds) {
             
             if (isThisSite(clientId.getSiteNumber())) {
@@ -2659,7 +2660,61 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendPacketToClients(packet, ClientType.Type.TEAM);
         }
     }
+    
+    public void sendToGroupsandIndividualTeams(Packet packet,IElementObject[] ultimateDestination) {
 
+//        Properties properties = (Properties) packet.getContent();
+//        // does the packet includes problemDataFiles
+//        boolean abort = true;
+//        if (properties.containsKey(PacketFactory.PROBLEM_DATA_FILES)) {
+//            // clone before start mucking with it, or do we need a deep clone?
+//            Properties cloneProperties = new Properties();
+//            for (Iterator<?> iter = properties.keySet().iterator(); iter.hasNext();) {
+//                String element = (String) iter.next();
+//                // skip PROBLEM_DATA_FILES, otherwise clone the element
+//                if (!element.equals(PacketFactory.PROBLEM_DATA_FILES)) {
+//                    cloneProperties.put(element, properties.get(element));
+//                    abort = false;
+//                }
+//            }
+//            packet = PacketFactory.clonePacket(packet.getSourceId(), packet.getDestinationId(), packet);
+//            // stick it back into the packet
+//            packet.setContent(cloneProperties);
+//        } else {
+//            abort = false;
+//        }
+//        if (!abort) {
+//            sendPacketToClients(packet, ClientType.Type.TEAM);
+//        }
+        
+        // sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet
+        ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
+        
+        List<ClientId> badClients = new ArrayList<ClientId>();
+       //TODO support teams
+        for (ClientId clientId : clientIds) {
+            ConnectionHandlerID connectionHandlerID = null;
+            for (IElementObject destination : ultimateDestination) {
+                if (destination instanceof Account) {
+                    continue;
+                }
+                Account account = contest.getAccount(clientId);
+                if (account.isGroupMember(destination.getElementId())) {
+                    connectionHandlerID = clientId.getConnectionHandlerID();
+                    try {
+                        sendToClient(connectionHandlerID, packet);
+                    }catch (Exception e) {
+                        getLog().log(Level.WARNING, "Exception attempting to send packet using Group sending to client " + clientId + "at connectionHandlerId " + connectionHandlerID
+                                + "as it belongs to group "+ destination + ": " + packet + ": "+ e.getMessage(), e);
+                    
+                    }
+                    break;
+                }
+            }
+                
+        }
+
+    }
     private int getPortForSite(int inSiteNumber) {
 
         try {
@@ -3708,11 +3763,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return clarification.getElementId();
     }
     
-    public void submitAnnouncement(Problem problem, String answer) {
+    public void submitAnnouncement(Problem problem, String answer,IElementObject[] ultimateDestination) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Clarification clarification = new Clarification(contest.getClientId(), problem, "");
         clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), true);
-        Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
+        Packet packet;
+        if (ultimateDestination.length == 0) {
+            packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
+        }
+        else {
+            packet = PacketFactory.createClarificationSubmissionwithDestination(contest.getClientId(), serverClientId, clarification, ultimateDestination);
+        }
+        
         sendToLocalServer(packet);
     }
     
@@ -4691,5 +4753,5 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToLocalServer(packet);
         
     }
-    
+
 }

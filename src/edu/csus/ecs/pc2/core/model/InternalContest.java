@@ -2386,7 +2386,11 @@ public class InternalContest implements IInternalContest {
     public Group[] getGroups() {
         return groupDisplayList.getList();
     }
-
+    
+    @Override
+    public boolean doGroupsExist() {
+        return groupDisplayList.getList().length != 0;
+    }
     @Override
     public void addGroupListener(IGroupListener groupListener) {
         groupListenerList.addElement(groupListener);

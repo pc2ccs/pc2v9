@@ -357,6 +357,11 @@ public final class PacketFactory {
 
     public static final String REQUEST_LOGIN_AS_PROXY = "REQUEST_LOGIN_AS_PROXY";
     
+    /**
+     * Ultimate destination on where answers to clarification is sent to
+     */
+    public static final String DESTINATION = "DESTINATION";
+    
     
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -1098,6 +1103,14 @@ public final class PacketFactory {
         return packet;
     }
 
+    public static Packet createClarificationSubmissionwithDestination(ClientId source, ClientId destination, Clarification clarification2,Object[] ultimateDestination) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(CLARIFICATION, clarification2);
+        prop.put(DESTINATION, ultimateDestination);
+        Packet packet = new Packet(Type.CLARIFICATION_SUBMISSION, source, destination, prop);
+        return packet;
+    }
     /**
      * Create a packet of {@link PacketType.Type#RUN_SUBMISSION_CONFIRM}.
      * 

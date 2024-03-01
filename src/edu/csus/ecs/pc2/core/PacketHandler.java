@@ -37,6 +37,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -149,6 +150,7 @@ public class PacketHandler {
                 break;
             case CLARIFICATION_SUBMISSION:
                 // Clarification submitted by team to server
+                // or clarification submitted by judge to server for announcement clarification
                 confirmSubmission(packet, fromId);
                 break;
             case CLARIFICATION_ANSWER:
@@ -1622,7 +1624,8 @@ public class PacketHandler {
 
         Clarification submittedClarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
         Clarification clarification = contest.acceptClarification(submittedClarification);
-
+           
+        IElementObject[] ultimateDestination = (IElementObject[]) PacketFactory.getObjectValue(packet, PacketFactory.DESTINATION);
         // Send to judge rather than team
         Packet confirmPacket = PacketFactory.createClarSubmissionConfirm(contest.getClientId(), fromId, clarification);
         controller.sendToClient(confirmPacket);
@@ -1633,7 +1636,13 @@ public class PacketHandler {
         }
         //check if clarification is actually an announcement clarification.
         if (clarification.getQuestion().equals("") && clarification.isAnswered()) {
-            controller.sendToTeams(confirmPacket);
+            if (ultimateDestination == null || ultimateDestination.length == 0) {
+                controller.sendToTeams(confirmPacket);//TODO modift to accomodate ultimate destination
+            }
+            else {
+                controller.sendToGroupsandIndividualTeams(confirmPacket,ultimateDestination);
+            }
+            
         }
     }
 

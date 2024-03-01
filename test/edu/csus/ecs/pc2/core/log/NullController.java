@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IPacketListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -166,7 +167,7 @@ public class NullController implements IInternalController{
 
     }
     
-    public void submitAnnouncement(Problem problem, String answer) {
+    public void submitAnnouncement(Problem problem, String answer,IElementObject[] ultimateDestination) {
         // TODO Auto-generated method stub
         
     }
@@ -296,7 +297,11 @@ public class NullController implements IInternalController{
         // TODO Auto-generated method stub
 
     }
-
+    
+    public void sendToGroupsandIndividualTeams(Packet packet,IElementObject[] ultimateDestination) {
+     // TODO Auto-generated method stub
+    }
+    
     public void sendToSpectators(Packet packet) {
         // TODO Auto-generated method stub
 
