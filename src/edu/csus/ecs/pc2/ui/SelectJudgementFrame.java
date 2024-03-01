@@ -1,6 +1,7 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Dimension;
 import java.io.File;
 
 import javax.swing.JFrame;
@@ -11,6 +12,8 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -18,11 +21,10 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
-import java.awt.Dimension;
 
 /**
  * Judge can chose judgement and execute run.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -31,7 +33,7 @@ import java.awt.Dimension;
 public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 6532349396307812235L;
 
@@ -45,10 +47,10 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
     private Log log = null;
 
-    
+
     /**
      * This method initializes
-     * 
+     *
      */
     public SelectJudgementFrame() {
         super();
@@ -57,7 +59,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setContentPane(getSelectJudgementPane());
@@ -67,6 +69,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
         this.setTitle("Select Run Judgement");
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 getSelectJudgementPane().handleCancelButton();
             }
@@ -75,33 +78,39 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 
-        if (!inContest.getAccount(inContest.getClientId()).getPermissionList().isAllowed(Permission.Type.JUDGE_RUN)) {
+        ClientId clientId = inContest.getClientId();
+
+        // SERVER client can do anything, but we have to check it explicitly since there is no server in the account list
+        if (clientId == null ||
+            (!clientId.getClientType().equals(ClientType.Type.SERVER) &&
+             !inContest.getAccount(clientId).getPermissionList().isAllowed(Permission.Type.JUDGE_RUN))) {
             throw new SecurityException("SelectJudgementFame requires JUDGE_RUN permission");
         }
         getSelectJudgementPane().setContestAndController(contest, controller);
         getSelectJudgementPane().setParentFrame(this);
 
         contest.addRunListener(new RunListenerImplementation());
-        
+
         log = controller.getLog();
     }
-    
+
     public void setRun(Run theRun, boolean rejudgeRun) {
         Executable tempEexecutable = new Executable(contest, controller, theRun, null, null);
         // clear as soon as we start this run, so View Outputs does not show old info
-        
+
         String temporaryExecuteableDirectory = tempEexecutable.getExecuteDirectoryName();
-        
+
         if (! new File(temporaryExecuteableDirectory).isDirectory()){
             // create directory if not present, needed for cleardirectory
             log.info("Creating directory "+temporaryExecuteableDirectory);
             Utilities.insureDir(temporaryExecuteableDirectory);
         }
-        
+
         tempEexecutable.clearDirectory(temporaryExecuteableDirectory);
 
         getSelectJudgementPane().setRun(theRun);
@@ -119,13 +128,14 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
         }
     }
 
+    @Override
     public String getPluginTitle() {
         return "Edit Run Frame";
     }
 
     /**
      * Run Listener for SelectJudgementFrame.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -133,19 +143,22 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
     // $HeadURL$
     public class RunListenerImplementation implements IRunListener {
 
+        @Override
         public void runAdded(RunEvent event) {
 //            System.out.println("sjf: : "+event.getAction()+" "+event.getSentToClientId()+" "+event.getRun());
             // ignore
         }
-        
+
+        @Override
         public void refreshRuns(RunEvent event) {
             // ignore
         }
 
+        @Override
         public void runChanged(RunEvent event) {
-            
+
 //            System.out.println("sjf: : "+event.getAction()+" "+event.getSentToClientId()+" "+event.getWhoModifiedRun()+" "+event.getRun());
-            
+
             if (run != null) {
                 if (event.getRun().getElementId().equals(run.getElementId())) {
                     // RUN_NOT_AVAILABLE is undirected (sentToClient is null)
@@ -155,6 +168,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
                         JOptionPane.showMessageDialog(null, "Run " + run.getNumber() + " (Site " + run.getSiteNumber() + ") is not available.");
 
                         SwingUtilities.invokeLater(new Runnable() {
+                            @Override
                             public void run() {
                                 getSelectJudgementPane().enableUpdateButtons(false);
                             }
@@ -163,9 +177,9 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
                         setVisible(false);
                     } else {
                         if (event.getSentToClientId() != null && event.getSentToClientId().equals(contest.getClientId())) {
-                            
+
                             getSelectJudgementPane().setRunAndFiles(event.getRun(), event.getRunFiles(), event.getRunResultFiles());
-                            // stop processing once we get it 
+                            // stop processing once we get it
                             // stops both the duplicate checkedout_run and the run_not_available going to other judges
                             run = null;
                         }
@@ -174,6 +188,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
             }
         }
 
+        @Override
         public void runRemoved(RunEvent event) {
             // TODO Auto-generated method stub
         }
@@ -181,7 +196,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes selectJudgementPane
-     * 
+     *
      * @return edu.csus.ecs.pc2.ui.SelectJudgementPane
      */
     private SelectJudgementPaneNew getSelectJudgementPane() {
