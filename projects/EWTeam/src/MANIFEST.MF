@@ -1,2 +1,0 @@
-Main-Class: PC2JavaMiniserver
-Class-Path: pc2.jar JavaBridge.jar
