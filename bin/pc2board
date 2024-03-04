@@ -6,16 +6,15 @@
 # $HeadURL$
 #
 
-. `dirname $0`/pc2env
+. "$(dirname "$0")"/pc2env
 
-# MacOS or not
+PC2XOPS=""
+# MacOS?
 if [ -f /mach_kernel ]; then
   # set our dock name (otherwise defaults to Starter)
-  PC2XOPS="-Xdock:name=`basename $0`"
-else
-  PC2XOPS=""
+  PC2XOPS="-Xdock:name=$(basename "$0")"
 fi
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp "$libdir/*" edu.csus.ecs.pc2.Starter $*
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp "$libdir/*" edu.csus.ecs.pc2.Starter "$@"
 
-# eof pc2board $Id$ 
+# eof pc2board $Id$
