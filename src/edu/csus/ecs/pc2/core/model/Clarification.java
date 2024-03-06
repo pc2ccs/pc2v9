@@ -152,7 +152,10 @@ public class Clarification extends Submission {
         ElementId[] destinations = getFirstAnswer().getAllDestinationsGroup();
         if (destinations != null) {
             for (ElementId destionation: destinations){
-                if (account.isGroupMember(destionation)) {
+                if (account.isGroupMember(destionation)) {  //checks if this announcement clar was sent to a group that this account belongs to
+                    return true;
+                }
+                if (account.getElementId().equals(destionation)) {  //checks if this announcement clar was sent to this account
                     return true;
                 }
             }

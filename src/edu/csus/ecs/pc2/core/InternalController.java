@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -2691,28 +2692,33 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
         
         List<ClientId> badClients = new ArrayList<ClientId>();
-        for (IElementObject destination : ultimateDestination) {
-            if (destination instanceof Group) {
-                continue;
-            }
-            ClientId clientId = ((Account)destination).getClientId();
-            ConnectionHandlerID connectionHandlerID = clientId.getConnectionHandlerID();
-            try {
-                sendToClient(connectionHandlerID, packet);
-            }catch (Exception e) {
-                getLog().log(Level.WARNING, "Exception attempting to send packet using individual team to client " + clientId + "at connectionHandlerId " + connectionHandlerID
-                        + "as it belongs to group "+ destination + ": " + packet + ": "+ e.getMessage(), e);
-            
-            }
+
+        HashSet<ElementId> setWithElementId = new HashSet<>();
+        for (IElementObject element : ultimateDestination) {
+            setWithElementId.add(element.getElementId());
         }
-       
         for (ClientId clientId : clientIds) {
             ConnectionHandlerID connectionHandlerID = null;
+            
+            //For individual accounts
+            Account account = contest.getAccount(clientId);
+   
+            if (setWithElementId.contains(account.getElementId())) {
+                connectionHandlerID = clientId.getConnectionHandlerID();
+                try {
+                    sendToClient(connectionHandlerID, packet);
+                }catch (Exception e) {
+                    getLog().log(Level.WARNING, "Exception attempting to send packet using individual team to client " + clientId + "at connectionHandlerId " + connectionHandlerID
+                            + ": " + packet + ": "+ e.getMessage(), e);
+                
+                }
+                continue;
+            }
             for (IElementObject destination : ultimateDestination) {
                 if (destination instanceof Account) {
                     continue;
                 }
-                Account account = contest.getAccount(clientId);
+                account = contest.getAccount(clientId);
                 if (account.isGroupMember(destination.getElementId())) {
                     connectionHandlerID = clientId.getConnectionHandlerID();
                     try {
