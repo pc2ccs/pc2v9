@@ -33,8 +33,13 @@ public class ClarificationAnswer implements Serializable{
     private String answer;
 
     private ElementId elementId;
+    
+    /**
+     * An clarification could be send to multiple groups, teams. Used when it is not sendToAll but some.
+     */
+    private ElementId[] allDestinationsGroup;
 
-    public ClarificationAnswer(String answer, ClientId answerClient, boolean sendToAll, ContestTime contestTime) {
+    public ClarificationAnswer(String answer, ClientId answerClient, boolean sendToAll, ElementId[] allDestinationsGroup, ContestTime contestTime) {
         super();
 
         if (answer == null) {
@@ -49,6 +54,7 @@ public class ClarificationAnswer implements Serializable{
         this.answer = answer;
         this.answerClient = answerClient;
         this.sendToAll = sendToAll;
+        this.allDestinationsGroup = allDestinationsGroup;
         setDate(contestTime);
     }
 
@@ -94,5 +100,13 @@ public class ClarificationAnswer implements Serializable{
      */
     public void setElementId(ElementId elementId) {
         this.elementId = elementId;
+    }
+    
+    public ElementId[] getAllDestinationsGroup() {
+        return allDestinationsGroup;
+    }
+    
+    public void setAllDestinationsGroup(ElementId[] allDestinationsGroup) {
+        this.allDestinationsGroup = allDestinationsGroup;
     }
 }

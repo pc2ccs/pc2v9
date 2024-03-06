@@ -867,7 +867,7 @@ public class InternalContest implements IInternalContest {
         if (clarificationList.get(clarification) != null) {
             Clarification answerClarification;
             try {
-                ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, whoAnsweredIt, sendToAll, getContestTime());
+                ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, whoAnsweredIt, sendToAll,new ElementId[0], getContestTime());
                 answerClarification = clarificationList.updateClarification(clarification, ClarificationStates.ANSWERED, clarificationAnswer);
                 ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, answerClarification);
                 clarificationEvent.setWhoModifiedClarification(whoAnsweredIt);
@@ -2092,10 +2092,12 @@ public class InternalContest implements IInternalContest {
 
         Vector<Clarification> clientClarifications = new Vector<Clarification>();
         Enumeration<Clarification> enumeration = clarificationList.getClarList();
+        
+        Account account = getAccount(clientId);
         while (enumeration.hasMoreElements()) {
             Clarification clarification = enumeration.nextElement();
 
-            if (clarification.isSendToAll() || clientId.equals(clarification.getSubmitter())) {
+            if (clarification.shouldAccountReceiveThisClarification(account)) {
                 clientClarifications.add(clarification);
             }
         }

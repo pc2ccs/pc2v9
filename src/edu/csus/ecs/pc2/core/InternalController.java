@@ -2691,7 +2691,21 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
         
         List<ClientId> badClients = new ArrayList<ClientId>();
-       //TODO support teams
+        for (IElementObject destination : ultimateDestination) {
+            if (destination instanceof Group) {
+                continue;
+            }
+            ClientId clientId = ((Account)destination).getClientId();
+            ConnectionHandlerID connectionHandlerID = clientId.getConnectionHandlerID();
+            try {
+                sendToClient(connectionHandlerID, packet);
+            }catch (Exception e) {
+                getLog().log(Level.WARNING, "Exception attempting to send packet using individual team to client " + clientId + "at connectionHandlerId " + connectionHandlerID
+                        + "as it belongs to group "+ destination + ": " + packet + ": "+ e.getMessage(), e);
+            
+            }
+        }
+       
         for (ClientId clientId : clientIds) {
             ConnectionHandlerID connectionHandlerID = null;
             for (IElementObject destination : ultimateDestination) {
@@ -2704,7 +2718,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     try {
                         sendToClient(connectionHandlerID, packet);
                     }catch (Exception e) {
-                        getLog().log(Level.WARNING, "Exception attempting to send packet using Group sending to client " + clientId + "at connectionHandlerId " + connectionHandlerID
+                        getLog().log(Level.WARNING, "Exception attempting to send packet using Group to client " + clientId + "at connectionHandlerId " + connectionHandlerID
                                 + "as it belongs to group "+ destination + ": " + packet + ": "+ e.getMessage(), e);
                     
                     }
@@ -3766,7 +3780,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void submitAnnouncement(Problem problem, String answer,IElementObject[] ultimateDestination) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Clarification clarification = new Clarification(contest.getClientId(), problem, "");
-        clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), true);
+        ElementId[] destination = new ElementId[ultimateDestination.length];
+        for (int i= 0; i< ultimateDestination.length;i++) {
+            destination[i] = ultimateDestination[i].getElementId();
+        }
+        if (destination.length > 0) {
+            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), destination, false);
+        }
+        else {
+            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), destination, true);
+        }
+        
         Packet packet;
         if (ultimateDestination.length == 0) {
             packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);

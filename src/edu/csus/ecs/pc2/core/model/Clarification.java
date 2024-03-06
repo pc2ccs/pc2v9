@@ -103,9 +103,9 @@ public class Clarification extends Submission {
      * @param contestTime
      * @param sendToAll
      */
-    public void setAnswer(String answer, ClientId client, ContestTime contestTime, boolean sendToAll) {
+    public void setAnswer(String answer, ClientId client, ContestTime contestTime, ElementId[] destination, boolean sendToAll) {
         state = ClarificationStates.ANSWERED;
-        ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, client, sendToAll, contestTime);
+        ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, client, sendToAll, destination, contestTime);
         addAnswer(clarificationAnswer);
     }
 
@@ -136,7 +136,31 @@ public class Clarification extends Submission {
             return getFirstAnswer().isSendToAll();
         }
     }
-
+    
+    public boolean shouldAccountReceiveThisClarification(Account account) {
+        
+        if (isSendToAll()) {
+            return true;
+        }
+        if (getSubmitter().equals(account.getClientId())){
+            return true;
+        }
+        if (getAnswer() == null) {
+            //THere is no answer to this clar yet hence there are no destinations for it.
+            return false;
+        }
+        ElementId[] destinations = getFirstAnswer().getAllDestinationsGroup();
+        if (destinations != null) {
+            for (ElementId destionation: destinations){
+                if (account.isGroupMember(destionation)) {
+                    return true;
+                }
+            }
+        }
+        //check if an account has a group that matches with a group in 
+        return false;
+        
+    }
     public String toString() {
         return "Clarification " + getNumber() + " " + getState() + " from " + getSubmitter() + " at " + getElapsedMins() + " id=" + getElementId();
     }
