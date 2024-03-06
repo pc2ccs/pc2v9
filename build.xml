@@ -265,13 +265,6 @@ TODO consider switching back to this at 9.8.0/9.9build
 	 <!-- build sub-projects unless BUILD_NO_SUBPROJECTS defined -->
     <target name="buildSubProjects" unless="BUILD_NO_SUBPROJECTS"  description="build sub projects ">
 
-    	<!-- Build the (old) EWTeam project and copy it (in zip/tar.gz form) to the "projects" folder -->
-      <ant dir="projects/EWTeam" antfile="package.xml" useNativeBasedir="true" inheritAll="false"/>
-      <copy todir="projects">
-            <fileset dir="projects/EWTeam/dist" includes="EWTeam*.tar.gz"/>
-            <fileset dir="projects/EWTeam/dist" includes="EWTeam*.zip"/>
-      </copy>
-
     	<!-- Build the WebTeamInterface (WTI) project (which also implicitly builds WTI-UI) and copy it to the "projects" folder. -->
         <ant dir="projects/WTI-API" antfile="packageWTI.xml" useNativeBasedir="true" inheritAll="false"/>
     	
@@ -297,7 +290,7 @@ TODO consider switching back to this at 9.8.0/9.9build
         <delete file="teams.output.txt" />
         <delete>
             <fileset dir="projects" includes="EWTeam-*"/>
-        	<fileset dir="projects" includes="WebTeamInterface-*"/>
+            <fileset dir="projects" includes="WebTeamInterface-*"/>
         </delete>
     </target>
 
