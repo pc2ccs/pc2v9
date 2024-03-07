@@ -313,7 +313,7 @@ public class JSONToolTest extends AbstractTestCase {
             clarification = new Clarification(account.getClientId(), problem, "Why #2? from " + account);
             if (answerAll) {
                 String answer = judgesDefaultAnswer;
-                clarification.setAnswer(answer, judgeId, contest.getContestTime(), sendToAll);
+                clarification.setAnswer(answer, judgeId, contest.getContestTime(), null, sendToAll);
             }
             try {
                 contest.acceptClarification(clarification);

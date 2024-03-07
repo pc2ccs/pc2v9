@@ -58,6 +58,24 @@ public class ClarificationAnswer implements Serializable{
         setDate(contestTime);
     }
 
+    public ClarificationAnswer(String answer, ClientId answerClient, boolean sendToAll, ContestTime contestTime) {
+        super();
+
+        if (answer == null) {
+            throw new IllegalArgumentException("answer can not be null");
+        }
+
+        if (contestTime == null) {
+            throw new IllegalArgumentException("contestTime can not be null");
+        }
+
+        setElementId(new ElementId("reply"));
+        this.answer = answer;
+        this.answerClient = answerClient;
+        this.sendToAll = sendToAll;
+        setDate(contestTime);
+    }
+
     /**
      * Set date/elapsed time for this submission.
      * 

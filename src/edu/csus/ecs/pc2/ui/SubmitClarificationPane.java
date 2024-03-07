@@ -135,10 +135,11 @@ public class SubmitClarificationPane extends JPanePlugin {
         if (announcementDestinationPane == null) {
             announcementDestinationPane = new JPanel();
             announcementDestinationPane.setLayout(new BorderLayout());
-            announcementDestinationPane.setBounds(new java.awt.Rectangle(19,100 , 336, 54));
+            announcementDestinationPane.setBounds(new java.awt.Rectangle(370, 50, 336, 54));
             announcementDestinationPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Destination", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             announcementDestinationPane.add(getAnnouncementDestinationComboBox(), java.awt.BorderLayout.CENTER);
+            announcementDestinationPane.setVisible(false);
         }
         return announcementDestinationPane;
     }
@@ -157,8 +158,8 @@ public class SubmitClarificationPane extends JPanePlugin {
     private JPanel getGroupsPanel() {
         if (groupsPanel == null) {
             groupsPanel = new JPanel();
-            groupsPanel.setLocation(new java.awt.Point(400, 13));
-            groupsPanel.setSize(new java.awt.Dimension(200, 200));
+            groupsPanel.setLocation(new java.awt.Point(370, 119));
+            groupsPanel.setSize(new java.awt.Dimension(336, 200));
             groupsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Groups", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             groupsPanel.add(getGroupList(),null);
@@ -201,7 +202,9 @@ public class SubmitClarificationPane extends JPanePlugin {
     private JScrollPane getGroupsScrollPane() {
         if (groupsScrollPane == null) {
             groupsScrollPane = new JScrollPane();
-            groupsScrollPane.setBounds(new java.awt.Rectangle(14, 291, 272, GROUPS_LIST_HEIGHT));
+//            groupsScrollPane.setBounds(new java.awt.Rectangle(14, 291, 272, GROUPS_LIST_HEIGHT));
+            groupsScrollPane.setBounds(0, 0, 336, 200);
+//            groupsScrollPane.setSize(new java.awt.Dimension(336, 200));
             groupsScrollPane.setViewportView(getGroupList());
         }
         return groupsScrollPane;
@@ -221,7 +224,12 @@ public class SubmitClarificationPane extends JPanePlugin {
         if (problemPane == null) {
             problemPane = new JPanel();
             problemPane.setLayout(new BorderLayout());
-            problemPane.setBounds(new java.awt.Rectangle(19, 13, 336, 54));
+            if (isTeam) {
+                problemPane.setBounds(new java.awt.Rectangle(19, 13, 336, 54));
+            }
+            else {
+                problemPane.setBounds(new java.awt.Rectangle(19, 50, 336, 54));
+            }
             problemPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Problem", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             problemPane.add(getProblemComboBox(), java.awt.BorderLayout.CENTER);
@@ -244,7 +252,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         if (submitAnnouncement == null) {
             submitAnnouncement = new JCheckBox();
             submitAnnouncement.setText("Generate Announcement");
-            submitAnnouncement.setBounds(19, 80, 170, 20);
+            submitAnnouncement.setBounds(19, 15, 170, 20);
             ToolTipManager.sharedInstance().setDismissDelay(6000);
             submitAnnouncement.setToolTipText("Announcement clarification is a clarification that directly goes to teams with an answer but without question.");
             submitAnnouncement.addItemListener(new java.awt.event.ItemListener() {
@@ -254,11 +262,16 @@ public class SubmitClarificationPane extends JPanePlugin {
                                 javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
                         getSubmitClarificationButton().setText("Submit Announcement");
                         getSubmitClarificationButton().setToolTipText("Click this button to submit your Announcement");
+                        getAnnouncementDestinationPane().setVisible(true);
                     } else {
                         getLargeTextBoxPane().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Question", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                                 javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
                         getSubmitClarificationButton().setText("Submit Clarification");
                         getSubmitClarificationButton().setToolTipText("Click this button to submit your Clarification");
+                        getAnnouncementDestinationPane().setVisible(false);
+                        getAnnouncementDestinationComboBox().setSelectedItem("All Teams");
+
+                        
                     }
                     
                 }
@@ -280,7 +293,7 @@ public class SubmitClarificationPane extends JPanePlugin {
                 largeTextBoxPane.setBounds(new java.awt.Rectangle(19,80,406,125));
             }
             else {
-                largeTextBoxPane.setBounds(new java.awt.Rectangle(19,160,406,125));
+                largeTextBoxPane.setBounds(new java.awt.Rectangle(19,119,336,125));
             }
             largeTextBoxPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Question", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
@@ -316,7 +329,7 @@ public class SubmitClarificationPane extends JPanePlugin {
                 submitClarificationButton.setLocation(new Point(20, 219));
             }
             else {
-                submitClarificationButton.setLocation(new Point(20, 299));
+                submitClarificationButton.setLocation(new Point(20, 259));
             }
             submitClarificationButton.setSize(new Dimension(200, 34));
             submitClarificationButton.setToolTipText("Click this button to submit your Clarification");
