@@ -402,7 +402,7 @@ public class NullController implements IInternalController {
         return null;
     }
     
-    public void submitAnnouncement(Problem problem, String answer, IElementObject[] ultimateDestination) {
+    public void submitAnnouncement(Problem problem, String answer, ElementId[] ultimateDestination) {
         
     }
     

@@ -401,7 +401,7 @@ public interface IInternalController {
      * such as certain groups,certain teams.
      * @return 
      */
-    void submitAnnouncement(Problem problem, String answer,IElementObject[] ultimateDestination);
+    void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestination);
 
     /**
      * Request clarification to answer.

@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.CategoryEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ICategoryListener;
@@ -57,10 +58,13 @@ public class SubmitClarificationPane extends JPanePlugin {
      */
     private static final long serialVersionUID = 6395977089692171705L;
     
-    public static final String CHECKBOX_GROUP_TEAM_PROPERTY = "group";
+    public static final String CHECKBOX_GROUP_TEAM_PROPERTY = "groupteam";
     
-    public static final String CHECKBOX_TEAM_PROPERTY = "team";
+    public static final String ALL_TEAMS = "All Teams";
     
+    public static final String GROUPS = "Group(s)";
+    
+    public static final String SPECIFIC_TEAMS = "Specific Team(s)";
  // the original height of the jcombobox was 22.  the groups jlist is 3 lines, so we added 46(?)
     // this makes it easier to make the groups list box bigger without having to change all the
     // control offsets below it.
@@ -123,13 +127,7 @@ public class SubmitClarificationPane extends JPanePlugin {
                 current.add(getSubmitClarificationButton(), null);
             }
         });
-                
-        
-        
-
-        
     }
-
 
     private JPanel getAnnouncementDestinationPane() {
         if (announcementDestinationPane == null) {
@@ -143,6 +141,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         }
         return announcementDestinationPane;
     }
+    
     /**
      * This method initializes announcementComboBox
      * 
@@ -169,6 +168,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         
         return groupsPanel;
     }
+    
     private JCheckBoxJList getGroupList() {
         
         if (groupsJList == null) {
@@ -180,7 +180,7 @@ public class SubmitClarificationPane extends JPanePlugin {
 //            getGroupsJList().setSelectedIndex(-1); //Will need this to deselect anything
             
             groupsJList.setModel(groupsListModel);
-            
+            groupsJList.setSize(new java.awt.Dimension(336, 200));
             // ListSelectionListeners are called before JCheckBoxes get updated
             groupsJList.addPropertyChangeListener("change", new PropertyChangeListener() {
                 @Override
@@ -202,8 +202,8 @@ public class SubmitClarificationPane extends JPanePlugin {
     private JScrollPane getGroupsScrollPane() {
         if (groupsScrollPane == null) {
             groupsScrollPane = new JScrollPane();
-//            groupsScrollPane.setBounds(new java.awt.Rectangle(14, 291, 272, GROUPS_LIST_HEIGHT));
-            groupsScrollPane.setBounds(0, 0, 336, 200);
+            groupsScrollPane.setBounds(new java.awt.Rectangle(14, 291, 272, GROUPS_LIST_HEIGHT));
+//            groupsScrollPane.setBounds(0, 0, 336, 200);
 //            groupsScrollPane.setSize(new java.awt.Dimension(336, 200));
             groupsScrollPane.setViewportView(getGroupList());
         }
@@ -248,6 +248,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         }
         return problemComboBox;
     }
+    
     protected JCheckBox getSubmitAnnouncementCheckBox() {
         if (submitAnnouncement == null) {
             submitAnnouncement = new JCheckBox();
@@ -314,7 +315,6 @@ public class SubmitClarificationPane extends JPanePlugin {
         return largeTextArea;
     }
 
-
     /**
      * This method initializes submitClarificationButton
      * 
@@ -342,7 +342,6 @@ public class SubmitClarificationPane extends JPanePlugin {
         }
         return submitClarificationButton;
     }
-    
 
     private void reloadProblems(){
         //TODO all problems shouldnt be listed! Selected Group effects which one that needs to be listed.
@@ -366,68 +365,62 @@ public class SubmitClarificationPane extends JPanePlugin {
 
     }
     
-    
     private void reloadAnnouncementDestinations(){
     
-    getAnnouncementDestinationComboBox().removeAllItems();
-    getAnnouncementDestinationComboBox().addItem("Select Destination");
-    getAnnouncementDestinationComboBox().addItem("All Teams");
-    
-    if (getContest().doGroupsExist()){ //TODO maybe if there is only one group it should be triggered. Ask John
-        getAnnouncementDestinationComboBox().addItem("Groups");
-    }
-    getAnnouncementDestinationComboBox().addItem("Specific Teams");
-    
-    getAnnouncementDestinationComboBox().addItemListener(new ItemListener() {
-        @Override
-        public void itemStateChanged(ItemEvent e) {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                JComboBox<?> source = (JComboBox<?>) e.getSource();
-                String selectedValue = (String) source.getSelectedItem();
-                if (selectedValue.equals("Groups")){
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            reloadGroupsTeamsList();
-                            getGroupsPanel().setVisible(true);
-                            getGroupsPanel().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Groups", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-                        }
-                    });
-                }
-                else if (selectedValue.equals("Specific Teams")) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            reloadGroupsTeamsList();
-                            getGroupsPanel().setVisible(true);
-                            getGroupsPanel().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Specific Teams", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-                        }
-                    });
-                }
-                else {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            reloadGroupsTeamsList();
-                            getGroupsPanel().setVisible(false);
-                            getGroupsPanel().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "-", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-                        }
-                    });
-                }
-                
-            }
+        getAnnouncementDestinationComboBox().removeAllItems();
+        getAnnouncementDestinationComboBox().addItem(ALL_TEAMS);
+        
+        if (getContest().doGroupsExist()){ //TODO maybe if there is only one group it should be triggered. Ask John
+            getAnnouncementDestinationComboBox().addItem(GROUPS);
         }
-    });
-
-
-
-
+        getAnnouncementDestinationComboBox().addItem(SPECIFIC_TEAMS);
+        
+        getAnnouncementDestinationComboBox().addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    JComboBox<?> source = (JComboBox<?>) e.getSource();
+                    String selectedValue = (String) source.getSelectedItem();
+                    if (selectedValue.equals(GROUPS)){
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                reloadGroupsTeamsList();
+                                getGroupsPanel().setVisible(true);
+                                getGroupsPanel().setBorder(javax.swing.BorderFactory.createTitledBorder(null, GROUPS, javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                                        javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+                            }
+                        });
+                    }
+                    else if (selectedValue.equals(SPECIFIC_TEAMS)) {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                reloadGroupsTeamsList();
+                                getGroupsPanel().setVisible(true);
+                                getGroupsPanel().setBorder(javax.swing.BorderFactory.createTitledBorder(null, SPECIFIC_TEAMS, javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                                        javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+                            }
+                        });
+                    }
+                    else {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                reloadGroupsTeamsList();
+                                getGroupsPanel().setVisible(false);
+                                getGroupsPanel().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "-", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                                        javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+                            }
+                        });
+                    }
+                    
+                }
+            }
+        });
     }
     
     private void reloadGroupsTeamsList() {
         // TODO must be modified so that Groups,teams that shouldnt be displayed because
         // they do not have the problem selected should be implemented. 
-        if (getAnnouncementDestinationComboBox().getSelectedItem().equals("Groups")){
+        if (getAnnouncementDestinationComboBox().getSelectedItem().equals(GROUPS)){
             ((DefaultListModel<Object>) groupsListModel).removeAllElements();
             Group [] allgroups = getContest().getGroups();
             Arrays.sort(allgroups, new GroupComparator());
@@ -437,7 +430,7 @@ public class SubmitClarificationPane extends JPanePlugin {
                 ((DefaultListModel<Object>) groupsListModel).addElement(checkBox);
             }
         }
-        else if (getAnnouncementDestinationComboBox().getSelectedItem().equals("Specific Teams")) {
+        else if (getAnnouncementDestinationComboBox().getSelectedItem().equals(SPECIFIC_TEAMS)) {
             ((DefaultListModel<Object>) groupsListModel).removeAllElements();
             Vector<Account> allTeams = getContest().getAccounts(ClientType.Type.TEAM);
             //TODO needs to be sorted
@@ -462,8 +455,6 @@ public class SubmitClarificationPane extends JPanePlugin {
         setButtonsActive(getContest().getContestTime().isContestRunning());
     }
 
-    
-
     /**
      * Enable or disable submission buttons, Question pane and Problem drop-down list.
      * 
@@ -480,27 +471,30 @@ public class SubmitClarificationPane extends JPanePlugin {
         });
         FrameUtilities.regularCursor(this);
     }
-    
+    /**
+     * Submits announcement or clarification for judge.
+     */
     protected void submit() {
 
         Problem problem = ((Problem) getProblemComboBox().getSelectedItem());
         String destination = (String) getAnnouncementDestinationComboBox().getSelectedItem();
         //TODO normal questions do not need to have a destination!
-        //TODO treat empty groups well
         Object[] ultimateDestinationsPacked = getGroupList().getSelectedValues();
         
         
         if (getSubmitAnnouncementCheckBox().isSelected()) {
-            if (getProblemComboBox().getSelectedIndex() < 1 && getAnnouncementDestinationComboBox().getSelectedIndex() < 1) {
-                showMessage("Please select problem and destination");
-                return;
-            }
+
             if (getProblemComboBox().getSelectedIndex() < 1) {
                 showMessage("Please select problem");
                 return;
             }
-            if (getAnnouncementDestinationComboBox().getSelectedIndex() < 1) {
-                showMessage("Please select destination");
+
+            if (getAnnouncementDestinationComboBox().getSelectedItem().equals(GROUPS) && getGroupList().isSelectionEmpty()) {
+                showMessage("Please select group(s)");
+                return;
+            }
+            if (getAnnouncementDestinationComboBox().getSelectedItem().equals(SPECIFIC_TEAMS) && getGroupList().isSelectionEmpty()) {
+                showMessage("Please select team(s)");
                 return;
             }
             submitAnnouncement(problem,destination,ultimateDestinationsPacked);
@@ -513,68 +507,109 @@ public class SubmitClarificationPane extends JPanePlugin {
             submitClarification(problem);
         }
         
-        
-        
-        
-        
-        
-
     }
-    
+    /**
+     * Reads the user inputs and gets it from parameter to submit a announcement clarification. Asks for a confirmation in a seperate frame.
+     * @param problem
+     * @param destination
+     * @param ultimateDestinationsPacked
+     */
     protected void submitAnnouncement(Problem problem,String destination,Object[] ultimateDestinationsPacked) {
-        //Get rid of String destination: that info is already inside Object[] ultimateDestinations
         
         String answerAnnouncement = largeTextArea.getText().trim();
 
         if (answerAnnouncement.length() < 1) {
-            showMessage("Please enter a answer for announcement");
+            showMessage("Please enter an answer for announcement");
             return;
         }
-        String[] stringArray = new String[ultimateDestinationsPacked.length];
-        IElementObject[] ultimateDestinations = new IElementObject[ultimateDestinationsPacked.length];
+        String[] stringDestinations = new String[ultimateDestinationsPacked.length];
+        ElementId[] ultimateDestinations = new ElementId[ultimateDestinationsPacked.length];
         
         for (int i = 0; i < ultimateDestinationsPacked.length; i++) { //Converts ultimateDestinationsPacked to html ready string
             IElementObject associatedObject = (IElementObject) ((JCheckBox) ultimateDestinationsPacked[i]).getClientProperty(CHECKBOX_GROUP_TEAM_PROPERTY);
-            stringArray[i] = String.valueOf(associatedObject);
-            ultimateDestinations[i] = associatedObject;
-            //            if (ultimateDestinations[i] instanceof Group) {
-//                stringArray[i] = ((Group) ultimateDestinations[i]).toString();
-//            } else if (ultimateDestinations[i] instanceof Account) {
-//                stringArray[i] = ((Account) ultimateDestinations[i]).toString();
-//            } else {
-//                // Handle other types or use String.valueOf for generic conversion
-//                stringArray[i] = String.valueOf(ultimateDestinations[i]);
-//            }
+            stringDestinations[i] = String.valueOf(associatedObject);
+            ultimateDestinations[i] = associatedObject.getElementId();
+
         }
-            
-        String destinationString =  String.join(", ", stringArray);
-        
-        String confirmAnswer = "<HTML><FONT SIZE=+1>Do you wish to submit a announcement clarification for<BR><BR>" + "Problem:  <FONT COLOR=BLUE>" + Utilities.forHTML(problem.toString()) + "</FONT><BR><BR>"
-                + "Announcement: <FONT COLOR=BLUE>" + Utilities.forHTML(answerAnnouncement)
-                + "</FONT><BR><BR>"
-                + "Destination: <FONT COLOR=BLUE>" + Utilities.forHTML(destination)+": "+Utilities.forHTML(destinationString) + "</FONT><BR><BR></FONT>";
-        
-        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), confirmAnswer, "Submit Clarification Confirm");
+                    
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(
+                "<html>"
+                + "    <head>"
+                + "    <style>"
+                + "        td {"
+                + "            padding: 0 0 8px 0; /* top right bottom left */"
+                + "            text-align: left;"
+                + "            vertical-align: top;"
+                + "        }"
+                + "        .no-padding {"
+                + "            padding-top: 0px;"
+                + "            padding-bottom: 0px;"
+                + "        }"
+                + "         body{"
+                + "            font-size: 1.1em;"
+                + "        }"
+                + "    </style>"
+                + "    </head>"
+                + "    <body>"
+                + "    <div style = \"padding-bottom: 8px\">Do you wish to submit an announcement clarification for </div>"
+                + "    <table style=\"width:100%; max-width: 700px\">"
+                + "        <tr>"
+                + "            <td style=\"width:20%\">Problem:</td>"
+                + "            <td style = \"width:50%\"><font color=\"blue\">"+Utilities.forHTML(problem.toString())+"</font></td>"
+                + "        </tr>"
+                + "        <tr>"
+                + "            <td>Announcement:</td>"
+                + "            <td><font color=\"blue\">"+Utilities.forHTML(answerAnnouncement)+"</font></td>"
+                + "        </tr>"
+                + "        <tr>"
+                );
+        if (destination.equals(ALL_TEAMS)) {
+            stringBuilder.append(
+            "            <td  class=\"no-padding\">Destination:</td>"
+            + "            <td class=\"no-padding\"><font color=\"blue\">"+Utilities.forHTML(ALL_TEAMS)+"</font></td>"
+            + "        </tr>"
+            );
+        }
+        else {
+            stringBuilder.append(
+                    "            <td  class=\"no-padding\">Destination:</td>"
+                    + "            <td class=\"no-padding\"><font color=\"blue\">"+Utilities.forHTML(stringDestinations[0])+"</font></td>"
+                    + "        </tr>"
+                    );
+        }
+        for (int i = 1;i <stringDestinations.length;i++) {
+            stringBuilder.append(
+                            "        <tr>"
+                            + "            <td class=\"no-padding\"></td>"
+                            + "            <td class=\"no-padding\"><font color=\"blue\">"+Utilities.forHTML(stringDestinations[i]) +"</font></td>"
+                            + "        </tr>");
+        }
+        stringBuilder.append(
+                        "    </table>"
+                        + "    </body>"
+                        + "</html>"
+                        );
+        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), stringBuilder.toString(), "Submit Clarification Confirm");
 
         if (result != JOptionPane.YES_OPTION) {
             return;
         }
         
         try {
-            log.info("submit announcement clarification for " + problem + " " + confirmAnswer);
-            //TODO change the logs
-            
-            //FIXME Dont read values here since this only works for groups
+            log.info("submit announcement clarification for " + problem + " " + stringBuilder);            
             getController().submitAnnouncement(problem, answerAnnouncement,ultimateDestinations);
             largeTextArea.setText("");
 
         } catch (Exception e) {
-            // TODO need to make this cleaner
             showMessage("Error sending announcement clar, contact staff");
             log.log(Log.SEVERE, "Exception sending announcement clarification ", e);
         }
     }
-    
+    /**
+     * Reads the user inputs to submit a clarification. Asks for a confirmation in a seperate frame.
+     * @param problem
+     */
     protected void submitClarification(Problem problem) {
         String question = largeTextArea.getText().trim();
 
@@ -651,7 +686,6 @@ public class SubmitClarificationPane extends JPanePlugin {
         public void contestAutoStarted(ContestTimeEvent event) {
             contestStarted(event);
         }
-
     }
     
     /**
@@ -764,8 +798,6 @@ public class SubmitClarificationPane extends JPanePlugin {
 //                setVisible(true);
             }
         });
-        
-        
     }
     
     /**
@@ -833,6 +865,4 @@ public class SubmitClarificationPane extends JPanePlugin {
     private void updateGUIperPermissions() {
         submitClarificationButton.setVisible(isAllowed(Permission.Type.SUBMIT_CLARIFICATION));
     }
-
-
 } // @jve:decl-index=0:visual-constraint="10,10"

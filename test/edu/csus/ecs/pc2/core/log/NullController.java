@@ -167,7 +167,7 @@ public class NullController implements IInternalController{
 
     }
     
-    public void submitAnnouncement(Problem problem, String answer,IElementObject[] ultimateDestination) {
+    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestination) {
         // TODO Auto-generated method stub
         
     }

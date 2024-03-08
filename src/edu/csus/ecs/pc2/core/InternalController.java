@@ -3783,18 +3783,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return clarification.getElementId();
     }
     
-    public void submitAnnouncement(Problem problem, String answer,IElementObject[] ultimateDestination) {
+    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestination) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Clarification clarification = new Clarification(contest.getClientId(), problem, "");
-        ElementId[] destination = new ElementId[ultimateDestination.length];
-        for (int i= 0; i< ultimateDestination.length;i++) {
-            destination[i] = ultimateDestination[i].getElementId();
-        }
-        if (destination.length > 0) {
-            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), destination, false);
+
+        if (ultimateDestination.length > 0) {
+            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestination, false);
         }
         else {
-            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), destination, true);
+            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestination, true);
         }
         
         Packet packet;
