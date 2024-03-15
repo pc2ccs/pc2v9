@@ -338,7 +338,7 @@ public class FinalizePane extends JPanePlugin {
 
         int count = 0;
         for (Clarification clarification : clarifications) {
-            if (!clarification.isAnswered()) {
+            if (!clarification.isAnsweredorAnnounced()) {
                 count++;
             }
         }

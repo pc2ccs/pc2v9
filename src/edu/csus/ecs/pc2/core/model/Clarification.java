@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.ArrayList;
@@ -44,6 +44,10 @@ public class Clarification extends Submission {
          * Judge has answered clarifications/question.
          */
         ANSWERED,
+        /**
+         * Judge has created the clarification without a question to answer itself.
+         */
+        ANNOUNCED,
     }
     
     private boolean deleted = false;
@@ -91,11 +95,18 @@ public class Clarification extends Submission {
             return getFirstAnswer().getAnswer();
         }
     }
-
+    
+//    public String getDestinations() {
+//        if (answerList.size() == 0) {
+//            return null;
+//        } else {
+//            return getFirstAnswer().getDestinationsToString();
+//        }  
+//    }
     private ClarificationAnswer getFirstAnswer() {
         return answerList.get(0);
     }
-
+    
     /**
      * @param answer
      *            The answer to set.
@@ -103,16 +114,45 @@ public class Clarification extends Submission {
      * @param contestTime
      * @param sendToAll
      */
-    public void setAnswer(String answer, ClientId client, ContestTime contestTime, ElementId[] destination, boolean sendToAll) {
-        state = ClarificationStates.ANSWERED;
-        ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, client, sendToAll, destination, contestTime);
+    public void setAnswer(String answer, ClientId client, ContestTime contestTime, boolean sendToAll) {
+        if (question.equals("")) {
+            state = ClarificationStates.ANNOUNCED;
+        }
+        else {
+            state = ClarificationStates.ANSWERED;
+        }
+        ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, client, sendToAll, contestTime);
+        addAnswer(clarificationAnswer);
+    }
+    
+    /**
+     * 
+     * @param answer The answer to set.
+     * @param client
+     * @param contestTime
+     * @param destinationGroup
+     * @param destinationTeam
+     * @param sendToAll
+     */
+    public void setAnswer(String answer, ClientId client, ContestTime contestTime, ElementId[] destinationGroup, ClientId[] destinationTeam, boolean sendToAll) {
+        if (question.equals("")) {
+            state = ClarificationStates.ANNOUNCED;
+        }
+        else {
+            state = ClarificationStates.ANSWERED;
+        }
+        ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, client, sendToAll, destinationGroup, destinationTeam, contestTime);
         addAnswer(clarificationAnswer);
     }
 
-    public boolean isAnswered() {
-        return state == ClarificationStates.ANSWERED;
+    public boolean isAnsweredorAnnounced() {
+        return state == ClarificationStates.ANSWERED || state == ClarificationStates.ANNOUNCED;
     }
-
+    
+    public boolean isAnnounced() {
+        return state == ClarificationStates.ANNOUNCED;
+    }
+    
     public boolean isNew() {
         return state == ClarificationStates.NEW;
     }
@@ -137,6 +177,25 @@ public class Clarification extends Submission {
         }
     }
     
+    /**
+     * Checks if clarification has destinations other than the submitter excluding is Send to All.
+     * @return
+     */
+    public boolean hasDestinationsOtherThanSubmitterorAllTeams() {
+        if (!isAnsweredorAnnounced()) {
+            return false;
+        }
+        return getFirstAnswer().isThereDestinationOtherThanSubmitter();
+    }
+    
+    public ElementId[] getAllDestinationsGroup() {
+        return getFirstAnswer().getAllDestinationsGroup();
+    }
+    
+    public ClientId[] getAllDestinationsTeam() {
+        return getFirstAnswer().getAllDestinationsTeam();
+    }
+
     public boolean shouldAccountReceiveThisClarification(Account account) {
         
         if (isSendToAll()) {
@@ -149,13 +208,20 @@ public class Clarification extends Submission {
             //THere is no answer to this clar yet hence there are no destinations for it.
             return false;
         }
-        ElementId[] destinations = getFirstAnswer().getAllDestinationsGroup();
-        if (destinations != null) {
-            for (ElementId destionation: destinations){
-                if (account.isGroupMember(destionation)) {  //checks if this announcement clar was sent to a group that this account belongs to
+        ElementId[] destinationGroup =  getAllDestinationsGroup();
+        ClientId[] destinationTeam = getAllDestinationsTeam();
+        
+        if (destinationTeam != null) {
+            for (ClientId team: destinationTeam) {
+                if (team.equals(account.getClientId())){
                     return true;
                 }
-                if (account.getElementId().equals(destionation)) {  //checks if this announcement clar was sent to this account
+            }
+        }
+        
+        if (destinationGroup != null) {
+            for (ElementId destination: destinationGroup){
+                if (account.isGroupMember(destination)) {  //checks if this announcement clar was sent to a group that this account belongs to
                     return true;
                 }
             }
@@ -223,7 +289,12 @@ public class Clarification extends Submission {
      * @param clarificationAnswer
      */
     public void addAnswer(ClarificationAnswer clarificationAnswer) {
-        state = ClarificationStates.ANSWERED;
+        if (question.equals("")) {
+            state = ClarificationStates.ANNOUNCED;
+        }
+        else {
+            state = ClarificationStates.ANSWERED;
+        }
         answerList.add(clarificationAnswer);
     }
 

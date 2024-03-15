@@ -48,7 +48,6 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
-import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IPacketListener;
@@ -2662,7 +2661,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
     
-    public void sendToGroupsandIndividualTeams(Packet packet,IElementObject[] ultimateDestination) {
+    public void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams) {
 
 //        Properties properties = (Properties) packet.getContent();
 //        // does the packet includes problemDataFiles
@@ -2691,19 +2690,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         // sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet
         ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
         
-        List<ClientId> badClients = new ArrayList<ClientId>();
+        List<ClientId> badClients = new ArrayList<ClientId>();//FIXME needs to keep track of badClients.
 
-        HashSet<ElementId> setWithElementId = new HashSet<>();
-        for (IElementObject element : ultimateDestination) {
-            setWithElementId.add(element.getElementId());
+        HashSet<ClientId> setWithClientId = new HashSet<>();
+        for (ClientId team : teams) {
+            setWithClientId.add(team);
         }
         for (ClientId clientId : clientIds) {
             ConnectionHandlerID connectionHandlerID = null;
             
             //For individual accounts
-            Account account = contest.getAccount(clientId);
+//            Account account = contest.getAccount(clientId);
    
-            if (setWithElementId.contains(account.getElementId())) {
+            if (setWithClientId.contains(clientId)) {
                 connectionHandlerID = clientId.getConnectionHandlerID();
                 try {
                     sendToClient(connectionHandlerID, packet);
@@ -2714,18 +2713,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 }
                 continue;
             }
-            for (IElementObject destination : ultimateDestination) {
-                if (destination instanceof Account) {
-                    continue;
-                }
-                account = contest.getAccount(clientId);
-                if (account.isGroupMember(destination.getElementId())) {
+            for (ElementId groupElementId : groups) {
+
+                Account account = contest.getAccount(clientId);
+                if (account.isGroupMember(groupElementId)) {
                     connectionHandlerID = clientId.getConnectionHandlerID();
                     try {
                         sendToClient(connectionHandlerID, packet);
                     }catch (Exception e) {
                         getLog().log(Level.WARNING, "Exception attempting to send packet using Group to client " + clientId + "at connectionHandlerId " + connectionHandlerID
-                                + "as it belongs to group "+ destination + ": " + packet + ": "+ e.getMessage(), e);
+                                + "as it belongs to group "+ groupElementId + ": " + packet + ": "+ e.getMessage(), e);
                     
                     }
                     break;
@@ -3783,24 +3780,21 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return clarification.getElementId();
     }
     
-    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestination) {
+    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Clarification clarification = new Clarification(contest.getClientId(), problem, "");
 
-        if (ultimateDestination.length > 0) {
-            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestination, false);
+        if (ultimateDestinationGroup.length + ultimateDestinationTeam.length> 0) {
+            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, false);
         }
         else {
-            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestination, true);
+            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, true);
         }
         
         Packet packet;
-        if (ultimateDestination.length == 0) {
-            packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
-        }
-        else {
-            packet = PacketFactory.createClarificationSubmissionwithDestination(contest.getClientId(), serverClientId, clarification, ultimateDestination);
-        }
+        packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
+        
+
         
         sendToLocalServer(packet);
     }

@@ -867,7 +867,7 @@ public class InternalContest implements IInternalContest {
         if (clarificationList.get(clarification) != null) {
             Clarification answerClarification;
             try {
-                ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, whoAnsweredIt, sendToAll,new ElementId[0], getContestTime());
+                ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, whoAnsweredIt, sendToAll, getContestTime());
                 answerClarification = clarificationList.updateClarification(clarification, ClarificationStates.ANSWERED, clarificationAnswer);
                 ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, answerClarification);
                 clarificationEvent.setWhoModifiedClarification(whoAnsweredIt);
@@ -2393,6 +2393,12 @@ public class InternalContest implements IInternalContest {
     public boolean doGroupsExist() {
         return groupDisplayList.getList().length != 0;
     }
+    
+    @Override
+    public int getNumberofGroups() {
+        return groupDisplayList.getList().length;
+    }
+    
     @Override
     public void addGroupListener(IGroupListener groupListener) {
         groupListenerList.addElement(groupListener);

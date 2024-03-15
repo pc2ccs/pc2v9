@@ -25,7 +25,6 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.DisplayTeamName;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
 
@@ -177,7 +176,7 @@ public class AnswerClarificationPane extends JPanePlugin {
 
     private ClarificationAnswer getClarificationFromFields() {
         ClarificationAnswer clarificationAnswer = new ClarificationAnswer(getAnswerTextArea().getText(), getContest().getClientId(), 
-                getSendToAllCheckBox().isSelected(), new ElementId[0],getContest().getContestTime());
+                getSendToAllCheckBox().isSelected(),getContest().getContestTime());
         return clarificationAnswer;
     }
 

@@ -27,7 +27,7 @@ public class ClarificationTest extends TestCase {
         
         Clarification clar = new Clarification(team, contest.getProblems()[0], "Why?");
         
-        clar.setAnswer("Because.", judge, contest.getContestTime(), null, false);
+        clar.setAnswer("Because.", judge, contest.getContestTime(), false);
         
         ClarificationAnswer answer = new ClarificationAnswer("Because 2", judge, false, contest.getContestTime());
         

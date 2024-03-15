@@ -612,12 +612,15 @@ public class ClarificationsTablePane extends JPanePlugin {
             // Oh my, really?
             boolean isTeam = getContest().getClientId().getClientType().equals(ClientType.Type.TEAM);
     
-            // Just close your eyes or look away.  This code is necessarily(?) complicated.
+            // Just close your eyes or look away.  This code is necessarily(?) complicated. 
+            // Yes it is.
             if (isTeam) {
-                if (clar.isAnswered()) {
-                    if (clar.isSendToAll()) {
+                if (clar.isAnsweredorAnnounced()) {
+                    if (clar.isSendToAll()) {//FIXME also Announcement
                         obj[idx++] = "Broadcast";
-                    } else {
+                    } else if(clar.isAnnounced()) {
+                        obj[idx++] = "Announcement";
+                    }else {
                         obj[idx++] = "Answered";
                     }
                 } else {
@@ -630,7 +633,7 @@ public class ClarificationsTablePane extends JPanePlugin {
             if (!isShowNewClarificationsOnly()) {
                 if (!isTeam) {
                     // Who judged it and who it was sent to is only shown for non-teams in not-new mode
-                    if (clar.isAnswered()) {
+                    if (clar.isAnsweredorAnnounced()) {
         
                         if (clar.getWhoJudgedItId() == null || isTeam) {
                             obj[idx++] = "";
@@ -647,7 +650,9 @@ public class ClarificationsTablePane extends JPanePlugin {
                     }
                     if (clar.isSendToAll()) {
                         obj[idx++] = "All Teams";
-                    } else {
+                    } else if (clar.hasDestinationsOtherThanSubmitterorAllTeams()) {
+                        obj[idx++] = convertGroupsandTeamstoString(clar.getAllDestinationsGroup(), clar.getAllDestinationsTeam());  //Not sure if this should be done like this
+                    }else {
                         obj[idx++] = getTeamDisplayName(clar.getSubmitter());
                     }
                 }
@@ -761,12 +766,12 @@ public class ClarificationsTablePane extends JPanePlugin {
 
         public void clarificationAdded(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());
-            if (event.getClarification().isAnswered()) {
+            if (event.getClarification().isAnsweredorAnnounced()) {
                 if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                     showClarificationAnswer(event.getClarification());
                 }
             }
-            if (event.getClarification().isAnswered() || event.getClarification().isNew() || event.getClarification().isDeleted()) {
+            if (event.getClarification().isAnsweredorAnnounced() || event.getClarification().isNew() || event.getClarification().isDeleted()) {
                 if (event.getClarification().getElementId().equals(lastAnswered)) {
                     lastAnswered = null;
                 }
@@ -785,12 +790,12 @@ public class ClarificationsTablePane extends JPanePlugin {
 
         public void clarificationChanged(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());
-            if (event.getClarification().isAnswered()) {
+            if (event.getClarification().isAnsweredorAnnounced()) {
                 if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                     showClarificationAnswer(event.getClarification());
                 }
             }
-            if (event.getClarification().isAnswered() || event.getClarification().isNew() || event.getClarification().isDeleted()) {
+            if (event.getClarification().isAnsweredorAnnounced() || event.getClarification().isNew() || event.getClarification().isDeleted()) {
                 if (event.getClarification().getElementId().equals(lastAnswered)) {
                     lastAnswered = null;
                 }

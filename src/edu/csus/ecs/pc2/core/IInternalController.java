@@ -16,7 +16,6 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
-import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IPacketListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -180,11 +179,13 @@ public interface IInternalController {
     void sendToTeams(Packet packet);
     
     /**
-     * Send to groups and or individual teams specified by ultimateDestination.
+     * Send to groups and or individual teams specified by groups and teams respectively.
      * @param packet
-     * @param ultimateDestination
+     * @param groups contains elementId of groups packet should be sent.
+     * @param teams  contains clientId of groups packet should be sent.
      */
-    void sendToGroupsandIndividualTeams(Packet packet,IElementObject[] ultimateDestination);
+    void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams);
+    
     /**
      * Send to all spectator/API clients
      * 
@@ -397,12 +398,12 @@ public interface IInternalController {
      * 
      * @param problem
      * @param answer
-     * @param ultimateDestination arraylist of where the answer for the clarification should ultimately go.
-     * such as certain groups,certain teams.
+     * @param ultimateDestinationGroup array of where the answer for the clarification should ultimately go.
+     * such as certain groups
+     * @param ultimateDestinationTeam same for teams
      * @return 
      */
-    void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestination);
-
+    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam);
     /**
      * Request clarification to answer.
      * 

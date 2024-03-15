@@ -74,7 +74,7 @@ public class ClarificationService implements Feature {
             } else {
                 // dump the request
                 childNode.add(jsonTool.convertToJSON(clarification, null));
-                if (clarification.isAnswered()) {
+                if (clarification.isAnsweredorAnnounced()) {
                     // dump the answers
                     ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
                     childNode.add(jsonTool.convertToJSON(clarification, clarAnswers[clarAnswers.length-1]));

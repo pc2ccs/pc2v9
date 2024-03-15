@@ -337,7 +337,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
             clarification = new Clarification(account.getClientId(), problem, "Why #2? from " + account);
             if (answerAll) {
                 String answer = judgesDefaultAnswer;
-                clarification.setAnswer(answer, judgeId, contest.getContestTime(), null, sendToAll);
+                clarification.setAnswer(answer, judgeId, contest.getContestTime(), sendToAll);
             }
             try {
                 contest.acceptClarification(clarification);
@@ -455,7 +455,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         Clarification clarification = clarifications[4];
         ClarificationAnswer clarAnswer = null;
-        if (clarification.isAnswered()) {
+        if (clarification.isAnsweredorAnnounced()) {
             ClarificationAnswer[] clarificationAnswers = clarification.getClarificationAnswers();
             clarAnswer = clarificationAnswers[clarificationAnswers.length - 1];
         }

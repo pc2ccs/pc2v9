@@ -1243,4 +1243,6 @@ public interface IInternalContest {
     String getCommandLineOptionValue(String optionNaeme);
 
     boolean doGroupsExist();
+
+    int getNumberofGroups();
 }
