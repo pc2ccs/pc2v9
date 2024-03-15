@@ -1210,7 +1210,6 @@ public class RemoteEventFeedMonitor implements Runnable {
          ZoneId defZone = ZoneId.systemDefault();
          ZonedDateTime zoneDate = dateInst.atZone(defZone);
          return(zoneDate.toString());
-//         return(DateTimeFormatter.ISO_ZONED_DATE_TIME.format(zoneDate.to);
      }
 
      /**
