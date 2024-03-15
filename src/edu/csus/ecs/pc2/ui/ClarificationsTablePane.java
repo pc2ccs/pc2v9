@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -504,7 +504,7 @@ public class ClarificationsTablePane extends JPanePlugin {
     }
 
     /**
-     * 
+     * Clarification is shown to users in a a frame.
      * @param clarification
      *            the clarification to show
      */
@@ -516,11 +516,21 @@ public class ClarificationsTablePane extends JPanePlugin {
         }
 
         String problemName = getProblemTitle(clarification.getProblemId());
-        String displayString = "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>" + "Problem: <FONT COLOR=BLUE>" + Utilities.forHTML(problemName) + "</FONT><BR><BR>" + "Clar Id: <FONT COLOR=BLUE>"
-                + clarification.getNumber() + "</FONT><BR><BR><BR>" + "Question: <FONT COLOR=BLUE> " + Utilities.forHTML(clarification.getQuestion()) + "</FONT><BR><BR><BR>"
-                + "Answer: <FONT COLOR=BLUE>" + Utilities.forHTML(clarification.getAnswer()) + "</FONT><BR><BR><BR>";
+        String displayString;
+        if (clarification.getQuestion().equals("")){//It is a announcement clarification
+            displayString = "<HTML><FONT SIZE=+1>Judge's Announcement<BR><BR>" + "Problem: <FONT COLOR=BLUE>" + Utilities.forHTML(problemName) + "</FONT><BR><BR>" + "Clar Id: <FONT COLOR=BLUE>"
+                    + clarification.getNumber() + "</FONT><BR><BR><BR>"
+                    + "Announcement: <FONT COLOR=BLUE>" + Utilities.forHTML(clarification.getAnswer()) + "</FONT><BR><BR><BR>";
 
-        if (clarification.isSendToAll()) {
+        }
+        else {
+            displayString = "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>" + "Problem: <FONT COLOR=BLUE>" + Utilities.forHTML(problemName) + "</FONT><BR><BR>" + "Clar Id: <FONT COLOR=BLUE>"
+                    + clarification.getNumber() + "</FONT><BR><BR><BR>" + "Question: <FONT COLOR=BLUE> " + Utilities.forHTML(clarification.getQuestion()) + "</FONT><BR><BR><BR>"
+                    + "Answer: <FONT COLOR=BLUE>" + Utilities.forHTML(clarification.getAnswer()) + "</FONT><BR><BR><BR>";
+
+        }
+        
+        if (clarification.isSendToAll()) {//TODO perhaps it wasnt sent to everyone but groups
             displayString = displayString + "* For All Teams *" + "\n";
         }
 
@@ -602,12 +612,15 @@ public class ClarificationsTablePane extends JPanePlugin {
             // Oh my, really?
             boolean isTeam = getContest().getClientId().getClientType().equals(ClientType.Type.TEAM);
     
-            // Just close your eyes or look away.  This code is necessarily(?) complicated.
+            // Just close your eyes or look away.  This code is necessarily(?) complicated. 
+            // Yes it is.
             if (isTeam) {
-                if (clar.isAnswered()) {
-                    if (clar.isSendToAll()) {
+                if (clar.isAnsweredorAnnounced()) {
+                    if (clar.isSendToAll()) {//FIXME also Announcement
                         obj[idx++] = "Broadcast";
-                    } else {
+                    } else if(clar.isAnnounced()) {
+                        obj[idx++] = "Announcement";
+                    }else {
                         obj[idx++] = "Answered";
                     }
                 } else {
@@ -620,7 +633,7 @@ public class ClarificationsTablePane extends JPanePlugin {
             if (!isShowNewClarificationsOnly()) {
                 if (!isTeam) {
                     // Who judged it and who it was sent to is only shown for non-teams in not-new mode
-                    if (clar.isAnswered()) {
+                    if (clar.isAnsweredorAnnounced()) {
         
                         if (clar.getWhoJudgedItId() == null || isTeam) {
                             obj[idx++] = "";
@@ -637,7 +650,9 @@ public class ClarificationsTablePane extends JPanePlugin {
                     }
                     if (clar.isSendToAll()) {
                         obj[idx++] = "All Teams";
-                    } else {
+                    } else if (clar.hasDestinationsOtherThanSubmitterorAllTeams()) {
+                        obj[idx++] = convertGroupsandTeamstoString(clar.getAllDestinationsGroup(), clar.getAllDestinationsTeam());  //Not sure if this should be done like this
+                    }else {
                         obj[idx++] = getTeamDisplayName(clar.getSubmitter());
                     }
                 }
@@ -751,12 +766,12 @@ public class ClarificationsTablePane extends JPanePlugin {
 
         public void clarificationAdded(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());
-            if (event.getClarification().isAnswered()) {
+            if (event.getClarification().isAnsweredorAnnounced()) {
                 if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                     showClarificationAnswer(event.getClarification());
                 }
             }
-            if (event.getClarification().isAnswered() || event.getClarification().isNew() || event.getClarification().isDeleted()) {
+            if (event.getClarification().isAnsweredorAnnounced() || event.getClarification().isNew() || event.getClarification().isDeleted()) {
                 if (event.getClarification().getElementId().equals(lastAnswered)) {
                     lastAnswered = null;
                 }
@@ -775,12 +790,12 @@ public class ClarificationsTablePane extends JPanePlugin {
 
         public void clarificationChanged(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());
-            if (event.getClarification().isAnswered()) {
+            if (event.getClarification().isAnsweredorAnnounced()) {
                 if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                     showClarificationAnswer(event.getClarification());
                 }
             }
-            if (event.getClarification().isAnswered() || event.getClarification().isNew() || event.getClarification().isDeleted()) {
+            if (event.getClarification().isAnsweredorAnnounced() || event.getClarification().isNew() || event.getClarification().isDeleted()) {
                 if (event.getClarification().getElementId().equals(lastAnswered)) {
                     lastAnswered = null;
                 }

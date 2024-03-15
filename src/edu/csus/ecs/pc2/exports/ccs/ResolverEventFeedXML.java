@@ -713,14 +713,14 @@ public class ResolverEventFeedXML {
         }
         XMLUtilities.addChild(memento, "answer", answer);
         XMLUtilities.addChild(memento, "id", clarification.getNumber());
-        XMLUtilities.addChild(memento, "answered", titleCaseBoolean(clarification.isAnswered()));
+        XMLUtilities.addChild(memento, "answered", titleCaseBoolean(clarification.isAnsweredorAnnounced()));
         XMLUtilities.addChild(memento, "question", clarification.getQuestion());
 
 //    <status>done</status>
 //    <team>8</team>
 //    <time>14016.479</time>
 
-        String status = getStatus(clarification.isAnswered());
+        String status = getStatus(clarification.isAnsweredorAnnounced());
         XMLUtilities.addChild(memento, "status", status);
         XMLUtilities.addChild(memento, "team", clarification.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(clarification.getElapsedMS()));

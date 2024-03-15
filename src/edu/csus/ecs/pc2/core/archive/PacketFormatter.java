@@ -547,7 +547,7 @@ public final class PacketFormatter {
             node.add(child);
             child = new DefaultMutableTreeNode("   Problem: " + clarification.getProblemId());
             node.add(child);
-            child = new DefaultMutableTreeNode("  Answered: " + clarification.isAnswered());
+            child = new DefaultMutableTreeNode("  Answered: " + clarification.isAnsweredorAnnounced());
             node.add(child);
             child = new DefaultMutableTreeNode("   For All: " + clarification.isSendToAll());
             node.add(child);

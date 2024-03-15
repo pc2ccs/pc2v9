@@ -176,7 +176,7 @@ public class AnswerClarificationPane extends JPanePlugin {
 
     private ClarificationAnswer getClarificationFromFields() {
         ClarificationAnswer clarificationAnswer = new ClarificationAnswer(getAnswerTextArea().getText(), getContest().getClientId(), 
-                getSendToAllCheckBox().isSelected(), getContest().getContestTime());
+                getSendToAllCheckBox().isSelected(),getContest().getContestTime());
         return clarificationAnswer;
     }
 

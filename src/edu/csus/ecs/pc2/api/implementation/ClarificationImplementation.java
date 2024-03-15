@@ -41,7 +41,7 @@ public class ClarificationImplementation implements IClarification {
 
     public ClarificationImplementation(Clarification clarification, IInternalContest contest, IInternalController controller) {
 
-        answered = clarification.isAnswered();
+        answered = clarification.isAnsweredorAnnounced();
         question = new String(clarification.getQuestion());
         answer = null;
         if (clarification.getAnswer() != null) {

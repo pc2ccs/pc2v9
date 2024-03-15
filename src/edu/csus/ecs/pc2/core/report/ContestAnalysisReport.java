@@ -128,7 +128,7 @@ public class ContestAnalysisReport implements IReport {
                     numClarsForAll[siteNum]++;
                 }
 
-                if (!clarification.isAnswered()) {
+                if (!clarification.isAnsweredorAnnounced()) {
                     numClarsUnAnswered[siteNum]++;
                     totalUnanswered++;
                 }

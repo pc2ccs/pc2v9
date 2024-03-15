@@ -32,7 +32,7 @@ public class ClarificationJSON extends JSONUtilities {
         ClarificationAnswer clarificationAnswer = null;
         ClarificationAnswer[] answers = null;
         answers = clarification.getClarificationAnswers();
-        if (clarification.isAnswered()) {
+        if (clarification.isAnsweredorAnnounced()) {
             clarificationAnswer = answers[answers.length - 1];
         }
         
