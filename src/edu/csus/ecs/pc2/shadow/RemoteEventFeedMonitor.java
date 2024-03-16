@@ -552,7 +552,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     } else if ("judgements".equals(eventType)) {
 
                                         if(!allowSubmitsAndJudgments) {
-                                             log.info("Skipping judgment event since the contest has not started and allowPrestartActivity is false.");
+                                            log.info("Skipping judgment event since the contest has not started and allowPrestartActivity is false.");
                                             event = reader.readLine();
                                             tossedMessages++;
                                             if(monitorStatus != null) {
@@ -632,7 +632,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             // Can set this to indicate we want to put a message in the GUI log
                                             String statusMessage = null;
 
-                                            //convert state data into a ShadowRunSubmission object
+                                            //convert state data into a ShadowStateMessage object
                                             ShadowStateMessage contestState = createStateMessage((Map<String, Object>) eventMap.get("data"));
 
                                             Date remoteStart = contestState.getStarted();
