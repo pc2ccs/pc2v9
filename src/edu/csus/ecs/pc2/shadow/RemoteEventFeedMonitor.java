@@ -7,7 +7,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.text.DateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -645,23 +647,33 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                         if(pc2Start != null) {
                                                             if(remoteStart.compareTo(pc2Start) != 0) {
                                                                 statusMessage ="Primary specified wrong start time " +
-                                                                        DateFormat.getDateInstance().format(remoteStart) +
+                                                                        getISODateString(remoteStart) +
                                                                         " instead of configured " +
-                                                                        DateFormat.getDateInstance().format(pc2Start);
+                                                                        getISODateString(pc2Start);
                                                                 logAndDebugPrint(log, Level.WARNING, statusMessage);
                                                             }
                                                         }
                                                     }
-                                                    // if the contest has never been started, then we are allowed to start. If the contest
-                                                    // has previously been started remotely, or from a previous invocation, we ignore the CCS
-                                                    // state change.
-                                                    if(pc2Controller.getContest().getContestTime().getContestStartTime() == null) {
+                                                    if(contestState.getEnded() == null) {
+                                                        // if the contest was started previoulsy, then we print a warning message and a status on the GUI
+                                                        // but we do allow it to start.
+                                                        if(pc2Controller.getContest().getContestTime().getContestStartTime() != null) {
+                                                            statusMessage = "Primary restarts the contest at " + getISODateString(remoteStart);
+                                                            if(monitorStatus != null) {
+                                                                monitorStatus.statusMessage(statusMessage);
+                                                            }
+                                                            logAndDebugPrint(log, Level.INFO, statusMessage);
+                                                            statusMessage = null;
+                                                        }
                                                         // contest never started, but remote says it's go time.  If the contest was already started
                                                         // manually, we ignore it.
                                                         remoteCCSStarted = true;
-                                                        statusMessage = "Primary started the contest at " + DateFormat.getDateInstance().format(remoteStart);
+                                                        statusMessage = "Primary started the contest at " + getISODateString(remoteStart);
                                                         logAndDebugPrint(log, Level.INFO, statusMessage);
                                                         pc2Controller.startAllContestTimes();
+                                                    } else {
+                                                        statusMessage = "First started state from Primary has ended set as well - not starting";
+                                                        logAndDebugPrint(log, Level.INFO, statusMessage);
                                                     }
                                                 }
                                                 // If anything related to the startTime decided it wants a status message in the GUI, here is where it comes out
@@ -680,7 +692,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                          // can only stop contest if it is running now
                                                         if(pc2Controller.getContest().getContestTime().isContestRunning()) {
                                                             statusMessage = "Primary ends the contest at " +
-                                                                DateFormat.getDateInstance().format(remoteEnd);
+                                                                getISODateString(remoteEnd);
                                                             pc2Controller.stopAllContestTimes();
                                                         } else {
                                                             statusMessage = "Primary wants to end the contest but it's stopped";
@@ -701,6 +713,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                 logAndDebugPrint(log, Level.INFO, "Ignored state event with null start time");
                                             }
                                         } catch (Exception e) {
+                                            System.err.println("Exception handling event: " + e.toString());
                                         }
                                     } else {
                                         logAndDebugPrint(log, Level.INFO, "Ignoring " + eventType + " event");
@@ -1113,7 +1126,7 @@ public class RemoteEventFeedMonitor implements Runnable {
             if(currentPrimaryState == false) {
                 currentPrimaryState = true;
                 String statusMessage = "Primary indicates state '" + what + "' at " +
-                        DateFormat.getDateInstance().format(when);
+                    getISODateString(when);
                 logAndDebugPrint(pc2Controller.getLog(), Level.INFO, statusMessage);
                 if(monitorStatus != null) {
                     monitorStatus.statusMessage(statusMessage);
@@ -1172,11 +1185,25 @@ public class RemoteEventFeedMonitor implements Runnable {
          return dateRet;
      }
 
-    /**
-     * This method is used to terminate the RemoteEventFeedListener thread.
-     */
-    public void stop() {
-        keepRunning = false;
-    }
+     /**
+      * Formats a Date object as a local time iso8601 string
+      *
+      * @param d The date to format
+      * @return The formatted string
+      */
+     public String getISODateString(Date d) {
+         Instant dateInst = d.toInstant();
+         ZoneId defZone = ZoneId.systemDefault();
+         ZonedDateTime zoneDate = dateInst.atZone(defZone);
+         return(zoneDate.toString());
+//         return(DateTimeFormatter.ISO_ZONED_DATE_TIME.format(zoneDate.to);
+     }
+
+     /**
+      * This method is used to terminate the RemoteEventFeedListener thread.
+      */
+     public void stop() {
+         keepRunning = false;
+     }
 
 }
