@@ -170,7 +170,8 @@ public class RemoteEventFeedMonitor implements Runnable {
     public void run() {
         boolean bDelay;
         boolean bOpened = false;
-        boolean allowSubmitsAndJudgments = false;
+        boolean allowSubmits = false;
+        boolean allowJudgments = false;
 
         Thread.currentThread().setName("RemoteEventFeedMonitorThread");
         // local map to look for duplicate submissions
@@ -293,9 +294,12 @@ public class RemoteEventFeedMonitor implements Runnable {
                                     logAndDebugPrint(log, Level.INFO, "Found event of type " + eventType + ": " + event);
 
                                     boolean isContestRunning = pc2Controller.getContest().getContestTime().isContestRunning();
+                                    boolean wasContestStarted = pc2Controller.getContest().getContestTime().isContestStarted();
 
-                                    // we will process submissions/judgments if we are allowed precontest or the contest is running
-                                    allowSubmitsAndJudgments = allowPrestartActivity | isContestRunning;
+                                    // we will process submissions if we are allowed precontest or the contest is running
+                                    allowSubmits = allowPrestartActivity | isContestRunning;
+                                    // we will process judgments if we are allowed precontest or the contest has been started at some point
+                                    allowJudgments = allowPrestartActivity | wasContestStarted;
 
                                     if ("submissions".equals(eventType)) {
 
@@ -305,7 +309,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             continue;
                                         }
 
-                                        if(!allowSubmitsAndJudgments) {
+                                        if(!allowSubmits) {
                                             log.info("Skipping submission event since the contest has not started and allowPrestartActivity is false.");
                                             event = reader.readLine();
                                             tossedMessages++;
@@ -551,7 +555,8 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                                     } else if ("judgements".equals(eventType)) {
 
-                                        if(!allowSubmitsAndJudgments) {
+                                        // For judgements, we toss them if the contest was never started.
+                                        if(!allowJudgments) {
                                             log.info("Skipping judgment event since the contest has not started and allowPrestartActivity is false.");
                                             event = reader.readLine();
                                             tossedMessages++;
@@ -655,9 +660,9 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                         }
                                                     }
                                                     if(contestState.getEnded() == null) {
-                                                        // if the contest was started previoulsy, then we print a warning message and a status on the GUI
+                                                        // if the contest was started previously, then we print a warning message and a status on the GUI
                                                         // but we do allow it to start.
-                                                        if(pc2Controller.getContest().getContestTime().getContestStartTime() != null) {
+                                                        if(wasContestStarted) {
                                                             statusMessage = "Primary restarts the contest at " + getISODateString(remoteStart);
                                                             if(monitorStatus != null) {
                                                                 monitorStatus.statusMessage(statusMessage);
@@ -665,21 +670,24 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                             logAndDebugPrint(log, Level.INFO, statusMessage);
                                                             statusMessage = null;
                                                         }
-                                                        // contest never started, but remote says it's go time.  If the contest was already started
-                                                        // manually, we ignore it.
                                                         remoteCCSStarted = true;
-                                                        if (!isReadOnlyClient()) {
-                                                            statusMessage = "Primary started the contest at " + getISODateString(remoteStart);
-                                                            pc2Controller.startAllContestTimes();
+                                                        // Remote says it's go time.  If the contest is already started
+                                                        // (manually or previously via state event), we ignore it.
+                                                        if(!isContestRunning) {
+                                                            if (!isReadOnlyClient()) {
+                                                                statusMessage = "Primary started the contest at " + getISODateString(remoteStart);
+                                                                pc2Controller.startAllContestTimes();
+                                                            } else {
+                                                                statusMessage = "Primary indicates contest start at " + getISODateString(remoteStart) +
+                                                                    " (R/O client)";
+                                                            }
                                                         } else {
-                                                            statusMessage = "Primary indicates contest start at " + getISODateString(remoteStart) +
-                                                                " but this is a read only client";
+                                                            statusMessage = "Primary indicates contest start at " + getISODateString(remoteStart) + " but it's already running";
                                                         }
-                                                        logAndDebugPrint(log, Level.INFO, statusMessage);
                                                     } else {
                                                         statusMessage = "First started state from Primary has ended set as well - not starting";
-                                                        logAndDebugPrint(log, Level.INFO, statusMessage);
                                                     }
+                                                    logAndDebugPrint(log, Level.INFO, statusMessage);
                                                 }
                                                 // If anything related to the startTime decided it wants a status message in the GUI, here is where it comes out
                                                 if(statusMessage != null && monitorStatus != null) {
@@ -695,13 +703,13 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                     if(!remoteCCSEnded) {
                                                         remoteCCSEnded = true;
                                                          // can only stop contest if it is running now
-                                                        if(pc2Controller.getContest().getContestTime().isContestRunning()) {
+                                                        if(isContestRunning) {
                                                             if (!isReadOnlyClient()) {
                                                                 statusMessage = "Primary ends the contest at " + getISODateString(remoteEnd);
                                                                 pc2Controller.stopAllContestTimes();
                                                             } else {
                                                                 statusMessage = "Primary indicates contest end at " + getISODateString(remoteStart) +
-                                                                    " but this is a read only client";
+                                                                    " (R/O client)";
                                                             }
                                                         } else {
                                                             statusMessage = "Primary wants to end the contest but it's stopped";
