@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Color;
@@ -12,7 +12,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.ListModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -21,13 +20,13 @@ import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
  * Edit groups that can view this Problem.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class ProblemGroupPane extends JPanePlugin {
-    
+
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 6334530401574768488L;
 
@@ -39,18 +38,18 @@ public class ProblemGroupPane extends JPanePlugin {
      * Model containing checkboxes
      */
     private DefaultListModel<WrapperJCheckBox> groupListModel = new DefaultListModel<WrapperJCheckBox>();
-    
+
     private JCheckBoxJList groupListBox = null;
 
     private JScrollPane groupsScrollPane = null;
 
     private ButtonGroup groupsSelectedButtonGroup = null;
 
-    private EditProblemPane parentPane; 
-    
+    private EditProblemPane parentPane;
+
     /**
      * This method initializes groupListBox
-     * 
+     *
      * @return javax.swing.JList
      */
     public JCheckBoxJList getGroupListBox() {
@@ -76,6 +75,7 @@ public class ProblemGroupPane extends JPanePlugin {
 
         allGroupsRadioButton = new JRadioButton("Show to all groups");
         allGroupsRadioButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 parentPane.enableUpdateButton();
                 enableGroupCheckBoxes(false);
@@ -87,6 +87,7 @@ public class ProblemGroupPane extends JPanePlugin {
 
         selectGroupsRadioButton = new JRadioButton("Show to only these groups");
         selectGroupsRadioButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 parentPane.enableUpdateButton();
                 enableGroupCheckBoxes(true);
@@ -101,11 +102,9 @@ public class ProblemGroupPane extends JPanePlugin {
 
 
     /**
-     * Enable or disable Group Checkboxes
+     * Enable or disable Group Checkboxs by enabling/disabling the JCheckboxJList
      */
     protected void enableGroupCheckBoxes(boolean enable) {
-
-        ListModel<Object> list = getGroupListBox().getModel();
 
         if (!enable) {
             getGroupListBox().clearSelection();
@@ -113,17 +112,7 @@ public class ProblemGroupPane extends JPanePlugin {
         } else {
             getGroupListBox().setForeground(Color.BLACK);
         }
-
-        for (int i = 0; i < list.getSize(); i++) {
-            Object ele = list.getElementAt(i);
-            if (ele instanceof WrapperJCheckBox) {
-                WrapperJCheckBox box = (WrapperJCheckBox) ele;
-
-                box.setEnabled(enable);
-
-            }
-
-        }
+        getGroupListBox().setEnabled(enable);
     }
 
     @Override
@@ -132,15 +121,15 @@ public class ProblemGroupPane extends JPanePlugin {
     }
 
     public void setProblem(Problem problem) {
-        
+
         groupListModel.removeAllElements(); // clear checkbox
-        
+
         populateProblemGroups(problem);
 
     }
 
     private void populateProblemGroups(Problem problem) {
-        
+
         boolean allGroupsSelected = true;
         if (problem != null) {
             allGroupsSelected = problem.isAllView();
@@ -151,15 +140,18 @@ public class ProblemGroupPane extends JPanePlugin {
         } else {
             selectGroupsRadioButton.setSelected(true);
         }
-        
-        enableGroupCheckBoxes(true);
+
+
+        // Enable/Disable the checkbox list box depending on whether "all groups" can view the problem
+        enableGroupCheckBoxes(!allGroupsSelected);
 
         Group[] groups = getContest().getGroups();
         for (Group group : groups) {
-            
+
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(group);
             wrapperJCheckBox.setSelected(allGroupsSelected || problem.canView(group));
             wrapperJCheckBox.addChangeListener(new ChangeListener() {
+                @Override
                 public void stateChanged(ChangeEvent e) {
                     parentPane.enableUpdateButton();
                 }
@@ -167,8 +159,6 @@ public class ProblemGroupPane extends JPanePlugin {
 
             groupListModel.addElement(wrapperJCheckBox);
         }
-        
-        enableGroupCheckBoxes(! allGroupsSelected);
     }
 
     public List<Group> getGroups() {
@@ -179,14 +169,14 @@ public class ProblemGroupPane extends JPanePlugin {
 
             Enumeration<WrapperJCheckBox> enumeration = groupListModel.elements();
             while (enumeration.hasMoreElements()) {
-                WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+                WrapperJCheckBox element = enumeration.nextElement();
                 if (element.isSelected()) {
                     Group group = (Group) element.getContents();
                     groups.add(group);
                 }
             }
         }
-        
+
         return groups;
     }
 
@@ -199,11 +189,11 @@ public class ProblemGroupPane extends JPanePlugin {
         return groupsSelectedButtonGroup;
     }
 
-  
+
 
     public void setParentPane(EditProblemPane editProblemPane) {
         parentPane = editProblemPane;
-        
-        
+
+
     }
 }
