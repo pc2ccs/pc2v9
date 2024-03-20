@@ -58,10 +58,10 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * Compile, execute and validate a run.
- * 
+ *
  * Before execute, one can use {@link #setLanguage(Language)}, {@link #setProblem(Problem)} to use a different language or problem. <br>
  * To not overwrite the judge's data files, use {@link #setOverwriteJudgesDataFiles(boolean)} to false.
- * 
+ *
  * @see #execute()
  * @version $Id$
  * @author pc2@ecs.csus.edu
@@ -75,7 +75,7 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 public class Executable extends Plugin implements IExecutable, IExecutableNotify {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1408367949659070087L;
 
@@ -90,7 +90,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private ProblemDataFiles problemDataFiles = null;
 
     private ClientId executorId = null;
-    
+
     private boolean killedByTimer ;
 
     /**
@@ -111,12 +111,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private ExecutionData executionData = new ExecutionData();
 
     private ExecuteTimer executionTimer;
-    
+
     /**
      * If something is actually being executed, then this is the ExecuteTimer being used
      */
     private ExecuteTimer activeExecutionTimer = null;
-    
+
     private IFileViewer fileViewer = null;
 
     /**
@@ -133,7 +133,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * Compile stderr filename.
      */
     public static final String COMPILER_STDERR_FILENAME = "cstderr.pc2";
-    
+
     /**
      * The default limit (in seconds) for compilation of a submission.
      */
@@ -158,7 +158,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * Validator stderr filename.
      */
     public static final String VALIDATOR_STDERR_FILENAME = "vstderr.pc2";
-    
+
     /**
      * The default limit (in seconds) for validation of a single run (test case) of a submission.
      */
@@ -170,12 +170,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private static final String EXIT_CODE_FILENAME = "EXITCODE.TXT";
 
     private static final long NANOSECS_PER_MILLISEC = 1_000_000;
-    
+
     /**
      * Sandbox constants
      */
     public static final long SANDBOX_EXTRA_KILLTIME_MS = 1000;
-    
+
     /**
      * Return codes from sandbox
      */
@@ -191,10 +191,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     public static final int FAIL_MEMORY_LIMIT_EXCEEDED = FAIL_RETCODE_BASE + 51;
     public static final int FAIL_TIME_LIMIT_EXCEEDED = FAIL_RETCODE_BASE + 52;
     public static final int FAIL_WALL_TIME_LIMIT_EXCEEDED = FAIL_RETCODE_BASE + 53;
-    
+
     public static final int FAIL_RETCODE_FIRST = FAIL_EXIT_CODE;
     public static final int FAIL_RECODE_LAST = FAIL_WALL_TIME_LIMIT_EXCEEDED;
-    
+
     /**
      * Files submitted with the Run.
      */
@@ -207,7 +207,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private IInternalController controller;
 
     private Log log;
-    
+
     private IExecutableMonitor executionMonitor = null;
 
     /**
@@ -259,15 +259,16 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     private Process process;
 
+    private boolean hasEntryPoint = false;
+    private String entryPointName = "";
     private String packageName = "";
-
     private String packagePath = "";
-    
+
     //The following two members are for debugging Linux specific functionality on Windows.
     // Note that THESE ARE FOR DEBUGGING PURPOSES only, since most debugging is done on Windows.
     // Setting either of these to "true" does NOT imply the functionality is supported on Windows at the moment.
     // TODO: Make sure BOTH of these are set to "false" for a production distribution.
-    
+
     //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
     private boolean debugAllowSandboxInvocationOnWindows = false;
     //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
@@ -285,7 +286,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         language = inContest.getLanguage(run.getLanguageId());
         problem = inContest.getProblem(run.getProblemId());
         executionMonitor = msgFrame;
-        
+
         initialize();
     }
 
@@ -294,7 +295,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * Does not support GUI since there is no frame for it.
      * @deprecated
      * This constructor should not be used in any new code.
-     * 
+     *
      * @param inContest
      * @param inController
      * @param run
@@ -313,7 +314,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         problem = inContest.getProblem(run.getProblemId());
         executionMonitor = null;
         usingGUI = false;
-        
+
         initialize();
     }
 
@@ -338,7 +339,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Remove all files from specified directory, including subdirectories.
-     * 
+     *
      * @param dirName
      *            directory to be cleared.
      * @return true if directory was cleared.
@@ -377,7 +378,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
         if (usingGUI) {
             fileViewer = new MultipleFileViewer(log);
-            
+
        } else {
             fileViewer = new NullViewer();
        }
@@ -414,13 +415,13 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 }
 
             }
-            
+
             if(usingGUI) {
                 activeExecutionTimer = null;
                 executionMonitor.setTimerFrameVisible(true);
                 executionMonitor.setTerminateButtonNotify(this);
             }
-            
+
             // Extract source file to name in Problem.getDataFileName().
 
             if (runFiles.getMainFile() != null) {
@@ -500,13 +501,13 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 // format of the name is: RSSexecuteinfo.ndjson where R = run number, SS = current clock seconds
                 // eg: for run 453 at 12:00:09:   4539executeinfo.ndjson
                 executeInfoFileName = run.getNumber() + Long.toString((new Date().getTime()) % 100) + Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX;
-                
+
                 /**
                  * Did at least one test case fail flag.
                  */
                 boolean atLeastOneTestFailed = false;
                 String failedResults = "";
-                
+
                 //problem indicates stop-on-first-failure
                 boolean stopOnFirstFailedTestCase = problem.isStopOnFirstFailedTestCase();
 
@@ -707,18 +708,18 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     }
 
     /**
-     * Executes the current run against a specified data set, then if the problem is marked as being validated also invokes 
-     * the appropriate validator to validate (evaluate the correctness of) the program (run) output.  
-     * However, validation is not invoked if an error occurs during the execution phase or if executing the run results in 
+     * Executes the current run against a specified data set, then if the problem is marked as being validated also invokes
+     * the appropriate validator to validate (evaluate the correctness of) the program (run) output.
+     * However, validation is not invoked if an error occurs during the execution phase or if executing the run results in
      * either a time limit exceeded or a runtime error.
-     * 
+     *
      * @param dataSetNumber
      *            zero-based data set number
      * @return true if the current submission was successfully executed using the specified data set AND the validator indicates
      *              that the output of the program was correct; returns false if any of the following happens:  there was an error
-     *              (such as an exception thrown) during execution of the submission; the submission either hit the time limit for 
+     *              (such as an exception thrown) during execution of the submission; the submission either hit the time limit for
      *              the problem or generated a runtime error during execution; the validator indicates that the program output is
-     *              not correct, or if there was an error during the attempt to validate the program output.  
+     *              not correct, or if there was an error during the attempt to validate the program output.
      */
     private boolean executeAndValidateDataSet(int dataSetNumber) {
 
@@ -729,7 +730,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         log.info("  Test case " + testNumber + " execute, run " + run.getNumber());
 
         boolean proceedToValidation = executeProgram(dataSetNumber);
-        
+
         if (proceedToValidation && isValidated()) {
             log.info(" "); //space for readability in the log
             log.info("  Test case " + testNumber + " validate, run " + run.getNumber());
@@ -743,19 +744,19 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             //if we get here we are not going to validate so there's no way we can declare the submission is correct
             submissionIsCorrect = false;
         }
-        
-        //at this point, "submisssionIsCorrect" is true if: 
-        //  the submitted program was successfully executed 
-        //  AND the problem has a validator 
-        //  AND method validateProgram() returned true (indicating the problem was correctly solved for the specified test case) 
+
+        //at this point, "submisssionIsCorrect" is true if:
+        //  the submitted program was successfully executed
+        //  AND the problem has a validator
+        //  AND method validateProgram() returned true (indicating the problem was correctly solved for the specified test case)
         //  AND the ExecutionData object for the run indicates that the submission solved the problem for the specified data case.
         //    (the ExecutionData object indicates the program solved the problem if:
-        //       the program compiled successfully 
-        //       AND the system was able to successfully execute the program 
-        //       AND the program did not exceed the runtime limit 
-        //       AND the validator program ran successfully 
-        //       AND there were no exceptions during Validator execution 
-        //       AND the result string returned by the Validator was "accepted".  
+        //       the program compiled successfully
+        //       AND the system was able to successfully execute the program
+        //       AND the program did not exceed the runtime limit
+        //       AND the validator program ran successfully
+        //       AND there were no exceptions during Validator execution
+        //       AND the result string returned by the Validator was "accepted".
         //     The ExecutionData object returns false (the problem was NOT solved) if any of these conditions is false.
         //    )
         //If any of the above conditions is not true, "passed" is false at this point.
@@ -785,7 +786,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Extracts file setNumber from list of files (fileList).
-     * 
+     *
      * @param fileList
      *            - list of SerializedFile's
      * @param setNumber
@@ -817,7 +818,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Show pop up mesage to user.
-     * 
+     *
      * @param string
      */
     protected void showDialogToUser(String string) {
@@ -832,7 +833,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Insure directory exists, if does not exist create it.
-     * 
+     *
      * @param dirName
      *            directory to create.
      * @return whether directory exists.
@@ -851,7 +852,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Runs the problem-specified validator to compare the output of the run (team program) with the corresponding judge's answer file.
-     * 
+     *
      * @param dataSetNumber
      *            a zero-based value indicating the data set against which the run was executed
      * @return true if the validator returns "success" (indicating that the problem was correctly solved)
@@ -864,7 +865,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         int testCase = dataSetNumber + 1;
         log.info(" ");
         log.info("starting validation for test case " + testCase);
-        
+
         executionData.setValidationReturnCode(-1);
         executionData.setValidationSuccess(false);
 
@@ -895,7 +896,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             commandPattern = getCustomValidatorCommandPattern();
 
             createValidatorProgram();
-            
+
         } else {
 
             log.warning("Problem is marked as validated but has no defined Validator");
@@ -1035,7 +1036,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             log.info("constructed new validator ExecuteTimer " + validatorExecutionTimer.toString());
             long startTime = System.currentTimeMillis();
-            
+
             Process validatorProcess = runProgram(cmdLine, formatTestCasePhase(msg, testCase), false, validatorExecutionTimer);
 
             if (validatorProcess == null) {
@@ -1103,7 +1104,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             //no longer can terminate since it is already finished.
             activeExecutionTimer = null;
-            
+
             // if(isJudge && executionTimer != null) {
             if (validatorExecutionTimer != null) {
                 log.info("stopping validator ExecuteTimer");
@@ -1131,7 +1132,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 validatorExecutionTimer.stopTimer();
             }
             log.log(Log.WARNING, "Exception running validator ", ex);
-            
+
         } finally {
             try {
                 stdoutlog.close();
@@ -1189,7 +1190,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 log.log(Log.WARNING, "Exception while reading results file '" + pc2InterfaceResultsFileName + "'", ex);
                 throw new SecurityException(ex);
             }
-            
+
             //the following code shouldn't be here -- the validateProgram method should never be called if there has already been a TLE
 //            } finally {
 //
@@ -1214,13 +1215,13 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 }
 
             } catch (Exception e) {
-                //TODO: this shouldn't be setting ExecutionException; 
+                //TODO: this shouldn't be setting ExecutionException;
                 // it needs to set a (currently undefined) separate field such as "ValidationException"
 //                executionData.setExecutionException(e);
                 log.log(Log.WARNING, "Exception while reading validator results file '" + clicsInterfaceFeedbackDirName + "'", e);
                 throw new SecurityException(e);
 
-            } 
+            }
             //ditto above
 //            finally {
 //
@@ -1238,7 +1239,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     /**
      * Returns a command pattern for invoking the PC2 "internal validator". The returned pattern contains "substitution variables" for the elements required by the PC2 validator (for example,
      * "{:infile}" where the judge's input data file should be substituted).
-     * 
+     *
      * @return a command pattern for invoking the PC2 Validator
      */
     private String getPC2ValidatorCommandPattern() {
@@ -1278,10 +1279,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     }
 
     /**
-     * Returns a command pattern for invoking the {@link ClicsValidator}. 
+     * Returns a command pattern for invoking the {@link ClicsValidator}.
      * The returned pattern contains "substitution variables" for the elements required by the CLICS validator (for example,
      * "{:infile}" where the judge's input data file should be substituted).
-     * 
+     *
      * @return a command pattern for invoking the CLICS Validator
      */
     private String getCLICSValidatorCommandPattern() {
@@ -1318,14 +1319,14 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     }
 
     /**
-     * Returns a command pattern for invoking a Custom Validator. 
+     * Returns a command pattern for invoking a Custom Validator.
      * If the current Problem is null or has no Custom Validator Settings, null is returned.
      * Otherwise, the returned command pattern is the command pattern defined in the
-     * Custom Validator Settings with "./" (or ".\") prepended, 
-     * unless the current Validator Program name ends with ".jar" in which case the 
+     * Custom Validator Settings with "./" (or ".\") prepended,
+     * unless the current Validator Program name ends with ".jar" in which case the
      * returned command pattern is the command pattern defined in the Custom Validator Settings
      * with "java -jar " prepended.
-     * 
+     *
      * @return a command pattern for invoking the Custom Validator, or null if no command pattern could be determined
      */
     private String getCustomValidatorCommandPattern() {
@@ -1338,7 +1339,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             if (validatorProgramName.trim().toLowerCase().endsWith(".jar")) {
                 cmdPattern = "java -jar " + problem.getCustomOutputValidatorSettings().getCustomValidatorCommandLine();
             } else {
-                cmdPattern = "." + File.separator + problem.getCustomOutputValidatorSettings().getCustomValidatorCommandLine();   
+                cmdPattern = "." + File.separator + problem.getCustomOutputValidatorSettings().getCustomValidatorCommandLine();
             }
         }
 
@@ -1351,7 +1352,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Returns a string containing the PC2 Validator options configured in the current problem.
-     * 
+     *
      * @return a String containing the PC2 Validator options, or the empty string if the problem is null or the PC2ValidatorSettings is null
      */
     private String getPC2ValidatorOptionString() {
@@ -1376,7 +1377,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Returns a string containing the {@link ClicsValidatorSettings} options configured in the current problem.
-     * 
+     *
      * @return a String containing the Clics Validator options, or the empty string if the problem is null or the ClicsValidatorSettings is null
      */
     private String getClicsValidatorOptionString() {
@@ -1410,7 +1411,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Returns a filename specific to data set number to store team's stdout
-     * 
+     *
      * @param dataSetNumber
      */
     private String getTeamOutputFilename(int dataSetNumber) {
@@ -1419,7 +1420,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Returns a filename specific to data set number to store team's stderr
-     * 
+     *
      * @param dataSetNumber
      */
     private String getTeamStderrFilename(int dataSetNumber) {
@@ -1428,7 +1429,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Set results of validation using the PC2Validator into executionData.
-     * 
+     *
      * @param resultsFileName
      * @param logger
      */
@@ -1477,13 +1478,13 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Saves the results of validation using the ClicsValidator into executionData.
-     * 
+     *
      * Validation results are found in one or both of two files in the feedbackDir directory.
      * The first file, named as defined by the constant {@link ClicsValidator#CLICS_JUDGEMENT_FEEDBACK_FILE_NAME},
      * contains the judgement string assigned by the {@link ClicsValidator}.
      * The second file, named as defined by the constant {@link ClicsValidator#CLICS_JUDGEMENT_DETAILS_FEEDBACK_FILE_NAME},
      * contains judgement details for submissions which were judged "no".
-     * 
+     *
      * @param exitCode the exit code returned by the ClicsValidator
      * @param feedbackDirPath the directory into which the ClicsValidator (should have) written feedback information
      * @param logger the log to be used for logging
@@ -1525,7 +1526,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 saveDefaultClicsValidatorResult(exitCode);
                 }
 
-            // check for a judgement details file 
+            // check for a judgement details file
             String detailsFileName = feedbackDirPath + ClicsValidator.CLICS_JUDGEMENT_DETAILS_FEEDBACK_FILE_NAME ;
                 File detailsFile = new File(detailsFileName);
                 if (detailsFile.exists()) {
@@ -1542,7 +1543,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 }
 
             } else {
-            
+
             //we SHOULD have had a feedback directory -- but we didn't!
             log.warning("No CLICS validator feedback directory named '" + feedbackDirPath + "' found");
             saveDefaultClicsValidatorResult(exitCode);
@@ -1551,8 +1552,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Saves into the current executionData object a Clics Validator result string based on the specified exitCode.
-     * This method is used when there is no feedback information from the validator available in the feedback directory. 
-     * 
+     * This method is used when there is no feedback information from the validator available in the feedback directory.
+     *
      * @param exitCode the exit code from the validator, used to select the appropriate result string
      */
     private void saveDefaultClicsValidatorResult(int exitCode) {
@@ -1569,9 +1570,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             resultString = ClicsValidator.CLICS_WRONG_ANSWER_MSG;
 
         } else if (exitCode == ClicsValidator.CLICS_VALIDATOR_ERROR_EXIT_CODE) {
-            
+
             resultString = "Clics Validator exited with error; exit code = " + ClicsValidator.CLICS_VALIDATOR_ERROR_EXIT_CODE;
-            
+
         } else {
             log.severe("Unknown Clics Validator exit code: " + exitCode);
             resultString = "Unknown exit code from Clics Validator: " + exitCode;
@@ -1581,11 +1582,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         log.info("Saving Clics Validator result: '" + resultString + "'");
     }
     /**
-     * Stores the results of the execution of a Custom Validator which uses the PC2 Validator Interface. 
+     * Stores the results of the execution of a Custom Validator which uses the PC2 Validator Interface.
      * Currently this method just delegates to {@link #updatePC2ValidatorResults(String, Log)}; it is
-     * provided in the event of a future need to distinguish between the real (internal) PC2Validator 
+     * provided in the event of a future need to distinguish between the real (internal) PC2Validator
      * and a Custom Validator which uses the PC2 Validator Interface.
-     * 
+     *
      * @param resultsFileName
      *            the name of the file containing the results
      * @param aLog
@@ -1596,12 +1597,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     }
 
     /**
-     * Stores the results of the execution of a Custom Validator which uses the Clics Validator Interface. 
-     * 
-     * Currently this method just delegates to {@link #updateClicsValidatorResults(int, String, Log)}; 
-     * it is provided in the event of a future need to distinguish between the real (internal) ClicsValidator 
+     * Stores the results of the execution of a Custom Validator which uses the Clics Validator Interface.
+     *
+     * Currently this method just delegates to {@link #updateClicsValidatorResults(int, String, Log)};
+     * it is provided in the event of a future need to distinguish between the real (internal) ClicsValidator
      * and a Custom Validator which uses the Clics Validator Interface.
-     * 
+     *
      * @param exitcode
      *            the exitcode returned by the Custom Validator
      * @param feedbackDirPath
@@ -1618,10 +1619,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     /**
      * Reads all of the lines in the specified file and returns them concatenated as a single string. Note that this should only be used for text files, and small ones at that. If any error occurs
      * while reading the file then the empty string is returned.
-     * 
+     *
      * @param fileName
      *            the name of the file to be read
-     * 
+     *
      * @return a String containing the contents of the specified file
      */
     private String readFileAsString(String fileName) {
@@ -1645,7 +1646,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Create an Execution Exception.
-     * 
+     *
      * @param inExecutionData
      * @param string
      */
@@ -1655,19 +1656,19 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * This method attempts to find a path to a "pc2.jar" file.
-     * 
+     *
      * It starts by assuming a default return value of "." (the current directory). It then makes various attempts to update (improve) this default, as follows:
-     * 
+     *
      * It starts by choosing "./build/prod" as the default path, or if that directory doesn't exist then it chooses "/software/pc2/cc/projects/pc2v9/build/prod".
-     * 
+     *
      * It then searches the current CLASSPATH (Java System property "java.class.path") for a classpath element ending in "pc2.jar". If one is found, the default path is updated to be the parent
      * directory of the indicated pc2.jar file.
-     * 
+     *
      * Finally, if no pc2.jar was found in the classpath it checks for the existence of file "dist/pc2.jar"; if that exists then the parent directory of that file (i.e., "dist") is returned as the
      * path.
-     * 
+     *
      * @return a String giving the path to a pc2.jar file, or "." if no pc2.jar file could be found. In any case the returned String is guaranteed to end with a File.separator character
-     * 
+     *
      * @throws IOException
      *             if any problem occurs accessing any of the specified paths
      */
@@ -1723,7 +1724,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Returns true if validator should be run/executed.
-     * 
+     *
      * @return true if should be validated.
      */
     public boolean isValidated() {
@@ -1733,6 +1734,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     public String getFileNameFromUser() {
         try {
             SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
                 public void run() {
                     JFileChooser chooser = new JFileChooser(mainFileDirectory);
                     try {
@@ -1758,7 +1760,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Select using File Open GUI file and copy to execute directory.
-     * 
+     *
      */
     protected void selectAndCopyDataFile(String inputFileName) throws Exception {
         // Prompt for filename
@@ -1779,18 +1781,18 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Execute the submission against a single data set.
-     * 
+     *
      * @param dataSetNumber
      *            a zero-based data set number
      * @return true if execution worked successfully.
      */
     protected boolean executeProgram(int dataSetNumber) {
-        
+
         boolean proceedToValidation = false;
         String inputDataFileName = null;
         boolean usingSandbox = false ;
         boolean bSandboxSystemError = false;
-        
+
         // a one-based test data set number
         int testSetNumber = dataSetNumber + 1;
 
@@ -1806,7 +1808,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             log.info("Constructing ExecuteTimer...");
             executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI() ? executionMonitor : null);
             log.info("Created new ExecuteTimer: " + executionTimer.toString());
-            
+
             if (problem.getDataFileName() != null) {
                 if (problem.isReadInputDataFromSTDIN()) {
                     // we are using createTempFile just to get a temp name, not to avoid conflicts
@@ -1828,7 +1830,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 // It is unclear what CAN be done without providing access to the interactive validator.  For
                 // interactive problems, it is up to the contestant to test their own submission with their
                 // own interactive validator, IMHO -- JB
-                
+
                 if (inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
                     selectAndCopyDataFile(inputDataFileName);
                 } else if (inputDataFileName != null) {
@@ -1937,7 +1939,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             //determine whether the Problem is configured to use a sandbox
             usingSandbox = isUsingSandbox();
-            
+
             // we do not do sandboxes or interactive for test runs
             if(!isTestRunOnly()) {
                 if(usingSandbox) {
@@ -1952,7 +1954,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                         executionData.setExecutionException(e);
                         return false;
                     }
-                
+
                     //insert the command for invoking the sandbox at the front of the command line
                     //note that if the problem is interactive, this is handled in getSandboxCmdLine() since
                     //there is a different sandbox command line and program (script) for interactive in a sandbox
@@ -1970,14 +1972,21 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             log.log(Log.DEBUG, "cmdline before substitution: " + cmdline);
 
             /**
-             * Special substitution for entry_point.
-             * We only do this substition for execution of the run, not compiles or validators, so it can't
+             * Special substitution for entry_point.  This is set up in compileProgram().
+             * We only do this substitution for execution of the run, not compiles or validators, so it can't
              * be done by substitutionAllStrings without refactoring.
              */
-            if (!StringUtilities.isEmpty(run.getEntryPoint())) {
-                // change Constants.CMDSUB_BASENAME_VARNAME to entry_point rather than basename from {:mainfile} before
-                // other substitutions (overrides :mainfile)
-                cmdline = replaceString(cmdline, Constants.CMDSUB_BASENAME_VARNAME, run.getEntryPoint());
+            if (hasEntryPoint) {
+                // change entry_point before substitutions on a per-language basis
+                // (overrides :mainfile, :files, :basename)
+                if(language.getID().equals(Language.CLICS_LANGID_PYTHON3)) {
+                    // Python ONLY takes one file, and if there's an entrypoint it overrides everything
+                    cmdline = replaceString(cmdline, Constants.CMSSUB_FILES_VARNAME, entryPointName);
+                    // This next one is dubious.  BASENAME implies no extension, but the entryPointName for python, has one.
+                    cmdline = replaceString(cmdline, Constants.CMDSUB_BASENAME_VARNAME, entryPointName);
+                } else {
+                    cmdline = replaceString(cmdline, Constants.CMDSUB_BASENAME_VARNAME, entryPointName);
+                }
             }
             cmdline = substituteAllStrings(run, cmdline, testSetNumber);
             log.log(Log.DEBUG, "cmdline after substitution: " + cmdline);
@@ -1989,7 +1998,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             String trimmedCmd = cmdline.trim();
             String cmdWord; //the first "word" in the command line
-            
+
             //find the location of the first space in the trimmed command line (if any)
             int i = trimmedCmd.indexOf(" ");
             if (i > -1) {
@@ -2027,16 +2036,16 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             //if a sandbox is being used, disable both the ExecutionTimer's actionPerformed() ability to stop the process
             // as well as the TimerTask's ability to stop the process
 //            if (usingSandbox) {
-//                //don't allow either the GUI timer or the TimerTask to stop the team code process; 
+//                //don't allow either the GUI timer or the TimerTask to stop the team code process;
 //                // the sandbox will be responsible for this.
 //                autoStop = false;
 //            }
-            
-            //start the program executing.  Note that runProgram() sets the "startTimeNanos" timestamp 
+
+            //start the program executing.  Note that runProgram() sets the "startTimeNanos" timestamp
             /// immediately prior to actually "execing" the process.
             log.info("starting team program...");
             process = runProgram(cmdline, formatTestCasePhase("Executing", testSetNumber), autoStop, executionTimer);
-            
+
             //make sure we succeeded in getting the external process going
             if (process == null) {
                 log.warning("team program failed to start (runProgram() returned null process)");
@@ -2049,61 +2058,62 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             } else {
                 log.info("created new team process " + getProcessID(process));
             }
-            
+
             //allow process to be terminated by button
             activeExecutionTimer = executionTimer;
-            
+
             //create a Timer to run the TLE kill task
             log.info("constructing new TLE-Timer...");
             Timer timeLimitKillTimer = new Timer("TLE-Timer");
             log.info("got new TLE-Timer: " + timeLimitKillTimer.toString());
-            
+
             //create a TimerTask to kill the process if it exceeds the problem time limit
             // (note that this task only gets scheduled (see below) if we are NOT using a sandbox)
-            
+
             killedByTimer = false ;
-            
+
             TimerTask task = new TimerTask() {
+                @Override
                 public void run() {
-                    
+
                     log.info("running TLE-Timer kill task...");
-                    
+
                     //first step: stop the process from running further
                     if (executionTimer != null) {
                         log.info("calling stopIOCollectors() in ExecuteTimer " + executionTimer.toString());
                         executionTimer.stopIOCollectors();
                     }
-                    
+
                     //make sure the process is gone (the call to stopIOCollectors(), above, will call destroy() first --
                     // but only if the executionTimer is not null)
                     if (process != null) {
                         log.info("calling process.destroy() for process " + getProcessID(process));
                         process.destroy();
                     }
-                    
+
                     killedByTimer = true;
                 }
             };
-            
+
             //set the TLE kill task delay to the number of milliseconds allowed by the problem
-            long delay = (long) (problem.getTimeOutInSeconds() * 1000) ;
-            
+            long delay = problem.getTimeOutInSeconds() * 1000 ;
+
             if(usingSandbox) {
                 log.info ("adding " + SANDBOX_EXTRA_KILLTIME_MS + " msec delay to TLE-Timer for sandbox");
                 delay += SANDBOX_EXTRA_KILLTIME_MS;
             }
-            
+
             //schedule the TLE kill task with the Timer -- but only for judged runs (i.e., non-team runs)
             // and only when we're not using a sandbox (which will handle time limit within the sandbox)
             if (autoStop) {
                 log.info ("scheduling kill task with TLE-Timer with " + delay + " msec delay");
                 timeLimitKillTimer.schedule(task, delay);
             }
-            
+
             // TODO: Future investigation: The IOCollectors are probably not needed for interactive problems since
             // the I/O is redirected between the submission and the interactive validator in the scripts. (JB)
-            // It doesn't hurt to create them, but nothing will every be written to them or read from them. 
-            
+            // It doesn't hurt to create them, but nothing will every be written to them or read from them.
+
             log.info("creating IOCollectors...");
             // Create a stream that reads from the stdout of the child process
             BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());
@@ -2114,7 +2124,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             IOCollector stdoutCollector = new IOCollector(log, childOutput, stdoutlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
             IOCollector stderrCollector = new IOCollector(log, childError, stderrlog, executionTimer, getMaxFileSize() + ERRORLENGTH);
 
-            //store references to the collectors in the execution timer 
+            //store references to the collectors in the execution timer
             log.info("calling setIOCollectors() for ExecuteTimer " + executionTimer.toString());
             executionTimer.setIOCollectors(stdoutCollector, stderrCollector);
             log.info("calling setProc(" + getProcessID(process) + ") in ExecuteTimer " + executionTimer.toString());
@@ -2126,14 +2136,14 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             //check if problem is configured with an input data file which the team program (process) should read from stdin
             if (inputDataFileName != null && problem.isReadInputDataFromSTDIN()) {
-                
+
                 //yes, problem needs data file sent to its stdin
                 log.info("Using STDIN from file " + inputDataFileName);
 
                 //create streams for input data file and stdin for the process
                 BufferedOutputStream out = new BufferedOutputStream(process.getOutputStream());  //team's stdin stream
                 BufferedInputStream in = new BufferedInputStream(new FileInputStream(inputDataFileName));  //data file to read
-                
+
                 //copy bytes from input data file to process's stdin, 32K at a time
                 byte[] buf = new byte[32768];
                 int c;
@@ -2147,10 +2157,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
                 //close the input data file and process stdin streams if they're still open
                 // (note that they could have been implicitly closed because a timer killed the process to which they were connected,
-                // and that this in turn can throw IOException, at least in Java8; 
+                // and that this in turn can throw IOException, at least in Java8;
                 // see https://stackoverflow.com/questions/25175882/java-8-filteroutputstream-exception/)
                 try {
-                    if (in!=null) {  
+                    if (in!=null) {
                         in.close();
                     }
                 } catch (IOException e) {
@@ -2166,12 +2176,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     log.info("Caught (and ignoring) an IOException while closing team stdin stream "
                                     + " (this can happen if the team process was terminated by timer).");
                 }
-              
+
             }
 
-            //wait (block this thread) until both IOCollectors terminate, which happens when either 
+            //wait (block this thread) until both IOCollectors terminate, which happens when either
             //  (1) EOF is reached on the child stdout/err,
-            //  (2) the collector is halted by the ExecuteTimer (either because the time limit was exceeded or the 
+            //  (2) the collector is halted by the ExecuteTimer (either because the time limit was exceeded or the
             //      operator presses the "Terminate" button), or
             //  (3) the collector collects maxFileSize input from the child process
             log.info("waiting for IOCollectors to terminate...");
@@ -2180,24 +2190,24 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             //no longer able to terminate with button since it is finished
             activeExecutionTimer = null;
-            
+
             //when we reach here we know that both IOCollectors have terminated, which means one (or more) of the three conditions above
             // is true: either the child has stopped producing output (generated EOF on both stdout and stderr), the timer has terminated the
             // IOCollectors due to either a time limit or the operator pressing the "Terminate" button, or the IOCollector reached maximum
             // output.  In all these cases we need to wait for the process to die.
-            
+
             //wait for the process to finish
             log.info("waiting for team process " + getProcessID(process) + " to exit...");
             int exitCode = process.waitFor();
-            
+
             //timestamp the end of the process's execution
             endTimeNanos = System.nanoTime();
-            
+
             log.info("team process returned exit code " + exitCode);
-            
+
             //TODO: comment-out this debug statement
             //System.out.println ("team process returned exit code " + exitCode);
-            
+
             //get rid of the TLE timer (whether the TLE-kill task has been fired or not)
             log.info("cancelling TLE-Timer (note: this does not stop any already-running TLE-Timer tasks...)");
             timeLimitKillTimer.cancel();
@@ -2205,10 +2215,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             //update executionData info
             executionData.setExecuteExitValue(exitCode);
             executionData.setExecuteTimeMS(getExecutionTimeInMSecs());
-            
+
             boolean runTimeLimitWasExceeded = getExecutionTimeInMSecs() > problem.getTimeOutInSeconds()*1000 ;
             executionData.setRunTimeLimitExceeded(runTimeLimitWasExceeded);
-            
+
             /**
              * Check sandbox script return codes
              */
@@ -2239,7 +2249,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     }
                 }
             }
- 
+
             if (executionData.isRunTimeLimitExceeded()) {
                 log.info("Run exceeded problem time limit of " + problem.getTimeOutInSeconds() + " secs: actual run time = " + executionData.getExecuteTimeMS() + " msec;  Run = " + run);
             }
@@ -2249,7 +2259,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 log.info("stopping ExecuteTimer " + executionTimer.toString());
                 executionTimer.stopTimer();
                 terminatedByOperator = executionTimer.isTerminatedByOperator();
-                
+
             }
 
             log.info("calling Process.destroy() on process " + getProcessID(process) );
@@ -2266,7 +2276,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             stderrlog.close();
 
             executionData.setExecuteSucess(true);
-            
+
             // TODO: Future development: for interactive problems, it might be nice to use the interactive validator output as the
             // program output so the judge's can see what happened. JB
             executionData.setExecuteProgramOutput(new SerializedFile(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME)));
@@ -2323,7 +2333,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             }
 
             proceedToValidation = true;
-            
+
         } catch (Exception e) {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
@@ -2355,7 +2365,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             executionData.setValidationResults(judgementString);
             executionData.setValidationSuccess(true);
             proceedToValidation = false;
-            
+
         } else if(bSandboxSystemError) {
             Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, Judgement.ACRONYM_OTHER_CONTACT_STAFF);
             String judgementString = "No - contact staff"; // default
@@ -2372,7 +2382,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         // if we were not killed by the execute timer and we didn't override the judgement above by
         // TLE/MLE/OCS
         if (executionData.getExecuteExitValue() != 0  &&  !killedByTimer && proceedToValidation) {
-            
+
             Judgement judgement = JudgementUtilities.findJudgementByAcronym(contest, "RTE");
             String judgementString = "No - Run-time Error"; // default
             if (judgement != null) {
@@ -2383,20 +2393,20 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             executionData.setValidationSuccess(true);
             proceedToValidation = false;
         }
-        
+
         return proceedToValidation;
     }
 
     /**
      * Check if the problem for this submission requires a sandbox.
      * Note: teams currently do not use a sandbox for the test button.
-     * 
+     *
      * @return true if a sandbox should be used for the current Problem; false if not.
      */
     private boolean isUsingSandbox() {
-        
+
         log.info("Checking problem sandbox usage for " + problem.getShortName() + " Sandbox Type " + problem.getSandboxType().toString());
-        
+
         return (problem.isUsingSandbox() && !isTeam());
     }
 
@@ -2404,30 +2414,30 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * Setup the environment needed for to run the current submission in a sandbox.  This involves making sure that
      * the system supports sandbox's and, the copying of any necessary files to create the sandbox succeeded.  This
      * does NOT imply creating will work when it comes time to run the submission.
-     * 
+     *
      * If this routine returns normally, then the files necessary for running in a sandbox have been copied successfully.
-     * 
-     * @throws Exception if there is a sandbox configuration issue, such as 
+     *
+     * @throws Exception if there is a sandbox configuration issue, such as
      *          we're running on an OS platform where sandbox isn't supported, or
      *          the specified sandbox can't be loaded into the execute directory.
      */
     private void setupSandbox() throws Exception {
-        
+
         log.info("Setting up problem sandbox for " + problem.getShortName() + " Sandbox Type " + problem.getSandboxType().toString());
-            
+
         //check the OS to be sure we have a sandbox supported
         if (OSCompatibilityUtilities.isRunningOnWindows() && !debugAllowSandboxInvocationOnWindows) {
-            
+
             log.severe("Attempt to execute a problem configured with a sandbox on a Windows system: not supported");
             throw new Exception ("Sandbox not supported on Windows OS");
-            
+
         } else {
-            
+
             //OS supported (non-Windows values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
             //check if we're supposed to use the PC2 internal sandbox
             SandboxType sbType = problem.getSandboxType();
             if (sbType == SandboxType.PC2_INTERNAL_SANDBOX) {
-                
+
                 log.info("Copying PC2 sandbox into Execute directory");
                 try {
                     //copy the PC2 internal sandbox into the execution directory
@@ -2442,30 +2452,30 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 //TODO: replace this block with whatever code is necessary to properly set up the specified external sandbox
                 log.severe("Unsupported sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
                 throw new Exception ("Unsupported sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
-                
+
             } else {
-                
+
                 //unknown sandbox type
                 log.severe("Unknown sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
                 throw new Exception ("Unknown sandbox type '" + sbType + "' in Problem configuration; cannot execute submission");
             }
         }
-        
+
         log.info("Using sandbox type '" + problem.getSandboxType() + "'; problem memory limit = " + problem.getMemoryLimitMB() + "MB");
-        
+
         //Problem has a properly-configured sandbox and we're not running a Team client
         return;
     }
 
     /**
      * Copies the PC2 internal sandbox implementation file into the execution directory.
-     * 
-     * @throws Exception if creation of the sandbox file in the execution directory failed.  
+     *
+     * @throws Exception if creation of the sandbox file in the execution directory failed.
      *          The Exception which is thrown is whatever Exception occurred during execution
      *          of the file copy operation.
      */
     private void copyPC2Sandbox() throws Exception {
-        
+
         String sandboxScriptName;
         if(problem.isInteractive()) {
             sandboxScriptName = Constants.PC2_INTERNAL_SANDBOX_INTERACTIVE_NAME;
@@ -2478,10 +2488,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         //use the VersionInfo class to get the PC2 installation directory
         VersionInfo versionInfo = new VersionInfo();
         String home = versionInfo.locateHome();
-        
+
         //point to the PC2 Internal Sandbox file (under "/sandbox" in the home, i.e. installation, directory)
         String srcFileName = home + File.separator + Constants.PC2_SCRIPT_DIRECTORY + File.separator + sandboxScriptName ;
-        
+
         try {
             //copy the PC2 internal sandbox program into the execute directory
             Files.copy(new File(srcFileName).toPath(), new File(targetFileName).toPath());
@@ -2490,36 +2500,36 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         } catch (Exception e){
             log.severe("Exception copying PC2 Internal Sandbox to execute directory: " + e.getMessage());
             executionData.setExecutionException(e);
-            throw e;  
+            throw e;
         }
     }
-    
+
 
     /**
      * Setup the environment needed to run the current submission using an interactive validator.  This involves making sure that
      * the system supports interactive validators and, the copying of any necessary files succeeds.  This
      * does NOT imply the validator will work when it comes time to run the submission.
-     * 
+     *
      * If this routine returns normally, then the files necessary for running in an interactive submission have been copied successfully.
-     * 
-     * @throws Exception if there is a interactive validator configuration issue, such as 
+     *
+     * @throws Exception if there is a interactive validator configuration issue, such as
      *          we're running on an OS platform where interactive validators aren't supported, or
      *          the specified scripts for interactive validation can't be loaded into the execute directory.
      */
     private void setupInteractiveValidator() throws Exception {
-        
+
         log.info("Setting up problem " + problem.getShortName() + " for interactive validation");
-            
+
         //check the OS to be sure we support interactive problems
         if (OSCompatibilityUtilities.isRunningOnWindows() && !debugAllowInteractiveInvocationOnWindows) {
-            
+
             log.severe("Attempt to execute a problem configured with an interactive validator on a Windows system: not supported");
             throw new Exception ("Interactive Validators are not supported on Windows OS");
-            
+
         } else {
-            
+
             //OS supported (non-Windows values of osName could be "Linux", "SunOS", "FreeBSD", and "Mac OS X", all of which should work)
-                
+
             log.info("Copying PC2 interactive validator scripts into Execute directory");
             try {
                 //copy the PC2 interactive validator scripts into the execution directory
@@ -2530,22 +2540,22 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 throw e;
             }
         }
-        
+
         //Problem has a properly-configured interactive validator and we're not running a Team client
         return;
     }
 
     /**
      * Copies the PC2 interactive validator script files into the execution directory.
-     * 
-     * @throws Exception if creation of the script files in the execution directory failed.  
+     *
+     * @throws Exception if creation of the script files in the execution directory failed.
      *          The Exception which is thrown is whatever Exception occurred during execution
      *          of the file copy operation.
      */
     private void copyPC2InteractiveValidatorScripts() throws Exception {
-        
+
         ArrayList<String> scriptNames = new ArrayList<String>();
-       
+
         //If a sandbox is being used, the interactive validator sandbox script was copied already by setupSandbox(). If not
         // using a sandbox, we have to copy the non-sandbox version of the interactive validator script here.
         SandboxType sbType = problem.getSandboxType();
@@ -2554,19 +2564,19 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         }
         // Add in the PC2 final validator that validates the results of the interactive validator
         scriptNames.add(Constants.PC2_INTERACTIVE_VALIDATOR_NAME);
-        
+
         //use the VersionInfo class to get the PC2 installation directory
         VersionInfo versionInfo = new VersionInfo();
-        String home = versionInfo.locateHome();      
-        
+        String home = versionInfo.locateHome();
+
         // Now, copy the files one at-a-time from the list
         for(String scriptName : scriptNames) {
             //point to the file that we want to create
             String targetFileName = prefixExecuteDirname(scriptName);
-    
+
             //point to the PC2 Internal Sandbox file (under "/scripts" in the home, i.e. installation, directory)
             String srcFileName = home + File.separator + Constants.PC2_SCRIPT_DIRECTORY + File.separator + scriptName ;
-            
+
             try {
                 //copy the script into the execute directory
                 Files.copy(new File(srcFileName).toPath(), new File(targetFileName).toPath());
@@ -2575,14 +2585,14 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             } catch (Exception e){
                 log.severe("Exception copying PC2 interactive validator script to execute directory: " + e.getMessage());
                 executionData.setExecutionException(e);
-                throw e;  
+                throw e;
             }
         }
     }
-    
+
     /**
      * Returns an indication of whether the currently executing client is a Team (as opposed to a Judge, Admin, or Scoreboard for example).
-     * 
+     *
      * @return true if the currently executing client is a Team; false otherwise.
      */
     private boolean isTeam() {
@@ -2603,19 +2613,19 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * Returns the execution time of the child process; assumes that both {@link #startTimeNanos} and
      * {@link #endTimeNanos} have been set prior to calling this method.  The method works by computing the difference
      * between these two variables and converting it from nanoseconds to milliseconds, rounded.
-     * 
+     *
      * @return a long containing the (rounded) millseconds of execution time
      */
     private long getExecutionTimeInMSecs() {
-                
+
         long diffNanos = endTimeNanos - startTimeNanos ;
         //round and convert to msecs
         long diffMillis = (diffNanos + 500_000) / NANOSECS_PER_MILLISEC ;
-        
+
         return diffMillis;
     }
 
-    
+
     protected boolean isValidDataFile(Problem inProblem) {
         boolean result = false;
         if (inProblem.getDataFileName() != null && inProblem.getDataFileName().trim().length() > 0) {
@@ -2633,10 +2643,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Extract source file and run compile command line script.
-     * 
+     *
      * @return true if executable is created.
-     * 
-     * TODO: this method needs to be updated to use the nanoTimer (see method {@link #executeProgram(int)}) 
+     *
+     * TODO: this method needs to be updated to use the nanoTimer (see method {@link #executeProgram(int)})
      */
     protected boolean compileProgram() {
         int exitCode = 0;
@@ -2648,30 +2658,62 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             packageName = "";
             packagePath = "";
-            
-            String programName = language.getExecutableIdentifierMask();
-            
-            // the "executable" program name is the entry point, if one exists, so try to substitute that first
-            if (!StringUtilities.isEmpty(run.getEntryPoint())) {
-                // change Constants.CMDSUB_BASENAME_VARNAME to entry_point rather than basename from {:mainfile} before
-                // other substitutions (overrides :mainfile)
-                programName = replaceString(programName, Constants.CMDSUB_BASENAME_VARNAME, run.getEntryPoint());
-            }
 
-            // This used to just replace the {:basename}, but there is no reason not to run it
-            // through the substituteAllStrings() especially since we now have conditional suffix
-            // substitution string.
-            programName = substituteAllStrings(run, programName);
-            
-            if (runFiles.getMainFile().getName().endsWith("java")) {
-                packageName = searchForPackage(prefixExecuteDirname(runFiles.getMainFile().getName()));
-                packagePath = replaceString(packageName, ".", File.separator);
+            String programName = language.getExecutableIdentifierMask();
+
+            hasEntryPoint = !StringUtilities.isEmpty(run.getEntryPoint());
+
+            // the "executable" program name is the entry point, if it has an entry point
+            // we have to figure out what the compiler is going to produce as output so we
+            // can see if the compile was successful.  That's why we have to go through
+            // all this.
+            if (hasEntryPoint) {
+                programName = run.getEntryPoint();
+                // For java, set up the packageName and packagePath members
+                if(language.getID().equals(Language.CLICS_LANGID_JAVA)) {
+                    // first check if ".class" is at the end.  Apparently, this can happen.
+                    int iSep = programName.lastIndexOf('.');
+                    if(iSep > 0 && programName.substring(iSep).equals(".class")) {
+                        // strip off extension
+                        programName = programName.substring(0, iSep);
+                    }
+                    // package name is everything before the last period, inclusive
+                    // eg. nwerc2021.MySolution.Knitpicking
+                    //  packageName = nwerc2021.MySolution
+                    //  packagePath = nwerc2021/MySolution (or nwerc2021\MySolution on Windows)
+                    //  programName = Knitpicking
+                    iSep = programName.lastIndexOf('.');
+                    // Has to be at least 1 char before the . and 1 after it for it to be a package.
+                    // Otherise, there is no package, and it's just the class name.
+                    if(iSep > 0 && iSep < programName.length()-1) {
+                        // include trailing '.' in packageName
+                        packageName = programName.substring(0, iSep+1);
+                        programName = programName.substring(iSep+1);
+                        packagePath = replaceString(packageName, ".", File.separator);
+                    }
+                }
+                entryPointName = programName;
+
+                // create the name of the expected compilation result
+                programName = replaceString(language.getExecutableIdentifierMask(), Constants.CMDSUB_BASENAME_VARNAME, programName);
+            } else {
+
+                // This used to just replace the {:basename}, but there is no reason not to run it
+                // through the substituteAllStrings() especially since we now have conditional suffix
+                // substitution string.
+                programName = substituteAllStrings(run, programName);
+
+                if(language.getID().equals(Language.CLICS_LANGID_JAVA)) {
+                    packageName = searchForPackage(prefixExecuteDirname(runFiles.getMainFile().getName()));
+                    packagePath = replaceString(packageName, ".", File.separator);
+                }
             }
 
             // Check whether the team submitted an executable, if they did remove
             // it.
             File program = new File(prefixExecuteDirname(programName));
-            if (program.exists()) {
+            // Program can exist if it's interpretted.  Can happen, for example, with python and an entrypoint.
+            if (program.exists() && !language.isInterpreted()) {
 
                 // SOMEDAY log Security Warning ?
                 log.config("Team submitted an executable " + programName);
@@ -2703,7 +2745,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             }
             //allow compile to be terminated by button
             activeExecutionTimer = executionTimer;
-            
+
             // This reads from the stdout of the child process
             BufferedInputStream childOutput = new BufferedInputStream(process.getInputStream());
             // The reads from the stderr of the child process
@@ -2726,7 +2768,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             //no longer can terminate by button since it is finished
             activeExecutionTimer = null;
-            
+
             // if(isJudge && executionTimer != null) {
             if (executionTimer != null) {
                 executionTimer.stopTimer();
@@ -2799,7 +2841,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         for (int i = 0; i < listOfFiles.length; i++) {
             File file = listOfFiles[i];
             if (file.getName().endsWith(".class")) {
-                file.renameTo(new File(path+File.separator+file.getName()));                
+                file.renameTo(new File(path+File.separator+file.getName()));
             }
         }
     }
@@ -2811,7 +2853,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             scanner = new Scanner(new File(file));
             while (scanner.hasNextLine()) {
                String lineFromFile = scanner.nextLine();
-               if (lineFromFile.startsWith("package ")) { 
+               if (lineFromFile.startsWith("package ")) {
                    // a match!
                    name = lineFromFile.substring(8).replaceAll(" ", "");
                    name = replaceString(name, ";", ".");
@@ -2827,23 +2869,23 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * This method returns the maximum allowed output file size for the current problem, in BYTES.
-     * 
+     *
      * The method first checks to see if the current problem has a non-zero maximum output file size
      * specified.  If so, that value is converted to bytes (it is stored in the {@link Problem} class
      * as a value in KB) and returned.  If not, the current global (contest-wide) max file size value
      * (which is stored in the {@link IInternalContest} object's {@link ContestInformation} object, in
      * BYTES) is returned.
-     * 
+     *
      *  If the current problem is null, an error is logged and a value of zero is returned.
-     * 
-     * 
+     *
+     *
      * @return max currently allowed output file size.
      */
     private long getMaxFileSize() {
-        
+
         //make sure we have a Problem defined
         if (problem != null) {
-            
+
             //check if the problem has its own (problem-specific) output file size limit, which is noted
             //  by having a limit value in the problem which is greater than zero
             long problemLimit = problem.getMaxOutputSizeKB();
@@ -2854,9 +2896,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 //problem doesn't have its own limit; return the global (contest-wide) value
                 return contest.getContestInformation().getMaxOutputSizeInBytes();
             }
-                
+
         } else {
-            
+
             //problem is null; log error and return global value since no per-problem value is available
             long globalMaxOutput = contest.getContestInformation().getMaxOutputSizeInBytes();
             if (log != null) {
@@ -2871,9 +2913,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Replace all instances of beforeString with afterString.
-     * 
+     *
      * If before string is not found, then returns original string.
-     * 
+     *
      * @param origString
      *            string to be modified
      * @param beforeString
@@ -2903,12 +2945,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
         return buf.toString();
     }
-    
+
     /**
      * Replace beforeString with int.
-     * 
+     *
      * For details see {@link #replaceString(String, String, String)}
-     * 
+     *
      * @param origString
      *            string to be modified
      * @param beforeString
@@ -2925,12 +2967,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     public String substituteAllStrings(Run inRun, String origString) {
         return(substituteAllStrings(inRun, origString, 1));
     }
-    
+
     /**
      * return string with all field variables filled with values.
-     * 
+     *
      * Each variable will be filled in with values.
-     * 
+     *
      * <pre>
      *             valid fields are:
      *              {:mainfile} - submitted file (hello.java)
@@ -2945,7 +2987,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      *              {:ansfile}
      *              {:pc2home}
      *              {:sandboxprogramname} - the sandbox program name as defined in the Problem
-     *              {:sandboxcommandline} - the command line used to invoke the sandbox as defined in the Problem 
+     *              {:sandboxcommandline} - the command line used to invoke the sandbox as defined in the Problem
      *              {:ensuresuffix=...} - add supplied suffix if not present already
      *              {:testcase} - testcase number
      *              {:executeinfofilename} - filename of NDJson to put execute/validation info in
@@ -2954,7 +2996,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      *              {:timelimit} - CPU time limit in seconds
      *              {:memlimit} - memory limit in MB
      * </pre>
-     * 
+     *
      * @param dataSetNumber
      *            which set of judge data to use (1 in the case of only 1 file)
      * @param inRun
@@ -2977,8 +3019,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 return origString;
             }
             newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
-            newString = replaceString(newString, "{files}", ExecuteUtilities.getAllSubmittedFilenames(runFiles));
-            newString = replaceString(newString, "{:basename}", removeExtension(runFiles.getMainFile().getName()));
+            newString = replaceString(newString, Constants.CMSSUB_FILES_VARNAME, ExecuteUtilities.getAllSubmittedFilenames(runFiles));
+            newString = replaceString(newString, Constants.CMDSUB_BASENAME_VARNAME, removeExtension(runFiles.getMainFile().getName()));
             newString = replaceString(newString, "{:package}", packageName);
 
             String validatorCommand = null;
@@ -3051,9 +3093,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 } else {
                     newString = replaceString(newString, "{:ansfile}", nullArgument);
                 }
-                
+
                 newString = replaceString(newString, "{:testcase}", Integer.toString(dataSetNumber));
-                
+
                 if(executeInfoFileName != null) {
                     newString = replaceString(newString, "{:executeinfofilename}", executeInfoFileName);
                 } else {
@@ -3080,7 +3122,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     newString = replaceString(newString, "{:ansfilename}", nullArgument);
                 }
                 newString = replaceString(newString, "{:timelimit}", Long.toString(problem.getTimeOutInSeconds()));
-              
+
                 // TODO REFACTOR replace vars with constants for: memlimit, sandboxcommandline,sandboxprogramname
                 newString = replaceString(newString, "{:memlimit}", Integer.toString(problem.getMemoryLimitMB()));
 
@@ -3102,7 +3144,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             } else {
                 log.config("substituteAllStrings() problem is undefined (null)");
             }
-            
+
             if (executionData != null) {
                 if (executionData.getExecuteProgramOutput() != null) {
                     if (executionData.getExecuteProgramOutput().getName() != null) {
@@ -3114,7 +3156,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 newString = replaceString(newString, "{:exitvalue}", Integer.toString(executionData.getExecuteExitValue()));
                 newString = replaceString(newString, "{:executetime}", Long.toString(executionData.getExecuteTimeMS()));
             }
-            
+
             String pc2home = new VersionInfo().locateHome();
             if (pc2home != null && pc2home.length() > 0) {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
@@ -3122,7 +3164,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             // Check for conditional suffix (that is, the previous chars match), if not, add them
             newString = ExecuteUtilities.replaceStringConditional(newString, Constants.CMDSUB_COND_SUFFIX);
-            
+
         } catch (Exception e) {
             log.log(Log.CONFIG, "Exception substituting strings ", e);
             // carrying on not required to save exception
@@ -3135,7 +3177,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * Return string minus last extension. <br>
      * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is found in string, will return a copy of the original string. <br>
      * Unlike the Unix basename program, no extension is supplied.
-     * 
+     *
      * @param original
      *            the input string
      * @return a string with all text after last . removed
@@ -3156,7 +3198,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * return directory name for input file.
-     * 
+     *
      * @param file
      *            input file.
      * @return directory name.
@@ -3172,17 +3214,17 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * This method accepts a String containing a command and exec's a new process running that command.
-     * 
-     * 
+     *
+     *
      * @param cmdline the command (program) to be executed as a new process
      * @param msg a String to be displayed on the specified ExecuteTimer GUI (if the ExecuteTimer is not null)
      * @param autoStopExecution a flag indicating whether the ExecuteTimer should stop (kill) the process when the timer expires
      * @return the newly-started process.
      */
     public Process runProgram(String cmdline, String msg, boolean autoStopExecution, ExecuteTimer myExecuteTimer) {
-        
+
         log.info("entering runProgram() to execute command '" + cmdline + "'");
-        
+
         Process newProcess = null;
         errorString = "";
 
@@ -3201,12 +3243,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 }
 
                 startTimeNanos = System.nanoTime();
-                
+
                 log.info("Invoking Runtime.exec() to execute command '" + cmdline + "'");
                 newProcess = Runtime.getRuntime().exec(cmdline, env, runDir);
-                
+
                 log.info("Created new process with id " + getProcessID(newProcess));
-                
+
 
                 // if(isJudge && executionTimer != null) {
                 if (myExecuteTimer != null) {
@@ -3215,7 +3257,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     log.info("Starting ExecuteTimer");
                     myExecuteTimer.startTimer();
                 }
-                
+
             } else {
                 errorString = "Execute Directory does not exist";
                 log.config("Execute Directory does not exist");
@@ -3234,10 +3276,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
         return newProcess;
     }
-    
+
     /**
      * This terminates the process by telling the ExecutionTimer to stop
      */
+    @Override
     public void executeFrameTerminated() {
         if(activeExecutionTimer != null) {
             activeExecutionTimer.terminateExecution();
@@ -3247,11 +3290,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * This method receives a {@link Process} object and returns the id of that Process.
-     * 
+     *
      * TODO: currently the implementation of this method simply returns the toString() of the received
      * Process object.  A future upgrade should use the Java 9 method Process.getProcessID() to obtain
      * the actual platform-specific id of the Process.
-     *  
+     *
      * @param theProcess the Process object who's ID is to be returned
      * @return a String containing the id of the specified Process
      */
@@ -3321,11 +3364,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Execute directory name for this client instance.
-     * 
+     *
      * The name is individual for each client.
-     * 
+     *
      * @see #getExecuteDirectoryNameSuffix()
-     * 
+     *
      * @return the name of the execute directory for this client.
      */
     public String getExecuteDirectoryName() {
@@ -3334,7 +3377,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Prepends directory name onto filename.
-     * 
+     *
      * @see #getExecuteDirectoryName()
      * @param filename
      *            filename without a directory name.
@@ -3350,7 +3393,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Set whether to overwrite judge's data files, or leave them.
-     * 
+     *
      * @param overwriteDataFiles
      *            if true, rewrite data files, if false do nothing.
      */
@@ -3364,9 +3407,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Is the pc2 module executing a team?
-     * 
+     *
      * If the module is a team, then execute will not extract judge's data files nor will execute run a validation.
-     * 
+     *
      */
 
     public void setTestRunOnly(boolean testRunOnly) {
@@ -3378,7 +3421,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     }
 
     /**
-     * 
+     *
      * @return true if show message to users
      */
     public boolean isShowMessageToUser() {
@@ -3387,7 +3430,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Show gui message to user when errors occur?
-     * 
+     *
      * @param showMessageToUser
      */
     public void setShowMessageToUser(boolean showMessageToUser) {
@@ -3404,7 +3447,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Prepend basedirectoryname in front of executedirectory name.
-     * 
+     *
      * @param baseDirectoryName
      */
     public void setExecuteBaseDirectoryName(String baseDirectoryName) throws Exception {
@@ -3426,11 +3469,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Set the suffix which is to be added to the execute directory name.
-     * 
+     *
      * This method must be called before calling {@link #getExecuteDirectoryName()} or {@link #getExecuteDirectoryName(String)}.
-     * 
+     *
      * @see #getExecuteDirectoryName()
-     * 
+     *
      * @param executeDirectoryNameSuffix
      *            the suffix to be added to the name of the execute directory
      */
@@ -3481,7 +3524,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Get filenames for each team's output for each test case.
-     * 
+     *
      * @return the list of team output file names.
      */
     public List<String> getTeamsOutputFilenames() {
@@ -3490,7 +3533,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Get filenames for each team's stderr for each test case.
-     * 
+     *
      * @return the list of team stderr file names.
      */
     public List<String> getTeamsStderrFilenames() {
@@ -3499,7 +3542,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Get filenames for each validator output for each test case.
-     * 
+     *
      * @return the list of validator output file names.
      */
     public List<String> getValidatorOutputFilenames() {
@@ -3508,52 +3551,52 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
     /**
      * Get filenames for each validator stderr output for each test case.
-     * 
+     *
      * @return the list of validator stderr output file names.
      */
     public List<String> getValidatorErrFilenames() {
         return validatorStderrFilesnames;
     }
-    
+
     /**
      * Returns the limit, in seconds, for the amount of time allowed for compilation of a submission.
-     * 
-     * TODO: currently the returned limit is the value defined by the constant DEFAULT_COMPILATION_TIME_LIMIT_SECS; 
-     * this should eventually be replaced by obtaining the problem-specified compilation time limit from a system 
+     *
+     * TODO: currently the returned limit is the value defined by the constant DEFAULT_COMPILATION_TIME_LIMIT_SECS;
+     * this should eventually be replaced by obtaining the problem-specified compilation time limit from a system
      * property settable either via the Admin GUI or from a problem.yaml file.  See bug 1669.
-     * 
+     *
      * @return an integer giving the compilation time limit, in seconds
      */
     private int getCompilationTimeLimit() {
-        
+
         return DEFAULT_COMPILATION_TIME_LIMIT_SECS ;
     }
-    
-    
+
+
     /**
-     * Returns the limit, in seconds, for the amount of time allowed for validation of the output of a single run 
+     * Returns the limit, in seconds, for the amount of time allowed for validation of the output of a single run
      * (test case) of a submission.
-     * 
-     * TODO: currently the returned limit is the value defined by the constant DEFAULT_VALIDATION_TIME_LIMIT_SECS; 
-     * this should eventually be replaced by obtaining the problem-specified compilation time limit from a system 
+     *
+     * TODO: currently the returned limit is the value defined by the constant DEFAULT_VALIDATION_TIME_LIMIT_SECS;
+     * this should eventually be replaced by obtaining the problem-specified compilation time limit from a system
      * property settable either via the Admin GUI or from a problem.yaml file. See bug 1669.
-     * 
+     *
      * @return an integer giving the per-run (per-test-case) validation time limit, in seconds
      */
     private int getValidationTimeLimit() {
-        
+
         return DEFAULT_VALIDATION_TIME_LIMIT_SECS ;
     }
-    
+
     /**
      * Returns a string indicating the phase of execution.
      * Ex. " Executing test case 3..."
      *     "Validating test case 3..."
      *     "Working on test case 3..."
-     *     
+     *
      * The goal is to return a fixed length string so it doesn't jump around
-     * when displayed in a GUI control. 
-     * 
+     * when displayed in a GUI control.
+     *
      * @return Formatted string that does not fluctuate in length.
      * @param runPhase A string indicating the phase of execution: Executing, Validating, etc.
      * @param testCase The test case number (1 ... 99999)
@@ -3562,12 +3605,12 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     {
         return(String.format("%10s test case %s", runPhase, StringUtilities.rpad(' ', 5, Integer.toString(testCase) + "...")));
     }
-    
+
     /**
      * Get the filename of a judge's file.  This could be a full path if the data files are external.  If the
      * files are internal, then we return the first one's name since each dataset will get copied to the name
      * of the first item.
-     * 
+     *
      * @return filename of a judge's file
      * @param wantInput - boolean indicating if we want the input file (true).  If false, we want the answer file
      * @param setIndex - Which dataset element number are we interested in [0, #datasets-1]
@@ -3576,15 +3619,15 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     {
         String result = null;
         SerializedFile serializedFile = null;
-        
+
         try {
             // it's a little more work for external files
             if (problem.isUsingExternalDataFiles()) {
-                
+
                 if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
                     serializedFile = problemDataFiles.getJudgesDataFiles()[setIndex];
                 } else {
-                    serializedFile = problemDataFiles.getJudgesAnswerFiles()[setIndex];               
+                    serializedFile = problemDataFiles.getJudgesAnswerFiles()[setIndex];
                 }
                 //Note: last argument (type) is unused in locateJudgesDataFile
                 result = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), type);
@@ -3608,10 +3651,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         }
         return(result);
     }
-    
+
     /**
      * Unpacks and creates a custom validator program.  If any error happens, an exception is thrown
-     * 
+     *
      * @throws SecurityException - if the copy of the output validator can not be generated in the execute folder
      * @throws IllegalStateException - if not output validator is available
      */
@@ -3643,6 +3686,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             throw new IllegalStateException("IllegalStateException: Problem is marked as having a Custom Validator but no "
                     + "SerializedFile for the validator could be obtained from the ProblemDataFiles");
         }
-        
+
     }
 }
