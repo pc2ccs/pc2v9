@@ -113,28 +113,6 @@ public class ProblemGroupPane extends JPanePlugin {
             getGroupListBox().setForeground(Color.BLACK);
         }
         getGroupListBox().setEnabled(enable);
-
-        // This loop is wrong and does not do what you think it does.
-        // Apparently, enabling/disabling a checkbox within a JCheckboxJList has no effect (it appears to always be enabled
-        // if the JCheckboxJList is enabled.)
-        // Instead you disable the entire JCheckboxJList component as we do above.  Leaving
-        // this here for code review, but should be removed.
-        // If this code is enabled, it causes lots and lots of re-reads of the problem data files
-        // since it would trigger a checkbox changed listener for each setEnabled().  This causes
-        // the check for the update button to be done which checks every data file and takes quite
-        // some time on huge data files and/or large numbers of files.
-//        ListModel<Object> list = getGroupListBox().getModel();
-//
-//        for (int i = 0; i < list.getSize(); i++) {
-//            Object ele = list.getElementAt(i);
-//            if (ele instanceof WrapperJCheckBox) {
-//                WrapperJCheckBox box = (WrapperJCheckBox) ele;
-//
-//                box.setEnabled(enable);
-//
-//            }
-//
-//        }
     }
 
     @Override
@@ -163,12 +141,8 @@ public class ProblemGroupPane extends JPanePlugin {
             selectGroupsRadioButton.setSelected(true);
         }
 
-        // I don't know what this is for and why it's here - This list is always empty at this point - JB 3/20/2024
-        // Why always enable the checkboxes?  Makes no sense.
-        // enableGroupCheckBoxes(true);
 
-        // This makes more sense - to color the background of the list box depending on whether "all groups" can view the problem
-        // and enable/disable the container of the checkboxes (JCheckBoxJList)
+        // Enable/Disable the checkbox list box depending on whether "all groups" can view the problem
         enableGroupCheckBoxes(!allGroupsSelected);
 
         Group[] groups = getContest().getGroups();
