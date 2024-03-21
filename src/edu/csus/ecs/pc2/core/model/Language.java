@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import edu.csus.ecs.pc2.core.StringUtilities;
@@ -7,16 +7,30 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 
 /**
  * Single Language Definition.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 // $HeadURL$
 public class Language implements IElementObject {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 7782777481422759344L;
+
+    /**
+     * Well-known CLICS language ids
+     * TODO: We have to find a better way to deal with language-specific things inside PC2.
+     *       Languages require specific processing for things like "entry_point".  It's non-trivial
+     *       to make this "dynamic" and have PC2 be language agnostic. This has to be discussed.
+     *       For now, we will use the somewhat "well-known" CLICS "unofficial" language Identifiers for
+     *       ICPC contests.  JB 03/20/2024
+     */
+    public static final String CLICS_LANGID_JAVA = "java";
+    public static final String CLICS_LANGID_KOTLIN = "kotlin";
+    public static final String CLICS_LANGID_PYTHON3 = "python3";
+    public static final String CLICS_LANGID_C = "c";
+    public static final String CLICS_LANGID_CPP = "cpp";
 
     /**
      * Title for the Language.
@@ -32,37 +46,37 @@ public class Language implements IElementObject {
 
     /**
      * Compiler/Language command line.
-     * 
+     *
      * Command line with field substitution to compile source.
      */
     private String compileCommandLine;
-    
+
     /**
      * Executable Identifier Mask.
-     * 
+     *
      */
     private String executableIdentifierMask;
 
-    
+
     /**
      * Judge program command line.
-     * 
+     *
      * Command line for judges to execute the program created using compileCommandLine.
      */
     private String judgeProgramExecuteCommandLine;
-    
+
     /**
      * Flag to indicate whether using judge execut command line.
      */
     private boolean usingJudgeProgramExecuteCommandLine = false;
-    
+
     /**
      * Execute program command line.
-     * 
+     *
      * Command line to execute the program created using compileCommandLine.
      */
     private String programExecuteCommandLine;
-    
+
     private boolean interpreted = false;
 
     private String id = "";
@@ -137,6 +151,7 @@ public class Language implements IElementObject {
     /**
      * @see Object#equals(java.lang.Object).
      */
+    @Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
@@ -150,6 +165,7 @@ public class Language implements IElementObject {
         }
     }
 
+    @Override
     public String toString() {
         return displayName;
     }
@@ -157,25 +173,29 @@ public class Language implements IElementObject {
     /**
      * @return Returns the elementId.
      */
+    @Override
     public ElementId getElementId() {
         return elementId;
     }
 
+    @Override
     public int versionNumber() {
         return elementId.getVersionNumber();
     }
 
+    @Override
     public int getSiteNumber() {
         return elementId.getSiteNumber();
     }
 
+    @Override
     public void setSiteNumber(int siteNumber) {
         elementId.setSiteNumber(siteNumber);
     }
 
     public boolean isSameAs(Language language) {
         try {
-            
+
             if (! StringUtilities.stringSame(displayName, language.getDisplayName())) {
                 return false;
             }
@@ -223,11 +243,11 @@ public class Language implements IElementObject {
     public void setExecutableIdentifierMask(String executableIdentifierMask) {
         this.executableIdentifierMask = executableIdentifierMask;
     }
-    
+
     public void setInterpreted(boolean interpreted) {
         this.interpreted = interpreted;
     }
-    
+
     public boolean isInterpreted() {
         return interpreted;
     }
@@ -239,15 +259,15 @@ public class Language implements IElementObject {
             return getProgramExecuteCommandLine();
         }
     }
-    
+
     public void setJudgeProgramExecuteCommandLine(String judgeProgramExecuteCommandLine) {
         this.judgeProgramExecuteCommandLine = judgeProgramExecuteCommandLine;
     }
-    
+
     public void setUsingJudgeProgramExecuteCommandLine(boolean usingJudgeProgramExecuteCommandLine) {
         this.usingJudgeProgramExecuteCommandLine = usingJudgeProgramExecuteCommandLine;
     }
-    
+
     public boolean isUsingJudgeProgramExecuteCommandLine() {
         return usingJudgeProgramExecuteCommandLine;
     }
@@ -255,7 +275,7 @@ public class Language implements IElementObject {
     public void setID(String newId) {
         this.id = newId;
     }
-    
+
     public String getID() {
         return id;
     }

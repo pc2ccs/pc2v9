@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Plugin;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -26,20 +27,20 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
- * 
- * 
+ *
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
 public class ExecuteUtilities extends Plugin {
-    
+
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -9167576117688387694L;
-    
+
     /**
      * Regular Expression to match include file names.
      */
@@ -51,51 +52,51 @@ public class ExecuteUtilities extends Plugin {
     private static Pattern includeRePattern = Pattern.compile(INCLUDE_RE);
 
     private Run run;
-    
+
     private RunFiles runFiles;
-    
+
     private Problem problem;
-    
+
     private Language language;
-    
+
     private ProblemDataFiles problemDataFiles;
-    
+
     private Log log;
-    
+
     private ExecutionData executionData;
-    
+
     private String resultsFileName;
 
     private static String debugMessage = null;
-    
+
     public static final String DEFAULT_PC2_JAR_PATH = "./build/prod";
-    
+
     public static final String PC2_JAR_FILENAME = "pc2.jar";
-    
+
     public ExecuteUtilities(IInternalContest contest, IInternalController controller, Run run, RunFiles runFiles, Problem problem, Language language) {
         super();
-        
+
         setContestAndController(contest, controller);
-        
+
         this.run = run;
         this.runFiles = runFiles;
         this.problem = problem;
         this.language = language;
-        
+
         log = getController().getLog();
-        
+
         if (run == null) {
             throw new IllegalArgumentException("Run is null");
         }
-        
+
         resultsFileName = createResultsFileName(run);
     }
 
     /**
      * Replace all instances of beforeString with afterString.
-     * 
+     *
      * If before string is not found, then returns original string.
-     * 
+     *
      * @param origString
      *            string to be modified
      * @param beforeString
@@ -106,7 +107,7 @@ public class ExecuteUtilities extends Plugin {
      */
     public static String replaceString(String origString, String beforeString, String afterString) {
         debugMessage = null;
-        
+
         if (origString == null) {
             return origString;
         }
@@ -126,12 +127,12 @@ public class ExecuteUtilities extends Plugin {
 
         return buf.toString();
     }
-    
+
     /**
      * Replace beforeString with int.
-     * 
+     *
      * For details see {@link #replaceString(String, String, String)}
-     * 
+     *
      * @param origString
      *            string to be modified
      * @param beforeString
@@ -141,7 +142,7 @@ public class ExecuteUtilities extends Plugin {
      * @return string after replacement.
      */
     public static String replaceString(String origString, String beforeString, int afterInt) {
-        
+
         debugMessage = null;
 
         String afterString = new Integer(afterInt).toString();
@@ -152,7 +153,7 @@ public class ExecuteUtilities extends Plugin {
      * Return string minus last extension. <br>
      * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is found in string, will return a copy of the original string. <br>
      * Unlike the Unix basename program, no extension is supplied.
-     * 
+     *
      * @param original
      *            the input string
      * @return a string with all text after last . removed
@@ -170,11 +171,11 @@ public class ExecuteUtilities extends Plugin {
         return outString;
 
     }
-    
-    
+
+
     /**
      * Match string to RE.
-     * 
+     *
      * @param str
      * @param reString
      * @return true if str matches regular expression reString
@@ -183,28 +184,28 @@ public class ExecuteUtilities extends Plugin {
         Pattern p = Pattern.compile(reString);
         Matcher m = p.matcher(str);
         return m.find();
-        
+
     }
-    
+
     /**
      * Match String to {@link #INCLUDE_RE}.
-     * 
+     *
      * @param str
      * @return true if string matches {{@link #INCLUDE_RE}.
      */
     public static boolean matchIncludeRe(String str) {
         return includeRePattern.matcher(str).find();
     }
-    
+
     /**
      * Return all compilable submitted file names.
-     * 
+     *
      * @param files
      * @return main file and any additional filenames that end in: .c, .cpp or .C
      */
     public static String getAllSubmittedFilenames(RunFiles files){
         String filelist = files.getMainFile().getName();
-        
+
         if (files.getOtherFiles() != null && files.getOtherFiles().length > 0){
             for (SerializedFile file : files.getOtherFiles()) {
                 if (! matchIncludeRe(file.getName())) {
@@ -214,12 +215,12 @@ public class ExecuteUtilities extends Plugin {
         }
         return filelist;
     }
-    
+
     /**
      * return string with all field variables filled with values.
-     * 
+     *
      * Each variable will be filled in with values.
-     * 
+     *
      * <pre>
      *             valid fields are:
      *              {:mainfile} - submitted file (hello.java)
@@ -234,13 +235,13 @@ public class ExecuteUtilities extends Plugin {
      *              {:ansfile}
      *              {:pc2home}
      * </pre>
-     * 
+     *
      * @param origString -
      *            original string to be substituted.
      * @return a new String with all occurrences of substitution variables replaced by the corresponding values
      */
     public String substituteAllStrings(String origString) {
-        
+
         String newString = "";
         String nullArgument = "-"; /* this needs to change */
 
@@ -252,24 +253,24 @@ public class ExecuteUtilities extends Plugin {
             return origString;
         }
         newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
-        newString = replaceString(newString, "{files}", getAllSubmittedFilenames(runFiles));
-        newString = replaceString(newString, "{:basename}", removeExtension(runFiles.getMainFile().getName()));
+        newString = replaceString(newString, Constants.CMSSUB_FILES_VARNAME, getAllSubmittedFilenames(runFiles));
+        newString = replaceString(newString, Constants.CMDSUB_BASENAME_VARNAME, removeExtension(runFiles.getMainFile().getName()));
 
         if (problem != null){
-            
+
             String validatorCommand = null;
 
             if (problem.getOutputValidatorProgramName() != null) {
                 validatorCommand = problem.getOutputValidatorProgramName();
             }
-            
+
             if (problemDataFiles != null) {
                 SerializedFile validatorFile = problemDataFiles.getOutputValidatorFile();
                 if (validatorFile != null) {
                     validatorCommand = validatorFile.getName(); // validator
                 }
             }
-            
+
             if (validatorCommand != null) {
                 newString = replaceString(newString, "{:validator}", validatorCommand);
             }
@@ -299,8 +300,8 @@ public class ExecuteUtilities extends Plugin {
                 debugLog("No language defined for "+run.getLanguageId());
             }
         }
-        
-        
+
+
         if (run.getProblemId() != null) {
             Problem[] problems = getContest().getProblems();
             int index = 0;
@@ -317,7 +318,7 @@ public class ExecuteUtilities extends Plugin {
                 debugLog("No problem defined for "+run.getProblemId());
             }
         }
-        
+
         if (run.getSubmitter() != null) {
             newString = replaceString(newString, "{:teamid}", run.getSubmitter().getClientNumber());
             newString = replaceString(newString, "{:siteid}", run.getSubmitter().getSiteNumber());
@@ -348,12 +349,12 @@ public class ExecuteUtilities extends Plugin {
             newString = replaceString(newString, "{:exitvalue}", Integer.toString(executionData.getExecuteExitValue()));
             newString = replaceString(newString, "{:executetime}", Long.toString(executionData.getExecuteTimeMS()));
         }
-        
+
         String pc2home = getPC2Home();
         if (pc2home != null && pc2home.length() > 0) {
             newString = replaceString(newString, "{:pc2home}", pc2home);
         }
-        
+
         if (resultsFileName != null) {
             newString = replaceString(newString, "{:resfile}", resultsFileName);
         }
@@ -363,31 +364,31 @@ public class ExecuteUtilities extends Plugin {
 
     /**
      * Perform conditional substitutions
-     * 
+     *
      * @param origString
      * @param condVar
      * @return - possibly modified string
      */
     public static String replaceStringConditional(String origString, String condVar) {
-        
+
         int subStartIdx, endIdx, suffLen;
         String suffString;
-        
+
         if (origString == null || condVar == null) {
             return origString;
         }
         // if substitute variable has an = sign, we try to match the substring up to and including the
         // equals sign, eg: {:ensuresuffix=Kt}, we want to match: {:ensuresuffix=
         int subIdx = condVar.indexOf('=');
-        
+
         // Need at least two chars to left of =
         if(subIdx < 2) {
             return origString;
-        }       
+        }
 
         // don't care about anything after the =
         String subMatch = condVar.substring(0, subIdx+1);
-        
+
         int startIdx = origString.lastIndexOf(subMatch);
 
         if (startIdx == -1) {
@@ -399,16 +400,16 @@ public class ExecuteUtilities extends Plugin {
         while (startIdx != -1) {
             subStartIdx = startIdx + subMatch.length();
             endIdx = origString.indexOf('}', subStartIdx);
-            
+
             // Missing closing } for substitute variable?
             if(endIdx == -1) {
                 break;
             }
-            
+
             // this is the string we may have to add, but first see if it's there already
             suffString = origString.substring(subStartIdx, endIdx);
             suffLen = suffString.length();
-            
+
             // if there are not enough chars before the substitute var to compare, or, the trailing characters
             // don't match, then we have to replace the substitute var with the new suffix string, otherwise, we
             // we just delete the substitute var altogether
@@ -418,13 +419,13 @@ public class ExecuteUtilities extends Plugin {
             } else {
                 buf.delete(startIdx,  endIdx+1);
             }
-            
+
             startIdx = origString.lastIndexOf(subMatch, startIdx - 1);
         }
 
         return buf.toString();
     }
-    
+
     public static String getPC2Home() {
         String pc2home = new VersionInfo().locateHome();
         return pc2home;
@@ -432,9 +433,9 @@ public class ExecuteUtilities extends Plugin {
 
 
     private void debugLog(String string) {
-        
+
         debugMessage = string;
-        
+
         Exception ex = new Exception("ERROR "+string);
         if (log != null){
             log. log(Log.DEBUG, ex.getMessage(),  ex);
@@ -442,15 +443,15 @@ public class ExecuteUtilities extends Plugin {
             ex.printStackTrace(System.err);
         }
     }
-    
+
     /**
      * Create a unique results file.
      */
     public static String createResultsFileName (Run run){
         return createResultsFileName(run.getNumber());
     }
-    
-    
+
+
     /**
      * Create a unique results file.
      */
@@ -499,15 +500,15 @@ public class ExecuteUtilities extends Plugin {
     public void setExecutionData(ExecutionData executionData) {
         this.executionData = executionData;
     }
-    
+
     public Language getLanguage() {
         return language;
     }
-    
+
     public void setLanguage(Language language) {
         this.language = language;
     }
-    
+
     public static String getDebugMessage() {
         return debugMessage;
     }
@@ -520,14 +521,14 @@ public class ExecuteUtilities extends Plugin {
     public String getResultsFileName() {
         return resultsFileName;
     }
-    
+
     public void setResultsFileName(String resultsFileName) {
         this.resultsFileName = resultsFileName;
     }
 
     /**
      * Remove all files from specified directory, including subdirectories.
-     * 
+     *
      * @param dirName
      *            directory to be cleared.
      * @return true if directory was cleared.
@@ -548,50 +549,50 @@ public class ExecuteUtilities extends Plugin {
         }
         return (result);
     }
-    
+
     /**
      * Removes the specified directory (folder) from the file system, including first recursively removing
      * all files and all sub-directories (and their contents).
-     * 
+     *
      * @param dirName the name of the directory to be removed
-     * 
-     * @return true if the directory was successfully cleared and removed; false if the 
-     *      specified directory is null or the empty string, does not exist, 
+     *
+     * @return true if the directory was successfully cleared and removed; false if the
+     *      specified directory is null or the empty string, does not exist,
      *      could not be cleared, could not be removed, or if the specified name is not a directory
      */
     public static boolean removeDirectory(String dirName) {
-        
+
         if (dirName==null || dirName.equals("")) {
             return false;
         }
-        
+
         File dir = new File(dirName);
         if (!dir.isDirectory()) {
             return false;
         }
-        
+
         boolean success = clearDirectory(dirName);
         if (!success) {
             return false;
-        } 
-        
+        }
+
         success = dir.delete();
-        
+
         return success;
     }
-    
-    
+
+
     @Override
     public void dispose() {
-        
+
         // nothing to dispose
     }
 
     /**
      * Ensures directory.
-     * 
+     *
      * If directory cannot be created then returns false.
-     * 
+     *
      * @param directoryName
      * @return true if directory exists or was created, false otherwise.
      */
@@ -606,7 +607,7 @@ public class ExecuteUtilities extends Plugin {
 
     /**
      * Find the pc2.jar file path.
-     * 
+     *
      */
     public static String findPC2JarPath() {
 
@@ -619,7 +620,7 @@ public class ExecuteUtilities extends Plugin {
             }
             jarDir = defaultPath;
             String cp = System.getProperty("java.class.path");
-            
+
             String[] dirlist = cp.split(":");
             for (String token : dirlist) {
 
@@ -631,12 +632,12 @@ public class ExecuteUtilities extends Plugin {
             }
 
             if (DEFAULT_PC2_JAR_PATH.equals(jarDir)) {
-                
+
                 File dir = new File("dist/" + PC2_JAR_FILENAME);
                 if (dir.isFile()) {
                     jarDir = new File(dir.getParent()).getCanonicalPath() + File.separator;
                 } else {
-                    
+
                     dir = new File(PC2_JAR_FILENAME);
                     if (dir.isFile()) {
                         jarDir = new File(dir.getParent()).getCanonicalPath() + File.separator;
@@ -670,37 +671,37 @@ public class ExecuteUtilities extends Plugin {
             return false;
         }
     }
-    
+
     /**
      * Did the team's run solve the problem ?.
-     * 
+     *
      * @param executionData  the ExecutionData object which was produced by running the team's program
      * @return true if validation returned accepted
      */
     public static boolean didTeamSolveProblem(ExecutionData executionData) {
-        
+
         if (!executionData.isCompileSuccess() || !executionData.isExecuteSucess()){
             return false;
         }
-        
+
         if (executionData.isRunTimeLimitExceeded()){
             return false;
         }
 
-        // validator program failed to run 
+        // validator program failed to run
         if (! executionData.isValidationSuccess()){
             return false;
         }
 
-        
+
         if (executionData.getExecutionException() != null){
             return false;
         }
-        
+
         if (executionData.getValidationResults() != null){
-            
+
             String results = executionData.getValidationResults();
-            
+
             // bug 280 ICPC Validator Interface Standard calls for "accepted" in any case.
             if (results.trim().equalsIgnoreCase("accepted")) {
                 return true;
@@ -708,7 +709,7 @@ public class ExecuteUtilities extends Plugin {
         }
         return false;
     }
-    
+
     public static String toString(ExecutionData executionData) {
 
         return " compileSuccess=" + executionData.isCompileSuccess() + //
@@ -719,7 +720,7 @@ public class ExecuteUtilities extends Plugin {
                 ", validationResults=" + executionData.getValidationResults() //
         ;
     }
-    
+
     public static void dump(ExecutionData executionData) {
 
         System.out.println( " compileSuccess=" + executionData.isCompileSuccess() + //
@@ -730,13 +731,13 @@ public class ExecuteUtilities extends Plugin {
                 ", validationResults=" + executionData.getValidationResults() //
                 )
         ;
-        
+
         if (executionData.getExecutionException() != null){
             executionData.getExecutionException().printStackTrace();
         }
     }
-    
-        
+
+
 
     /**
      * Write String Array to file.
@@ -767,8 +768,8 @@ public class ExecuteUtilities extends Plugin {
         writer.close();
         writer = null;
     }
-    
-    
+
+
     /**
      * Cast a CheckedException as an unchecked one.
      *
@@ -781,5 +782,5 @@ public class ExecuteUtilities extends Plugin {
     public static <T extends Throwable> RuntimeException rethrow(Throwable throwable) throws T {
         throw (T) throwable;
     }
-    
+
 }
