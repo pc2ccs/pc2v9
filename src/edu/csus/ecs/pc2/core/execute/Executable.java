@@ -2696,6 +2696,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
                 // create the name of the expected compilation result
                 programName = replaceString(language.getExecutableIdentifierMask(), Constants.CMDSUB_BASENAME_VARNAME, programName);
+                // perform any other substitutions
+                programName = substituteAllStrings(run, programName);
             } else {
 
                 // This used to just replace the {:basename}, but there is no reason not to run it
