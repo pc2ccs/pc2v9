@@ -1059,17 +1059,21 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             if(lastToken == null || !token.equals(lastToken)) {
                 // TODO: Do we want to save the token to a file here in case we crash?
                 //       Currently, token is only saved when the shadow is "stopped"
-                // TODO: Do we want to "InvokeLater" these (simple) updates to text fields?
                 lastToken = token;
-                lastEventTextfield.setText(lastToken);
-                try {
-                    GregorianCalendar cal = new GregorianCalendar();
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        lastEventTextfield.setText(lastToken);
+                        try {
+                            GregorianCalendar cal = new GregorianCalendar();
 
-                    lastDateFormat.setCalendar(cal);
-                    lastEventTimeTextField.setText(lastDateFormat.format(cal.getTime()));
-                } catch(Exception e) {
-                    // Just ignore any exception from date formatter
-                }
+                            lastDateFormat.setCalendar(cal);
+                            lastEventTimeTextField.setText(lastDateFormat.format(cal.getTime()));
+                        } catch(Exception e) {
+                            // Just ignore any exception from date formatter
+                        }
+                    }
+                });
             }
         }
     }
@@ -1083,10 +1087,14 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         // if the number of records is different from what we last display and it's valid
         // update the instrumentation.
         if(nRec != numRecord && nRec >= 0) {
-            // TODO: Do we want to "InvokeLater" this (simple) update to a text field?
             numRecord = nRec;
-            // Save to file? Send to server contestinfo?
-            lastRecordTextfield.setText(String.valueOf(numRecord));
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    // Save to file? Send to server contestinfo?
+                    lastRecordTextfield.setText(String.valueOf(numRecord));
+                }
+            });
         }
     }
 
@@ -1099,10 +1107,14 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         // if the number of tossed records is different from what we last display and it's valid
         // update the instrumentation.
         if(nRec != numTossedRecord && nRec >= 0) {
-            // TODO: Do we want to "InvokeLater" this (simple) update to a text field?
             numTossedRecord = nRec;
-            // Save to file? Send to server contestinfo?
-            lastTossedRecordTextfield.setText(String.valueOf(numTossedRecord));
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    // Save to file? Send to server contestinfo?
+                    lastTossedRecordTextfield.setText(String.valueOf(numTossedRecord));
+                }
+            });
         }
     }
 
