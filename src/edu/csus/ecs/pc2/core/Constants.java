@@ -111,7 +111,7 @@ public final class Constants {
     /**
      * Command substitution variable for all files submitted. Note the missing ':' - legacy.
      */
-    public static final String CMSSUB_FILES_VARNAME = "{files}";
+    public static final String CMDSUB_FILES_VARNAME = "{files}";
 
     /**
      * Command substitution variable for conditional suffix

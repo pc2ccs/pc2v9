@@ -253,7 +253,7 @@ public class ExecuteUtilities extends Plugin {
             return origString;
         }
         newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
-        newString = replaceString(newString, Constants.CMSSUB_FILES_VARNAME, getAllSubmittedFilenames(runFiles));
+        newString = replaceString(newString, Constants.CMDSUB_FILES_VARNAME, getAllSubmittedFilenames(runFiles));
         newString = replaceString(newString, Constants.CMDSUB_BASENAME_VARNAME, removeExtension(runFiles.getMainFile().getName()));
 
         if (problem != null){

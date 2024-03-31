@@ -1981,7 +1981,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 // (overrides :mainfile, :files, :basename)
                 if(language.getID().equals(Language.CLICS_LANGID_PYTHON3)) {
                     // Python ONLY takes one file, and if there's an entrypoint it overrides everything
-                    cmdline = replaceString(cmdline, Constants.CMSSUB_FILES_VARNAME, entryPointName);
+                    cmdline = replaceString(cmdline, Constants.CMDSUB_FILES_VARNAME, entryPointName);
                     // This next one is dubious.  BASENAME implies no extension, but the entryPointName for python, has one.
                     cmdline = replaceString(cmdline, Constants.CMDSUB_BASENAME_VARNAME, entryPointName);
                 } else {
@@ -3021,7 +3021,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 return origString;
             }
             newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
-            newString = replaceString(newString, Constants.CMSSUB_FILES_VARNAME, ExecuteUtilities.getAllSubmittedFilenames(runFiles));
+            newString = replaceString(newString, Constants.CMDSUB_FILES_VARNAME, ExecuteUtilities.getAllSubmittedFilenames(runFiles));
             newString = replaceString(newString, Constants.CMDSUB_BASENAME_VARNAME, removeExtension(runFiles.getMainFile().getName()));
             newString = replaceString(newString, "{:package}", packageName);
 
