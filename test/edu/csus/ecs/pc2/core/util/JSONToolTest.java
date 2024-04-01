@@ -14,8 +14,8 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 public class JSONToolTest extends AbstractTestCase {
 
     /**
-     * Test judgement not starting with "No - "
-     * github issue #950
+     * Test judgement not starting with "No - " github issue #950
+     *
      * @throws Exception
      */
     public void testIssue950failed() throws Exception {
@@ -23,8 +23,8 @@ public class JSONToolTest extends AbstractTestCase {
         IInternalContest contest = sampleContest.createContest(2, 2, 12, 12, true);
         String outputTestDirectory = getOutputDataDirectory();
         IInternalController controller = sampleContest.createController(contest, outputTestDirectory, true, false); // creates StaticLog instance
-        
-        Judgement judgementJE = new Judgement("JE","JE"); 
+
+        Judgement judgementJE = new Judgement("JE", "JE");
         contest.addJudgement(judgementJE);
         JSONTool json_tool = new JSONTool(contest, controller);
         json_tool.convertToJSON(judgementJE);
