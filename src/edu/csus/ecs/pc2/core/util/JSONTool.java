@@ -312,7 +312,9 @@ public class JSONTool {
             solved = true;
             penalty = false;
         } else {
-            name = name.substring(5, name.length());
+            if (name.startsWith("No - ")) {
+                name = name.substring(5, name.length());
+            }
             Properties scoringProperties = model.getContestInformation().getScoringProperties();
             if (judgement.getAcronym().equalsIgnoreCase("ce") || name.toLowerCase().contains("compilation error")
                     || name.toLowerCase().contains("compile error")) {
