@@ -1,16 +1,14 @@
-// Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Arrays;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.Utilities;
-
 /**
  * Submitted Run info.
- * 
+ *
  * Contains the submitter, problem, language, files and other data for a run.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 
@@ -20,7 +18,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 public class Run extends Submission {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 4643865629642121895L;
 
@@ -45,14 +43,14 @@ public class Run extends Submission {
 
         /**
          * Run is being judged.
-         * 
+         *
          * If a run must be judged by more than one judge, then when at least one judge has judged the run this state is set.
          */
         BEING_JUDGED,
 
         /**
          * Run is being re-judged.
-         * 
+         *
          * A run was previously judged.
          */
         BEING_RE_JUDGED,
@@ -167,7 +165,7 @@ public class Run extends Submission {
 
     /**
      * Returns true if judged (or is being re-judged, or Manual_review.
-     * 
+     *
      * @return true if judged.
      */
     public boolean isJudged() {
@@ -176,7 +174,7 @@ public class Run extends Submission {
 
     /**
      * Get the current judgement.
-     * 
+     *
      * @return return null if not judged else the judgement
      */
     public JudgementRecord getJudgementRecord() {
@@ -201,7 +199,7 @@ public class Run extends Submission {
     }
 
     /**
-     * 
+     *
      * @return true if team given a Yes.
      */
     public boolean isSolved() {
@@ -215,18 +213,18 @@ public class Run extends Submission {
 
     /**
      * Return list of all JudgementRecords.
-     * 
+     *
      * @return JudgementRecord[] - list of all active and inactive JudgementRecord
      */
     public JudgementRecord[] getAllJudgementRecords() {
-        return (JudgementRecord[]) judgementList.toArray(new JudgementRecord[judgementList.size()]);
+        return judgementList.toArray(new JudgementRecord[judgementList.size()]);
     }
 
     /**
      * Add new judgement.
-     * 
+     *
      * This will disable previous judgements and
-     * 
+     *
      * @param judgement
      *            new judgement to add.
      */
@@ -252,7 +250,7 @@ public class Run extends Submission {
     }
 
     /**
-     * 
+     *
      * @return null if no judgement found, else the judgement
      */
     public JudgementRecord getComputerJudgementRecord() {
@@ -281,7 +279,7 @@ public class Run extends Submission {
     }
 
     /**
-     * 
+     *
      * @return 0 if not judged, else number of minutes to judge run.
      */
     public long getJudgedMinutes() {
@@ -307,7 +305,7 @@ public class Run extends Submission {
     }
 
     /**
-     * 
+     *
      * @return empty string if no judgement, else comment
      */
     public String getCommentsForJudge() {
@@ -325,7 +323,7 @@ public class Run extends Submission {
 
     /**
      * Show this judgement to teams ?
-     * 
+     *
      * @return true if the judgement can be shown to the team, else false
      */
     public boolean isSendToTeams() {
@@ -344,6 +342,7 @@ public class Run extends Submission {
         return systemOS;
     }
 
+    @Override
     public String toString() {
         return "Run " + getNumber() + " " + getStatus() + " " + getElapsedMins() + " min " + getElapsedMS() + "ms from " + getSubmitter() + " id " + getElementId().toString() + " problem "
                 + getProblemId() + " lang " + getLanguageId();
@@ -351,9 +350,9 @@ public class Run extends Submission {
 
     /**
      * The elapsed time when this run was added.
-     * 
+     *
      * This is always the actual server submission time. The submission time can be 'overridden' using {@link #setElapsedMS(long)} and that elapsed MS will be used for scoring, esp. in CCS Test Mode.
-     * 
+     *
      * @return the server timestamp for this submission
      */
     public long getOriginalElapsedMS() {
@@ -376,9 +375,9 @@ public class Run extends Submission {
 
     /**
      * Set an override time for the elapsed time.
-     * 
+     *
      * When {@link #setElapsedMS(long)} is invoked will save that elapsed time (fetched by {@link #getOverRideElapsedTimeMS()}) and set the elapsed time to this override time.
-     * 
+     *
      * @param overRideElapsedTimeMS
      */
     public void setOverRideElapsedTimeMS(long overRideElapsedTimeMS) {
@@ -430,7 +429,7 @@ public class Run extends Submission {
 
     /**
      * The run id assigned by a server.
-     * 
+     *
      * @return
      */
     public int internalRunId() {
@@ -440,17 +439,17 @@ public class Run extends Submission {
     public void setOverRideNumber(int number) {
         overrideNumber = number;
     }
-    
+
     public int getOverrideNumber() {
         return overrideNumber;
     }
 
     /**
-     * 
+     *
      * @return a list of the testcase results
      */
     public RunTestCase[] getRunTestCases() {
-        return (RunTestCase[]) testcases.toArray(new RunTestCase[testcases.size()]);
+        return testcases.toArray(new RunTestCase[testcases.size()]);
     }
 
     public void addTestCase(RunTestCase runTestCaseResult) {
@@ -463,20 +462,17 @@ public class Run extends Submission {
 
     /**
      * Set entry point (main file name).
-     * 
+     *
      * Strips path and strips extension.
-     * 
+     *
      * @param name
      */
     public void setEntryPoint(String name) {
         if(name != null) {
-            name = Utilities.getFileBaseName(name);
-            if (name != null){
-                entryPoint = name.toCharArray();
-            }
+            entryPoint = name.toCharArray();
         }
     }
-    
+
     /**
      * Get the entry point, main file, for the submitted source(s).
      * @return
@@ -485,7 +481,7 @@ public class Run extends Submission {
         if (entryPoint != null){
             return new String(entryPoint);
         }
-        
+
         return null;
     }
 }
