@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.BufferedReader;
@@ -7,12 +7,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+
+import javax.xml.bind.DatatypeConverter;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,14 +39,14 @@ import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
 
 /**
  * This class listens for submission events in the event feed input stream from a remote CCS CLICS Contest API Event Feed.
- * 
+ *
  * Events of type "submissions" result in fetching the submission files from the remote CCS and submitting those files
  * as a submission to the local (Shadow) PC2 system.
- * 
+ *
  * Events of type "judgements" result in updating a global map of judgements received from the remote system; this map
  * is subsequently used by the {@link ShadowCompareRunsPane} class to display comparisons between local (shadow) judgements
  * and the corresponding judgements from the remote CCS.
- * 
+ *
  * @author pc2@ecs.csus.edu
  *
  */
@@ -48,25 +55,34 @@ public class RemoteEventFeedMonitor implements Runnable {
     public static final int REMOTE_EVENT_FEED_DELAYMS = 0;
     public static final int RECONNECT_RETRY_DELAY = 5000;
     public static final boolean ATTEMPT_RECONNECTS = true;
-    
+    public static final boolean ALLOW_PRESTART_ACTIVITY = false;
+
     private IRemoteContestAPIAdapter remoteContestAPIAdapter;
     private URL remoteURL;
     private String login;
     private String password;
     private RemoteRunSubmitter submitter;
-    
+
     private boolean keepRunning ;
-    
+
+    // contest state from remote CCS
+    private boolean remoteCCSStarted = false;
+    private boolean remoteCCSEnded = false;
+    private boolean remoteCCSFrozen = false;
+    private boolean remoteCCSThawed = false;
+    private boolean remoteCCSFinalized = false;
+    private boolean remoteCCSEOU = false;
+
     //set this to true to filter out all but those submissions/judgements listed in "submissionFilterIDs"
-    private boolean respectSubmissionFilter = false; 
-    
+    private boolean respectSubmissionFilter = false;
+
     //a list of submissions which are the only ones we are interested in if respectSubmissionFilter is true
     private String [] submissionFilterIDs = {
 
             /* PacNW submissions of interest
              * "286", "414", "908", "1414", "1437", "1460", "1464", "1481", "1531", "1611"
-             */        
-            
+             */
+
             /* DOMJudge SystestA submissions of interest
              */
             "248603", //cpp, first judgement (which is null)
@@ -74,29 +90,33 @@ public class RemoteEventFeedMonitor implements Runnable {
             "248611", //java
             "248609", //py2
             "249388"  //py3
-            
+
         } ;
-    
+
     //a list form of the above, created in the class constructor
     private List<String> submissionFilterIDsList;
-    
+
     private boolean listening;
     private IInternalController pc2Controller;
     private InputStream remoteInputStream;
     private IShadowMonitorStatus monitorStatus;
-    
+
     //for support of reconnecting to the primary
     private String lastToken = null;
     private String msg;
     private int nRecords;
     private int retryConnectDelay = RECONNECT_RETRY_DELAY;
     private boolean attemptConnectRetries = ATTEMPT_RECONNECTS;
-        
+    private int tossedMessages = 0;
+
+    // Should we allow submissions/judgements from remote prior to contest start
+    private boolean allowPrestartActivity = ALLOW_PRESTART_ACTIVITY;
+
    /**
-     * A Map mapping remote judgement ids to corresponding submission ids and the judgement applied to that submission.
-     */
+    * A Map mapping remote judgement ids to corresponding submission ids and the judgement applied to that submission.
+    */
     private static Map<String,String> remoteJudgements;
-    
+
     /**
      * A lock for synchronizing access to the above map.
      */
@@ -104,7 +124,7 @@ public class RemoteEventFeedMonitor implements Runnable {
 
     /**
      * Constructs a RemoteEventFeedMonitor with the specified values.  The RemoteEventFeedMonitor
-     * is used to listen for submission events in the event feed from a remote CCS contest.  
+     * is used to listen for submission events in the event feed from a remote CCS contest.
      *
      * @param pc2Controller an {@link IInternalController} for passing error handling back to the local PC2 system
      * @param remoteContestAPIAdapter an adapter for accessing the remote contest API
@@ -117,10 +137,10 @@ public class RemoteEventFeedMonitor implements Runnable {
                                   URL remoteURL, String login, String password, RemoteRunSubmitter submitter) {
         this(pc2Controller, remoteContestAPIAdapter, remoteURL, login, password, submitter, null);
     }
-    
+
     /**
      * Constructs a RemoteEventFeedMonitor with the specified values.  The RemoteEventFeedMonitor
-     * is used to listen for submission events in the event feed from a remote CCS contest.  
+     * is used to listen for submission events in the event feed from a remote CCS contest.
      *
      * @param pc2Controller an {@link IInternalController} for passing error handling back to the local PC2 system
      * @param remoteContestAPIAdapter an adapter for accessing the remote contest API
@@ -140,27 +160,30 @@ public class RemoteEventFeedMonitor implements Runnable {
         this.password = password;
         this.submitter = submitter;
         this.monitorStatus = mon;
-        
+
         //create a filter for submissions (only used if respectSubmmissionFilter = true)
         submissionFilterIDsList = new ArrayList<String>(submissionFilterIDs.length);
         Collections.addAll( submissionFilterIDsList, submissionFilterIDs);
 
     }
-    
+
     @Override
     public void run() {
         boolean bDelay;
         boolean bOpened = false;
+        boolean allowSubmits = false;
+        boolean allowJudgments = false;
+
         Thread.currentThread().setName("RemoteEventFeedMonitorThread");
         // local map to look for duplicate submissions
         Map<String, Boolean> mapSubmissions = new HashMap<String, Boolean>();
         Boolean bFound;
-        
+
         keepRunning = true;
         nRecords = 0;
-       
+
         Log log = pc2Controller.getLog();
-        
+
         while(keepRunning) {
             // open or reopen connection to remoteURL event-feed endpoint
             // make up nice message for log
@@ -176,7 +199,7 @@ public class RemoteEventFeedMonitor implements Runnable {
             }
             logAndDebugPrint(log, Level.INFO, msg);
             remoteInputStream = remoteContestAPIAdapter.getRemoteEventFeedInputStream(lastToken);
-    
+
             if (remoteInputStream == null) {
                 //  TODO: improve error handling (more than just logging?)
                 logAndDebugPrint(log, Level.SEVERE, "Error opening event feed stream");
@@ -185,37 +208,39 @@ public class RemoteEventFeedMonitor implements Runnable {
                     monitorStatus.connectFailed(lastToken);
                 }
             } else {
-    
+
                 String event = "null event";
-                
+
                 bOpened = true;
                 if(monitorStatus != null) {
                     // if someone is monitoring, inform them we are connected
                     monitorStatus.connectSucceeded(lastToken);
                 }
                 try {
-    
+
                     //wrap the event stream (which consists of newline-delimited character strings representing events)
                     // in a BufferedReader
                     BufferedReader reader = new BufferedReader(new InputStreamReader(remoteInputStream));
-    
+
                     //read the next event from the event feed stream
                     event = reader.readLine();
-    
+
+                    tossedMessages = 0;
+
                     //process the next event
                     while ((event != null) && keepRunning) {
-    
+
                         //if the remote system feeds events too fast (which happens when testing with a completed contest/eventfeed, and could
                         // in theory happen during a live contest), this RemoteEventFeedMonitor thread overwhelms the JVM scheduler, causing
                         // things like AWT Dispatch thread GUI updates to become hung.
                         //Let's sleep for a moment to allow other threads to run.
                         //Note1: it might seem more logical to put this sleep at the END of the while-loop; however, there are multiple places
                         // within the loop which invoke "continue", which would SKIP the sleep if it was at the end of the loop...
-                        //Note2:  the value "10ms" was experimentally determined using the NADC21 Kattis event feed, which contains over 53,300 
+                        //Note2:  the value "10ms" was experimentally determined using the NADC21 Kattis event feed, which contains over 53,300
                         // events (lines).  Any value below 10ms caused the GUI to freeze up.
-                        //Note3: an attempt was made to change the priority of this thread to a higher number (so, lower priority) than that 
+                        //Note3: an attempt was made to change the priority of this thread to a higher number (so, lower priority) than that
                         // assigned to the AWT Event Dispatch thread, and then to use Thread.yield() here instead of Thread.sleep().  In theory
-                        // this should have allowed the AWT thread to gain the CPU when it was ready to run, but in practice GUI lockups were 
+                        // this should have allowed the AWT thread to gain the CPU when it was ready to run, but in practice GUI lockups were
                         // still seen.  This could be because the AWT thread has multiple blocking conditions and each one of these allows this
                         // Event Feed Monitor thread to get back to the CPU (and use it for a full scheduling timeslice).
                         // So it was determined that the following was the best solution, at least in the short term...
@@ -225,10 +250,10 @@ public class RemoteEventFeedMonitor implements Runnable {
                         // delay for will set the bDelay to true, such as submissions and judgements (which is currently all we process anyway)
                         // by default, we will NOT delay.  This lets messages like organizations, runs, teams, etc, fly by quickly.
                         bDelay = false;
-                       
+
                         //skip blank lines and any that do not start/end with "{...}"
                         if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
-                            
+
                             if(lastToken != null) {
                                 msg = "Got event string (last token " + lastToken + "): " + event;
                             } else {
@@ -236,7 +261,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                             }
                             logAndDebugPrint(log, Level.INFO, msg);
                             try {
-    
+
                                 /**
                                  *
                                 Sample submissions JSON from finals 2019 dom judge event feed.
@@ -245,14 +270,14 @@ public class RemoteEventFeedMonitor implements Runnable {
                                 {"id":"279031","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.228+01:00","contest_time":"-17:02:04.771","id":"10549","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10549/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.235+01:00"}
                                 {"id":"279032","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.244+01:00","contest_time":"-17:02:04.755","id":"10550","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10550/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.251+01:00"}
                                  */
-    
+
                                 // extract the event into a map of event element names/values
                                 Map<String, Object> eventMap = getMap(event);
-    
+
                                 if (eventMap == null) {
                                     // could not parse event
                                     logAndDebugPrint(log, Level.WARNING, "Could not parse event: " + event);
-    
+
                                 } else {
                                     // Get event token, if present
                                     String evToken = (String)eventMap.get("token");
@@ -263,99 +288,116 @@ public class RemoteEventFeedMonitor implements Runnable {
                                             monitorStatus.updateShadowLastToken(lastToken);
                                         }
                                     }
-   
+
                                     // find event type
                                     String eventType = (String) eventMap.get("type");
-                                    
+
                                     logAndDebugPrint(log, Level.INFO, "Found event of type " + eventType + ": " + event);
-    
+
+                                    boolean isContestRunning = pc2Controller.getContest().getContestTime().isContestRunning();
+                                    boolean wasContestStarted = pc2Controller.getContest().getContestTime().isContestStarted();
+
+                                    // we will process submissions if we are allowed precontest or the contest is running
+                                    allowSubmits = allowPrestartActivity || isContestRunning;
+                                    // we will process judgments if we are allowed precontest or the contest has been started at some point
+                                    allowJudgments = (allowPrestartActivity || wasContestStarted) && (!remoteCCSFinalized);
+
                                     if ("submissions".equals(eventType)) {
-    
+
                                         if (isReadOnlyClient()) {
                                             log.info("Skipping submission event due to being logged in as a read-only client (not Feeder1)");
                                             event = reader.readLine();
                                             continue;
                                         }
 
-    
+                                        if(!allowSubmits) {
+                                            log.info("Skipping submission event since the contest has not started and allowPrestartActivity is false.");
+                                            event = reader.readLine();
+                                            tossedMessages++;
+                                            if(monitorStatus != null) {
+                                                monitorStatus.updateShadowNumberofTossedRecords(tossedMessages);
+                                            }
+                                            continue;
+                                        }
+
                                         //process a submission event
                                         try {
-    
+
                                             logAndDebugPrint(log, Level.INFO, "Processing submission event: " + event);
-    
+
                                             //get a map of the data comprising the submission
                                             Map<String, Object> submissionEventDataMap = (Map<String, Object>) eventMap.get("data");
-    
+
                                             //get the submission ID out of the submission event data map
                                             String submissionID = (String) submissionEventDataMap.get("id");
-                                            
+
                                             //check if the current submission is to be ignored due to filtering
                                             // (submissionFilterIDsList is a list of submissions we WANT TO KEEP; typically used for debugging...)
                                             if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
-    
+
                                                 logAndDebugPrint(log, Level.INFO, "Ignoring submission " + submissionID + " due to filter");
                                                 event = reader.readLine();
                                                 continue;
                                             }
-    
-                                            bFound = (Boolean)mapSubmissions.get(submissionID);
+
+                                            bFound = mapSubmissions.get(submissionID);
                                             if(bFound != null && bFound.booleanValue() == true) {
-                                                
+
                                                 logAndDebugPrint(log, Level.INFO, "Quickly Ignoring submission " + submissionID + " due to it already having been submitted");
 
                                                 event = reader.readLine();
                                                 continue;
                                             }
-                                            
+
                                             //make sure we haven't seen this submission before (this could happen if
                                             // we've done a restart but already processed this submission on a prior shadow run)
                                             if (RunUtilities.isAlreadySubmitted(pc2Controller.getContest(),submissionID) ) {
-                                                
+
                                                 logAndDebugPrint(log, Level.INFO, "Ignoring submission " + submissionID + " due to it already having been submitted");
 
                                                 event = reader.readLine();
                                                 continue;
                                             }
-    
+
                                             // add to local map to detect quick duplicate before they get entered into the system
                                             mapSubmissions.put(submissionID, true);
-                                            
+
                                             // This is the commit point for a submission, so we will want to delay at the end of the loop
                                             bDelay = true;
-                                            
+
                                             //convert submission data into a ShadowRunSubmission object
                                             ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
-    
+
                                             if (runSubmission == null) {
-                                                
+
                                                 logAndDebugPrint(log, Level.SEVERE, "Error parsing submission data: " + event);
                                                 throw new Exception("Error parsing submission data " + event);
-                                                
+
                                             } else {
-    
+
                                                 logAndDebugPrint(log, Level.INFO, "Found run " + runSubmission.getId() + " from team " +
                                                         runSubmission.getTeam_id() + ": event= " + event);
-    
+
                                                 //construct the override values to be used for the shadow submission
                                                 long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
                                                 long overrideSubmissionID = Utilities.stringToLong(runSubmission.getId());
-    
+
         //The entire following block of commented-out code is intended to be used to support fetching submission files from the remote system by using the
         // "href" element found within the "files" element of a submission event.  However, the href element cannot be properly used
-        // until the "Primary CCS URL" property is split into "Primary CCS BaseURL" and "Primary CCS ContestID Path" elements.  
+        // until the "Primary CCS URL" property is split into "Primary CCS BaseURL" and "Primary CCS ContestID Path" elements.
         // Until that update is made throughout the code, the following block is commented out and we're using a default URL
         // created by calling the RemoteContestAPIAdapter with just the submissionID; the RemoteContestAPIAdapter constructs the
         // default URL by appending "/submissions/<submissionID>/files" to the current value of "Primary CCS URL" and then
         // fetches the submission files from that URL.
         // See also the comment in interface IRemoteContestAPIAdapter; the additional (commented-out) method there must be uncommented
         // for the following block of code to work.
-    
+
     //                                            //define the path to where the remote zip file containing the submissions files can be found
     //                                            String defaultSubmissionFilesURLString = "/submissions/" + runSubmission.getId() + "/files"; //our default path
     //                                            String submissionFilesURLString = null;  //this one we hope to pull out of the submission event, below
-    //                                            
-    //                                            
-    //                                            //Note about the next set of code: the CLICS ContestAPI spec says that a submission event has numerous fields, 
+    //
+    //
+    //                                            //Note about the next set of code: the CLICS ContestAPI spec says that a submission event has numerous fields,
     //                                            // one of which is "files".  The value found in the "files" element is specified as an ARRAY of "zip file references",
     //                                            // where each "zip file reference" has the form  {href:path/to/zip,mime:application/zip}.  Thus there
     //                                            // can in principle be multiple zip files on the remote system, with each zip file containing multiple files.
@@ -363,16 +405,16 @@ public class RemoteEventFeedMonitor implements Runnable {
     //                                            // so what we do is fetch the array (as a List, where each list element is one "zip file reference" (consisting of
     //                                            // two parts:  href:path and mime:zip)), then pull the first element out of the array (List), pull the href
     //                                            // out of that Map, and use that to form the URL to fetch the zip file containing the submission files.  *whew*
-    //                          
+    //
     //                                            //get from the ShadowRunSubmission object the list of references to zip files.
     //                                            List<Map<String, String>> filesList = runSubmission.getFiles();
-    //                                            
+    //
     //                                            //make sure we got a valid list from the submission
     //                                            if (filesList.size() >= 1){
-    //                                                
+    //
     //                                                //get out of the list the first zip file reference (which is a map containing "href:path" and "mime:zip" elements)
     //                                                Map<String, String> zipFileReferenceMap = filesList.get(0);
-    //                                                
+    //
     //                                                //make sure we got a valid zip file reference map (the map should contain exactly "href" and "mime" keys)
     //                                                if (zipFileReferenceMap.size() == 2){
     //                                                    String filesPath = zipFileReferenceMap.get("href");
@@ -406,47 +448,47 @@ public class RemoteEventFeedMonitor implements Runnable {
     //                                            } else {
     //                                                System.out.println("debug 22 getRemoteSubmissionFiles GOT "+files.size()+" files");
     //                                            }
-    
+
                                                 //this block is a temporary substitute for the above commented-out block
                                                 List<IFile> files = null;
-                                                
+
                                                 logAndDebugPrint(log, Level.INFO, "Fetching files from remote system using id "+overrideSubmissionID);
-                                                
+
                                                 //try up to maxTries times to get files without having a SocketTimeout
                                                 int tryNum = 1;
                                                 int maxTries = 10;
                                                 boolean success = false ;
                                                 Exception ex = null;
-                                                
+
                                                 while (!success && tryNum<=maxTries) {
-                                                    try {              
+                                                    try {
                                                         //request files from remote CCS
                                                         files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
-                                                        
+
                                                         //if we get here, no exception was thrown while getting the files
                                                         success = true;
-    
+
                                                     } catch (Exception e) {
-                                                        
+
                                                         //we got an exception attempting to get the files for the submission from the remote CCS;
                                                         //see if the underlying cause of the exception was a socket timeout
                                                         Throwable cause = e.getCause();
                                                         if (cause!=null && cause instanceof SocketTimeoutException) {
-    
+
                                                                 logAndDebugPrint(log, Level.WARNING, "SocketTimeoutException getting files for submission " +
                                                                         overrideSubmissionID + " on try " + tryNum + "; trying up to " + maxTries + " times");
                                                                 tryNum++;
-                                                                
+
                                                                 //save the exception so we can rethrow it if we never get "success"
                                                                 ex = e;
-                                                            
+
                                                         } else {
                                                             //we got an exception other than a socket timeout; rethrow it outward (which will be logged in the catch clause)
                                                             throw e;
                                                         }
                                                     }
                                                 }
-                                                
+
                                                 //if after maxTries we still weren't successful getting files, log it and rethrow the last exception
                                                 if (!success) {
                                                     logAndDebugPrint(log, Level.SEVERE, "Unable to get files for submission " + overrideSubmissionID
@@ -454,71 +496,82 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                     throw ex;
                                                 } else {
                                                     //we got files from the remote CCS; log how many tries it took
-                                                    String pluralizer = tryNum==1 ? " try." : " tries."; 
-                                                    logAndDebugPrint(log, Level.INFO, "Got files for submission id " + overrideSubmissionID + " from remote CCS after " 
+                                                    String pluralizer = tryNum==1 ? " try." : " tries.";
+                                                    logAndDebugPrint(log, Level.INFO, "Got files for submission id " + overrideSubmissionID + " from remote CCS after "
                                                             + tryNum + pluralizer);
                                                 }
-                                                
+
                                                 //if we get here we at least know we got a "success" from the above communication with the remote CCS
                                                 if (files==null) {
                                                     logAndDebugPrint(log, Level.SEVERE, "Null file list returned from remote system while processing event: " + event);
                                                     throw new Exception("Null file list returned from remote system while processing event: " + event);
                                                 }
-                                                
+
                                                 IFile mainFile = null;
-    
+
                                                 if (files.size() <= 0) {
-                                                    
+
                                                     logAndDebugPrint(log, Level.SEVERE, "Empty file list returned from remote system while processing event: " + event);
                                                     throw new Exception("Empty file list returned from remote system while processing event: " + event);
-                                                    
+
                                                 } else {
-                                                    
+
                                                     logAndDebugPrint(log, Level.INFO, "Received files from remote system for id " + overrideSubmissionID);
-    
+
                                                     mainFile = files.get(0);
                                                 }
-    
+
                                                 List<IFile> auxFiles = null;
                                                 if (files.size() > 1) {
                                                     auxFiles = files.subList(1, files.size());
                                                 }
-    
-                                                logAndDebugPrint(log, Level.INFO, "Invoking submitter.submitRun() for team " + runSubmission.getTeam_id() 
-                                                    + " problem " + runSubmission.getProblem_id() 
+
+                                                logAndDebugPrint(log, Level.INFO, "Invoking submitter.submitRun() for team " + runSubmission.getTeam_id()
+                                                    + " problem " + runSubmission.getProblem_id()
                                                     + " language " +  runSubmission.getLanguage_id()
                                                     + " entry_point " + runSubmission.getEntry_point()
-                                                    + " time " + overrideTimeMS 
+                                                    + " time " + overrideTimeMS
                                                     + " submissionID " + overrideSubmissionID);
                                                 try {
                                                     submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(),
                                                             runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
                                                 } catch (Exception e) {
-                                                    
+
                                                     // Send message, message will add to connectStatusTable
                                                     MessageManager.fireMessageListener(new MessageRecord("Unable to submit run " + overrideSubmissionID + " " + e.getMessage(), MessageScope.SHADOW_UI, e));
-                                                    
+
                                                     // TODO design error handling reporting
                                                     logAndDebugPrint(log, Level.WARNING, "Exception submitting run for event: " + event, e);
                                                 }
                                             }
-    
+
                                         } catch (Exception e) {
-                                            
+
                                             // Send message, message will add to connectStatusTable
                                             MessageManager.fireMessageListener(new MessageRecord("Exception processing event: " + event, MessageScope.SHADOW_UI, e));
-                                            
+
                                             // TODO design error handling reporting (logging?)
                                             logAndDebugPrint(log, Level.WARNING, "Exception processing event: " + event, e);
                                         }
-    
+
                                     } else if ("judgements".equals(eventType)) {
-                                        
+
+                                        // For "judgements", we toss them if the contest was never started.
+                                        if(!allowJudgments) {
+                                            log.info("Skipping judgment event since the contest has not started and allowPrestartActivity is false.");
+                                            event = reader.readLine();
+                                            tossedMessages++;
+                                            if(monitorStatus != null) {
+                                                monitorStatus.updateShadowNumberofTossedRecords(tossedMessages);
+                                            }
+                                            continue;
+                                        }
+
                                         // Delay on judgments
                                         bDelay = true;
-                                    
+
                                         logAndDebugPrint(log, Level.INFO, "Found event of type " + eventType + ": " + event);
-    
+
                                         //process a judgment event
                                         try {
                                             if(isDeleteOperation(eventMap)) {
@@ -530,64 +583,169 @@ public class RemoteEventFeedMonitor implements Runnable {
                                                 // (there might not be such an element; "create" operations do not always have a judgment)
                                                 // get a map of the data elements for the judgment
                                                 Map<String, Object> judgementEventDataMap = (Map<String, Object>) eventMap.get("data");
-                                                
+
                                                 String judgement = (String) judgementEventDataMap.get("judgement_type_id");
                                                 if (judgement != null && !judgement.equals("")) {
-    
-    
+
+
                                                     // there is a judgement; get the relevant IDs
                                                     String judgementID = (String) judgementEventDataMap.get("id");
                                                     String submissionID = (String) judgementEventDataMap.get("submission_id");
-    
+
                                                     //check if the submission for this judgement is to be ignored due to filtering
                                                     // (submissionFilterIDsList is a list of submissions we WANT TO KEEP; typically used for debugging...)
                                                    if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
-                                                        
-                                                       logAndDebugPrint(log, Level.INFO, "Ignoring judgement " + judgementID + 
+
+                                                       logAndDebugPrint(log, Level.INFO, "Ignoring judgement " + judgementID +
                                                                " for submission " + submissionID + " due to filter");
                                                         event = reader.readLine();
                                                         continue;
                                                     }
-                                                       
-                                                       //TODO: make sure this is a judgement for a submission we know about.  
-                                                       //  Question: isn't it possible the remote system will send us a "judgement" before it sends us 
+
+                                                       //TODO: make sure this is a judgement for a submission we know about.
+                                                       //  Question: isn't it possible the remote system will send us a "judgement" before it sends us
                                                        //  the "submission" associated with that judgement?  It seems that this is both allowed by the CLICS
                                                        //  specification, and in fact does happen (e.g. in Kattis) when it sends "judgements" at the beginning
                                                        //  of the event stream which specify a "create" op and have "null" for values such as "judgement_type_id".
-             
+
                                                     // this (appears to be) a judgement we want; save it in the global judgements map under a key of
                                                     // the judgement ID with value "submissionID:judgement"
-    //                                                System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");                                                
+    //                                                System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");
                                                     synchronized (remoteJudgementsMapLock) {
                                                         getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
                                                     }
                                                 }
                                             }
-    
+
                                         } catch (Exception e) {
                                             // TODO design error handling reporting (logging?)
-                                            logAndDebugPrint(log, Level.SEVERE, "Exception processing event: " + event, e); 
+                                            logAndDebugPrint(log, Level.SEVERE, "Exception processing event: " + event, e);
                                         }
-    
+
+                                    } else if ("state".equals(eventType)) {
+
+                                        // State messages look like this (Sample from DOMjudge Event feed Dhaka WF 2022):
+                                        // {"token":"151701","id":null,"type":"state",
+                                        //  "data":{"started":"2022-11-10T10:53:36.000+06:00","ended":null,"frozen":null,"thawed":null,"finalized":null,"end_of_updates":null},"time":"2022-11-10T10:53:36.014+06:00"}
+                                        // {"token":"229483","id":null,"type":"state",
+                                        //  "data":{"started":"2022-11-10T10:53:36.000+06:00","ended":null,"frozen":"2022-11-10T14:53:36.000+06:00","thawed":null,"finalized":null,"end_of_updates":null},"time":"2022-11-10T14:53:36.112+06:00"}
+                                        // {"token":"257177","id":null,"type":"state",
+                                        //  "data":{"started":"2022-11-10T10:53:36.000+06:00","ended":"2022-11-10T15:53:36.000+06:00","frozen":"2022-11-10T14:53:36.000+06:00","thawed":null,"finalized":null,"end_of_updates":null},"time":"2022-11-10T15:53:36.035+06:00"}
+
+                                        try {
+                                            logAndDebugPrint(log, Level.INFO, "Found event of type " + eventType + ": " + event);
+
+                                            // Can set this to indicate we want to put a message in the GUI log
+                                            String statusMessage = null;
+
+                                            //convert state data into a ShadowStateMessage object
+                                            ShadowStateMessage contestState = createStateMessage((Map<String, Object>) eventMap.get("data"));
+
+                                            // Keep track of states reported by primary.  We check the various fields in reverse occurrence order.
+                                            // As per the spec, the events must appear in order, so we check the last event first, since, if that occurs
+                                            // the other must have already happened.
+                                            if(contestState.getEndOfUpdates() != null) {
+                                                remoteCCSEOU = generalStateCheck(contestState.getEndOfUpdates(), remoteCCSEOU, "End-of-updates");
+                                            } else if(contestState.getFinalized() != null || contestState.getThawed() != null) {
+                                                remoteCCSFinalized = generalStateCheck(contestState.getFinalized(), remoteCCSFinalized, "Finalized");
+                                                remoteCCSThawed = generalStateCheck(contestState.getThawed(), remoteCCSThawed, "Thawed");
+                                            } else if(contestState.getEnded() != null) {
+                                                // Now check for end of contest from remote
+                                                Date remoteEnd = contestState.getEnded();
+                                                // Only interested if we haven't seen "ended" yet from primary ccs.
+                                                if(!remoteCCSEnded) {
+                                                    remoteCCSEnded = true;
+                                                     // can only stop contest if it is running now
+                                                    if(isContestRunning) {
+                                                        if (!isReadOnlyClient()) {
+                                                            statusMessage = "Primary ends the contest at " + getISODateString(remoteEnd);
+                                                            pc2Controller.stopAllContestTimes();
+                                                        } else {
+                                                            statusMessage = "Primary indicates contest end at " + getISODateString(remoteEnd) +
+                                                                " (R/O client)";
+                                                        }
+                                                    } else {
+                                                        statusMessage = "Primary wants to end the contest but it's stopped";
+                                                    }
+                                                }
+                                                // If anything related to the endTime decided it wants a status message in the GUI, here is where it comes out
+                                                if(statusMessage != null && monitorStatus != null) {
+                                                    logAndDebugPrint(log, Level.INFO, statusMessage);
+                                                    monitorStatus.statusMessage(statusMessage);
+                                                }
+                                            } else if(contestState.getFrozen() != null) {
+                                                remoteCCSFrozen = generalStateCheck(contestState.getFrozen(), remoteCCSFrozen, "Frozen");
+                                            } else if(contestState.getStarted() != null) {
+
+                                                Date remoteStart = contestState.getStarted();
+                                                // only interested if remote hasn't already started
+                                                if(!remoteCCSStarted) {
+                                                    Calendar calStart = pc2Controller.getContest().getContestInformation().getScheduledStartTime();
+                                                    if(calStart != null) {
+                                                        Date pc2Start = calStart.getTime();
+                                                        if(pc2Start != null) {
+                                                            if(remoteStart.compareTo(pc2Start) != 0) {
+                                                                statusMessage ="Primary specified wrong start time " +
+                                                                        getISODateString(remoteStart) +
+                                                                        " instead of configured " +
+                                                                        getISODateString(pc2Start);
+                                                                logAndDebugPrint(log, Level.WARNING, statusMessage);
+                                                            }
+                                                        }
+                                                    }
+                                                    // if the contest was started previously, then we print a warning message and a status on the GUI
+                                                    // but we do allow it to start.
+                                                    if(wasContestStarted) {
+                                                        statusMessage = "Primary restarts the contest at " + getISODateString(remoteStart);
+                                                        if(monitorStatus != null) {
+                                                            monitorStatus.statusMessage(statusMessage);
+                                                        }
+                                                        logAndDebugPrint(log, Level.INFO, statusMessage);
+                                                        statusMessage = null;
+                                                    }
+                                                    remoteCCSStarted = true;
+                                                    // Remote says it's go time.  If the contest is already started
+                                                    // (manually or previously via state event), we ignore it.
+                                                    if(!isContestRunning) {
+                                                        if (!isReadOnlyClient()) {
+                                                            statusMessage = "Primary started the contest at " + getISODateString(remoteStart);
+                                                            pc2Controller.startAllContestTimes();
+                                                        } else {
+                                                            statusMessage = "Primary indicates contest start at " + getISODateString(remoteStart) +
+                                                                " (R/O client)";
+                                                        }
+                                                    } else {
+                                                        statusMessage = "Primary indicates contest start at " + getISODateString(remoteStart) + " but it's already running";
+                                                    }
+                                                    logAndDebugPrint(log, Level.INFO, statusMessage);
+                                                }
+                                                // If anything related to the startTime decided it wants a status message in the GUI, here is where it comes out
+                                                if(statusMessage != null && monitorStatus != null) {
+                                                    monitorStatus.statusMessage(statusMessage);
+                                                }
+                                            } else {
+                                                logAndDebugPrint(log, Level.INFO, "Ignored state event with null start time");
+                                            }
+                                        } catch (Exception e) {
+                                            System.err.println("Exception handling event: " + e.toString());
+                                        }
                                     } else {
-    
-                                        logAndDebugPrint(log, Level.INFO, "Ignoring " + eventType + " event"); 
+                                        logAndDebugPrint(log, Level.INFO, "Ignoring " + eventType + " event");
                                     }
-    
-                                } // else
+                                }
                             } catch (Exception e) {
                                 // TODO design error handling reporting (logging?)
-                                logAndDebugPrint(log, Level.SEVERE, "Exception processing event: " + event, e); 
-                            } 
+                                logAndDebugPrint(log, Level.SEVERE, "Exception processing event: " + event, e);
+                            }
                         } else {
-                            
+
                             //we're skipping an event feed input line -- log the reason
                             if (event.length()<=0) {
                                 log.log(Level.INFO, "Skipping event feed input line (length is " + event.length() + ")");
                             } else if (!event.trim().startsWith("{")) {
                                 log.log(Level.INFO, "Skipping event feed input line (does not start with \"{\"): " + event.toString());
                             } else if (!event.trim().endsWith("}")) {
-                                log.log(Level.INFO, "Skipping event feed input line (does not end with \"}\"): " + event.toString());                            
+                                log.log(Level.INFO, "Skipping event feed input line (does not end with \"}\"): " + event.toString());
                             } else {
                                 log.log(Level.WARNING, "Skipping event feed input line (sorry - no explanation for why): " + event.toString());
                             }
@@ -598,12 +756,12 @@ public class RemoteEventFeedMonitor implements Runnable {
                         if(monitorStatus != null) {
                             monitorStatus.updateShadowNumberofRecords(nRecords);
                         }
-                        
+
                         if(bDelay) {
                             Thread.sleep(REMOTE_EVENT_FEED_DELAYMS);
                         }
                         event = reader.readLine();
-    
+
                     } // while
                 } catch (IOException ioe) {
                     if(lastToken != null) {
@@ -618,10 +776,10 @@ public class RemoteEventFeedMonitor implements Runnable {
                     }
                 } catch (Exception e) {
                     // TODO design error handling reporting (logging?)
-                    logAndDebugPrint(log, Level.SEVERE, "Exception reading event from stream: " + event, e); 
+                    logAndDebugPrint(log, Level.SEVERE, "Exception reading event from stream: " + event, e);
                 }
             } // end else
-            
+
             // In all cases of a connection disconnect or exception or other failure, we want
             // to see if connect retries are indicated, and if so, then pause a bit and retry, otherwise
             // we break out and give up.  We have to delay here if we are retrying or we'll just go into
@@ -643,30 +801,30 @@ public class RemoteEventFeedMonitor implements Runnable {
             }
         } // keepRunning
     }
-    
-    
+
+
     /**
      * Returns an indication of whether the current client is a "read-only shadow" client.
-     * 
+     *
      * Currently, account "feeder1" is allowed to be a read-write Shadow (meaning, it has the ability
      * to actually submit runs to the PC2 server when they are received from the Remote CCS); all
      * other accounts are considered "read-only" -- meaning they can look at submissions,
      * the scoreboards, etc. but they will not actually submit runs received from the Remote CCS to
      * the PC2 server.
-     * 
+     *
      * TODO: extend this function to allow a broader definition and control of when a client
      *      is considered "read-only"; for example, managing this by Permissions and/or via
      *      Admin settings.  See https://github.com/pc2ccs/pc2v9/issues/240.
-     * 
+     *
      * @return true if the current client is a "read-only Shadow" client; false if the client
      *          is allowed to do read-write operations (such as submitting a run from the Remote CCS
      *          to the PC2 server).
      */
     private boolean isReadOnlyClient() {
-        ClientId clientId = pc2Controller.getContest().getClientId(); 
+        ClientId clientId = pc2Controller.getContest().getClientId();
         ClientType.Type clientType = clientId.getClientType();
         int clientNum = clientId.getClientNumber();
-        
+
         if (clientType.equals(Type.FEEDER) && clientNum==1) {
             //client is Feeder1; it is NOT a "read-only" client
             return false;
@@ -679,13 +837,13 @@ public class RemoteEventFeedMonitor implements Runnable {
     /**
      * Initializes the Map<String,String> which holds mappings of judgement id's to corresponding submissions and judgement
      * types (acronymns).
-     * 
+     *
      * The keys to the map are Strings containing the numerical value of a judgement id as received from the remote CCS;
      * the values under each key are the concatenation of the submission id corresponding to the judgement with the
      * judgement type id (i.e., the judgement acronym), separated by a colon (":").
-     * 
+     *
      * Note that this method is PRIVATE; external clients wanting access to the remoteJudgementsMap should use method {@link #getRemoteJudgementsMapSnapshot()}.
-     * 
+     *
      * @return a Mapping of judgement id's to the corresponding submission and judgement type (value).
      *              If no remote judgements have yet been received the returned Map will be empty (but not null).
      */
@@ -698,32 +856,32 @@ public class RemoteEventFeedMonitor implements Runnable {
         }
     }
 
- 
+
     /**
-     * Returns a snapshot of the current contents of the Map<String,String> which holds mappings of judgement id's to corresponding 
+     * Returns a snapshot of the current contents of the Map<String,String> which holds mappings of judgement id's to corresponding
      * submissions and judgement types (acronymns).
-     * 
+     *
      * The keys to the map are Strings containing the numerical value of a judgement id as received from the remote CCS;
      * the values under each key are the concatenation of the submission id corresponding to the judgement with the
      * judgement type id (i.e., the judgement acronym), separated by a colon (":").
-     * 
-     * Note that this method returns a <I>copy</i> which is a <I>snapshot</i>; there is no guarantee that the map will not subsequently be 
-     * changed by other threads. However, the method does provide internal synchronization to insure that the map is not simultaneously 
+     *
+     * Note that this method returns a <I>copy</i> which is a <I>snapshot</i>; there is no guarantee that the map will not subsequently be
+     * changed by other threads. However, the method does provide internal synchronization to insure that the map is not simultaneously
      * altered while the snapshot is being created.
-     * 
+     *
      * @return a snapshot copy of the current Mapping of judgement id's to the corresponding submission and judgement type (value).
      *              If no remote judgements have yet been received the returned Map will be empty (but not null).
      */
     public static Map<String,String> getRemoteJudgementsMapSnapshot() {
-        
+
         synchronized (remoteJudgementsMapLock) {
             Map<String, String> currentMap = getRemoteJudgementsMap();
-            
+
             Map<String, String> copy = new HashMap<String,String>();
             for (String key : currentMap.keySet()) {
                 copy.put(key, currentMap.get(key));
             }
-           
+
             return copy;
         }
     }
@@ -733,18 +891,18 @@ public class RemoteEventFeedMonitor implements Runnable {
      * This method uses the Jackson {@link ObjectMapper} to perform the conversion from the JSON
      * string to a Map.  Note that the ObjectMapper recurses for nested JSON elements, returning
      * a appropriate Object in the Map under the corresponding key string.
-     * 
+     *
      * @param jsonString a JSON string to be converted to a Map
      * @return a Map mapping the keys in the JSON string to corresponding values, or null if the input
      *          String is null or if an exception occurs while converting the JSON to a Map.
      */
     @SuppressWarnings("unchecked")
     protected static Map<String, Object> getMap(String jsonString) {
-        
+
         if (jsonString == null){
             return null;
         }
-        
+
         ObjectMapper mapper = new ObjectMapper();
         try {
             Map<String, Object> map = mapper.readValue(jsonString, Map.class);
@@ -756,7 +914,7 @@ public class RemoteEventFeedMonitor implements Runnable {
     }
 
     ShadowRunSubmission createRunSubmission2(String jsonString){
-        
+
         Map<String, Object> map = getMap(jsonString);
         if (map == null) {
             // could not parse.
@@ -786,22 +944,22 @@ public class RemoteEventFeedMonitor implements Runnable {
 
     /**
      * Return if an event is a delete operation
-     * 
+     *
      * For older event feed events, the "op" property will be checked for existence
      * and if it's a "delete".
      * For newer event feed (2022-07), there is no "op", but if the "data" object
      * is null, then it's a delete.
-     * 
+     *
      * @param eventMap map of all properties in the event
      * @return true if this is the event map passed in specifies a delete operation
-     */  
+     */
     private boolean isDeleteOperation(Map<String, Object> eventMap)
     {
         boolean bDelete = false;
-        
+
         // "op" property, if it's there - old feed format uses this
         String operation = (String) eventMap.get("op");
-        
+
         if(operation != null) {
             // Old feed
             if(operation.equals("delete")) {
@@ -812,26 +970,26 @@ public class RemoteEventFeedMonitor implements Runnable {
         }
         return(bDelete);
     }
-    
+
     /** Delete the judgment specified by the supplied eventMap properties
-     * 
+     *
      * For older event feed events, the "op" property will be checked for existence
      * and if it's a "delete", we use the eventDataMap's "id" property.
      * For newer event feed (2022-07), there is no "op", and no "data" object
      * but the "id" is in the eventMap.
-     * 
+     *
      * @param eventMap map of all properties in the event
      * @return true if this is the event map passed in specifies a delete operation
-     */  
+     */
     private boolean deleteJudgment(Map<String, Object> eventMap)
     {
         String operation = (String) eventMap.get("op");
         String idToDelete = null;
         boolean bDeleted = false;
-        
+
         // Determine feed version, and where to get the judgement id.
         // For the 2022-07 (and 2021-11) clics spec, "operation" will always be null since the "op" field was removed
-        // For the 2020-03 the "op" field will be non-null.  This is how we determine the feed type.                                        
+        // For the 2020-03 the "op" field will be non-null.  This is how we determine the feed type.
        if (operation == null) {
            // 2022-07 (newer) feed - the ID of the judgment is in the notification object since there is
            // no data object.
@@ -839,7 +997,7 @@ public class RemoteEventFeedMonitor implements Runnable {
        } else if(operation.equals("delete")) {
            // 2020-03 feed, "op" field present and is an explicit delete, judgment id is in "data" object
            Map<String, Object> judgmentEventDataMap = (Map<String, Object>) eventMap.get("data");
-           
+
            if(judgmentEventDataMap != null) {
                idToDelete = (String) judgmentEventDataMap.get("id");
            }
@@ -863,109 +1021,159 @@ public class RemoteEventFeedMonitor implements Runnable {
         return mapper.convertValue(eventDataMap, ShadowRunSubmission.class);
     }
 
-    
+    protected static ShadowStateMessage createStateMessage(Map<String, Object> eventDataMap) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+        return mapper.convertValue(eventDataMap, ShadowStateMessage.class);
+    }
+
+
     /**
      * Set lastToken starting point for next open of remote feed
-     * 
-     * 
+     *
+     *
      * @param token where to start reading remote feed from
-     */  
+     */
     public void setStartAfterToken(String token) {
         lastToken = token;
     }
 
-    
+
     /**
      * Get lastToken starting point for next open of remote feed
-     * 
-     * 
+     *
+     *
      * @return token of last processed event
-     */  
+     */
     public String getStartAfterToken() {
         return(lastToken);
     }
 
-    
+
     /**
      * Get the number of records read from remote.  This is NOT the number of
      * events processed.  This includes events we do not care about.
-     * 
-     * 
+     *
+     *
      * @return number of records read
-     */  
+     */
     public int getRecordsRead() {
         return(nRecords);
     }
 
-    
+
     /**
      * Set the delay of how long to wait between reconnect attempts
      * to the primary
-     * 
+     *
      * @param delay how long to wait (in ms) between connect attempts to primary
-     */  
+     */
     public void setRetryConnectDelay(int delay) {
         retryConnectDelay = delay;
     }
 
-    
+
     /**
      * Get the delay of how long to wait between reconnect attempts
      * to the primary
-     * 
+     *
      * @return number of ms to delay before a reconnect attempt (0 is allowed)
-     */  
+     */
     public int getRetryConnectDelay() {
         return(retryConnectDelay);
     }
 
-    
+
     /**
      * Set whether or not connection retries are being attempted
-     * 
-     * 
+     *
+     *
      * @param attemptRetries is true to attempt retries on connection failures
-     */  
+     */
     public void setAttemptConnectRetries(boolean attemptRetries) {
         attemptConnectRetries = attemptRetries;
     }
 
-    
+
     /**
      * Get whether or not connection retries are being attempted
-     * 
-     * 
+     *
+     *
      * @return true if attempts are being attempted on errors
-     */  
+     */
     public boolean getAttemptConnectRetries() {
         return(attemptConnectRetries);
     }
-       
-    
+
+    /**
+     * Set whether or not we accept submissions/judgments from primary
+     * prior to contest start.
+     *
+     * @param allowPrecontestActivity is true to allow precontest submissions and judgments
+     */
+    public void setAllowPrecontestActivity(boolean allowPrecontestActivity) {
+        this.allowPrestartActivity = allowPrecontestActivity;
+    }
+
+
+    /**
+     * Get whether or not we accept submissions/judgments from primary
+     * prior to contest start.
+     *
+     * @return true if we allow precontest submissions/judgments
+     */
+    public boolean getAllowPrecontestActivity() {
+        return(this.allowPrestartActivity);
+    }
+
+    /**
+     * Check a for a state change of the provided state string
+     *
+     * @param when indicating when this state changed
+     * @param currentPrimaryState whether or not we saw the state change from the primary yet
+     * @param what is the property
+     * @return the possibly new state if it's the first time we saw this
+     */
+    private boolean generalStateCheck(Date when, boolean currentPrimaryState, String what)
+    {
+        if(when != null) {
+            if(currentPrimaryState == false) {
+                currentPrimaryState = true;
+                String statusMessage = "Primary indicates state '" + what + "' at " +
+                    getISODateString(when);
+                logAndDebugPrint(pc2Controller.getLog(), Level.INFO, statusMessage);
+                if(monitorStatus != null) {
+                    monitorStatus.statusMessage(statusMessage);
+                }
+            }
+        }
+        return(currentPrimaryState);
+    }
+
     /** Shorthand method to print a message if debugging is enable, but always
      * log the message
-     * 
+     *
      * @param logger where to log the message
      * @param lLev logging level
      * @param msg string to print/log
-     * @return 
-     */  
+     * @return
+     */
     private void logAndDebugPrint(Log logger, Level lLev, String msg) {
         if (Utilities.isDebugMode()) {
             System.err.println(msg);
         }
         logger.log(lLev, msg);
     }
-    
+
      /** Shorthand method to print a message and exception if debugging is enable, but always
       * log the message
-      * 
+      *
       * @param logger where to log the message
       * @param lLev logging level
       * @param msg string to print/log
       * @param thrown an exception that was thrown that should be printed
-      * @return 
-      */  
+      * @return
+      */
      private void logAndDebugPrint(Log logger, Level lLev, String msg, Throwable thrown) {
          if (Utilities.isDebugMode()) {
              System.err.println(msg + thrown.toString());
@@ -973,13 +1181,42 @@ public class RemoteEventFeedMonitor implements Runnable {
          }
          logger.log(lLev, msg, thrown);
      }
-    
-   
-    /**
-     * This method is used to terminate the RemoteEventFeedListener thread.
-     */
-    public void stop() {
-        keepRunning = false;
-    }
+
+     /*
+      * Convert an iso time to a date.  Returns null if it's a bad time.
+      *
+      * @param isoTime The time to convert
+      * @return Date representing the isoTime or null if it's bad.
+      */
+     public Date parseISO8601Date(String isoTime) {
+         Date dateRet = null;
+
+         try {
+             dateRet = DatatypeConverter.parseDateTime(isoTime).getTime();
+         } catch(Exception e) {
+             logAndDebugPrint(pc2Controller.getLog(), Level.WARNING, "Invalid ISO Date: " + isoTime, e);
+         }
+         return dateRet;
+     }
+
+     /**
+      * Formats a Date object as a local time iso8601 string
+      *
+      * @param d The date to format
+      * @return The formatted string
+      */
+     public String getISODateString(Date d) {
+         Instant dateInst = d.toInstant();
+         ZoneId defZone = ZoneId.systemDefault();
+         ZonedDateTime zoneDate = dateInst.atZone(defZone);
+         return(zoneDate.toString());
+     }
+
+     /**
+      * This method is used to terminate the RemoteEventFeedListener thread.
+      */
+     public void stop() {
+         keepRunning = false;
+     }
 
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -63,28 +63,28 @@ import edu.csus.ecs.pc2.shadow.ShadowController.SHADOW_CONTROLLER_STATUS;
 
 /**
  * This class provides a GUI for configuring and starting Shadowing operations on a remote CCS.
- * 
- * The remote CCS must support the <A href="https://clics.ecs.baylor.edu/index.php?title=Contest_API">CLICS Contest API</a>. 
- * 
- * This class is a {@link JPanePlugin} which allows specifying the remote CCS URL/login/password, 
+ *
+ * The remote CCS must support the <A href="https://clics.ecs.baylor.edu/index.php?title=Contest_API">CLICS Contest API</a>.
+ *
+ * This class is a {@link JPanePlugin} which allows specifying the remote CCS URL/login/password,
  * along with "last event id" (that is, the value for the "since_id" parameter on the CLICS event-feed endpoint).
- * 
+ *
  * @author John Clevenger, PC2 Development Team, pc2@ecs.csus.edu
  */
 
 public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStatus {
 
     private static final long serialVersionUID = 1;
-    
+
     private static final int VERT_PAD = 2;
     private static final int HORZ_PAD = 20;
-    
+
     private static final String CCS_API_ENDPOINT = "/";
 
     private JPanel buttonPanel = null;
 
     private JButton startStopButton = null;
-    
+
     private JButton testConnectionButton;
 
     private JPanel centerPanel = null;
@@ -100,58 +100,69 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private JPanel lastEventIDPane;
 
     private JPanel shadowingOnOffStatusPane;
-    
+
     private JScrollPane connectStatusPane;
 
     private JLabel shadowingStatusValueLabel;
 
     private JTextField lastEventTextfield;
-    
+
     private ContestInformation savedContestInformation;
-    
+
     private JButton compareRunsButton;
 
     private JButton compareScoreboardsButton;
 
     private JTextField lastRecordTextfield;
-    
+
+    private JTextField lastTossedRecordTextfield;
+
     private JTextField lastEventTimeTextField;
-    
+
     private JTableCustomized connectStatusTable;
-    
+
     private DefaultTableModel connectStatusTableModel;
-    
+
     private int statusScrollBarMax = 0;
-    
+
     private int numRecord = 0;
-    
+    private int numTossedRecord = 0;
+
     private String lastToken = null;
-    
+
     private SimpleDateFormat lastDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-    
+
     // Lightish green for success
     private Color statusColorSuccess = new Color(128, 255, 128);
     // Lightish red for failure
     private Color statusColorFailure = new Color(255, 128, 128);
+    // Lightish cyan for status messages
+    private Color statusColorStatus = new Color(128, 255, 255);
+
+    private static final String notStartedMessage = "<html>The contest has not started yet." +
+            "<p><p>It will not be started until a valid " +
+            "CLICS <b><i>state</i></b> message with a non-null <b>started</b> property is received." +
+            "<p><p>Do you wish to continue and start shadowing anyway?</html>";
 
     // Status column for JTable notifications
     enum ShadowStatus {
         SUCCESS,
         FAILURE,
-        INFO
+        INFO,
+        STATUS
     };
 
     /**
      * Constructs a new ShadowControlPane using the specified Contest and Controller.
-     * 
+     *
      * This constructor invokes the superclass ({@link JPanePlugin}) method
      * {@link JPanePlugin#setContestAndController(IInternalContest, IInternalController)} passing to it
      * the received {@link IInternalContest} and {@link IInternalController}, making it unnecessary for
      * the caller to explicitly invoke that method.
-     * 
+     *
      * @param inContest the PC2 IInternalContest representing the local contest acting as the shadow
      * @param inController the PC2 IInternalController for the local contest acting as the shadow
-     * 
+     *
      */
     public ShadowControlPane(IInternalContest inContest, IInternalController inController) {
         super();
@@ -162,7 +173,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
     /**
      * This method initializes the ShadowControlPane.
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -195,7 +206,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
     /**
      * This method initializes the Button Panel containing the Start and Stop buttons
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPanel() {
@@ -224,6 +235,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             updateButton.setMnemonic(KeyEvent.VK_S);
             updateButton.setToolTipText("Save the updated Remote CCS settings");
             updateButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
 //                    System.out.println("Update pressed...");
                     updateContestInformation();
@@ -237,7 +249,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     /**
      * This method initializes the startStopButton which starts or stops
      * shadowing operations.
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getStartStopButton() {
@@ -248,15 +260,20 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             startStopButton.setToolTipText("Start shadowing operations on the specified remote CCS");
             startStopButton.addActionListener(new java.awt.event.ActionListener() {
 
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (!currentlyShadowing) {
-                        
+
                         if (!getContest().getContestTime().isContestRunning()) {
-                            showErrorMessage("Contest clock STOPPED, cannot start shadowing", "Cannot start shadowing");
-                            return;
+                            // inform the user the contest is not started, and it wont be started until the
+                            // primary says so. (valid "state" message received)
+                            if(showConfirmMessage(notStartedMessage, "Notice") == JOptionPane.NO_OPTION) {
+                                return;
+                            }
                         }
 
                     	SwingUtilities.invokeLater(new Runnable() {
+                            @Override
                             public void run() {
                                 startShadowing();
                             }
@@ -264,6 +281,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
                     } else {
                         SwingUtilities.invokeLater(new Runnable() {
+                            @Override
                             public void run() {
 
                                 int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to stop shadowing?", "Stop Shadowing");
@@ -284,10 +302,10 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
     /**
      * Starts a Shadow Controller (a facade which manages the Shadowing system classes).
-     * 
+     *
      */
     private void startShadowing() {
- 
+
         //the following was carried over from WebServerPane (from which this class was initially copied)
 
 //        Properties properties = new Properties();
@@ -298,13 +316,13 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 //        properties.put(WebServer.FETCH_RUN_SERVICE_ENABLED_KEY, Boolean.toString(getChckbxFetchRuns().isSelected()));
 //
 //        getWebServer().startWebServer(getContest(), getController(), properties);
-        
+
 
         boolean shadowCheckboxEnabled = getShadowSettingsPane().getShadowModeCheckbox().isSelected();
         boolean shadowDataComplete = verifyShadowControls();
-        
+
         if (shadowCheckboxEnabled && shadowDataComplete) {
-            shadowController = new ShadowController(this.getContest(), this.getController(), (IShadowMonitorStatus)this, lastToken) ;
+            shadowController = new ShadowController(this.getContest(), this.getController(), this, lastToken) ;
             boolean success = shadowController.start();
             if (success) {
                 currentlyShadowing = true;
@@ -325,32 +343,32 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
     /**
      * This method is invoked when a call to ShadowController.start() returns false (failure in starting shadowing).
-     * 
+     *
      */
     private void handleStartFailure() {
-        
+
         SHADOW_CONTROLLER_STATUS failureStatus = shadowController.getStatus();
-        
+
         String failureReason = failureStatus.getLabel();
-        
+
         showErrorMessage(failureReason, "Shadow Controller Failed To Start");
-        
+
     }
 
     /**
      * Checks all the components on the ShadowModePane, returns true if they all have sane values
      * (meaning, they all have values which will work for starting shadowing); false otherwise.
-     * 
+     *
      * Specifically, this means that in order for "true" to be returned, ALL of the following must be true:
      * <pre>
      *   - the "Enable Shadow Mode" checkbox is checked (selected)
      *   - the RemoteCCS textfields for URL, Login, and Password are ALL non-null and not the empty string
      * </pre>
-     * 
+     *
      * @return an indication of whether the GUI controls are set for shadowing to start
      */
     private boolean verifyShadowControls() {
-        
+
         ShadowSettingsPane shadowPane = getShadowSettingsPane();
         if (shadowPane==null) {
             return false;
@@ -372,13 +390,14 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     }
 
     /**
-     * Displays a message in a simple dialog format.
+     * Displays a message in a simple Yes/No dialog format along with a title.
      * @param string the message to be displayed
+     * @param title for the dialog
      */
-    private void showMessage(String string) {
-        JOptionPane.showMessageDialog(this, string);
+    private int showConfirmMessage(String message, String title) {
+        return(JOptionPane.showConfirmDialog(this, message, title, JOptionPane.YES_NO_OPTION));
     }
-    
+
     /**
      * Displays an error message dialog; also logs the Error Message.
      * @param message the message to be displayed and logged.
@@ -390,7 +409,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     }
 
     /**
-     * Stops shadowing operations if running. 
+     * Stops shadowing operations if running.
      */
     protected void stopShadowing() {
 
@@ -409,13 +428,13 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
     /**
      * This method initializes centerPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPanel() {
         if (centerPanel == null) {
             centerPanel = new JPanel();
-            
+
            /*
              * We use a GridBagLayout instead of a FlowLayout since we want to make
              * the notification JTable resize as the window gets bigger so you can see more
@@ -428,35 +447,35 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
              */
             centerPanel.setLayout(new GridBagLayout());
             GridBagConstraints c = new GridBagConstraints();
-            
+
             // Each pane uses exactly one cell in the layout
             c.gridwidth = 1;
             c.gridheight = 1;
             // Since it's only 1 column wide, all cells start in the first column
             c.gridx = 0;
-            
+
             c.fill = GridBagConstraints.NONE;
             c.gridy = 0;
             centerPanel.add(getShadowingOnOffStatusPane(), c);
-            
+
             c.gridy = 1;
             centerPanel.add(getShadowSettingsPane(), c);
-            
+
             // Fill horizontally or it will chop it off.
             c.fill = GridBagConstraints.HORIZONTAL;
             c.gridy = 2;
-            // This is needed due to the way the pane is created.  We have to 
+            // This is needed due to the way the pane is created.  We have to
             // allow the height to expand a tiny bit, or it chops the pane off.
             c.weighty = 0.01;
             centerPanel.add(getLastEventIDPane(), c);
-            
+
             // Fill both width and height as needed as display area expands
             c.fill = GridBagConstraints.BOTH;
             c.gridy = 3;
             c.weighty = 0.5;
             // Was bumping up against the edge, so leave some elbow room
             c.insets = new Insets(0, 20, 0, 20);
-            centerPanel.add(getConnectStatusPane(), c);          
+            centerPanel.add(getConnectStatusPane(), c);
         }
         return centerPanel;
     }
@@ -466,14 +485,15 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      * Constructs a new {@link ShadowSettingsPane} if none exists.
      * Construction includes adding keylisteners and actionlisteners to the ShadowSettingsPane
      * components.
-     * 
+     *
      * @return a ShadowSettingsPane with listeners attached to its active components
      */
     private ShadowSettingsPane getShadowSettingsPane() {
         if (shadowSettingsPane==null) {
             shadowSettingsPane = new ShadowSettingsPane();
-            
+
             KeyListener keyListener = new java.awt.event.KeyAdapter() {
+                @Override
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableButtons();
                 }
@@ -483,6 +503,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             shadowSettingsPane.getRemoteCCSPasswdTextfield().addKeyListener(keyListener);
 
             ActionListener actionListener = new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     enableButtons();
                 }
@@ -499,40 +520,50 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private JPanel getLastEventIDPane() {
         if (lastEventIDPane==null) {
             lastEventIDPane = new JPanel();
-            
+
             lastEventIDPane.setLayout(new FlowLayout(FlowLayout.CENTER));
-            
+
             JLabel lastEventDateLabel = new JLabel("Last Event Processed At:");
             lastEventDateLabel.setToolTipText("The time the last event was processed");
             lastEventIDPane.add(lastEventDateLabel);
-            
+
             // 2022-09-27 23:02:03.009 (23 chars), but that's too many columns for our font
-            lastEventTimeTextField = new JTextField("N/A", 16);
+            lastEventTimeTextField = new JTextField("N/A", 14);
             lastEventTimeTextField.setEditable(false);
             lastEventIDPane.add(lastEventTimeTextField);
-            
-            JLabel lastEventIDLabel = new JLabel("Last Event ID:");
-            lastEventIDLabel.setToolTipText("The ID of the last event already received; i.e., the \"since_id\" for events being requested");
+
+            JLabel lastEventIDLabel = new JLabel("Last Token:");
+            lastEventIDLabel.setToolTipText("The Token ID of the last event already received; i.e., the \"since_id\" for events being requested");
             lastEventIDPane.add(lastEventIDLabel);
-            
+
             lastEventTextfield = new JTextField(10);
             lastEventTextfield.addKeyListener(new KeyAdapter() {
+                @Override
                 public void keyReleased(KeyEvent e) {
                     enableButtons();
                 }
             });
             lastEventTextfield.setHorizontalAlignment(JTextField.RIGHT);
             lastEventIDPane.add(lastEventTextfield);
-            
+
+            JLabel lastTossedRecordLabel = new JLabel("Tossed:");
+            lastTossedRecordLabel.setToolTipText("The number of JSON event records read from the primary that were tossed since the contest was not started yet");
+            lastEventIDPane.add(lastTossedRecordLabel);
+
+            lastTossedRecordTextfield = new JTextField(5);
+            lastTossedRecordTextfield.setEditable(false);
+            lastTossedRecordTextfield.setHorizontalAlignment(JTextField.RIGHT);
+            lastEventIDPane.add(lastTossedRecordTextfield);
+
             JLabel lastRecordLabel = new JLabel("Records Read:");
             lastRecordLabel.setToolTipText("The number of JSON event records read from the primary");
             lastEventIDPane.add(lastRecordLabel);
-            
-            lastRecordTextfield = new JTextField(10);
+
+            lastRecordTextfield = new JTextField(5);
             lastRecordTextfield.setEditable(false);
             lastRecordTextfield.setHorizontalAlignment(JTextField.RIGHT);
             lastEventIDPane.add(lastRecordTextfield);
-            
+
         }
         return lastEventIDPane;
     }
@@ -546,21 +577,22 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
             // make it so it always scrolls to the bottom of the pane
             connectStatusPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+                @Override
                 public void adjustmentValueChanged(AdjustmentEvent e) {
                     if(statusScrollBarMax == e.getAdjustable().getMaximum()) {
                         return;
                     }
                     statusScrollBarMax = e.getAdjustable().getMaximum();
-                    e.getAdjustable().setValue(statusScrollBarMax);  
+                    e.getAdjustable().setValue(statusScrollBarMax);
                 }
             });
         }
-        
+
         return connectStatusPane;
     }
-    
+
     private JTableCustomized getConnectStatusTable() {
-    
+
         connectStatusTable = new JTableCustomized() {
             private static final long serialVersionUID = 1L;
 
@@ -572,7 +604,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
                 //default to normal background
                 c.setBackground(getBackground());
-              
+
                 if(connectStatusTableModel != null) {
                     //map the specified row index number to the corresponding model row (index numbers can change due
                     // to sorting/scrolling; model row numbers never change).
@@ -582,14 +614,15 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                         case SUCCESS: c.setBackground(statusColorSuccess); break;
                         case FAILURE: c.setBackground(statusColorFailure); break;
                         case INFO: c.setBackground(getBackground()); break;
+                        case STATUS: c.setBackground(statusColorStatus); break;
                     }
                 }
-                
-                
+
+
                 return(c);
             }
         };
-        
+
         return(connectStatusTable);
     }
 
@@ -599,19 +632,19 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private JPanel getShadowingOnOffStatusPane() {
         if (shadowingOnOffStatusPane==null) {
             shadowingOnOffStatusPane = new JPanel();
-            
+
             shadowingOnOffStatusPane.setLayout(new FlowLayout(FlowLayout.CENTER));
-            
+
             JLabel shadowingStatusLabel = new JLabel();
             shadowingStatusLabel.setFont(new Font("Dialog", Font.BOLD, 14));
             shadowingStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
             shadowingStatusLabel.setText("Shadowing is currently: ");
             shadowingOnOffStatusPane.add(shadowingStatusLabel);
-            
+
             shadowingStatusValueLabel = new JLabel();
             shadowingStatusValueLabel.setFont(new Font("Dialog", Font.BOLD, 14));
             shadowingStatusValueLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            shadowingStatusValueLabel.setText("UNDEFINED");  
+            shadowingStatusValueLabel.setText("UNDEFINED");
             shadowingOnOffStatusPane.add(shadowingStatusValueLabel);
 
         }
@@ -626,8 +659,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         if (getCurrentShadowInformation(getContest().getContestInformation()).isSameAs(newChoice)) {
             getUpdateButton().setEnabled(false);
             getStartStopButton().setEnabled(true);
-            getTestConnectionButton().setEnabled(!currentlyShadowing);            
-            
+            getTestConnectionButton().setEnabled(!currentlyShadowing);
+
         } else {
             getUpdateButton().setEnabled(true);
             getStartStopButton().setEnabled(false);
@@ -642,7 +675,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      * @return
      */
     private ShadowInformation getCurrentShadowInformation(ContestInformation contestInformation) {
-        
+
         ShadowInformation newShadowInfo = new ShadowInformation();
 
         newShadowInfo.setShadowModeEnabled(contestInformation.isShadowMode());
@@ -657,7 +690,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
         Object[] columns = { "Time             ", "Status", "Description               " };
         connectStatusTable.removeAll();
-        
+
         connectStatusTableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int col) {
@@ -669,18 +702,18 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
         // Sorters
         TableRowSorter<DefaultTableModel> trs = new TableRowSorter<DefaultTableModel>(connectStatusTableModel);
-        
+
         connectStatusTable.setRowSorter(trs);
         connectStatusTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        
+
         ArrayList<SortKey> sortList = new ArrayList<SortKey>();
-        
+
         /*
          * Column headers left justified
          */
         ((DefaultTableCellRenderer)connectStatusTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
         connectStatusTable.setRowHeight(connectStatusTable.getRowHeight() + VERT_PAD);
-                     
+
         int idx = 0;
 
         // These are in sort order
@@ -691,16 +724,17 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         trs.setSortKeys(sortList);
         resizeColumnWidth(connectStatusTable);
     }
-    
+
     private void resizeColumnWidth(JTableCustomized table) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
                 tca.adjustColumns();
             }
         });
     }
-    
+
     /**
      * Updates the GUI to correspond to the current state.
      */
@@ -709,12 +743,12 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         ContestInformation contestInformation = getContest().getContestInformation();
 
 //        System.out.println ("UpdateGUI(): got the following shadow info:");
-//        System.out.println ("   Shadow Enabled: " + contestInformation.isShadowMode() 
+//        System.out.println ("   Shadow Enabled: " + contestInformation.isShadowMode()
 //                          + "\n              URL: " + contestInformation.getPrimaryCCS_URL()
 //                          + "\n            login: " + contestInformation.getPrimaryCCS_user_login()
 //                          + "\n           passwd: " + contestInformation.getPrimaryCCS_user_pw()
 //                          + "\n        lastEvent: " + contestInformation.getLastShadowEventID() );
-//        
+//
 
         getStartStopButton().setEnabled(true);
         getUpdateButton().setEnabled(false);
@@ -728,14 +762,14 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             getStartStopButton().setText("Start shadowing");
             getStartStopButton().setToolTipText("Start shadowing the currently specified remote CCS");
         }
-        
+
         updateShadowSettingsPane(currentlyShadowing);
         lastToken = contestInformation.getLastShadowEventID();
         lastEventTextfield.setText(lastToken);
     }
-    
+
     private void updateShadowSettingsPane(boolean currentlyShadowing) {
-        
+
         ContestInformation contestInformation = getContest().getContestInformation();
 
         getShadowSettingsPane().getShadowModeCheckbox().setSelected(contestInformation.isShadowMode());
@@ -755,9 +789,9 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      * @return a ShadowInformation object
      */
     protected ShadowInformation getFromFields() {
-        
-        ShadowInformation newShadowInformation = new ShadowInformation();                
-        
+
+        ShadowInformation newShadowInformation = new ShadowInformation();
+
         //fill in Shadow Mode information from this pane
         newShadowInformation.setShadowModeEnabled(getShadowSettingsPane().getShadowModeCheckbox().isSelected());
         newShadowInformation.setRemoteCCSURL(getShadowSettingsPane().getRemoteCCSURLTextfield().getText());
@@ -771,33 +805,33 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     /**
      * Updates the current {@link ContestInformation} on the server with the current shadow settings
      * in this GUI pane.
-     * 
+     *
      */
     private void updateContestInformation() {
         ShadowInformation shadowInfo = getFromFields();
-        
+
 //        System.out.println ("UpdateContestInformation(): got the following shadow info:");
 //        System.out.println ("   Shadow Enabled: " + shadowInfo.isShadowModeEnabled()
 //                          + "\n              URL: " + shadowInfo.getRemoteCCSURL()
 //                          + "\n            login: " + shadowInfo.getRemoteCCSLogin()
 //                          + "\n           passwd: " + shadowInfo.getRemoteCCSPassword()
 //                          + "\n        lastEvent: " + shadowInfo.getLastEventID());
-//        
+//
 //        System.out.println ("UpdateContestInformation(): savedContestInformation contains the following shadow info:");
 //        System.out.println ("   Shadow Enabled: " + savedContestInformation.isShadowMode()
 //                          + "\n              URL: " + shadowInfo.getRemoteCCSURL()
 //                          + "\n            login: " + shadowInfo.getRemoteCCSLogin()
 //                          + "\n           passwd: " + shadowInfo.getRemoteCCSPassword()
 //                          + "\n        lastEvent: " + shadowInfo.getLastEventID());
-        
+
         ContestInformation contestInfo = getContest().getContestInformation();
-        
+
         contestInfo.setShadowMode(shadowInfo.isShadowModeEnabled());
         contestInfo.setPrimaryCCS_URL(shadowInfo.getRemoteCCSURL());
         contestInfo.setPrimaryCCS_user_login(shadowInfo.getRemoteCCSLogin());
         contestInfo.setPrimaryCCS_user_pw(shadowInfo.getRemoteCCSPassword());
         contestInfo.setLastShadowEventID(shadowInfo.getLastEventID());
-        
+
         getController().updateContestInformation(contestInfo);
     }
 
@@ -805,28 +839,33 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
 
 
 
+        @Override
         public void contestInformationAdded(ContestInformationEvent event) {
 //            System.out.println ("contestInformationAdded listener: event = " + event);
             savedContestInformation = event.getContestInformation();
             updateGUI();
         }
 
+        @Override
         public void contestInformationChanged(ContestInformationEvent event) {
 //            System.out.println ("contestInformationChanged listener: event = " + event);
            savedContestInformation = event.getContestInformation();
             updateGUI();
         }
 
+        @Override
         public void contestInformationRemoved(ContestInformationEvent event) {
             // TODO Auto-generated method stub
         }
 
+        @Override
         public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
 //            System.out.println ("contestInformationRefreshAll listener: event = " + contestInformationEvent);
             savedContestInformation = contestInformationEvent.getContestInformation();
             updateGUI();
         }
-        
+
+        @Override
         public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
             // Not used
         }
@@ -839,9 +878,10 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         	compareRunsButton.setMnemonic(KeyEvent.VK_R);
         	compareRunsButton.setToolTipText("Display run comparison results");
         	compareRunsButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (shadowController==null) {
-                        showErrorMessage("No shadow controller available; cannot show runs comparison", "Missing Controller"); 
+                        showErrorMessage("No shadow controller available; cannot show runs comparison", "Missing Controller");
                     } else if (!ShadowController.SHADOW_CONTROLLER_STATUS.SC_RUNNING.equals(shadowController.getStatus())) {
                         showErrorMessage("Cannot compare runs, shadow not running","Shadow not running");
                     } else {
@@ -852,29 +892,31 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                         shadowCompareRunsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                         shadowCompareRunsFrame.setVisible(true);
                     }
-                    
+
                 }
             });
 
         }
         return compareRunsButton;
     }
-    
+
     private JButton getCompareScoreboardsButton() {
         if (compareScoreboardsButton == null) {
             compareScoreboardsButton = new JButton("Compare Scoreboards");
             compareScoreboardsButton.setMnemonic(KeyEvent.VK_S);
             compareScoreboardsButton.setToolTipText("Display scoreboard comparison results");
             compareScoreboardsButton.addActionListener(new java.awt.event.ActionListener() {
-        	    
+
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
 
                 	SwingUtilities.invokeLater(new Runnable() {
-                		
-                		public void run() {
-                		
+
+                		@Override
+                        public void run() {
+
                             if (shadowController==null) {
-                                showErrorMessage("No shadow controller available; cannot show scoreboard comparison", "Missing Controller"); 
+                                showErrorMessage("No shadow controller available; cannot show scoreboard comparison", "Missing Controller");
                             } else if (!ShadowController.SHADOW_CONTROLLER_STATUS.SC_RUNNING.equals(shadowController.getStatus())) {
                                 showErrorMessage("Cannot compare scoreboard, shadow not running","Shadow not running");
                             } else {
@@ -886,7 +928,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                 shadowCompareScoreboardFrame.setVisible(true);
                             }
                 		}
-                	}); 
+                	});
                 };
 
             });
@@ -894,16 +936,18 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         }
         return compareScoreboardsButton;
     }
-    
+
     private JButton getTestConnectionButton() {
         if (testConnectionButton == null) {
             testConnectionButton = new JButton("Test Connection");
             testConnectionButton.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent arg0) {
-                    
+
                     SwingUtilities.invokeLater(new Runnable() {
+                        @Override
                         public void run() {
-                            
+
                                IRemoteContestAPIAdapter remoteContestAPIAdapter = null;
                                 try {
                                     ShadowInformation shadowInfo = getCurrentShadowInformation(getContest().getContestInformation());
@@ -918,7 +962,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                     } else {
                                         addConnectTableEntry(ShadowStatus.FAILURE, "Test connection to remote CCS");
                                     }
-                                    
+
                                     // Try to get the remote API version
                                     String infoStr = getRemoteAPIVersionInfo(remoteURLString, remoteLogin, remotePW);
                                     // infoStr is supposed to be non-null all the time, but let's be sure
@@ -929,7 +973,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                 } catch (Exception e) {
                                     showErrorMessage("Exception attempting to test connection to remote system:\n" + e, "Exception in connecting");
                                     getController().getLog().log(Log.SEVERE, "Exception attempting to test connection to remote system: " + e.getMessage(), e);
-                                    
+
                                 } finally {
                                     if (remoteContestAPIAdapter != null) {
                                         remoteContestAPIAdapter = null;
@@ -938,7 +982,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                         }
                     });
 
-                    
+
                 }
             });
         }
@@ -950,18 +994,18 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
      * This method uses the Jackson {@link ObjectMapper} to perform the conversion from the JSON
      * string to a Map.  Note that the ObjectMapper recurses for nested JSON elements, returning
      * a appropriate Object in the Map under the corresponding key string.
-     * 
+     *
      * @param jsonString a JSON string to be converted to a Map
      * @return a Map mapping the keys in the JSON string to corresponding values, or null if the input
      *          String is null or if an exception occurs while converting the JSON to a Map.
      */
     @SuppressWarnings("unchecked")
     protected static Map<String, Object> getMap(String jsonString) {
-        
+
         if (jsonString == null){
             return null;
         }
-        
+
         ObjectMapper mapper = new ObjectMapper();
         try {
             Map<String, Object> map = mapper.readValue(jsonString, Map.class);
@@ -975,12 +1019,13 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private void addConnectTableEntry(ShadowStatus stat, String msg)
     {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 Object[] objects = new Object[3];
-                
+
                 try {
                     GregorianCalendar cal = new GregorianCalendar();
-                    
+
                     lastDateFormat.setCalendar(cal);
                     objects[0] = lastDateFormat.format(cal.getTime());
                 } catch(Exception e) {
@@ -996,15 +1041,16 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                 resizeColumnWidth(connectStatusTable);
             }
         });
-        
+
     }
-    
+
     /*
      * IShadowMonitorStatus implementaiton
      */
     /**
      * {@inheritDoc}
      */
+    @Override
     public void updateShadowLastToken(String token)
     {
         // if the value supplied is valid and different from what we last saw,
@@ -1013,39 +1059,69 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             if(lastToken == null || !token.equals(lastToken)) {
                 // TODO: Do we want to save the token to a file here in case we crash?
                 //       Currently, token is only saved when the shadow is "stopped"
-                // TODO: Do we want to "InvokeLater" these (simple) updates to text fields?
                 lastToken = token;
-                lastEventTextfield.setText(lastToken);
-                try {
-                    GregorianCalendar cal = new GregorianCalendar();
-                    
-                    lastDateFormat.setCalendar(cal);
-                    lastEventTimeTextField.setText(lastDateFormat.format(cal.getTime()));
-                } catch(Exception e) {
-                    // Just ignore any exception from date formatter
-                }
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        lastEventTextfield.setText(lastToken);
+                        try {
+                            GregorianCalendar cal = new GregorianCalendar();
+
+                            lastDateFormat.setCalendar(cal);
+                            lastEventTimeTextField.setText(lastDateFormat.format(cal.getTime()));
+                        } catch(Exception e) {
+                            // Just ignore any exception from date formatter
+                        }
+                    }
+                });
             }
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
+    @Override
     public void updateShadowNumberofRecords(int nRec)
     {
         // if the number of records is different from what we last display and it's valid
         // update the instrumentation.
         if(nRec != numRecord && nRec >= 0) {
-            // TODO: Do we want to "InvokeLater" this (simple) update to a text field?
             numRecord = nRec;
-            // Save to file? Send to server contestinfo?
-            lastRecordTextfield.setText(String.valueOf(numRecord));
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    // Save to file? Send to server contestinfo?
+                    lastRecordTextfield.setText(String.valueOf(numRecord));
+                }
+            });
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
+    @Override
+    public void updateShadowNumberofTossedRecords(int nRec)
+    {
+        // if the number of tossed records is different from what we last display and it's valid
+        // update the instrumentation.
+        if(nRec != numTossedRecord && nRec >= 0) {
+            numTossedRecord = nRec;
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    // Save to file? Send to server contestinfo?
+                    lastTossedRecordTextfield.setText(String.valueOf(numTossedRecord));
+                }
+            });
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void connectFailed(String token)
     {
         if(token == null || token.isEmpty()) {
@@ -1058,6 +1134,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     /**
      * {@inheritDoc}
      */
+    @Override
     public void connectSucceeded(String token)
     {
         if(token == null || token.isEmpty()) {
@@ -1066,16 +1143,17 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             addConnectTableEntry(ShadowStatus.SUCCESS, "Connected starting at token " + token);
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
+    @Override
     public void connectClosed(String msg)
     {
         if(msg == null || msg.isEmpty()) {
             msg = "Connection closed";
         }
-        
+
         // Save last token on disconnect
         if(lastToken != null && !lastToken.isEmpty()) {
             updateContestInformation();
@@ -1083,24 +1161,38 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         }
         addConnectTableEntry(ShadowStatus.INFO, msg);
     }
-    
+
     /**
      * {@inheritDoc}
      */
+    @Override
     public void errorDisconnect(String errMsg)
     {
         if(errMsg == null || errMsg.isEmpty()) {
             errMsg = "Unexpected disconnect";
         }
         addConnectTableEntry(ShadowStatus.FAILURE, errMsg);
-        
+
         // Save last token on disconnect
         if(lastToken != null && !lastToken.isEmpty()) {
             updateContestInformation();
         }
     }
 
-    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void statusMessage(String status)
+    {
+        if(status == null || status.isEmpty()) {
+            addConnectTableEntry(ShadowStatus.STATUS, "Empty Status");
+        } else {
+            addConnectTableEntry(ShadowStatus.STATUS, status);
+        }
+    }
+
+
     private IRemoteContestAPIAdapter createRemoteContestAPIAdapter(URL url, String login, String password) {
 
         boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow.usemockcontestadapter"), false);
@@ -1111,7 +1203,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             return new RemoteContestAPIAdapter(url, login, password);
         }
     }
-    
+
     /**
      * Returns a String containing the URL of the remote version endpoint, or null if the string can not be formed
      * from the supplied remoteURLString
@@ -1124,7 +1216,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private String getRemoteAPIVersionURLString(String remoteURLString)
     {
         String remoteAPIVersionURLString = null;
-    
+
         // API (Version) endpoint is right before /contests/ in the URL, so find that, if it's there
         int iApi = remoteURLString.lastIndexOf("/contests/");
         if(iApi != -1) {
@@ -1136,7 +1228,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
         }
         return(remoteAPIVersionURLString);
     }
-    
+
     /**
      * Returns a new IRemoteContestAPIAdapter object suitable for connecting to the VERSION api endpoint of the remote CCS
      * This endpoint is distinctly different from the /contest/xxxx endpoints in that it is the same for all contests
@@ -1148,7 +1240,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private IRemoteContestAPIAdapter createRemoteContestVersionAPIAdapter(String remoteURLString, String login, String password) throws MalformedURLException {
 
         boolean useMockAdapter = StringUtilities.getBooleanValue(IniFile.getValue("shadow.usemockcontestadapter"), false);
-        
+
         String remoteAPIVersionURLString = getRemoteAPIVersionURLString(remoteURLString);
         if(remoteAPIVersionURLString != null) {
             // If we have a valid URL to try, let's do it.
@@ -1176,7 +1268,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
     private String getRemoteAPIVersionInfo(String remoteURLString, String login, String password)
     {
         String infoStr;
-        
+
         try {
             // get the special API adapter for version info
             IRemoteContestAPIAdapter remoteAPI = createRemoteContestVersionAPIAdapter(remoteURLString, login, password);
@@ -1186,9 +1278,9 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                     // ex. {"version":"2022-07","version_url":"https://ccs-specs.icpc.io/2022-07/contest_api","name":"domjudge"}
                     String verstr = (String)map.get("version");
                     String provider = (String)map.get("name");
-                    
+
                     infoStr = "API Version: ";
-                    
+
                     // Try to make an intelligent looking string if stuff is missing
                     if(verstr == null || verstr.isEmpty()) {
                         infoStr += "N/A";
@@ -1202,7 +1294,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                     }
                 } else {
                     // getRemoteAPIVersionURLString will always return non-null here for those wondering, or remoteAPI would be null!
-                    infoStr = "No API version available at " + getRemoteAPIVersionURLString(remoteURLString);                                                   
+                    infoStr = "No API version available at " + getRemoteAPIVersionURLString(remoteURLString);
                 }
             } else {
                 infoStr = "Can not form API Version URL from " + remoteURLString;
