@@ -106,9 +106,15 @@ public class ResultsFile {
 
         int median = getMedian(standingsRecords);
 
+        // if not finalized, make up "best guess" data.
+        // There should be constants somewhere that give the "current" gold/silver/bronze ranks; note that
+        // FinalizePane hard codes 4, 8, 12 in the text fields *ARGH*
+        // Should also be able to read the defaults at startup from the config files
+        // Here we just cobble together some half-assed finalized data
         if (finalizeData == null) {
-            String [] badbad = {"Contest not finalized cannot create awards"};
-            return badbad;
+            finalizeData = GenDefaultFinalizeData();
+//            String [] badbad = {"Contest not finalized cannot create awards"};
+//            return badbad;
         }
 
         // TODO finalizeData really needs a B instead of getBronzeRank
@@ -210,7 +216,7 @@ public class ResultsFile {
     }
 
     /**
-     * Create CCS restuls.tsv file contents.
+     * Create CCS results.tsv file contents.
      *
      * @param contest
      * @param resultFileTitleFieldName override title anem {@value #DEFAULT_RESULT_FIELD_NAME}.
@@ -249,8 +255,9 @@ public class ResultsFile {
         int median = getMedian(standingsRecords);
 
         if (finalizeData == null) {
-            String [] badbad = {"Contest not finalized cannot create awards"};
-            return badbad;
+            finalizeData = GenDefaultFinalizeData();
+//            String [] badbad = {"Contest not finalized cannot create awards"};
+//            return badbad;
         }
 
         // TODO finalizeData really needs a B instead of getBronzeRank
@@ -377,4 +384,18 @@ public class ResultsFile {
         return XMLUtilities.transformToArray(xmlString, xsltFileName);
     }
 
+    /**
+     * Generate some default finalize data so we can make a results.tsv before the contest is finalized.
+     * @return FinalizeData object
+     */
+    private FinalizeData GenDefaultFinalizeData()
+    {
+        finalizeData = new FinalizeData();
+        finalizeData.setGoldRank(4);
+        finalizeData.setSilverRank(8);
+        finalizeData.setBronzeRank(12);
+        finalizeData.setCertified(false);
+        finalizeData.setComment("Preliminary Results - Contest not Finalized");
+        return(finalizeData);
+    }
 }
