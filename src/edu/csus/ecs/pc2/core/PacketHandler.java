@@ -1631,7 +1631,7 @@ public class PacketHandler {
         // Send to clients and other servers
         if (isServer()) {
             controller.sendToJudgesAndOthers(confirmPacket, true);
-        }//TODO is send to all working??
+        }
         //check if clarification is actually an announcement clarification.
         if (clarification.isAnnounced()) {
             if (! clarification.hasDestinationsOtherThanSubmitterorAllTeams()) {
