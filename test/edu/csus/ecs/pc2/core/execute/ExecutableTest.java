@@ -40,7 +40,7 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * Test Executable class.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -65,29 +65,30 @@ public class ExecutableTest extends AbstractTestCase {
 
     //a Sumit problem which reads data from stdin
     private Problem iSumitProblem;
-    
-    //a Sumit problem which reads data from stdin and produces floating point output 
+
+    //a Sumit problem which reads data from stdin and produces floating point output
     private Problem iSumitFloatOutputProblem;
-    
+
     // SOMEDAY add test for hello
     private Problem helloWorldProblem = null;
 
     private Language javaLanguage = null;
 
     private String pc2YesJudgement = PC2Validator.JUDGEMENT_YES;
-    
+
     private String pc2NoJudgement = PC2Validator.JUDGEMENT_NO_WRONG_ANSWER;
-    
+
     private String clicsYesJudgement = ClicsValidator.CLICS_CORRECT_ANSWER_MSG;
-    
+
     private String clicsNoJudgement = ClicsValidator.CLICS_WRONG_ANSWER_MSG;
-    
+
     private String clicsWrongOutputSpacingJudgement = ClicsValidator.CLICS_INCORRECT_OUTPUT_FORMAT_MSG;
 
     public ExecutableTest(String string) {
         super(string);
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
 
@@ -122,7 +123,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Returns number of failed data sets.
-     * 
+     *
      * @param run
      * @return
      */
@@ -139,7 +140,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Returns number of failed data sets.
-     * 
+     *
      * @param run
      * @return
      */
@@ -156,7 +157,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Create a language using {@link LanguageAutoFill}.
-     * 
+     *
      * @param autoFillLanguageTitle
      *            title for language from {@link LanguageAutoFill}.
      * @return
@@ -172,6 +173,8 @@ public class ExecutableTest extends AbstractTestCase {
         language.setExecutableIdentifierMask(values[2]);
         // programExecutionCommandLineTextField.setText(values[3]);
         language.setProgramExecuteCommandLine(values[3]);
+        language.setInterpreted(LanguageAutoFill.INTERPRETER_VALUE.equals(values[5]));
+        language.setID(values[6]);
 
         return language;
     }
@@ -205,13 +208,13 @@ public class ExecutableTest extends AbstractTestCase {
 
         problem.setPC2ValidatorSettings(settings);
     }
-    
+
     protected void setupMockPC2Validator(Problem problem) {
 
         problem.setValidatorType(VALIDATOR_TYPE.CUSTOMVALIDATOR);
         assertFalse("Not Expecting using pc2 validator", problem.isUsingPC2Validator());
         String mockValidatorCommandLine = "java {:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
-        problem.setOutputValidatorCommandLine(mockValidatorCommandLine + " -pc2 " + problem.getPC2ValidatorSettings().getWhichPC2Validator() 
+        problem.setOutputValidatorCommandLine(mockValidatorCommandLine + " -pc2 " + problem.getPC2ValidatorSettings().getWhichPC2Validator()
                 + " " + problem.getPC2ValidatorSettings().isIgnoreCaseOnValidation());
         problem.setOutputValidatorProgramName(MOCK_VALIDATOR_NAME);
     }
@@ -219,7 +222,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Create sample Hello world problem with validator add to contest.
-     * 
+     *
      * @param contest2
      * @return
      * @throws FileNotFoundException
@@ -246,7 +249,7 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     /**
-     * 
+     *
      * @param contest2
      * @return
      * @see #createISumitProblem(IInternalContest)
@@ -287,10 +290,10 @@ public class ExecutableTest extends AbstractTestCase {
      * The difference between this method and method createSumitProblem() is that the Problem created
      * by this method uses the "ISumit" program, which reads its data from stdin (the Problem
      * created by method createSumitProblem() is configured to read data from a file).
-     * 
+     *
      * @param contest2 - the contest to which the Problem will be added
      * @return a new Problem (which has been added to the specified contest)
-     * @throws FileNotFoundException if either the input data file "sumit.in" or the judge's 
+     * @throws FileNotFoundException if either the input data file "sumit.in" or the judge's
      *          answer file "sumit.ans" cannot be found
      * @see #createISumitFloatOutputProblem(IInternalContest)
      */
@@ -304,7 +307,7 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setTimeOutInSeconds(10);
 
         setupUsingPC2Validator(problem);
-        
+
         problem.setReadInputDataFromSTDIN(true);
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
@@ -329,7 +332,7 @@ public class ExecutableTest extends AbstractTestCase {
      * Produces a new file in the Test Output directory which has the same name as the specified
      * file but where the End-of-Line characters in the new file have been converted to the form
      * of the host OS.
-     * 
+     *
      * @param originalFileName the original data file
      * @return the name of a new file with EOL converted
      */
@@ -346,13 +349,13 @@ public class ExecutableTest extends AbstractTestCase {
             }
             br.close();
             bw.close();
-            
+
         } catch (IOException e) {
             System.err.println ("IOException while converting input file '"+ originalFileName + "'");
             e.printStackTrace();
         }
-        
-        
+
+
         return newFilename;
     }
 
@@ -361,10 +364,10 @@ public class ExecutableTest extends AbstractTestCase {
      * The newly-created problem is configured to use the PC2Validator.
      * The difference between this method and method createISumitProblem() is that the Problem created
      * by this method is configured to expect floating-point output.
-     * 
+     *
      * @param contest2 - the contest to which the Problem will be added
      * @return a new Problem (which has been added to the specified contest)
-     * @throws FileNotFoundException if either the input data file "sumit.in" or the judge's 
+     * @throws FileNotFoundException if either the input data file "sumit.in" or the judge's
      *          answer file "sumitFloatOutput.ans" cannot be found
      */
     private Problem createISumitFloatOutputProblem(IInternalContest contest2) throws FileNotFoundException {
@@ -377,7 +380,7 @@ public class ExecutableTest extends AbstractTestCase {
         problem.setTimeOutInSeconds(10);
 
         setupUsingPC2Validator(problem);
-        
+
         problem.setReadInputDataFromSTDIN(true);
 
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
@@ -399,7 +402,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Create sample LargeOutput problem and add to contest.
-     * 
+     *
      * @param contest2
      * @return
      * @throws FileNotFoundException
@@ -435,7 +438,7 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     /**
-     * 
+     *
      * @param contest2
      * @return
      * @throws FileNotFoundException
@@ -535,54 +538,54 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, false, pc2YesJudgement);
     }
-    
+
     /**
      * Verifies that the PC2 Validator returns the correct results for all combinations
      * of the "ignoreCase" flag.  The combinations are:  a program which produces the
-     * CORRECT case output, both with ignoreCase=true and ignoreCase=false  (both should succeed); 
+     * CORRECT case output, both with ignoreCase=true and ignoreCase=false  (both should succeed);
      * and a program which produces INCORRECT case output, both with ignoreCase=true (should succeed)
-     * and with ignoreCase=false (should fail). 
-     * 
+     * and with ignoreCase=false (should fail).
+     *
      * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
      */
     public void testPC2ValidatorIgnoreCaseOption() throws Exception {
-        
+
         if (isFastJUnitTesting()){
             return;
         }
-        
+
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem to ignore case and use straight "diff" on validation
         iSumitProblem.getPC2ValidatorSettings().setIgnoreCaseOnValidation(true);
         iSumitProblem.getPC2ValidatorSettings().setWhichPC2Validator(1);
-        
+
         //submit ISumit, which should succeed
         Run run = createRun(submitter, javaLanguage, iSumitProblem, 42, 120);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("ISumit.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, pc2YesJudgement);
-        
+
         //set the problem to require case sensitivity and use straight "diff" on validation
         iSumitProblem.getPC2ValidatorSettings().setIgnoreCaseOnValidation(false);
         iSumitProblem.getPC2ValidatorSettings().setWhichPC2Validator(1);
-        
+
         //submit ISumit, which should succeed
         run = createRun(submitter, javaLanguage, iSumitProblem, 43, 121);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumit.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, pc2YesJudgement);
-        
+
         //submit ISumitWrongCase, which should fail
         run = createRun(submitter, javaLanguage, iSumitProblem, 44, 122);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitWrongOutputCase.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, false, pc2NoJudgement );
-        
+
         //set the problem to ignore case sensitivity and use straight "diff" on validation
         iSumitProblem.getPC2ValidatorSettings().setIgnoreCaseOnValidation(true);
         iSumitProblem.getPC2ValidatorSettings().setWhichPC2Validator(1);
-        
+
         //submit ISumitWrongCase, which should succeed (because case is being ignored)
         run = createRun(submitter, javaLanguage, iSumitProblem, 45, 123);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitWrongOutputCase.java"));
@@ -592,13 +595,13 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Verifies that the PC2 Validator returns the correct results for all combinations
-     * of the "ignore whitespace" option (that is, PC2Validator option 4).  
+     * of the "ignore whitespace" option (that is, PC2Validator option 4).
      * The combinations are:  a program which produces the
      * CORRECT spacing in its output, both with option 1 (require exact spacing, i.e. use "diff" (option 1))
-     * and with option 4 (ignore whitespace in output)  (both should succeed); 
+     * and with option 4 (ignore whitespace in output)  (both should succeed);
      * and a program which produces INCORRECT output spacing, both with option 1 (should fail)
-     * and with option 4 (should succeed). 
-     * 
+     * and with option 4 (should succeed).
+     *
      * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
      */
     public void testPC2ValidatorIgnoreWhitespaceOption() throws Exception {
@@ -613,185 +616,185 @@ public class ExecutableTest extends AbstractTestCase {
         iSumitProblem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
         iSumitProblem.getPC2ValidatorSettings().setIgnoreCaseOnValidation(true);
         iSumitProblem.getPC2ValidatorSettings().setWhichPC2Validator(1);
-        
+
         //submit ISumit, which should succeed
         Run run = createRun(submitter, javaLanguage, iSumitProblem, 52, 130);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("ISumit.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, pc2YesJudgement);
-        
+
         //set the problem to ignore whitespace
         iSumitProblem.getPC2ValidatorSettings().setWhichPC2Validator(4);
-        
+
         //submit ISumit, which should succeed
         run = createRun(submitter, javaLanguage, iSumitProblem, 53, 132);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumit.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, pc2YesJudgement);
-        
+
         //submit ISumitWrongOutputSpacing, which should succeed
         run = createRun(submitter, javaLanguage, iSumitProblem, 54, 133);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitWrongOutputSpacing.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, pc2YesJudgement );
-        
-        //set the problem to require whitespace to match 
+
+        //set the problem to require whitespace to match
         iSumitProblem.getPC2ValidatorSettings().setWhichPC2Validator(1);
-        
+
         //submit ISumitWrongOutputSpacing, which should fail (because spacing match is being required)
         run = createRun(submitter, javaLanguage, iSumitProblem, 55, 134);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitWrongOutputSpacing.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, false, pc2NoJudgement );
     }
-    
+
     /**
      * Verifies that the Clics Validator returns the correct results for all combinations
-     * of the "case_sensitive" option.  
+     * of the "case_sensitive" option.
      * The combinations are:  a program which produces the
      * CORRECT case in its output, both with case-sensitivity off and on (both should succeed)
      * and a program which produces INCORRECT case in its output, both with case-sensitivity
      * off (should succeed) and with case-sensitivity on (should fail).
-     * 
+     *
      * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
      */
     public void testClicsValidatorCaseSensitiveOption() throws Exception {
-        
+
         if (isFastJUnitTesting()){
             return;
         }
-        
+
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem to ignore case
         iSumitProblem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
         iSumitProblem.getClicsValidatorSettings().setCaseSensitive(false);
-        
+
         //submit ISumit, which should succeed
         Run run = createRun(submitter, javaLanguage, iSumitProblem, 62, 140);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("ISumit.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         //set the problem to require case match
         iSumitProblem.getClicsValidatorSettings().setCaseSensitive(true);
-        
+
         //submit ISumit, which should succeed
         run = createRun(submitter, javaLanguage, iSumitProblem, 63, 141);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumit.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         //submit ISumitWrongOutputCase, which should fail
         run = createRun(submitter, javaLanguage, iSumitProblem, 64, 142);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitWrongOutputCase.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, false, clicsNoJudgement );
-        
-        //set the problem to ignore case 
+
+        //set the problem to ignore case
         iSumitProblem.getClicsValidatorSettings().setCaseSensitive(false);
-        
+
         //submit ISumitWrongOutputCase, which should succeed (because case is being ignored)
         run = createRun(submitter, javaLanguage, iSumitProblem, 65, 143);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitWrongOutputCase.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, clicsYesJudgement );
     }
-    
+
     /**
      * Verifies that the Clics Validator returns the correct results for all combinations
-     * of the "space_sensitive" option.  
+     * of the "space_sensitive" option.
      * The combinations are:  a program which produces the
      * CORRECT spacing in its output, both with space-sensitivity off and on (both should succeed)
      * and a program which produces INCORRECT spacing in its output, both with space-sensitivity
      * off (should succeed) and with case-sensitivity on (should fail).
-     * 
+     *
      * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
      */
     public void testClicsValidatorSpaceSensitiveOption() throws Exception {
-        
+
         if (isFastJUnitTesting()){
             return;
         }
-        
+
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem to ignore spacing
         iSumitProblem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
         iSumitProblem.getClicsValidatorSettings().setSpaceSensitive(false);
-        
+
         //submit ISumit, which should succeed
         Run run = createRun(submitter, javaLanguage, iSumitProblem, 62, 140);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("ISumit.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         //set the problem to require spacing match
         iSumitProblem.getClicsValidatorSettings().setSpaceSensitive(true);
-        
+
         //submit ISumit, which should succeed
         run = createRun(submitter, javaLanguage, iSumitProblem, 63, 141);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumit.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         //submit ISumitWrongOutputSpacing, which should fail
         run = createRun(submitter, javaLanguage, iSumitProblem, 64, 142);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitWrongOutputSpacing.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, false, clicsWrongOutputSpacingJudgement );
-        
-        //set the problem to ignore spacing 
+
+        //set the problem to ignore spacing
         iSumitProblem.getClicsValidatorSettings().setSpaceSensitive(false);
-        
+
         //submit ISumitWrongOutputSpacing, which should succeed (because spacing is being ignored)
         run = createRun(submitter, javaLanguage, iSumitProblem, 65, 143);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitWrongOutputSpacing.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
         runExecutableTest(run, runFiles, true, clicsYesJudgement );
     }
-    
+
     /**
      * Verifies that the Clics Validator returns the correct results for all combinations
-     * of the "Relative Tolerance" option. The combinations are:  
+     * of the "Relative Tolerance" option. The combinations are:
      * - a program that produces a floating-point output value that matches exactly the judge's answer when relative tolerance is disabled (should succeed)
      * - a program that produces a floating point value that doesn't match exactly the judge's answer when relative tolerance is disabled (should fail)
      * - a program that produces a floating-point value that matches exactly the judge's answer with relative tolerance enabled (should succeed regardless of tolerance value)
      * - a program that produces a floating-point value within the specified relative tolerance of the judge's answer (should succeed)
      * - a program that produces a floating-point value outside the specified relative tolerance of the judge's answer (should fail)
-     * 
+     *
      * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
      */
     public void testClicsValidatorRelativeToleranceOption() throws Exception {
-        
+
         if (isFastJUnitTesting()){
             return;
         }
-        
+
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem state to ignore tolerances
         iSumitFloatOutputProblem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
         iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatRelativeTolerance();
         iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatAbsoluteTolerance();
-        
-        // submit a program that produces a floating-point output value that matches exactly the judge's answer 
+
+        // submit a program that produces a floating-point output value that matches exactly the judge's answer
         // when relative tolerance is disabled (should succeed)
         Run run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 71, 171);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutput.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorRelativeToleranceOption(): ISumitFloatOutput with relative tolerance disabled (should succeed)");
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
-        // submit a program that produces a floating point value that doesn't match exactly the judge's answer 
+
+        // submit a program that produces a floating point value that doesn't match exactly the judge's answer
         // when relative tolerance is disabled (should fail)
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 72, 172);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutputTenUnitsOff.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorRelativeToleranceOption(): ISumitFloatOutputTenUnitsOff with relative tolerance disabled (should fail)");
         runExecutableTest(run, runFiles, false, clicsNoJudgement);
-        
-        // submit a program that produces a floating-point value that matches exactly the judge's answer 
+
+        // submit a program that produces a floating-point value that matches exactly the judge's answer
         // with relative tolerance enabled (should succeed regardless of tolerance value)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatRelativeTolerance(0.0);
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 73, 173);
@@ -799,7 +802,7 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorRelativeToleranceOption(): ISumitFloatOutput with relative tolerance of zero (should succeed)");
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         // try the same thing with a wildly different relative tolerance value (should succeed)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatRelativeTolerance(10000.0);
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 74, 174);
@@ -807,7 +810,7 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorRelativeToleranceOption(): ISumitFloatOutput with relative tolerance of 10000 (should succeed)");
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         // try the same thing with another wildly different relative tolerance value (should succeed)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatRelativeTolerance(-10000.0);
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 75, 175);
@@ -815,7 +818,7 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorRelativeToleranceOption(): ISumitFloatOutput with relative tolerance of -10000 (should succeed)");
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         // submit a program that produces a floating-point value within the specified tolerance of the judge's answer (should succeed)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatRelativeTolerance(0.15);
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 76, 176);
@@ -823,7 +826,7 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorRelativeToleranceOption(): ISumitFloatOutputTenPercentOff with relative tolerance of 15% (should succeed)");
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         // submit a program that produces a floating-point value outside the specified tolerance of the judge's answer (should fail)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatRelativeTolerance(0.05);
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 77, 177);
@@ -831,50 +834,50 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorRelativeToleranceOption(): ISumitFloatOutputTenPercentOff with relative tolerance of 5% (should fail)");
         runExecutableTest(run, runFiles, false, clicsNoJudgement);
-        
+
     }
-    
+
     /**
      * Verifies that the Clics Validator returns the correct results for all combinations
-     * of the "Absolute Tolerance" option. The combinations are:  
+     * of the "Absolute Tolerance" option. The combinations are:
      * - a program that produces a floating-point output value that matches exactly the judge's answer when absolute tolerance is disabled (should succeed)
      * - a program that produces a floating point value that doesn't match exactly the judge's answer when absolute tolerance is disabled (should fail)
      * - a program that produces a floating-point value that matches exactly the judge's answer with absolute tolerance enabled (should succeed regardless of tolerance value)
      * - a program that produces a floating-point value within the specified absolute tolerance of the judge's answer (should succeed)
      * - a program that produces a floating-point value outside the specified absolute tolerance of the judge's answer (should fail)
-     * 
+     *
      * @throws Exception if an Exception occurs during the execution of the program (i.e., during invocation of Executable.execute())
      */
     public void testClicsValidatorAbsoluteToleranceOption() throws Exception {
-        
+
         if (isFastJUnitTesting()){
             return;
         }
-        
+
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
 
         //set the problem state to ignore tolerances
         iSumitFloatOutputProblem.setValidatorType(VALIDATOR_TYPE.CLICSVALIDATOR);
         iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatAbsoluteTolerance();
         iSumitFloatOutputProblem.getClicsValidatorSettings().disableFloatRelativeTolerance();
-        
-        // submit a program that produces a floating-point output value that matches exactly the judge's answer 
+
+        // submit a program that produces a floating-point output value that matches exactly the judge's answer
         // when absolute tolerance is disabled (should succeed)
         Run run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 81, 181);
         RunFiles runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutput.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutput with absolute tolerance disabled (should succeed)");
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
-        // submit a program that produces a floating point value that doesn't match exactly the judge's answer 
+
+        // submit a program that produces a floating point value that doesn't match exactly the judge's answer
         // when absolute tolerance is disabled (should fail)
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 82, 182);
         runFiles = new RunFiles(run, getSamplesSourceFilename("ISumitFloatOutputTenUnitsOff.java"));
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutputTenUnitsOff with absolute tolerance disabled (should fail)");
         runExecutableTest(run, runFiles, false, clicsNoJudgement);
-        
-        // submit a program that produces a floating-point value that matches exactly the judge's answer 
+
+        // submit a program that produces a floating-point value that matches exactly the judge's answer
         // with absolute tolerance enabled (should succeed regardless of tolerance value)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatAbsoluteTolerance(0.0);
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 83, 183);
@@ -882,7 +885,7 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutput with absolute tolerance of zero (should succeed)");
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         // try the same thing with a wildly different absolute tolerance value (should succeed)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatAbsoluteTolerance(10000.0);
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 84, 184);
@@ -890,7 +893,7 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutput with absolute tolerance of 10000 (should succeed)");
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         // try the same thing with another wildly different absolute tolerance value (should succeed)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatAbsoluteTolerance(-10000.0);
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 85, 185);
@@ -898,7 +901,7 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutput with absolute tolerance of -10000 (should succeed)");
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         // submit a program that produces a floating-point value within the specified absolute tolerance of the judge's answer (should succeed)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatAbsoluteTolerance(15.0);
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 86, 186);
@@ -906,7 +909,7 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutputTenUnitsOff with absolute tolerance of 15 (should succeed)");
         runExecutableTest(run, runFiles, true, clicsYesJudgement);
-        
+
         // submit a program that produces a floating-point value outside the specified tolerance of the judge's answer (should fail)
         iSumitFloatOutputProblem.getClicsValidatorSettings().setFloatAbsoluteTolerance(5.0);
         run = createRun(submitter, javaLanguage, iSumitFloatOutputProblem, 87, 187);
@@ -914,7 +917,7 @@ public class ExecutableTest extends AbstractTestCase {
         contest.setClientId(getLastAccount(Type.JUDGE).getClientId());
 //        System.out.println ("Running testClicsValidatorAbsoluteToleranceOption(): ISumitFloatOutputTenUnitsOff with absolute tolerance of 5 (should fail)");
         runExecutableTest(run, runFiles, false, clicsNoJudgement);
-        
+
     }
 
     protected Executable runExecutableTest(Run run, RunFiles runFiles, boolean solved, String expectedJudgement) throws Exception {
@@ -923,7 +926,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Invoke a executable test.
-     * 
+     *
      * @param run
      * @param runFiles
      * @param solved
@@ -944,7 +947,7 @@ public class ExecutableTest extends AbstractTestCase {
         executable.execute();
 
         ExecutionData executionData = executable.getExecutionData();
-        
+
         // TODO 917  dumpRunTestCases(run);
 
         // System.out.println("expectedJudgement  = " + expectedJudgement);
@@ -1038,7 +1041,7 @@ public class ExecutableTest extends AbstractTestCase {
             count++;
         }
         System.out.println("There are " + runTestCases.length + " test cases ");
-        
+
     }
 
     private Account getFirstJudge() {
@@ -1088,15 +1091,16 @@ public class ExecutableTest extends AbstractTestCase {
 
     }
 
+    @Override
     protected void tearDown() throws Exception {
         super.tearDown();
     }
 
     /**
      * Executable class with override for executable directory.
-     * 
+     *
      * Executable creates a directory based on execute site and client id, this class allows for an override of that execute directory, especially for testing purposes with multi-threaded tests.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -1105,7 +1109,7 @@ public class ExecutableTest extends AbstractTestCase {
     class ExecutableOverride extends Executable {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -6045865627706850495L;
 
@@ -1121,6 +1125,7 @@ public class ExecutableTest extends AbstractTestCase {
             return executeDirectoryName;
         }
 
+        @Override
         public void setExecuteDirectoryName(String directory) {
             this.executeDirectoryName = directory;
         }
@@ -1168,70 +1173,70 @@ public class ExecutableTest extends AbstractTestCase {
         String actual = executeUtilities.substituteAllStrings(origString);
         assertEquals(expected, actual);
     }
-    
+
     /**
      * test {files} substitution.
-     * 
+     *
      * Bug 1244.
-     * 
+     *
      * @throws Exception
      */
     public void testSubstituteFiles() throws Exception {
-        
+
         String executeDirectoryName = getOutputDataDirectory(getName());
         ensureDirectory(executeDirectoryName);
-        
+
         String sumitFilename = getSamplesSourceFilename("ISumit.java");
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
         Problem problem = createHelloProblemNoJudgesData(contest);
-        
+
         Run run = createRun(submitter, javaLanguage, problem, 2, 2);
         assertFileExists(sumitFilename);
-        
+
         RunFiles runFiles = new RunFiles(run, sumitFilename);
-        
+
         Executable executable = new Executable(contest, controller, run, runFiles);
         executable.setExecuteDirectoryName(executeDirectoryName);
         executable.setUsingGUI(false);
-        
+
         String actual = executable.substituteAllStrings(run, "foo {files}");
-        
+
         assertEquals("Expected substitution", "foo ISumit.java", actual);
     }
-    
+
     /**
      * test {:ensuresuffix=xxx} substitution.
-     * 
+     *
      * @throws Exception
      */
     public void testCondSuffixSubstitute() throws Exception {
-        
+
         String executeDirectoryName = getOutputDataDirectory(getName());
         ensureDirectory(executeDirectoryName);
-        
+
         String sumitFilename = getSamplesSourceFilename("ISumit.java");
         ClientId submitter = contest.getAccounts(Type.TEAM).lastElement().getClientId();
         Problem problem = createHelloProblemNoJudgesData(contest);
-        
+
         Run run = createRun(submitter, javaLanguage, problem, 2, 2);
         assertFileExists(sumitFilename);
-        
+
         RunFiles runFiles = new RunFiles(run, sumitFilename);
-        
+
         Executable executable = new Executable(contest, controller, run, runFiles);
         executable.setExecuteDirectoryName(executeDirectoryName);
         executable.setUsingGUI(false);
-        
+
         String actual = executable.substituteAllStrings(run, "foo {:basename}{:ensuresuffix=it}");
-        
+
         assertEquals("Expected substitution", "foo ISumit", actual);
-        
+
         actual = executable.substituteAllStrings(run, "{:basename}{:ensuresuffix=Kt}");
-        
+
         assertEquals("Expected substitution", "ISumitKt", actual);
-        
+
         actual = executable.substituteAllStrings(run, "kotlin {:basename}{:ensuresuffix=Kt}{:ensuresuffix=Kt} {:basename}{:ensuresuffix=ISumit}{:ensuresuffix=Kt}");
-        
+
         assertEquals("Expected substitution", "kotlin ISumitKtKt ISumitKt", actual);
     }
 
@@ -1264,7 +1269,7 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     /**
-     * 
+     *
      * @param contest2
      * @return
      * @throws FileNotFoundException
@@ -1299,7 +1304,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Bug TODO - no judge data file specified
-     * 
+     *
      * @throws Exception
      */
     public void testValidateMissingJudgesDataFile() throws Exception {
@@ -1324,7 +1329,7 @@ public class ExecutableTest extends AbstractTestCase {
         Map<String, String> map = System.getenv();
 
         Set<String> keys = map.keySet();
-        String[] names = (String[]) keys.toArray(new String[keys.size()]);
+        String[] names = keys.toArray(new String[keys.size()]);
         Arrays.sort(names);
 
         for (String name : names) {
@@ -1471,7 +1476,7 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     public void testMultipleTestCaseExternalFile() throws Exception {
-        
+
         if (isFastJUnitTesting()){
             return;
         }
@@ -1507,7 +1512,7 @@ public class ExecutableTest extends AbstractTestCase {
     }
 
     public void testMultipleTestCaseInternalFile() throws Exception {
-        
+
         if (isFastJUnitTesting()){
             return;
         }
@@ -1703,7 +1708,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Create a multiple test case sumit problem.
-     * 
+     *
      * @param contest2
      * @param externalFiles
      * @return
@@ -1779,7 +1784,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Load problemdatafiles from directory
-     * 
+     *
      * @param problem
      * @param problemDataFiles
      * @param dataFilesDirectory
@@ -1818,7 +1823,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Submit hello world program for sumit problem.
-     * 
+     *
      * @throws Exception
      */
     public void testValidationFailure() throws Exception {
@@ -1834,7 +1839,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Test validation results for runs that fail validation.
-     * 
+     *
      * @param run
      * @param executable
      * @param expectedPassingTestCases
@@ -1859,7 +1864,7 @@ public class ExecutableTest extends AbstractTestCase {
 
     /**
      * Test where all test cases are tried/tested.
-     * 
+     *
      * @throws Exception
      */
     public void testMiddleFailure() throws Exception {
@@ -1891,8 +1896,8 @@ public class ExecutableTest extends AbstractTestCase {
 
         assertValidationFailure(run, executable, 1, 6, noJudgement);
     }
-    
-    
+
+
     /**
      * Test where on first failed test case, does not test the remaining tests.
      * @throws Exception
@@ -1931,7 +1936,7 @@ public class ExecutableTest extends AbstractTestCase {
 
         assertValidationFailure(run, executable, 0, 1, noJudgement);
     }
-    
+
     public void testsubstituteFiles() throws Exception {
         SampleContest sampleContest = new SampleContest();
         IInternalContest contest = sampleContest.createContest(2, 2, 12, 12, true);
@@ -1971,5 +1976,5 @@ public class ExecutableTest extends AbstractTestCase {
         assertEquals("Expected file list ", expected, filelist);
 
     }
-    
+
 }

@@ -290,6 +290,18 @@ public class ScoreboardCommon {
                 log.log(Log.WARNING, "Trouble creating results.tsv", e);
             }
             try {
+                ResultsFile resultsFile = new ResultsFile();
+                String[] createCSVFileLines = resultsFile.createCSVFileLines(contest, group);
+                log.log(Log.DEBUG, "found " + createCSVFileLines.length + " lines");
+                FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + makeGroupFilename("results.csv", groupName));
+                for (int i = 0; i < createCSVFileLines.length; i++) {
+                    outputFile.write(createCSVFileLines[i] + System.getProperty("line.separator"));
+                }
+                outputFile.close();
+            } catch (IOException e) {
+                log.log(Log.WARNING, "Trouble creating results.csv", e);
+            }
+            try {
                 ScoreboardFile scoreboardFile = new ScoreboardFile();
                 String[] createTSVFileLines = scoreboardFile.createTSVFileLines(contest, group);
                 FileWriter outputFile = new FileWriter(outputResultsDirFile + File.separator + makeGroupFilename("scoreboard.tsv", groupName));

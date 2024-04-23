@@ -37,9 +37,13 @@ public class ResultsFile {
 
     private static final String TAB = "\t";
 
+    private static final String COMMA = ",";
+
     private static final String DEFAULT_RESULT_FIELD_NAME =  "results";
 
     public static final String RESULTS_FILENAME = "results.tsv";
+
+    public static final String RESULTS_CSV_FILENAME = "results.csv";
 
     private static final String RANKED = "Ranked";
 
@@ -68,6 +72,112 @@ public class ResultsFile {
 
     private String [] createTSVFileLines(IInternalContest contest, String resultFileTitleFieldName) {
         return createTSVFileLines(contest, null, resultFileTitleFieldName);
+    }
+
+    /**
+     * creates CCS results.csv file contents
+     * @param contest
+     * @param group (or null)
+     * @return contents of results.csv (after header line)
+     */
+    public String[] createCSVFileLines(IInternalContest contest, Group group) {
+        Vector<String> lines = new Vector<String>();
+
+        lines.addElement("teamId,rank,medalCitation,problemsSolved,totalTime,lastProblemTime,siteCitation,citation");
+        finalizeData = contest.getFinalizeData();
+
+        NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
+        scoringAlgorithm.setContest(contest);
+
+        Properties properties = getScoringProperties(contest);
+
+        // return ranked teams
+        StandingsRecord[] standingsRecords = null;
+        try {
+            List<Group> groupList = null;
+            if(group != null) {
+                groupList = new ArrayList<Group>();
+                groupList.add(group);
+            }
+            standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null,  groupList, properties, false, null);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to generate standings ", e.getCause());
+        }
+
+        int median = getMedian(standingsRecords);
+
+        if (finalizeData == null) {
+            String [] badbad = {"Contest not finalized cannot create awards"};
+            return badbad;
+        }
+
+        // TODO finalizeData really needs a B instead of getBronzeRank
+        int lastMedalRank = finalizeData.getBronzeRank();
+        int lastSolvedNum = 0;
+        int rankNumber = 0;
+        // resort standingsRecord based on lastMedalRank and median
+/*
+        // this causes a major diff between John's results and these.
+        Vector<Account> accountVector = contest.getAccounts(Type.TEAM);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
+        AccountList accountList = new AccountList();
+        for (Account account : accounts) {
+            accountList.add(account);
+        }
+        comparator = new FinalsStandingsRecordComparator();
+        comparator.setCachedAccountList(accountList);
+        comparator.setLastRank(lastMedalRank);
+        comparator.setMedian(median);
+        Arrays.sort(standingsRecords, comparator);
+*/
+
+        int realRank = 0;
+        for (StandingsRecord record : standingsRecords) {
+            realRank++;
+            Account account = contest.getAccount(record.getClientId());
+
+            // Then follow several lines with the following format (one per team).
+            // Field Description Example Type
+            // 1 Reservation ID 24314 integer
+            // 2 Rank in contest 1 integer
+            // 3 Award gold string
+            // 4 Number of problems the team has solved 4 integer
+            // 5 Total Time 534 integer
+            // 6 Time of the last submission 233 integer
+
+            String reservationId = account.getExternalId();
+            boolean ranked = false;
+            if (record.getNumberSolved() >= median) {
+                ranked = true;
+            }
+            String award = getAwardMedal(record.getRankNumber(), finalizeData, ranked);
+            String rank = "";
+            if (!"honorable".equalsIgnoreCase(award)) {
+                if (realRank > lastMedalRank && (lastSolvedNum != record.getNumberSolved())) {
+                    lastSolvedNum = record.getNumberSolved();
+                    rankNumber = realRank;
+                    record.setRankNumber(realRank);
+                } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
+                    lastSolvedNum = record.getNumberSolved();
+                    rankNumber = realRank;
+                    record.setRankNumber(realRank);
+                } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
+                    record.setRankNumber(rankNumber);
+                }
+                rank = Integer.toString(record.getRankNumber());
+            }
+            // teamId,rank,medalCitation,problemsSolved,totalTime,lastProblemTime,siteCitation,citation
+            lines.addElement(reservationId + COMMA //
+                    + rank + COMMA //
+                    + award + COMMA //
+                    + record.getNumberSolved() + COMMA //
+                    + record.getPenaltyPoints() + COMMA //
+                    + record.getLastSolved() + COMMA // then siteCitation
+                    + COMMA);  // then citation
+
+        }
+
+        return lines.toArray(new String[lines.size()]);
     }
 
     /**

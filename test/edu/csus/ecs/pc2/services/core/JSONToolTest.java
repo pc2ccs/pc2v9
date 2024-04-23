@@ -982,11 +982,11 @@ public class JSONToolTest extends AbstractTestCase {
         Judgement judgement = contest.getJudgements()[4];
 
         String json = jsonTool.convertToJSON(judgement).toString();
-        //        System.out.println("debug judgement "+json);
+//                System.out.println("debug judgement "+json);
         // debug judgement {"id":"WA2","name":"ave no clue","penalty":true,"solved":false}
 
         assertJSONStringValue(json, "id", "WA2");
-        assertJSONStringValue(json, "name", "ave no clue");
+        assertJSONStringValue(json, "name", "You have no clue"); // does not start with "No - "
         assertJSONBooleanValue(json, "penalty", true);
         assertJSONBooleanValue(json, "solved", false);
 

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -628,6 +628,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         getAcceptValidatorJudgementButton().setEnabled(b);
         // getViewOutputsButton().setEnabled(b);
         getAcceptChosenSelectionButton().setEnabled(b && getJudgementComboBox().getSelectedIndex() != -1);
+        getTestResultsFrame().enableExecuteAllButton(b);
     }
 
     /**
@@ -807,7 +808,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     new Thread(new Runnable() {
                         public void run() {
-                            executeRun();
+                            executeRun(false);
                         }
                     }).start();
                 }
@@ -859,8 +860,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         showMessage("Would have extracted run");
         // TODO code extract run
     }
-
-    protected void executeRun() {
+    
+    /**
+     * Takes a boolean condition whether to override stop on first failure condition
+     */
+    protected void executeRun(boolean overrideStopOnFirstFailedTestCase) {
 
         executeTimeMS = 0;
         System.gc();
@@ -876,6 +880,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         
        // getManualRunResultsPanel().clear();
         setEnabledButtonStatus(false);
+
+        // Set override to execute all testcases
+        if (overrideStopOnFirstFailedTestCase) {
+            executable.setOverrideStopOnFirstFailedTestCase(true);
+        }
         executable.execute();
         
         // Dump execution results files to log
@@ -1519,6 +1528,17 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private TestResultsFrame getTestResultsFrame() {
         if (testResultsFrame == null) {
             testResultsFrame = new TestResultsFrame();
+            // Add action listener whether Test results pane button is clicked
+            testResultsFrame.addActionListenerToExecuteAllButton(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    new Thread(new Runnable() {
+                        public void run() {
+                            executeRun(true);
+                        }
+                    }).start();
+                }
+            });
             testResultsFrame.setContestAndController(getContest(), getController());
             FrameUtilities.centerFrame(testResultsFrame);
         }

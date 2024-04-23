@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -245,11 +245,16 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
 
     private JButton selectAllButton;
 
+    private JButton executeAllButton;
+
     private JButton unselectAllButton;
 
     private JButton compareSelectedButton;
 
     private JButton optionsPaneCloseButton;
+
+    // Horizotal Strut to be added/removed before execute all button
+    private Component executeAllHorizontalStrut;
 
     private JButton resultsPaneCloseButton;
     private JLabel lblTotalTestCases;
@@ -1003,6 +1008,12 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             // add a control button to invoke comparison of the team and judge output files for selected row(s)
             resultsPaneButtonPanel.add(getCompareSelectedButton());
 
+            //add space specific for Execute All Button
+            resultsPaneButtonPanel.add(getExecuteAllHorizontalStrut());
+            
+            // add a control button to execute all test cases
+            resultsPaneButtonPanel.add(getExecuteAllButton());
+
             //add space
             Component horizontalGlue_3 = Box.createHorizontalGlue();
             horizontalGlue_3.setPreferredSize(new Dimension(20, 20));
@@ -1012,6 +1023,18 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             resultsPaneButtonPanel.add(getResultsPaneCloseButton());
         }
         return resultsPaneButtonPanel;
+    }
+
+    /**
+     * Sets the visibility of Execute All Button based on condition
+     */
+    private void setExecuteAllButtonVisible(boolean b) {
+
+        // Set the space visible/invisible based on condition
+        getExecuteAllHorizontalStrut().setVisible(b);
+                
+        // Set the Execute All Button visible/invisible based on condition
+        getExecuteAllButton().setVisible(b);
     }
     
     /**
@@ -1085,6 +1108,44 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
             });
         }
         return selectAllButton;
+    }
+
+    /**
+     * Returns JButton Execute All to by-pass stop-on-first-failure and run all test cases
+     */
+    private JButton getExecuteAllButton() {
+
+        if (executeAllButton == null) {
+            executeAllButton = new JButton("Execute All");
+            executeAllButton.setVisible(false);
+        }
+        return executeAllButton;
+    }
+
+    /**
+     * Returns Horizontal strut to be added before execute all button
+     */
+    private Component getExecuteAllHorizontalStrut() {
+
+        if (executeAllHorizontalStrut == null) {
+            executeAllHorizontalStrut = Box.createHorizontalStrut(20);
+            executeAllHorizontalStrut.setVisible(false);
+        }
+        return executeAllHorizontalStrut;
+    }
+
+    /**
+     * Adds action listeners to Execute All Button
+    */
+    public void addActionListenerToExecuteAllButton(java.awt.event.ActionListener e) {
+        getExecuteAllButton().addActionListener(e);
+    }
+
+    /**
+     * Enables/Disables Execute All button
+    */
+    public void enableExecuteAllButton(boolean b) {
+        getExecuteAllButton().setEnabled(b && currentRunFiles != null);
     }
     
     /**
@@ -2319,6 +2380,7 @@ public class TestResultsPane extends JPanePlugin implements TableModelListener {
         this.currentRunFiles = runFiles;
         this.currentProblem = problem;
         this.currentProblemDataFiles = problemDataFiles;
+        setExecuteAllButtonVisible(currentProblem != null && currentProblem.isStopOnFirstFailedTestCase());
         executableDir = getExecuteDir();
         populateGUI();
         try {

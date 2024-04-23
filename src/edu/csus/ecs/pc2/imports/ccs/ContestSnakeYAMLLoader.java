@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.ByteArrayInputStream;
@@ -71,7 +71,7 @@ import edu.csus.ecs.pc2.validator.pc2Validator.PC2ValidatorSettings;
 
 /**
  * Load contest/model from Yaml and files in a CDP.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class ContestSnakeYAMLLoader implements IContestLoader {
@@ -112,7 +112,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Create a simple string with parse info.
-     * 
+     *
      * @param markedYAMLException
      * @return
      */
@@ -176,10 +176,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Load from files, support #include FILENAME.
-     * 
+     *
      * Loads text files, if a #include FILENAME  specified will
      * replace the #incldue with the contents of FILENAME.
-     * 
+     *
      * @param dirname
      *            if null will ignore #include files.
      * @param filename
@@ -211,13 +211,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
 
-        return (String[]) outs.toArray(new String[outs.size()]);
+        return outs.toArray(new String[outs.size()]);
     }
 
     @Override
     public String getContestTitle(String contestYamlFilename) throws IOException {
         File contestYaml = new File(contestYamlFilename);
-        
+
         // Try CLICS name first.  Fun fact: CLICS_CONTEST_NAME == CONTEST_NAME_KEY, but may not someday
         String contestTitle = fetchValue(contestYaml, IContestLoader.CLICS_CONTEST_NAME);
         // only if the CLICS name isn't there do we try the old one.  non-null means it is there.
@@ -251,9 +251,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Insures that contest is instantiated.
-     * 
+     *
      * Creates contest if contest is null, otherwise returns contest.
-     * 
+     *
      * @param contest
      * @return
      */
@@ -278,7 +278,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contestInformation.setSandboxCommandLine(sandboxCommandLine);
         contest.updateContestInformation(contestInformation);
     }
-    
+
     private int getMemoryLimitMB(IInternalContest contest) {
         ContestInformation contestInformation = contest.getContestInformation();
         return(contestInformation.getMemoryLimitInMeg());
@@ -307,12 +307,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setStopOnFirstFailedtestCase(stopOnFirstFail);
         contest.updateContestInformation(contestInformation);
-    }    
+    }
 
     /**
      * Parse and convert dateString to Date.
-     * 
-     * 
+     *
+     *
      * @param dateString
      *            date string in form: yyyy-MM-dd HH:mm or yyyy-MM-dd HH:mmZ
      * @return date for input string
@@ -354,9 +354,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Returns boolean for input string.
-     * 
+     *
      * Matches (case insensitive) yes, no, true, false.
-     * 
+     *
      * @param string
      * @param defaultBoolean
      * @return default if string does not match (case-insensitive) string
@@ -404,7 +404,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Input date before now, aka current date/time.
-     * 
+     *
      * @param date
      * @return
      */
@@ -439,53 +439,53 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (ccsTestMode) {
             setCcsTestMode(contest, ccsTestMode);
         }
-        
+
         boolean loadSamples = fetchBooleanValue(content, LOAD_SAMPLE_JUDGES_DATA, true);
         setLoadSampleJudgesData(contest, loadSamples);
-        
+
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, false);
         setStopOnFirstFailedTestCase (contest, stopOnFirstFail);
-        
+
         /**
          * assign shadow values
          */
-        
+
         ContestInformation contestInformation = getContestInformation(contest);
-        
+
         //set allow-multiple-team-logins mode
         boolean allowMultipleTeamLogins = fetchBooleanValue(content, ALLOW_MULTIPLE_TEAM_LOGINS_KEY, contestInformation.isAllowMultipleLoginsPerTeam());
         contestInformation.setAllowMultipleLoginsPerTeam(allowMultipleTeamLogins);
-        
+
         // Load team scoreboard string (the one with variables)
         String teamScoreboadDisplayString = fetchValue(content, TEAM_SCOREBOARD_DISPLAY_FORMAT_STRING, contestInformation.getTeamScoreboardDisplayFormat());
         contestInformation.setTeamScoreboardDisplayFormat(teamScoreboadDisplayString);
-        
+
         // enable shadow mode
         boolean shadowMode = fetchBooleanValue(content, SHADOW_MODE_KEY, contestInformation.isShadowMode());
         contestInformation.setShadowMode(shadowMode);
-        
+
         String altAccountsLoadFilename = fetchValue(content, LOAD_ACCOUNTS_FILE_KEY, null);
         contestInformation.setOverrideLoadAccountsFilename(altAccountsLoadFilename);
-        
+
         // base URL for CCS REST service
         String  ccsUrl= fetchValue(content, CCS_URL_KEY, contestInformation.getPrimaryCCS_URL());
         contestInformation.setPrimaryCCS_URL(ccsUrl);
-        
+
         // CCS REST login
         String ccsLogin = fetchValue(content, CCS_LOGIN_KEY, contestInformation.getPrimaryCCS_user_login());
         contestInformation.setPrimaryCCS_user_login(ccsLogin);
-        
+
         // CCS REST password
         String ccsPassoword = fetchValue(content, CCS_PASSWORD_KEY, contestInformation.getPrimaryCCS_user_pw());
         contestInformation.setPrimaryCCS_user_pw(ccsPassoword);
-        
+
 
         String lastEventId = fetchValue(content, CCS_LAST_EVENT_ID_KEY, contestInformation.getLastShadowEventID());
         contestInformation.setLastShadowEventID(lastEventId);
 
         // save ContesInformation to model
         contest.updateContestInformation(contestInformation);
-        
+
 
         String judgeCDPath = fetchValue(content, JUDGE_CONFIG_PATH_KEY);
         if (judgeCDPath != null) {
@@ -495,13 +495,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         }
 
         Integer defaultTimeout = fetchIntValue(content, TIMEOUT_KEY, DEFAULT_TIME_OUT);
-        
+
         int currentGlobalMemoryLimit = getMemoryLimitMB(contest);
         Integer globalMemoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, currentGlobalMemoryLimit);
         if(currentGlobalMemoryLimit != globalMemoryLimit) {
             setMemoryLimitMB(contest, globalMemoryLimit);
         }
-        
+
         for (String line : yamlLines) {
             if (line.startsWith(CLICS_CONTEST_NAME + DELIMIT) || line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
                 setTitle(contest, unquoteAll(line.substring(line.indexOf(DELIMIT) + 1).trim()));
@@ -538,7 +538,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (contestLength != null) {
             setContestLength(contest, contestLength);
         }
-        
+
         boolean isRunning  = fetchBooleanValue(content, "running", false);
         if (isRunning){
             ContestTime time = contest.getContestTime();
@@ -554,12 +554,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // in order of preference: CLICS, old, new  (does that make sense? shouldn't
         // new be tried before old? -- JB)
         String scoreboardFreezeTime = fetchValue(content, CLICS_CONTEST_FREEZE_DURATION);
-        
+
         // This is absolutely ridiculous, but backward compatible *sigh*
         if(scoreboardFreezeTime == null) {
             // Old yaml name
             scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_KEY);
-    
+
             if(scoreboardFreezeTime == null) {
                 // New yaml name
                 scoreboardFreezeTime = fetchValue(content, SCOREBOARD_FREEZE_LENGTH_KEY);
@@ -620,7 +620,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
             }
         }
-        
+
         // If the contest type is present in contest.yaml, verify it
         String scoreType = fetchValue(content, CLICS_CONTEST_SCOREBOARD_TYPE);
         if(scoreType != null && !scoreType.equals("pass-fail")) {
@@ -703,7 +703,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         //get the current default global output size for the contest so getProblems() can use it if no
         // Problem-specific output limit is defined
         Long defaultMaxOutputBytes = new Long(contest.getContestInformation().getMaxOutputSizeInBytes());
-        
+
         Problem[] problems = getProblems(yamlLines, defaultTimeout, defaultMaxOutputBytes, loadDataFileContents, defaultValidatorCommandLine, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
 
         if (loadProblemDataFiles) {
@@ -714,11 +714,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
             }
         }
-        
+
         //update each of the problems with Input Validators as specified in the corresponding problem.yaml file, or if none is
         // specified in problem.yaml then look for custom input validators in the "input_format_validators" folder.
         //Note: ideally these calls to assignInputValidators() would be done inside method getProblems() as part of creating each Problem.
-        //However, that would require changing the interface signature for getProblems(), because assigning Input Validators requires 
+        //However, that would require changing the interface signature for getProblems(), because assigning Input Validators requires
         // reading the problem.yaml file for each problem, which in turn requires knowing the base directory beneath which the problems are
         // defined -- but that directory is not currently passed to any version of interface method getProblems().
         // Since changing the interface signatures is a breaking change (not that there aren't already others under development),
@@ -726,7 +726,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         for (Problem problem : problems) {
             assignInputValidators(contest, problem, directoryName);
         }
-        
+
         Site[] sites = getSites(yamlLines);
         for (Site site : sites) {
             Site existingSite = contest.getSite(site.getSiteNumber());
@@ -753,9 +753,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         // SOMEDAY CCS load general answer catagories into contest
 
         Account[] accounts = getAccounts(yamlLines);
-        
+
         Map<String, Object> passwordYamlMap = fetchMap(content, "passwords");
-        
+
         if (passwordYamlMap != null) {
 
             String passTypeString = fetchValueDefault(passwordYamlMap, "type", PasswordType2.LETTERS_AND_DIGITS.toString());
@@ -765,7 +765,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             int length = getIntegerValue(lengthString, 8);
 
             String prefix = fetchValueDefault(passwordYamlMap, "prefix", "");
-            
+
             /**
              * Assign team passwords
              */
@@ -782,7 +782,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             targetDirectory = fetchValueDefault(passwordYamlMap, "outdirname", targetDirectory);
 
             String passfilename = fetchValueDefault(passwordYamlMap, "passfile", targetDirectory + File.separator + MailMergeFile.PASSWORD_LIST_FILENNAME);
-            
+
             /**
              * Write OS login passwords file (just a list of passwords in a text file)
              */
@@ -800,10 +800,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            
+
             // TODO TODAY write accounts.tsv file
         }
-        
+
         contest.addAccounts(accounts);
 
         AutoJudgeSetting[] autoJudgeSettings = null;
@@ -821,10 +821,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         for (AutoJudgeSetting auto : autoJudgeSettings) {
             addAutoJudgeSetting(contest, auto);
         }
-        
+
         ClientId[] proxyClientIds = getShadowProxyClientIds(yamlLines);
 //        System.out.println("debug  There are "+proxyClientIds.length+" shadow proxy client definitions in yaml in dir "+directoryName);
-        
+
         if (proxyClientIds.length > 0) {
             for (ClientId clientId : proxyClientIds) {
                 Account account = contest.getAccount(clientId);
@@ -849,7 +849,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     }
 
-    
+
     /**
      * Generate and write OS password file.
      * @param passfilename
@@ -859,9 +859,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
      * @param prefix
      */
     private void generateOSPasswords(String passfilename, int count, PasswordType2 passwordType, int length, String prefix) {
-        
+
         boolean joePassword = PasswordType2.JOE.equals(passwordType);
-        
+
         List<String> passwords = null;
         if (joePassword){
             passwords = PasswordGenerator.generateJoePasswords("team", count);
@@ -869,7 +869,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             passwords = PasswordGenerator.generatePasswords(count, passwordType, length, prefix);
         }
 
-        String[] lines = (String[]) passwords.toArray(new String[passwords.size()]);
+        String[] lines = passwords.toArray(new String[passwords.size()]);
 
         try {
             Utilities.writeLinesToFile(passfilename, lines);
@@ -881,7 +881,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Assign passwords to team accounts.
-     * 
+     *
      * @param contest
      * @param accounts
      * @param length
@@ -892,11 +892,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     protected Account[] assignPasswords(IInternalContest contest, Account[] accounts, int length, PasswordType2 passwordType, String prefix) {
 
         List<Account> teamAccounts = getTeamAccounts(accounts);
-        
+
         if (teamAccounts.size() == 0){
-            
+
             teamAccounts = getTeamAccounts(contest.getAccounts());
-            
+
         }
 
         if (teamAccounts.size() > 0) {
@@ -908,9 +908,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             // #   type: joe
             // #   type: digits
             //            prefix: bark
-            // 
+            //
             // # If account not specified defaults to TEAMS and JUDGES
-            //   
+            //
             //  - account: TEAM
             // # default all judges
             //  - account: JUDGE
@@ -932,10 +932,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
             }
         }
-        
+
         // TODO assign judge and other accounts
-        
-        return (Account[]) teamAccounts.toArray(new Account[teamAccounts.size()]);
+
+        return teamAccounts.toArray(new Account[teamAccounts.size()]);
     }
 
     /**
@@ -955,7 +955,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Find group for input string.
-     * 
+     *
      * @param groups
      * @param groupInfo
      *            group external id or group name
@@ -978,7 +978,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     }
 
     /**
-     * 
+     *
      * @param stop
      *            - true, auto stop at end of contest
      */
@@ -999,7 +999,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Date date = cal.getTime();
         return date;
     }
-  
+
     protected ContestInformation getContestInformation(IInternalContest contest){
         ContestInformation contestInformation = contest.getContestInformation();
         return contestInformation;
@@ -1035,11 +1035,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Parses input string and returns number of seconds.
-     * 
+     *
      * form can be integer or HH:MM:SS
-     * 
+     *
      * @param defaultLongValue
-     * 
+     *
      * @param timeString
      * @param defaultLongValue
      *            - default value if parsing error or no valid time format found
@@ -1076,9 +1076,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Get boolean value for input key in map.
-     * 
+     *
      * Returns defaultVaue if no entry matches key.
-     * 
+     *
      * @param content
      * @param key
      * @param defaultValue
@@ -1140,13 +1140,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 /**
                  * <pre>
-                 * 
+                 *
                  * accounts:
                  *   -account: TEAM
                  *       site: 1
                  *      start: 100
                  *      count: 14
-                 * 
+                 *
                  *   -account: JUDGE
                  *       site: 1
                  *      count: 12
@@ -1160,7 +1160,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
 
         }
-        
+
         // Load permissions from yaml into accounts
         Account[] fullAccountList = accountVector.toArray(new Account[accountVector.size()]);
         PermissionYamlLoader loader = new PermissionYamlLoader(yamlLines, fullAccountList);
@@ -1178,7 +1178,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Fetch value from a map.
-     * 
+     *
      * @param content
      * @param key
      * @return null if content does not contain a value for the key, else the value for the key.
@@ -1196,7 +1196,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             return content.get(key).toString();
         }
     }
-    
+
     private String fetchValue(Map<String, Object> content, String key, String defaultValue) {
         if (content == null) {
             return null;
@@ -1230,7 +1230,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         ArrayList<Map<String, Object>> list = fetchList(yamlContent, REPLAY_KEY);
 
         if (list != null) {
-            Map<String, Object> map = (Map<String, Object>) list.get(0);
+            Map<String, Object> map = list.get(0);
 
             String siteTitle = fetchValue(map, "title");
 
@@ -1306,7 +1306,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         }
 
-        return (Site[]) sitesVector.toArray(new Site[sitesVector.size()]);
+        return sitesVector.toArray(new Site[sitesVector.size()]);
 
     }
 
@@ -1387,7 +1387,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     public void loadProblemInformationAndDataFiles(IInternalContest contest, String baseDirectoryName, Problem problem, boolean overrideUsePc2Validator, boolean overrideManualReview) {
 
         Group[] groups = contest.getGroups();  // fetch once instead of fetching for each problem (in loop)
-        
+
         // SOMEDAY CCS code this: do not add problem to contest model, new new parameter flag
 
         String problemDirectory = baseDirectoryName + File.separator + problem.getShortName();
@@ -1406,15 +1406,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
         } else {
             problemLaTexFilename = problemDirectory + File.separator + "problem_statement" + File.separator + DEFAULT_ENGLISH_PROBLEM_LATEX_FILENAME;
-            problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
+            if(new File(problemLaTexFilename).isFile()) {
+                problemTitle = getProblemNameFromLaTex(problemLaTexFilename);
+            }
         }
-        
+
         boolean usingCustomValidator = false;
         Map<String, Object> validatorContent = fetchMap(content, VALIDATOR_KEY);
         if (validatorContent != null) {
             usingCustomValidator = fetchBooleanValue(validatorContent, IContestLoader.USING_CUSTOM_VALIDATOR, false);
         }
-        
+
         // check for CLICS "validation" property; provides an alternate way to specify a customer validator and,
         // the ONLY way to specify if the problem is interactive.
         String validationType = fetchValue(content, VALIDATION_TYPE);
@@ -1482,18 +1484,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         //
         assignValidatorSettings(content, problem);
-        
+
         // Make sure the validator settings are acceptable for interactive problems
         if(isInteractive) {
             if(!usingCustomValidator) {
-                throw new YamlLoadException("For problem short name " + problem.getShortName() + 
+                throw new YamlLoadException("For problem short name " + problem.getShortName() +
                         ", a custom validator is required for an interactive problem");
-                
+
             }
             if(!problem.getCustomOutputValidatorSettings().isUseClicsValidatorInterface()) {
-                throw new YamlLoadException("For problem short name " + problem.getShortName() + 
+                throw new YamlLoadException("For problem short name " + problem.getShortName() +
                         ", the custom validator must be a CLICS compliant for an interactive problem");
-                
+
             } else {
                 // A note here about how interactive validation works.  The interactive validator must be CLICS
                 // compliant and return an exit code of 42 or 43, and possibly generating a feedback file for
@@ -1507,14 +1509,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // return complete result info in one XML file, other than AC or WA.  CLICS validators do not allow that
                 // without munging the feedback dir.  The important thing is, the actual testcase is validated by a CLICS
                 // validator.
-                
+
                 // We set the custom output validator settings for interactive.  The CLICS spec does not have
                 // a validator section in the YAML, as such, we first verified that the custom validator is CLICS compliant.
                 // We then we set output validator type to clics interactive.
                 problem.getCustomOutputValidatorSettings().setUseInteractiveValidatorInterface();
             }
         }
-        
+
         //read any PC2-format limits specified at the top level of the problem.yaml file
         Integer timeoutSecs = fetchIntValue(content, TIMEOUT_KEY);
         if (timeoutSecs != null) {
@@ -1524,16 +1526,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         if (maxOutputPC2 != null) {
             problem.setMaxOutputSizeKB(maxOutputPC2);
         }
-        
+
         Integer memoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, Problem.DEFAULT_MEMORY_LIMIT_MB);
         problem.setMemoryLimitMB(memoryLimit);
-        
+
         String sandboxCommandLine = fetchValue(content, SANDBOX_COMMAND_LINE_KEY, "");
         problem.setSandboxCmdLine(sandboxCommandLine);
-        
+
         String sandboxProgramName = fetchValue(content, SANDBOX_PROGRAM_NAME_KEY, "");
         problem.setSandboxProgramName(sandboxProgramName);
-        
+
         String sandboxTypeString = fetchValue(content, SANDBOX_TYPE_KEY);
         if (sandboxTypeString != null) {
 
@@ -1552,10 +1554,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         //get the map (if any) of the CLICS "limits" section in the problem.yaml file
         Map<String, Object> limitsContent = fetchMap(content, LIMITS_KEY);
 
-        //if there is a CLICS "limits" section in the problem.yaml, read any values in that section and use 
+        //if there is a CLICS "limits" section in the problem.yaml, read any values in that section and use
         // them to override any PC2-formatted values (just read in, above)
         if (limitsContent != null) {
-            
+
             //check for a CLICS timeout limit
             //NOTE:  CLICS does not support directly specifying a problem time limit (like PC2 does with the "timeout" key).
             //Rather, the CLCIS problem package format (at https://icpc.io/problem-package-format/spec/problem_package_format#limits)
@@ -1565,7 +1567,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             //value, allowing for a variance specified by the "time-safety_margin".  PC2 needs to implement this for CLICS compatibility, but
             //it currently doesn't have any support for reading/executing the judge's accepted solutions to get these values,
             //so we'll reject any time_multiplier and time_safety_margin values that are present.
-            
+
             //Note also:  the following code is COMMENTED OUT because some of the existing PC2 JUnits contain "limits:" sections
             // which DO have CLICS "time_multiplier" and/or "time_saftety_margin" entries in them (even though PC2 doesn't currently
             // support those attibutes).  The problem is that the presence of those attributes in these JUnit test files results
@@ -1580,25 +1582,25 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 //                //TODO: replace the following exception with code to properly handle the CLICS time_safety_margin value.
 //                throw new YamlLoadException("Unsupported CLICS attribute in " + problemYamlFilename + " 'limits' section: " + CLICS_TIME_SAFETY_MARGIN_KEY);
 //            }
-            
-            //check for a timeout limit within the CLICS "limits:" section. 
+
+            //check for a timeout limit within the CLICS "limits:" section.
             // Note that the presence of a "timeout:" entry within a CLICS
             // "limits:" section is non-CLICS standard -- but we want to support it in PC2.
             Integer clicsTimeout = fetchIntValue(limitsContent, TIMEOUT_KEY);
             if (clicsTimeout != null) {
                 problem.setTimeOutInSeconds(clicsTimeout);
             }
-            
+
             //check for a CLICS maxoutput limit - the value is in MiB
             Integer clicsMaxOutput = fetchIntValue(limitsContent, CLICS_MAX_OUTPUT_KEY);
             if (clicsMaxOutput != null) {
                 problem.setMaxOutputSizeKB(clicsMaxOutput * Constants.KIBIBYTE_PER_MEBIBYTE);
             }
-            
+
             Integer clicsMemoryLimit = fetchIntValue(limitsContent, MEMORY_LIMIT_CLICS, Problem.DEFAULT_MEMORY_LIMIT_MB);
             problem.setMemoryLimitMB(clicsMemoryLimit);
         }
-        
+
         if (!usingCustomValidator) {
             if (!pc2FormatProblemYamlFile) {
                 // SOMEDAY CCS add CCS validator derived based on build script
@@ -1612,34 +1614,34 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // `$validate_cmd $inputfile $answerfile $feedbackfile < $teamoutput `;
 
                 addClicsOutputValidator(problem, problemDataFiles, baseDirectoryName);
-                
+
             } else {
                 addDefaultPC2Validator(problem, 1);
             }
         } else {
             // using Custom Output Validator
             String outputValidatorNameFromYaml = fetchValue(validatorContent, "validatorProg");
-            
+
             if (outputValidatorNameFromYaml != null) {
                 Problem cleanProblem = contest.getProblem(problem.getElementId());
                 ProblemDataFiles problemDataFile = contest.getProblemDataFile(problem);
-                
+
                 String outputValidatorName = findOutputValidatorFile (baseDirectoryName, problem, outputValidatorNameFromYaml);
-                
+
                 if (!StringUtilities.isEmpty(outputValidatorName)) {
-                    
+
                     // Check for output validator if defined
-                    
+
                     if (!new File(outputValidatorName).isFile()) {
                         throw new YamlLoadException("Missing output validator for problem " + problem.getShortName() + ", expecting at: " + outputValidatorName);
                     }
 
                     SerializedFile outputValidatorFile = new SerializedFile(outputValidatorName);
                     if (outputValidatorFile.getSHA1sum() != null) {
-                        
+
                         // Save validator internal file
                         problemDataFile.setOutputValidatorFile(outputValidatorFile);
-                        
+
                         // save validator program name
                         problem.setOutputValidatorProgramName(outputValidatorName);
                         contest.updateProblem(cleanProblem, problemDataFile);
@@ -1651,7 +1653,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
             }
         }
-        
+
         boolean globlStopOnFirstFail = contest.getContestInformation().isStopOnFirstFailedtestCase();
 
         boolean stopOnFirstFail = fetchBooleanValue(content, STOP_ON_FIRST_FAILED_TEST_CASE_KEY, globlStopOnFirstFail);
@@ -1721,7 +1723,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Assign validator config settings.
-     * 
+     *
      * @param content
      * @param problem
      * @param contest
@@ -1776,14 +1778,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 } else {
                     customSettings.setUsePC2ValidatorInterface();
                 }
-                
+
                 customSettings.setValidatorCommandLine(validatorCmd);
-                
+
                 if (problem.getOutputValidatorProgramName() != null) {
                     // TODO REFACTOR There are two locations that store the validator program name, there should be one.
                     customSettings.setValidatorProgramName(problem.getOutputValidatorProgramName());
                 }
-                
+
                 customSettings.setValidatorProgramName(validatorProg);
                 problem.setCustomOutputValidatorSettings(customSettings);
             }
@@ -1877,7 +1879,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     private ArrayList fetchList(Map<String, Object> content, String key) {
         return (ArrayList) content.get(key);
     }
-    
+
     public ClientId [] getShadowProxyClientIds(String[] yamlLines) {
         ArrayList<ClientId> clientIdList = new ArrayList<ClientId>();
         Map<String, Object> yamlContent = loadYaml(null, yamlLines);
@@ -1896,9 +1898,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 ClientType.Type type = ClientType.Type.valueOf(accountType.trim());
                 Integer siteNumber = fetchIntValue(map, "site", 1);
                 String numberString = fetchValue(map, "number");
-                
+
                 int[] clientNumbers = getNumberList(numberString.trim());
-                
+
 
                 for (int i = 0; i < clientNumbers.length; i++) {
 
@@ -1908,7 +1910,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 }
             }
         }
-        return (ClientId[]) clientIdList.toArray(new ClientId[clientIdList.size()]);
+        return clientIdList.toArray(new ClientId[clientIdList.size()]);
     }
 
     @SuppressWarnings("unchecked")
@@ -1936,14 +1938,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     Language lookedupLanguage = LanguageAutoFill.languageLookup(name);
                     String compilerName = fetchValue(map, "compiler");
                     String pc2CompilerCommandLine = fetchValue(map, PC2_COMPILER_CMD);
-                    
-         
+
+
 
                     language.setDisplayName(name);
-                    
+
                     if (compilerName != null) {
 
-                        // CLICS Language 
+                        // CLICS Language
                         compilerName = fetchValue(map, "compiler");
                         String compilerArgs = fetchValue(map, "compiler-args");
                         String runner = fetchValue(map, "runner");
@@ -1964,7 +1966,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                              */
                             runner = "a.out";
                         }
-                        
+
                         if (runnerArgs == null) {
                             programExecuteCommandLine = runner;
                         } else {
@@ -2015,7 +2017,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     } else {
                         language.setUsingJudgeProgramExecuteCommandLine(false);
                     }
-                    
+
                     String clicsLanguageId = fetchValue(map, "clics-id");
                     if (clicsLanguageId != null){
                         language.setID(clicsLanguageId);
@@ -2032,7 +2034,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         }
 
-        return (Language[]) languageList.toArray(new Language[languageList.size()]);
+        return languageList.toArray(new Language[languageList.size()]);
     }
 
     @SuppressWarnings("unchecked")
@@ -2051,14 +2053,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             list = fetchList(yamlContent, PROBLEMSET_PROBLEMS_KEY);
         }
 
-        //at this point if "list" is not null then it should contain an entry for each problem defined in 
+        //at this point if "list" is not null then it should contain an entry for each problem defined in
         //the "problemset" section of the contest.yaml file.  Each problem entry in "list" has four yaml-defined
         // key/value pairs, with keys "letter", "short-name", "color", and "rgb".
         if (list != null) {
-            
+
             //process each problem entry in list
             for (Object object : list) {
-                
+
                 //get a map of the problem key/value pairs (see comment above)
                 Map<String, Object> problemMap = (Map<String, Object>) object;
 
@@ -2100,7 +2102,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // contains an "OUTPUT" key, use the timeout value from the problem.yaml; otherwise use the passed-in default.
                 Long actualMaxOutputBytes = fetchLongValue(problemMap, MAX_OUTPUT_SIZE_K_KEY, maxOutputBytes);
                 problem.setMaxOutputSizeKB(actualMaxOutputBytes/Constants.BYTES_PER_KIBIBYTE);
-                
+
                 //TODO:  add code to check for the CLICS-compliant key "output:" in the "limits: section
                 // of problem.yaml if the PC2 "MAX_OUTPUT_SIZE_K_KEY doesn't exist
 
@@ -2148,38 +2150,38 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     outputValidatorCommandLine = overrideValidatorCommandLine;
                 }
                 problem.setValidatorType(VALIDATOR_TYPE.PC2VALIDATOR);
-                problem.setOutputValidatorCommandLine(outputValidatorCommandLine);                
+                problem.setOutputValidatorCommandLine(outputValidatorCommandLine);
 
                 problemList.addElement(problem);
             }
         }
 
-        return (Problem[]) problemList.toArray(new Problem[problemList.size()]);
+        return problemList.toArray(new Problem[problemList.size()]);
     }
 
     /**
-     * Assign individual problem input validator(s) to a problem.  This method 
+     * Assign individual problem input validator(s) to a problem.  This method
      * reads the "problem.yaml" file associated with the specified problem (as determined by the "problem short-name")
      * and uses the settings in that problem.yaml file to determine what Input Validators to assign to the problem.
      * The method always arranges that a Viva Input Validator is configured for the problem (although the Viva Pattern
-     * for the problem will be empty if no pattern is specified in the problem.yaml file).  
+     * for the problem will be empty if no pattern is specified in the problem.yaml file).
      * If the problem.yaml file specifies a "custom input validator", that validator
      * is configured into the problem; if not, the method searches the "input_format_validators" folder for an input validator
      * and configures that into the problem.
-     * 
+     *
      * @param contest the contest in which the specified problems are configured.
      * @param problem the Problem which is to be updated with Input Validators.
      * @param problemsBaseDir the name of the directory where Problems are stored under their short-name values.
-     * 
-     * @throws YamlLoadException 
+     *
+     * @throws YamlLoadException
      *              if the specified problem has a null or empty-string short-name;
      *              if the problem directory could not be found;
      *              if an error or exception occurred loading a custom input validator program.
      */
     protected void assignInputValidators(IInternalContest contest, Problem problem, String problemsBaseDir) {
-        
+
         String probName = problem.getShortName();
-        
+
         if (probName==null || probName.equals("")) {
             String errMsg = "Error during YAML loading: encountered contest problem with null/empty short name";
             YamlLoadException exception = new YamlLoadException(errMsg);
@@ -2199,18 +2201,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
             //we haven't (yet) set the default Input Validator type
             boolean defaultInputValidatorTypeHasBeenSet = false;
-            
+
              //we haven't (yet) loaded a custom input validator into the problem
             boolean customInputValidatorProgramHasBeenSet = false;
-            
+
             //we haven't (yet) set a Viva pattern in the problem
             boolean vivaPatternHasBeenSet = false;
-            
+
             //check if there is an "input_validator" section in the problem.yaml file
             if (inputValidatorMap != null) {
 
                 //yes; process the "input_validator" section settings, assigning defaults for unspecified settings
-                
+
                 // if there is a default Input Validator type (NONE, VIVA, or CUSTOM) specified, set that in the problem
                 String defaultIVType = fetchValue(inputValidatorMap, DEFAULT_INPUT_VALIDATOR_KEY);
                 if (defaultIVType != null) {
@@ -2229,8 +2231,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                             syntaxError("Unknown value for " + DEFAULT_INPUT_VALIDATOR_KEY + ": " + defaultIVType);
                     }
                     defaultInputValidatorTypeHasBeenSet = true;
-                    
-                } 
+
+                }
 
                 // if there is a custom input validator command specified in the YAML map, set it in the problem
                 String customInputValidatorCommandLine = fetchValue(inputValidatorMap, CUSTOM_INPUT_VALIDATOR_COMMAND_LINE_KEY);
@@ -2243,19 +2245,19 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 // if there is a custom input validator program specified in the YAML map, attempt to read the file into a SerializedFile
                 String customInputValidatorProgName = fetchValue(inputValidatorMap, CUSTOM_INPUT_VALIDATOR_PROGRAM_NAME_KEY);
                 if (customInputValidatorProgName != null) {
-                    String pathToCustomProg = getInputValidatorDir(problemsBaseDir, problem) + File.separator 
+                    String pathToCustomProg = getInputValidatorDir(problemsBaseDir, problem) + File.separator
                             + customInputValidatorProgName;
                     SerializedFile customIVProg = new SerializedFile(pathToCustomProg);
                     // check for errors/exceptions during file loading
                     try {
                         if (Utilities.serializedFileError(customIVProg)) {
-                            String errMsg = "Unable to load custom input validator program '" + customInputValidatorProgName + "': " 
+                            String errMsg = "Unable to load custom input validator program '" + customInputValidatorProgName + "': "
                                             + customIVProg.getErrorMessage();
                             YamlLoadException exception = new YamlLoadException(errMsg);
                             throw exception;
                         }
                     } catch (Exception e) {
-                        String errMsg = "Exception loading custom input validator program '" + customInputValidatorProgName + "': " 
+                        String errMsg = "Exception loading custom input validator program '" + customInputValidatorProgName + "': "
                                         + e.getMessage();
                         YamlLoadException exception = new YamlLoadException(errMsg);
                         throw exception;
@@ -2266,7 +2268,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     problem.setCustomInputValidationStatus(InputValidationStatus.NOT_TESTED);
                     problem.setCustomInputValidatorHasBeenRun(false);
                     customInputValidatorProgramHasBeenSet = true;
-                    
+
                 } else {
                     // no custom input validator was specified in the problem.yaml "input_validator" section
                     problem.setCustomInputValidatorFile(null);
@@ -2274,7 +2276,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     problem.setCustomInputValidationStatus(InputValidationStatus.NOT_TESTED);
                     problem.setCustomInputValidatorHasBeenRun(false);
                 }
-                
+
                 // if there is a VIVA pattern file specified in the YAML map, attempt to read the file into a SerializedFile
 
                 String vivaPatternFileName = fetchValue(inputValidatorMap, VIVA_PATTERN_FILE_KEY);
@@ -2292,7 +2294,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     String[] patternLines = new String(vivaPatternSF.getBuffer()).split("\n");
                     problem.setVivaInputValidatorPattern(patternLines);
                     vivaPatternHasBeenSet = true;
-                } 
+                }
 
                 // if there is a VIVA pattern specified directly in the YAML map, add it to the problem.
                 // Note that this means a pattern directly specified in the YAML file supersedes any
@@ -2314,21 +2316,21 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
                 // no custom IV has been set; try to load one from the "input_format_validators" folder
                 customInputValidatorProgramHasBeenSet = addCustomInputValidator(problem, contest.getProblemDataFile(problem), problemsBaseDir);
-                
+
                 //if addCustomInputValidator() loaded a custom Input Validator, it also set the problem's custom IV status.
                 // if not, do so here
                 if (!customInputValidatorProgramHasBeenSet) {
-                    
+
                     // we didn't find a custom input validator anywhere
                     problem.setProblemHasCustomInputValidator(false);
                     problem.setCustomInputValidatorCommandLine(null);
                     problem.setCustomInputValidatorFile(null);
                     problem.setCustomInputValidationStatus(InputValidationStatus.NOT_TESTED);
                     problem.setCustomInputValidatorHasBeenRun(false);
-                    
-                } 
+
+                }
             }
-            
+
             //if the user didn't set the default Input Validator type via the problem.yaml file, set it here
             if (!defaultInputValidatorTypeHasBeenSet) {
                 if (vivaPatternHasBeenSet) {
@@ -2339,16 +2341,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                     problem.setCurrentInputValidatorType(INPUT_VALIDATOR_TYPE.NONE);
                 }
             }
-                       
+
             //This block of code is commented out because whether or not the problem has a Viva pattern is now determined by whether it has a non-zero-length pattern field;
-            // a separate variable "problemHasVivaInputValidatorPattern" in the Problem class is not warranted (and is actually dangerous; it allows the problem 
+            // a separate variable "problemHasVivaInputValidatorPattern" in the Problem class is not warranted (and is actually dangerous; it allows the problem
             // to enter an invalid state where the boolean variable is set to one indication but the actual pattern indicates the opposite).
 //            // if the user set the Viva pattern via the problem.yaml file, mark the problem to so indicate
 //            if (vivaPatternHasBeenSet) {
 //                problem.setProblemHasVivaInputValidatorPattern(true);
 //            } else {
 //                // no Viva pattern was found (either because it wasn't explicitly specified in the problem.yaml
-//                // "input_validator:" section, or because there was no such section in the problem.yaml file; 
+//                // "input_validator:" section, or because there was no such section in the problem.yaml file;
 //                // in either case, mark the problem as such
 //                problem.setProblemHasVivaInputValidatorPattern(false);
 //            }
@@ -2356,7 +2358,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problem.setVivaInputValidationStatus(InputValidationStatus.NOT_TESTED);
             problem.setVivaInputValidatorHasBeenRun(false);
 
-            
+
         } else {
             //the problem folder either doesn't exist or is not a directory
             String errMsg = "Error during YAML loading: unable to locate problem folder '" + problemDir + "'";
@@ -2367,19 +2369,19 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     }
 
 //    /**
-//     * Returns a map containing the Input Validator settings from the problem.yaml file for the problem whose 
-//     * short-name is contained in the specified problemMap.  
-//     * 
+//     * Returns a map containing the Input Validator settings from the problem.yaml file for the problem whose
+//     * short-name is contained in the specified problemMap.
+//     *
 //     * @param problemMap a problemset map containing the short-name of the problem.
-//     * 
+//     *
 //     * @return a map of input validator settings for the specified problem.
 //     */
 //    protected LinkedHashMap<String, Object> getInputValidatorMap(Map<String, Object> problemMap) {
-//        
+//
 //        //get problem short-name out of the received map
-//            
+//
 //        LinkedHashMap<String,Object> inputValidatorMap = (LinkedHashMap<String, Object>) yamlContent.get(JUDGING_TYPE_KEY);
-//            
+//
 //        return inputValidatorMap ;
 //    }
 
@@ -2395,7 +2397,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Return list of judge account numbers for list, in ascending order.
-     * 
+     *
      * @param accounts
      * @return array of judge numbers, in ascending order.
      */
@@ -2517,7 +2519,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
 
-        return (AutoJudgeSetting[]) ajList.toArray(new AutoJudgeSetting[ajList.size()]);
+        return ajList.toArray(new AutoJudgeSetting[ajList.size()]);
 
     }
 
@@ -2530,12 +2532,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     public IInternalContest fromYaml(IInternalContest contest, String[] yamlLines, String directoryName) {
         return fromYaml(contest, yamlLines, directoryName, false);
     }
-    
+
     @Override
     public Problem[] getProblems(String[] yamlLines, int defaultTimeOut) {
         return getProblems(yamlLines, defaultTimeOut, Constants.DEFAULT_MAX_OUTPUT_SIZE_K*1024);
     }
-    
+
     @Override
     public Problem[] getProblems(String[] yamlLines, int defaultTimeOut, boolean loadDataFileContents, String defaultValidatorCommand, String overrideValidatorCommandLine, boolean overrideUsePc2Validator, boolean manualReviewOverride) {
         return getProblems(yamlLines, defaultTimeOut, Constants.DEFAULT_MAX_OUTPUT_SIZE_K*1024, loadDataFileContents, defaultValidatorCommand, overrideValidatorCommandLine, overrideUsePc2Validator, manualReviewOverride);
@@ -2564,7 +2566,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             }
         }
 
-        return (String[]) list.toArray(new String[list.size()]);
+        return list.toArray(new String[list.size()]);
     }
 
     @Override
@@ -2646,7 +2648,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Remove trailing and leading quote char
-     * 
+     *
      * @param string
      * @param quoteChar
      * @return
@@ -2665,10 +2667,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Unquotes either ' or ".
-     * 
+     *
      * If the first character is a ' then will strip leading/trailing ' <br>
      * or If the first character is a " then will strip leading/trailing ". <br>
-     * 
+     *
      * @param string
      * @return
      */
@@ -2691,17 +2693,17 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Adds the CLICS output validator as the output validator for the specified problem.
-     * 
+     *
      * Developer's note: this method at one time also had code which loaded a Clics INPUT Validator
      * and added it to the specified problem.  Since this method is about loading the OUTPUT Validator,
      * that code was moved to a separate method {@link #addCustomInputValidator(Problem, ProblemDataFiles, String)}.
-     * 
+     *
      * @param problem the {@link Problem} to which the CLICS output validator is to be added.
      * @param problemDataFiles the {@link ProblemDataFiles} associated with the specified problem.
      * @param baseDirectoryName the config of the directory where problems are found, ex /home/ubtuntu/current/config
-     * 
+     *
      * @return an updated Problem (the problem is also modified via the received reference parameter).
-     * 
+     *
      * @see #addCustomInputValidator(Problem, ProblemDataFiles, String)
      */
     private Problem addClicsOutputValidator(Problem problem, ProblemDataFiles problemDataFiles, String baseDirectoryName) {
@@ -2718,13 +2720,13 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             problem.setOutputValidatorCommandLine(Constants.DEFAULT_CLICS_VALIDATOR_COMMAND);
         }
 
-        
+
         return problem;
     }
 
     /**
      * Return path of output validator
-     * 
+     *
      * @param baseDirectoryName
      *            CDP base directory
      * @param problem
@@ -2738,7 +2740,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         /**
          * Return path if validator is an absolute path.
-         * 
+         *
          * Ex. /home/ubuntu/current/config/alt_output_validator
          */
         if (new File(validatorFile).isFile()) {
@@ -2747,7 +2749,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         /**
          * Check for validator under output_validators/
-         * 
+         *
          * Ex. /home/ubuntu/current/config/bells/output_validators/bells_validator/validator
          */
         validatorFile = baseDirectoryName + File.separator + problem.getShortName() + File.separator + //
@@ -2759,7 +2761,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
         /**
          * Check for under CDP/basename
-         * 
+         *
          * Ex. /home/ubuntu/current/config/bells/validator
          */
         String baseValidatorFile = baseDirectoryName + File.separator + validatorFile;
@@ -2774,31 +2776,31 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     /**
      * Adds a Custom Input Validator (also called an Input Format Validator) to the specified {@link Problem} and
      * its associated {@link ProblemDataFiles} if an appropriate Input Validator can be found.
-     * 
+     *
      * This method is based on searching for Input Validators defined by the CLICS Problem Package Format specification
      * (https://icpc.io/problem-package-format/spec/problem_package_format).  CLICS Input Validators are Custom Input Validators (in PC2 terminology) which are found in the CLICS-defined
      * Problem Package Format under the folder "<B><I>input_format_validators</i></b>".  This method searches for such a folder
-     * under the specified Problem definition folder; if found, it searches that folder for input validators and 
+     * under the specified Problem definition folder; if found, it searches that folder for input validators and
      * assigns the first validator found, if any, to the specified Problem and its associated ProblemDataFiles.
-     * 
+     *
      * Note that the CLICS problem package format specification defines that a problem may have MULTIPLE input format validators.
      * If more than one input format validator is found in the <B><I>input_format_validators</i></b> folder, the FIRST such
      * input validator is chosen, and a warning message is displayed on the standard output.
-     * 
+     *
      * If no CLICS Custom Input Validator can be found, this method silently does nothing.
-     * 
+     *
      * //TODO: update PC2 to support the ability to execute multiple CLICS input format validators.
      *
      * @param problem the Problem to which an Input Format Validator is to be assigned.
      * @param problemDataFiles the ProblemDataFiles associated with the specified problem.
      * @param problemsBaseDir the folder under which problems are stored by their short-name.
-     * 
+     *
      * @return true if the method found an input validator and loaded it into the problem; false otherwise.
-     * 
+     *
      * @throws YamlLoadException if an error or exception occurs while loading an Input Validator file.
      */
     private boolean addCustomInputValidator(Problem problem, ProblemDataFiles problemDataFiles, String problemsBaseDir) {
-        
+
         //search for an input validator beneath the specified folder
         String inputValidatorName = findInputValidator(problemsBaseDir, problem);
 
@@ -2808,7 +2810,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
              */
             if (inputValidatorName != null && new File(inputValidatorName).isFile()) {
                 SerializedFile customInputValidatorFile = new SerializedFile(inputValidatorName);
-                
+
                 //make sure there were no errors constructing the SerializedFile
                 if (Utilities.serializedFileError(customInputValidatorFile)) {
                     String msg = "Error loading Input Validator: " + customInputValidatorFile.getErrorMessage() ;
@@ -2823,12 +2825,12 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 //set the custom input validator command line to the input validator file basename as a default
                 String basename = customInputValidatorFile.getName();
                 problem.setCustomInputValidatorCommandLine(basename);
-                
+
                 //if the input validator file is a DOS script, update the command line to properly invoke it
                 if (basename.toLowerCase().endsWith(".bat") || basename.toLowerCase().endsWith(".cmd")) {
                     problem.setCustomInputValidatorCommandLine("cmd /c " + basename);
                 }
-                
+
                 //if the input validator file is a Java ".class" file, update the command line to properly invoke it
                 if (basename.toLowerCase().endsWith(".class")) {
                     basename = basename.replaceFirst(".class", "");
@@ -2838,15 +2840,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 //input validator program name now comes from the SerializedFile; there is no separate "name" field any more.
 //                // set validator name to short filename
 //                problem.setCustomInputValidatorProgramName(customInputValidatorFile.getName());
-                
+
                 //update the problem's input validator state
                 problem.setProblemHasCustomInputValidator(true);
                 problem.setCustomInputValidationStatus(InputValidationStatus.NOT_TESTED);
                 problem.setCustomInputValidatorHasBeenRun(false);
-                
+
                 return true;
 
-            } 
+            }
         } catch (Exception e) {
             throw new YamlLoadException("Unable to load input format validator for problem " + problem.getShortName() + ": " + inputValidatorName, e);
         }
@@ -2857,7 +2859,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Get file directory entries with relative dir path
-     * 
+     *
      * @param directory
      *            - directory to search and to prepend onto the matching filenames
      * @return
@@ -2873,7 +2875,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 list.add(directory + File.separator + file.getName());
             }
         }
-        return (String[]) list.toArray(new String[list.size()]);
+        return list.toArray(new String[list.size()]);
     }
 
     protected String findInputValidator(String baseDirectoryName, Problem problem) {
@@ -2969,9 +2971,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
          * Data files are external so data files should not be loaded into problem data files.
          */
         boolean loadExternalFile = problem.isUsingExternalDataFiles();
-        
+
         boolean loadSamples = contest.getContestInformation().isLoadSampleJudgesData();
-        
+
         String sampleDataDirectory = dataFileBaseDirectory.replaceAll("secret$", "sample");
 
         String[] inputFileNames = getFileNames(dataFileBaseDirectory, ".in");
@@ -2990,18 +2992,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
             ArrayList<SerializedFile> dataFiles = new ArrayList<SerializedFile>();
             ArrayList<SerializedFile> answerFiles = new ArrayList<SerializedFile>();
-            
+
             if (loadSamples) {
                 loadDataFiles(problem, dataFiles, answerFiles, sampleDataDirectory, loadExternalFile);
             }
-            
+
             // Load all secret files
             loadDataFiles(problem, dataFiles, answerFiles, dataFileBaseDirectory, loadExternalFile);
 
             if (dataFiles.size() > 0) {
 
-                SerializedFile[] data = (SerializedFile[]) dataFiles.toArray(new SerializedFile[dataFiles.size()]);
-                SerializedFile[] answer = (SerializedFile[]) answerFiles.toArray(new SerializedFile[answerFiles.size()]);
+                SerializedFile[] data = dataFiles.toArray(new SerializedFile[dataFiles.size()]);
+                SerializedFile[] answer = answerFiles.toArray(new SerializedFile[answerFiles.size()]);
 
                 // dumpSerialzedFileList (problem, "Judges data", data);
                 // dumpSerialzedFileList (problem, "Judges answer", answer);
@@ -3036,18 +3038,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Per problem, add files names into datafiles and answerfiles.
-     * 
-     * @param problem 
+     *
+     * @param problem
      * @param dataFiles input data files
      * @param answerFiles input answer files
      * @param fileSourceDirectory - location for the secret or sample files
      * @param loadExternalFile - load as external data fils
      */
     protected void loadDataFiles(Problem problem, ArrayList<SerializedFile> dataFiles, ArrayList<SerializedFile> answerFiles, String fileSourceDirectory, boolean loadExternalFile) {
-        
+
         String[] inputFileNames = getFileNames(fileSourceDirectory, ".in");
         String[] answerFileNames = getFileNames(fileSourceDirectory, ".ans");
-        
+
         if (inputFileNames.length == answerFileNames.length) {
 
             // Sort file names before loading into datafiles and answerfiles
@@ -3132,10 +3134,10 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Check for existence of file, if does not exist throw exception with message.
-     * 
+     *
      * @param filename
      * @param message
-     * 
+     *
      */
     private void checkForFile(String filename, String message) {
 
@@ -3146,14 +3148,16 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Load problem data files.
-     * 
+     *
      * @param loadProblemDataFiles
      *            false means ignore problem data files
      */
+    @Override
     public void setLoadProblemDataFiles(boolean loadProblemDataFiles) {
         this.loadProblemDataFiles = loadProblemDataFiles;
     }
 
+    @Override
     public boolean isLoadProblemDataFiles() {
         return loadProblemDataFiles;
     }
@@ -3236,7 +3240,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Convert String to second. Expects input in form: ss or mm:ss or hh:mm:ss
-     * 
+     *
      * @param s
      *            string to be converted to seconds
      * @return -1 if invalid time string, 0 or greater if valid
@@ -3296,7 +3300,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Find sample conetst by name.
-     * 
+     *
      * @param name
      * @return
      */
@@ -3313,8 +3317,8 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Get sample yaml in sample config dir.
-     * 
-     * 
+     *
+     *
      * @param name
      * @return
      */
@@ -3326,7 +3330,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     /**
      * Load groups.tsv and teams.tsv.
-     * 
+     *
      * @param contest
      * @param cdpConfigDirectory
      * @throws Exception
@@ -3367,7 +3371,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         File cdpConfigDirectory = null;
 
         if (entry.isDirectory()) {
-            
+
             String contestYamlFile = entry.getPath() + File.separator + IContestLoader.DEFAULT_CONTEST_YAML_FILENAME;
             if (new File(contestYamlFile).exists()) {
                 // if contest.yaml in current directory, then this is the equiv of config directory.
@@ -3476,7 +3480,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         LoadAccounts loader = new LoadAccounts();
 
         Vector<Account> teams = contest.getAccounts(ClientType.Type.TEAM);
-        Account[] teamAccounts = (Account[]) teams.toArray(new Account[teams.size()]);
+        Account[] teamAccounts = teams.toArray(new Account[teams.size()]);
 
         Group[] groups = contest.getGroups();
 
@@ -3496,11 +3500,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         for (Account account : newAccounts) {
             contest.addAccount(account);
         }
-        
+
         for (Account account : updatedAccount) {
             contest.updateAccount(account);
         }
-        
+
         System.out.println("Update " + updatedAccount.size() + " accounts, add " + newAccounts.size() + " accounts from " + loadfilename);
         StaticLog.info("Update " + updatedAccount.size() + " accounts, add " + newAccounts.size() + " accounts from " + loadfilename);
 
