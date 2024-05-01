@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Color;
@@ -6,8 +6,11 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -18,6 +21,7 @@ import java.util.Map;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -25,11 +29,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -39,6 +45,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 
 import edu.csus.ecs.pc2.clics.CLICSJudgementType;
 import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
@@ -87,6 +97,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     private Run runWeRequestedServerToUpdate;
 
     private boolean serverHasUpdatedOurRun;
+    
+    private JPanel dynamicallyRefreshPanel;
 
     @Override
     public String getPluginTitle() {
@@ -327,11 +339,110 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         
     }
     
+    private JPanel getdynamicallyRefreshPanel() {
+        
+        if (dynamicallyRefreshPanel == null) {
+            dynamicallyRefreshPanel = new JPanel();
+            
+            JCheckBox checkbox = new JCheckBox("Automatically Refresh Every:");
+            dynamicallyRefreshPanel.add(checkbox);
+            
+            
+            JTextField textField = new JTextField("5",2);
+            ((AbstractDocument) textField.getDocument()).setDocumentFilter(new DocumentFilter() { //Makes the textfield so that user is not allowed to enter illegal numbers.
+                @Override
+                public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                    String currentText = fb.getDocument().getText(0, fb.getDocument().getLength());
+                    StringBuilder newText = new StringBuilder(currentText);
+                    newText.replace(offset, offset + length, text);
+                    
+                    try {
+                        int value = Integer.parseInt(newText.toString());
+                        if (value >= 1 && value <= 60) {
+                            // Allow values between 1 and 60
+                            super.replace(fb, offset, length, text, attrs);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Duration of automatic refresh has to be between 1 and 60 seconds", "Warning", JOptionPane.WARNING_MESSAGE);
+                            Toolkit.getDefaultToolkit().beep();
+                        }
+                    } catch (NumberFormatException e) {
+                        Toolkit.getDefaultToolkit().beep();
+                    }
+                    
+                }
+            });
+            
+            dynamicallyRefreshPanel.add(textField);
+            
+            checkbox.addItemListener(new ItemListener() {
+                Timer timer;
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    
+                    
+                    if (e.getStateChange() == ItemEvent.SELECTED) {
+                        if (textField.getText().isEmpty()) {
+                            JOptionPane.showMessageDialog(null, "Please enter a value to textField", "Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        int time;
+                        try {
+                            time = Integer.parseInt(textField.getText());
+                            if (time < 1) {
+                                log.log(Log.WARNING, "dynamicallyRefreshPanel received time less than 1"+ textField.getText());
+                                throw new IllegalArgumentException("Time value cannot be less than 1, time is : " + time);
+                            }
+                            if (time > 60) {
+                                log.log(Log.WARNING, "dynamicallyRefreshPanel received time more than 60"+ textField.getText());
+                                throw new IllegalArgumentException("Time value cannot be more than 60, time is:  " + time);
+                            }
+                        } catch (NumberFormatException a) {
+                            // Handle the case where the text cannot be parsed as an integer
+                            log.log(Log.WARNING, "dynamicallyRefreshPanel did not receive an integer for time. It received"+ textField.getText());
+                            throw new NumberFormatException("dynamicallyRefreshPanel did not receive an integer for time. It received: " + textField.getText());
+                        }
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                refreshResultsTable();
+                            }
+                        });
+                        timer = new Timer(time * 1000, new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                
+
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    public void run() {
+                                        refreshResultsTable();
+                                    }
+                                });
+                            }
+                        });
+                        textField.setEnabled(false);
+                        log.log(Log.INFO, "Shadow table will be dynamically refreshed every " + time + " seconds.");  
+                        timer.start();
+                    } 
+                    else {
+                        textField.setEnabled(true);
+                        log.log(Log.INFO, " Dynamically refreshing has been stopped.");
+                        timer.stop();
+                    }
+                }
+            });
+            
+            JLabel label = new JLabel("seconds");
+            dynamicallyRefreshPanel.add(label);
+            
+        }
+        return dynamicallyRefreshPanel;
+    }
     
     private JComponent getButtonPanel() {
         
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setMaximumSize(new Dimension(500,40));
+        buttonPanel.setMaximumSize(new Dimension(1000,40));
+        
+        buttonPanel.add(getdynamicallyRefreshPanel());
         
         JButton refreshButton = new JButton("Refresh");
         refreshButton.addActionListener(new ActionListener() {
