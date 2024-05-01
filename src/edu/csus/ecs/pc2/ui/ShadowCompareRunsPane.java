@@ -339,6 +339,10 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         
     }
     
+    /**
+     * Initialized dynamically refresh panel that contains checkbox,textfield and label for auto refreshing.
+     * @return
+     */
     private JPanel getdynamicallyRefreshPanel() {
         
         if (dynamicallyRefreshPanel == null) {
