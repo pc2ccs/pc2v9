@@ -340,7 +340,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     }
     
     /**
-     * Initialized dynamically refresh panel that contains checkbox,textfield and label for auto refreshing.
+     * Initialized dynamically refresh panel that contains checkbox, textfield and label for auto refreshing.
      * @return
      */
     private JPanel getdynamicallyRefreshPanel() {
@@ -370,6 +370,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                             Toolkit.getDefaultToolkit().beep();
                         }
                     } catch (NumberFormatException e) {
+                        //catch if user tries to enter non numeric chars.
                         Toolkit.getDefaultToolkit().beep();
                     }
                     
@@ -386,31 +387,30 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                     
                     if (e.getStateChange() == ItemEvent.SELECTED) {
                         if (textField.getText().isEmpty()) {
-                            JOptionPane.showMessageDialog(null, "Please enter a value to textField", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "Please specify the number of seconds between refreshes (1-60)", "Error", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
-                        int time;
+                        int duration;
                         try {
-                            time = Integer.parseInt(textField.getText());
-                            if (time < 1) {
-                                log.log(Log.WARNING, "dynamicallyRefreshPanel received time less than 1"+ textField.getText());
-                                throw new IllegalArgumentException("Time value cannot be less than 1, time is : " + time);
+                            duration = Integer.parseInt(textField.getText());
+                            if (duration < 1) {
+                                log.log(Log.WARNING, "dynamicallyRefreshPanel received duration less than 1. It received: "+ textField.getText());
+                                throw new IllegalArgumentException("Duration value cannot be less than 1, time is : " + duration);
                             }
-                            if (time > 60) {
-                                log.log(Log.WARNING, "dynamicallyRefreshPanel received time more than 60"+ textField.getText());
-                                throw new IllegalArgumentException("Time value cannot be more than 60, time is:  " + time);
+                            if (duration > 60) {
+                                log.log(Log.WARNING, "dynamicallyRefreshPanel received duration more than 60. It received: "+ textField.getText());
+                                throw new IllegalArgumentException("Duration value cannot be more than 60, time is: " + duration);
                             }
                         } catch (NumberFormatException a) {
-                            // Handle the case where the text cannot be parsed as an integer
-                            log.log(Log.WARNING, "dynamicallyRefreshPanel did not receive an integer for time. It received"+ textField.getText());
-                            throw new NumberFormatException("dynamicallyRefreshPanel did not receive an integer for time. It received: " + textField.getText());
+                            log.log(Log.WARNING, "dynamicallyRefreshPanel did not receive an integer for duration. It received: "+ textField.getText());
+                            throw new NumberFormatException("dynamicallyRefreshPanel did not receive an integer for duration. It received: " + textField.getText());
                         }
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
                                 refreshResultsTable();
                             }
                         });
-                        timer = new Timer(time * 1000, new ActionListener() {
+                        timer = new Timer(duration * 1000, new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
                                 
@@ -423,7 +423,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                             }
                         });
                         textField.setEnabled(false);
-                        log.log(Log.INFO, "Shadow table will be dynamically refreshed every " + time + " seconds.");  
+                        log.log(Log.INFO, "Shadow table will be dynamically refreshed every " + duration + " seconds.");  
                         timer.start();
                     } 
                     else {
