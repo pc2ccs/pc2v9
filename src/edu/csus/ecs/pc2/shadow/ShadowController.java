@@ -1052,7 +1052,8 @@ public class ShadowController {
             for (String key : currentJudgementMap.keySet()) {
 
                 ShadowJudgementPair pair = currentJudgementMap.get(key).getShadowJudgementPair();
-                if (! pair.getPc2Judgement().equals(pair.getRemoteCCSJudgement())) {
+                if ((! pair.getPc2Judgement().equals(pair.getRemoteCCSJudgement())) && 
+                        ! pair.getPc2Judgement().equals("<pending>") &&  !pair.getRemoteCCSJudgement().equals("<pending>") ){//When one of the judgement is pending it will be filtered out
                     newJudgementMap.put(key,currentJudgementMap.get(key));
                 }
             }
