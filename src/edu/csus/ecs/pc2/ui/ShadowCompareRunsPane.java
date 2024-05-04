@@ -85,6 +85,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     //the current judgement information from the shadow controller
     private Map<String, ShadowJudgementInfo> currentJudgementMap = null;
     
+    private Map<String, ShadowJudgementInfo> filteredJudgementMap = null;
+    
     //the table displaying the current results
     private JTable resultsTable = null ;
     
@@ -102,6 +104,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     private JPanel dynamicallyRefreshPanel;
     
     private String defaultDuration = "5";
+    
+    private JCheckBox mismatchCheckBox;
 
     @Override
     public String getPluginTitle() {
@@ -242,18 +246,18 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         
         //get the current judgement information from the shadow controller
         currentJudgementMap = shadowController.getJudgementComparisonInfo();
-        currentJudgementMap = shadowController.filterJudgmenentMap(currentJudgementMap);
+        filteredJudgementMap = shadowController.filterJudgmenentMap(currentJudgementMap);  //We don't want summaryPanel to count only mismatches for the summary. This prevents it.
         //define the columns for the table
         String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?", "Overridden?" };
         
         //an array to hold the table data
-        Object[][] data = new Object[currentJudgementMap.size()][8];
+        Object[][] data = new Object[filteredJudgementMap.size()][8];
         
         //fill in each data row with info from the shadow controller's judgement map
         int row = 0;
-        for (String key : currentJudgementMap.keySet()) {
+        for (String key : filteredJudgementMap.keySet()) {
             
-            ShadowJudgementInfo curJudgementInfo = currentJudgementMap.get(key);
+            ShadowJudgementInfo curJudgementInfo = filteredJudgementMap.get(key);
             data[row][0] = new Integer(Utilities.nullSafeToInt(curJudgementInfo.getTeamID(), 0));
             data[row][1] = curJudgementInfo.getProblemID();
             data[row][2] = curJudgementInfo.getLanguageID();
@@ -446,7 +450,15 @@ public class ShadowCompareRunsPane extends JPanePlugin {
             Component horizontalStrut2 = Box.createHorizontalStrut(40);
             dynamicallyRefreshPanel.add(horizontalStrut2);
             
-            JCheckBox mismatchCheckBox = new JCheckBox("Only Mismatched");
+            
+            dynamicallyRefreshPanel.add(getmismatchCheckBox());
+        }
+        return dynamicallyRefreshPanel;
+    }
+    
+    private JCheckBox getmismatchCheckBox() {
+        if (mismatchCheckBox == null) {
+            mismatchCheckBox = new JCheckBox("Only Mismatched");
             mismatchCheckBox.setToolTipText("When toggled, table will only display when pc2 and remote ccs' judgements do not match");
             
             mismatchCheckBox.addItemListener(new ItemListener() {
@@ -472,11 +484,9 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                     }
                 }
             });
-            dynamicallyRefreshPanel.add(mismatchCheckBox);
         }
-        return dynamicallyRefreshPanel;
+        return mismatchCheckBox;
     }
-    
     private JComponent getButtonPanel() {
         
         JPanel buttonPanel = new JPanel();
