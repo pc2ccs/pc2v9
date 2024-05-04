@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.Box;
-//import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -101,6 +100,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     private boolean serverHasUpdatedOurRun;
     
     private JPanel dynamicallyRefreshPanel;
+    
+    private String defaultDuration = "5";
 
     @Override
     public String getPluginTitle() {
@@ -357,7 +358,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
             dynamicallyRefreshPanel.add(checkbox);
             
             
-            JTextField textField = new JTextField("5",2);
+            JTextField textField = new JTextField(defaultDuration,2);
             ((AbstractDocument) textField.getDocument()).setDocumentFilter(new DocumentFilter() { //Makes the textfield so that user is not allowed to enter illegal numbers.
                 @Override
                 public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
@@ -445,21 +446,33 @@ public class ShadowCompareRunsPane extends JPanePlugin {
             Component horizontalStrut2 = Box.createHorizontalStrut(40);
             dynamicallyRefreshPanel.add(horizontalStrut2);
             
-            JCheckBox missMatchCheckBox = new JCheckBox("Only Missmatched");
-            missMatchCheckBox.setToolTipText("When toggled, table will only display when pc2 and remote ccs' judgements do not match");
+            JCheckBox mismatchCheckBox = new JCheckBox("Only Mismatched");
+            mismatchCheckBox.setToolTipText("When toggled, table will only display when pc2 and remote ccs' judgements do not match");
             
-            missMatchCheckBox.addItemListener(new ItemListener() {
+            mismatchCheckBox.addItemListener(new ItemListener() {
                 @Override
                 public void itemStateChanged(ItemEvent e) {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
-                        shadowController.setFilter(FILTERS.ONLY_MISSMATCH);
+                        
+                        shadowController.setFilter(FILTERS.ONLY_MISMATCH);
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                refreshResultsTable();
+                            }
+                        });
                     }
                     else {
+                        
                         shadowController.setFilter(FILTERS.NONE);
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                refreshResultsTable();
+                            }
+                        });
                     }
                 }
             });
-            dynamicallyRefreshPanel.add(missMatchCheckBox);
+            dynamicallyRefreshPanel.add(mismatchCheckBox);
         }
         return dynamicallyRefreshPanel;
     }

@@ -97,7 +97,7 @@ public class ShadowController {
     }
     public enum FILTERS {
         NONE,
-        ONLY_MISSMATCH
+        ONLY_MISMATCH
     }
     
     private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
@@ -1047,7 +1047,7 @@ public class ShadowController {
      * @return currentJudgementMap but judgements that shouldnt be shown is removed.
      */
     public Map<String, ShadowJudgementInfo> filterJudgmenentMap(Map<String, ShadowJudgementInfo> currentJudgementMap) {
-        if (getFilter().equals(FILTERS.ONLY_MISSMATCH)) {
+        if (getFilter().equals(FILTERS.ONLY_MISMATCH)) {
             Map<String, ShadowJudgementInfo> newJudgementMap = new HashMap<String, ShadowJudgementInfo>();
             for (String key : currentJudgementMap.keySet()) {
 
