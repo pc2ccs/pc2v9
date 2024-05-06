@@ -80,6 +80,8 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     
     private static final int RUN_UPDATE_REQUEST_SERVER_TIMEOUT_MILLIS = 30000;
     
+    private static final String DEFAULT_REFRESH_INTERVAL = "5";
+    
     private ShadowController shadowController = null ;
     
     //the current judgement information from the shadow controller
@@ -102,9 +104,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     private boolean serverHasUpdatedOurRun;
     
     private JPanel dynamicallyRefreshPanel;
-    
-    private String defaultDuration = "5";
-    
+        
     private JCheckBox mismatchCheckBox;
 
     @Override
@@ -244,9 +244,11 @@ public class ShadowCompareRunsPane extends JPanePlugin {
      */
     private TableModel getUpdatedResultsTableModel() {
         
-        //get the current judgement information from the shadow controller
+        //get the current judgment information from the shadow controller
         currentJudgementMap = shadowController.getJudgementComparisonInfo();
-        filteredJudgementMap = shadowController.filterJudgmenentMap(currentJudgementMap);  //We don't want summaryPanel to count only mismatches for the summary. This prevents it.
+        
+        //We don't want summaryPanel to count only mismatches for the summary. Below prevents it.
+        filteredJudgementMap = shadowController.filterJudgmenentMap(currentJudgementMap);
         //define the columns for the table
         String[] columnNames = { "Team", "Problem", "Language", "Submission ID", "PC2 Shadow", "Remote CCS", "Match?", "Overridden?" };
         
@@ -362,7 +364,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
             dynamicallyRefreshPanel.add(checkbox);
             
             
-            JTextField textField = new JTextField(defaultDuration,2);
+            JTextField textField = new JTextField(DEFAULT_REFRESH_INTERVAL,2);
             ((AbstractDocument) textField.getDocument()).setDocumentFilter(new DocumentFilter() { //Makes the textfield so that user is not allowed to enter illegal numbers.
                 @Override
                 public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
