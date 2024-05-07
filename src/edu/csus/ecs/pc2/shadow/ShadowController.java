@@ -95,14 +95,18 @@ public class ShadowController {
             return this.label;
         }
     }
-
+    public enum FILTERS {
+        NONE,
+        ONLY_MISMATCH
+    }
+    
     private SHADOW_CONTROLLER_STATUS controllerStatus = null ;
     private RemoteContestConfiguration remoteContestConfig;
     private Thread monitorThread;
     private IRemoteContestAPIAdapter remoteContestAPIAdapter;
 
     private boolean convertJudgementsToBig5 = true;
-
+    private FILTERS currentFilter = FILTERS.NONE ;
     /**
      * a ContestInformation Listener
      *
@@ -1027,5 +1031,34 @@ public class ShadowController {
 
     public IInternalController getLocalController() {
         return localController;
+    }
+    
+    public FILTERS getFilter() {
+        return currentFilter;
+    }
+    
+    public void setFilter(FILTERS filter) {
+        currentFilter = filter;
+    }
+    
+    /**
+     * 
+     * @param currentJudgementMap
+     * @return currentJudgementMap but judgements that shouldnt be shown is removed.
+     */
+    public Map<String, ShadowJudgementInfo> filterJudgmenentMap(Map<String, ShadowJudgementInfo> currentJudgementMap) {
+        if (getFilter().equals(FILTERS.ONLY_MISMATCH)) {
+            Map<String, ShadowJudgementInfo> newJudgementMap = new HashMap<String, ShadowJudgementInfo>();
+            for (String key : currentJudgementMap.keySet()) {
+
+                ShadowJudgementPair pair = currentJudgementMap.get(key).getShadowJudgementPair();
+                if ((! pair.getPc2Judgement().equals(pair.getRemoteCCSJudgement())) && 
+                        ! pair.getPc2Judgement().equals("<pending>") &&  !pair.getRemoteCCSJudgement().equals("<pending>") ){//When one of the judgement is pending it will be filtered out
+                    newJudgementMap.put(key,currentJudgementMap.get(key));
+                }
+            }
+            return newJudgementMap;
+        }
+        return currentJudgementMap;
     }
 }
