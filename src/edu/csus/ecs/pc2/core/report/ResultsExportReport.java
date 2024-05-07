@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
 public class ResultsExportReport implements IReport {
-    
+
     private IInternalContest contest;
 
     private IInternalController controller;
@@ -34,11 +34,11 @@ public class ResultsExportReport implements IReport {
     private Filter filter = new Filter();
 
     private String pc2ResultsDir = null;
-    
+
     private String primaryCCSResultsDir = null;
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -796328654541676730L;
 
@@ -67,7 +67,7 @@ public class ResultsExportReport implements IReport {
 
     @Override
     public void createReportFile(String filename, Filter inFilter) throws IOException {
-        
+
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
         filter = inFilter;
 
@@ -85,7 +85,7 @@ public class ResultsExportReport implements IReport {
 
             printWriter.close();
             printWriter = null;
-            
+
         }
 
         catch (RuntimeException rte) {
@@ -98,24 +98,24 @@ public class ResultsExportReport implements IReport {
             printWriter.println("Exception generating report " + rte.getMessage());
             throwable.printStackTrace(printWriter);
         }
-        
+
         catch (Exception e) {
             log.log(Log.INFO, "Exception writing report", e);
             printWriter.println("Exception generating report " + e.getMessage());
         }
     }
 
-    
+
     public String getReportFileName (IReport selectedReport, String extension) {
-       
+
         return getReportBaseFileName(selectedReport, "txt");
     }
-    
+
     public String getAltReportDirname (IReport selectedReport, String extension) {
-        
+
         return getReportBaseFileName(selectedReport, "files");
     }
-    
+
     public String getReportBaseFileName(IReport selectedReport, String extension) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
         // "yyMMdd HHmmss.SSS");
@@ -124,14 +124,14 @@ public class ResultsExportReport implements IReport {
         while (reportName.indexOf(' ') > -1) {
             reportName = reportName.replace(" ", "_");
         }
-        
+
         if (extension != null &&  extension.length() >= 0) {
             extension = "." + extension;
         }
-            
+
         return "report." + reportName + "." + simpleDateFormat.format(new Date()) + extension;
     }
-    
+
     public String getFileName(IReport selectedReport, String extension) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS"); // or maybe? "yyMMdd HHmmss.SSS");
         String reportName = selectedReport.getReportTitle();
@@ -141,30 +141,31 @@ public class ResultsExportReport implements IReport {
         }
         return "report." + reportName + "." + simpleDateFormat.format(new Date()) + "." + extension;
     }
-    
+
     @Override
     public String[] createReport(Filter filter) {
-        
+
     List<String> outList = new ArrayList<String>();
-        
-        
+
+
         String resultsFilename = getPc2ResultsDir() + File.separator + ResultsFile.RESULTS_FILENAME;
         String scoreboardJsonFilename = getPc2ResultsDir() + File.separator + Constants.SCOREBOARD_JSON_FILENAME;
         String awardsFileName = getPc2ResultsDir() + File.separator + Constants.AWARDS_JSON_FILENAME;
-        
+        String eventFeedJsonFileName = getPc2ResultsDir() + File.separator + Constants.EVENT_FEED_JSON_FILENAME;
+
         ExportFilesUtilities.writeResultsFiles(contest, getPc2ResultsDir());
 
         String finalizedStatus = "No.  (Warning - contest is not finalized)";
-        
+
         FinalizeData finalizedDAta = contest.getFinalizeData();
         if (finalizedDAta != null) {
             if ( finalizedDAta.isCertified() ) {
-                
+
                 finalizedStatus = "Yes.  Finalized at "+
                         finalizedDAta.getCertificationDate();
             }
         }
-        
+
         String[] reportLinss = { //
 
                 "pc2 results dir       : " + getPc2ResultsDir(), //
@@ -175,15 +176,16 @@ public class ResultsExportReport implements IReport {
                 resultsFilename, //
                 scoreboardJsonFilename, //
                 awardsFileName, //
+                eventFeedJsonFileName, //
                 "", //
 
         };
-        
+
         outList.addAll(0, Arrays.asList(reportLinss));
-        
-   
-        
-        return (String[]) outList.toArray(new String[outList.size()]);
+
+
+
+        return outList.toArray(new String[outList.size()]);
     }
 
 
@@ -244,7 +246,7 @@ public class ResultsExportReport implements IReport {
         printWriter.println("end report: " + getReportTitle());
 
     }
-    
+
     public String getPc2ResultsDir() {
         if (pc2ResultsDir == null) {
 //            ExecuteUtilities.ensureDirectory(Constants.REPORT_DIRECTORY_NAME);
@@ -266,7 +268,7 @@ public class ResultsExportReport implements IReport {
     public String getPrimaryCCSResultsDir() {
         return primaryCCSResultsDir;
     }
-    
+
     public void setPrimaryCCSResultsDir(String primaryCCSResultsDir) {
         this.primaryCCSResultsDir = primaryCCSResultsDir;
     }

@@ -12,6 +12,8 @@ public final class Constants {
 
     public final static String SCOREBOARD_JSON_FILENAME = "scoreboard.json";
 
+    public final static String EVENT_FEED_JSON_FILENAME = "event-feed.ndjson";
+
     public static final long HOURS_PER_DAY = 24;
 
     private Constants() {
