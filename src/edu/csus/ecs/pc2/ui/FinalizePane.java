@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -50,6 +50,8 @@ public class FinalizePane extends JPanePlugin {
     private JPanel buttonPane = null;
 
     private JButton finalizeButton = null;
+    
+    private JButton updateButton = null;
 
     private JPanel centerPane = null;
 
@@ -117,7 +119,8 @@ public class FinalizePane extends JPanePlugin {
             flowLayout.setHgap(45);
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
-            buttonPane.setPreferredSize(new Dimension(35, 35));
+            buttonPane.setPreferredSize(new Dimension(52, 35));
+            buttonPane.add(getUpdateButton(), null);
             buttonPane.add(getFinalizeButton(), null);
             buttonPane.add(getReportButton(), null);
         }
@@ -218,6 +221,60 @@ public class FinalizePane extends JPanePlugin {
             });
         }
         return finalizeButton;
+    }
+
+    /**
+     * This method initializes updateButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getUpdateButton() {
+        if (updateButton == null) {
+            updateButton = new JButton();
+            updateButton.setText("Update");
+            updateButton.setMnemonic(KeyEvent.VK_U);
+            updateButton.setToolTipText("Update medal counts");
+            updateButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    updateMedalCounts();
+                }
+            });
+        }
+        return updateButton;
+    }
+
+    protected void updateMedalCounts() {
+
+        FinalizeData data = getFromFields();
+        FinalizeData currentData = getContest().getFinalizeData();
+        
+        try {
+            if(currentData != null && currentData.isCertified()) {
+                throw new InvalidFieldValue("You can not change the medal counts on a certfied contest");                
+            }
+            if (data.getGoldRank() <= 0) {
+                throw new InvalidFieldValue("Gold rank must be greater than zero");                
+            }
+            if (data.getSilverRank() <= 0) {
+                throw new InvalidFieldValue("Silver rank must be greater than zero");                
+            }
+            if (data.getBronzeRank() <= 0) {
+                throw new InvalidFieldValue("Bronze rank must be greater than zero");
+            }
+            if(data.getGoldRank() >= data.getSilverRank()) {
+                throw new InvalidFieldValue("Gold rank must not be greater than silver rank");
+            }
+            if(data.getSilverRank() >= data.getBronzeRank()) {
+                throw new InvalidFieldValue("Silver rank must not be greater than bronze rank");
+            }
+
+        } catch (InvalidFieldValue e) {
+            showMessage(e.getMessage());
+            return;
+        }
+
+        data.setCertified(false);
+        getController().updateFinalizeData(data);
     }
 
     protected void certifyContest() {

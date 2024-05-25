@@ -224,6 +224,9 @@ public class ResultsFile {
      */
     public String[] createTSVFileLines(IInternalContest contest, Group group, String resultFileTitleFieldName)  {
 
+        // TODO JB
+        boolean wfGroupRanking = false;
+        
         Vector<String> lines = new Vector<String>();
 
         finalizeData = contest.getFinalizeData();
@@ -299,12 +302,14 @@ public class ResultsFile {
             String award = getAwardMedal(record.getRankNumber(), finalizeData, ranked);
             String rank = "";
             if (!"honorable".equalsIgnoreCase(award)) {
-                if (realRank > lastMedalRank && (lastSolvedNum != record.getNumberSolved())) {
-                    lastSolvedNum = record.getNumberSolved();
-                    rankNumber = realRank;
-                    record.setRankNumber(realRank);
-                } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
-                    record.setRankNumber(rankNumber);
+                if(wfGroupRanking) {
+                    if (realRank > lastMedalRank && (lastSolvedNum != record.getNumberSolved())) {
+                        lastSolvedNum = record.getNumberSolved();
+                        rankNumber = realRank;
+                        record.setRankNumber(realRank);
+                    } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
+                        record.setRankNumber(rankNumber);
+                    }
                 }
                 rank = Integer.toString(record.getRankNumber());
             }
@@ -391,9 +396,9 @@ public class ResultsFile {
     private FinalizeData GenDefaultFinalizeData()
     {
         finalizeData = new FinalizeData();
-        finalizeData.setGoldRank(4);
-        finalizeData.setSilverRank(8);
-        finalizeData.setBronzeRank(12);
+        finalizeData.setGoldRank(1);
+        finalizeData.setSilverRank(3);
+        finalizeData.setBronzeRank(6);
         finalizeData.setCertified(false);
         finalizeData.setComment("Preliminary Results - Contest not Finalized");
         return(finalizeData);
