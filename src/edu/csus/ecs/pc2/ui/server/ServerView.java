@@ -58,6 +58,7 @@ import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPane;
+import edu.csus.ecs.pc2.ui.SubmitSampleRunsPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import java.awt.Dimension;
 
@@ -525,6 +526,9 @@ public class ServerView extends JFrame implements UIPlugin {
 
         if (Utilities.isDebugMode()) {
             try {
+                SubmitSampleRunsPane submitSampleRunsPane = new SubmitSampleRunsPane();
+                addUIPlugin(getMainTabbedPane(), "Submit Samples", submitSampleRunsPane);
+
                 PacketMonitorPane packetMonitorPane = new PacketMonitorPane();
                 addUIPlugin(getMainTabbedPane(), "Packets", packetMonitorPane);
                 

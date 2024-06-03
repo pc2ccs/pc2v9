@@ -5,6 +5,14 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Rectangle;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -24,6 +32,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.Icon;
+import javax.swing.JLabel;
+import javax.swing.border.EmptyBorder;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.Constants;
@@ -31,6 +42,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+
 
 /**
  * Methods to center frame, change cursor, etc. <br>
@@ -557,5 +569,87 @@ public final class FrameUtilities {
                 JOptionPane.showMessageDialog(component, message, title, JOptionPane.ERROR_MESSAGE);
             }
         });
+    }
+    private static Image getScaledImage(Image srcImg, int w, int h) {
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+
+        return resizedImg;
+    }
+
+    /**
+     * create a label with question mark and on click shows a message dialog.
+     * 
+     * @param messageTitle dialog title
+     * @param messageLines dialog message lines
+     * @return @return a What's this? label.
+     */
+    public static JLabel getWhatsThisLabel(String messageTitle, String[] messageLines) {
+        return getToolTipLabel("<What's This?>", "What's This? (click for additional information)", messageTitle,
+                String.join("\n", messageLines));
+    }
+
+    /**
+     * create a label with question mark and on click shows a message dialog.
+     * 
+     * @param messageTitle dialog title
+     * @param message      dialog message
+     * @return a What's this JLabel
+     */
+    // TODO REFACTOR use a getWhatsThisLabel where other What's up labels, search for getIcon("OptionPane.questionIcon")
+    public static JLabel getWhatsThisLabel(String messageTitle, String message) {
+        return getToolTipLabel("<What's This?>", "What's This? (click for additional information)", messageTitle,
+                message);
+    }
+
+    /**
+     * create a label with question mark and on click shows a message dialog.
+     * 
+     * @param buttonName
+     * @param toolTip
+     * @param messageTitle
+     * @param messageLines
+     */
+    public static JLabel getToolTipLabel(String buttonName, String toolTip, String messageTitle,
+            String[] messageLines) {
+        return getToolTipLabel(buttonName, toolTip, messageTitle, String.join("\n", messageLines));
+    }
+
+    /**
+     * create a label with question mark and on click shows a message dialog.
+     * 
+     * @param buttonName   name for button
+     * @param toolTip      tooltip for button
+     * @param messageTitle
+     * @param message
+     */
+    public static JLabel getToolTipLabel(String buttonName, String toolTip, String messageTitle, String message) {
+
+        JLabel button = new JLabel(buttonName);
+
+        Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+        if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+            // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+
+            button.setForeground(Color.blue);
+        } else {
+            Image image = ((ImageIcon) questionIcon).getImage();
+            button = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+        }
+
+        button.setToolTipText(toolTip);
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+                JOptionPane.showMessageDialog(null, message, messageTitle, JOptionPane.INFORMATION_MESSAGE, null);
+            }
+        });
+        button.setBorder(new EmptyBorder(0, 15, 0, 0));
+        return button;
     }
 }
