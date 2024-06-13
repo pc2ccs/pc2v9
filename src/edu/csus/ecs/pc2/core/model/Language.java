@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.ArrayList;
+
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 
@@ -27,10 +29,15 @@ public class Language implements IElementObject {
      *       ICPC contests.  JB 03/20/2024
      */
     public static final String CLICS_LANGID_JAVA = "java";
+    private static final String [] DEFAULT_EXT_JAVA = { "java" };
     public static final String CLICS_LANGID_KOTLIN = "kotlin";
+    private static final String [] DEFAULT_EXT_KOTLIN = { "kt" };
     public static final String CLICS_LANGID_PYTHON3 = "python3";
+    private static final String [] DEFAULT_EXT_PYTHON3 = { "py" };
     public static final String CLICS_LANGID_C = "c";
+    private static final String [] DEFAULT_EXT_C = { "c" };
     public static final String CLICS_LANGID_CPP = "cpp";
+    private static final String [] DEFAULT_EXT_CPP = { "cc", "cpp", "cxx", "c++" };
 
     /**
      * Title for the Language.
@@ -80,6 +87,8 @@ public class Language implements IElementObject {
     private boolean interpreted = false;
 
     private String id = "";
+
+    private ArrayList<String> extensions = new ArrayList<String>();
 
     public Language(String displayName) {
         super();
@@ -274,9 +283,47 @@ public class Language implements IElementObject {
 
     public void setID(String newId) {
         this.id = newId;
+        // set default extensions for the language based on its CLICS id
+        if(extensions.isEmpty()) {
+            String [] ext = null;
+            if(newId.equals(CLICS_LANGID_C)) {
+                ext = DEFAULT_EXT_C;
+            } else if(newId.equals(CLICS_LANGID_CPP)) {
+                ext = DEFAULT_EXT_CPP;
+            } else if(newId.equals(CLICS_LANGID_PYTHON3)) {
+                ext = DEFAULT_EXT_PYTHON3;
+            } else if(newId.equals(CLICS_LANGID_JAVA)) {
+                ext = DEFAULT_EXT_JAVA;
+            } else if(newId.equals(CLICS_LANGID_KOTLIN)) {
+                ext = DEFAULT_EXT_KOTLIN;
+            }
+            if(ext != null) {
+                copyExtensions(ext);
+            }
+        }
     }
 
     public String getID() {
         return id;
+    }
+
+    public void setExtensions(ArrayList<String> exts) {
+        extensions.clear();
+        extensions.addAll(exts);
+    }
+
+    public ArrayList<String> getExtensions() {
+        return(extensions);
+    }
+
+    /**
+     * Utility method to convert between a string array and ArrayList<String>
+     *
+     * @param exts array of strings to convert
+     */
+    private void copyExtensions(String [] exts) {
+        for(String ext : exts) {
+            extensions.add(ext);
+        }
     }
 }

@@ -2018,11 +2018,15 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                         language.setUsingJudgeProgramExecuteCommandLine(false);
                     }
 
-                    String clicsLanguageId = fetchValue(map, "clics-id");
+                    String clicsLanguageId = fetchValue(map, CLICS_LANG_ID);
                     if (clicsLanguageId != null){
                         language.setID(clicsLanguageId);
                     }
 
+                    Object exts = fetchObjectValue(map, LANG_EXTENSIONS);
+                    if(exts != null && exts instanceof ArrayList<?>) {
+                        language.setExtensions((ArrayList<String>)exts);
+                    }
                     // SOMEDAY handle interpreted languages, seems it should be in the export
 
                     if (valid(language, name)) {

@@ -1,8 +1,9 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -11,53 +12,71 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
+import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ScrollPaneConstants;
+import javax.swing.RowSorter;
+import javax.swing.RowSorter.SortKey;
+import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableRowSorter;
 
-import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.core.ClipboardUtilities;
 import edu.csus.ecs.pc2.core.FileUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.StringToNumberComparator;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.list.ListUtilities;
+import edu.csus.ecs.pc2.list.SubmissionSample;
 import edu.csus.ecs.pc2.list.SubmissionSampleLocation;
 import edu.csus.ecs.pc2.list.SubmissionSolutionList;
+import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 import edu.csus.ecs.pc2.ui.team.QuickSubmitter;
 
 /**
  * A UI that to submit files found in a CDP.
- * 
- * 
+ *
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class SubmitSampleRunsPane extends JPanePlugin {
+
+    private static final int VERT_PAD = 2;
+    private static final int HORZ_PAD = 20;
+    private static final int SUBMISSION_WAIT_TIMEOUT_MS = 10000;
 
 	/**
 	 * ClientSettings key for CDP Path
@@ -70,78 +89,51 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
 	private JLabel messageLabel;
 
-	private JCheckBox checkBoxSubmitYesSamples;
-
-	private JCheckBox checkBoxSubmitFailingSamples;
-
 	private QuickSubmitter submitter = new QuickSubmitter();
 
-	private JTextArea textArea;
-
-	private SimpleDateFormat hhMMSSformatter = new SimpleDateFormat("hh:mm:ss");
-
-	private int linenumber = 0;
-	/**
-	 * @wbp.nonvisual location=162,159
-	 */
-	private final ButtonGroup judgingTypesButtonGroup = new ButtonGroup();
-	
-	private final ButtonGroup problemsButtonGroup = new ButtonGroup();
-    
-	private final ButtonGroup languagesButtonGroup = new ButtonGroup();
-    
-	
 	/**
 	 * List of selected solutions names and dirs.
 	 */
 	private SubmissionSolutionList submissionSolutionList = null;
-	
-	/**
-	 * List of selected Problems.
-	 * 
-	 */
-	private List<Problem> selectedProblemList = null;
-	
-    private List<Language> selectedLanguageList = null;
-    
-	private int[] selectedJudgingTypeIndexes;
-	
-	private int[] selectedProblemsIndexes;
-	
-	private int[] selectedLanguagesIndexes;
-	
-	private JLabel selectedNosLabel = new JLabel("None selected");
-	
-	private JRadioButton submitAllJudgingTypesRadioButton = new JRadioButton("Submit All");
-	
-	private JRadioButton submitSelectedJudgingTypeRadioButton = new JRadioButton("Submit Selected");
-	
-    private JCheckBox checkBoxProblems = null;
 
-    private JRadioButton selecteAllProblemsRadioButton = null;
-    private JRadioButton submitAllProblemsRadioButton;
+	private JPanel centerPane = null;
+    private JButton filterButton = null;
 
-    private JRadioButton submitSelectedProblems = null;
-    private JRadioButton submitSelectedProblemsRadioButton;
+    private JScrollPane scrollPane = null;
+    private JTableCustomized runTable = null;
+    private DefaultTableModel runTableModel = null;
 
-    private JLabel selectedProblemsLabel = null;
+    private JPanel messagePanel = null;
+    private JLabel rowCountLabel = null;
 
-    private JButton selectProblemsButton = null;
+    /**
+     * User filter
+     */
+    private Filter filter = new Filter();
 
-    private JCheckBox checkBoxLanguage = null;
+    private EditFilterFrame editFilterFrame = null;
 
-    private JRadioButton selecteAllLanguages = null;
-    private JRadioButton submitAllLanguagesRadioButton;
-
-    private JRadioButton submitSelectedLanguages = null;
-    private JRadioButton submitSelectedLanguagesRadioButton;
-
-    private JLabel selectedLanguagesLabel = null;
-
-    private JButton selectLanguageButton = null;
+    private String filterFrameTitle = "Judges' Submissions filter";
 
 
     private Log log;
+
+    private List<File> submissionFileList = null;
+    private int currentSubmission = -1;
+    private List<SubmissionSample> submissionList = null;
+
+    private Timer submissionWaitTimer = null;
+    private TimerTask submissionTimerTask = null;
+
+    // Lightish green for match
+    private Color matchColorSuccess = new Color(128, 255, 128);
+    // Lightish red for hard non-match
+    private Color matchColorFailure = new Color(255, 128, 128);
+    // Lightish yellow for take a look/maybe's/indeterminates
+    private Color matchColorMaybe = new Color(255, 255, 128);
+    // Lightish cyan for pending
+    private Color matchColorPending = new Color(128, 255, 255);
+
 
     // TODO 232 remove debug22Flag
     private boolean debug22Flag = false;
@@ -150,34 +142,64 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
 	public SubmitSampleRunsPane() {
 		super();
-		setLayout(new BorderLayout(0, 0));
+		setLayout(new BorderLayout());
 
-		JPanel centerPane = new JPanel();
-		centerPane.setLayout(new BorderLayout());
-		add(centerPane, BorderLayout.CENTER);
+        add(getMessagePanel(), BorderLayout.NORTH);
+        add(getCenterPanel(), BorderLayout.CENTER);
+        add(getBottomPanel(), BorderLayout.SOUTH);
 
-		JSplitPane splitPane = new JSplitPane();
-		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		centerPane.add(splitPane, BorderLayout.CENTER);
+	}
 
-		JPanel controlsPane = new JPanel();
-		controlsPane.setPreferredSize(new Dimension(400, 400));
+    /**
+     * This method initializes messagePanel
+     *
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMessagePanel() {
+        if (messagePanel == null) {
+            rowCountLabel = new JLabel();
+            rowCountLabel.setText("### of ###");
+            rowCountLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+            rowCountLabel.setPreferredSize(new java.awt.Dimension(100,16));
 
-		controlsPane.setLayout(null);
+            messageLabel = new JLabel("message label");
+            messageLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+            messageLabel.setForeground(Color.RED);
+            messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+//            messageLabel.setPreferredSize(new Dimension(400, 32));
 
-		JLabel cdpConfigDirLabel = new JLabel("CDP config dir");
-		cdpConfigDirLabel.setToolTipText("CDP Location for sample source files");
-		cdpConfigDirLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		cdpConfigDirLabel.setBounds(10, 60, 86, 14);
-		controlsPane.add(cdpConfigDirLabel);
+            messagePanel = new JPanel();
+            messagePanel.setLayout(new BorderLayout());
+            messagePanel.setPreferredSize(new java.awt.Dimension(30, 30));
+            messagePanel.add(messageLabel, java.awt.BorderLayout.CENTER);
+            messagePanel.add(rowCountLabel, java.awt.BorderLayout.EAST);
+        }
+        return messagePanel;
+    }
 
-		cdpTextField = new JTextField();
-		cdpTextField.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		cdpTextField.setBounds(113, 54, 418, 27);
-		controlsPane.add(cdpTextField);
-		cdpTextField.setColumns(10);
-		
+    private JPanel getCenterPanel() {
+        JPanel centerPane = new JPanel();
+        centerPane.setLayout(new BorderLayout());
+
+        JPanel controlsPane = new JPanel();
+
+        controlsPane.setLayout(new FlowLayout());
+
+        JLabel cdpConfigDirLabel = new JLabel("CDP config folder: ");
+        cdpConfigDirLabel.setToolTipText("CDP Location for judges' samples source files");
+        cdpConfigDirLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        controlsPane.add(cdpConfigDirLabel);
+
+        cdpTextField = new JTextField();
+        cdpTextField.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        Dimension cdpDim = cdpTextField.getPreferredSize();
+        cdpDim.setSize(cdpDim.getWidth(), 27);
+        cdpTextField.setPreferredSize(cdpDim);
+        controlsPane.add(cdpTextField);
+        cdpTextField.setColumns(40);
+
         cdpTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
             public void keyPressed(java.awt.event.KeyEvent e) {
                 if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
                     if (new File(cdpTextField.getText()).isDirectory()) {
@@ -188,267 +210,61 @@ public class SubmitSampleRunsPane extends JPanePlugin {
             }
         });
 
-		messageLabel = new JLabel("message label");
-		messageLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		messageLabel.setForeground(Color.RED);
-		messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		messageLabel.setBounds(10, 11, 691, 32);
-		controlsPane.add(messageLabel);
 
-		checkBoxSubmitYesSamples = new JCheckBox("Submit Yes Samples");
-		checkBoxSubmitYesSamples.setSelected(true);
-		checkBoxSubmitYesSamples.setToolTipText("Only submit AC sample source");
-		checkBoxSubmitYesSamples.setBounds(33, 102, 265, 23);
-		controlsPane.add(checkBoxSubmitYesSamples);
-
-		JButton selectCDPButton = new JButton("...");
-		selectCDPButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				selectNewCDP();
-			}
-		});
-		selectCDPButton.setToolTipText("Select a different CDP");
-		selectCDPButton.setBounds(541, 56, 39, 23);
-		controlsPane.add(selectCDPButton);
-
-		JPanel LogPanel = new JPanel();
-		LogPanel.setSize(new Dimension(400, 400));
-		LogPanel.setMinimumSize(new Dimension(400, 400));
-
-		LogPanel.setLayout(new BorderLayout(0, 0));
-
-		textArea = new JTextArea();
-		textArea.setFont(new Font("Courier New", Font.PLAIN, 13));
-		textArea.setSize(new Dimension(360, 360));
-		JScrollPane scrollPane = new JScrollPane(textArea);
-		LogPanel.add(scrollPane, BorderLayout.CENTER);
-
-		JPanel panel = new JPanel();
-		panel.setPreferredSize(new Dimension(50, 50));
-		FlowLayout flowLayout_1 = (FlowLayout) panel.getLayout();
-		flowLayout_1.setHgap(45);
-		LogPanel.add(panel, BorderLayout.SOUTH);
-
-		JButton clearTextAButton = new JButton("Clear");
-		clearTextAButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				clearTextArea();
-			}
-
-		});
-		panel.add(clearTextAButton);
-
-		JButton copyButton = new JButton("Copy");
-		copyButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ClipboardUtilities.put(textArea.getText());
-			}
-		});
-		copyButton.setToolTipText("Copy text into clipboard");
-		panel.add(copyButton);
-
-		JPanel bottomPane = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) bottomPane.getLayout();
-		flowLayout.setHgap(125);
-		add(bottomPane, BorderLayout.SOUTH);
-
-		JButton submitRunButton = new JButton("Submit");
-		submitRunButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			    submitSelectedJudgesSolutions();
-			}
-		});
-
-		JButton resetButton = new JButton("Reset");
-		resetButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				resetFields(true);
-			}
-		});
-		resetButton.setToolTipText("Reset back to default settings");
-		bottomPane.add(resetButton);
-		submitRunButton.setToolTipText("Submit selected sample runs");
-		bottomPane.add(submitRunButton);
-
-//		centerPane2.add(controlsPane, BorderLayout.CENTER);
-		JScrollPane leftSide = new JScrollPane(controlsPane);
-		
-		JPanel submitNoSamplesPane = new JPanel();
-		submitNoSamplesPane.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		FlowLayout fl_submitNoSamplesPane = (FlowLayout) submitNoSamplesPane.getLayout();
-		fl_submitNoSamplesPane.setAlignment(FlowLayout.LEFT);
-		submitNoSamplesPane.setBounds(33, 131, 650, 32);
-		controlsPane.add(submitNoSamplesPane);
-
-		checkBoxSubmitFailingSamples = new JCheckBox("Submit Failing Samples");
-		checkBoxSubmitFailingSamples.setVerticalAlignment(SwingConstants.TOP);
-		submitNoSamplesPane.add(checkBoxSubmitFailingSamples);
-		checkBoxSubmitFailingSamples.setSelected(true);
-		checkBoxSubmitFailingSamples.setToolTipText("Submt all non-AC (Yes) submissions");
-
-		judgingTypesButtonGroup.add(submitAllJudgingTypesRadioButton);
-		submitAllJudgingTypesRadioButton.setSelected(true);
-		judgingTypesButtonGroup.add(submitSelectedJudgingTypeRadioButton);
-		
-		submitNoSamplesPane.add(submitAllJudgingTypesRadioButton);
-		submitNoSamplesPane.add(submitSelectedJudgingTypeRadioButton);
-		
-		leftSide.setPreferredSize(new Dimension(230, 230));
-		leftSide.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-		leftSide.setWheelScrollingEnabled(true);
-		splitPane.setLeftComponent(leftSide);
-
-		// centerPane2.add(LogPanel, BorderLayout.SOUTH);
-		JScrollPane logScrollPanel = new JScrollPane(LogPanel);
-		logScrollPanel.setPreferredSize(new Dimension(60, 60));
-		logScrollPanel.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-		logScrollPanel.setWheelScrollingEnabled(true);
-		splitPane.setRightComponent(logScrollPanel);
-		
-		
-		selectedNosLabel.setToolTipText("None selected");
-		selectedNosLabel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-			    showJudgementTypeList();
-			}
-		});
-		submitNoSamplesPane.add(selectedNosLabel);
-		JButton selectJudementTypesButton = new JButton("Select");
-		selectJudementTypesButton.setToolTipText("Select Judgement Types");
-		selectJudementTypesButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			    showJudgementTypeList();
-			}
-		});
-		
-		submitNoSamplesPane.add(selectJudementTypesButton);
-		
-		JLabel lblNewLabel_2 = getWhatsThisOne();
-		submitNoSamplesPane.add(lblNewLabel_2);
-		
-		JPanel submitNoSamplesPane_1 = new JPanel();
-		FlowLayout flowLayout_2 = (FlowLayout) submitNoSamplesPane_1.getLayout();
-		flowLayout_2.setAlignment(FlowLayout.LEFT);
-		submitNoSamplesPane_1.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		submitNoSamplesPane_1.setBounds(33, 161, 650, 32);
-		controlsPane.add(submitNoSamplesPane_1);
-		   
-        checkBoxProblems = new JCheckBox("Problems");
-        checkBoxProblems.setVerticalAlignment(SwingConstants.TOP);
-        checkBoxProblems.setToolTipText("Select Problems");
-        checkBoxProblems.setSelected(true);
-        submitNoSamplesPane_1.add(checkBoxProblems);
-        
-        submitAllProblemsRadioButton = new JRadioButton("Submit All");
-        submitAllProblemsRadioButton.setSelected(true);
-        submitNoSamplesPane_1.add(submitAllProblemsRadioButton);
-        
-        submitSelectedProblemsRadioButton = new JRadioButton("Submit Selected");
-        submitNoSamplesPane_1.add(submitSelectedProblemsRadioButton);
-        
-        selectedProblemsLabel = new JLabel("None selected");
-        selectedProblemsLabel.setToolTipText("None selected");
-        submitNoSamplesPane_1.add(selectedProblemsLabel);
-        
-        selectProblemsButton = new JButton("Select");
-        selectProblemsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showProblemList();
-            }
-        });
-        selectProblemsButton.setToolTipText("Select Problems");
-        submitNoSamplesPane_1.add(selectProblemsButton);
-        
-        JPanel submitLanguages = new JPanel();
-        FlowLayout fl_submitLanguages = (FlowLayout) submitLanguages.getLayout();
-        fl_submitLanguages.setAlignment(FlowLayout.LEFT);
-        submitLanguages.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        submitLanguages.setBounds(33, 191, 650, 32);
-        controlsPane.add(submitLanguages);
-        
-        checkBoxLanguage = new JCheckBox("Languages");
-        checkBoxLanguage.setVerticalAlignment(SwingConstants.TOP);
-        checkBoxLanguage.setToolTipText("Select Languages");
-        checkBoxLanguage.setSelected(true);
-        submitLanguages.add(checkBoxLanguage);
-        
-        submitAllLanguagesRadioButton = new JRadioButton("Submit All Languages");
-        submitAllLanguagesRadioButton.setSelected(true);
-        submitLanguages.add(submitAllLanguagesRadioButton);
-        
-        submitSelectedLanguagesRadioButton = new JRadioButton("Submit Selected");
-        submitLanguages.add(submitSelectedLanguagesRadioButton);
-        
-        selectedLanguagesLabel = new JLabel("None selected Lang?");
-        selectedLanguagesLabel.setToolTipText("None selected");
-        submitLanguages.add(selectedLanguagesLabel);
-        
-        selectLanguageButton = new JButton("Select");
-        selectLanguageButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showLanguageList();
-            }
-        });
-        selectLanguageButton.setToolTipText("Select Problems");
-        submitLanguages.add(selectLanguageButton);
-        
-
-        languagesButtonGroup.add(submitAllLanguagesRadioButton);
-        languagesButtonGroup.add(submitSelectedLanguagesRadioButton);
-        
-        problemsButtonGroup.add(submitAllProblemsRadioButton);
-        problemsButtonGroup.add(submitSelectedProblemsRadioButton);
-        
-		VersionInfo info = new VersionInfo();
-		String verstring = info.getBuildNumber() + " x " + info.getPC2Version();
-		addLineToTextArea(verstring);
-		
-		
-		
-	}
-
-	protected void showLanguageList() {
-
-	    // TODO 232 show language selection
-	    
-        Language[] Languages = getContest().getLanguages();
-        
-        if (Languages.length == 0) {
-            showMessage("No Languagess defined in contest");
-            return;
-        }
-    
-        JListFrame selectLanguagessFrame = new JListFrame("Select Languages ", Languages, selectedLanguagesIndexes, new ISelectedListsSetter() {
-            
+        JButton selectCDPButton = new JButton("...");
+        selectCDPButton.addActionListener(new ActionListener() {
             @Override
-            public void setSelectedValuesList(List<Object> selectedValuesList, int[] selectedIndices) {
-                selectedLanguagesIndexes = selectedIndices;
-                updateLanguagesLabel(selectedValuesList);
+            public void actionPerformed(ActionEvent e) {
+                selectNewCDP();
             }
         });
-        selectLanguagessFrame.setVisible(true);
+        selectCDPButton.setToolTipText("Select a different CDP");
+        selectCDPButton.setPreferredSize(new Dimension(56, 27));
+//      selectCDPButton.setBounds(541, 56, 39, 23);
+        controlsPane.add(selectCDPButton);
+
+        JButton fb = getFilterButton();
+        controlsPane.add(fb);
+
+
+        centerPane.add(controlsPane, BorderLayout.NORTH);
+
+        centerPane.add(getScrollPane(), BorderLayout.SOUTH);;
+
+        return(centerPane);
     }
- 
 
-    protected void showProblemList() {
-        
-        Problem[] problems = getContest().getProblems();
-        
-        if (problems.length == 0) {
-            showMessage("No problems defined in contest");
-            return;
-        }
-    
-        JListFrame selectProblemsFrame = new JListFrame("Select Problems ", problems, selectedProblemsIndexes, new ISelectedListsSetter() {
-            
+    /**
+     * Builds the bottom panel (buttons)
+     *
+     * @return JPanel for the bottom area (buttons)
+     */
+    private JPanel getBottomPanel() {
+        JPanel bottomPane = new JPanel();
+        FlowLayout flowLayout = (FlowLayout) bottomPane.getLayout();
+        flowLayout.setHgap(125);
+
+        JButton submitRunButton = new JButton("Submit");
+        submitRunButton.addActionListener(new ActionListener() {
             @Override
-            public void setSelectedValuesList(List<Object> selectedValuesList, int[] selectedIndices) {
-                selectedProblemsIndexes = selectedIndices;
-                updateProblemsLabel(selectedValuesList);
+            public void actionPerformed(ActionEvent e) {
+                submitSelectedJudgesSolutions();
             }
         });
-        selectProblemsFrame.setVisible(true);
+
+        JButton resetButton = new JButton("Reset");
+        resetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                resetFields(true);
+            }
+        });
+
+        resetButton.setToolTipText("Reset back to default settings");
+        bottomPane.add(resetButton);
+        submitRunButton.setToolTipText("Submit selected sample runs");
+        bottomPane.add(submitRunButton);
+        return(bottomPane);
     }
 
     protected void updateCDPDirAndFields(String cdpConfigDir) {
@@ -458,133 +274,30 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 //            if (configFile.getAbsolutePath().endsWith(IContestLoader.CONFIG_DIRNAME)) {
 //                cdpRootDirectory = configFile.getParent();
 //            }
-	        
+
 	        cdpTextField.setText(cdpRootDirectory);
 	        updateClientCDPPath(cdpRootDirectory);
-	        updateNosLabel(null);
         } catch (Exception e) {
             log.log(Level.WARNING, "Problem updating CDP Dir", e);
         }
     }
 
-    /**
-	 * Dialog with question mark ison for info on selecting judgement types.
-	 * @return
-	 */
-	private JLabel getWhatsThisOne() {
-		
-		String[] messageLines = {
-				"Selecting judgement types", //
-				"", //
-				"Use Select button to select judgement types", //
-		};
-		
-		return FrameUtilities.getWhatsThisLabel("Selecting judgement samples", messageLines);
-	}
-	
 	/**
 	 * Repopulate submissionSolutionList.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public SubmissionSolutionList getSubmissionSolutionList() {
 		String cdpPath = cdpTextField.getText();
-		
-		SubmissionSolutionList list = new SubmissionSolutionList(new File(cdpPath));
-		Collections.reverse(list);
-		submissionSolutionList = list;
-		
+
+		submissionSolutionList = new SubmissionSolutionList(getContest(), cdpPath);
+
 		return submissionSolutionList;
 	}
 
-	protected void showJudgementTypeList() {
-		
-		if (getSubmissionSolutionList() == null || getSubmissionSolutionList().size() == 0) {
-			showMessage("No submission judgement types found in dir: "+cdpTextField.getText());
-			return;
-		}
-		
-		SubmissionSampleLocation[] listData = toArray(getSubmissionSolutionList());
-	
-		JListFrame selectNoSolutionsFrame = new JListFrame("Select No/Failed Judges solutions", listData, selectedJudgingTypeIndexes, new ISelectedListsSetter() {
-			
-			@Override
-			public void setSelectedValuesList(List<Object> selectedValuesList, int[] selectedIndices) {
-				selectedJudgingTypeIndexes = selectedIndices;
-				updateNosLabel(selectedValuesList);
-			}
-		});
-		selectNoSolutionsFrame.setVisible(true);
-	}
 
 	private SubmissionSampleLocation[] toArray(SubmissionSolutionList list) {
-		return (SubmissionSampleLocation[]) list.toArray(new SubmissionSampleLocation[list.size()]);
-	}
-	
-	/**
-	 * Update selected languages label and selected language list
-	 * @param valuesList
-	 */
-	protected void updateLanguagesLabel(List<Object> valuesList) {
-	    if (valuesList == null || valuesList.size() == 0) {
-	        selectedLanguagesLabel.setText("None selected");
-	        selectedLanguagesLabel.setToolTipText("None selected");
-        } else {
-            selectedLanguagesLabel.setText(valuesList.size()+" selected");
-            selectedLanguagesLabel.setToolTipText(Arrays.toString(valuesList.toArray()));
-            
-            selectedLanguageList = new ArrayList<Language>();
-            valuesList.forEach((lang) -> {selectedLanguageList.add((Language)lang);});
-        }
-	}
-
-	protected void updateProblemsLabel(List<Object> valuesList) {
-	    
-	    if (valuesList == null || valuesList.size() == 0) {
-            selectedProblemsLabel.setText("None selected");
-            selectedProblemsLabel.setToolTipText("None selected");
-        } else {
-            
-            selectedProblemsLabel.setText(valuesList.size()+" selected");
-            selectedProblemsLabel.setToolTipText(Arrays.toString(valuesList.toArray()));
-            
-            selectedProblemList = new ArrayList<Problem>();
-            valuesList.forEach((prob) -> {selectedProblemList.add((Problem)prob);});
-        }
-	}
-
-	protected void updateNosLabel(List<Object> valuesList) {
-
-        if (valuesList == null || valuesList.size() == 0) {
-            selectedNosLabel.setText("None selected");
-            selectedNosLabel.setToolTipText("None selected");
-        } else {
-
-            selectedNosLabel.setText(valuesList.size() + " selected");
-            selectedNosLabel.setToolTipText(Arrays.toString(valuesList.toArray()));
-            submissionSolutionList = new SubmissionSolutionList();
-
-            // update/load selected items into submissionSolutionList
-            valuesList.forEach((subSL) -> {
-                submissionSolutionList.add((SubmissionSampleLocation) subSL);
-            });
-
-        }
-    }
-
-	protected void clearTextArea() {
-		textArea.selectAll();
-		textArea.replaceSelection("");
-		linenumber = 0;
-	}
-
-	void addLineToTextArea(String s) {
-
-		linenumber++;
-		String fmtLineNumber = String.format("%4d", linenumber);
-
-		textArea.insert(fmtLineNumber + " " + hhMMSSformatter.format(new Date()) + " " + s + "\n", 0);
-//		textArea.append(s);
+		return list.toArray(new SubmissionSampleLocation[list.size()]);
 	}
 
 	protected void selectNewCDP() {
@@ -607,7 +320,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
 	/**
 	 * Select yaml file/entry.
-	 * 
+	 *
 	 * @param dialogTitle
 	 * @return
 	 */
@@ -647,11 +360,6 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 		getController().updateClientSettings(settings);
 	}
 
-	private void xlog(String string) {
-		System.out.println(string);
-		addLineToTextArea(string);
-	}
-
 	protected String getClientCDPPath() {
 
 		ClientSettings settings = getContest().getClientSettings();
@@ -667,31 +375,15 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
 	/**
 	 * Reset fields back to default values
-	 * 
+	 *
 	 * @param usingGui
 	 */
 	protected void resetFields(boolean isUsingGui) {
-	    
-	    
-	    selectedJudgingTypeIndexes = new int[0];
-	    selectedProblemsIndexes = new int[0];
-	    selectedLanguagesIndexes = new int[0];
-
-		checkBoxSubmitYesSamples.setSelected(true);
-		checkBoxSubmitFailingSamples.setSelected(true);
-		
-		checkBoxLanguage.setSelected(true);
-        checkBoxProblems.setSelected(true);
-        
-        submitAllJudgingTypesRadioButton.setSelected(true);
-        submitAllProblemsRadioButton.setSelected(true);
-        submitAllLanguagesRadioButton.setSelected(true);
-
 		String cdpPath = getContest().getContestInformation().getJudgeCDPBasePath();
 
 		String clientPath = getClientCDPPath();
 
-		if (clientPath != null && isUsingGui) {
+		if (clientPath != null && !clientPath.equals(cdpPath)) {
 			int result = FrameUtilities.yesNoCancelDialog(this, "Overwrite locally saved CDP path with this (default) " + cdpPath,
 					"Replace CDP Path?");
 			if (result == JOptionPane.NO_OPTION) {
@@ -699,9 +391,15 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 			}
 		}
 
+		submissionList = null;
+		stopSubmissionTimer();
+		clearSubmissionFiles();
+		clearAllRuns();
+
+
 		cdpTextField.setText(cdpPath);
 
-//		getController().updateClientSettings(settings);;
+//		getController().updateClientSettings(settings);
 
 	}
 
@@ -711,98 +409,132 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 	protected void submitSelectedJudgesSolutions() {
 	    showMessage("");
 
+	    if(submissionFileList != null) {
+	        showMessage("Please wait until the previous files have finished being submitted (" + (submissionList.size() - currentSubmission) + " remain)");
+	        return;
+	    }
 	    String warningMessage = verifyCDP (cdpTextField.getText());
 	    if (warningMessage != null) {
 	        // let the user know that the CDP selected may not work
-	        FrameUtilities.showMessage(this, "Trying to use an invalid CDP?", warningMessage);
+	        FrameUtilities.showMessage(this, "Maybe the CDP is invalid?", warningMessage);
 	    }
 
-        List<File> allFiles = ListUtilities.getAllJudgeSampleSubmissionFilenamesFromCDP(getContest(), cdpTextField.getText());
+        List<File> files = ListUtilities.getAllJudgeSampleSubmissionFilenamesFromCDP(getContest(), cdpTextField.getText());
 
-        if (allFiles.size() == 0) {
-            FrameUtilities.showMessage(this, "No Runs", "No Runs found under " + cdpTextField.getText());
+        if (files.size() == 0) {
+            FrameUtilities.showMessage(this, "No Submissions", "No submissions found under " + cdpTextField.getText());
             return;
         }
 
-        boolean submitYesSamples = checkBoxSubmitYesSamples.isSelected();
-        boolean submitNoSamples = checkBoxSubmitFailingSamples.isSelected();
+        // The actual filtering is done somewhat differently for potential submissions.  We can still use
+        // the Filter object (filter) since it has all the criteria we need.
+        if(filter.isFilterOn()) {
+            // We use the custom filtering list for judge submission types, eg. accepted, wrong_answer, etc
+            if(filter.isFilteringCustom()) {
+                files = ListUtilities.filterByJudgingTypes(files, filter.getCustomList());
+            }
 
-        if (!submitYesSamples && !submitNoSamples) {
-            FrameUtilities.showMessage(this, "No Runs", "Select either Yes or Failed runs");
-            return;
-        }
+            if(filter.isFilteringProblems()) {
+                ElementId[] probElems = filter.getProblemIdList();
+                ArrayList<Problem> probList = new ArrayList<Problem>();
 
-        List<File> files = new ArrayList<File>();
-
-        files = QuickSubmitter.filterRuns(allFiles, submitYesSamples, submitNoSamples);
-
-        if (submitNoSamples && submitSelectedJudgingTypeRadioButton.isSelected()) {
-            if (submitSelectedJudgingTypeRadioButton.isSelected()) {
-                // if they selected the radio button for selected, they should select at least
-                if (selectedJudgingTypeIndexes == null || selectedJudgingTypeIndexes.length == 0) {
-                    FrameUtilities.showMessage(this, "No Judging Types selected", "No Judging Types selected, select at least one");
-                    return;
+                for(ElementId ele : probElems) {
+                    Problem prob = getContest().getProblem(ele);
+                    if(prob != null) {
+                        probList.add(prob);
+                    }
                 }
+                files = ListUtilities.filterByProblems(files, probList);
+            }
 
-                // fitler by judging type (accepted, wrong_answer, etc.)
-                files = ListUtilities.filterByJudgingTypes(files, submissionSolutionList);
+            if(filter.isFilteringLanguages()) {
+                ElementId[] langElems = filter.getLanguageIdList();
+                ArrayList<Language> langList = new ArrayList<Language>();
+
+                for(ElementId ele : langElems) {
+                    Language lang = getContest().getLanguage(ele);
+                    if(lang != null) {
+                        langList.add(lang);
+                    }
+                }
+                files = ListUtilities.filterByLanguages(files, getContest(), langList);
             }
         }
-	    
-        if (checkBoxProblems.isSelected() ) {
-            if (submitSelectedProblemsRadioButton.isSelected()) {
-                // submissions may be filtered by problem
-
-                if (selectedProblemsIndexes == null || selectedProblemsIndexes.length == 0) {
-                    FrameUtilities.showMessage(this, "No Problem selected", "No Problems selected, select at least one");
-                    return;
-                }
-
-                // filter list by problem name
-                files = ListUtilities.filterByProblems (files, selectedProblemList);
-
-            }
-        }
-	    
-	    if (checkBoxLanguage.isSelected()) {
-	        // submissions may be filtered by language
-	        
-	        if (submitSelectedLanguagesRadioButton.isSelected()) {
-	            if (selectedLanguagesIndexes == null || selectedLanguagesIndexes.length == 0) {
-	                FrameUtilities.showMessage(this, "No Language selected", "No Languages selected, select at least one");
-	                return;
-
-	            }
-
-	            files = ListUtilities.filterByLanguages(files, getContest(), selectedLanguageList);
-	        }
-	    }
-	    
-
 	    int count = 0;
-	    for (File file : files) {
-	        count++;
-	        xlog("Will submit #" + count + " file =" + file.getAbsolutePath());
-	    }
 
+	    if(Utilities.isDebugMode()) {
+    	    for (File file : files) {
+    	        count++;
+    	        System.out.println("Will submit #" + count + " file = " + file.getAbsolutePath());
+    	    }
+	    } else {
+	        count = files.size();
+	    }
 	    if (count == 0) {
-	        showMessage("There are no CDP samples source files  under " + cdpTextField.getText());
+	        showMessage("There are no matching CDP sample source files under " + cdpTextField.getText());
 	        return;
 	    }
 
-	    int result = FrameUtilities.yesNoCancelDialog(this, "Submit " + files.size() + " sample submissions?",
-	            "Submit CDP submissions");
-
-	    if (result == JOptionPane.YES_OPTION) {
-	        /**
-	         * This will submit each file found
-	         */
-	        submitter.sendSubmissions(files);
-
-	        showMessage("Submitted " + files.size() + " runs.");
+	    // check with the user to be sure they want to submit everything.
+        int result = FrameUtilities.yesNoCancelDialog(this, "Submit " + count + " judge sample submissions?",
+              "Submit CDP submissions");
+	    if (result != JOptionPane.YES_OPTION) {
+	        return;
 	    }
+        showMessage("Submitting " + count + " runs.");
 
+        submissionFileList = files;
+        // create submissionList to add SubmissionSample's to as we submit them.
+        submissionList = new ArrayList<SubmissionSample>();
+        currentSubmission = 0;
 
+        submitNextSubmission();
+	}
+
+	private void submitNextSubmission() {
+	    try {
+	        File file = submissionFileList.get(currentSubmission);
+
+	        submissionTimerTask = new TimerTask() {
+	            @Override
+	            public void run() {
+	                // Whoops! This means the submission never came in
+	                log.severe("No submission was received from the server for #" + currentSubmission + "; cancelling remaining submissions");
+	                showMessage("Submission #" + currentSubmission + " not received from server");
+	                clearSubmissionFiles();
+                    stopSubmissionTimer();
+	            }
+	        };
+
+	        submissionWaitTimer = new Timer("Submission Wait Timer " + currentSubmission);
+	        submissionWaitTimer.schedule(submissionTimerTask, SUBMISSION_WAIT_TIMEOUT_MS);
+
+            SubmissionSample sub = submitter.sendSubmission(file);
+            if(sub != null) {
+                submissionList.add(sub);
+                updateRunRow(sub, getContest().getClientId(), true);
+            }
+            if(Utilities.isDebugMode()) {
+                System.out.println("Submitted #" + currentSubmission + " for problem " + sub.toString());
+    	    }
+	    } catch(Exception e) {
+	        log.log(Level.WARNING, "Error submitting submission #" + currentSubmission, e);
+	        clearSubmissionFiles();
+	        stopSubmissionTimer();
+	    }
+	}
+
+	private void clearSubmissionFiles() {
+	    submissionFileList = null;
+	    currentSubmission = -1;
+	}
+
+	private void stopSubmissionTimer() {
+	    if(submissionWaitTimer != null) {
+	        submissionWaitTimer.cancel();
+	        submissionWaitTimer = null;
+	        submissionTimerTask = null;
+	    }
 	}
 
 	/**
@@ -811,13 +543,36 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 	 * @return null if no issues, else a warning message about a diffence between model and cdpDir
 	 */
 	private String verifyCDP(String cdpDir) {
-	    // TODO 232 compare problems in CDP with problems in model 
-		return null;
+
+        Problem[] problems = getContest().getProblems();
+        List<File> files = new ArrayList<>();
+        String missingProbs = "";
+        String warningMsg = null;
+        String configDir = cdpDir + File.separator + IContestLoader.CONFIG_DIRNAME;
+
+        if (new File(configDir).isDirectory()) {
+            cdpDir = configDir;
+        }
+
+        for (Problem problem : problems) {
+
+            // config\sumit\submissions\accepted\ISumit.java
+            if(!(new File(cdpDir + File.separator + problem.getShortName()).isDirectory())) {
+                if(!missingProbs.isEmpty()) {
+                    missingProbs = missingProbs + ',';
+                }
+                missingProbs = missingProbs + problem.getShortName();
+            }
+        }
+        if(!missingProbs.isEmpty()) {
+            warningMsg = "No problem folder found for: " + missingProbs;
+        }
+		return warningMsg;
 	}
 
 	/**
 	 * Returns the list of filenames that end in extension
-	 * 
+	 *
 	 * @param files
 	 * @param extension
 	 * @return
@@ -851,27 +606,629 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 			cdpPath = clientPath;
 		}
 
-		xlog("CDP dir is now at " + cdpPath);
+//		xlog("CDP dir is now at " + cdpPath);
 		cdpTextField.setText(cdpPath);
 
 		showMessage("");
 
 		submitter.setContestAndController(inContest, inController);
-		
-		
+        getEditFilterFrame().setContestAndController(inContest, inController);
+
+
 		log = inController.getLog();
+
+        getContest().addRunListener(new RunListenerImplementation());
 
 	}
 
 	public void showMessage(final String message) {
 		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				xlog(message);
+			@Override
+            public void run() {
+//				xlog(message);
 				messageLabel.setText(message);
 				messageLabel.setToolTipText(message);
 			}
 		});
 	}
+
+    /**
+     * This method initializes filterButton
+     *
+     * @return javax.swing.JButton
+     */
+    private JButton getFilterButton() {
+        if (filterButton == null) {
+            filterButton = new JButton();
+            filterButton.setText("Filter");
+            filterButton.setToolTipText("Edit Filter");
+            filterButton.setMnemonic(java.awt.event.KeyEvent.VK_F);
+            filterButton.setPreferredSize(new Dimension(80, 27));
+            filterButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showFilterRunsFrame();
+                }
+            });
+        }
+        return filterButton;
+    }
+
+    protected void showFilterRunsFrame() {
+        getEditFilterFrame().addList(ListNames.CUSTOM_LIST);
+        getEditFilterFrame().addCustomItems(getSubmissionSolutionList());
+        getEditFilterFrame().setCustomTitle("Solution Type");
+        getEditFilterFrame().addList(ListNames.LANGUAGES);
+        getEditFilterFrame().addList(ListNames.PROBLEMS);
+
+        getEditFilterFrame().setFilter(filter);
+        getEditFilterFrame().validate();
+        getEditFilterFrame().setVisible(true);
+    }
+
+    public EditFilterFrame getEditFilterFrame() {
+        if (editFilterFrame == null){
+            Runnable callback = new Runnable(){
+                @Override
+                public void run() {
+//                    reloadRunList();
+                }
+            };
+            editFilterFrame = new EditFilterFrame(filter, filterFrameTitle,  callback);
+        }
+        return editFilterFrame;
+    }
+
+    /**
+     * Set title for the Filter Frame.
+     *
+     * @param title
+     */
+    public void setFilterFrameTitle (String title){
+        filterFrameTitle = title;
+        if (editFilterFrame != null){
+            editFilterFrame.setTitle(title);
+        }
+    }
+
+    /**
+     * This method initializes scrollPane
+     *
+     * @return javax.swing.JScrollPane
+     */
+    private JScrollPane getScrollPane() {
+        if (scrollPane == null) {
+            scrollPane = new JScrollPane(getRunTable());
+            resetRunsListBoxColumns();
+        }
+        return scrollPane;
+    }
+
+    /**
+     * This method initializes the runTable
+     *
+     * @return JTableCustomized
+     */
+    private JTableCustomized getRunTable() {
+        if (runTable == null) {
+            runTable = new JTableCustomized() {
+                private static final long serialVersionUID = 1L;
+
+                // override JTable's default renderer to set the background color based on the match status
+                // of the sample folder the submission was found in vs. the judgment.
+                // Essentially stolen from ShadowCompareScoreboardPane.  Thank you JohnC.
+                @Override
+                public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                    Component c = super.prepareRenderer(renderer, row, column);
+
+                    //default to normal background
+                    c.setBackground(getBackground());
+
+                    if(runTableModel != null) {
+                        //map the specified row index number to the corresponding model row (index numbers can change due
+                        // to sorting/scrolling; model row numbers never change).
+                        // Here are the columns:
+                        // Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Source", "Judge", "Language", "ElementId" };
+
+                        int modelRow = convertRowIndexToModel(row);
+                        String submissionAcronym = submissionSolutionList.getAcronymForSubmissionDirectory((String)runTableModel.getValueAt(modelRow, 3));
+
+                        if(submissionAcronym == null) {
+                            c.setBackground(matchColorMaybe);
+                        } else {
+                            String judgment = (String)runTableModel.getValueAt(modelRow, 4);
+                            // Format is something like:  "Wrong answer:WA"
+                            int idx = judgment.lastIndexOf(":");
+                            if(idx != -1) {
+                                judgment = judgment.substring(idx+1);
+                                if(submissionAcronym.equals(judgment)) {
+                                    c.setBackground(matchColorSuccess);
+                                } else {
+                                    c.setBackground(matchColorFailure);
+                                }
+                            } else {
+                                // No judgment yet; eg "QUEUED_FOR_COMPUTER_JUDGEMENT" or other non-judged status
+                                c.setBackground(matchColorPending);
+                            }
+                        }
+                    }
+
+                    return(c);
+                }
+            };
+
+            runTable.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent me) {
+                   // If double-click see if we can select the run
+                   if (me.getClickCount() == 2) {
+                      JTable target = (JTable)me.getSource();
+                      if(target.getSelectedRow() != -1 && isAllowed(Permission.Type.JUDGE_RUN)) {
+//                          requestSelectedRun();
+                      }
+                   }
+                }
+             });
+        }
+        return runTable;
+    }
+
+    public void clearAllRuns() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                if(runTableModel != null) {
+                    // All rows are discarded - the TM will notify the Table
+                    runTableModel.setRowCount(0);
+                }
+            }
+        });
+    }
+
+    private void resetRunsListBoxColumns() {
+
+        runTable.removeAll();
+
+        Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Source", "Judge", "Language", "ElementId" };
+        Object[] columns;
+
+        columns = fullColumns;
+        runTableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                return false;
+            }
+        };
+
+        runTable.setModel(runTableModel);
+        TableColumnModel tcm = runTable.getColumnModel();
+        // Remove ElementID from display - this does not REMOVE the column, just makes it so it doesn't show
+        tcm.removeColumn(tcm.getColumn(columns.length - 1));
+
+        // Sorters
+        TableRowSorter<DefaultTableModel> trs = new TableRowSorter<DefaultTableModel>(runTableModel);
+
+        runTable.setRowSorter(trs);
+        runTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        ArrayList<SortKey> sortList = new ArrayList<SortKey>();
+
+
+        /*
+         * Column headers left justified
+         */
+        ((DefaultTableCellRenderer)runTable.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
+        runTable.setRowHeight(runTable.getRowHeight() + VERT_PAD);
+
+
+        StringToNumberComparator numericStringSorter = new StringToNumberComparator();
+
+        int idx = 0;
+
+
+//      Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Source", "Judge", "Language" };
+
+
+        // These are in column order - omitted ones are straight string compare
+        trs.setComparator(0, numericStringSorter);
+        trs.setComparator(1, numericStringSorter);
+        // These are in sort order
+        sortList.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+        sortList.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+        sortList.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
+        sortList.add(new RowSorter.SortKey(3, SortOrder.ASCENDING));
+        sortList.add(new RowSorter.SortKey(4, SortOrder.ASCENDING));
+        sortList.add(new RowSorter.SortKey(5, SortOrder.ASCENDING));
+        sortList.add(new RowSorter.SortKey(6, SortOrder.ASCENDING));
+        sortList.add(new RowSorter.SortKey(7, SortOrder.ASCENDING));
+        trs.setSortKeys(sortList);
+        resizeColumnWidth(runTable);
+    }
+
+    private void resizeColumnWidth(JTableCustomized table) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                TableColumnAdjuster tca = new TableColumnAdjuster(table, HORZ_PAD);
+                tca.adjustColumns();
+            }
+        });
+    }
+
+    protected Object[] buildRunRow(SubmissionSample sub, ClientId judgeId) {
+
+        try {
+            Run run = sub.getRun();
+
+            int cols = runTableModel.getColumnCount();
+            Object[] s = new Object[cols];
+
+            int idx = 0;
+
+//          Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Source", "Judge", "Language", ["ElementId"] };
+            if(run != null) {
+                boolean autoJudgedRun = isAutoJudgedRun(run);
+                s[idx++] = Integer.toString(run.getNumber());
+                s[idx++] = Long.toString(run.getElapsedMins());
+                s[idx++] = getProblemTitle(sub.getProblem());
+                s[idx++] = sub.getSampleType();
+                s[idx++] = getJudgementResultString(run);
+                s[idx++] = sub.getSourceFile().getName();
+                s[idx++] = getJudgesTitle(run, judgeId, autoJudgedRun);
+            } else {
+                s[idx++] = "Waiting";
+                s[idx++] = "N/A";
+                s[idx++] = getProblemTitle(sub.getProblem());
+                s[idx++] = sub.getSampleType();
+                s[idx++] = "N/A";
+                s[idx++] = sub.getSourceFile().getName();
+                s[idx++] = "N/A";
+            }
+            s[idx++] = getLanguageTitle(sub.getLanguage());
+            s[idx++] = sub.getElementId();
+
+            return s;
+        } catch (Exception exception) {
+            StaticLog.getLog().log(Log.INFO, "Exception in buildRunRow()", exception);
+        }
+        return null;
+    }
+
+    private String getLanguageTitle(ElementId languageId) {
+        Language language = getContest().getLanguage(languageId);
+        if(language != null) {
+            return(language.getDisplayName());
+        }
+        return "Language ?";
+    }
+
+    private String getProblemTitle(ElementId problemId) {
+        Problem problem = getContest().getProblem(problemId);
+        if (problem != null) {
+            return problem.toString();
+        }
+        return "Problem ?";
+    }
+
+    private String getJudgesTitle(Run run, ClientId judgeId, boolean autoJudgedRun) {
+
+        String result = "";
+
+        if (judgeId != null) {
+            if (judgeId.equals(getContest().getClientId())) {
+                result = "Me";
+            } else {
+                result = judgeId.getName() + " S" + judgeId.getSiteNumber();
+            }
+            if (autoJudgedRun) {
+                result = result + "/AJ";
+            }
+        } else {
+            result = "";
+        }
+        return result;
+    }
+
+    private boolean isAutoJudgedRun(Run run) {
+        if (run.isJudged()) {
+            if (!run.isSolved()) {
+                JudgementRecord judgementRecord = run.getJudgementRecord();
+                if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
+                    return judgementRecord.isUsedValidator();
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return the judgement/status for the run.
+     *
+     * @param run
+     * @return a string that represents the state of the run
+     */
+    protected String getJudgementResultString(Run run) {
+
+        String result = "";
+        String acronym = "";
+
+        if (run.isJudged()) {
+
+            if (run.isSolved()) {
+                // oh my, this is bad, but, alas, copied from RunTable - gets the "accepted" judgment
+                Judgement judgment = getContest().getJudgements()[0];
+                acronym = ":" + judgment.getAcronym();
+
+                result = judgment.getDisplayName();
+                if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
+                    result = RunStates.MANUAL_REVIEW + " (" + result + ")";
+                }
+
+            } else {
+                result = "No";
+
+                JudgementRecord judgementRecord = run.getJudgementRecord();
+
+                if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
+                    Judgement judgment = getContest().getJudgement(judgementRecord.getJudgementId());
+                    // Get acronym now, because we tack it on later
+                    if(judgment != null) {
+                        acronym = ":" + judgment.getAcronym();
+                    }
+                    if (judgementRecord.isUsedValidator() && judgementRecord.getValidatorResultString() != null) {
+                        result = judgementRecord.getValidatorResultString();
+                    } else {
+                        if (judgment != null) {
+                            result = judgment.toString();
+                        }
+                    }
+
+                    if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
+                        result = RunStates.MANUAL_REVIEW + " (" + result + ")";
+                    }
+
+                    if (run.getStatus().equals(RunStates.BEING_RE_JUDGED)) {
+                        result = RunStates.BEING_RE_JUDGED.toString();
+                    }
+                }
+            }
+
+        } else {
+            result = run.getStatus().toString();
+        }
+
+        if (run.isDeleted()) {
+            result = "DEL " + result;
+        }
+
+        result = result + acronym;
+
+
+        return result;
+    }
+
+    /**
+     * Find row that contains the supplied key (in last column)
+     * @param value - unique key - really, the ElementId of run
+     * @return index of row, or -1 if not found
+     */
+    private int getRowByKey(Object value) {
+        Object o;
+
+        if(runTableModel != null) {
+            int col = runTableModel.getColumnCount() - 1;
+            for (int i = runTableModel.getRowCount() - 1; i >= 0; --i) {
+                o = runTableModel.getValueAt(i, col);
+                if (o != null && o.equals(value)) {
+                    return i;
+                }
+            }
+        }
+        return(-1);
+    }
+
+    /**
+     * Remove run from grid by removing the data row from the TableModel
+     *
+     * @param run
+     */
+    private void removeRunRow(final Run run) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+
+                int rowNumber = getRowByKey(run.getElementId());
+                if (rowNumber != -1) {
+                    runTableModel.removeRow(rowNumber);
+                    updateRowCount();
+                }
+            }
+        });
+    }
+
+    /**
+     * This updates the rowCountlabel & toolTipText. It should be called only while on the swing thread.
+     */
+    private void updateRowCount() {
+        if (filter.isFilterOn()){
+            int totalRuns = getContest().getRuns().length;
+            rowCountLabel.setText(runTable.getRowCount()+" of "+totalRuns);
+            rowCountLabel.setToolTipText(runTable.getRowCount() + " filtered runs");
+        } else {
+            rowCountLabel.setText("" + runTable.getRowCount());
+            rowCountLabel.setToolTipText(runTable.getRowCount() + " runs");
+        }
+    }
+
+    public void updateRunRow(final SubmissionSample sub, final ClientId whoModifiedId, final boolean autoSizeAndSort) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+
+                ClientId whoJudgedId = whoModifiedId;
+                Run run = sub.getRun();
+                if (run != null && run.isJudged()) {
+                    JudgementRecord judgementRecord = run.getJudgementRecord();
+                    if (judgementRecord != null) {
+                        whoJudgedId = judgementRecord.getJudgerClientId();
+                    }
+                }
+
+                Object[] objects = buildRunRow(sub, whoJudgedId);
+                int rowNumber = getRowByKey(sub.getElementId());
+                if (rowNumber == -1) {
+                    // No row with this key - add new one
+                    runTableModel.addRow(objects);
+                } else {
+                    // Update all fields
+                    for(int j = runTableModel.getColumnCount()-1; j >= 0; j--) {
+                        runTableModel.setValueAt(objects[j], rowNumber, j);
+                    }
+                }
+
+                if (autoSizeAndSort) {
+                    updateRowCount();
+                    resizeColumnWidth(runTable);
+                }
+
+//                if (selectJudgementFrame != null) {
+                        //TODO the selectJudgementFrame should be placed above all PC2 windows, not working when dblClicking in Windows OS
+//                }
+            }
+        });
+    }
+
+    public void reloadRunList() {
+
+        if (filter.isFilterOn()){
+            getFilterButton().setForeground(Color.BLUE);
+            getFilterButton().setToolTipText("Edit filter - filter ON");
+            rowCountLabel.setForeground(Color.BLUE);
+        } else {
+            getFilterButton().setForeground(Color.BLACK);
+            getFilterButton().setToolTipText("Edit filter");
+            rowCountLabel.setForeground(Color.BLACK);
+        }
+
+        for (SubmissionSample sub : submissionList) {
+            ClientId clientId = null;
+
+            Run run = sub.getRun();
+            if(run != null) {
+                RunStates runStates = run.getStatus();
+                if (!(runStates.equals(RunStates.NEW) || run.isDeleted())) {
+                    JudgementRecord judgementRecord = run.getJudgementRecord();
+                    if (judgementRecord != null) {
+                        clientId = judgementRecord.getJudgerClientId();
+                    }
+                }
+            }
+            updateRunRow(sub, clientId, false);
+        }
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                updateRowCount();
+                resizeColumnWidth(runTable);
+            }
+        });
+    }
+    /**
+     * Run Listener
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    // $HeadURL$
+    public class RunListenerImplementation implements IRunListener {
+
+        @Override
+        public void runAdded(RunEvent event) {
+            SubmissionSample sub = null;
+            Run run = event.getRun();
+            ClientId me = getContest().getClientId();
+
+            // We are only interested in runs we submitted
+            if(run.getSubmitter().equals(me)) {
+
+                // JB - think this test for duplicate is inadequate.
+                // We should remember the run id in a hashmap or something and ignore it if was seen
+                SubmissionSample dupRun = getSubmission(event);
+                if(dupRun == null) {
+                    try {
+                        // This is the last run - it has to be the one that was just added by us
+                        sub = submissionList.get(currentSubmission);
+                    } catch (Exception e) {
+                        log.log(Level.WARNING, "No submission sample for run id " + run.getNumber(), e);
+                        if(Utilities.isDebugMode()) {
+                            System.out.println("No submission runAdded (" + run.getNumber() + ") - currentSubmission #" + currentSubmission);
+                        }
+                    }
+                } else {
+                    log.log(Level.WARNING, "Duplicate runAdded event for Run id " + run.getNumber() + " ignored.");
+                    if(Utilities.isDebugMode()) {
+                        System.out.println("Duplicate runAdded (" + run.getNumber() + ") ignored - currentSubmission #" + currentSubmission);
+                    }
+                }
+            }
+            if(sub != null) {
+                stopSubmissionTimer();
+                sub.setRun(run);
+                if(Utilities.isDebugMode()) {
+                    System.out.println("Received runAdded currentSubmission #" + currentSubmission + " for problem " + sub.toString());
+                }
+                updateRunRow(sub, event.getWhoModifiedRun(), true);
+                // setup for next submission; if last one clean things up.
+                currentSubmission++;
+                if(currentSubmission >= submissionFileList.size()) {
+                    clearSubmissionFiles();
+                } else {
+                    submitNextSubmission();
+                }
+            }
+        }
+
+        @Override
+        public void refreshRuns(RunEvent event) {
+            reloadRunList();
+        }
+
+        @Override
+        public void runChanged(RunEvent event) {
+            SubmissionSample sub = getSubmission(event);
+            if(sub != null) {
+                updateRunRow(sub, event.getWhoModifiedRun(), true);
+            }
+        }
+
+        @Override
+        public void runRemoved(RunEvent event) {
+            SubmissionSample sub = getSubmission(event);
+            if(sub != null) {
+                updateRunRow(sub, event.getWhoModifiedRun(), true);
+            }
+        }
+
+        private SubmissionSample getSubmission(RunEvent event)
+        {
+            Run run = event.getRun();
+
+            // We are only interested in runs we submitted
+            if(run.getSubmitter().equals(getContest().getClientId())) {
+                for(SubmissionSample sub : submissionList) {
+                    Run subRun = sub.getRun();
+                    // Check run numbers if this submission has a run
+                    if(subRun != null && subRun.getNumber() == run.getNumber()) {
+                        sub.setRun(run);
+                        return(sub);
+                    }
+                }
+            }
+            return(null);
+        }
+    }
 
 
 } // @jve:decl-index=0:visual-constraint="10,10"

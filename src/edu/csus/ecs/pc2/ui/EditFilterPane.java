@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -16,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -173,7 +175,20 @@ public class EditFilterPane extends JPanePlugin {
 
     private JCheckBoxJList clientTypesListBox;  //  @jve:decl-index=0:
 
+    private TitledBorder customPaneBorder = null;
+    private JPanel customTypePane = null;
+
+    private JScrollPane customTypeScroll = null;
+
+    private DefaultListModel<WrapperJCheckBox> customTypeListModel = new DefaultListModel<WrapperJCheckBox>();
+
+    private JCheckBoxJList customTypesListBox;
+
     private Permission permission = new Permission();
+
+    private ArrayList<?> customItems = new ArrayList<Object>();
+
+    private String customTitle = "Custom";
 
     /**
      * JList names in EditFilterPane.
@@ -233,6 +248,10 @@ public class EditFilterPane extends JPanePlugin {
          *
          */
         CLIENT_TYPES,
+        /**
+         *
+         */
+        CUSTOM_LIST,
     }
 
     public EditFilterPane() {
@@ -687,6 +706,15 @@ public class EditFilterPane extends JPanePlugin {
                 getToTimeTextField().setText("" + filter.getEndElapsedTime());
             }
         }
+
+        customTypeListModel.removeAllElements();
+        for (Object custItem : customItems) {
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(custItem);
+            if (filter.isFilteringCustom()) {
+                wrapperJCheckBox.setSelected(filter.matches(custItem));
+            }
+            customTypeListModel.addElement(wrapperJCheckBox);
+        }
     }
 
     /**
@@ -919,6 +947,16 @@ public class EditFilterPane extends JPanePlugin {
             }
         }
 
+        filter.clearCustomItems();
+        enumeration = customTypeListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addCustomItem(object);
+            }
+        }
+
         filter.clearElapsedTimeRange();
         if (getFromTimeTextField().getText().length() > 0){
             filter.setStartElapsedTime(Long.parseLong(getFromTimeTextField().getText()));
@@ -1045,8 +1083,30 @@ public class EditFilterPane extends JPanePlugin {
             case CLIENT_TYPES:
                 listsPanel.add(getClientTypePane(), 0);
                 break;
+            case CUSTOM_LIST:
+                listsPanel.add(getCustomTypePane(), 0);
+                break;
             default:
                 throw new InvalidParameterException("Invalid listNames: " + listName);
+        }
+    }
+
+    /**
+     *
+     * @param items custom items to add
+     */
+    public void addCustomItems(ArrayList<?> items) {
+        customItems = items;
+    }
+
+    /**
+     *
+     * @param title - title for the custom item check box list
+     */
+    public void setCustomTitle(String title) {
+        customTitle = title;
+        if(customPaneBorder != null) {
+            customPaneBorder.setTitle(customTitle);
         }
     }
 
@@ -1242,6 +1302,38 @@ public class EditFilterPane extends JPanePlugin {
             clientTypesListBox = new JCheckBoxJList(clientTypeListModel);
         }
         return clientTypesListBox;
+    }
+
+
+
+    public JPanel getCustomTypePane() {
+        if (customTypePane == null) {
+            customTypePane = new JPanel();
+            customTypePane.setLayout(new BorderLayout());
+            customTypePane.setName("customTypePane");
+            customPaneBorder = javax.swing.BorderFactory.createTitledBorder(null, customTitle, javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new java.awt.Color(51, 51, 51));
+            customTypePane.setBorder(customPaneBorder);
+            customTypePane.setSize(new java.awt.Dimension(251, 151));
+            customTypePane.add(getCustomTypeScroll(), java.awt.BorderLayout.CENTER);
+        }
+
+        return customTypePane;
+    }
+
+    private JScrollPane getCustomTypeScroll() {
+        if (customTypeScroll == null) {
+            customTypeScroll = new JScrollPane();
+            customTypeScroll.setViewportView(getCustomTypesListBox());
+        }
+        return customTypeScroll;
+    }
+
+    private JCheckBoxJList getCustomTypesListBox () {
+        if (customTypesListBox == null) {
+            customTypesListBox = new JCheckBoxJList(customTypeListModel);
+        }
+        return customTypesListBox;
     }
 
 

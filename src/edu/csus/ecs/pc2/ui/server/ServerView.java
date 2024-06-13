@@ -2,10 +2,11 @@
 package edu.csus.ecs.pc2.ui.server;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog.ModalityType;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.Dialog.ModalityType;
 import java.awt.event.KeyEvent;
 import java.util.Date;
 
@@ -60,11 +61,10 @@ import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPane;
 import edu.csus.ecs.pc2.ui.SubmitSampleRunsPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import java.awt.Dimension;
 
 /**
  * GUI for Server.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -79,7 +79,7 @@ public class ServerView extends JFrame implements UIPlugin {
     private IInternalController controller = null;  //  @jve:decl-index=0:
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 4547574494017009634L;
 
@@ -98,12 +98,12 @@ public class ServerView extends JFrame implements UIPlugin {
     private JButton exitButton = null;
 
     private LogWindow securityAlertLogWindow = null;
-    
+
     private VersionInfo versionInfo = new VersionInfo();
 
     /**
      * This method initializes
-     * 
+     *
      */
     public ServerView() {
         super();
@@ -116,7 +116,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setSize(new Dimension(800, 450));
@@ -124,6 +124,7 @@ public class ServerView extends JFrame implements UIPlugin {
         this.setTitle("Server View");
         this.setContentPane(getMainViewPane());
         this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 promptAndExit();
             }
@@ -132,14 +133,14 @@ public class ServerView extends JFrame implements UIPlugin {
         overRideLookAndFeel();
         FrameUtilities.centerFrameTop(this);
         setVisible(true);
-        
+
         showMessage("Version "+versionInfo.getVersionNumber()+" (Build "+versionInfo.getBuildNumber()+")");
-        
+
 
     }
-    
+
     private void overRideLookAndFeel(){
-        
+
         String value = IniFile.getValue("server.plaf");
         if (value != null && value.equalsIgnoreCase("java")){
             FrameUtilities.setJavaLookAndFeel();
@@ -158,7 +159,7 @@ public class ServerView extends JFrame implements UIPlugin {
             try {
                 ContestSummaryReports contestReports = new ContestSummaryReports();
                 contestReports.setContestAndController(model, controller);
-            
+
                 if (contestReports.isLateInContest()){
                     contestReports.generateReports();
                     controller.getLog().info("Reports Generated to "+contestReports.getReportDirectory());
@@ -166,7 +167,7 @@ public class ServerView extends JFrame implements UIPlugin {
             } catch (Exception e) {
                 log.log(Log.WARNING,"Unable to create reports ", e);
             }
-            
+
             log.info("Server "+model.getSiteNumber()+" halted");
             System.exit(0);
         }
@@ -174,25 +175,29 @@ public class ServerView extends JFrame implements UIPlugin {
 
     /**
      * Implementation for the Run Listener.
-     * 
+     *
      * @author pc2@ecs.csus.edu
-     * 
+     *
      */
     private class RunListenerImplementation implements IRunListener {
 
+        @Override
         public void runAdded(RunEvent event) {
             logDebugMessage("Run Event " + event.getRun() + " ADDED ");
         }
 
+        @Override
         public void refreshRuns(RunEvent event) {
             logDebugMessage("Run Event " + event.getRun() + " REFRESH/RESET RUNS ");
-            
+
         }
-        
+
+        @Override
         public void runChanged(RunEvent event) {
             logDebugMessage("Run Event " + event.getRun() + " CHANGED ");
         }
-        
+
+        @Override
         public void runRemoved(RunEvent event) {
             logDebugMessage("Run Event " + event.getRun() + " REMOVED ");
         }
@@ -207,24 +212,28 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
-     * 
+     *
      */
     public class LoginListenerImplementation implements ILoginListener {
 
+        @Override
         public void loginAdded(LoginEvent event) {
             logDebugMessage("Login Event " + event.getAction() + " " + event.getClientId());
         }
 
+        @Override
         public void loginRemoved(LoginEvent event) {
             logDebugMessage("Login Event " + event.getAction() + " " + event.getClientId());
         }
 
+        @Override
         public void loginDenied(LoginEvent event) {
             logDebugMessage("Login Event " + event.getAction() + " " + event.getClientId());
         }
-        
+
+        @Override
         public void loginRefreshAll(LoginEvent event) {
             logDebugMessage("Login Event " + event.getAction() + " " + event.getClientId());
         }
@@ -232,30 +241,35 @@ public class ServerView extends JFrame implements UIPlugin {
 
     /**
      * Implementation for a Account Event Listener.
-     * 
+     *
      * @author pc2@ecs.csus.edu
-     * 
+     *
      */
     public class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             logDebugMessage("Account Event " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
 
         }
 
+        @Override
         public void accountModified(AccountEvent accountEvent) {
             logDebugMessage("Account Event " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
 
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             logDebugMessage("Account Event " + accountEvent.getAction() + " " + accountEvent.getAccounts().length + " accounts");
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             logDebugMessage("Account Event " + accountEvent.getAction() + " " + accountEvent.getAccounts().length + " accounts");
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
             logDebugMessage("Account Event " + accountEvent.getAction() + " " + accountEvent.getAccounts().length + " accounts");
         }
@@ -263,36 +277,43 @@ public class ServerView extends JFrame implements UIPlugin {
 
     /**
      * Site Listener for use by ServerView.
-     * 
+     *
      * @author pc2@ecs.csus.edu
-     * 
+     *
      */
     public class SiteListenerImplementation implements ISiteListener {
 
+        @Override
         public void siteProfileStatusChanged(SiteEvent event) {
-            // TODO this UI does not use a change in profile status 
+            // TODO this UI does not use a change in profile status
         }
 
+        @Override
         public void siteAdded(SiteEvent event) {
             logDebugMessage("Site Event Event " + event.getAction() + " " + event.getSite());
         }
 
+        @Override
         public void siteRemoved(SiteEvent event) {
             logDebugMessage("Site Event " + event.getAction() + " " + event.getSite());
         }
 
+        @Override
         public void siteLoggedOn(SiteEvent event) {
             logDebugMessage("Site Event " + event.getAction() + " " + event.getSite());
         }
 
+        @Override
         public void siteLoggedOff(SiteEvent event) {
             logDebugMessage("Site Event " + event.getAction() + " " + event.getSite());
         }
 
+        @Override
         public void siteChanged(SiteEvent event) {
             logDebugMessage("Site Event " + event.getAction() + " " + event.getSite());
         }
 
+        @Override
         public void sitesRefreshAll(SiteEvent event) {
             logDebugMessage("Site Event " + event.getAction());
         }
@@ -300,21 +321,25 @@ public class ServerView extends JFrame implements UIPlugin {
 
     /**
      * InternalContest Time for use by ServerView.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      *
      */
     public class ContestTimeListenerImplementation implements IContestTimeListener {
 
+        @Override
         public void contestTimeAdded(ContestTimeEvent event) {
         }
 
+        @Override
         public void contestTimeRemoved(ContestTimeEvent event) {
         }
 
+        @Override
         public void contestTimeChanged(ContestTimeEvent event) {
         }
 
+        @Override
         public void contestStarted(ContestTimeEvent event) {
             // only update our title if the event concerns us
             if (model.getSiteNumber() == event.getSiteNumber()) {
@@ -322,6 +347,7 @@ public class ServerView extends JFrame implements UIPlugin {
             }
         }
 
+        @Override
         public void contestStopped(ContestTimeEvent event) {
             // only update our title if the event concerns us
             if (model.getSiteNumber() == event.getSiteNumber()) {
@@ -329,12 +355,13 @@ public class ServerView extends JFrame implements UIPlugin {
             }
         }
 
+        @Override
         public void refreshAll(ContestTimeEvent event) {
             if (model.getSiteNumber() == event.getSiteNumber()) {
                 updateFrameTitle(event.getContestTime().isContestRunning());
             }
         }
-        
+
         /** This method exists to support differentiation between manual and automatic starts.
          * Currently it delegates the handling to the contestStarted() method, while
          * also popping up a notification dialog if the Server is in GUI mode and also
@@ -343,10 +370,10 @@ public class ServerView extends JFrame implements UIPlugin {
         @Override
         public void contestAutoStarted(ContestTimeEvent event) {
             contestStarted(event);
-            
+
             //log the automatic-start
             info("Contest automatically started due to arrival of enabled scheduled start time.");
-            
+
             //if using a GUI, display a popup notification of the automatic-start
             if (controller != null && controller.isUsingGUI()) {
                 //Note: previously the following line of code was used for the popup; however, showMessageDialog() does
@@ -370,10 +397,10 @@ public class ServerView extends JFrame implements UIPlugin {
             }
         }
     }
-    
+
     /**
      * This method initializes mainViewPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMainViewPane() {
@@ -388,7 +415,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
     /**
      * Puts this frame to right of input frame.
-     * 
+     *
      * @param sourceFrame the JFrame to which this frame is attached (that is,
      *   the frame in which this frame will be moved to the right)
      */
@@ -399,7 +426,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes mainTabbedPane
-     * 
+     *
      * @return javax.swing.JTabbedPane
      */
     private JTabbedPane getMainTabbedPane() {
@@ -411,14 +438,15 @@ public class ServerView extends JFrame implements UIPlugin {
 
     void updateFrameTitle(final boolean turnButtonsOn) {
         final Frame thisFrame = this;
-        
+
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 FrameUtilities.setFrameTitle(thisFrame, "Server (Site "+model.getSiteNumber()+")", turnButtonsOn, new VersionInfo());
             }
         });
     }
-    
+
     protected void registerPlugin (UIPlugin plugin){
         try {
             controller.register (plugin);
@@ -430,55 +458,58 @@ public class ServerView extends JFrame implements UIPlugin {
             JOptionPane.showMessageDialog(this, "Error loading " + plugin.getPluginTitle());
         }
     }
-    
+
     /**
      * Listeners for server view.
-     * 
+     *
      * This provides a way to refresh the server view on refresh.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
     protected class ServerListeners implements UIPlugin {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 3733076435840880891L;
 
+        @Override
         public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-            
+
             inContest.addRunListener(new RunListenerImplementation());
             inContest.addAccountListener(new AccountListenerImplementation());
             inContest.addLoginListener(new LoginListenerImplementation());
             inContest.addSiteListener(new SiteListenerImplementation());
             inContest.addContestTimeListener(new ContestTimeListenerImplementation());
             inContest.addProfileListener(new ProfileListenerImplementation());
-            
+
             setModel(inContest);
             setController(inController);
-            
+
             populateUI();
         }
 
+        @Override
         public String getPluginTitle() {
             return "ServerListeners";
         }
     }
-    
+
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-        
+
         setModel(inContest);
         setController(inController);
-        
+
         this.log = controller.getLog();
-        
+
         populateUI();
 
         inController.startLogWindow(model);
-        
+
         initializeSecurityAlertWindow(inContest);
 
         ServerListeners serverListeners = new ServerListeners();
@@ -495,10 +526,10 @@ public class ServerView extends JFrame implements UIPlugin {
                 logException(e);
             }
         }
-        
+
         ExportDataPane exportPane = new ExportDataPane();
         addUIPlugin(getMainTabbedPane(), "Export", exportPane);
-        
+
         if (Utilities.isDebugMode()) {
             try {
                 LoadContestPane loadContestPane = new LoadContestPane();
@@ -507,7 +538,7 @@ public class ServerView extends JFrame implements UIPlugin {
                 logException(e);
             }
         }
-        
+
         LoginsTablePane loginsPane = new LoginsTablePane();
         addUIPlugin(getMainTabbedPane(), "Logins", loginsPane);
 
@@ -527,24 +558,24 @@ public class ServerView extends JFrame implements UIPlugin {
         if (Utilities.isDebugMode()) {
             try {
                 SubmitSampleRunsPane submitSampleRunsPane = new SubmitSampleRunsPane();
-                addUIPlugin(getMainTabbedPane(), "Submit Samples", submitSampleRunsPane);
+                addUIPlugin(getMainTabbedPane(), "Submit Judges", submitSampleRunsPane);
 
                 PacketMonitorPane packetMonitorPane = new PacketMonitorPane();
                 addUIPlugin(getMainTabbedPane(), "Packets", packetMonitorPane);
-                
+
                 PluginLoadPane pane = new PluginLoadPane();
                 pane.setParentTabbedPane(getMainTabbedPane());
                 addUIPlugin(getMainTabbedPane(), "Plugin Load", pane);
-                
+
                 ProfilesPane profilePane = new ProfilesPane();
                 addUIPlugin(getMainTabbedPane(), "Profiles", profilePane);
-                
+
                 PlaybackPane playbackPane = new PlaybackPane();
                 addUIPlugin(getMainTabbedPane(), "Replay", playbackPane);
             } catch (Exception e) {
                 logException(e);
             }
-        }            
+        }
 
         ReportPane reportPane = new ReportPane();
         addUIPlugin(getMainTabbedPane(), "Reports", reportPane);
@@ -554,27 +585,27 @@ public class ServerView extends JFrame implements UIPlugin {
 
         ContestTimesPane contestTimesPane = new ContestTimesPane();
         addUIPlugin(getMainTabbedPane(), "Times", contestTimesPane);
-        
+
         AboutPane aboutPane = new AboutPane();
         addUIPlugin(getMainTabbedPane(), "About", aboutPane);
-        
+
         setSelectedTab(getMainTabbedPane(), "Logins");
-        
+
         Profile profile = inContest.getProfile();
         info("Using Profile: " + profile.getName() + " @ " + profile.getProfilePath());
 
     }
-    
+
     private void info(String string) {
         System.out.println(new Date() + " " + string);
         if (log != null) {
-            log.info(string);  
+            log.info(string);
         }
     }
 
     /**
      * Update frame title and profile label.
-     * 
+     *
      */
     private void populateUI() {
         updateFrameTitle(model.getContestTime().isContestRunning());
@@ -584,14 +615,14 @@ public class ServerView extends JFrame implements UIPlugin {
     public void setModel(IInternalContest inContest) {
         this.model = inContest;
     }
-    
+
     public void setController(IInternalController controller) {
         this.controller = controller;
     }
 
     /**
      * Set the tab for the input name.
-     * 
+     *
      * @param tabbedPane
      * @param name
      */
@@ -630,6 +661,7 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
 
+    @Override
     public String getPluginTitle() {
         return "Server Main GUI";
     }
@@ -650,7 +682,7 @@ public class ServerView extends JFrame implements UIPlugin {
         }
 
     }
-    
+
     protected void addUIPlugin(String tabTitle, JPanePlugin plugin) {
         try {
             plugin.setParentFrame(this);
@@ -659,12 +691,12 @@ public class ServerView extends JFrame implements UIPlugin {
         } catch (Exception e) {
             controller.getLog().log(Log.WARNING, "Exception loading plugin ", e);
             JOptionPane.showMessageDialog(this, "Error loading " + plugin.getPluginTitle());
-        }    
+        }
     }
 
     /**
      * This method initializes messagePanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMessagePanel() {
@@ -676,6 +708,7 @@ public class ServerView extends JFrame implements UIPlugin {
             messageLabel.setFont(new Font("Dialog", Font.BOLD, 14));
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     if (e.getClickCount() > 1){
 //                        System.out.println("debug profile is "+model.getProfile().getName());
@@ -694,7 +727,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes exitPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getExitPanel() {
@@ -712,7 +745,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes exitButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getExitButton() {
@@ -722,6 +755,7 @@ public class ServerView extends JFrame implements UIPlugin {
             exitButton.setMnemonic(KeyEvent.VK_X);
             exitButton.setToolTipText("Click here to Shutdown PC^2");
             exitButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     promptAndExit();
                 }
@@ -733,13 +767,14 @@ public class ServerView extends JFrame implements UIPlugin {
     private void showMessage(final String string) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(string);
             }
         });
 
     }
-    
+
     private void updateProfileLabel() {
 
         int numberProfiles = model.getProfiles().length;
@@ -752,6 +787,7 @@ public class ServerView extends JFrame implements UIPlugin {
         final String message = s;
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(message);
                 messageLabel.setToolTipText("Version "+versionInfo.getVersionNumber()+" (Build "+versionInfo.getBuildNumber()+")");
@@ -759,35 +795,39 @@ public class ServerView extends JFrame implements UIPlugin {
         });
     }
 
-    
+
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
     protected class ProfileListenerImplementation implements IProfileListener {
 
+        @Override
         public void profileAdded(ProfileEvent event) {
             updateProfileLabel();
         }
 
+        @Override
         public void profileChanged(ProfileEvent event) {
             updateProfileLabel();
         }
 
+        @Override
         public void profileRemoved(ProfileEvent event) {
             // ignore
-            
+
         }
 
+        @Override
         public void profileRefreshAll(ProfileEvent profileEvent) {
             updateProfileLabel();
         }
     }
 
-    
+
 
 
 } // @jve:decl-index=0:visual-constraint="10,10"
