@@ -42,15 +42,6 @@ public class SubmissionSample {
         return run;
     }
 
-    // JB this is wrong - needs fixing
-    public boolean isRunForSubmission(Run r) {
-
-        if(srcFile != null) {
-            return(false);
-        }
-        return(false);
-    }
-
     public String getProblemName() {
         return problemName;
     }

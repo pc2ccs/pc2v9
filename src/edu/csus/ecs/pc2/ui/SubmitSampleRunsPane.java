@@ -4,15 +4,18 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -36,11 +39,13 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import edu.csus.ecs.pc2.core.FileUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.StringToDoubleComparator;
 import edu.csus.ecs.pc2.core.list.StringToNumberComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -54,9 +59,11 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 import edu.csus.ecs.pc2.list.ListUtilities;
@@ -64,6 +71,7 @@ import edu.csus.ecs.pc2.list.SubmissionSample;
 import edu.csus.ecs.pc2.list.SubmissionSampleLocation;
 import edu.csus.ecs.pc2.list.SubmissionSolutionList;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
+import edu.csus.ecs.pc2.ui.cellRenderer.LinkCellRenderer;
 import edu.csus.ecs.pc2.ui.team.QuickSubmitter;
 
 /**
@@ -77,6 +85,8 @@ public class SubmitSampleRunsPane extends JPanePlugin {
     private static final int VERT_PAD = 2;
     private static final int HORZ_PAD = 20;
     private static final int SUBMISSION_WAIT_TIMEOUT_MS = 10000;
+
+    private static final int ELAPSED_TIME_COLUMN = 5;
 
 	/**
 	 * ClientSettings key for CDP Path
@@ -115,12 +125,14 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
     private String filterFrameTitle = "Judges' Submissions filter";
 
+    private SampleResultsFrame sampleResultsFrame = null;
 
     private Log log;
 
     private List<File> submissionFileList = null;
     private int currentSubmission = -1;
     private List<SubmissionSample> submissionList = null;
+    private HashSet<Integer> runsAdded = new HashSet<Integer>();
 
     private Timer submissionWaitTimer = null;
     private TimerTask submissionTimerTask = null;
@@ -527,6 +539,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 	private void clearSubmissionFiles() {
 	    submissionFileList = null;
 	    currentSubmission = -1;
+	    runsAdded.clear();
 	}
 
 	private void stopSubmissionTimer() {
@@ -691,6 +704,35 @@ public class SubmitSampleRunsPane extends JPanePlugin {
         }
     }
 
+    private ProblemDataFiles getProblemDataFiles(Run run) {
+        Problem problem = getContest().getProblem(run.getProblemId());
+        return getContest().getProblemDataFile(problem);
+    }
+
+    protected void viewOutputsAndData(SubmissionSample sub) {
+
+        if(sub != null) {
+            if (getSampleResultsFrame().isVisible()) {
+                if (getSampleResultsFrame().getState() == Frame.ICONIFIED) {
+                    getSampleResultsFrame().setState(javax.swing.JFrame.NORMAL);
+                }
+            }
+
+            getSampleResultsFrame().setData(sub);
+
+            getSampleResultsFrame().setVisible(true);
+        }
+    }
+
+    private SampleResultsFrame getSampleResultsFrame() {
+        if (sampleResultsFrame == null) {
+            sampleResultsFrame = new SampleResultsFrame();
+            sampleResultsFrame.setContestAndController(getContest(), getController());
+            FrameUtilities.centerFrame(sampleResultsFrame);
+        }
+        return sampleResultsFrame;
+    }
+
     /**
      * This method initializes scrollPane
      *
@@ -728,7 +770,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
                         //map the specified row index number to the corresponding model row (index numbers can change due
                         // to sorting/scrolling; model row numbers never change).
                         // Here are the columns:
-                        // Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Source", "Judge", "Language", "ElementId" };
+                        // Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Source", "Judge", "Language", "SubmissionSample" };
 
                         int modelRow = convertRowIndexToModel(row);
                         String submissionAcronym = submissionSolutionList.getAcronymForSubmissionDirectory((String)runTableModel.getValueAt(modelRow, 3));
@@ -764,13 +806,32 @@ public class SubmitSampleRunsPane extends JPanePlugin {
                    if (me.getClickCount() == 2) {
                       JTable target = (JTable)me.getSource();
                       if(target.getSelectedRow() != -1 && isAllowed(Permission.Type.JUDGE_RUN)) {
-//                          requestSelectedRun();
-                      }
+                          // Maybe we want to let them edit the run someday?
+                          // requestSelectedRun();
+                     }
                    }
                 }
              });
         }
         return runTable;
+    }
+
+    protected SubmissionSample findSelectedSubmissionSample() {
+
+        SubmissionSample sub = null;
+        int[] selectedIndexes = runTable.getSelectedRows();
+
+        if (selectedIndexes.length >= 1) {
+
+            try {
+                int modelIndex = runTable.convertRowIndexToModel(selectedIndexes[0]);
+                TableModel tm = runTable.getModel();
+                sub = (SubmissionSample) tm.getValueAt(modelIndex,  tm.getColumnCount()-1);
+            } catch (Exception e) {
+                // Just ignore exception - non-fatal.
+            }
+        }
+        return sub;
     }
 
     public void clearAllRuns() {
@@ -789,7 +850,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
         runTable.removeAll();
 
-        Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Source", "Judge", "Language", "ElementId" };
+        Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Max Time(s)", "Source", "Judge", "Language", "SubmissionSample" };
         Object[] columns;
 
         columns = fullColumns;
@@ -802,7 +863,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
         runTable.setModel(runTableModel);
         TableColumnModel tcm = runTable.getColumnModel();
-        // Remove ElementID from display - this does not REMOVE the column, just makes it so it doesn't show
+        // Remove SubmissionSample from display - this does not REMOVE the column, just makes it so it doesn't show
         tcm.removeColumn(tcm.getColumn(columns.length - 1));
 
         // Sorters
@@ -821,17 +882,26 @@ public class SubmitSampleRunsPane extends JPanePlugin {
         runTable.setRowHeight(runTable.getRowHeight() + VERT_PAD);
 
 
+//        DefaultTableCellRenderer rightAlign = new DefaultTableCellRenderer();
+//        rightAlign.setHorizontalAlignment(JLabel.RIGHT);
+//        runTable.getTableHeader().getColumnModel().getColumn(ELAPSED_TIME_COLUMN).setCellRenderer(rightAlign);
+//        runTable.getColumnModel().getColumn(5).setCellRenderer(rightAlign);
+
+        runTable.getColumnModel().getColumn(ELAPSED_TIME_COLUMN).setCellRenderer(new LinkCellRenderer());
+
         StringToNumberComparator numericStringSorter = new StringToNumberComparator();
+        StringToDoubleComparator doubleStringSorter = new StringToDoubleComparator();
 
         int idx = 0;
 
 
-//      Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Source", "Judge", "Language" };
+//      Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Max CPU ms", "Source", "Judge", "Language" };
 
 
         // These are in column order - omitted ones are straight string compare
         trs.setComparator(0, numericStringSorter);
         trs.setComparator(1, numericStringSorter);
+        trs.setComparator(5, doubleStringSorter);
         // These are in sort order
         sortList.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
         sortList.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
@@ -841,8 +911,69 @@ public class SubmitSampleRunsPane extends JPanePlugin {
         sortList.add(new RowSorter.SortKey(5, SortOrder.ASCENDING));
         sortList.add(new RowSorter.SortKey(6, SortOrder.ASCENDING));
         sortList.add(new RowSorter.SortKey(7, SortOrder.ASCENDING));
+        sortList.add(new RowSorter.SortKey(8,  SortOrder.ASCENDING));
         trs.setSortKeys(sortList);
         resizeColumnWidth(runTable);
+
+        // add a listener to allow users to click an output or data file name and display it
+        MouseAdapter linkListener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JTable target = (JTable) e.getSource();
+                int row = target.getSelectedRow();
+                int column = target.getSelectedColumn();
+
+                if (Utilities.isDebugMode()) {
+                    System.out.println("Mouse clicked in cell (" + row + "," + column + ")");
+                }
+
+                if (column != ELAPSED_TIME_COLUMN) {
+                    //user clicked on a column that doesn't contain a link; ignore it
+                    if (Utilities.isDebugMode()) {
+                        System.out.println ("... ignored");
+                    }
+                    return;
+                }
+
+                //get the text in the JLabel at the current row/column cell
+                String labelString = "";
+                try {
+                    labelString = ((JLabel)target.getValueAt(row, column)).getText();
+                } catch (ClassCastException e1) {
+                     if (log != null) {
+                        log.warning("SubmitSampleRunsPane.getResultsTable(): expected to find a JLabel in runTable; exception: "
+                                + e1.getMessage());
+                    } else {
+                        System.err.println("SubmitSampleRunsPane.getResultsTable(): expected to find a JLabel in runTable; exception: "
+                                + e1.getMessage());
+                    }
+                    return;
+                }
+
+                //check whether the clicked cell has a visible string in it (only cells with legitimate links to something have non-empty strings)
+                if (!labelString.equals("")) {
+                    if(Utilities.isDebugMode()) {
+                        System.out.println("Clicked on " + labelString);
+                    }
+                    viewOutputsAndData(findSelectedSubmissionSample());
+                }
+                //else cell was empty - ignore the the click
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                JTable target = (JTable) e.getSource();
+                int column = target.columnAtPoint(e.getPoint());
+
+                if (column != ELAPSED_TIME_COLUMN) {
+                    target.setCursor(Cursor.getDefaultCursor());
+                    return;
+                }
+                target.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+        };
+        runTable.addMouseListener(linkListener);
+        runTable.addMouseMotionListener(linkListener);
     }
 
     private void resizeColumnWidth(JTableCustomized table) {
@@ -855,6 +986,33 @@ public class SubmitSampleRunsPane extends JPanePlugin {
         });
     }
 
+    /**
+     * Looks at all the TestCaseResults for a run and filters
+     * that list to just the most recent.
+     *
+     * @param run
+     * @return most recent RunTestCaseResults
+     */
+    private RunTestCase[] getCurrentTestCaseResults(Run run) {
+        RunTestCase[] testCases = null;
+        RunTestCase[] allTestCases = run.getRunTestCases();
+        // hope the lastTestCase has the highest testNumber....
+        if (allTestCases != null && allTestCases.length > 0) {
+            testCases = new RunTestCase[allTestCases[allTestCases.length-1].getTestNumber()];
+            for (int i = allTestCases.length-1; i >= 0; i--) {
+                RunTestCase runTestCaseResult = allTestCases[i];
+                int testCaseNumIndex = runTestCaseResult.getTestNumber()-1;
+                if (testCases[testCaseNumIndex] == null) {
+                    testCases[testCaseNumIndex] = runTestCaseResult;
+                    if (testCaseNumIndex == 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        return testCases;
+    }
+
     protected Object[] buildRunRow(SubmissionSample sub, ClientId judgeId) {
 
         try {
@@ -865,14 +1023,28 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
             int idx = 0;
 
-//          Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Source", "Judge", "Language", ["ElementId"] };
+//          Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Max CPU ms", "Source", "Judge", "Language", ["SubmissionSample"] };
             if(run != null) {
                 boolean autoJudgedRun = isAutoJudgedRun(run);
+                RunTestCase [] testCases = getCurrentTestCaseResults(run);
+                long maxMS = -1;
+                if(testCases != null) {
+                    for(RunTestCase tc : testCases) {
+                        if(tc.getElapsedMS() > maxMS) {
+                            maxMS = tc.getElapsedMS();
+                        }
+                    }
+                }
                 s[idx++] = Integer.toString(run.getNumber());
                 s[idx++] = Long.toString(run.getElapsedMins());
                 s[idx++] = getProblemTitle(sub.getProblem());
                 s[idx++] = sub.getSampleType();
                 s[idx++] = getJudgementResultString(run);
+                if(maxMS == -1) {
+                    s[idx++] = new JLabel("N/A");
+                } else {
+                    s[idx++] = new JLabel(String.format("%d.%03ds", maxMS/1000, maxMS%1000));
+                }
                 s[idx++] = sub.getSourceFile().getName();
                 s[idx++] = getJudgesTitle(run, judgeId, autoJudgedRun);
             } else {
@@ -881,11 +1053,12 @@ public class SubmitSampleRunsPane extends JPanePlugin {
                 s[idx++] = getProblemTitle(sub.getProblem());
                 s[idx++] = sub.getSampleType();
                 s[idx++] = "N/A";
+                s[idx++] = new JLabel("N/A");
                 s[idx++] = sub.getSourceFile().getName();
                 s[idx++] = "N/A";
             }
             s[idx++] = getLanguageTitle(sub.getLanguage());
-            s[idx++] = sub.getElementId();
+            s[idx++] = sub;
 
             return s;
         } catch (Exception exception) {
@@ -1009,7 +1182,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
     /**
      * Find row that contains the supplied key (in last column)
-     * @param value - unique key - really, the ElementId of run
+     * @param value - unique key - really, the SubmissionSample
      * @return index of row, or -1 if not found
      */
     private int getRowByKey(Object value) {
@@ -1025,26 +1198,6 @@ public class SubmitSampleRunsPane extends JPanePlugin {
             }
         }
         return(-1);
-    }
-
-    /**
-     * Remove run from grid by removing the data row from the TableModel
-     *
-     * @param run
-     */
-    private void removeRunRow(final Run run) {
-
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-
-                int rowNumber = getRowByKey(run.getElementId());
-                if (rowNumber != -1) {
-                    runTableModel.removeRow(rowNumber);
-                    updateRowCount();
-                }
-            }
-        });
     }
 
     /**
@@ -1077,7 +1230,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
                 }
 
                 Object[] objects = buildRunRow(sub, whoJudgedId);
-                int rowNumber = getRowByKey(sub.getElementId());
+                int rowNumber = getRowByKey(sub);
                 if (rowNumber == -1) {
                     // No row with this key - add new one
                     runTableModel.addRow(objects);
@@ -1148,44 +1301,40 @@ public class SubmitSampleRunsPane extends JPanePlugin {
         public void runAdded(RunEvent event) {
             SubmissionSample sub = null;
             Run run = event.getRun();
+            Integer runNum = new Integer(run.getNumber());
+
+            if(runsAdded.contains(runNum)) {
+                log.log(Level.WARNING, "Duplicate runAdded event for Run id " + run.getNumber() + " ignored.");
+                if(Utilities.isDebugMode()) {
+                    System.out.println("Duplicate runAdded (" + run.getNumber() + ") ignored - currentSubmission #" + currentSubmission);
+                }
+                return;
+            }
+            runsAdded.add(runNum);
+            if(Utilities.isDebugMode()) {
+                System.out.println("Got runAdded for run ID " + run.getNumber() + " - added to runsAdded hashset");
+            }
+
             ClientId me = getContest().getClientId();
 
             // We are only interested in runs we submitted
             if(run.getSubmitter().equals(me)) {
-
-                // JB - think this test for duplicate is inadequate.
-                // We should remember the run id in a hashmap or something and ignore it if was seen
-                SubmissionSample dupRun = getSubmission(event);
-                if(dupRun == null) {
-                    try {
-                        // This is the last run - it has to be the one that was just added by us
-                        sub = submissionList.get(currentSubmission);
-                    } catch (Exception e) {
-                        log.log(Level.WARNING, "No submission sample for run id " + run.getNumber(), e);
-                        if(Utilities.isDebugMode()) {
-                            System.out.println("No submission runAdded (" + run.getNumber() + ") - currentSubmission #" + currentSubmission);
-                        }
-                    }
-                } else {
-                    log.log(Level.WARNING, "Duplicate runAdded event for Run id " + run.getNumber() + " ignored.");
+                // This is the last run - it has to be the one that was just added by us
+                sub = submissionList.get(currentSubmission);
+                if(sub != null) {
+                    stopSubmissionTimer();
+                    sub.setRun(run);
                     if(Utilities.isDebugMode()) {
-                        System.out.println("Duplicate runAdded (" + run.getNumber() + ") ignored - currentSubmission #" + currentSubmission);
+                        System.out.println("Received runAdded currentSubmission #" + currentSubmission + " for problem " + sub.toString());
                     }
-                }
-            }
-            if(sub != null) {
-                stopSubmissionTimer();
-                sub.setRun(run);
-                if(Utilities.isDebugMode()) {
-                    System.out.println("Received runAdded currentSubmission #" + currentSubmission + " for problem " + sub.toString());
-                }
-                updateRunRow(sub, event.getWhoModifiedRun(), true);
-                // setup for next submission; if last one clean things up.
-                currentSubmission++;
-                if(currentSubmission >= submissionFileList.size()) {
-                    clearSubmissionFiles();
-                } else {
-                    submitNextSubmission();
+                    updateRunRow(sub, event.getWhoModifiedRun(), true);
+                    // setup for next submission; if last one clean things up.
+                    currentSubmission++;
+                    if(currentSubmission >= submissionFileList.size()) {
+                        clearSubmissionFiles();
+                    } else {
+                        submitNextSubmission();
+                    }
                 }
             }
         }
