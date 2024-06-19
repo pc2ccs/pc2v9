@@ -6,6 +6,7 @@ import java.util.Vector;
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
 
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -99,17 +100,29 @@ public class SampleResultsTableModel extends DefaultTableModel {
                         if (probID!=null) {
                             Problem prob = contest.getProblem(probID);
                             if (prob!=null) {
+                                String extPath = contest.getContestInformation().getJudgeCDPBasePath();
+                                String judgesFileName;
                                 //update team-compare and judges-answer-file links if there is a judge's answer file
                                 String answerFileName = prob.getAnswerFileName(row+1);
                                 if (answerFileName!=null && answerFileName.length()>0) {
                                     //there is a judge's answer file for this problem for this test case
-                                    judgesOutputViewLabel.setText("View");
+                                    judgesOutputViewLabel.setText(answerFileName);
+                                    judgesFileName = Utilities.locateJudgesDataFile(prob, answerFileName, extPath);
+                                    if(judgesFileName == null) {
+                                        judgesFileName = answerFileName;
+                                    }
+                                    judgesOutputViewLabel.setToolTipText(judgesFileName);
                                 }
                                 //update judge's data file link if the problem has a judge's data file
                                 String dataFileName = prob.getDataFileName(row+1);
                                 if (dataFileName!=null && dataFileName.length()>0) {
                                     //there is a judge's data file for this problem for this test case
-                                    judgesDataViewLabel.setText("View");
+                                    judgesDataViewLabel.setText(dataFileName);
+                                    judgesFileName = Utilities.locateJudgesDataFile(prob, dataFileName, extPath);
+                                    if(judgesFileName == null) {
+                                        judgesFileName = dataFileName;
+                                    }
+                                    judgesDataViewLabel.setToolTipText(judgesFileName);
                                 }
                             }
                         }
@@ -118,7 +131,7 @@ public class SampleResultsTableModel extends DefaultTableModel {
 
                 // build the row object and add it to the model
                 Object[] rowData = new Object[] { testCaseNum, resultLabel, time,
-                        judgesOutputViewLabel, judgesDataViewLabel};
+                        judgesDataViewLabel, judgesOutputViewLabel};
 
                 super.addRow(rowData);
             }
@@ -183,7 +196,7 @@ public class SampleResultsTableModel extends DefaultTableModel {
 
         //build the row object and add it to the model
         Object [] rowData = new Object [] {testCaseNum, resultLabel, data.getTime(),
-                judgesOutputViewJLabel, judgesDataViewJLabel };
+                judgesDataViewJLabel, judgesOutputViewJLabel };
 
         super.addRow(rowData);
     }

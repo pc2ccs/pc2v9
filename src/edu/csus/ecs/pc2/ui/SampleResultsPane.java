@@ -4,10 +4,14 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -29,6 +33,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -57,12 +62,12 @@ public class SampleResultsPane extends JPanePlugin implements TableModelListener
      * list of columns
      */
     protected enum COLUMN {
-        DATASET_NUM, RESULT, TIME, JUDGE_OUTPUT, JUDGE_DATA
+        DATASET_NUM, RESULT, TIME, JUDGE_DATA, JUDGE_OUTPUT
     };
 
     // define the column headers for the table of results
     private String[] columnNames = { "Data Set #", "Result", "Time (s)",
-                                        "Judge's Output", "Judge's Data" };
+                                        "Judge's Data", "Judge's Output" };
 
     private JPanel centerPanel = null;
 
@@ -99,6 +104,8 @@ public class SampleResultsPane extends JPanePlugin implements TableModelListener
     private JLabel lblNumTestCasesActuallyRun;
     private JLabel lblNumFailedTestCases;
     private Component horizontalGlue_9;
+
+    private MultipleFileViewer currentViewer = null;
 
     private boolean debug = false;
 
@@ -421,6 +428,11 @@ public class SampleResultsPane extends JPanePlugin implements TableModelListener
 
                 resultsTable = getResultsTable(testCases);
                 getResultsScrollPane().setViewportView(resultsTable);
+
+                // On switch of data, clear tabs that are there from previous
+                if(currentViewer != null) {
+                    currentViewer.dispose();
+                }
             }
 
         });
@@ -598,6 +610,80 @@ public class SampleResultsPane extends JPanePlugin implements TableModelListener
 
         // render Time column right-justified
         localResultsTable.getColumn(columnNames[COLUMN.TIME.ordinal()]).setCellRenderer(new RightJustifiedCellRenderer());
+
+        // add a listener to allow users to click an output or data file name and display it
+        MouseAdapter linkListener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JTable target = (JTable) e.getSource();
+                int row = target.getSelectedRow();
+                int column = target.getSelectedColumn();
+
+                if (Utilities.isDebugMode()) {
+                    System.out.println("Mouse clicked in cell (" + row + "," + column + ")");
+                }
+
+                if (column != COLUMN.JUDGE_OUTPUT.ordinal() && column != COLUMN.JUDGE_DATA.ordinal()) {
+                    //user clicked on a column that doesn't contain a link; ignore it
+                    if (Utilities.isDebugMode()) {
+                        System.out.println ("... ignored");
+                    }
+                    return;
+                }
+
+                //get the text in the JLabel at the current row/column cell
+                String labelString = "";
+                String tooltipString = "";
+                try {
+                    JLabel targetLabel = (JLabel)target.getValueAt(row, column);
+                    // Text shown in the cell
+                    labelString = targetLabel.getText();
+                    // full filename is the tooltip, we use that to display the file.
+                    tooltipString = targetLabel.getToolTipText();
+                } catch (ClassCastException e1) {
+                     if (log != null) {
+                        log.warning("SampleResultsPane.getResultsTable(): expected to find a JLabel in localResultsTable; exception: "
+                                + e1.getMessage());
+                    } else {
+                        System.err.println("SampleResultsPane.getResultsTable(): expected to find a JLabel in localResultsTable; exception: "
+                                + e1.getMessage());
+                    }
+                    return;
+                }
+
+                //check whether the clicked cell has a visible string in it (only cells with legitimate links to something have non-empty strings)
+                if (!labelString.equals("")) {
+                    if(Utilities.isDebugMode()) {
+                        System.out.println("Clicked on " + labelString + "(" + tooltipString + ")");
+                    }
+                    String title, tabLabel;
+                    if(column == COLUMN.JUDGE_OUTPUT.ordinal()) {
+                        title = "Judge's Answer File";
+                        tabLabel= "Ans";
+                    } else {
+                        title = "Judge's Input File";
+                        tabLabel= "In";
+                    }
+                    tabLabel = tabLabel + " File #" + target.getValueAt(row,  COLUMN.DATASET_NUM.ordinal());
+                    showFile(getCurrentViewer(), tooltipString, title, tabLabel, true);
+                }
+                //else cell was empty - ignore the the click
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                JTable target = (JTable) e.getSource();
+                int column = target.columnAtPoint(e.getPoint());
+
+                if (column != COLUMN.JUDGE_OUTPUT.ordinal() && column != COLUMN.JUDGE_DATA.ordinal()) {
+                    target.setCursor(Cursor.getDefaultCursor());
+                    return;
+                }
+                target.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+        };
+        localResultsTable.addMouseListener(linkListener);
+        localResultsTable.addMouseMotionListener(linkListener);
 
         return localResultsTable;
     }
@@ -813,4 +899,54 @@ public class SampleResultsPane extends JPanePlugin implements TableModelListener
         }
         return horizontalGlue_9;
     }
+
+    /**
+     * @return the currentViewer
+     */
+    public MultipleFileViewer getCurrentViewer() {
+        if (currentViewer == null) {
+            currentViewer = new MultipleFileViewer(getController().getLog());
+        }
+        return currentViewer;
+    }
+
+    /**
+     * Uses the specified fileViewer to display the specified file, setting the title and message
+     * on the viewer to the specified values and invoking "setVisible()" on the viewer if desired.
+     * @param fileViewer - the viewer to be used
+     * @param file - the file to be displayed in the viewer
+     * @param title - the title to be set on the viewer title bar
+     * @param tabLabel - the label to be put on the viewer pane tab
+     * @param visible - whether or not to invoke setVisible(true) on the viewer
+     */
+    private void showFile(MultipleFileViewer fileViewer, String file, String title, String tabLabel, boolean visible) {
+
+        if (fileViewer == null || file == null) {
+            log = getController().getLog();
+            log.log(Log.WARNING, "SampleResultsPane.showFile(): fileViewer or file is null");
+            JOptionPane.showMessageDialog(getParentFrame(),
+                    "System Error: null fileViewer or file; contact Contest Administrator (check logs)",
+                    "System Error", JOptionPane.ERROR_MESSAGE);
+            return ;
+        }
+        File myFile = new File(file);
+        if (! myFile.isFile()) {
+            JOptionPane.showMessageDialog(getParentFrame(),
+                "Error: could not find file: " + file,
+                "File Missing", JOptionPane.ERROR_MESSAGE);
+            log = getController().getLog();
+            log.warning("SampleResultsPane.showFile(): could not find file "+file);
+            return;
+        }
+        fileViewer.setTitle(title);
+        fileViewer.addFilePane(tabLabel, file);
+        // addFilePane always adds it first
+        fileViewer.setSelectedIndex(0);
+        fileViewer.enableCompareButton(false);
+        fileViewer.setInformationLabelText("File: " + myFile.getName());
+        if (visible) {
+            fileViewer.setVisible(true);
+        }
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"
