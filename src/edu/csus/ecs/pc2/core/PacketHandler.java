@@ -1561,6 +1561,8 @@ public class PacketHandler {
             }
         }
 
+        Boolean overrideStopOnFailure = (Boolean) PacketFactory.getObjectValue(packet,  PacketFactory.OVERRIDE_STOP_ON_FAILURE);
+
         ClientId submitter = submittedRun.getSubmitter();
         boolean proxySubmission = ! submitter.equals(fromId);
 
@@ -1589,6 +1591,7 @@ public class PacketHandler {
         }
 
         Run run = contest.acceptRun(submittedRun, runFiles);
+        boolean updateRun = false;
 
         /**
          * There are three conditions where a run would be added to the system but not appear on the scoreboard (or team's display):
@@ -1600,6 +1603,14 @@ public class PacketHandler {
         if (contestTime.isPastEndOfContest() || !contestTime.isContestRunning() || submittedRun.getOverRideElapsedTimeMS() > contestTime.getContestLengthMS()) {
             run.setDeleted(true);
             submittedRun.setDeleted(true);
+            updateRun = true;
+        }
+
+        if(overrideStopOnFailure) {
+            run.setOverrideStopOnFailure(true);
+            updateRun = true;
+        }
+        if(updateRun) {
             contest.updateRun(run, getServerClientId());
         }
 

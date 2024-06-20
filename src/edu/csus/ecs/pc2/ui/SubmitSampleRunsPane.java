@@ -22,6 +22,7 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -115,6 +116,8 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
     private JPanel messagePanel = null;
     private JLabel rowCountLabel = null;
+
+    private JCheckBox overrideStopOnError = null;
 
     /**
      * User filter
@@ -271,6 +274,11 @@ public class SubmitSampleRunsPane extends JPanePlugin {
                 resetFields(true);
             }
         });
+
+        overrideStopOnError = new JCheckBox("Stop on first failure");
+        overrideStopOnError.setSelected(false);
+        overrideStopOnError.setToolTipText("Use this checkbox to override the problem defined behaviour of judging when a testcase fails.");
+        bottomPane.add(overrideStopOnError);
 
         resetButton.setToolTipText("Reset back to default settings");
         bottomPane.add(resetButton);
@@ -521,7 +529,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 	        submissionWaitTimer = new Timer("Submission Wait Timer " + currentSubmission);
 	        submissionWaitTimer.schedule(submissionTimerTask, SUBMISSION_WAIT_TIMEOUT_MS);
 
-            SubmissionSample sub = submitter.sendSubmission(file);
+            SubmissionSample sub = submitter.sendSubmission(file, !overrideStopOnError.isSelected());
             if(sub != null) {
                 submissionList.add(sub);
                 updateRunRow(sub, getContest().getClientId(), true);

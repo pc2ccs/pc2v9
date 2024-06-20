@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
@@ -75,7 +76,14 @@ public class SampleResultsTableModel extends DefaultTableModel {
                     if (passed) {
                         resultString = "Pass";
                     } else {
+                        ElementId judgmentId = testCaseResults[row].getJudgementId();
                         resultString = "Fail";
+                        if(judgmentId != null) {
+                            Judgement judgment = contest.getJudgement(judgmentId);
+                            if(judgment != null) {
+                                resultString = String.format("Fail - %s : %s", judgment.getDisplayName(), judgment.getAcronym());
+                            }
+                        }
                     }
                 }
                 JLabel resultLabel = new JLabel(resultString);

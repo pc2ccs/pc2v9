@@ -111,6 +111,8 @@ public class Run extends Submission {
 
     private int overrideNumber = 0;
 
+    private boolean overrideStopOnFailure = false;
+
     /**
      * Short/basename for submitted file.
      */
@@ -483,5 +485,23 @@ public class Run extends Submission {
         }
 
         return null;
+    }
+
+    /**
+     * Sets the "one-shot" flag to override the stop on failure for a problem
+     * This is used for submitting sample judge runs.
+     *
+     * @param override true to override stop on failure, otherwise it uses the value for the problem
+     */
+    public void setOverrideStopOnFailure(boolean override) {
+        overrideStopOnFailure = override;
+    }
+
+    /**
+     *
+     * @return if we should override the stop on failure set for a problem
+     */
+    public boolean isOverrideStopOnFailure() {
+        return overrideStopOnFailure;
     }
 }

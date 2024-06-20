@@ -31,13 +31,19 @@ public class ListUtilities {
     public static List<File> filterByJudgingTypes(List<File> files, List<String> submissionSolutionList) {
 
         List<File> newFileList = new ArrayList<File>();
+        int idx;
 
         for (File file : files) {
-            submissionSolutionList.forEach((subSol) -> {
-                if (file.getAbsolutePath().contains(File.separator + subSol + File.separator)) {
+            String filePath = file.getAbsolutePath();
+            for(String subSol : submissionSolutionList) {
+                idx = subSol.indexOf(':');
+                if(idx > 0) {
+                    subSol = subSol.substring(0, idx).trim();
+                }
+                if (filePath.contains(File.separator + subSol + File.separator)) {
                     newFileList.add(file);
                 }
-            });
+            }
         }
 
         return newFileList;

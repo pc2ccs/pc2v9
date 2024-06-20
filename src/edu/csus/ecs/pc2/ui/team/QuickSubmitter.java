@@ -134,6 +134,22 @@ public class QuickSubmitter implements UIPlugin {
      * @return the SubmissionSample if it was submitted, null otherwise
      */
     public SubmissionSample sendSubmission(File file) {
+        return(sendSubmission(file, false));
+    }
+
+    /**
+     * submit a single run
+     *
+     * Will guess langauge and problem based on path
+     *
+     * @see #guessLanguage(IInternalContest, String)
+     * @see #guessProblem(IInternalContest, String)
+     *
+     * @param File object to submit
+     * @param Boolean overrideStopOnFailure - to override iff a problem has stop on failiure set.
+     * @return the SubmissionSample if it was submitted, null otherwise
+     */
+    public SubmissionSample sendSubmission(File file, boolean overrideStopOnFailure) {
 
         SubmissionSample subResult = null;
         String filePath = file.getAbsolutePath();
@@ -146,7 +162,7 @@ public class QuickSubmitter implements UIPlugin {
             } else {
                 Problem problem = guessProblem(getContest(), filePath);
                 try {
-                    controller.submitJudgeRun(problem, language, filePath, null);
+                    controller.submitJudgeRun(problem, language, filePath, null, overrideStopOnFailure);
                     log.log(Level.INFO, "submitted run with language " + language + " and problem " + problem + " source: " + filePath);
                     subResult = new SubmissionSample(problem.getShortName(), problem.getElementId(),
                             language.getDisplayName(), language.getElementId(), guessSubmissionType(file.getParent()), file);
