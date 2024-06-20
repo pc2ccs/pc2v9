@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -17,22 +17,22 @@ import javax.swing.JScrollPane;
  * A Pane that presents the user with a list of items and provides a way to identify
  * which list items are selected.   On Update will return the selected items via
  * the callback  ISelectedListsSetter.
- * 
+ *
  * Provides a way to show the user a list of items to select, then
  * use ISelectedListsSetter to return the selected values to the calling method.
- * 
+ *
  * As input takes a list of items and corresponding (if any) indexes of selected items.
- * 
+ *
  * When a user selects items and clicks Update will call the ISelectedListsSetter with
  * the item list and (new) list of selected indexes within that list.
- * 
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  *
  */
 // TODO NOW 232 fix bug where says there is a change, when not selection change has been made.
 public class JListPane extends JPanePlugin {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -1383088589409036086L;
 
@@ -60,7 +60,8 @@ public class JListPane extends JPanePlugin {
 
 		JButton saveButton = new JButton("Save");
 		saveButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+			@Override
+            public void actionPerformed(ActionEvent e) {
 				saveAndClose();
 			}
 		});
@@ -68,7 +69,8 @@ public class JListPane extends JPanePlugin {
 
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+			@Override
+            public void actionPerformed(ActionEvent e) {
 				closeTheWindow();
 			}
 		});
@@ -77,8 +79,8 @@ public class JListPane extends JPanePlugin {
 
 	/**
 	 * Create a pane that has a list of objects.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param parentFrame          parent frame for JPanel, used to close parent frame
 	 * @param items                list of items to display, must be at least one
 	 *                             item
@@ -89,7 +91,7 @@ public class JListPane extends JPanePlugin {
 	@SuppressWarnings("unchecked")
 	public JListPane(JFrame parentFrame, Object [] items, int[] selectedItemsIndexes, ISelectedListsSetter selectedListsSetter) {
 		this();
-		
+
 		if (selectedListsSetter == null) {
 			throw new IllegalArgumentException("selectedListsSetter is null");
 		}
@@ -145,7 +147,7 @@ public class JListPane extends JPanePlugin {
 	protected void saveAndClose() {
 
 		selectedListsSetter.setSelectedValuesList(theList.getSelectedValuesList(), theList.getSelectedIndices());
-		
+
 		if (parentFrame != null) {
 		    parentFrame.setVisible(false);
 		    parentFrame.dispose();

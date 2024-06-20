@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.server;
 
 import java.awt.BorderLayout;
@@ -59,7 +59,6 @@ import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPane;
-import edu.csus.ecs.pc2.ui.SubmitSampleRunsPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -557,9 +556,6 @@ public class ServerView extends JFrame implements UIPlugin {
 
         if (Utilities.isDebugMode()) {
             try {
-                SubmitSampleRunsPane submitSampleRunsPane = new SubmitSampleRunsPane();
-                addUIPlugin(getMainTabbedPane(), "Submit Judges", submitSampleRunsPane);
-
                 PacketMonitorPane packetMonitorPane = new PacketMonitorPane();
                 addUIPlugin(getMainTabbedPane(), "Packets", packetMonitorPane);
 

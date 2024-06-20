@@ -1,5 +1,11 @@
+// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.list;
 
+/**
+ * A judge's submission sample
+ *
+ * @author John Buck, PC^2 Team, pc2@ecs.csus.edu
+ */
 import java.io.File;
 
 import edu.csus.ecs.pc2.core.model.ElementId;
