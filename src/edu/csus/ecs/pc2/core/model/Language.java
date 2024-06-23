@@ -245,6 +245,15 @@ public class Language implements IElementObject {
         return elementId.hashCode();
     }
 
+    /**
+     * Check if extensions array is allocated.  If not allocate it.  This can happen on deserialization of an older object.
+     */
+    private void checkExtensions() {
+        if(extensions == null) {
+            extensions = new ArrayList<String>();
+        }
+    }
+
     public String getExecutableIdentifierMask() {
         return executableIdentifierMask;
     }
@@ -282,7 +291,8 @@ public class Language implements IElementObject {
     }
 
     public void setID(String newId) {
-        this.id = newId;
+        id = newId;
+        checkExtensions();
         // set default extensions for the language based on its CLICS id
         if(extensions.isEmpty()) {
             String [] ext = null;
@@ -308,12 +318,34 @@ public class Language implements IElementObject {
     }
 
     public void setExtensions(ArrayList<String> exts) {
+        checkExtensions();
         extensions.clear();
         extensions.addAll(exts);
     }
 
     public ArrayList<String> getExtensions() {
+        checkExtensions();
+        if(extensions.isEmpty()) {
+            setDefaultExtensions();
+        }
         return(extensions);
+    }
+
+    /**
+     * In the event the user did not specify a CLICS ID for the language, we have to make a guess.
+     * We use is the lower-case display name, minus spaces, and + changed to p, and compare to our known
+     * list of CLICS ids.
+     */
+    private void setDefaultExtensions()
+    {
+        // Make lower case, get rid of spaces and convert all plus signs to p's (eg c++ -> cpp)
+        String fauxId = getDisplayName().toLowerCase().replaceAll("\\s", "").replaceAll("\\+", "p");
+        // Let's use it as the clics ID
+        setID(fauxId);
+        // if it didn't work, then pretend we didn't try.
+        if(extensions.isEmpty()) {
+            id = null;
+        }
     }
 
     /**
