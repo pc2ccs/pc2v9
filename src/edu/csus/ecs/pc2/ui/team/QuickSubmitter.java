@@ -104,7 +104,7 @@ public class QuickSubmitter implements UIPlugin {
      * @see #guessProblem(IInternalContest, String)
      *
      * @param a list of files to submit
-     * @return count of files sucessfully submitted/added.
+     * @return list of successfully submitted samples.
      */
     public List<SubmissionSample> sendSubmissions(List<File> filesToSubmit) {
 

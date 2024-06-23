@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.validator.clicsValidator.ClicsValidator;
  */
 public class ListUtilities {
 
-	/**
+    /**
      * Returns list of files that match the SubmissionSolutionList (judging types location/list)
      *
      * @param files list of files to be filtered
@@ -55,7 +55,7 @@ public class ListUtilities {
      * @param dirName location to fetch files from
      * @return list of files in and under dirName
      */
-	// TODO REFACTOR replace findAll from QuickSubmitter with this method.
+    // TODO REFACTOR replace findAll from QuickSubmitter with this method.
     public static List<File> findAllFiles(String dirName) {
 
         List<File> files = new ArrayList<>();
@@ -79,92 +79,92 @@ public class ListUtilities {
         return files;
     }
 
-	/**
-	 * Get all CDP judge's sample submission filenames.
-	 *
-	 * Example files under config\sumit\submissions
-	 *
-	 * @param mycontest
-	 * @param directoryName CDP config/ dir or CDP base directory
-	 * @return list of judges sample submissions
-	 */
-	// TODO REFACTOR remove getAllCDPsubmissionFileNames from QuickSubmitter
-	public static List<File> getAllJudgeSampleSubmissionFilenamesFromCDP(IInternalContest mycontest, String directoryName) {
+    /**
+     * Get all CDP judge's sample submission filenames.
+     *
+     * Example files under config\sumit\submissions
+     *
+     * @param mycontest
+     * @param directoryName CDP config/ dir or CDP base directory
+     * @return list of judges sample submissions
+     */
+    // TODO REFACTOR remove getAllCDPsubmissionFileNames from QuickSubmitter
+    public static List<File> getAllJudgeSampleSubmissionFilenamesFromCDP(IInternalContest mycontest, String directoryName) {
 
-		Problem[] problems = mycontest.getProblems();
-		List<File> files = new ArrayList<>();
+        Problem[] problems = mycontest.getProblems();
+        List<File> files = new ArrayList<>();
 
-		String configDir = directoryName + File.separator + IContestLoader.CONFIG_DIRNAME;
-		if (new File(configDir).isDirectory()) {
-		    directoryName = configDir;
-		}
+        String configDir = directoryName + File.separator + IContestLoader.CONFIG_DIRNAME;
+        if (new File(configDir).isDirectory()) {
+            directoryName = configDir;
+        }
 
-		for (Problem problem : problems) {
+        for (Problem problem : problems) {
 
-			// config\sumit\submissions\accepted\ISumit.java
-			String probSubmissionDir = directoryName + File.separator + problem.getShortName() + File.separator
-					+ IContestLoader.SUBMISSIONS_DIRNAME;
-			files.addAll(findAllFiles(probSubmissionDir));
+            // config\sumit\submissions\accepted\ISumit.java
+            String probSubmissionDir = directoryName + File.separator + problem.getShortName() + File.separator
+                    + IContestLoader.SUBMISSIONS_DIRNAME;
+            files.addAll(findAllFiles(probSubmissionDir));
 
-		}
+        }
 
-		HashSet<String> allExts = new HashSet<String>();
-		String ext, srcFile;
-		int ridx;
+        HashSet<String> allExts = new HashSet<String>();
+        String ext, srcFile;
+        int ridx;
 
-		// make up hashset of all language extensions
-		for(Language lang : mycontest.getLanguages()) {
-		    allExts.addAll(lang.getExtensions());
-		}
-		// Reverse scan for uninteresting files and remove them.
-		for(int i = files.size(); --i >= 0; ) {
-		    srcFile = files.get(i).getName();
-		    ridx = srcFile.lastIndexOf('.');
-		    // if no extension on the file, or, it's not in our list of src extensions, drop the file.
-		    if(ridx == -1 || !allExts.contains(srcFile.substring(ridx+1))) {
-		        files.remove(i);
-		    }
-		}
+        // make up hashset of all language extensions
+        for(Language lang : mycontest.getLanguages()) {
+            allExts.addAll(lang.getExtensions());
+        }
+        // Reverse scan for uninteresting files and remove them.
+        for(int i = files.size(); --i >= 0; ) {
+            srcFile = files.get(i).getName();
+            ridx = srcFile.lastIndexOf('.');
+            // if no extension on the file, or, it's not in our list of src extensions, drop the file.
+            if(ridx == -1 || !allExts.contains(srcFile.substring(ridx+1))) {
+                files.remove(i);
+            }
+        }
 
-		return files;
-	}
+        return files;
+    }
 
-	/**
-	 * Gets a list of all the different types of judges' submissions by scanning the submissions folder for
-	 * each problem.  ex. accepted, wrong_answer, time_limit_exceeded, other, run_time_exception, etc.
-	 * To qualify as a valid type, the particular folder must contain at least one source file with a known
-	 * extension for the configurationed languages.
-	 *
-	 * @param mycontest The contest
-	 * @param directoryName Where to start looking (config folder)
-	 * @return List<String> of folder basenames
-	 */
-	public static List<String> getAllCDPSubmissionTypes(IInternalContest mycontest, String directoryName) {
-	    List <File> files = getAllJudgeSampleSubmissionFilenamesFromCDP(mycontest, directoryName);
-	    String srcName;
-	    int idx;
-	    ArrayList<String> types = new ArrayList<String>();
-	    HashSet<String> uniqTypes = new HashSet<String>();
+    /**
+     * Gets a list of all the different types of judges' submissions by scanning the submissions folder for
+     * each problem.  ex. accepted, wrong_answer, time_limit_exceeded, other, run_time_exception, etc.
+     * To qualify as a valid type, the particular folder must contain at least one source file with a known
+     * extension for the configurationed languages.
+     *
+     * @param mycontest The contest
+     * @param directoryName Where to start looking (config folder)
+     * @return List<String> of folder basenames
+     */
+    public static List<String> getAllCDPSubmissionTypes(IInternalContest mycontest, String directoryName) {
+        List <File> files = getAllJudgeSampleSubmissionFilenamesFromCDP(mycontest, directoryName);
+        String srcName;
+        int idx;
+        ArrayList<String> types = new ArrayList<String>();
+        HashSet<String> uniqTypes = new HashSet<String>();
 
-	    for(File src : files ) {
-	        srcName = src.getParent();
-	        idx = srcName.lastIndexOf(File.separator);
-	        if(idx != -1) {
-	            srcName = srcName.substring(idx+1);
-	        }
-	        if(!uniqTypes.contains(srcName)) {
-    	        types.add(srcName);
-    	        uniqTypes.add(srcName);
-	        }
-	    }
-	    types.sort(null);
-	    return(types);
-	}
+        for(File src : files ) {
+            srcName = src.getParent();
+            idx = srcName.lastIndexOf(File.separator);
+            if(idx != -1) {
+                srcName = srcName.substring(idx+1);
+            }
+            if(!uniqTypes.contains(srcName)) {
+                types.add(srcName);
+                uniqTypes.add(srcName);
+            }
+        }
+        types.sort(null);
+        return(types);
+    }
 
-	/**
-	 * Find files (in CDP) that contain one of the Problems in the list.
-	 *
-	 */
+    /**
+     * Find files (in CDP) that contain one of the Problems in the list.
+     *
+     */
     public static List<File> filterByProblems(List<File> files, List<Problem> selectedProblemList) {
 
         List<File> newFileList = new ArrayList<File>();

@@ -1606,7 +1606,7 @@ public class PacketHandler {
             updateRun = true;
         }
 
-        if(overrideStopOnFailure) {
+        if(overrideStopOnFailure != null && overrideStopOnFailure.booleanValue() == true) {
             run.setOverrideStopOnFailure(true);
             updateRun = true;
         }

@@ -542,7 +542,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * {@inheritDoc}
      * Calling this method is equivalent to calling
-     * {@link #submitJudgeRun(Problem, Language, String, SerializedFile[], long, long)}
+     * {@link #submitJudgeRun(Problem, Language, String, SerializedFile[], long, long, boolean)}
      * with zeroes as the last two parameters.
      */
     @Override

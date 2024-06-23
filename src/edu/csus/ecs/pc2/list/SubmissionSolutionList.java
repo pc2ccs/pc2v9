@@ -17,30 +17,30 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  */
 public class SubmissionSolutionList extends ArrayList<SubmissionSampleLocation> {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 6231245379952020474L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 6231245379952020474L;
 
-	private Hashtable<String, String> submissionDirectoryToAcronym = new Hashtable<String, String>();
+    private Hashtable<String, String> submissionDirectoryToAcronym = new Hashtable<String, String>();
 
-	public SubmissionSolutionList() {
-		super();
+    public SubmissionSolutionList() {
+        super();
         createSubmissionDirectoryMap();
-	}
+    }
 
-	public SubmissionSolutionList(IInternalContest mycontest, String cdpPath) {
-		super();
-		createSubmissionDirectoryMap();
-		loadCDPSampleSubmissionList(mycontest, cdpPath);
-	}
+    public SubmissionSolutionList(IInternalContest mycontest, String cdpPath) {
+        super();
+        createSubmissionDirectoryMap();
+        loadCDPSampleSubmissionList(mycontest, cdpPath);
+    }
 
-	private void createSubmissionDirectoryMap() {
+    private void createSubmissionDirectoryMap() {
         // Create quick access to look up acronym for folder
         for(String [] subFolderRow : SubmissionSampleLocation.CLICS_SUBMISSION_TO_ACRONYM) {
             submissionDirectoryToAcronym.put(subFolderRow[0], subFolderRow[1]);
         }
-	}
+    }
 
     /**
      * get all directories and child directories (recurses).
@@ -48,7 +48,7 @@ public class SubmissionSolutionList extends ArrayList<SubmissionSampleLocation> 
      * @param directory
      * @return list of directory names
      */
-	// TODO REFACTOR move to FileUtilities.getAllDirectoryEntries
+    // TODO REFACTOR move to FileUtilities.getAllDirectoryEntries
     public static List<String> getAllDirectoryEntries(String directory) {
 
         ArrayList<String> list = new ArrayList<>();
@@ -57,14 +57,14 @@ public class SubmissionSolutionList extends ArrayList<SubmissionSampleLocation> 
 
         if (files != null) {
 
-        	for (File entry : files) {
-        		if (entry.isDirectory()) {
-        			list.add(directory + File.separator + entry.getName());
-        			if (!(entry.getName().equals(".") || entry.getName().equals(".."))) {
-        				list.addAll(getAllDirectoryEntries(directory + File.separator + entry.getName()));
-        			}
-        		}
-        	}
+            for (File entry : files) {
+                if (entry.isDirectory()) {
+                    list.add(directory + File.separator + entry.getName());
+                    if (!(entry.getName().equals(".") || entry.getName().equals(".."))) {
+                        list.addAll(getAllDirectoryEntries(directory + File.separator + entry.getName()));
+                    }
+                }
+            }
         }
 
         return list;
@@ -83,17 +83,17 @@ public class SubmissionSolutionList extends ArrayList<SubmissionSampleLocation> 
         return null;
     }
 
-	/**
-	 * Load Judge's samples judgement types
-	 * @param cdpPath
-	 * @throws IOException
-	 */
+    /**
+     * Load Judge's samples judgement types
+     * @param cdpPath
+     * @throws IOException
+     */
     // TODO NOW use FileUtilities.getAllDirectoryEntries
-	private void loadCDPSampleSubmissionList(IInternalContest contest, String cdpPath)  {
+    private void loadCDPSampleSubmissionList(IInternalContest contest, String cdpPath)  {
 
-	    List<String> types = ListUtilities.getAllCDPSubmissionTypes(contest, cdpPath);
-	    for(String type : types) {
-	        super.add(new SubmissionSampleLocation("", type, getAcronymForSubmissionDirectory(type)));
-	    }
-	}
+        List<String> types = ListUtilities.getAllCDPSubmissionTypes(contest, cdpPath);
+        for(String type : types) {
+            super.add(new SubmissionSampleLocation("", type, getAcronymForSubmissionDirectory(type)));
+        }
+    }
 }

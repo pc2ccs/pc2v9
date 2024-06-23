@@ -25,57 +25,57 @@ public class SubmissionSampleLocation  implements Comparable<SubmissionSampleLoc
         { CLICS_SUBMISSION_LOCATION_CE, CLICSJudgementType.CLICS_BIG5.CE.toString() }
     };
 
-	private String title;
-	private String shortDirectoryName;
-	private String clicsAcronym;
+    private String title;
+    private String shortDirectoryName;
+    private String clicsAcronym;
 
-	/**
-	 * A judges solution name and location.
-	 *
-	 * @param title title for directory, ex. Run Time Error
-	 * @param shortDirectoryName base directory name, ex. run_time_error
-	 * @param clicsAcronym Big-5 acronym AC/WA/RTE/TLE/CE
-	 */
-	public SubmissionSampleLocation(String title, String shortDirectoryName, String clicsAcronym) {
-		this.title = title;
-		this.shortDirectoryName = shortDirectoryName;
-		if(clicsAcronym == null || clicsAcronym.isEmpty()) {
-		    this.clicsAcronym = "NA";
-		} else {
-		    this.clicsAcronym = clicsAcronym;
-		}
-	}
+    /**
+     * A judges solution name and location.
+     *
+     * @param title title for directory, ex. Run Time Error
+     * @param shortDirectoryName base directory name, ex. run_time_error
+     * @param clicsAcronym Big-5 acronym AC/WA/RTE/TLE/CE
+     */
+    public SubmissionSampleLocation(String title, String shortDirectoryName, String clicsAcronym) {
+        this.title = title;
+        this.shortDirectoryName = shortDirectoryName;
+        if(clicsAcronym == null || clicsAcronym.isEmpty()) {
+            this.clicsAcronym = "NA";
+        } else {
+            this.clicsAcronym = clicsAcronym;
+        }
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public String getShortDirectoryName() {
-		return shortDirectoryName;
-	}
+    public String getShortDirectoryName() {
+        return shortDirectoryName;
+    }
 
-	public String getCLICSAcronym() {
-	    return clicsAcronym;
-	}
+    public String getCLICSAcronym() {
+        return clicsAcronym;
+    }
 
-	@Override
-	public String toString() {
-	    String strVal;
+    @Override
+    public String toString() {
+        String strVal;
 
-		if (title.length() > 0) {
-			strVal = title + " ("+shortDirectoryName+")";
-		} else {
-			strVal = shortDirectoryName;
-		}
-		if(!clicsAcronym.isEmpty()) {
-		    strVal = strVal + " : " + clicsAcronym;
-		}
-		return strVal;
-	}
+        if (title.length() > 0) {
+            strVal = title + " ("+shortDirectoryName+")";
+        } else {
+            strVal = shortDirectoryName;
+        }
+        if(!clicsAcronym.isEmpty()) {
+            strVal = strVal + " : " + clicsAcronym;
+        }
+        return strVal;
+    }
 
-	@Override
-	public int compareTo(SubmissionSampleLocation o) {
-		return o.toString().compareTo(toString());
-	}
+    @Override
+    public int compareTo(SubmissionSampleLocation o) {
+        return o.toString().compareTo(toString());
+    }
 
 }

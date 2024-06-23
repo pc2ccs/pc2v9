@@ -89,25 +89,25 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
     private static final int ELAPSED_TIME_COLUMN = 5;
 
-	/**
-	 * ClientSettings key for CDP Path
-	 */
-	private static final String CUSTOM_SUBMIT_SAMPLE_CDP_PATH = "CustomSubmitSampleCDPPath";
+    /**
+     * ClientSettings key for CDP Path
+     */
+    private static final String CUSTOM_SUBMIT_SAMPLE_CDP_PATH = "CustomSubmitSampleCDPPath";
 
-	private static final long serialVersionUID = -8862440024499524533L;
+    private static final long serialVersionUID = -8862440024499524533L;
 
-	private JTextField cdpTextField;
+    private JTextField cdpTextField;
 
-	private JLabel messageLabel;
+    private JLabel messageLabel;
 
-	private QuickSubmitter submitter = new QuickSubmitter();
+    private QuickSubmitter submitter = new QuickSubmitter();
 
-	/**
-	 * List of selected solutions names and dirs.
-	 */
-	private SubmissionSolutionList submissionSolutionList = null;
+    /**
+     * List of selected solutions names and dirs.
+     */
+    private SubmissionSolutionList submissionSolutionList = null;
 
-	private JPanel centerPane = null;
+    private JPanel centerPane = null;
     private JButton filterButton = null;
 
     private JScrollPane scrollPane = null;
@@ -155,15 +155,15 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
     // TODO On Admin update of Languages or Update of Problems - clear selected index arrays
 
-	public SubmitSampleRunsPane() {
-		super();
-		setLayout(new BorderLayout());
+    public SubmitSampleRunsPane() {
+        super();
+        setLayout(new BorderLayout());
 
         add(getMessagePanel(), BorderLayout.NORTH);
         add(getCenterPanel(), BorderLayout.CENTER);
         add(getBottomPanel(), BorderLayout.SOUTH);
 
-	}
+    }
 
     /**
      * This method initializes messagePanel
@@ -288,156 +288,156 @@ public class SubmitSampleRunsPane extends JPanePlugin {
     }
 
     protected void updateCDPDirAndFields(String cdpConfigDir) {
-	    try {
+        try {
             File configFile = new File(cdpConfigDir);
             String cdpRootDirectory = configFile.getAbsolutePath();
 //            if (configFile.getAbsolutePath().endsWith(IContestLoader.CONFIG_DIRNAME)) {
 //                cdpRootDirectory = configFile.getParent();
 //            }
 
-	        cdpTextField.setText(cdpRootDirectory);
-	        updateClientCDPPath(cdpRootDirectory);
+            cdpTextField.setText(cdpRootDirectory);
+            updateClientCDPPath(cdpRootDirectory);
         } catch (Exception e) {
             log.log(Level.WARNING, "Problem updating CDP Dir", e);
         }
     }
 
-	/**
-	 * Repopulate submissionSolutionList.
-	 *
-	 * @return
-	 */
-	public SubmissionSolutionList getSubmissionSolutionList() {
-		String cdpPath = cdpTextField.getText();
+    /**
+     * Repopulate submissionSolutionList.
+     *
+     * @return
+     */
+    public SubmissionSolutionList getSubmissionSolutionList() {
+        String cdpPath = cdpTextField.getText();
 
-		submissionSolutionList = new SubmissionSolutionList(getContest(), cdpPath);
+        submissionSolutionList = new SubmissionSolutionList(getContest(), cdpPath);
 
-		return submissionSolutionList;
-	}
+        return submissionSolutionList;
+    }
 
 
-	private SubmissionSampleLocation[] toArray(SubmissionSolutionList list) {
-		return list.toArray(new SubmissionSampleLocation[list.size()]);
-	}
+    private SubmissionSampleLocation[] toArray(SubmissionSolutionList list) {
+        return list.toArray(new SubmissionSampleLocation[list.size()]);
+    }
 
-	protected void selectNewCDP() {
+    protected void selectNewCDP() {
 
-		File file = selectEntry("Select CDP");
+        File file = selectEntry("Select CDP");
 
-		File cdpDir = FileUtilities.findCDPConfigDirectory(file);
+        File cdpDir = FileUtilities.findCDPConfigDirectory(file);
 
-		if (cdpDir != null) {
-		    updateCDPDirAndFields(cdpDir.getAbsolutePath());
-		} else {
+        if (cdpDir != null) {
+            updateCDPDirAndFields(cdpDir.getAbsolutePath());
+        } else {
 
-			int result = FrameUtilities.yesNoCancelDialog(this,
-					file.getAbsoluteFile() + " may not be a CDP directory, continue anyways?", "Select CDP");
-			if (result == JOptionPane.YES_OPTION) {
-	            updateCDPDirAndFields(file.getAbsolutePath());
-			}
-		}
-	}
+            int result = FrameUtilities.yesNoCancelDialog(this,
+                    file.getAbsoluteFile() + " may not be a CDP directory, continue anyways?", "Select CDP");
+            if (result == JOptionPane.YES_OPTION) {
+                updateCDPDirAndFields(file.getAbsolutePath());
+            }
+        }
+    }
 
-	/**
-	 * Select yaml file/entry.
-	 *
-	 * @param dialogTitle
-	 * @return
-	 */
-	protected File selectEntry(String dialogTitle) {
+    /**
+     * Select yaml file/entry.
+     *
+     * @param dialogTitle
+     * @return
+     */
+    protected File selectEntry(String dialogTitle) {
 
-		JFileChooser chooser = new JFileChooser(cdpTextField.getText());
+        JFileChooser chooser = new JFileChooser(cdpTextField.getText());
 //        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		FileFilter filterYAML = new FileNameExtensionFilter("YAML document (*.yaml)", "yaml");
-		chooser.addChoosableFileFilter(filterYAML);
+        FileFilter filterYAML = new FileNameExtensionFilter("YAML document (*.yaml)", "yaml");
+        chooser.addChoosableFileFilter(filterYAML);
 
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setFileFilter(filterYAML);
+        chooser.setAcceptAllFileFilterUsed(false);
+        chooser.setFileFilter(filterYAML);
 
-		int action = chooser.showOpenDialog(this);
-		chooser.setDialogTitle(dialogTitle);
+        int action = chooser.showOpenDialog(this);
+        chooser.setDialogTitle(dialogTitle);
 
-		switch (action) {
-		case JFileChooser.APPROVE_OPTION:
-			File file = chooser.getSelectedFile();
-			return file;
-		case JFileChooser.CANCEL_OPTION:
-		case JFileChooser.ERROR_OPTION:
-		default:
-			break;
-		}
-		return null;
+        switch (action) {
+        case JFileChooser.APPROVE_OPTION:
+            File file = chooser.getSelectedFile();
+            return file;
+        case JFileChooser.CANCEL_OPTION:
+        case JFileChooser.ERROR_OPTION:
+        default:
+            break;
+        }
+        return null;
 
-	}
+    }
 
-	void updateClientCDPPath(String path) {
-		ClientSettings settings = getContest().getClientSettings();
-		if (settings == null) {
-			settings = new ClientSettings(getContest().getClientId());
-		}
-		settings.put(CUSTOM_SUBMIT_SAMPLE_CDP_PATH, path);
+    void updateClientCDPPath(String path) {
+        ClientSettings settings = getContest().getClientSettings();
+        if (settings == null) {
+            settings = new ClientSettings(getContest().getClientId());
+        }
+        settings.put(CUSTOM_SUBMIT_SAMPLE_CDP_PATH, path);
 
-		getController().updateClientSettings(settings);
-	}
+        getController().updateClientSettings(settings);
+    }
 
-	protected String getClientCDPPath() {
+    protected String getClientCDPPath() {
 
-		ClientSettings settings = getContest().getClientSettings();
-		if (settings != null) {
-			String path = settings.getProperty(CUSTOM_SUBMIT_SAMPLE_CDP_PATH);
-			if (path != null) {
-				return path;
-			}
-		}
+        ClientSettings settings = getContest().getClientSettings();
+        if (settings != null) {
+            String path = settings.getProperty(CUSTOM_SUBMIT_SAMPLE_CDP_PATH);
+            if (path != null) {
+                return path;
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	/**
-	 * Reset fields back to default values
-	 *
-	 * @param usingGui
-	 */
-	protected void resetFields(boolean isUsingGui) {
-		String cdpPath = getContest().getContestInformation().getJudgeCDPBasePath();
+    /**
+     * Reset fields back to default values
+     *
+     * @param usingGui
+     */
+    protected void resetFields(boolean isUsingGui) {
+        String cdpPath = getContest().getContestInformation().getJudgeCDPBasePath();
 
-		String clientPath = getClientCDPPath();
+        String clientPath = getClientCDPPath();
 
-		if (clientPath != null && !clientPath.equals(cdpPath)) {
-			int result = FrameUtilities.yesNoCancelDialog(this, "Overwrite locally saved CDP path with this (default) " + cdpPath,
-					"Replace CDP Path?");
-			if (result == JOptionPane.NO_OPTION) {
-				cdpPath = clientPath;
-			}
-		}
+        if (clientPath != null && !clientPath.equals(cdpPath)) {
+            int result = FrameUtilities.yesNoCancelDialog(this, "Overwrite locally saved CDP path with this (default) " + cdpPath,
+                    "Replace CDP Path?");
+            if (result == JOptionPane.NO_OPTION) {
+                cdpPath = clientPath;
+            }
+        }
 
-		submissionList = null;
-		stopSubmissionTimer();
-		clearSubmissionFiles();
-		clearAllRuns();
+        submissionList = null;
+        stopSubmissionTimer();
+        clearSubmissionFiles();
+        clearAllRuns();
 
 
-		cdpTextField.setText(cdpPath);
+        cdpTextField.setText(cdpPath);
 
-//		getController().updateClientSettings(settings);
+//        getController().updateClientSettings(settings);
 
-	}
+    }
 
-	/**
-	 * Submit sample solutions.
-	 */
-	protected void submitSelectedJudgesSolutions() {
-	    showMessage("");
+    /**
+     * Submit sample solutions.
+     */
+    protected void submitSelectedJudgesSolutions() {
+        showMessage("");
 
-	    if(submissionFileList != null) {
-	        showMessage("Please wait until the previous files have finished being submitted (" + (submissionList.size() - currentSubmission) + " remain)");
-	        return;
-	    }
-	    String warningMessage = verifyCDP (cdpTextField.getText());
-	    if (warningMessage != null) {
-	        // let the user know that the CDP selected may not work
-	        FrameUtilities.showMessage(this, "Maybe the CDP is invalid?", warningMessage);
-	    }
+        if(submissionFileList != null) {
+            showMessage("Please wait until the previous files have finished being submitted (" + (submissionList.size() - currentSubmission) + " remain)");
+            return;
+        }
+        String warningMessage = verifyCDP (cdpTextField.getText());
+        if (warningMessage != null) {
+            // let the user know that the CDP selected may not work
+            FrameUtilities.showMessage(this, "Maybe the CDP is invalid?", warningMessage);
+        }
 
         List<File> files = ListUtilities.getAllJudgeSampleSubmissionFilenamesFromCDP(getContest(), cdpTextField.getText());
 
@@ -480,27 +480,27 @@ public class SubmitSampleRunsPane extends JPanePlugin {
                 files = ListUtilities.filterByLanguages(files, getContest(), langList);
             }
         }
-	    int count = 0;
+        int count = 0;
 
-	    if(Utilities.isDebugMode()) {
-    	    for (File file : files) {
-    	        count++;
-    	        System.out.println("Will submit #" + count + " file = " + file.getAbsolutePath());
-    	    }
-	    } else {
-	        count = files.size();
-	    }
-	    if (count == 0) {
-	        showMessage("There are no matching CDP sample source files under " + cdpTextField.getText());
-	        return;
-	    }
+        if(Utilities.isDebugMode()) {
+            for (File file : files) {
+                count++;
+                System.out.println("Will submit #" + count + " file = " + file.getAbsolutePath());
+            }
+        } else {
+            count = files.size();
+        }
+        if (count == 0) {
+            showMessage("There are no matching CDP sample source files under " + cdpTextField.getText());
+            return;
+        }
 
-	    // check with the user to be sure they want to submit everything.
+        // check with the user to be sure they want to submit everything.
         int result = FrameUtilities.yesNoCancelDialog(this, "Submit " + count + " judge sample submissions?",
               "Submit CDP submissions");
-	    if (result != JOptionPane.YES_OPTION) {
-	        return;
-	    }
+        if (result != JOptionPane.YES_OPTION) {
+            return;
+        }
         showMessage("Submitting " + count + " runs.");
 
         submissionFileList = files;
@@ -509,25 +509,25 @@ public class SubmitSampleRunsPane extends JPanePlugin {
         currentSubmission = 0;
 
         submitNextSubmission();
-	}
+    }
 
-	private void submitNextSubmission() {
-	    try {
-	        File file = submissionFileList.get(currentSubmission);
+    private void submitNextSubmission() {
+        try {
+            File file = submissionFileList.get(currentSubmission);
 
-	        submissionTimerTask = new TimerTask() {
-	            @Override
-	            public void run() {
-	                // Whoops! This means the submission never came in
-	                log.severe("No submission was received from the server for #" + currentSubmission + "; cancelling remaining submissions");
-	                showMessage("Submission #" + currentSubmission + " not received from server");
-	                clearSubmissionFiles();
+            submissionTimerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    // Whoops! This means the submission never came in
+                    log.severe("No submission was received from the server for #" + currentSubmission + "; cancelling remaining submissions");
+                    showMessage("Submission #" + currentSubmission + " not received from server");
+                    clearSubmissionFiles();
                     stopSubmissionTimer();
-	            }
-	        };
+                }
+            };
 
-	        submissionWaitTimer = new Timer("Submission Wait Timer " + currentSubmission);
-	        submissionWaitTimer.schedule(submissionTimerTask, SUBMISSION_WAIT_TIMEOUT_MS);
+            submissionWaitTimer = new Timer("Submission Wait Timer " + currentSubmission);
+            submissionWaitTimer.schedule(submissionTimerTask, SUBMISSION_WAIT_TIMEOUT_MS);
 
             SubmissionSample sub = submitter.sendSubmission(file, !overrideStopOnError.isSelected());
             if(sub != null) {
@@ -536,34 +536,34 @@ public class SubmitSampleRunsPane extends JPanePlugin {
             }
             if(Utilities.isDebugMode()) {
                 System.out.println("Submitted #" + currentSubmission + " for problem " + sub.toString());
-    	    }
-	    } catch(Exception e) {
-	        log.log(Level.WARNING, "Error submitting submission #" + currentSubmission, e);
-	        clearSubmissionFiles();
-	        stopSubmissionTimer();
-	    }
-	}
+            }
+        } catch(Exception e) {
+            log.log(Level.WARNING, "Error submitting submission #" + currentSubmission, e);
+            clearSubmissionFiles();
+            stopSubmissionTimer();
+        }
+    }
 
-	private void clearSubmissionFiles() {
-	    submissionFileList = null;
-	    currentSubmission = -1;
-	    runsAdded.clear();
-	}
+    private void clearSubmissionFiles() {
+        submissionFileList = null;
+        currentSubmission = -1;
+        runsAdded.clear();
+    }
 
-	private void stopSubmissionTimer() {
-	    if(submissionWaitTimer != null) {
-	        submissionWaitTimer.cancel();
-	        submissionWaitTimer = null;
-	        submissionTimerTask = null;
-	    }
-	}
+    private void stopSubmissionTimer() {
+        if(submissionWaitTimer != null) {
+            submissionWaitTimer.cancel();
+            submissionWaitTimer = null;
+            submissionTimerTask = null;
+        }
+    }
 
-	/**
-	 * Check whether cdpDir and model match
-	 * @param cdpDir base dir for CDP, parent dir for config/ dir
-	 * @return null if no issues, else a warning message about a diffence between model and cdpDir
-	 */
-	private String verifyCDP(String cdpDir) {
+    /**
+     * Check whether cdpDir and model match
+     * @param cdpDir base dir for CDP, parent dir for config/ dir
+     * @return null if no issues, else a warning message about a diffence between model and cdpDir
+     */
+    private String verifyCDP(String cdpDir) {
 
         Problem[] problems = getContest().getProblems();
         List<File> files = new ArrayList<>();
@@ -588,70 +588,70 @@ public class SubmitSampleRunsPane extends JPanePlugin {
         if(!missingProbs.isEmpty()) {
             warningMsg = "No problem folder found for: " + missingProbs;
         }
-		return warningMsg;
-	}
+        return warningMsg;
+    }
 
-	/**
-	 * Returns the list of filenames that end in extension
-	 *
-	 * @param files
-	 * @param extension
-	 * @return
-	 */
-	public static List<File> filterSource(List<File> files, String extension) {
+    /**
+     * Returns the list of filenames that end in extension
+     *
+     * @param files
+     * @param extension
+     * @return
+     */
+    public static List<File> filterSource(List<File> files, String extension) {
 
-		List<File> list = new ArrayList<File>();
-		for (File file : files) {
-			if (file.getName().endsWith(extension)) {
-				list.add(file);
-			}
-		}
-		return list;
-	}
+        List<File> list = new ArrayList<File>();
+        for (File file : files) {
+            if (file.getName().endsWith(extension)) {
+                list.add(file);
+            }
+        }
+        return list;
+    }
 
-	@Override
-	public String getPluginTitle() {
-		return "Submitter Pane";
-	}
+    @Override
+    public String getPluginTitle() {
+        return "Submitter Pane";
+    }
 
-	@Override
-	public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-		super.setContestAndController(inContest, inController);
+    @Override
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        super.setContestAndController(inContest, inController);
 
-		resetFields(false);
+        resetFields(false);
 
-		String cdpPath = getContest().getContestInformation().getJudgeCDPBasePath();
-		String clientPath = getClientCDPPath();
+        String cdpPath = getContest().getContestInformation().getJudgeCDPBasePath();
+        String clientPath = getClientCDPPath();
 
-		if (clientPath != null) {
-			cdpPath = clientPath;
-		}
+        if (clientPath != null) {
+            cdpPath = clientPath;
+        }
 
-//		xlog("CDP dir is now at " + cdpPath);
-		cdpTextField.setText(cdpPath);
+//        xlog("CDP dir is now at " + cdpPath);
+        cdpTextField.setText(cdpPath);
 
-		showMessage("");
+        showMessage("");
 
-		submitter.setContestAndController(inContest, inController);
+        submitter.setContestAndController(inContest, inController);
         getEditFilterFrame().setContestAndController(inContest, inController);
 
 
-		log = inController.getLog();
+        log = inController.getLog();
 
         getContest().addRunListener(new RunListenerImplementation());
 
-	}
+    }
 
-	public void showMessage(final String message) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
+    public void showMessage(final String message) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
-//				xlog(message);
-				messageLabel.setText(message);
-				messageLabel.setToolTipText(message);
-			}
-		});
-	}
+//                xlog(message);
+                messageLabel.setText(message);
+                messageLabel.setToolTipText(message);
+            }
+        });
+    }
 
     /**
      * This method initializes filterButton
