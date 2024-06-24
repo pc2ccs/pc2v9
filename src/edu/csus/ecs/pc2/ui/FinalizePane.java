@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -36,22 +37,24 @@ import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
 /**
  * Edit Finalize settings pane.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 public class FinalizePane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 3089291613784484371L;
 
     private JPanel buttonPane = null;
 
     private JButton finalizeButton = null;
-    
+
     private JButton updateButton = null;
+
+    private JCheckBox useWFGroupRankingCheckBox = null;
 
     private JPanel centerPane = null;
 
@@ -63,11 +66,11 @@ public class FinalizePane extends JPanePlugin {
 
     private JLabel certifierLabel = null;
 
-    private JTextField goldRankTextField = null;
+    private JTextField goldCountTextField = null;
 
-    private JTextField silverRankTextField = null;
+    private JTextField silverCountTextField = null;
 
-    private JTextField bronzeRankTextField = null;
+    private JTextField bronzeCountTextField = null;
 
     private JTextField commentTextField = null;
 
@@ -85,7 +88,7 @@ public class FinalizePane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public FinalizePane() {
         super();
@@ -94,11 +97,11 @@ public class FinalizePane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(457, 239));
+        this.setSize(new Dimension(560, 239));
         this.add(getCenterPane(), BorderLayout.CENTER);
         add(getSouthPanel(), BorderLayout.SOUTH);
     }
@@ -110,7 +113,7 @@ public class FinalizePane extends JPanePlugin {
 
     /**
      * This method initializes buttonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -132,6 +135,7 @@ public class FinalizePane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 reloadFrame();
             }
@@ -144,11 +148,14 @@ public class FinalizePane extends JPanePlugin {
     protected FinalizeData getFromFields() {
         FinalizeData data = new FinalizeData();
 
-        data.setGoldRank(getIntegerValue(getGoldRankTextField()));
-        data.setSilverRank(getIntegerValue(getSilverRankTextField()));
-        data.setBronzeRank(getIntegerValue(getBronzeRankTextField()));
+        int ng = getIntegerValue(getGoldCountTextField());
+        int ns = getIntegerValue(getSilverCountTextField());
+        int nb = getIntegerValue(getBronzeCountTextField());
+        data.setGoldRank(ng);
+        data.setSilverRank(ng+ns);
+        data.setBronzeRank(ng+ns+nb);
         data.setComment("" + getCommentTextField().getText());
-
+        data.setUseWFGroupRanking(getUseWFGroupRankingsCheckBox().isSelected());
         return data;
     }
 
@@ -158,19 +165,25 @@ public class FinalizePane extends JPanePlugin {
     }
 
     private void populateDefaults() {
-        getGoldRankTextField().setText("4");
-        getSilverRankTextField().setText("8");
-        getBronzeRankTextField().setText("12");
+        getGoldCountTextField().setText("4");
+        getSilverCountTextField().setText("4");
+        getBronzeCountTextField().setText("4");
+        getUseWFGroupRankingsCheckBox().setSelected(true);
     }
 
     protected void reloadFrame() {
 
         FinalizeData data = getContest().getFinalizeData();
         if (data != null) {
-            getGoldRankTextField().setText(Integer.toString(data.getGoldRank()));
-            getSilverRankTextField().setText(Integer.toString(data.getSilverRank()));
-            getBronzeRankTextField().setText(Integer.toString(data.getBronzeRank()));
+            int gr = data.getGoldRank();
+            int sr = data.getSilverRank();
+            int br = data.getBronzeRank();
+
+            getGoldCountTextField().setText(Integer.toString(gr));
+            getSilverCountTextField().setText(Integer.toString(sr - gr));
+            getBronzeCountTextField().setText(Integer.toString(br - sr));
             getCommentTextField().setText(data.getComment());
+            getUseWFGroupRankingsCheckBox().setSelected(data.isUseWFGroupRanking());
 
             if (data.isCertified()) {
                 certificationCommentLabel.setText("Contest Finalized (Certified done)");
@@ -205,7 +218,7 @@ public class FinalizePane extends JPanePlugin {
 
     /**
      * This method initializes finalizeButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getFinalizeButton() {
@@ -215,8 +228,10 @@ public class FinalizePane extends JPanePlugin {
             finalizeButton.setMnemonic(KeyEvent.VK_Z);
             finalizeButton.setToolTipText("Certify Contest Results");
             finalizeButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     certifyContest();
+                    enableResultsLabel();
                 }
             });
         }
@@ -225,7 +240,7 @@ public class FinalizePane extends JPanePlugin {
 
     /**
      * This method initializes updateButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getUpdateButton() {
@@ -235,6 +250,7 @@ public class FinalizePane extends JPanePlugin {
             updateButton.setMnemonic(KeyEvent.VK_U);
             updateButton.setToolTipText("Update medal counts");
             updateButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     updateMedalCounts();
                 }
@@ -247,33 +263,31 @@ public class FinalizePane extends JPanePlugin {
 
         FinalizeData data = getFromFields();
         FinalizeData currentData = getContest().getFinalizeData();
-        
+
         try {
             if(currentData != null && currentData.isCertified()) {
-                throw new InvalidFieldValue("You can not change the medal counts on a certfied contest");                
+                throw new InvalidFieldValue("You can not change the medal counts on a certfied contest");
             }
-            if (data.getGoldRank() <= 0) {
-                throw new InvalidFieldValue("Gold rank must be greater than zero");                
-            }
-            if (data.getSilverRank() <= 0) {
-                throw new InvalidFieldValue("Silver rank must be greater than zero");                
-            }
-            if (data.getBronzeRank() <= 0) {
-                throw new InvalidFieldValue("Bronze rank must be greater than zero");
-            }
-            if(data.getGoldRank() >= data.getSilverRank()) {
-                throw new InvalidFieldValue("Gold rank must not be greater than silver rank");
-            }
-            if(data.getSilverRank() >= data.getBronzeRank()) {
-                throw new InvalidFieldValue("Silver rank must not be greater than bronze rank");
-            }
+            int ng = data.getGoldRank();
+            int ns = data.getSilverRank() - ng;
+            int nb = data.getBronzeRank() - (ns+ng);
 
+            if (ng <= 0) {
+                throw new InvalidFieldValue("The Number of Gold medals must be greater than zero");
+            }
+            if (ns <= 0) {
+                throw new InvalidFieldValue("The number of Silver medals must be greater than zero");
+            }
+            if (nb <= 0) {
+                throw new InvalidFieldValue("The number of Bronze medals must be greater than zero");
+            }
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
             return;
         }
 
         data.setCertified(false);
+        data.setUseWFGroupRanking(getUseWFGroupRankingsCheckBox().isSelected());
         getController().updateFinalizeData(data);
     }
 
@@ -330,7 +344,7 @@ public class FinalizePane extends JPanePlugin {
 
     /**
      * Get number of JE runs.
-     * 
+     *
      * @param contest
      * @return
      */
@@ -409,7 +423,7 @@ public class FinalizePane extends JPanePlugin {
 
     /**
      * This method initializes centerPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPane() {
@@ -425,76 +439,77 @@ public class FinalizePane extends JPanePlugin {
             certifierLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             bronzeLabel = new JLabel();
             bronzeLabel.setBounds(new Rectangle(64, 134, 170, 22));
-            bronzeLabel.setText("Last Bronze Rank");
+            bronzeLabel.setText("Number of Bronze Medals");
             bronzeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             silverLabel = new JLabel();
             silverLabel.setBounds(new Rectangle(64, 97, 170, 22));
-            silverLabel.setText("Last Silver Rank");
+            silverLabel.setText("Number of Silver Medals");
             silverLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             goldLabel = new JLabel();
             goldLabel.setBounds(new Rectangle(64, 56, 170, 22));
             goldLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-            goldLabel.setText("Last Gold Rank");
+            goldLabel.setText("Number of Gold Medals");
             centerPane = new JPanel();
             centerPane.setLayout(null);
             centerPane.add(goldLabel, null);
             centerPane.add(silverLabel, null);
             centerPane.add(bronzeLabel, null);
             centerPane.add(certifierLabel, null);
-            centerPane.add(getGoldRankTextField(), null);
-            centerPane.add(getSilverRankTextField(), null);
-            centerPane.add(getBronzeRankTextField(), null);
+            centerPane.add(getGoldCountTextField(), null);
+            centerPane.add(getSilverCountTextField(), null);
+            centerPane.add(getBronzeCountTextField(), null);
             centerPane.add(getCommentTextField(), null);
             centerPane.add(certificationCommentLabel, null);
+            centerPane.add(getUseWFGroupRankingsCheckBox(), null);
         }
         return centerPane;
     }
 
     /**
-     * This method initializes goldRankTextField
-     * 
+     * This method initializes goldCountTextField
+     *
      * @return javax.swing.JTextField
      */
-    private JTextField getGoldRankTextField() {
-        if (goldRankTextField == null) {
-            goldRankTextField = new JTextField();
-            goldRankTextField.setBounds(new Rectangle(250, 57, 40, 20));
-            goldRankTextField.setDocument(new IntegerDocument());
+    private JTextField getGoldCountTextField() {
+        if (goldCountTextField == null) {
+            goldCountTextField = new JTextField();
+            goldCountTextField.setBounds(new Rectangle(250, 57, 40, 20));
+            goldCountTextField.setDocument(new IntegerDocument());
         }
-        return goldRankTextField;
+        return goldCountTextField;
     }
 
     /**
-     * This method initializes silverRankTextField
-     * 
+     * This method initializes silverCountTextField
+     *
      * @return javax.swing.JTextField
      */
-    private JTextField getSilverRankTextField() {
-        if (silverRankTextField == null) {
-            silverRankTextField = new JTextField();
-            silverRankTextField.setBounds(new Rectangle(250, 94, 40, 20));
-            silverRankTextField.setDocument(new IntegerDocument());
+    private JTextField getSilverCountTextField() {
+        if (silverCountTextField == null) {
+            silverCountTextField = new JTextField();
+            silverCountTextField.setBounds(new Rectangle(250, 94, 40, 20));
+            silverCountTextField.setDocument(new IntegerDocument());
         }
-        return silverRankTextField;
+        return silverCountTextField;
     }
 
     /**
-     * This method initializes bronzeRankTextField
-     * 
+     * This method initializes bronzeCountTextField
+     *
      * @return javax.swing.JTextField
      */
-    private JTextField getBronzeRankTextField() {
-        if (bronzeRankTextField == null) {
-            bronzeRankTextField = new JTextField();
-            bronzeRankTextField.setBounds(new Rectangle(250, 131, 40, 20));
-            goldRankTextField.setDocument(new IntegerDocument());
+    private JTextField getBronzeCountTextField() {
+        if (bronzeCountTextField == null) {
+            bronzeCountTextField = new JTextField();
+            bronzeCountTextField.setBounds(new Rectangle(250, 131, 40, 20));
+            goldCountTextField.setDocument(new IntegerDocument());
         }
-        return bronzeRankTextField;
+        return bronzeCountTextField;
     }
 
     /**
      * This method initializes commentTextField
-     * 
+     *
      * @return javax.swing.JTextField
      */
     private JTextField getCommentTextField() {
@@ -505,9 +520,18 @@ public class FinalizePane extends JPanePlugin {
         return commentTextField;
     }
 
+    private JCheckBox getUseWFGroupRankingsCheckBox() {
+        if(useWFGroupRankingCheckBox == null) {
+            useWFGroupRankingCheckBox = new JCheckBox();
+            useWFGroupRankingCheckBox.setText("Use World Finals group rankings for results");
+            useWFGroupRankingCheckBox.setBounds(new Rectangle(250, 205, 300, 20));
+        }
+        return(useWFGroupRankingCheckBox);
+    }
+
     /**
      * Contest Information Listener for Judgement Notifications.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -515,24 +539,30 @@ public class FinalizePane extends JPanePlugin {
     // $HeadURL$
     public class ContestInformationListenerImplementation implements IContestInformationListener {
 
+        @Override
         public void contestInformationAdded(ContestInformationEvent event) {
             // not used
         }
 
+        @Override
         public void contestInformationChanged(ContestInformationEvent event) {
             // not used
         }
 
+        @Override
         public void contestInformationRemoved(ContestInformationEvent event) {
             // not used
         }
 
+        @Override
         public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
             // not used
         }
 
+        @Override
         public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     reloadFrame();
                 }
@@ -543,7 +573,7 @@ public class FinalizePane extends JPanePlugin {
 
     /**
      * This method initializes reportButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getReportButton() {
@@ -552,6 +582,7 @@ public class FinalizePane extends JPanePlugin {
             reportButton.setText("Report");
             reportButton.setMnemonic(KeyEvent.VK_R);
             reportButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     Utilities.viewReport(new FinalizeReport(), "Finalize Report", getContest(), getController());
                 }
@@ -566,19 +597,33 @@ public class FinalizePane extends JPanePlugin {
         if (getContest().getFinalizeData() != null) {
             finalized = getContest().getFinalizeData().isCertified();
         }
+        getFinalizeButton().setEnabled(!finalized);
 
-        getFinalizeButton().setEnabled(true);
+        // Always allow us to generate a results.tsv, even if not finalized.
+        getViewButton().setEnabled(true);
 
-        getViewButton().setEnabled(finalized);
+    }
 
-        if (finalized) {
-            String text = "Results file generated to " + genererateResultsFile();
-            getResultsFileLabel().setText(text);
-            getResultsFileLabel().setToolTipText(text);
+    /**
+     * Generate results.tsv and show the generated results file name and make it visible.
+     */
+    private void enableResultsLabel() {
+
+        String text;
+        boolean finalized = false;
+        if (getContest().getFinalizeData() != null) {
+            finalized = getContest().getFinalizeData().isCertified();
         }
+        if(finalized) {
+            text = "Final";
+        } else {
+            text = "Unofficial";
+        }
+        text = text + " Results file generated to " + genererateResultsFile();
+        getResultsFileLabel().setText(text);
+        getResultsFileLabel().setToolTipText(text);
 
-        getResultsFileLabel().setVisible(finalized);
-
+        getResultsFileLabel().setVisible(true);
     }
 
     private String genererateResultsFile() {
@@ -627,8 +672,9 @@ public class FinalizePane extends JPanePlugin {
 
     private JLabel getResultsFileLabel() {
         if (resultsFileLabel == null) {
-            resultsFileLabel = new JLabel("results/resulst.tsv");
+            resultsFileLabel = new JLabel("results/results.tsv");
             resultsFileLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            resultsFileLabel.setVisible(false);
         }
         return resultsFileLabel;
     }
@@ -638,7 +684,9 @@ public class FinalizePane extends JPanePlugin {
             viewButton = new JButton("View");
             viewButton.setToolTipText("View results.tsv");
             viewButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableResultsLabel();
                     showResultsFile();
                 }
             });

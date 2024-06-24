@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.FileOutputStream;
@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Print Finalize Report.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -24,12 +24,12 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 public class FinalizeReport implements IReport {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -7306522824265732770L;
 
     /**
-     * 
+     *
      */
 
     private IInternalContest contest;
@@ -40,6 +40,7 @@ public class FinalizeReport implements IReport {
 
     private Filter filter;
 
+    @Override
     public void writeReport(PrintWriter printWriter) {
         printFinalizeData(printWriter);
     }
@@ -60,6 +61,7 @@ public class FinalizeReport implements IReport {
             printWriter.println("  silver rank : " + data.getSilverRank());
             printWriter.println("  bronze rank : " + data.getBronzeRank());
             printWriter.println("  comment     : " + data.getComment());
+            printWriter.println("  WF Rankings : " + data.isUseWFGroupRanking());
         } else {
             printWriter.println("  certified   : false");
             printWriter.println("   ** no data ** ");
@@ -67,6 +69,7 @@ public class FinalizeReport implements IReport {
         }
     }
 
+    @Override
     public void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());
         printWriter.println("Date: " + Utilities.getL10nDateTime());
@@ -75,11 +78,13 @@ public class FinalizeReport implements IReport {
         printWriter.println(getReportTitle() + " Report");
     }
 
+    @Override
     public void printFooter(PrintWriter printWriter) {
         printWriter.println();
         printWriter.println("end report");
     }
 
+    @Override
     public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
@@ -105,32 +110,39 @@ public class FinalizeReport implements IReport {
         }
     }
 
+    @Override
     public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
+    @Override
     public String createReportXML(Filter inFilter) throws IOException {
         return Reports.notImplementedXML(this);
     }
 
+    @Override
     public String getReportTitle() {
         return "Finalize-Certify";
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();
     }
 
+    @Override
     public String getPluginTitle() {
         return "Finalize-Certify Report";
     }
 
+    @Override
     public Filter getFilter() {
         return filter;
     }
 
+    @Override
     public void setFilter(Filter filter) {
         this.filter = filter;
     }
