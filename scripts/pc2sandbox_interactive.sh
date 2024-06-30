@@ -15,6 +15,10 @@
 # 
 # Author: John Buck, based on earlier versions by John Clevenger and Doug Lane
 
+# CPU to run submission on.  This is 0 based, so 3 means the 4th CPU
+DEFAULT_CPU_NUM=3
+CPU_OVERRIDE_FILE=$HOME/pc2_cpu_override
+
 # FAIL_RETCODE_BASE is 128 + 64 + xx
 # 128 = system error, like signal
 # 64 = biggest used signal
@@ -37,14 +41,42 @@ FAIL_INTERACTIVE_ERROR=$((FAIL_RETCODE_BASE+55))
 # This gets added to the current number of executing processes for this user.
 MAXPROCS=32
 
-# taskset cpu mask for running submission on single processor
-cpunum=${USER/judge/}
-if [[ "$cpunum" =~ ^[1-5]$ ]]
+# Compute taskset cpu mask for running submission on single processor
+
+# Get system's maximum CPU number
+MAX_CPU_NUM=`lscpu -p=cpu | tail -1`
+
+# See if the admin wants to override the CPU by reading the override file
+if test -s ${CPU_OVERRIDE_FILE}
 then
-	CPUMASK=$((1<<(cpunum-1)))
-else
-	CPUMASK=0x08
+	# This will get the first line that consists of numbers only
+	cpunum=`egrep '^[0-9]+$' ${CPU_OVERRIDE_FILE} | head -1`
+	if test -z ${cpunum}
+	then
+		cpunum=""
+	elif test ${cpunum} -gt ${MAX_CPU_NUM}
+	then
+		cpunum=""
+	fi
 fi
+
+# If there was no override or the override was bad, let's try to figure out the cpunum
+if test -z ${cpunum}
+then
+	# The login id must be "judge#" where # is the desired CPU and judge number.
+	# If the login is not "judge#", then the system default is used.
+	# This special case is for when you want to run multiple judges on one computer
+	# that has lots of CPU's, but want to pin each judge to its own cpu.
+	cpunum=${USER/judge/}
+	if [[ "$cpunum" =~ ^[1-9][0-9]*$ ]]
+	then
+		# Restrict to number of CPU's.
+		cpunum=$(((cpunum-1)%(MAX_CPU_NUM+1)))
+	else
+		cpunum=$(((DEFAULT_CPU_NUM+1)))
+	fi
+fi
+CPUMASK=$((1<<cpunum-1))
 
 # Process ID of submission
 submissionpid=""
@@ -199,7 +231,7 @@ ShowStats()
 	REPORT_DEBUG "$(printf '%5d.%03d %5d.%03d %6d.%03d  %12s %12d\n' $((cpuused / 1000)) $((cpuused % 1000)) \
 		$((cpulim / 1000)) $((cpulim % 1000)) \
 		$((walltime / 1000)) $((walltime % 1000)) \
-		$((memused)) $((memlim)))"
+		${memused} $((memlim)))"
 }
 
 sent_xml=0
@@ -208,10 +240,11 @@ GenXML()
 {
 	rm -rf "$INT_RESULTFILE"
 	msg1="$1"
-	msg2="$2"
+	shift
+	msg2="$*"
 	cat << EOF > $INT_RESULTFILE
 <?xml version="1.0"?>
-<result outcome="$msg1" security="$INT_RESULTFILE">$msg2</result>
+<result outcome="$msg1" security="$INT_RESULTFILE"><![CDATA[$msg2]]></result>
 EOF
 	sent_xml=1
 }
@@ -240,6 +273,8 @@ JUDGEIN="$4"
 JUDGEANS="$5"
 TESTCASE="$6"
 COMMAND="$7"
+DEBUG echo "+---------------- Test Case ${TESTCASE} ----------------+"
+DEBUG echo Command line: $0 $*
 shift 7
 
 # the rest of the commmand line arguments  are the command args for the submission
@@ -431,7 +466,7 @@ do
 			# If validator created a feedback file, put the last line in the judgement
 			if test -s "$feedbackfile"
 			then
-				GenXML "No - Wrong answer" `tail -1 $feedbackfile`
+				GenXML "No - Wrong answer" `head -n 1 $feedbackfile`
 			else
 				GenXML "No - Wrong answer" "No feedback file"
 			fi

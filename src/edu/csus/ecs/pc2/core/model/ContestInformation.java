@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
@@ -15,14 +15,14 @@ import edu.csus.ecs.pc2.util.ScoreboardVariableReplacer;
 
 /**
  * Contest-wide Information/settings.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 
 public class ContestInformation implements Serializable{
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -7333255582657988200L;
 
@@ -34,33 +34,33 @@ public class ContestInformation implements Serializable{
     private String contestTitle = "Programming Contest";
 
     private String contestURL;
-    
+
     private TeamDisplayMask teamDisplayMode = TeamDisplayMask.LOGIN_NAME_ONLY;
 
     private String judgesDefaultAnswer = "No response, read problem statement";
-    
+
     private boolean preliminaryJudgementsUsedByBoard = false;
     private boolean preliminaryJudgementsTriggerNotifications = false;
-    
+
     private boolean sendAdditionalRunStatusInformation = false;
-    
+
     private String judgeCDPBasePath = null;
-    
+
     private String adminCDPBasePath = null;
-    
+
     /**
      * Test mode allow run submission with override elapsed time.
-     * 
+     *
      */
     private boolean ccsTestMode = false;
-    
+
     //Shadow Mode settings
     private boolean shadowMode = false;
     private String primaryCCS_URL = null;
     private String primaryCCS_user_login = "";
     private String primaryCCS_user_pw = "";
     private String lastShadowEventID = "";
-    
+
     /**
      * Global setting for maximum output allowed by a submission.
      * Note that this value can be overridden on a per-problem basis.
@@ -69,35 +69,40 @@ public class ContestInformation implements Serializable{
 
     /**
      * This is a list of the judgement notification end of contest control settings.
-     * 
+     *
      */
     private JudgementNotificationsList judgementNotificationsList = new JudgementNotificationsList();
-    
+
     private String externalYamlPath = null;
-    
+
     private String rsiCommand = null;
-    
+
     private int lastRunNumberSubmitted = 0;
-    
+
     /**
      * Memory Limit for team's solution (application).
      */
     private int memoryLimitInMeg = 0;
-    
+
     /**
      * Sandbox application or application command line.
      */
     private String sandboxCommandLine = "";
-    
+
     /**
      * Display string for team display on standings.
-     * 
+     *
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, Account, Group)
      */
     private String teamScoreboardDisplayFormat = ScoreboardVariableReplacer.TEAM_NAME;
 
     /**
-     * 
+     * String to append to the execute folder for judged runs.  May contain substitution strings.
+     */
+    private String judgesExecuteFolder = "";
+
+    /**
+     *
      * @author pc2@ecs.csus.edu
      */
     public enum TeamDisplayMask {
@@ -114,7 +119,7 @@ public class ContestInformation implements Serializable{
          */
         DISPLAY_NAME_ONLY,
         /**
-         * name and number, teamN  Johns Hopkins Team 1. 
+         * name and number, teamN  Johns Hopkins Team 1.
          */
         NUMBERS_AND_NAME,
         /**
@@ -124,15 +129,15 @@ public class ContestInformation implements Serializable{
          */
         ALIAS,
     }
-    
+
     private Properties scoringProperties = new Properties();
 
     /**
      * Enable team auto registration.
-     * 
+     *
      */
     private boolean enableAutoRegistration = false;
-    
+
     /**
      * The password type for the new passwords.
      */
@@ -143,20 +148,20 @@ public class ContestInformation implements Serializable{
 //     * Contest Start/Date Time.
 //     */
 //    private Date startDate;
-    
+
     /**
      * The date/time when the contest is scheduled (intended) to start.
      * This value is null (undefined) if no scheduled start time has been set.
-     * This value ONLY applies BEFORE THE CONTEST STARTS; once 
+     * This value ONLY applies BEFORE THE CONTEST STARTS; once
      * any "start contest" operation (e.g. pushing the "Start Button") has occurred,
      * this value no longer has meaning.
      */
     private GregorianCalendar scheduledStartTime = null ;
-    
+
     private boolean autoStartContest = false;
 
     private boolean autoStopContest = false ;
-    
+
     /**
      * Scoreboard freeze time.
      */
@@ -167,44 +172,44 @@ public class ContestInformation implements Serializable{
     /**
      * Whether the contest is thawed(unfrozen).  Meaning the final scoreboard
      * can be revealed (despite the scoreboad freeze).
-     * 
+     *
      * Typically a contest is not thawed until the awards ceremony.
      */
     private Date thawed = null;
 
     private boolean allowMultipleLoginsPerTeam;
-    
-    
+
+
     /**
-     * Load CDP samples/data in front of judges secret data. 
-     * 
+     * Load CDP samples/data in front of judges secret data.
+     *
      * <pre>
-     * # in yaml, do not load sample judges data 
+     * # in yaml, do not load sample judges data
      * loadSampleJudgesData : false
      * </pre>
-     * 
+     *
      */
     private boolean loadSampleJudgesData = true;
-    
-    
+
+
     /**
      * stop-on-first-failed-test-case
-     * 
+     *
      */
     private boolean stopOnFirstFailedtestCase = false;
 
     private String overrideLoadAccountsFilename = null;
-    
+
     /**
      * Returns the date/time when the contest is scheduled (intended) to start.
      * This value is null if no scheduled start time has been set,
-     * or if the contest has already started.  
+     * or if the contest has already started.
      * @see ContestTime#getContestStartTime()
      */
     public GregorianCalendar getScheduledStartTime() {
         return scheduledStartTime;
     }
-    
+
     /**
      * Receives a {@link GregorianCalendar} object specifying a (future) instant in time;
      * sets the specified date/time as the scheduled (intended) start time for the
@@ -212,10 +217,10 @@ public class ContestInformation implements Serializable{
      * after the contest has started, since the value of "scheduled start time" is meaningless after
      * the contest is under way.  It is the responsibility of clients to insure
      * this method is only invoked with a non-null value before the contest has been started.
-     * 
+     *
      */
     public void setScheduledStartTime(GregorianCalendar newScheduledStartTime) {
-        scheduledStartTime = newScheduledStartTime; 
+        scheduledStartTime = newScheduledStartTime;
     }
 
     public String getContestTitle() {
@@ -248,7 +253,7 @@ public class ContestInformation implements Serializable{
 
     /**
      * judgesDefaultAnswer must be a non-zero length trimmed string.
-     * 
+     *
      * @param judgesDefaultAnswer The judgesDefaultAnswer to set.
      */
     public void setJudgesDefaultAnswer(String judgesDefaultAnswer) {
@@ -256,7 +261,25 @@ public class ContestInformation implements Serializable{
             this.judgesDefaultAnswer = judgesDefaultAnswer.trim();
         }
     }
-    
+
+    public String getJudgesExecuteFolder() {
+        if(judgesExecuteFolder == null) {
+            judgesExecuteFolder = "";
+        }
+        return judgesExecuteFolder ;
+    }
+
+    /**
+     * judgesDefaultAnswer must be a non-zero length trimmed string.
+     *
+     * @param judgesDefaultAnswer The judgesDefaultAnswer to set.
+     */
+    public void setJudgesExecuteFolder(String judgesExecuteFolder) {
+        if (judgesExecuteFolder != null && judgesExecuteFolder.trim().length() > 0) {
+            this.judgesExecuteFolder = judgesExecuteFolder.trim();
+        }
+    }
+
     public boolean isSameAs(ContestInformation contestInformation) {
         try {
             if (contestTitle == null) {
@@ -269,6 +292,9 @@ public class ContestInformation implements Serializable{
                 }
             }
             if (!judgesDefaultAnswer.equals(contestInformation.getJudgesDefaultAnswer())) {
+                return false;
+            }
+            if (!judgesExecuteFolder.equals(contestInformation.getJudgesExecuteFolder())) {
                 return false;
             }
             if (!teamDisplayMode.equals(contestInformation.getTeamDisplayMode())) {
@@ -309,10 +335,10 @@ public class ContestInformation implements Serializable{
             }
             if (enableAutoRegistration != contestInformation.isEnableAutoRegistration()) {
                 return false;
-            }            
+            }
             if (! StringUtilities.stringSame(primaryCCS_URL, contestInformation.primaryCCS_URL)) {
                 return false;
-            }            
+            }
             if (! StringUtilities.stringSame(primaryCCS_user_login, contestInformation.primaryCCS_user_login)) {
                 return false;
             }
@@ -331,9 +357,9 @@ public class ContestInformation implements Serializable{
             //DateUtilities.dateSame() expects Date objects but ContestInformation now maintains
             // scheduledStartTime (formerly "StartDate") as a GregorianCalendar; need to convert.
             //Also need to first check for null references (to avoid NPEs on fetch of Date from GregorianCalendar)
-            
-            //If the references to scheduledStartTime in the two ContestInfos are such that one is null and the other 
-            // is not, the ContestInfos are not the same so return false.  
+
+            //If the references to scheduledStartTime in the two ContestInfos are such that one is null and the other
+            // is not, the ContestInfos are not the same so return false.
             // Note that "one is null and the other is not null" can be computed with the ^ (XOR) operator:
             //   "A XOR B" = true iff A != B
             if (scheduledStartTime==null ^ contestInformation.getScheduledStartTime()==null) {
@@ -343,12 +369,12 @@ public class ContestInformation implements Serializable{
             //If both are null, this test for equality passes and we fall through to other cases
             //If both non-null, get Dates from both and compare them
             if (scheduledStartTime!=null /*and therefore contestInformation.getScheduledStartTime() also != null*/) {
-                if (!DateUtilities.dateSame(scheduledStartTime.getTime(), 
+                if (!DateUtilities.dateSame(scheduledStartTime.getTime(),
                         contestInformation.getScheduledStartTime().getTime())) {
                     return false;
                 }
-            } 
-            
+            }
+
             //both scheduledStartTime and contestInformation.getScheduledStartTime() must be null (hence, "same")
             //continue;
 
@@ -366,21 +392,21 @@ public class ContestInformation implements Serializable{
             if (!StringUtilities.stringSame(judgeCDPBasePath, contestInformation.getJudgeCDPBasePath())) {
                 return false;
             }
-            
+
             if (!StringUtilities.stringSame(adminCDPBasePath, contestInformation.getAdminCDPBasePath())) {
                 return false;
             }
             if (autoStopContest != contestInformation.isAutoStopContest()) {
                 return false;
             }
-            
+
             if (allowMultipleLoginsPerTeam != contestInformation.isAllowMultipleLoginsPerTeam()) {
                 return false;
             }
-            
+
             return true;
         } catch (Exception e) {
-            e.printStackTrace(System.err); // TODO log this exception 
+            e.printStackTrace(System.err); // TODO log this exception
             return false;
         }
     }
@@ -395,7 +421,7 @@ public class ContestInformation implements Serializable{
     /**
      * The Scoring Algorithm should use this to determine whether to count preliminary judgements
      * as scoreable.
-     * 
+     *
      * @return the preliminaryJudgementsUsedByBoard
      */
     public boolean isPreliminaryJudgementsUsedByBoard() {
@@ -423,7 +449,7 @@ public class ContestInformation implements Serializable{
     public void setSendAdditionalRunStatusInformation(boolean sendAdditionalRunStatusInformation) {
         this.sendAdditionalRunStatusInformation = sendAdditionalRunStatusInformation;
     }
-    
+
     public JudgementNotificationsList getJudgementNotificationsList() {
         return judgementNotificationsList;
     }
@@ -431,7 +457,7 @@ public class ContestInformation implements Serializable{
     public void setJudgementNotificationsList(JudgementNotificationsList judgementNotificationsList) {
         this.judgementNotificationsList = judgementNotificationsList;
     }
-    
+
     public void updateJudgementNotification (NotificationSetting notificationSetting ){
         judgementNotificationsList.update(notificationSetting);
     }
@@ -442,7 +468,7 @@ public class ContestInformation implements Serializable{
      * via a call to {@link Problem#setMaxOutputFileSizeKB(int)}; note also that
      * the parameter for {@link Problem#setMaxOutputFileSizeKB(int)} is in KB, whereas
      * the value returned by THIS method is in BYTES.
-     * 
+     *
      * @return maximum output file size in bytes.
      */
     public long getMaxOutputSizeInBytes() {
@@ -455,21 +481,21 @@ public class ContestInformation implements Serializable{
      * Problem does NOT have a specified problem-specific output size limit.
      * Note also that problem-specific output size limits are specified in KB,
      * whereas the parameter for this method gives the (global) output size limit in BYTES.
-     * 
+     *
      * @param maxOutputSizeInBytes
-     * 
-     * @see Problem#setMaxOutputSizeKB(long) 
+     *
+     * @see Problem#setMaxOutputSizeKB(long)
      * @see Problem#getMaxOutputSizeKB()
      */
     public void setMaxOutputSizeInBytes(long maxOutputSizeInBytes) {
         this.maxOutputSizeInBytes = maxOutputSizeInBytes;
     }
-    
+
     /**
      * Scoring Properties.
-     * 
+     *
      * Minute penalties, etc.
-     * 
+     *
      * @return
      */
     public Properties getScoringProperties() {
@@ -483,11 +509,11 @@ public class ContestInformation implements Serializable{
     public boolean isCcsTestMode() {
         return ccsTestMode;
     }
-    
+
     public void setCcsTestMode(boolean ccsTestMode) {
         this.ccsTestMode = ccsTestMode;
     }
-    
+
     public boolean isShadowMode() {
         return shadowMode;
     }
@@ -499,9 +525,9 @@ public class ContestInformation implements Serializable{
     public void setRsiCommand(String rsiCommand) {
         this.rsiCommand = rsiCommand;
     }
-    
+
     /**
-     * Returns the String representation for a "Primary CCS" URL (that is, the URL of a Remote CCS being shadowed); 
+     * Returns the String representation for a "Primary CCS" URL (that is, the URL of a Remote CCS being shadowed);
      * only relevant when operating this instance of the PC2 CCS as a "Shadow CCS".
      * @return a String containing the URL of the Primary CCS which we're shadowing
      */
@@ -510,7 +536,7 @@ public class ContestInformation implements Serializable{
     }
 
     /**
-     * Sets the String representation for a "Primary CCS" URL (that is, the URL of a Remote CCS being shadowed); 
+     * Sets the String representation for a "Primary CCS" URL (that is, the URL of a Remote CCS being shadowed);
      * only relevant when operating this instance of the PC2 CCS as a "Shadow CCS".
      * @param primaryCCS_URL a String giving the URL of the Primary (remote) CCS (the CCS being shadowed)
      */
@@ -519,7 +545,7 @@ public class ContestInformation implements Serializable{
     }
 
     /**
-     * Returns a String containing the user login account to be used when connecting 
+     * Returns a String containing the user login account to be used when connecting
      * to a Primary CCS (only useful when operating this instance of PC2 as a "Shadow CCS").
      * @return a String containing the Primary CCS user account name
      */
@@ -537,7 +563,7 @@ public class ContestInformation implements Serializable{
     }
 
     /**
-     * Returns a String containing the password used for logging in to the 
+     * Returns a String containing the password used for logging in to the
      * Primary CCS (only useful when operating this instance of PC2 as a
      * "Shadow CCS").
      * @return a String containing a password
@@ -580,39 +606,39 @@ public class ContestInformation implements Serializable{
 
     /**
      * Get the Run Submission Interface (RSI) command.
-     * 
+     *
      * @return the command string to run when each run is submitted.
      */
     public String getRsiCommand() {
         return rsiCommand;
     }
-    
+
     public void setExternalYamlPath(String externalYamlPath) {
         this.externalYamlPath = externalYamlPath;
     }
     /**
      * Get the external YAML path.
-     * 
+     *
      * @return the location of contest.yaml and problem data files.
      */
     public String getExternalYamlPath() {
         return externalYamlPath;
     }
-    
+
     public void setLastRunNumberSubmitted(int lastRunNumberSubmitted) {
         this.lastRunNumberSubmitted = lastRunNumberSubmitted;
     }
-   
+
     /**
      * Get the last run that was sent to the RSI.
-     * 
+     *
      * @see #getRsiCommand()
      * @return
      */
     public int getLastRunNumberSubmitted() {
         return lastRunNumberSubmitted;
     }
-    
+
     public boolean isEnableAutoRegistration() {
         return enableAutoRegistration;
     }
@@ -632,12 +658,12 @@ public class ContestInformation implements Serializable{
     /**
      * Sets the contest scheduled start time from the specified Date.
      * Note: previously, ContestInformation stored "startDate" as an object of
-     * class {@link Date}.  It nows stores the scheduled start time as a 
+     * class {@link Date}.  It nows stores the scheduled start time as a
      * {@link GregorianCalendar}; however, this method is maintained for compatibility.
      * The method converts the given {@link Date} into an equivalent {@link GregorianCalendar}
      * and invokes {@link #scheduledStartTime} with the resulting {@link GregorianCalendar} object.
-     * 
-     * @param startDate - the date at which the contest is scheduled to start; 
+     *
+     * @param startDate - the date at which the contest is scheduled to start;
      *      specifying "null" as the start date causes the scheduled start time to become undefined
      */
     public void setScheduledStartDate(Date startDate) {
@@ -649,7 +675,7 @@ public class ContestInformation implements Serializable{
             setScheduledStartTime(newStartDate);
         }
     }
-    
+
     /**
      * Returns a {@link Date} object representing the scheduled start time for the contest,
      * or null if no scheduled start time has been set.
@@ -661,19 +687,19 @@ public class ContestInformation implements Serializable{
         if (scheduledStartTime == null) {
             return null;
         } else {
-            return scheduledStartTime.getTime();            
+            return scheduledStartTime.getTime();
         }
 
     }
-    
+
     public boolean isAutoStartContest() {
         return autoStartContest;
     }
-    
+
     public void setAutoStartContest(boolean autoStartContest) {
         this.autoStartContest = autoStartContest;
     }
-    
+
     public void setAutoStopContest(boolean autoStopContest) {
         this.autoStopContest = autoStopContest;
     }
@@ -681,11 +707,11 @@ public class ContestInformation implements Serializable{
     public boolean isAutoStopContest() {
         return autoStopContest;
     }
-    
+
     public String getFreezeTime() {
         return freezeTime;
     }
-    
+
     public void setFreezeTime(String freezeTime) {
         this.freezeTime = freezeTime;
     }
@@ -693,16 +719,16 @@ public class ContestInformation implements Serializable{
     public String getContestShortName() {
         return contestShortName;
     }
-    
+
     public void setContestShortName(String contestShortName) {
         this.contestShortName = contestShortName;
     }
-    
+
     /**
      * Set base path for CDP/external files on judge.
-     * 
+     *
      * This is the base path location where the problem data files are located.
-     * 
+     *
      * @param judgeCDPBasePath
      */
     public void setJudgeCDPBasePath(String judgeCDPBasePath) {
@@ -716,11 +742,11 @@ public class ContestInformation implements Serializable{
     public String getJudgeCDPBasePath() {
         return judgeCDPBasePath;
     }
-    
+
     public void setAdminCDPBasePath(String adminCDPBasePath) {
         this.adminCDPBasePath = adminCDPBasePath;
     }
-    
+
     /**
      * Get base path for CDP on Admin.
      */
@@ -737,20 +763,20 @@ public class ContestInformation implements Serializable{
 
     /**
      * Returns the date the was thawed, or null if not thawed.
-     * 
+     *
      * @return Date the contest was thawed, else null
      */
     public Date getThawed() {
         return thawed;
     }
-    
+
     /**
      * @param thawed when/if the contest is thawed
      */
     public void setThawed(Date date) {
         thawed = date;
     }
-    
+
     /**
      * @param thawed whether the contest is thawed
      */
@@ -764,38 +790,38 @@ public class ContestInformation implements Serializable{
 
     /**
      * Sets the boolean flag indicating whether or not teams are allowed to have multiple simultaneous logins.
-     * Note that this is a GLOBAL setting, configured on the Admin's "Configure Contest>Settings" screen (or via YAML); 
+     * Note that this is a GLOBAL setting, configured on the Admin's "Configure Contest>Settings" screen (or via YAML);
      * either ALL teams are allowed to have multiple simultaneous logins, or NO team is allowed to have multiple simultaneous logins.
-     * 
+     *
      * @param allowMultipleLoginsPerTeam whether or not a team is allowed to have multiple simultaneous login sessions.
      */
     public void setAllowMultipleLoginsPerTeam(boolean allowMultipleLoginsPerTeam) {
         this.allowMultipleLoginsPerTeam = allowMultipleLoginsPerTeam;
     }
-    
+
     /**
      * Returns a boolean indicating whether or not the Contest Settings allow teams to have multiple simultaneous logins.
      * Note that this is a GLOBAL setting, configured on the Admin's "Configure Contest>Settings" screen; either ALL teams
      * are allowed to have multiple simultaneous logins, or NO team is allowed to have multiple simultaneous logins.
-     * 
+     *
      * @return a boolean indicating the current "allow multiple simultaneous logins" setting for teams.
      */
     public boolean isAllowMultipleLoginsPerTeam() {
-        return this.allowMultipleLoginsPerTeam;   
+        return this.allowMultipleLoginsPerTeam;
     }
 
     public boolean isStopOnFirstFailedtestCase() {
         return stopOnFirstFailedtestCase;
     }
-    
+
     public void setStopOnFirstFailedtestCase(boolean stopOnFirstFailedtestCase) {
         this.stopOnFirstFailedtestCase = stopOnFirstFailedtestCase;
     }
-    
-    
+
+
     /**
      * Returns a string which defines which fields will be dispayed on the scoreboard.
-     * 
+     *
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, Account, Group)
      * @return
      */
@@ -827,11 +853,11 @@ public class ContestInformation implements Serializable{
     public void setSandboxCommandLine(String sandboxCommandLine) {
         this.sandboxCommandLine = sandboxCommandLine;
     }
-        
+
     public String getOverrideLoadAccountsFilename() {
         return overrideLoadAccountsFilename;
     }
-    
+
     public void setOverrideLoadAccountsFilename(String overrideLoadAccountsFilename) {
         this.overrideLoadAccountsFilename = overrideLoadAccountsFilename;
     }
@@ -839,7 +865,7 @@ public class ContestInformation implements Serializable{
     public boolean isLoadSampleJudgesData() {
         return loadSampleJudgesData;
     }
-    
+
     public void setLoadSampleJudgesData(boolean loadSampleJudgesData) {
         this.loadSampleJudgesData = loadSampleJudgesData;
     }
