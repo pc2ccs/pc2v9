@@ -212,7 +212,7 @@ public final class Constants {
     /**
      * Command line to run submission in a sandbox
      */
-    public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit}";
+    public static final String PC2_INTERNAL_SANDBOX_COMMAND_LINE = "./{:sandboxprogramname} {:memlimit} {:timelimit} {:infilename} {:ansfilename} {:testcase}";
 
     /**
      * File name of script to run submission in sandbox ({:sandboxprogramname} if non-interactive)
