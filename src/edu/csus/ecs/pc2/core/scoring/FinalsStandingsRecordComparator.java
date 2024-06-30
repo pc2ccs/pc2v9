@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.Serializable;
@@ -22,13 +22,13 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
      *
      */
     private static final long serialVersionUID = 2417425534254224622L;
-    
+
     private AccountNameComparator accountNameComparator = new AccountNameComparator();
 
     private AccountList cachedAccountList;
-    
+
     private int median = -1;
-    
+
     private int lastRank = -1;
 
     /**
@@ -59,6 +59,7 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
      * @throws ClassCastException
      *             if the arguments' types prevent them from being compared by this Comparator.
      */
+    @Override
     public int compare(StandingsRecord o1, StandingsRecord o2) {
         int status = 0;
         long a1, b1;
@@ -69,8 +70,8 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
         int nameComparison;
         int a0, b0;
 
-        StandingsRecord teamA = (StandingsRecord) o1;
-        StandingsRecord teamB = (StandingsRecord) o2;
+        StandingsRecord teamA = o1;
+        StandingsRecord teamB = o2;
         a0 = teamA.getRankNumber();
         a1 = teamA.getNumberSolved();
         a2 = teamA.getPenaltyPoints();
@@ -88,7 +89,7 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
 //        nameComparison = nameA.toLowerCase().compareTo(nameB.toLowerCase());
         nameComparison = accountNameComparator.compare(nameA, nameB);
 
-        // 
+        //
         // Primary Sort = number of solved problems (high to low)
         // Secondary Sort = score (low to high)
         // Tertiary Sort = earliest submittal of last submission (low to high)
@@ -114,10 +115,10 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
             }
         } else if (a0 > getLastRank()) {
             return 1;
-        } else if (b1 > getLastRank()) {
+        } else if (b0 > getLastRank()) {
             return -1;
         }
-        
+
         if ((b1 == a1) && (b2 == a2) && (b3 == a3) && (nameComparison == 0)
                 && (b5 == a5)) {
             status = 0; // elements equal, this shouldn't happen...
