@@ -379,6 +379,8 @@ REPORT Setting maximum user processes to $MAXPROCS
 ulimit -u $MAXPROCS
 
 # Keep track of details for reports
+REPORT_BRIEF ${JUDGEIN}
+REPORT_BRIEF ${JUDGEANS}
 REPORT_BRIEF $cpunum
 REPORT_BRIEF $$
 REPORT_BRIEF $(date "+%F %T.%6N")
