@@ -19,6 +19,11 @@ REJECT_INI=${JUDGE_HOME}/pc2/reject.ini
 
 # Where PC2 puts CLICS validator results
 EXECUTE_DATA_PREFIX=executedata
+# Where PC2 puts run output/error
+TEST_OUT_PREFIX="teamoutput"
+TEST_ERR_PREFIX="teamstderr"
+TEST_VALOUT_PREFIX="valout"
+TEST_VALERR_PREFIX="valerr"
 
 declare -A Judgments
 
@@ -88,7 +93,7 @@ GetLastJudgmentFile()
 	result=`ls $lj_exdir/${EXECUTE_DATA_PREFIX}.[0-9]*.txt 2>/dev/null | sed -e 's;^.*/;;' | sort -t. +1rn | head -1`
 }
 
-GetLastTestCaseNumber()
+GetTestCaseNumber()
 {
 	if test -z "$1"
 	then
@@ -102,6 +107,32 @@ GetLastTestCaseNumber()
 		if test -z "${result}"
 		then
 			result=0
+		fi
+	fi
+}
+
+GetJudgmentFromFile()
+{
+	exdata="$1"
+	if test -z "${exdata}"
+	then
+		result="No results"
+	else
+		# Source the file
+		. ${exdata}
+		if test ${compileSuccess} = "false"
+		then
+			result="CE"
+		elif test ${executeSuccess} = "true"
+		then
+			if test ${validationSuccess} = "true"
+			then
+				MapJudgment "${validationResults}" "${validationReturnCode}"
+			else
+				result="JE (Validator error)"
+			fi
+		else
+			result="RTE (Execute error)"
 		fi
 	fi
 }
@@ -120,30 +151,8 @@ GetJudgment()
 	else
 		# We got a real live run
 		# Check out the biggest executedata file
-#		exdata=`ls ${EXECUTE_DATA_PREFIX}.[0-9]*.txt 2>/dev/null | sort -t. +1rn | head -1`
 		GetLastJudgmentFile $dir
-		exdata=${result}
-		if test -z "${exdata}"
-		then
-			result="No results"
-		else
-			# Source the file
-			. ./${exdata}
-			if test ${compileSuccess} = "false"
-			then
-				result="CE"
-			elif test ${executeSuccess} = "true"
-			then
-				if test ${validationSuccess} = "true"
-				then
-					MapJudgment "${validationResults}" "${validationReturnCode}"
-				else
-					result="JE (Validator error)"
-				fi
-			else
-				result="RTE (Execute error)"
-			fi
-		fi
+		GetJudgmentFromFile ./${result}
 	fi
 }
 
