@@ -1122,6 +1122,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
 
             executionData.setvalidateTimeMS(System.currentTimeMillis() - startTime);
+            // be sure to flush before serializing.
+            stdoutlog.flush();
+            stderrlog.flush();
             executionData.setValidationStdout(new SerializedFile(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME)));
             executionData.setValidationStderr(new SerializedFile(prefixExecuteDirname(VALIDATOR_STDERR_FILENAME)));
 
