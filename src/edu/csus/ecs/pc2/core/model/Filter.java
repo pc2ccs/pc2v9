@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -182,6 +183,9 @@ public class Filter implements Serializable {
     private HashSet<ElementId> groupIdHash = new HashSet<ElementId>();
 
     private boolean filteringGroups = false;
+
+    private HashSet<String> customItemHash = new HashSet<String>();
+    private boolean filteringCustom = false;
 
     /**
      * filtering for this site only
@@ -1033,6 +1037,21 @@ public class Filter implements Serializable {
         return elementIds;
     }
 
+    /**
+     * Get list of custom item objects
+     *
+     * @return list of objects
+     */
+    public ArrayList<String> getCustomList() {
+        ArrayList<String> items = new ArrayList<String>();
+
+        customItemHash.forEach((custItem) -> {
+            items.add(custItem);
+        });
+
+        return items;
+    }
+
     public void setUsingRunStatesFilter(boolean turnOn) {
         filteringRunStates = turnOn;
     }
@@ -1210,6 +1229,32 @@ public class Filter implements Serializable {
         clarificationStateHash = new Hashtable<ClarificationStates, Date>();
     }
 
+    /**
+     *
+     * @param o Object of the string to use to attempt the lookup in the hashset
+     * @return true of the string is in the custom item hashset
+     */
+    public boolean matches(Object o) {
+        if(filteringCustom) {
+            return customItemHash.contains(o.toString());
+        }
+        return(true);
+    }
+
+    /**
+     *
+     * @param o adds the string value of o to the custom item hash
+     */
+    public void addCustomItem(Object o) {
+        customItemHash.add(o.toString());
+        filteringCustom = true;
+    }
+
+    public void clearCustomItems() {
+        customItemHash.clear();
+        filteringCustom = false;
+    }
+
     @Override
     public String toString() {
 
@@ -1295,6 +1340,14 @@ public class Filter implements Serializable {
 
     public void setFilteringAccounts(boolean filteringAccounts) {
         this.filteringAccounts = filteringAccounts;
+    }
+
+    public boolean isFilteringCustom() {
+        return filteringCustom;
+    }
+
+    public void setFilteringCustom(boolean filtCustom) {
+        filteringCustom = filtCustom;
     }
 
     public void setFilterOff() {

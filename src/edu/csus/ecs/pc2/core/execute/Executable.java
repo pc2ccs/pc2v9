@@ -510,6 +510,13 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
                 //problem indicates stop-on-first-failure
                 boolean stopOnFirstFailedTestCase = problem.isStopOnFirstFailedTestCase();
+                // if we should override the overrideStopOnFailure, the unset our local flag.  Also clear the
+                // run's copy of the flag since this is a one-shot flag.  We do not wantto overrideStopOnFailure if
+                // the run is rejudged, for example.
+                if(run.isOverrideStopOnFailure()) {
+                    stopOnFirstFailedTestCase = false;
+                    run.setOverrideStopOnFailure(false);
+                }
 
                 if (dataFiles == null || dataFiles.length <= 1) {
 

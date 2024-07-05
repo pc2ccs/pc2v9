@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.admin;
 
 import java.awt.BorderLayout;
@@ -71,12 +71,13 @@ import edu.csus.ecs.pc2.ui.RunsTablePane;
 import edu.csus.ecs.pc2.ui.SitesPane;
 import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
 import edu.csus.ecs.pc2.ui.StandingsTablePane;
+import edu.csus.ecs.pc2.ui.SubmitSampleRunsPane;
 import edu.csus.ecs.pc2.ui.TeamStatusPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Administrator GUI.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class AdministratorView extends JFrame implements UIPlugin, ChangeListener {
@@ -122,10 +123,10 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     private JPanel aMessagePane = null;
 
     private JLabel messageLabel = null;
-    
+
     /**
      * This method initializes
-     * 
+     *
      */
     public AdministratorView() {
         super();
@@ -134,7 +135,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -142,18 +143,19 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         this.setContentPane(getJPanel());
         this.setTitle("PC^2 Administrator");
         this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 promptAndExit();
             }
         });
 
         getMainTabbedPanel().addChangeListener(this);
-        
+
         overRideLookAndFeel();
-    
+
         FrameUtilities.centerFrame(this);
     }
-    
+
     private void overRideLookAndFeel(){
         String value = IniFile.getValue("client.plaf");
         if (value != null && value.equalsIgnoreCase("java")){
@@ -163,29 +165,31 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             FrameUtilities.setNativeLookAndFeel();
         }
     }
-    
+
     /**
      * Listeners for admin view.
-     * 
+     *
      * This provides a way to refresh the admin view on refresh.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
     protected class AdminListeners implements UIPlugin {
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 3733076435840880891L;
 
+        @Override
         public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-            
+
             inContest.addProfileListener(new ProfileListenerImplementation());
         }
 
+        @Override
         public String getPluginTitle() {
             return "AdminListeners";
         }
@@ -197,18 +201,20 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 //        is NOT started; if both are true then get the ScheduledStartTime, format it, and display it on the Frame.
 
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         final JFrame thisFrame = this;
 
         updateProfileLabel();
-        
+
         AdminListeners adminListeners = new AdminListeners();
         adminListeners.setContestAndController(inContest, inController);
         controller.register(adminListeners);
-        
+
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
 
                 controller.startLogWindow(contest);
@@ -234,14 +240,14 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                     try {
                         CategoriesPane categoriesPane = new CategoriesPane();
                         addUIPlugin(getConfigureContestTabbedPane(), "Clar Categories", categoriesPane);
-                        
+
                         ContestPreloadPane contestPreloadPane = new ContestPreloadPane();
                         addUIPlugin(getConfigureContestTabbedPane(), "Contests", contestPreloadPane);
                     } catch (Exception e) {
                         logException(e);
                     }
                 }
-                
+
                 AutoJudgesPane autoJudgesPane = new AutoJudgesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Auto Judge", autoJudgesPane);
 
@@ -250,7 +256,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 ICPCLoadPane icpcPane = new ICPCLoadPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "ICPC", icpcPane);
-                
+
                 ImportDataPane importDataPane = new ImportDataPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Import Config", importDataPane);
 
@@ -259,7 +265,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 LanguagesPane languagesPane = new LanguagesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Languages", languagesPane);
-                
+
                 BalloonSettingsPane balloonSettingsPane = new BalloonSettingsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Notifications", balloonSettingsPane);
 
@@ -302,7 +308,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                     ConnectionsTablePane connectionsPane = new ConnectionsTablePane();
                     addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
                 }
-                
+
                 ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsTablePane);
 
@@ -314,24 +320,27 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                         logException(e);
                     }
                 }
-                
+
 //                EventFeedsPane eventFeedsPane = new EventFeedsPane();
 //                addUIPlugin(getRunContestTabbedPane(), "Event Feeds", eventFeedsPane);
 
                 ExportDataPane exportPane = new ExportDataPane();
                 addUIPlugin(getRunContestTabbedPane(), "Export", exportPane);
-                
+
                 FinalizePane finalizePane = new FinalizePane();
                 addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
-                
+
                 QuickJudgePane quickJudgePane = new QuickJudgePane();
                 addUIPlugin(getRunContestTabbedPane(), "Judging Utilities", quickJudgePane);
+
+                SubmitSampleRunsPane sampleRunsPane = new SubmitSampleRunsPane();
+                addUIPlugin(getRunContestTabbedPane(), "Submit Samples", sampleRunsPane);
 
                 if (!controller.isSuppressLoginsPaneDisplay()) {
                     LoginsTablePane loginsTablePane = new LoginsTablePane();
                     addUIPlugin(getRunContestTabbedPane(), "Logins", loginsTablePane);
                 }
-                
+
                 if (Utilities.isDebugMode()) {
                     try {
                         MessageMonitorPane messageMonitorPane = new MessageMonitorPane();
@@ -354,11 +363,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                         logException(e);
                     }
                 }
-                
+
                 if (Utilities.isDebugMode()) {
                     try {
                         PlaybackPane playbackPane = new PlaybackPane();
-                        
+
                         addUIPlugin(getRunContestTabbedPane(), "Replay", playbackPane);
                         PluginLoadPane pane = new PluginLoadPane();
                         pane.setParentTabbedPane(getRunContestTabbedPane());
@@ -367,11 +376,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                         logException(e);
                     }
                 }
-                
+
 
                 ReportPane reportPane = new ReportPane();
                 addUIPlugin(getRunContestTabbedPane(), "Reports", reportPane);
-                
+
                 ResultsComparePane resultsExportComparePane = new ResultsComparePane();
                 addUIPlugin(getRunContestTabbedPane(), "Results Compare", resultsExportComparePane);
 
@@ -398,7 +407,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 setSelectedTab (getRunContestTabbedPane(), "Runs");
                 setSelectedTab (getConfigureContestTabbedPane(), "Accounts");
-                
+
                 /**
                  * Clock and frame title.
                  */
@@ -410,7 +419,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 contest.addContestTimeListener(new ContestTimeListenerImplementation());
                 controller.register(contestClockDisplay);
-                
+
                 FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contest.getContestTime().isContestRunning(), new VersionInfo());
                 setVisible(true);
             }
@@ -418,15 +427,15 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
      });
     }
-    
+
     /**
      * Set the tab for the input name.
-     * 
+     *
      * @param tabbedPane
      * @param name
      */
     protected void setSelectedTab(JTabbedPane tabbedPane, String name) {
-        
+
         for (int i = 0; i < tabbedPane.getComponentCount(); i ++){
             String tabTitle = tabbedPane.getTitleAt(i);
 //            System.err.println("For "+tabbedPane.getName()+" found "+tabTitle);
@@ -458,13 +467,14 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         securityAlertLogWindow.getLog().info("Security Log Started "+versionInfo.getSystemVersionInfo());
     }
 
+    @Override
     public String getPluginTitle() {
         return "Admin GUI";
     }
 
     /**
      * This method initializes jPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getJPanel() {
@@ -480,7 +490,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes mainTabbedPanel
-     * 
+     *
      * @return javax.swing.JTabbedPane
      */
     private JTabbedPane getMainTabbedPanel() {
@@ -494,7 +504,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes statusPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getStatusPanel() {
@@ -507,7 +517,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes topPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getTopPanel() {
@@ -524,7 +534,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes exitButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getExitButton() {
@@ -534,6 +544,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             exitButton.setToolTipText("Click here to Shutdown PC^2");
             exitButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             exitButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     promptAndExit();
                 }
@@ -576,7 +587,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes clockPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getClockPane() {
@@ -595,7 +606,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes exitButtonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getExitButtonPane() {
@@ -612,7 +623,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes padPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getPadPane() {
@@ -625,7 +636,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes configureContestTabbedPane
-     * 
+     *
      * @return javax.swing.JTabbedPane
      */
     private JTabbedPane getConfigureContestTabbedPane() {
@@ -639,7 +650,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes runContestTabbedPane
-     * 
+     *
      * @return javax.swing.JTabbedPane
      */
     private JTabbedPane getRunContestTabbedPane() {
@@ -649,6 +660,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         return runContestTabbedPane;
     }
 
+    @Override
     public void stateChanged (ChangeEvent e) {
         if (e.getSource()==getMainTabbedPanel()) {
             //change all mainpanel tab text to black
@@ -656,7 +668,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             for (int i=0; i<tabCount; i++) {
                 getMainTabbedPanel().setForegroundAt(i,INACTIVE_TAB_COLOR);
             }
-            //change the currently selected mainpanel tab to red 
+            //change the currently selected mainpanel tab to red
             int selectedTab = getMainTabbedPanel().getSelectedIndex();
             getMainTabbedPanel().setForegroundAt( selectedTab, ACTIVE_TAB_COLOR);
         } else {
@@ -666,7 +678,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes centerPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPane() {
@@ -681,7 +693,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     /**
      * This method initializes aMessagePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getAMessagePane() {
@@ -703,27 +715,30 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         AdministratorView administratorView = new AdministratorView();
         administratorView.setVisible(true);
     }
-    
+
     protected boolean isThisSite(int siteNumber) {
         return contest.getSiteNumber() == siteNumber;
     }
-    
+
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
 
     class ContestTimeListenerImplementation implements IContestTimeListener {
 
+        @Override
         public void contestTimeAdded(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestTimeRemoved(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestTimeChanged(ContestTimeEvent event) {
             ContestTime contestTime = event.getContestTime();
             if (isThisSite(contestTime.getSiteNumber())) {
@@ -731,14 +746,17 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             }
         }
 
+        @Override
         public void contestStarted(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestStopped(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void refreshAll(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
@@ -751,7 +769,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         @Override
         public void contestAutoStarted(ContestTimeEvent event) {
             contestStarted(event);
-            
+
             Log log = controller.getLog();
             if (log != null) {
                 log.info("Contest automatically started due to arrival of enabled scheduled start time.");
@@ -762,18 +780,18 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             // not allow to call setAlwaysOnTop()
 //            JOptionPane.showMessageDialog(null, "Scheduled Start Time has arrived; contest has been automatically started!", "Contest Started",
 //                    JOptionPane.INFORMATION_MESSAGE);
-            
+
             JOptionPane optionPane = new JOptionPane();
             optionPane.setMessage("Scheduled Start Time has arrived; contest has been automatically started!");
-            optionPane.setMessageType(JOptionPane.INFORMATION_MESSAGE); 
+            optionPane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
             JDialog dialog = optionPane.createDialog("Contest Started");
             dialog.setLocationRelativeTo(null); //center the dialog
             dialog.setModalityType(ModalityType.APPLICATION_MODAL);
-            
+
             //force the notification dialog to always be on top even if the Admin isn't the active program
             // (Note: this works on Windows; it may not work under Linux -- and/or it may be window-system dependent...)
             dialog.setAlwaysOnTop(true);
-            
+
             dialog.setVisible(true);
         }
 
@@ -782,8 +800,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     private void setFrameTitle(final boolean contestStarted) {
         final JFrame thisFrame = this;
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
-                
+
                 FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contestStarted, new VersionInfo());
                 if (contestStarted) {
                     contestClockDisplay.fireClockStateChange(contest.getContestTime());
@@ -799,7 +818,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
         FrameUtilities.regularCursor(this);
     }
-    
+
     private void updateProfileLabel() {
 
         int numberProfiles = contest.getProfiles().length;
@@ -812,39 +831,44 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         final String message = s;
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(message);
             }
         });
     }
-    
+
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
     protected class ProfileListenerImplementation implements IProfileListener {
 
+        @Override
         public void profileAdded(ProfileEvent event) {
             updateProfileLabel();
         }
 
+        @Override
         public void profileChanged(ProfileEvent event) {
             updateProfileLabel();
         }
 
+        @Override
         public void profileRemoved(ProfileEvent event) {
             // ignore
-            
+
         }
 
+        @Override
         public void profileRefreshAll(ProfileEvent profileEvent) {
             updateProfileLabel();
         }
     }
-        
+
 
 
 
