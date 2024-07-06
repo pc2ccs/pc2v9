@@ -268,12 +268,15 @@ shift
 shift
 shift
 shift
+shift
 DEBUG echo -e "\nYou can run this by hand in the sandbox by using the following command:"
-DEBUG echo -e "\n$0" ${MEMLIMIT} ${TIMELIMIT} xxx xxx $* "< ${JUDGEIN} > $TESTCASE.ans"
+RUN_LOCAL_CMD="$0 ${MEMLIMIT} ${TIMELIMIT} xxx xxx ${COMMAND} $* < ${JUDGEIN} > $TESTCASE.ans"
+DIFF_OUTPUT_CMD="diff -w ${JUDGEANS} $TESTCASE.ans | more"
+DEBUG echo -e "\n${RUN_LOCAL_CMD}"
 DEBUG echo -e "\nor, without the sandbox by using the following command:"
-DEBUG echo -e "\n$* < ${JUDGEIN} > $TESTCASE.ans"
+DEBUG echo -e "\n${COMMAND} $* < ${JUDGEIN} > $TESTCASE.ans"
 DEBUG echo -e "\nAnd compare with the judge's answer:"
-DEBUG echo -e "\ndiff -w ${JUDGEANS} $TESTCASE.ans | more\n"
+DEBUG echo -e "\n${DIFF_OUTPUT_CMD}\n"
 
 #### Debugging - just set expected first args to: 8MB 2seconds
 ###MEMLIMIT=8
@@ -351,31 +354,33 @@ mkdir -p "$REPORTDIR"
 REPORTFILE=`printf "$REPORTDIR/testcase_%03d.log" $TESTCASE`
 BRIEFREPORTFILE=`printf "$REPORTDIR/briefcase_%03d.log" $TESTCASE`
 DEBUG echo Report file: ${REPORTFILE} Brief Report File: ${BRIEFREORTFILE}
+REPORT Test case $TESTCASE:
+REPORT Command: "${RUN_LOCAL_CMD}"
+REPORT Diff: "   ${DIFF_OUTPUT_CMD}"
 
 # set the specified memory limit - input is in MB, cgroup v2 requires bytes, so multiply by 1M
 # but only if > 0.
 # "max" means unlimited, which is the cgroup v2 default
 DEBUG echo checking memory limit
 if [ "$MEMLIMIT" -gt "0" ] ; then
-  DEBUG echo setting memory limit to $MEMLIMIT MB
+  REPORT_DEBUG echo Setting memory limit to $MEMLIMIT MB
   echo $(( $MEMLIMIT * 1024 * 1024 ))  > $PC2_SANDBOX_CGROUP_PATH/memory.max
   echo 1  > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max
 else
-  DEBUG echo setting memory limit to max, meaning no limit
+  REPORT_DEBUG echo Setting memory limit to max, meaning no limit
   echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.max  
   echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max  
 fi
 
-REPORT Test case $TESTCASE:
 # We use ulimit to limit CPU time, not cgroups.  Time is supplied in seconds.  This may have to
 # be reworked if ms accuracy is needed.  The problem is, cgroups do not kill off a process that
 # exceeds the time limit, ulimit does.
 TIMELIMIT_US=$((TIMELIMIT * 1000000))
-REPORT Setting cpu limit to $TIMELIMIT_US microseconds "("ulimit -t $TIMELIMIT ")"
+REPORT_DEBUG Setting cpu limit to $TIMELIMIT_US microseconds "("ulimit -t $TIMELIMIT ")"
 ulimit -t $TIMELIMIT
 
 MAXPROCS=$((MAXPROCS+`ps -T -u $USER | wc -l`))
-REPORT Setting maximum user processes to $MAXPROCS
+REPORT_DEBUG Setting maximum user processes to $MAXPROCS
 ulimit -u $MAXPROCS
 
 # Keep track of details for reports
@@ -398,12 +403,7 @@ then
 fi
 
 # run the command
-# the following are the cgroup-tools V1 commands; need to find cgroup-tools v2 commands
-# echo Using cgexec to run $COMMAND $*
-# cgexec -g cpu,memory:/pc2 $COMMAND $*
-
-# since we don't know how to use cgroup-tools to execute, just execute it directly (it's a child so it
-#  should still fall under the cgroup limits).
+# execute it directly (it's a child so it should still fall under the cgroup limits).
 REPORT_DEBUG Executing "setsid taskset $CPUMASK $COMMAND $*"
 
 # Set up trap handler to catch wall-clock time exceeded and getting killed by PC2's execute timer
@@ -442,6 +442,8 @@ else
 	peakmem="N/A"
 fi
 ShowStats ${cputime} ${TIMELIMIT_US} ${walltime} ${peakmem} $((MEMLIMIT*1024*1024))
+
+REPORT_DEBUG The command exited with code: ${COMMAND_EXIT_CODE}
 
 if test "$kills" != "0"
 then
