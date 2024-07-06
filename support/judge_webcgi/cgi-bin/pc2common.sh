@@ -7,6 +7,12 @@ JUDGE_HOME=/home/icpc
 PC2_RUN_DIR=${JUDGE_HOME}/pc2
 PC2_CDP=${PC2_RUN_DIR}/current/config
 
+EXE_LINK_PREFIX=../exedir
+PROB_LINK_PREFIX=../probdir
+
+# How many exedir and probdir links to keep around
+NUM_LINK_KEEP=4
+
 # Where can we find the contest banner png file for webpage headers
 BANNER_FILE=banner.png
 BANNER_IMAGE=${PC2_RUN_DIR}/current/contest/${BANNER_FILE}
@@ -24,6 +30,15 @@ TEST_OUT_PREFIX="teamoutput"
 TEST_ERR_PREFIX="teamstderr"
 TEST_VALOUT_PREFIX="valout"
 TEST_VALERR_PREFIX="valerr"
+
+# Detailed log of entire judging process
+SANDBOX_LOG=sandbox.log
+
+# Testcase file prefix
+TESTCASE_REPORT_FILE_PREFIX="testcase"
+# Briefcase file prefix
+BRIEFCASE_FILE_PREFIX="briefcase"
+REPORTS_DIR=reports
 
 declare -A Judgments
 
@@ -154,6 +169,54 @@ GetJudgment()
 		GetLastJudgmentFile $dir
 		GetJudgmentFromFile ./${result}
 	fi
+}
+
+MakeTestcaseFile()
+{
+	d="$1"
+	t="$2"
+	result=`printf '%s/%s/%s_%03d.log' "$d" "$REPORTS_DIR" "$TESTCASE_REPORT_FILE_PREFIX" "$t"`
+}
+
+MakeBriefcaseFile()
+{
+	d="$1"
+	t="$2"
+	result=`printf '%s/%s/%s_%03d.log' "$d" "$REPORTS_DIR" "$BRIEFCASE_FILE_PREFIX" "$t"`
+}
+
+# Must redirect from briefcase file
+ReadBriefcase()
+{
+	read judgein
+	read judgeans
+	read cpunum
+	read exepid
+	read exetime
+	read execpums cpulimms exewallms mempeakbytes memlimbytes
+	mempeak=$mempeakbytes
+	memlim=$memlimbytes
+	# Calculate Mib from bytes, round upto next Mib
+	if [[ $mempeak = [0-9]* ]]
+	then
+		mempeak=$(((mempeak+(1024*1024)-1)/(1024*1024)))
+	fi
+	if [[ $memlim = [0-9]* ]]
+	then
+		memlim=$(((memlim+(1024*1024)-1)/(1024*1024)))
+	fi
+}
+
+DeleteOldestLinks()
+{
+	for linkpref in ${EXE_LINK_PREFIX} ${PROB_LINK_PREFIX}
+	do
+		dellist=`ls -1td ${linkpref}* | sed 1,${NUM_LINK_KEEP}d`
+		if test -n "${dellist}"
+		then
+			rm -f ${dellist}
+		fi
+	done
 }
 
 InitJudgments
