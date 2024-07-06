@@ -369,7 +369,6 @@ else
   echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max  
 fi
 
-REPORT Test case $TESTCASE:
 # We use ulimit to limit CPU time, not cgroups.  Time is supplied in seconds.  This may have to
 # be reworked if ms accuracy is needed.  The problem is, cgroups do not kill off a process that
 # exceeds the time limit, ulimit does.
