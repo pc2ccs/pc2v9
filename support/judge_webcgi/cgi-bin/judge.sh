@@ -71,6 +71,7 @@ TableRow()
 ###ParseProblemYaml
 Preamble
 Header
+LogButton
 StartTable
 TableHeader
 

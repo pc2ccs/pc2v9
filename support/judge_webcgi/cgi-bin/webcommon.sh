@@ -1,4 +1,7 @@
 # File meant to be "source'd" to support generating web pages
+TOOLTIP_UL_COLOR="blue"
+TOOLTIP_TEXT_COLOR="white"
+TOOLTIP_BG_COLOR="black"
 
 #
 # Display very curt textual error message
@@ -27,6 +30,9 @@ Preamble()
 <head>
 <title>PC&#xb2; $headmsg</title>
 <style>
+body {
+  font-family: "Arial", "Helvetica", "sans-serif";
+}
 table {
   font-family: arial, sans-serif;
   border-collapse: collapse;
@@ -88,6 +94,30 @@ img {
 .judgeicon {
   height: 36px;
   width: auto;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 3px dashed ${TOOLTIP_UL_COLOR};
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: ${TOOLTIP_BG_COLOR};
+  color: ${TOOLTIP_TEXT_COLOR};
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }
 
 </style>
