@@ -1461,7 +1461,7 @@ public class ContestInformationPane extends JPanePlugin {
 
             + "\n\nAny substitution string available for an executable is allowed here."
 
-            + "\n\nSo for example a judge's execute folder string like \"executesite{:siteid}judge{:clientname}_Run_{:runnumber}\" would change the execute folder to something like:" //
+            + "\n\nSo for example a judge's execute folder string like \"executesite{:siteid}{:clientname}_Run_{:runnumber}\" would change the execute folder to something like:" //
             + "\n    executesite1judge1_Run_220 " //
 
             + "\n\nSubstitution values depend on the corresponding data having been loaded into the PC^2 Server; if there is no value defined for a" //

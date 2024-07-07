@@ -233,6 +233,9 @@ done
 
 DeleteOldestLinks
 Preamble - 'Run '$run
+Styles
+EndStyles
+StartHTMLDoc
 HeaderNoBanner Details for Run Id $run - $probletter "("$probshort") - team$submitter - Judged: $judgment"
 
 # Create links apache can access in our html folder
