@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+# Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 #  
 # File:    pc2sandbox_interacive.sh 
 # Purpose: a sandbox for pc2 using Linux CGroups v2 and supporting interactive problems
@@ -18,6 +18,10 @@
 # CPU to run submission on.  This is 0 based, so 3 means the 4th CPU
 DEFAULT_CPU_NUM=3
 CPU_OVERRIDE_FILE=$HOME/pc2_cpu_override
+
+# Where to the the result of the first failure.  If this file is not created, then the
+# run was accepted. (correct)
+RESULT_FAILURE_FILE=failure.txt
 
 # FAIL_RETCODE_BASE is 128 + 64 + xx
 # 128 = system error, like signal
@@ -130,6 +134,13 @@ function REPORT()
 		echo "$@" >> $REPORTFILE
 	fi
 }
+function REPORT_BRIEF()
+{
+	if test -n "$BRIEFREPORTFILE"
+	then
+		echo "$@" >> $BRIEFREPORTFILE
+	fi
+}
 
 # For per-testcase report and debugging both
 function REPORT_DEBUG()
@@ -163,24 +174,24 @@ SAGE
 # Function to kill all processes in the cgroupv2 after process has exited
 KillcgroupProcs()
 {
-        if test -n ${PC2_SANDBOX_CGROUP_PATH_KILL}
-        then
+	if test -n ${PC2_SANDBOX_CGROUP_PATH_KILL}
+	then
 		DEBUG echo "Purging cgroup ${PC2_SANDBOX_CGROUP_PATH_KILL} of processes"
-                echo 1 > ${PC2_SANDBOX_CGROUP_PATH_KILL}
-        fi
+		echo 1 > ${PC2_SANDBOX_CGROUP_PATH_KILL}
+	fi
 }
 
 # Kill active children and stragglers
 KillChildProcs()
 {
-        DEBUG echo "Killing off submission process group $submissionpid and all children"
-        # Kill off process group
-        if test -n "$submissionpid"
-        then
-                pkill -9 -s $submissionpid
-        fi
-        # and... extra stragglers with us as a parent
-        pkill -9 -P $$
+	DEBUG echo "Killing off submission process group $submissionpid and all children"
+	# Kill off process group
+	if test -n "$submissionpid"
+	then
+		pkill -9 -s $submissionpid
+	fi
+	# and... extra stragglers with us as a parent
+	pkill -9 -P $$
 }
 
 # Kill off the validator if it is still running
@@ -226,6 +237,10 @@ ShowStats()
 	walltime=$3
 	memused=$4
 	memlim=$5
+	REPORT_BRIEF "$(printf '%d.%03d' $((cpuused / 1000)) $((cpuused % 1000)))" \
+        	"$(printf '%d.%03d' $((cpulim / 1000)) $((cpulim % 1000)))" \
+		"$(printf '%d.%03d' $((walltime / 1000)) $((walltime % 1000)))" \
+		${memused} $((memlim))
 	REPORT_DEBUG Resources used for this run:
 	REPORT_DEBUG "$(printf '   CPU ms  Limit ms    Wall ms   Memory Used Memory Limit\n')"
 	REPORT_DEBUG "$(printf '%5d.%03d %5d.%03d %6d.%03d  %12s %12d\n' $((cpuused / 1000)) $((cpuused % 1000)) \
@@ -233,6 +248,27 @@ ShowStats()
 		$((walltime / 1000)) $((walltime % 1000)) \
 		${memused} $((memlim)))"
 }
+
+# Generate a system failure result file.  This will be the FIRST failure as it will not overwrite the file
+# if it exists.
+SysFailure()
+{
+	if test ! -s ${RESULT_FAILURE_FILE}
+	then
+		(echo system; echo $* ) > ${RESULT_FAILURE_FILE}
+	fi
+}
+
+# Generate a failure result file.  This will be the FIRST failure as it will not overwrite the file
+# if it exists.
+Failure()
+{
+	if test ! -s ${RESULT_FAILURE_FILE}
+	then
+		echo $* > ${RESULT_FAILURE_FILE}
+	fi
+}
+
 
 sent_xml=0
 
@@ -253,6 +289,7 @@ EOF
 
 if [ "$#" -lt 1 ] ; then
    echo $0: Missing command line arguments. Try '"'"$0 --help"'"' for help.
+   SysFailure No command line arguments to $0
    exit $FAIL_NO_ARGS_EXIT_CODE
 fi 
 
@@ -263,6 +300,7 @@ fi
 
 if [ "$#" -lt 7 ] ; then
    echo $0: expected 7 or more arguments, found: $*
+   SysFailure Expected 7 or more arguments to $0, found: $*
    exit $FAIL_INSUFFICIENT_ARGS_EXIT_CODE
 fi 
 
@@ -277,6 +315,19 @@ DEBUG echo "+---------------- Test Case ${TESTCASE} ----------------+"
 DEBUG echo Command line: $0 $*
 shift 7
 
+DEBUG echo -e "\nYou can run this by hand in the sandbox by using the following command:"
+RUN_LOCAL_CMD="$0 ${MEMLIMIT} ${TIMELIMIT} ${VALIDATOR} ${JUDGEIN} ${JUDGEANS} ${TESTCASE} ${COMMAND} $*"
+tcfile=`printf "$REPORTDIR/testcase_%03d.log" $TESTCASE`
+REPORT_OUTPUT_CMD="more ${tcfile}"
+DEBUG echo -e "\n${RUN_LOCAL_CMD}"
+#DEBUG echo -e "\nor, without the sandbox by using the following command:"
+#DEBUG echo -e "\n${COMMAND} $* < ${JUDGEIN} > $TESTCASE.ans"
+DEBUG echo -e "\nAnd see the run report using the following command:"
+DEBUG echo -e "\n${REPORT_OUTPUT_CMD}\n"
+
+# Skip used arguments
+shift 7
+
 # the rest of the commmand line arguments  are the command args for the submission
 
 
@@ -284,42 +335,49 @@ shift 7
 
 DEBUG echo checking PC2 CGroup V2 installation...
 if [ ! -d "$PC2_CGROUP_PATH" ]; then
-   echo $0: expected pc2sandbox CGroups v2 installation in $PC2_CGROUP_PATH 
+   echo $0: expected pc2sandbox CGroups v2 installation in $PC2_CGROUP_PATH
+   SysFailure CGroups v2 not installed in $PC2_CGROUP_PATH
    exit $FAIL_INVALID_CGROUP_INSTALLATION
 fi
 
 if [ ! -f "$CGROUP_PATH/cgroup.controllers" ]; then
    echo $0: missing file cgroup.controllers in $CGROUP_PATH
+   SysFailure Missing cgroup.controllers in $CGROUP_PATH
    exit $FAIL_MISSING_CGROUP_CONTROLLERS_FILE
 fi
 
 if [ ! -f "$CGROUP_PATH/cgroup.subtree_control" ]; then
    echo $0: missing file cgroup.subtree_control in $CGROUP_PATH
+   SysFailure Missing cgroup.subtree_controll in $CGORUP_PATH
    exit $FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE
 fi
 
 # make sure the cpu and memory controllers are enabled
 if ! grep -q -F "cpu" "$CGROUP_PATH/cgroup.subtree_control"; then
    echo $0: cgroup.subtree_control in $CGROUP_PATH does not enable cpu controller
+   SysFailure CPU controller not enabled in cgroup.subtree_control in $CGROUP_PATH
    exit $FAIL_CPU_CONTROLLER_NOT_ENABLED
 fi
 
 if ! grep -q -F "memory" "$CGROUP_PATH/cgroup.subtree_control"; then
    echo $0: cgroup.subtree_control in $CGROUP_PATH does not enable memory controller
+   SysFailure Memory controller not enabled in cgroup.subtree_control in $CGROUP_PATH
    exit $FAIL_MEMORY_CONTROLLER_NOT_ENABLED
 fi
 
 if [ ! -e "$VALIDATOR" ]; then
    echo $0: The interactive validator \'"$VALIDATOR"\' was not found
+   SysFailure The interactive validator \'"$VALIDATOR"\' was not found
    exit $FAIL_INTERACTIVE_ERROR
 fi
 
 if [ ! -x "$VALIDATOR" ]; then
    echo $0: The interactive validator \'"$VALIDATOR"\' is not an executable file
+   SysFailure  The interactive validator \'"$VALIDATOR"\' is not an executable file
    exit $FAIL_INTERACTIVE_ERROR
 fi
 
-# we seem to have a valid CGroup installation
+# we seem to have a valid CGroup and validator setup
 DEBUG echo ...done.
 
 if test -d $PC2_SANDBOX_CGROUP_PATH
@@ -329,6 +387,7 @@ then
 	if ! rmdir $PC2_SANDBOX_CGROUP_PATH
 	then
 		DEBUG echo Cannot purge old sandbox: $PC2_SANDBOX_CGROUP_PATH
+   		SysFailure  Cannot purge old sandbox: $PC2_SANDBOX_CGROUP_PATH
 		exit $FAIL_SANDBOX_ERROR
 	fi
 fi
@@ -337,6 +396,7 @@ DEBUG echo Creating sandbox $PC2_SANDBOX_CGROUP_PATH
 if ! mkdir $PC2_SANDBOX_CGROUP_PATH
 then
 	DEBUG echo Cannot create $PC2_SANDBOX_CGROUP_PATH
+	SysFailure  Cannot create sandbox: $PC2_SANDBOX_CGROUP_PATH
 	exit $FAIL_INVALID_CGROUP_INSTALLATION
 fi
 
@@ -344,12 +404,14 @@ fi
 rm -f "$INFIFO" "$OUTFIFO"
 if ! mkfifo --mode=$FIFOMODE $INFIFO
 then
-	DEBUG Can not create FIFO $INFIFO 1>&2
+	DEBUG Can not create input FIFO $INFIFO 1>&2
+	SysFailure  Cannot create input FIFO: $INFIFO
 	exit $FAIL_INTERACTIVE_ERROR
 fi
 if ! mkfifo --mode=$FIFOMODE $OUTFIFO
 then
-	DEBUG Can not create FIFO $INFIFO 1>&2
+	DEBUG Can not create output FIFO $OUTFIFO 1>&2
+	SysFailure  Cannot create output FIFO: $OUTFIFO
 	rm $INFIFO
 	exit $FAIL_INTERACTIVE_ERROR
 fi
@@ -359,17 +421,22 @@ mkdir -p "$REPORTDIR"
 
 # Set report file to be testcase specific one now
 REPORTFILE=`printf "$REPORTDIR/testcase_%03d.log" $TESTCASE`
+BRIEFREPORTFILE=`printf "$REPORTDIR/briefcase_%03d.log" $TESTCASE`
+DEBUG echo Report file: ${REPORTFILE} Brief Report File: ${BRIEFREORTFILE}
+REPORT Test case $TESTCASE:
+REPORT Command: "${RUN_LOCAL_CMD}"
+REPORT Report: " ${REPORT_OUTPUT_CMD}"
 
 # set the specified memory limit - input is in MB, cgroup v2 requires bytes, so multiply by 1M
 # but only if > 0.
 # "max" means unlimited, which is the cgroup v2 default
 DEBUG echo checking memory limit
 if [ "$MEMLIMIT" -gt "0" ] ; then
-  REPORT Setting memory limit to $MEMLIMIT MB
+  REPORT_DEBUG Setting memory limit to $MEMLIMIT MiB
   echo $(( $MEMLIMIT * 1024 * 1024 ))  > $PC2_SANDBOX_CGROUP_PATH/memory.max
   echo 1  > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max
 else
-  REPORT Setting memory limit to max, meaning no limit
+  REPORT_DEBUG Setting memory limit to max, meaning no limit
   echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.max  
   echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max  
 fi
@@ -384,21 +451,28 @@ mkdir -p "$INT_FEEDBACKDIR"
 
 # Note that starting of the validator will block until the submission is started since
 # it will block on the $INFIFO (no one else connected yet)
-REPORT Starting: "$VALIDATOR $JUDGEIN $JUDGEANS $INT_FEEDBACKDIR > $INFIFO < $OUTFIFO &"
+REPORT_DEBUG Starting: "$VALIDATOR $JUDGEIN $JUDGEANS $INT_FEEDBACKDIR > $INFIFO < $OUTFIFO &"
 $VALIDATOR $JUDGEIN $JUDGEANS $INT_FEEDBACKDIR > $INFIFO < $OUTFIFO &
 intv_pid=$!
-REPORT Started interactive validator PID $intv_pid
+REPORT_DEBUG Started interactive validator PID $intv_pid
 
 # We use ulimit to limit CPU time, not cgroups.  Time is supplied in seconds.  This may have to
 # be reworked if ms accuracy is needed.  The problem is, cgroups do not kill off a process that
 # exceeds the time limit, ulimit does.
 TIMELIMIT_US=$((TIMELIMIT * 1000000))
-REPORT Setting cpu limit to $TIMELIMIT_US microseconds "("ulimit -t $TIMELIMIT ")"
+REPORT_DEBUG Setting cpu limit to $TIMELIMIT_US microseconds "("ulimit -t $TIMELIMIT ")"
 ulimit -t $TIMELIMIT
 
 MAXPROCS=$((MAXPROCS+`ps -T -u $USER | wc -l`))
-REPORT Setting maximum user processes to $MAXPROCS 
+REPORT_DEBUG Setting maximum user processes to $MAXPROCS 
 ulimit -u $MAXPROCS
+
+# Keep track of details for reports
+REPORT_BRIEF ${JUDGEIN}
+REPORT_BRIEF ${JUDGEANS}
+REPORT_BRIEF $cpunum
+REPORT_BRIEF $$
+REPORT_BRIEF $(date "+%F %T.%6N")
 
 # Remember wall time when we started
 starttime=`GetTimeInMicros`
@@ -408,6 +482,7 @@ REPORT Putting $$ into $PC2_SANDBOX_CGROUP_PATH cgroup
 if ! echo $$ > $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
 then
 	echo $0: Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs - not executing submission.
+	SysFailure Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
 	rm -f "$INFIFO" "$OUTFIFO"
 	exit $FAIL_SANDBOX_ERROR
 fi
@@ -435,19 +510,19 @@ do
 	# A return code 127 indicates there are no more children.  How did that happen?
 	if test $wstat -eq 127
 	then
-		REPORT No more children found while waiting: Submission PID was $submissionpid and Interactive Validator PID was $intv_pid
+		REPORT_DEBUG No more children found while waiting: Submission PID was $submissionpid and Interactive Validator PID was $intv_pid
 		break
 	fi
 	# If interactive validator finishes
 	if test "$child_pid" -eq "$intv_pid"
 	then
-		REPORT Validator finishes with status $wstat
+		REPORT_DEBUG Validator finishes with exit code $wstat
 		if test "$contestant_done" -eq 0
 		then
 			# Only kill it if it still exists
 			if test -d /proc/$contestantpid
 			then
-				REPORT Contestant PID $submissionpid has not finished - killing it
+				REPORT_DEBUG Contestant PID $submissionpid has not finished - killing it
 				# TODO: We should kill and wait for it here and print out the stats
 			fi
 			# This just determines if the program ran, not if it's correct.
@@ -493,7 +568,7 @@ do
 		fi
 
 
-		REPORT Contestant PID $submissionpid finished with status $wstat
+		REPORT_DEBUG Contestant PID $submissionpid finished with exit code $wstat
 		contestant_done=1
 		COMMAND_EXIT_CODE=$wstat
 
@@ -505,6 +580,7 @@ do
 		if test "$kills" != "0"
 		then
 			REPORT_DEBUG The command was killed because it exceeded the memory limit
+			REPORT_BRIEF MLE
 			COMMAND_EXIT_CODE=${FAIL_MEMORY_LIMIT_EXCEEDED}
 			GenXML "No - Memory limit exceeded" ""
 			KillValidator
@@ -514,6 +590,7 @@ do
 			if test "$COMMAND_EXIT_CODE" -eq 137 -o "$cputime" -gt "$TIMELIMIT_US"
 			then
 				REPORT_DEBUG The command was killed because it exceeded the CPU Time limit
+				REPORT_BRIEF TLE
 				COMMAND_EXIT_CODE=${FAIL_TIME_LIMIT_EXCEEDED}
 				GenXML "No - Time limit exceeded" "${cputime}us > ${TIMELIMIT_US}us"
 				KillValidator
@@ -531,6 +608,7 @@ do
 		if test "$wstat" -ne 0
 		then
 			REPORT_DEBUG Contestant finished abnormally - killing validator
+			REPORT_BRIEF RTE
 			KillValidator
 			GenXML "No - Run-time Error" "Exit status $wstat"
 			break

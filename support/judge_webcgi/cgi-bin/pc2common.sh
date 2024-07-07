@@ -50,7 +50,7 @@ InitJudgments()
 	Judgments["timelimit"]="TLE"
 	Judgments["run error"]="RTE"
 	Judgments["compiler error"]="CE"
-	if test -s ${REJECT_INI}
+	if test -s "${REJECT_INI}"
 	then
 		while read j
 		do
@@ -82,14 +82,14 @@ MapJudgment()
 	jm="$1"
 	vr="$2"
 	result=${Judgments[$jm]}
-	if test -z ${result}
+	if test -z "${result}"
 	then
-		if test ${validationReturnCode} -eq 0
+		if test "${validationReturnCode}" -eq 0
 		then
-			if test ${vr} = "43"
+			if test "${vr}" = "43"
 			then
 				resul="WA"
-			elif test ${vr} = "42"
+			elif test "${vr}" = "42"
 			then
 				result="AC"
 			else
@@ -135,12 +135,12 @@ GetJudgmentFromFile()
 	else
 		# Source the file
 		. ${exdata}
-		if test ${compileSuccess} = "false"
+		if test "${compileSuccess}" = "false"
 		then
 			result="CE"
-		elif test ${executeSuccess} = "true"
+		elif test "${executeSuccess}" = "true"
 		then
-			if test ${validationSuccess} = "true"
+			if test "${validationSuccess}" = "true"
 			then
 				MapJudgment "${validationResults}" "${validationReturnCode}"
 			else
@@ -159,7 +159,7 @@ GetJudgment()
 	if ! cd ${dir}
 	then
 		result="Not found"
-	elif test -s ${RESULT_FAILURE_FILE}
+	elif test -s "${RESULT_FAILURE_FILE}"
 	then
 		jerr=`cat ${RESULT_FAILURE_FILE}`
 		result="JE ($jerr)"
