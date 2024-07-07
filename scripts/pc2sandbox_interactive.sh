@@ -315,6 +315,19 @@ DEBUG echo "+---------------- Test Case ${TESTCASE} ----------------+"
 DEBUG echo Command line: $0 $*
 shift 7
 
+DEBUG echo -e "\nYou can run this by hand in the sandbox by using the following command:"
+RUN_LOCAL_CMD="$0 ${MEMLIMIT} ${TIMELIMIT} ${VALIDATOR} ${JUDGEIN} ${JUDGEANS} ${TESTCASE} ${COMMAND} $*"
+tcfile=`printf "$REPORTDIR/testcase_%03d.log" $TESTCASE`
+REPORT_OUTPUT_CMD="more ${tcfile}"
+DEBUG echo -e "\n${RUN_LOCAL_CMD}"
+#DEBUG echo -e "\nor, without the sandbox by using the following command:"
+#DEBUG echo -e "\n${COMMAND} $* < ${JUDGEIN} > $TESTCASE.ans"
+DEBUG echo -e "\nAnd see the run report using the following command:"
+DEBUG echo -e "\n${REPORT_OUTPUT_CMD}\n"
+
+# Skip used arguments
+shift 7
+
 # the rest of the commmand line arguments  are the command args for the submission
 DEBUG echo -e "\nYou can run this by hand in the sandbox by using the following command:"
 RUN_LOCAL_CMD="$0 ${MEMLIMIT} ${TIMELIMIT} ${VALIDATOR} ${JUDGEIN} ${JUDGEANS} ${TESTCASE} ${COMMAND} $*"
