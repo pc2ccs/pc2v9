@@ -244,9 +244,9 @@ if [ "$#" -lt 1 ] ; then
    exit $FAIL_NO_ARGS_EXIT_CODE
 fi 
 
-if [ "$#" -lt 3 ] ; then
-   echo $0: expected 3 or more arguments, found: $*
-   SysFailure Expected 3 or more arguments to $0, found: $*
+if [ "$#" -lt 6 ] ; then
+   echo $0: expected 6 or more arguments, found: $*
+   SysFailure Expected 6 or more arguments to $0, found: $*
    exit $FAIL_INSUFFICIENT_ARGS_EXIT_CODE
 fi 
 

@@ -11,7 +11,7 @@ LogButton()
 {
 	# Read first judgment file to get compile time - it's compiled once for all
 	GetJudgmentFromFile "$dir/${EXECUTE_DATA_PREFIX}.0.txt"
-	if test -n ${result} -a -n ${compileTimeMS}
+	if test -n "${result}" -a -n "${compileTimeMS}"
 	then
 		cat << LBEOF0
 <center>
@@ -22,8 +22,14 @@ LBEOF0
 
 	# Read the first briefcase file (if any) for limits
 	MakeBriefcaseFile ${EXE_DIR_LINK} 1
-	ReadBriefcase < $result
-	if test -n ${cpulimms}
+	if test -s "${result}"
+	then
+		ReadBriefcase < $result
+	else
+		cpulimms=""
+		memlim=""
+	fi
+	if test -n "${cpulimms}"
 	then
 		cpulimms=${cpulimms%%.*}
 		cpusecs="$((cpulimms/1000))"
@@ -38,8 +44,14 @@ LBEOF0
 <p style="font-size:30px">The CPU Limit for this problem is <b>${cpusecs} (${cpulimms}ms)</b>.
 </center>
 LBEOF1
+	else
+		cat << LBEOF1AA
+<center>
+<p style="font-size:30px">The CPU Limit for this problem is <b>N/A</b>.
+</center>
+LBEOF1AA
 	fi
-	if test -n ${memlim}
+	if test -n "${memlim}"
 	then
 		if test ${memlim} = "0"
 		then
@@ -52,9 +64,15 @@ LBEOF1
 <p style="font-size:30px">The Memory limit for this problem is <b>${memlim}</b>.
 </center>
 LBEOF1A
+	else
+		cat << LBEOF1AAA
+<center>
+<p style="font-size:30px">The Memory limit for this problem is <b>N/A</b>.
+</center>
+LBEOF1AAA
 	fi
 	sandlog=${EXE_DIR_LINK}/${SANDBOX_LOG}
-	if test -s ${sandlog}
+	if test -s "${sandlog}"
 	then
 		cat << LBEOF2
 <a href="$sandlog" target="_blank">Click here for the full sandbox log for this run</a>
@@ -92,11 +110,11 @@ GenFileLink()
 	tstcase=$((tstcase-1))
 	tstfile=$1.$tstcase.txt
 	tstpath=$dir/$1.$tstcase.txt
-	if test -s ${tstpath}
+	if test -s "${tstpath}"
 	then
 		bytes=`stat -c %s ${tstpath}`
 		echo '   <td><a href="'$EXE_DIR_LINK/$tstfile'" target="_blank">View ('$bytes' bytes)</td>'
-	elif test -e ${tstpath}
+	elif test -e "${tstpath}"
 	then
 		echo '   <td>(Empty)</td>'
 	else
@@ -166,7 +184,7 @@ TableRow()
 
 	echo '  <tr>'
 
-	if test -n ${tcreport}
+	if test -n "${tcreport}"
 	then
 		echo '   <td class="cent"><a href="'${tcreport}'" target="_blank">'$tc'</a></td>'
 	else

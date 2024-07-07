@@ -26,15 +26,15 @@ TableRow()
 	judge="${10}"
 	probname=""
 	probdir=""
-	if test -n ${shortname}
+	if test -n "${shortname}"
 	then
 		probdir=${PC2_CDP}/${shortname}
 		probstatement=${probdir}/problem_statement/problem.en.tex
-		if test ! -s ${probstatement}
+		if test ! -s "{probstatement}"
 		then
 			probstatement=${probdir}/problem_statement/problem.tex
 		fi
-		if test -s ${probstatement}
+		if test -s "${probstatement}"
 		then
 			probname=`head -1 ${probstatement}`
 			probname=${probname##*\{}
