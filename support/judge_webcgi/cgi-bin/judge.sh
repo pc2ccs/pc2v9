@@ -93,7 +93,6 @@ MyTableStyles
 EndStyles
 StartHTMLDoc
 Header
-LogButton
 StartTable
 TableHeader
 
