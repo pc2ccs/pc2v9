@@ -3,13 +3,31 @@
 . ./webcommon.sh
 . ./cdpcommon.sh
 
+
 TableHeader()
 {
 	cat << EOFTH
 <tr>
-<th>Run ID</th><th class="cent">Disp</th><th class="cent">Judgment</th><th>Problem</th><th>Team</th><th class="cent">Test Cases</th><th class="cent">Language</th><th class="cent">Judge</th><th>Time Judged</th>
+<th>Run ID <span>&#x25b2;</span></th>
+<th class="cent">Disp</th>
+<th class="cent">Judgment <span>&#x25b2;</span></th>
+<th>Problem <span>&#x25b2;</span></th>
+<th>Team <span>&#x25b2;</span></th>
+<th class="cent">Test Cases <span>&#x25b2;</span></th>
+<th class="cent">Language <span>&#x25b2;</span></th>
+<th class="cent">Judge <span>&#x25b2;</span></th>
+<th>Time Judged <span>&#x25b2;</span></th>
 </tr>
 EOFTH
+}
+
+MyTableStyles()
+{
+	cat << EOFMYSTYLES
+th {
+    cursor: pointer;
+}
+EOFMYSTYLES
 }
 
 TableRow()
@@ -70,8 +88,11 @@ TableRow()
 
 ###ParseProblemYaml
 Preamble
+Styles
+MyTableStyles
+EndStyles
+StartHTMLDoc
 Header
-LogButton
 StartTable
 TableHeader
 
@@ -113,12 +134,13 @@ do
 			numcases="??"
 		fi
 		# Note that GetJudgment also filled in exdata with the last execute data
-		GetLastTestCaseNumber "${exdata}"
+		GetTestCaseNumber "${exdata##./}"
 		testcaseinfo=$((result+1))/${numcases}
 
 		TableRow "$exedir" $runid $problet $probshort $langid $teamnum "$judgment" "$runtime" "$testcaseinfo" "$judge"
 	fi
 done
 EndTable
+TableSortScripts
 Trailer
 exit 0

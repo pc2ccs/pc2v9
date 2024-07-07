@@ -263,12 +263,8 @@ TESTCASE=$5
 COMMAND=$6
 DEBUG echo "+---------------- Test Case ${TESTCASE} ----------------+"
 DEBUG echo Command line: $0 $*
-shift
-shift
-shift
-shift
-shift
-shift
+shift 6
+
 DEBUG echo -e "\nYou can run this by hand in the sandbox by using the following command:"
 RUN_LOCAL_CMD="$0 ${MEMLIMIT} ${TIMELIMIT} xxx xxx ${COMMAND} $* < ${JUDGEIN} > $TESTCASE.ans"
 DIFF_OUTPUT_CMD="diff -w ${JUDGEANS} $TESTCASE.ans | more"
@@ -363,11 +359,11 @@ REPORT Diff: "   ${DIFF_OUTPUT_CMD}"
 # "max" means unlimited, which is the cgroup v2 default
 DEBUG echo checking memory limit
 if [ "$MEMLIMIT" -gt "0" ] ; then
-  REPORT_DEBUG echo Setting memory limit to $MEMLIMIT MB
+  REPORT_DEBUG Setting memory limit to $MEMLIMIT MiB
   echo $(( $MEMLIMIT * 1024 * 1024 ))  > $PC2_SANDBOX_CGROUP_PATH/memory.max
   echo 1  > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max
 else
-  REPORT_DEBUG echo Setting memory limit to max, meaning no limit
+  REPORT_DEBUG Setting memory limit to max, meaning no limit
   echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.max  
   echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max  
 fi
