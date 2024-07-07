@@ -3770,7 +3770,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             executeDataWriter.println("compileResultCode='" + executionData.getCompileResultCode() + "'");
             executeDataWriter.println("executeExitValue='" + executionData.getExecuteExitValue() + "'");
             executeDataWriter.println("executeSuccess='" + executionData.isExecuteSucess() + "'");
-            executeDataWriter.println("validationReturnCode ='" + executionData.getValidationReturnCode() + "'");
+            executeDataWriter.println("validationReturnCode='" + executionData.getValidationReturnCode() + "'");
             executeDataWriter.println("validationSuccess='" + executionData.isValidationSuccess() + "'");
             executeDataWriter.println("validationResults='" + showNullAsEmpty(executionData.getValidationResults()) + "'");
             executeDataWriter.println("compileTimeMS='" + executionData.getCompileTimeMS() + "'");
