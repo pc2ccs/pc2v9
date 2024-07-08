@@ -31,6 +31,8 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
 
     private int lastRank = -1;
 
+    private boolean useWFGroupRanking = true;
+
     /**
      * Compares its two arguments for order. Returns a negative integer, zero, or a positive integer as the first argument is less
      * than, equal to, or greater than the second.
@@ -102,21 +104,23 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
             return 1;
         } else if (b1 < getMedian()) {
             return -1;
-        } else if( a0 > getLastRank() && b0 > getLastRank() ) {
-            // compare only number of solved and name
-            if (b1 == a1) {
-                return(nameComparison);
-            } else {
-                if (b1 < a1) {
-                    return (-1);
+        } else if(isUseWFGroupRanking()) {
+            if( a0 > getLastRank() && b0 > getLastRank() ) {
+                // compare only number of solved and name
+                if (b1 == a1) {
+                    return(nameComparison);
                 } else {
-                    return (1);
+                    if (b1 < a1) {
+                        return (-1);
+                    } else {
+                        return (1);
+                    }
                 }
+            } else if (a0 > getLastRank()) {
+                return 1;
+            } else if (b0 > getLastRank()) {
+                return -1;
             }
-        } else if (a0 > getLastRank()) {
-            return 1;
-        } else if (b0 > getLastRank()) {
-            return -1;
         }
 
         if ((b1 == a1) && (b2 == a2) && (b3 == a3) && (nameComparison == 0)
@@ -159,5 +163,13 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
 
     public void setLastRank(int lastRank) {
         this.lastRank = lastRank;
+    }
+
+    public boolean isUseWFGroupRanking() {
+        return useWFGroupRanking;
+    }
+
+    public void setUseWFGroupRanking(boolean useGroupRank) {
+        useWFGroupRanking = useGroupRank;
     }
 }
