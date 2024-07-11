@@ -1,8 +1,9 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.list;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.text.Normalizer;
 
 /**
  * Compare the name of one team with another.
@@ -44,6 +45,13 @@ public class AccountNameComparator implements Comparator<String>, Serializable {
                 }
             }
         }
+
+        /**
+         * strip accents off string to make them accent insensitive
+         */
+        displayNameOne = Normalizer.normalize(displayNameOne, Normalizer.Form.NFD);
+        displayNameTwo = Normalizer.normalize(displayNameTwo, Normalizer.Form.NFD);
+
         if (displayNameOne.charAt(0) != displayNameTwo.charAt(0)) {
             // if first character different then just regular sort
             return displayNameOne.compareTo(displayNameTwo);
