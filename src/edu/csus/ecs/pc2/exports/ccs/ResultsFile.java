@@ -86,6 +86,10 @@ public class ResultsFile {
      * @param group (or null)
      * @return contents of results.csv (after header line)
      */
+    public String[] createCSVFileLines(IInternalContest contest) {
+        return createFileLines(contest, null, DEFAULT_RESULT_FIELD_NAME, false);
+    }
+
     public String[] createCSVFileLines(IInternalContest contest, Group group) {
         return createFileLines(contest, group, DEFAULT_RESULT_FIELD_NAME, false);
     }
@@ -251,8 +255,8 @@ public class ResultsFile {
                 lines.addElement(reservationId + TAB //
                         + rank + TAB //
                         + award + TAB  //
-                        + record.getNumberSolved() //
-                        + TAB + record.getPenaltyPoints() + TAB //
+                        + record.getNumberSolved() + TAB //
+                        + record.getPenaltyPoints() + TAB //
                         + record.getLastSolved());
             } else {
                 // teamId,rank,medalCitation,problemsSolved,totalTime,lastProblemTime,siteCitation,citation
