@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import edu.csus.ecs.pc2.core.list.AccountList;
-import edu.csus.ecs.pc2.core.list.AccountNameComparator;
+import edu.csus.ecs.pc2.core.list.AccountNameCaseComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 
 /**
@@ -23,7 +23,7 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
      */
     private static final long serialVersionUID = 2417425534254224622L;
 
-    private AccountNameComparator accountNameComparator = new AccountNameComparator();
+    private AccountNameCaseComparator accountNameCaseComparator = new AccountNameCaseComparator();
 
     private AccountList cachedAccountList;
 
@@ -89,7 +89,7 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
         nameB = accountB.getDisplayName();
         b5 = teamB.getClientId().hashCode();
 //        nameComparison = nameA.toLowerCase().compareTo(nameB.toLowerCase());
-        nameComparison = accountNameComparator.compare(nameA, nameB);
+        nameComparison = accountNameCaseComparator.compare(nameA, nameB);
 
         //
         // Primary Sort = number of solved problems (high to low)
