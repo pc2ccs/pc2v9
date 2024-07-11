@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.list;
 
 import java.io.Serializable;
 import java.util.Comparator;
-import java.text.Collator;
+import java.text.Normalizer;
 
 /**
  * Compare the name of one team with another, ignoring case.
@@ -47,10 +47,10 @@ public class AccountNameCaseComparator implements Comparator<String>, Serializab
         }
 
         /**
-         * Collator set to primary is does an accent and case sensitive comparison
+         * strip accents off string to make them accent insensitive
          */
-        Collator collator = Collator.getInstance();
-        collator.setStrength(Collator.PRIMARY);
+        displayNameOne = Normalizer.normalize(displayNameOne, Normalizer.Form.NFD);
+        displayNameTwo = Normalizer.normalize(displayNameTwo, Normalizer.Form.NFD);
         /*
          * Perform quick check to see if the 2 strings have a chance of being in the same ballpark
          */
@@ -67,7 +67,7 @@ public class AccountNameCaseComparator implements Comparator<String>, Serializab
                
                 if (lastNumberIndexOne == lastNumberIndexTwo && lastNumberIndexOne > 0) {
     
-                    nCmpResult = collator.compare(displayNameOne.substring(0, lastNumberIndexOne + 1), displayNameTwo.substring(0, lastNumberIndexOne + 1));
+                    nCmpResult = displayNameOne.substring(0, lastNumberIndexOne + 1).compareToIgnoreCase(displayNameTwo.substring(0, lastNumberIndexOne + 1));
                     // If the text preceeding the final number on the string are different, just compare
                     if (nCmpResult != 0) {
                         return nCmpResult;
@@ -84,7 +84,7 @@ public class AccountNameCaseComparator implements Comparator<String>, Serializab
         /*
          * Default is to just compare ignoring case.
          */
-        return collator.compare(displayNameOne, displayNameTwo);
+        return displayNameOne.compareToIgnoreCase(displayNameTwo);
     }
 
     private int findLastNumberIndex(String name) {
