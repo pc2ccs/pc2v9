@@ -113,8 +113,6 @@ public class ResultsFile {
         // Here we just cobble together some half-assed finalized data
         if (finalizeData == null) {
             finalizeData = GenDefaultFinalizeData();
-//            String [] badbad = {"Contest not finalized cannot create awards"};
-//            return badbad;
         }
 
         // TODO finalizeData really needs a B instead of getBronzeRank
@@ -134,6 +132,7 @@ public class ResultsFile {
         comparator.setCachedAccountList(accountList);
         comparator.setLastRank(lastMedalRank);
         comparator.setMedian(median);
+        comparator.setUseWFGroupRanking(finalizeData.isUseWFGroupRanking());
         Arrays.sort(standingsRecords, comparator);
 */
 
@@ -159,16 +158,18 @@ public class ResultsFile {
             String award = getAwardMedal(record.getRankNumber(), finalizeData, ranked);
             String rank = "";
             if (!"honorable".equalsIgnoreCase(award)) {
-                if (realRank > lastMedalRank && (lastSolvedNum != record.getNumberSolved())) {
-                    lastSolvedNum = record.getNumberSolved();
-                    rankNumber = realRank;
-                    record.setRankNumber(realRank);
-                } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
-                    lastSolvedNum = record.getNumberSolved();
-                    rankNumber = realRank;
-                    record.setRankNumber(realRank);
-                } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
-                    record.setRankNumber(rankNumber);
+                if(finalizeData.isUseWFGroupRanking()) {
+                    if (realRank > lastMedalRank && (lastSolvedNum != record.getNumberSolved())) {
+                        lastSolvedNum = record.getNumberSolved();
+                        rankNumber = realRank;
+                        record.setRankNumber(realRank);
+                    } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
+                        lastSolvedNum = record.getNumberSolved();
+                        rankNumber = realRank;
+                        record.setRankNumber(realRank);
+                    } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
+                        record.setRankNumber(rankNumber);
+                    }
                 }
                 rank = Integer.toString(record.getRankNumber());
             }
@@ -256,8 +257,6 @@ public class ResultsFile {
 
         if (finalizeData == null) {
             finalizeData = GenDefaultFinalizeData();
-//            String [] badbad = {"Contest not finalized cannot create awards"};
-//            return badbad;
         }
 
         // TODO finalizeData really needs a B instead of getBronzeRank
@@ -275,6 +274,7 @@ public class ResultsFile {
         comparator.setCachedAccountList(accountList);
         comparator.setLastRank(lastMedalRank);
         comparator.setMedian(median);
+        comparator.setUseWFGroupRanking(finalizeData.isUseWFGroupRanking());
         Arrays.sort(standingsRecords, comparator);
 
         int realRank = 0;
@@ -299,12 +299,14 @@ public class ResultsFile {
             String award = getAwardMedal(record.getRankNumber(), finalizeData, ranked);
             String rank = "";
             if (!"honorable".equalsIgnoreCase(award)) {
-                if (realRank > lastMedalRank && (lastSolvedNum != record.getNumberSolved())) {
-                    lastSolvedNum = record.getNumberSolved();
-                    rankNumber = realRank;
-                    record.setRankNumber(realRank);
-                } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
-                    record.setRankNumber(rankNumber);
+                if(finalizeData.isUseWFGroupRanking()) {
+                    if (realRank > lastMedalRank && (lastSolvedNum != record.getNumberSolved())) {
+                        lastSolvedNum = record.getNumberSolved();
+                        rankNumber = realRank;
+                        record.setRankNumber(realRank);
+                    } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
+                        record.setRankNumber(rankNumber);
+                    }
                 }
                 rank = Integer.toString(record.getRankNumber());
             }
@@ -396,6 +398,7 @@ public class ResultsFile {
         finalizeData.setBronzeRank(12);
         finalizeData.setCertified(false);
         finalizeData.setComment("Preliminary Results - Contest not Finalized");
+        finalizeData.setUseWFGroupRanking(true);
         return(finalizeData);
     }
 }

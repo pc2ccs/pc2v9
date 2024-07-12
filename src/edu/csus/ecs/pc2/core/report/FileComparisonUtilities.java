@@ -494,7 +494,7 @@ public class FileComparisonUtilities {
         @Override
         public String getKey(Object object) {
             CLICSAward clicsAward = (CLICSAward) object;
-            return clicsAward.getCitation();
+            return clicsAward.getId();
         }
     }
     
