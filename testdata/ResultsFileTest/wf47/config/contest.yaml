@@ -1,0 +1,8 @@
+id:                         wf47_finals
+formal_name:                WF47 ICPC 47th World Finals
+name:                       47th ICPC World Finals
+start_time:                 2024-04-18T12:00:00+02:00
+duration:                   5:00:00
+scoreboard_freeze_duration: 1:00:00
+penalty_time:               20
+scoreboard_type:            pass-fail

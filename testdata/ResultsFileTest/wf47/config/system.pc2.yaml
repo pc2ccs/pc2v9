@@ -1,0 +1,99 @@
+#
+# File:    system.pc2.yaml
+# Purpose: pc2 setttings for a contest
+#
+
+# TODO update scoreboard html locations
+# Locations to write scorboard html/web pages
+# unfrozen board
+# output-private-score-dir: /home/ubuntu/pc2/WebTeamInterface-1.1/WebContent/WTI-UI/secret
+# frozen board
+# output-public-score-dir: /home/ubuntu/pc2/WebTeamInterface-1.1/WebContent/WTI-UI/scoreboard
+
+# 8M
+max-output-size-K: 8192
+# 2G
+memory-limit-in-Meg: 2048
+
+stop-on-first-failed-test-case: true
+team-scoreboard-display-format-string: "{:longschoolname}"
+
+load-data-files: false
+
+# Load sample data 
+load-sample-judges-data: true
+
+# Needed if shadowing
+ccs-test-mode : true
+
+judge-config-path: /home/icpc2023/pc2/current/config
+
+allow-multiple-team-logins: false
+
+# account permissions
+permissions:
+# enable perms for FEEDER 1 to edit runs and submit runs
+  - account: FEEDER
+    number: 1
+    enable: SHADOW_PROXY_TEAM, EDIT_RUN, START_CONTEST_CLOCK, STOP_CONTEST_CLOCK
+# non-primary shadow consumer, can edit runs
+  - account: FEEDER
+    number: 2,3,4,5,6,7,8
+    enable: EDIT_RUN
+# disable show on scoreboard for all teams by default
+  - account: TEAM
+    number: 150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184
+    disable: DISPLAY_ON_SCOREBOARD
+# domjudge admins
+  - account: ADMINISTRATOR
+    number: 9,10
+    disable: EDIT_RUN,ADD_ACCOUNT,EDIT_ACCOUNT,JUDGE_RUN,REJUDGE_RUN,EDIT_LANGUAGE,EDIT_PERMISSIONS,EDIT_PROBLEM,ALLOWED_TO_AUTO_JUDGE,RESET_CONTEST,SWITCH_PROFILE,EDIT_JUDGEMENTS,SHUTDOWN_SERVER
+
+accounts:
+
+  - account: TEAM
+    site: 1
+    start: 150
+    count: 35
+
+  - account: ADMINISTRATOR
+    site: 1
+    count: 10
+
+  - account: JUDGE
+    site: 1
+    count: 15
+
+  - account: FEEDER
+    site: 1
+    count: 10
+
+  - account: SCOREBOARD
+    site: 1
+    count: 3
+
+# TODO ASSIGN AJ's
+
+auto-judging:
+  - account: JUDGE
+    site: 1
+    number: 1,2,3,4,5,6,7,8
+    letters: all
+    enabled: yes
+
+# pc2 Shadow CCS settings
+# enable shadow mode
+shadow-mode: true
+
+# base URL for primary CCS REST service
+ccs-url: https://domjudge-wf47/api/contests/finals
+
+# primary CCS REST login
+ccs-login: pc2
+
+# primary CCS REST password
+#ccs-password: PETITE-PASSCODE-champion-patchy
+ccs-password: keenly-vice-exert-wand
+
+# EOF system.pc2.yaml
+

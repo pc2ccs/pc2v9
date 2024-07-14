@@ -1,0 +1,54 @@
+\problemname{Tilting Tiles}
+
+You found a weird puzzle in a box with old toys in your attic.
+The puzzle forms a~rectangular grid board made of $h \times w$ square cells. 
+Some cells in that grid have a~colored tile placed on them, as shown in Figure~\ref{fig:start}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[height=1.8in]{tilting_0}
+\caption{Color tiles correspond to the starting arrangement in Sample Input 1.}
+\label{fig:start}
+\end{figure}
+
+You are not yet sure what the exact goal of this puzzle is, but you started examining possible ways of rearranging the tiles.
+Their arrangement can be manipulated by tilting the grid in one of the four cardinal directions:
+to your left, to your right, towards you, or away from you.
+Tilting causes all the tiles to slide in the respective direction until they are blocked either by the boundary or by another tile.
+Given a~starting and ending arrangement, determine whether there exists some sequence of tilts that transforms the former into the latter.
+Figure~\ref{fig:tilt} illustrates tilting of the puzzle shown in Sample Input 1.
+
+\begin{figure}[h]
+\newcommand{\tiltfigln}{\vphantom{ly}\small}
+\newlength{\tiltfigsp}\setlength{\tiltfigsp}{-4pt}
+\centering
+\parbox{0.4in}{\centering {\tiltfigln }\\[\tiltfigsp]{\tiltfigln tilt}\\[\tiltfigsp]{\tiltfigln left}\\$\Longrightarrow$\\~}
+\raisebox{-0.5in}{\includegraphics[height=1in]{tilting_1}}
+\parbox{0.5in}{\centering {\tiltfigln tilt}\\[\tiltfigsp]{\tiltfigln towards}\\[\tiltfigsp]{\tiltfigln you}\\$\Longrightarrow$\\~}
+\raisebox{-0.5in}{\includegraphics[height=1in]{tilting_2}}
+\parbox{0.4in}{\centering {\tiltfigln ~}\\[\tiltfigsp]{\tiltfigln tilt}\\[\tiltfigsp]{\tiltfigln right}\\$\Longrightarrow$\\~}
+\raisebox{-0.5in}{\includegraphics[height=1in]{tilting_3}}
+\parbox{0.55in}{\centering {\tiltfigln tilt}\\[\tiltfigsp]{\tiltfigln away}\\[\tiltfigsp]{\tiltfigln from you}\\$\Longrightarrow$\\~}
+\raisebox{-0.5in}{\includegraphics[height=1in]{tilting_4}}
+\caption{Solution to Sample Input 1.}
+\label{fig:tilt}
+\end{figure}
+
+
+\begin{Input}
+The first line of input contains two integers $h$ and $w$ ($1\le h,w\le 500$) representing the height and width of the grid.
+Then follow $h$ lines giving the starting arrangement from the top row to the bottom row.
+Each of these lines contains a~string of length $w$ describing cells on the row from left to right.
+If a~cell is empty, the corresponding character is a dot (\texttt{.}).
+If there is a~tile, the color of that tile is given, denoted by a~lowercase letter (\texttt{a}-\texttt{z}).
+Different letters represent different colors, and tiles of the same color cannot be distinguished.
+
+After the starting arrangement, there is one empty line and then follows a~description of the ending arrangement,
+consisting of $h$ lines in the same format as for the starting arrangement.
+\end{Input}
+
+
+\begin{Output}
+Output \texttt{yes} if a~sequence of tilts exists that transforms the starting arrangement to the ending arrangement, and \texttt{no} otherwise.
+\end{Output}
+

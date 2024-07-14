@@ -1,0 +1,23 @@
+name: Riddle of the Sphinx
+source: ICPC World Finals 2022/2023
+license: permission
+
+validation: custom interactive
+
+sandbox-type: PC2_INTERNAL_SANDBOX
+
+limits:
+   timeout: 2
+   memory: 2048
+   time_multiplier: 3.3
+
+
+validator:
+  validatorProg: 'sphinx_validator/validate_out'
+  validatorCmd: '{:validator} {:infile} {:ansfile} {:feedbackdir}'
+  usingInternal: false
+  validatorOption: 0
+  use-internal-validator: false
+  use-clics-validator: false
+  use-custom-validator: true
+  use-clics-custom-validator-interface: true
