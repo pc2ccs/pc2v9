@@ -61,28 +61,29 @@ public class ResultsFileTest extends AbstractTestCase {
      * @throws Exception
      */
     public void testcreateTSVFileLinesEmpty() throws Exception {
-
+        
+        // If everybody solved 0 problems then they all should be Honorable
         String[] expectedResults = { //
-                "2020;1;Gold Medal;0", // results 
-                "2021;1;Gold Medal;0", // results 
-                "2022;1;Gold Medal;0", // results 
-                "2023;1;Gold Medal;0", // results 
-                "2024;1;Gold Medal;0", // results 
-                "2025;1;Gold Medal;0", // results 
-                "2026;1;Gold Medal;0", // results 
-                "2027;1;Gold Medal;0", // results 
-                "2028;1;Gold Medal;0", // results 
-                "2029;1;Gold Medal;0", // results 
-                "2030;1;Gold Medal;0", // results 
-                "2031;1;Gold Medal;0", // results 
-                "2032;1;Gold Medal;0", // results 
-                "2033;1;Gold Medal;0", // results 
-                "2034;1;Gold Medal;0", // results 
-                "2035;1;Gold Medal;0", // results 
-                "2036;1;Gold Medal;0", // results 
-                "2037;1;Gold Medal;0", // results 
-                "2038;1;Gold Medal;0", // results 
-                "2039;1;Gold Medal;0", // results 
+                "2020;;Honorable;0", // results 
+                "2021;;Honorable;0", // results 
+                "2022;;Honorable;0", // results 
+                "2023;;Honorable;0", // results 
+                "2024;;Honorable;0", // results 
+                "2025;;Honorable;0", // results 
+                "2026;;Honorable;0", // results 
+                "2027;;Honorable;0", // results 
+                "2028;;Honorable;0", // results 
+                "2029;;Honorable;0", // results 
+                "2030;;Honorable;0", // results 
+                "2031;;Honorable;0", // results 
+                "2032;;Honorable;0", // results 
+                "2033;;Honorable;0", // results 
+                "2034;;Honorable;0", // results 
+                "2035;;Honorable;0", // results 
+                "2036;;Honorable;0", // results 
+                "2037;;Honorable;0", // results 
+                "2038;;Honorable;0", // results 
+                "2039;;Honorable;0", // results 
         };
 
         ResultsFile resultsFile = new ResultsFile();
@@ -128,9 +129,9 @@ public class ResultsFileTest extends AbstractTestCase {
         resultsFile.setFinalizeData(finalizeData);
 
         IContestLoader loader = new ContestSnakeYAMLLoader();
-        IInternalContest contest = loader.fromYaml(null, getDataDirectory()+File.separator+"wf2017"+File.separator+"config", true);
+        IInternalContest contest = loader.fromYaml(null, getDataDirectory()+File.separator+"wf47"+File.separator+"config", true);
         ensureStaticLog();
-        loader.initializeContest(contest, new File(getDataDirectory()+File.separator+"wf2017"));
+        loader.initializeContest(contest, new File(getDataDirectory()+File.separator+"wf47"));
         // Hmm, no judgements
         Judgement[] judgements = contest.getJudgements();
         if (judgements.length == 0) {
@@ -277,6 +278,7 @@ public class ResultsFileTest extends AbstractTestCase {
         ResultsFile resultsFile = new ResultsFile();
 
         FinalizeData finalizeData = createSampFinalData(1);
+        finalizeData.setUseWFGroupRanking(false);
         resultsFile.setFinalizeData(finalizeData);
 
         int numTeams = 20;
@@ -341,9 +343,9 @@ public class ResultsFileTest extends AbstractTestCase {
             // Reservation Id; rank ; medal; solved
 
             assertEquals("Row "+ row + " Reservation Id", fields1[0], fields2[0]);
-            assertEquals("Row "+ row + "Rank for " + fields1[0], fields1[1], fields2[1]);
-            assertEquals("Row "+ row + "Medal for " + fields1[0], fields1[2], fields2[2]);
-            assertEquals("Row "+ row + "Solved for " + fields1[0], fields1[3], fields2[3]);
+            assertEquals("Row "+ row + " Rank for " + fields1[0], fields1[1], fields2[1]);
+            assertEquals("Row "+ row + " Medal for " + fields1[0], fields1[2], fields2[2]);
+            assertEquals("Row "+ row + " Solved for " + fields1[0], fields1[3], fields2[3]);
         }
     }
 }

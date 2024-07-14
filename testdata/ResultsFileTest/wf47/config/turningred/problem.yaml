@@ -1,0 +1,12 @@
+name: Turning Red
+source: ICPC World Finals 2022/2023
+license: permission
+
+sandbox-type: PC2_INTERNAL_SANDBOX
+
+limits:
+  timeout: 3
+  memory: 2048
+  time_multiplier: 1.05 # Paul.java just at the boundary of AC
+  
+

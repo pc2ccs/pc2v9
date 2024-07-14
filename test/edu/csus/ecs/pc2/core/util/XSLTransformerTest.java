@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
 import java.io.FileOutputStream;
@@ -112,6 +112,7 @@ public class XSLTransformerTest extends AbstractTestCase {
         };
         
         // for medal ranks 4, 8, 12
+        // ) solved problems are overwritten as Honorable
         String[] expectedResults = { //
                 "2024;1;Gold Medal;2;88;53", // 
                 "2031;2;Gold Medal;2;90;55", // 
@@ -124,15 +125,15 @@ public class XSLTransformerTest extends AbstractTestCase {
                 "2032;9;Bronze Medal;1;45;45", // 
                 "2033;10;Bronze Medal;1;55;55", // 
                 "2034;11;Bronze Medal;1;65;65", // 
-                "2022;12;Bronze Medal;0;0;0", // 
-                "2023;12;Bronze Medal;0;0;0", // 
-                "2025;12;Bronze Medal;0;0;0", // 
-                "2027;12;Bronze Medal;0;0;0", // 
-                "2028;12;Bronze Medal;0;0;0", // 
-                "2035;12;Bronze Medal;0;0;0", // 
-                "2036;12;Bronze Medal;0;0;0", // 
-                "2037;12;Bronze Medal;0;0;0", // 
-                "2039;12;Bronze Medal;0;0;0", // 
+                "2022;;Honorable;0;0;0", // 
+                "2023;;Honorable;0;0;0", // 
+                "2025;;Honorable;0;0;0", // 
+                "2027;;Honorable;0;0;0", // 
+                "2028;;Honorable;0;0;0", // 
+                "2035;;Honorable;0;0;0", // 
+                "2036;;Honorable;0;0;0", // 
+                "2037;;Honorable;0;0;0", // 
+                "2039;;Honorable;0;0;0", // 
         };
 
         

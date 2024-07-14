@@ -214,12 +214,19 @@ public class ResultsFile {
             boolean isHighHonor = false;
             boolean isHonor = false;
 
-            if (record.getNumberSolved() >= highestHonorSolvedCount) {
-                isHighestHonor = true;
-            } else if (record.getNumberSolved() == highHonorSolvedCount) {
-                isHighHonor = true;
-            } else if (record.getNumberSolved() >= median) {
-                isHonor = true;
+            if (record.getNumberSolved() > 0) {
+                if (finalizeData.isUseWFGroupRanking()) {
+                    if (record.getNumberSolved() >= highestHonorSolvedCount) {
+                        isHighestHonor = true;
+                    } else if (record.getNumberSolved() == highHonorSolvedCount) {
+                        isHighHonor = true;
+                    } else if (record.getNumberSolved() >= median) {
+                        isHonor = true;
+                    }
+                }
+                else if (record.getNumberSolved() >= median) {
+                    isHonor = true;
+                }
             }
 
             String award = getAwardMedal(record.getRankNumber(), finalizeData, isHighestHonor, isHighHonor, isHonor);
@@ -289,25 +296,22 @@ public class ResultsFile {
     private String getAwardMedal(int rankNumber, FinalizeData data, boolean isHighestHonor, boolean isHighHonor, boolean isHonor) {
 
         // TODO CCS determine how to assign bronze and ranked
-
-        if (rankNumber <= data.getGoldRank()) {
+        if (!(isHighestHonor || isHighHonor || isHonor)) {
+            return HONORABLE;
+        } else if (rankNumber <= data.getGoldRank()) {
             return GOLD;
         } else if (rankNumber <= data.getSilverRank()) {
             return SILVER;
         } else if (rankNumber <= data.getBronzeRank()) {
             return BRONZE;
-        } else if (isHighestHonor || isHighHonor || isHonor) {
-            if (!data.isUseWFGroupRanking()) {
-                return RANKED;
-            } else if (isHighestHonor) {
-                return HIGHEST_HONOR;
-            } else if (isHighHonor) {
-                return HIGH_HONOR;
-            } else {
-                return HONOR;
-            }
+        } else if (!data.isUseWFGroupRanking()) {
+            return RANKED;
+        } else if (isHighestHonor) {
+            return HIGHEST_HONOR;
+        } else if (isHighHonor) {
+            return HIGH_HONOR;
         } else {
-            return HONORABLE;
+            return HONOR;
         }
     }
 

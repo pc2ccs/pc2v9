@@ -1,0 +1,13 @@
+name: Alea Iacta Est
+source: ICPC World Finals 2022/2023
+license: permission
+validation: default
+validator_flags: float_tolerance 1e-6
+
+sandbox-type: PC2_INTERNAL_SANDBOX
+
+limits:
+  timeout: 10
+  memory: 2048
+  time_multiplier: 1.6
+
