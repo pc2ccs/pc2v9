@@ -11,12 +11,12 @@ LogButton()
 {
 	# Read first judgment file to get compile time - it's compiled once for all
 	GetJudgmentFromFile "$dir/${EXECUTE_DATA_PREFIX}.0.txt"
+	echo '<center><p style="font-size:30px">'
 	if test -n "${result}" -a -n "${compileTimeMS}"
 	then
 		cat << LBEOF0
-<center>
-<p style="font-size:30px">The program took <b>${compileTimeMS}ms</b> to compile.
-</center>
+The program took <b>${compileTimeMS}ms</b> to compile.
+<br>
 LBEOF0
 	fi
 
@@ -40,15 +40,13 @@ LBEOF0
 			cpusecs="1 second"
 		fi
 		cat << LBEOF1
-<center>
-<p style="font-size:30px">The CPU Limit for this problem is <b>${cpusecs} (${cpulimms}ms)</b>.
-</center>
+The CPU Limit for this problem is <b>${cpusecs} (${cpulimms}ms)</b>.
+<br>
 LBEOF1
 	else
 		cat << LBEOF1AA
-<center>
-<p style="font-size:30px">The CPU Limit for this problem is <b>N/A</b>.
-</center>
+The CPU Limit for this problem is <b>N/A</b>.
+<br>
 LBEOF1AA
 	fi
 	if test -n "${memlim}"
@@ -60,17 +58,34 @@ LBEOF1AA
 			memlim=${memlim}MiB
 		fi
 		cat << LBEOF1A
-<center>
-<p style="font-size:30px">The Memory limit for this problem is <b>${memlim}</b>.
-</center>
+The Memory limit for this problem is <b>${memlim}</b>.
+<br>
 LBEOF1A
 	else
 		cat << LBEOF1AAA
-<center>
-<p style="font-size:30px">The Memory limit for this problem is <b>N/A</b>.
-</center>
+The Memory limit for this problem is <b>N/A</b>.
+<br>
 LBEOF1AAA
 	fi
+
+	GetSourceList $lang ${EXE_DIR_LINK}
+	srclist="$result"
+	echo "Submission Source Code: "
+	# Get source files
+	sep=""
+	for sfile in $srclist
+	do
+		if test -z "$sep"
+		then
+			sep=" "
+		else
+			echo -n "$sep"
+		fi
+		GenGenericFileLink "$sfile"
+	done
+	echo "<br>"
+	echo "</center>"
+
 	sandlog=${EXE_DIR_LINK}/${SANDBOX_LOG}
 	if test -s "${sandlog}"
 	then
@@ -94,14 +109,64 @@ TableHeader()
  <th class="right">MiB Used</th>
  <th class="right">Val Time</th>
  <th class="cent">Val Success</th>
- <th>Run Out</th>
- <th>Run Err</th>
+ <th>Run stdout</th>
+ <th>Run stderr</th>
  <th>Judge In</th>
  <th>Judge Ans</th>
  <th>Val Out</th>
  <th>Val Err</th>
 </tr>
 EOFTH
+}
+
+# Usage is:
+# GenGenericFileLink full-path-to-file [link-text]
+# If no [link-text] supplied, then use basename of file
+# This just makes up the href.
+#
+GenGenericFileLink()
+{
+	tstfile=$1
+	gentxt="$2"
+	if test -z "$gentxt"
+	then
+		gentxt=${tstfile##*/}
+	fi
+	tstpath=$tstfile
+	if test -s "${tstpath}"
+	then
+		echo -n '<a href="'$EXE_DIR_LINK/$tstfile'" target="_blank">'$gentxt'</a>'
+	elif test -e "${tstpath}"
+	then
+		echo -n "($gentxt Empty)"
+	else
+		echo -n "$gentxt Not found"
+	fi
+}
+
+# Usage is:
+# GenGenericFileLinkTd full-path-to-file [link-text]
+# If no [link-text] supplied, then use basename of file
+# This includes the bracketing <td>...</td>
+#
+GenGenericFileLinkTd()
+{
+	tstfile=$1
+	gentxt="$2"
+	if test -z "$gentxt"
+	then
+		gentxt=${tstfile##*/}
+	fi
+	tstpath=$dir/$tstfile
+	if test -s "${tstpath}"
+	then
+		echo '   <td><a href="'$EXE_DIR_LINK/$tstfile'" target="_blank">'$gentxt'</a></td>'
+	elif test -e "${tstpath}"
+	then
+		echo '   <td>(Empty)</td>'
+	else
+		echo '   <td>Not found</td>'
+	fi
 }
 
 GenFileLink()
@@ -127,8 +192,13 @@ GenFileLinkWithText()
 	linkaddr="$1"
 	linktext="$2"
 	linkcolor="$3"
-	bytes=`stat -c %s ${linkaddr}`
-	echo '   <td><a href="'$linkaddr'" style="color:'$linkcolor'" target="_blank">'$linktext' ('$bytes' bytes)</td>'
+	if test -z "${linktext}"
+	then
+		echo '   <td>N/A</td>'
+	else
+		bytes=`stat -c %s ${linkaddr}`
+		echo '   <td><a href="'$linkaddr'" style="color:'$linkcolor'" target="_blank">'$linktext' ('$bytes' bytes)</td>'
+	fi
 }
 
 TableRow()
@@ -152,7 +222,7 @@ TableRow()
 	memused="$9"
 	memusedbytes="${10}"
 	exesandms="${11}"
-
+	srclist="${12}"
 	# Create link to report/testcase file for testcase number
 	MakeTestcaseFile ${EXE_DIR_LINK} ${tc}
 	tcreport="${result}"
@@ -207,8 +277,14 @@ TableRow()
 	fi
 	echo '   <td class="right">'$valtm'ms</td>'
 	echo '   <td class="cent">'$valsucc'</td>'
-	GenFileLink $TEST_OUT_PREFIX $tc
-	GenFileLink $TEST_ERR_PREFIX $tc
+	if test "$judgment" != "CE"
+	then
+		GenFileLink $TEST_OUT_PREFIX $tc
+		GenFileLink $TEST_ERR_PREFIX $tc
+	else
+		GenGenericFileLinkTd $COMP_OUT_PREFIX.pc2 "View Compiler"
+		GenGenericFileLinkTd $COMP_ERR_PREFIX.pc2 "View Compiler"
+	fi
 	GenFileLinkWithText $PROB_DIR_LINK/data/"$jin" "$jinbase" $lcolor
 	GenFileLinkWithText $PROB_DIR_LINK/data/"$jans" "$jansbase" $lcolor
 	GenFileLink $TEST_VALOUT_PREFIX $tc
@@ -260,8 +336,17 @@ do
 	valtm=$validateTimeMS
 	valsuc=$validationSuccess
 	MakeBriefcaseFile "$dir" "$tc"
-	ReadBriefcase < ${result}
-	TableRow "$tc" "$judgment" "$ec" "$exetm" "$valtm" "$judgein" "$judgeans" "$valsuc" "$mempeak" "$mempeakbytes" "$execpums"
+	if test -s "${result}"
+	then
+		ReadBriefcase < ${result}
+	else
+		judgein=""
+		judgeans=""
+		mempeak=""
+		mempeakbytes=""
+	fi
+	GetSourceList $lang ${EXE_DIR_LINK}
+	TableRow "$tc" "$judgment" "$ec" "$exetm" "$valtm" "$judgein" "$judgeans" "$valsuc" "$mempeak" "$mempeakbytes" "$execpums" "$result"
 done
 
 Trailer
