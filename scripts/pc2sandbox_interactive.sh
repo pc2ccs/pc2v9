@@ -15,6 +15,19 @@
 # 
 # Author: John Buck, based on earlier versions by John Clevenger and Doug Lane
 
+# KILL_WA_VALIDATOR may be set to 1 to kill off a submission if the validator finishes first with
+# a WA judgment.  In this case, we don't care what the submission does.  This matches how DOMjudge
+# handles this case.  Setting this to 0 will always make it wait for the contestant submission to
+# finish, and use whatever judgement is appropriate.  If contestant finishes with 0, then we use the
+# vaildator result, else we use the exit code of the submission.
+KILL_WA_VALIDATOR=1
+# If WAIT_FOR_SUB_ON_AC is 1, we wait for the submission if the validator says "AC".  We then
+# use the exit code of the submission if it is non-zero to determine disposition, otherise,
+# we return AC
+# If WAIT_FOR_SUB_ON_AC is 0, we will kill off the submission as soon as we get an AC from the
+# validator if the submission is not complete yet.
+WAIT_FOR_SUB_ON_AC=1
+
 # CPU to run submission on.  This is 0 based, so 3 means the 4th CPU
 DEFAULT_CPU_NUM=3
 CPU_OVERRIDE_FILE=$HOME/pc2_cpu_override
@@ -285,6 +298,59 @@ EOF
 	sent_xml=1
 }
 
+# Dont complain to me - this is the order they appear in ./x86_64-linux-gnu/bits/signum-generic.h
+declare -A signal_names=(
+	["2"]="SIGINT"
+	["4"]="SIGILL"
+	["6"]="SIGABRT"
+	["8"]="SIGFPE"
+	["11"]="SIGSEGV"
+	["15"]="SIGTERM"
+	["1"]="SIGHUP"
+	["3"]="SIGQUIT"
+	["5"]="SIGTRAP"
+	["9"]="SIGKILL"
+	["13"]="SIGPIPE"
+	["14"]="SIGALRM"
+)
+
+declare -A fail_codes=(
+	["$FAIL_EXIT_CODE"]="FAIL_EXIT_CODE"
+	["$FAIL_NO_ARGS_EXIT_CODE"]="FAIL_NO_ARGS_EXIT_CODE"
+	["$FAIL_INSUFFICIENT_ARGS_EXIT_CODE"]="FAIL_INSUFFICIENT_ARGS_EXIT_CODE"
+	["$FAIL_INVALID_CGROUP_INSTALLATION"]="FAIL_INVALID_CGROUP_INSTALLATION"
+	["$FAIL_MISSING_CGROUP_CONTROLLERS_FILE"]="FAIL_MISSING_CGROUP_CONTROLLERS_FILE"
+	["$FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE"]="FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE"
+	["$FAIL_CPU_CONTROLLER_NOT_ENABLED"]="FAIL_CPU_CONTROLLER_NOT_ENABLED"
+	["$FAIL_MEMORY_CONTROLLER_NOT_ENABLED"]="FAIL_MEMORY_CONTROLLER_NOT_ENABLED"
+	["$FAIL_MEMORY_LIMIT_EXCEEDED"]="FAIL_MEMORY_LIMIT_EXCEEDED"
+	["$FAIL_TIME_LIMIT_EXCEEDED"]="FAIL_TIME_LIMIT_EXCEEDED"
+	["$FAIL_WALL_TIME_LIMIT_EXCEEDED"]="FAIL_WALL_TIME_LIMIT_EXCEEDED"
+	["$FAIL_SANDBOX_ERROR"]="FAIL_SANDBOX_ERROR"
+	["$FAIL_INTERACTIVE_ERROR"]="FAIL_INTERACTIVE_ERROR"
+)
+FormatExitCode()
+{
+	result="$1"
+	if [[ "$result" = [0-9]* ]]
+	then
+		failerr=${fail_codes[$result]}
+		if test -n "$failerr"
+		then
+			result="$result ($failerr)"
+		elif test "$result" -gt 128 -a "$result" -lt 192
+		then
+			sig=$((result-128))
+			signame=${signal_names[$sig]}
+			if test -n "$signame"
+			then
+				signame="$signame "
+			fi
+			result="$result (Signal $signame$((result-128)))"
+		fi
+	fi
+}
+
 # ------------------------------------------------------------
 
 if [ "$#" -lt 1 ] ; then
@@ -504,6 +570,10 @@ submissionpid=$!
 
 # Flag to indicate if contestant submission has terminated
 contestant_done=0
+# Validator exit status, if it finished before submission
+val_result=""
+# Indicates if we still have to wait for the submission
+wait_sub=0
 
 # Now we wait.  We wait for either the child or interactive validator to finish.
 # If the validator finishes, no matter what, we're done.  If the submission is still
@@ -527,36 +597,80 @@ do
 		REPORT_DEBUG Validator finishes with exit code $wstat
 		if test "$contestant_done" -eq 0
 		then
-			# Only kill it if it still exists
-			if test -d /proc/$contestantpid
+			# If we always kill off the child when the validator finishes with WA, or the validator finishes with "AC" and we dont wait for submission on AC,
+			# then kill off the child, otherwise we wait for it.
+			if test "(" ${KILL_WA_VALIDATOR} -eq 1 -a "$wstat" -ne "${EXITCODE_AC}" ")" -o "(" ${WAIT_FOR_SUB_ON_AC} -eq 0 -a "$wstat" -eq ${EXITCODE_AC} ")"
 			then
-				REPORT_DEBUG Contestant PID $submissionpid has not finished - killing it
-				# TODO: We should kill and wait for it here and print out the stats
+				# Only kill it if it still exists
+				if test -d /proc/$contestantpid
+				then
+					REPORT_DEBUG Contestant PID $submissionpid has not finished - killing it "(KILL_WA_VALIDATOR=1)"
+					# TODO: We should kill and wait for it here and print out the stats
+				fi
+				# This just determines if the program ran, not if it's correct.
+				# The result file has the correctness in it.
+				# We only do this if the contestant program has not finished yet.
+				REPORT_DEBUG Indicating that the submission exited with code 0 because we killed it.
+				COMMAND_EXIT_CODE=0
+			else
+				REPORT_DEBUG Contestant PID $submissionpid has not finished - waiting for it "(KILL_WA_VALIDATOR=1)"
+				# Need to wait for child.  Remember validator result.
+				val_result="$wstat"
+				wait_sub=1
 			fi
-			# This just determines if the program ran, not if it's correct.
-			# The result file has the correctness in it.
-			# We only do this if the contestant program has not finished yet.
-			COMMAND_EXIT_CODE=0
 		fi
 
-		KillChildProcs
+		# Kill everything off if we don't have to wait for submission
+		if test "$wait_sub" -eq 0
+		then
+			KillChildProcs
+		fi
 
 		if test "$wstat" -eq $EXITCODE_AC
 		then
-			GenXML Accepted ""
+			# COMMAND_EXIT_CODE will be set to 0 above, or 0 if the submission finished already with EC 0.
+			# If COMMAND_EXIT_CODE is anything else, we will either be waiting for the submission, or, use
+			# it's exit code as the result.  The GenXML will have been filled in in this case with any errors.
+			if test -z "${COMMAND_EXIT_CODE}" -o "${COMMAND_EXIT_CODE}" = "0"
+			then
+				REPORT_DEBUG Both the validator and the submission indicate AC
+				# Set the result to AC.  If we have to wait for the submission, this will get overwritten with
+				# the submissions disposition.
+				GenXML Accepted ""
+			fi
 		elif test "$wstat" -eq $EXITCODE_WA
 		then
-			# If validator created a feedback file, put the last line in the judgement
-			if test -s "$feedbackfile"
+			# COMMAND_EXIT_CODE may be set to something here, either 0 from above, or
+			# an exit code from when the submission finished below.  In the latter case, the
+			# XML result file will have already been created with the disposition from below.
+			# We will only generate an XML here if the validator says it failed (WA).
+			# COMMAND_EXIT_CODE can be empty if we are waiting for the submission to finish.
+			if test -z "${COMMAND_EXIT_CODE}" -o "${COMMAND_EXIT_CODE}" = "0"
 			then
-				GenXML "No - Wrong answer" `head -n 1 $feedbackfile`
-			else
-				GenXML "No - Wrong answer" "No feedback file"
+				REPORT_DEBUG Submission has an exit code of 0 and validator says WA.
+				# If validator created a feedback file, put the last line in the judgement
+				if test -s "$feedbackfile"
+				then
+					GenXML "No - Wrong answer" `head -n 1 $feedbackfile`
+				else
+					GenXML "No - Wrong answer" "No feedback file"
+				fi
 			fi
 		else
-			GenXML "Other - contact staff" "bad return code $wstat"
+			REPORT_DEBUG Validator returned code $wstat which is not 42 or 43 - validator error.
+			GenXML "Other - contact staff" "bad validator return code $wstat"
+			if test "$wait_sub" -ne 0
+			then
+				KillChildProcs
+			fi
+			COMMAND_EXIT_CODE=${FAIL_INTERACTIVE_ERROR}
+			break
 		fi
-		break;
+		if test "$wait_sub" -eq 0
+		then
+			REPORT_DEBUG No need to wait for submission to finish.
+			break
+		fi
 	fi
 	# If this is the contestant submission
 	if test "$child_pid" -eq "$submissionpid"
@@ -576,7 +690,8 @@ do
 		fi
 
 
-		REPORT_DEBUG Contestant PID $submissionpid finished with exit code $wstat
+		FormatExitCode $wstat
+		REPORT_DEBUG Contestant PID $submissionpid finished with exit code $result
 		contestant_done=1
 		COMMAND_EXIT_CODE=$wstat
 
@@ -587,39 +702,60 @@ do
 		
 		if test "$kills" != "0"
 		then
-			REPORT_DEBUG The command was killed because it exceeded the memory limit
+			REPORT_DEBUG The command was killed because it exceeded the memory limit - setting exit code to ${FAIL_MEMORY_LIMIT_EXCEEDED}
 			REPORT_BRIEF MLE
 			COMMAND_EXIT_CODE=${FAIL_MEMORY_LIMIT_EXCEEDED}
 			GenXML "No - Memory limit exceeded" ""
-			KillValidator
-			break
+			if test "$val_result" = "${EXITCODE_AC}" -o "${KILL_WA_VALIDATOR}" -eq 0
+			then
+				KillValidator
+				break
+			fi
 		else
 			# See why we terminated.  137 = 128 + 9 = SIGKILL, which is what ulimit -t sends
 			if test "$COMMAND_EXIT_CODE" -eq 137 -o "$cputime" -gt "$TIMELIMIT_US"
 			then
-				REPORT_DEBUG The command was killed because it exceeded the CPU Time limit
-				REPORT_BRIEF TLE
 				COMMAND_EXIT_CODE=${FAIL_TIME_LIMIT_EXCEEDED}
+				FormatExitCode "$COMMAND_EXIT_CODE"
+				REPORT_DEBUG The command was killed because it exceeded the CPU Time limit - setting exit code to $result
+				REPORT_BRIEF TLE
 				GenXML "No - Time limit exceeded" "${cputime}us > ${TIMELIMIT_US}us"
-				KillValidator
-				break
+				if test "$val_result" = "${EXITCODE_AC}" -o "${KILL_WA_VALIDATOR}" -eq 0
+				then
+					KillValidator
+					break
+				fi
 			elif test "$COMMAND_EXIT_CODE" -ge 128
 			then
-				REPORT_DEBUG The command terminated abnormally due to a signal with exit code $COMMAND_EXIT_CODE signal $((COMMAND_EXIT_CODE - 128))
+				FormatExitCode "$COMMAND_EXIT_CODE"
+				REPORT_DEBUG The command terminated due to a signal with exit code $result
 			else
-				REPORT_DEBUG The command terminated normally.
+				REPORT_DEBUG The command terminated normally with exit code $result
 			fi
 		fi
 		REPORT_DEBUG Finished executing "$COMMAND $*"
-		REPORT_DEBUG "$COMMAND" exited with exit code $COMMAND_EXIT_CODE
+		FormatExitCode "$COMMAND_EXIT_CODE"
+		REPORT_DEBUG "$COMMAND" exited with exit code $result
 
-		if test "$wstat" -ne 0
+		if test "$COMMAND_EXIT_CODE" -ne 0
 		then
-			REPORT_DEBUG Contestant finished abnormally - killing validator
+			REPORT_DEBUG Contestant finished with a non-zero exit code $result
 			REPORT_BRIEF RTE
-			KillValidator
 			GenXML "No - Run-time Error" "Exit status $wstat"
-			break
+			# If validator finished with AC, but submission has a bad exit code, we use that.
+			# Or, if we didn't kill off the submission, and want to use it's exit code
+			if test "$val_result" = "${EXITCODE_AC}" -o "${KILL_WA_VALIDATOR}" -eq 0
+			then
+				KillValidator
+				break
+			fi
+		else
+			# COMMAND_EXIT_CODE is 0, let's see if the validator finished.  If
+			# so, we're done, since the validator already created it's disposition.
+			if test -n "$val_result"
+			then
+				break
+			fi
 		fi
 		REPORT_DEBUG Waiting for interactive validator to finish...
 	fi
@@ -633,6 +769,8 @@ rm -f "$INFIFO" "$OUTFIFO"
 # TODO: determine how to pass more detailed pc2sandbox.sh results back to PC2... Perhaps in a file...
 
 # return the exit code of the command as our exit code
+FormatExitCode "$COMMAND_EXIT_CODE"
+REPORT_DEBUG Returning exit code $result to PC2
 exit $COMMAND_EXIT_CODE
 
 # eof pc2sandbox_interactive.sh 

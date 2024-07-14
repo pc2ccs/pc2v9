@@ -30,6 +30,8 @@ TEST_OUT_PREFIX="teamoutput"
 TEST_ERR_PREFIX="teamstderr"
 TEST_VALOUT_PREFIX="valout"
 TEST_VALERR_PREFIX="valerr"
+COMP_OUT_PREFIX="cstdout"
+COMP_ERR_PREFIX="cstderr"
 
 # Detailed log of entire judging process
 SANDBOX_LOG=sandbox.log
@@ -217,6 +219,29 @@ DeleteOldestLinks()
 			rm -f ${dellist}
 		fi
 	done
+}
+
+GetSourceList()
+{
+        sllang="$1"
+        sldir="$2"
+        ext=""
+        case "$sllang" in
+        c)      ext="c" ;;
+        cpp)    ext="cc cpp cxx c++" ;;
+        java)   ext="java" ;;
+        python3)        ext="py" ;;
+        kotlin) ext="kt" ;;
+        esac
+        result=""
+        if test -n "$ext"
+        then
+                for e in $ext
+                do
+                        result="$result "`ls -d $sldir/*.$e 2>/dev/null`
+                done
+        fi
+
 }
 
 InitJudgments
