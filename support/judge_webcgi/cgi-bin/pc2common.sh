@@ -167,9 +167,18 @@ GetJudgment()
 		result="JE ($jerr)"
 	else
 		# We got a real live run
-		# Check out the biggest executedata file
-		GetLastJudgmentFile $dir
-		GetJudgmentFromFile ./${result}
+		# Have to check all judgements, in order
+		jresult="AC"
+		for jfile in `ls ${EXECUTE_DATA_PREFIX}.[0-9]*.txt 2>/dev/null | sed -e 's;^.*/;;' | sort -t. +1n`
+		do
+			GetJudgmentFromFile ./${jfile}
+			if test -n "$result" -a "$result" != "AC"
+			then
+				jresult="$result"
+				break
+			fi
+		done
+		result="$jresult"
 	fi
 }
 

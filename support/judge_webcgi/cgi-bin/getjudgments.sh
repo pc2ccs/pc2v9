@@ -57,7 +57,7 @@ echo ""
 echo '['
 sep=""
 # Format of the execute folders must be: ex_runid_probletter_probshort_teamnum_langid_judge
-for exdir in `ls ${PC2_RUN_DIR} | grep -P '^ex_\d+_[A-Z]_[a-z\d]+_\d+_[a-z\d]+' | sort --field-separator=_ +1rn`
+for exdir in `ls ${PC2_RUN_DIR} | grep -P '^ex_\d+_[A-Z]_[a-z\-\d]+_\d+_[a-z\d]+' | sort --field-separator=_ +1rn`
 do
 	# exdir looks like: ex_188_Y_compression_46103_cpp
 	#                    RId P ProbShort   team# Lang
