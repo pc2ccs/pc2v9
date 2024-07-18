@@ -1263,38 +1263,40 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
     public void reloadRunList() {
 
-        if (filter.isFilterOn()){
-            getFilterButton().setForeground(Color.BLUE);
-            getFilterButton().setToolTipText("Edit filter - filter ON");
-            rowCountLabel.setForeground(Color.BLUE);
-        } else {
-            getFilterButton().setForeground(Color.BLACK);
-            getFilterButton().setToolTipText("Edit filter");
-            rowCountLabel.setForeground(Color.BLACK);
-        }
+        if(submissionList != null) {
+            if (filter.isFilterOn()){
+                getFilterButton().setForeground(Color.BLUE);
+                getFilterButton().setToolTipText("Edit filter - filter ON");
+                rowCountLabel.setForeground(Color.BLUE);
+            } else {
+                getFilterButton().setForeground(Color.BLACK);
+                getFilterButton().setToolTipText("Edit filter");
+                rowCountLabel.setForeground(Color.BLACK);
+            }
 
-        for (SubmissionSample sub : submissionList) {
-            ClientId clientId = null;
+            for (SubmissionSample sub : submissionList) {
+                ClientId clientId = null;
 
-            Run run = sub.getRun();
-            if(run != null) {
-                RunStates runStates = run.getStatus();
-                if (!(runStates.equals(RunStates.NEW) || run.isDeleted())) {
-                    JudgementRecord judgementRecord = run.getJudgementRecord();
-                    if (judgementRecord != null) {
-                        clientId = judgementRecord.getJudgerClientId();
+                Run run = sub.getRun();
+                if(run != null) {
+                    RunStates runStates = run.getStatus();
+                    if (!(runStates.equals(RunStates.NEW) || run.isDeleted())) {
+                        JudgementRecord judgementRecord = run.getJudgementRecord();
+                        if (judgementRecord != null) {
+                            clientId = judgementRecord.getJudgerClientId();
+                        }
                     }
                 }
+                updateRunRow(sub, clientId, false);
             }
-            updateRunRow(sub, clientId, false);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    updateRowCount();
+                    resizeColumnWidth(runTable);
+                }
+            });
         }
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                updateRowCount();
-                resizeColumnWidth(runTable);
-            }
-        });
     }
     /**
      * Run Listener
@@ -1370,16 +1372,18 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
         private SubmissionSample getSubmission(RunEvent event)
         {
-            Run run = event.getRun();
+            if(submissionList != null) {
+                Run run = event.getRun();
 
-            // We are only interested in runs we submitted
-            if(run.getSubmitter().equals(getContest().getClientId())) {
-                for(SubmissionSample sub : submissionList) {
-                    Run subRun = sub.getRun();
-                    // Check run numbers if this submission has a run
-                    if(subRun != null && subRun.getNumber() == run.getNumber()) {
-                        sub.setRun(run);
-                        return(sub);
+                // We are only interested in runs we submitted
+                if(run.getSubmitter().equals(getContest().getClientId())) {
+                    for(SubmissionSample sub : submissionList) {
+                        Run subRun = sub.getRun();
+                        // Check run numbers if this submission has a run
+                        if(subRun != null && subRun.getNumber() == run.getNumber()) {
+                            sub.setRun(run);
+                            return(sub);
+                        }
                     }
                 }
             }
