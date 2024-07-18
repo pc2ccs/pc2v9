@@ -99,7 +99,7 @@ public class ContestInformation implements Serializable{
     /**
      * String to append to the execute folder for judged runs.  May contain substitution strings.
      */
-    private String judgesExecuteFolder = "";
+    private String executeFolder = "";
 
     /**
      *
@@ -262,11 +262,11 @@ public class ContestInformation implements Serializable{
         }
     }
 
-    public String getJudgesExecuteFolder() {
-        if(judgesExecuteFolder == null) {
-            judgesExecuteFolder = "";
+    public String getExecuteFolder() {
+        if(executeFolder == null) {
+            executeFolder = "";
         }
-        return judgesExecuteFolder ;
+        return executeFolder ;
     }
 
     /**
@@ -274,9 +274,9 @@ public class ContestInformation implements Serializable{
      *
      * @param judgesDefaultAnswer The judgesDefaultAnswer to set.
      */
-    public void setJudgesExecuteFolder(String judgesExecuteFolder) {
-        if (judgesExecuteFolder != null && judgesExecuteFolder.trim().length() > 0) {
-            this.judgesExecuteFolder = judgesExecuteFolder.trim();
+    public void setExecuteFolder(String executeFolder) {
+        if (executeFolder != null && executeFolder.trim().length() > 0) {
+            this.executeFolder = executeFolder.trim();
         }
     }
 
@@ -294,7 +294,7 @@ public class ContestInformation implements Serializable{
             if (!judgesDefaultAnswer.equals(contestInformation.getJudgesDefaultAnswer())) {
                 return false;
             }
-            if (!judgesExecuteFolder.equals(contestInformation.getJudgesExecuteFolder())) {
+            if (!executeFolder.equals(contestInformation.getExecuteFolder())) {
                 return false;
             }
             if (!teamDisplayMode.equals(contestInformation.getTeamDisplayMode())) {

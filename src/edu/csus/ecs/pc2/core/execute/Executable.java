@@ -2841,6 +2841,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     executionData.setCompileResultCode(0);
                     return true;
                 } else {
+                    log.log(Log.INFO, "Expected compiler to generate executable: '" + programName + "' but it did not - Compile failed");
                     executionData.setCompileExeFileName("");
                     executionData.setCompileSuccess(false);
                     executionData.setCompileResultCode(2);
@@ -3139,9 +3140,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 if(executeInfoFileName != null) {
                     newString = replaceString(newString, "{:executeinfofilename}", executeInfoFileName);
                 } else {
-                    // can't happen, but if it does, just use default basename
                     newString = replaceString(newString, "{:executeinfofilename}", Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
-                    log.config("substituteAllStrings() executeInfoFileName is null, using default basename" + Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
                 }
                 String fileName = getJudgeFileName(Utilities.DataFileType.JUDGE_DATA_FILE, dataSetNumber-1);
                 if(fileName == null) {
@@ -3415,7 +3414,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * @return the name of the execute directory for this client.
      */
     public String getExecuteDirectoryName() {
-        String dirName = getContestInformation().getJudgesExecuteFolder();
+        String dirName = getContestInformation().getExecuteFolder();
         if(StringUtilities.isEmpty(dirName)) {
             dirName = DEFAULT_EXECUTE_DIRECTORY_TEMPLATE;
         }
@@ -3668,33 +3667,37 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         String result = null;
         SerializedFile serializedFile = null;
 
-        try {
-            // it's a little more work for external files
-            if (problem.isUsingExternalDataFiles()) {
+        // It's possible for this to be null if someone requests the name before the run has started
+        // executing.
+        if(problemDataFiles != null) {
+            try {
+                // it's a little more work for external files
+                if (problem.isUsingExternalDataFiles()) {
 
-                if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
-                    serializedFile = problemDataFiles.getJudgesDataFiles()[setIndex];
+                    if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
+                        serializedFile = problemDataFiles.getJudgesDataFiles()[setIndex];
+                    } else {
+                        serializedFile = problemDataFiles.getJudgesAnswerFiles()[setIndex];
+                    }
+                    //Note: last argument (type) is unused in locateJudgesDataFile
+                    result = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), type);
                 } else {
-                    serializedFile = problemDataFiles.getJudgesAnswerFiles()[setIndex];
+                    // For internal files, the appropriate data files are copied to the FIRST datafile's name in the
+                    // execute folder, so we always return that one.
+                    if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
+                        result = prefixExecuteDirname(problem.getDataFileName());
+                    } else {
+                        result = prefixExecuteDirname(problem.getAnswerFileName());
+                    }
                 }
-                //Note: last argument (type) is unused in locateJudgesDataFile
-                result = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), type);
-            } else {
-                // For internal files, the appropriate data files are copied to the FIRST datafile's name in the
-                // execute folder, so we always return that one.
-                if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
-                    result = prefixExecuteDirname(problem.getDataFileName());
+            } catch (Exception e)
+            {
+                //if we got far enough to get the serialized file, show the expected name in the log message
+                if(serializedFile != null) {
+                    log.log(Log.WARNING, "Can not get " + type.toString() + " expected filename (" + serializedFile.getName() + ") for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
                 } else {
-                    result = prefixExecuteDirname(problem.getAnswerFileName());
+                    log.log(Log.WARNING, "Can not get " + type.toString() + " filename for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
                 }
-            }
-        } catch (Exception e)
-        {
-            //if we got far enough to get the serialized file, show the expected name in the log message
-            if(serializedFile != null) {
-                log.log(Log.WARNING, "Can not get " + type.toString() + " expected filename (" + serializedFile.getName() + ") for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
-            } else {
-                log.log(Log.WARNING, "Can not get " + type.toString() + " filename for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
             }
         }
         return(result);
@@ -3776,7 +3779,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             executeDataWriter.println("compileTimeMS='" + executionData.getCompileTimeMS() + "'");
             executeDataWriter.println("executeTimeMS='" + executionData.getExecuteTimeMS() + "'");
             executeDataWriter.println("validateTimeMS='" + executionData.getvalidateTimeMS() + "'");
-            executeDataWriter.println("executionException='" + showNullAsEmpty(executionData.getExecutionException().getMessage()) + "'");
+            if(executionData.getExecutionException() != null) {
+                executeDataWriter.println("executionException='" + showNullAsEmpty(executionData.getExecutionException().getMessage()) + "'");
+            } else {
+                executeDataWriter.println("executionException=''");
+            }
             executeDataWriter.println("runTimeLimitExceeded='" + executionData.isRunTimeLimitExceeded() + "'");
             executeDataWriter.println("additionalInformation='" + showNullAsEmpty(executionData.getAdditionalInformation()) + "'");
             bWritten = true;

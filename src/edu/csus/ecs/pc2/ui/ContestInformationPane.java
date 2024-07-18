@@ -1002,7 +1002,7 @@ public class ContestInformationPane extends JPanePlugin {
 
         //fill in judging information
         newContestInformation.setJudgesDefaultAnswer(getJudgesDefaultAnswerTextField().getText());
-        newContestInformation.setJudgesExecuteFolder(getJudgesExecuteFolderTextField().getText());
+        newContestInformation.setExecuteFolder(getJudgesExecuteFolderTextField().getText());
         newContestInformation.setPreliminaryJudgementsTriggerNotifications(getJCheckBoxShowPreliminaryOnNotifications().isSelected());
         newContestInformation.setPreliminaryJudgementsUsedByBoard(getJCheckBoxShowPreliminaryOnBoard().isSelected());
         newContestInformation.setSendAdditionalRunStatusInformation(getAdditionalRunStatusCheckBox().isSelected());
@@ -1097,7 +1097,7 @@ public class ContestInformationPane extends JPanePlugin {
                 selectDisplayRadioButton();
 
                 getJudgesDefaultAnswerTextField().setText(contestInformation.getJudgesDefaultAnswer());
-                getJudgesExecuteFolderTextField().setText(contestInformation.getJudgesExecuteFolder());
+                getJudgesExecuteFolderTextField().setText(contestInformation.getExecuteFolder());
                 getJCheckBoxShowPreliminaryOnBoard().setSelected(contestInformation.isPreliminaryJudgementsUsedByBoard());
                 getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
