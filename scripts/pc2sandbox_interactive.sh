@@ -21,12 +21,10 @@
 # finish, and use whatever judgement is appropriate.  If contestant finishes with 0, then we use the
 # vaildator result, else we use the exit code of the submission.
 KILL_WA_VALIDATOR=1
-# If WAIT_FOR_SUB_ON_AC is 1, we wait for the submission if the validator says "AC".  We then
-# use the exit code of the submission if it is non-zero to determine disposition, otherise,
-# we return AC
-# If WAIT_FOR_SUB_ON_AC is 0, we will kill off the submission as soon as we get an AC from the
-# validator if the submission is not complete yet.
-WAIT_FOR_SUB_ON_AC=1
+
+# Always return WA if validator gets WA before submission finishes. This is the DOMjudge compatibility
+# option (set it to 1 to be compatible)
+ALWAYS_WA_BEFORE_SUB_FINISHES=1
 
 # CPU to run submission on.  This is 0 based, so 3 means the 4th CPU
 DEFAULT_CPU_NUM=3
@@ -238,6 +236,23 @@ GetTimeInMicros()
 	ret=$((sec*1000000))
 	ret=$((ret+$us))
 	echo $ret
+}
+
+GetSandboxStats()
+{
+	# Get cpu time immediately to minimize any usage by this shell
+	cputime=`grep usage_usec $PC2_SANDBOX_CGROUP_PATH/cpu.stat | cut -d ' ' -f 2`
+	# Get wall time - we want it as close as possible to when we fetch the cpu time so they stay close
+	# since the cpu.stat includes the time this script takes AFTER the submission finishes.
+	endtime=`GetTimeInMicros`
+	walltime=$((endtime-starttime))
+	# Newer kernels support memory.peak, so we have to check if it's there.
+	if test -e $PC2_SANDBOX_CGROUP_PATH/memory.peak
+	then
+		peakmem=`cat $PC2_SANDBOX_CGROUP_PATH/memory.peak`
+	else
+		peakmem="N/A"
+	fi
 }
 
 # Show run's resource summary in a nice format, eg.
@@ -577,10 +592,15 @@ do
 	# Wait for the next process and put its PID in child_pid
 	wait -n -p child_pid
 	wstat=$?
+	REPORT_DEBUG Wait returned pid=$child_pid wstat=$wstat
 	# A return code 127 indicates there are no more children.  How did that happen?
 	if test $wstat -eq 127
 	then
 		REPORT_DEBUG No more children found while waiting: Submission PID was $submissionpid and Interactive Validator PID was $intv_pid
+		if test -d /proc/$submissionpid
+		then
+			REPORT_DEBUG The contestant pid /proc/$submissionpid still exists though
+		fi
 		break
 	fi
 	# If interactive validator finishes
@@ -589,39 +609,30 @@ do
 		REPORT_DEBUG Validator finishes with exit code $wstat
 		if test "$contestant_done" -eq 0
 		then
-			# If we always kill off the child when the validator finishes with WA, or the validator finishes with "AC" and we dont wait for submission on AC,
-			# then kill off the child, otherwise we wait for it.
-			if test "(" ${KILL_WA_VALIDATOR} -eq 1 -a "$wstat" -ne "${EXITCODE_AC}" ")" -o "(" ${WAIT_FOR_SUB_ON_AC} -eq 0 -a "$wstat" -eq ${EXITCODE_AC} ")"
+			REPORT_DEBUG Waiting for submission pid $submissionpid to finish...
+			# Wait for child to finish - it has to, one way or the other (TLE or just finish)
+			wait -n "$submissionpid"
+			COMMAND_EXIT_CODE=$?
+
+			GetSandboxStats
+
+			if test $COMMAND_EXIT_CODE -eq 127
 			then
-				# Only kill it if it still exists
-				if test -d /proc/$contestantpid
-				then
-					REPORT_DEBUG Contestant PID $submissionpid has not finished - killing it "(KILL_WA_VALIDATOR=1)"
-					# TODO: We should kill and wait for it here and print out the stats
-				fi
-				# This just determines if the program ran, not if it's correct.
-				# The result file has the correctness in it.
-				# We only do this if the contestant program has not finished yet.
-				REPORT_DEBUG Indicating that the submission exited with code 0 because we killed it.
+				REPORT_DEBUG No more children found.  Setting submission exit code to 0
 				COMMAND_EXIT_CODE=0
 			else
-				REPORT_DEBUG Contestant PID $submissionpid has not finished - waiting for it "(KILL_WA_VALIDATOR=1)"
-				# Need to wait for child.  Remember validator result.
-				val_result="$wstat"
-				wait_sub=1
+				FormatExitCode $COMMAND_EXIT_CODE
+				REPORT_DEBUG Contestant PID $submissionpid finished with exit code $result but after the validator
 			fi
+			ShowStats ${cputime} ${TIMELIMIT_US} ${walltime} ${peakmem} $((MEMLIMIT*1024*1024))
 		fi
 
-		# Kill everything off if we don't have to wait for submission
-		if test "$wait_sub" -eq 0
-		then
-			KillChildProcs
-		fi
+		KillChildProcs
 
 		if test "$wstat" -eq $EXITCODE_AC
 		then
-			# COMMAND_EXIT_CODE will be set to 0 above, or 0 if the submission finished already with EC 0.
-			# If COMMAND_EXIT_CODE is anything else, we will either be waiting for the submission, or, use
+			# COMMAND_EXIT_CODE will be set to 0 above, or 0 if the submission previously finished already with EC 0.
+			# If COMMAND_EXIT_CODE is anything else, we'll use 
 			# it's exit code as the result.  The GenXML will have been filled in in this case with any errors.
 			if test -z "${COMMAND_EXIT_CODE}" -o "${COMMAND_EXIT_CODE}" = "0"
 			then
@@ -637,9 +648,9 @@ do
 			# XML result file will have already been created with the disposition from below.
 			# We will only generate an XML here if the validator says it failed (WA).
 			# COMMAND_EXIT_CODE can be empty if we are waiting for the submission to finish.
-			if test -z "${COMMAND_EXIT_CODE}" -o "${COMMAND_EXIT_CODE}" = "0"
+			if test "(" ${ALWAYS_WA_BEFORE_SUB_FINISHES} -eq 1 -a "$contestant_done" -eq 0 ")" -o "(" -z "${COMMAND_EXIT_CODE}" -o "${COMMAND_EXIT_CODE}" = "0" ")"
 			then
-				REPORT_DEBUG Submission has an exit code of 0 and validator says WA.
+				REPORT_DEBUG Submission has an exit code of ${COMMAND_EXIT_CODE} and validator says WA. "(ALWAYS_WA_BEFORE_SUB_FINISHES=${ALWAYS_WA_BEFORE_SUB_FINISHES})"
 				# If validator created a feedback file, put the last line in the judgement
 				if test -s "$feedbackfile"
 				then
@@ -647,47 +658,34 @@ do
 				else
 					GenXML "No - Wrong answer" "No feedback file"
 				fi
+				COMMAND_EXIT_CODE=0
 			fi
 		else
 			REPORT_DEBUG Validator returned code $wstat which is not 42 or 43 - validator error.
 			GenXML "Other - contact staff" "bad validator return code $wstat"
-			if test "$wait_sub" -ne 0
-			then
-				KillChildProcs
-			fi
 			COMMAND_EXIT_CODE=${FAIL_INTERACTIVE_ERROR}
 			break
 		fi
-		if test "$wait_sub" -eq 0
-		then
-			REPORT_DEBUG No need to wait for submission to finish.
-			break
-		fi
+		break
 	fi
 	# If this is the contestant submission
 	if test "$child_pid" -eq "$submissionpid"
 	then
-		# Get cpu time immediately to minimize any usage by this shell
-		cputime=`grep usage_usec $PC2_SANDBOX_CGROUP_PATH/cpu.stat | cut -d ' ' -f 2`
-		# Get wall time - we want it as close as possible to when we fetch the cpu time so they stay close
-		# since the cpu.stat includes the time this script takes AFTER the submission finishes.
-		endtime=`GetTimeInMicros`
-		walltime=$((endtime-starttime))
-		# Newer kernels support memory.peak, so we have to check if it's there.
-		if test -e $PC2_SANDBOX_CGROUP_PATH/memory.peak
-		then
-			peakmem=`cat $PC2_SANDBOX_CGROUP_PATH/memory.peak`
-		else
-			peakmem="N/A"
-		fi
-
+		GetSandboxStats
 
 		FormatExitCode $wstat
 		REPORT_DEBUG Contestant PID $submissionpid finished with exit code $result
 		contestant_done=1
-		COMMAND_EXIT_CODE=$wstat
 
 		ShowStats ${cputime} ${TIMELIMIT_US} ${walltime} ${peakmem} $((MEMLIMIT*1024*1024))
+
+		# If we have already made a definitive judgment based on the validator and we are just waiting
+		# for the submission to finish, the break out now
+		if test "$wait_sub" = "2"
+		then
+			break
+		fi
+		COMMAND_EXIT_CODE=$wstat
 
 		# See if we were killed due to memory - this is a kill 9 if it happened
 		kills=`grep oom_kill $PC2_SANDBOX_CGROUP_PATH/memory.events | cut -d ' ' -f 2`
@@ -735,8 +733,7 @@ do
 			REPORT_BRIEF RTE
 			GenXML "No - Run-time Error" "Exit status $wstat"
 			# If validator finished with AC, but submission has a bad exit code, we use that.
-			# Or, if we didn't kill off the submission, and want to use it's exit code
-			if test "$val_result" = "${EXITCODE_AC}" -o "${KILL_WA_VALIDATOR}" -eq 0
+			if test "$val_result" = "${EXITCODE_AC}"
 			then
 				KillValidator
 				break
@@ -744,6 +741,8 @@ do
 		else
 			# COMMAND_EXIT_CODE is 0, let's see if the validator finished.  If
 			# so, we're done, since the validator already created it's disposition.
+			# Note: this case should not happen since we wait for the submission above if the validator
+			# finishes first.
 			if test -n "$val_result"
 			then
 				break
