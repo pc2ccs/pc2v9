@@ -3042,7 +3042,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * @return string with values
      */
     public String substituteAllStrings(Run inRun, String origString, int dataSetNumber) {
-        String newString = "";
+        // Make a new copy to start with to avoid issues in the future.
+        String newString = origString;
         String nullArgument = "-"; /* this needs to change */
 
         try {
@@ -3050,13 +3051,15 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 throw new IllegalArgumentException("Run is null");
             }
 
-            if (runFiles.getMainFile() == null) {
-                log.config("substituteAllStrings() main file is null (no contents)");
-                return origString;
+            if(runFiles != null) {
+                if (runFiles.getMainFile() == null) {
+                    log.config("substituteAllStrings() main file is null (no contents)");
+                    return newString;
+                }
+                newString = replaceString(newString, "{:mainfile}", runFiles.getMainFile().getName());
+                newString = replaceString(newString, Constants.CMDSUB_FILES_VARNAME, ExecuteUtilities.getAllSubmittedFilenames(runFiles));
+                newString = replaceString(newString, Constants.CMDSUB_BASENAME_VARNAME, removeExtension(runFiles.getMainFile().getName()));
             }
-            newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
-            newString = replaceString(newString, Constants.CMDSUB_FILES_VARNAME, ExecuteUtilities.getAllSubmittedFilenames(runFiles));
-            newString = replaceString(newString, Constants.CMDSUB_BASENAME_VARNAME, removeExtension(runFiles.getMainFile().getName()));
             newString = replaceString(newString, "{:package}", packageName);
 
             String validatorCommand = null;
