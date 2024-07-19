@@ -27,6 +27,7 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.CommandVariableReplacer;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
@@ -276,6 +277,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
     private boolean debugAllowInteractiveInvocationOnWindows = false;
 
+    // for execute folder, and maybe in the future, for the other substitute vars
+    CommandVariableReplacer variableReplacer = new CommandVariableReplacer();
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, IExecutableMonitor msgFrame) {
         super();
@@ -3113,10 +3116,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 }
                 if (index > 0) {
                     newString = replaceString(newString, "{:problem}", index);
-                    if(problem != null) {
-                        newString = replaceString(newString, "{:problemletter}", problem.getLetter());
-                        newString = replaceString(newString, "{:problemshort}", problem.getShortName());
-                    }
                 }
             }
             if (inRun.getSubmitter() != null) {
@@ -3126,7 +3125,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             newString = replaceString(newString, "{:clientname}", contest.getClientId().getName());
             newString = replaceString(newString, "{:clientid}", contest.getClientId().getClientNumber());
             newString = replaceString(newString, "{:clientsite}", contest.getClientId().getSiteNumber());
+            newString = replaceString(newString, "{:runnumber}", Integer.toString(inRun.getNumber()));
+
             if (problem != null) {
+                newString = replaceString(newString, "{:problemletter}", problem.getLetter());
+                newString = replaceString(newString, "{:problemshort}", problem.getShortName());
                 if (problem.getDataFileName() != null && !problem.getDataFileName().equals("")) {
                     newString = replaceString(newString, "{:infile}", problem.getDataFileName());
                 } else {
@@ -3164,8 +3167,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     newString = replaceString(newString, "{:ansfilename}", nullArgument);
                 }
                 newString = replaceString(newString, "{:timelimit}", Long.toString(problem.getTimeOutInSeconds()));
-
-                newString = replaceString(newString, "{:runnumber}", Integer.toString(inRun.getNumber()));
 
                 // TODO REFACTOR replace vars with constants for: memlimit, sandboxcommandline,sandboxprogramname
                 newString = replaceString(newString, "{:memlimit}", Integer.toString(problem.getMemoryLimitMB()));
@@ -3421,7 +3422,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         if(StringUtilities.isEmpty(dirName)) {
             dirName = DEFAULT_EXECUTE_DIRECTORY_TEMPLATE;
         }
-        dirName = substituteAllStrings(run, dirName) + getExecuteDirectoryNameSuffix();
+        dirName = variableReplacer.substituteExecuteFolderVariables(contest, log, run, dirName) + getExecuteDirectoryNameSuffix();
         return(dirName);
     }
 

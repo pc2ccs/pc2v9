@@ -1451,15 +1451,20 @@ public class ContestInformationPane extends JPanePlugin {
 
             + "\n\nLiteral characters (i.e., anything NOT part of a substituion variable) are displayed exactly as written in the format string." //
 
-            + "\n\nSome useful, recognized substitution variables include:" //
-            + "\n    {:runnumber}                -- the run Id number, eg. 220 for Run Id 220" //
-            + "\n    {:basename}                 -- mainfile without extension (hello)"
-            + "\n    {:languageid}                -- CLICS language ID (cpp, java, kotlin, etc.)"
-            + "\n    {:problemletter}           -- A,B,C..."
-            + "\n    {:problemshort}           -- problem short name"
-            + "\n    {:teamid}                        -- team number (23)"
-
-            + "\n\nAny substitution string available for an executable is allowed here."
+            + "\n\nThe recognized substitution variables include:" //
+            + "\n    {:clientid} - this client's id number, eg. 1"
+            + "\n    {:clientname} - this client's name, eg judge1"
+            + "\n    {:clientsite} - this client's site"
+            + "\n    {:languageid} - CLICS language id, eg cpp"
+            + "\n    {:language} - index into languages (1 based)"
+            + "\n    {:languageletter} - index converted to letter, eg 1=A, 2=B"
+            + "\n    {:languagename} - Display name of language (spaces converted to _)"
+            + "\n    {:problem} - Index into problem table"
+            + "\n    {:problemletter} - A,B,C..."
+            + "\n    {:problemshort} - problem short name"
+            + "\n    {:runnumber} - the run number"
+            + "\n    {:siteid} - team's site"
+            + "\n    {:teamid} - team's id number"
 
             + "\n\nSo for example a judge's execute folder string like \"executesite{:siteid}{:clientname}_Run_{:runnumber}\" would change the execute folder to something like:" //
             + "\n    executesite1judge1_Run_220 " //

@@ -1,10 +1,12 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -17,7 +19,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * Replace command line variables.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -33,7 +35,7 @@ public class CommandVariableReplacer {
 
     /**
      * All files, main file and additional files.
-     * 
+     *
      */
     public static final String FILELIST = "{:filelist}";
 
@@ -51,19 +53,30 @@ public class CommandVariableReplacer {
      * Run Id (or number).
      */
     public static final String RUNID = "{:runid}";
-    
+    public static final String RUNNUMBER = "{:runnumber}";
+
     /**
      * Internal run id.
-     * 
-     * If run comes from another CCS this is the internal 
+     *
+     * If run comes from another CCS this is the internal
      * pc2 submission number for this run.
      */
     public static final String INTERNAL_RUNID = "{:irunid}";
-    
+
     /**
      * CCS short problem name.
      */
     public static final String PROBLEMSHORTNAME = "{:problemshort}";
+
+    /**
+     * CCS problem letter.
+     */
+    public static final String PROBLEMLETTER = "{:problemletter}";
+
+    /**
+     * CCS problem  index (1 based).
+     */
+    public static final String PROBLEMINDEX = "{:problem}";
 
     /**
      * Language name.
@@ -71,13 +84,33 @@ public class CommandVariableReplacer {
     public static final String LANGUAGENAME = "{:languagename}";
 
     /**
+     * Language letter.
+     */
+    public static final String LANGUAGELETTER = "{:languageletter}";
+
+    /**
+     * CLICS Language id.
+     */
+    public static final String LANGUAGEID = "{:languageid}";
+
+    /**
      * Client Id.
      */
     public static final String CLIENTID = "{:clientid}";
 
     /**
-     * Team Id (client id).
-     * 
+     * Client full name, eg team2
+     */
+    public static final String CLIENTNAME = "{:clientname}";
+
+    /**
+     * Client's site id.
+     */
+    public static final String CLIENTSITE = "{:clientsite}";
+
+    /**
+     * Team Id.
+     *
      */
     public static final String TEAMID = "{:teamid}";
 
@@ -98,7 +131,7 @@ public class CommandVariableReplacer {
 
     /**
      * Client type.
-     * 
+     *
      */
     public static final String CLIENTTYPE = "{:clienttype}";
 
@@ -106,11 +139,18 @@ public class CommandVariableReplacer {
      * Language number.
      */
     public static final String LANGUAGE = "{:language}";
-    
+
+    /**
+     * Site
+     */
+    public static final String SITEID = "{:siteid}";
+
     public static final String[] VARIABLE_NAMES = {//
             BASENAME, //
             CLIENTID, //
             CLIENTTYPE, //
+            CLIENTNAME, //
+            CLIENTSITE,
             ELAPSEDMINUTES, //
             ELAPSEDMS, //
             ELAPSEDSECONDS, //
@@ -123,28 +163,28 @@ public class CommandVariableReplacer {
             PROBLEMSHORTNAME, //
             RUNID, //
             TEAMID, //
+            SITEID, //
 
             "{:ansfile}", //
             "{:executetime}", //
             "{:exitvalue}", //
             "{:infile}", //
-            "{:languageletter}", //
+            LANGUAGELETTER, //
             "{:outfile}", //
             "{:pc2home}", //
-            "{:problemletter}", //
-            "{:problem}", //
-            "{:siteid}", //
+            PROBLEMLETTER, //
+            PROBLEMINDEX, //
             "{:timelimit}", //
             "{:validator}", //
 
     };
 
-    
+
     /**
      * Replace all instances of beforeString with afterString.
-     * 
+     *
      * If before string is not found, then returns original string.
-     * 
+     *
      * @param origString
      *            string to be modified
      * @param beforeString
@@ -156,7 +196,7 @@ public class CommandVariableReplacer {
     public static String replaceString(String origString, String beforeString, String afterString) {
 
         // SOMEDAY replace this with Java String replace method.
-        
+
         if (origString == null || afterString == null) {
             return origString;
         }
@@ -179,9 +219,9 @@ public class CommandVariableReplacer {
 
     /**
      * Replace beforeString with int.
-     * 
+     *
      * For details see {@link #replaceString(String, String, String)}
-     * 
+     *
      * @param origString
      *            string to be modified
      * @param beforeString
@@ -197,9 +237,9 @@ public class CommandVariableReplacer {
 
     /**
      * return string with all field variables filled with values.
-     * 
+     *
      * Each variable will be filled in with values.
-     * 
+     *
      * <pre>
      *             valid fields are:
      *              {:mainfile} - submitted file (hello.java)
@@ -214,7 +254,7 @@ public class CommandVariableReplacer {
      *              {:ansfile}
      *              {:pc2home}
      * </pre>
-     * 
+     *
      * @param run
      *            submitted by team
      * @param origString
@@ -223,7 +263,7 @@ public class CommandVariableReplacer {
      * @param problemDataFiles
      * @return string with values
      */
-    public String substituteExecutableVariables(IInternalContest contest, Run run, RunFiles runFiles, String origString, // 
+    public String substituteExecutableVariables(IInternalContest contest, Run run, RunFiles runFiles, String origString, //
             ExecutionData executionData, ProblemDataFiles problemDataFiles) {
         String newString = "";
         String nullArgument = "-"; /* this needs to change */
@@ -266,21 +306,21 @@ public class CommandVariableReplacer {
             Language language = contest.getLanguage(run.getLanguageId());
             int index = getLanguageIndex(contest, language);
             if (index > 0) {
-                
+
                 newString = replaceString(newString, LANGUAGE, index);
-                newString = replaceString(newString, "{:languageletter}", Utilities.convertNumber(index));
+                newString = replaceString(newString, LANGUAGELETTER, Utilities.convertNumber(index));
             }
         }
         if (run.getProblemId() != null) {
             int index = getProblemIndex(contest, problem);
             if (index > 0) {
-                newString = replaceString(newString, "{:problem}", index);
-                newString = replaceString(newString, "{:problemletter}", Utilities.convertNumber(index));
+                newString = replaceString(newString, PROBLEMINDEX, index);
+                newString = replaceString(newString, PROBLEMLETTER, Utilities.convertNumber(index));
             }
         }
         if (run.getSubmitter() != null) {
             newString = replaceString(newString, TEAMID, run.getSubmitter().getClientNumber());
-            newString = replaceString(newString, "{:siteid}", run.getSubmitter().getSiteNumber());
+            newString = replaceString(newString, SITEID, run.getSubmitter().getSiteNumber());
         }
 
         if (problem != null) {
@@ -317,9 +357,9 @@ public class CommandVariableReplacer {
 
     /**
      * Return the problem index (starting at/base one)).
-     * 
+     *
      * Does not count problems that are not active.
-     * 
+     *
      * @param contest
      * @param inProblem
      * @return -1 if problem not found or inactive, else 1 or greater as rank for problem.
@@ -340,7 +380,7 @@ public class CommandVariableReplacer {
 
     /**
      * Return the language index (starting at base one).
-     * 
+     *
      * @param contest
      * @param inLanguage
      * @return -2 if language not found or inactive, else 1 or greater rank for language.
@@ -361,10 +401,10 @@ public class CommandVariableReplacer {
 
     /**
      * Return string minus last extension.
-     * 
+     *
      * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is found in string, will return a copy of the original string. <br>
      * Unlike the Unix basename program, no extension is supplied.
-     * 
+     *
      * @param original
      *            the input string
      * @return a string with all text after last . removed
@@ -403,12 +443,12 @@ public class CommandVariableReplacer {
     public static String replaceLong(String origString, String beforeString, long longValue) {
         return replaceString(origString, beforeString, Long.toString(longValue));
     }
-    
+
     /**
      * Create command after substituting various variables.
-     * 
+     *
      * See substitution constants. {@value CommandVariableReplacer#OPTIONS} will substitute:
-     * 
+     *
      * <pre>
      * -p &lt;problem short-name&gt;, string
      * -l &lt;language name&gt;, string
@@ -418,18 +458,18 @@ public class CommandVariableReplacer {
      * -i &lt;run id&gt; unique key for the run, integer
      * -w &lt;team password&gt;, string
      * </pre>
-     * 
+     *
      * @param command
      * @param run
      * @param runFiles
      * @param runDir
-     * @param contest 
+     * @param contest
      * @return a file with value substituted for variables.
      * @throws Exception
      */
     public String substituteVariables(String command, IInternalContest contest, Run run, RunFiles runFiles, String runDir, //
             ExecutionData executionData, ProblemDataFiles problemDataFiles) throws Exception {
-    
+
         String mainfileName = getMainFileName(runDir, runFiles);
         String fileList = mainfileName;
 
@@ -514,11 +554,11 @@ public class CommandVariableReplacer {
 
         return newCommand;
     }
-    
+
     /**
      * Returns full path for main file.
      * @param runDir if null just returns mainfilename
-     * @param runFiles 
+     * @param runFiles
      * @return name of main file, if runDir is not null returns rundir + FS + mainfilename.
      */
     public String getMainFileName(String runDir, RunFiles runFiles) {
@@ -529,5 +569,90 @@ public class CommandVariableReplacer {
         }
     }
 
+    /**
+     * Replaces substitute variables in the execute folder string.
+     * This needs a special version (and can't use substituteAllStrings) because some substitute
+     * variables do not make sense or are not available at the time the execute folder is needed,
+     * such as the test case, package, mainfile, infile, outfile, etc.
+     *
+     * return string with execute folder relevent field variables filled with values.
+     *
+     * Each variable will be filled in with values.
+     *
+     * <pre>
+     *             valid fields are:
+     *              {:language} - index into languages (1 based)
+     *              {:languageletter} - index converted to letter, eg 1=A, 2=B
+     *              {:languagename} - Display name of language (spaces converted to _)
+     *              {:languageid} - CLICS language id, eg cpp
+     *              {:problem} - Index into problem table
+     *              {:problemletter} - A,B,C...
+     *              {:problemshort} - problem short name
+     *              {:teamid} - team's id number
+     *              {:siteid} - team's site
+     *              {:clientname} - this client's name, eg judge1
+     *              {:clientid} - this client's id number, eg. 1
+     *              {:clientsite} - this client's site
+     *              {:runnumber} - the run number
+     * </pre>
+     *
+     * @param inRun
+     *            submitted by team
+     * @param origString
+     *            - original string to be substituted.
+     * @return string with values
+     */
+    public String substituteExecuteFolderVariables(IInternalContest contest, Log log, Run inRun, String origString) {
+        // Make a new copy to start with to avoid issues in the future.
+        String newString = origString;
+
+        try {
+            if (inRun == null) {
+                throw new IllegalArgumentException("Run is null");
+            }
+
+            // SOMEDAY LanguageId and ProblemId are now a long string not an int,
+            // what should we do?
+
+            if (inRun.getLanguageId() != null) {
+                Language language = contest.getLanguage(inRun.getLanguageId());
+                int index = getLanguageIndex(contest, language);
+                if (index > 0) {
+                    newString = replaceString(newString, LANGUAGE, index);
+                    newString = replaceString(newString, LANGUAGELETTER, Utilities.convertNumber(index));
+                    newString = replaceString(newString, LANGUAGENAME, language.getDisplayName().toLowerCase().replaceAll(" ", "_"));
+                    newString = replaceString(newString, LANGUAGEID, language.getID());
+                }
+            }
+            if (inRun.getProblemId() != null) {
+                Problem problem = contest.getProblem(inRun.getProblemId());
+                if(problem != null) {
+                    int index = getProblemIndex(contest, problem);
+                    newString = replaceString(newString, PROBLEMINDEX, index);
+                    newString = replaceString(newString, PROBLEMLETTER, problem.getLetter());
+                    newString = replaceString(newString, PROBLEMSHORTNAME, problem.getShortName());
+                }
+            }
+            if (inRun.getSubmitter() != null) {
+                newString = replaceString(newString, TEAMID, inRun.getSubmitter().getClientNumber());
+                newString = replaceString(newString, SITEID, inRun.getSubmitter().getSiteNumber());
+            }
+            newString = replaceString(newString, CLIENTNAME, contest.getClientId().getName());
+            newString = replaceString(newString, CLIENTID, contest.getClientId().getClientNumber());
+            newString = replaceString(newString, CLIENTSITE, contest.getClientId().getSiteNumber());
+            newString = replaceString(newString, RUNNUMBER, Integer.toString(inRun.getNumber()));
+
+        } catch (Exception e) {
+            if(log == null) {
+                log = StaticLog.getLog();
+            }
+            if(log != null) {
+                log.log(Log.CONFIG, "Exception substituting execute folder variables ", e);
+            }
+            // carrying on not required to save exception
+        }
+
+        return newString;
+    }
 
 }
