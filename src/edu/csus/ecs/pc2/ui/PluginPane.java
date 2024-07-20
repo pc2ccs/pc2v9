@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -14,7 +14,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Pane for Plugin Frame (tabbed panes).
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 public class PluginPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 4327701084703859112L;
 
@@ -35,7 +35,7 @@ public class PluginPane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public PluginPane() {
         super();
@@ -44,7 +44,7 @@ public class PluginPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -56,13 +56,15 @@ public class PluginPane extends JPanePlugin {
 
     }
 
+    @Override
     public String getPluginTitle() {
         return "Plugin View";
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
-        
+
         PluginLoadPane pluginLoadPane = new PluginLoadPane();
         pluginLoadPane.setParentFrame(getParentFrame());
         pluginLoadPane.setParentTabbedPane(getPluginTabbedPane());
@@ -72,7 +74,7 @@ public class PluginPane extends JPanePlugin {
 
     /**
      * This method initializes pluginTabbedPane
-     * 
+     *
      * @return javax.swing.JTabbedPane
      */
     private JTabbedPane getPluginTabbedPane() {
@@ -84,13 +86,13 @@ public class PluginPane extends JPanePlugin {
 
     /**
      * This method initializes infoPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getInfoPane() {
         if (infoPane == null) {
             infoLabel = new JLabel();
-            infoLabel.setText("JLabel");
+            infoLabel.setText("Dynamically Load Plugins");
             infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
             infoLabel.setHorizontalTextPosition(SwingConstants.CENTER);
             infoPane = new JPanel();
