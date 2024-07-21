@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 
 /**
  * Compare contest results files report.
- * 
+ *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
 public class ResultsCompareReport implements IReport {
@@ -45,20 +45,20 @@ public class ResultsCompareReport implements IReport {
     private Filter filter = new Filter();
 
     private boolean fullDetails = false;
-    
-    private String missingSourceMessage = ComparisonState.MISSING_SOURCE.toString(); 
-    
+
+    private String missingSourceMessage = ComparisonState.MISSING_SOURCE.toString();
+
     private String missingTargetMessage = ComparisonState.MISSING_TARGET.toString();
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -796328654541676730L;
 
     public ResultsCompareReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir, boolean fullDetails) {
         this(contest, controller, primaryCCSResultsDir, pc2ResultsDir, fullDetails, null, null);
     }
-    
+
     /**
      * Validate input for report, check parameters, check for missing dirs and invalid input files.
      */
@@ -101,7 +101,7 @@ public class ResultsCompareReport implements IReport {
         FileComparisonUtilities.createScoreboardJSONFileComparison(Constants.SCOREBOARD_JSON_FILENAME, sourceDir, targetDir, scoreboardKey);
 
     }
-    
+
     public ResultsCompareReport(IInternalContest contest, IInternalController controller, String primaryCCSResultsDir, String pc2ResultsDir, boolean fullDetails, String missingSourceMessage,
             String missingTargetMessage) {
         super();
@@ -116,7 +116,7 @@ public class ResultsCompareReport implements IReport {
         }
         setContestAndController(contest, controller);
     }
-    
+
 
     public ResultsCompareReport() {
         ;
@@ -193,7 +193,7 @@ public class ResultsCompareReport implements IReport {
                 compSummary = "All MATCH " + totalFieldsCompared + " fields match";
             }
         }
-        lines.add("  Comparision summary " + compSummary);
+        lines.add("  Comparison summary " + compSummary);
 
         String previousKey = "";
         int foundCount = 0;
@@ -201,7 +201,7 @@ public class ResultsCompareReport implements IReport {
         if (differentFields != 0) {
 
             lines.add("");
-            
+
             Collections.sort(fields, new FieldCompareRecordComparator());
 
             for (FieldCompareRecord fieldCompareRecord : fields) {
@@ -213,7 +213,7 @@ public class ResultsCompareReport implements IReport {
                 }
 
                 if (!fieldCompareRecord.getState().equals(ComparisonState.SAME)) {
-                    
+
                     foundCount ++;
                     if (foundCount == 1) {
                         lines.add("");
@@ -221,7 +221,7 @@ public class ResultsCompareReport implements IReport {
                     }
 
                     String stateString = fieldCompareRecord.getState().toString();
-                    
+
                     String formattedLine = String.format("   field %-18s %8s '%s' '%s'", fieldCompareRecord.getFieldName(), stateString, fieldCompareRecord.getValueOne(),
                             fieldCompareRecord.getValueTwo());
 
@@ -233,6 +233,11 @@ public class ResultsCompareReport implements IReport {
                         case MISSING_TARGET:
                             stateString = getMissingTargetMessage();
                             formattedLine = String.format("   field %-18s %8s '%s'", fieldCompareRecord.getFieldName(), stateString, fieldCompareRecord.getValueOne());
+                            break;
+                        case BOTH_MISSING:
+                            stateString = getMissingSourceMessage() + " and " + getMissingTargetMessage();
+                            formattedLine = String.format("   field %-18s %8s '%s' and '%s'", fieldCompareRecord.getFieldName(), stateString,
+                                    fieldCompareRecord.getValueOne(), fieldCompareRecord.getValueTwo());
                             break;
                         case NOT_SAME:
                             stateString = "Not identical";
@@ -250,17 +255,17 @@ public class ResultsCompareReport implements IReport {
 
         return lines;
     }
-    
+
     @Override
     public String[] createReport(Filter filter) {
 
         String sourceDir = pc2ResultsDir;
         String targetDir = primaryCCSResultsDir;
-        
+
         /**
          * Throw exceptions if source or target dir are null or do not exist.
          */
-        
+
         if (targetDir == null) {
             throw new RuntimeException("Primary CCS directory is not assigned (is null)");
         }
@@ -268,12 +273,12 @@ public class ResultsCompareReport implements IReport {
         if (sourceDir == null) {
             throw new RuntimeException("PC2 directory is not assigned (is null)");
         }
-        
-        
+
+
         if (!Utilities.isDirThere(targetDir)) {
             throw new RuntimeException("Primary CCS results dir: "+primaryCCSResultsDir+" does not exist");
         }
-        
+
         if (!Utilities.isDirThere(sourceDir)) {
             throw new RuntimeException("PC2 results dir: "+sourceDir+" does not exist");
         }
@@ -298,16 +303,16 @@ public class ResultsCompareReport implements IReport {
             outList.add("Summary:   All PASS - no differences found");
             outList.add("");
 
-            outList.add(String.format("%3d", scoreboardJsonCompare.getNumberRows())+ " rows "+Constants.SCOREBOARD_JSON_FILENAME);
-            outList.add(String.format("%3d", awardsFileCompare.getNumberRows())+ " rows "+Constants.AWARDS_JSON_FILENAME);
             outList.add(String.format("%3d", resultsCompare.getNumberRows())+ " rows "+ResultsFile.RESULTS_FILENAME);
+            outList.add(String.format("%3d", awardsFileCompare.getNumberRows())+ " rows "+Constants.AWARDS_JSON_FILENAME);
+            outList.add(String.format("%3d", scoreboardJsonCompare.getNumberRows())+ " rows "+Constants.SCOREBOARD_JSON_FILENAME);
         } else {
             outList.add("Summary:   FAIL - there are " + totalDifferences + "  differences found");
             outList.add("");
 
-            outList.add(String.format("%3d", scoreboardJsonCompare.getNumberDifferences())+ " differences "+Constants.SCOREBOARD_JSON_FILENAME);
-            outList.add(String.format("%3d", awardsFileCompare.getNumberDifferences())+ " differences "+Constants.AWARDS_JSON_FILENAME);
             outList.add(String.format("%3d", resultsCompare.getNumberDifferences())+ " differences "+ResultsFile.RESULTS_FILENAME);
+            outList.add(String.format("%3d", awardsFileCompare.getNumberDifferences())+ " differences "+Constants.AWARDS_JSON_FILENAME);
+            outList.add(String.format("%3d", scoreboardJsonCompare.getNumberDifferences())+ " differences "+Constants.SCOREBOARD_JSON_FILENAME);
         }
 
 
@@ -329,7 +334,7 @@ public class ResultsCompareReport implements IReport {
             outList.addAll(lines);
         }
 
-        return (String[]) outList.toArray(new String[outList.size()]);
+        return outList.toArray(new String[outList.size()]);
     }
 
     @Override
@@ -396,27 +401,27 @@ public class ResultsCompareReport implements IReport {
     public String getPc2ResultsDir() {
         return pc2ResultsDir;
     }
-    
+
     public boolean isFullDetails() {
         return fullDetails;
     }
-    
+
     public void setFullDetails(boolean fullDetails) {
         this.fullDetails = fullDetails;
     }
-    
+
     public String getMissingSourceMessage() {
         return missingSourceMessage;
     }
-    
+
     public String getMissingTargetMessage() {
         return missingTargetMessage;
     }
-    
+
     public void setMissingSourceMessage(String missingSourceMessage) {
         this.missingSourceMessage = missingSourceMessage;
     }
-    
+
     public void setMissingTargetMessage(String missingTargetMessage) {
         this.missingTargetMessage = missingTargetMessage;
     }
