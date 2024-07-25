@@ -628,7 +628,7 @@ public class ReportPane extends JPanePlugin {
 
             selectedReport.setContestAndController(getContest(), getController());
 
-            // SOMEDAY insure that each report createReportFile sets the filter too
+            // SOMEDAY ensure that each report createReportFile sets the filter too
             /**
              * Using setFilter because createReportFile may not set the filter
              */

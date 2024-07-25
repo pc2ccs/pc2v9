@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.standings;
 
 import java.io.Serializable;
@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -13,6 +14,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 /**
  * This class defines the header which appears at the top of a {@link ContestStandings} object.  
@@ -90,10 +93,18 @@ public class StandingsHeader implements Serializable {
     @XmlAttribute
     private String totalSolved;
     
+    @XmlAnyElement(lax = true)
+    private List<Object> otherElements;
+
+    
     @XmlElement(name = "groupList")
+    @JacksonXmlProperty(localName = "groupList")
+    @JacksonXmlElementWrapper(useWrapping = false)
     private GroupList grouplist = null;
 
     @XmlElement(name = "problem")
+    @JacksonXmlProperty(localName = "problem")
+    @JacksonXmlElementWrapper(useWrapping = false)
     private List<ScoringProblem> problems = null;
 
     public String getGeneratorId() {

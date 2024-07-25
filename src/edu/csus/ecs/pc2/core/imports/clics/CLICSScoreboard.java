@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 
 package edu.csus.ecs.pc2.core.imports.clics;
 
@@ -123,9 +123,13 @@ public class CLICSScoreboard {
                 ProblemScoreRow scoreRow = new ProblemScoreRow();
 
                 //  <problem attempts="50" bestSolutionTime="13" id="3" lastSolutionTime="87" numberSolved="35" title="Careful Ascent"/>
-
+                   
+                scoreRow.setSolved(toBool(psi.getIsSolved(), false));
+                
                 scoreRow.setNum_judged(toInt(psi.getAttempts()));
-
+                
+                scoreRow.setTime(toInt(psi.getSolutionTime()));
+                
                 String problemIdNumber = psi.getProblemId();
                 // TODO FIX must get shortname from Problem rather than using id
                 String problemShortName = "Id = " + problemIdNumber;
@@ -133,7 +137,7 @@ public class CLICSScoreboard {
 
                 scoreRow.setNum_pending(toInt(psi.getIsPending()));
 
-                scoreRow.setSolved(toBool(psi.getIsSolved(), false));
+                
 
                 problemList.add(scoreRow);
             }
