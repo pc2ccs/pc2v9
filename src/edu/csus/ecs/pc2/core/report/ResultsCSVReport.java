@@ -10,7 +10,9 @@ import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 public class ResultsCSVReport extends AbstractReport {
 
     /**
+     * Generates the results.csv report
      * 
+     * @author Samanway Sadhu
      */
     private static final long serialVersionUID = -6988627277661871941L;
 
