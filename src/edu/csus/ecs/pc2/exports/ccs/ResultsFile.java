@@ -172,6 +172,8 @@ public class ResultsFile {
 
         // TODO finalizeData really needs a B instead of getBronzeRank
         int lastMedalRank = finalizeData.getBronzeRank();
+        int lastSolvedNum = 0;
+        int rankNumber = 0;
 
         // resort standingsRecord based on lastMedalRank and median
         Vector<Account> accountVector = contest.getAccounts(Type.TEAM);
@@ -190,10 +192,6 @@ public class ResultsFile {
         int realRank = 0;
         int highestHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved();
         int highHonorSolvedCount = highestHonorSolvedCount - 1;
-        int firstNonMedalHighestHonorRank = 0;
-        int firstHighHonorRank = 0;
-        int firstHonorRank = 0;
-        int firstHonorableRank = 0;
 
         for (StandingsRecord record : standingsRecords) {
             realRank++;
@@ -218,7 +216,7 @@ public class ResultsFile {
                 if (finalizeData.isUseWFGroupRanking()) {
                     if (record.getNumberSolved() >= highestHonorSolvedCount) {
                         isHighestHonor = true;
-                    } else if (record.getNumberSolved() == highHonorSolvedCount) {
+                    } else if (record.getNumberSolved() >= highHonorSolvedCount) {
                         isHighHonor = true;
                     } else if (record.getNumberSolved() >= median) {
                         isHonor = true;
@@ -233,27 +231,11 @@ public class ResultsFile {
             String rank = "";
             if (!"honorable".equalsIgnoreCase(award)) {
                 if (finalizeData.isUseWFGroupRanking() && realRank > lastMedalRank) {
-                    if (isHighestHonor) {
-                        if (firstNonMedalHighestHonorRank == 0) {
-                            firstNonMedalHighestHonorRank = realRank;
-                        }
-                        record.setRankNumber(firstNonMedalHighestHonorRank);
-                    } else if (isHighHonor) {
-                        if (firstHighHonorRank == 0) {
-                            firstHighHonorRank = realRank;
-                        }
-                        record.setRankNumber(firstHighHonorRank);
-                    } else if (isHonor) {
-                        if (firstHonorRank == 0) {
-                            firstHonorRank = realRank;
-                        }
-                        record.setRankNumber(firstHonorRank);
-                    } else {
-                        if (firstHonorableRank == 0) {
-                            firstHonorableRank = realRank;
-                        }
-                        record.setRankNumber(firstHonorableRank);
+                    if (record.getNumberSolved() != lastSolvedNum) {
+                        lastSolvedNum = record.getNumberSolved();
+                        rankNumber = realRank;
                     }
+                    record.setRankNumber(rankNumber);
                 }
                 rank = Integer.toString(record.getRankNumber());
             }
