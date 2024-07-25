@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Developer tools pane.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class DevelopmentPane extends JPanePlugin {
@@ -18,7 +18,7 @@ public class DevelopmentPane extends JPanePlugin {
     private static final long serialVersionUID = -6902750741500529883L;
 
     private PluginPane pluginPane = new PluginPane();
-    
+
     private ContestScheduledStartClockPane contestScheduledStartClockPane = new ContestScheduledStartClockPane();
 
     private ReportPane reportPane = new ReportPane();
@@ -26,15 +26,15 @@ public class DevelopmentPane extends JPanePlugin {
     private OptionsPane optionsPane = new OptionsPane();
 
     private LogSettingsPane logSettingsPane = new LogSettingsPane();
-    
+
     private ContestPreloadPane contestPreloadPane = new ContestPreloadPane();
 
     private ContestClockAllPane contestClockAllPane = new ContestClockAllPane();
-    
-    private SubmitSubmissionsPane submitSubmissionsPane = new SubmitSubmissionsPane();
-    
+
+    private SubmitSampleRunsPane submitSampleRunsPane = new SubmitSampleRunsPane();
+
     private DisplayPermissionsPane displayPermissionsPane = new DisplayPermissionsPane();
-    
+
    public DevelopmentPane() {
         super();
         setLayout(new BorderLayout(0, 0));
@@ -43,23 +43,23 @@ public class DevelopmentPane extends JPanePlugin {
         add(tabbedPane);
 
         tabbedPane.addTab("Plugins", null, pluginPane, null);
-        
-        tabbedPane.addTab("Submitter", null, submitSubmissionsPane, null);
-        
+
+        tabbedPane.addTab("Submit Judge's Submissions", null, submitSampleRunsPane, null);
+
         tabbedPane.addTab("Scheduled Start Countdown", null, contestScheduledStartClockPane, null);
-        
+
         tabbedPane.addTab("All Countdown Timers", null, contestClockAllPane, null);
-        
+
         tabbedPane.addTab("Reports", null, reportPane, null);
-        
+
         tabbedPane.addTab("Sample Contests", null, contestPreloadPane, null);
 
         tabbedPane.addTab("Log Settings", null, logSettingsPane, null);
 
         tabbedPane.addTab("Options", null, optionsPane, null);
-        
+
         tabbedPane.addTab("Check Permissions", null, displayPermissionsPane, null);
-        
+
    }
 
     @Override
@@ -77,9 +77,9 @@ public class DevelopmentPane extends JPanePlugin {
         contestPreloadPane.setContestAndController(inContest, inController);
         contestScheduledStartClockPane.setContestAndController(inContest, inController);
         contestClockAllPane.setContestAndController(inContest, inController);
-        submitSubmissionsPane.setContestAndController(inContest, inController);
+        submitSampleRunsPane.setContestAndController(inContest, inController);
         displayPermissionsPane.setContestAndController(inContest, inController);
     }
-    
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -23,6 +23,7 @@ import javax.swing.event.ChangeListener;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -83,6 +84,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 public class AdministratorView extends JFrame implements UIPlugin, ChangeListener {
 
     private static final long serialVersionUID = 1L;
+
+    private static final String SAMPLE_SUBMIT_PANE_KEY = "admin.sampleSubmitPane";
 
     private IInternalContest contest;
 
@@ -333,8 +336,10 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 QuickJudgePane quickJudgePane = new QuickJudgePane();
                 addUIPlugin(getRunContestTabbedPane(), "Judging Utilities", quickJudgePane);
 
-                SubmitSampleRunsPane sampleRunsPane = new SubmitSampleRunsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Submit Samples", sampleRunsPane);
+                if(StringUtilities.getBooleanValue(IniFile.getValue(SAMPLE_SUBMIT_PANE_KEY), false)) {
+                    SubmitSampleRunsPane sampleRunsPane = new SubmitSampleRunsPane();
+                    addUIPlugin(getRunContestTabbedPane(), "Submit Samples", sampleRunsPane);
+                }
 
                 if (!controller.isSuppressLoginsPaneDisplay()) {
                     LoginsTablePane loginsTablePane = new LoginsTablePane();
