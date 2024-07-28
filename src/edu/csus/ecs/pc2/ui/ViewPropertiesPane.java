@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
  * View this clients properties.
- *  
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -34,7 +34,7 @@ import edu.csus.ecs.pc2.core.security.Permission.Type;
 public class ViewPropertiesPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 2554693130978453347L;
 
@@ -54,9 +54,12 @@ public class ViewPropertiesPane extends JPanePlugin {
 
     private JButton closeButton = null;
 
+    private JPanel permissionSummaryPane = null;
+
+
     /**
      * This method initializes
-     * 
+     *
      */
     public ViewPropertiesPane() {
         super();
@@ -65,11 +68,12 @@ public class ViewPropertiesPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
         this.setSize(new Dimension(396, 208));
+        this.add(getPermissionSummaryPane(), BorderLayout.NORTH);
         this.add(getPermissionsScrollPane(), BorderLayout.CENTER);
         this.add(getButtonPane(), BorderLayout.SOUTH);
 
@@ -82,7 +86,7 @@ public class ViewPropertiesPane extends JPanePlugin {
 
     /**
      * This method initializes permissionsJList
-     * 
+     *
      * @return javax.swing.JList
      */
     private JCheckBoxJList getPermissionsJList() {
@@ -91,6 +95,7 @@ public class ViewPropertiesPane extends JPanePlugin {
             permissionsJList.setModel(defaultListModel);
             // ListSelectionListeners are called before JCheckBoxes get updated
             permissionsJList.addPropertyChangeListener("change", new PropertyChangeListener() {
+                @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     showPermissionCount(permissionsJList.getSelectedIndices().length + " permissions selected");
                 }
@@ -104,7 +109,7 @@ public class ViewPropertiesPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
         account = inContest.getAccount(inContest.getClientId());
         populatePermissions(account);
-        
+
         if (getParentFrame() != null){
             getParentFrame().setTitle("Permissions/Abilities for " + inContest.getClientId());
         }
@@ -174,15 +179,16 @@ public class ViewPropertiesPane extends JPanePlugin {
 
     public void showPermissionCount(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
-                permissionCountLabel.setText(message);
+                getPermissionCountLabel().setText(message);
             }
         });
     }
 
     /**
      * This method initializes permissionsScrollPane
-     * 
+     *
      * @return javax.swing.JScrollPane
      */
     private JScrollPane getPermissionsScrollPane() {
@@ -195,7 +201,7 @@ public class ViewPropertiesPane extends JPanePlugin {
 
     /**
      * This method initializes buttonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -203,14 +209,17 @@ public class ViewPropertiesPane extends JPanePlugin {
             buttonPane = new JPanel();
             buttonPane.setLayout(new FlowLayout());
             buttonPane.setPreferredSize(new Dimension(35, 35));
-            buttonPane.add(getCloseButton(), null);
+            // do not add close button if in a tabbed control
+            if(getParentFrame() != null) {
+                buttonPane.add(getCloseButton(), null);
+            }
         }
         return buttonPane;
     }
 
     /**
      * This method initializes closeButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getCloseButton() {
@@ -218,6 +227,7 @@ public class ViewPropertiesPane extends JPanePlugin {
             closeButton = new JButton();
             closeButton.setText("Close");
             closeButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     closeWindow();
                 }
@@ -230,6 +240,29 @@ public class ViewPropertiesPane extends JPanePlugin {
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
+    }
+
+    /**
+     * The summary pane is used to show things like how many permissions are selected.
+     * it appears at the top of the frame
+     *
+     * @return the pane containing the summary info
+     */
+    private JPanel getPermissionSummaryPane() {
+        if(permissionSummaryPane == null) {
+            permissionSummaryPane = new JPanel();
+            permissionSummaryPane.setLayout(new FlowLayout());
+            permissionSummaryPane.setPreferredSize(new Dimension(25, 25));
+            permissionSummaryPane.add(getPermissionCountLabel(), null);
+        }
+        return(permissionSummaryPane);
+    }
+
+    private JLabel getPermissionCountLabel() {
+        if(permissionCountLabel == null) {
+          permissionCountLabel = new JLabel("No permissions selected");
+        }
+        return(permissionCountLabel);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
