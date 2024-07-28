@@ -94,7 +94,6 @@ public class FileComparisonUtilities {
                     FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
-                    // TODO 760 Do we need to compare problems??   firstRowfirstRow.getProblems() ?
                     fieldName = "num_solved";
                     valueOne = Long.toString(firstRow.getScore().getNum_solved());
                     valueTwo = Long.toString(secondScoreRow.getScore().getNum_solved());
@@ -119,31 +118,44 @@ public class FileComparisonUtilities {
                     if(probs1 != null && probs2 != null) {
                         ProblemScoreRow p1, p2;
                         int ptime;
-                        String probString;
+                        String probString, probId;
                         boolean foundProblem;
 
                         int nProb1 = probs1.size();
                         int nProb2 = probs2.size();
 
                         for(int iProb = 0; iProb < nProb1; iProb++) {
+                            probString = rowString + "problem[" + iProb + "]";
+
                             p1 = probs1.get(iProb);
 
                             // Do problem_id first, because we look up the problem in the primary by id
                             fieldName = "problem_id";
-                            valueOne = cleanupProblemId(p1.getProblem_id());
+                            probId = p1.getProblem_id();
+                            if(probId == null) {
+                                fieldCompareRecord = new FieldCompareRecord(fieldName, null, null, "Missing main key in PC2 file", probString);
+                                fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                                continue;
+                            }
+                            valueOne = cleanupProblemId(probId);
 
                             // Find problem in p2
                             p2 = null;
                             foundProblem = false;
                             for(int iProb2 = 0; iProb2 < nProb2; iProb2++) {
                                 p2 = probs2.get(iProb2);
-                                valueTwo = cleanupProblemId(p2.getProblem_id());
+                                probId = p2.getProblem_id();
+                                if(probId == null) {
+                                    fieldCompareRecord = new FieldCompareRecord(fieldName, null, null, "Missing main key in Primary file", probString);
+                                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                                    continue;
+                                }
+                                valueTwo = cleanupProblemId(probId);
                                 if(valueOne.equals(valueTwo)) {
                                     foundProblem = true;
                                     break;
                                 }
                             }
-                            probString = rowString + "problem[" + iProb + "]";
 
                             if(!foundProblem) {
                                 // problem not found in primary
@@ -218,39 +230,41 @@ public class FileComparisonUtilities {
 
                 for (int rowNum = minLines; rowNum < firstTeamScoreRows.size(); rowNum++) {
                     TeamScoreRow firstRow = firstTeamScoreRows.get(rowNum);
+                    String rowString = "[" + rowNum + "]";
 
                     numberRows ++;
                     String valueTwo = null;
 
                     String fieldName = "rank";
                     String valueOne = Integer.toString(firstRow.getRank());
-                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
+                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     // TODO 760 Do we need to compare problems??  firstRowfirstRow.getProblems() ?
                     fieldName = "num solved";
                     valueOne = Long.toString(firstRow.getScore().getNum_solved());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     fieldName = "total_time";
                     valueOne = Long.toString(firstRow.getScore().getTotal_time());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     fieldName = "team_id";
                     valueOne = Long.toString(firstRow.getTeam_id());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     // TODO 760 compare team names
                     //                fieldName = "team name";
                     //                valueOne = firstRow.getTeamName();
-                    //                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
+                    //                fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     //                fileComparison.addfieldCompareRecord(fieldCompareRecord);
                 }
 
                 for (int rowNum = minLines; rowNum < secondTeamScoreRows.size(); rowNum++) {
+                    String rowString = "[" + rowNum + "]";
 
                     numberRows ++;
 
@@ -260,23 +274,23 @@ public class FileComparisonUtilities {
 
                     String fieldName = "rank";
                     String valueTwo = Integer.toString(teamScoreRow.getRank());
-                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
+                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     // TODO 760 Do we need to compare problems??  firstRowfirstRow.getProblems() ?
                     fieldName = "num solved";
                     valueTwo = Long.toString(teamScoreRow.getScore().getNum_solved());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     fieldName = "total_time";
                     valueTwo = Long.toString(teamScoreRow.getScore().getTotal_time());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                     fieldName = "team_id";
                     valueTwo = Long.toString(teamScoreRow.getTeam_id());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, valueOne);
+                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, rowString);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                 }
@@ -318,7 +332,17 @@ public class FileComparisonUtilities {
         return(probId);
     }
 
-    public static FileComparison createAwardJSONFileComparison(String jsonFilename, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey) {
+    /**
+     * Generates a FileComparison records comparing two award files.
+     *
+     * @param jsonFilename - name of the file to compare in each folder
+     * @param sourceDir - PC2 (shadow) folder
+     * @param targetDir - Primary or CDS folder
+     * @param fileComparisonKey - used to get the compare key
+     * @param ignoreEmptyAwards - if an award has no members (teams), ignore it if it's not in the other file.
+     * @return
+     */
+    public static FileComparison createAwardJSONFileComparison(String jsonFilename, String sourceDir, String targetDir, IFileComparisonKey fileComparisonKey, boolean ignoreEmptyAwards) {
 
         String firstFilename = sourceDir + File.separator + jsonFilename;
         String secondFilename = targetDir + File.separator + jsonFilename;
@@ -351,22 +375,22 @@ public class FileComparisonUtilities {
                 }
 
                 /**
-                 * Map first awards citation to awards class
+                 * Map first awards (PC2) key to awards class
                  */
                 Map<String, CLICSAward> firstFileMap = new HashMap<String, CLICSAward>();
                 for (CLICSAward clicsAwardOne : firstAwardRows) {
                     String key = fileComparisonKey.getKey(clicsAwardOne);
                     firstFileMap.put(key, clicsAwardOne);
-
-
                 }
 
+                /**
+                 * Map second awards (primary, cds, etc) key to awards class
+                 */
                 for (CLICSAward clicsAward : secondAwardRows) {
                     String key = fileComparisonKey.getKey(clicsAward);
                     CLICSAward firstAward = firstFileMap.get(key);
 
-                    numberRows++;
-
+                    // key exists in both PC2 (first) and primary/cds (second) files, so compare each field
                     if (firstAward != null) {
 
                         String fieldName = "citation";
@@ -387,54 +411,36 @@ public class FileComparisonUtilities {
                         fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                         fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
+                        // remove key since we found it
                         firstFileMap.remove(key);
-
-
+                        numberRows++;
                     } else {
-                        String fieldName = "citation";
-
-                        String valueOne = null;
-
-                        String valueTwo = clicsAward.getCitation();
-                        FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                        fileComparison.addfieldCompareRecord(fieldCompareRecord);
-
-                        fieldName = "id";
-                        valueTwo = clicsAward.getId();
-                        fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                        fileComparison.addfieldCompareRecord(fieldCompareRecord);
-
-                        fieldName = "team_ids";
-                        valueTwo = formatTeamList(clicsAward.getTeam_ids());
-                        fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                        fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                        // Only deal with this record if it has teams for the award or we want to see empty awards
+                        if(!ignoreEmptyAwards || clicsAward.getTeam_ids().length > 0) {
+                            // No key in PC2 awards file, generate missing key error
+                            FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(key, null, key, "No record with that key was found in the PC2 awards file", key);
+                            fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                            numberRows++;
+                       }
                     }
                 }
 
+                /**
+                 * Any things left in the firstFileMap (PC2) are keys that PC2 has but the primary/cds does not
+                 */
                 Set<String> awardKeySet = firstFileMap.keySet();
                 String[] awardkeys = awardKeySet.toArray(new String[awardKeySet.size()]);
                 Arrays.sort(awardkeys);
 
                 for (String key : awardkeys) {
-                    CLICSAward award = firstFileMap.get(key);
-                    numberRows++;
+                    CLICSAward firstAward = firstFileMap.get(key);
+                    // Only deal with this record if it's valid and has teams for the award or we want to see empty awards
+                    if(firstAward != null && (!ignoreEmptyAwards || firstAward.getTeam_ids().length > 0)) {
+                        numberRows++;
 
-                    String valueTwo = null;
-
-                    String fieldName = "citation";
-                    String valueOne = award.getCitation();
-                    FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-
-                    fieldName = "id";
-                    valueTwo = award.getId();
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
-
-                    fieldName = "team_ids";
-                    valueTwo = formatTeamList(award.getTeam_ids());
-                    fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
-                    fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                        FieldCompareRecord fieldCompareRecord = new FieldCompareRecord(key, key, null, "A Record with that key was only found in the PC2 awards file", key);
+                        fileComparison.addfieldCompareRecord(fieldCompareRecord);
+                    }
                 }
 
             } catch (Exception e) {
@@ -452,7 +458,7 @@ public class FileComparisonUtilities {
     }
 
     /**
-     * Check if files exist.  I one or both don't, then add a record to the FileComparison object
+     * Check if files exist.  If one or both don't, then add a record to the FileComparison object
      *
      * @param firstFilename - the source file (PC2)
      * @param secondFilename = the target file (Primary)
