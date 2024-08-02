@@ -782,6 +782,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         IMemento summaryInfoMemento = mementoRoot.createChild("problemSummaryInfo");
         summaryInfoMemento.putInteger("index", index);
         summaryInfoMemento.putString("problemId", summaryInfo.getProblemId().toString());
+        summaryInfoMemento.putString("shortName", summaryInfo.getShortName());
         summaryInfoMemento.putInteger("attempts", summaryInfo.getNumberSubmitted());
         summaryInfoMemento.putInteger("points", summaryInfo.getPenaltyPoints());
         summaryInfoMemento.putLong("solutionTime", summaryInfo.getSolutionTime());
@@ -801,6 +802,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
         summaryInfo.setUnJudgedRuns(false);
         summaryInfo.setSolved(problemScoreRecord.isSolved());
         summaryInfo.setProblemId(problem.getElementId());
+        summaryInfo.setShortName(problem.getShortName());
 
         return summaryInfo;
     }

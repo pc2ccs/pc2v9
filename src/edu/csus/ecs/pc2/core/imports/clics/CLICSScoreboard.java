@@ -130,10 +130,9 @@ public class CLICSScoreboard {
                 
                 scoreRow.setTime(toInt(psi.getSolutionTime()));
                 
-                String problemIdNumber = psi.getProblemId();
-                // TODO FIX must get shortname from Problem rather than using id
-                String problemShortName = "Id = " + problemIdNumber;
-                scoreRow.setProblem_id(problemShortName); // problem short name
+                String problemShortName = psi.getShortName();
+                
+                scoreRow.setProblem_id(problemShortName);
 
                 scoreRow.setNum_pending(toInt(psi.getIsPending()));
 
