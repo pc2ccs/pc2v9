@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# Set to 1 to search through all test cases looking for first failure, otherwise
+# it will use the last one.  In practice, it makes little difference in terms of
+# how long it takes, so might as well set it to 1
+USE_ALL_TESTCASES=1
+
 . ./pc2common.sh
 . ./webcommon.sh
 . ./cdpcommon.sh
@@ -81,7 +87,12 @@ do
 		then
 			judge="N/A"
 		fi
-		GetJudgment "${exedir}"
+		if test ${USE_ALL_TESTCASES} -eq 1
+		then
+			GetJudgment "${exedir}"
+		else
+			GetLastJudgment "${exedir}"
+		fi
 		judgment="${result}"
 		runtime="${executeDateTime}"
 		# Get how many total test cases there are

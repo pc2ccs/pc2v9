@@ -128,6 +128,14 @@ GetTestCaseNumber()
 	fi
 }
 
+
+GetLastJudgmentFile()
+{
+	lj_exdir="$1"
+	result=`ls $lj_exdir/${EXECUTE_DATA_PREFIX}.[0-9]*.txt 2>/dev/null | sed -e 's;^.*/;;' | sort -t. +1rn | head -1`
+}
+
+
 GetJudgmentFromFile()
 {
 	exdata="$1"
@@ -181,6 +189,26 @@ GetJudgment()
 		result="$jresult"
 	fi
 }
+
+GetLastJudgment()
+{
+	dir=$1
+	exdata=""
+	if ! cd ${dir}
+	then
+		result="Not found"
+	elif test -s "${RESULT_FAILURE_FILE}"
+	then
+		jerr=`cat ${RESULT_FAILURE_FILE}`
+		result="JE ($jerr)"
+	else
+		# We got a real live run
+		# Check out the biggest executedata file
+		GetLastJudgmentFile $dir
+		GetJudgmentFromFile ./${result}
+	fi
+}
+
 
 MakeTestcaseFile()
 {
