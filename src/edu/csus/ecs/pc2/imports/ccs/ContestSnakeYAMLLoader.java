@@ -290,6 +290,28 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         contest.updateContestInformation(contestInformation);
     }
 
+    private int getSandboxGraceTimeSecs(IInternalContest contest) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        return(contestInformation.getSandboxGraceTimeSecs());
+    }
+
+    private void setSandboxGraceTimeSecs(IInternalContest contest, int graceTime) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setSandboxGraceTimeSecs(graceTime);;
+        contest.updateContestInformation(contestInformation);
+    }
+
+    private int getSandboxInteractiveTimeMultiplier(IInternalContest contest) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        return(contestInformation.getSandboxInteractiveGraceMultiplier());
+    }
+
+    private void setSandboxInteractiveTimeMultiplier(IInternalContest contest, int mult) {
+        ContestInformation contestInformation = contest.getContestInformation();
+        contestInformation.setSandboxInteractiveGraceMultiplier(mult);
+        contest.updateContestInformation(contestInformation);
+    }
+
 
     private void setCcsTestMode(IInternalContest contest, boolean ccsTestMode) {
         ContestInformation contestInformation = contest.getContestInformation();
@@ -500,6 +522,18 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         Integer globalMemoryLimit = fetchIntValue(content, MEMORY_LIMIT_IN_MEG_KEY, currentGlobalMemoryLimit);
         if(currentGlobalMemoryLimit != globalMemoryLimit) {
             setMemoryLimitMB(contest, globalMemoryLimit);
+        }
+
+        int currentSandboxGraceTime = getSandboxGraceTimeSecs(contest);
+        Integer sandboxGraceTime = fetchIntValue(content, SANDBOX_GRACE_TIME, currentSandboxGraceTime);
+        if(currentSandboxGraceTime != sandboxGraceTime) {
+            setSandboxGraceTimeSecs(contest, sandboxGraceTime);
+        }
+
+        int currentSandboxIntMult = getSandboxInteractiveTimeMultiplier(contest);
+        Integer sandboxIntMult = fetchIntValue(content, SANDBOX_INTERACTIVE_GRACE_MULTIPLIER, currentSandboxIntMult);
+        if(currentSandboxIntMult != sandboxIntMult) {
+            setSandboxInteractiveTimeMultiplier(contest, sandboxIntMult);
         }
 
         for (String line : yamlLines) {

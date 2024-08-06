@@ -172,11 +172,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private static final long NANOSECS_PER_MILLISEC = 1_000_000;
 
     /**
-     * Sandbox constants
-     */
-    public static final long SANDBOX_EXTRA_KILLTIME_MS = 1000;
-
-    /**
      * Return codes from sandbox
      */
     public static final int FAIL_RETCODE_BASE = 128 + 64;
@@ -1815,8 +1810,29 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 log.log(Log.INFO, "Executing run " + run.getNumber() + " from " + run.getSubmitter().getTripletKey() + " test set " + testSetNumber);
             }
 
-            log.info("Constructing ExecuteTimer...");
-            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI() ? executionMonitor : null);
+
+            //determine whether the Problem is configured to use a sandbox
+            usingSandbox = isUsingSandbox();
+
+            //set the TLE kill task delay and ExecuteTimer delay to the number of seconds allowed by the problem
+            int delaySecs = problem.getTimeOutInSeconds();
+
+            if(usingSandbox) {
+                ContestInformation contestInfo = contest.getContestInformation();
+
+                //add ample extra time for interactive problems due to overhead the Primary may have in logging; also
+                //interactive validators may spend time too.
+                if(problem.isInteractive()) {
+                    delaySecs = delaySecs * contestInfo.getSandboxInteractiveGraceMultiplier();
+                    log.info ("multiplying time limit by " + contestInfo.getSandboxInteractiveGraceMultiplier() + " for interactive problem: " +
+                        problem.getTimeOutInSeconds() + "secs -> " + delaySecs);
+                } else {
+                    log.info ("adding " + contestInfo.getSandboxGraceTimeSecs() + " sec delay to TLE-Timer for sandbox");
+                    delaySecs += contestInfo.getSandboxGraceTimeSecs();
+                }
+            }
+            log.info("Constructing ExecuteTimer of " + delaySecs + " seconds...");
+            executionTimer = new ExecuteTimer(log, delaySecs, executorId, isUsingGUI() ? executionMonitor : null);
             log.info("Created new ExecuteTimer: " + executionTimer.toString());
 
             if (problem.getDataFileName() != null) {
@@ -1947,9 +1963,6 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             }
 
-            //determine whether the Problem is configured to use a sandbox
-            usingSandbox = isUsingSandbox();
-
             // we do not do sandboxes or interactive for test runs
             if(!isTestRunOnly()) {
                 if(usingSandbox) {
@@ -2041,7 +2054,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
             //We do NOT disable the ExecutionTimer here for sandbox mode as the original comment suggests.
             // The reason is, we use the ExecutionTimer as a watchdog in the event that the sandbox script hangs for some reason.
-            // We do bump the time up limit up a bit, though, so it doesn't prematurely terminate the run. JB 05/03/2023
+            // We do bump the time up limit up a bit (see delaySecs above), though, so it doesn't prematurely terminate the run. JB 05/03/2023
             //
             //if a sandbox is being used, disable both the ExecutionTimer's actionPerformed() ability to stop the process
             // as well as the TimerTask's ability to stop the process
@@ -2105,19 +2118,15 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 }
             };
 
-            //set the TLE kill task delay to the number of milliseconds allowed by the problem
-            long delay = problem.getTimeOutInSeconds() * 1000 ;
-
-            if(usingSandbox) {
-                log.info ("adding " + SANDBOX_EXTRA_KILLTIME_MS + " msec delay to TLE-Timer for sandbox");
-                delay += SANDBOX_EXTRA_KILLTIME_MS;
-            }
+            // this is how long the timers are set for.  If running in a sandbox, TLE is handled by the sandbox,
+            // and this time represents wall time pc2 will wait.  If not in a sandbox, this is the problem time limit.
+            long delayMs = delaySecs * 1000;
 
             //schedule the TLE kill task with the Timer -- but only for judged runs (i.e., non-team runs)
             // and only when we're not using a sandbox (which will handle time limit within the sandbox)
             if (autoStop) {
-                log.info ("scheduling kill task with TLE-Timer with " + delay + " msec delay");
-                timeLimitKillTimer.schedule(task, delay);
+                log.info ("scheduling kill task with TLE-Timer with " + delayMs + " msec delay");
+                timeLimitKillTimer.schedule(task, delayMs);
             }
 
             // TODO: Future investigation: The IOCollectors are probably not needed for interactive problems since
@@ -2226,7 +2235,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             executionData.setExecuteExitValue(exitCode);
             executionData.setExecuteTimeMS(getExecutionTimeInMSecs());
 
-            boolean runTimeLimitWasExceeded = getExecutionTimeInMSecs() > problem.getTimeOutInSeconds()*1000 ;
+            //delaySecs represents wall time for sandbox submissions, and cpu time for non-sandbox submissions.
+            boolean runTimeLimitWasExceeded = getExecutionTimeInMSecs() > delayMs ;
             executionData.setRunTimeLimitExceeded(runTimeLimitWasExceeded);
 
             /**
