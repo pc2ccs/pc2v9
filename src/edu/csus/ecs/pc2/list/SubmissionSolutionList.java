@@ -77,7 +77,7 @@ public class SubmissionSolutionList extends ArrayList<SubmissionSampleLocation> 
      * @return the acronym, or null if the folder is non-standard
      */
     public String getAcronymForSubmissionDirectory(String dir) {
-        if(submissionDirectoryToAcronym.containsKey(dir)) {
+        if(dir != null && submissionDirectoryToAcronym.containsKey(dir)) {
             return submissionDirectoryToAcronym.get(dir);
         }
         return null;

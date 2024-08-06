@@ -46,8 +46,8 @@ import javax.swing.table.TableRowSorter;
 import edu.csus.ecs.pc2.core.FileUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.list.StringToDoubleComparator;
-import edu.csus.ecs.pc2.core.list.StringToNumberComparator;
+import edu.csus.ecs.pc2.core.list.AlphaNumericComparator;
+import edu.csus.ecs.pc2.core.list.LabelToDoubleComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -310,7 +310,9 @@ public class SubmitSampleRunsPane extends JPanePlugin {
     public SubmissionSolutionList getSubmissionSolutionList() {
         String cdpPath = cdpTextField.getText();
 
-        submissionSolutionList = new SubmissionSolutionList(getContest(), cdpPath);
+        if(submissionSolutionList == null) {
+            submissionSolutionList = new SubmissionSolutionList(getContest(), cdpPath);
+        }
 
         return submissionSolutionList;
     }
@@ -547,7 +549,9 @@ public class SubmitSampleRunsPane extends JPanePlugin {
     private void clearSubmissionFiles() {
         submissionFileList = null;
         currentSubmission = -1;
-        runsAdded.clear();
+        synchronized(runsAdded) {
+            runsAdded.clear();
+        }
     }
 
     private void stopSubmissionTimer() {
@@ -781,7 +785,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
                         // Object[] fullColumns = { "Run Id", "Time", "Problem", "Expected", "Status", "Source", "Judge", "Language", "SubmissionSample" };
 
                         int modelRow = convertRowIndexToModel(row);
-                        String submissionAcronym = submissionSolutionList.getAcronymForSubmissionDirectory((String)runTableModel.getValueAt(modelRow, 3));
+                        String submissionAcronym = getSubmissionSolutionList().getAcronymForSubmissionDirectory((String)runTableModel.getValueAt(modelRow, 3));
 
                         if(submissionAcronym == null) {
                             c.setBackground(matchColorMaybe);
@@ -897,8 +901,8 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
         runTable.getColumnModel().getColumn(ELAPSED_TIME_COLUMN).setCellRenderer(new LinkCellRenderer());
 
-        StringToNumberComparator numericStringSorter = new StringToNumberComparator();
-        StringToDoubleComparator doubleStringSorter = new StringToDoubleComparator();
+        AlphaNumericComparator numericStringSorter = new AlphaNumericComparator();
+        LabelToDoubleComparator doubleStringSorter = new LabelToDoubleComparator();
 
         int idx = 0;
 
@@ -1051,7 +1055,7 @@ public class SubmitSampleRunsPane extends JPanePlugin {
                 if(maxMS == -1) {
                     s[idx++] = new JLabel("N/A");
                 } else {
-                    s[idx++] = new JLabel(String.format("%d.%03ds", maxMS/1000, maxMS%1000));
+                    s[idx++] = new JLabel(String.format("%d.%03d", maxMS/1000, maxMS%1000));
                 }
                 s[idx++] = sub.getSourceFile().getName();
                 s[idx++] = getJudgesTitle(run, judgeId, autoJudgedRun);
@@ -1313,14 +1317,16 @@ public class SubmitSampleRunsPane extends JPanePlugin {
             Run run = event.getRun();
             Integer runNum = new Integer(run.getNumber());
 
-            if(runsAdded.contains(runNum)) {
-                log.log(Level.WARNING, "Duplicate runAdded event for Run id " + run.getNumber() + " ignored.");
-                if(Utilities.isDebugMode()) {
-                    System.out.println("Duplicate runAdded (" + run.getNumber() + ") ignored - currentSubmission #" + currentSubmission);
+            synchronized (runsAdded) {
+                if(runsAdded.contains(runNum)) {
+                    log.log(Level.WARNING, "Duplicate runAdded event for Run id " + run.getNumber() + " ignored.");
+                    if(Utilities.isDebugMode()) {
+                        System.out.println("Duplicate runAdded (" + run.getNumber() + ") ignored - currentSubmission #" + currentSubmission);
+                    }
+                    return;
                 }
-                return;
+                runsAdded.add(runNum);
             }
-            runsAdded.add(runNum);
             if(Utilities.isDebugMode()) {
                 System.out.println("Got runAdded for run ID " + run.getNumber() + " - added to runsAdded hashset");
             }
@@ -1329,21 +1335,25 @@ public class SubmitSampleRunsPane extends JPanePlugin {
 
             // We are only interested in runs we submitted
             if(run.getSubmitter().equals(me)) {
-                // This is the last run - it has to be the one that was just added by us
-                sub = submissionList.get(currentSubmission);
-                if(sub != null) {
-                    stopSubmissionTimer();
-                    sub.setRun(run);
-                    if(Utilities.isDebugMode()) {
-                        System.out.println("Received runAdded currentSubmission #" + currentSubmission + " for problem " + sub.toString());
-                    }
-                    updateRunRow(sub, event.getWhoModifiedRun(), true);
-                    // setup for next submission; if last one clean things up.
-                    currentSubmission++;
-                    if(currentSubmission >= submissionFileList.size()) {
-                        clearSubmissionFiles();
-                    } else {
-                        submitNextSubmission();
+                // Since we get run added events for each run, it's possible that the currentSubmission could be -1
+                // in the event of the very last submission, since clearSubmissionFiles() below would set it to -1
+                if(currentSubmission >= 0) {
+                    // This is the last run - it has to be the one that was just added by us
+                    sub = submissionList.get(currentSubmission);
+                    if(sub != null) {
+                        stopSubmissionTimer();
+                        sub.setRun(run);
+                        if(Utilities.isDebugMode()) {
+                            System.out.println("Received runAdded currentSubmission #" + currentSubmission + " for problem " + sub.toString());
+                        }
+                        updateRunRow(sub, event.getWhoModifiedRun(), true);
+                        // setup for next submission; if last one clean things up.
+                        currentSubmission++;
+                        if(currentSubmission >= submissionFileList.size()) {
+                            clearSubmissionFiles();
+                        } else {
+                            submitNextSubmission();
+                        }
                     }
                 }
             }
