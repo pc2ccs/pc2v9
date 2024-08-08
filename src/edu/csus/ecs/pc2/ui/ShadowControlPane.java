@@ -886,8 +886,13 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                         showErrorMessage("No shadow controller available; cannot show runs comparison", "Missing Controller");
                     } else if (!ShadowController.SHADOW_CONTROLLER_STATUS.SC_RUNNING.equals(shadowController.getStatus())) {
                         showErrorMessage("Cannot compare runs, shadow not running","Shadow not running");
-                    } else if (shadowCompareRunsFrame != null && shadowCompareRunsFrame.isOpen()) {
+                    } else if (shadowCompareRunsFrame != null && shadowCompareRunsFrame.isVisible()) {
                         showErrorMessage("Compare Runs already open", "Compare Runs Already Open");
+                        shadowCompareRunsFrame.setState(JFrame.NORMAL); //If the frame was minimized this brings it back.
+                        shadowCompareRunsFrame.setVisible(false);  // This was recommended to make it work for MacOS
+                        shadowCompareRunsFrame.setVisible(true);   
+                        shadowCompareRunsFrame.toFront();          
+                        shadowCompareRunsFrame.requestFocus();     
                     }else {
                         shadowCompareRunsFrame = new ShadowCompareRunsFrame(shadowController);
                         shadowCompareRunsFrame.setSize(600,700);
@@ -924,7 +929,7 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                 showErrorMessage("No shadow controller available; cannot show scoreboard comparison", "Missing Controller");
                             } else if (!ShadowController.SHADOW_CONTROLLER_STATUS.SC_RUNNING.equals(shadowController.getStatus())) {
                                 showErrorMessage("Cannot compare scoreboard, shadow not running","Shadow not running");
-                            } else if (shadowCompareScoreboardFrame != null && shadowCompareScoreboardFrame.isOpen()) {
+                            } else if (shadowCompareScoreboardFrame != null && shadowCompareScoreboardFrame.isVisible()) {
                                 showErrorMessage("Compare Scoreboards already open", "Compare Scoreboards Already Open");
                             }
                             else {
