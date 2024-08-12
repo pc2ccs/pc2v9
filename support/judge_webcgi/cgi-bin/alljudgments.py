@@ -2,8 +2,13 @@
 import json
 import urllib.request
 import operator
+import subprocess
 
 import HtmlFunctions
+
+# For looking up all auto-judges
+HOSTS_FILE="/etc/hosts"
+JUDGE_PREFIX="pc2-aj"
 
 TESTING = False
 
@@ -19,8 +24,6 @@ else :
     JUDGE_STYLES="/css/judgestyles.css"
     
 JUDGMENTS_SCRIPT="getjudgments.sh"
-
-JUDGE_HOSTS = ['pc2-aj1', 'pc2-aj2', 'pc2-aj3' ]
 
 def MyTableStyles() :
     print("<style>")
@@ -76,16 +79,27 @@ HtmlFunctions.Styles(JUDGE_STYLES)
 MyTableStyles()
 HtmlFunctions.StartHTMLDoc()
 HtmlFunctions.Header()
-HtmlFunctions.StartTable()
-TableHeader()
 
 alldata=[]
-for jh in JUDGE_HOSTS :
-    newData = getJudgmentsFromHost(jh)
-    if newData != None :
-        alldata = alldata + newData
 
-#alldata.sort(key = operator.itemgetter('runid'), reverse=True)
+procJudges = subprocess.Popen("egrep '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}[[:space:]]" + JUDGE_PREFIX + "[0-9][0-9]*' " + HOSTS_FILE,
+        shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+for hostent in procJudges.stdout.readlines() :
+    hostinfo = hostent.decode().split();
+    # we only accept lines that have: IP hostname
+    if len(hostinfo) == 2 :
+        # get the judge hostname, eg. pc2-aj1
+        jh = hostinfo[1]
+        newData = getJudgmentsFromHost(jh)
+        if newData != None :
+         alldata = alldata + newData
+
+if TESTING :
+    retval = p.wait()
+    print(f"egrep for {JUDGE_PREFIX} in {HOSTS_FILE} Return code {retval}")
+
+HtmlFunctions.StartTable()
+TableHeader()
 alldata.sort(key = lambda n: int(n['runid']), reverse=True)
 addDataToTable(alldata)
 
