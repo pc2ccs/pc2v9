@@ -931,6 +931,11 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                 showErrorMessage("Cannot compare scoreboard, shadow not running","Shadow not running");
                             } else if (shadowCompareScoreboardFrame != null && shadowCompareScoreboardFrame.isVisible()) {
                                 showErrorMessage("Compare Scoreboards already open", "Compare Scoreboards Already Open");
+                                shadowCompareScoreboardFrame.setState(JFrame.NORMAL); //If the frame was minimized this brings it back.
+                                shadowCompareScoreboardFrame.setVisible(false);  // This was recommended to make it work for MacOS
+                                shadowCompareScoreboardFrame.setVisible(true);   
+                                shadowCompareScoreboardFrame.toFront();          
+                                shadowCompareScoreboardFrame.requestFocus();
                             }
                             else {
                                 shadowCompareScoreboardFrame = new ShadowCompareScoreboardFrame(shadowController);

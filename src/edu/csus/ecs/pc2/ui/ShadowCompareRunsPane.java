@@ -126,8 +126,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     public ShadowCompareRunsPane(ShadowController shadowController) {
         Dimension size = new Dimension(700,700);
         this.setPreferredSize(size);
-        this.setMinimumSize(size);
-
+        this.setMinimumSize(size);shadowController.setFilter(FILTERS.NONE);//Required to reset the state of the filter
         this.shadowController = shadowController ;
 
         this.log = shadowController.getLog();
@@ -141,10 +140,11 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         JLabel header = new JLabel("Comparison of PC2 vs. Remote Judgements");
         header.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.add(header);
-
+ 
+        this.setMinimumSize(size);shadowController.setFilter(FILTERS.NONE);//Required to reset the state of the filter
         //get the framework for the table which will be used to display comparison results
         resultsTable = getResultsTable();
-        
+ 
         //put the current comparison results into the table model
         resultsTable.setModel(getUpdatedResultsTableModel());
 
@@ -152,12 +152,11 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(resultsTable.getModel());
         resultsTable.setRowSorter(sorter);
         resultsTable.setAutoCreateRowSorter(true); //necessary to allow updated model to display and sort correctly
-                
+ 
         //put the results table in a scrollpane on the GUI
         JScrollPane scrollPane = new JScrollPane(resultsTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                     ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        shadowController.setFilter(FILTERS.NONE);//Required to reset the state of the filter
 
         this.add(scrollPane);
 
