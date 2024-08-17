@@ -244,7 +244,6 @@ if [ "$#" -lt 1 ] ; then
    exit $FAIL_NO_ARGS_EXIT_CODE
 fi 
 
-
 if [ "$#" -lt 6 ] ; then
    echo $0: expected 6 or more arguments, found: $*
    SysFailure Expected 6 or more arguments to $0, found: $*
@@ -267,7 +266,7 @@ DEBUG echo Command line: $0 $*
 shift 6
 
 DEBUG echo -e "\nYou can run this by hand in the sandbox by using the following command:"
-RUN_LOCAL_CMD="$0 ${MEMLIMIT} ${TIMELIMIT} xxx xxx ${COMMAND} $* < ${JUDGEIN} > $TESTCASE.ans"
+RUN_LOCAL_CMD="$0 ${MEMLIMIT} ${TIMELIMIT} xxx xxx $TESTCASE ${COMMAND} $* < ${JUDGEIN} > $TESTCASE.ans"
 DIFF_OUTPUT_CMD="diff -w ${JUDGEANS} $TESTCASE.ans | more"
 DEBUG echo -e "\n${RUN_LOCAL_CMD}"
 DEBUG echo -e "\nor, without the sandbox by using the following command:"
