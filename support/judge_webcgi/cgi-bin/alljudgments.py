@@ -92,7 +92,7 @@ for hostent in procJudges.stdout.readlines() :
         jh = hostinfo[1]
         newData = getJudgmentsFromHost(jh)
         if newData != None :
-         alldata = alldata + newData
+            alldata = alldata + newData
 
 if TESTING :
     retval = p.wait()

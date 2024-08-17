@@ -9,9 +9,6 @@ USE_ALL_TESTCASES=1
 . ./webcommon.sh
 . ./cdpcommon.sh
 
-CACHEDIR=${JUDGE_HOME}/html/cache
-LASTFILE=${CACHEDIR}/lastfile
-
 TableRow()
 {
 	dir="$1"
@@ -60,24 +57,14 @@ TableRow()
 }
 
 hostname=`hostname`
+echo "Content-type: application/json"
+echo ""
 
-# Create cache dir, if it does not exist
-mkdir -p ${CACHEDIR}
-# Create last update time file if it does not exist
-if test ! -s ${LASTFILE}
-then
-	lastdate="2024-01-01 00:00:01"
-else
-	lastdate=`cat ${LASTFILE}`
-fi
-newdate="${lastdate}"
-
-#echo $LASTFILE contains date $lastdate 1>&2
-
-for exedir in `find ${PC2_RUN_DIR} -name  'ex_[0-9]*_[A-Z]_[a-z][a-z0-9]*_[0-9]*_[a-z0-9]*_[a-z][a-z0-9]*' -a -newermt "${lastdate}" -a -type d`
+echo '['
+sep=""
+# Format of the execute folders must be: ex_runid_probletter_probshort_teamnum_langid_judge
+for exdir in `ls ${PC2_RUN_DIR} | grep -P '^ex_\d+_[A-Z]_[a-z\-\d]+_\d+_[a-z\d]+' | sort --field-separator=_ +1rn`
 do
-	# Strip leading PC2_RUN_DIR
-	exdir=${exedir##*/}
 	# exdir looks like: ex_188_Y_compression_46103_cpp
 	#                    RId P ProbShort   team# Lang
 	# RId = Run ID
@@ -89,13 +76,7 @@ do
 	IFS="$saveIFS"
 	if test $# -ge 6
 	then
-		# Update last update time if newer
-		filetime=`stat --format %y $exedir`
-		if [[ -z "$newdate" || "${filetime}" > "${newdate}" ]]
-		then
-			newdate="${filetime}"
-		fi
-		cachefile=${CACHEDIR}/$exdir
+		exedir=${PC2_RUN_DIR}/$exdir
 		runid=$2
 		problet=$3
 		probshort=$4
@@ -126,30 +107,14 @@ do
 		# Note that GetJudgment also filled in exdata with the last execute data
 		GetTestCaseNumber "${exdata##./}"
 		testcaseinfo=$((result+1))/${numcases}
-		TableRow "$exedir" $runid $problet $probshort $langid $teamnum "$judgment" "$runtime" "$testcaseinfo" "$judge" > $cachefile
+		if test -n "$sep"
+		then
+			echo "  $sep"
+		else
+			sep=","
+		fi
+		TableRow "$exedir" $runid $problet $probshort $langid $teamnum "$judgment" "$runtime" "$testcaseinfo" "$judge"
 	fi
-done
-if [[ -z "$lastdate" || "${newdate}" > "${lastdate}" ]]
-then
-	echo "${newdate}" > ${LASTFILE}
-#	echo Updated $LASTFILE with $newdate 1>&2
-fi
-
-echo "Content-type: application/json"
-echo ""
-
-echo '['
-sep=""
-# Format of the execute folders must be: ex_runid_probletter_probshort_teamnum_langid_judge
-for exdir in `ls ${CACHEDIR} | grep -P '^ex_\d+_[A-Z]_[a-z\-\d]+_\d+_[a-z\d]+' | sort --field-separator=_ +1rn`
-do
-	if test -n "$sep"
-	then
-		echo "  $sep"
-	else
-		sep=","
-	fi
-	cat ${CACHEDIR}/$exdir
 done
 echo ']'
 exit 0
