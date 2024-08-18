@@ -240,8 +240,11 @@ public class FinalizePane extends JPanePlugin {
             getCommentTextField().setText(data.getComment());
             getUseWFGroupRankingsCheckBox().setSelected(data.isUseWFGroupRanking());
             if (data.isUseWFGroupRanking()) {
+                getCustomizeHonorsSolvedCountCheckBox().setEnabled(true);
+                getCustomizeHonorsSolvedCountWhatsThisButton().setEnabled(true);
                 getCustomizeHonorsSolvedCountCheckBox().setSelected(data.isCustomizeHonorsSolvedCount());
                 if (data.isCustomizeHonorsSolvedCount()) {
+                    setEnableHonorsCountFields(true);
                     int highestHonorSolvedCount = data.getHighestHonorSolvedCount();
                     int highHonorSolvedCount = data.getHighHonorSolvedCount();
                     int honorSolvedCount = data.getHonorSolvedCount();
@@ -254,7 +257,14 @@ public class FinalizePane extends JPanePlugin {
                     if (honorSolvedCount != 0) {
                         getHonorSolvedCountTextField().setText(Integer.toString(honorSolvedCount));
                     }
+                } else {
+                    setEnableHonorsCountFields(false);
                 }
+            } else {
+                getCustomizeHonorsSolvedCountCheckBox().setSelected(false);
+                setEnableHonorsCountFields(false);
+                getCustomizeHonorsSolvedCountCheckBox().setEnabled(false);
+                getCustomizeHonorsSolvedCountWhatsThisButton().setEnabled(false);
             }
 
             if (data.isCertified()) {
