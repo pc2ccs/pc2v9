@@ -184,6 +184,13 @@ public class FinalizePane extends JPanePlugin {
         data.setBronzeRank(ng+ns+nb);
         data.setComment("" + getCommentTextField().getText());
         data.setUseWFGroupRanking(getUseWFGroupRankingsCheckBox().isSelected());
+        if (getUseWFGroupRankingsCheckBox().isSelected() && getCustomizeHonorsSolvedCountCheckBox().isSelected()) {
+            int highestHonorSolvedCount = getIntegerValue(getHighestHonorSolvedCountTextField());
+            int highHonorSolvedCount = getIntegerValue(getHighHonorSolvedCountTextField());
+            int honorSolvedCount = getIntegerValue(getHonorSolvedCountTextField());
+            data.setCustomizeHonorsSolvedCount(getCustomizeHonorsSolvedCountCheckBox().isSelected());
+            data.setHonorsSolvedCount(highestHonorSolvedCount, highHonorSolvedCount, honorSolvedCount);
+        }
         return data;
     }
 
@@ -197,7 +204,7 @@ public class FinalizePane extends JPanePlugin {
         getSilverCountTextField().setText("4");
         getBronzeCountTextField().setText("4");
         getUseWFGroupRankingsCheckBox().setSelected(true);
-        getCustomizeHonorsSolvedCount().setSelected(false);
+        getCustomizeHonorsSolvedCountCheckBox().setSelected(false);
         getCustomizeHonorsSolvedCountWhatsThisButton().setEnabled(true);
         setEnableHonorsCountFields(false);
     }
@@ -232,6 +239,23 @@ public class FinalizePane extends JPanePlugin {
             getBronzeCountTextField().setText(Integer.toString(br - sr));
             getCommentTextField().setText(data.getComment());
             getUseWFGroupRankingsCheckBox().setSelected(data.isUseWFGroupRanking());
+            if (data.isUseWFGroupRanking()) {
+                getCustomizeHonorsSolvedCountCheckBox().setSelected(data.isCustomizeHonorsSolvedCount());
+                if (data.isCustomizeHonorsSolvedCount()) {
+                    int highestHonorSolvedCount = data.getHighestHonorSolvedCount();
+                    int highHonorSolvedCount = data.getHighHonorSolvedCount();
+                    int honorSolvedCount = data.getHonorSolvedCount();
+                    if (highestHonorSolvedCount != 0) {
+                        getHighestHonorSolvedCountTextField().setText(Integer.toString(highestHonorSolvedCount));
+                    }
+                    if (highHonorSolvedCount != 0) {
+                        getHighHonorSolvedCountTextField().setText(Integer.toString(highHonorSolvedCount));
+                    }
+                    if (honorSolvedCount != 0) {
+                        getHonorSolvedCountTextField().setText(Integer.toString(honorSolvedCount));
+                    }
+                }
+            }
 
             if (data.isCertified()) {
                 certificationCommentLabel.setText("Contest Finalized (Certified done)");
@@ -515,7 +539,7 @@ public class FinalizePane extends JPanePlugin {
             centerPane.add(getHonorSolvedCountTextField(), null);
             centerPane.add(certificationCommentLabel, null);
             centerPane.add(getUseWFGroupRankingsCheckBox(), null);
-            centerPane.add(getCustomizeHonorsSolvedCount(), null);
+            centerPane.add(getCustomizeHonorsSolvedCountCheckBox(), null);
             centerPane.add(getCustomizeHonorsSolvedCountWhatsThisButton(), null);
         }
         return centerPane;
@@ -673,8 +697,8 @@ public class FinalizePane extends JPanePlugin {
             useWFGroupRankingCheckBox.addItemListener(new ItemListener() {
                 @Override
                 public void itemStateChanged(ItemEvent e) {
-                    getCustomizeHonorsSolvedCount().setSelected(false);
-                    getCustomizeHonorsSolvedCount().setEnabled(e.getStateChange() == ItemEvent.SELECTED);
+                    getCustomizeHonorsSolvedCountCheckBox().setSelected(false);
+                    getCustomizeHonorsSolvedCountCheckBox().setEnabled(e.getStateChange() == ItemEvent.SELECTED);
                     getCustomizeHonorsSolvedCountWhatsThisButton().setEnabled(e.getStateChange() == ItemEvent.SELECTED);
                 }
             });
@@ -687,7 +711,7 @@ public class FinalizePane extends JPanePlugin {
      *
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getCustomizeHonorsSolvedCount() {
+    private JCheckBox getCustomizeHonorsSolvedCountCheckBox() {
         if(customizeHonorsSolvedCountCheckBox == null) {
             customizeHonorsSolvedCountCheckBox = new JCheckBox();
             customizeHonorsSolvedCountCheckBox.setText("Customize Number of Problems solved for Honors rankings");

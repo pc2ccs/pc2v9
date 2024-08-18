@@ -41,6 +41,14 @@ public class FinalizeData implements Serializable {
 
     private boolean useWFGroupRanking = true;
 
+    private boolean customizeHonorsSolvedCount = false;
+
+    private int highestHonorSolvedCount = 0;
+
+    private int highHonorSolvedCount = 0;
+
+    private int honorSolvedCount = 0;
+
     /**
      * @return last rank for gold.
      */
@@ -132,5 +140,63 @@ public class FinalizeData implements Serializable {
      */
     public boolean isUseWFGroupRanking() {
         return useWFGroupRanking;
+    }
+
+    /**
+     * Set whether to customize the minimum number of problems solved for each Honors field
+     *
+     * @param customizeHonorsSolvedCount
+     */
+    public void setCustomizeHonorsSolvedCount(boolean customizeHonorsSolvedCount) {
+        this.customizeHonorsSolvedCount = customizeHonorsSolvedCount;
+    }
+
+    /**
+     * Return whether or not minimum problems solved for honors fields is to be customized or not
+     *
+     * @return true if WF group rankings are to be used
+     */
+    public boolean isCustomizeHonorsSolvedCount() {
+        return customizeHonorsSolvedCount;
+    }
+
+    /**
+     * Set the customized values of minimum number of problems solved for Highest Honors, High Honors and Honors fields
+     *
+     * @param highestHonorSolvedCount
+     * @param highHonorSolvedCount
+     * @param honorSolvedCount
+     */
+    public void setHonorsSolvedCount(int highestHonorSolvedCount, int highHonorSolvedCount, int honorSolvedCount) {
+        this.highestHonorSolvedCount = highestHonorSolvedCount;
+        this.highHonorSolvedCount = highHonorSolvedCount;
+        this.honorSolvedCount = honorSolvedCount;
+    }
+
+    /**
+     * Return  the customized minimum problems required to solve to be Highest Honors
+     *
+     * @return the customized minimum problems required to solve to be Highest Honors
+     */
+    public int getHighestHonorSolvedCount() {
+        return highestHonorSolvedCount;
+    }
+
+    /**
+     * Return  the customized minimum problems required to solve to be High Honors
+     *
+     * @return the customized minimum problems required to solve to be High Honors
+     */
+    public int getHighHonorSolvedCount() {
+        return highHonorSolvedCount;
+    }
+
+    /**
+     * Return  the customized minimum problems required to solve to be Honors
+     *
+     * @return the customized minimum problems required to solve to be Honors
+     */
+    public int getHonorSolvedCount() {
+        return honorSolvedCount;
     }
 }
