@@ -2,6 +2,7 @@
 package edu.csus.ecs.pc2.core.standings;
 
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -12,6 +13,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 
 /**
  * This class encapsulates a collection of data representing the current contest standings.  
@@ -62,7 +66,8 @@ public class ContestStandings {
         try {
             retStr = mapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
-            // TODO pass a log into this class so we can do proper logging
+            Log log = StaticLog.getLog();
+            log.log(Level.WARNING, "Contest Standings (teamStanding) was unable to be turned into a JSON", e);
             e.printStackTrace();
         }
         
