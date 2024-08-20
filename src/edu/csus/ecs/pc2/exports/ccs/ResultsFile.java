@@ -168,6 +168,10 @@ public class ResultsFile {
         int highestHonorSolvedCount = 0;
         int highHonorSolvedCount = 0;
 
+        if (finalizeData == null) {
+            finalizeData = GenDefaultFinalizeData();
+        }
+
         if (finalizeData.isUseWFGroupRanking() && finalizeData.isCustomizeHonorsSolvedCount()) {
             if (finalizeData.getHighestHonorSolvedCount() != 0) {
                 highestHonorSolvedCount = finalizeData.getHighestHonorSolvedCount();
@@ -178,10 +182,6 @@ public class ResultsFile {
             if (finalizeData.getHonorSolvedCount() != 0) {
                 median = finalizeData.getHonorSolvedCount();
             }
-        }
-
-        if (finalizeData == null) {
-            finalizeData = GenDefaultFinalizeData();
         }
 
         // TODO finalizeData really needs a B instead of getBronzeRank

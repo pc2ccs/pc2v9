@@ -369,7 +369,6 @@ public class FinalizePane extends JPanePlugin {
         }
 
         data.setCertified(false);
-        data.setUseWFGroupRanking(getUseWFGroupRankingsCheckBox().isSelected());
         getController().updateFinalizeData(data);
     }
 
