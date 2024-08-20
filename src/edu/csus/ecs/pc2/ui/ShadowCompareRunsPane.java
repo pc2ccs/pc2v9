@@ -126,7 +126,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     public ShadowCompareRunsPane(ShadowController shadowController) {
         Dimension size = new Dimension(700,700);
         this.setPreferredSize(size);
-        this.setMinimumSize(size);shadowController.setFilter(FILTERS.NONE);//Required to reset the state of the filter
+        this.setMinimumSize(size);
         this.shadowController = shadowController ;
 
         this.log = shadowController.getLog();
@@ -141,7 +141,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         header.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.add(header);
  
-        this.setMinimumSize(size);shadowController.setFilter(FILTERS.NONE);//Required to reset the state of the filter
+        shadowController.setFilter(FILTERS.NONE);//Required to reset the state of the filter
         //get the framework for the table which will be used to display comparison results
         resultsTable = getResultsTable();
  
