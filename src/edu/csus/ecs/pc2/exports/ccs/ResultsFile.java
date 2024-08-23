@@ -229,7 +229,7 @@ public class ResultsFile {
 
             String award = getAwardMedal(record.getRankNumber(), finalizeData, isHighestHonor, isHighHonor, isHonor);
             String rank = "";
-            if (!"honorable".equalsIgnoreCase(award)) {
+            if (!HONORABLE.equalsIgnoreCase(award)) {
                 if (finalizeData.isUseWFGroupRanking() && realRank > lastMedalRank) {
                     if (record.getNumberSolved() != lastSolvedNum) {
                         lastSolvedNum = record.getNumberSolved();
