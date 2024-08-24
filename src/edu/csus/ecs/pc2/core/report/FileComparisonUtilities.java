@@ -117,7 +117,7 @@ public class FileComparisonUtilities {
                     List<ProblemScoreRow> probs2 = secondScoreRow.getProblems();
                     if(probs1 != null && probs2 != null) {
                         ProblemScoreRow p1, p2;
-                        int ptime;
+                        int ptime1, ptime2;
                         String probString, probId;
                         boolean foundProblem;
 
@@ -190,11 +190,12 @@ public class FileComparisonUtilities {
                             fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
                             // only matters, really, if solved is true, however, we will compare it to catch errors in implementations
-                            ptime = p1.getTime();
-                            if(ptime != 0 || !IGNORE_ZERO_SOLVE_TIMES) {
+                            ptime1 = p1.getTime();
+                            ptime2 = p2.getTime();
+                            if((ptime1 != 0 && ptime2 != 0) || !IGNORE_ZERO_SOLVE_TIMES) {
                                 fieldName = "time";
-                                valueOne = Integer.toString(ptime);
-                                valueTwo = Integer.toString(p2.getTime());
+                                valueOne = Integer.toString(ptime1);
+                                valueTwo = Integer.toString(ptime2);
                                 fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, probString);
                                 fileComparison.addfieldCompareRecord(fieldCompareRecord);
                             }
