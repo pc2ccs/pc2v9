@@ -189,8 +189,9 @@ public class FileComparisonUtilities {
                             fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, probString);
                             fileComparison.addfieldCompareRecord(fieldCompareRecord);
 
+                            // only matters, really, if solved is true, however, we will compare it to catch errors in implementations
                             ptime = p1.getTime();
-                            if(ptime == 0 && !IGNORE_ZERO_SOLVE_TIMES) {
+                            if(ptime != 0 || !IGNORE_ZERO_SOLVE_TIMES) {
                                 fieldName = "time";
                                 valueOne = Integer.toString(ptime);
                                 valueTwo = Integer.toString(p2.getTime());
