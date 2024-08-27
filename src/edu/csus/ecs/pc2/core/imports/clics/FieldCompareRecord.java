@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports.clics;
 
 import java.util.logging.Level;
@@ -13,7 +13,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * Information about a comparison of two fields.
- * 
+ *
  * @author Douglas A. Lane, PC^2 team pc2@ecs.csus.edu
  */
 public class FieldCompareRecord {
@@ -39,7 +39,7 @@ public class FieldCompareRecord {
     public FieldCompareRecord(String fieldName, String valueOne, String valueTwo, String details) {
         this(fieldName, valueOne, valueTwo, details, null);
     }
-    
+
     public FieldCompareRecord(String fieldName, String valueOne, String valueTwo, String details, String key) {
         super();
         this.fieldName = fieldName;
@@ -48,6 +48,9 @@ public class FieldCompareRecord {
         this.details = details;
         this.key = key;
 
+        if(key == null) {
+            this.key = "any";
+        }
         createComparisonState(valueOne, valueTwo);
     }
 
@@ -106,18 +109,18 @@ public class FieldCompareRecord {
     public void setDetails(String details) {
         this.details = details;
     }
-    
+
     public String getKey() {
         return key;
     }
-    
+
     public void setKey(String key) {
         this.key = key;
     }
 
     /**
      * Returns a JSON string representation of this SerializedFile object.
-     * 
+     *
      * @return a String containing a JSON representation of this object, or null if an error occurs during creation of the JSON string
      */
     // TODO REFACTOR Move into a JSON Utility class
@@ -137,7 +140,7 @@ public class FieldCompareRecord {
             return null;
         }
     }
-    
+
     @Override
     public String toString() {
         return toJSON();
