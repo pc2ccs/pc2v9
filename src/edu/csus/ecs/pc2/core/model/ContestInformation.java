@@ -31,6 +31,12 @@ public class ContestInformation implements Serializable{
      */
     public static final int DEFAULT_FREEZE_MINUTES = 60;
 
+    /**
+     * Default Sandbox grace time constants
+     */
+    public static final int SANDBOX_GRACE_TIME_SECS = 1;
+    public static final int SANDBOX_INTERACTIVE_MULTIPLIER = 3;
+
     private String contestTitle = "Programming Contest";
 
     private String contestURL;
@@ -97,6 +103,11 @@ public class ContestInformation implements Serializable{
     private String teamScoreboardDisplayFormat = ScoreboardVariableReplacer.TEAM_NAME;
 
     /**
+     * Grace time constants to adjust Executable timers
+     */
+    private int sandboxGraceTimeSecs = SANDBOX_GRACE_TIME_SECS;
+    private int sandboxInteractiveGraceMultiplier = SANDBOX_INTERACTIVE_MULTIPLIER;
+    /*
      * String to append to the execute folder for judged runs.  May contain substitution strings.
      */
     private String executeFolder = "";
@@ -868,6 +879,22 @@ public class ContestInformation implements Serializable{
 
     public void setLoadSampleJudgesData(boolean loadSampleJudgesData) {
         this.loadSampleJudgesData = loadSampleJudgesData;
+    }
+
+    public int getSandboxGraceTimeSecs() {
+        return(sandboxGraceTimeSecs);
+    }
+
+    public void setSandboxGraceTimeSecs(int nSecs) {
+        sandboxGraceTimeSecs = nSecs;
+    }
+
+    public int getSandboxInteractiveGraceMultiplier() {
+        return(sandboxInteractiveGraceMultiplier);
+    }
+
+    public void setSandboxInteractiveGraceMultiplier(int nSecs) {
+        sandboxInteractiveGraceMultiplier = nSecs;
     }
 
 }

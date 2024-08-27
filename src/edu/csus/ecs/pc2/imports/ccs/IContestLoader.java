@@ -236,6 +236,10 @@ public interface IContestLoader {
 
     String LOAD_ACCOUNTS_FILE_KEY = "load-accounts-file";
 
+    String SANDBOX_GRACE_TIME = "sandbox-grace-time-secs";
+
+    String SANDBOX_INTERACTIVE_GRACE_MULTIPLIER = "sandbox-interactive-time-multiplier";
+
     /**
      *
      * @see ScoreboardVariableReplacer#substituteDisplayNameVariables(String, IInternalContest, edu.csus.ecs.pc2.core.model.Account)

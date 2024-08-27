@@ -49,6 +49,7 @@ import javax.swing.border.TitledBorder;
 
 import edu.csus.ecs.pc2.core.CommandVariableReplacer;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
@@ -240,6 +241,14 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JLabel teamDisplayFormatWhatsThisButton;
 
+    private JPanel executeTimingPane;
+    private JLabel sandboxGraceTimeLabel;
+    private JTextField sandboxGraceTimeTextField;
+    private JLabel sandboxInteractiveMultiplierLabel;
+    private JTextField sandboxInteractiveMultiplierTextField;
+    private JLabel sandboxInteractiveMultiplerWhatsThisButton;
+    private JLabel sandboxGraceTimeWhatsThisButton;
+
 //    private JTextField textfieldPrimaryCCSURL;
 //
 //    private JTextField textfieldPrimaryCCSLogin;
@@ -427,6 +436,87 @@ public class ContestInformationPane extends JPanePlugin {
         return scheduledStartTimePane;
     }
 
+    private Component getExecuteTimingPane() {
+        if(executeTimingPane == null) {
+            executeTimingPane = new JPanel();
+            executeTimingPane.setLayout(new FlowLayout(FlowLayout.LEFT));
+            executeTimingPane.add(getSandboxGraceTimeLabel());
+            executeTimingPane.add(getSandboxGraceTimeTextField());
+            executeTimingPane.add(getSandboxGraceTimeWhatsThisButton());
+            executeTimingPane.add(Box.createRigidArea(new Dimension(30, 0)));
+            executeTimingPane.add(getSandboxInteractiveMultiplierLabel());
+            executeTimingPane.add(getSandboxInteractiveMultiplierTextField());
+            executeTimingPane.add(getSandboxInteractiveMultiplerWhatsThisButton());
+        }
+        return(executeTimingPane);
+    }
+
+    private JLabel getSandboxGraceTimeLabel() {
+        if (sandboxGraceTimeLabel == null) {
+
+            sandboxGraceTimeLabel = new JLabel();
+            sandboxGraceTimeLabel.setText("Sandbox Grace Time added (seconds): ");
+            sandboxGraceTimeLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
+            sandboxGraceTimeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        }
+        return sandboxGraceTimeLabel;
+    }
+
+    /**
+     * This method initializes sandboxGraceTimeTextField
+     *
+     * @return javax.swing.JTextField
+     */
+    private JTextField getSandboxGraceTimeTextField() {
+        if (sandboxGraceTimeTextField == null) {
+
+            sandboxGraceTimeTextField = new JTextField(4);
+
+            sandboxGraceTimeTextField.setDocument(new IntegerDocument());
+
+            sandboxGraceTimeTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return sandboxGraceTimeTextField;
+    }
+
+    private JLabel getSandboxInteractiveMultiplierLabel() {
+        if (sandboxInteractiveMultiplierLabel == null) {
+
+            sandboxInteractiveMultiplierLabel = new JLabel();
+            sandboxInteractiveMultiplierLabel.setText("Interactive problem time multiplier: ");
+            sandboxInteractiveMultiplierLabel.setHorizontalTextPosition(SwingConstants.TRAILING);
+            sandboxInteractiveMultiplierLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        }
+        return sandboxInteractiveMultiplierLabel;
+    }
+
+    /**
+     * This method initializes sandboxInteractiveMultiplierTextField
+     *
+     * @return javax.swing.JTextField
+     */
+    private JTextField getSandboxInteractiveMultiplierTextField() {
+        if (sandboxInteractiveMultiplierTextField == null) {
+
+            sandboxInteractiveMultiplierTextField = new JTextField(4);
+
+            sandboxInteractiveMultiplierTextField.setDocument(new IntegerDocument());
+
+            sandboxInteractiveMultiplierTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return sandboxInteractiveMultiplierTextField;
+    }
+
     private JLabel getContestFreezeLengthLabel() {
         if (contestFreezeLengthLabel == null) {
 
@@ -442,9 +532,9 @@ public class ContestInformationPane extends JPanePlugin {
         if (contestSettingsPane == null) {
             contestSettingsPane = new JPanel();
             contestSettingsPane.setLayout(new FlowLayout(FlowLayout.LEFT));
-            contestSettingsPane.setMinimumSize(new Dimension(700, 120));
-            contestSettingsPane.setMaximumSize(new Dimension(700, 120));
-            contestSettingsPane.setPreferredSize(new Dimension(700,120));
+            contestSettingsPane.setMinimumSize(new Dimension(900, 190));
+            contestSettingsPane.setMaximumSize(new Dimension(900, 190));
+            contestSettingsPane.setPreferredSize(new Dimension(900,190));
             contestSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
 
             if (showPaneOutlines) {
@@ -463,6 +553,8 @@ public class ContestInformationPane extends JPanePlugin {
             contestSettingsPane.add(getContestTitlePane(), null);
 
             contestSettingsPane.add(getScheduledStartTimePane());
+
+            contestSettingsPane.add(getExecuteTimingPane());
 
             contestSettingsPane.add(getScoreboardFreezePane());
             contestSettingsPane.add(getHorizontalStrut_3());
@@ -505,9 +597,9 @@ public class ContestInformationPane extends JPanePlugin {
             judgeSettingsPane = new JPanel();
 
             judgeSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
-            judgeSettingsPane.setMaximumSize(new Dimension(800, 600));
-            judgeSettingsPane.setMinimumSize(new Dimension(800, 600));
-            judgeSettingsPane.setPreferredSize(new Dimension(800,550));
+            judgeSettingsPane.setMaximumSize(new Dimension(900, 425));
+            judgeSettingsPane.setMinimumSize(new Dimension(900, 425));
+            judgeSettingsPane.setPreferredSize(new Dimension(900,375));
 
             if (showPaneOutlines) {
 
@@ -545,8 +637,8 @@ public class ContestInformationPane extends JPanePlugin {
         if (teamSettingsPane == null ) {
 
             teamSettingsPane = new JPanel();
-            teamSettingsPane.setMaximumSize(new Dimension(800, 120));
-            teamSettingsPane.setPreferredSize(new Dimension(800,120));
+            teamSettingsPane.setMaximumSize(new Dimension(900, 120));
+            teamSettingsPane.setPreferredSize(new Dimension(900,120));
             teamSettingsPane.setAlignmentX(LEFT_ALIGNMENT);
 
             if (showPaneOutlines) {
@@ -1050,6 +1142,10 @@ public class ContestInformationPane extends JPanePlugin {
 
         newContestInformation.setThawed(scoreboardHasBeenUnfrozen);
 
+        // fill in sandbox/interative grace time adjustments
+        newContestInformation.setSandboxGraceTimeSecs(StringUtilities.getIntegerValue("0" + getSandboxGraceTimeTextField().getText(), savedContestInformation.getSandboxGraceTimeSecs()));
+        newContestInformation.setSandboxInteractiveGraceMultiplier(StringUtilities.getIntegerValue("0" + this.getSandboxInteractiveMultiplierTextField().getText(), savedContestInformation.getSandboxInteractiveGraceMultiplier()));
+
         return (newContestInformation);
     }
 
@@ -1125,6 +1221,10 @@ public class ContestInformationPane extends JPanePlugin {
                 getStartTimeTextField().setText(getScheduledStartTimeStr(cal));
 
                 getUnfreezeScoreboardButton().setSelected(contestInformation.isUnfrozen());
+
+                sandboxGraceTimeTextField.setText("" + contestInformation.getSandboxGraceTimeSecs());
+                sandboxInteractiveMultiplierTextField.setText("" + contestInformation.getSandboxInteractiveGraceMultiplier());
+
                 setContestInformation(contestInformation);
                 ((ScoringPropertiesPane) getScoringPropertiesPane()).setProperties(changedScoringProperties);
                 setEnableButtons(false);
@@ -1631,6 +1731,89 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return runSubmissionInterfaceCommandTextField;
     }
+
+    private JLabel getSandboxInteractiveMultiplerWhatsThisButton() {
+
+            if (sandboxInteractiveMultiplerWhatsThisButton == null) {
+                Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+                if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                    // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                    sandboxInteractiveMultiplerWhatsThisButton = new JLabel("<What's This?>");
+                    sandboxInteractiveMultiplerWhatsThisButton.setForeground(Color.blue);
+                } else {
+                    Image image = ((ImageIcon) questionIcon).getImage();
+                    sandboxInteractiveMultiplerWhatsThisButton = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+                }
+
+                sandboxInteractiveMultiplerWhatsThisButton.setToolTipText("What's This? (click for additional information)");
+                sandboxInteractiveMultiplerWhatsThisButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        JOptionPane.showMessageDialog(null, sandboxInteractiveMultiplierWhatsThisMessage, "About the Sandbox Interactive Multiplier", JOptionPane.INFORMATION_MESSAGE, null);
+                    }
+                });
+                sandboxInteractiveMultiplerWhatsThisButton.setBorder(new EmptyBorder(0, 15, 0, 0));
+            }
+            return sandboxInteractiveMultiplerWhatsThisButton;
+        }
+
+    // the string which will be displayed when the "What's This" icon in the contest settings panel is clicked (sandbox time multiplier)
+    private String sandboxInteractiveMultiplierWhatsThisMessage = //
+            "\nThe Interactive Problem Time Multiplier field allows you to specify an integer value which defines a multiplier" //
+            + "\nthat will be used for the problem wall time limit for interactive problems judged in a sandbox." //
+
+            + "\n\nThis is designed to compensate for the extra wall time that can be consumed by an interactive validator and" //
+            + "\nthe interactive judging facility.  This value does not affect the CPU time limit for the problem.  The CPU time is" //
+            + "\nstill controlled by the sandbox and the problem's specified time limit." //
+            + "\n\nConsider an example where the interactive problem's time limit is 5 seconds, and the Interative Problem Time" //
+            + "\nMultiplier is specified as 3.  This will tell PC2 to allow a maximum of 15 seconds (5*3) for a single test case of" //
+            + "\nthe interactive problem to complete.  The sandbox will still enforce a CPU time limit of 5 seconds, so if the CPU" //
+            + "\ntime limit of 5 is exceeded the run will terminate at that point with TLE.  If, for example, the interactive validator" //
+            + "\nadds an inordinate amount of overhead and the test case run takes 13 seconds (but the submission only uses" //
+            + "\n3 seconds of CPU time, the submission will not be terminated by PC2 permaturely." //
+            + " \n\n";
+
+
+    private JLabel getSandboxGraceTimeWhatsThisButton() {
+
+            if (sandboxGraceTimeWhatsThisButton == null) {
+                Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+                if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                    // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                    sandboxGraceTimeWhatsThisButton = new JLabel("<What's This?>");
+                    sandboxGraceTimeWhatsThisButton.setForeground(Color.blue);
+                } else {
+                    Image image = ((ImageIcon) questionIcon).getImage();
+                    sandboxGraceTimeWhatsThisButton = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+                }
+
+                sandboxGraceTimeWhatsThisButton.setToolTipText("What's This? (click for additional information)");
+                sandboxGraceTimeWhatsThisButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        JOptionPane.showMessageDialog(null, sandboxGraceTimeWhatsThisMessage, "About the Sandbox Grace Time", JOptionPane.INFORMATION_MESSAGE, null);
+                    }
+                });
+                sandboxGraceTimeWhatsThisButton.setBorder(new EmptyBorder(0, 15, 0, 0));
+            }
+            return sandboxGraceTimeWhatsThisButton;
+        }
+
+    // the string which will be displayed when the "What's This" icon in the contest settings panel is clicked (sandbox grace time)
+    private String sandboxGraceTimeWhatsThisMessage = //
+            "\nThe Sandbox Grace Time field allows you to specify an integer value which defines the number of extra" //
+            + "\nseconds that will be used for the problem wall time limit for problems judged in a sandbox." //
+
+            + "\n\nThis is designed to compensate for the extra wall time that can be consumed by the sandbox judging" //
+            + "\nfacility.  This value does not affect the CPU time limit for the problem.  The CPU time is still controlled" //
+            + "\nby the sandbox and the problem's specified time limit." //
+            + "\n\nConsider an example where the problem's time limit is 5 seconds, and the Sandbox Grace Time is specified as" //
+            + "\n2.  This will tell PC2 to allow a maximum of 7 seconds (5+2) for a single test case of the problem to complete." //
+            + "\nThe sandbox will still enforce a CPU time limit of 5 seconds, so if the CPU time limit of 5 seconds is" //
+            + "\nexceeded the run will terminate at that point with TLE.  If, for example, the sandbox facility adds two extra" //
+            + "\nseconds of overhead and the test case run takes 6 seconds (but the submission only uses 4 seconds of CPU time," //
+            + "\nthe submission will not be terminated by PC2 permaturely." //
+            + " \n\n";
 
     private Image getScaledImage(Image srcImg, int w, int h) {
         BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
