@@ -325,7 +325,6 @@ public class ResultsFile {
 
      private String getCitation(FinalizeData data, boolean isHighestHonor, boolean isHighHonor, boolean isHonor) {
 
-        // TODO CCS determine how to assign bronze and ranked
         if (!(isHighestHonor || isHighHonor || isHonor)) {
             return HONORABLE;
         } else if (!data.isUseWFGroupRanking()) {
