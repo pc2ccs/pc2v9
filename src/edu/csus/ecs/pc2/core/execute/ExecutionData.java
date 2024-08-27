@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.Serializable;
@@ -7,9 +7,9 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * Execution Data.
- * 
+ *
  * Contains data for compilation, execution and validation.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -19,7 +19,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 public class ExecutionData implements Serializable {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 3095803815304273632L;
 
@@ -40,9 +40,9 @@ public class ExecutionData implements Serializable {
     private SerializedFile executeProgramOutput; // this is STDOUT of the execution
 
     private int executeExitValue = 0;
-    
+
     private boolean executeSucess;
-    
+
     private SerializedFile validationStdout;
 
     private SerializedFile validationStderr; // this is STDOUT of the validation
@@ -52,23 +52,23 @@ public class ExecutionData implements Serializable {
     private boolean validationSuccess;
 
     private String validationResults;
-    
+
     private long compileTimeMS = 0;
-    
+
     private long executeTimeMS = 0;
-    
+
     private long validateTimeMS = 0;
-    
+
     private Exception executionException = null;
-    
+
     private boolean runTimeLimitExceeded = false;
-    
+
     private boolean memoryLimitExceeded = false;
 
     private boolean failedToCompile = false;
 
     private String additionalInformation = "";
-    
+
     /**
      * @return Returns the validationReturnCode.
      */
@@ -235,10 +235,10 @@ public class ExecutionData implements Serializable {
 
     /**
      * Did the validator program run without an error ?.
-     * 
+     *
      * This does NOT indicate that the team's run was a Yes/accepted.  This
      * only returns whether the validator program ran without any OS or other sort of error.
-     * 
+     *
      * @return Returns whether the validator program executed successfully.
      */
     public boolean isValidationSuccess() {
@@ -282,17 +282,17 @@ public class ExecutionData implements Serializable {
     }
 
     public void setCompileTimeMS(long compileTime) {
-        compileTimeMS = compileTime; 
+        compileTimeMS = compileTime;
     }
 
     public long getCompileTimeMS() {
         return compileTimeMS;
     }
-    
+
     public void setExecuteTimeMS(long inExecuteTime){
         executeTimeMS = inExecuteTime;
     }
-    
+
     public long getExecuteTimeMS(){
         return executeTimeMS;
     }
@@ -300,15 +300,15 @@ public class ExecutionData implements Serializable {
     public void setvalidateTimeMS(long validateTime){
         validateTimeMS = validateTime;
     }
-    
+
     public long getvalidateTimeMS(){
         return validateTimeMS;
     }
-    
+
     public boolean isExecuteSucess() {
         return executeSucess;
     }
-    
+
     public void setExecuteSucess(boolean executeSucess) {
         this.executeSucess = executeSucess;
     }
@@ -318,15 +318,17 @@ public class ExecutionData implements Serializable {
      * @return
      * @deprecated use {@link #isCompileSuccess()}.
      */
+    @Deprecated
     public boolean isFailedToCompile() {
         return failedToCompile;
     }
 
     /**
-     * 
+     *
      * @param failedToCompile
      * @deprecated use {@link #setCompileSuccess(boolean)}
      */
+    @Deprecated
     public void setFailedToCompile(boolean failedToCompile) {
         this.failedToCompile = failedToCompile;
     }
@@ -354,7 +356,7 @@ public class ExecutionData implements Serializable {
     public void setMemoryLimitExceeded(boolean memoryLimitExceeded) {
         this.memoryLimitExceeded = memoryLimitExceeded;
     }
-    
+
     public void setAdditionalInformation(String additionalInformation) {
         this.additionalInformation = additionalInformation;
     }
@@ -366,7 +368,7 @@ public class ExecutionData implements Serializable {
     public String getAdditionalInformation() {
         return additionalInformation;
     }
-    
+
     @Override
     public String toString() {
         String retStr = "[";
@@ -381,7 +383,7 @@ public class ExecutionData implements Serializable {
         retStr += "executeSucess=" + executeSucess + ",";
         retStr += "validationStdout=" + validationStdout + ",";
         retStr += "validationStderr=" + validationStderr + ",";
-        retStr += "validationReturnCode" + validationReturnCode + ",";
+        retStr += "validationReturnCode=" + validationReturnCode + ",";
         retStr += "validationSuccess=" + validationSuccess + ",";
         retStr += "validationResults=" + validationResults + ",";
         retStr += "compileTimeMS=" + compileTimeMS + ",";
@@ -392,7 +394,7 @@ public class ExecutionData implements Serializable {
         retStr += "failedToCompile=" + failedToCompile + ",";
         retStr += "additionalInformation=" + additionalInformation;
         retStr += "]";
-        
+
         return retStr;
     }
 }

@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 
 /**
  * Unit tests.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -38,7 +38,7 @@ public class CommandVariableReplacerTest extends AbstractTestCase {
     }
 
     public void testMostFields() throws Exception {
-        
+
         String [] dataLines = {
                 "{:basename}::Sumit", //
                 "{:clientid}::9", //
@@ -79,10 +79,10 @@ public class CommandVariableReplacerTest extends AbstractTestCase {
         Run run = sample.createRun(contest, teamId, language, problem, 0);
         run.setNumber(45);
         run.setElapsedMS(elapsed);
-        
+
         ExecutionData executionData = null;
         String filename = getSamplesSourceFilename("Sumit.java");
-        
+
         RunFiles runFiles = new RunFiles(run, filename);
         ProblemDataFiles problemDataFiles = null;
 
@@ -91,19 +91,19 @@ public class CommandVariableReplacerTest extends AbstractTestCase {
 //            String result = commandVariableReplacer.substituteAllStrings(contest, run, runFiles, name, executionData, problemDataFiles);
 //            System.out.println("\""+name+"::"+result+"\", //");
 //        }
-        
+
         for (String line : dataLines) {
             String [] list = line.split("::");
             String name = list[0];
             String expectedString = list[1];
             String actual = commandVariableReplacer.substituteVariables(name, contest, run, runFiles, null, executionData, problemDataFiles);
-            
+
             assertEquals(name+" variable ", expectedString, actual);
         }
     }
 
     public void testOtherFields() throws Exception {
-        
+
         String [] dataLines = {
                 "{:basename}::Sumit", //
                 "{:clientid}::9", //
@@ -144,15 +144,15 @@ public class CommandVariableReplacerTest extends AbstractTestCase {
         Run run = sample.createRun(contest, teamId, language, problem, 0);
         run.setNumber(45);
         run.setElapsedMS(elapsed);
-        
+
         problem.setTimeOutInSeconds(3412);
-        
+
         ExecutionData executionData = new ExecutionData();
         executionData.setExecuteExitValue(999);
         executionData.setExecuteTimeMS(112233);
-        
+
         String filename = getSamplesSourceFilename("Sumit.java");
-        
+
         RunFiles runFiles = new RunFiles(run, filename);
         ProblemDataFiles problemDataFiles = null;
 
@@ -161,7 +161,48 @@ public class CommandVariableReplacerTest extends AbstractTestCase {
             String name = list[0];
             String expectedString = list[1];
             String actual = commandVariableReplacer.substituteVariables(name, contest, run, runFiles, null, executionData, problemDataFiles);
-            
+
+            assertEquals(name+" variable ", expectedString, actual);
+        }
+    }
+
+    public void testExecuteFolderFields() throws Exception {
+
+        String [] dataLines = {
+                "{:clientname}::server0", //
+                "{:clientid}::0", //
+                "{:clientsite}::1", //
+                "{:runnumber}::1029", //
+                "{:siteid}::1", //
+                "{:teamid}::9", //
+                "{:problem}::3", //
+                "{:problemletter}::C", //
+                "{:problemshort}::dancingladies",
+                "{:language}::4", //
+                "{:languageletter}::D",
+                "{:languagename}::perl", //
+                "{:languageid}::peeeeerl",
+                "executesite{:siteid}{:clientname}::executesite1server0",
+                "ex_{:runnumber}_{:problemletter}_{:problemshort}_{:teamid}_{:languageid}_{:clientname}::ex_1029_C_dancingladies_9_peeeeerl_server0"
+        };
+
+        Problem problem = contest.getProblems()[2];
+        Language language = contest.getLanguages()[3];
+        Account account = SampleContest.getTeamAccounts(contest)[8];
+        ClientId teamId = account.getClientId();
+        problem.setShortName("dancingladies");
+
+        Run run = sample.createRun(contest, teamId, language, problem, 0);
+        run.setNumber(1029);
+        run.setElapsedMS(1000);
+
+        language.setID("peeeeerl");
+        for (String line : dataLines) {
+            String [] list = line.split("::");
+            String name = list[0];
+            String expectedString = list[1];
+            String actual = commandVariableReplacer.substituteExecuteFolderVariables(contest, null, run, name);
+
             assertEquals(name+" variable ", expectedString, actual);
         }
     }

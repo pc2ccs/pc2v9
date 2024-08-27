@@ -1,0 +1,23 @@
+John Buck, August 12, 2024
+
+Before starting, make sure that the /home/icpc/html folder is setup with the proper permissions;
+that is, /home/icpc/html must be owned by  icpc.www-data and mode 775  (apache has to be able to
+write to this folder to create symlinks).
+The rest of the folders/files under /home/icpc/html just have to be readable.
+
+To setup Apache2 to service the judgments:
+
+1) Install apache2:  apt-get install apache2
+2) Enable the CGI module: a2enmod cgi
+3) Copy the judge.conf in this folder to: /etc/apache2/sites-available
+4) Enable the site: a2ensite judge
+5) You may want to disable the default site: a2dissite 000-default
+6) Restart apache: apachectl restart
+7) Create the /home/icpc/html/.htpasswd file with any user(s) you want to have access to the page:
+   (as root):
+        htpasswd -c /home/icpc/html/.htpasswd pc2 pc2password
+   This would only allow user "pc2" with password: "pc2password" to access the:
+   http://<server>/cgi-bin/alljudgments.py page.
+
+
+
