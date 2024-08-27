@@ -141,6 +141,8 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JTextField judgesDefaultAnswerTextField = null;
 
+    private JTextField judgesExecuteFolderTextField = null;
+
     private JCheckBox jCheckBoxShowPreliminaryOnBoard = null;
 
     private JCheckBox jCheckBoxShowPreliminaryOnNotifications = null;
@@ -180,6 +182,9 @@ public class ContestInformationPane extends JPanePlugin {
     private JPanel contestSettingsPane;
 
     private JPanel judgesDefaultAnswerPane;
+
+    private JPanel judgesExecutePane;
+    private JLabel judgesExecuteFolderWhatsThisButton;
 
     private JPanel judgingOptionsPane;
 
@@ -618,6 +623,8 @@ public class ContestInformationPane extends JPanePlugin {
 
             judgeSettingsPane.add(getJudgingOptionsPane(),LEFT_ALIGNMENT);
 
+            judgeSettingsPane.add(getJudgesExecutePane(),LEFT_ALIGNMENT);
+
             judgeSettingsPane.add(getScoringPropertiesPane(),LEFT_ALIGNMENT);
 
             judgeSettingsPane.add(Box.createHorizontalStrut(20));
@@ -848,6 +855,28 @@ public class ContestInformationPane extends JPanePlugin {
         return judgesDefaultAnswerPane;
     }
 
+    private JPanel getJudgesExecutePane() {
+        if (judgesExecutePane == null) {
+
+            judgesExecutePane = new JPanel();
+            judgesExecutePane.setMaximumSize(new Dimension(500, 200));
+            judgesExecutePane.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            judgesExecutePane.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+            judgesExecutePane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Execute Folder",
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+
+            //the contents of the pane:
+
+            judgesExecutePane.add(getJudgesExecuteFolderTextField(), null);
+            judgesExecutePane.add(getJudgesExecuteFolderWhatsThisButton(), null);
+
+        }
+        return judgesExecutePane;
+    }
+
     /**
      * Returns a ShadowSettingsPane containing the components comprising Shadow Mode configuration options.
      * Because the ShadowSettingsPane class does not add any listeners to its components (because it can't
@@ -1065,6 +1094,7 @@ public class ContestInformationPane extends JPanePlugin {
 
         //fill in judging information
         newContestInformation.setJudgesDefaultAnswer(getJudgesDefaultAnswerTextField().getText());
+        newContestInformation.setExecuteFolder(getJudgesExecuteFolderTextField().getText());
         newContestInformation.setPreliminaryJudgementsTriggerNotifications(getJCheckBoxShowPreliminaryOnNotifications().isSelected());
         newContestInformation.setPreliminaryJudgementsUsedByBoard(getJCheckBoxShowPreliminaryOnBoard().isSelected());
         newContestInformation.setSendAdditionalRunStatusInformation(getAdditionalRunStatusCheckBox().isSelected());
@@ -1163,6 +1193,7 @@ public class ContestInformationPane extends JPanePlugin {
                 selectDisplayRadioButton();
 
                 getJudgesDefaultAnswerTextField().setText(contestInformation.getJudgesDefaultAnswer());
+                getJudgesExecuteFolderTextField().setText(contestInformation.getExecuteFolder());
                 getJCheckBoxShowPreliminaryOnBoard().setSelected(contestInformation.isPreliminaryJudgementsUsedByBoard());
                 getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
@@ -1462,6 +1493,86 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return judgesDefaultAnswerTextField;
     }
+
+    /**
+     * This method initializes JudgesExecuteFolderTextField
+     *
+     * @return javax.swing.JTextField
+     */
+    private JTextField getJudgesExecuteFolderTextField() {
+        if (judgesExecuteFolderTextField == null) {
+            judgesExecuteFolderTextField = new JTextField(50);
+            judgesExecuteFolderTextField.setText("");
+            judgesExecuteFolderTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return judgesExecuteFolderTextField;
+    }
+
+    private JLabel getJudgesExecuteFolderWhatsThisButton() {
+
+            if (judgesExecuteFolderWhatsThisButton == null) {
+                Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+                if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                    // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                    judgesExecuteFolderWhatsThisButton = new JLabel("<What's This?>");
+                    judgesExecuteFolderWhatsThisButton.setForeground(Color.blue);
+                } else {
+                    Image image = ((ImageIcon) questionIcon).getImage();
+                    judgesExecuteFolderWhatsThisButton = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+                }
+
+                judgesExecuteFolderWhatsThisButton.setToolTipText("What's This? (click for additional information)");
+                judgesExecuteFolderWhatsThisButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        JOptionPane.showMessageDialog(null, judgesExecuteFolderWhatsThisMessage, "About Judges Execute Folder", JOptionPane.INFORMATION_MESSAGE, null);
+                    }
+                });
+                judgesExecuteFolderWhatsThisButton.setBorder(new EmptyBorder(0, 15, 0, 0));
+            }
+            return judgesExecuteFolderWhatsThisButton;
+        }
+
+    // the string which will be displayed when the "What's This" icon in the Team Settings panel is clicked
+    private String judgesExecuteFolderWhatsThisMessage = //
+            "\nThe Judges Execute Folder field allows you to specify a string which gets used as the judge's execute folder " //
+            + "\neg. \"executesite1judge1\"" //
+
+            + "\n\nThe string is a pattern which may contain \"substitution variables\", identified by substrings starting with \"{:\"" //
+            + " and ending with \"}\" (for example, {:runnumber} )." //
+            + "\nPC^2 automatically replaces substitution variables with the corresponding value for each team" //
+            + " (for example, the substitution variable {:runnumber} "  //
+            + "\ngets replaced with the current Run's ID Number defined by the PC^2 Server)." //
+
+            + "\n\nLiteral characters (i.e., anything NOT part of a substituion variable) are displayed exactly as written in the format string." //
+
+            + "\n\nThe recognized substitution variables include:" //
+            + "\n    {:clientid} - this client's id number, eg. 1"
+            + "\n    {:clientname} - this client's name, eg judge1"
+            + "\n    {:clientsite} - this client's site"
+            + "\n    {:languageid} - CLICS language id, eg cpp"
+            + "\n    {:language} - index into languages (1 based)"
+            + "\n    {:languageletter} - index converted to letter, eg 1=A, 2=B"
+            + "\n    {:languagename} - Display name of language (spaces converted to _)"
+            + "\n    {:problem} - Index into problem table"
+            + "\n    {:problemletter} - A,B,C..."
+            + "\n    {:problemshort} - problem short name"
+            + "\n    {:runnumber} - the run number"
+            + "\n    {:siteid} - team's site"
+            + "\n    {:teamid} - team's id number"
+
+            + "\n\nSo for example a judge's execute folder string like \"executesite{:siteid}{:clientname}_Run_{:runnumber}\" would change the execute folder to something like:" //
+            + "\n    executesite1judge1_Run_220 " //
+
+            + "\n\nSubstitution values depend on the corresponding data having been loaded into the PC^2 Server; if there is no value defined for a" //
+            + "\nspecified substitution string then the substitution string itself appears in the result."
+            + " If the defined value is null or empty then an empty string appears in the result."
+            + "\n\n"; //
 
     /**
      * This method initializes jCheckBoxShowPreliminaryOnBoard

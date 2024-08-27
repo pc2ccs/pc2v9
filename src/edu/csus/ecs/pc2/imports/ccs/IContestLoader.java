@@ -127,6 +127,8 @@ public interface IContestLoader {
 
     String JUDGE_CONFIG_PATH_KEY = "judge-config-path";
 
+    String EXECUTE_FOLDER = "execute-folder";
+
     String TIMEOUT_KEY = "timeout";
 
     final String MEMORY_LIMIT_IN_MEG_KEY = "memory-limit-in-Meg";

@@ -107,6 +107,10 @@ public class ContestInformation implements Serializable{
      */
     private int sandboxGraceTimeSecs = SANDBOX_GRACE_TIME_SECS;
     private int sandboxInteractiveGraceMultiplier = SANDBOX_INTERACTIVE_MULTIPLIER;
+    /*
+     * String to append to the execute folder for judged runs.  May contain substitution strings.
+     */
+    private String executeFolder = "";
 
     /**
      *
@@ -269,6 +273,24 @@ public class ContestInformation implements Serializable{
         }
     }
 
+    public String getExecuteFolder() {
+        if(executeFolder == null) {
+            executeFolder = "";
+        }
+        return executeFolder ;
+    }
+
+    /**
+     * judgesDefaultAnswer must be a non-zero length trimmed string.
+     *
+     * @param judgesDefaultAnswer The judgesDefaultAnswer to set.
+     */
+    public void setExecuteFolder(String executeFolder) {
+        if (executeFolder != null && executeFolder.trim().length() > 0) {
+            this.executeFolder = executeFolder.trim();
+        }
+    }
+
     public boolean isSameAs(ContestInformation contestInformation) {
         try {
             if (contestTitle == null) {
@@ -281,6 +303,9 @@ public class ContestInformation implements Serializable{
                 }
             }
             if (!judgesDefaultAnswer.equals(contestInformation.getJudgesDefaultAnswer())) {
+                return false;
+            }
+            if (!executeFolder.equals(contestInformation.getExecuteFolder())) {
                 return false;
             }
             if (!teamDisplayMode.equals(contestInformation.getTeamDisplayMode())) {

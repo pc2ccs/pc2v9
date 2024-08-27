@@ -27,6 +27,7 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.CommandVariableReplacer;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
@@ -80,6 +81,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     private static final long serialVersionUID = 1408367949659070087L;
 
     private static final String NL = System.getProperty("line.separator");
+
+    private static final String DEFAULT_EXECUTE_DIRECTORY_TEMPLATE = "executesite{:clientsite}{:clientname}";
 
     private Run run = null;
 
@@ -269,6 +272,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     //setting this to True will override the prohibition on invoking a Sandbox when running on Windows.
     private boolean debugAllowInteractiveInvocationOnWindows = false;
 
+    // for execute folder, and maybe in the future, for the other substitute vars
+    CommandVariableReplacer variableReplacer = new CommandVariableReplacer();
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles, IExecutableMonitor msgFrame) {
         super();
@@ -318,14 +323,15 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      */
     private void initialize() {
 
+        // set log early in case of exceptions
+        log = controller.getLog();
+
         this.executorId = contest.getClientId();
 
         if (runFiles != null) {
             mainFileDirectory = getDirName(runFiles.getMainFile());
         }
         executeDirectoryName = getExecuteDirectoryName();
-
-        log = controller.getLog();
 
         if (executorId.getClientType() != ClientType.Type.TEAM) {
             this.problemDataFiles = contest.getProblemDataFile(problem);
@@ -523,6 +529,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                         atLeastOneTestFailed = true;
                         failedResults = executionData.getValidationResults();
                     }
+                    // Create summary of execution results in execute folder for human judge
+                    saveExecuteData(dataSetNumber);
 
                 } else {
 
@@ -535,6 +543,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
 
                         // execute against one specific data set
                         passed = executeAndValidateDataSet(dataSetNumber);
+
+                        // Create summary of execution results in execute folder for human judge
+                        saveExecuteData(dataSetNumber);
 
                         dataSetNumber++;
                         if (!passed) {
@@ -604,6 +615,9 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     setException(errorMessage);
                     fileViewer.addTextPane("Error during compile", errorMessage);
                 } // else they will get a tab hopefully showing something wrong
+
+                // Create summary of compilation failure for human judge
+                saveExecuteData(0);
             }
 
             // we've finished the compile/execute/validate steps (for better or worse); do the required final steps to display the results
@@ -2840,6 +2854,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     executionData.setCompileResultCode(0);
                     return true;
                 } else {
+                    log.log(Log.INFO, "Expected compiler to generate executable: '" + programName + "' but it did not - Compile failed");
                     executionData.setCompileExeFileName("");
                     executionData.setCompileSuccess(false);
                     executionData.setCompileResultCode(2);
@@ -2998,16 +3013,24 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * <pre>
      *             valid fields are:
      *              {:mainfile} - submitted file (hello.java)
+     *              {:package} - if a package was specified
      *              {:basename} - mainfile without extension (hello)
      *              {:validator} - validator program name
-     *              {:language}
-     *              {:problem}
-     *              {:teamid}
-     *              {:siteid}
+     *              {:language} - index into languages (1 based)
+     *              {:languageletter} - index converted to letter, eg 1=A, 2=B
+     *              {:languagename} - Display name of language (spaces converted to _)
+     *              {:languageid} - CLICS language id, eg cpp
+     *              {:problem} - Index into problem table
+     *              {:problemletter} - A,B,C...
+     *              {:problemshort} - problem short name
+     *              {:teamid} - team's id number
+     *              {:siteid} - team's site
+     *              {:clientname} - this client's name, eg judge1
+     *              {:clientid} - this client's id number, eg. 1
+     *              {:clientsite} - this client's site
      *              {:infile}
      *              {:outfile}
      *              {:ansfile}
-     *              {:pc2home}
      *              {:sandboxprogramname} - the sandbox program name as defined in the Problem
      *              {:sandboxcommandline} - the command line used to invoke the sandbox as defined in the Problem
      *              {:ensuresuffix=...} - add supplied suffix if not present already
@@ -3017,6 +3040,10 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      *              {:ansfilename} - full path to judges answer file
      *              {:timelimit} - CPU time limit in seconds
      *              {:memlimit} - memory limit in MB
+     *              {:exitvalue} - results exit code
+     *              {:executetime} - result execution time in MS
+     *              {:pc2home} - where pc2 is installed
+     *              {:runnumber} - the run number
      * </pre>
      *
      * @param dataSetNumber
@@ -3028,7 +3055,8 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
      * @return string with values
      */
     public String substituteAllStrings(Run inRun, String origString, int dataSetNumber) {
-        String newString = "";
+        // Make a new copy to start with to avoid issues in the future.
+        String newString = origString;
         String nullArgument = "-"; /* this needs to change */
 
         try {
@@ -3036,13 +3064,15 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 throw new IllegalArgumentException("Run is null");
             }
 
-            if (runFiles.getMainFile() == null) {
-                log.config("substituteAllStrings() main file is null (no contents)");
-                return origString;
+            if(runFiles != null) {
+                if (runFiles.getMainFile() == null) {
+                    log.config("substituteAllStrings() main file is null (no contents)");
+                    return newString;
+                }
+                newString = replaceString(newString, "{:mainfile}", runFiles.getMainFile().getName());
+                newString = replaceString(newString, Constants.CMDSUB_FILES_VARNAME, ExecuteUtilities.getAllSubmittedFilenames(runFiles));
+                newString = replaceString(newString, Constants.CMDSUB_BASENAME_VARNAME, removeExtension(runFiles.getMainFile().getName()));
             }
-            newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
-            newString = replaceString(newString, Constants.CMDSUB_FILES_VARNAME, ExecuteUtilities.getAllSubmittedFilenames(runFiles));
-            newString = replaceString(newString, Constants.CMDSUB_BASENAME_VARNAME, removeExtension(runFiles.getMainFile().getName()));
             newString = replaceString(newString, "{:package}", packageName);
 
             String validatorCommand = null;
@@ -3069,9 +3099,11 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 Language[] langs = contest.getLanguages();
                 int index = 0;
                 String displayName = "";
+                String languageid = "";
                 for (int i = 0; i < langs.length; i++) {
                     if (langs[i] != null && langs[i].getElementId().equals(inRun.getLanguageId())) {
                         displayName = langs[i].getDisplayName().toLowerCase().replaceAll(" ", "_");
+                        languageid = langs[i].getID();
                         index = i + 1;
                         break;
                     }
@@ -3080,6 +3112,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     newString = replaceString(newString, "{:language}", index);
                     newString = replaceString(newString, "{:languageletter}", Utilities.convertNumber(index));
                     newString = replaceString(newString, "{:languagename}", displayName);
+                    newString = replaceString(newString, "{:languageid}", languageid);
                 }
             }
             if (inRun.getProblemId() != null) {
@@ -3093,18 +3126,20 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 }
                 if (index > 0) {
                     newString = replaceString(newString, "{:problem}", index);
-                    newString = replaceString(newString, "{:problemletter}", Utilities.convertNumber(index));
-                    if(problem != null) {
-                        newString = replaceString(newString, "{:problemshort}", problem.getShortName());
-                    }
                 }
             }
             if (inRun.getSubmitter() != null) {
                 newString = replaceString(newString, "{:teamid}", inRun.getSubmitter().getClientNumber());
                 newString = replaceString(newString, "{:siteid}", inRun.getSubmitter().getSiteNumber());
             }
+            newString = replaceString(newString, "{:clientname}", contest.getClientId().getName());
+            newString = replaceString(newString, "{:clientid}", contest.getClientId().getClientNumber());
+            newString = replaceString(newString, "{:clientsite}", contest.getClientId().getSiteNumber());
+            newString = replaceString(newString, "{:runnumber}", Integer.toString(inRun.getNumber()));
 
             if (problem != null) {
+                newString = replaceString(newString, "{:problemletter}", problem.getLetter());
+                newString = replaceString(newString, "{:problemshort}", problem.getShortName());
                 if (problem.getDataFileName() != null && !problem.getDataFileName().equals("")) {
                     newString = replaceString(newString, "{:infile}", problem.getDataFileName());
                 } else {
@@ -3121,9 +3156,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                 if(executeInfoFileName != null) {
                     newString = replaceString(newString, "{:executeinfofilename}", executeInfoFileName);
                 } else {
-                    // can't happen, but if it does, just use default basename
                     newString = replaceString(newString, "{:executeinfofilename}", Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
-                    log.config("substituteAllStrings() executeInfoFileName is null, using default basename" + Constants.PC2_EXECUTION_RESULTS_NAME_SUFFIX);
                 }
                 String fileName = getJudgeFileName(Utilities.DataFileType.JUDGE_DATA_FILE, dataSetNumber-1);
                 if(fileName == null) {
@@ -3183,6 +3216,7 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
             if (pc2home != null && pc2home.length() > 0) {
                 newString = replaceString(newString, "{:pc2home}", pc2home);
             }
+
 
             // Check for conditional suffix (that is, the previous chars match), if not, add them
             newString = ExecuteUtilities.replaceStringConditional(newString, Constants.CMDSUB_COND_SUFFIX);
@@ -3387,14 +3421,19 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
     /**
      * Execute directory name for this client instance.
      *
-     * The name is individual for each client.
+     * The name is individual for each client and run.
      *
      * @see #getExecuteDirectoryNameSuffix()
      *
      * @return the name of the execute directory for this client.
      */
     public String getExecuteDirectoryName() {
-        return "executesite" + contest.getClientId().getSiteNumber() + contest.getClientId().getName() + getExecuteDirectoryNameSuffix();
+        String dirName = getContestInformation().getExecuteFolder();
+        if(StringUtilities.isEmpty(dirName)) {
+            dirName = DEFAULT_EXECUTE_DIRECTORY_TEMPLATE;
+        }
+        dirName = variableReplacer.substituteExecuteFolderVariables(contest, log, run, dirName) + getExecuteDirectoryNameSuffix();
+        return(dirName);
     }
 
     /**
@@ -3642,33 +3681,37 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
         String result = null;
         SerializedFile serializedFile = null;
 
-        try {
-            // it's a little more work for external files
-            if (problem.isUsingExternalDataFiles()) {
+        // It's possible for this to be null if someone requests the name before the run has started
+        // executing.
+        if(problemDataFiles != null) {
+            try {
+                // it's a little more work for external files
+                if (problem.isUsingExternalDataFiles()) {
 
-                if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
-                    serializedFile = problemDataFiles.getJudgesDataFiles()[setIndex];
+                    if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
+                        serializedFile = problemDataFiles.getJudgesDataFiles()[setIndex];
+                    } else {
+                        serializedFile = problemDataFiles.getJudgesAnswerFiles()[setIndex];
+                    }
+                    //Note: last argument (type) is unused in locateJudgesDataFile
+                    result = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), type);
                 } else {
-                    serializedFile = problemDataFiles.getJudgesAnswerFiles()[setIndex];
+                    // For internal files, the appropriate data files are copied to the FIRST datafile's name in the
+                    // execute folder, so we always return that one.
+                    if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
+                        result = prefixExecuteDirname(problem.getDataFileName());
+                    } else {
+                        result = prefixExecuteDirname(problem.getAnswerFileName());
+                    }
                 }
-                //Note: last argument (type) is unused in locateJudgesDataFile
-                result = Utilities.locateJudgesDataFile(problem, serializedFile, getContestInformation().getJudgeCDPBasePath(), type);
-            } else {
-                // For internal files, the appropriate data files are copied to the FIRST datafile's name in the
-                // execute folder, so we always return that one.
-                if(type == Utilities.DataFileType.JUDGE_DATA_FILE) {
-                    result = prefixExecuteDirname(problem.getDataFileName());
+            } catch (Exception e)
+            {
+                //if we got far enough to get the serialized file, show the expected name in the log message
+                if(serializedFile != null) {
+                    log.log(Log.WARNING, "Can not get " + type.toString() + " expected filename (" + serializedFile.getName() + ") for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
                 } else {
-                    result = prefixExecuteDirname(problem.getAnswerFileName());
+                    log.log(Log.WARNING, "Can not get " + type.toString() + " filename for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
                 }
-            }
-        } catch (Exception e)
-        {
-            //if we got far enough to get the serialized file, show the expected name in the log message
-            if(serializedFile != null) {
-                log.log(Log.WARNING, "Can not get " + type.toString() + " expected filename (" + serializedFile.getName() + ") for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
-            } else {
-                log.log(Log.WARNING, "Can not get " + type.toString() + " filename for dataset " + (setIndex+1) + ": " + e.getMessage(), e);
             }
         }
         return(result);
@@ -3709,5 +3752,58 @@ public class Executable extends Plugin implements IExecutable, IExecutableNotify
                     + "SerializedFile for the validator could be obtained from the ProblemDataFiles");
         }
 
+    }
+
+    /**
+     * Shows a 'null' string as "" instead of "null"
+     *
+     * @param str String to check
+     * @return "" if null or the original string if not.
+     */
+    private String showNullAsEmpty(String str)
+    {
+        if(str == null) {
+            return("");
+        }
+        return(str);
+    }
+
+    /**
+     * Write execute summary data to the specified testcase executedata. file in the execute folder.
+     *
+     * @param dataSetNumber The dataset number, used to create a file name
+     * @return true if it worked, false otherwise.
+     */
+    private boolean saveExecuteData(int dataSetNumber)
+    {
+        // create execution data results summary file - useful for human judges reviewing the problem
+        String executionDataFilename = prefixExecuteDirname("executedata." + dataSetNumber + ".txt");
+        boolean bWritten = false;
+        try (PrintWriter executeDataWriter = new PrintWriter(executionDataFilename)){
+            // The file produced may be "sourced" in bash if desired, eg. ". ./executedata.1.txt"
+            executeDataWriter.println("executeDateTime='" + Utilities.getIso8601formatterWithMS().format(new Date()) + "'");
+            executeDataWriter.println("compileExeFileName='" + showNullAsEmpty(executionData.getCompileExeFileName()) + "'");
+            executeDataWriter.println("compileSuccess='" + executionData.isCompileSuccess() + "'");
+            executeDataWriter.println("compileResultCode='" + executionData.getCompileResultCode() + "'");
+            executeDataWriter.println("executeExitValue='" + executionData.getExecuteExitValue() + "'");
+            executeDataWriter.println("executeSuccess='" + executionData.isExecuteSucess() + "'");
+            executeDataWriter.println("validationReturnCode='" + executionData.getValidationReturnCode() + "'");
+            executeDataWriter.println("validationSuccess='" + executionData.isValidationSuccess() + "'");
+            executeDataWriter.println("validationResults='" + showNullAsEmpty(executionData.getValidationResults()) + "'");
+            executeDataWriter.println("compileTimeMS='" + executionData.getCompileTimeMS() + "'");
+            executeDataWriter.println("executeTimeMS='" + executionData.getExecuteTimeMS() + "'");
+            executeDataWriter.println("validateTimeMS='" + executionData.getvalidateTimeMS() + "'");
+            if(executionData.getExecutionException() != null) {
+                executeDataWriter.println("executionException='" + showNullAsEmpty(executionData.getExecutionException().getMessage()) + "'");
+            } else {
+                executeDataWriter.println("executionException=''");
+            }
+            executeDataWriter.println("runTimeLimitExceeded='" + executionData.isRunTimeLimitExceeded() + "'");
+            executeDataWriter.println("additionalInformation='" + showNullAsEmpty(executionData.getAdditionalInformation()) + "'");
+            bWritten = true;
+        } catch(Exception e) {
+            log.log(Log.WARNING, "Can not save execution data file " + executionDataFilename);
+        }
+        return bWritten;
     }
 }

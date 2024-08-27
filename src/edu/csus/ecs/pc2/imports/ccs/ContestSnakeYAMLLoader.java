@@ -501,9 +501,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
         String ccsPassoword = fetchValue(content, CCS_PASSWORD_KEY, contestInformation.getPrimaryCCS_user_pw());
         contestInformation.setPrimaryCCS_user_pw(ccsPassoword);
 
-
         String lastEventId = fetchValue(content, CCS_LAST_EVENT_ID_KEY, contestInformation.getLastShadowEventID());
         contestInformation.setLastShadowEventID(lastEventId);
+
+        String executeDir = fetchValue(content, EXECUTE_FOLDER, contestInformation.getExecuteFolder());
+        contestInformation.setExecuteFolder(executeDir);
 
         // save ContesInformation to model
         contest.updateContestInformation(contestInformation);
