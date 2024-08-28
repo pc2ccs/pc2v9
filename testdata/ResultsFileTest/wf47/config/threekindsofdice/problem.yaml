@@ -1,0 +1,13 @@
+name: Three Kinds of Dice
+source: ICPC World Finals 2022/2023
+license: permission
+
+sandbox-type: PC2_INTERNAL_SANDBOX
+
+limits:
+  timeout: 1
+  memory: 2048
+  time_multiplier: 2.2
+
+validator_flags: float_absolute_tolerance 1e-6
+

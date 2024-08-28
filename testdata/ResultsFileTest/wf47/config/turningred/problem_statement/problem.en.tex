@@ -1,0 +1,34 @@
+\problemname{Turning Red}
+
+Mei's parents have spent the last year remodeling their house, but their lighting system is quite complex!
+Each room in the house has an LED light, which can be set to red, green, or blue, as seen in Figure~\ref{turningred:sample1}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\textwidth]{lightbulb}
+\caption{The initial state of the lights in Sample Input 1. Buttons and wires not shown.}
+\label{turningred:sample1}
+\end{figure}
+
+Throughout the house are various buttons which are each connected to one or more lights.
+When a button is pressed, any red lights connected to that button become green, any green lights connected to that button become blue, and any blue lights connected to that button become red. Each button can be pressed multiple times. Because the house was built prior to the invention of crossbar wiring, each light is controlled by at most two buttons.
+
+Mei's favorite color is red, so she wants to turn all of the lights red.
+Her parents, fearing the buttons will wear out, have asked her to minimize the total number of button presses.
+
+\section*{Input}
+
+The first line of input contains two positive integers $l$ and $b$, where
+$l$ ($1 \leq l \leq 2 \cdot 10^5$) is the number of lights and
+$b$ ($0 \leq b \leq 2 \cdot l$) is the number of buttons.
+The second line of input is a string of $l$ characters, all either \texttt{R}, \texttt{G}, or \texttt{B}, where the $i^{\text{th}}$ character is the initial color of the $i^{\text{th}}$ light.
+The next $b$ lines describe the buttons.
+Each of these lines begins with an integer $k$ ($1 \le k \le l$), the number of lights controlled by this button.
+Then $k$ distinct integers follow, the lights controlled by this button.
+The lights are indexed from $1$ to $l$, inclusive.
+Each light appears at most twice across all buttons.
+
+\section*{Output}
+
+Output the minimum number of button presses Mei needs to turn all the lights red.
+If it is impossible for Mei to turn all of the lights red, output \texttt{impossible}.

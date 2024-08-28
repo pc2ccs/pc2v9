@@ -1,0 +1,12 @@
+name: Tilting Tiles
+source: ICPC World Finals 2022/2023
+license: permission
+validation: default
+
+sandbox-type: PC2_INTERNAL_SANDBOX
+
+limits:
+   timeout: 3
+   memory: 2048
+   time_multiplier: 2
+

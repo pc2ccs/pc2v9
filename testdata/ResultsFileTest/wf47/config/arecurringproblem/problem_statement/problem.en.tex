@@ -1,0 +1,50 @@
+\problemname{A Recurring Problem}
+
+You have a very big problem! You love recurrence relations, perhaps
+a bit too much. In particular, you are a fan of positive linear
+recurrence relations (PLRR), which can be defined as follows. First,
+you choose the order $k$ of the relation. Then you choose coefficients
+$c_1, c_2, \dots, c_k$, and the first $k$ elements of a sequence $a_1,
+a_2, \dots, a_k$. The relation is called ``positive'' if all of these
+numbers are positive integers. The rest of the sequence can then be
+generated indefinitely using the formula
+$$
+a_{i+k} = c_1 \cdot a_i + c_2 \cdot a_{i+1} + \dots + c_k \cdot a_{i+k-1} \quad\text{for}\quad i \geq 1.
+$$
+The Fibonacci sequence is the most famous recurrence of this form, but
+there are many others.
+
+In fact, yesterday, in a fit of mad mathematical inspiration, you
+wrote down {\em all} possible ways of choosing a positive linear
+recurrence relation, and each associated infinite sequence, on some
+index cards, one per card. (You have a lot of index cards; you buy in
+bulk.) It has all been a bit of a blur. But when you woke up today, you
+realized that you do not have a good way to order or count the
+PLRRs. You tried just sorting the sequences lexicographically, but
+there are too many that start with ``$1$'' --- you will never make it to
+the later ones.
+
+Fortunately, inspiration struck again! You realized that you can
+instead order the PLRRs lexicographically by the generated part of the
+sequence only (that is, the part of the sequence starting after the
+initial $k$ values). Ties are broken by lexicographic order of the
+coefficients.  For example $k=1$, $c_1=2$, $a_1=2$ comes before $k=2$,
+$(c_1,c_2)=(2,1)$, $(a_1,a_2)=(1,2)$, even though the continuation of
+the sequence is the same for both. This allows you to properly index
+your cards, starting from $1$, with every card being assigned a
+number.
+
+Given the number on a card, describe the sequence on it!
+
+\section*{Input}
+
+The input consists of a single line with an integer $n$ ($1 \leq n
+\leq 10^9$), the index of the desired PLRR.
+
+\section*{Output}
+
+Output four lines detailing the desired recurrence relation. The first
+line contains its order $k$. The second line contains the
+$k$ coefficients $c_1, \dots, c_k$. The third line contains the
+$k$ starting values $a_1, \dots, a_k$. The fourth line contains
+the first $10$ of the generated values.
