@@ -1,15 +1,24 @@
 #!/bin/bash
-# Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+# Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 #  
 # File:    pc2sandbox.sh 
 # Purpose: a sandbox for pc2 using Linux CGroups v2.
 # Input arguments:
 #  $1: memory limit in MB
 #  $2: time limit in seconds
-#  $3: command to be executed
-#  $4... : command arguments
+#  $3: judges_input_file
+#  $4: judges_answer_file
+#  $5: testcase number
+#  $6: command to be executed
+#  $7... : command arguments
 # 
 # Author: John Buck, based on earlier versions by John Clevenger and Doug Lane
+DEFAULT_CPU_NUM=3
+CPU_OVERRIDE_FILE=$HOME/pc2_cpu_override
+
+# Where to the the result of the first failure.  If this file is not created, then the
+# run was accepted. (correct)
+RESULT_FAILURE_FILE=failure.txt
 
 # FAIL_RETCODE_BASE is 128 + 64 + xx
 # 128 = system error, like signal
@@ -32,14 +41,43 @@ FAIL_SANDBOX_ERROR=$((FAIL_RETCODE_BASE+54))
 # This gets added to the current number of executing processes for this user.
 MAXPROCS=32
 
-# taskset cpu mask for running submission on single processor
-cpunum=${USER/judge/}
-if [[ "$cpunum" =~ ^[1-5]$ ]]
+# Compute taskset cpu mask for running submission on single processor
+
+# Get system's maximum CPU number
+MAX_CPU_NUM=`lscpu -p=cpu | tail -1`
+
+# See if the admin wants to override the CPU by reading the override file
+if test -s ${CPU_OVERRIDE_FILE}
 then
-	CPUMASK=$((1<<(cpunum-1)))
-else
-	CPUMASK=0x08
+	# This will get the first line that consists of numbers only
+	cpunum=`egrep '^[0-9]+$' ${CPU_OVERRIDE_FILE} | head -1`
+	if test -z ${cpunum}
+	then
+		cpunum=""
+	elif test ${cpunum} -gt ${MAX_CPU_NUM}
+	then
+		cpunum=""
+	fi
 fi
+
+# If there was no override or the override was bad, let's try to figure out the cpunum
+if test -z ${cpunum}
+then
+	# The login id must be "judge#" where # is the desired CPU and judge number.
+	# If the login is not "judge#", then the system default is used.
+	# This special case is for when you want to run multiple judges on one computer
+	# that has lots of CPU's, but want to pin each judge to its own cpu.
+	cpunum=${USER/judge/}
+	if [[ "$cpunum" =~ ^[1-9][0-9]*$ ]]
+	then
+		# Restrict to number of CPU's.
+		cpunum=$(((cpunum-1)%(MAX_CPU_NUM+1)))
+	else
+		cpunum=$(((DEFAULT_CPU_NUM+1)))
+	fi
+fi
+cpunum=$((cpunum-1))
+CPUMASK=$((1<<cpunum))
 
 # Process ID of submission
 submissionpid=""
@@ -61,12 +99,41 @@ fi
 # the kill control for the cgroup
 PC2_SANDBOX_CGROUP_PATH_KILL=${PC2_SANDBOX_CGROUP_PATH}/cgroup.kill
 
+# We putreports of each testcase in this folder
+REPORTDIR=reports
+
 # control whether the script outputs debug/tracing info
 _DEBUG="on"   # change this to anything other than "on" to disable debug/trace output
 DEBUG_FILE=sandbox.log
 function DEBUG()
 {
   [ "$_DEBUG" == "on" ] && "$@" >> $DEBUG_FILE
+}
+
+# For per-testcase reporting/logging
+function REPORT()
+{
+	if test -n "$REPORTFILE"
+	then
+		echo "$@" >> $REPORTFILE
+	fi
+}
+function REPORT_BRIEF()
+{
+	if test -n "$BRIEFREPORTFILE"
+	then
+		echo "$@" >> $BRIEFREPORTFILE
+	fi
+}
+
+# For per-testcase report and debugging both
+function REPORT_DEBUG()
+{
+	if test -n "$REPORTFILE"
+	then
+		echo "$@" >> $REPORTFILE
+	fi
+	[ "$_DEBUG" == "on" ] && echo "$@" >> $DEBUG_FILE
 }
 
 # ------------------------------------------------------------
@@ -109,9 +176,10 @@ KillChildProcs()
 # is wall-time exceeded which is execute time limit + 1 second
 HandleTerminateFromPC2()
 {
-	DEBUG echo "Received TERMINATE signal from PC2"
+	REPORT_DEBUG "Received TERMINATE signal from PC2"
+	REPORT_DEBUG "Kiling off submission process group $submissionpid and all children"
 	KillChildProcs
-	DEBUG echo $0: Wall time exceeded - exiting with code $FAIL_WALL_TIME_LIMIT_EXCEEDED
+	REPORT_DEBUG $0: Wall time exceeded - exiting with code $FAIL_WALL_TIME_LIMIT_EXCEEDED
 	exit $FAIL_WALL_TIME_LIMIT_EXCEEDED 
 }
 
@@ -136,23 +204,49 @@ ShowStats()
 	walltime=$3
 	memused=$4
 	memlim=$5
-	DEBUG echo Resources used for this run:
-	DEBUG printf "   CPU ms  Limit ms    Wall ms   Memory Used Memory Limit\n"
-	DEBUG printf "%5d.%03d %5d.%03d %6d.%03d  %12s %12d\n" $((cpuused / 1000)) $((cpuused % 1000)) \
+	REPORT_BRIEF "$(printf '%d.%03d' $((cpuused / 1000)) $((cpuused % 1000)))" \
+		"$(printf '%d.%03d' $((cpulim / 1000)) $((cpulim % 1000)))" \
+		"$(printf '%d.%03d' $((walltime / 1000)) $((walltime % 1000)))" \
+		${memused} $((memlim))
+	REPORT_DEBUG Resources used for this run:
+	REPORT_DEBUG "$(printf '   CPU ms  Limit ms    Wall ms   Memory Used Memory Limit\n')"
+	REPORT_DEBUG "$(printf '%5d.%03d %5d.%03d %6d.%03d  %12s %12d\n' $((cpuused / 1000)) $((cpuused % 1000)) \
 		$((cpulim / 1000)) $((cpulim % 1000)) \
 		$((walltime / 1000)) $((walltime % 1000)) \
-		$((memused)) $((memlim))
+		${memused} $((memlim)))"
+}
+
+# Generate a system failure result file.  This will be the FIRST failure as it will not overwrite the file
+# if it exists.
+SysFailure()
+{
+	if test ! -s ${RESULT_FAILURE_FILE}
+	then
+		(echo system; echo $* ) > ${RESULT_FAILURE_FILE}
+	fi
+}
+
+# Generate a failure result file.  This will be the FIRST failure as it will not overwrite the file
+# if it exists.
+Failure()
+{
+	if test ! -s ${RESULT_FAILURE_FILE}
+	then
+		echo $* > ${RESULT_FAILURE_FILE}
+	fi
 }
 
 # ------------------------------------------------------------
 
 if [ "$#" -lt 1 ] ; then
    echo $0: No command line arguments
+   SysFailure No command line arguments to $0
    exit $FAIL_NO_ARGS_EXIT_CODE
 fi 
 
-if [ "$#" -lt 3 ] ; then
-   echo $0: expected 3 or more arguments, found: $*
+if [ "$#" -lt 6 ] ; then
+   echo $0: expected 6 or more arguments, found: $*
+   SysFailure Expected 6 or more arguments to $0, found: $*
    exit $FAIL_INSUFFICIENT_ARGS_EXIT_CODE
 fi 
 
@@ -163,14 +257,30 @@ fi
 
 MEMLIMIT=$1
 TIMELIMIT=$2
-COMMAND=$3
-shift
-shift
-shift
+JUDGEIN=$3
+JUDGEANS=$4
+TESTCASE=$5
+COMMAND=$6
+DEBUG echo "+---------------- Test Case ${TESTCASE} ----------------+"
+DEBUG echo Command line: $0 $*
+shift 6
 
-#### Debugging - just set expected first 3 args to: 16MB 5seconds
+DEBUG echo -e "\nYou can run this by hand in the sandbox by using the following command:"
+scriptname=`basename $0`
+RUN_LOCAL_CMD="./${scriptname} ${MEMLIMIT} ${TIMELIMIT} xxx xxx $TESTCASE ${COMMAND} $* < ${JUDGEIN} > $TESTCASE.ans"
+DIFF_OUTPUT_CMD="diff -w ${JUDGEANS} $TESTCASE.ans | more"
+DEBUG echo -e "\n${RUN_LOCAL_CMD}"
+DEBUG echo -e "\nor, without the sandbox by using the following command:"
+DEBUG echo -e "\n${COMMAND} $* < ${JUDGEIN} > $TESTCASE.ans"
+DEBUG echo -e "\nAnd compare with the judge's answer:"
+DEBUG echo -e "\n${DIFF_OUTPUT_CMD}\n"
+
+#### Debugging - just set expected first args to: 8MB 2seconds
 ###MEMLIMIT=8
 ###TIMELIMIT=2
+###JUDGEIN=none
+###JUDGEANS=none
+###TESTCASE=1
 ###COMMAND=$1
 ###shift
 
@@ -181,27 +291,32 @@ shift
 DEBUG echo checking PC2 CGroup V2 installation...
 if [ ! -d "$PC2_CGROUP_PATH" ]; then
    echo $0: expected pc2sandbox CGroups v2 installation in $PC2_CGROUP_PATH 
+   SysFailure CGroups v2 not installed in $PC2_CGROUP_PATH
    exit $FAIL_INVALID_CGROUP_INSTALLATION
 fi
 
 if [ ! -f "$CGROUP_PATH/cgroup.controllers" ]; then
    echo $0: missing file cgroup.controllers in $CGROUP_PATH
+   SysFailure Missing cgroup.controllers in $CGROUP_PATH
    exit $FAIL_MISSING_CGROUP_CONTROLLERS_FILE
 fi
 
 if [ ! -f "$CGROUP_PATH/cgroup.subtree_control" ]; then
    echo $0: missing file cgroup.subtree_control in $CGROUP_PATH
+   SysFailure Missing cgroup.subtree_controll in $CGORUP_PATH
    exit $FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE
 fi
 
 # make sure the cpu and memory controllers are enabled
 if ! grep -q -F "cpu" "$CGROUP_PATH/cgroup.subtree_control"; then
    echo $0: cgroup.subtree_control in $CGROUP_PATH does not enable cpu controller
+   SysFailure CPU controller not enabled in cgroup.subtree_control in $CGROUP_PATH
    exit $FAIL_CPU_CONTROLLER_NOT_ENABLED
 fi
 
 if ! grep -q -F "memory" "$CGROUP_PATH/cgroup.subtree_control"; then
    echo $0: cgroup.subtree_control in $CGROUP_PATH does not enable memory controller
+   SysFailure Memory controller not enabled in cgroup.subtree_control in $CGROUP_PATH
    exit $FAIL_MEMORY_CONTROLLER_NOT_ENABLED
 fi
 
@@ -216,6 +331,7 @@ then
 	if ! rmdir $PC2_SANDBOX_CGROUP_PATH
 	then
 		DEBUG echo Cannot remove previous sandbox: $PC2_SANDBOX_CGROUP_PATH
+		SysFailure Can not remove previous sandbox $PC2_SANDBOX_CGROUP_PATH
 		exit $FAIL_SANDBOX_ERROR
 	fi
 fi
@@ -224,19 +340,31 @@ DEBUG echo Creating sandbox $PC2_SANDBOX_CGROUP_PATH
 if ! mkdir $PC2_SANDBOX_CGROUP_PATH
 then
 	DEBUG echo Cannot create $PC2_SANDBOX_CGROUP_PATH
+	SysFailure Can not create $PC2_SANDBOX_CGROUP_PATH
 	exit $FAIL_INVALID_CGROUP_INSTALLATION
 fi
+
+# Set up report directory for per-case logging
+mkdir -p "$REPORTDIR"
+
+# Set report file to be testcase specific one now
+REPORTFILE=`printf "$REPORTDIR/testcase_%03d.log" $TESTCASE`
+BRIEFREPORTFILE=`printf "$REPORTDIR/briefcase_%03d.log" $TESTCASE`
+DEBUG echo Report file: ${REPORTFILE} Brief Report File: ${BRIEFREORTFILE}
+REPORT Test case $TESTCASE:
+REPORT Command: "${RUN_LOCAL_CMD}"
+REPORT Diff: "   ${DIFF_OUTPUT_CMD}"
 
 # set the specified memory limit - input is in MB, cgroup v2 requires bytes, so multiply by 1M
 # but only if > 0.
 # "max" means unlimited, which is the cgroup v2 default
 DEBUG echo checking memory limit
 if [ "$MEMLIMIT" -gt "0" ] ; then
-  DEBUG echo setting memory limit to $MEMLIMIT MB
+  REPORT_DEBUG Setting memory limit to $MEMLIMIT MiB
   echo $(( $MEMLIMIT * 1024 * 1024 ))  > $PC2_SANDBOX_CGROUP_PATH/memory.max
   echo 1  > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max
 else
-  DEBUG echo setting memory limit to max, meaning no limit
+  REPORT_DEBUG Setting memory limit to max, meaning no limit
   echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.max  
   echo "max" > $PC2_SANDBOX_CGROUP_PATH/memory.swap.max  
 fi
@@ -245,32 +373,35 @@ fi
 # be reworked if ms accuracy is needed.  The problem is, cgroups do not kill off a process that
 # exceeds the time limit, ulimit does.
 TIMELIMIT_US=$((TIMELIMIT * 1000000))
-DEBUG echo setting cpu limit to $TIMELIMIT_US microseconds "("ulimit -t $TIMELIMIT ")"
+REPORT_DEBUG Setting cpu limit to $TIMELIMIT_US microseconds "("ulimit -t $TIMELIMIT ")"
 ulimit -t $TIMELIMIT
 
 MAXPROCS=$((MAXPROCS+`ps -T -u $USER | wc -l`))
-DEBUG echo setting maximum user processes to $MAXPROCS
+REPORT_DEBUG Setting maximum user processes to $MAXPROCS
 ulimit -u $MAXPROCS
+
+# Keep track of details for reports
+REPORT_BRIEF ${JUDGEIN}
+REPORT_BRIEF ${JUDGEANS}
+REPORT_BRIEF $cpunum
+REPORT_BRIEF $$
+REPORT_BRIEF $(date "+%F %T.%6N")
 
 # Remember wall time when we started
 starttime=`GetTimeInMicros`
 
 #put the current process (and implicitly its children) into the pc2sandbox cgroup.
-DEBUG echo putting $$ into $PC2_SANDBOX_CGROUP_PATH cgroup
+REPORT Putting $$ into $PC2_SANDBOX_CGROUP_PATH cgroup
 if ! echo $$ > $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
 then
 	echo $0: Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs - not executing submission.
+	SysFailure Could not add current process to $PC2_SANDBOX_CGROUP_PATH/cgroup.procs
 	exit $FAIL_SANDBOX_ERROR
 fi
 
 # run the command
-# the following are the cgroup-tools V1 commands; need to find cgroup-tools v2 commands
-# echo Using cgexec to run $COMMAND $*
-# cgexec -g cpu,memory:/pc2 $COMMAND $*
-
-# since we don't know how to use cgroup-tools to execute, just execute it directly (it's a child so it
-#  should still fall under the cgroup limits).
-DEBUG echo Executing "setsid taskset $CPUMASK $COMMAND $*"
+# execute it directly (it's a child so it should still fall under the cgroup limits).
+REPORT_DEBUG Executing "setsid taskset $CPUMASK $COMMAND $*"
 
 # Set up trap handler to catch wall-clock time exceeded and getting killed by PC2's execute timer
 trap HandleTerminateFromPC2 15
@@ -309,25 +440,30 @@ else
 fi
 ShowStats ${cputime} ${TIMELIMIT_US} ${walltime} ${peakmem} $((MEMLIMIT*1024*1024))
 
+REPORT_DEBUG The command exited with code: ${COMMAND_EXIT_CODE}
+
 if test "$kills" != "0"
 then
-	DEBUG echo The command was killed because it exceeded the memory limit
+	REPORT_DEBUG The command was killed because it exceeded the memory limit
+	REPORT_BRIEF MLE
 	COMMAND_EXIT_CODE=${FAIL_MEMORY_LIMIT_EXCEEDED}
 else
 	# See why we terminated.  137 = 128 + 9 = SIGKILL, which is what ulimit -t sends.
 	if test "$COMMAND_EXIT_CODE" -eq 137 -o "$cputime" -gt "$TIMELIMIT_US"
 	then
-		DEBUG echo The command was killed because it exceeded the CPU Time limit
+		REPORT_DEBUG The command was killed because it exceeded the CPU Time limit
+		REPORT_BRIEF TLE
 		COMMAND_EXIT_CODE=${FAIL_TIME_LIMIT_EXCEEDED}
 	elif test "$COMMAND_EXIT_CODE" -ge 128
 	then
-		DEBUG echo The command terminated abnormally with exit code $COMMAND_EXIT_CODE
+		REPORT_DEBUG The command terminated abnormally with exit code $COMMAND_EXIT_CODE
+		REPORT_BRIEF RTE Exit:$COMMAND_EXIT_CODE
 	else
-		DEBUG echo The command terminated normally.
+		REPORT_DEBUG The command terminated normally.
 	fi
 fi
-DEBUG echo Finished executing $COMMAND $*
-DEBUG echo $COMMAND exited with exit code $COMMAND_EXIT_CODE
+REPORT_DEBUG Finished executing $COMMAND $*
+REPORT_DEBUG $COMMAND exited with exit code $COMMAND_EXIT_CODE
 DEBUG echo
 
 

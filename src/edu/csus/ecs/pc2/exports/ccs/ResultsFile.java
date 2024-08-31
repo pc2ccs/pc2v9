@@ -230,24 +230,25 @@ public class ResultsFile {
             boolean isHighHonor = false;
             boolean isHonor = false;
 
-            if (record.getNumberSolved() > 0) {
-                if (finalizeData.isUseWFGroupRanking()) {
-                    if (record.getNumberSolved() >= highestHonorSolvedCount) {
-                        isHighestHonor = true;
-                    } else if (record.getNumberSolved() >= highHonorSolvedCount) {
-                        isHighHonor = true;
-                    } else if (record.getNumberSolved() >= median) {
-                        isHonor = true;
-                    }
-                }
-                else if (record.getNumberSolved() >= median) {
+            if (finalizeData.isUseWFGroupRanking()) {
+                if (record.getNumberSolved() >= highestHonorSolvedCount) {
+                    isHighestHonor = true;
+                } else if (record.getNumberSolved() >= highHonorSolvedCount) {
+                    isHighHonor = true;
+                } else if (record.getNumberSolved() >= median) {
                     isHonor = true;
                 }
+            } else if (record.getNumberSolved() >= median) {
+                isHonor = true;
             }
 
-            String award = getAwardMedal(record.getRankNumber(), finalizeData, isHighestHonor, isHighHonor, isHonor);
+            String award = getMedalCitation(record.getRankNumber(), finalizeData, isHighestHonor, isHighHonor, isHonor);
+            if (record.getNumberSolved() == 0) {
+                award = HONORABLE;
+            }
+
             String rank = "";
-            if (!"honorable".equalsIgnoreCase(award)) {
+            if (!HONORABLE.equalsIgnoreCase(award)) {
                 if (finalizeData.isUseWFGroupRanking() && realRank > lastMedalRank) {
                     if (record.getNumberSolved() != lastSolvedNum) {
                         lastSolvedNum = record.getNumberSolved();
@@ -281,29 +282,69 @@ public class ResultsFile {
     }
 
     /**
+     * Determine whether a team receives a medal or Honor citaion.
+     *
+     * <pre>
+     * Award is a string with value "gold", "silver", "bronze", "highest honor", "high honor", "honor" if WF type rankings or "ranked"
+     * or "honorable" as appropriate.
+     * </pre>
+     *
+     * @param rankNumber,isHighestHonor,isHighHonor,isHonor
+     * @param finalizeData
+     * @return medalOrCitation
+     */
+
+    private String getMedalCitation(int rankNumber, FinalizeData data, boolean isHighestHonor, boolean isHighHonor, boolean isHonor) {
+
+        String medalOrCitation = getAwardMedal(rankNumber, data);
+        if (medalOrCitation == null) {
+            medalOrCitation = getCitation(data, isHighestHonor, isHighHonor, isHonor);
+        }
+        return medalOrCitation;
+    }
+
+    /**
      * Determine and return award medal color.
      *
      * <pre>
-     * Award is a string with value "gold", "silver", "bronze", "highest honor", "high honor", "honor"
-     * or "honorable" as appropriate.
+     * Award is a string with value "gold", "silver", "bronze"
+     * or null as appropriate.
      * </pre>
      *
      * @param rankNumber
      * @param finalizeData
-     * @return
+     * @return medalColor
      */
+    private String getAwardMedal(int rankNumber, FinalizeData data) {
 
-    private String getAwardMedal(int rankNumber, FinalizeData data, boolean isHighestHonor, boolean isHighHonor, boolean isHonor) {
-
-        // TODO CCS determine how to assign bronze and ranked
-        if (!(isHighestHonor || isHighHonor || isHonor)) {
-            return HONORABLE;
-        } else if (rankNumber <= data.getGoldRank()) {
+        if (rankNumber <= data.getGoldRank()) {
             return GOLD;
         } else if (rankNumber <= data.getSilverRank()) {
             return SILVER;
         } else if (rankNumber <= data.getBronzeRank()) {
             return BRONZE;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Determine what citation team will receive based on new WF rules or are they Ranked if WF rules not used
+     *
+     * <pre>
+     * Award is a string with value "highest honor", "high honor", "honor" if WF type rankings or "ranked"
+     * or "honorable" as appropriate.
+     * </pre>
+     *
+     * @param isHighestHonor,isHighHonor,isHonor
+     * @param finalizeData
+     * @return citation
+     */
+
+     private String getCitation(FinalizeData data, boolean isHighestHonor, boolean isHighHonor, boolean isHonor) {
+
+        if (!(isHighestHonor || isHighHonor || isHonor)) {
+            return HONORABLE;
         } else if (!data.isUseWFGroupRanking()) {
             return RANKED;
         } else if (isHighestHonor) {

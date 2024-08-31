@@ -127,6 +127,8 @@ public interface IContestLoader {
 
     String JUDGE_CONFIG_PATH_KEY = "judge-config-path";
 
+    String EXECUTE_FOLDER = "execute-folder";
+
     String TIMEOUT_KEY = "timeout";
 
     final String MEMORY_LIMIT_IN_MEG_KEY = "memory-limit-in-Meg";
@@ -233,6 +235,10 @@ public interface IContestLoader {
     String ALLOW_MULTIPLE_TEAM_LOGINS_KEY = "allow-multiple-team-logins";
 
     String LOAD_ACCOUNTS_FILE_KEY = "load-accounts-file";
+
+    String SANDBOX_GRACE_TIME = "sandbox-grace-time-secs";
+
+    String SANDBOX_INTERACTIVE_GRACE_MULTIPLIER = "sandbox-interactive-time-multiplier";
 
     /**
      *

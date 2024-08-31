@@ -1289,6 +1289,9 @@ public class Filter implements Serializable {
             if (filteringGroups) {
                 filterInfo += " groups(s)";
             }
+            if (filteringCustom) {
+                filterInfo += " custom";
+            }
 
             return filterInfo;
         } else {
@@ -1373,7 +1376,8 @@ public class Filter implements Serializable {
                 || filteringJudgements || filteringLanguages || filteringElapsedTime || filteringRunStates
                 || filteringPermissions
                 || thisSiteOnly
-                || filteringGroups;
+                || filteringGroups
+                || filteringCustom;
         } else {
             return false;
         }
