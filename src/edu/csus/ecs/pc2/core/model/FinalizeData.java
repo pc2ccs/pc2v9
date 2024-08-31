@@ -154,7 +154,7 @@ public class FinalizeData implements Serializable {
     /**
      * Return whether or not minimum problems solved for honors fields is to be customized or not
      *
-     * @return true if WF group rankings are to be used
+     * @return true if minimum problems solved count in Honors category is to be customized
      */
     public boolean isCustomizeHonorsSolvedCount() {
         return customizeHonorsSolvedCount;
