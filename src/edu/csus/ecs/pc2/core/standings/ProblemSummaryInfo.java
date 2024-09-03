@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.standings;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -18,7 +18,7 @@ public class ProblemSummaryInfo {
 
     // <problemSummaryInfo attempts="0" index="12" isPending="false"
     // isSolved="false" points="0" problemId="sodaslurper--6927480297132897573"
-    // solutionTime="0"/>
+    // shortName ="sodaslurper" solutionTime="0"/>
 
     @XmlAttribute
     private String attempts;
@@ -37,6 +37,9 @@ public class ProblemSummaryInfo {
 
     @XmlAttribute
     private String problemId;
+    
+    @XmlAttribute
+    private String shortName;
 
     @XmlAttribute
     private String solutionTime;
@@ -87,6 +90,14 @@ public class ProblemSummaryInfo {
 
     public void setProblemId(String problemId) {
         this.problemId = problemId;
+    }
+    
+    public String getShortName() {
+        return shortName;
+    }
+
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
     }
 
     public String getSolutionTime() {

@@ -1,9 +1,15 @@
-// Copyright (C) 1989-2021 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.standings.json;
+
+import java.io.IOException;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * 
@@ -12,9 +18,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  *
  */
 
-//The following annotation tells the Jackson ObjectMapper not to include "type information" when it serializes
+//The annotation one after @JsonSerialize tells the Jackson ObjectMapper not to include "type information" when it serializes
 //objects of this class (the default is to include the fully-qualified class name as an additional JSON element).
 //(Note that exclusion of such type information means that generated JSON cannot subsequently be accurately DESERIALIZED...)
+@JsonSerialize(using = ProblemScoreRowSerializer.class)
 @JsonTypeInfo(use=Id.NONE)
 public class ProblemScoreRow {
     
@@ -69,5 +76,27 @@ public class ProblemScoreRow {
         this.num_pending = num_pending;
     }
     
+}
+
+/**
+ * This custom JsonSerialer for ProblemScoreRow class adds time field to Json based on the condition of whether the problem is marked as solved or not. 
+ * If it is the boolean for solved is marked true Json will have time field. If not Json will not have the time field.
+ *
+ */
+class ProblemScoreRowSerializer extends JsonSerializer<ProblemScoreRow> {
+    @Override
+    public void serialize(ProblemScoreRow problemScoreRow, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        gen.writeStartObject();
+        gen.writeBooleanField("solved", problemScoreRow.isSolved());
+        gen.writeNumberField("num_judged", problemScoreRow.getNum_judged());
+
+        if (problemScoreRow.isSolved()) {
+            gen.writeNumberField("time", problemScoreRow.getTime());
+        } 
+        gen.writeStringField("problem_id", problemScoreRow.getProblem_id());
+        gen.writeNumberField("num_pending", problemScoreRow.getNum_pending());
+
+        gen.writeEndObject();
+    }
 }
 

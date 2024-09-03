@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.Serializable;
@@ -35,6 +35,8 @@ public class ProblemSummaryInfo implements Serializable {
     private int judgedRunCount = 0;
 
     private ElementId problemId = null;
+    
+    private String shortName = "";
 
     /**
      * @return Returns the problemId.
@@ -49,6 +51,14 @@ public class ProblemSummaryInfo implements Serializable {
      */
     public void setProblemId(edu.csus.ecs.pc2.core.model.ElementId problemId) {
         this.problemId = problemId;
+    }
+    
+    public String getShortName() {
+        return shortName;
+    }
+    
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
     }
 
     /**
