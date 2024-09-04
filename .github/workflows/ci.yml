@@ -24,7 +24,7 @@ jobs:
       - name: Build
         run: ant -noinput -buildfile package.xml
 
-      - uses: actions/upload-artifact@v4.1.7
+      - uses: actions/upload-artifact@v4.4.0
         with:
           name: build
           path: dist/*
