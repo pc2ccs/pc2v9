@@ -14,11 +14,13 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.ExecuteUtilities;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAwardUtilities;
+import edu.csus.ecs.pc2.core.imports.clics.CLICSScoreboard;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.standings.ContestStandings;
+import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.services.core.EventFeedJSON;
-import edu.csus.ecs.pc2.services.core.ScoreboardJson;
 
 public class ExportFilesUtilities {
 
@@ -61,13 +63,13 @@ public class ExportFilesUtilities {
         }
 
         try {
-            ScoreboardJson scoreboardJson = new ScoreboardJson();
-            String json = scoreboardJson.createJSON(contest);
-            String[] scoreboardJsonLines = { json };
-            FileUtilities.writeFileContents(scoreboardJsonFilename, scoreboardJsonLines);
+            ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(contest);
+            CLICSScoreboard clicsScoreboard = new CLICSScoreboard(contestStandings);
+            String json = clicsScoreboard.toString();
+            String[] sa = { json };
+            FileUtilities.writeFileContents(scoreboardJsonFilename, sa);
 
             filesCreated.add(scoreboardJsonFilename);
-
         } catch (Exception e) {
             StaticLog.getLog().log(Level.WARNING, "Problem writing scorebord file", e);
             Utilities.printStackTrace(System.out, e);
