@@ -1,6 +1,4 @@
-/**
- * 
- */
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
@@ -12,7 +10,9 @@ import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
 /**
- * @author john
+ * Test the Data Groups classes
+ * 
+ * @author John Buck
  *
  */
 public class TestDataGroupsTest extends AbstractTestCase {

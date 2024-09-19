@@ -8,6 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
@@ -228,6 +230,41 @@ public class ContestImportUtilities {
             throw new YamlLoadException(getSnakeParserDetails(e), e, filename);
         }
     }
+    
+    /**
+     * read directory and return list of files with given extension
+     * @param directoryName to search
+     * @param extension to look for
+     * @return array of filenames
+     */
+    public static ArrayList<TestCaseInfo> getTestCaseFileNames(String directoryName) {
+
+        ArrayList<TestCaseInfo> list = new ArrayList<TestCaseInfo>();
+        File dir = new File(directoryName);
+
+        String[] entries = dir.list();
+        HashSet<String> fileNames = new HashSet<String>();
+        String ansFile;
+        
+        if (entries != null) {
+            Arrays.sort(entries);
+
+            for (String name : entries) {
+                fileNames.add(name);
+            }
+            for (String name : entries) {
+                if (name.endsWith(TestCaseInfo.TEST_CASE_INPUT_EXTENSION)) {
+                    // the answer file better be there
+                    ansFile = name.replaceAll(TestCaseInfo.TEST_CASE_INPUT_EXTENSION + "$", TestCaseInfo.TEST_CASE_ANSWER_EXTENSION);
+                    if(!fileNames.contains(ansFile)) {
+                        throw new YamlLoadException("Missing answer file " + ansFile + " for input file " + name);
+                    }
+                    list.add(new TestCaseInfo(name, ansFile));
+                }
+            }
+        }
+        return list;
+    }
 
     /**
      * Create a simple string with parse info.
@@ -235,7 +272,6 @@ public class ContestImportUtilities {
      * @param markedYAMLException
      * @return
      */
-
     public static String getSnakeParserDetails(MarkedYAMLException markedYAMLException) {
 
         Mark mark = markedYAMLException.getProblemMark();

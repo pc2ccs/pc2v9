@@ -125,6 +125,10 @@ public class TestDataGroup {
         return(result);
     }
     
+    public boolean readTestCases() {
+        return false;
+    }
+    
     /**
      * @return the staticValidation
      */
