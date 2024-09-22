@@ -242,7 +242,7 @@ public class JSONTool {
             
             // Only get date if the contest is, in fact, certified
             if (finalizedData != null && finalizedData.isCertified()) {
-                finalizedDate = Utilities.getIso8601formatterWithMS().format(model.getFinalizeData().getCertificationDate());
+                finalizedDate = Utilities.getIso8601formatterWithMS().format(finalizedData.getCertificationDate());
             }
             if (finalizedDate != null) {
                 element.put("finalized", finalizedDate);
