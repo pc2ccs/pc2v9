@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
@@ -248,7 +248,7 @@ public class FileComparisonUtilities {
 
                     fieldName = "team_ids";
                     valueOne = formatTeamList(firstAward.getTeam_ids());
-                    valueTwo = formatTeamList(firstAward.getTeam_ids());
+                    valueTwo = formatTeamList(clicsAward.getTeam_ids());
                     fieldCompareRecord = new FieldCompareRecord(fieldName, valueOne, valueTwo, null, key);
                     fileComparison.addfieldCompareRecord(fieldCompareRecord);
                     
