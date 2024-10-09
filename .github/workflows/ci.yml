@@ -24,7 +24,7 @@ jobs:
       - name: Build
         run: ant -noinput -buildfile package.xml
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4.4.0
         with:
           name: build
           path: dist/*
@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: build
           path: dist
@@ -127,7 +127,7 @@ jobs:
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: build
           path: dist

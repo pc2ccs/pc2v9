@@ -18,14 +18,14 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Pane to allow user to choose and open/start plugin window or pane.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 
 public class PluginLoadPane extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -1303011559658754807L;
 
@@ -47,7 +47,7 @@ public class PluginLoadPane extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public PluginLoadPane() {
         super();
@@ -56,7 +56,7 @@ public class PluginLoadPane extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         this.setLayout(null);
@@ -74,7 +74,7 @@ public class PluginLoadPane extends JPanePlugin {
 
     /**
      * This method initializes pluginComboBox
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<PluginWrapper> getPluginComboBox() {
@@ -87,7 +87,7 @@ public class PluginLoadPane extends JPanePlugin {
 
     /**
      * This method initializes openNewPluginButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getOpenNewPluginButton() {
@@ -96,6 +96,7 @@ public class PluginLoadPane extends JPanePlugin {
             openNewPluginButton.setBounds(new Rectangle(41, 147, 134, 36));
             openNewPluginButton.setText("Add Tab");
             openNewPluginButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     addNewTab();
                 }
@@ -119,7 +120,7 @@ public class PluginLoadPane extends JPanePlugin {
 
     /**
      * This method initializes addPluginInNewWindow
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getAddPluginInNewWindow() {
@@ -128,6 +129,7 @@ public class PluginLoadPane extends JPanePlugin {
             addPluginInNewWindow.setBounds(new Rectangle(317, 147, 182, 36));
             addPluginInNewWindow.setText("Open in new Window");
             addPluginInNewWindow.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     addNewPluginWindow();
                 }
@@ -144,7 +146,7 @@ public class PluginLoadPane extends JPanePlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -177,7 +179,7 @@ public class PluginLoadPane extends JPanePlugin {
 
     private JPanePlugin[] getPluginList() {
         Vector<JPanePlugin> plugins = new Vector<JPanePlugin>();
-        
+
         plugins.add(new AccountsPane());
         plugins.add(new AccountsTablePane());
         plugins.add(new AutoJudgesPane());
@@ -187,6 +189,7 @@ public class PluginLoadPane extends JPanePlugin {
         plugins.add(new ConnectionsPane());
         plugins.add(new ConnectionsTablePane());
         plugins.add(new ContestClockPane());
+        plugins.add(new ContestInformationPane());
         plugins.add(new ContestScheduledStartClockPane());
         plugins.add(new ContestTimesPane());
         plugins.add(new EventFeedServerPane());
@@ -216,10 +219,10 @@ public class PluginLoadPane extends JPanePlugin {
         plugins.add(new ViewPropertiesPane());
         plugins.add(new NSAStandingsPane());
         plugins.add(new QuickJudgePane());
-        
+
         plugins.add(new ResultsComparePane());
 
-        JPanePlugin[] pluginList = (JPanePlugin[]) plugins.toArray(new JPanePlugin[plugins.size()]);
+        JPanePlugin[] pluginList = plugins.toArray(new JPanePlugin[plugins.size()]);
 
         Arrays.sort(pluginList, new JPluginPaneNameComparator());
 
@@ -229,6 +232,7 @@ public class PluginLoadPane extends JPanePlugin {
     private void loadPluginList() {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 pluginComboBox.removeAllItems();
                 for (JPanePlugin plugin : getPluginList()) {

@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import edu.csus.ecs.pc2.core.list.AccountList;
-import edu.csus.ecs.pc2.core.list.AccountNameComparator;
+import edu.csus.ecs.pc2.core.list.AccountNameCaseComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 
 /**
@@ -23,13 +23,15 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
      */
     private static final long serialVersionUID = 2417425534254224622L;
 
-    private AccountNameComparator accountNameComparator = new AccountNameComparator();
+    private AccountNameCaseComparator accountNameCaseComparator = new AccountNameCaseComparator();
 
     private AccountList cachedAccountList;
 
     private int median = -1;
 
     private int lastRank = -1;
+
+    private boolean useWFGroupRanking = true;
 
     /**
      * Compares its two arguments for order. Returns a negative integer, zero, or a positive integer as the first argument is less
@@ -87,7 +89,7 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
         nameB = accountB.getDisplayName();
         b5 = teamB.getClientId().hashCode();
 //        nameComparison = nameA.toLowerCase().compareTo(nameB.toLowerCase());
-        nameComparison = accountNameComparator.compare(nameA, nameB);
+        nameComparison = accountNameCaseComparator.compare(nameA, nameB);
 
         //
         // Primary Sort = number of solved problems (high to low)
@@ -102,21 +104,23 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
             return 1;
         } else if (b1 < getMedian()) {
             return -1;
-        } else if( a0 > getLastRank() && b0 > getLastRank() ) {
-            // compare only number of solved and name
-            if (b1 == a1) {
-                return(nameComparison);
-            } else {
-                if (b1 < a1) {
-                    return (-1);
+        } else if(isUseWFGroupRanking()) {
+            if( a0 > getLastRank() && b0 > getLastRank() ) {
+                // compare only number of solved and name
+                if (b1 == a1) {
+                    return(nameComparison);
                 } else {
-                    return (1);
+                    if (b1 < a1) {
+                        return (-1);
+                    } else {
+                        return (1);
+                    }
                 }
+            } else if (a0 > getLastRank()) {
+                return 1;
+            } else if (b0 > getLastRank()) {
+                return -1;
             }
-        } else if (a0 > getLastRank()) {
-            return 1;
-        } else if (b0 > getLastRank()) {
-            return -1;
         }
 
         if ((b1 == a1) && (b2 == a2) && (b3 == a3) && (nameComparison == 0)
@@ -159,5 +163,13 @@ public class FinalsStandingsRecordComparator implements Serializable, Comparator
 
     public void setLastRank(int lastRank) {
         this.lastRank = lastRank;
+    }
+
+    public boolean isUseWFGroupRanking() {
+        return useWFGroupRanking;
+    }
+
+    public void setUseWFGroupRanking(boolean useGroupRank) {
+        useWFGroupRanking = useGroupRank;
     }
 }

@@ -96,7 +96,7 @@ import edu.csus.ecs.pc2.ui.UIPluginList;
 
 /**
  * Implementation of InternalContest InternalController.
- * 
+ *
  * Run Flow, submit run.
  * <ol>
  * <li>Team: {@link #submitRun(Problem, Language, String)}
@@ -129,12 +129,12 @@ import edu.csus.ecs.pc2.ui.UIPluginList;
  * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#RUN_AVAILABLE}
  * </ol>
  * <P>
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class InternalController implements IInternalController, ITwoToOne, IBtoA {
 
-    
+
     private boolean haltOnFatalError = true;
 
     /**
@@ -162,27 +162,27 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private Log log;
 
     private Ini ini = new Ini();
-    
+
     private boolean suppressConnectionsPaneDisplay = false;
     private boolean suppressLoginsPaneDisplay = false;
 
     /**
      * The port that the server will listen on.
-     * 
+     *
      * This is the port where all clients will contact this server/site.
      */
     private static int port;
 
     /**
      * The host/IP for a client or server to contact.
-     * 
+     *
      * Both client and server who are connecting a server use this host as the host to contact.
      */
     private String remoteHostName = "127.0.0.1";
 
     /**
      * The port for a client or server to login to/contact.
-     * 
+     *
      * Both client and server who are connecting a server use this port as the portt to contact.
      */
     private int remoteHostPort;
@@ -250,7 +250,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private String loginClassName = LOGIN_UI_GUI_CLASSNAME;
 
     private String startupDialogClassName = STARTUP_DIALOG_GUI_CLASS;
-    
+
     private String countdownClassName = COUNTDOWN_UI_CLASSNAME;
 
     private IStartupContestDialog startDialog;
@@ -262,7 +262,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Flag indicating whether Roman Numeral shutdown is done.
-     * 
+     *
      * If set to false, then will trigger/send the event
      */
     private boolean clientAutoShutdown = true;
@@ -277,20 +277,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private ILogWindow logWindow = null;
 
     private RunSubmitterInterfaceManager runSubmitterInterfaceManager = new RunSubmitterInterfaceManager();
-    
+
     /**
      * The object used to control contest auto-starting.
      */
     private AutoStarter autoStarter;
-    
+
     private AutoStopContestClockThread autoStopContestClockThread = null;
-    
+
     /**
      * Packets which should be sent to multiple instances of logins (for example, a "RUN_SUBMSSION_CONFIRMATION"
      * packet should be sent to every instance of a given team client login when multiple team logins are allowed).
      * Listing an element of {@link PacketType.Type} in this EnumSet causes packets of that type to be duplicated
      * and sent to every login instance for the destination client specified in the packet.
-     * 
+     *
      * @author John Clevenger, PC2 Development Team (pc2@ecs.csus.edu)
      *
      */
@@ -298,8 +298,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             PacketType.Type.RUN_SUBMISSION_CONFIRM,
             PacketType.Type.RUN_JUDGEMENT,
 //            PacketType.Type.RUN_JUDGEMENT_UPDATE,     //this seems to only be sent to judges/admins/boards to update run status, but not teams
-            PacketType.Type.CLARIFICATION_SUBMISSION_CONFIRM, 
-            PacketType.Type.CLARIFICATION_UPDATE, 
+            PacketType.Type.CLARIFICATION_SUBMISSION_CONFIRM,
+            PacketType.Type.CLARIFICATION_UPDATE,
             PacketType.Type.CLARIFICATION_ANSWER,
             PacketType.Type.CLARIFICATION_ANSWER_UPDATE
         );
@@ -309,6 +309,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         setContest(contest);
     }
 
+    @Override
     public void sendToLocalServer(Packet packet) {
 
         if (isThisServer(packet.getSourceId()) && isServer()) {
@@ -358,10 +359,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     /**
-     * 
+     *
      * @param inSiteNumber site number for client to send to
      * @param packet info to send
      */
+    @Override
     public void sendToRemoteServer(int inSiteNumber, Packet packet) {
 
         if (packet.getSourceId() != null && (packet.getOriginalSourceId().getSiteNumber() == inSiteNumber)) {
@@ -370,9 +372,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         Site remoteSite = lookupRemoteServer(inSiteNumber);
         int siteNumber = remoteSite.getSiteNumber();
-        
+
         ClientId clientId = new ClientId(siteNumber, Type.SERVER, 0);
-        
+
         ConnectionHandlerID connectionHandlerID = getConnectionHandleID(clientId);
         info("sendToRemoteServer " + clientId + " at "+siteNumber+" " + packet + " " + connectionHandlerID);
 
@@ -398,7 +400,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     protected ConnectionHandlerID getConnectionHandleID(ClientId clientId) {
-        
+
         ClientId[] ids = contest.getLocalLoggedInClients(clientId.getClientType());
         for (ClientId id : ids) {
             if (id.equals(clientId)){
@@ -408,12 +410,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return null;
     }
 
+    @Override
     public void sendToClient(Packet packet) {
         info("sendToClient b4 to " + packet.getDestinationId() + " " + packet);
 
         ClientId toClientId = packet.getDestinationId();
 
-        //this method should never be called with a packet containing a destination ClientId containing a null ConnectionHandlerID; 
+        //this method should never be called with a packet containing a destination ClientId containing a null ConnectionHandlerID;
         // however, the addition of "multiple login" support may have left some place where this is inadvertently true.
         //The following is an effort to catch/identify such situations.
         if (toClientId.getConnectionHandlerID()==null) {
@@ -424,14 +427,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (isThisSite(toClientId.getSiteNumber())) {
 
             if (contest.isLocalLoggedIn(toClientId)) {
-                
+
                 ConnectionHandlerID connectionHandlerID = toClientId.getConnectionHandlerID();
                 info("sendToClient " + packet.getDestinationId() + " @ " + connectionHandlerID);
                 sendToClient(connectionHandlerID, packet);
-                
+
                 //certain packets should also be sent to any other logged in clients (e.g. logins for the same team)
                 sendToDuplicateClients(packet);
-                
+
             } else {
                 try {
                     packetArchiver.writeNextPacket(packet);
@@ -462,37 +465,37 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         info("sendToClient af to " + packet.getDestinationId() + " " + packet);
     }
-    
+
     /**
      * Examines the specified packet to determine if there duplicate client logins to which the packet should be sent
      * (for example, in the case where multiple team clients for the same team have been allowed to login); sends the
      * specified packet to any duplicate login clients.
-     * 
+     *
      * @param packet the packet to be sent to any duplicate login clients.
      */
     private void sendToDuplicateClients(Packet packet) {
 
         //determine what client the packet was initially sent to (it is assumed that the caller took care of the initial send)
         ClientId toClientId = packet.getDestinationId();
-        
+
         //see if the packet is one of the types that should be duplicated (sent to all logins for the client)
         if (DuplicatePacketTypes.contains(packet.getType()) ) {
-            
+
             //see if the destination for the packet is a team
             if (toClientId.getClientType()==ClientType.Type.TEAM) {
-                
+
                 //get a list of all logged-in team clients
                 ClientId[] clientList = contest.getAllLoggedInClients(ClientType.Type.TEAM);
-                
+
                 //check every logged-in team client
                 for (ClientId clientId : clientList) {
-                    
+
                     //see if the current logged-in team client is the same team as the original intended destination
                     if (clientId.equals(toClientId)) {
-                        
+
                         //same team; make sure it's a DIFFERENT connection (we assume the caller already sent the packet to the original dest)
                         if (!clientId.getConnectionHandlerID().equals(toClientId.getConnectionHandlerID())) {
-                            
+
                             //it's a different connection for the same team; send a duplicate of the packet
                             ConnectionHandlerID connectionHandlerID = clientId.getConnectionHandlerID();
                             info("sendToClient " + packet.getDestinationId() + " @ " + connectionHandlerID);
@@ -528,15 +531,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * {@inheritDoc}
-     * Calling this method is equivalent to calling 
+     * Calling this method is equivalent to calling
      * {@link #submitJudgeRun(Problem, Language, String, SerializedFile[], long, long)}
      * with zeroes as the last two parameters.
      */
-    @Override    
+    @Override
     public void submitJudgeRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
         submitJudgeRun(problem, language, filename, otherFiles, 0, 0);
     }
-    
+
+    /**
+     * {@inheritDoc}
+     * Calling this method is equivalent to calling
+     * {@link #submitJudgeRun(Problem, Language, String, SerializedFile[], long, long, boolean)}
+     * with zeroes as the last two parameters.
+     */
+    @Override
+    public void submitJudgeRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles, boolean overrideStopOnFailure) throws Exception {
+        submitJudgeRun(problem, language, filename, otherFiles, 0, 0, overrideStopOnFailure);
+    }
+
     /**
      * {@inheritDoc}
      * Calling this method is equivalent to calling
@@ -544,29 +558,58 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * with a {@link SerializedFile} containing the main source code file contents.
      */
     @Override
-    public void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] otherFiles, 
+    public void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] otherFiles,
+                                long overrideSubmissionTimeMS, long overrideRunId, boolean overrideStopOnFailure) throws Exception {
+
+        SerializedFile serializedMainFile = new SerializedFile(mainFileName);
+
+        submitJudgeRun(problem, language, serializedMainFile, otherFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
+    }
+
+    /**
+     * {@inheritDoc}
+     * Calling this method is equivalent to calling
+     * {@link #submitJudgeRun(Problem, Language, SerializedFile, SerializedFile[], long, long, false)}
+     * with a {@link SerializedFile} containing the main source code file contents.
+     */
+    @Override
+    public void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] otherFiles,
                                 long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
 
         SerializedFile serializedMainFile = new SerializedFile(mainFileName);
 
-        submitJudgeRun(problem, language, serializedMainFile, otherFiles, overrideSubmissionTimeMS, overrideRunId);
+        submitJudgeRun(problem, language, serializedMainFile, otherFiles, overrideSubmissionTimeMS, overrideRunId, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     * Calling this method is equivalent to calling
+     * {@link #submitJudgeRun(Problem, Language, SerializedFile, SerializedFile[], long, long, false)}
+     * with a {@link SerializedFile} containing the main source code file contents.
+     */
+    @Override
+    public void submitJudgeRun(Problem problem, Language language, SerializedFile mainFile, SerializedFile[] otherFiles,
+                                long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
+
+        submitJudgeRun(problem, language, mainFile, otherFiles, overrideSubmissionTimeMS, overrideRunId, false);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void submitJudgeRun(Problem problem, Language language, SerializedFile mainFile, SerializedFile[] otherFiles, 
-                                long overrideSubmissionTimeMS, long overrideRunId) throws Exception {
+    public void submitJudgeRun(Problem problem, Language language, SerializedFile mainFile, SerializedFile[] otherFiles,
+                                long overrideSubmissionTimeMS, long overrideRunId, boolean overrideStopOnFailure) throws Exception {
 
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Run run = new Run(contest.getClientId(), language, problem);
         RunFiles runFiles = new RunFiles(run, mainFile, otherFiles);
 
-        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId);
+        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideSubmissionTimeMS, overrideRunId, overrideStopOnFailure);
         sendToLocalServer(packet);
     }
 
+    @Override
     public void requestChangePassword(String oldPassword, String newPassword) {
 
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
@@ -577,7 +620,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Return int for input string
-     * 
+     *
      * @param s
      * @return zero if error, otherwise returns value.
      */
@@ -591,7 +634,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * returns true if .ini file exists and key is present in file.
-     * 
+     *
      * @see IniFile#getValue(String)
      * @param key
      * @return true if key found and ini file exists.
@@ -606,7 +649,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Get value from .ini file if it exists.
-     * 
+     *
      * @param key
      * @return
      */
@@ -714,15 +757,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Login to contest server.
-     * 
+     *
      * @param id
      *            the login name.
      * @param password
      *            the password for the id.
-     * @throws SecurityException 
+     * @throws SecurityException
      *              if a login is attempted when the contest is not running or if the login is from a server
      *              and this is a Client (servers can only log in to other servers)
      */
+    @Override
     public void login(String id, String password) {
 
         if (!isStarted) {
@@ -766,13 +810,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 }
 
                 info("Contacted using connection id " + remoteServerConnectionHandlerID);
-                
+
                 boolean loggingInSiteRequestsToBeProxy = getBooleanValue(getINIValue(AppConstants.PROXY_ME_SERVER_KEY), false);
-                
+
                 if (parseArguments.isOptPresent(AppConstants.PROXYME_OPTION_STRING)){
                     loggingInSiteRequestsToBeProxy = true;
                 }
-                
+
                 sendLoginRequestFromServerToServer(connectionManager, remoteServerConnectionHandlerID, clientId, password, loggingInSiteRequestsToBeProxy, 0);
 
             } else {
@@ -803,12 +847,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendLoginRequest(connectionManager, clientId, id, password);
         }
     }
-    
+
     /**
      * For input string return boolean value.
-     * 
+     *
      * Does a trim and case in-sensitive match on the list: yes, no, true, false
-     * 
+     *
      * @param string true/false string/value
      * @param defaultBoolean if matches none in list returns this values
      */
@@ -834,9 +878,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * This is a very temporary kludge class.
-     * 
+     *
      * This is used with clientLogin, as a
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -851,15 +895,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         private SecurityException securityException = null;
 
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 8735788359720905862L;
 
+        @Override
         public void setContestAndController(IInternalContest inContest, IInternalController inController) {
             contest = inContest;
             controller = inController;
         }
 
+        @Override
         public String getPluginTitle() {
             return "TemporaryClientUI";
         }
@@ -884,25 +930,30 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             this.controller = controller;
         }
 
+        @Override
         public void loginAdded(LoginEvent event) {
             // no action
 
         }
 
+        @Override
         public void loginRemoved(LoginEvent event) {
             // no action
 
         }
 
+        @Override
         public void loginDenied(LoginEvent event) {
             securityException = new SecurityException("Login denied " + event.getMessage());
         }
 
+        @Override
         public void loginRefreshAll(LoginEvent event) {
             // no action
         }
     }
 
+    @Override
     public IInternalContest clientLogin(IInternalContest internalContest, String loginName, String password) throws Exception {
 
         if (!isStarted) {
@@ -965,12 +1016,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void initializeStorage(IStorage storage) {
         contest.setStorage(storage);
         packetArchiver = new PacketArchiver(storage, getBaseProfileDirectoryName("packets"));
 
     }
 
+    @Override
     public void initializeServer(IInternalContest inContest) throws IOException, ClassNotFoundException, FileSecurityException {
 
         if (inContest.getSites().length == 0) {
@@ -1039,7 +1092,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             inContest.initializeStartupData(inContest.getSiteNumber());
 
             inContest.initializeSubmissions(inContest.getSiteNumber());
-            
+
             if (inContest.getGeneralProblem() == null) {
                 inContest.setGeneralProblem(new Problem("General"));
             }
@@ -1049,24 +1102,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             info("initialized controller Site " + inContest.getSiteNumber());
-            
+
             handleCDPLoad(true);
-            
+
             if (contest.getJudgements().length == 0) {
-                // judgements not loaded from yaml, cdp config - load from  ./reject.ini 
+                // judgements not loaded from yaml, cdp config - load from  ./reject.ini
                 String result = JudgementLoader.loadJudgements(inContest, false, ".");
                 getLog().info(result);
             }
 
-            
+
             if (contest.getJudgements().length == 0) {
-                // judgements not loaded from cdp, yaml or ./reject.ini 
+                // judgements not loaded from cdp, yaml or ./reject.ini
                 JudgementLoader.loadDefaultJudgements(contest);
                 getLog().info("Loaded default judgements");
             }
-            
+
             dumpAutoStartInformation(contest.getContestInformation());
-            
+
             try {
                 manager.mergeProfiles(inContest);
             } catch (Exception e) {
@@ -1107,9 +1160,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } catch (Exception e) {
             getLog().log(Log.WARNING, "Exception creating evals.log ", e);
         }
-        
+
         updateAutoStartInformation(inContest, this);
-        
+
         updateAutoStopClockThread();
     }
 
@@ -1140,14 +1193,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Loads reject.ini file contents into Judgements.
-     * 
+     *
      * If finds reject.ini file, reads file. Adds Yes judgement, then prepends "No - " onto each entry from the reject.ini file and returns true.
-     * 
+     *
      * Reads judge acronyms if present, if file contains a AC judgement then will use that
      * text for the Yes judgement.
-     * 
+     *
      * Returns false if cannot read reject.ini file or reject.ini file is empty (perhaps only containing comments).
-     * 
+     *
      * @return true if loaded, false if could not read file.
      */
     protected boolean loadedJudgementsFromIni(String filename) {
@@ -1161,17 +1214,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     protected void loadDefaultJudgements() {
 
         String[] judgementNames = { //
-                "Yes", // 
-                "No - Compilation Error", // 
-                "No - Run-time Error", // 
-                "No - Time Limit Exceeded", // 
-                "No - Wrong Answer", // 
-                "No - Excessive Output", // 
-                "No - Output Format Error", // 
+                "Yes", //
+                "No - Compilation Error", //
+                "No - Run-time Error", //
+                "No - Time Limit Exceeded", //
+                "No - Wrong Answer", //
+                "No - Excessive Output", //
+                "No - Output Format Error", //
                 "No - Other - Contact Staff" //
         };
         String [] judgementAcronyms = {
-                Judgement.ACRONYM_ACCEPTED, // 
+                Judgement.ACRONYM_ACCEPTED, //
                 Judgement.ACRONYM_COMPILATION_ERROR, //
                 Judgement.ACRONYM_RUN_TIME_ERROR, //
                 Judgement.ACRONYM_TIME_LIMIT_EXCEEDED, //
@@ -1180,7 +1233,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 Judgement.ACRONYM_OUTPUT_FORMAT_ERROR, //
                 Judgement.ACRONYM_OTHER_CONTACT_STAFF, //
         };
-        
+
         int i = 0;
         for (String judgementName : judgementNames) {
             Judgement judgement = new Judgement(judgementName, judgementAcronyms[i]);
@@ -1244,11 +1297,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Reads .ini file and sets server and port.
-     * 
+     *
      * Sets the server and port for client.
-     * 
+     *
      * @param portString
-     * 
+     *
      */
     private void setClientServerAndPort(String portString) {
 
@@ -1345,9 +1398,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Send login request from server to another server.
-     * 
+     *
      * Send login request directly to connectionHandlerId.
-     * 
+     *
      * @param manager
      *            transmission manager
      * @param targetConnectionHandlerID
@@ -1360,8 +1413,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * @param targetSiteNumber the target/destination site number for this login request
      */
     private void sendLoginRequestFromServerToServer(ITransportManager manager, ConnectionHandlerID targetConnectionHandlerID, ClientId clientId, String password, boolean proxyMe,
-            int targetSiteNumber) {        
-        
+            int targetSiteNumber) {
+
         try {
             info("sendLoginRequestFromServerToServer ConId start - sending from " + clientId);
             ClientId serverClientId = new ClientId(targetSiteNumber, Type.SERVER, 0);
@@ -1372,8 +1425,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } catch (TransportException e) {
             info("Exception sendLoginRequestFromServerToServer ", e);
         }
-        
-        
+
+
 //        info("sendLoginRequestFromServerToServer ConId start - sending from " + clientId + " proxyMe = " + proxyMe);
 //        ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
 //        String joeLoginName = password;
@@ -1387,7 +1440,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Send login request to server as a login.
-     * 
+     *
      * @param manager
      * @param clientId
      * @param password
@@ -1402,9 +1455,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Server receives Packet from client or server.
-     * 
+     *
      * @see edu.csus.ecs.pc2.core.transport.ITwoToOne#receiveObject(java.io.Serializable, edu.csus.ecs.pc2.core.transport.ConnectionHandlerID)
      */
+    @Override
     public void receiveObject(Serializable object, ConnectionHandlerID connectionHandlerID) {
 
         // SOMEDAY SECURITY code check the input connection to insure they are valid connection
@@ -1416,7 +1470,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 Packet packet = (Packet) object;
                 ClientId clientId = packet.getSourceId();
-                
+
                 clientId.setConnectionHandlerID(connectionHandlerID);
 
                 info("receiveObject " + packet);
@@ -1440,20 +1494,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     }
 
                 } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
-                    
+
                     if (packetHandler.forwardedToProxy((packet))) {
-                        
+
                         // Handled proxy packets (send/receive), no additional action necesary in this method.
                         return;
                     }
-                    
+
                     String password = PacketFactory.getStringValue(packet, PacketFactory.PASSWORD);
                     boolean requestProxy = false;
                     Boolean requestedProxy = PacketFactory.getBooleanValue(packet, PacketFactory.REQUEST_LOGIN_AS_PROXY);
                     if (requestedProxy != null) {
                         requestProxy = requestedProxy.booleanValue();
                     }
-                    
+
                     try {
 
                         /**
@@ -1463,15 +1517,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         packetArchiver.writeNextPacket(packet);
 
                         if (clientId.getSiteNumber() == ClientId.UNSET) {
-                            
+
                             info("LOGIN_REQUEST packet contains clientId object with site number of " + ClientId.UNSET + "; replacing with my site number (" + contest.getSiteNumber() + ")");
-                            
+
                             ConnectionHandlerID connHID = clientId.getConnectionHandlerID();
                             clientId = new ClientId(contest.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
                             clientId.setConnectionHandlerID(connHID);
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
-                        
+
                         if (requestProxy){
                             if (isServer(packet.getSourceId())){
                                 /**
@@ -1480,7 +1534,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                                 sendSiteUpdateSetProxy (packet.getSourceId(), contest.getSiteNumber());
                             }
                         }
-                        
+
                         sendLoginSuccess(clientId, connectionHandlerID);
 
                         // Send login notification to users.
@@ -1540,16 +1594,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 //                    securityCheck(packet, connectionHandlerID);
                     processPacket(packet, connectionHandlerID);
                 } else {
-                    
+
                     if (clientId.getClientType().equals(Type.SERVER)) {
                         // Packet from a server.
 
                         if (packet.getType() == PacketType.Type.LOGIN_FAILED) {
-                            
+
                             handleServerLoginFailure(packet);
-                            
+
                         } else if (packet.getType().equals(PacketType.Type.LOGIN_SUCCESS)) {
-                            
+
                             /**
                              * The current server has successfully logged into a remote server.
                              */
@@ -1561,14 +1615,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                             // Add the other (server we logged into) into our local logged in list.
                             loginServer(clientId, connectionHandlerID);
-                            
+
                             /**
                              * Since this module is not logged in, this packet should only be a LOGIN_SUCCESS from a server we initially logged into,
-                             * aka the remoteServer.  
+                             * aka the remoteServer.
                              */
-                            
+
                             if (connectionHandlerID.equals(remoteServerConnectionHandlerID)){
-                                
+
                                 /**
                                  * Only accept/change config data on this site if the login success is from the server that this site connected to initially.
                                  */
@@ -1576,42 +1630,42 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                                 // Add data from packet into contest and sync all runs
                                 processPacket(packet, connectionHandlerID);
-                                
+
                             } else {
-                                
+
                                 /**
                                  * This should happen when a server logs into another server that is not its remoeteServer (initial server logged into).
-                                 * 
+                                 *
                                  * This is where the remote site's data is synced on this server.
                                  */
-                                
+
                                 info("Updating this server's settings from remote server specific settings from " + clientId + " @ " + connectionHandlerID);
- 
+
                                 packetHandler.loadSettingsFromRemoteServer(new ContestLoader(), packet, connectionHandlerID);
-                                
+
                                 info("Sending this server's settings to remote server " + packet.getSourceId() + " @ " + connectionHandlerID);
                                 // Send settings packet to the server we logged into
                                 sendToClient(packetHandler.createContestSettingsPacket(packet.getSourceId()));
-                                
+
                                 info("Sending a request for all run files to remote server " + packet.getSourceId() + " @ " + connectionHandlerID);
                                 packetHandler.sendRequestForRunfFiles (packet, packet.getSourceId().getSiteNumber());
-                      
+
                             }
 
                         } else if (contest.isLocalLoggedIn(clientId) && packet.getType().equals(PacketType.Type.LOGIN)) {
                             /**
-                             * A user has logged into another remote server 
+                             * A user has logged into another remote server
                              */
                             // on site 2 login to site 1, site 2 reports LOGIN on login to site1
                             processPacket(packet, connectionHandlerID);
                         } else if (packet.getType().equals(PacketType.Type.LOGIN) && contest.getSite(contest.getSiteNumber()).hasProxy() && packet.getDestinationId().getSiteNumber() == 0) {
                             /**
-                             * This is probably coming from our proxy 
+                             * This is probably coming from our proxy
                              */
                             processPacket(packet, connectionHandlerID);
                         } else if (contest.isLocalLoggedIn(packet.getDestinationId()) && contest.getSite(contest.getSiteNumber()).getMyProxy() == packet.getDestinationId().getSiteNumber()) {
                             /**
-                             * This is coming from our proxy 
+                             * This is coming from our proxy
                              */
                             processPacket(packet, connectionHandlerID);
                         } else if (contest.isRemoteLoggedIn(packet.getSourceId()) && packet.getSourceId().getClientType() == ClientType.Type.SERVER) {
@@ -1649,18 +1703,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Assign proxy, send updated Site to all connected sites.
-     * 
+     *
      * @param siteToBeProxied client/site to be proxied
      * @param proxySiteNumber proxy site for siteToBeProxied
      */
     private void sendSiteUpdateSetProxy(ClientId siteToBeProxied, int proxySiteNumber) {
-        
-        // assign proxy 
+
+        // assign proxy
          Site site = contest.getSite(siteToBeProxied.getSiteNumber());
          site.setMyProxy(proxySiteNumber);
-         
+
          updateSite(site);
-        
+
     }
 
     private String[] removeFirstElement(String[] stringArray) {
@@ -1671,7 +1725,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Handle client attempt to auto register.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
      */
@@ -1712,6 +1766,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void sendToJudgesAndOthers(Packet packet, boolean sendToServers) {
 
         if (isServer()) {
@@ -1742,7 +1797,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Creates and saves a ClientSettings.
-     * 
+     *
      * @param clientId
      * @return
      */
@@ -1770,7 +1825,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * This logs server into local logins and out of remote logins, if needed.
-     * 
+     *
      * @param clientId
      * @param connectionHandlerID
      */
@@ -1829,7 +1884,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Handle incoming invalid login and message.
-     * 
+     *
      * @param packet
      */
     private void handleServerLoginFailure(Packet packet) {
@@ -1862,7 +1917,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Looks up site number based on password.
-     * 
+     *
      * @param password
      * @return site number or throws SecurityException if nothing matches.
      */
@@ -1914,7 +1969,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         return false;
     }
-    
+
     /**
      * Returns true if the password matches the hash for the override password.
      */
@@ -1956,9 +2011,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Attempt to login, if login success add to login list.
-     * 
+     *
      * If login fails will throw SecurityException.
-     * 
+     *
      * @param newClientId the new client attempting to log in.
      * @param password the new client's password.
      * @param connectionHandlerID the ConnectionHandlerID associated with the newly connecting client.
@@ -1966,13 +2021,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void attemptToLogin(ClientId newClientId, String password, ConnectionHandlerID connectionHandlerID) {
 
         info("ClientID=" + newClientId);
-        
+
         if (newClientId.getClientType().equals(Type.SERVER)) {
             // Server login request
 
             int newSiteNumber = getServerSiteNumber(newClientId.getSiteNumber(), password);
-            
-            info("Logging in new server; newSiteNumber = " + newSiteNumber);           
+
+            info("Logging in new server; newSiteNumber = " + newSiteNumber);
             info("My site number = " + contest.getSiteNumber());
 
             if (newSiteNumber == contest.getSiteNumber()) {
@@ -1993,24 +2048,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         } else {
             // Client login request
-            
+
             //check if the account and password are valid
             if (validAccountAndMatchOverride(newClientId, password) || contest.isValidLoginAndPassword(newClientId, password)) {
 
                 //valid acct and pw; see if the account is already logged in
                 if (contest.isLocalLoggedIn(newClientId)) {
-                    
+
                     //already logged in; see if the current login(s) should be forced off
                     if (newClientId.getClientType()!=ClientType.Type.TEAM || (!contest.getContestInformation().isAllowMultipleLoginsPerTeam())) {
-                        
+
                         //not a team, or is a team but multiple team logins not allowed; force off all clients matching the new client
                         forceOffAllClientsMatching(newClientId);
                     }
                 }
-                
+
                 contest.addLocalLogin(newClientId, connectionHandlerID);
                 info("LOGIN logged in " + newClientId + " at " + connectionHandlerID);
-                
+
             } else {
                 //invalid account or bad password
                 info("attemptToLogin FAILED logged on: " + newClientId);
@@ -2020,46 +2075,46 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
     }
-    
+
     /**
-     * Searches the list of currently logged-in clients and forces a logoff for any client matching 
+     * Searches the list of currently logged-in clients and forces a logoff for any client matching
      * the specified ClientId (that is, any client of the same type, number, and site).
-     * 
+     *
      * @param clientId the ClientId for which matching client logins are to be forced logged-off.
      */
     private void forceOffAllClientsMatching(ClientId clientId) {
 
         // get a list of all logged in clients of the same type as the specified client
         ClientId[] loggedInClientsOfSameType = contest.getLocalLoggedInClients(clientId.getClientType());
-        
+
         //check every logged in client in the list
         for (ClientId nextLoggedInClientId : loggedInClientsOfSameType) {
-            
+
             //see if the next logged in client "matches" the specified incoming client.
             //(note that ClientId.equals() compares type, number, and site (only))
             if (nextLoggedInClientId.equals(clientId)) {
-                
+
                 //yes, matches; force the existing client to logoff
                 forceLogoff(nextLoggedInClientId);
             }
         }
     }
 
-    
+
     /**
      * This method forces a logoff of the specified Client.
-     * 
+     *
      * @param clientId the client that is to be forced logged off.
      */
     private void forceLogoff(ClientId clientId) {
-        
+
         // Already logged in, log them off
         log.info("login - " + clientId + " already logged in at connection " + clientId.getConnectionHandlerID() + "; forcing logoff " );
- 
+
 //        old code: only removes login from local contest but doesn't notify Admins or Servers
 //        // this updates the model contest-wide
 //        contest.removeLogin(clientId);
-        
+
         //new code: calls contest.removeLogin(clientId) as above, but also calls forceConnectionDrop() and sends LOGOFF packets to Admins and Servers
         logoffUser(clientId);
 
@@ -2071,7 +2126,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 log.log(Log.WARNING, "Exception on canceling runs/clars for " + clientId, e);
             }
         }
-        
+
 //      old code; not needed now because the call to logoffUser() (above) calls forceConnectionDrop()
 //        //this is what actually causes the connection to be dropped/disconnected
 //        forceConnectionDrop(connHandlerID);
@@ -2086,7 +2141,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Can this user checkout clars and runs.
-     * 
+     *
      * @param theClient
      * @return
      */
@@ -2096,11 +2151,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Process all packets.
-     * 
+     *
      * Assumes that the packet is from an authenticated user.
-     * 
+     *
      * Process packets when user is logged in.
-     * 
+     *
      * @param packet
      * @param connectionHandlerID
      */
@@ -2177,7 +2232,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Send login failure packet back to non-logged in user, via ConnectionHandlerID.
-     * 
+     *
      * @param destinationId
      * @param connectionHandlerID
      * @param message
@@ -2189,7 +2244,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Send Login Success packet to client.
-     * 
+     *
      * @param clientId
      * @param connectionHandlerID
      */
@@ -2198,6 +2253,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToClient(packetHandler.createLoginSuccessPacket(clientId, contest.getContestPassword()));
     }
 
+    @Override
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
         info("connectionEstablished: " + connectionHandlerID);
         contest.connectionEstablished(connectionHandlerID);
@@ -2209,9 +2265,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Connection to client lost.
-     * 
+     *
      * @throws IOException
      */
+    @Override
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
 
         // getLog().log(Log.INFO, "connection Dropped for " + connectionHandlerID, new Exception("connection Dropped for " + connectionHandlerID));
@@ -2259,7 +2316,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Cancel all checked out runs and clarifications by this client.
-     * 
+     *
      * @param judgeId
      * @throws ContestSecurityException
      * @throws FileSecurityException
@@ -2297,6 +2354,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * @throws IllegalArgumentException if the specified ClientId contains a null ConnectionHandlerID.
      */
+    @Override
     public void logoffUser(ClientId clientId) {
 
         if (isServer() && contest.isLocalLoggedIn(clientId)) {
@@ -2308,7 +2366,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             ConnectionHandlerID connectionHandlerID = clientId.getConnectionHandlerID();
 
-            //this method should never be called with a clientId having a null ConnectionHandlerID; however, the addition of 
+            //this method should never be called with a clientId having a null ConnectionHandlerID; however, the addition of
             // "multiple login" support may have left some place where this is inadvertently true.
             //The following is an effort to catch/identify such situations.
             if (connectionHandlerID==null) {
@@ -2317,7 +2375,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 logException("InternalController.logoffUser() called null ConnectionHandlerID in ClientId " + clientId, e);
                 throw e;
             }
-            
+
 
             contest.removeLogin(clientId);
 
@@ -2336,6 +2394,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     }
 
+    @Override
     public void connectionError(Serializable object, ConnectionHandlerID connectionHandlerID, String causeDescription) {
 
         // SOMEDAY code create a packet and send it to servers and admins
@@ -2347,9 +2406,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Client receive object.
-     * 
+     *
      * @see edu.csus.ecs.pc2.core.transport.IBtoA#receiveObject(java.io.Serializable)
      */
+    @Override
     public void receiveObject(Serializable object) {
 
         info(" receiveObject(S) start got " + object);
@@ -2364,14 +2424,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 // SOMEDAY code put the server's connection handler id as 4th parameter
                 packetHandler.handlePacket(packet, null);
-                
+
             } else {
                 info("receiveObject(S) Unsupported class received: " + object.getClass().getName());
             }
         } catch (Exception e) {
-            
+
             error(e.toString(),e);
-            
+
             if (loginUI != null) {
                 loginUI.regularCursor();
             }
@@ -2382,6 +2442,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * This client lost connection.
      */
+    @Override
     public void connectionDropped() {
 
         // Connection dropped, countdown and halt client
@@ -2402,19 +2463,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             contest.connectionDropped(null);
         }
     }
-    
+
     public void setCountdownClassName(String countdownClassName) {
         this.countdownClassName = countdownClassName;
     }
-    
+
     public String getCountdownClassName() {
         return countdownClassName;
     }
-    
+
     public void setLoginClassName(String loginClassName) {
         this.loginClassName = loginClassName;
     }
-    
+
     public String getLoginClassName() {
         return loginClassName;
     }
@@ -2425,7 +2486,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public String getStartupDialogClassName() {
         return startupDialogClassName;
-    }   
+    }
 
     private void shutdown() {
 
@@ -2443,7 +2504,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
              */
             countDownMessage = new TextCountDownMessage();
         }
-        
+
         if (contest.getClientId() != null) {
             info("connectionDropped: shutting down " + contest.getClientId());
             countDownMessage.setTitle("Shutting down PC^2 " + contest.getClientId().getClientType() + " " + contest.getTitle());
@@ -2453,13 +2514,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         countDownMessage.setExitOnClose(true);
         countDownMessage.start("Shutting down PC^2 in ", 10);
-        
+
         /**
-         * This is needed to allow the countdown timer threads to 
-         * actually run, otherwise the JVM ends before the timer starts. 
+         * This is needed to allow the countdown timer threads to
+         * actually run, otherwise the JVM ends before the timer starts.
          */
         sleep (12);
-        
+
     }
 
     /**
@@ -2467,22 +2528,22 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * @param secs
      */
     private void sleep(int secs) {
-        
+
         try {
             Thread.sleep(secs * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
+
     }
-    
+
     public void info(String message) {
         if (! isUsingGUI()){
             System.out.println(message);
         }
         log.log(Log.INFO, message);
     }
-    
+
     public void error(String message, Exception ex){
         if (! isUsingGUI()){
             System.err.println(message+" exception "+ex.getMessage());
@@ -2491,7 +2552,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void info(String message, Exception exception) {
-        
+
         if (! isUsingGUI()){
             System.out.println(message);
         }
@@ -2502,10 +2563,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         log.log(Log.INFO, message, exception);
     }
 
+    @Override
     public void setSiteNumber(int number) {
         contest.setSiteNumber(number);
     }
 
+    @Override
     public void setContestTime(ContestTime contestTime) {
         if (contest.getContestTime() != null) {
             contest.updateContestTime(contestTime);
@@ -2514,6 +2577,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void sendToServers(Packet packet) {
 
         // do remotes first, for proxies this mean they are shutdown before the server
@@ -2551,25 +2615,25 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Send packet to all clients logged into this site that are a particular clienttype.
-     * 
+     *
      * @param packet
      * @param type client type
      */
     private void sendPacketToClients(Packet packet, ClientType.Type type) {
 
         ClientId[] clientIds = contest.getLocalLoggedInClients(type);
-        
+
         List<ClientId> badClients = new ArrayList<ClientId>();
-       
+
         for (ClientId clientId : clientIds) {
-            
+
             if (isThisSite(clientId.getSiteNumber())) {
-                
+
                 ConnectionHandlerID connectionHandlerID = null;
                 try {
                     connectionHandlerID = clientId.getConnectionHandlerID();
-                    
-                    //there should never be localLoggedInClients with null ConnectionHandlerIDs; however, the addition of 
+
+                    //there should never be localLoggedInClients with null ConnectionHandlerIDs; however, the addition of
                     // "multiple login" support may have left some place where this is inadvertently true.
                     //The following is an effort to catch/identify such situations.
                     if (connectionHandlerID==null) {
@@ -2577,13 +2641,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         badClients.add(clientId);
                     } else {
                         //good clientId; send the packet to the client
-                        sendToClient(connectionHandlerID, packet); 
+                        sendToClient(connectionHandlerID, packet);
                     }
                 } catch (Exception e) {
                     getLog().log(Level.WARNING, "Exception attempting to send packet to client " + clientId + "at connectionHandlerId " + connectionHandlerID
                             + ": " + packet + ": "+ e.getMessage(), e);
                 }
-                
+
                 //check if we got any bad clientIds
                 if (badClients.size()>0) {
                     //yes, build a comma-separated list of bad clientIds
@@ -2600,7 +2664,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     e.printStackTrace();
                     throw e;
                 }
-                
+
             }
         }
     }
@@ -2611,29 +2675,34 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Send to judges and spectators clients.
-     * 
+     *
      */
+    @Override
     public void sendToJudges(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.JUDGE);
         sendPacketToClients(packet, ClientType.Type.SPECTATOR);
     }
 
+    @Override
     public void sendToSpectators(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.SPECTATOR);
     }
 
+    @Override
     public void sendToAdministrators(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.ADMINISTRATOR);
     }
 
+    @Override
     public void sendToScoreboards(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
     }
-    
+
     public void sendToFeeders(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.FEEDER);
     }
 
+    @Override
     public void sendToTeams(Packet packet) {
 
         Properties properties = (Properties) packet.getContent();
@@ -2781,10 +2850,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Client has successfully logged in, show them UI.
-     * 
+     *
      * @param clientId
      *            new client id
      */
+    @Override
     public void startMainUI(ClientId clientId) {
 
         try {
@@ -2839,7 +2909,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                             info("Loaded UI class " + uiClassName);
                         }
                     }
-                    
+
                     uiPlugin.setContestAndController(contest, this);
 
                     if (loginUI != null) {
@@ -2870,95 +2940,95 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * @param allowedToLoadConfig if true will overwrite config with CDP, else does nothing.
      */
     protected void handleCDPLoad(boolean allowedToLoadConfig) {
-        
+
         /**
          * Name of CDP dir or file to be loaded.
          */
         String entryLocation = contest.getCommandLineOptionValue(AppConstants.LOAD_OPTION_STRING);
-        
+
         if (contest.isCommandLineOptionPresent(AppConstants.LOAD_OPTION_STRING)){
-            
+
             if (allowedToLoadConfig){
-                
+
                 IContestLoader loader = new ContestSnakeYAMLLoader();
                 info("Loading CDP from " + entryLocation);
-                
+
                 try {
-                    
+
                     // Load Configuration from CDP
-                    
+
                     loader.initializeContest(contest, new File(entryLocation));
-                    
+
                     info("Loaded CDP/config values from " + entryLocation);
-                    
+
                     File cdpConfigDir = loader.findCDPConfigDirectory(new File(entryLocation));
-                    
+
                     if (contest.getJudgements().length == 0) {
                         // judgements not loaded from yaml nor config/reject.ini
                         // load from "."
                         JudgementLoader.loadJudgements(contest, false, ".");
                     }
-                    
-         
-                    
+
+
+
                     if (saveCofigurationToDisk) {
                         // save newly merged profiles
                         contest.storeConfiguration(getLog());
                     }
-                    
+
                     // Load Submissions from CDP
-                    
+
                     String submissionsDir = entryLocation + File.separator + IContestLoader.SUBMISSIONS_DIRNAME;
-                    
-                    String eventFeedDirectory = entryLocation + File.separator + IContestLoader.EVENT_FEED_DIRNAME; 
+
+                    String eventFeedDirectory = entryLocation + File.separator + IContestLoader.EVENT_FEED_DIRNAME;
                     String eventFeedfilename = eventFeedDirectory + File.separator + IContestLoader.EVENT_FEED_XML_FILENAME;
-                    
-                    
+
+
                     if (new File(submissionsDir).isDirectory()){
-                        
+
                         if (new File(eventFeedfilename).isFile()){
-                            
+
                             info("Loading event feed runs... ");
                             info("Event feed file is "+eventFeedfilename);
-                            
+
                             LoadRuns loadRuns = new LoadRuns();
-                            
+
                             List<EventFeedRun> eventFeedRuns = loadRuns.loadRunsFromEventFeed(eventFeedfilename);
-                            
+
                             info("Found "+eventFeedRuns.size()+" runs.");
-                            
+
                             info("Validating event feed runs");
-                            
+
                             loadRuns.validateEventFeedRuns(contest, eventFeedRuns);
-                            
+
                             info("Validated "+eventFeedRuns.size()+" event feed runs.");
-                            
+
                             info("Loading "+eventFeedRuns.size()+" event feed runs.");
-                            
+
                             boolean addRuneJudgementsFromEventFeed = contest.isCommandLineOptionPresent(AppConstants.LOAD_EF_JUDGEMENTS_OPTION_STRING);
-                            
+
                             loadRuns.updateContestFromEFRuns(contest, eventFeedRuns, cdpConfigDir.getParent(), addRuneJudgementsFromEventFeed);
-                            
+
                             info("Loaded "+eventFeedRuns.size()+" event feed runs.");
                             if (addRuneJudgementsFromEventFeed){
                                 info("Loaded judgments for "+eventFeedRuns.size()+" event feed runs.");
                             } else {
                                 info("No judgements were added for "+eventFeedRuns.size()+" event feed runs, all are 'new' runs.");
                             }
-                            
+
                             eventFeedRuns = null;
                             loadRuns = null;
-                            
+
                         } else {
                             info("No submissions loaded, no event feed at "+eventFeedfilename);
                         }
-                        
+
                     } else {
                         info("No submissions loaded, no submissions at "+submissionsDir);
                     }
-                    
-                    
-                    
+
+
+
                 } catch (Exception e) {
                     String szMsg = e.getMessage();
                     if(szMsg == null) {
@@ -2969,17 +3039,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     loader = null;
                 }
             } else {
-                
+
                 info("** Not loading (" + AppConstants.LOAD_OPTION_STRING + ") CDP from " + entryLocation+" contest config ALREADY exists. **");
-                System.err.println ("Warning: contest configuration already exists; ignoring " + AppConstants.LOAD_OPTION_STRING + " option"); 
-                
+                System.err.println ("Warning: contest configuration already exists; ignoring " + AppConstants.LOAD_OPTION_STRING + " option");
+
             }
         }
     }
 
     /**
      * Dump Auto Start information to log.
-     * 
+     *
      * @param contestInformation
      */
     private void dumpAutoStartInformation(ContestInformation contestInformation) {
@@ -2998,19 +3068,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Start the UI.
      */
+    @Override
     public void start(String[] stringArray) {
 
         /**
          * Saved exception.
-         * 
+         *
          * If TransportException thrown before UI has been created, save the exception and present it on the UI later.
          */
         TransportException savedTransportException = null;
 
-        String[] requireArgumentArgs = { // 
-                AppConstants.LOGIN_OPTION_STRING, 
+        String[] requireArgumentArgs = { //
+                AppConstants.LOGIN_OPTION_STRING,
                 AppConstants.PASSWORD_OPTION_STRING,
-                AppConstants.MAIN_UI_OPTION_STRING, 
+                AppConstants.MAIN_UI_OPTION_STRING,
                 AppConstants.REMOTE_SERVER_OPTION_STRING, //
                 AppConstants.PORT_OPTION_STRING, //
                 AppConstants.LOAD_OPTION_STRING, //
@@ -3019,7 +3090,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 AppConstants.CONTEST_PASSWORD_OPTION_STRING, //
                 AppConstants.CONTEST_ID_OPTION_STRING,
                 AppConstants.FILE_OPTION_STRING };
-        
+
         /**
          * This will not catch unknown options, that is done below after logging is set up
          * We scan the arguments twice.  First time to allow logging to be set up
@@ -3031,24 +3102,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // mostly catches "IllegalArgumentException" and informs the user
             fatalError(e.getMessage(), e);
         }
-        
+
         /**
          * usingGUI should be set early no matter what, since we do not want to pop-up
          * GUI message boxes on errors, if NO_GUI_OPTION_STRING was specified.
          * Validation of NO_GUI_OPTION_STRING is handled in handleCommandLineOptions().
          * That is, currently, NO_GUI_OPTION_STRING is only allowed for AJ and server.
-         * We don't care about that at this point in time though. 
+         * We don't care about that at this point in time though.
          */
         if (parseArguments.isOptPresent(AppConstants.NO_GUI_OPTION_STRING)) {
             usingGUI = false;
         }
-        
+
         if (parseArguments.isOptPresent(AppConstants.DEBUG_OPTION_STRING)){
             parseArguments.dumpArgs(System.out);
         }
-        
+
         contest.setCommandLineArguments(parseArguments);
-        
+
         if (parseArguments.isOptPresent(AppConstants.SERVER_OPTION_STRING)) {
             if (!isContactingRemoteServer()) {
                 theProfile = getCurrentProfile();
@@ -3061,7 +3132,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else {
             startLog(null, "pc2.startup."+System.currentTimeMillis(), null, null);
         }
-        
+
         // make sure supplied arguments are recognized (allowed)
         try {
             // this is the second scan of the argument list where accepted options are checked.
@@ -3086,7 +3157,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         /**
          * if (args DOES NOT contains login/pwd) { String s; if (args contains LoginUI ) { s = args login UI } else { s = pc2 LoginFrame } UIPlugin l = classloader (s); l.setModelAndListener (contest,
          * this); } else { this.login (login,password)
-         * 
+         *
          */
 
         log.info("Starting ConnectionManager...");
@@ -3122,7 +3193,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 fatalError("Cannot start PC^2, " + iniName + " cannot be read (" + exception.getMessage() + ")", exception);
             }
             //the following line was deleted when InternalController was updated per b_1564_integrate_API_work
-//            IniFile.setHashtable(ini.getHashmap());            
+//            IniFile.setHashtable(ini.getHashmap());
         }
 
         contest.setSiteNumber(0);
@@ -3161,7 +3232,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             try {
                 setServerPort(parseArguments.getOptValue(AppConstants.PORT_OPTION_STRING));
             } catch (NumberFormatException numException) {
-                savedTransportException = new TransportException("Unable to parse value after " + 
+                savedTransportException = new TransportException("Unable to parse value after " +
                         AppConstants.PORT_OPTION_STRING + "'" + parseArguments.getOptValue(AppConstants.PORT_OPTION_STRING) + "'");
                 log.log(Log.WARNING, "Exception parsing " + AppConstants.PORT_OPTION_STRING, numException);
             }
@@ -3276,7 +3347,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Get current profile, create one if needed.
-     * 
+     *
      * @return
      */
     private Profile getCurrentProfile() {
@@ -3318,7 +3389,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     "[" + AppConstants.FIRST_SERVER_OPTION_STRING + "] " + //
                     "[" + AppConstants.LOGIN_OPTION_STRING + " <login>] " + //
                     "[" + AppConstants.PASSWORD_OPTION_STRING + " <pass>]", //
-                    "           " + 
+                    "           " +
                     "[" + AppConstants.LOAD_OPTION_STRING + " <dir>|<file> ] " + //
                     "[" + AppConstants.SKIP_INI_OPTION_STRING + "] " + //
                     "[" + AppConstants.INI_FILENAME_OPTION_STRING + " INIfilename] " + //
@@ -3330,11 +3401,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     "           " +
                     "[" + AppConstants.NOLOGGING_OPTION_STRING + "] " + //
                     "[" + AppConstants.NO_GUI_OPTION_STRING + "] " + //
-                    "[" + AppConstants.NOSTANDINGS_OPTION_STRING + "] " + 
-                    "[" + AppConstants.NO_CONNECTIONS_PANE_OPTION_STRING + "] " + 
+                    "[" + AppConstants.NOSTANDINGS_OPTION_STRING + "] " +
+                    "[" + AppConstants.NO_CONNECTIONS_PANE_OPTION_STRING + "] " +
                     "[" + AppConstants.NO_LOGINS_PANE_OPTION_STRING + "]", //
                     "", //
-                    "See https://github.com/pc2ccs/pc2v9/wiki/Command-Line-Arguments for more information", // 
+                    "See https://github.com/pc2ccs/pc2v9/wiki/Command-Line-Arguments for more information", //
             };
             for (String string : usage) {
                 System.out.println(string);
@@ -3359,7 +3430,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 fatalError("Unable to read file " + propertiesFileName, e);
             }
         }
-        
+
         if (parseArguments.isOptPresent(AppConstants.NOSTANDINGS_OPTION_STRING)) {
             Utilities.setShowStandingsPanes(false);
         }
@@ -3397,7 +3468,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 } else if (isScoreboard(client)){
                     overRideUIName = "edu.csus.ecs.pc2.ui.board.ScoreboardModule";
                 } else if (isEventFeeder(client)) {
-                    overRideUIName = "edu.csus.ecs.pc2.services.eventFeed.EventFeederModule"; 
+                    overRideUIName = "edu.csus.ecs.pc2.services.eventFeed.EventFeederModule";
                 } else {
                     fatalError(AppConstants.NO_GUI_OPTION_STRING + " can only be used with a judge, server, scoreboard or event feed login, login '" + loginName + "' is not one of those.");
                 }
@@ -3459,18 +3530,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Print debug message to stdout.
-     * 
+     *
      * @param string
      */
     protected void printDebug(String message) {
         System.out.println("debug: "+message);
-        
+
     }
 
     private boolean isJudge(ClientId clientId) {
         return clientId.getClientType().equals(ClientType.Type.JUDGE);
     }
-    
+
     private boolean isScoreboard(ClientId clientId) {
         return clientId.getClientType().equals(ClientType.Type.SCOREBOARD);
     }
@@ -3482,9 +3553,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Return working directory.
-     * 
+     *
      * File.separator has already been appended as needed.
-     * 
+     *
      * @param dirname
      * @return profile directory if server, else return "";
      */
@@ -3499,9 +3570,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Start new Log for client/server.
-     * 
+     *
      * This new a new Log(logFileName), sets up the StaticLog, and prints basic info to the log. If loginName is not null a Login: line is printed.
-     * 
+     *
      * @param directoryName
      *            if null will use the profile/* directory.
      * @param logFileName
@@ -3535,12 +3606,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void checkOutRun(Run run, boolean readOnly, boolean computerJudge) {
         ClientId clientId = contest.getClientId();
         Packet packet = PacketFactory.createRunRequest(clientId, getServerClientId(), run, clientId, readOnly, computerJudge);
         sendToLocalServer(packet);
     }
 
+    @Override
     public void checkOutRejudgeRun(Run run) {
         ClientId clientId = contest.getClientId();
         Packet packet = PacketFactory.createRunRejudgeRequest(clientId, getServerClientId(), run, clientId);
@@ -3550,6 +3623,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Send run judgement to server.
      */
+    @Override
     public void submitRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
         ClientId clientId = contest.getClientId();
         Packet packet = PacketFactory.createRunJudgement(clientId, getServerClientId(), run, judgementRecord, runResultFiles);
@@ -3559,6 +3633,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Send cancel run to server.
      */
+    @Override
     public void cancelRun(Run run) {
         ClientId clientId = contest.getClientId();
         Packet packet = PacketFactory.createUnCheckoutRun(clientId, getServerClientId(), run, clientId);
@@ -3567,11 +3642,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Add a new site into contest, send update to other servers.
-     * 
+     *
      * @throws FileSecurityException
      * @throws ClassNotFoundException
      * @throws IOException
      */
+    @Override
     public void addNewSite(Site site) {
         if (isServer()) {
             contest.addSite(site);
@@ -3611,6 +3687,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToServers(packet);
     }
 
+    @Override
     public void sendServerLoginRequest(int inSiteNumber) throws Exception {
 
         if (isServer()) {
@@ -3625,7 +3702,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             Site remoteSite = lookupRemoteServer(inSiteNumber);
-            
+
             Site localSite = contest.getSite(contest.getSiteNumber());
             String localPassword = localSite.getPassword();
 
@@ -3654,7 +3731,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             info("Contacted Site " + inSiteNumber + " (via " + remoteSite.getSiteNumber() + ") using connection id " + connectionHandlerID);
             sendLoginRequestFromServerToServer(connectionManager, connectionHandlerID, getServerClientId(), localPassword, false, inSiteNumber);
-            
+
         } else if (contest.isAllowed(Permission.Type.ALLOWED_TO_RECONNECT_SERVER)) {
             // Send the reconnection request to our server
 
@@ -3671,9 +3748,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Determine which site to send this packet to.
-     * 
+     *
      * This handles packets sent via proxy.
-     * 
+     *
      * @param inSiteNumber destination site
      * @return site to send packet to.
      */
@@ -3684,8 +3761,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          */
         Site site = contest.getSite(inSiteNumber);
         Site mySite = contest.getSite(contest.getSiteNumber());
-        
-        // if the destination has a proxy 
+
+        // if the destination has a proxy
         if (site.hasProxy()) {
 
             /**
@@ -3699,14 +3776,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else if (mySite.hasProxy()) {
             site = contest.getSite(mySite.getMyProxy());
         }// else no proxys, send to site
-        
+
 //        System.out.println("debug lookupRemoteServer for site "+inSiteNumber+" use site "+site);
         return site;
     }
 
     /**
      * Contacting remote server (joining contest).
-     * 
+     *
      * @return true if joining contest, false if first server
      */
     public boolean isContactingRemoteServer() {
@@ -3719,9 +3796,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Will main UI be invoked/displayed ?
-     * 
+     *
      * This includes Login UI as well as Main UI.
-     * 
+     *
      * @return true - shows main UI, false - does not show main UI.
      */
     public boolean isUsingMainUI() {
@@ -3740,6 +3817,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         this.uiPlugin = uiPlugin;
     }
 
+    @Override
     public void updateSite(Site site) {
 
         if (isServer()) {
@@ -3770,7 +3848,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Returns true if this client is a server.
-     * 
+     *
      * @return true if logged in client is a server.
      */
     private boolean isServer() {
@@ -3781,22 +3859,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return clientId.getClientType().equals(ClientType.Type.SERVER);
     }
 
+    @Override
     public final Log getLog() {
         return log;
     }
 
+    @Override
     public void generateNewAccounts(String clientTypeName, int siteNumber, int count, int startNumber, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName);
         Packet packet = PacketFactory.createGenerateAccounts(contest.getClientId(), getServerClientId(), siteNumber, type, count, startNumber, active);
         sendToLocalServer(packet);
     }
 
+    @Override
     public void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active) {
         generateNewAccounts(clientTypeName, contest.getSiteNumber(), count, startNumber, active);
 
     }
 
     public ElementId submitClarification(Problem problem, String question) {
+
 
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Clarification clarification = new Clarification(contest.getClientId(), problem, question);
@@ -3827,28 +3909,31 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToLocalServer(packet);
     }
     
-    
+    @Override
     public void checkOutClarification(Clarification clarification, boolean readOnly) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Packet packet = PacketFactory.createClarificationRequest(contest.getClientId(), serverClientId, clarification.getElementId(), contest.getClientId());
         sendToLocalServer(packet);
     }
 
+    @Override
     public void cancelClarification(Clarification clarification) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Packet packet = PacketFactory.createUnCheckoutClarification(contest.getClientId(), serverClientId, clarification);
         sendToLocalServer(packet);
     }
 
+    @Override
     public void submitClarificationAnswer(Clarification clarification) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Packet packet = PacketFactory.createAnsweredClarification(contest.getClientId(), serverClientId, clarification, clarification.getAnswer());
         sendToLocalServer(packet);
     }
 
+    @Override
     public void forceConnectionDrop(ConnectionHandlerID connectionHandlerID) {
 
-        //this method should never be called with a null ConnectionHandlerID; however, the addition of 
+        //this method should never be called with a null ConnectionHandlerID; however, the addition of
         // "multiple login" support may have left some place where this is inadvertently true.
         //The following is an effort to catch/identify such situations.
         if (connectionHandlerID==null) {
@@ -3857,7 +3942,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             logException("InternalController.forceConnectionDrop() called with null ConnectionHandlerID", e);
             throw e;
         }
-        
+
         if (isServer()) {
 
             if (contest.isConnected(connectionHandlerID)) {
@@ -3877,40 +3962,48 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles) {
         Packet updateProblemPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), problem, problemDataFiles);
         sendToLocalServer(updateProblemPacket);
     }
 
+    @Override
     public void addNewProblem(Problem[] problem, ProblemDataFiles[] problemDataFiles) {
         Packet updateProblemPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), problem, problemDataFiles);
         sendToLocalServer(updateProblemPacket);
     }
 
+    @Override
     public void updateRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
         Packet updateRunPacket = PacketFactory.createRunUpdated(contest.getClientId(), getServerClientId(), run, judgementRecord, runResultFiles, contest.getClientId());
         sendToLocalServer(updateRunPacket);
     }
 
+    @Override
     public void addProblem(Problem problem) {
         Packet updateProblemPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), problem, null);
         sendToLocalServer(updateProblemPacket);
     }
 
+    @Override
     public void updateProblem(Problem problem) {
         Packet updateProblemPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), problem, null);
         sendToLocalServer(updateProblemPacket);
     }
 
+    @Override
     public void updateProblem(Problem problem, ProblemDataFiles problemDataFiles) {
         Packet updateProblemPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), problem, problemDataFiles);
         sendToLocalServer(updateProblemPacket);
     }
 
+    @Override
     public ProblemDataFiles getProblemDataFiles(Problem problem) {
         return contest.getProblemDataFile(problem);
     }
 
+    @Override
     public void shutdownTransport() {
         connectionManager.shutdownTransport();
     }
@@ -3918,6 +4011,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Removes connection from list and sends packet.
      */
+    @Override
     public void removeConnection(ConnectionHandlerID connectionHandlerID) {
 
         contest.connectionDropped(connectionHandlerID);
@@ -3931,6 +4025,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Removed login from system and sends packet.
      */
+    @Override
     public void removeLogin(ClientId clientId) {
 
         contest.removeLogin(clientId);
@@ -3947,66 +4042,79 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void startContest(int inSiteNumber) {
         Packet packet = PacketFactory.createStartContestClock(contest.getClientId(), getServerClientId(), inSiteNumber, contest.getClientId());
         sendToLocalServer(packet);
     }
 
+    @Override
     public void stopContest(int inSiteNumber) {
         Packet packet = PacketFactory.createStopContestClock(contest.getClientId(), getServerClientId(), inSiteNumber, contest.getClientId());
         sendToLocalServer(packet);
     }
 
+    @Override
     public void startAllContestTimes() {
         Packet packet = PacketFactory.createStartAllClocks(contest.getClientId(), getServerClientId(), contest.getClientId());
         sendToLocalServer(packet);
     }
 
+    @Override
     public void stopAllContestTimes() {
         Packet packet = PacketFactory.createStopAllClocks(contest.getClientId(), getServerClientId(), contest.getClientId());
         sendToLocalServer(packet);
     }
 
+    @Override
     public void addNewLanguage(Language language) {
         Packet addLanguagePacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), language);
         sendToLocalServer(addLanguagePacket);
     }
 
+    @Override
     public void addNewJudgement(Judgement judgement) {
         Packet addJudgementPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), judgement);
         sendToLocalServer(addJudgementPacket);
     }
 
+    @Override
     public void updateLanguage(Language language) {
         Packet updateLanguagePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), language);
         sendToLocalServer(updateLanguagePacket);
     }
 
+    @Override
     public void updateJudgement(Judgement judgement) {
         Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), judgement);
         sendToLocalServer(updatePacket);
     }
 
+    @Override
     public void updateAccount(Account account) {
         Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), account);
         sendToLocalServer(updatePacket);
     }
 
+    @Override
     public void updateAccounts(Account[] accounts) {
         Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), accounts);
         sendToLocalServer(updatePacket);
     }
 
+    @Override
     public void updateCategories(Category[] categories) {
         Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), categories);
         sendToLocalServer(updatePacket);
     }
 
+    @Override
     public void addNewAccount(Account account) {
         Packet addAccountPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), account);
         sendToLocalServer(addAccountPacket);
     }
 
+    @Override
     public void addNewAccounts(Account[] accounts) {
         Packet addAccountPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), accounts);
         sendToLocalServer(addAccountPacket);
@@ -4014,9 +4122,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Read Configuration.
-     * 
+     *
      * Halt if configuration is corrupt.
-     * 
+     *
      * @param siteNum
      * @return true if config file read
      */
@@ -4026,15 +4134,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (saveCofigurationToDisk) {
             try {
                 loadedConfiguration = contest.readConfiguration(siteNum, getLog());
-                
+
             } catch (FileNotFoundException fnf){
                 // This is expected
                 loadedConfiguration = false;
-            
+
             } catch (Exception e) {
                 logException(e);
-                
-                // Bug 879 -If there is a problem reading the config then exit and show a message. 
+
+                // Bug 879 -If there is a problem reading the config then exit and show a message.
                 fatalError("Halting server - configuration file corrupt", e);
                 return false;
             }
@@ -4042,36 +4150,43 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return loadedConfiguration;
     }
 
+    @Override
     public void addNewClientSettings(ClientSettings clientSettings) {
         Packet addClientSettingsPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), clientSettings);
         sendToLocalServer(addClientSettingsPacket);
     }
 
+    @Override
     public void updateClientSettings(ClientSettings clientSettings) {
         Packet updateClientSettingsPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), clientSettings);
         sendToLocalServer(updateClientSettingsPacket);
     }
 
+    @Override
     public void updateContestInformation(ContestInformation contestInformation) {
         Packet contestInfoPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), contestInformation);
         sendToLocalServer(contestInfoPacket);
     }
 
+    @Override
     public void setJudgementList(Judgement[] judgementList) {
         Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), judgementList);
         sendToLocalServer(updatePacket);
     }
 
+    @Override
     public void removeJudgement(Judgement judgement) {
         Packet deleteJudgmentPacket = PacketFactory.createDeleteSetting(contest.getClientId(), getServerClientId(), judgement);
         sendToLocalServer(deleteJudgmentPacket);
     }
 
+    @Override
     public void addNewBalloonSettings(BalloonSettings newBalloonSettings) {
         Packet newBalloonSettingsPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), newBalloonSettings);
         sendToLocalServer(newBalloonSettingsPacket);
     }
 
+    @Override
     public void updateBalloonSettings(BalloonSettings balloonSettings) {
         Packet balloonSettingsPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), balloonSettings);
         sendToLocalServer(balloonSettingsPacket);
@@ -4081,32 +4196,37 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return contest.getSiteNumber();
     }
 
+    @Override
     public void updateContestTime(ContestTime newContestTime) {
         Packet newContestTimePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), newContestTime);
         sendToLocalServer(newContestTimePacket);
     }
 
+    @Override
     public void addNewGroup(Group group) {
         Packet newGroupPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), group);
         sendToLocalServer(newGroupPacket);
     }
 
+    @Override
     public void updateGroup(Group group) {
         Packet groupPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), group);
         sendToLocalServer(groupPacket);
     }
 
+    @Override
     public int getSecurityLevel() {
         return securityLevel;
     }
 
+    @Override
     public void setSecurityLevel(int securityLevel) {
         this.securityLevel = securityLevel;
     }
 
     /**
      * Server send out security packet.
-     * 
+     *
      */
     public void sendSecurityMessageFromServer(ContestSecurityException contestSecurityException, ConnectionHandlerID connectionHandlerID, Packet packet) {
         Packet violationPacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, contestSecurityException.getSecurityMessage(), null, connectionHandlerID,
@@ -4119,20 +4239,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     }
 
+    @Override
     public void sendSecurityMessage(String event, String message, ContestSecurityException contestSecurityException) {
         Packet securityMessagePacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), getServerClientId(), event, contestSecurityException.getClientId(),
                 contestSecurityException.getConnectionHandlerID(), contestSecurityException, null);
         sendToLocalServer(securityMessagePacket);
     }
 
+    @Override
     public String getHostContacted() {
         return remoteHostName;
     }
 
+    @Override
     public int getPortContacted() {
         return remoteHostPort;
     }
 
+    @Override
     public void fetchRun(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
 
         RunFiles runFiles = contest.getRunFiles(run);
@@ -4152,42 +4276,51 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void sendCompilingMessage(Run run) {
         sendStatusMessge(run, RunExecutionStatus.COMPILING);
     }
 
+    @Override
     public void sendExecutingMessage(Run run) {
         sendStatusMessge(run, RunExecutionStatus.EXECUTING);
     }
 
+    @Override
     public void sendValidatingMessage(Run run) {
         sendStatusMessge(run, RunExecutionStatus.VALIDATING);
     }
 
+    @Override
     public boolean isClientAutoShutdown() {
         return clientAutoShutdown;
     }
 
+    @Override
     public void setClientAutoShutdown(boolean clientAutoShutdown) {
         this.clientAutoShutdown = clientAutoShutdown;
     }
 
+    @Override
     public void resetContest(ClientId clientResettingContest, boolean eraseProblems, boolean eraseLanguages) {
         Profile currentProfile = contest.getProfile();
         Packet sendPacket = PacketFactory.createResetAllSitesPacket(contest.getClientId(), getServerClientId(), clientResettingContest, currentProfile, eraseProblems, eraseLanguages);
         sendToLocalServer(sendPacket);
     }
 
+    @Override
     public void cloneProfile(Profile profile, ProfileCloneSettings settings, boolean switchNow) {
         Packet sendPacket = PacketFactory.createCloneProfilePacket(contest.getClientId(), getServerClientId(), profile, settings, switchNow);
         sendToLocalServer(sendPacket);
     }
 
+    @Override
     public void switchProfile(Profile currentProfile, Profile switchToProfile, String contestPassword) {
         Packet sendPacket = PacketFactory.createSwitchProfilePacket(contest.getClientId(), getServerClientId(), currentProfile, switchToProfile, contestPassword);
         sendToLocalServer(sendPacket);
     }
 
+    @Override
     public void updateProfile(Profile profile) {
         Packet updateProfilePackert = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), profile);
         sendToLocalServer(updateProfilePackert);
@@ -4216,12 +4349,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Fatal error - log error and show user message before exiting.
-     * 
+     *
      * @param message
      * @param ex
      */
     protected void fatalError(String message, Exception ex) {
-        
+
         if (log != null) {
             if (ex != null) {
                 log.log(Log.SEVERE, message, ex);
@@ -4253,11 +4386,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (haltOnFatalError) {
             System.exit(4);
         }
-        
+
     }
 
     /**
-     * 
+     *
      * @see #fatalError(String, Exception)
      * @param message
      */
@@ -4265,6 +4398,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         fatalError(message, null);
     }
 
+    @Override
     public void setContest(IInternalContest newContest) {
         this.contest = newContest;
         contest.setCommandLineArguments(parseArguments);
@@ -4272,10 +4406,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         runSubmitterInterfaceManager.setContestAndController(newContest, this);
     }
 
+    @Override
     public void register(UIPlugin plugin) {
         pluginList.register(plugin);
     }
 
+    @Override
     public UIPlugin[] getPluginList() {
         return pluginList.getList();
     }
@@ -4292,6 +4428,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void updateContestController(IInternalContest inContest, IInternalController inController) {
 
         setContest(inContest);
@@ -4372,19 +4509,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void addPacketListener(IPacketListener packetListener) {
         packetListenerList.addElement(packetListener);
     }
 
+    @Override
     public void removePacketListener(IPacketListener packetListener) {
         packetListenerList.removeElement(packetListener);
     }
 
+    @Override
     public void incomingPacket(Packet packet) {
         PacketEvent event = new PacketEvent(Action.RECEIVED, packet);
         firePacketListener(event);
     }
 
+    @Override
     public void outgoingPacket(Packet packet) {
         PacketEvent event = new PacketEvent(Action.SENT, packet);
         firePacketListener(event);
@@ -4394,18 +4535,22 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         this.log = log;
     }
 
+    @Override
     public boolean isUsingGUI() {
         return usingGUI;
     }
 
+    @Override
     public boolean isSuppressConnectionsPaneDisplay() {
         return suppressConnectionsPaneDisplay;
     }
 
+    @Override
     public boolean isSuppressLoginsPaneDisplay() {
         return suppressLoginsPaneDisplay;
     }
 
+    @Override
     public ILogWindow startLogWindow(IInternalContest inContest) {
 
         if (!isUsingGUI()) {
@@ -4427,11 +4572,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return logWindow;
     }
 
-    private String noLogWindowAvailableMsg = 
-            "Log Window is null or invalid; cannot show log." 
+    private String noLogWindowAvailableMsg =
+            "Log Window is null or invalid; cannot show log."
             + "\n (Log Windows were temporarily disabled in certain Clients (see Issue https://github.com/pc2ccs/pc2v9/pull/555);"
-            + "\n   you may be running a version of PC^2 which still includes this patch...)";                
+            + "\n   you may be running a version of PC^2 which still includes this patch...)";
 
+    @Override
     public void showLogWindow(boolean showWindow) {
 
         if (isUsingGUI()) {
@@ -4444,6 +4590,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public boolean isLogWindowVisible() {
         if (isUsingGUI()) {
             if (logWindow != null && logWindow instanceof ILogWindow) {
@@ -4462,6 +4609,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         System.err.println("Warning: " + string);
     }
 
+    @Override
     public void logWarning(String string, Exception e) {
         log.log(Log.WARNING, string, e);
         System.err.println("Warning: " + string);
@@ -4489,24 +4637,28 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void syncProfileSubmissions(Profile profile) {
         Packet packet = PacketFactory.createSwitchSynchronizePacket(contest.getClientId(), getServerClientId(), profile);
         sendToLocalServer(packet);
     }
 
+    @Override
     public void sendShutdownAllSites() {
         Packet packet = PacketFactory.createShutdownAllServersPacket(contest.getClientId(), getServerClientId());
         sendToLocalServer(packet);
     }
 
+    @Override
     public void sendShutdownSite(int siteNumber) {
         Packet packet = PacketFactory.createShutdownPacket(contest.getClientId(), getServerClientId(), siteNumber);
         sendToLocalServer(packet);
     }
 
     /**
-     * 
+     *
      */
+    @Override
     public void shutdownServer(ClientId requestor) {
 
         if (isServer()) {
@@ -4540,6 +4692,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void shutdownRemoteServers(ClientId requestor) {
 
         if (contest.isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS)) {
@@ -4556,6 +4709,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
+    @Override
     public void shutdownServer(ClientId requestor, int siteNumber) {
 
         if (contest.isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS) || contest.isAllowed(requestor, Permission.Type.SHUTDOWN_SERVER)) {
@@ -4598,30 +4752,36 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return new ClientId(siteNumber, Type.SERVER, 0);
     }
 
+    @Override
     public void updateFinalizeData(FinalizeData data) {
         Packet updateFinalizePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), data);
         sendToLocalServer(updateFinalizePacket);
     }
 
+    @Override
     public void setUsingGUI(boolean usingGUI) {
         this.usingGUI = usingGUI;
     }
 
+    @Override
     public void updateCategory(Category newCategory) {
         Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), newCategory);
         sendToLocalServer(updatePacket);
     }
 
+    @Override
     public void addNewCategory(Category newCategory) {
         Packet addNewCategory = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), newCategory);
         sendToLocalServer(addNewCategory);
     }
 
+    @Override
     public void startPlayback(PlaybackInfo playbackInfo) {
         Packet startPacket = PacketFactory.createStartPlayback(contest.getClientId(), getServerClientId(), playbackInfo);
         sendToLocalServer(startPacket);
     }
 
+    @Override
     public void sendRunToSubmissionInterface(Run run, RunFiles runFiles) {
         try {
             runSubmitterInterfaceManager.sendRun(run, runFiles);
@@ -4642,15 +4802,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             System.err.println("Unable to add console logging, log is null");
         }
     }
-    
+
     public Profile getTheProfile() {
         return theProfile;
     }
-    
+
     public void setTheProfile(Profile theProfile) {
         this.theProfile = theProfile;
     }
-    
+
+    @Override
     public void autoRegister(String loginName) {
 
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
@@ -4663,11 +4824,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void setConnectionManager(ITransportManager connectionManager) {
         this.connectionManager = connectionManager;
     }
-    
+
     public void setHaltOnFatalError(boolean haltOnFatalError) {
         this.haltOnFatalError = haltOnFatalError;
     }
-    
+
     public boolean isHaltOnFatalError() {
         return haltOnFatalError;
     }
@@ -4695,18 +4856,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), groups);
         sendToLocalServer(updatePacket);
     }
-    
+
     /**
      * Creates an {@link AutoStarter} if none exists, and then instructs the AutoStarter to update its Scheduled Start Task to correspond to the Scheduled Start Time information in the
      * {@link ContestInformation} object in the received {@link IInternalContest}.
-     * 
+     *
      * @param theContest
      *            - the Contest (Model) containing the Scheduled Start Time information
      * @param theController
      *            - the Controller to which this request applies
      */
+    @Override
     public void updateAutoStartInformation(IInternalContest theContest, IInternalController theController) {
-        
+
         // if I'm a server then if there's no AutoStarter create one, and then tell the AutoStarter to
         // update its Scheduled Start task list based on the ContestInformation in theContest (Model).
 //        if (isServer()) {
@@ -4763,7 +4925,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 //            System.err.println ("in updateAutoStartInformation() -- NOT A SERVER!!");
 //        }
     }
-    
+
     /**
      * Start Auto Stop Contest Clock Thread.
      */
@@ -4772,7 +4934,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (autoStopContestClockThread == null) {
             autoStopContestClockThread = new AutoStopContestClockThread(this, contest);
             autoStopContestClockThread.start();
-            
+
             ContestTime time = contest.getContestTime();
             log.info("Started auto stop clock thread, remaining time is " + time.getRemainingTimeStr());
         }
@@ -4786,13 +4948,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     @Override
     public void submitRun(ClientId submitter, Problem problem, Language language, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId) {
-        
+
         submitRun(submitter, problem, language, null, mainSubmissionFile, additionalFiles, overrideTimeMS, overrideRunId);
     }
 
     @Override
     public void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideSubmissionId) {
-        
+
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Run run = new Run(submitter, language, problem);
         run.setEntryPoint(entry_point);
@@ -4800,7 +4962,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles, overrideTimeMS, overrideSubmissionId);
         sendToLocalServer(packet);
-        
+
     }
 
 }

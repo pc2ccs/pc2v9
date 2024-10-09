@@ -1,0 +1,45 @@
+problems:
+  - short-name: riddleofthesphinx
+    letter: A
+    name: Riddle of the Sphinx
+    color: silver
+  - short-name: schedule
+    letter: B
+    name: Schedule
+    color: limegreen
+  - short-name: threekindsofdice
+    letter: C
+    name: Three Kinds of Dice
+    color: black
+  - short-name: carlsvacation
+    letter: D
+    name: Carl's Vacation
+    color: lightpink
+  - short-name: arecurringproblem
+    letter: E
+    name: A Recurring Problem
+    color: blue
+  - short-name: tiltingtiles
+    letter: F
+    name: Tilting Tiles
+    color: orangered
+  - short-name: turningred
+    letter: G
+    name: Turning Red
+    color: deepskyblue
+  - short-name: jetlag
+    letter: H
+    name: Jet Lag
+    color: darkorange
+  - short-name: waterworld
+    letter: I
+    name: Waterworld
+    color: yellow
+  - short-name: bridgingthegap
+    letter: J
+    name: Bridging the Gap
+    color: mediumpurple
+  - short-name: aleaiactaest
+    letter: K
+    name: Alea Iacta Est
+    color: tan

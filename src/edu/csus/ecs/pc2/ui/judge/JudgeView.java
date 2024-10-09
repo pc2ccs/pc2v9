@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.judge;
 
 import java.awt.BorderLayout;
@@ -15,6 +15,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.exception.MultipleIssuesException;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -39,19 +40,22 @@ import edu.csus.ecs.pc2.ui.RunsTablePane;
 import edu.csus.ecs.pc2.ui.SubmissionBiffPane;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
+import edu.csus.ecs.pc2.ui.SubmitSampleRunsPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Judge GUI.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class JudgeView extends JFrame implements UIPlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 5365837218548110171L;
+
+    private static final String SAMPLE_SUBMIT_PANE_KEY = "judge.sampleSubmitPane";
 
     private IInternalContest contest;
 
@@ -97,6 +101,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         FrameUtilities.centerFrame(this);
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 promptAndExit();
             }
@@ -105,7 +110,7 @@ public class JudgeView extends JFrame implements UIPlugin {
     }
 
     private void overRideLookAndFeel(){
-        // TODO eventually move this method to on location 
+        // TODO eventually move this method to on location
         String value = IniFile.getValue("client.plaf");
         if (value != null && value.equalsIgnoreCase("java")){
             FrameUtilities.setJavaLookAndFeel();
@@ -124,7 +129,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes mainTabbedPane
-     * 
+     *
      * @return javax.swing.JTabbedPane
      */
     private JTabbedPane getMainTabbedPane() {
@@ -149,8 +154,9 @@ public class JudgeView extends JFrame implements UIPlugin {
     private void setFrameTitle(final boolean contestStarted) {
         final Frame thisFrame = this;
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
-                
+
                 FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contestStarted, new VersionInfo());
                 if (contestStarted) {
                     contestClockDisplay.fireClockStateChange(contest.getContestTime());
@@ -166,17 +172,19 @@ public class JudgeView extends JFrame implements UIPlugin {
 
         FrameUtilities.regularCursor(this);
     }
-    
 
 
+
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
-                
+
                 controller.startLogWindow(contest);
 
                 contest.addContestTimeListener(new ContestTimeListenerImplementation());
@@ -200,16 +208,21 @@ public class JudgeView extends JFrame implements UIPlugin {
 
                 ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
                 addUIPlugin(getMainTabbedPane(), "All clarifications", clarificationsTablePane);
-              
+
                 SubmitRunPane submitRunPane = new SubmitRunPane();
                 addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
-                
+
                 SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
                 addUIPlugin(getMainTabbedPane(), "Generate Clarification", submitClarificationPane);
 
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
-                
+
+                if(StringUtilities.getBooleanValue(IniFile.getValue(SAMPLE_SUBMIT_PANE_KEY), false)) {
+                    SubmitSampleRunsPane sampleRunsPane = new SubmitSampleRunsPane();
+                    addUIPlugin(getMainTabbedPane(), "Submit Samples", sampleRunsPane);
+                }
+
                 ImBoredPane boredPane = new ImBoredPane();
                 addUIPlugin(getMainTabbedPane(), "I\'m Bored", boredPane);
 
@@ -217,7 +230,7 @@ public class JudgeView extends JFrame implements UIPlugin {
                 contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
                 contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
                 controller.register(contestClockDisplay);
-                
+
                 if (Utilities.isDebugMode()) {
 
                     try {
@@ -266,14 +279,14 @@ public class JudgeView extends JFrame implements UIPlugin {
                     JOptionPane.showMessageDialog(getParent(), message, "Cannot perform Judging", JOptionPane.ERROR_MESSAGE);
                     System.exit(1);
                 }
-                
+
                 SubmissionBiffPane submissionBiffPane = new SubmissionBiffPane();
                 getJudgeBiffPane().add(submissionBiffPane, java.awt.BorderLayout.CENTER);
                 submissionBiffPane.setContestAndController(contest, controller);
                 controller.register(submissionBiffPane);
-                
-                setVisible(true);  
-                //the following was fixed under Bug 800        
+
+                setVisible(true);
+                //the following was fixed under Bug 800
 //                //TODO This needs to be resolved. The submitClarifcaitonPane is bleeding through the other tabs
 //                getMainTabbedPane().setSelectedComponent(submitClarificationPane);
 //                getMainTabbedPane().doLayout();
@@ -282,7 +295,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 //                getMainTabbedPane().setSelectedComponent(newRunsPane);
 
                 if (Utilities.isDebugMode()){
-                    
+
                     try {
                         PacketMonitorPane pane = new PacketMonitorPane();
                         addUIPlugin(getMainTabbedPane(), "Packets", pane);
@@ -290,7 +303,7 @@ public class JudgeView extends JFrame implements UIPlugin {
                         logException(e);
                     }
                 }
-                
+
                 AboutPane aboutPane = new AboutPane();
                 addUIPlugin(getMainTabbedPane(), "About", aboutPane);
 
@@ -304,12 +317,13 @@ public class JudgeView extends JFrame implements UIPlugin {
                 } catch (Exception e) {
                     logException(e);
                 }
-          
+
             }
         });
 
     }
 
+    @Override
     public String getPluginTitle() {
         return "Judge Main GUI";
     }
@@ -320,7 +334,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes messagePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMessagePane() {
@@ -339,7 +353,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes centerPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getCenterPane() {
@@ -353,7 +367,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes mainPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMainPane() {
@@ -368,7 +382,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes exitPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getExitPane() {
@@ -381,7 +395,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes exitButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getExitButton() {
@@ -390,6 +404,7 @@ public class JudgeView extends JFrame implements UIPlugin {
             exitButton.setText("Exit");
             exitButton.setToolTipText("Click here to Shutdown PC^2");
             exitButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     promptAndExit();
                 }
@@ -401,6 +416,7 @@ public class JudgeView extends JFrame implements UIPlugin {
     private void showMessage(final String string) {
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(string);
                 messageLabel.setToolTipText(string);
@@ -414,21 +430,24 @@ public class JudgeView extends JFrame implements UIPlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
 
     class ContestTimeListenerImplementation implements IContestTimeListener {
 
+        @Override
         public void contestTimeAdded(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestTimeRemoved(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestTimeChanged(ContestTimeEvent event) {
             ContestTime contestTime = event.getContestTime();
             if (isThisSite(contestTime.getSiteNumber())) {
@@ -436,14 +455,17 @@ public class JudgeView extends JFrame implements UIPlugin {
             }
         }
 
+        @Override
         public void contestStarted(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void contestStopped(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
 
+        @Override
         public void refreshAll(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
@@ -461,7 +483,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes northPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getNorthPane() {
@@ -477,7 +499,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes judgeBiffPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getJudgeBiffPane() {
@@ -498,7 +520,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         // if anybody was waiting for us to not be judging, wake 1 of them now
         if (!alreadyJudgingRun) {
             /**
-             * notify is called outside of a synchronized block: 
+             * notify is called outside of a synchronized block:
              * Exception in thread "AWT-EventQueue-0" java.lang.IllegalMonitorStateException: current thread not owner
              */
             synchronized (JudgeView.getAlreadyJudgingRun()) {
@@ -513,7 +535,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     /**
      * This method initializes clockPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getClockPane() {
@@ -542,7 +564,7 @@ public class JudgeView extends JFrame implements UIPlugin {
             e.printStackTrace(System.err);
         }
     }
-    
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"
 

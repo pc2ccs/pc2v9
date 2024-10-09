@@ -33,7 +33,13 @@ public class ResultsFile {
 
     private static final String SILVER = "Silver Medal";
 
-    private static final String HONORABLE = "Honorable" ;
+    private static final String HIGHEST_HONOR = "Highest Honors";
+
+    private static final String HIGH_HONOR = "High Honors";
+
+    private static final String HONOR = "Honors";
+
+    private static final String HONORABLE = "Honorable";
 
     private static final String TAB = "\t";
 
@@ -67,11 +73,11 @@ public class ResultsFile {
     }
 
     public String [] createTSVFileLines(IInternalContest contest, Group group) {
-        return createTSVFileLines(contest, group, DEFAULT_RESULT_FIELD_NAME);
+        return createFileLines(contest, group, DEFAULT_RESULT_FIELD_NAME, true);
     }
 
     private String [] createTSVFileLines(IInternalContest contest, String resultFileTitleFieldName) {
-        return createTSVFileLines(contest, null, resultFileTitleFieldName);
+        return createFileLines(contest, null, resultFileTitleFieldName, true);
     }
 
     /**
@@ -80,110 +86,12 @@ public class ResultsFile {
      * @param group (or null)
      * @return contents of results.csv (after header line)
      */
+    public String[] createCSVFileLines(IInternalContest contest) {
+        return createFileLines(contest, null, DEFAULT_RESULT_FIELD_NAME, false);
+    }
+
     public String[] createCSVFileLines(IInternalContest contest, Group group) {
-        Vector<String> lines = new Vector<String>();
-
-        lines.addElement("teamId,rank,medalCitation,problemsSolved,totalTime,lastProblemTime,siteCitation,citation");
-        finalizeData = contest.getFinalizeData();
-
-        NewScoringAlgorithm scoringAlgorithm = new NewScoringAlgorithm();
-        scoringAlgorithm.setContest(contest);
-
-        Properties properties = getScoringProperties(contest);
-
-        // return ranked teams
-        StandingsRecord[] standingsRecords = null;
-        try {
-            List<Group> groupList = null;
-            if(group != null) {
-                groupList = new ArrayList<Group>();
-                groupList.add(group);
-            }
-            standingsRecords = scoringAlgorithm.getStandingsRecords(contest, null,  groupList, properties, false, null);
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to generate standings ", e.getCause());
-        }
-
-        int median = getMedian(standingsRecords);
-
-        // if not finalized, make up "best guess" data.
-        // There should be constants somewhere that give the "current" gold/silver/bronze ranks; note that
-        // FinalizePane hard codes 4, 8, 12 in the text fields *ARGH*
-        // Should also be able to read the defaults at startup from the config files
-        // Here we just cobble together some half-assed finalized data
-        if (finalizeData == null) {
-            finalizeData = GenDefaultFinalizeData();
-//            String [] badbad = {"Contest not finalized cannot create awards"};
-//            return badbad;
-        }
-
-        // TODO finalizeData really needs a B instead of getBronzeRank
-        int lastMedalRank = finalizeData.getBronzeRank();
-        int lastSolvedNum = 0;
-        int rankNumber = 0;
-        // resort standingsRecord based on lastMedalRank and median
-/*
-        // this causes a major diff between John's results and these.
-        Vector<Account> accountVector = contest.getAccounts(Type.TEAM);
-        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
-        AccountList accountList = new AccountList();
-        for (Account account : accounts) {
-            accountList.add(account);
-        }
-        comparator = new FinalsStandingsRecordComparator();
-        comparator.setCachedAccountList(accountList);
-        comparator.setLastRank(lastMedalRank);
-        comparator.setMedian(median);
-        Arrays.sort(standingsRecords, comparator);
-*/
-
-        int realRank = 0;
-        for (StandingsRecord record : standingsRecords) {
-            realRank++;
-            Account account = contest.getAccount(record.getClientId());
-
-            // Then follow several lines with the following format (one per team).
-            // Field Description Example Type
-            // 1 Reservation ID 24314 integer
-            // 2 Rank in contest 1 integer
-            // 3 Award gold string
-            // 4 Number of problems the team has solved 4 integer
-            // 5 Total Time 534 integer
-            // 6 Time of the last submission 233 integer
-
-            String reservationId = account.getExternalId();
-            boolean ranked = false;
-            if (record.getNumberSolved() >= median) {
-                ranked = true;
-            }
-            String award = getAwardMedal(record.getRankNumber(), finalizeData, ranked);
-            String rank = "";
-            if (!"honorable".equalsIgnoreCase(award)) {
-                if (realRank > lastMedalRank && (lastSolvedNum != record.getNumberSolved())) {
-                    lastSolvedNum = record.getNumberSolved();
-                    rankNumber = realRank;
-                    record.setRankNumber(realRank);
-                } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
-                    lastSolvedNum = record.getNumberSolved();
-                    rankNumber = realRank;
-                    record.setRankNumber(realRank);
-                } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
-                    record.setRankNumber(rankNumber);
-                }
-                rank = Integer.toString(record.getRankNumber());
-            }
-            // teamId,rank,medalCitation,problemsSolved,totalTime,lastProblemTime,siteCitation,citation
-            lines.addElement(reservationId + COMMA //
-                    + rank + COMMA //
-                    + award + COMMA //
-                    + record.getNumberSolved() + COMMA //
-                    + record.getPenaltyPoints() + COMMA //
-                    + record.getLastSolved() + COMMA // then siteCitation
-                    + COMMA);  // then citation
-
-        }
-
-        return lines.toArray(new String[lines.size()]);
+        return createFileLines(contest, group, DEFAULT_RESULT_FIELD_NAME, false);
     }
 
     /**
@@ -222,7 +130,7 @@ public class ResultsFile {
      * @param resultFileTitleFieldName override title anem {@value #DEFAULT_RESULT_FIELD_NAME}.
      * @return
      */
-    public String[] createTSVFileLines(IInternalContest contest, Group group, String resultFileTitleFieldName)  {
+    public String[] createFileLines(IInternalContest contest, Group group, String resultFileTitleFieldName, boolean isTSV)  {
 
         Vector<String> lines = new Vector<String>();
 
@@ -237,7 +145,11 @@ public class ResultsFile {
         // 1 Label results fixed string (always same value)
         // 2 Version number 1 integer
 
-        lines.addElement(resultFileTitleFieldName + TAB + "1");
+        if (isTSV) {
+            lines.addElement(resultFileTitleFieldName + TAB + "1");
+        } else {
+            lines.addElement("teamId,rank,medalCitation,problemsSolved,totalTime,lastProblemTime,siteCitation,citation");
+        }
 
         // return ranked teams
         StandingsRecord[] standingsRecords = null;
@@ -256,14 +168,13 @@ public class ResultsFile {
 
         if (finalizeData == null) {
             finalizeData = GenDefaultFinalizeData();
-//            String [] badbad = {"Contest not finalized cannot create awards"};
-//            return badbad;
         }
 
         // TODO finalizeData really needs a B instead of getBronzeRank
         int lastMedalRank = finalizeData.getBronzeRank();
         int lastSolvedNum = 0;
         int rankNumber = 0;
+
         // resort standingsRecord based on lastMedalRank and median
         Vector<Account> accountVector = contest.getAccounts(Type.TEAM);
         Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
@@ -275,9 +186,13 @@ public class ResultsFile {
         comparator.setCachedAccountList(accountList);
         comparator.setLastRank(lastMedalRank);
         comparator.setMedian(median);
+        comparator.setUseWFGroupRanking(finalizeData.isUseWFGroupRanking());
         Arrays.sort(standingsRecords, comparator);
 
         int realRank = 0;
+        int highestHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved();
+        int highHonorSolvedCount = highestHonorSolvedCount - 1;
+
         for (StandingsRecord record : standingsRecords) {
             realRank++;
             Account account = contest.getAccount(record.getClientId());
@@ -292,49 +207,97 @@ public class ResultsFile {
             // 6 Time of the last submission 233 integer
 
             String reservationId = account.getExternalId();
-            boolean ranked = false;
-            if (record.getNumberSolved() >= median) {
-                ranked = true;
+            
+            boolean isHighestHonor = false;
+            boolean isHighHonor = false;
+            boolean isHonor = false;
+
+            if (finalizeData.isUseWFGroupRanking()) {
+                if (record.getNumberSolved() >= highestHonorSolvedCount) {
+                    isHighestHonor = true;
+                } else if (record.getNumberSolved() >= highHonorSolvedCount) {
+                    isHighHonor = true;
+                } else if (record.getNumberSolved() >= median) {
+                    isHonor = true;
+                }
+            } else if (record.getNumberSolved() >= median) {
+                isHonor = true;
             }
-            String award = getAwardMedal(record.getRankNumber(), finalizeData, ranked);
+
+            String award = getMedalCitation(record.getRankNumber(), finalizeData, isHighestHonor, isHighHonor, isHonor);
+            if (record.getNumberSolved() == 0) {
+                award = HONORABLE;
+            }
+
             String rank = "";
-            if (!"honorable".equalsIgnoreCase(award)) {
-                if (realRank > lastMedalRank && (lastSolvedNum != record.getNumberSolved())) {
-                    lastSolvedNum = record.getNumberSolved();
-                    rankNumber = realRank;
-                    record.setRankNumber(realRank);
-                } else if (realRank > lastMedalRank && lastSolvedNum == record.getNumberSolved() && lastSolvedNum > 0) {
+            if (!HONORABLE.equalsIgnoreCase(award)) {
+                if (finalizeData.isUseWFGroupRanking() && realRank > lastMedalRank) {
+                    if (record.getNumberSolved() != lastSolvedNum) {
+                        lastSolvedNum = record.getNumberSolved();
+                        rankNumber = realRank;
+                    }
                     record.setRankNumber(rankNumber);
                 }
                 rank = Integer.toString(record.getRankNumber());
             }
-            lines.addElement(reservationId + TAB //
-                    + rank + TAB //
-                    + award + TAB  //
-                    + record.getNumberSolved() //
-                    + TAB + record.getPenaltyPoints() + TAB //
-                    + record.getLastSolved());
+
+            if (isTSV) {
+                lines.addElement(reservationId + TAB //
+                        + rank + TAB //
+                        + award + TAB  //
+                        + record.getNumberSolved() + TAB //
+                        + record.getPenaltyPoints() + TAB //
+                        + record.getLastSolved());
+            } else {
+                // teamId,rank,medalCitation,problemsSolved,totalTime,lastProblemTime,siteCitation,citation
+                lines.addElement(reservationId + COMMA //
+                        + rank + COMMA //
+                        + award + COMMA //
+                        + record.getNumberSolved() + COMMA //
+                        + record.getPenaltyPoints() + COMMA //
+                        + record.getLastSolved() + COMMA // then siteCitation
+                        + COMMA);  // then citation
+            }
         }
 
         return lines.toArray(new String[lines.size()]);
     }
 
     /**
+     * Determine whether a team receives a medal or Honor citaion.
+     *
+     * <pre>
+     * Award is a string with value "gold", "silver", "bronze", "highest honor", "high honor", "honor" if WF type rankings or "ranked"
+     * or "honorable" as appropriate.
+     * </pre>
+     *
+     * @param rankNumber,isHighestHonor,isHighHonor,isHonor
+     * @param finalizeData
+     * @return medalOrCitation
+     */
+
+    private String getMedalCitation(int rankNumber, FinalizeData data, boolean isHighestHonor, boolean isHighHonor, boolean isHonor) {
+
+        String medalOrCitation = getAwardMedal(rankNumber, data);
+        if (medalOrCitation == null) {
+            medalOrCitation = getCitation(data, isHighestHonor, isHighHonor, isHonor);
+        }
+        return medalOrCitation;
+    }
+
+    /**
      * Determine and return award medal color.
      *
      * <pre>
-     * Award is a string with value "gold", "silver", "bronze", "ranked"
-     * or "honorable" as appropriate.
+     * Award is a string with value "gold", "silver", "bronze"
+     * or null as appropriate.
      * </pre>
      *
      * @param rankNumber
      * @param finalizeData
-     * @return
+     * @return medalColor
      */
-
-    private String getAwardMedal(int rankNumber, FinalizeData data, boolean ranked) {
-
-        // TODO CCS determine how to assign bronze and ranked
+    private String getAwardMedal(int rankNumber, FinalizeData data) {
 
         if (rankNumber <= data.getGoldRank()) {
             return GOLD;
@@ -342,10 +305,36 @@ public class ResultsFile {
             return SILVER;
         } else if (rankNumber <= data.getBronzeRank()) {
             return BRONZE;
-        } else if (ranked) {
-            return RANKED;
         } else {
+            return null;
+        }
+    }
+
+    /**
+     * Determine what citation team will receive based on new WF rules or are they Ranked if WF rules not used
+     *
+     * <pre>
+     * Award is a string with value "highest honor", "high honor", "honor" if WF type rankings or "ranked"
+     * or "honorable" as appropriate.
+     * </pre>
+     *
+     * @param isHighestHonor,isHighHonor,isHonor
+     * @param finalizeData
+     * @return citation
+     */
+
+     private String getCitation(FinalizeData data, boolean isHighestHonor, boolean isHighHonor, boolean isHonor) {
+
+        if (!(isHighestHonor || isHighHonor || isHonor)) {
             return HONORABLE;
+        } else if (!data.isUseWFGroupRanking()) {
+            return RANKED;
+        } else if (isHighestHonor) {
+            return HIGHEST_HONOR;
+        } else if (isHighHonor) {
+            return HIGH_HONOR;
+        } else {
+            return HONOR;
         }
     }
 
@@ -396,6 +385,7 @@ public class ResultsFile {
         finalizeData.setBronzeRank(12);
         finalizeData.setCertified(false);
         finalizeData.setComment("Preliminary Results - Contest not Finalized");
+        finalizeData.setUseWFGroupRanking(true);
         return(finalizeData);
     }
 }

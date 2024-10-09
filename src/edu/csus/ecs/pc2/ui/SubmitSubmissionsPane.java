@@ -1,6 +1,7 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -10,6 +11,7 @@ import java.io.File;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -19,14 +21,13 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.list.SubmissionSample;
 import edu.csus.ecs.pc2.ui.team.QuickSubmitter;
-import java.awt.BorderLayout;
-import javax.swing.JCheckBox;
 
 /**
  * A UI that to submit files found in a CDP.
- * 
- * 
+ *
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class SubmitSubmissionsPane extends JPanePlugin {
@@ -36,7 +37,7 @@ public class SubmitSubmissionsPane extends JPanePlugin {
     private JTextField cdptextField;
 
     private JLabel messageLabel;
-    
+
     private JCheckBox checkBoxSubmitYesSamples;
 
     private JCheckBox checkBoxSubmitFailingSamples;
@@ -68,14 +69,14 @@ public class SubmitSubmissionsPane extends JPanePlugin {
         messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         messageLabel.setBounds(10, 11, 418, 32);
         centerPane.add(messageLabel);
-        
-        
+
+
         checkBoxSubmitYesSamples = new JCheckBox("Submit Yes Samples");
         checkBoxSubmitYesSamples.setSelected(true);
         checkBoxSubmitYesSamples.setToolTipText("Only submit AC sample source");
         checkBoxSubmitYesSamples.setBounds(48, 101, 265, 23);
         centerPane.add(checkBoxSubmitYesSamples);
-        
+
         checkBoxSubmitFailingSamples = new JCheckBox("Submit Failing (non-AC) Samples");
         checkBoxSubmitFailingSamples.setSelected(true);
         checkBoxSubmitFailingSamples.setToolTipText("Submt all non-AC (Yes) submissions");
@@ -89,6 +90,7 @@ public class SubmitSubmissionsPane extends JPanePlugin {
 
         JButton submitRunButton = new JButton("Submit");
         submitRunButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 submitSampleSubmissions();
             }
@@ -108,28 +110,33 @@ public class SubmitSubmissionsPane extends JPanePlugin {
 
         if (submitall) {
             List<File> files = submitter.getAllCDPsubmissionFileNames(getContest(), cdptextField.getText());
-            
+
             boolean submitYesSamples = checkBoxSubmitYesSamples.isSelected();
             boolean submitNoSamples = checkBoxSubmitFailingSamples.isSelected();
-            
+
             if (! submitYesSamples || ! submitNoSamples){
                 files =  QuickSubmitter.filterRuns (files, submitYesSamples, submitNoSamples);
             }
-            
-            
+
+
             int count = 1;
             for (File file : files) {
                 System.out.println("Found file " + count + " " + file.getAbsolutePath());
                 count++;
-                
-                
+
+
             }
 
             int result = FrameUtilities.yesNoCancelDialog(this, "Submit " + files.size() + " sample submissions?", "Submit CDP submissions");
 
             if (result == JOptionPane.YES_OPTION) {
 
-                int numberSubmitted = submitter.sendSubmissions(files);
+                List<SubmissionSample> subList = submitter.sendSubmissions(files);
+                int numberSubmitted = 0;
+
+                if(subList != null) {
+                    numberSubmitted = subList.size();
+                }
 
                 if (numberSubmitted == files.size()) {
                     showMessage("Submitted all (" + files.size() + ") files/runs.");
@@ -166,6 +173,7 @@ public class SubmitSubmissionsPane extends JPanePlugin {
 
     public void showMessage(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(message);
                 messageLabel.setToolTipText(message);

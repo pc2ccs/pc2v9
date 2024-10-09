@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.packet;
 
 import java.io.PrintStream;
@@ -48,7 +48,7 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
  * Creates {@link Packet}s.
- * 
+ *
  * Each packet can be created by using a method in this class. There is a "create" method for each {@link Type}. <br>
  * There are also some methods to extract fields/classes from packets.
  * <P>
@@ -56,13 +56,13 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
  * <P>
  * Constants are present in this class that are used to extract individual contents from a packet. <br>
  * Example of extracting individual contents from a packet {@link edu.csus.ecs.pc2.core.packet.Packet}.
- * 
+ *
  * <pre>
  * Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
- * 
+ *
  * ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
  * </pre>
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -96,7 +96,7 @@ public final class PacketFactory {
     public static final String PROBLEM = "PROBLEM";
 
     public static final String GENERAL_PROBLEM = "GENERAL_PROBLEM";
-    
+
     public static final String GROUP = "GROUP";
 
     public static final String CLARIFICATION_ANSWER = "CLARIFICATION_ANSWER";
@@ -110,12 +110,12 @@ public final class PacketFactory {
     public static final String CLIENT_ID = "CLIENT_ID";
 
     public static final String CONTEST_PASSWORD = "CONTEST_PASSWORD";
-    
+
     /**
      * Array of ClientIds of logged in users.
      */
     public static final String LOCAL_LOGGED_IN_USERS = "LOCAL_LOGGED_IN_USERS";
-    
+
     /**
      * Array of ClientIds of logged in users.
      */
@@ -160,7 +160,7 @@ public final class PacketFactory {
 
     /**
      * A single ClientType.Type.
-     * 
+     *
      * @see #createGenerateAccounts(ClientId, ClientId, int, ClientType.Type, int, int, boolean)
      */
     public static final String CLIENT_TYPE = "CLIENT_TYPE";
@@ -169,7 +169,7 @@ public final class PacketFactory {
 
     /**
      * Used as a start count (id) for generating accounts.
-     * 
+     *
      * If start count is 0, will add accounts after max account number. <br>
      * If start count is 100, will add accounts after max account number is greater than 100.
      */
@@ -208,16 +208,16 @@ public final class PacketFactory {
     public static final String SITE_LIST = "SITE_LIST";
 
     public static final String MESSAGE_STRING = "MESSAGE_STRING";
-    
+
     public static final String CONTEST_INFORMATION = "CONTEST_INFORMATION";
-    
+
     /**
      * Array of {@link ClientSettings}.
      */
     public static final String CLIENT_SETTINGS_LIST = "CLIENT_SETTINGS_LIST";
-    
+
     public static final String CLIENT_SETTINGS = "CLIENT_SETTINGS";
-    
+
     /**
      * Array of {@link BalloonSettings}.
      */
@@ -234,11 +234,11 @@ public final class PacketFactory {
      * Boolean value.
      */
     public static final String PASSWORD_CHANGED = "PASSWORD_CHANGED";
-    
+
 
     /**
      * On login, send settings to server.
-     * 
+     *
      * Usually set to false.s
      */
     public static final String SEND_SETTINGS = "SEND_SETTINGS";
@@ -274,7 +274,7 @@ public final class PacketFactory {
      * Array of {@link Judgement}.
      */
     public static final String JUDGEMENT_LIST = "JUDGEMENT_LIST";
-    
+
     /**
      * Array of {@link ContestTime}.
      */
@@ -348,17 +348,17 @@ public final class PacketFactory {
 
     public static final String OVERRIDE_RUN_ID = "OVERRIDE_RUN_ID";
 
+    public static final String OVERRIDE_STOP_ON_FAILURE = "OVERRIDE_STOP_ON_FAILURE";
+
     public static final String AUTO_REG_REQUEST_INFO = "AUTO_REG_REQUEST_INFO";
-    
+
     /**
      * List of files submitted by team.
      */
     public static final String TEAM_RUN_SOURCE_FILES_LIST = "TEAM_RUN_SOURCE_FILES_LIST";
 
     public static final String REQUEST_LOGIN_AS_PROXY = "REQUEST_LOGIN_AS_PROXY";
-    
-    
-    
+
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
      */
@@ -368,7 +368,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#LOGIN_REQUEST}.
-     * 
+     *
      * @param source -
      *            who is logging in.
      * @param password -
@@ -380,9 +380,9 @@ public final class PacketFactory {
     public static Packet createLoginRequest(ClientId source, String loginName, String password, ClientId destination) {
         return createLoginRequest(source, loginName, password, destination, false);
     }
-    
+
     /**
-     * 
+     *
      * @param source
      * @param loginName
      * @param password
@@ -398,7 +398,7 @@ public final class PacketFactory {
         prop.put(REQUEST_LOGIN_AS_PROXY, new Boolean(proxiedSite));
         return createPacket(PacketType.Type.LOGIN_REQUEST, source, destination, prop);
     }
-    
+
     public static Packet createPasswordChangeRequest(ClientId source,  ClientId destination, String password, String newPassword) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
@@ -406,7 +406,7 @@ public final class PacketFactory {
         prop.put(NEW_PASSWORD, newPassword);
         return createPacket(PacketType.Type.PASSWORD_CHANGE_REQUEST, source, destination, prop);
     }
-    
+
     public static Packet createPasswordChangeResult(ClientId source,  ClientId destination, boolean passwordChanged, String message) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
@@ -414,11 +414,11 @@ public final class PacketFactory {
         prop.put(PacketFactory.MESSAGE_STRING, message);
         return createPacket(PacketType.Type.PASSWORD_CHANGE_RESULTS, source, destination, prop);
     }
-   
+
     /**
      * Create a packet.
-     * 
-     * 
+     *
+     *
      * @param type -
      *            {@link PacketType.Type}
      * @param source -
@@ -436,7 +436,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#MESSAGE}.
-     * 
+     *
      * @param source
      * @param destination
      * @param message
@@ -459,12 +459,14 @@ public final class PacketFactory {
     }
     /**
      * Create a packet of {@link PacketType.Type#RUN_SUBMISSION}.
-     * 
+     *
+     * This method is for backward compatibiltiy for classes that do not pass the overrideStopOnFailure flag
+     *
      * @param source
      * @param destination
      * @param run
      * @param runFiles
-     * @param overrideSubmissionTime 
+     * @param overrideSubmissionTime
      * @return submitted run packet.
      */
     public static Packet createSubmittedRun(ClientId source, ClientId destination, Run run, RunFiles runFiles, long overrideSubmissionTime, long overrideRunId) {
@@ -480,19 +482,46 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.RUN_SUBMISSION, source, destination, prop);
         return packet;
     }
-    
+
+    /**
+     * Create a packet of {@link PacketType.Type#RUN_SUBMISSION}.
+     *
+     * @param source
+     * @param destination
+     * @param run
+     * @param runFiles
+     * @param overrideSubmissionTime
+     * @param overrideRunId
+     * @param overrideStopOnFailure
+     * @return submitted run packet.
+     */
+    public static Packet createSubmittedRun(ClientId source, ClientId destination, Run run, RunFiles runFiles, long overrideSubmissionTime, long overrideRunId, boolean overrideStopOnFailure) {
+        Properties prop = new Properties();
+        prop.put(RUN, run);
+        prop.put(RUN_FILES, runFiles);
+        if (overrideSubmissionTime > 0) {
+            prop.put(ELAPSED_TIME, new Long(overrideSubmissionTime));
+        }
+        if (overrideRunId > 0) {
+            prop.put(OVERRIDE_RUN_ID, new Long(overrideRunId));
+        }
+        prop.put(OVERRIDE_STOP_ON_FAILURE, Boolean.valueOf(overrideStopOnFailure));
+        Packet packet = new Packet(Type.RUN_SUBMISSION, source, destination, prop);
+        return packet;
+    }
+
     public static Packet createRunSubmissionConfirmation(ClientId source, ClientId destination, Run run, RunFiles runFiles) {
         Properties prop = new Properties();
         prop.put(RUN, run);
         prop.put(RUN_FILES, runFiles);
         Packet packet = new Packet(Type.RUN_SUBMISSION_CONFIRM_SERVER, source, destination, prop);
         return packet;
-        
+
     }
 
     /**
      * Dump packet info to PrintWriter and System.err.
-     * 
+     *
      * @param pw
      * @param packet
      */
@@ -523,10 +552,10 @@ public final class PacketFactory {
         pw.println();
 
     }
-    
+
     /**
      * Dump packet info to PrintWriter and System.err.
-     * 
+     *
      * @param log
      * @param packet
      * @param message
@@ -558,10 +587,10 @@ public final class PacketFactory {
 
     /**
      * Dump packet to PrintStream.
-     * 
+     *
      * @param pw
      * @param packet
-     * @param message 
+     * @param message
      */
     public static void dumpPacket(PrintStream pw, Packet packet, String message) {
         pw.println("Packet " + packet.getType() + " (Seq #" + packet.getPacketNumber() + ", o#" + packet.getOriginalPacketNumber() + " ) " + message);
@@ -591,7 +620,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#RUN_AVAILABLE}.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -606,7 +635,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#RUN_UPDATE}.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -627,7 +656,7 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.RUN_UPDATE, source, destination, prop);
         return packet;
     }
-    
+
     public static Packet createRunUpdateNotification(ClientId source, ClientId destination, Run run, ClientId whoModifiedRun) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, whoModifiedRun);
@@ -639,7 +668,7 @@ public final class PacketFactory {
 
     /**
      * Send checked out packet to requesting judge.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -666,7 +695,7 @@ public final class PacketFactory {
 
     /**
      * Create packet that notifies judges and others that run has been checked out.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -682,10 +711,10 @@ public final class PacketFactory {
         return packet;
     }
 
-    
+
     /**
      * Create a packet of {@link PacketType.Type#RUN_NOTAVAILABLE}.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -696,10 +725,10 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.RUN_NOTAVAILABLE, source, destination, prop);
         return packet;
     }
-    
+
     /**
      * Create a packet of {@link PacketType.Type#RUN_NOTAVAILABLE}.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -714,7 +743,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#RUN_LIST}.
-     * 
+     *
      * @param source
      * @param destination
      * @param runs
@@ -728,7 +757,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#CLARIFICATION_LIST}.
-     * 
+     *
      * @param source
      * @param destination
      * @param clarList
@@ -740,7 +769,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#RUN_UNCHECKOUT}.
-     * 
+     *
      * @param source
      * @param destination
      * @param beingJudgingRun
@@ -756,7 +785,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#RUN_JUDGEMENT}.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -777,27 +806,27 @@ public final class PacketFactory {
         return packet;
 
     }
-    
+
     /**
      * Return the value (Object) inside a packet.
-     * 
+     *
      * If the packet contents is a {@link Properties} object, will retrieve the value for the input key from that {@link Properties}
      * object.
      * <P>
      * Examples:
      * <pre>
      * Clarification [] clarifications =(Clarification[]) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION_LIST);
-     * 
+     *
      * Run [] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
-     * 
+     *
      * ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
-     * 
+     *
      * ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-     * 
+     *
      * </pre>
      * One can then check for whether the item is null to determine whether item
      * is in the packet.
-     * 
+     *
      * @param packet packet to extract data from.
      * @param key one of the many constant Strings in PacketFactory
      * @return a Object value for a property inside a packet, or null if object is not present.
@@ -813,7 +842,7 @@ public final class PacketFactory {
 
     /**
      * Return the String value inside a packet.
-     * 
+     *
      * @see #getObjectValue(Packet, String)
      * @param packet
      * @param key
@@ -825,7 +854,7 @@ public final class PacketFactory {
 
     /**
      * Return the Boolean value inside a packet.
-     * 
+     *
      * @see #getObjectValue(Packet, String)
      * @param packet
      * @param key
@@ -837,7 +866,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param language
@@ -849,14 +878,14 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
-    
+
     public static Packet createUpdateSetting(ClientId source, ClientId destination, Profile profile) {
         Properties prop = new Properties();
         prop.put(PROFILE, profile);
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
-    
+
     public static Packet createUpdateSetting(ClientId source, ClientId destination, BalloonSettings balloonSettings) {
         Properties prop = new Properties();
         prop.put(BALLOON_SETTINGS, balloonSettings);
@@ -885,7 +914,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#ADD_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param language
@@ -920,7 +949,7 @@ public final class PacketFactory {
 
      /**
      * Create a packet of {@link PacketType.Type#ADD_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param judgement
@@ -944,7 +973,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet for a list of problems.
-     * 
+     *
      * @param source
      * @param destination
      * @param problems
@@ -958,12 +987,12 @@ public final class PacketFactory {
         return packet;
     }
 
-    /** 
+    /**
      * Create start contest to send to server.
      * @param source
      * @param destination
      * @param siteNumber
-     * @param who 
+     * @param who
      */
     public static Packet createStartContestClock(ClientId source, ClientId destination, int siteNumber, ClientId who) {
         Properties prop = new Properties();
@@ -976,11 +1005,11 @@ public final class PacketFactory {
 
     /**
      * Create a stop contest to send to server.
-     * 
+     *
      * @param source
      * @param destination
      * @param siteNumber
-     * @param who 
+     * @param who
      */
     public static Packet createStopContestClock(ClientId source, ClientId destination, int siteNumber, ClientId who) {
         Properties prop = new Properties();
@@ -989,10 +1018,10 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.STOP_CONTEST_CLOCK, source, destination, prop);
         return packet;
     }
-    
+
     /**
      * Create a stop contest to send to clients.
-     * 
+     *
      * @param source
      * @param destination
      * @param inSiteNumber
@@ -1007,7 +1036,7 @@ public final class PacketFactory {
 
     /**
      * Create a start contest to send to clients.
-     * 
+     *
      * @param source
      * @param destination
      * @param inSiteNumber
@@ -1026,7 +1055,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#UPDATE_CONTEST_CLOCK}.
-     * 
+     *
      * @param source
      * @param destination
      * @param contestTime
@@ -1043,7 +1072,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#ACCOUNT_LOGIN}.
-     * 
+     *
      * @param source
      * @param destination
      * @param connectionHandlerID
@@ -1058,7 +1087,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#LOGOUT}.
-     * 
+     *
      * @param source
      * @param destination
      * @param userId
@@ -1072,7 +1101,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#CLARIFICATION_SUBMISSION_CONFIRM}.
-     * 
+     *
      * @param source
      * @param destination
      * @param newClarification
@@ -1086,7 +1115,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#CLARIFICATION_SUBMISSION}.
-     * 
+     *
      * @param source
      * @param destination
      * @param clarification2
@@ -1101,7 +1130,7 @@ public final class PacketFactory {
 
     /**
      * Create a packet of {@link PacketType.Type#RUN_SUBMISSION_CONFIRM}.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -1118,7 +1147,7 @@ public final class PacketFactory {
      * @param destination
      * @param connectionHandlerID
      * @param loggedInClientId
-     * @param settings 
+     * @param settings
      */
     public static Packet createLogin(ClientId source, ClientId destination, ConnectionHandlerID connectionHandlerID, ClientId loggedInClientId, ClientSettings settings) {
         Properties prop = new Properties();
@@ -1131,28 +1160,28 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#LOGIN_SUCCESS}.
-     * 
+     *
      * Sent to a client or server on successful login.  This packet
      * has all contest data.
-     * 
+     *
      * @param source
      * @param destination
      * @param contestTime
      * @param siteNumber
-     * @param information 
-     * @param data 
+     * @param information
+     * @param data
      */
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime contestTime, int siteNumber, ContestInformation information, ContestLoginSuccessData data) {
         try {
             Properties prop = new Properties();
-            
+
             prop.put(SITE_NUMBER, new Integer(siteNumber));
             prop.put(CONTEST_TIME, contestTime);
             prop.put(CLIENT_ID, destination);
             prop.put(CONTEST_INFORMATION, information);
-            
+
             addContestData(prop, data);
-            
+
             TimeZone timeZone = TimeZone.getTimeZone("GMT");
             GregorianCalendar gregorianCalendar = new GregorianCalendar(timeZone);
             prop.put(SERVER_CLOCK_OFFSET, gregorianCalendar);
@@ -1166,17 +1195,17 @@ public final class PacketFactory {
             throw new SecurityException(e.getMessage());
         }
     }
-    
+
     /**
      * Add Contest Data into a Properties.
-     * 
+     *
      * Can be used in a Packet.
-     * 
+     *
      * @param prop
      * @param data
      */
     private static void addContestData(Properties prop, ContestLoginSuccessData data) {
-        
+
         prop.put(CONTEST_TIME_LIST, data.getContestTimes());
 
         prop.put(PROBLEM_LIST, data.getProblems());
@@ -1200,15 +1229,15 @@ public final class PacketFactory {
         prop.put(SITE_NUMBER, new Integer(data.getSiteNumber()));
         prop.put(CONTEST_TIME, data.getContestTime());
         prop.put(CONTEST_INFORMATION, data.getContestInformation());
-        
+
         if (data.getFinalizeData() != null) {
             prop.put(FINALIZE_DATA, data.getFinalizeData());
         }
-        
+
         if (data.getContestSecurityPassword() != null) {
             prop.put(CONTEST_PASSWORD, data.getContestSecurityPassword());
         }
-        
+
         if (data.getCategories() != null){
             prop.put(CATEGORY_LIST, data.getCategories());
         }
@@ -1216,7 +1245,7 @@ public final class PacketFactory {
 
     /**
      * A contest settings packet.
-     * 
+     *
      * @param source
      * @param destination
      * @param loginSuccessPacket
@@ -1242,12 +1271,12 @@ public final class PacketFactory {
         }
 
     }
-    
-    
+
+
 
     /**
      * Create a packet of {@link PacketType.Type#SETTINGS}.
-     * 
+     *
      * @param source
      * @param destination
      * @param props
@@ -1259,7 +1288,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#LOGIN_FAILED}.
-     * 
+     *
      * @param source
      * @param destination
      * @param string
@@ -1274,7 +1303,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#RUN_REQUEST}.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -1290,7 +1319,7 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.RUN_REQUEST, source, destination, props);
         return packet;
     }
-    
+
     /**
      * Create a request to fetch a run from the server.
      * @param source
@@ -1306,12 +1335,12 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.FETCH_RUN, source, destination, props);
         return packet;
     }
-    
+
     /**
      * Create a run fetched (but not checked out) from server packet.
-     * 
+     *
      * Response to createFetchRun.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -1334,7 +1363,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#CLARIFICATION_REQUEST}.
-     * 
+     *
      * @param source
      * @param destination
      * @param elementId
@@ -1347,12 +1376,12 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.CLARIFICATION_REQUEST, source, destination, props);
         return packet;
     }
-    
-    
+
+
 
     /**
      * Create packet for {@link PacketType.Type#CLARIFICATION_CHECKOUT}.
-     * 
+     *
      * @param source
      * @param destination
      * @param clarification
@@ -1369,7 +1398,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#CLARIFICATION_UNCHECKOUT}.
-     * 
+     *
      * @param source
      * @param destination
      * @param clarification
@@ -1384,7 +1413,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#CLARIFICATION_AVAILABLE}.
-     * 
+     *
      * @param source
      * @param destination
      * @param clarification
@@ -1395,7 +1424,7 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.CLARIFICATION_AVAILABLE, source, destination, prop);
         return packet;
     }
-    
+
     public static Packet createClarificationRevoked(ClientId source, ClientId destination, Clarification clarification, ClientId revokedFrom) {
         Properties prop = new Properties();
         prop.put(CLARIFICATION, clarification);
@@ -1407,7 +1436,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#CLARIFICATION_UPDATE}.
-     * 
+     *
      * @param source
      * @param destination
      * @param clarification
@@ -1421,7 +1450,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#CLARIFICATION_ANSWER}.
-     * 
+     *
      * @param source
      * @param destination
      * @param clarification
@@ -1439,7 +1468,7 @@ public final class PacketFactory {
 
      /**
          * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-         * 
+         *
          * @param source
          * @param destination
          * @param site
@@ -1453,7 +1482,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#ADD_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param account
@@ -1464,7 +1493,7 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
         return packet;
     }
-    
+
     public static Packet createUpdateSetting(ClientId source, ClientId destination, Account [] accounts) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
@@ -1486,7 +1515,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#ADD_SETTING }.
-     * 
+     *
      * @param source
      * @param destination
      * @param type
@@ -1508,7 +1537,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#ADD_SETTING }.
-     * 
+     *
      * @param source
      * @param destination
      * @param type
@@ -1524,7 +1553,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param account
@@ -1538,7 +1567,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param group
@@ -1549,10 +1578,10 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
-    
+
     /**
      * Create packet for {@link PacketType.Type#RUN_REJUDGE_REQUEST}.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -1568,7 +1597,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#RUN_REJUDGE_CHECKOUT}.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -1589,7 +1618,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param timeValue
@@ -1605,7 +1634,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param timeValue
@@ -1621,7 +1650,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param timeValue
@@ -1637,7 +1666,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#DROPPED_CONNECTION}.
-     * 
+     *
      * @param source
      * @param destination
      * @param connectionHandlerID
@@ -1651,7 +1680,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#ESTABLISHED_CONNECTION}.
-     * 
+     *
      * @param source
      * @param destination
      * @param connectionHandlerID
@@ -1674,7 +1703,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -1691,7 +1720,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param run
@@ -1715,7 +1744,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#FORCE_DISCONNECTION}.
-     * 
+     *
      * @param source
      * @param destination
      * @param userLoginId
@@ -1729,7 +1758,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#FORCE_DISCONNECTION}.
-     * 
+     *
      * @param source
      * @param destination
      * @param connectionHandlerID
@@ -1743,7 +1772,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#START_ALL_CLOCKS}.
-     * 
+     *
      * @param source
      * @param destination
      * @param userLoginId
@@ -1757,7 +1786,7 @@ public final class PacketFactory {
 
 //    /**
 //     * Create packet for {@link PacketType.Type#RESET_CONTEST}.
-//     * 
+//     *
 //     * @param source
 //     * @param destination
 //     * @param siteNumber
@@ -1774,7 +1803,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#RESET_ALL_CONTESTS}.
-     * 
+     *
      * @param source
      * @param destination
      * @param userLoginId
@@ -1788,7 +1817,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param languageDisplayList
@@ -1805,7 +1834,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param problemDisplayList
@@ -1822,7 +1851,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param answer
@@ -1839,7 +1868,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#STOP_ALL_CLOCKS}.
-     * 
+     *
      * @param source
      * @param destination
      * @param userLoginId
@@ -1862,7 +1891,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param clarification
@@ -1888,7 +1917,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
+     *
      * @param source
      * @param destination
      * @param clarification
@@ -1909,7 +1938,7 @@ public final class PacketFactory {
 
     /**
      * Create packet for {@link PacketType.Type#CONTEST_TIME}.
-     * 
+     *
      * @param source
      * @param destination
      * @param inContestTime
@@ -1928,26 +1957,26 @@ public final class PacketFactory {
         prop.put(ACCOUNT_ARRAY, accounts);
         return createPacket(PacketType.Type.ADD_SETTING, source, destination, prop);
     }
-    
+
     public static Packet createAddSetting(ClientId source, ClientId destination, ClientSettings clientSettings) {
         Properties prop = new Properties();
         prop.put(CLIENT_SETTINGS, clientSettings);
         Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
         return packet;
     }
-    
+
     public static Packet createRunJudgmentUpdate(ClientId source, ClientId destination, Run run, ClientId whoJudgedId) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, whoJudgedId);
         prop.put(RUN, run);
         return createPacket(PacketType.Type.RUN_JUDGEMENT_UPDATE, source, destination, prop);
     }
-    
+
     /**
      * Clone packet from existing packet.
-     * 
+     *
      * Can reassign source and destination with affecting contents.
-     * 
+     *
      * @param source
      * @param destination
      * @param packet
@@ -1959,12 +1988,12 @@ public final class PacketFactory {
         newPacket.setOriginalSourceId(packet.getOriginalSourceId());
         return newPacket;
     }
-    
+
     /**
      * Clone packet and change packet type.
-     * 
+     *
      * Can reassign type, source, and destination with affecting contents.
-     * 
+     *
      * @param type
      * @param source
      * @param destination
@@ -2014,7 +2043,7 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
-    
+
     public static Packet createUpdateSetting(ClientId source, ClientId destination, Judgement[] judgements) {
         Properties prop = new Properties();
         prop.put(JUDGEMENT_LIST, judgements);
@@ -2051,7 +2080,7 @@ public final class PacketFactory {
         return packet;
     }
 
-    public static Packet createSecurityMessagePacket(ClientId source, ClientId destination, String message, ClientId whoCanceledRun, 
+    public static Packet createSecurityMessagePacket(ClientId source, ClientId destination, String message, ClientId whoCanceledRun,
             ConnectionHandlerID connectionHandlerID, ContestSecurityException contestSecurityException, Packet inPacket) {
         Properties prop = new Properties();
         if (whoCanceledRun != null){
@@ -2062,12 +2091,12 @@ public final class PacketFactory {
             prop.put(CONNECTION_HANDLE_ID, connectionHandlerID);
         }
         if (inPacket != null){
-            prop.put(PACKET, inPacket); 
+            prop.put(PACKET, inPacket);
         }
         if (contestSecurityException != null){
             prop.put(EXCEPTION, contestSecurityException);
         }
-        
+
         Packet packet = new Packet(Type.SECURITY_MESSAGE, source, destination, prop);
         return packet;
     }
@@ -2087,9 +2116,9 @@ public final class PacketFactory {
         prop.put(DELETE_LANGUAGE_DEFINITIONS, new Boolean(eraseLanguages));
         prop.put(PROFILE, newProfile);
         return createPacket(PacketType.Type.RESET_ALL_CONTESTS, source, destination, prop);
-      
+
     }
-    
+
     public static Packet createCloneProfilePacket(ClientId source, ClientId destination, Profile profile2, ProfileCloneSettings settings, boolean switchNow) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
@@ -2107,24 +2136,24 @@ public final class PacketFactory {
         prop.put(CONTEST_PASSWORD, contestPassword);
         return createPacket(PacketType.Type.SWITCH_PROFILE, source, destination, prop);
     }
-    
+
     // TODO fold contestTime and ContestInformation into  ContestLoginSuccessData
 
     public static Packet createUpdateProfileClientPacket(ClientId source, ClientId destination, Profile currentProfile, Profile switchToProfile, ContestLoginSuccessData data) {
         try {
-            
+
             Properties prop = new Properties();
-            
+
             prop.put(PROFILE, currentProfile);
             prop.put(NEW_PROFILE, switchToProfile);
-            
+
             prop.put(CLIENT_ID, destination);
-            prop.put(PROFILE_LIST, data.getProfiles()); 
+            prop.put(PROFILE_LIST, data.getProfiles());
 
             if (data.getContestSecurityPassword() != null) {
                 prop.put(CONTEST_PASSWORD, data.getContestSecurityPassword());
             }
-            
+
             addContestData(prop, data);
 
             TimeZone timeZone = TimeZone.getTimeZone("GMT");
@@ -2137,7 +2166,7 @@ public final class PacketFactory {
 
             Packet packet = new Packet(Type.UPDATE_CLIENT_PROFILE, source, destination, prop);
             return packet;
-            
+
         } catch (Exception e) {
             System.err.println("Exception creating UPDATE_CLIENT_PROFILE");
             e.printStackTrace(System.err);
@@ -2153,7 +2182,7 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.FETCH_RUN_FILES, source, destination, prop);
         return packet;
     }
-    
+
     public static Packet createRequestRemoteDataPacket(ClientId source, ClientId destination) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
@@ -2168,7 +2197,7 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.UPDATE_RUN_FILES, source, destination, prop);
         return packet;
     }
-    
+
     public static Packet createRequestServerStatusPacket(ClientId source, ClientId destination, Profile currentProfile) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
@@ -2241,7 +2270,7 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.START_PLAYBACK, source, destination, prop);
         return packet;
     }
-    
+
     public static Packet createUpdateSetting(ClientId source, ClientId destination, PlaybackInfo playbackInfo) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
@@ -2297,10 +2326,10 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
-    
+
     /**
      * List of team source files.
-     * 
+     *
      * <P>
      * This is a response/reply to a {@link #createRunSourceFetchRequest(ClientId, ClientId, Run[])}.
      */
@@ -2311,7 +2340,7 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
-    
+
     /**
      * Request a list of team source files.
      */
@@ -2322,5 +2351,5 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.REQUEST_FETCH_TEAMS_SUBMISSION_FILES, source, destination, prop);
         return packet;
     }
-    
+
 }

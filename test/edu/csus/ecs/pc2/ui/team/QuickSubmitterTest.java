@@ -16,10 +16,11 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
 import edu.csus.ecs.pc2.imports.ccs.ContestSnakeYAMLLoader;
 import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
+import edu.csus.ecs.pc2.list.SubmissionSample;
 
 /**
  * Unit test.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class QuickSubmitterTest extends AbstractTestCase {
@@ -123,7 +124,7 @@ public class QuickSubmitterTest extends AbstractTestCase {
 
     /**
      * Test QuickSubmitter send/add submissions.
-     * 
+     *
      * @throws Exception
      */
     public void testsendSubmissions() throws Exception {
@@ -154,7 +155,13 @@ public class QuickSubmitterTest extends AbstractTestCase {
         List<File> files = submitter.getAllCDPsubmissionFileNames(contest, cdpConfig);
         assertEquals(expectedFiles, files.size());
 
-        int totSubmit = submitter.sendSubmissions(files);
+        List<SubmissionSample> subList = submitter.sendSubmissions(files);
+        int totSubmit;
+        if(subList == null) {
+            totSubmit = 0;
+        } else {
+            totSubmit = subList.size();
+        }
         assertEquals(expectedFiles, totSubmit);
     }
 

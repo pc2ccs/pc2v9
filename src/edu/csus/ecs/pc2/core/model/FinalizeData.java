@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
@@ -6,18 +6,18 @@ import java.util.Date;
 
 /**
  * CCS Finalization Data.
- * 
+ *
  * When a contest is finalized it is "certified" and a result is that
  * the contest data is locked down, no changes that would change
  * score results will be allowed.  This condition can be checked
  * using the {@link #isCertified()} method.
- * 
+ *
  * <br><br>
- * 
+ *
  * This data contains information about which ranks (teams) get
  * medals, and provides information for the CCS Event Feed XML
  * finalized element.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -34,10 +34,12 @@ public class FinalizeData implements Serializable {
     private int bronzeRank;
 
     private String comment;
-    
+
     private boolean certified = false;
-    
+
     private Date certificationDate = null;
+
+    private boolean useWFGroupRanking = true;
 
     /**
      * @return last rank for gold.
@@ -82,7 +84,7 @@ public class FinalizeData implements Serializable {
 
     /**
      * Is contest certified?.
-     * 
+     *
      * @param certified true certifies, false un-certifies.
      */
     public void setCertified(boolean certified) {
@@ -92,12 +94,12 @@ public class FinalizeData implements Serializable {
         } else {
             certificationDate = null;
         }
-        
+
     }
 
     /**
      * Has is the contest been finalized/certified?.
-     * 
+     *
      * @return true if certified/finalized.
      */
     public boolean isCertified() {
@@ -106,10 +108,29 @@ public class FinalizeData implements Serializable {
 
     /**
      * Date when certified.
-     * 
+     *
      * @return
      */
     public Date getCertificationDate() {
         return certificationDate;
+    }
+
+    /**
+     * Set whether or not to show rankings in results files as groups based on # of problems
+     * solved, after the medal ranks.
+     *
+     * @param useWFGroupRanking
+     */
+    public void setUseWFGroupRanking(boolean useWFGroupRanking) {
+        this.useWFGroupRanking = useWFGroupRanking;
+    }
+
+    /**
+     * Return whether or not WF group rankings (based on # problems solved) should be used for results files
+     *
+     * @return true if WF group rankings are to be used
+     */
+    public boolean isUseWFGroupRanking() {
+        return useWFGroupRanking;
     }
 }

@@ -40,9 +40,9 @@ import edu.csus.ecs.pc2.imports.ccs.IContestLoader;
 
 /**
  * Create CCS contest.yaml and problem.yaml files.
- * 
+ *
  * Creates contest.yaml and problem.yaml files along with all the data files per the CCS specification.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 // TODO REFACTOR and CI use constants for secret and sample dir names
@@ -71,9 +71,9 @@ public class ExportYAML {
 
     /**
      * Write CCS Yaml files to directory.
-     * 
+     *
      * Creates files:
-     * 
+     *
      * <pre>
      * directoryName/contest.yaml
      * directoryName/shortname1/problem.yaml
@@ -82,7 +82,7 @@ public class ExportYAML {
      * directoryName/shortname2/problem.yaml
      * directoryName/shortname3/problem.yaml
      * </pre>
-     * 
+     *
      * @param directoryName
      * @param contest
      * @throws IOException
@@ -103,7 +103,7 @@ public class ExportYAML {
 
     /**
      * Write contest and problem yaml and files to directory.
-     * 
+     *
      * @param contest
      * @param directoryName
      * @param contestFileName
@@ -156,10 +156,10 @@ public class ExportYAML {
         contestWriter.println("remaining: " + contestTime.getRemainingTimeStr());
         contestWriter.println("running: " + contestTime.isContestRunning());
 
-        
+
         // PC^2 Specific
         contestWriter.println(IContestLoader.AUTO_STOP_CLOCK_AT_END_KEY + ": " + info.isAutoStopContest());
- 
+
         // start-time: 2011-02-04 01:23Z
         if (info.getScheduledStartDate() == null) {
             info.setScheduledStartDate(new Date());
@@ -171,13 +171,13 @@ public class ExportYAML {
 
         // TODO CCS scoreboard-freeze: 4:00:00
         // scoreboard-freeze: 4:00:00
-        
+
         // Bug 1192
-        // scoreboard-freeze-length     Time length before end of contest when scoreboard will be frozen, in h:mm:ss 
+        // scoreboard-freeze-length     Time length before end of contest when scoreboard will be frozen, in h:mm:ss
 
 //        contestWriter.println("scoreboard-freeze: " + info.getFreezeTime());
         contestWriter.println("scoreboard-freeze-length: " + info.getFreezeTime());
-        
+
         contestWriter.println(IContestLoader.OUTPUT_PRIVATE_SCORE_DIR_KEY+": " + info.getScoringProperties().getProperty(DefaultScoringAlgorithm.JUDGE_OUTPUT_DIR));
         contestWriter.println(IContestLoader.OUTPUT_PUBLIC_SCORE_DIR_KEY+": " + info.getScoringProperties().getProperty(DefaultScoringAlgorithm.PUBLIC_OUTPUT_DIR));
 
@@ -188,12 +188,13 @@ public class ExportYAML {
         if (! StringUtilities.isEmpty(judgeCDPBasePath)){
             contestWriter.println(IContestLoader.JUDGE_CONFIG_PATH_KEY +": "+judgeCDPBasePath);
         }
-        
+
         contestWriter.println(IContestLoader.SHADOW_MODE_KEY + ": " + (new Boolean(info.isShadowMode()).toString()));
         contestWriter.println(IContestLoader.CCS_URL_KEY + ": " + (info.getPrimaryCCS_URL()));
         contestWriter.println(IContestLoader.CCS_LOGIN_KEY + ": " + (info.getPrimaryCCS_user_login()));
         contestWriter.println(IContestLoader.CCS_PASSWORD_KEY + ": " + (info.getPrimaryCCS_user_pw()));
         contestWriter.println(IContestLoader.CCS_LAST_EVENT_ID_KEY + ": " + (info.getLastShadowEventID()));
+        contestWriter.println(IContestLoader.EXECUTE_FOLDER + ": " + (info.getExecuteFolder()));
 
         contestWriter.println();
 
@@ -246,7 +247,7 @@ public class ExportYAML {
             contestWriter.println(PAD4 + "compilerCmd: " + quote(language.getCompileCommandLine()));
             contestWriter.println(PAD4 + "exemask: " + quote(language.getExecutableIdentifierMask()));
             contestWriter.println(PAD4 + "execCmd: " + quote(language.getProgramExecuteCommandLine()));
-            
+
             String clicsId = language.getID();
             if ( clicsId != null && clicsId.trim().length() > 0){
                 contestWriter.println(PAD4 + "clics-id: " + quote(clicsId));
@@ -259,7 +260,7 @@ public class ExportYAML {
                 contestWriter.println(PAD4 + "runner: " + quote(runner));
                 contestWriter.println(PAD4 + "runner-args: " + quote(runnerArguments));
             }
-            
+
             contestWriter.println(PAD4 + IContestLoader.INTERPRETED_LANGUAGE_KEY + ": " + language.isInterpreted());
             contestWriter.println(PAD4 + "use-judge-cmd: " + language.isUsingJudgeProgramExecuteCommandLine());
             contestWriter.println(PAD4 + "judge-exec-cmd: " + quote(language.getJudgeProgramExecuteCommandLine()));
@@ -267,30 +268,30 @@ public class ExportYAML {
             contestWriter.println();
         }
         // end of system.yaml stuff
-        
+
         Problem[] problems = contest.getProblems();
-        
+
         /**
-         * Write problemset.yaml file. 
+         * Write problemset.yaml file.
          */
         String confiDir = new File(contestFileName).getParent();
-        
+
         String problemSetFilename = confiDir + File.separator + IContestLoader.DEFAULT_PROBLEM_SET_YAML_FILENAME;
         PrintWriter problemSetWriter = new PrintWriter(new FileOutputStream(problemSetFilename, false), true);
 
         problemSetWriter.println("# Contest Configuration, Problem Set, version 1.0 ");
         problemSetWriter.println("# PC^2 Version: " + new VersionInfo().getSystemVersionInfo());
         problemSetWriter.println("# Created: " + getDateTimeString());
-        
+
         writeProblemSetYaml(problemSetWriter, contest, directoryName, IContestLoader.PROBLEMSET_PROBLEMS_KEY, problems);
-        
+
         problemSetWriter.flush();
         problemSetWriter.close();
         problemSetWriter = null;
 
         // TODO this should go to system.pc2.yaml
         Vector<Account> accountVector = contest.getAccounts(ClientType.Type.JUDGE);
-        Account[] judgeAccounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Account[] judgeAccounts = accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(judgeAccounts, new AccountComparator());
 
         int ajCount = 0;
@@ -386,11 +387,11 @@ public class ExportYAML {
 
     /**
      * Write problem set section.
-     * 
+     *
      * @param writer
      * @param contest
      * @param directoryName
-     * @param problemsKey problemset for contest.yaml or problems for problemset.yaml 
+     * @param problemsKey problemset for contest.yaml or problems for problemset.yaml
      * @param problems
      * @throws IOException
      */
@@ -399,8 +400,8 @@ public class ExportYAML {
         if (problems.length > 0) {
             writer.println(problemsKey + ":");
         }
-        
-        // 
+
+        //
         // problemset:
         //
         // - letter: B
@@ -454,12 +455,12 @@ public class ExportYAML {
 
             writer.println();
         }
-        
+
     }
 
     /**
      * Surround by a single quote
-     * 
+     *
      * @param string
      * @return
      */
@@ -468,7 +469,7 @@ public class ExportYAML {
     }
 
     /**
-     * 
+     *
      * @param date
      * @return empty string if date is null, other wise
      */
@@ -515,9 +516,9 @@ public class ExportYAML {
 
     /**
      * Create disk file for input SerializedFile.
-     * 
+     *
      * Returns true if file is written to disk and is not null.
-     * 
+     *
      * @param file
      * @param outputFileName
      * @return true if file written to disk, false if external or not written to disk.
@@ -533,7 +534,7 @@ public class ExportYAML {
 
     /**
      * Write problem yaml and data files files to directory.
-     * 
+     *
      * @param contest
      * @param directoryName
      *            directory to write files to.
@@ -553,7 +554,7 @@ public class ExportYAML {
 
     /**
      * Write problem YAML to file.
-     * 
+     *
      * @param contest
      * @param problem
      * @param filename
@@ -591,7 +592,7 @@ public class ExportYAML {
         problemWriter.println("author: ");
         problemWriter.println("license: ");
         problemWriter.println("rights_owner: ");
-        
+
         problemWriter.println();
 
         problemWriter.println(IContestLoader.HIDE_PROBLEM+": "+!problem.isActive());
@@ -600,7 +601,7 @@ public class ExportYAML {
         problemWriter.println(IContestLoader.SHOW_VALIDATION_RESULTS+": "+problem.isShowValidationToJudges());
         problemWriter.println(IContestLoader.PROBLEM_LOAD_DATA_FILES_KEY + ": " + (!isExternalFiles(problemDataFiles)));
         problemWriter.println(IContestLoader.STOP_ON_FIRST_FAILED_TEST_CASE_KEY + ": " + problem.isStopOnFirstFailedTestCase());
-        
+
         problemWriter.println();
         List<Group> groups = problem.getGroups();
         if (groups.size() == 0){
@@ -615,7 +616,7 @@ public class ExportYAML {
             // datafile: sumit.in
             problemWriter.println("datafile: " + dataFile);
         }
-        
+
         String answerFileName = problem.getAnswerFileName();
         if (answerFileName != null) {
             // answerfile: sumit.ans
@@ -628,21 +629,21 @@ public class ExportYAML {
         } else {
             problemWriter.println("# "+ IContestLoader.VALIDATOR_FLAGS_KEY + ": ");
         }
-        
+
         problemWriter.println();
-        
+
         problemWriter.println(IContestLoader.LIMITS_KEY + ":");
         problemWriter.println(PAD4 + "timeout: " + problem.getTimeOutInSeconds());
         if (problem.getMemoryLimitMB() > 0) {
             problemWriter.println(PAD4 + IContestLoader.MEMORY_LIMIT_CLICS + ": " + problem.getMemoryLimitMB());
         }
-        
+
         problemWriter.println();
-        
+
         problemWriter.println(IContestLoader.SANDBOX_TYPE_KEY+": "+problem.getSandboxType());
         problemWriter.println(IContestLoader.SANDBOX_COMMAND_LINE_KEY+": "+quote(problem.getSandboxCmdLine()));
         problemWriter.println(IContestLoader.SANDBOX_PROGRAM_NAME_KEY+": "+quote(problem.getSandboxProgramName()));
-        
+
         problemWriter.println();
 
         if (problem.isValidatedProblem()) {
@@ -660,19 +661,19 @@ public class ExportYAML {
             }
             problemWriter.println();
         }
-        
+
         problemWriter.println(IContestLoader.JUDGING_TYPE_KEY + ":");
-        
+
         problemWriter.println(PAD4 + IContestLoader.COMPUTER_JUDGING_KEY +": " + problem.isComputerJudged());
 
         if (problem.isComputerJudged()) {
-            // if computer judged, may or may not be manual judged 
+            // if computer judged, may or may not be manual judged
             problemWriter.println(PAD4 + IContestLoader.MANUAL_REVIEW_KEY + ": " + problem.isManualReview());
         } else {
             // if not computer judged then MUST be manaul judged
             problemWriter.println(PAD4 + IContestLoader.MANUAL_REVIEW_KEY + ": true");
         }
-        
+
         problemWriter.println(PAD4 + IContestLoader.SEND_PRELIMINARY_JUDGEMENT_KEY + ": " + problem.isPrelimaryNotification());
 
         problemWriter.println();
@@ -734,12 +735,12 @@ public class ExportYAML {
         problemWriter.close();
         problemWriter = null;
 
-        return (String[]) filesWritten.toArray(new String[filesWritten.size()]);
+        return filesWritten.toArray(new String[filesWritten.size()]);
     }
 
     /**
      * Return true if files are not loaded/stored internally.
-     * 
+     *
      * @param problemDataFiles
      * @return
      */
@@ -768,7 +769,7 @@ public class ExportYAML {
 
     /**
      * Write problem title to (LaTeX) file
-     * 
+     *
      * @param filename
      * @param title
      * @throws FileNotFoundException
@@ -798,9 +799,9 @@ public class ExportYAML {
 
     /**
      * Get problem letter for input integer.
-     * 
+     *
      * getProblemLetter(1) is 'A'
-     * 
+     *
      * @param id
      *            a one based problem number.
      * @return
@@ -813,7 +814,7 @@ public class ExportYAML {
 
     /**
      * Create a problem short name.
-     * 
+     *
      * @param name
      *            Problem full name
      * @return

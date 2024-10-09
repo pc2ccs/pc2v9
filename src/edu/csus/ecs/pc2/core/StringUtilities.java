@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2022 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.Serializable;
@@ -12,9 +12,9 @@ import java.util.List;
  */
 
 public final class StringUtilities implements Serializable {
-    
+
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -4197938292232525730L;
     /**
@@ -25,10 +25,10 @@ public final class StringUtilities implements Serializable {
     private StringUtilities() {
         super();
     }
-    
+
     /**
      * null-safe string compare.
-     * 
+     *
      * @param s1
      * @param s2
      * @return true if both null or equal, false otherwise
@@ -37,18 +37,18 @@ public final class StringUtilities implements Serializable {
         if (s1 == null && s2 == null) {
             return true;
         }
-        
+
         if (s1 == null && s2 != null){
             return false;
         }
-        
+
         return s1.equals(s2);
-            
+
     }
 
     /**
      * null-safe string arrays compare.
-     * 
+     *
      * @param s1[]
      * @param s2[]
      * @return true if both null or equal, false otherwise
@@ -57,11 +57,11 @@ public final class StringUtilities implements Serializable {
         if (s1 == null && s2 == null) {
             return true;
         }
-        
+
         if (s1 == null && s2 != null){
             return false;
         }
-        
+
         if (s1.length != s2.length) {
             return false;
         }
@@ -71,7 +71,7 @@ public final class StringUtilities implements Serializable {
             }
         }
         return true;
-            
+
     }
 
     /**
@@ -89,8 +89,8 @@ public final class StringUtilities implements Serializable {
 
     /**
      * Join a set of string together delimited by delimit.
-     * 
-     * @param delimit delimiter inserted between strings. 
+     *
+     * @param delimit delimiter inserted between strings.
      * @param strings list of names
      * @return
      */
@@ -104,7 +104,7 @@ public final class StringUtilities implements Serializable {
         }
         return buffer.toString();
     }
-    
+
     /**
      * Join a list of items
      * @param delimit
@@ -125,7 +125,7 @@ public final class StringUtilities implements Serializable {
 
     /**
      * Clone array and add string as last element.
-     * 
+     *
      * @param originalArray
      * @param string
      * @return
@@ -154,7 +154,7 @@ public final class StringUtilities implements Serializable {
 
     /**
      * Add padding on left side of string to insure minFieldLength.
-     * 
+     *
      * @param padChar
      * @param minFieldLength
      * @param value
@@ -168,10 +168,10 @@ public final class StringUtilities implements Serializable {
         }
         return v;
     }
-    
+
     /**
      * Add padding on left side of string to insure minFieldLength.
-     * 
+     *
      * @param padChar
      * @param minFieldLength
      * @param value
@@ -184,10 +184,10 @@ public final class StringUtilities implements Serializable {
         }
         return string;
     }
-    
+
     /**
      * Add padding on end of string to insure minFieldLength.
-     * 
+     *
      * @param padChar
      * @param minFieldLength
      * @param value
@@ -196,10 +196,10 @@ public final class StringUtilities implements Serializable {
     public static String rpad(char padChar, int minFieldLength, int value) {
         return rpad(padChar, minFieldLength, Integer.toString(value));
     }
-    
+
     /**
      * Add padding on end of string to insure minFieldLength.
-     * 
+     *
      * @param padChar
      * @param minFieldLength
      * @param value
@@ -212,11 +212,11 @@ public final class StringUtilities implements Serializable {
         }
         return string;
     }
-    
-    
+
+
     /**
      * Is string empty or null?.
-     * 
+     *
      * @param name
      * @return true if string is null or trimmed string is length 0
      */
@@ -226,33 +226,33 @@ public final class StringUtilities implements Serializable {
 
     /**
      * Create new array for input strings, creates new String array elements instances.
-     * 
+     *
      * Uses {@link #cloneString(String)}
-     * 
+     *
      * @param strings
      * @return exact clone/copy of input
      */
     public static String[] cloneStringArray(String[] strings) {
-        
+
         String [] names = new String[strings.length];
         int i = 0;
         for (String name : strings) {
             names[i] = cloneString(name);
             i++;
         }
-        
+
         return names;
     }
 
-    
+
     /**
      * Returns a boolean value for the input string.
-     * 
+     *
      * <li> If string is null or empty returns defaultValue.
      * <li> If string is yes or true (case insensitive) returns true
      * <li> If string is no or false (case insensitive) returns false
      * <li> If string not true or false, returns  defaultBoolean.
-     * 
+     *
      * @param string a string containing a word
      * @param defaultBoolean default value if stirng is null or does no
      * @return true or false
@@ -276,12 +276,12 @@ public final class StringUtilities implements Serializable {
 
         return value;
     }
-    
+
     /**
      * Return a list of integers for input string.
-     * 
+     *
      * Input string is a list of comma delimited numbers or ranges.
-     * 
+     *
      * Invalid number conditions
      * <li> range end must be greater than or equal to start number in range
      * <li> all numbers must be greater than 0
@@ -289,27 +289,27 @@ public final class StringUtilities implements Serializable {
      * <li> missing end range number, ex. 22-
      * <li> missing number, ex 1,2,,5
      * <li> too many dashes in a range, ex 1-5-6-7
-     * 
+     *
      * @throws RuntimeException if invalid range
      * @param numberString
-     * @return raw (not sorted, not unique) list of numbers 
+     * @return raw (not sorted, not unique) list of numbers
      */
     public static int[] getNumberList(String numberString) {
 
         // TODO REFACTOR replace ContestSnakeYAMLLoader.getNumberList with this method
-        
+
         String[] list = numberString.split(",");
         List<Integer> outList = new ArrayList<Integer>();
-        
+
         for (String numberItem : list) {
 
             String trimmed = numberItem.replaceAll(" ", ""); // remove all spaces
             trimmed = trimmed.replaceAll("^0", ""); // remove left padding zero
-            
+
             if (0 == trimmed.length()) {
                 throw new RuntimeException("Invalid/missing number in range, '" + trimmed + "' input: '" + numberString + "'");
             }
-            
+
             if (trimmed.indexOf('-') > -1) {
                 if (trimmed.startsWith("-")) {
                     throw new RuntimeException("Invalid range, missing range start number '" + trimmed + "' input: '" + numberString + "'");
@@ -343,7 +343,7 @@ public final class StringUtilities implements Serializable {
                 .toArray();
         return outArray;
     }
-    
+
     public static int getIntegerValue(String string, int defaultNumber) {
         // TODO REFACTOR replace ContestSnakeYAMLLoader.getIntegerValue with this method
 
@@ -355,10 +355,10 @@ public final class StringUtilities implements Serializable {
 
         return number;
     }
-    
+
     /**
      *  get team number from login string.
-     * 
+     *
      * @param user team login in form team#, team102
      * @return null if no team number found or string after team is not a number.
      */
@@ -375,11 +375,11 @@ public final class StringUtilities implements Serializable {
         }
         return null;
     }
-    
+
     /**
      * Removes the last character from the given String and returns the resulting String.
      * If the given String is null or empty, returns null.
-     * 
+     *
      * @param s the String whose last char is to be removed.
      * @return a String identical to the input String except with the last character removed, or null.
      */
@@ -401,14 +401,14 @@ public final class StringUtilities implements Serializable {
 
     /**
      * null safe compare to.  Avoids NPEs.
-     * 
+     *
      * @see {@link String#compareTo(String)}
      * @param s1
      * @param s2
      * @return 0 if both strings null or strings equal.
      */
     public static int nullSafeCompareTo(String s1, String s2) {
-        
+
         if (s1 == null && s2 == null) {
             return 0;
         }
@@ -422,5 +422,87 @@ public final class StringUtilities implements Serializable {
         return s1.compareTo(s2);
 
     }
-    
+
+    /**
+     * null safe natural compare to.  Avoids NPEs.
+     *
+     * @param s1
+     * @param s2
+     * @param ignoreCase to do a case insensitive compare
+     * @return 0 if both strings null or strings equal.
+     */
+    public static int nullSafeNaturalCompareTo(String s1, String s2, boolean ignoreCase) {
+
+        if (s1 == null && s2 == null) {
+            return 0;
+        }
+
+        if (s1 == null && s2 != null) {
+            return -1;
+        }
+        if (s1 != null && s2 == null) {
+            return 1;
+        }
+        return naturalCompare(s1, s2, ignoreCase);
+    }
+
+    /**
+     * Compare strings as a human might.  a.1 comes before a.10, b[3] comes before b[10], etc.
+     *
+     * @see {@link https://stackoverflow.com/questions/1262239/natural-sort-order-string-comparison-in-java-is-one-built-in}
+     * @param a
+     * @param b
+     * @param ignoreCase
+     * @return -1, 0, 1 depending on which string is bigger.
+     */
+    public static int naturalCompare(String a, String b, boolean ignoreCase) {
+        if (ignoreCase) {
+            a = a.toLowerCase();
+            b = b.toLowerCase();
+        }
+        int aLength = a.length();
+        int bLength = b.length();
+        int minSize = Math.min(aLength, bLength);
+        char aChar, bChar;
+        boolean aNumber, bNumber;
+        boolean asNumeric = false;
+        int lastNumericCompare = 0;
+        for (int i = 0; i < minSize; i++) {
+            aChar = a.charAt(i);
+            bChar = b.charAt(i);
+            aNumber = aChar >= '0' && aChar <= '9';
+            bNumber = bChar >= '0' && bChar <= '9';
+            if (asNumeric)
+                if (aNumber && bNumber) {
+                    if (lastNumericCompare == 0)
+                        lastNumericCompare = aChar - bChar;
+                } else if (aNumber)
+                    return 1;
+                else if (bNumber)
+                    return -1;
+                else if (lastNumericCompare == 0) {
+                    if (aChar != bChar)
+                        return aChar - bChar;
+                    asNumeric = false;
+                } else
+                    return lastNumericCompare;
+            else if (aNumber && bNumber) {
+                asNumeric = true;
+                if (lastNumericCompare == 0)
+                    lastNumericCompare = aChar - bChar;
+            } else if (aChar != bChar)
+                return aChar - bChar;
+        }
+        if (asNumeric)
+            if (aLength > bLength && a.charAt(bLength) >= '0' && a.charAt(bLength) <= '9') // as number
+                return 1;  // a has bigger size, thus b is smaller
+            else if (bLength > aLength && b.charAt(aLength) >= '0' && b.charAt(aLength) <= '9') // as number
+                return -1;  // b has bigger size, thus a is smaller
+            else if (lastNumericCompare == 0)
+              return aLength - bLength;
+            else
+                return lastNumericCompare;
+        else
+            return aLength - bLength;
+    }
 }

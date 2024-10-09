@@ -1,10 +1,11 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,7 +21,7 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 /**
  * Edit a filter.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -32,7 +33,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
     // TODO on close button if they say yes, invoke callback.
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 6498270977601785261L;
 
@@ -60,7 +61,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public EditFilterFrame() {
         super();
@@ -68,7 +69,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
     }
 
     /**
-     * 
+     *
      * @param filter
      * @param title
      * @param refreshCallback
@@ -96,7 +97,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes mainPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMainPane() {
@@ -111,7 +112,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes buttonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
@@ -130,7 +131,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes saveButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getApplyButton() {
@@ -140,6 +141,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
             applyButton.setToolTipText("Apply this filter to listbox");
             applyButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
             applyButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     updateFilter(editFilterPane.getFilter());
                 }
@@ -187,7 +189,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes closeButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getCloseButton() {
@@ -197,6 +199,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
             closeButton.setToolTipText("Close this window");
             closeButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             closeButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     checkForChangesAndExit();
                 }
@@ -206,15 +209,15 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
     }
 
     protected void checkForChangesAndExit() {
-        
-        // TODO check for changes in filter. 
-        
+
+        // TODO check for changes in filter.
+
         setVisible(false);
     }
 
     /**
      * This method initializes editFilterPane
-     * 
+     *
      * @return edu.csus.ecs.pc2.ui.EditFilterPane
      */
     private EditFilterPane getEditFilterPane() {
@@ -225,16 +228,18 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
         return editFilterPane;
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 
         editFilterPane.setContestAndController(inContest, inController);
         editFilterPane.setFilter(filter);
-    
+
         getReportButton().setVisible(Utilities.isDebugMode());
     }
 
+    @Override
     public String getPluginTitle() {
         return "Edit Filter Frame";
     }
@@ -249,7 +254,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes okButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getOkButton() {
@@ -258,6 +263,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
             okButton.setText("Ok");
             okButton.setMnemonic(java.awt.event.KeyEvent.VK_O);
             okButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     updateFilter(editFilterPane.getFilter());
                     setVisible(false);
@@ -269,21 +275,37 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     /**
      * Show or hide list on edit filter frame.
-     * 
+     *
      * @param listName
      *            list to show or hide
      */
     public void addList(ListNames listName) {
         editFilterPane.addList(listName);
     }
-    
+
     public void setDisplayTeamName(DisplayTeamName displayTeamName) {
         editFilterPane.setDisplayTeamName(displayTeamName);
     }
 
     /**
+     *
+     * @param items custom items to add
+     */
+    public void addCustomItems(ArrayList<?> items) {
+        editFilterPane.addCustomItems(items);
+    }
+
+    /**
+     *
+     * @param title - title for the custom item check box list
+     */
+    public void setCustomTitle(String title) {
+        editFilterPane.setCustomTitle(title);
+    }
+
+    /**
      * If filtering clarification, set this to true.
-     * @param filteringClarifications 
+     * @param filteringClarifications
      */
     public void setFilteringClarifications(boolean filteringClarifications) {
         editFilterPane.setFilteringClarifications(filteringClarifications);
@@ -291,7 +313,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     /**
      * This method initializes reportButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getReportButton() {
@@ -300,6 +322,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
             reportButton.setText("Report");
             reportButton.setMnemonic(KeyEvent.VK_R);
             reportButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     showReport();
                 }
@@ -307,7 +330,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
         }
         return reportButton;
     }
-    
+
     protected void showReport() {
         FilterReport report = new FilterReport();
         report.setFilter(getEditFilterPane().getFilter());
