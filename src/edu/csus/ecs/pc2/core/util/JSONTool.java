@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -237,8 +238,11 @@ public class JSONTool {
             }
             // FIXME this should only be showed if the contest is thawed for public users
             String finalizedDate = null;
-            if (model.getFinalizeData() != null) {
-                finalizedDate = Utilities.getIso8601formatterWithMS().format(model.getFinalizeData().getCertificationDate());
+            FinalizeData finalizedData = model.getFinalizeData();
+            
+            // Only get date if the contest is, in fact, certified
+            if (finalizedData != null && finalizedData.isCertified()) {
+                finalizedDate = Utilities.getIso8601formatterWithMS().format(finalizedData.getCertificationDate());
             }
             if (finalizedDate != null) {
                 element.put("finalized", finalizedDate);
