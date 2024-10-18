@@ -77,16 +77,16 @@ import edu.csus.ecs.pc2.shadow.ShadowJudgementPair;
 public class ShadowCompareRunsPane extends JPanePlugin {
 
     private static final long serialVersionUID = 1L;
-    
+
     private static final int RUN_UPDATE_REQUEST_SERVER_TIMEOUT_MILLIS = 30000;
-    
+
     private static final String DEFAULT_REFRESH_INTERVAL = "5";
-    
+
     private ShadowController shadowController = null ;
-    
+
     //the current judgement information from the shadow controller
     private Map<String, ShadowJudgementInfo> currentJudgementMap = null;
-    
+
     private Map<String, ShadowJudgementInfo> filteredJudgementMap = null;
     
     //the table displaying the current results
@@ -102,16 +102,16 @@ public class ShadowCompareRunsPane extends JPanePlugin {
     private Run runWeRequestedServerToUpdate;
 
     private boolean serverHasUpdatedOurRun;
-    
+
     private JPanel dynamicallyRefreshPanel;
-        
+ 
     private JCheckBox mismatchCheckBox;
 
     @Override
     public String getPluginTitle() {
         return "Shadow_Compare_Pane";
     }
-    
+
     /**
      * This GUI class accepts a reference to a {@link ShadowController}, from which it obtains (by calling 
      * {@link ShadowController#getJudgementComparisonInfo()}) a
@@ -127,11 +127,10 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         Dimension size = new Dimension(700,700);
         this.setPreferredSize(size);
         this.setMinimumSize(size);
-        
         this.shadowController = shadowController ;
-        
+
         this.log = shadowController.getLog();
-        
+
         this.setContestAndController(shadowController.getLocalContest(), shadowController.getLocalController());
 
         //add a run listener so we can be notified when run edits which we invoke (during the "Resolve Run" operation) are completed
@@ -141,28 +140,33 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         JLabel header = new JLabel("Comparison of PC2 vs. Remote Judgements");
         header.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.add(header);
-        
+ 
+        shadowController.setFilter(FILTERS.NONE);//Required to reset the state of the filter
         //get the framework for the table which will be used to display comparison results
         resultsTable = getResultsTable();
-        
+ 
         //put the current comparison results into the table model
         resultsTable.setModel(getUpdatedResultsTableModel());
-        
+
         //support sorting the table by clicking on the column headers
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(resultsTable.getModel());
         resultsTable.setRowSorter(sorter);
         resultsTable.setAutoCreateRowSorter(true); //necessary to allow updated model to display and sort correctly
-                
+ 
         //put the results table in a scrollpane on the GUI
         JScrollPane scrollPane = new JScrollPane(resultsTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                     ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+
         this.add(scrollPane);
 
         this.add(getSummaryPanel());
-        
+
         this.add(getdynamicallyRefreshPanel());
-        
+
         this.add(getButtonPanel());
+
+
     }
         
     /**
@@ -179,7 +183,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
 
         JTable resultsTable = new JTable() {
             private static final long serialVersionUID = 1L;
-            
+
             private Border outside = new MatteBorder(1, 0, 1, 0, Color.RED);
             private Border inside = new EmptyBorder(0, 1, 0, 1);
             private Border highlight = new CompoundBorder(outside, inside);
@@ -207,7 +211,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
                      (remoteJudgement != null && remoteJudgement.toLowerCase().contains("pending"))) {
                     c.setBackground(new Color(255, 255, 153));
                 }
-                
+
                 // update font to bold & italic if row is selected
                 if (isRowSelected(row)) {
                     c.setFont(new Font("Arial Bold", Font.ITALIC, 14));
@@ -216,7 +220,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
 
                 return c;
             }
-            
+
             //we don't want any of the results cells to be editable
             public boolean isCellEditable(int nRow, int nCol) {
                 return false;
@@ -228,7 +232,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
         resultsTable.setDefaultRenderer(String.class, centerRenderer);
         resultsTable.setDefaultRenderer(Integer.class, centerRenderer);
-        
+
         resultsTable.setRowSelectionAllowed(true);
         resultsTable.setColumnSelectionAllowed(false);
         resultsTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -455,6 +459,7 @@ public class ShadowCompareRunsPane extends JPanePlugin {
             
             dynamicallyRefreshPanel.add(getmismatchCheckBox());
         }
+        
         return dynamicallyRefreshPanel;
     }
     
