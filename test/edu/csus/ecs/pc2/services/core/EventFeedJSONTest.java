@@ -455,7 +455,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         Clarification clarification = clarifications[4];
         ClarificationAnswer clarAnswer = null;
-        if (clarification.isAnswered()) {
+        if (clarification.isAnsweredorAnnounced()) {
             ClarificationAnswer[] clarificationAnswers = clarification.getClarificationAnswers();
             clarAnswer = clarificationAnswers[clarificationAnswers.length - 1];
         }

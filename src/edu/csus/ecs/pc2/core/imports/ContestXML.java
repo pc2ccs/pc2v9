@@ -492,7 +492,7 @@ public class ContestXML {
         clarificationMemento.putString("problem", problemName);
 
         clarificationMemento.putString("question", clarification.getQuestion());
-        if (clarification.getAnswer() != null && clarification.isAnswered()) {
+        if (clarification.getAnswer() != null && clarification.isAnsweredorAnnounced()) {
             clarificationMemento.putString("answer", clarification.getAnswer());
             clarificationMemento.putBoolean("sendToAll", clarification.isSendToAll());
         }

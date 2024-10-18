@@ -2092,10 +2092,12 @@ public class InternalContest implements IInternalContest {
 
         Vector<Clarification> clientClarifications = new Vector<Clarification>();
         Enumeration<Clarification> enumeration = clarificationList.getClarList();
+        
+        Account account = getAccount(clientId);
         while (enumeration.hasMoreElements()) {
             Clarification clarification = enumeration.nextElement();
 
-            if (clarification.isSendToAll() || clientId.equals(clarification.getSubmitter())) {
+            if (clarification.shouldAccountReceiveThisClarification(account)) {
                 clientClarifications.add(clarification);
             }
         }
@@ -2386,7 +2388,17 @@ public class InternalContest implements IInternalContest {
     public Group[] getGroups() {
         return groupDisplayList.getList();
     }
-
+    
+    @Override
+    public boolean doGroupsExist() {
+        return groupDisplayList.getList().length != 0;
+    }
+    
+    @Override
+    public int getNumberofGroups() {
+        return groupDisplayList.getList().length;
+    }
+    
     @Override
     public void addGroupListener(IGroupListener groupListener) {
         groupListenerList.addElement(groupListener);

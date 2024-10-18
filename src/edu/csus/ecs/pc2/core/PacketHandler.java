@@ -149,6 +149,7 @@ public class PacketHandler {
                 break;
             case CLARIFICATION_SUBMISSION:
                 // Clarification submitted by team to server
+                // or clarification submitted by judge to server for announcement clarification
                 confirmSubmission(packet, fromId);
                 break;
             case CLARIFICATION_ANSWER:
@@ -1633,14 +1634,24 @@ public class PacketHandler {
 
         Clarification submittedClarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
         Clarification clarification = contest.acceptClarification(submittedClarification);
-
-        // Send to team
+           
+        // Send to judge rather than team
         Packet confirmPacket = PacketFactory.createClarSubmissionConfirm(contest.getClientId(), fromId, clarification);
         controller.sendToClient(confirmPacket);
 
         // Send to clients and other servers
         if (isServer()) {
             controller.sendToJudgesAndOthers(confirmPacket, true);
+        }
+        //check if clarification is actually an announcement clarification.
+        if (clarification.isAnnounced()) {
+            if (! clarification.hasDestinationsOtherThanSubmitterorAllTeams()) {
+                controller.sendToTeams(confirmPacket);
+            }
+            else {
+                controller.sendToGroupsandIndividualTeams(confirmPacket,clarification.getAllDestinationsGroup(),clarification.getAllDestinationsTeam());
+            }
+            
         }
     }
 

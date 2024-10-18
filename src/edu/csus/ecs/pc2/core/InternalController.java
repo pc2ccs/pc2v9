@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -2728,7 +2729,106 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendPacketToClients(packet, ClientType.Type.TEAM);
         }
     }
+    
+    public void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams) {
+         
+        // below is taken from sendToTeams()
+        Properties properties = (Properties) packet.getContent();
+        // does the packet includes problemDataFiles
+        boolean abort = true;
+        if (properties.containsKey(PacketFactory.PROBLEM_DATA_FILES)) {
+            // clone before start mucking with it, or do we need a deep clone?
+            Properties cloneProperties = new Properties();
+            for (Iterator<?> iter = properties.keySet().iterator(); iter.hasNext();) {
+                String element = (String) iter.next();
+                // skip PROBLEM_DATA_FILES, otherwise clone the element
+                if (!element.equals(PacketFactory.PROBLEM_DATA_FILES)) {
+                    cloneProperties.put(element, properties.get(element));
+                    abort = false;
+                }
+            }
+            packet = PacketFactory.clonePacket(packet.getSourceId(), packet.getDestinationId(), packet);
+            // stick it back into the packet
+            packet.setContent(cloneProperties);
+        } else {
+            abort = false;
+        }
+        if (abort) {
+            return;
+        }
+        
+        ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
+        
+        List<ClientId> badClients = new ArrayList<ClientId>();
 
+        HashSet<ClientId> setWithClientId = new HashSet<>();
+        for (ClientId team : teams) {
+            setWithClientId.add(team);
+        }
+        for (ClientId clientId : clientIds) {
+            ConnectionHandlerID connectionHandlerID = null;
+               
+            if (setWithClientId.contains(clientId)) {
+                connectionHandlerID = clientId.getConnectionHandlerID();
+                //there should never be localLoggedInClients with null ConnectionHandlerIDs; however, the addition of 
+                // "multiple login" support may have left some place where this is inadvertently true.
+                //The following is an effort to catch/identify such situations.
+                //this was taken from sendPacketToClients()
+                if (connectionHandlerID==null) {
+                    //add the bad clientId to the badList
+                    badClients.add(clientId);
+                }
+                else {
+                    try {
+                        sendToClient(connectionHandlerID, packet);
+                    }catch (Exception e) {
+                        getLog().log(Level.WARNING, "Exception attempting to send packet using individual team to client " + clientId + "at connectionHandlerId " + connectionHandlerID
+                                + ": " + packet + ": "+ e.getMessage(), e);
+                    }
+                }
+                continue;
+            }
+            for (ElementId groupElementId : groups) {
+
+                Account account = contest.getAccount(clientId);
+                if (account.isGroupMember(groupElementId)) {
+                    connectionHandlerID = clientId.getConnectionHandlerID();
+                    if (connectionHandlerID==null) {
+                        //add the bad clientId to the badList
+                        badClients.add(clientId);
+                    }
+                    else {
+                        try {
+                            sendToClient(connectionHandlerID, packet);
+                        }catch (Exception e) {
+                            getLog().log(Level.WARNING, "Exception attempting to send packet using Group to client " + clientId + "at connectionHandlerId " + connectionHandlerID
+                                    + "as it belongs to group "+ groupElementId + ": " + packet + ": "+ e.getMessage(), e);
+                        
+                        }
+                    }
+                    break;
+                }
+            }
+                
+        }
+        //check if we got any bad clientIds
+        if (badClients.size()>0) {
+            //yes, build a comma-separated list of bad clientIds
+            String badClientListStr = "";
+            for (ClientId client : badClients) {
+                if (!badClientListStr.equals("")) {
+                    badClientListStr += ", ";
+                }
+                badClientListStr += client.toString();
+            }
+            RuntimeException e = new RuntimeException(
+                    "InternalController.sendToGroupsandIndividualTeams(): contest.getLocalLoggedInClients() returned the following ClientId(s) with a null ConnectionHandlerID: "
+                    + badClientListStr);
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    
     private int getPortForSite(int inSiteNumber) {
 
         try {
@@ -3777,8 +3877,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     }
 
-    @Override
-    public void submitClarification(Problem problem, String question) {
+    public ElementId submitClarification(Problem problem, String question) {
+
 
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Clarification clarification = new Clarification(contest.getClientId(), problem, question);
@@ -3786,8 +3886,29 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
 
         sendToLocalServer(packet);
+        
+        return clarification.getElementId();
     }
+    
+    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Clarification clarification = new Clarification(contest.getClientId(), problem, "");
 
+        if (ultimateDestinationGroup.length + ultimateDestinationTeam.length> 0) {
+            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, false);
+        }
+        else {
+            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, true);
+        }
+        
+        Packet packet;
+        packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
+        
+
+        
+        sendToLocalServer(packet);
+    }
+    
     @Override
     public void checkOutClarification(Clarification clarification, boolean readOnly) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);

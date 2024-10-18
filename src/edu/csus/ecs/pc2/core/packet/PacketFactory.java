@@ -359,7 +359,6 @@ public final class PacketFactory {
 
     public static final String REQUEST_LOGIN_AS_PROXY = "REQUEST_LOGIN_AS_PROXY";
 
-
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
      */

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.log;
 
 import java.io.IOException;
@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -185,6 +186,11 @@ public class NullController implements IInternalController{
         // TODO Auto-generated method stub
 
     }
+    
+    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+        // TODO Auto-generated method stub
+        
+    }
 
     public void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS) throws Exception {
         // TODO Auto-generated method stub
@@ -197,9 +203,9 @@ public class NullController implements IInternalController{
 
     }
 
-    @Override
-    public void submitClarification(Problem problem, String question) {
+    public ElementId submitClarification(Problem problem, String question) {
         // TODO Auto-generated method stub
+        return null;
 
     }
 
@@ -334,7 +340,11 @@ public class NullController implements IInternalController{
         // TODO Auto-generated method stub
 
     }
-
+    
+    public void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams) {
+     // TODO Auto-generated method stub
+    }
+    
     @Override
     public void sendToSpectators(Packet packet) {
         // TODO Auto-generated method stub
@@ -802,4 +812,6 @@ public class NullController implements IInternalController{
     public boolean isSuppressLoginsPaneDisplay() {
         return false;
     }
+
+
 }
