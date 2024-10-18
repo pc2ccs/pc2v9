@@ -165,9 +165,23 @@ public class ResultsFile {
         }
 
         int median = getMedian(standingsRecords);
+        int highestHonorSolvedCount = 0;
+        int highHonorSolvedCount = 0;
 
         if (finalizeData == null) {
             finalizeData = GenDefaultFinalizeData();
+        }
+
+        if (finalizeData.isUseWFGroupRanking() && finalizeData.isCustomizeHonorsSolvedCount()) {
+            if (finalizeData.getHighestHonorSolvedCount() != 0) {
+                highestHonorSolvedCount = finalizeData.getHighestHonorSolvedCount();
+            }
+            if (finalizeData.getHighHonorSolvedCount() != 0) {
+                highHonorSolvedCount = finalizeData.getHighHonorSolvedCount();
+            }
+            if (finalizeData.getHonorSolvedCount() != 0) {
+                median = finalizeData.getHonorSolvedCount();
+            }
         }
 
         // TODO finalizeData really needs a B instead of getBronzeRank
@@ -190,8 +204,12 @@ public class ResultsFile {
         Arrays.sort(standingsRecords, comparator);
 
         int realRank = 0;
-        int highestHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved();
-        int highHonorSolvedCount = highestHonorSolvedCount - 1;
+        if (highestHonorSolvedCount == 0) {
+            highestHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved();
+        }
+        if (highHonorSolvedCount == 0) {
+            highHonorSolvedCount = standingsRecords[lastMedalRank - 1].getNumberSolved() - 1;
+        }
 
         for (StandingsRecord record : standingsRecords) {
             realRank++;

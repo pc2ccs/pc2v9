@@ -2,14 +2,25 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.logging.Level;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -18,6 +29,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -56,6 +68,10 @@ public class FinalizePane extends JPanePlugin {
 
     private JCheckBox useWFGroupRankingCheckBox = null;
 
+    private JCheckBox customizeHonorsSolvedCountCheckBox = null;
+
+    private JLabel customizeHonorsSolvedCountWhatsThisButton = null;
+
     private JPanel centerPane = null;
 
     private JLabel goldLabel = null;
@@ -66,6 +82,12 @@ public class FinalizePane extends JPanePlugin {
 
     private JLabel certifierLabel = null;
 
+    private JLabel highestHonorLabel = null;
+
+    private JLabel highHonorLabel = null;
+
+    private JLabel honorLabel = null;
+
     private JTextField goldCountTextField = null;
 
     private JTextField silverCountTextField = null;
@@ -73,6 +95,12 @@ public class FinalizePane extends JPanePlugin {
     private JTextField bronzeCountTextField = null;
 
     private JTextField commentTextField = null;
+
+    private JTextField highestHonorSolvedCountTextField = null;
+
+    private JTextField highHonorSolvedCountTextField = null;
+
+    private JTextField honorSolvedCountTextField = null;
 
     private JLabel certificationCommentLabel = null;
 
@@ -156,6 +184,13 @@ public class FinalizePane extends JPanePlugin {
         data.setBronzeRank(ng+ns+nb);
         data.setComment("" + getCommentTextField().getText());
         data.setUseWFGroupRanking(getUseWFGroupRankingsCheckBox().isSelected());
+        if (getUseWFGroupRankingsCheckBox().isSelected() && getCustomizeHonorsSolvedCountCheckBox().isSelected()) {
+            int highestHonorSolvedCount = getIntegerValue(getHighestHonorSolvedCountTextField());
+            int highHonorSolvedCount = getIntegerValue(getHighHonorSolvedCountTextField());
+            int honorSolvedCount = getIntegerValue(getHonorSolvedCountTextField());
+            data.setCustomizeHonorsSolvedCount(getCustomizeHonorsSolvedCountCheckBox().isSelected());
+            data.setHonorsSolvedCount(highestHonorSolvedCount, highHonorSolvedCount, honorSolvedCount);
+        }
         return data;
     }
 
@@ -169,6 +204,26 @@ public class FinalizePane extends JPanePlugin {
         getSilverCountTextField().setText("4");
         getBronzeCountTextField().setText("4");
         getUseWFGroupRankingsCheckBox().setSelected(true);
+        getCustomizeHonorsSolvedCountCheckBox().setSelected(false);
+        getCustomizeHonorsSolvedCountWhatsThisButton().setEnabled(true);
+        setEnableHonorsCountFields(false);
+    }
+
+    /**
+     * This method Enables/Disables Honors solved count text fields
+     * 
+     * @param isEnabled 
+     */
+    private void setEnableHonorsCountFields(boolean isEnabled) {
+        getHighestHonorSolvedCountTextField().setText("");
+        getHighHonorSolvedCountTextField().setText("");
+        getHonorSolvedCountTextField().setText("");
+        getHighestHonorLabel().setEnabled(isEnabled);
+        getHighHonorLabel().setEnabled(isEnabled);
+        getHonorLabel().setEnabled(isEnabled);
+        getHighestHonorSolvedCountTextField().setEnabled(isEnabled);
+        getHighHonorSolvedCountTextField().setEnabled(isEnabled);
+        getHonorSolvedCountTextField().setEnabled(isEnabled);
     }
 
     protected void reloadFrame() {
@@ -184,6 +239,33 @@ public class FinalizePane extends JPanePlugin {
             getBronzeCountTextField().setText(Integer.toString(br - sr));
             getCommentTextField().setText(data.getComment());
             getUseWFGroupRankingsCheckBox().setSelected(data.isUseWFGroupRanking());
+            if (data.isUseWFGroupRanking()) {
+                getCustomizeHonorsSolvedCountCheckBox().setEnabled(true);
+                getCustomizeHonorsSolvedCountWhatsThisButton().setEnabled(true);
+                getCustomizeHonorsSolvedCountCheckBox().setSelected(data.isCustomizeHonorsSolvedCount());
+                if (data.isCustomizeHonorsSolvedCount()) {
+                    setEnableHonorsCountFields(true);
+                    int highestHonorSolvedCount = data.getHighestHonorSolvedCount();
+                    int highHonorSolvedCount = data.getHighHonorSolvedCount();
+                    int honorSolvedCount = data.getHonorSolvedCount();
+                    if (highestHonorSolvedCount != 0) {
+                        getHighestHonorSolvedCountTextField().setText(Integer.toString(highestHonorSolvedCount));
+                    }
+                    if (highHonorSolvedCount != 0) {
+                        getHighHonorSolvedCountTextField().setText(Integer.toString(highHonorSolvedCount));
+                    }
+                    if (honorSolvedCount != 0) {
+                        getHonorSolvedCountTextField().setText(Integer.toString(honorSolvedCount));
+                    }
+                } else {
+                    setEnableHonorsCountFields(false);
+                }
+            } else {
+                getCustomizeHonorsSolvedCountCheckBox().setSelected(false);
+                setEnableHonorsCountFields(false);
+                getCustomizeHonorsSolvedCountCheckBox().setEnabled(false);
+                getCustomizeHonorsSolvedCountWhatsThisButton().setEnabled(false);
+            }
 
             if (data.isCertified()) {
                 certificationCommentLabel.setText("Contest Finalized (Certified done)");
@@ -287,7 +369,6 @@ public class FinalizePane extends JPanePlugin {
         }
 
         data.setCertified(false);
-        data.setUseWFGroupRanking(getUseWFGroupRankingsCheckBox().isSelected());
         getController().updateFinalizeData(data);
     }
 
@@ -434,19 +515,19 @@ public class FinalizePane extends JPanePlugin {
             certificationCommentLabel.setHorizontalAlignment(SwingConstants.CENTER);
             certificationCommentLabel.setText("Contest Not Certified");
             certifierLabel = new JLabel();
-            certifierLabel.setBounds(new Rectangle(64, 167, 170, 22));
+            certifierLabel.setBounds(new Rectangle(64, 168, 170, 22));
             certifierLabel.setText("Who certifies");
             certifierLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             bronzeLabel = new JLabel();
-            bronzeLabel.setBounds(new Rectangle(64, 134, 170, 22));
+            bronzeLabel.setBounds(new Rectangle(64, 131, 170, 22));
             bronzeLabel.setText("Number of Bronze Medals");
             bronzeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             silverLabel = new JLabel();
-            silverLabel.setBounds(new Rectangle(64, 97, 170, 22));
+            silverLabel.setBounds(new Rectangle(64, 94, 170, 22));
             silverLabel.setText("Number of Silver Medals");
             silverLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             goldLabel = new JLabel();
-            goldLabel.setBounds(new Rectangle(64, 56, 170, 22));
+            goldLabel.setBounds(new Rectangle(64, 57, 170, 22));
             goldLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             goldLabel.setText("Number of Gold Medals");
             centerPane = new JPanel();
@@ -455,14 +536,67 @@ public class FinalizePane extends JPanePlugin {
             centerPane.add(silverLabel, null);
             centerPane.add(bronzeLabel, null);
             centerPane.add(certifierLabel, null);
+            centerPane.add(getHighestHonorLabel(), null);
+            centerPane.add(getHighHonorLabel(), null);
+            centerPane.add(getHonorLabel(), null);
             centerPane.add(getGoldCountTextField(), null);
             centerPane.add(getSilverCountTextField(), null);
             centerPane.add(getBronzeCountTextField(), null);
             centerPane.add(getCommentTextField(), null);
+            centerPane.add(getHighestHonorSolvedCountTextField(), null);
+            centerPane.add(getHighHonorSolvedCountTextField(), null);
+            centerPane.add(getHonorSolvedCountTextField(), null);
             centerPane.add(certificationCommentLabel, null);
             centerPane.add(getUseWFGroupRankingsCheckBox(), null);
+            centerPane.add(getCustomizeHonorsSolvedCountCheckBox(), null);
+            centerPane.add(getCustomizeHonorsSolvedCountWhatsThisButton(), null);
         }
         return centerPane;
+    }
+
+    /**
+     * This method initializes highestHonorLabel
+     *
+     * @return javax.swing.JLabel
+     */
+    private JLabel getHighestHonorLabel() {
+        if (highestHonorLabel == null) {
+            highestHonorLabel = new JLabel();
+            highestHonorLabel.setBounds(new Rectangle(4, 279, 230, 22));
+            highestHonorLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            highestHonorLabel.setText("Highest Honors min. problems solved");
+        }
+        return highestHonorLabel;
+    }
+
+    /**
+     * This method initializes highHonorLabel
+     *
+     * @return javax.swing.JLabel
+     */
+    private JLabel getHighHonorLabel() {
+        if (highHonorLabel == null) {
+            highHonorLabel = new JLabel();
+            highHonorLabel.setBounds(new Rectangle(4, 316, 230, 22));
+            highHonorLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            highHonorLabel.setText("High Honors min. problems solved");
+        }
+        return highHonorLabel;
+    }
+
+    /**
+     * This method initializes honorLabel
+     *
+     * @return javax.swing.JLabel
+     */
+    private JLabel getHonorLabel() {
+        if (honorLabel == null) {
+            honorLabel = new JLabel();
+            honorLabel.setBounds(new Rectangle(4, 353, 230, 22));
+            honorLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            honorLabel.setText("Honors min. problems solved");
+        }
+        return honorLabel;
     }
 
     /**
@@ -520,13 +654,144 @@ public class FinalizePane extends JPanePlugin {
         return commentTextField;
     }
 
+    /**
+     * This method initializes highestHonorSolvedCountTextField
+     *
+     * @return javax.swing.JTextField
+     */
+    private JTextField getHighestHonorSolvedCountTextField() {
+        if (highestHonorSolvedCountTextField == null) {
+            highestHonorSolvedCountTextField = new JTextField();
+            highestHonorSolvedCountTextField.setBounds(new Rectangle(250, 279, 40, 20));
+        }
+        return highestHonorSolvedCountTextField;
+    }
+
+    /**
+     * This method initializes highHonorSolvedCountTextField
+     *
+     * @return javax.swing.JTextField
+     */
+    private JTextField getHighHonorSolvedCountTextField() {
+        if (highHonorSolvedCountTextField == null) {
+            highHonorSolvedCountTextField = new JTextField();
+            highHonorSolvedCountTextField.setBounds(new Rectangle(250, 316, 40, 20));
+        }
+        return highHonorSolvedCountTextField;
+    }
+
+    /**
+     * This method initializes honorSolvedCountTextField
+     *
+     * @return javax.swing.JTextField
+     */
+    private JTextField getHonorSolvedCountTextField() {
+        if (honorSolvedCountTextField == null) {
+            honorSolvedCountTextField = new JTextField();
+            honorSolvedCountTextField.setBounds(new Rectangle(250, 353, 40, 20));
+        }
+        return honorSolvedCountTextField;
+    }
+
+    /**
+     * This method initializes useWFGroupRankingsCheckBox
+     *
+     * @return javax.swing.JCheckBox
+     */
     private JCheckBox getUseWFGroupRankingsCheckBox() {
         if(useWFGroupRankingCheckBox == null) {
             useWFGroupRankingCheckBox = new JCheckBox();
             useWFGroupRankingCheckBox.setText("Use World Finals group rankings for results");
             useWFGroupRankingCheckBox.setBounds(new Rectangle(250, 205, 300, 20));
+            useWFGroupRankingCheckBox.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    getCustomizeHonorsSolvedCountCheckBox().setSelected(false);
+                    getCustomizeHonorsSolvedCountCheckBox().setEnabled(e.getStateChange() == ItemEvent.SELECTED);
+                    getCustomizeHonorsSolvedCountWhatsThisButton().setEnabled(e.getStateChange() == ItemEvent.SELECTED);
+                }
+            });
         }
-        return(useWFGroupRankingCheckBox);
+        return useWFGroupRankingCheckBox;
+    }
+
+    /**
+     * This method initializes customizeHonorsSolvedCountCheckBox
+     *
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getCustomizeHonorsSolvedCountCheckBox() {
+        if(customizeHonorsSolvedCountCheckBox == null) {
+            customizeHonorsSolvedCountCheckBox = new JCheckBox();
+            customizeHonorsSolvedCountCheckBox.setText("Customize Number of Problems solved for Honors rankings");
+            customizeHonorsSolvedCountCheckBox.setBounds(new Rectangle(250, 242, 365, 20));
+            customizeHonorsSolvedCountCheckBox.setSelected(false);
+            customizeHonorsSolvedCountCheckBox.setEnabled(getUseWFGroupRankingsCheckBox().isSelected());
+            customizeHonorsSolvedCountCheckBox.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    setEnableHonorsCountFields(e.getStateChange() == ItemEvent.SELECTED);
+                }
+            });
+        }
+        return customizeHonorsSolvedCountCheckBox;
+    }
+
+    /**
+     * This method initializes customizeHonorsSolvedCountWhatsThisButton
+     *
+     * @return javax.swing.JLabel
+     */
+    private JLabel getCustomizeHonorsSolvedCountWhatsThisButton() {
+
+        if (customizeHonorsSolvedCountWhatsThisButton == null) {
+            Icon questionIcon = UIManager.getIcon("OptionPane.questionIcon");
+            if (questionIcon == null || !(questionIcon instanceof ImageIcon)) {
+                // the current PLAF doesn't have an OptionPane.questionIcon that's an ImageIcon
+                customizeHonorsSolvedCountWhatsThisButton = new JLabel("<What's This?>");
+                customizeHonorsSolvedCountWhatsThisButton.setForeground(Color.blue);
+            } else {
+                Image image = ((ImageIcon) questionIcon).getImage();
+                customizeHonorsSolvedCountWhatsThisButton = new JLabel(new ImageIcon(getScaledImage(image, 20, 20)));
+            }
+
+            customizeHonorsSolvedCountWhatsThisButton.setToolTipText("What's This? (click for additional information)");
+            customizeHonorsSolvedCountWhatsThisButton.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, customizeHonorsSolvedCountWhatsThisMessage, "About Customizing different Honors Solved Count", JOptionPane.INFORMATION_MESSAGE, null);
+                }
+            });
+            customizeHonorsSolvedCountWhatsThisButton.setBounds(new Rectangle(620, 242, 20, 20));
+        }
+        return customizeHonorsSolvedCountWhatsThisButton;
+    }
+
+    private String customizeHonorsSolvedCountWhatsThisMessage = //
+            "\nBy default:" //
+            + "\nMinimum problems solved to get Highest Honors = Num. problems solved by last ranked Bronze medalist" //
+            + "\nMinimum problems solved to get High Honors = Num. problems solved by last ranked Bronze medalist - 1" //
+            + "\nMinimum problems solved to get Honors = Num. problems solved by median ranked team (In case of even count of teams, avg. of both medians)" //
+            + "\n\nHere we can customize the counts." //
+            + "\nIf field is left blank or \"0\", then the default value is considerd." //
+            + "\nIn case a team satisfies multiple Honor list problem solved counts, then always highest kind trumps" //
+            + "\ni.e. Highest Honor trumps High Honor trumps Honor." //
+            + "\nThis may arise in certain extreme cases of default or erroneous field entries." //
+            + "\nFor eg:-" //
+            + "\nOut of 100 teams, 99 solved solved 7 problems and 1 solved 6 problems." //
+            + "\nThen both Highest Honors and Honors by default will be 7 problems and High Honors is 6 problems solved." //
+            + "\nAll teams (except medalists) solving 7 problems will get Highest Honors and the team solving 6 problems get High Honors" //
+            + " \n\n";
+    
+    private Image getScaledImage(Image srcImg, int w, int h) {
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+
+        return resizedImg;
     }
 
     /**
