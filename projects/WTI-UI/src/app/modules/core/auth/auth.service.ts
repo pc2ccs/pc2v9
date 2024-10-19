@@ -1,3 +1,5 @@
+//auth.service.ts
+
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LoginCredentials } from '../models/login-credentials';
@@ -18,9 +20,12 @@ export class AuthService {
   get username(): string { return this._userName; }
 
   constructor(private _teamsService: ITeamsService,
-              private _router: Router) { }
+              private _router: Router) { 
+  	console.log("Constructing AuthService...");
+  }
 
   completeLogin(tokenValue: string, username: string) {
+	console.log ("Running AuthService.completeLogin(); saving token=" + tokenValue + ", username=" + username);
     this._token = tokenValue;
     this._userName = username;
     this._router.navigateByUrl(this.redirectUrl || this.defaultRoute);
@@ -35,8 +40,16 @@ export class AuthService {
   }
 
   completeLogout(): void {
+	console.log("Running AuthService.completeLogout(): ");
+	
+	console.log("   ...clearing localStorage");
+	localStorage.clear();
+	
+	console.log("   ...setting 'token' and username to 'undefined'");
     this._token = undefined;
     this._userName = undefined;
+
+	console.log("   ...invoking Router.navigateByUrl('/login')");
     this._router.navigateByUrl('/login');
   }
 }
