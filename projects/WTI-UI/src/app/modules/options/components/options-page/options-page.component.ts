@@ -1,8 +1,12 @@
+//options-page.component.ts
+
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ChangePasswordComponent } from '../change-password/change-password.component';
 import { UiHelperService } from 'src/app/modules/core/services/ui-helper.service';
 import { environment } from 'src/environments/environment';
+import { saveCurrentPage } from 'src/app/app.component';
+import * as Constants from 'src/constants';
 
 @Component({
   templateUrl: './options-page.component.html',
@@ -17,7 +21,10 @@ export class OptionsPageComponent implements OnInit {
   constructor(private _dialogSvc: MatDialog,
               private _uiHelperService: UiHelperService) { }
 
-  ngOnInit(): void {  }
+  ngOnInit(): void {  
+    //indicate that this Options page is the most recently accessed page
+    saveCurrentPage(Constants.OPTIONS_PAGE_KEY);
+  }
 
   showWebsocketDebug(): boolean {
     return !!environment.useMock;
