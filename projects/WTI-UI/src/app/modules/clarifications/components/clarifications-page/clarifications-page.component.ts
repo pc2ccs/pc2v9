@@ -7,6 +7,9 @@ import { Clarification } from '../../../core/models/clarification';
 import { MatDialog } from '@angular/material/dialog';
 import { NewClarificationComponent } from '../new-clarification/new-clarification.component';
 import { AuthService } from '../../../core/auth/auth.service';
+import { saveCurrentPage } from 'src/app/app.component';
+import * as Constants from 'src/constants';
+
 
 @Component({
   templateUrl: './clarifications-page.component.html',
@@ -25,6 +28,9 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
               private _authService: AuthService) { }
 
   ngOnInit(): void {
+    //indicate that this Clarifications page is the most recently accessed page
+    saveCurrentPage(Constants.CLARIFICATIONS_PAGE_KEY);
+
     this.buildForm();
     this.loadClars();
 

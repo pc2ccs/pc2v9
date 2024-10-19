@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy, DoCheck } from '@angular/core';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { saveCurrentPage } from 'src/app/app.component';
+import * as Constants from 'src/constants';
 
 @Component({
 	templateUrl: './scoreboard-page.component.html',
@@ -17,7 +19,9 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	) { }
 
 	ngOnInit(): void {
-		//console.log("Scoreboard OnInit executed.");
+        //indicate that this Scoreboard page is the most recently accessed page
+        saveCurrentPage(Constants.SCOREBOARD_PAGE_KEY);
+
 		this.loadStandings();
 
 		// when standings are updated, trigger a reload
