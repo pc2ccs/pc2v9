@@ -8,6 +8,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { NewClarificationComponent } from '../new-clarification/new-clarification.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
+import { saveCurrentPage } from 'src/app/app.component';
+import * as Constants from 'src/constants';
 
 @Component({
   templateUrl: './clarifications-page.component.html',
@@ -29,7 +31,10 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
 	
 	this._appTitleService.setTitleWithTeamId("Clarifications");
-	
+
+    //indicate that this Clarifications page is the most recently accessed page
+    saveCurrentPage(Constants.CLARIFICATIONS_PAGE_KEY);
+
     this.buildForm();
     this.loadClars();
 
