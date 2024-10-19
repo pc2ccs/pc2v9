@@ -19,13 +19,14 @@ export class WebsocketService extends IWebsocketService {
   }
 
   startWebsocket(): void {
-    console.log('starting websocket');
+    console.log('Constructing websocket...');
     this.socket = new WebSocket(`${environment.websocketUrl}/${this._authService.token}`);
     this.socket.addEventListener('message', this.handleIncomingMessage);
+    console.log('...websocket URL =' + this.socket.url);
   }
 
   stopWebsocket(): void {
-    console.log('ending websocket');
+    console.log('Closing websocket');
     if (this.socket) {
       this.socket.close();
       this.socket = undefined;
