@@ -39,7 +39,8 @@ export function WebsocketServiceFactory(injector: Injector, authService: AuthSer
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: IWebsocketService, useFactory: WebsocketServiceFactory, deps: [Injector, AuthService] },
     AuthGuard,
-    UiHelperService
+    UiHelperService,
+    ContestService
   ],
   imports: [
     HttpClientModule,
