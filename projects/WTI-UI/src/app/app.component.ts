@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import * as Constants from 'src/constants';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/modules/core/auth/auth.service' ;
+import { ContestService } from 'src/app/modules/core/services/contest.service' ;
 
 @Component({
   selector: 'app-root',
@@ -13,23 +15,35 @@ import { Router } from '@angular/router';
 export class AppComponent implements OnInit {
   configLoaded = false;
 
-  constructor(private _httpClient: HttpClient, public router: Router) { 
-  	this.router.events.subscribe(console.log);
+  constructor(private _httpClient: HttpClient, public router: Router, 
+    private _authService: AuthService, private _contestService: ContestService) { 
+  	//this.router.events.subscribe(console.log); //shows router tracing on console
   }
 
   ngOnInit(): void {
   
+    //debugging
+    console.log ("Entering AppComponent.ngOnInit()...");
+    console.log ("...localStorage.length = " + localStorage.length);
+
     //check if we're loading for the first time
     if (!getCurrentPage()) {
         //we have no current page so we must be starting from scratch
-        console.log ('Starting from scratch...');
+        console.log ('Starting Single-Page-Application from scratch...');
         this.loadEnvironment();
         
 	} else {
 	    //there is a current page stored; we must be reloading from (e.g.) an F5 refresh
-	    console.log ('Restarting after refresh navigation');
+	    console.log ('Restarting Single-Page-Application after refresh navigation');
 	    
+        //restore former environment
         this.loadEnvironment();
+
+        //restore the connection token and username into the AuthService from browser localStorage
+        let token = localStorage.getItem(Constants.CONNECTION_TOKEN_KEY);
+        let username = localStorage.getItem(Constants.CONNECTION_USERNAME_KEY);
+        console.log("Calling completeLogin() on AuthService to set token '" + token + "' and username '" + username + "'" );
+        this._authService.completeLogin(token,username);
 
 	    // transfer to the (former) "current page".
 	    let page = getCurrentPage();
@@ -39,9 +53,9 @@ export class AppComponent implements OnInit {
 	    // TODO:  consider whether using history.pushState()/popState() is a better solution for this...
 	    this.router.navigate([page])
 	      .then(nav => {
-	        console.log("Call to router.navigate([" + page + "]) returned " + nav);  //true if navigation is successful
+	        
 	      }, err => {
-	         console.log("Call to router.navigate([" + page + "]) returned " + err)
+	         console.log("Call to router.navigate([" + page + "]) failed (returned '" + err + "')");
 	      });
 	    
 	}
