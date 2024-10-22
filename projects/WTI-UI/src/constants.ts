@@ -24,3 +24,13 @@ export const CLARIFICATIONS_PAGE_KEY = 'clarifications';
  * The key for the SCOREBOARD page.
  */
 export const SCOREBOARD_PAGE_KEY = 'scoreboard';
+
+/**
+ * The key under which the "connection token" for websocket messages is stored in localStorage.
+ */
+export const CONNECTION_TOKEN_KEY = 'token';
+
+/**
+ * The key under which the user name for the current websocket connection is stored in localStorage.
+ */
+export const CONNECTION_USERNAME_KEY = 'username';
