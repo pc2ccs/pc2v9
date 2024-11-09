@@ -6,18 +6,18 @@
 #
 # Sat Jan 18 13:58:12 PDT 2020 laned fixed classpath
 
-. `dirname $0`/pc2env
+. "$(dirname "$0")/pc2env"
 
 # MacOS or not
 if [ -f /mach_kernel ]; then
   # set our dock name (otherwise defaults to Starter)
-  PC2XOPS="-Xdock:name=`basename $0`"
+  PC2XOPS="-Xdock:name=$(basename "$0")"
 else
   PC2XOPS=""
 fi
 
 CLASSNAME=edu.csus.ecs.pc2.ui.team.Submitter
 
-java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp "$libdir/*" $CLASSNAME $*
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp "$libdir/*" $CLASSNAME "$@"
 
-# eof pc2submit $Id$ 
+# eof pc2submit $Id$
