@@ -438,7 +438,7 @@ public class ContestController extends MainController {
 	required = true) @HeaderParam("team_id")String key) {
 
 		ServerConnection userInformation = connections.get(key);
-
+	    
 		//verify the user is logged in and the contest is running
 		try {
 			// make sure we have connection information for this user (i.e. that the user is logged in)
@@ -462,8 +462,9 @@ public class ContestController extends MainController {
 		List<ClarificationModel> clarifications = new ArrayList<ClarificationModel>();
 		
 		try {
-			//get ALL clarifications in the contest
-			IClarification[] clars = userInformation.getContest().getClarifications();
+			
+		    //This function only gets clarifications that the current Client should receive.
+			IClarification[] clars = userInformation.getContest().getClarificationsWithClientId();
 			
 			//check all contest clars to see which should be returned to the team
 			for(IClarification clar : clars) {
@@ -472,6 +473,7 @@ public class ContestController extends MainController {
 								
 				//return to the team only those clars that came from the team, or from the judges
 				if(clar.getTeam().getLoginName().equalsIgnoreCase(userInformation.getMyClient().getLoginName()) || isJudge || clar.isSendToAll()) {
+				    //TODO must also include clars directed to here from group
 					
 					String displayName = (isJudge || clar.isSendToAll()) ? "All" : clar.getTeam().getDisplayName();
 					clarifications.add(new ClarificationModel(

@@ -265,6 +265,17 @@ public class Contest implements IContest, UIPlugin {
         }
         return clarificationImplementations;
     }
+    
+public IClarification[] getClarificationsWithClientId() {
+        
+        Clarification[] clarifications = contest.getClarifications(contest.getClientId());
+        ClarificationImplementation[] clarificationImplementations = new ClarificationImplementation[clarifications.length];
+
+        for (int i = 0; i < clarifications.length; i++) {
+            clarificationImplementations[i] = new ClarificationImplementation(clarifications[i], contest, controller);
+        }
+        return clarificationImplementations;
+    }
 
     public void removeClarificationListener(IClarificationEventListener clarificationEventListener) {
         clarificationListenerList.removeClarificationListener(clarificationEventListener);

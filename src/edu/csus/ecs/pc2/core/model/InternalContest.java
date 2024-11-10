@@ -2086,7 +2086,12 @@ public class InternalContest implements IInternalContest {
     public ConnectionHandlerID[] getConnectionHandlerIDs() {
         return localConnectionHandlerList.getList();
     }
-
+    
+    /**
+     * Gets clarifications appropriate for the clientId.
+     * This means if the client is unable to see some of the clarifications this method will not return it. 
+     * For example certain clarifications might be only directed towards certain groups/teams. 
+     */
     @Override
     public Clarification[] getClarifications(ClientId clientId) {
 
