@@ -5,6 +5,8 @@ import * as Constants from 'src/constants';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/modules/core/auth/auth.service' ;
 import { ContestService } from 'src/app/modules/core/services/contest.service' ;
+import { WebsocketService } from 'src/app/modules/core/services/websocket.service' ;
+import { DEBUG_MODE } from 'src/constants';
 
 @Component({
   selector: 'app-root',
@@ -15,39 +17,81 @@ import { ContestService } from 'src/app/modules/core/services/contest.service' ;
 export class AppComponent implements OnInit {
   configLoaded = false;
 
-  constructor(private _httpClient: HttpClient, public router: Router, 
-    private _authService: AuthService, private _contestService: ContestService) { 
+  constructor(private _httpClient: HttpClient, 
+		      public router: Router, 
+              private _authService: AuthService, 
+              private _contestService: ContestService,
+              private _websocketService: WebsocketService) { 
   	//this.router.events.subscribe(console.log); //shows router tracing on console
   }
 
   ngOnInit(): void {
   
-    //debugging
-    console.log ("Entering AppComponent.ngOnInit()...");
-    console.log ("...localStorage.length = " + localStorage.length);
+    if (DEBUG_MODE) {
+	    console.log ("Entering AppComponent.ngOnInit()...");
+	    console.log ("...sessionStorage.length = " + sessionStorage.length);
+	    if (sessionStorage.length > 0) {
+	    	console.log ("...sessionStorage values:");
+	    	for (let i = 0; i < sessionStorage.length; i++) {
+	    		  let key = sessionStorage.key(i);
+	    		  let value = sessionStorage.getItem(key);
+	    		  console.log("      Key: ", key, " Value: ", value);
+	    	}
+	    }
+    }
 
     //check if we're loading for the first time
     if (!getCurrentPage()) {
-        //we have no current page so we must be starting from scratch
-        console.log ('Starting Single-Page-Application from scratch...');
+        if (DEBUG_MODE) {
+        	console.log ('Starting Single-Page-Application from scratch...');
+        }
+        //we have no current page so we must be starting from scratch;
+        // the following matches the sum total of what ngOnInit() used to do before "F5 handling" was added -- jlc
         this.loadEnvironment();
         
 	} else {
 	    //there is a current page stored; we must be reloading from (e.g.) an F5 refresh
-	    console.log ('Restarting Single-Page-Application after refresh navigation');
+	    if (DEBUG_MODE) {
+	    	console.log ('Restarting Single-Page-Application after refresh navigation');
+	    }
 	    
         //restore former environment
         this.loadEnvironment();
 
-        //restore the connection token and username into the AuthService from browser localStorage
-        let token = localStorage.getItem(Constants.CONNECTION_TOKEN_KEY);
-        let username = localStorage.getItem(Constants.CONNECTION_USERNAME_KEY);
-        console.log("Calling completeLogin() on AuthService to set token '" + token + "' and username '" + username + "'" );
-        this._authService.completeLogin(token,username);
+        //restore the connection token and username into the AuthService from browser sessionStorage
+        let token = getCurrentToken();
+        let username = getCurrentUserName();
+        if (DEBUG_MODE) {
+        	if (!!token && !!username) {
+        		console.log("Restoring token '" + token + "' and username '" + username + "' into AuthService" );
+        	}
+        }
+        //check whether we found non-null token and username from sessionStorage
+        if (! (!!token && !!username) ) {
+        	console.warn ("Attempting to reload after F5 restart but found invalid state: token = ", token, " and username = ", username, " !!") ;
+        	//TODO: what should happen if the above occurs??
+        } else {
+        	this._authService.token = token;
+        	this._authService.username = username;
+        }
+        
+        //re-create websocket connection to the WTI Server
+        this._websocketService.startWebsocket();
+        
+        //update the "is contest running" value in the IContestService object using the value returned from
+        // an HTTP call within ContestService.getIsContestRunning() 
+         this._contestService.getIsContestRunning()
+              .subscribe((val: boolean) => {
+                  this._contestService.isContestRunning = val;
+                  this._contestService.contestClock.next();
+               });
+
 
 	    // transfer to the (former) "current page".
 	    let page = getCurrentPage();
-	    console.log ('Transferring to previous page: ' + page);
+	    if (DEBUG_MODE) {
+	    	console.log ('Transferring to previous page: ' + page);
+	    }
 	    
 	    //navigate to the most recently saved page
 	    // TODO:  consider whether using history.pushState()/popState() is a better solution for this...
@@ -64,7 +108,9 @@ export class AppComponent implements OnInit {
 
   // Load appconfig.json from assets directory, overwrite environment.ts with these values
   loadEnvironment(): void {
-	console.log("Loading environment from 'assets/appconfig.json'");
+	if (DEBUG_MODE) {
+		console.log("Loading environment from 'assets/appconfig.json'");
+	}
 	this._httpClient.get('assets/appconfig.json')
 	    .subscribe((data: any) => {
 	        this.configLoaded = true;
@@ -78,22 +124,42 @@ export class AppComponent implements OnInit {
 
 }//end class AppComponent
 
-  //save the current page in localStorage so a subsequent F5 (refresh) can return to that page
+  //save the current page in sessionStorage so a subsequent F5 (refresh) can return to that page
   export function saveCurrentPage(page:string) {
-      localStorage.setItem(Constants.CURRENT_PAGE_KEY, page) ;
+      sessionStorage.setItem(Constants.CURRENT_PAGE_KEY, page) ;
   }
   
   //return the most recently saved page
   export function getCurrentPage() {
-      return (localStorage.getItem(Constants.CURRENT_PAGE_KEY));
+      return (sessionStorage.getItem(Constants.CURRENT_PAGE_KEY));
   }
   
   //clear any record of a "current page"
   export function clearCurrentPage() {
-      localStorage.removeItem(Constants.CURRENT_PAGE_KEY);
+      sessionStorage.removeItem(Constants.CURRENT_PAGE_KEY);
   }
   
-  //clear all data in localStorage
-  export function clearLocalStorage() {
-      localStorage.clear();
+  //save the current token in sessionStorage so a subsequent F5 (refresh) can restore it
+  export function saveCurrentToken(token:string) {
+      sessionStorage.setItem(Constants.CONNECTION_TOKEN_KEY, token) ;
+  }
+  
+  //return the most recently saved token
+  export function getCurrentToken() {
+      return (sessionStorage.getItem(Constants.CONNECTION_TOKEN_KEY));
+  }
+  
+  //save the current username in sessionStorage so a subsequent F5 (refresh) can restore it
+  export function saveCurrentUserName(username:string) {
+      sessionStorage.setItem(Constants.CONNECTION_USERNAME_KEY, username) ;
+  }
+  
+  //return the most recently saved username
+  export function getCurrentUserName() {
+      return (sessionStorage.getItem(Constants.CONNECTION_USERNAME_KEY));
+  }
+  
+  //clear all data in sessionStorage
+  export function clearSessionStorage() {
+      sessionStorage.clear();
   }

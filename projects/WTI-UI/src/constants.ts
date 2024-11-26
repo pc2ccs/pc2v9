@@ -1,7 +1,13 @@
 //App-wide constants for the PC2 WTI-UI project
 
 /**
- * The key under which the currently-active WTI page is stored in localStorage.
+ * Global flag indicating whether to display debug messages on the browser console.
+ * Set to null to disable debugging output; any non-null value causes debugging output.
+ */
+export const DEBUG_MODE = 'true'
+ 
+/**
+ * The key under which the currently-active WTI page is stored in sessionStorage.
  */
 export const CURRENT_PAGE_KEY = 'curPageKey';
 
@@ -26,11 +32,11 @@ export const CLARIFICATIONS_PAGE_KEY = 'clarifications';
 export const SCOREBOARD_PAGE_KEY = 'scoreboard';
 
 /**
- * The key under which the "connection token" for websocket messages is stored in localStorage.
+ * The key under which the "connection token" for websocket messages is stored in sessionStorage.
  */
 export const CONNECTION_TOKEN_KEY = 'token';
 
 /**
- * The key under which the user name for the current websocket connection is stored in localStorage.
+ * The key under which the user name for the current websocket connection is stored in sessionStorage.
  */
 export const CONNECTION_USERNAME_KEY = 'username';
