@@ -30,8 +30,8 @@ export class AuthService {
     this._token = tokenValue;
     this._userName = username;
     //save values in sessionStorage to allow for recovery from F5
-    saveCurrentToken(token);
-    saveCurrentUserName(userName);
+    saveCurrentToken(tokenValue);
+    saveCurrentUserName(username);
     //switch to the main user page
     this._router.navigateByUrl(this.redirectUrl || this.defaultRoute);
   }
