@@ -6,6 +6,7 @@ import { TeamsLoginResponse } from '../models/teams-login-response';
 import { Submission } from '../models/submission';
 import { Run } from '../models/run';
 import { NewClarification } from '../models/new-clarification';
+import { DEBUG_MODE } from 'src/constants';
 
 @Injectable()
 export class TeamsMockService extends ITeamsService {
@@ -21,7 +22,9 @@ export class TeamsMockService extends ITeamsService {
   }
 
   submitRun(submission: Submission): Observable<any> {
-    console.log(submission);
+    if (DEBUG_MODE) {
+    	console.log(submission);
+    }
     return of({});
   }
 
@@ -95,7 +98,9 @@ export class TeamsMockService extends ITeamsService {
   }
 
   postClarification(clarification: NewClarification): Observable<any> {
-    console.log(clarification);
+    if (DEBUG_MODE) {
+    	console.log(clarification);
+    }
     return of({});
   }
 }

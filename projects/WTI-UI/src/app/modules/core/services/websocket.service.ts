@@ -6,8 +6,11 @@ import { AuthService } from '../auth/auth.service';
 import { WebsocketMessage } from '../models/websocket-message';
 import { IContestService } from '../abstract-services/i-contest.service';
 import { ITeamsService } from '../abstract-services/i-teams.service';
+import { DEBUG_MODE } from 'src/constants';
 
-@Injectable()
+@Injectable({
+	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
+})
 export class WebsocketService extends IWebsocketService {
   socket: WebSocket;
 
@@ -15,18 +18,26 @@ export class WebsocketService extends IWebsocketService {
     // Manually get UiHelperService from angular DI to pass to abstract class
     // This avoids having two references to UiHelperService
     super(_injector.get(UiHelperService), _injector.get(IContestService), _injector.get(ITeamsService), _injector.get(AuthService));
-    console.log('firing constructor in WebsocketService');
+    if (DEBUG_MODE) {
+    	console.log('Executing WebsocketService constructor');
+    }
   }
 
   startWebsocket(): void {
-    console.log('Constructing websocket...');
+    if (DEBUG_MODE) {
+    	console.log('Constructing websocket...');
+    }
     this.socket = new WebSocket(`${environment.websocketUrl}/${this._authService.token}`);
     this.socket.addEventListener('message', this.handleIncomingMessage);
-    console.log('...websocket URL =' + this.socket.url);
+    if (DEBUG_MODE) {
+    	console.log('...websocket URL =' + this.socket.url);
+    }
   }
 
   stopWebsocket(): void {
-    console.log('Closing websocket');
+    if (DEBUG_MODE) {
+    	console.log('Closing websocket');
+    }
     if (this.socket) {
       this.socket.close();
       this.socket = undefined;

@@ -6,8 +6,11 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { ContestProblem } from '../models/contest-problem';
 import { Clarification } from '../models/clarification';
+import { DEBUG_MODE } from 'src/constants';
 
-@Injectable()
+@Injectable({
+	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
+})
 export class ContestService extends IContestService {
 	
   standingsAreCurrent: boolean ;
@@ -39,13 +42,19 @@ export class ContestService extends IContestService {
   }
   
   getStandings(): Observable<String> {
-	console.log("ContestService.getStandings():")
+	if (DEBUG_MODE) {
+		console.log("ContestService.getStandings():")
+	}
 	if (!this.standingsAreCurrent) {
-		console.log ("Standings are out of date; fetching new standings");
+		if (DEBUG_MODE) {
+			console.log ("Standings are out of date; fetching new standings");
+		}
 		this.cachedStandings = this._httpClient.get<String>(`${environment.baseUrl}/contest/scoreboard`);
 		this.standingsAreCurrent = true ;
 	} else {
-		 console.log("Returning cached standings");
+		 if (DEBUG_MODE) {
+			 console.log("Returning cached standings");
+		 }
 	}
 	return this.cachedStandings ;
   }

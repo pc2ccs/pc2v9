@@ -7,6 +7,7 @@ import { ITeamsService } from 'src/app/modules/core/abstract-services/i-teams.se
 import { Subject } from 'rxjs';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UiHelperService } from '../../../core/services/ui-helper.service';
+import { DEBUG_MODE } from 'src/constants';
 
 //See the comments in method getOSName() regarding these services
 //import * as os  from 'os';
@@ -115,7 +116,9 @@ export class NewRunComponent implements OnInit, OnDestroy {
     
     model.osName = this.getOSName();
 
-    console.log('getOSName() returned : ' + model.osName);
+    if (DEBUG_MODE) {
+    	console.log('getOSName() returned : ' + model.osName);
+    }
 
 	//make sure no file names contain blanks (the PC2 server chokes on such filenames)
 	if (this.filenameContainsBlanks(this.mainFile, this.additionalFiles, this.testFiles)){
@@ -200,7 +203,9 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	//returns a string intended to identify the platform on which the browser is running
 	private getOSName() : string {
 		
-		console.log(navigator.userAgent);
+		if (DEBUG_MODE) {
+			console.log(navigator.userAgent);
+		}
 		return navigator.userAgent.toString();
 		
 // The following were all attempts to get the Angular Typescript/Javascript code to invoke the underlying OS to obtain
