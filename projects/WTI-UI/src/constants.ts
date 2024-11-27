@@ -3,8 +3,9 @@
 /**
  * Global flag indicating whether to display debug messages on the browser console.
  * Set to null to disable debugging output; any non-null value causes debugging output.
+ * NOTE: this flag should probably be set to null when creating a production release.
  */
-export const DEBUG_MODE = 'true'
+export let DEBUG_MODE = true ;
  
 /**
  * The key under which the currently-active WTI page is stored in sessionStorage.
