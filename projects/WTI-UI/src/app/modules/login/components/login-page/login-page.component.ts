@@ -9,6 +9,7 @@ import { IWebsocketService } from 'src/app/modules/core/abstract-services/i-webs
 import { Router } from '@angular/router';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
+import { DEBUG_MODE } from 'src/constants';
 
 @Component({
   templateUrl: './login-page.component.html',
@@ -52,6 +53,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         this._websocketService.startWebsocket();
         this._contestService.getIsContestRunning()
           .subscribe((val: boolean) => {
+			if (DEBUG_MODE) {
+				console.log("Login-page-component.onSubmit(): ");
+				console.log (" Subscription callback from ContestService.getIsContestRunning() returned: ", val);
+				console.log (" ContestService object is:")
+				console.log (this._contestService);
+			}
             this._contestService.isContestRunning = val;
             this._contestService.contestClock.next();
           });
