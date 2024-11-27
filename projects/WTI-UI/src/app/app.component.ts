@@ -58,6 +58,20 @@ export class AppComponent implements OnInit {
         //restore former environment
         this.loadEnvironment();
 
+		//The following was initially done by the login-page component's onSubmit() method during login;
+		// this F5 "restore state" code needs to accomplish the equivalent:
+		//this._authService.login(loginCreds)
+		//  .pipe(takeUntil(this._unsubscribe))
+		//  .subscribe((result: TeamsLoginResponse) => {
+        //    this._authService.completeLogin(result.teamId, result.teamName);  //save 'teamId' returned from HTTP login  "token"
+        //    this._websocketService.startWebsocket();							//create a websocket connection to the WTI Server
+        //    this._contestService.getIsContestRunning()				//get contest isRunning state and save in ContestService
+        //      .subscribe((val: boolean) => {
+        //        this._contestService.isContestRunning = val;
+        //        this._contestService.contestClock.next();
+        //      });
+        //  }
+
         //restore the connection token and username into the AuthService from browser sessionStorage
         let token = getCurrentToken();
         let username = getCurrentUserName();
@@ -66,11 +80,14 @@ export class AppComponent implements OnInit {
         		console.log("Restoring token '" + token + "' and username '" + username + "' into AuthService" );
         	}
         }
+
         //check whether we found non-null token and username from sessionStorage
         if (! (!!token && !!username) ) {
         	console.warn ("Attempting to reload after F5 restart but found invalid state: token = ", token, " and username = ", username, " !!") ;
         	//TODO: what should happen if the above occurs??
         } else {
+			//put the token and username back into AuthService (accomplishing what was originally done
+			// by AuthService.completeLogin(teamId, teamName); teamId is the "token")
         	this._authService.token = token;
         	this._authService.username = username;
         }
@@ -82,10 +99,15 @@ export class AppComponent implements OnInit {
         // an HTTP call within ContestService.getIsContestRunning() 
          this._contestService.getIsContestRunning()
               .subscribe((val: boolean) => {
-                  this._contestService.isContestRunning = val;
-                  this._contestService.contestClock.next();
-               });
-
+					if (DEBUG_MODE) {
+						console.log("AppComponent F5 'restore-state' code: ");
+						console.log (" Subscription callback from ContestService.getIsContestRunning() returned: ", val);
+						console.log (" ContestService object is:")
+						console.log (this._contestService);
+					}
+					this._contestService.isContestRunning = val;
+					this._contestService.contestClock.next();
+				});
 
 	    // transfer to the (former) "current page".
 	    let page = getCurrentPage();
