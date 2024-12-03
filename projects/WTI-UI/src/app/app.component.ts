@@ -22,6 +22,9 @@ export class AppComponent implements OnInit {
               private _authService: AuthService, 
               private _contestService: ContestService,
               private _websocketService: WebsocketService) { 
+	  if (DEBUG_MODE) {
+		  console.log("Executing AppComponent constructor...");
+	  }
   	//this.router.events.subscribe(console.log); //shows router tracing on console
   }
 
@@ -52,10 +55,13 @@ export class AppComponent implements OnInit {
 	} else {
 	    //there is a current page stored; we must be reloading from (e.g.) an F5 refresh
 	    if (DEBUG_MODE) {
-	    	console.log ('Restarting Single-Page-Application after refresh navigation');
+	    	console.log ('Restarting Single-Page-Application after refresh navigation...');
 	    }
 	    
         //restore former environment
+        if (DEBUG_MODE) {
+        	console.log ("...Loading environment...") ;
+        }
         this.loadEnvironment();
 
 		//The following was initially done by the login-page component's onSubmit() method during login;
@@ -77,7 +83,7 @@ export class AppComponent implements OnInit {
         let username = getCurrentUserName();
         if (DEBUG_MODE) {
         	if (!!token && !!username) {
-        		console.log("Restoring token '" + token + "' and username '" + username + "' into AuthService" );
+        		console.log("...restoring token '" + token + "' and username '" + username + "' into AuthService..." );
         	}
         }
 
@@ -93,6 +99,9 @@ export class AppComponent implements OnInit {
         }
         
         //re-create websocket connection to the WTI Server
+        if (DEBUG_MODE) {
+			console.log ("...calling WebsocketService.startWebsocket()...");
+		}
         this._websocketService.startWebsocket();
         
         //update the "is contest running" value in the IContestService object using the value returned from
@@ -112,14 +121,16 @@ export class AppComponent implements OnInit {
 	    // transfer to the (former) "current page".
 	    let page = getCurrentPage();
 	    if (DEBUG_MODE) {
-	    	console.log ('Transferring to previous page: ' + page);
+	    	console.log ('...navigating to previous page: ' + page);
 	    }
 	    
 	    //navigate to the most recently saved page
 	    // TODO:  consider whether using history.pushState()/popState() is a better solution for this...
 	    this.router.navigate([page])
 	      .then(nav => {
-	        
+	         if (DEBUG_MODE) {
+	        	 console.log ("...navigation complete.");
+	         }
 	      }, err => {
 	         console.log("Call to router.navigate([" + page + "]) failed (returned '" + err + "')");
 	      });
@@ -131,7 +142,7 @@ export class AppComponent implements OnInit {
   // Load appconfig.json from assets directory, overwrite environment.ts with these values
   loadEnvironment(): void {
 	if (DEBUG_MODE) {
-		console.log("Loading environment from 'assets/appconfig.json'");
+		console.log("...loading environment from 'assets/appconfig.json'...");
 	}
 	this._httpClient.get('assets/appconfig.json')
 	    .subscribe((data: any) => {

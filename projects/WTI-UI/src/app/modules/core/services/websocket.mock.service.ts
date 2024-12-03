@@ -8,12 +8,13 @@ import { DEBUG_MODE } from 'src/constants';
 
 @Injectable()
 export class WebsocketMockService extends IWebsocketService {
+	
   constructor(private _injector: Injector) {
     // Manually get UiHelperService from angular DI to pass to abstract class
     // This avoids having two references to UiHelperService
     super(_injector.get(UiHelperService), _injector.get(IContestService), _injector.get(ITeamsService), _injector.get(AuthService));
     if (DEBUG_MODE) {
-    	console.log('Firing constructor in websocket MOCK');
+    	console.log('Executing WebsocketMockService constructor');
     }
   }
 
