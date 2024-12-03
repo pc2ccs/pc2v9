@@ -10,6 +10,14 @@ import { DEBUG_MODE } from 'src/constants';
 
 @Injectable()
 export class TeamsMockService extends ITeamsService {
+	
+	constructor() {
+		if (DEBUG_MODE) {
+			console.log ("TeamsMockService constructor; preparing to invoke ITeamsService superclass constructor via 'super()'") ;
+		}
+		super() ;
+	}
+	
   login(loginCredentials: LoginCredentials): Observable<TeamsLoginResponse> {
     return of<TeamsLoginResponse>({
       teamName: loginCredentials.teamName,

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ITeamsService } from '../abstract-services/i-teams.service';
 import { TeamsLoginResponse } from '../models/teams-login-response';
 import { saveCurrentToken, saveCurrentUserName, clearSessionStorage } from 'src/app/app.component';
+import { DEBUG_MODE } from 'src/constants';
 
 @Injectable({
 	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == root injector)
@@ -24,9 +25,17 @@ export class AuthService {
   set username(value) { this._userName = value; }
   
   constructor(private _teamsService: ITeamsService,
-              private _router: Router) { }
+              private _router: Router) { 
+	  if (DEBUG_MODE) {
+		  console.log ("Executing AuthService constructor...");
+	  }
+  }
 
   completeLogin(tokenValue: string, username: string) {
+	if (DEBUG_MODE) {
+		console.log ("Executing AuthService.completeLogin()...");
+	}
+	
     this._token = tokenValue;
     this._userName = username;
     //save values in sessionStorage to allow for recovery from F5
@@ -37,14 +46,24 @@ export class AuthService {
   }
 
   login(loginCredentials: LoginCredentials): Observable<TeamsLoginResponse> {
+	if (DEBUG_MODE) {
+		console.log ("Executing AuthService.login() -- invoking TeamsService.login()") ;
+	}
     return this._teamsService.login(loginCredentials);
   }
 
   logout(): Observable<any> {
-    return this._teamsService.logout();
+	if (DEBUG_MODE) {
+		console.log ("Executing AuthService.logout() -- invoking TeamsService.logout()") ;
+	}
+	return this._teamsService.logout();
   }
 
   completeLogout(): void {
+	if (DEBUG_MODE) {
+		console.log ("Executing AuthService.completeLogout()...");
+	}
+		
     this._token = undefined;
     this._userName = undefined;
     clearSessionStorage();

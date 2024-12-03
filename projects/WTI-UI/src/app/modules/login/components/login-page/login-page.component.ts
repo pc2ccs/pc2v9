@@ -24,43 +24,84 @@ export class LoginPageComponent implements OnInit, OnDestroy {
               private _authService: AuthService,
               private _websocketService: IWebsocketService,
               private _router: Router,
-              private _contestService: IContestService) { }
+              private _contestService: IContestService) { 
+	  if (DEBUG_MODE) {
+		  console.log ("Executing LoginPageComponent constructor; instantiation has created a new '_unsubscribe' Subject") ;
+		  console.log ("  and set invalidCreds=false and loginStarted=false.") ;
+	  }
+  }
 
   ngOnInit(): void {
-    if (this._authService.token) { this._router.navigateByUrl(this._authService.defaultRoute); }
-    this.buildForm();
+	  if (DEBUG_MODE) {
+		  console.log ("Executing LoginPageComponent.ngOnInit()") ;
+	  }
+    if (this._authService.token) { 
+    	if (DEBUG_MODE) {
+    		console.log ("  AuthService.token returns positive Truthy value; invoking Router to navigate to ") ;
+    		console.log ("    AuthService.defaultRoute '", this._authService.defaultRoute, "'") ;
+    		console.log ("    and invoking buildForm() " ) ;
+    	}
+    	this._router.navigateByUrl(this._authService.defaultRoute); }
+		this.buildForm();
   }
 
   ngOnDestroy(): void {
-    this._unsubscribe.next();
-    this._unsubscribe.complete();
+		if (DEBUG_MODE) {
+			console.log ("Executing LoginPageComponent.ngOnDestroy(); invoking _unsubscribe.next() and then _unsubscribe.complete()") ;
+		}
+		this._unsubscribe.next();
+		this._unsubscribe.complete();
   }
 
   onSubmit(): void {
+	  if (DEBUG_MODE) {
+		  console.log ("Executing LoginPageComponent.onSubmit()...") ;
+	  }
     this.loginStarted = true;
     const loginCreds = new LoginCredentials();
     loginCreds.teamName = this.formGroup.get('username').value;
     loginCreds.password = this.formGroup.get('password').value;
+    if (DEBUG_MODE) {
+    	console.log ("Invoking AuthService.login()") ;
+    }
     this._authService.login(loginCreds)
       .pipe(takeUntil(this._unsubscribe))
       .subscribe((result: TeamsLoginResponse) => {
+			if (DEBUG_MODE) {
+				console.log ("Received callback from subscribing to AuthService.login();" ) ;
+				console.log ("  Invoking AuthService.completeLogin()") ;
+			}
         this._authService.completeLogin(result.teamId, result.teamName);
+			if (DEBUG_MODE) {
+				console.log ("  Invoking WebsocketService.startWebsocket()") ;
+			}
         this._websocketService.startWebsocket();
+        	if (DEBUG_MODE) {
+        		console.log ("  invoking ContestService.getisContestRunning() and subscribing to the result") ;
+        	}
         this._contestService.getIsContestRunning()
           .subscribe((val: boolean) => {
 			if (DEBUG_MODE) {
-				console.log("Login-page-component.onSubmit(): ");
 				console.log (" Subscription callback from ContestService.getIsContestRunning() returned: ", val);
 				console.log (" ContestService object is:")
 				console.log (this._contestService);
 			}
+			if (DEBUG_MODE) {
+				console.log ("Setting ContestService.isContestRunning to '", val, "'") ;
+			}
             this._contestService.isContestRunning = val;
+            if (DEBUG_MODE) {
+            	console.log ("Invoking ContestService.contestClock.next()") ;
+            }
             this._contestService.contestClock.next();
           });
       }, (error: any) => {
-        this.invalidCreds = true;
-        this.loginStarted = false;
-      });
+    	  if (DEBUG_MODE) {
+    		  console.log ("AuthService.login() subscription returned error.") ;
+    	  }
+			this.invalidCreds = true;
+			this.loginStarted = false;
+		});
   }
 
   private buildForm(): void {
