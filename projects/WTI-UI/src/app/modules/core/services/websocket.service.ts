@@ -1,6 +1,6 @@
 import { Injectable, Injector } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { UiHelperService } from './ui-helper.service';
+import { UiHelperService } from '../services/ui-helper.service';
 import { IWebsocketService } from '../abstract-services/i-websocket.service';
 import { AuthService } from '../auth/auth.service';
 import { WebsocketMessage } from '../models/websocket-message';
@@ -14,10 +14,15 @@ import { DEBUG_MODE } from 'src/constants';
 export class WebsocketService extends IWebsocketService {
   socket: WebSocket;
 
-  constructor(private _injector: Injector, _authService: AuthService) {
+  constructor(_uiHelperService: UiHelperService,
+              _iContestService: IContestService,
+              _iTeamsService: ITeamsService,
+              _authService: AuthService) {
     // Manually get UiHelperService from angular DI to pass to abstract class
     // This avoids having two references to UiHelperService
-    super(_injector.get(UiHelperService), _injector.get(IContestService), _injector.get(ITeamsService), _injector.get(AuthService));
+    //super(_injector.get(UiHelperService), _iContestService, _iTeamsService, _authService);
+    //The above was replaced with the following at the same time all services were specified as "providedIn: 'root'"
+    super(_uiHelperService, _iContestService, _iTeamsService, _authService);
     if (DEBUG_MODE) {
     	console.log('Executing WebsocketService constructor');
     }
