@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { UiHelperService } from '../services/ui-helper.service';
 import { WebsocketMessage } from '../models/websocket-message';
 import { IContestService } from './i-contest.service';
