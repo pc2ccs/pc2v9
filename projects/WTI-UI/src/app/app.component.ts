@@ -20,7 +20,7 @@ export class AppComponent implements OnInit {
   constructor(private _httpClient: HttpClient, 
 		      public router: Router, 
               private _authService: AuthService, 
-              private _contestService: ContestService,
+              private _contestService: ContestService,		//<= needs to invoke ContestServiceFactory (but apparently it doesn't...)
               private _websocketService: WebsocketService) { 
 	  if (DEBUG_MODE) {
 		  console.log("Executing AppComponent constructor...");
@@ -111,7 +111,10 @@ export class AppComponent implements OnInit {
 					if (DEBUG_MODE) {
 						console.log("AppComponent F5 'restore-state' code: ");
 						console.log (" Subscription callback from ContestService.getIsContestRunning() returned: ", val);
-						console.log (" ContestService object is:")
+						console.log (" ContestService object has uniqueId", this._contestService.uniqueId);
+						//JSON.stringify() can't handle recursive objects like Angular Subjects
+						//console.log (JSON.stringify(this._contestService,null,2)); //obj, replacerFunction, indent
+						console.log ("   and contents:");
 						console.log (this._contestService);
 					}
 					this._contestService.isContestRunning = val;

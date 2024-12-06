@@ -12,15 +12,17 @@ import { DEBUG_MODE } from 'src/constants';
 	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
 })
 export class ContestService extends IContestService {
-	
+
   standingsAreCurrent: boolean ;
   cachedStandings: Observable<String> ;
 
   constructor(private _httpClient: HttpClient) {
 	super();
+
 	if (DEBUG_MODE) {
-		console.log ("Executing ContestService constructor") ;
+		console.log ("Executing ContestService constructor; instance ID = ", this.uniqueId) ;
 	}
+	
 	this.standingsAreCurrent = false;
   }
 
