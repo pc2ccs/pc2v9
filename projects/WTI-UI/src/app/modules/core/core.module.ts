@@ -24,14 +24,14 @@ export function TeamsServiceFactory(http: HttpClient) {
 
   if (environment.useMock) { 
     if (DEBUG_MODE) {
-      console.log("...returning new TeamsMockService")
+      console.log("...about to construct then return new TeamsMockService")
     }
     return new TeamsMockService(); 
   } 
 
   //not using Mock
   if (DEBUG_MODE) {
-    console.log("...returning new TeamsService")
+    console.log("...about to construct then return new TeamsService")
   }
   return new TeamsService(http);
 }
@@ -43,14 +43,14 @@ export function ContestServiceFactory(http: HttpClient) {
 
   if (environment.useMock) { 
     if (DEBUG_MODE) {
-      console.log("...returning new ContestMockService")
+      console.log("...about to construct then return new ContestMockService")
     }
     return new ContestMockService(); 
   }
 
   //not using Mock
   if (DEBUG_MODE) {
-    console.log("...returning new ContestService")
+    console.log("...about to construct then return new ContestService")
   }
   return new ContestService(http);
 }
@@ -64,14 +64,14 @@ export function WebsocketServiceFactory(injector: Injector,
 
   if (environment.useMock) { 
     if (DEBUG_MODE) {
-      console.log("...returning new WebsocketMockService")
+      console.log("...about to construct then return new WebsocketMockService")
     }	
     return new WebsocketMockService(injector); 
   }
 
   //not using Mock
   if (DEBUG_MODE) {
-    console.log("...returning new WebsocketService")
+    console.log("...about to construct then return new WebsocketService")
   }
 
   //original code:
