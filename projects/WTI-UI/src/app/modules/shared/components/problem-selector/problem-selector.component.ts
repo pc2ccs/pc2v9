@@ -27,7 +27,7 @@ export class ProblemSelectorComponent implements OnInit, OnDestroy, ControlValue
 
   constructor(private _contestService: IContestService) { 
 	if (DEBUG_MODE) {
-		console.log ("Executing ProblemSelectorComponent constructor.") ;
+		console.log ("Executing ProblemSelectorComponent constructor; IContestService id = ", this._contestService.uniqueId) ;
 	}
   }
 

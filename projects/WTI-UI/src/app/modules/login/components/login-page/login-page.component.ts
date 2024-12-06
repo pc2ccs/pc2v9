@@ -83,7 +83,10 @@ export class LoginPageComponent implements OnInit, OnDestroy {
           .subscribe((val: boolean) => {
 			if (DEBUG_MODE) {
 				console.log (" Subscription callback from ContestService.getIsContestRunning() returned: ", val);
-				console.log (" ContestService object is:")
+				console.log (" ContestService object has uniqueId", this._contestService.uniqueId);
+				//JSON.stringify() can't handle recursive objects like Angular Subjects
+				//console.log (JSON.stringify(this._contestService,null,2)); //obj, replacerFunction, indent
+				console.log ("   and contents:");
 				console.log (this._contestService);
 			}
 			if (DEBUG_MODE) {
