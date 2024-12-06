@@ -4,7 +4,9 @@ import { NewClarificationAlertComponent } from '../../clarifications/components/
 import { NewRunAlertComponent } from '../../runs/components/new-run-alert/new-run-alert.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-@Injectable()
+@Injectable({
+	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
+})
 export class UiHelperService {
   enableClarificationNotifications = true;
   enableRunsNotifications = true;

@@ -1,3 +1,4 @@
+import { Injectable } from '@angular/core';
 import { LoginCredentials } from '../models/login-credentials';
 import { Observable, Subject } from 'rxjs';
 import { TeamsLoginResponse } from '../models/teams-login-response';
@@ -6,6 +7,9 @@ import { Run } from '../models/run';
 import { NewClarification } from '../models/new-clarification';
 import { DEBUG_MODE } from 'src/constants';
 
+@Injectable({
+	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
+})
 export abstract class ITeamsService {
   runsUpdated = new Subject<void>();
   
