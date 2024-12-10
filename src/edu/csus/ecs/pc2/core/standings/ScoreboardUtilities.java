@@ -405,22 +405,4 @@ public class ScoreboardUtilities {
         }
         return(ret);
     }
-
-    /**
-     * Return Group for input clientId.
-     *
-     * @param contest
-     * @param submitter
-     * @return null if no group, else the Group
-     */
-    public static Group getGroup(IInternalContest contest, ClientId submitter) {
-
-        ElementId groupId = contest.getAccount(submitter).getGroupId();
-        if (groupId == null) {
-            return null;
-        }
-
-        return(contest.getGroup(groupId));
-    }
-
 }
