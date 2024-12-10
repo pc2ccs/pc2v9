@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.IOException;
@@ -492,7 +492,7 @@ public class ContestXML {
         clarificationMemento.putString("problem", problemName);
 
         clarificationMemento.putString("question", clarification.getQuestion());
-        if (clarification.getAnswer() != null && clarification.isAnswered()) {
+        if (clarification.getAnswer() != null && clarification.isAnsweredorAnnounced()) {
             clarificationMemento.putString("answer", clarification.getAnswer());
             clarificationMemento.putBoolean("sendToAll", clarification.isSendToAll());
         }

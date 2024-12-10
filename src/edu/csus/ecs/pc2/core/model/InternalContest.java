@@ -2086,16 +2086,23 @@ public class InternalContest implements IInternalContest {
     public ConnectionHandlerID[] getConnectionHandlerIDs() {
         return localConnectionHandlerList.getList();
     }
-
+    
+    /**
+     * Gets clarifications appropriate for the clientId.
+     * This means if the client is unable to see some of the clarifications this method will not return it. 
+     * For example certain clarifications might be only directed towards certain groups/teams. 
+     */
     @Override
     public Clarification[] getClarifications(ClientId clientId) {
 
         Vector<Clarification> clientClarifications = new Vector<Clarification>();
         Enumeration<Clarification> enumeration = clarificationList.getClarList();
+        
+        Account account = getAccount(clientId);
         while (enumeration.hasMoreElements()) {
             Clarification clarification = enumeration.nextElement();
 
-            if (clarification.isSendToAll() || clientId.equals(clarification.getSubmitter())) {
+            if (clarification.shouldAccountReceiveThisClarification(account)) {
                 clientClarifications.add(clarification);
             }
         }
@@ -2386,7 +2393,17 @@ public class InternalContest implements IInternalContest {
     public Group[] getGroups() {
         return groupDisplayList.getList();
     }
-
+    
+    @Override
+    public boolean doGroupsExist() {
+        return groupDisplayList.getList().length != 0;
+    }
+    
+    @Override
+    public int getNumberofGroups() {
+        return groupDisplayList.getList().length;
+    }
+    
     @Override
     public void addGroupListener(IGroupListener groupListener) {
         groupListenerList.addElement(groupListener);

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
 
 import java.util.ArrayList;
@@ -258,6 +258,17 @@ public class Contest implements IContest, UIPlugin {
     public IClarification[] getClarifications() {
         
         Clarification[] clarifications = contest.getClarifications();
+        ClarificationImplementation[] clarificationImplementations = new ClarificationImplementation[clarifications.length];
+
+        for (int i = 0; i < clarifications.length; i++) {
+            clarificationImplementations[i] = new ClarificationImplementation(clarifications[i], contest, controller);
+        }
+        return clarificationImplementations;
+    }
+    
+public IClarification[] getClarificationsWithClientId() {
+        
+        Clarification[] clarifications = contest.getClarifications(contest.getClientId());
         ClarificationImplementation[] clarificationImplementations = new ClarificationImplementation[clarifications.length];
 
         for (int i = 0; i < clarifications.length; i++) {

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -176,7 +176,7 @@ public class AnswerClarificationPane extends JPanePlugin {
 
     private ClarificationAnswer getClarificationFromFields() {
         ClarificationAnswer clarificationAnswer = new ClarificationAnswer(getAnswerTextArea().getText(), getContest().getClientId(), 
-                getSendToAllCheckBox().isSelected(), getContest().getContestTime());
+                getSendToAllCheckBox().isSelected(),getContest().getContestTime());
         return clarificationAnswer;
     }
 

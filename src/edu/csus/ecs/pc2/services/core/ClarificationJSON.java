@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +32,7 @@ public class ClarificationJSON extends JSONUtilities {
         ClarificationAnswer clarificationAnswer = null;
         ClarificationAnswer[] answers = null;
         answers = clarification.getClarificationAnswers();
-        if (clarification.isAnswered()) {
+        if (clarification.isAnsweredorAnnounced()) {
             clarificationAnswer = answers[answers.length - 1];
         }
         

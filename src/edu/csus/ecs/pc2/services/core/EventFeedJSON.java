@@ -454,7 +454,7 @@ public class EventFeedJSON extends JSONUtilities {
             }
             appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getClarificationJSON(contest, clarification, null));
             stringBuilder.append(NL);
-            if (clarification.isAnswered()) {
+            if (clarification.isAnsweredorAnnounced()) {
                 ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
                 appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getClarificationJSON(contest, clarification, clarAnswers[clarAnswers.length - 1]));
                 stringBuilder.append(NL);

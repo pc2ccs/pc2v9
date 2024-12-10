@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.archive;
 
 import java.util.Arrays;
@@ -547,7 +547,7 @@ public final class PacketFormatter {
             node.add(child);
             child = new DefaultMutableTreeNode("   Problem: " + clarification.getProblemId());
             node.add(child);
-            child = new DefaultMutableTreeNode("  Answered: " + clarification.isAnswered());
+            child = new DefaultMutableTreeNode("  Answered: " + clarification.isAnsweredorAnnounced());
             node.add(child);
             child = new DefaultMutableTreeNode("   For All: " + clarification.isSendToAll());
             node.add(child);

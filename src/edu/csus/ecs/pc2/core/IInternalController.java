@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -225,7 +226,15 @@ public interface IInternalController {
      * @param packet
      */
     void sendToTeams(Packet packet);
-
+    
+    /**
+     * Send to groups and or individual teams specified by groups and teams respectively.
+     * @param packet
+     * @param groups contains elementId of groups packet should be sent.
+     * @param teams  contains clientId of groups packet should be sent.
+     */
+    void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams);
+    
     /**
      * Send to all spectator/API clients
      *
@@ -429,9 +438,21 @@ public interface IInternalController {
      *
      * @param problem
      * @param question
+     * @return ElementId of the newly created clarification
      */
-    void submitClarification(Problem problem, String question);
-
+    ElementId submitClarification(Problem problem, String question);
+    
+    /**
+     * Submit an announcement clarification. Possibly to certain groups teams only
+     * 
+     * @param problem
+     * @param answer
+     * @param ultimateDestinationGroup array of where the answer for the clarification should ultimately go.
+     * such as certain groups
+     * @param ultimateDestinationTeam same for teams
+     * @return 
+     */
+    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam);
     /**
      * Request clarification to answer.
      *
@@ -823,4 +844,6 @@ public interface IInternalController {
      * @param overrideRunId
      */
     void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId);
+
+    
 }

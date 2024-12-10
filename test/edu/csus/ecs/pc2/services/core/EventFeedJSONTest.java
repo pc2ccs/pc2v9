@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.core;
 
 import java.io.File;
@@ -455,7 +455,7 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         Clarification clarification = clarifications[4];
         ClarificationAnswer clarAnswer = null;
-        if (clarification.isAnswered()) {
+        if (clarification.isAnsweredorAnnounced()) {
             ClarificationAnswer[] clarificationAnswers = clarification.getClarificationAnswers();
             clarAnswer = clarificationAnswers[clarificationAnswers.length - 1];
         }

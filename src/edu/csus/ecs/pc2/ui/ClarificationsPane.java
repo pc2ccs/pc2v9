@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -514,7 +514,7 @@ public class ClarificationsPane extends JPanePlugin {
         boolean isTeam = getContest().getClientId().getClientType().equals(ClientType.Type.TEAM);
 
         if (isTeam) {
-            if (clar.isAnswered()) {
+            if (clar.isAnsweredorAnnounced()) {
                 if (clar.isSendToAll()) {
                     obj[idx++] = "Broadcast";
                 } else {
@@ -529,7 +529,7 @@ public class ClarificationsPane extends JPanePlugin {
 
         if (!isShowNewClarificationsOnly()) {
             if (!isTeam) {
-                if (clar.isAnswered()) {
+                if (clar.isAnsweredorAnnounced()) {
     
                     if (clar.getWhoJudgedItId() == null || isTeam) {
                         obj[idx++] = "";
@@ -667,7 +667,7 @@ public class ClarificationsPane extends JPanePlugin {
 
         public void clarificationAdded(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());
-            if (event.getClarification().isAnswered()) {
+            if (event.getClarification().isAnsweredorAnnounced()) {
                 if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                     showClarificationAnswer(event.getClarification());
                 }
@@ -687,7 +687,7 @@ public class ClarificationsPane extends JPanePlugin {
 
         public void clarificationChanged(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());
-            if (event.getClarification().isAnswered()) {
+            if (event.getClarification().isAnsweredorAnnounced()) {
                 if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                     showClarificationAnswer(event.getClarification());
                 }

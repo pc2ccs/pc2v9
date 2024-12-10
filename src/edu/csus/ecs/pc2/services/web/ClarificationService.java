@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.web;
 
 import javax.inject.Singleton;
@@ -74,7 +74,7 @@ public class ClarificationService implements Feature {
             } else {
                 // dump the request
                 childNode.add(jsonTool.convertToJSON(clarification, null));
-                if (clarification.isAnswered()) {
+                if (clarification.isAnsweredorAnnounced()) {
                     // dump the answers
                     ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
                     childNode.add(jsonTool.convertToJSON(clarification, clarAnswers[clarAnswers.length-1]));

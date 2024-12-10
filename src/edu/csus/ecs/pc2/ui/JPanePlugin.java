@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Component;
@@ -29,7 +29,9 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -378,5 +380,27 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     public static void showExceptionMessage(Component component, final String message, Exception ex) {
         FrameUtilities.showExceptionMessage(component, message, ex);
     }
-
+    
+    public String convertGroupsandTeamstoString(ElementId[] groupIds, ClientId[] teamIds) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (groupIds == null & teamIds == null) {
+            return "";
+        }
+        for (int i = 0; i < groupIds.length + teamIds.length; i++) {
+            if (i < groupIds.length) {
+                Group group = getContest().getGroup(groupIds[i]);
+                stringBuilder.append(group.getDisplayName());
+            }
+            else {
+                stringBuilder.append("team"+teamIds[i].getClientNumber());
+            }
+            
+            if (i < groupIds.length + teamIds.length - 1) {
+                stringBuilder.append(", ");
+            }
+        }
+        
+        return stringBuilder.toString();
+        
+    }
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
@@ -33,6 +33,33 @@ public class ClarificationAnswer implements Serializable{
     private String answer;
 
     private ElementId elementId;
+    
+    /**
+     * An clarification could be send to multiple groups, teams. Used when it is not sendToAll but some.
+     */
+    private ElementId[] destinationsGroup = new ElementId[0];
+    
+    private ClientId[] destinationsTeam = new ClientId[0];
+
+    public ClarificationAnswer(String answer, ClientId answerClient, boolean sendToAll, ElementId[] destinationsGroup, ClientId[] destinationsTeam, ContestTime contestTime) {
+        super();
+
+        if (answer == null) {
+            throw new IllegalArgumentException("answer can not be null");
+        }
+
+        if (contestTime == null) {
+            throw new IllegalArgumentException("contestTime can not be null");
+        }
+
+        setElementId(new ElementId("reply"));
+        this.answer = answer;
+        this.answerClient = answerClient;
+        this.sendToAll = sendToAll;
+        this.destinationsGroup = destinationsGroup;
+        this.destinationsTeam = destinationsTeam;
+        setDate(contestTime);
+    }
 
     public ClarificationAnswer(String answer, ClientId answerClient, boolean sendToAll, ContestTime contestTime) {
         super();
@@ -95,4 +122,28 @@ public class ClarificationAnswer implements Serializable{
     public void setElementId(ElementId elementId) {
         this.elementId = elementId;
     }
+    
+    public ElementId[] getAllDestinationsGroup() {
+        return destinationsGroup;
+    }
+    
+    public void setAllDestinationsTeam(ClientId[] allDestinationsTeam) {
+        this.destinationsTeam = allDestinationsTeam;
+    }
+    
+    public ClientId[] getAllDestinationsTeam() {
+        return destinationsTeam;
+    }
+    
+    public void setAllDestinationsGroup(ElementId[] allDestinationsGroup) {
+        this.destinationsGroup = allDestinationsGroup;
+    }
+    
+    public boolean isThereDestinationOtherThanSubmitter() {
+        if (this.destinationsGroup == null || this.destinationsGroup == null) {
+            return false;
+        }
+        return this.destinationsGroup.length + this.destinationsTeam.length != 0;
+    }
+    
 }

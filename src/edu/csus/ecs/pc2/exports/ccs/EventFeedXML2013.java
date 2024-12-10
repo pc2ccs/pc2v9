@@ -619,14 +619,14 @@ public class EventFeedXML2013 {
         }
         XMLUtilities.addChild(memento, "answer", answer);
         XMLUtilities.addChild(memento, "id", clarification.getNumber());
-        XMLUtilities.addChild(memento, "answered", titleCaseBoolean(clarification.isAnswered()));
+        XMLUtilities.addChild(memento, "answered", titleCaseBoolean(clarification.isAnsweredorAnnounced()));
         XMLUtilities.addChild(memento, "question", clarification.getQuestion());
 
 //        <status>fresh</status>
 //        <team>53</team>
 //        <time>1194.626055</time>
 
-        String status = getStatus(clarification.isAnswered());
+        String status = getStatus(clarification.isAnsweredorAnnounced());
         XMLUtilities.addChild(memento, "status", status);
         XMLUtilities.addChild(memento, "team", clarification.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(clarification.getElapsedMS()));
