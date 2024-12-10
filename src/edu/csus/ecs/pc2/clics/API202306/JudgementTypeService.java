@@ -12,7 +12,6 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
@@ -106,16 +105,6 @@ public class JudgementTypeService implements Feature {
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    
-    /**
-     * Retrieve access information about this endpoint for the supplied user's security context
-     * 
-     * @param sc User's security information
-     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
-     */
-    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        return(new CLICSEndpoint("judgement-types", JSONUtilities.getJsonProperties(CLICSJudgmentType.class)));
     }
 
     /**
