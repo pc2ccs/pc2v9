@@ -6,7 +6,6 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -16,7 +15,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * CLICS Contest Info.
- *
+ * 
  * @author John Buck
  *
  */
@@ -54,12 +53,12 @@ public class CLICSContestInfo {
 
     /**
      * Fill in properties for a contest.
-     *
+     * 
      * @param model The contest to use
      */
     public CLICSContestInfo(IInternalContest model) {
         ContestInformation ci = model.getContestInformation();
-
+        
         id = model.getContestIdentifier();
         name = ci.getContestShortName();
         formal_name = ci.getContestTitle();

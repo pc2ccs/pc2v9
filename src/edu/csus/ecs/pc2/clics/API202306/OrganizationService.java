@@ -13,7 +13,6 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
@@ -30,7 +29,7 @@ import edu.csus.ecs.pc2.imports.ccs.ICPCTSVLoader;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * WebService for handling teams
+ * WebService for handling organizations
  *
  * @author John Buck
  *
@@ -115,16 +114,6 @@ public class OrganizationService implements Feature {
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    
-    /**
-     * Retrieve access information about this endpoint for the supplied user's security context
-     * 
-     * @param sc User's security information
-     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
-     */
-    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        return(new CLICSEndpoint("organizations", JSONUtilities.getJsonProperties(CLICSOrganization.class)));
     }
 
     /**

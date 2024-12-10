@@ -4,6 +4,7 @@ package edu.csus.ecs.pc2.clics.API202306;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -85,10 +87,14 @@ public class CLICSTeam {
         if (JSONTool.notEmpty(account.getInstitutionCode()) && !account.getInstitutionCode().equals("undefined")) {
             organization_id = JSONTool.getOrganizationId(account);
         }
-        if (account.getGroupId() != null) {
-            group_ids = new String[1];
-            // FIXME eventually accounts should have more then 1 groupId, make sure add them
-            group_ids[0] = JSONTool.getGroupId(model.getGroup(account.getGroupId()));
+        if (account.getGroupIds() != null) {
+            HashSet<ElementId> groups = account.getGroupIds();
+            ArrayList<String> groupList = new ArrayList<String>();
+
+            for(ElementId ele : groups) {
+                groupList.add(JSONTool.getGroupId(model.getGroup(ele)));
+            }
+            group_ids = (String [])groupList.toArray();
         }
         hidden = !account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD);
     }
@@ -197,16 +203,21 @@ public class CLICSTeam {
             }
             // now fill in any other fields we can
             if(team.group_ids != null && team.group_ids.length > 0) {
-                Group group = jsontool.getGroupFromNumber(team.group_ids[0]);
-                if(group == null) {
-                    log.log(Log.SEVERE, "No group has been defined with GroupId=" + team.group_ids[0]);
-                    error = true;
-                    break;
+                Group group;
+                boolean bFirst = true;
+                // team has a list of group names
+                for(String groupName : team.group_ids) {
+                    group = jsontool.getGroupFromNumber(groupName);
+                    if(group == null) {
+                        log.log(Log.SEVERE, "No group has been defined with GroupId=" + groupName);
+                        error = true;
+                        break;
+                    }
+                    account.addGroupId(group.getElementId(), bFirst);
+                    bFirst = false;
                 }
-                account.setGroupId(group.getElementId());
-                //TODO fix this when PC2 supports multiple groups per account
-                if(team.group_ids.length > 1) {
-                    log.log(Log.INFO, account.getDisplayName() + " has " + team.group_ids.length + " groups assigned - only using first one");
+                if(error) {
+                    break;
                 }
             }
             if(team.hidden) {

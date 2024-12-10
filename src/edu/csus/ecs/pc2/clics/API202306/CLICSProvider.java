@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 /**
  * CLICS Provider
  * Contains information about the system providing the API feed (PC2, in this case)
- *
+ * 
  * @author John Buck
  *
  */
@@ -28,12 +28,12 @@ public class CLICSProvider {
 
     /**
      * Fill in API Provider information properties (for the version endpoint)
-     *
+     * 
      * @param versionInfo
      */
     public CLICSProvider(VersionInfo versionInfo) {
         name = "pc2";
-        version = versionInfo.getPC2Version() + " build " + versionInfo.getBuildNumber();
+        version = versionInfo.getPC2Version() + " build " + versionInfo.getBuildNumber(); 
     }
 
     public String toJSON() {

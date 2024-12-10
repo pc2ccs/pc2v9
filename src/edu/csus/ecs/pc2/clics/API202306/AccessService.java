@@ -19,7 +19,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * WebService to handle "state" REST endpoint as described by the CLICS wiki.
- *
+ * 
  * @author John Buck
  *
  */
@@ -41,7 +41,7 @@ public class AccessService implements Feature {
 
     /**
      * This method returns a representation of the access that the connected user has
-     *
+     * 
      * @return a {@link Response} object containing a JSON String giving the access information for the connected user
      */
     @GET
@@ -52,7 +52,7 @@ public class AccessService implements Feature {
         if(contestId.equals(model.getContestIdentifier()) == true) {
             return Response.ok(new CLICSContestAccess(sc, model, controller, contestId).toJSON(), MediaType.APPLICATION_JSON).build();
         }
-        return Response.status(Response.Status.NOT_FOUND).build();
+        return Response.status(Response.Status.NOT_FOUND).build();        
     }
 
     @Override

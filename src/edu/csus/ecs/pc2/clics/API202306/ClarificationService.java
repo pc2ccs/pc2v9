@@ -21,8 +21,8 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -42,9 +42,9 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
- * WebService to handle languages
- * 
- * @author ICPC
+ * WebService to handle clarifications
+ *
+ * @author John Buck
  *
  */
 @Path("/contests/{contestId}/clarifications")
@@ -52,7 +52,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 @Provider
 @Singleton
 public class ClarificationService implements Feature {
-   
+
     private IInternalContest model;
 
     private IInternalController controller;
@@ -65,7 +65,7 @@ public class ClarificationService implements Feature {
 
     /**
      * This method returns a representation of the current contest clarifications in JSON format. The returned value is a JSON array with one clarification description per array element, complying with 2023-06
-     * 
+     *
      * @param sc security info for the user making the request
      * @param contestId Contest for which info is requested
      * @return a {@link Response} object containing the contest languages in JSON form
@@ -76,14 +76,14 @@ public class ClarificationService implements Feature {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();        
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-        
+
         // get the groups from the contest
         Clarification[] clarifications = model.getClarifications();
-        
+
         ArrayList<CLICSClarification> clarList = new ArrayList<CLICSClarification>();
-        
+
         // these are the only 2 that have special rules.
         boolean isStaff = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE);
         boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM);
@@ -108,7 +108,7 @@ public class ClarificationService implements Feature {
 
     /**
      * This method returns a representation of the current contest clarification requested in JSON format. The returned value is a single clarification in json, Complying with 2023-06
-     * 
+     *
      * @param sc security info for the user making the request
      * @param contestId Contest for which info is requested
      * @param clarificationId the id of the desired clarification
@@ -121,11 +121,11 @@ public class ClarificationService implements Feature {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();        
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
         // get the groups from the contest
         Clarification[] clarifications = model.getClarifications();
-        
+
         // these are the only 2 that have special rules.
         boolean isStaff = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE);
         boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM);
@@ -133,11 +133,11 @@ public class ClarificationService implements Feature {
         String user = sc.getUserPrincipal().getName();
 
         ClarificationAnswer[] clarAnswers = null;
-        
+
         // keep track of whether the clarificationId specified was for the question, in which case this will
         // be set to non-null
         Clarification clarNoAnswer = null;
-        
+
         // create list of clarifications to send back
         for (Clarification clarification: clarifications) {
             if (clarification.isSendToAll() || isStaff || (isTeam && isClarificationForUser(clarification, user))) {
@@ -168,14 +168,14 @@ public class ClarificationService implements Feature {
                 return Response.ok(json, MediaType.APPLICATION_JSON).build();
             } catch (Exception e) {
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for clarification " + clarificationId + " " + e.getMessage()).build();
-            }                    
+            }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     /**
      * Post a new clarification
-     * 
+     *
      * @param servletRequest details of request
      * @param sc requesting user's authorization info
      * @param contestId The contest
@@ -189,14 +189,14 @@ public class ClarificationService implements Feature {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();        
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-        
+
         // only admin, hydge, or team can create a clarification.  And team can do it only if contest is started.
         if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) && (!sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM) || !model.getContestTime().isContestStarted())) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-        
+
         // check for empty request
         if (jsonInputString == null || jsonInputString.length() == 0) {
             // return HTTP 400 response code per CLICS spec
@@ -215,13 +215,13 @@ public class ClarificationService implements Feature {
         if(StringUtilities.isEmpty(clar.getText())) {
             return Response.status(Status.BAD_REQUEST).entity("text must not be empty").build();
         }
-        
+
         if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && (clar.getTo_team_id() != null || clar.getTime() != null || clar.getContest_time() != null)) {
             return Response.status(Status.BAD_REQUEST).entity("may not include one or more properties").build();
         }
-        
+
         String user = sc.getUserPrincipal().getName();
-        
+
         // if team specifies "from id", it must be that of the current user.
         if(!StringUtilities.isEmpty(clar.getFrom_team_id())) {
             String fullUser = "team" + clar.getFrom_team_id();
@@ -243,7 +243,7 @@ public class ClarificationService implements Feature {
                 } catch (Exception e) {
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for clarification " + e.getMessage()).build();
                 }
-                
+
             } else {
                 controller.getLog().log(Log.WARNING, "Can not find problem for id " + clar.getProblem_id());
             }
@@ -252,10 +252,10 @@ public class ClarificationService implements Feature {
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
-    
+
     /**
      * Put updates an existing clarification (presumably an answer)
-     * 
+     *
      * @param servletRequest details of request
      * @param sc requesting user's authorization info
      * @param contestId The contest
@@ -266,17 +266,17 @@ public class ClarificationService implements Feature {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateClarification(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
-        
+
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();        
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-        
+
         // only admin or judge can update a clarification.
         if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-        
+
         // check for empty request
         if (jsonInputString == null || jsonInputString.length() == 0) {
             // return HTTP 400 response code per CLICS spec
@@ -288,18 +288,18 @@ public class ClarificationService implements Feature {
             // return HTTP 400 response code per CLICS spec
             return Response.status(Status.BAD_REQUEST).entity("invalid json supplied").build();
         }
-        
+
         if(StringUtilities.isEmpty(clar.getText())) {
             return Response.status(Status.BAD_REQUEST).entity("text must not be empty").build();
         }
-        
-        
+
+
         return Response.status(Response.Status.NOT_IMPLEMENTED).build();
     }
 
     /**
      * Check if the supplied clarification is from/to the supplied user
-     * 
+     *
      * @param clarification the clarification to check
      * @param user the user to check
      * @return true if the user is allowed to see this clarification
@@ -307,21 +307,21 @@ public class ClarificationService implements Feature {
     private boolean isClarificationForUser(Clarification clarification, String user) {
         return(clarification.getSubmitter().getName().equals(user));
     }
-    
+
     /**
      * Tests if the supplied user context has a role to submit clarifications as a team
-     * 
+     *
      * @param sc User's security context
      * @return true of the user can submit clarifications
      */
     public static boolean isTeamSubmitClarificationAllowed(SecurityContext sc) {
         return(sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM));
     }
-    
+
 
     /**
      * Tests if the supplied user context has a role to submit clarifications
-     * 
+     *
      * @param sc User's security context
      * @return true of the user can submit clarifications
      */
@@ -331,17 +331,17 @@ public class ClarificationService implements Feature {
 
     /**
      * Tests if the supplied user context has a role to submit clarifications on behalf of a team
-     * 
+     *
      * @param sc User's security context
      * @return true of the user can submit clarifications on behalf of a team
      */
     public static boolean isProxySubmitClarificationAllowed(SecurityContext sc) {
         return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
     }
-    
+
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
-     * 
+     *
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
@@ -351,7 +351,7 @@ public class ClarificationService implements Feature {
 
     /**
      * Converts the input string, assumed to be a JSON string, into a {@link Map<String,String>} of JSON key-value pairs.
-     * 
+     *
      * @param contestId contest identifier
      * @param jsonRequestString
      *            a JSON string specifying a starttime request in CLICS format
@@ -377,7 +377,7 @@ public class ClarificationService implements Feature {
 
         return jsonDataMap;
     }
-    
+
     /**
      * Returns a ClientId based on the user supplied.  eg. "team99", "administrator1", etc.
      * @param user eg. team99
@@ -385,7 +385,7 @@ public class ClarificationService implements Feature {
      */
     private ClientId getClientIdFromUser(String user) {
         ClientId clientId = null;
-        
+
         // basically, need to match lower case letters followed by digits
         Matcher matcher = Pattern.compile("^([a-z]+)([0-9]+)$").matcher(user);
         if(matcher.matches()) {
@@ -397,10 +397,10 @@ public class ClarificationService implements Feature {
         }
         return clientId;
     }
-    
+
     /**
      * Returns the the Problem object for supplied id (short name) or null if none found
-     * 
+     *
      * @param id shortname of problem
      * @return Problem object or null
      */
@@ -412,7 +412,7 @@ public class ClarificationService implements Feature {
         }
         return(null);
     }
-    
+
     @Override
     public boolean configure(FeatureContext arg0) {
         // TODO Auto-generated method stub

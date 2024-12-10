@@ -13,12 +13,11 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -27,7 +26,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * WebService for handling teams
- *
+ * 
  * @author ICPC
  *
  */
@@ -49,7 +48,7 @@ public class TeamService implements Feature {
 
     /**
      * This method returns a representation of the current model teams in JSON format. The returned value is a JSON array with one team description per array element.
-     *
+     * 
      * @param sc user information
      * @param contestId the contest for which the teams are requested
      * @return a {@link Response} object containing the model teams in JSON form
@@ -60,7 +59,7 @@ public class TeamService implements Feature {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND).build();        
         }
         // get the team accounts from the model
         Account[] accounts = model.getAccounts();
@@ -69,7 +68,7 @@ public class TeamService implements Feature {
         ArrayList<CLICSTeam> teams = new ArrayList<CLICSTeam>();
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
-
+            
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
                 teams.add(new CLICSTeam(model, account));
             }
@@ -85,7 +84,7 @@ public class TeamService implements Feature {
 
     /**
      * Return response to the request for information about a specific teamid in a specific contestid
-     *
+     * 
      * @param sc user information
      * @param contestId the contest
      * @param teamId the team id
@@ -100,7 +99,7 @@ public class TeamService implements Feature {
         if(contestId.equals(model.getContestIdentifier()) == true) {
             // get the team accounts from the model
             Account[] accounts = model.getAccounts();
-
+    
             for (int i = 0; i < accounts.length; i++) {
                 Account account = accounts[i];
                 // TODO multi-site with overlapping teamNumbers?
@@ -115,16 +114,6 @@ public class TeamService implements Feature {
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
      * 
-     * @param sc User's security information
-     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
-     */
-    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        return(new CLICSEndpoint("teams", JSONUtilities.getJsonProperties(CLICSTeam.class)));
-    }
-
-    /**
-     * Retrieve access information about this endpoint for the supplied user's security context
-     *
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
