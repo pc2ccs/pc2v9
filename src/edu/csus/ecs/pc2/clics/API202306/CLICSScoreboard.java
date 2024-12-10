@@ -31,7 +31,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 /**
  * CLICS Scoreboard
  * Contains information about the scoreboard
- * 
+ *
  * @author John Buck
  *
  */
@@ -49,22 +49,28 @@ public class CLICSScoreboard {
 
     @JsonProperty
     private CLICSScoreboardRow [] rows;
-    
+
     /**
      * Fill in the scoreboard information
-     * 
+     *
      */
     public CLICSScoreboard(IInternalContest model, IInternalController controller, Group group, Integer division)  throws IllegalContestState, JAXBException, IOException {
-        
+
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
 
         Properties properties = ScoreboardUtilities.getScoringProperties(model);
 
-        // legacy - standings are created as XML, and we convert that to JSON. 
-        String xml = scoringAlgorithm.getStandings(model, null, division, group, properties, StaticLog.getLog());
-        
+        ArrayList<Group> groupList = null;
+
+        if(group != null) {
+            groupList = new ArrayList<Group>();
+            groupList.add(group);
+        }
+        // legacy - standings are created as XML, and we convert that to JSON.
+        String xml = scoringAlgorithm.getStandings(model, null, division, groupList, properties, StaticLog.getLog());
+
         ContestStandings contestStandings = ScoreboardUtilities.createContestStandings(xml);
-        
+
         // This is what we want to return:
         //        {
         //            "time": "2014-06-25T14:13:07.832+01",
@@ -90,10 +96,10 @@ public class CLICSScoreboard {
         time = ZonedDateTime.now( ZoneOffset.UTC ).format( DateTimeFormatter.ISO_INSTANT);
         contest_time = model.getContestTime().getElapsedTimeStr();
         state = new CLICSContestState(model);
-     
+
         ArrayList<CLICSScoreboardRow>rowsArray = new ArrayList<CLICSScoreboardRow>();
         HashMap<String, String> probEleToShort = new HashMap<String, String>();
-      
+
         // create a mapping of each problem's element ID to its shortname.
         // we will use shortname as the problem id in the problem list for each team's solutions
         for(Problem problem: model.getProblems()) {

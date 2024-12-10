@@ -12,7 +12,6 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
@@ -26,9 +25,9 @@ import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * WebService to handle languages
+ * WebService to handle Judgement Types
  *
- * @author ICPC
+ * @author John Buck
  *
  */
 @Path("/contests/{contestId}/judgement-types")
@@ -48,7 +47,7 @@ public class JudgementTypeService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest groups in JSON format. The returned value is a JSON array with one judgement-type description per array element, complying with 2023-06
+     * This method returns a representation of the current contest judgement types in JSON format. The returned value is a JSON array with one judgement-type description per array element, complying with 2023-06
      *
      * @param contestId contest for which judgment types are requested
      * @return a {@link Response} object containing the contest judgement-types in JSON form
@@ -106,16 +105,6 @@ public class JudgementTypeService implements Feature {
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    
-    /**
-     * Retrieve access information about this endpoint for the supplied user's security context
-     * 
-     * @param sc User's security information
-     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
-     */
-    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        return(new CLICSEndpoint("judgement-types", JSONUtilities.getJsonProperties(CLICSJudgmentType.class)));
     }
 
     /**

@@ -9,7 +9,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 /**
  * CLICS Endpoint
  * Contains information about an API endpoint that is supported
- *
+ * 
  * @author John Buck
  *
  */
@@ -24,7 +24,7 @@ public class CLICSEndpoint {
 
     /**
      * For use with the access endpoint.  This describes the properties of a single endpoint.
-     *
+     * 
      * @param type String representing the name of the endpoint, eg. "teams", "groups", etc.
      * @param properties List of supported properties
      */

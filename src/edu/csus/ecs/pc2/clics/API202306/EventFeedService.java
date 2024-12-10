@@ -1,9 +1,5 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-<<<<<<<< HEAD:src/edu/csus/ecs/pc2/clics/API202306/EventFeedService.java
 package edu.csus.ecs.pc2.clics.API202306;
-========
-package edu.csus.ecs.pc2.clics.API202003;
->>>>>>>> 78682bd20 (i823 Relocate CLICS API Service endpoints):src/edu/csus/ecs/pc2/clics/API202003/EventFeedService.java
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,7 +34,7 @@ import edu.csus.ecs.pc2.services.web.EventFeedStreamer;
 
 /**
  * Implementation of CLICS REST event-feed.
- *
+ * 
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 @Path("/contest/event-feed")
@@ -67,12 +63,12 @@ public class EventFeedService implements Feature {
 
     /**
      * a JSON stream representation of the events occurring in the contest.
-     *
+     * 
      * @param type
      *            a comma-separated query parameter identifying the type(s) of events being requested (if empty or null, indicates ALL event types)
      * @param id
      *            the event-id of the earliest event being requested (i.e., an indication of the requested starting point in the event stream)
-     *
+     * 
      * @return a {@link Response} object whose body contains the JSON event feed
      * @param asyncResponse
      * @param servletRequest
@@ -96,7 +92,7 @@ public class EventFeedService implements Feature {
         }
 
         EventFeedFilter filter = new EventFeedFilter();
-
+        
         if (eventTypeList != null) {
             filter.addEventTypeList(eventTypeList);
             System.out.println("starting event feed, sending only event types '" + eventTypeList + "'");
@@ -153,10 +149,10 @@ public class EventFeedService implements Feature {
         // TODO Auto-generated method stub
         return false;
     }
-
+    
     /**
      * Create a snapshot of the JSON event feed.
-     *
+     * 
      * @param contest
      * @param controller
      * @return

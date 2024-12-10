@@ -32,7 +32,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 /**
  * Webservice to handle scoreboard requests
- *
+ * 
  * @author ICPC
  */
 @Path("/contests/{contestId}/scoreboard")
@@ -51,9 +51,9 @@ public class ScoreboardService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest scoreboard in JSON format.
+     * This method returns a representation of the current contest scoreboard in JSON format. 
      * The return JSON is in the format defined by the CLICS 2023-06 spec.
-     *
+     * 
      * @param servletRequest
      * @param sc
      * @param contestId
@@ -73,10 +73,10 @@ public class ScoreboardService implements Feature {
                 ((sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
                   sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST) ||
                   sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)))) {
-
+                
                 Group specificGroup = null;
                 Integer divNumber = null;
-
+                
                 // if a specific group was requested, let's look for that so we can pass it to the standings routine
                 if(!StringUtilities.isEmpty(group_id)) {
                     for(Group group: model.getGroups()) {
@@ -86,10 +86,10 @@ public class ScoreboardService implements Feature {
                         }
                     }
                     if(specificGroup == null) {
-                        return Response.status(Response.Status.NOT_FOUND).build();
+                        return Response.status(Response.Status.NOT_FOUND).build(); 
                     }
                 }
-
+                
                 // see if a division number was specified - this is a PC2 extension(!!) and is NOT part of the CLICS API, but,
                 // we are allowed to add things.
                 if(!StringUtilities.isEmpty(division)) {
@@ -97,19 +97,19 @@ public class ScoreboardService implements Feature {
                         divNumber = Integer.parseInt(division);
                     } catch(Exception e) {
                         // Bad division specified
-                        return Response.status(Response.Status.NOT_FOUND).build();
+                        return Response.status(Response.Status.NOT_FOUND).build(); 
                     }
                 }
-
+                
                 // ok to return scoreboard
                 try {
-                    CLICSScoreboard scoreboard = new CLICSScoreboard(model, controller, specificGroup, divNumber);
+                    CLICSScoreboard scoreboard = new CLICSScoreboard(model, controller, specificGroup, divNumber);                    
                     return Response.ok(scoreboard.toJSON(), MediaType.APPLICATION_JSON).build();
                 } catch (IllegalContestState | JAXBException | IOException e) {
                     controller.getLog().log(Log.WARNING, "Exception creating PC2 scoreboard JSON: " + e.getMessage(), e);
                     return Response.status(Status.INTERNAL_SERVER_ERROR).build();
                 }
-
+                
             } else {
                 // do not show (return) the scoreboard if the contest has not
                 // been started and the requester is not special)
@@ -117,12 +117,12 @@ public class ScoreboardService implements Feature {
                 return Response.status(Status.FORBIDDEN).build();
             }
         }
-        return Response.status(Response.Status.NOT_FOUND).build();
+        return Response.status(Response.Status.NOT_FOUND).build();        
     }
-
+    
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
-     *
+     * 
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */

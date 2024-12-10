@@ -36,8 +36,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -45,10 +43,12 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IRunListener;
 
 /**
  * WebService to handle submissions
- *
+ * 
  * @author ICPC
  *
  */
@@ -78,37 +78,33 @@ public class SubmissionService implements Feature {
 
     /**
      * Run Listener
-     *
+     * 
      * @author pc2@ecs.csus.edu
      */
 
     public class RunListenerImplementation implements IRunListener {
 
-        @Override
         public void runAdded(RunEvent event) {
             // ignore
         }
 
-        @Override
         public void refreshRuns(RunEvent event) {
             // ignore
         }
 
-        @Override
         public void runChanged(RunEvent event) {
             // server replied, aka our model has been updated :)
             serverReplied = true;
         }
 
-        @Override
         public void runRemoved(RunEvent event) {
             // ignore
         }
     }
 
     /**
-     * This method returns a JSON representation of all Runs (Submissions).
-     *
+     * This method returns a JSON representation of all Runs (Submissions). 
+     * 
      * @return a {@link Response} object containing the Submissions in JSON form
      */
     @GET
@@ -149,17 +145,17 @@ public class SubmissionService implements Feature {
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (jsonTool.getSubmissionId(submission).equals(submissionId)) {
-
+                
                 //we found the requested Submission ID in the list of runs returned from the model; try to get the runfiles for Submission
                 runFiles = null;
                 try {
                     controller.getLog().log(Log.INFO, "Requesting run files for submission " + submission.getNumber() + " from local client model");
                     runFiles = model.getRunFiles(submission);
                 } catch (ClassNotFoundException | IOException | FileSecurityException e2) {
-                    controller.getLog().log(Log.INFO, "Exception attempting to get run files for submission "
+                    controller.getLog().log(Log.INFO, "Exception attempting to get run files for submission " 
                             + submissionId + " from local model", e2);
                 }
-
+                
                 //if runFiles is still null we failed to get the runfiles from the local model
                 if (runFiles == null) {
                     // try getting the submission from the server
@@ -220,7 +216,7 @@ public class SubmissionService implements Feature {
                             createZip(submission, tmpDir, filesToWrite, zipFileName);
                             // set file (and path) to be download
                             File file = new File(zipFileName);
-                            ResponseBuilder responseBuilder = Response.ok(file);
+                            ResponseBuilder responseBuilder = Response.ok((Object) file);
                             responseBuilder.header("Content-Disposition", "attachment; filename=\"files.zip\"");
                             return responseBuilder.build();
                         } catch (IOException e) {
@@ -263,7 +259,7 @@ public class SubmissionService implements Feature {
         zip.setComment(comment);
         byte[] b = new byte[1024];
         for (Iterator<Integer> iterator = filesToWrite.keySet().iterator(); iterator.hasNext();) {
-            Integer fileIndex = iterator.next();
+            Integer fileIndex = (Integer) iterator.next();
             String inputFile = filesToWrite.get(fileIndex);
             FileInputStream in = new FileInputStream(tmpDir + File.pathSeparator + inputFile);
             ZipEntry ze = new ZipEntry(inputFile);
@@ -311,7 +307,7 @@ public class SubmissionService implements Feature {
 
     /**
      * Check if the supplied user has a team or admin role, if so they can make team submissions
-     *
+     * 
      * @param sc User's security context
      * @return true if the user is allowed to make team submissions
      */
@@ -321,7 +317,7 @@ public class SubmissionService implements Feature {
 
     /**
      * Check if the supplied user has a admin, if so they can make submissions on behalf of a team
-     *
+     * 
      * @param sc User's security context
      * @return true if the user is allowed to make team submissions
      */
@@ -331,14 +327,14 @@ public class SubmissionService implements Feature {
 
     /**
      * Check if the supplied user has the admin role, if so they can make admin submissions
-     *
+     * 
      * @param sc User's security context
      * @return true if the user is allowed to make team submissions
      */
     public static boolean isAdminSubmitAllowed(SecurityContext sc) {
         return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
     }
-
+    
     @Override
     public boolean configure(FeatureContext arg0) {
         // TODO Auto-generated method stub
