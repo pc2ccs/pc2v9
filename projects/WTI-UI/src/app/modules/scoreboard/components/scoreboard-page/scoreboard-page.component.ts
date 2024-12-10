@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
 import { saveCurrentPage } from 'src/app/app.component';
 import * as Constants from 'src/constants';
+import { DEBUG_MODE } from 'src/constants';
 
 @Component({
 	templateUrl: './scoreboard-page.component.html',
@@ -21,7 +22,10 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	) { }
 
 	ngOnInit(): void {
-		//console.log("Scoreboard OnInit executed.");
+<<<<<<< HEAD
+		if (DEBUG_MODE) {
+			console.log("Executing ScoreboardPageComponent.ngOnInit");
+		}
 		
 		this._appTitleService.setTitleWithTeamId("Scoreboard");
 		

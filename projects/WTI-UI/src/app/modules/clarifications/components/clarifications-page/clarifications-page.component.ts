@@ -7,9 +7,15 @@ import { Clarification } from '../../../core/models/clarification';
 import { MatDialog } from '@angular/material/dialog';
 import { NewClarificationComponent } from '../new-clarification/new-clarification.component';
 import { AuthService } from '../../../core/auth/auth.service';
+<<<<<<< HEAD
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
 import { saveCurrentPage } from 'src/app/app.component';
 import * as Constants from 'src/constants';
+=======
+import { saveCurrentPage } from 'src/app/app.component';
+import * as Constants from 'src/constants';
+
+>>>>>>> branch 'i871_F5_in_WTI' of https://github.com/clevengr/pc2v9.git
 
 @Component({
   templateUrl: './clarifications-page.component.html',
