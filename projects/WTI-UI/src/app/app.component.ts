@@ -5,7 +5,7 @@ import * as Constants from 'src/constants';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/modules/core/auth/auth.service' ;
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service' ;
-import { WebsocketService } from 'src/app/modules/core/services/websocket.service' ;
+import { IWebsocketService } from 'src/app/modules/core/abstract-services/i-websocket.service' ;
 import { DEBUG_MODE } from 'src/constants';
 
 @Component({
@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
 		      public router: Router, 
               private _authService: AuthService, 
               private _contestService: IContestService,
-              private _websocketService: WebsocketService) { 
+              private _websocketService: IWebsocketService) { 
 	  if (DEBUG_MODE) {
 		  console.log("Executing AppComponent constructor...");
 	  }
