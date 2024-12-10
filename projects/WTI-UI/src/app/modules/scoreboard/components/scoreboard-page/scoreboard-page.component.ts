@@ -22,7 +22,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	) { }
 
 	ngOnInit(): void {
-<<<<<<< HEAD
+
 		if (DEBUG_MODE) {
 			console.log("Executing ScoreboardPageComponent.ngOnInit");
 		}
