@@ -59,7 +59,7 @@ export function WebsocketServiceFactory(injector: Injector,
 										uiHelperService: UiHelperService, iContestService: IContestService,
               							iTeamsService: ITeamsService, authService: AuthService) {
   if (DEBUG_MODE) {
-    console.log("Executing ContestServiceFactory...")
+    console.log("Executing WebsocketServiceFactory...")
   }
 
   if (environment.useMock) { 
