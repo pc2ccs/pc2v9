@@ -11,6 +11,26 @@ import { IContestService } from 'src/app/modules/core/abstract-services/i-contes
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
 import { DEBUG_MODE } from 'src/constants';
 
+/*
+LoginPageComponent is the initial page displayed by the WTI-UI Single-Page-Application (SPA).
+It gets created as part of the "AppModule" bootstrapping process, which invokes its constructor
+causing instantiation of each of the classes listed in the constructor parameter list
+(note however that IContestService and IWebsocketService get created via invocation of "factory" methods
+which are defined in, and exported from, class CoreModule).
+
+When LoginPageComponent is created, its "ngOnInit()" method gets invoked and checks to see if there is
+already a "token" defined in the AuthService class (which would indicate the user is already logged in).
+If so, it uses the Router to navigate to the "default route" defined in AuthService, which is the "/runs" page.
+
+Otherwise, it builds a "form" for the user to enter team name and password.  When the user clicks "Submit" on that
+form, the LoginPageComponent's "onSubmit()" method is invoked.  onSubmit() invokes the AuthService's "login()" method,
+which in turn makes an HTTP request to the login() method of the WTI server.  onSubmit() subscribes to (waits for)
+the response to this request, and if login was successful then it completes the login (saving login information in 
+the AuthService class and using the Router to transfer to the default "/runs" page), opens a WebSocket to the WTI server,
+and invokes the ContestService to determine whether the contest clock is running (using the result to cause an SPA-local
+"clock tick", which in turn has the effect of notifying class ProblemSelectorComponent whether or not to display
+the list of contest problems).
+*/
 @Component({
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss']

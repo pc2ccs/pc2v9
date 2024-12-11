@@ -8,6 +8,46 @@ import { IContestService } from 'src/app/modules/core/abstract-services/i-contes
 import { IWebsocketService } from 'src/app/modules/core/abstract-services/i-websocket.service' ;
 import { DEBUG_MODE } from 'src/constants';
 
+/*
+This AppComponent class is the main starting point for the WTI-UI Angular Single-Page-Application (SPA).  
+(The overall SPA starts in main.ts, which invokes app.module.ts, which in turn bootstraps this AppComponent class.)
+
+When app.module.ts invokes this class's constructor, the constructor parameters cause TypeScript to automatically construct
+local property variables (objects) of type HttpClient, Router, AuthService, IContestService, and IWebsocketService.
+Construcing the AuthService object in turn causes creation of an ITeamsService object.
+
+The AuthService, IContestService, ITeamsService, and IWebsocketService classes are all listed in the "providers" array
+of class CoreModule (core.module.ts), which means that CoreModule is responsible for providing those service classes. 
+All four service classes are marked as "injectable", which means they can be injected into other classes.  All four classes
+are marked as "providedIn: 'root'" in their "@Injectable" decorator, which means they are all defined as singletons provided
+by (injected by) the "root injector"
+
+The latter three classes (IContestService, ITeamsService, and IWebsocketService) are listed in CoreModule with "provide" properties
+indicating that they are to be "provided" by corresponding "factory methods" (also in CoreModule).  These factory methods choose 
+between "real" and "mock" service providers depending on the value of an "environment flag" named "useMock" (see the files 
+under "environments").
+
+Once construction is complete, this AppComponent then starts running at its "ngOnInit()" method.  
+ngOnInit() checks the browser's "sessionStorage" to see if there is a "current page" recorded there.  
+If not, AppComponent invokes "loadEnvironment()" to load the SPA configuration from file "assets/appconfig.json".  
+
+If an existing "current page" IS found in "sessionStorage", AppComponent interprets it as indicating that a "browser refresh"
+(F5) has occurred.  In this case, AppComponent performs the same "loadEnvironment() operations, then loads additional state 
+information (userName and token value) from "sessionStorage" and restores it into the AuthService class.  
+It then startsa new WebSocket for communication with the WTI Server, checks the ContestService "isContestRunning" value
+(using it to trigger updates to things like display of problem names), and finally uses the Router to navigate to the
+previous SPA page.
+
+Meanwhile, as part of the AppModule bootstrap process, module "AppRoutingModule" sets up a list of "available routes"
+(that is, pages which the SPA knows how to transfer to), with the first (default) route being the LoginPageComponent.
+This causes the SPA to display the LoginPageComponent, which builds a "submission form" for the user to enter 
+team name and password.  When this form's "Submit" button is clicked, 
+the LoginPageComponent.onSubmit() method invokes the AuthService's "login" method, which connects to
+the WTI server and logs the user into the PC2 server, then (on successful login) uses the Router's 
+path list to transfer to the "/runs" page.
+
+*/
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
