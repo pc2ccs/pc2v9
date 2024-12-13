@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Dimension;
@@ -21,7 +21,10 @@ public class ShadowCompareScoreboardFrame extends JFrame {
         Dimension size = new Dimension(1200,900);
         this.setPreferredSize(size);
         this.setMinimumSize(size);
+        
         this.getContentPane().add(new ShadowCompareScoreboardPane(shadowController));
     }
+    
+
 
 }

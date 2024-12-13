@@ -144,6 +144,8 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
             "CLICS <b><i>state</i></b> message with a non-null <b>started</b> property is received." +
             "<p><p>Do you wish to continue and start shadowing anyway?</html>";
 
+    private ShadowCompareRunsFrame shadowCompareRunsFrame;
+    private ShadowCompareScoreboardFrame shadowCompareScoreboardFrame;
     // Status column for JTable notifications
     enum ShadowStatus {
         SUCCESS,
@@ -884,13 +886,21 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                         showErrorMessage("No shadow controller available; cannot show runs comparison", "Missing Controller");
                     } else if (!ShadowController.SHADOW_CONTROLLER_STATUS.SC_RUNNING.equals(shadowController.getStatus())) {
                         showErrorMessage("Cannot compare runs, shadow not running","Shadow not running");
-                    } else {
-                        JFrame shadowCompareRunsFrame = new ShadowCompareRunsFrame(shadowController);
+                    } else if (shadowCompareRunsFrame != null && shadowCompareRunsFrame.isVisible()) {
+                        showErrorMessage("Compare Runs already open", "Compare Runs Already Open");
+                        shadowCompareRunsFrame.setState(JFrame.NORMAL); //If the frame was minimized this brings it back.
+                        shadowCompareRunsFrame.setVisible(false);  // This was recommended to make it work for MacOS
+                        shadowCompareRunsFrame.setVisible(true);   
+                        shadowCompareRunsFrame.toFront();          
+                        shadowCompareRunsFrame.requestFocus();     
+                    }else {
+                        shadowCompareRunsFrame = new ShadowCompareRunsFrame(shadowController);
                         shadowCompareRunsFrame.setSize(600,700);
                         shadowCompareRunsFrame.setLocationRelativeTo(null); // centers frame
                         shadowCompareRunsFrame.setTitle("Shadow Run Comparison");
                         shadowCompareRunsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                         shadowCompareRunsFrame.setVisible(true);
+                        
                     }
 
                 }
@@ -919,8 +929,16 @@ public class ShadowControlPane extends JPanePlugin implements IShadowMonitorStat
                                 showErrorMessage("No shadow controller available; cannot show scoreboard comparison", "Missing Controller");
                             } else if (!ShadowController.SHADOW_CONTROLLER_STATUS.SC_RUNNING.equals(shadowController.getStatus())) {
                                 showErrorMessage("Cannot compare scoreboard, shadow not running","Shadow not running");
-                            } else {
-                                JFrame shadowCompareScoreboardFrame = new ShadowCompareScoreboardFrame(shadowController);
+                            } else if (shadowCompareScoreboardFrame != null && shadowCompareScoreboardFrame.isVisible()) {
+                                showErrorMessage("Compare Scoreboards already open", "Compare Scoreboards Already Open");
+                                shadowCompareScoreboardFrame.setState(JFrame.NORMAL); //If the frame was minimized this brings it back.
+                                shadowCompareScoreboardFrame.setVisible(false);  // This was recommended to make it work for MacOS
+                                shadowCompareScoreboardFrame.setVisible(true);   
+                                shadowCompareScoreboardFrame.toFront();          
+                                shadowCompareScoreboardFrame.requestFocus();
+                            }
+                            else {
+                                shadowCompareScoreboardFrame = new ShadowCompareScoreboardFrame(shadowController);
                                 shadowCompareScoreboardFrame.setSize(600,700);
                                 shadowCompareScoreboardFrame.setLocationRelativeTo(null); // centers frame
                                 shadowCompareScoreboardFrame.setTitle("Shadow Scoreboard Comparison");

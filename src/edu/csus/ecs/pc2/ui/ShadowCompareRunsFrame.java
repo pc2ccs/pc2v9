@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Dimension;
@@ -16,17 +16,17 @@ import edu.csus.ecs.pc2.shadow.ShadowController;
 public class ShadowCompareRunsFrame extends JFrame {
 
     private static final long serialVersionUID = 1L;
-    
     public ShadowCompareRunsFrame(ShadowController shadowController) {
         setMinimumSize(new Dimension(750, 900));
         Dimension size = new Dimension(750,750);
         this.setPreferredSize(size);
 //        this.setMinimumSize(size);
-        
+
         ShadowCompareRunsPane runsPane = new ShadowCompareRunsPane(shadowController);
         runsPane.setMinimumSize(new Dimension(750, 900));
         runsPane.setPreferredSize(new Dimension(750, 900));
-        
+
+
 //        runsPane.setContestAndController(shadowController.getLocalContest(), shadowController.getLocalController());
         //the above statement was moved into the ShadowCompareRunsPane() constructor, as follows:
         //   this.setContestAndController(shadowController.getLocalContest(), shadowController.getLocalController());
@@ -37,5 +37,6 @@ public class ShadowCompareRunsFrame extends JFrame {
 
         this.getContentPane().add(runsPane);
     }
+
 
 }
