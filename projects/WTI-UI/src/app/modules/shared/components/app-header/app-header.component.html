@@ -4,9 +4,17 @@
         <img src='/assets/VerticalBar.png' alt='VerticalBar'>
         <img src='/assets/icpc-banner.png' alt='ICPC Programming Contest Logo'>
     </div>
+    
+    <div class='clock-container' *ngIf='showClocks'> 
+       	  Elapsed: <countdown [config]="{ leftTime: 0, format: 'HH:mm:ss', message: 'Elapsed Time is up!' }">
+       	  <ng-template #template let-time>{{time.days}}d {{time.hours}}h {{time.minutes}}m {{time.seconds}}s</ng-template>
+       	  </countdown>
+    </div>
+    
     <div class='teamid-container' *ngIf='showTeamId'>
     	<P>TEAM {{teamId}}</P>
     </div>
+    
     <nav *ngIf='showLinks'>
         <a routerLink='/runs' routerLinkActive='active'>Runs</a>
         <a routerLink='/clarifications' routerLinkActive='active'>Clarifications</a>
@@ -14,4 +22,9 @@
         <a routerLink='/scoreboard' routerLinkActive='active'>Scoreboard</a>
         <a routerLink='/logout'>Logout</a>
     </nav>
+    
+    <div class='clock-container' *ngIf='showClocks'> 
+    	Remaining: <countdown [config]="{ leftTime: 3630, format: 'HH:mm:ss', message: 'Remaining Time is up!' }"></countdown>
+    </div>
+    
 </header>

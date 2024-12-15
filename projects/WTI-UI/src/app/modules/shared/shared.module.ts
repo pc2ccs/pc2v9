@@ -13,6 +13,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { AboutWtiComponent } from './components/about-wti/about-wti.component';
+import { CountdownModule } from 'ngx-countdown';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { AboutWtiComponent } from './components/about-wti/about-wti.component';
     MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
+    CountdownModule
   ],
   exports: [
     AppHeaderComponent,
@@ -44,6 +46,7 @@ import { AboutWtiComponent } from './components/about-wti/about-wti.component';
     MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
+    CountdownModule
   ]
 })
 export class SharedModule { }
