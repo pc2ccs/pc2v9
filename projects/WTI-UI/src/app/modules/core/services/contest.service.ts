@@ -6,16 +6,24 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { ContestProblem } from '../models/contest-problem';
 import { Clarification } from '../models/clarification';
+import { DEBUG_MODE } from 'src/constants';
 
-@Injectable()
+@Injectable({
+	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
+})
 export class ContestService extends IContestService {
-	
+
   standingsAreCurrent: boolean ;
   cachedStandings: Observable<String> ;
 
   constructor(private _httpClient: HttpClient) {
-    super();
-	    this.standingsAreCurrent = false;
+	super();
+
+	if (DEBUG_MODE) {
+		console.log ("Executing ContestService constructor; instance ID = ", this.uniqueId) ;
+	}
+	
+	this.standingsAreCurrent = false;
   }
 
   getLanguages(): Observable<ContestLanguage[]> {
@@ -35,17 +43,26 @@ export class ContestService extends IContestService {
   }
 
   getIsContestRunning(): Observable<boolean> {
-    return this._httpClient.get<boolean>(`${environment.baseUrl}/contest/isRunning`);
+	if (DEBUG_MODE) {
+		console.log ("Executing ContestService.getIsContestRunning(): calling HTTP client get(.../contest.isRunning)") ;
+	}
+	return this._httpClient.get<boolean>(`${environment.baseUrl}/contest/isRunning`);
   }
   
   getStandings(): Observable<String> {
-	console.log("ContestService.getStandings():")
+	if (DEBUG_MODE) {
+		console.log("ContestService.getStandings():")
+	}
 	if (!this.standingsAreCurrent) {
-		console.log ("Standings are out of date; fetching new standings");
+		if (DEBUG_MODE) {
+			console.log ("Standings are out of date; fetching new standings");
+		}
 		this.cachedStandings = this._httpClient.get<String>(`${environment.baseUrl}/contest/scoreboard`);
 		this.standingsAreCurrent = true ;
 	} else {
-		 console.log("Returning cached standings");
+		 if (DEBUG_MODE) {
+			 console.log("Returning cached standings");
+		 }
 	}
 	return this.cachedStandings ;
   }

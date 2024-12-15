@@ -4,6 +4,7 @@ import { ContestProblem } from 'src/app/modules/core/models/contest-problem';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { DEBUG_MODE } from 'src/constants';
 
 @Component({
   selector: 'app-problem-selector',
@@ -24,9 +25,16 @@ export class ProblemSelectorComponent implements OnInit, OnDestroy, ControlValue
   onChange = (event: any) => { };
   onTouched = (event: any) => { };
 
-  constructor(private _contestService: IContestService) { }
+  constructor(private _contestService: IContestService) { 
+	if (DEBUG_MODE) {
+		console.log ("Executing ProblemSelectorComponent constructor; IContestService id = ", this._contestService.uniqueId) ;
+	}
+  }
 
   ngOnInit(): void {
+	  if (DEBUG_MODE) {
+		  console.log ("Executing ProblemSelectorComponent.ngOnInit()") ;
+	  }
     this.loadProblems();
     if (this.allowGeneral) {
       this.writeValue('general');
@@ -56,15 +64,34 @@ export class ProblemSelectorComponent implements OnInit, OnDestroy, ControlValue
   }
 
   private loadProblems(): void {
+	  if (DEBUG_MODE) {
+		  console.log ("Executing ProblemSelectorComponent.loadProblems()") ;
+	  }
     if (this._contestService.isContestRunning) {
+    	if (DEBUG_MODE) {
+    		console.log ("ProblemSelectorComponent.loadProblems(): ContestService.isContestRunning() returned positive Truthy value") ;
+    	}
       this._contestService.getProblems()
       .pipe(takeUntil(this._unsubscribe))
       .subscribe((data: ContestProblem[]) => {
+    	  if (DEBUG_MODE) {
+    		  console.log ("ProblemSelectorComponent.loadProblems(): subscription callback from ContestService.getProblems() returned data:");
+    		  console.log (data) ;
+    	  }
         this.problems = data;
       }, (error: any) => {
+    	  if (DEBUG_MODE) {
+    		  console.log ("ProblemSelectorComponent.loadProblems(): subscription callback from ContestService.getProblems() returned error");
+    		  console.log ("  Setting contest problem list to empty array." ) ;
+    	  }
         this.problems = [];
       });
     } else {
+    	if (DEBUG_MODE) {
+    		console.log ("ProblemSelectorComponent.loadProblems(): ContestService.isContestRunning() returned negative Truthy value") ;
+			console.log ("  Setting contest problem list to empty array." ) ;
+
+    	}
       this.problems = [];
     }
   }

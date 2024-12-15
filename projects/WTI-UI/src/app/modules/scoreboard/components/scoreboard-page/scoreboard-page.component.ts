@@ -3,6 +3,9 @@ import { IContestService } from 'src/app/modules/core/abstract-services/i-contes
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
+import { saveCurrentPage } from 'src/app/app.component';
+import * as Constants from 'src/constants';
+import { DEBUG_MODE } from 'src/constants';
 
 @Component({
 	templateUrl: './scoreboard-page.component.html',
@@ -19,10 +22,16 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 	) { }
 
 	ngOnInit(): void {
-		//console.log("Scoreboard OnInit executed.");
+
+		if (DEBUG_MODE) {
+			console.log("Executing ScoreboardPageComponent.ngOnInit");
+		}
 		
 		this._appTitleService.setTitleWithTeamId("Scoreboard");
 		
+        	//indicate that this Scoreboard page is the most recently accessed page
+        	saveCurrentPage(Constants.SCOREBOARD_PAGE);
+
 		this.loadStandings();
 
 		// when standings are updated, trigger a reload

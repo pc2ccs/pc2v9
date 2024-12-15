@@ -6,9 +6,18 @@ import { TeamsLoginResponse } from '../models/teams-login-response';
 import { Submission } from '../models/submission';
 import { Run } from '../models/run';
 import { NewClarification } from '../models/new-clarification';
+import { DEBUG_MODE } from 'src/constants';
 
 @Injectable()
 export class TeamsMockService extends ITeamsService {
+	
+	constructor() {
+		if (DEBUG_MODE) {
+			console.log ("TeamsMockService constructor; preparing to invoke ITeamsService superclass constructor via 'super()'") ;
+		}
+		super() ;
+	}
+	
   login(loginCredentials: LoginCredentials): Observable<TeamsLoginResponse> {
     return of<TeamsLoginResponse>({
       teamName: loginCredentials.teamName,
@@ -21,7 +30,9 @@ export class TeamsMockService extends ITeamsService {
   }
 
   submitRun(submission: Submission): Observable<any> {
-    console.log(submission);
+    if (DEBUG_MODE) {
+    	console.log(submission);
+    }
     return of({});
   }
 
@@ -95,7 +106,9 @@ export class TeamsMockService extends ITeamsService {
   }
 
   postClarification(clarification: NewClarification): Observable<any> {
-    console.log(clarification);
+    if (DEBUG_MODE) {
+    	console.log(clarification);
+    }
     return of({});
   }
 }
