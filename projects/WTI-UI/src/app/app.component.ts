@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { AuthService } from 'src/app/modules/core/auth/auth.service' ;
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service' ;
 import { IWebsocketService } from 'src/app/modules/core/abstract-services/i-websocket.service' ;
+import { UiHelperService } from 'src/app/modules/core/services/ui-helper.service'
 import { DEBUG_MODE } from 'src/constants';
 
 /*
@@ -61,7 +62,8 @@ export class AppComponent implements OnInit {
 		      public router: Router, 
               private _authService: AuthService, 
               private _contestService: IContestService,
-              private _websocketService: IWebsocketService) { 
+              private _websocketService: IWebsocketService,
+              private _uiHelperService: UiHelperService) { 
 	  if (DEBUG_MODE) {
 		  console.log("Executing AppComponent constructor...");
 	  }
@@ -149,7 +151,6 @@ export class AppComponent implements OnInit {
          this._contestService.getIsContestRunning()
               .subscribe((val: boolean) => {
 					if (DEBUG_MODE) {
-						console.log("AppComponent F5 'restore-state' code: ");
 						console.log (" Subscription callback from ContestService.getIsContestRunning() returned: ", val);
 						console.log (" ContestService object has uniqueId", this._contestService.uniqueId);
 						//JSON.stringify() can't handle recursive objects like Angular Subjects
@@ -161,6 +162,24 @@ export class AppComponent implements OnInit {
 					this._contestService.contestClock.next();
 				});
 
+        //get the most recently saved Option values from sessionStorage
+        let options = getOptions();
+        
+        //if options were obtained, store them back into the OptionsPageComponent radio buttons
+        if (!!options) {
+        	if (DEBUG_MODE) {
+        		console.log ("Calling 'restoreOptions' to restore Options Page settings; values retrieved from sessionStorage are:") ;
+        		console.log ("  ClarsNotificationsEnabled option = ", options.clarsNotificationsEnabled);
+        		console.log ("  RunsNotificationsEnabled option = ", options.runsNotificationsEnabled);
+        	}
+        	this.restoreOptions (options);
+        	
+        } else {
+        	if (DEBUG_MODE) {
+        		console.log ("Got null options from sessionStorage; nothing to restore for Options page.") 
+        	}
+        }
+        
 	    // transfer to the (former) "current page".
 	    let page = getCurrentPage();
 	    if (DEBUG_MODE) {
@@ -198,6 +217,19 @@ export class AppComponent implements OnInit {
 	    });	
   }//end function loadEnvironment()
 
+  /**
+   * Accept the received Options object and install the values therein into the OptionsPage Clarifications and Runs radio button options.
+   */
+  restoreOptions(options: any) {
+	  if (DEBUG_MODE) {
+		  console.log ("Executing AppComponent.restoreOptions()...");
+		  console.log ("...received option values are: 'clarsNoficationsEnabled='", options.clarsNotificationsEnabled);
+		  console.log ("...and 'runsNotificationsEnabled='", options.runsNotificationsEnabled);
+	  }
+	  this._uiHelperService.enableClarificationNotifications = options.clarsNotificationsEnabled;
+	  this._uiHelperService.enableRunsNotifications = options.runsNotificationsEnabled;
+
+  }
 }//end class AppComponent
 
   //save the current page in sessionStorage so a subsequent F5 (refresh) can return to that page
@@ -233,6 +265,17 @@ export class AppComponent implements OnInit {
   //return the most recently saved username
   export function getCurrentUserName() {
       return (sessionStorage.getItem(Constants.CONNECTION_USERNAME_KEY));
+  }
+  
+  //save the current options in sessionStorage so a subsequent F5 (refresh) can restore it
+  export function saveOptions(options: Object) {
+      return (sessionStorage.setItem(Constants.OPTIONS_DETAILS_KEY, JSON.stringify(options)));
+  }
+  
+  //return the most recently saved option values from sessionStorage
+  export function getOptions() {
+      const value = sessionStorage.getItem(Constants.OPTIONS_DETAILS_KEY);
+      return value ? JSON.parse(value) : null;
   }
   
   //clear all data in sessionStorage
