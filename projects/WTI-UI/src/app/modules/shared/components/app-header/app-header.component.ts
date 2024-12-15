@@ -14,6 +14,9 @@ export class AppHeaderComponent {
   //Return a boolean indicating whether or not to show a teamId in the header
   get showTeamId(): boolean { return this._authService.isLoggedIn; }
   
+  //Return a boolean indicating whether or not to show the contest clock(s) in the header
+  get showClocks(): boolean { return this._authService.isLoggedIn; }
+  
   /* Return a string containing the "team id" -- that is, the PC2 team account number with
      the leading "team" removed */
   get teamId(): string { 
