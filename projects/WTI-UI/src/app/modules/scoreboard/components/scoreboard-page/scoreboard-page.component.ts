@@ -30,7 +30,7 @@ export class ScoreboardPageComponent implements OnInit, OnDestroy, DoCheck {
 		this._appTitleService.setTitleWithTeamId("Scoreboard");
 		
         	//indicate that this Scoreboard page is the most recently accessed page
-        	saveCurrentPage(Constants.SCOREBOARD_PAGE_KEY);
+        	saveCurrentPage(Constants.SCOREBOARD_PAGE);
 
 		this.loadStandings();
 

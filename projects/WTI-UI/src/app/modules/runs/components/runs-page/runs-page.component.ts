@@ -34,7 +34,7 @@ export class RunsPageComponent implements OnInit, OnDestroy {
     this.loadRuns();
     
     //indicate that this Runs page is the most recently accessed page
-    saveCurrentPage(Constants.RUNS_PAGE_KEY);
+    saveCurrentPage(Constants.RUNS_PAGE);
 
     this.filteredRuns = this.runs;
 

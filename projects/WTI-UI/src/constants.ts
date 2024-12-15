@@ -13,24 +13,39 @@ export let DEBUG_MODE = true ;
 export const CURRENT_PAGE_KEY = 'curPageKey';
 
 /**
- * The key for the RUNS page.
+ * The storageSession value indicating the RUNS page is "current".
  */
-export const RUNS_PAGE_KEY = 'runs';
+export const RUNS_PAGE = 'runs';
 
 /**
- * The key for the OPTIONS page.
+ * The storageSession value indicating the OPTIONS page is "current".
  */
-export const OPTIONS_PAGE_KEY = 'options';
+export const OPTIONS_PAGE = 'options';
 
 /**
- * The key for the CLARIFICATIONS page.
+ * The key under which the OPTIONS page details (that is, current option values) are stored in sessionStorage.
  */
-export const CLARIFICATIONS_PAGE_KEY = 'clarifications';
+export const OPTIONS_DETAILS_KEY = 'optionsDetails';
 
 /**
- * The key for the SCOREBOARD page.
+ * The optionsDetails key for the clarifications-notifications-enabled option
  */
-export const SCOREBOARD_PAGE_KEY = 'scoreboard';
+export const CLARS_ENABLED_OPTIONS_KEY = 'clarsNotificationsEnabled';
+		 
+/**
+ * The optionsDetails key for the runs-notifications-enabled option
+ */
+export const RUNS_ENABLED_OPTIONS_KEY = 'runsNotificationsEnabled';
+		 		 
+/**
+ * The storageSession value indicating the CLARIFICATIONS page is "current".
+ */
+export const CLARIFICATIONS_PAGE = 'clarifications';
+
+/**
+  * The storageSession value indicating the SCOREBOARD page is "current".
+ */
+export const SCOREBOARD_PAGE = 'scoreboard';
 
 /**
  * The key under which the "connection token" for websocket messages is stored in sessionStorage.

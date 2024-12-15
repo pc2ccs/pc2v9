@@ -33,7 +33,7 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
 	this._appTitleService.setTitleWithTeamId("Clarifications");
 
     //indicate that this Clarifications page is the most recently accessed page
-    saveCurrentPage(Constants.CLARIFICATIONS_PAGE_KEY);
+    saveCurrentPage(Constants.CLARIFICATIONS_PAGE);
 
     this.buildForm();
     this.loadClars();
