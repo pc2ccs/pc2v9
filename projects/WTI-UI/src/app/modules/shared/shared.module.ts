@@ -8,12 +8,14 @@ import { AppFooterComponent } from './components/app-footer/app-footer.component
 import { RouterModule } from '@angular/router';
 import { JudgementSelectorComponent } from './components/judgement-selector/judgement-selector.component';
 import { MatDialogModule } from '@angular/material/dialog';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatSelectModule} from '@angular/material/select';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { AboutWtiComponent } from './components/about-wti/about-wti.component';
 import { CountdownModule } from 'ngx-countdown';
+import { BrowserModule } from '@angular/platform-browser';
+import { ElapsedTimePipe } from 'src/app/modules/core/services/elapsedTimePipe.service';
 
 @NgModule({
   declarations: [
@@ -33,7 +35,9 @@ import { CountdownModule } from 'ngx-countdown';
     MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
-    CountdownModule
+    CountdownModule,
+    BrowserModule,
+    ElapsedTimePipe
   ],
   exports: [
     AppHeaderComponent,
