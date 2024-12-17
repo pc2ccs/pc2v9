@@ -6,9 +6,30 @@
     </div>
     
     <div class='clock-container' *ngIf='showClocks'> 
-       	  Elapsed: <countdown [config]="{ leftTime: 0, format: 'HH:mm:ss', message: 'Elapsed Time is up!' }">
+       	  Elapsed: <br />
+       	  
+       	  <div> {{ elapsedSecs }}</div>
+       	  <!-- <div>{{ myUpCounter * 1000 | date: "HH':'MM':'SS" }}</div> -->
+       	  <!-- <div>{{ getElapsedTimeAsDate() | date: "ddd:HH:mm:ss" }}</div> -->
+       	  <div>{{ getElapsedTimeAsDate() | elapsedTime }}</div>
+       	  <!-- <div>{{ getElapsedTimeAsDate() | date: 'medium' }}</div> -->
+       	  <!-- 
+       	  <countUp [startVal]="0" [endVal]="3630" >
+       	  -->
+       	  
+       	  <!-- 
+      	  <countUp [startVal]="0" [endVal]="3630" format= "HH:mm:ss">
+      	  -->
+      	  
+       	  <!-- 
+       	  <countUp [config]="{ startVal:0,  endVal:3630,  format: 'HH:mm:ss' }">
+       	  <!-- probably need something like the following to support insertion of contest time data into the counter...
        	  <ng-template #template let-time>{{time.days}}d {{time.hours}}h {{time.minutes}}m {{time.seconds}}s</ng-template>
-       	  </countdown>
+       	  -->
+       	  
+       	  <!-- 
+       	  </countUp>
+       	  -->
     </div>
     
     <div class='teamid-container' *ngIf='showTeamId'>
@@ -24,7 +45,8 @@
     </nav>
     
     <div class='clock-container' *ngIf='showClocks'> 
-    	Remaining: <countdown [config]="{ leftTime: 3630, format: 'HH:mm:ss', message: 'Remaining Time is up!' }"></countdown>
+    	Remaining: <br />
+    	<countdown [config]="{ leftTime: 3600, format: 'HH:mm:ss', message: 'Remaining Time is up!' }"></countdown>
     </div>
     
 </header>
