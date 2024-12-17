@@ -16,6 +16,7 @@ import { IWebsocketService } from './abstract-services/i-websocket.service';
 import { UiHelperService } from './services/ui-helper.service';
 import { SharedModule } from '../shared/shared.module';
 import { DEBUG_MODE } from 'src/constants';
+import { CommonModule } from '@angular/common';
 
 export function TeamsServiceFactory(http: HttpClient) {
   if (DEBUG_MODE) {
@@ -93,8 +94,8 @@ export function WebsocketServiceFactory(injector: Injector,
   ],
   imports: [
     HttpClientModule,
-    SharedModule
+    SharedModule,
+    CommonModule
   ],
-  exports: [],
 })
 export class CoreModule { }
