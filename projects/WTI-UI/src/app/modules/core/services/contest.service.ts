@@ -5,6 +5,7 @@ import { ContestLanguage } from '../models/contest-language';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { ContestProblem } from '../models/contest-problem';
+import { ContestClock } from '../models/contest-clock';
 import { Clarification } from '../models/clarification';
 
 @Injectable()
@@ -36,6 +37,13 @@ export class ContestService extends IContestService {
 
   getIsContestRunning(): Observable<boolean> {
     return this._httpClient.get<boolean>(`${environment.baseUrl}/contest/isRunning`);
+  }
+  
+  /** This method returns an Observable "ContestClock" object -- a WTI-UI model corresponding to the PC2 "ContestTime" class,
+   *  which itself encapsulates the "contest clock" on the PC2 server.
+   */
+  getContestClock(): Observable<ContestClock> {
+    return this._httpClient.get<ContestClock>(`${environment.baseUrl}/contest/contestclock`);
   }
   
   getStandings(): Observable<String> {
