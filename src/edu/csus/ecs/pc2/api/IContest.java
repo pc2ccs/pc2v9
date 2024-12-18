@@ -299,7 +299,7 @@ public interface IContest {
     /**
      * Get an {@link IContestClock} object containing contest time-related information.
      * The {@link IContestClock} object can be queried for values such as the amount of 
-     * time elasped so far in the contest, the amount of time remaining in the contest, and
+     * time elapsed so far in the contest, the amount of time remaining in the contest, and
      * whether the contest clock is currently &quot;paused&quot; or not. 
      * <P>
      * Note that the {@link IContestClock} object returned by the current implementation of 
