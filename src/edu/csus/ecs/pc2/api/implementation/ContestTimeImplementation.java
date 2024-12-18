@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
 
+import java.util.Calendar;
+
 import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -36,6 +38,15 @@ public class ContestTimeImplementation implements IContestClock {
         return contestTime.getElapsedSecs();
     }
 
+    /**
+     * Returns the time at which the contest was first started, or null if the contest has never
+     * been started.  Note that the returned time is never affected by any "pause" operations
+     * which occur after the contest has been first started.
+     */
+    public Calendar getContestStartTime() {
+        return contestTime.getContestStartTime();
+    }
+    
     public boolean isContestClockRunning() {
         return contestTime.isContestRunning();
     }
