@@ -15,7 +15,6 @@ import { WebsocketMockService } from './services/websocket.mock.service';
 import { IWebsocketService } from './abstract-services/i-websocket.service';
 import { UiHelperService } from './services/ui-helper.service';
 import { SharedModule } from '../shared/shared.module';
-import { CommonModule } from '@angular/common';
 import { ElapsedTimePipe } from './services/elapsedTimePipe.service';
 
 export function TeamsServiceFactory(http: HttpClient) {
@@ -41,15 +40,13 @@ export function WebsocketServiceFactory(injector: Injector, authService: AuthSer
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: IWebsocketService, useFactory: WebsocketServiceFactory, deps: [Injector, AuthService] },
     AuthGuard,
-    UiHelperService
-  ],
-  declarations: [
+    UiHelperService,
     ElapsedTimePipe
   ],
   imports: [
     HttpClientModule,
     SharedModule,
-    CommonModule
+    ElapsedTimePipe
   ],
   exports: [
     ElapsedTimePipe
