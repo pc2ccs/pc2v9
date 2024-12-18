@@ -94,8 +94,7 @@ export function WebsocketServiceFactory(injector: Injector,
   ],
   imports: [
     HttpClientModule,
-    SharedModule,
-    CommonModule
+    SharedModule
   ],
 })
 export class CoreModule { }
