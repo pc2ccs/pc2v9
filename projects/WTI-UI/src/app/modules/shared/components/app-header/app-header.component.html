@@ -7,29 +7,10 @@
     
     <div class='clock-container' *ngIf='showClocks'> 
        	  Elapsed: <br />
-       	  
-       	  <div> {{ elapsedSecs }}</div>
-       	  <!-- <div>{{ myUpCounter * 1000 | date: "HH':'MM':'SS" }}</div> -->
-       	  <!-- <div>{{ getElapsedTimeAsDate() | date: "ddd:HH:mm:ss" }}</div> -->
-       	  <div>{{ getElapsedTimeAsDate() | elapsedTime }}</div>
-       	  <!-- <div>{{ getElapsedTimeAsDate() | date: 'medium' }}</div> -->
-       	  <!-- 
-       	  <countUp [startVal]="0" [endVal]="3630" >
-       	  -->
-       	  
-       	  <!-- 
-      	  <countUp [startVal]="0" [endVal]="3630" format= "HH:mm:ss">
-      	  -->
-      	  
-       	  <!-- 
-       	  <countUp [config]="{ startVal:0,  endVal:3630,  format: 'HH:mm:ss' }">
-       	  <!-- probably need something like the following to support insertion of contest time data into the counter...
-       	  <ng-template #template let-time>{{time.days}}d {{time.hours}}h {{time.minutes}}m {{time.seconds}}s</ng-template>
-       	  -->
-       	  
-       	  <!-- 
-       	  </countUp>
-       	  -->
+       	  {{ elapsedSecs }} <br />
+       	  <!-- "elapsedTime" is the "name" of the ElapsedTimePipe service which produces a formatted
+       	      string representing the time difference between the specified "start date" and "now". -->
+       	  {{ getStartDate() | elapsedTime }}
     </div>
     
     <div class='teamid-container' *ngIf='showTeamId'>
