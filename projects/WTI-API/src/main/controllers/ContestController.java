@@ -467,8 +467,9 @@ public class ContestController extends MainController {
 					long elapsedSecs = contestClock.getElapsedSecs();
 					long wallClockStartTime = contestClock.getContestStartTime().getTimeInMillis();	
 					
+					//construct a ContestClock containing the PC2 Server clock values
 					returnableContestClock = new ContestClockModel(isRunning,contestLengthInSecs, elapsedSecs, wallClockStartTime);
-					
+										
 				}
 				catch(NotLoggedInException e) {
 					return Response.status(Response.Status.UNAUTHORIZED)
@@ -482,6 +483,7 @@ public class ContestController extends MainController {
 							.type(MediaType.APPLICATION_JSON).build();
 				}		
 				
+				//return the PC2 ContestClock, mapped into JSON
 				return Response.ok()
 						.entity(returnableContestClock)
 						.type(MediaType.APPLICATION_JSON).build();
