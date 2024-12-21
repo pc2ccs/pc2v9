@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
 import { DEBUG_MODE } from 'src/constants';
+import { ContestClock } from 'src/app/modules/core/models/contest-clock';
 
 /*
 LoginPageComponent is the initial page displayed by the WTI-UI Single-Page-Application (SPA).
@@ -40,6 +41,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   formGroup: FormGroup;
   invalidCreds = false;
   loginStarted = false;
+  contestClock: ContestClock = new ContestClock();
 
   constructor(private _formBuilder: FormBuilder,
               private _authService: AuthService,
@@ -135,6 +137,53 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 			this.invalidCreds = true;
 			this.loginStarted = false;
 		});
+
+		//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
+		if (DEBUG_MODE) {
+			console.log ("LoginPageComponent.onSubmit(): invoking ContestService.getContestClock() and subscribing to wait for response.")
+		}
+		this._contestService.getContestClock() 
+			.subscribe(
+				(data: any) => {
+					if (DEBUG_MODE) {
+						console.log ("LoginPageComponent.onSubmit(): got subscription callback from getContestClock()");
+					}
+        			if (!data) { 
+						console.error ("Unable to get ContestClock from PC2 API via ContestService!");
+					} else {
+						if (DEBUG_MODE) {
+							console.log ("LoginPageComponent.onSubmit(): data object returned from getContestClock():");
+							console.log (data);
+						}
+						
+						//copy the data fields received from the PC2 Server (via the WTI-API) into the local ContestClock object
+						this.contestClock.isRunning = data.running ;
+						this.contestClock.contestLengthSecs = data.contestLengthInSecs ;
+						this.contestClock.elapsedSecs = data.elapsedSecs ;
+						this.contestClock.wallClockStartTime = data.wallClockStartTime ;
+
+						if (DEBUG_MODE) {
+							console.log ("  Contest Clock values:");
+							console.log ("    isRunning = ", this.contestClock.isRunning);
+							console.log ("    contestLengthSecs = ", this.contestClock.contestLengthSecs);
+							console.log ("    elapsedSecs = ", this.contestClock.elapsedSecs);
+							console.log ("    wallClockStartTime = ", this.contestClock.wallClockStartTime);
+						}
+					}
+      			}, 
+				(error: any) => {
+        			console.error("LoginPageComponent.onSubmit(): getContestClock() subscription callback error:");
+					console.error (error);
+      			}
+			);
+		
+       }, (error: any) => {
+    	  if (DEBUG_MODE) {
+    		  console.error ("AuthService.login() subscription returned error:", error) ;
+    	  }
+         this.invalidCreds = true;
+         this.loginStarted = false;
+       });
   }
 
   private buildForm(): void {
