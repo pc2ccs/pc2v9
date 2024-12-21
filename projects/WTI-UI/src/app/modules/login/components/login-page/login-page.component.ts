@@ -99,18 +99,30 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this._authService.login(loginCreds)
       .pipe(takeUntil(this._unsubscribe))
       .subscribe((result: TeamsLoginResponse) => {
+<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
 			if (DEBUG_MODE) {
 				console.log ("Received callback from subscribing to AuthService.login();" ) ;
 				console.log ("  Invoking AuthService.completeLogin()") ;
 			}
+=======
+	
+>>>>>>> d55fa7f i1027: removed no-longer-needed debugging; reformat code for readability
         this._authService.completeLogin(result.teamId, result.teamName);
+<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
 			if (DEBUG_MODE) {
 				console.log ("  Invoking WebsocketService.startWebsocket()") ;
 			}
+=======
+
+>>>>>>> d55fa7f i1027: removed no-longer-needed debugging; reformat code for readability
         this._websocketService.startWebsocket();
+<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
         	if (DEBUG_MODE) {
         		console.log ("  invoking ContestService.getisContestRunning() and subscribing to the result") ;
         	}
+=======
+
+>>>>>>> d55fa7f i1027: removed no-longer-needed debugging; reformat code for readability
         this._contestService.getIsContestRunning()
           .subscribe((val: boolean) => {
 			if (DEBUG_MODE) {
@@ -139,50 +151,38 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 		});
 
 		//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
-		if (DEBUG_MODE) {
-			console.log ("LoginPageComponent.onSubmit(): invoking ContestService.getContestClock() and subscribing to wait for response.")
-		}
 		this._contestService.getContestClock() 
 			.subscribe(
 				(data: any) => {
-					if (DEBUG_MODE) {
-						console.log ("LoginPageComponent.onSubmit(): got subscription callback from getContestClock()");
-					}
         			if (!data) { 
 						console.error ("Unable to get ContestClock from PC2 API via ContestService!");
-					} else {
-						if (DEBUG_MODE) {
-							console.log ("LoginPageComponent.onSubmit(): data object returned from getContestClock():");
-							console.log (data);
-						}
-						
+					} else {						
 						//copy the data fields received from the PC2 Server (via the WTI-API) into the local ContestClock object
 						this.contestClock.isRunning = data.running ;
 						this.contestClock.contestLengthSecs = data.contestLengthInSecs ;
 						this.contestClock.elapsedSecs = data.elapsedSecs ;
 						this.contestClock.wallClockStartTime = data.wallClockStartTime ;
-
-						if (DEBUG_MODE) {
-							console.log ("  Contest Clock values:");
-							console.log ("    isRunning = ", this.contestClock.isRunning);
-							console.log ("    contestLengthSecs = ", this.contestClock.contestLengthSecs);
-							console.log ("    elapsedSecs = ", this.contestClock.elapsedSecs);
-							console.log ("    wallClockStartTime = ", this.contestClock.wallClockStartTime);
-						}
 					}
       			}, 
 				(error: any) => {
-        			console.error("LoginPageComponent.onSubmit(): getContestClock() subscription callback error:");
+        			console.error("LoginPageComponent.onSubmit(): getContestClock() subscription callback error: ");
 					console.error (error);
       			}
 			);
 		
        }, (error: any) => {
+<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
     	  if (DEBUG_MODE) {
     		  console.error ("AuthService.login() subscription returned error:", error) ;
     	  }
          this.invalidCreds = true;
          this.loginStarted = false;
+=======
+			console.error ("LoginPageComponent.onSubmit(): AuthService.login() subscription callback error: ");
+			console.error(error);
+			this.invalidCreds = true;
+			this.loginStarted = false;
+>>>>>>> d55fa7f i1027: removed no-longer-needed debugging; reformat code for readability
        });
   }
 
