@@ -13,11 +13,18 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { AboutWtiComponent } from './components/about-wti/about-wti.component';
-import { CountdownModule } from 'ngx-countdown';
 import { BrowserModule } from '@angular/platform-browser';
-import { ElapsedTimePipe } from 'src/app/modules/core/services/elapsedTimePipe.service';
+import { DisplayTimePipe } from 'src/app/modules/core/services/displayTimePipe.service';
+import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
+import { ContestService } from 'src/app/modules/core/services/contest.service';
+import { ContestServiceFactory } from '../core/core.module';
+import { HttpClient } from '@angular/common/http';
 
 @NgModule({
+  providers: [
+    { provide: IContestService, useFactory: ContestServiceFactory, deps: [HttpClient] },
+    { provide: ContestService, useFactory: ContestServiceFactory, deps: [HttpClient] },
+  ],
   declarations: [
     AppHeaderComponent,
     AppFooterComponent,
@@ -35,9 +42,8 @@ import { ElapsedTimePipe } from 'src/app/modules/core/services/elapsedTimePipe.s
     MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
-    CountdownModule,
     BrowserModule,
-    ElapsedTimePipe
+    DisplayTimePipe
   ],
   exports: [
     AppHeaderComponent,
@@ -49,8 +55,7 @@ import { ElapsedTimePipe } from 'src/app/modules/core/services/elapsedTimePipe.s
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatSnackBarModule,
-    CountdownModule
+    MatSnackBarModule
   ]
 })
 export class SharedModule { }
