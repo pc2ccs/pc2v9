@@ -6,6 +6,7 @@ import { ContestProblem } from '../models/contest-problem';
 import { Clarification } from '../models/clarification';
 import { DEBUG_MODE } from 'src/constants';
 import { ContestClock } from '../models/contest-clock';
+import { DEBUG_MODE } from 'src/constants';
 
 @Injectable()
 export class ContestMockService extends IContestService {
