@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AuthService } from 'src/app/modules/core/auth/auth.service';
-import { ElapsedTimePipe } from 'src/app/modules/core/services/elapsedTimePipe.service';
+import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
+import { DEBUG_MODE } from 'src/constants'
 
 @Component({
     selector: 'app-header',
@@ -26,26 +27,20 @@ export class AppHeaderComponent {
     return teamId;
   }
   
-  elapsedSecs = 0 ; 
-  
-  getElapsedTimeAsDate(): Date {
-	  let newDate = new Date(this.elapsedSecs * 1000);
-	  console.log(newDate.toString());
-	  return newDate ;
+  constructor(private _authService: AuthService, private _contestService: IContestService) {
+	  if (DEBUG_MODE ) {
+		console.log ("Executing AppHeaderComponent constructor")
+	  }
   }
 
 
-  constructor(private _authService: AuthService) {
-	  
-	  setInterval(
-			//execute this function at the specified interval:
-			() => {
-				//add 1 second to the counter since 1000msec have passed
-	    		this.elapsedSecs += 1 ;
-	    		console.log(`Seconds: ${this.elapsedSecs}`);
-	  		}, 
-			1000	// 1000 milliseconds = 1 second interval
-		); 
-	  
+  getElapsedSecs(): number {
+	let secs = this._contestService.getElapsedSecs() ;
+	return secs;
+  }
+
+  getRemainingSecs(): number {
+	let secs = this._contestService.getRemainingSecs() ;
+	return secs;
   }
 }

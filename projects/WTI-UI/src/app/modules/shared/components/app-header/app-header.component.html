@@ -7,10 +7,10 @@
     
     <div class='clock-container' *ngIf='showClocks'> 
        	  Elapsed: <br />
-       	  {{ elapsedSecs }} <br />
-       	  <!-- "elapsedTime" is the "name" of the ElapsedTimePipe service which produces a formatted
-       	      string representing the time difference between the specified "start date" and "now". -->
-       	  {{ getStartDate() | elapsedTime }}
+       	  {{ getElapsedSecs() }} <br />
+       	  <!-- "displayTime" is the "name" of the DisplayTimePipe service which produces a string,
+       	  		formatted as Days:Hours:Minutes:Seconds, from a given time specified as a number of seconds. -->
+       	  {{ getElapsedSecs() | displayTime }}
     </div>
     
     <div class='teamid-container' *ngIf='showTeamId'>
@@ -27,7 +27,9 @@
     
     <div class='clock-container' *ngIf='showClocks'> 
     	Remaining: <br />
-    	<countdown [config]="{ leftTime: 3600, format: 'HH:mm:ss', message: 'Remaining Time is up!' }"></countdown>
+    	<!-- <countdown [config]="{ leftTime: 3600, format: 'HH:mm:ss', message: 'Remaining Time is up!' }"></countdown> -->
+       	{{ getRemainingSecs() | displayTime }}
+
     </div>
     
 </header>
