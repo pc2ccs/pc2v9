@@ -23,10 +23,6 @@ export class DisplayTimePipe implements PipeTransform {
     const minutes = Math.floor((numSecs % (60 * 60)) / (60));
     const seconds = Math.floor(numSecs % 60);
 
-	if (DEBUG_MODE) {
-		console.log("DisplayTimePipe.transform(): computed ", numSecs, " as ", days, "d ", hours, "h ", minutes, "m ", seconds, "s");
-	} 
-
     const formattedHours = hours.toString().padStart(2, '0');
     const formattedMinutes = minutes.toString().padStart(2, '0');
     const formattedSeconds = seconds.toString().padStart(2, '0');
