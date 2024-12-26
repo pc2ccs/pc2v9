@@ -159,7 +159,11 @@ export class AppComponent implements OnInit {
 						console.log (this._contestService);
 					}
 					this._contestService.isContestRunning = val;
+<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
 					this._contestService.contestClock.next();
+=======
+					this._contestService.contestClockEvent.next();
+>>>>>>> c622bdd i1027: AppComponent: add support matching i871-F5-in-WTI.
 				});
 
         //get the most recently saved Option values from sessionStorage
