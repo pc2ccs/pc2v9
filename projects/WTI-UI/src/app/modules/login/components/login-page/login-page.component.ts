@@ -99,30 +99,18 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this._authService.login(loginCreds)
       .pipe(takeUntil(this._unsubscribe))
       .subscribe((result: TeamsLoginResponse) => {
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
 			if (DEBUG_MODE) {
 				console.log ("Received callback from subscribing to AuthService.login();" ) ;
 				console.log ("  Invoking AuthService.completeLogin()") ;
 			}
-=======
-	
->>>>>>> d55fa7f i1027: removed no-longer-needed debugging; reformat code for readability
         this._authService.completeLogin(result.teamId, result.teamName);
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
 			if (DEBUG_MODE) {
 				console.log ("  Invoking WebsocketService.startWebsocket()") ;
 			}
-=======
-
->>>>>>> d55fa7f i1027: removed no-longer-needed debugging; reformat code for readability
         this._websocketService.startWebsocket();
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
         	if (DEBUG_MODE) {
         		console.log ("  invoking ContestService.getisContestRunning() and subscribing to the result") ;
         	}
-=======
-
->>>>>>> d55fa7f i1027: removed no-longer-needed debugging; reformat code for readability
         this._contestService.getIsContestRunning()
           .subscribe((val: boolean) => {
 			if (DEBUG_MODE) {
@@ -144,7 +132,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
           });
       }, (error: any) => {
     	  if (DEBUG_MODE) {
-    		  console.log ("AuthService.login() subscription returned error.") ;
+    		  console.log ("AuthService.login() subscription returned error: ", error) ;
     	  }
 			this.invalidCreds = true;
 			this.loginStarted = false;
@@ -171,18 +159,11 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 			);
 		
        }, (error: any) => {
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
     	  if (DEBUG_MODE) {
     		  console.error ("AuthService.login() subscription returned error:", error) ;
     	  }
          this.invalidCreds = true;
          this.loginStarted = false;
-=======
-			console.error ("LoginPageComponent.onSubmit(): AuthService.login() subscription callback error: ");
-			console.error(error);
-			this.invalidCreds = true;
-			this.loginStarted = false;
->>>>>>> d55fa7f i1027: removed no-longer-needed debugging; reformat code for readability
        });
   }
 
