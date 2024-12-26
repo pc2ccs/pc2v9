@@ -51,11 +51,15 @@ export abstract class IWebsocketService {
         	  if (DEBUG_MODE) {
         		  console.log ("IWebsocketService.incomingMessage(): callback from ContestService.getIsContestRunning() returned '", val, "'");
         		  console.log ("Setting ContestService.isContestRunning to '", val, "'") ;
+<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
         		  console.log ("  and invoking ContestService.contestClock.next()") ;
+=======
+        		  console.log ("  and invoking ContestService.contestClockEvent.next()") ;
+>>>>>>> 5291696 i1027: IWebSocketService: make root-injectable; add debug output.
         	  }
 
             this._contestService.isContestRunning = val;
-            this._contestService.contestClock.next();
+            this._contestService.contestClockEvent.next();
           });
         break;
       }
