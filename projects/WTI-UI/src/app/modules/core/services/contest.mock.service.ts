@@ -93,6 +93,18 @@ export class ContestMockService extends IContestService {
 		{isRunning:'true', contestLengthSecs:'18000', elapsedSecs:'3600', wallClockStartTime:'1734593847'});
   }
 
+  updateContestClock (newContestClock: ContestClock) {
+	//nothing to do -- this is a mock service
+  }		
+
+  getElapsedSecs(): number {
+	return 3600; //mock: 1 hour has elapsed
+  }
+
+  getRemainingSecs(): number {
+	return 18000 - 3600 ;  //mock: 5 hour contest with one hour elapsed
+  }
+
   getStandings(): Observable<String> {
   
 	//TODO: this method needs to return a legitimate (mock) team standing array!
