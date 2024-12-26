@@ -15,41 +15,96 @@ import { WebsocketMockService } from './services/websocket.mock.service';
 import { IWebsocketService } from './abstract-services/i-websocket.service';
 import { UiHelperService } from './services/ui-helper.service';
 import { SharedModule } from '../shared/shared.module';
-import { ElapsedTimePipe } from './services/elapsedTimePipe.service';
+import { DEBUG_MODE } from 'src/constants';
+import { DisplayTimePipe } from './services/displayTimePipe.service';
 
 export function TeamsServiceFactory(http: HttpClient) {
-  if (environment.useMock) { return new TeamsMockService(); }
+  if (DEBUG_MODE) {
+    console.log("Executing TeamsServiceFactory...")
+  }
+
+  if (environment.useMock) { 
+    if (DEBUG_MODE) {
+      console.log("...about to construct then return new TeamsMockService")
+    }
+    return new TeamsMockService(); 
+  } 
+
+  //not using Mock
+  if (DEBUG_MODE) {
+    console.log("...about to construct then return new TeamsService")
+  }
   return new TeamsService(http);
 }
 
 export function ContestServiceFactory(http: HttpClient) {
-  if (environment.useMock) { return new ContestMockService(); }
+  if (DEBUG_MODE) {
+    console.log("Executing ContestServiceFactory...")
+  }
+
+  if (environment.useMock) { 
+    if (DEBUG_MODE) {
+      console.log("...about to construct then return new ContestMockService")
+    }
+    return new ContestMockService(); 
+  }
+
+  //not using Mock
+  if (DEBUG_MODE) {
+    console.log("...about to construct then return new ContestService")
+  }
   return new ContestService(http);
 }
 
-export function WebsocketServiceFactory(injector: Injector, authService: AuthService) {
-  if (environment.useMock) { return new WebsocketMockService(injector); }
-  return new WebsocketService(injector, authService);
+export function WebsocketServiceFactory(injector: Injector, 
+										uiHelperService: UiHelperService, iContestService: IContestService,
+              							iTeamsService: ITeamsService, authService: AuthService) {
+  if (DEBUG_MODE) {
+    console.log("Executing WebsocketServiceFactory...")
+  }
+
+  if (environment.useMock) { 
+    if (DEBUG_MODE) {
+      console.log("...about to construct then return new WebsocketMockService")
+    }	
+    return new WebsocketMockService(injector); 
+  }
+
+  //not using Mock
+  if (DEBUG_MODE) {
+    console.log("...about to construct then return new WebsocketService")
+  }
+
+  //original code:
+  //return new WebsocketService(injector, authService);
+  return new WebsocketService(uiHelperService, iContestService, iTeamsService, authService);
 }
 
 @NgModule({
   providers: [
     { provide: ITeamsService, useFactory: TeamsServiceFactory, deps: [HttpClient] },
     { provide: IContestService, useFactory: ContestServiceFactory, deps: [HttpClient] },
+    { provide: ContestService, useFactory: ContestServiceFactory, deps: [HttpClient] },
     { provide: AuthService, useClass: AuthService },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-    { provide: IWebsocketService, useFactory: WebsocketServiceFactory, deps: [Injector, AuthService] },
+    { provide: IWebsocketService, useFactory: WebsocketServiceFactory, deps: [Injector, UiHelperService, IContestService, ITeamsService, AuthService] },
     AuthGuard,
     UiHelperService,
-    ElapsedTimePipe
+    DisplayTimePipe,
+	//TODO:  should the following two still be declared here since they are now listed in the above "deps" list?
+    UiHelperService,
+    ContestService,
+	//TODO:  should the following two still be declared here since they are now listed in the above "deps" list?
+    UiHelperService,
+    ContestService
   ],
   imports: [
     HttpClientModule,
     SharedModule,
-    ElapsedTimePipe
+    DisplayTimePipe
   ],
   exports: [
-    ElapsedTimePipe
-  ],
+    DisplayTimePipe
+  ]
 })
 export class CoreModule { }

@@ -5,9 +5,17 @@ import { ContestLanguage } from '../models/contest-language';
 import { ContestProblem } from '../models/contest-problem';
 import { Clarification } from '../models/clarification';
 import { ContestClock } from '../models/contest-clock';
+import { DEBUG_MODE } from 'src/constants';
 
 @Injectable()
 export class ContestMockService extends IContestService {
+	
+	constructor() {
+		if (DEBUG_MODE) {
+			console.log ("Executing ContestMockService constructor; preparing to call IContestService.super()") ;
+		}
+		super();
+	}
 
   getLanguages(): Observable<ContestLanguage[]> {
     return of<ContestLanguage[]>([
