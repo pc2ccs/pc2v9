@@ -35,7 +35,12 @@ export class ContestTimerService {
 	  console.error ("ContestTimerService.setRemainingSecs(): cannot set remaining seconds while Timer is running; stop the timer first.")
       return;
 	} else {
-      this.remainingSecs = newRemainingSecs>=0 ? newRemainingSecs : 0;
+      if (newRemainingSecs>=0) {
+        this.remainingSecs = newRemainingSecs;
+      } else {
+        console.error("ContestTimerService.setRemainingSecs(): attempt to set Remaining Time to less than zero not allowed; setting to zero instead.");
+        this.remainingSecs = 0;
+      }
 	}
   }
 
