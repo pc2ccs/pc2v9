@@ -6,17 +6,27 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { ContestProblem } from '../models/contest-problem';
 import { ContestClock } from '../models/contest-clock';
+import { ContestTimerService } from './contestTimer.service' ;
 import { Clarification } from '../models/clarification';
+import { DEBUG_MODE } from 'src/constants';
 
-@Injectable()
+@Injectable({
+	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
+})
 export class ContestService extends IContestService {
 	
   standingsAreCurrent: boolean ;
   cachedStandings: Observable<String> ;
 
+  //the WTI-UI timer service which updates elapsed and remaining time when started
+  contestTimer: ContestTimerService = new ContestTimerService() ; 
+  
   constructor(private _httpClient: HttpClient) {
     super();
-	    this.standingsAreCurrent = false;
+	if (DEBUG_MODE) {
+		console.log ("Executing ContestService constructor; instance ID = ", this.uniqueId) ;
+	}
+    this.standingsAreCurrent = false;
   }
 
   getLanguages(): Observable<ContestLanguage[]> {
@@ -36,24 +46,34 @@ export class ContestService extends IContestService {
   }
 
   getIsContestRunning(): Observable<boolean> {
-    return this._httpClient.get<boolean>(`${environment.baseUrl}/contest/isRunning`);
+	if (DEBUG_MODE) {
+		console.log ("Executing ContestService.getIsContestRunning(): calling HTTP client get(.../contest.isRunning)") ;
+	}
+	return this._httpClient.get<boolean>(`${environment.baseUrl}/contest/isRunning`);
   }
   
   /** This method returns an Observable "ContestClock" object -- a WTI-UI model corresponding to the PC2 "ContestTime" class,
    *  which itself encapsulates the "contest clock" on the PC2 server.
+   * TODO: should this method return the local copy of the ContestClock?
    */
   getContestClock(): Observable<ContestClock> {
     return this._httpClient.get<ContestClock>(`${environment.baseUrl}/contest/contestclock`);
   }
   
   getStandings(): Observable<String> {
-	console.log("ContestService.getStandings():")
+	if (DEBUG_MODE) {
+		console.log("ContestService.getStandings():")
+	}
 	if (!this.standingsAreCurrent) {
-		console.log ("Standings are out of date; fetching new standings");
+		if (DEBUG_MODE) {
+			console.log ("Standings are out of date; fetching new standings");
+		}
 		this.cachedStandings = this._httpClient.get<String>(`${environment.baseUrl}/contest/scoreboard`);
 		this.standingsAreCurrent = true ;
 	} else {
-		 console.log("Returning cached standings");
+		 if (DEBUG_MODE) {
+			 console.log("Returning cached standings");
+		 }
 	}
 	return this.cachedStandings ;
   }
@@ -64,6 +84,48 @@ export class ContestService extends IContestService {
 	
 	getStandingsAreCurrentFlag() : boolean {
 		return this.standingsAreCurrent ;
+	}
+	
+	updateContestClock (newContestClock: ContestClock)  {
+		//save the new clock
+		this.contestClock = newContestClock;
+		
+		//pull the relevant values out of the new clock
+		let timerShouldBeStarted = this.contestClock.isRunning === 'true';
+		let elapsedSecs = parseInt(this.contestClock.elapsedSecs);
+		let contestLengthSecs = parseInt(this.contestClock.contestLengthSecs);
+		let remainingSecs = contestLengthSecs - elapsedSecs;
+		
+		//shut off timer if it is running (otherwise we can't update the elapsed/remaining time values)
+		if (this.contestTimer.isTimerRunning) {
+			this.contestTimer.stopTimer();
+		}
+		
+		//store the new contest time values in the Timer
+		this.contestTimer.setElapsedSecs(elapsedSecs);
+		this.contestTimer.setRemainingSecs(remainingSecs);
+		
+		//restart the timer if the new contest clock values indicate it should be running
+		if (timerShouldBeStarted) {
+			this.contestTimer.startTimer();
+		}
+	}
+	
+	enableContestTimerUpdates() {
+		this.contestTimer.startTimer();
+	}
+	
+	disableContestTimerUpdates() {
+		this.contestTimer.stopTimer();
+	}
+	
+	getElapsedSecs(): number {
+		return parseInt(this.contestClock.elapsedSecs) ;
+	}
+	
+	getRemainingSecs(): number {
+		let remainingSecs = parseInt(this.contestClock.contestLengthSecs) - parseInt(this.contestClock.elapsedSecs) ;
+		return remainingSecs ;
 	}
 
 }
