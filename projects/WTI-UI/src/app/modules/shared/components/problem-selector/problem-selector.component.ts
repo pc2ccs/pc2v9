@@ -40,8 +40,18 @@ export class ProblemSelectorComponent implements OnInit, OnDestroy, ControlValue
       this.writeValue('general');
     }
 
-    // listen for contest start/stop to show/hide contest problems
-    this._contestService.contestClock
+    //Listen for (subscribe to) contest start/stop events to show/hide contest problems.
+  	//The contestClockEvent "Subject" (defined in IContestService) is used as a toggle to indicate when 
+	//contest clock-related events have occured. Subscribing to it means that this component will get a 
+	//callback whenever the contestClockEvent's "next()" method is invoked. 
+	//Currently the contestClockEvent's "next()" method is invoked in exactly one
+	//place:  IWebsocketService.incomingMessage(), when a message of type "contest_clock" is received by the WTI-UI from the WTI-API
+	//(which in turn happens when the WTI-API receives a "contest clock configuration update" notice via the PC2 API).
+	//The effect of all this is that this Component gets notified when "some change" has occurred in the state of the
+	//PC2 contest clock.  This causes the Component to execute its "loadProblems()" method; that method in turn checks
+	//whether the contest is currently RUNNING; if so, it loads the problem names; if not, it blanks out problem names.
+
+    this._contestService.contestClockEvent
       .pipe(takeUntil(this._unsubscribe))
       .subscribe(_ => this.loadProblems());
   }
