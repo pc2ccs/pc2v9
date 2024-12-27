@@ -139,17 +139,37 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 		});
 
 		//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
+		if (DEBUG_MODE) {
+			console.log("  Invoking ContestService.getContestClock(), subscribing for callback result")
+		}
 		this._contestService.getContestClock() 
 			.subscribe(
 				(data: any) => {
         			if (!data) { 
-						console.error ("Unable to get ContestClock from PC2 API via ContestService!");
+						console.error ("LoginPageComponent.onSubmit() ContestClock subscription callback: unable to get ContestClock from PC2 API via ContestService!");
 					} else {						
+<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
 						//copy the data fields received from the PC2 Server (via the WTI-API) into the local ContestClock object
 						this.contestClock.isRunning = data.running ;
 						this.contestClock.contestLengthSecs = data.contestLengthInSecs ;
 						this.contestClock.elapsedSecs = data.elapsedSecs ;
 						this.contestClock.wallClockStartTime = data.wallClockStartTime ;
+=======
+						//copy the data fields received from the PC2 Server (via the WTI-API) into the ContestService's ContestClock object
+						if (DEBUG_MODE) {
+							console.log("LoginPageComponent.onSubmit(): got callback from ContestService.getContestClock() subscription; callback data =");
+							console.log(data);
+						}
+						let newContestClock = new ContestClock();
+						newContestClock.isRunning = data.running ;
+						newContestClock.contestLengthSecs = data.contestLengthInSecs ;
+						newContestClock.elapsedSecs = data.elapsedSecs ;
+						newContestClock.wallClockStartTime = data.wallClockStartTime ;
+						if (DEBUG_MODE) {
+							console.log("LoginPageComponent.onSubmit() ContestService.getContestClock() subscription callback: calling ContestService.updateContestClock() with new clock data) ");
+						}
+						this._contestService.updateContestClock(newContestClock);
+>>>>>>> 95ef304 i1027: LoginPageComponent: added conditional debugging output.
 					}
       			}, 
 				(error: any) => {
