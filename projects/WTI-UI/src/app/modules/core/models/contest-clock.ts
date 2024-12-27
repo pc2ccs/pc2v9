@@ -3,6 +3,9 @@
  *  whether the contest is running or paused right now, and how much time has elapsed on the contest clock since the
  *  contest started (note that this latter value does NOT include any real time which passed while the contest was "paused").
  *  Essentially, this model class corresponds to the PC2 server class "ContestTime".
+ *  Note however that because the (Java-based) PC2 class "ContestTime" is returned from the WTI Server as a JSON string,
+ *  all of the values in the WTI-UI ContestClock model are type 'string' and must be converted to the appropriate type when
+ *  they are actually used.
  */
 export class ContestClock { 
   isRunning: string = '';			//string 'true' or 'false'
