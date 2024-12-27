@@ -14,10 +14,16 @@ export class ContestTimerService {
   }
 
   getElapsedSecs(): number {
+    if (DEBUG_MODE) {
+	  console.log("ContestTimerService.getElapsedSecs(): returning ", this.elapsedSecs);
+    }
     return this.elapsedSecs;
   }
 
   getRemainingSecs(): number {
+    if (DEBUG_MODE) {
+	  console.log("ContestTimerService.getRemainingSecs(): returning ", this.remainingSecs);
+    }
 	return this.remainingSecs;
   }
   
@@ -26,6 +32,9 @@ export class ContestTimerService {
 	  console.error ("ContestTimerService.setElapsedSecs(): cannot set elapsed seconds while Timer is running; stop the timer first.")
       return;
 	} else {
+      if (DEBUG_MODE) {
+        console.log ("ContestTimerService.setElapsedSecs(): setting elapsed seconds to ", newElapsedSecs);
+      }
       this.elapsedSecs = newElapsedSecs;
 	}
   }
@@ -35,6 +44,9 @@ export class ContestTimerService {
 	  console.error ("ContestTimerService.setRemainingSecs(): cannot set remaining seconds while Timer is running; stop the timer first.")
       return;
 	} else {
+      if (DEBUG_MODE) {
+        console.log ("ContestTimerService.setRemainingTime(): setting remaining seconds to ", newRemainingSecs);
+      }
       if (newRemainingSecs>=0) {
         this.remainingSecs = newRemainingSecs;
       } else {
@@ -59,7 +71,9 @@ export class ContestTimerService {
           //bump the elapsed & remaining counters since 1000msec (one sec) has passed
           this.elapsedSecs += 1 ;
 		  this.remainingSecs -= 1
-          console.log(`Elapsed secs: ${this.elapsedSecs}; remaining secs: ${this.remainingSecs}`);
+          if (DEBUG_MODE) {
+            console.log(`Elapsed secs: ${this.elapsedSecs}; remaining secs: ${this.remainingSecs}`);
+          }
         }, 
         1000	// 1000 milliseconds = 1 second interval
       ); 
