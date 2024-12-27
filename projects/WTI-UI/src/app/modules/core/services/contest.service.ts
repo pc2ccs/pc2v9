@@ -57,7 +57,7 @@ export class ContestService extends IContestService {
 
   getIsContestRunning(): Observable<boolean> {
 	if (DEBUG_MODE) {
-		console.log ("Executing ContestService.getIsContestRunning(): calling HTTP client get(.../contest.isRunning)") ;
+		console.log ("ContestService.getIsContestRunning(): calling HTTP client get(.../contest.isRunning)") ;
 	}
 	return this._httpClient.get<boolean>(`${environment.baseUrl}/contest/isRunning`);
   }
