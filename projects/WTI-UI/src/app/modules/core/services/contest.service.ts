@@ -88,6 +88,10 @@ export class ContestService extends IContestService {
 	
 	updateContestClock (newContestClock: ContestClock)  {
 		//save the new clock
+		if (DEBUG_MODE) {
+			console.log("ContestService (id ", this.uniqueId, ").updateContestClock(): replacing Contest Clock with:");
+			console.log(newContestClock);
+		}
 		this.contestClock = newContestClock;
 		
 		//pull the relevant values out of the new clock
@@ -98,6 +102,9 @@ export class ContestService extends IContestService {
 		
 		//shut off timer if it is running (otherwise we can't update the elapsed/remaining time values)
 		if (this.contestTimer.isTimerRunning) {
+			if (DEBUG_MODE) {
+				console.log("ContestService (id ", this.uniqueId, ").updateContestClock(): stopping timer");
+			}
 			this.contestTimer.stopTimer();
 		}
 		
@@ -107,24 +114,39 @@ export class ContestService extends IContestService {
 		
 		//restart the timer if the new contest clock values indicate it should be running
 		if (timerShouldBeStarted) {
+			if (DEBUG_MODE) {
+				console.log("ContestService (id ", this.uniqueId, ").updateContestClock(): starting timer");
+			}
 			this.contestTimer.startTimer();
 		}
 	}
 	
 	enableContestTimerUpdates() {
+		if (DEBUG_MODE) {
+			console.log("ContestService (id ", this.uniqueId, ").enableContestTimerUpdates(): starting timer");
+		}
 		this.contestTimer.startTimer();
 	}
 	
 	disableContestTimerUpdates() {
+		if (DEBUG_MODE) {
+			console.log("ContestService (id ", this.uniqueId, ").disableContestTimerUpdates(): stopping timer");
+		}
 		this.contestTimer.stopTimer();
 	}
 	
 	getElapsedSecs(): number {
+		if (DEBUG_MODE) {
+			console.log("ContestService (id ", this.uniqueId, ").getElapsedSecs(): returning ", this.contestClock.elapsedSecs);
+		}
 		return parseInt(this.contestClock.elapsedSecs) ;
 	}
 	
 	getRemainingSecs(): number {
 		let remainingSecs = parseInt(this.contestClock.contestLengthSecs) - parseInt(this.contestClock.elapsedSecs) ;
+		if (DEBUG_MODE) {
+			console.log("ContestService (id ", this.uniqueId, ").getRemainingSecs(): returning ", remainingSecs);
+		}
 		return remainingSecs ;
 	}
 
