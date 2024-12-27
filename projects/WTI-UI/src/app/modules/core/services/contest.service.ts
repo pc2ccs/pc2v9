@@ -104,12 +104,20 @@ export class ContestService extends IContestService {
 		}
 		this.contestClock = newContestClock;
 		
-		//pull the relevant values out of the new clock
-		let timerShouldBeStarted = this.contestClock.isRunning === 'true';
+		//pull the values out of the updated clock
+		let timerShouldBeStarted = this.contestClock.isRunning ;
 		let elapsedSecs = parseInt(this.contestClock.elapsedSecs);
 		let contestLengthSecs = parseInt(this.contestClock.contestLengthSecs);
 		let remainingSecs = contestLengthSecs - elapsedSecs;
 		
+/*		if (DEBUG_MODE) {
+			console.log ("ContestService.updateContestClock(): values pulled from newContestClock:");
+			console.log ("  timerShouldBeStarted = ", timerShouldBeStarted);
+			console.log ("  elapsedSecs = ", elapsedSecs);
+			console.log ("  contestLengthSecs = ", contestLengthSecs);
+			console.log ("  remainingSecs = ", remainingSecs);
+		}
+*/		
 		//shut off timer if it is running (otherwise we can't update the elapsed/remaining time values)
 		if (this.contestTimer.isTimerRunning) {
 			if (DEBUG_MODE) {
@@ -147,17 +155,19 @@ export class ContestService extends IContestService {
 	
 	getElapsedSecs(): number {
 		let elapsedSecs = this.contestTimer.getElapsedSecs();
-		if (DEBUG_MODE) {
+/*		if (DEBUG_MODE) {
 			console.log("ContestService (id ", this.uniqueId, ").getElapsedSecs(): returning elapsed secs from ContestTimer: ", elapsedSecs);
 		}
+*/		
 		return elapsedSecs ;
 	}
 	
 	getRemainingSecs(): number {
 		let remainingSecs = this.contestTimer.getRemainingSecs();
-		if (DEBUG_MODE) {
+/*		if (DEBUG_MODE) {
 			console.log("ContestService (id ", this.uniqueId, ").getRemainingSecs(): returning remaining secs from ContestTimer: ", remainingSecs);
 		}
+*/
 		return remainingSecs ;
 	}
 

@@ -14,16 +14,18 @@ export class ContestTimerService {
   }
 
   getElapsedSecs(): number {
-    if (DEBUG_MODE) {
+/*    if (DEBUG_MODE) {
 	  console.log("ContestTimerService.getElapsedSecs(): returning ", this.elapsedSecs);
     }
+*/
     return this.elapsedSecs;
   }
 
   getRemainingSecs(): number {
-    if (DEBUG_MODE) {
+/*    if (DEBUG_MODE) {
 	  console.log("ContestTimerService.getRemainingSecs(): returning ", this.remainingSecs);
     }
+*/
 	return this.remainingSecs;
   }
   
@@ -71,9 +73,10 @@ export class ContestTimerService {
           //bump the elapsed & remaining counters since 1000msec (one sec) has passed
           this.elapsedSecs += 1 ;
 		  this.remainingSecs -= 1
-          if (DEBUG_MODE) {
+/*          if (DEBUG_MODE) {
             console.log(`Elapsed secs: ${this.elapsedSecs}; remaining secs: ${this.remainingSecs}`);
           }
+*/
         }, 
         1000	// 1000 milliseconds = 1 second interval
       ); 
