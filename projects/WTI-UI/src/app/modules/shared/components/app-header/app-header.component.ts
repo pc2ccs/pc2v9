@@ -36,17 +36,19 @@ export class AppHeaderComponent {
 
   getElapsedSecs(): number {
 	let secs = this._contestService.getElapsedSecs() ;
-	if (DEBUG_MODE) {
+/*	if (DEBUG_MODE) {
 		console.log("AppHeaderComponent.getElapsedSecs(): returning ", secs);
 	}
-	return secs;
+*/	
+    return secs;
   }
 
   getRemainingSecs(): number {
 	let secs = this._contestService.getRemainingSecs() ;
-	if (DEBUG_MODE) {
+/*	if (DEBUG_MODE) {
 		console.log("AppHeaderComponent.getRemainingSecs(): returning ", secs);
 	}
+*/
 	return secs;
   }
 }
