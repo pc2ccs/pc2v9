@@ -136,16 +136,17 @@ export class ContestService extends IContestService {
 	}
 	
 	getElapsedSecs(): number {
+		let elapsedSecs = this.contestTimer.getElapsedSecs();
 		if (DEBUG_MODE) {
-			console.log("ContestService (id ", this.uniqueId, ").getElapsedSecs(): returning ", this.contestClock.elapsedSecs);
+			console.log("ContestService (id ", this.uniqueId, ").getElapsedSecs(): returning elapsed secs from ContestTimer: ", elapsedSecs);
 		}
-		return parseInt(this.contestClock.elapsedSecs) ;
+		return elapsedSecs ;
 	}
 	
 	getRemainingSecs(): number {
-		let remainingSecs = parseInt(this.contestClock.contestLengthSecs) - parseInt(this.contestClock.elapsedSecs) ;
+		let remainingSecs = this.contestTimer.getRemainingSecs();
 		if (DEBUG_MODE) {
-			console.log("ContestService (id ", this.uniqueId, ").getRemainingSecs(): returning ", remainingSecs);
+			console.log("ContestService (id ", this.uniqueId, ").getRemainingSecs(): returning remaining secs from ContestTimer: ", remainingSecs);
 		}
 		return remainingSecs ;
 	}
