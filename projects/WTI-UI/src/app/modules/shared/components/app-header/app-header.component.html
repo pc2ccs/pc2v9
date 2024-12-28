@@ -7,8 +7,8 @@
     
     <div class='clock-container' *ngIf='showClocks'> 
        	  Elapsed: <br />
-       	  {{ getElapsedSecs() }} <br />
-       	  <!-- "displayTime" is the "name" of the DisplayTimePipe service which produces a string,
+          <!-- {{ getElapsedSecs() }} <br /> This will display the raw number of elapsed seconds, for debugging purposes -->
+          <!-- "displayTime" is the "name" of the DisplayTimePipe service which produces a string,
        	  		formatted as Days:Hours:Minutes:Seconds, from a given time specified as a number of seconds. -->
        	  {{ getElapsedSecs() | displayTime }}
     </div>
