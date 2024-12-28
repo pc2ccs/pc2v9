@@ -130,6 +130,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             if (DEBUG_MODE) {
             	console.log ("Invoking ContestService.contestClockEvent.next()") ;
             }
+			//trigger a contestClockEvent so the SelectProblems dropdown can decide whether to display the problems or not
             this._contestService.contestClockEvent.next();
           });
 
