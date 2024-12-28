@@ -111,7 +111,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         this._websocketService.startWebsocket();
 
         	if (DEBUG_MODE) {
-        		console.log ("  invoking ContestService.getisContestRunning() and subscribing to the result") ;
+        		console.log ("  Invoking ContestService.getisContestRunning() and subscribing to the result") ;
         	}
         this._contestService.getIsContestRunning()
           .subscribe((val: boolean) => {
@@ -133,38 +133,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             this._contestService.contestClockEvent.next();
           });
 
-		//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
-		if (DEBUG_MODE) {
-			console.log("  Invoking ContestService.getContestClock(), subscribing for callback result")
-		}
-		this._contestService.getContestClock() 
-			.subscribe(
-				(data: any) => {
-        			if (!data) { 
-						console.error ("LoginPageComponent.onSubmit() ContestClock subscription callback: unable to get ContestClock from PC2 API via ContestService!");
-					} else {						
-						//copy the data fields received from the PC2 Server (via the WTI-API) into the ContestService's ContestClock object
-						if (DEBUG_MODE) {
-							console.log("LoginPageComponent.onSubmit(): got callback from ContestService.getContestClock() subscription; callback data =");
-							console.log(data);
-						}
-						let newContestClock = new ContestClock();
-						newContestClock.isRunning = data.running ;
-						newContestClock.contestLengthSecs = data.contestLengthInSecs ;
-						newContestClock.elapsedSecs = data.elapsedSecs ;
-						newContestClock.wallClockStartTime = data.wallClockStartTime ;
-						if (DEBUG_MODE) {
-							console.log("LoginPageComponent.onSubmit() ContestService.getContestClock() subscription callback: calling ContestService.updateContestClock() with new clock data) ");
-						}
-						this._contestService.updateContestClock(newContestClock);
-					}
-      			}, 
-				(error: any) => {
-        			console.error("LoginPageComponent.onSubmit(): getContestClock() subscription callback error: ");
-					console.error (error);
-      			}
-			);
-		
+		//update the WTI-UI representations of the PC2 Contest Clock
+        if (DEBUG_MODE) {
+        	console.log ("  Invoking ContestService.updateContestClock()") ;
+        }
+		this._contestService.updateContestClock();
+
        }, (error: any) => {
 			console.error ("LoginPageComponent.onSubmit(): AuthService.login() subscription callback error: ");
 			console.error(error);

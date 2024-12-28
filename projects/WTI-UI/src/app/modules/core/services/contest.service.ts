@@ -47,7 +47,7 @@ export class ContestService extends IContestService {
 
   getIsContestRunning(): Observable<boolean> {
 	if (DEBUG_MODE) {
-		console.log ("ContestService.getIsContestRunning(): calling HTTP client get(.../contest.isRunning)") ;
+		console.log ("ContestService.getIsContestRunning(): invoking HTTP get(.../contest.isRunning) WTI-API endpoint") ;
 	}
 	return this._httpClient.get<boolean>(`${environment.baseUrl}/contest/isRunning`);
   }
@@ -86,10 +86,56 @@ export class ContestService extends IContestService {
 		return this.standingsAreCurrent ;
 	}
 	
-	updateContestClock (newContestClock: ContestClock)  {
+	/** This method invokes the local getContestClock() method, which makes an HTTP call to the WTI-API to get the current
+	 *  PC2 Server clock (aka "ContestTime").  It subscribes to the Observable returned by the HTTP call, 
+	 *  and when the subscription callback occurs it uses the received ContestClock data (an instance of 
+	 *  WTI=UI models/ContestClock) to update the WTI-UI contest clock (including the onscreen displays).  
+	 */
+	updateContestClock ()  {
+		
+		//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
+		if (DEBUG_MODE) {
+			console.log("  Invoking ContestService.getContestClock(), subscribing for HTTP callback result")
+		}
+		this.getContestClock()
+			.subscribe(
+				(data: any) => {
+        			if (!data) { 
+						console.error ("ContestService.updateContestClock() getContestClock() subscription callback: unable to get ContestClock from PC2 API via ContestService!");
+					} else {
+						if (DEBUG_MODE) {
+							console.log("ContestService.updateContestClock(): got callback from getContestClock() subscription; callback data =");
+							console.log(data);
+						}
+						//install the received contest clock data into the ContestService's ContestClock
+						this.installNewContestClock(data);					
+					}
+      			}, 
+				(error: any) => {
+        			console.error("ContestService.updateContestClock(): getContestClock() subscription callback error: ");
+					console.error (error);
+      			}
+			);	
+	}
+	
+	/** This method receives a WTI-UI ContestClock model containing new values which should be used to update the WTI-UI contest clock,
+	 *  including the onscreen displays.  It constructs a new ContestClock object containing the received data and installs that
+	 *  object as the current WTI-UI clock.  It then updates the separate "ContestTimer" object with the specified values, and
+	 *  if the received data indicates the clock should be running it starts the ContestTimer (which then genrates a "clock tick"
+	 *  once per second to update the clock displays).
+	 */
+	installNewContestClock(data: any) {
+		
+		//copy the data fields (received from the PC2 Server via the WTI-API) into a new ContestService ContestClock object
+		let newContestClock = new ContestClock();
+		newContestClock.isRunning = data.running ;
+		newContestClock.contestLengthSecs = data.contestLengthInSecs ;
+		newContestClock.elapsedSecs = data.elapsedSecs ;
+		newContestClock.wallClockStartTime = data.wallClockStartTime ;
+
 		//save the new clock
 		if (DEBUG_MODE) {
-			console.log("ContestService (id ", this.uniqueId, ").updateContestClock(): replacing Contest Clock with:");
+			console.log("ContestService (id", this.uniqueId, ").installNewContestClock(): replacing Contest Clock with:");
 			console.log(newContestClock);
 		}
 		this.contestClock = newContestClock;
@@ -100,18 +146,18 @@ export class ContestService extends IContestService {
 		let contestLengthSecs = parseInt(this.contestClock.contestLengthSecs);
 		let remainingSecs = contestLengthSecs - elapsedSecs;
 		
-/*		if (DEBUG_MODE) {
-			console.log ("ContestService.updateContestClock(): values pulled from newContestClock:");
+		if (DEBUG_MODE) {
+			console.log ("ContestService.installNewContestClock(): values pulled from newContestClock:");
 			console.log ("  timerShouldBeStarted = ", timerShouldBeStarted);
 			console.log ("  elapsedSecs = ", elapsedSecs);
 			console.log ("  contestLengthSecs = ", contestLengthSecs);
 			console.log ("  remainingSecs = ", remainingSecs);
 		}
-*/		
+	
 		//shut off timer if it is running (otherwise we can't update the elapsed/remaining time values)
 		if (this.contestTimer.isTimerRunning) {
 			if (DEBUG_MODE) {
-				console.log("ContestService (id ", this.uniqueId, ").updateContestClock(): stopping timer");
+				console.log("ContestService (id", this.uniqueId, ").installNewContestClock(): stopping timer");
 			}
 			this.contestTimer.stopTimer();
 		}
@@ -123,42 +169,25 @@ export class ContestService extends IContestService {
 		//restart the timer if the new contest clock values indicate it should be running
 		if (timerShouldBeStarted) {
 			if (DEBUG_MODE) {
-				console.log("ContestService (id ", this.uniqueId, ").updateContestClock(): starting timer");
+				console.log("ContestService (id", this.uniqueId, ").installNewContestClock(): starting timer");
 			}
 			this.contestTimer.startTimer();
 		}
 	}
 	
-	enableContestTimerUpdates() {
-		if (DEBUG_MODE) {
-			console.log("ContestService (id ", this.uniqueId, ").enableContestTimerUpdates(): starting timer");
-		}
-		this.contestTimer.startTimer();
-	}
-	
-	disableContestTimerUpdates() {
-		if (DEBUG_MODE) {
-			console.log("ContestService (id ", this.uniqueId, ").disableContestTimerUpdates(): stopping timer");
-		}
-		this.contestTimer.stopTimer();
-	}
-	
+	/** Returns the number of seconds which have elapsed so far in the contest, which it obtains from the separate
+	 *  ContestTimer object.
+	 */
 	getElapsedSecs(): number {
-		let elapsedSecs = this.contestTimer.getElapsedSecs();
-/*		if (DEBUG_MODE) {
-			console.log("ContestService (id ", this.uniqueId, ").getElapsedSecs(): returning elapsed secs from ContestTimer: ", elapsedSecs);
-		}
-*/		
+		let elapsedSecs = this.contestTimer.getElapsedSecs();	
 		return elapsedSecs ;
 	}
 	
+	/** Returns the number of seconds remaining in the contest, which it obtains from the separate
+	 *  ContestTimer object.
+	 */
 	getRemainingSecs(): number {
 		let remainingSecs = this.contestTimer.getRemainingSecs();
-/*		if (DEBUG_MODE) {
-			console.log("ContestService (id ", this.uniqueId, ").getRemainingSecs(): returning remaining secs from ContestTimer: ", remainingSecs);
-		}
-*/
 		return remainingSecs ;
 	}
-
 }
