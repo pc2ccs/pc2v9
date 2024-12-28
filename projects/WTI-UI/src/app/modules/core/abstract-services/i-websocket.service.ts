@@ -52,14 +52,14 @@ export abstract class IWebsocketService {
           .subscribe((val: any) => {
         	  if (DEBUG_MODE) {
         		  console.log ("IWebsocketService.incomingMessage(): callback from ContestService.getIsContestRunning() returned '", val, "'");
-        		  console.log ("Setting ContestService.isContestRunning to '", val, "'") ;
-        		  console.log ("  and invoking ContestService.contestClockEvent.next()") ;
+        		  console.log ("Setting ContestService.isContestRunning to '", val, "',") ;
+        		  console.log ("  invoking ContestService.contestClockEvent.next()") ;
+                  console.log ("  and invoking ContestService.updateContestClock()");
         	  }
 
             this._contestService.isContestRunning = val;
-            //TODO: need to force the ContestService to update the contest clock and set the ContestTimer as appropriate here.
-            //  Possibly: subscribe somewhere to the ContestClockEvent Subject and implement a subscription callback that does this updating? 
             this._contestService.contestClockEvent.next();
+			this._contestService.updateContestClock();
           });
         break;
       }
