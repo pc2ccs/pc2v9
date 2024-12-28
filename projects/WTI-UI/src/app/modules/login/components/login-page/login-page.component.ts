@@ -109,7 +109,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 			}
         this._websocketService.startWebsocket();
         	if (DEBUG_MODE) {
-        		console.log ("  invoking ContestService.getisContestRunning() and subscribing to the result") ;
+        		console.log ("  Invoking ContestService.getisContestRunning() and subscribing to the result") ;
         	}
         this._contestService.getIsContestRunning()
           .subscribe((val: boolean) => {
@@ -148,28 +148,11 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         			if (!data) { 
 						console.error ("LoginPageComponent.onSubmit() ContestClock subscription callback: unable to get ContestClock from PC2 API via ContestService!");
 					} else {						
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
 						//copy the data fields received from the PC2 Server (via the WTI-API) into the local ContestClock object
 						this.contestClock.isRunning = data.running ;
 						this.contestClock.contestLengthSecs = data.contestLengthInSecs ;
 						this.contestClock.elapsedSecs = data.elapsedSecs ;
 						this.contestClock.wallClockStartTime = data.wallClockStartTime ;
-=======
-						//copy the data fields received from the PC2 Server (via the WTI-API) into the ContestService's ContestClock object
-						if (DEBUG_MODE) {
-							console.log("LoginPageComponent.onSubmit(): got callback from ContestService.getContestClock() subscription; callback data =");
-							console.log(data);
-						}
-						let newContestClock = new ContestClock();
-						newContestClock.isRunning = data.running ;
-						newContestClock.contestLengthSecs = data.contestLengthInSecs ;
-						newContestClock.elapsedSecs = data.elapsedSecs ;
-						newContestClock.wallClockStartTime = data.wallClockStartTime ;
-						if (DEBUG_MODE) {
-							console.log("LoginPageComponent.onSubmit() ContestService.getContestClock() subscription callback: calling ContestService.updateContestClock() with new clock data) ");
-						}
-						this._contestService.updateContestClock(newContestClock);
->>>>>>> 95ef304 i1027: LoginPageComponent: added conditional debugging output.
 					}
       			}, 
 				(error: any) => {
@@ -178,6 +161,13 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       			}
 			);
 		
+
+		//update the WTI-UI representations of the PC2 Contest Clock
+        if (DEBUG_MODE) {
+        	console.log ("  Invoking ContestService.updateContestClock()") ;
+        }
+		this._contestService.updateContestClock();
+
        }, (error: any) => {
     	  if (DEBUG_MODE) {
     		  console.error ("AuthService.login() subscription returned error:", error) ;
