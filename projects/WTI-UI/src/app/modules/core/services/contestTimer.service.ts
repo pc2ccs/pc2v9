@@ -2,8 +2,8 @@ import { DEBUG_MODE } from 'src/constants'
 
 export class ContestTimerService {
 
-  elapsedSecs = 0 ; 		//how many seconds the contest has been running (doesn't include any 'paused' time)
-  remainingSecs = 18000 ;   //how many seconds remain in the contest (default initial value: 5 hours = 18,000 secs)
+  elapsedSecs = 0 ; 	//how many seconds the contest has been running (doesn't include any 'paused' time)
+  remainingSecs = 0 ;   //how many seconds remain in the contest (default default=0 until specified otherwise)
   intervalId: ReturnType<typeof setInterval> ;  //the id of the JavaScript "interval" used to generate timer ticks
   isTimerRunning: boolean = false;
   
