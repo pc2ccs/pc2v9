@@ -479,7 +479,7 @@ public class ContestController extends MainController {
 				catch(NullPointerException e) {
 					logger.severe(e.getMessage());
 					return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.clarifications()"))
+							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.contestClock()"))
 							.type(MediaType.APPLICATION_JSON).build();
 				}		
 				
