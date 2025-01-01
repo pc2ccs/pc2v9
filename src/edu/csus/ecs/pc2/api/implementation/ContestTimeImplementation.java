@@ -70,4 +70,16 @@ public class ContestTimeImplementation implements IContestClock {
         return elementId.toString().hashCode();
     }
     
+    @Override
+    public String toString() {
+        String retStr = "ContestTimeImplementation (aka 'ContestClockImplementation'): [";
+        retStr += "elementId:" + this.elementId + ";";
+        retStr += "contestLengthSecs:" + contestTime.getContestLengthSecs() + ";";
+        retStr += "elapsedSecs:" + contestTime.getElapsedSecs() + ";";
+        retStr += "remainingSecs:" + contestTime.getRemainingSecs();
+        retStr += "]";
+        return retStr ;
+        
+    }
+    
 }
