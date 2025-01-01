@@ -2729,9 +2729,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendPacketToClients(packet, ClientType.Type.TEAM);
         }
     }
-    
+
+    @Override
     public void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams) {
-         
+
         // below is taken from sendToTeams()
         Properties properties = (Properties) packet.getContent();
         // does the packet includes problemDataFiles
@@ -2756,9 +2757,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (abort) {
             return;
         }
-        
+
         ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
-        
+
         List<ClientId> badClients = new ArrayList<ClientId>();
 
         HashSet<ClientId> setWithClientId = new HashSet<>();
@@ -2767,10 +2768,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         for (ClientId clientId : clientIds) {
             ConnectionHandlerID connectionHandlerID = null;
-               
+
             if (setWithClientId.contains(clientId)) {
                 connectionHandlerID = clientId.getConnectionHandlerID();
-                //there should never be localLoggedInClients with null ConnectionHandlerIDs; however, the addition of 
+                //there should never be localLoggedInClients with null ConnectionHandlerIDs; however, the addition of
                 // "multiple login" support may have left some place where this is inadvertently true.
                 //The following is an effort to catch/identify such situations.
                 //this was taken from sendPacketToClients()
@@ -2803,13 +2804,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         }catch (Exception e) {
                             getLog().log(Level.WARNING, "Exception attempting to send packet using Group to client " + clientId + "at connectionHandlerId " + connectionHandlerID
                                     + "as it belongs to group "+ groupElementId + ": " + packet + ": "+ e.getMessage(), e);
-                        
+
                         }
                     }
                     break;
                 }
             }
-                
+
         }
         //check if we got any bad clientIds
         if (badClients.size()>0) {
@@ -2828,7 +2829,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             throw e;
         }
     }
-    
+
     private int getPortForSite(int inSiteNumber) {
 
         try {
@@ -3877,25 +3878,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     }
 
+    @Override
     public ElementId submitClarification(Problem problem, String question) {
 
 
-        submitClarification(new ClientId(contest.getSiteNumber(), Type.SERVER, 0), problem, question);
+        return(submitClarification(new ClientId(contest.getSiteNumber(), Type.SERVER, 0), problem, question));
     }
 
-    public void submitClarification(ClientId clientId, Problem problem, String question) {
+    @Override
+    public ElementId submitClarification(ClientId clientId, Problem problem, String question) {
 
-        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-        
         Clarification clarification = new Clarification(clientId, problem, question);
 
-        Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
+        Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), clientId, clarification);
 
         sendToLocalServer(packet);
-        
+
         return clarification.getElementId();
     }
-    
+
+    @Override
     public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Clarification clarification = new Clarification(contest.getClientId(), problem, "");
@@ -3906,15 +3908,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         else {
             clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, true);
         }
-        
+
         Packet packet;
         packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
-        
 
-        
+
+
         sendToLocalServer(packet);
     }
-    
+
     @Override
     public void checkOutClarification(Clarification clarification, boolean readOnly) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);

@@ -510,8 +510,8 @@ public class MockController implements IInternalController {
     }
 
     @Override
-    public void submitClarification(ClientId clientId, Problem problem, String question) {
-
+    public ElementId submitClarification(ClientId clientId, Problem problem, String question) {
+        return null;
     }
 
     @Override

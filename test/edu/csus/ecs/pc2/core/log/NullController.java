@@ -186,10 +186,11 @@ public class NullController implements IInternalController{
         // TODO Auto-generated method stub
 
     }
-    
+
+    @Override
     public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void submitJudgeRun(Problem problem, Language language, String mainFileName, SerializedFile[] auxFileList, long overrideSubmissionTimeMS) throws Exception {
@@ -203,6 +204,7 @@ public class NullController implements IInternalController{
 
     }
 
+    @Override
     public ElementId submitClarification(Problem problem, String question) {
         // TODO Auto-generated method stub
         return null;
@@ -210,8 +212,9 @@ public class NullController implements IInternalController{
     }
 
     @Override
-    public void submitClarification(ClientId clientId, Problem problem, String question) {
+    public ElementId submitClarification(ClientId clientId, Problem problem, String question) {
         // TODO Auto-generated method stub
+        return null;
 
     }
 
@@ -346,11 +349,12 @@ public class NullController implements IInternalController{
         // TODO Auto-generated method stub
 
     }
-    
+
+    @Override
     public void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams) {
      // TODO Auto-generated method stub
     }
-    
+
     @Override
     public void sendToSpectators(Packet packet) {
         // TODO Auto-generated method stub

@@ -226,7 +226,7 @@ public interface IInternalController {
      * @param packet
      */
     void sendToTeams(Packet packet);
-    
+
     /**
      * Send to groups and or individual teams specified by groups and teams respectively.
      * @param packet
@@ -234,7 +234,7 @@ public interface IInternalController {
      * @param teams  contains clientId of groups packet should be sent.
      */
     void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams);
-    
+
     /**
      * Send to all spectator/API clients
      *
@@ -441,16 +441,16 @@ public interface IInternalController {
      * @return ElementId of the newly created clarification
      */
     ElementId submitClarification(Problem problem, String question);
-    
+
     /**
      * Submit an announcement clarification. Possibly to certain groups teams only
-     * 
+     *
      * @param problem
      * @param answer
      * @param ultimateDestinationGroup array of where the answer for the clarification should ultimately go.
      * such as certain groups
      * @param ultimateDestinationTeam same for teams
-     * @return 
+     * @return elementid of new clar
      */
     public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam);
     /**
@@ -459,8 +459,9 @@ public interface IInternalController {
      * @param clientId to submit clarification as, eg. "team99"
      * @param problem
      * @param question
+     * @return elementid of new clar
      */
-    void submitClarification(ClientId clientId, Problem problem, String question);
+    ElementId submitClarification(ClientId clientId, Problem problem, String question);
 
     /**
      * Request clarification to answer.
@@ -854,5 +855,5 @@ public interface IInternalController {
      */
     void submitRun(ClientId submitter, Problem problem, Language language, String entry_point, SerializedFile mainSubmissionFile, SerializedFile[] additionalFiles, long overrideTimeMS, long overrideRunId);
 
-    
+
 }

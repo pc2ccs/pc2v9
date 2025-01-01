@@ -731,7 +731,7 @@ public class EventFeedJSON extends JSON202306Utilities {
                     dataCollection.append(",");
                 }
                 dataCollection.append(getClarificationJSON(contest, clarification, null));
-                if (clarification.isAnswered()) {
+                if (clarification.isAnsweredorAnnounced()) {
                     ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
                     dataCollection.append(",");
                     dataCollection.append(getClarificationJSON(contest, clarification, clarAnswers[clarAnswers.length - 1]));
@@ -749,7 +749,7 @@ public class EventFeedJSON extends JSON202306Utilities {
                 }
                 appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, IJSONTool.getClarificationId(clarification), getClarificationJSON(contest, clarification, null));
                 stringBuilder.append(NL);
-                if (clarification.isAnswered()) {
+                if (clarification.isAnsweredorAnnounced()) {
                     ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
                     ClarificationAnswer clarAns = clarAnswers[clarAnswers.length - 1];
                     appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, IJSONTool.getClarificationAnswerId(clarAns), getClarificationJSON(contest, clarification, clarAns));
