@@ -219,12 +219,6 @@ public class NullController implements IInternalController{
     }
 
     @Override
-    public void submitClarification(ClientId clientId, Problem problem, String question) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void stopContest(int inSiteNumber) {
         // TODO Auto-generated method stub
 
