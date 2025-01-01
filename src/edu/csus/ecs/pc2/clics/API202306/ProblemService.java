@@ -13,11 +13,12 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -27,7 +28,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
  * WebService to handle problems
- * 
+ *
  * @author John Buck
  *
  */
@@ -53,7 +54,7 @@ public class ProblemService implements Feature {
 
     /**
      * This method returns a representation of the current contest problems in JSON format. The returned value is a JSON array with one problems description per array element, compying with 2023-06
-     * 
+     *
      * @param sc User information
      * @param contestId The contest
      * @return a {@link Response} object containing the contest problems in JSON form
@@ -63,16 +64,16 @@ public class ProblemService implements Feature {
     public Response getProblems(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
 
         System.err.println("getProblems from " + sc.getUserPrincipal().getName() + " for contest " + contestId);
-        
+
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();        
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
         // get the problems from the contest
         Problem[] problems = model.getProblems();
         int ord = 1;
         ArrayList<CLICSProblem> problist = new ArrayList<CLICSProblem>();
-        
+
         // public only gets the problems when the contest starts
         if (sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) || model.getContestTime().isContestStarted()) {
             for (Problem problem: problems) {
@@ -93,7 +94,7 @@ public class ProblemService implements Feature {
 
     /**
      * Return the reponse to a request for a single problem's information for the specified contest and problem id.
-     * 
+     *
      * @param sc user info
      * @param contestId the contest
      * @param problemId the problem id desired
@@ -115,7 +116,7 @@ public class ProblemService implements Feature {
                         try {
                             return Response.ok(JSONUtilities.getObjectMapper().writeValueAsString(new CLICSProblem(model, problem, ord)), MediaType.APPLICATION_JSON).build();
                         } catch(Exception e) {
-                            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for problem " + problemId + " in contest " + contestId + ": " + e.getMessage()).build();                    
+                            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for problem " + problemId + " in contest " + contestId + ": " + e.getMessage()).build();
                         }
                     }
                     ord++;
@@ -125,10 +126,10 @@ public class ProblemService implements Feature {
         }
         return Response.status(Response.Status.FORBIDDEN).build();
     }
-    
+
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
-     * 
+     *
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */

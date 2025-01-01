@@ -29,8 +29,6 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.services.web.EventFeedFilter;
-import edu.csus.ecs.pc2.services.web.EventFeedStreamer;
 
 /**
  * Implementation of CLICS REST event-feed.
