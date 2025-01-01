@@ -1064,7 +1064,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     private void setScoreboardFreezeTime(IInternalContest contest, String scoreboardFreezeTime) {
         ContestInformation contestInformation = contest.getContestInformation();
-        // adapted from core.util.JSONTool
+        // adapted from core.util.IJSONTool
         // seems the yaml is converting the 1:00:00 into 3600
         if (scoreboardFreezeTime.length() > 2) {
             if (!scoreboardFreezeTime.contains(":")) {

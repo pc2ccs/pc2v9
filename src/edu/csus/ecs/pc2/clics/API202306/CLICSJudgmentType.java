@@ -5,6 +5,7 @@ import java.util.Properties;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -13,7 +14,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 /**
  * CLICS judgement-type
  * Contains information about a judgement-type
- * 
+ *
  * @author John Buck
  *
  */
@@ -37,19 +38,22 @@ public class CLICSJudgmentType {
      * @param judgment The judgment type
      */
     public CLICSJudgmentType(IInternalContest model, Judgement judgment) {
- 
+
         name = judgment.getDisplayName();
         solved = false;
         penalty = true;
         id = judgment.getAcronym();
-        
+
         // TODO: absolutely horrendous.  this has got to go and be done a better way -- JB
         if (name.equalsIgnoreCase("yes") || name.equalsIgnoreCase("accepted") || judgment.getAcronym().equalsIgnoreCase("ac")) {
             name = "Accepted";
             solved = true;
             penalty = false;
         } else {
-            name = name.substring(5, name.length());
+            // Remove leading "No - " if present
+            if(name.toLowerCase().startsWith("no - ")) {
+                name = name.substring(5, name.length());
+            }
             Properties scoringProperties = model.getContestInformation().getScoringProperties();
             // TODO: omg - this too is horrendous.  How did this past muster? It's got to go. -- JB
             if (judgment.getAcronym().equalsIgnoreCase("ce") || name.toLowerCase().contains("compilation error")
@@ -68,7 +72,7 @@ public class CLICSJudgmentType {
             }
         }
     }
-    
+
     public String toJSON() {
 
         try {

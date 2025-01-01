@@ -18,11 +18,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /**
  * WebService to handle languages
- * 
+ *
  * @author ICPC
  *
  */
@@ -46,10 +46,10 @@ public class JudgementTypeService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest groups in JSON format. The returned value is a JSON array with one language description per array element, matching the description
+     * This method returns a representation of the current judgment types in JSON format. The returned value is a JSON array with one judgment type description per array element, matching the description
      * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
-     * 
-     * @return a {@link Response} object containing the contest languages in JSON form
+     *
+     * @return a {@link Response} object containing the current judgment types in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -82,7 +82,7 @@ public class JudgementTypeService implements Feature {
 
         for (int i = 0; i < judgements.length; i++) {
             Judgement judgement = judgements[i];
-            if (jsonTool.getJudgementType(judgement).equals(judgementType) && judgement.isActive()) {
+            if (IJSONTool.getJudgementType(judgement).equals(judgementType) && judgement.isActive()) {
                 return Response.ok(jsonTool.convertToJSON(judgement).toString(), MediaType.APPLICATION_JSON).build();
             }
         }

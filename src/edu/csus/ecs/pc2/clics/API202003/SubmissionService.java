@@ -36,18 +36,18 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
-import edu.csus.ecs.pc2.core.util.JSONTool;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /**
  * WebService to handle languages
- * 
+ *
  * @author ICPC
  *
  */
@@ -77,33 +77,37 @@ public class SubmissionService implements Feature {
 
     /**
      * Run Listener
-     * 
+     *
      * @author pc2@ecs.csus.edu
      */
 
     public class RunListenerImplementation implements IRunListener {
 
+        @Override
         public void runAdded(RunEvent event) {
             // ignore
         }
 
+        @Override
         public void refreshRuns(RunEvent event) {
             // ignore
         }
 
+        @Override
         public void runChanged(RunEvent event) {
             // server replied, aka our model has been updated :)
             serverReplied = true;
         }
 
+        @Override
         public void runRemoved(RunEvent event) {
             // ignore
         }
     }
 
     /**
-     * This method returns a JSON representation of all Runs (Submissions). 
-     * 
+     * This method returns a JSON representation of all Runs (Submissions).
+     *
      * @return a {@link Response} object containing the Submissions in JSON form
      */
     @GET
@@ -143,18 +147,18 @@ public class SubmissionService implements Feature {
         //check each submission to see if it's the one that was requested
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
-            if (jsonTool.getSubmissionId(submission).equals(submissionId)) {
-                
+            if (IJSONTool.getSubmissionId(submission).equals(submissionId)) {
+
                 //we found the requested Submission ID in the list of runs returned from the model; try to get the runfiles for Submission
                 runFiles = null;
                 try {
                     controller.getLog().log(Log.INFO, "Requesting run files for submission " + submission.getNumber() + " from local client model");
                     runFiles = model.getRunFiles(submission);
                 } catch (ClassNotFoundException | IOException | FileSecurityException e2) {
-                    controller.getLog().log(Log.INFO, "Exception attempting to get run files for submission " 
+                    controller.getLog().log(Log.INFO, "Exception attempting to get run files for submission "
                             + submissionId + " from local model", e2);
                 }
-                
+
                 //if runFiles is still null we failed to get the runfiles from the local model
                 if (runFiles == null) {
                     // try getting the submission from the server
@@ -215,7 +219,7 @@ public class SubmissionService implements Feature {
                             createZip(submission, tmpDir, filesToWrite, zipFileName);
                             // set file (and path) to be download
                             File file = new File(zipFileName);
-                            ResponseBuilder responseBuilder = Response.ok((Object) file);
+                            ResponseBuilder responseBuilder = Response.ok(file);
                             responseBuilder.header("Content-Disposition", "attachment; filename=\"files.zip\"");
                             return responseBuilder.build();
                         } catch (IOException e) {
@@ -245,7 +249,7 @@ public class SubmissionService implements Feature {
 
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
-            if (!submission.isDeleted() && jsonTool.getSubmissionId(submission).equals(submissionId)) {
+            if (!submission.isDeleted() && IJSONTool.getSubmissionId(submission).equals(submissionId)) {
                 return Response.ok(jsonTool.convertToJSON(submission, servletRequest, sc).toString(), MediaType.APPLICATION_JSON).build();
             }
         }
@@ -258,7 +262,7 @@ public class SubmissionService implements Feature {
         zip.setComment(comment);
         byte[] b = new byte[1024];
         for (Iterator<Integer> iterator = filesToWrite.keySet().iterator(); iterator.hasNext();) {
-            Integer fileIndex = (Integer) iterator.next();
+            Integer fileIndex = iterator.next();
             String inputFile = filesToWrite.get(fileIndex);
             FileInputStream in = new FileInputStream(tmpDir + File.pathSeparator + inputFile);
             ZipEntry ze = new ZipEntry(inputFile);

@@ -23,11 +23,10 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
-import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
  * WebService to handle judgements
- * 
+ *
  * @author ICPC
  *
  */
@@ -54,7 +53,7 @@ public class RunService implements Feature {
     /**
      * This method returns a representation of the current contest runs (testcases) in JSON format. The returned value is a JSON array with one language description per array element, matching the
      * description at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#Judgements}.
-     * 
+     *
      * @return a {@link Response} object containing the contest runs in JSON form
      */
     @GET

@@ -3,17 +3,18 @@ package edu.csus.ecs.pc2.clics.API202306;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * CLICS Judgment test case
  * Contains information about a single test case (run)
- * 
+ *
  * @author John Buck
  *
  */
@@ -42,7 +43,7 @@ public class CLICSTestCase {
 
     /**
      * Fills in the test case properties
-     * 
+     *
      * @param model The contest
      * @param testCase The test case
      * @param ord Ordinal test case number
@@ -54,14 +55,14 @@ public class CLICSTestCase {
         id = testCase.getElementId().toString();
         judgement_id = testCase.getRunElementId().toString();
         ordinal = testCase.getTestNumber();
-        judgement_type_id= JSONTool.getJudgementType(model.getJudgement(testCase.getJudgementId()));
+        judgement_type_id= IJSONTool.getJudgementType(model.getJudgement(testCase.getJudgementId()));
         // SOMEDAY get the time from the server instead of the judge
         time = Utilities.getIso8601formatterWithMS().format(testCase.getDate().getTime());
         // note this is the contest_time as seen on the judge
         contest_time = ContestTime.formatTimeMS(testCase.getContestTimeMS());
-        run_time = ((double)testCase.getElapsedMS())/1000.;
+        run_time = (testCase.getElapsedMS())/1000.;
     }
-    
+
     public String toJSON() {
 
         try {

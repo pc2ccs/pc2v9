@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.clics.API202306;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -11,13 +12,13 @@ import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * CLICS Clarification
  * Contains information about a clarification
- * 
+ *
  * @author John Buck
  *
  */
@@ -50,32 +51,32 @@ public class CLICSClarification {
     public CLICSClarification() {
         // for jackson deserialize
     }
-    
+
     public CLICSClarification(IInternalContest model, Clarification clar) {
         this(model, clar, null);
     }
 
     /**
      * Fills in the clarification properties
-     * 
+     *
      * @param model The contest
      * @param clar The clarification
      * @param clarAns non-null if this is an answer
      */
     public CLICSClarification(IInternalContest model, Clarification clar, ClarificationAnswer clarAns) {
-        
-        // use last answer if we were not handed the answer
-        if(clarAns == null) {
-            if (clar.isAnswered()) {
-                // dump the answer
-                ClarificationAnswer[] clarAnswers = clar.getClarificationAnswers();
-                if(clarAnswers != null && clarAnswers.length > 0) {
-                    clarAns = clarAnswers[clarAnswers.length-1];
-                }
-            }            
-        }
-        
-        // SOMEDAY change id to a original?  WTF does that mean? -- JB
+
+//        // use last answer if we were not handed the answer
+//        if(clarAns == null) {
+//            if (clar.isAnswered()) {
+//                // dump the answer
+//                ClarificationAnswer[] clarAnswers = clar.getClarificationAnswers();
+//                if(clarAnswers != null && clarAnswers.length > 0) {
+//                    clarAns = clarAnswers[clarAnswers.length-1];
+//                }
+//            }
+//        }
+
+        // SOMEDAY change id to a original?  WTF does that mean? ordinal would make sense. -- JB
         id = clar.getElementId().toString();
         if (clarAns != null && clarAns.getElementId() != null) {
             id = clarAns.getElementId().toString();
@@ -101,14 +102,14 @@ public class CLICSClarification {
         }
         // if not a general clar and it's not a special category clar, then we need to supply the problem id.
         if (!clar.getProblemId().equals(model.getGeneralProblem()) && model.getCategory(clar.getProblemId()) == null) {
-            problem_id = JSONTool.getProblemId(model.getProblem(clar.getProblemId()));
+            problem_id = IJSONTool.getProblemId(model.getProblem(clar.getProblemId()));
         }
     }
-    
+
     public String getId() {
         return id;
     }
-    
+
     public String getFrom_team_id() {
         return from_team_id;
     }
@@ -146,23 +147,23 @@ public class CLICSClarification {
             return "Error creating JSON for version info " + e.getMessage();
         }
     }
-    
+
     /**
      * Create CLICSClarification object
-     * 
+     *
      * @param json string to deserialize
      * @return new CLICSClarification object
      */
     public static CLICSClarification fromJSON(String json) {
         Log log = StaticLog.getLog();
-        
+
         try {
             ObjectMapper mapper = new ObjectMapper();
             return(mapper.readValue(json, CLICSClarification.class));
             // deserialize exceptions
         } catch (Exception e) {
             log.log(Log.WARNING, "could not deserialize clarification string " + json, e);
-        }        
+        }
         return(null);
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-package edu.csus.ecs.pc2.services.core;
+package edu.csus.ecs.pc2.clics.API202003;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -10,7 +10,6 @@ import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.SecurityContext;
 
-import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
@@ -32,8 +31,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.util.JSONTool;
-import edu.csus.ecs.pc2.services.web.EventFeedFilter;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /**
  * Event feed information in the CLICS JSON format.
@@ -41,18 +39,17 @@ import edu.csus.ecs.pc2.services.web.EventFeedFilter;
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 // TODO for all sections pass in Key rather than hard coded inside method
-public class EventFeedJSON extends JSONUtilities {
+public class EventFeedJSON extends JSON202003Utilities {
+
+    public static final String EVENT_ID_PREFIX = "pc2-";
+
     /**
      *
      */
-    public EventFeedJSON(IInternalContest contest) {
+    public EventFeedJSON(IJSONTool jsonTool) {
         super();
-        jsonTool = new JSONTool(contest, null);
+        this.jsonTool = jsonTool;
     }
-
-    private AwardJSON awardJSON = new AwardJSON();
-
-    private TeamMemberJSON teamMemberJSON = new TeamMemberJSON();
 
     /**
      * Event Id Sequence.
@@ -74,7 +71,7 @@ public class EventFeedJSON extends JSONUtilities {
      */
     private String eventTypeList = null;
 
-    private JSONTool jsonTool;
+    private IJSONTool jsonTool;
 
     private Filter filter = null;
 
@@ -122,7 +119,7 @@ public class EventFeedJSON extends JSONUtilities {
         return stringBuilder.toString();
     }
 
-    String getJudgementTypeJSON(IInternalContest contest, Judgement judgement) {
+    public String getJudgementTypeJSON(IInternalContest contest, Judgement judgement) {
         return jsonTool.convertToJSON(judgement).toString();
     }
 
@@ -215,7 +212,7 @@ public class EventFeedJSON extends JSONUtilities {
      */
     private HashSet<ElementId> getGroupsUsed(IInternalContest contest) {
 
-        Account[] accounts = getTeamAccounts(contest);
+        Account[] accounts = EventFeedJSON.getTeamAccounts(contest);
 
         HashSet<ElementId> usedGroups = new HashSet<ElementId>();
 
@@ -236,7 +233,7 @@ public class EventFeedJSON extends JSONUtilities {
         return usedGroups;
     }
 
-    protected String getGroupJSON(IInternalContest contest, Group group) {
+    public String getGroupJSON(IInternalContest contest, Group group) {
         return jsonTool.convertToJSON(group).toString();
 
     }
@@ -262,25 +259,11 @@ public class EventFeedJSON extends JSONUtilities {
         return stringBuilder.toString();
     }
 
-    /**
-     * Get all sites' teams in sorted order.
-     *
-     * @param contest
-     * @return array of sorted teams
-     */
-    public Account[] getTeamAccounts(IInternalContest inContest) {
-        Vector<Account> accountVector = inContest.getAccounts(ClientType.Type.TEAM);
-        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
-        Arrays.sort(accounts, new AccountComparator());
-
-        return accounts;
-    }
-
     public String getTeamJSON(IInternalContest contest) {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        Account[] accounts = getTeamAccounts(contest);
+        Account[] accounts = EventFeedJSON.getTeamAccounts(contest);
 
         for (Account account : accounts) {
 
@@ -331,15 +314,18 @@ public class EventFeedJSON extends JSONUtilities {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        Account[] accounts = getTeamAccounts(contest);
+        Account[] accounts = EventFeedJSON.getTeamAccounts(contest);
 
         for (Account account : accounts) {
             String[] names = account.getMemberNames();
 
             if (names.length > 0) {
                 for (String teamMemberName : names) {
-                    appendJSONEvent(stringBuilder, TEAM_MEMBERS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, getTeamMemberJSON(contest, account, teamMemberName));
-                    stringBuilder.append(NL);
+                    String teamMemberJson = getTeamMemberJSON(contest, account, teamMemberName);
+                    if(teamMemberJson != null) {
+                        appendJSONEvent(stringBuilder, TEAM_MEMBERS_KEY, ++eventIdSequence, EventFeedOperation.CREATE, teamMemberJson);
+                        stringBuilder.append(NL);
+                    }
                 }
             }
         }
@@ -347,8 +333,14 @@ public class EventFeedJSON extends JSONUtilities {
         return stringBuilder.toString();
     }
 
-    protected String getTeamMemberJSON(IInternalContest contest, Account account, String teamMemberName) {
-        return teamMemberJSON.createJSON(contest, account, teamMemberName);
+    public String getTeamMemberJSON(IInternalContest contest, Account account, String teamMemberName) {
+        return(null);
+        // TODO: Fix in IJSONTool
+        // The class TeamMemberJSON which supposedly generates JSON for a team member is just plain wrong.
+        // It gives all members of a team the same "id" for starters.  Also, for some reason, it only added team
+        // id's if it had an external CMS team id, even though it was adding the pc2 team's client ID.
+        // Basically it was just plain wrong.
+        //return teamMemberJSON.createJSON(contest, account, teamMemberName);
     }
 
     /**
@@ -401,7 +393,7 @@ public class EventFeedJSON extends JSONUtilities {
         return stringBuilder.toString();
     }
 
-    private String getJudgementJSON(IInternalContest contest, Run run) {
+    public String getJudgementJSON(IInternalContest contest, Run run) {
         return jsonTool.convertJudgementToJSON(run).toString();
     }
 
@@ -433,7 +425,7 @@ public class EventFeedJSON extends JSONUtilities {
         return stringBuilder.toString();
     }
 
-    private String getRunJSON(IInternalContest contest, RunTestCase[] runTestCases, int ordinal) {
+    public String getRunJSON(IInternalContest contest, RunTestCase[] runTestCases, int ordinal) {
         return jsonTool.convertToJSON(runTestCases, ordinal).toString();
     }
 
@@ -464,13 +456,16 @@ public class EventFeedJSON extends JSONUtilities {
         return stringBuilder.toString();
     }
 
-    String getClarificationJSON(IInternalContest contest, Clarification clarification, ClarificationAnswer clarAnswer) {
+    public String getClarificationJSON(IInternalContest contest, Clarification clarification, ClarificationAnswer clarAnswer) {
         return jsonTool.convertToJSON(clarification, clarAnswer).toString();
 
     }
 
     public String getAwardJSON(IInternalContest contest) {
-        return awardJSON.createJSON(contest);
+        return null;
+        // TODO: Old code return null as a result of the unimplement createJSON in the unimplemented AwardJSON class (which has
+        // since been removed.  This should use the IJSONTool interface which is API specific
+        //return awardJSON.createJSON(contest);
     }
 
     public String createJSON(IInternalContest contest, EventFeedFilter filter, HttpServletRequest servletRequest, SecurityContext sc) throws IllegalContestState {
@@ -486,10 +481,7 @@ public class EventFeedJSON extends JSONUtilities {
         // filter
         List<String> list = EventFeedFilter.filterJson(lines, filter);
 
-        // SOMEDAY in Java 8 return String.join(NL, list) + NL;
-
-        String[] sa = list.toArray(new String[list.size()]);
-        return StringUtilities.join(NL, sa) + NL;
+        return String.join(NL, list) + NL;
     }
 
     /**
@@ -660,7 +652,7 @@ public class EventFeedJSON extends JSONUtilities {
      */
     public String nextEventId() {
         eventIdSequence++;
-        return getEventId(eventIdSequence);
+        return EventFeedJSON.getEventId(eventIdSequence);
     }
 
     /**
@@ -668,21 +660,6 @@ public class EventFeedJSON extends JSONUtilities {
      */
     public long nextEventIdSequence() {
         return(++eventIdSequence);
-    }
-
-    /**
-     * get event id.
-     *
-     * @param sequenceNumber
-     *            ascending number
-     * @return event Id
-     */
-    public static String getEventId(long sequenceNumber) {
-        return "pc2-" + sequenceNumber;
-    }
-
-    public static long extractSequence(String eventId) {
-        return Long.parseLong(eventId.substring(4));
     }
 
     // TODO technical deficit - move these methods
@@ -718,5 +695,39 @@ public class EventFeedJSON extends JSONUtilities {
 
     public void setFilter(Filter filter) {
         this.filter = filter;
+    }
+
+    /**
+     * Get event id property for the event feed notification
+     *
+     * @param sequenceNumber ascending number
+     * @return event Id, eg: pc2-314
+     */
+    public static String getEventId(long sequenceNumber) {
+        return EVENT_ID_PREFIX + sequenceNumber;
+    }
+
+    /**
+     * Remove the EVENT_ID_PREFIX from an event id
+     *
+     * @param eventId
+     * @return the sequence number of the event
+     */
+    public static long extractSequence(String eventId) {
+        return Long.parseLong(eventId.substring(EVENT_ID_PREFIX.length()));
+    }
+
+    /**
+     * Get all sites' teams in sorted order.
+     *
+     * @param inContest
+     * @return array of sorted teams' Accounts
+     */
+    public static Account[] getTeamAccounts(IInternalContest inContest) {
+        Vector<Account> accountVector = inContest.getAccounts(ClientType.Type.TEAM);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
+        Arrays.sort(accounts, new AccountComparator());
+
+        return accounts;
     }
 }

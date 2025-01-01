@@ -3,15 +3,17 @@ package edu.csus.ecs.pc2.clics.API202306;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * CLICS Problem
  * Contains information about a Problem
- * 
+ *
  * @author John Buck
  *
  */
@@ -44,42 +46,42 @@ public class CLICSProblem {
     @JsonProperty
     private int test_data_count;
 
-// only for "score" type contests, N/A for pc2/wf pass-fail type contests    
+// only for "score" type contests, N/A for pc2/wf pass-fail type contests
 //    @JsonProperty
 //    private int max_score;
 
     // The next two will be 'null' for now until we implement the new json CPF
     @JsonProperty("package")
     private CLICSFileReference [] packagezip;
-    
+
     @JsonProperty
     private CLICSFileReference [] statement;
 
     /**
      * Fill in properties for a Problem description.
-     * 
+     *
      * @param model The contest
-     * @param problem The problem 
+     * @param problem The problem
      * @param ordinal Order in which problem appears in display list
      */
     public CLICSProblem(IInternalContest model, Problem problem, int ordinal) {
         // {"id":"asteroids","label":"A","name":"Asteroid Rangers","ordinal":1,"color":"blue","rgb":"#00000f","test_data_count":10,"time_limit":2 }
-        id = JSONTool.getProblemId(problem);
+        id = IJSONTool.getProblemId(problem);
         label = problem.getLetter();
         name = problem.getDisplayName();
         this.ordinal = ordinal;
         // optional attribute color
-        if (JSONTool.notEmpty(problem.getColorName())) {
+        if (!StringUtilities.isEmpty(problem.getColorName())) {
             color = problem.getColorName();
         }
         // optional attribute rgb
-        if (JSONTool.notEmpty(problem.getColorRGB())) {
+        if (!StringUtilities.isEmpty(problem.getColorRGB())) {
             rgb = problem.getColorRGB();
         }
         test_data_count = problem.getNumberTestCases();
         time_limit = problem.getTimeOutInSeconds();
     }
-    
+
     public String toJSON() {
 
         try {

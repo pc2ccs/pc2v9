@@ -31,17 +31,16 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
  * WebService to handle "contest" REST endpoint as described by the CLICS wiki.
- * 
+ *
  * example get output: {"id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45", "name":"2014 ICPC World Finals", "formal_name":"38th Annual World Finals of the ACM International Collegiate Programming Contest",
  * "start_time":"2014-06-25T10:00:00+01","duration":"5:00:00","scoreboard_freeze_duration":"1:00:00","penalty_time":20, "state":{"running":true,"frozen":false,"final":false} } example patch request
  * data: {"id":"7b0dd4ea-19a1-4434-9034-529ebe55ab45","start_time":"2014-06-25T10:00:00+01"}
- * 
+ *
  * or {"id":"wf2016","start_time":null}
- * 
+ *
  * @author pc2@ecs.csus.edu
  *
  */
@@ -59,7 +58,7 @@ public class ContestService implements Feature {
 
     /**
      * List of the possible types of requests which might be received from clients.
-     * 
+     *
      * @author john
      */
     private enum StartTimeRequestType {
@@ -76,9 +75,9 @@ public class ContestService implements Feature {
     /**
      * This method resets the current contest scheduled start time according to the received (input) string, which it expects to be in JSON format as described in the CLICS Wiki "StartTime" interface
      * specification.
-     * 
+     *
      * @return a {@link Response} object indicating the status of the setStarttime request as follows (from the CLI Wiki Contest_Start_Interface spec):
-     * 
+     *
      *         <pre>
      *         // PUT HTTP body is application/json:
      *         // { &quot;starttime&quot;:1265335138.26 }
@@ -139,7 +138,7 @@ public class ContestService implements Feature {
 //            // certainly NOT what PC2 set up as the identifier (Default-###############).  As such, until the
 //            // API endpoints are fixed to include a (configurable) contest identifier, a reasonable thing to
 //            // do at this point is not validate the id at all.  Just make sure one was specified (above).  That's
-//            // enough for now.            
+//            // enough for now.
 //            if (!model.getContestIdentifier().equals(requestMap.get("id"))) {
 //                controller.getLog().log(Log.WARNING, "Starttime PATCH Service: JSON mismatched 'id' key: '" + requestMap.get("id") + "'");
 //                // return HTTP 400 response code per CLICS spec
@@ -288,7 +287,7 @@ public class ContestService implements Feature {
 
     /**
      * Parses the given String and returns a {@link GregorianCalendar} object if the String represents a valid Unix Epoch date; otherwise returns null.
-     * 
+     *
      * @param startTimeValueString
      *            a String containing a date in ISO 8601 format.
      * @return the GregorianCalendar date/time represented by the String, or null if the String does not represent a valid date/time
@@ -317,10 +316,10 @@ public class ContestService implements Feature {
     /**
      * This method updates the Scheduled Start Date for the contest, including causing the scheduling of a "start contest" task for the specified date (which is assumed to be a valid date in the
      * future).
-     * 
+     *
      * This is accomplished by telling the controller to update the {@link ContestInformation} with the scheduled start date. The controller then sends a packet to the server to do that; the server in
      * turn creates a task to start the contest at the specified date/time.
-     * 
+     *
      * @param theDate
      *            the date/time to which the automatic start of the contest should be set, or null if the start date/time should be set to "undefined"
      * @return true if the method was successful in setting the scheduled start time; false otherwise
@@ -347,7 +346,7 @@ public class ContestService implements Feature {
 
     /**
      * Converts the input string, assumed to be a JSON string, into a {@link Map<String,String>} of JSON key-value pairs.
-     * 
+     *
      * @param jsonRequestString
      *            a JSON string specifying a starttime request in CLICS format
      * @return a Map of the JSON string key-to-value pairs as Strings, or null if the input JSON does not parse as a Map(String->String).
@@ -382,7 +381,7 @@ public class ContestService implements Feature {
 
     /**
      * This method returns a representation of the current contest scheduled start time in JSON format as described on the CLICS wiki.
-     * 
+     *
      * @return a {@link Response} object containing a JSON String giving the scheduled contest start time as a Unix Epoch value, or as the string "undefined" if no start time is currently scheduled.
      */
     @GET

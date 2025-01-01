@@ -21,11 +21,11 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /**
  * WebService for handling teams
- * 
+ *
  * @author ICPC
  *
  */
@@ -50,7 +50,7 @@ public class OrganizationService implements Feature {
 
     /**
      * This method returns a representation of the current model teams in JSON format. The returned value is a JSON array with one team description per array element.
-     * 
+     *
      * @return a {@link Response} object containing the model teams in JSON form
      */
     @GET
@@ -68,7 +68,7 @@ public class OrganizationService implements Feature {
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
-                String id = jsonTool.getOrganizationId(account);
+                String id = IJSONTool.getOrganizationId(account);
                 if (!organizations.containsKey(id)) {
                     organizations.put(id, account);
                     childNode.add(jsonTool.convertOrganizationsToJSON(account));
@@ -87,7 +87,7 @@ public class OrganizationService implements Feature {
 
         for (int i = 0; i < accounts.length; i++) {
             Account account = accounts[i];
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && jsonTool.getOrganizationId(account).equals(organizationId)) {
+            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && IJSONTool.getOrganizationId(account).equals(organizationId)) {
                 return Response.ok(jsonTool.convertOrganizationsToJSON(account).toString(), MediaType.APPLICATION_JSON).build();
             }
         }

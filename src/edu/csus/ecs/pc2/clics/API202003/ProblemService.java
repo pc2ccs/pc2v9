@@ -20,11 +20,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /**
  * WebService to handle problems
- * 
+ *
  * @author ICPC
  *
  */
@@ -51,7 +51,7 @@ public class ProblemService implements Feature {
     /**
      * This method returns a representation of the current contest problems in JSON format. The returned value is a JSON array with one problems description per array element, matching the description
      * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#.2Fproblems}.
-     * 
+     *
      * @return a {@link Response} object containing the contest problems in JSON form
      */
     @GET
@@ -88,7 +88,7 @@ public class ProblemService implements Feature {
         for (int i = 0; i < problems.length; i++) {
             Problem problem = problems[i];
             // match by ID
-            if (problem.isActive() && jsonTool.getProblemId(problem).equals(problemId)) {
+            if (problem.isActive() && IJSONTool.getProblemId(problem).equals(problemId)) {
                 return Response.ok(jsonTool.convertToJSON(problem, i).toString(), MediaType.APPLICATION_JSON).build();
             }
         }

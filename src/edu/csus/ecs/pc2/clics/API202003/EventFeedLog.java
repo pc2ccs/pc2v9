@@ -1,5 +1,5 @@
 // Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-package edu.csus.ecs.pc2.services.web;
+package edu.csus.ecs.pc2.clics.API202003;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,9 +14,9 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Event fee log.
- * 
+ *
  * Contains all event feed log entries for current contest.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class EventFeedLog {
@@ -35,10 +35,10 @@ public class EventFeedLog {
 
     /**
      * Load all events from events log
-     * 
+     *
      * @param contest
      * @throws FileNotFoundException
-     * @throws UnsupportedEncodingException 
+     * @throws UnsupportedEncodingException
      */
     public EventFeedLog(IInternalContest contest) throws FileNotFoundException, UnsupportedEncodingException {
 
@@ -63,7 +63,7 @@ public class EventFeedLog {
     }
 
     private String getEventFeedLogName(String id) {
-        return logsDirectory + File.separator + "EventfeedLog_" + id + ".log";
+        return logsDirectory + File.separator + "Eventfeed_2020_03_Log_" + id + ".log";
     }
 
     public String[] getLogLines() {
@@ -80,11 +80,11 @@ public class EventFeedLog {
 
     /**
      * Append event to event log.
-     * 
+     *
      * @param eventString
      * @throws IOException
      */
-    void writeEvent(String eventString) throws IOException {
+    public void writeEvent(String eventString) throws IOException {
         outStream.write(eventString);
         outStream.flush();
     }

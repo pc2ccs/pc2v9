@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.csus.ecs.pc2.core.LanguageUtilities;
 import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
@@ -47,7 +47,7 @@ public class CLICSLanguage {
      * @param language The language being serialized
      */
     public CLICSLanguage(Language language) {
-        id = JSONTool.getLanguageId(language);
+        id = IJSONTool.getLanguageId(language);
         name = language.getDisplayName();
         entry_point_required = false;
         compiler = new CLICSCommand(language.getCompileCommandLine());

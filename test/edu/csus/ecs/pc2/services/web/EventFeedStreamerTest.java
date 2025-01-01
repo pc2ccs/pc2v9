@@ -9,6 +9,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.csus.ecs.pc2.clics.API202306.EventFeedJSON;
+import edu.csus.ecs.pc2.clics.API202306.EventFeedStreamer;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -21,18 +23,17 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.services.core.EventFeedJSON;
 
 /**
  * Unit Test
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public class EventFeedStreamerTest extends AbstractTestCase {
-    
+
     /**
      * Unit test data.
-     * 
+     *
      * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
      */
     class UnitTestData {
@@ -43,7 +44,7 @@ public class EventFeedStreamerTest extends AbstractTestCase {
 
         /**
          * Construct contest with accounts, runs, clars, etc.
-         * 
+         *
          * @throws Exception
          */
         public UnitTestData() throws Exception {
@@ -84,12 +85,12 @@ public class EventFeedStreamerTest extends AbstractTestCase {
             sampleContest.assignSampleGroups(getContest(), "North Group", "South Group");
 
             assertEquals("Runs", 12, getContest().getRuns().length);
-            
+
         }
 
         /**
          * Get contest populated with test data.
-         * 
+         *
          * @return
          */
         public IInternalContest getContest() {
@@ -97,10 +98,10 @@ public class EventFeedStreamerTest extends AbstractTestCase {
         }
 
     }
-    
+
     /**
      * Generate a clarification for every team accounts.
-     * 
+     *
      * @param contest
      * @param problem
      * @param judgeId
@@ -146,7 +147,7 @@ public class EventFeedStreamerTest extends AbstractTestCase {
 
     /**
      * Get all team accounts (all sites).
-     * 
+     *
      */
     public static Account[] getTeamAccounts(IInternalContest contest) {
         // SOMEDAY move getTeamAccounts into AccountsUtility class
@@ -171,15 +172,15 @@ public class EventFeedStreamerTest extends AbstractTestCase {
         // SOMEDAY move getAllAccounts into AccountsUtility class
 
         Vector<Account> accountVector = contest.getAccounts(type);
-        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Account[] accounts = accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         return accounts;
     }
-    
+
     /**
      * Add team member names to account.
-     * 
+     *
      * @param contest
      * @param count
      *            number of accounts to add team names to.
@@ -202,13 +203,13 @@ public class EventFeedStreamerTest extends AbstractTestCase {
                     names.add(name);
                 }
 
-                String[] newNames = (String[]) names.toArray(new String[names.size()]);
+                String[] newNames = names.toArray(new String[names.size()]);
                 account.setMemberNames(newNames);
             }
             contest.updateAccount(account);
         }
     }
-    
+
 
     private static String pickRandom(String[] stringArray) {
 
@@ -218,28 +219,28 @@ public class EventFeedStreamerTest extends AbstractTestCase {
         int nameIndex = random.nextInt(stringArray.length);
         return stringArray[nameIndex];
     }
-    
+
     public void testCompleteStream() throws Exception {
-        
+
         String outputDir = getOutputDataDirectory(this.getName());
         ensureDirectory(outputDir);
-        
+
         IInternalContest contest = new UnitTestData().getContest();
         IInternalController controller = new SampleContest().createController(contest, outputDir, true, false);
- 
+
         String json = EventFeedStreamer.createEventFeedJSON(contest, controller, null, null);
-        
+
         assertNotNull(json);
-        
+
         assertTrue("Expected long json ",  json.length() > 8000);
-        
-        assertCountEvent(100, EventFeedJSON.CLARIFICATIONS_KEY, json); 
-        
+
+        assertCountEvent(100, EventFeedJSON.CLARIFICATIONS_KEY, json);
+
     }
-    
+
     /**
      * Expect count of elementName in JSON.
-     * 
+     *
      * @param exepectedCount
      * @param eleementName
      * @param json
@@ -252,7 +253,7 @@ public class EventFeedStreamerTest extends AbstractTestCase {
 
     /**
      * Return count of events in json.
-     * 
+     *
      * @param eleementName element to match
      * @param json
      * @return
@@ -260,7 +261,7 @@ public class EventFeedStreamerTest extends AbstractTestCase {
     private int matchEventCount(String eleementName, String json) {
 
         String regex = "\"type\":\"" + eleementName + "\"";
-        
+
         return matchCount(regex, json);
     }
 

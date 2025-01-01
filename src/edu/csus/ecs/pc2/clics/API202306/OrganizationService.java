@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.imports.ccs.ICPCTSVLoader;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
@@ -76,7 +76,7 @@ public class OrganizationService implements Feature {
         // make up a list of CLICSOrganizations in use.
         for(Account account: model.getAccounts()) {
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
-                String orgId = JSONTool.getOrganizationId(account);
+                String orgId = IJSONTool.getOrganizationId(account);
                 if(orgSet.add(orgId)) {
                     String [] orgFields = ICPCTSVLoader.getInstitutionNames(orgId);
                     if(orgFields != null) {
@@ -107,7 +107,7 @@ public class OrganizationService implements Feature {
             if(orgFields != null) {
                 // find a team who belongs to this organization
                 for(Account account: model.getAccounts()) {
-                    if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && JSONTool.getOrganizationId(account).equals(organizationId)) {
+                    if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && IJSONTool.getOrganizationId(account).equals(organizationId)) {
                         return Response.ok(new CLICSOrganization(organizationId, account, orgFields).toJSON(), MediaType.APPLICATION_JSON).build();
                     }
                 }

@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
@@ -93,7 +93,7 @@ public class JudgementTypeService implements Feature {
         if(contestId.equals(model.getContestIdentifier()) == true) {
 
             for(Judgement judgment: model.getJudgements()) {
-                if (judgment.isActive() && JSONTool.getJudgementType(judgment).equals(judgmentType)) {
+                if (judgment.isActive() && IJSONTool.getJudgementType(judgment).equals(judgmentType)) {
                     try {
                         ObjectMapper mapper = JSONUtilities.getObjectMapper();
                         String json = mapper.writeValueAsString(new CLICSJudgmentType(model, judgment));

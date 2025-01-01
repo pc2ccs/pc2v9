@@ -1,12 +1,10 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-package edu.csus.ecs.pc2.core.util;
+package edu.csus.ecs.pc2.clics.API202003;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.TimeZone;
-import java.util.logging.Level;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.SecurityContext;
@@ -18,7 +16,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
@@ -36,13 +33,14 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /**
  * JSON for pc2 classes.
  *
  * @author Troy Boudreau <boudreat@ecs.csus.edu>
  */
-public class JSONTool {
+public class JSONTool implements IJSONTool {
 
     /**
      * A default localhost location.
@@ -69,11 +67,12 @@ public class JSONTool {
      *
      * @param submission
      */
+    @Override
     public ObjectNode convertToJSON(Run submission, HttpServletRequest servletRequest, SecurityContext sc) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", getSubmissionId(submission));
-        element.put("language_id", getLanguageId(model.getLanguage(submission.getLanguageId())));
-        element.put("problem_id", getProblemId(model.getProblem(submission.getProblemId())));
+        element.put("id", IJSONTool.getSubmissionId(submission));
+        element.put("language_id", IJSONTool.getLanguageId(model.getLanguage(submission.getLanguageId())));
+        element.put("problem_id", IJSONTool.getProblemId(model.getProblem(submission.getProblemId())));
         element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
         element.put("time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
         element.put("contest_time", Utilities.formatDuration(submission.getElapsedMS()));
@@ -85,17 +84,15 @@ public class JSONTool {
 
         // FIXME we need separate event feeds for public and admin/analyst
         // FIXME perhaps change sc to a boolean for public or not?
+        // JB: 12/24: Not sure why we need different ones for a submission.
         // if (servletRequest != null && (sc != null && sc.isUserInRole("admin") || sc.isUserInRole("analyst"))) {
-
-
-        // TODO shadow add time and mime elements to submission
-//        element.put("mime","application/zip");
 
         String pathValue = "/contest/submissions/" + submission.getNumber() + "/files";
 
         ObjectMapper mymapper = new ObjectMapper();
         ArrayNode arrayNode = mymapper.createArrayNode();
         ObjectNode objectNode = mymapper.createObjectNode();
+        objectNode.put("mime",  "application/zip");
         objectNode.put("href", pathValue);
         arrayNode.add(objectNode);
         element.set("files", arrayNode);
@@ -119,18 +116,10 @@ public class JSONTool {
         return url;
     }
 
-    private void logWarn(String string, Exception e) {
-
-        System.err.println(string);
-        e.printStackTrace(System.err);
-
-        Log log = controller.getLog();
-        log.log(Level.WARNING, string, e);
-    }
-
+    @Override
     public ObjectNode convertToJSON(Group group) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", getGroupId(group));
+        element.put("id", IJSONTool.getGroupId(group));
         if (group.getGroupId() != -1) {
             element.put("icpc_id", Integer.toString(group.getGroupId()));
         }
@@ -138,21 +127,15 @@ public class JSONTool {
         return element;
     }
 
-    public static String getGroupId(Group group) {
-        String id = group.getElementId().toString();
-        if (group.getGroupId() != -1) {
-            id = Integer.toString(group.getGroupId());
-        }
-        return id;
-    }
-
+    @Override
     public ObjectNode convertToJSON(Language language) {
         ObjectNode element = mapper.createObjectNode();
-        element.put("id", getLanguageId(language));
+        element.put("id", IJSONTool.getLanguageId(language));
         element.put("name", language.getDisplayName());
         return element;
     }
 
+    @Override
     public ObjectNode convertToJSON(Clarification clarification, ClarificationAnswer clarAnswer) {
         ObjectNode element = mapper.createObjectNode();
 
@@ -182,7 +165,7 @@ public class JSONTool {
         if (clarification.getProblemId().equals(model.getGeneralProblem()) || model.getCategory(clarification.getProblemId()) != null) {
             element.set("problem_id", null);
         } else {
-            element.put("problem_id", getProblemId(model.getProblem(clarification.getProblemId())));
+            element.put("problem_id", IJSONTool.getProblemId(model.getProblem(clarification.getProblemId())));
         }
         if (clarAnswer != null) {
             ClarificationAnswer[] clarificationAnswers = clarification.getClarificationAnswers();
@@ -206,6 +189,7 @@ public class JSONTool {
      * @param ci
      * @return
      */
+    @Override
     public ObjectNode toStateJSON(ContestInformation ci) {
         ObjectNode element = mapper.createObjectNode();
         String startTime = null;
@@ -213,7 +197,7 @@ public class JSONTool {
             startTime = Utilities.getIso8601formatterWithMS().format(model.getContestTime().getContestStartTime().getTime());
             element.put("started", startTime);
             if (model.getContestTime().isPastEndOfContest()) {
-                Calendar endedDate = calculateElapsedWalltime(model, model.getContestTime().getContestLengthMS());
+                Calendar endedDate = IJSONTool.calculateElapsedWalltime(model, model.getContestTime().getContestLengthMS());
                 if (endedDate != null) {
                     element.put("ended", Utilities.getIso8601formatterWithMS().format(endedDate.getTimeInMillis()));
                 }
@@ -224,7 +208,7 @@ public class JSONTool {
                 long freezeTime = Utilities.getFreezeTime(model);
                 // FIXME this date should be stored in ContestInformation
                 if (elapsed >= freezeTime) {
-                    Calendar freezeDate = calculateElapsedWalltime(model, freezeTime * 1000);
+                    Calendar freezeDate = IJSONTool.calculateElapsedWalltime(model, freezeTime * 1000);
                     if (freezeDate != null) {
                         element.put("frozen", Utilities.getIso8601formatterWithMS().format(freezeDate.getTime()));
                     }
@@ -239,7 +223,7 @@ public class JSONTool {
             // FIXME this should only be showed if the contest is thawed for public users
             String finalizedDate = null;
             FinalizeData finalizedData = model.getFinalizeData();
-            
+
             // Only get date if the contest is, in fact, certified
             if (finalizedData != null && finalizedData.isCertified()) {
                 finalizedDate = Utilities.getIso8601formatterWithMS().format(finalizedData.getCertificationDate());
@@ -257,6 +241,7 @@ public class JSONTool {
      * @param ci
      * @return
      */
+    @Override
     public ObjectNode convertToJSON(ContestInformation ci) {
         String id = model.getContestIdentifier();
         String name = ci.getContestShortName();
@@ -306,6 +291,7 @@ public class JSONTool {
         return element;
     }
 
+    @Override
     public ObjectNode convertToJSON(Judgement judgement) {
         ObjectNode element = mapper.createObjectNode();
         String name = judgement.getDisplayName();
@@ -335,30 +321,18 @@ public class JSONTool {
             }
 
         }
-        element.put("id", getJudgementType(judgement));
+        element.put("id", IJSONTool.getJudgementType(judgement));
         element.put("name", name);
         element.put("penalty", penalty);
         element.put("solved", solved);
         return element;
     }
 
-    /**
-     * returns true if the value is not null and is not the empty string
-     *
-     * @param value
-     * @return
-     */
-    public static boolean notEmpty(String value) {
-        if (value != null && !value.equals("")) {
-            return true;
-        }
-        return false;
-    }
-
+    @Override
     public ObjectNode convertOrganizationsToJSON(Account account) {
         // this is a hack because we do not have organizations in the Model directly.
         ObjectNode element = mapper.createObjectNode();
-        String id = getOrganizationId(account);
+        String id = IJSONTool.getOrganizationId(account);
         element.put("id", id);
         element.put("icpc_id", id);
         element.put("name", account.getInstitutionShortName());
@@ -371,17 +345,7 @@ public class JSONTool {
         return element;
     }
 
-    public static String getOrganizationId(Account account) {
-        String id = account.getInstitutionCode();
-        if (id.startsWith("INST-U-")) {
-            id = id.substring(7);
-        }
-        if (id.startsWith("INST-")) {
-            id = id.substring(5);
-        }
-        return id;
-    }
-
+    @Override
     public ObjectNode convertToJSON(Account account) {
         ObjectNode element = mapper.createObjectNode();
         // SOMEDAY spec should be updated for overlapping multi-site team Ids, this will need to be updated at that time
@@ -391,23 +355,24 @@ public class JSONTool {
         }
         element.put("name", account.getDisplayName());
         if (notEmpty(account.getInstitutionCode()) && !account.getInstitutionCode().equals("undefined")) {
-            element.put("organization_id", getOrganizationId(account));
+            element.put("organization_id", IJSONTool.getOrganizationId(account));
         }
         HashSet<ElementId> groups = account.getGroupIds();
         if (groups != null) {
             ArrayNode groupIds = mapper.createArrayNode();
             for(ElementId elementId : groups) {
-                groupIds.add(getGroupId(model.getGroup(elementId)));
+                groupIds.add(IJSONTool.getGroupId(model.getGroup(elementId)));
             }
             element.set("group_ids", groupIds);
         }
         return element;
     }
 
+    @Override
     public ObjectNode convertToJSON(Problem problem, int ordinal) {
         ObjectNode element = mapper.createObjectNode();
         // {"id":"asteroids","label":"A","name":"Asteroid Rangers","ordinal":1,"color":"blue","rgb":"#00f","test_data_count":10}
-        String id = getProblemId(problem);
+        String id = IJSONTool.getProblemId(problem);
         element.put("id", id);
         element.put("label", problem.getLetter());
         element.put("name", problem.getDisplayName());
@@ -424,59 +389,18 @@ public class JSONTool {
         return element;
     }
 
-    public static String getProblemId(Problem problem) {
-        String id = problem.getElementId().toString();
-        // if we have a problem shortName use it, otherwise default to the internal id
-        if (notEmpty(problem.getShortName())) {
-            id = problem.getShortName();
-        }
-        return id;
-    }
-
-    /**
-     * Return wall time for input elapsed time in ms.
-     *
-     * Calculates based on elapsed time plus contest start time
-     *
-     * @param contest
-     * @param elapsedMS
-     *            - elapsed ms when submission submitted
-     * @return wall time for run.
-     */
-    public static Calendar calculateElapsedWalltime(IInternalContest contest, long elapsedMS) {
-
-        ContestTime time = contest.getContestTime();
-        if (time.getElapsedMins() > 0) {
-
-            Calendar contestStart = time.getContestStartTime();
-
-            long ms = contestStart.getTimeInMillis();
-
-            ms += elapsedMS; // add elapsed time
-
-            // create wall time.
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
-            calendar.setTimeInMillis(ms);
-            return calendar;
-
-        } else {
-            return null;
-        }
-
-    }
-
     /**
      * Create JSON for judgement.
      *
      * @param submission
      */
+    @Override
     public ObjectNode convertJudgementToJSON(Run submission) {
         // {"id":"189549","submission_id":"wf2017-32163123xz3132yy","judgement_type_id":"CE","start_time":"2014-06-25T11:22:48.427+01",
         // "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"}
         ObjectNode element = mapper.createObjectNode();
         element.put("id", submission.getElementId().toString());
-        element.put("submission_id", getSubmissionId(submission));
+        element.put("submission_id", IJSONTool.getSubmissionId(submission));
         // SOMEDAY this is suppose to be when the judge retrieves it, not the submission time.
         element.put("start_time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
         element.put("start_contest_time", ContestTime.formatTimeMS(submission.getElapsedMS()));
@@ -491,7 +415,7 @@ public class JSONTool {
                 String judgmentAcronym = getJudgementAcronymn(judgementRecord);
                 element.put("judgement_type_id", judgmentAcronym);
 
-                Calendar wallElapsed = calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime() * 60000);
+                Calendar wallElapsed = IJSONTool.calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime() * 60000);
                 if (wallElapsed != null) {
                     element.put("end_time", Utilities.getIso8601formatter().format(wallElapsed.getTime()));
                 } // is null if there are no elapsedMinutes in the contest
@@ -516,25 +440,7 @@ public class JSONTool {
         return judgement.getAcronym();
     }
 
-    public static String getSubmissionId(Run submission) {
-        return Integer.toString(submission.getNumber());
-    }
-
-    /**
-     * Get judgement type (acronym).
-     */
-    public static String getJudgementType(Judgement judgement) {
-        return judgement.getAcronym();
-    }
-
-    public static String getLanguageId(Language language) {
-        String key = language.getID();
-        if (key == null || key.trim().equals("")) {
-            key = language.getElementId().toString();
-        }
-        return key;
-    }
-
+    @Override
     public ObjectNode convertToJSON(RunTestCase[] runTestCases, int ordinal) {
         // {"id":"1312","judgement_id":"189549","ordinal":28,"judgement_type_id":"TLE",
         // "time":"2014-06-25T11:22:42.420+01","contest_time":"1:22:42.420"}
@@ -547,20 +453,24 @@ public class JSONTool {
         // that since it really exactly what we want here.  It is always in the
         // range 1 through #_of_test_cases.
         element.put("ordinal", run.getTestNumber());
-        element.put("judgement_type_id", getJudgementType(model.getJudgement(run.getJudgementId())));
+        element.put("judgement_type_id", IJSONTool.getJudgementType(model.getJudgement(run.getJudgementId())));
         // SOMEDAY get the time from the server instead of the judge
         element.put("time", Utilities.getIso8601formatterWithMS().format(run.getDate().getTime()));
         // note this is the contest_time as seen on the judge
         element.put("contest_time", ContestTime.formatTimeMS(run.getContestTimeMS()));
         return element;
     }
-    
+
     public Group getGroupFromNumber(String groupnum) {
         for(Group group: model.getGroups()) {
-            if (getGroupId(group).equals(groupnum)) {
+            if (IJSONTool.getGroupId(group).equals(groupnum)) {
                 return(group);
             }
         }
         return(null);
+    }
+
+    private boolean notEmpty(String str) {
+        return(str != null && !str.equals(""));
     }
 }

@@ -29,8 +29,6 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.services.web.EventFeedFilter;
-import edu.csus.ecs.pc2.services.web.EventFeedStreamer;
 
 /**
  * Implementation of CLICS REST event-feed.
@@ -52,7 +50,7 @@ public class EventFeedService implements Feature {
     /**
      * Streamer that sends all JSON to clients (and sends keep alive).
      */
-    private static EventFeedStreamer eventFeedSteamer;
+    private static EventFeedStreamer eventFeedStreamer;
 
     public EventFeedService(IInternalContest inContest, IInternalController inController) {
         super();
@@ -88,8 +86,8 @@ public class EventFeedService implements Feature {
         final AsyncContext asyncContext = servletRequest.getAsyncContext();
         final ServletOutputStream servletOutputStream = asyncContext.getResponse().getOutputStream();
 
-        if (eventFeedSteamer == null) {
-            eventFeedSteamer = new EventFeedStreamer(contest, controller, servletRequest, sc);
+        if (eventFeedStreamer == null) {
+            eventFeedStreamer = new EventFeedStreamer(contest, controller, servletRequest, sc);
         }
 
         EventFeedFilter filter = new EventFeedFilter();
@@ -133,17 +131,18 @@ public class EventFeedService implements Feature {
         /**
          * Add stream and write past events to stream.
          */
-        eventFeedSteamer.addStream(servletOutputStream, filter);
+        eventFeedStreamer.addStream(servletOutputStream, filter);
 
-        if (!eventFeedSteamer.isRunning()) {
+        if (!eventFeedStreamer.isRunning()) {
             /**
              * Put on thread if not running on a thread.
              */
-            new Thread(eventFeedSteamer).start();
+            new Thread(eventFeedStreamer).start();
         }
 
         while (true) {
-            if (eventFeedSteamer.isFinalized()) {
+            // If the contest has been finalized or this client is not longer connected (eg not receiving the EF), we are done
+            if (eventFeedStreamer.isFinalized() || !eventFeedStreamer.isStreamActive(servletOutputStream)) {
                 break;
             }
             try {

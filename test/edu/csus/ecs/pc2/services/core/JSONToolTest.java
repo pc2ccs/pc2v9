@@ -22,6 +22,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.csus.ecs.pc2.clics.CLICSJudgementType;
+import edu.csus.ecs.pc2.clics.API202306.EventFeedFilter;
+import edu.csus.ecs.pc2.clics.API202306.EventFeedJSON;
+import edu.csus.ecs.pc2.clics.API202306.JSONTool;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -45,8 +48,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.core.util.JSONTool;
-import edu.csus.ecs.pc2.services.web.EventFeedFilter;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /**
  * Unit Test.
@@ -122,7 +124,7 @@ public class JSONToolTest extends AbstractTestCase {
 
     public void simpleTest() throws Exception {
 
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(null);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(null, null));
         IInternalContest contest = new SampleContest().createStandardContest();
 
         String json = eventFeedJSON.createJSON(contest, null, null, null);
@@ -138,7 +140,7 @@ public class JSONToolTest extends AbstractTestCase {
     public void testCompleteEventFeed() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
 
         String json = eventFeedJSON.createJSON(data.getContest(), null, null);
 
@@ -365,7 +367,7 @@ public class JSONToolTest extends AbstractTestCase {
     public void testSubmissionJSON() throws Exception {
 
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
 
         Run[] runs = contest.getRuns();
         Arrays.sort(runs, new RunComparator());
@@ -384,7 +386,7 @@ public class JSONToolTest extends AbstractTestCase {
     public void testTeamAndGroupJSON() throws Exception {
 
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
 
         Account[] accounts = getAccounts(contest, Type.TEAM);
 
@@ -415,7 +417,7 @@ public class JSONToolTest extends AbstractTestCase {
     public void testGroupJSON() throws Exception {
 
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
 
         Group[] groups = contest.getGroups();
         Arrays.sort(groups, new GroupComparator());
@@ -474,10 +476,10 @@ public class JSONToolTest extends AbstractTestCase {
 
         asertEqualJSON(json, "text", "Why #2? from team5");
         asertEqualJSON(json, "reply_to_id", "null");
-        asertEqualJSON(json, "problem_id", JSONTool.getProblemId(contest.getProblem(clarification.getProblemId())));
+        asertEqualJSON(json, "problem_id", IJSONTool.getProblemId(contest.getProblem(clarification.getProblemId())));
 
 //        assertJSONStringValue(json, "problem_id", "1");  SOMEDAY
-        assertJSONStringValue(json, "problem_id", JSONTool.getProblemId(contest.getProblem(clarification.getProblemId())));
+        assertJSONStringValue(json, "problem_id", IJSONTool.getProblemId(contest.getProblem(clarification.getProblemId())));
 //        assertJSONStringValue(json, "id", "5"); SOMEDAY
         assertJSONStringValue(json, "id", clarification.getElementId().toString());
         assertJSONStringValue(json,  "from_team_id", "5" );
@@ -522,7 +524,7 @@ public class JSONToolTest extends AbstractTestCase {
 
     public void testContestJSON() throws Exception {
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
 
         String json = eventFeedJSON.getContestJSONFields(contest);
         //        System.out.println("debug cont json = "+json);
@@ -542,7 +544,7 @@ public class JSONToolTest extends AbstractTestCase {
 
     public void testProblemJSON() throws Exception {
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
 
 
         Problem problem = contest.getProblems()[0];
@@ -562,7 +564,7 @@ public class JSONToolTest extends AbstractTestCase {
 
     public void testTeamMemberJSON() throws Exception{
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
 
         Account account = getAccounts(contest, Type.TEAM)[8];
         String[] names = account.getMemberNames();
@@ -592,7 +594,7 @@ public class JSONToolTest extends AbstractTestCase {
 
     public void testLanguageJSON() throws Exception {
         IInternalContest contest = new UnitTestData().getContest();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(contest);
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
 
         Language language = contest.getLanguages()[2];
         String json = eventFeedJSON.getLanguageJSON(contest, language);
@@ -600,10 +602,9 @@ public class JSONToolTest extends AbstractTestCase {
 //         System.out.println("debug lang json = "+json);
 
         //  {"id": "java", "name":"Java"}
-        JSONTool jsonTool= new JSONTool(contest, null);
 
-        asertEqualJSON(json, "id", JSONTool.getLanguageId(language));
-        assertJSONStringValue(json,  "id", JSONTool.getLanguageId(language));
+        asertEqualJSON(json, "id", IJSONTool.getLanguageId(language));
+        assertJSONStringValue(json,  "id", IJSONTool.getLanguageId(language));
         asertEqualJSON(json, "name", "GNU C++ (Unix / Windows)");
     }
 
@@ -723,7 +724,7 @@ public class JSONToolTest extends AbstractTestCase {
     public void testStartAtContestEvent() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
         String jsonBefore = eventFeedJSON.createJSON(data.getContest(), null, null);
 
         eventFeedJSON.setEventIdSequence(0);
@@ -742,7 +743,7 @@ public class JSONToolTest extends AbstractTestCase {
     public void testStartAfterEvent39() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
 
         EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(39), null);
         String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
@@ -766,7 +767,7 @@ public class JSONToolTest extends AbstractTestCase {
 
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
 
         String [] badTypeNameLists = {
                 //
@@ -798,7 +799,7 @@ public class JSONToolTest extends AbstractTestCase {
     public void testValidEventTypes() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
 
         String elist = EventFeedJSON.CONTEST_KEY + "," + EventFeedJSON.TEAM_KEY;
         EventFeedFilter filter = new EventFeedFilter(null, elist);
@@ -819,7 +820,7 @@ public class JSONToolTest extends AbstractTestCase {
     public void testLotsOfValidTypes() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
 
         String elist = EventFeedJSON.AWARD_KEY + "," + //
                 EventFeedJSON.CLARIFICATIONS_KEY + "," + //
@@ -864,7 +865,7 @@ public class JSONToolTest extends AbstractTestCase {
     public void testTeamEventType() throws Exception {
 
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
 
         String elist = EventFeedJSON.SUBMISSION_KEY + "," + //
                 EventFeedJSON.TEAM_KEY;
@@ -898,7 +899,7 @@ public class JSONToolTest extends AbstractTestCase {
 
     public void testEventTypeNotFound() throws Exception {
         UnitTestData data = new UnitTestData();
-        EventFeedJSON eventFeedJSON = new EventFeedJSON(data.getContest());
+        EventFeedJSON eventFeedJSON = new EventFeedJSON(new JSONTool(data.getContest(), null));
 
         String elist = EventFeedJSON.AWARD_KEY + "," + //
                 EventFeedJSON.CLARIFICATIONS_KEY;
@@ -920,7 +921,8 @@ public class JSONToolTest extends AbstractTestCase {
 
     public void testConvertToJSONGroup() throws Exception {
 
-        IInternalContest contest = new UnitTestData().getContest();JSONTool jsonTool= new JSONTool(contest, null);
+        IInternalContest contest = new UnitTestData().getContest();
+        JSONTool jsonTool = new JSONTool(contest, null);
 
         Group group = new Group("Group T1");
         group.setGroupId(2323);
@@ -953,7 +955,7 @@ public class JSONToolTest extends AbstractTestCase {
 
         assertJSONStringValue(json, "id", clarification.getElementId().toString()); // SOMEDAY
         assertJSONStringValue(json, "from_team_id", "4");
-        assertJSONStringValue(json, "problem_id", JSONTool.getProblemId(contest.getProblem(clarification.getProblemId())));
+        assertJSONStringValue(json, "problem_id", IJSONTool.getProblemId(contest.getProblem(clarification.getProblemId())));
         assertJSONStringValue(json, "text", "Why #2. from team4");
 
     }
@@ -1226,8 +1228,8 @@ public class JSONToolTest extends AbstractTestCase {
         String runInfoLine = "1,1,A,1,No,No,4"; // 0 (a No before first yes Security Violation)
         SampleContest.addRunFromInfo(contest, runInfoLine, true);
 
-        IInternalController conroller = null;
-        JSONTool jsonTool = new JSONTool(contest,conroller);
+        IInternalController controller = null;
+        JSONTool jsonTool = new JSONTool(contest,controller);
 
         Run firstRun = contest.getRuns()[0];
         assertTrue(firstRun.isJudged());
@@ -1261,8 +1263,8 @@ public class JSONToolTest extends AbstractTestCase {
         String runInfoLine = "1,1,A,1,No,No,4"; // 0 (a No before first yes Security Violation)
         SampleContest.addRunFromInfo(contest, runInfoLine, true);
 
-        IInternalController conroller = null;
-        JSONTool jsonTool = new JSONTool(contest,conroller);
+        IInternalController controller = null;
+        JSONTool jsonTool = new JSONTool(contest,controller);
 
         Run firstRun = contest.getRuns()[0];
         assertTrue(firstRun.isJudged());

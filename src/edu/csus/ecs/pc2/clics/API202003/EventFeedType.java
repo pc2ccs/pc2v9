@@ -1,9 +1,9 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-package edu.csus.ecs.pc2.services.web;
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+package edu.csus.ecs.pc2.clics.API202003;
 
 /**
  * Event Feed Types.
- * 
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
 public enum EventFeedType {
@@ -76,5 +76,5 @@ public enum EventFeedType {
     public String toString() {
         return this.name;
     }
-    
+
 }

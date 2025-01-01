@@ -13,11 +13,10 @@ import javax.ws.rs.ext.Provider;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
  * WebService to handle "state" REST endpoint as described by the CLICS wiki.
- * 
+ *
  * @author pc2@ecs.csus.edu
  *
  */
@@ -42,7 +41,7 @@ public class StateService implements Feature {
 
     /**
      * This method returns a representation of the current contest state in JSON format as described on the CLICS wiki.
-     * 
+     *
      * @return a {@link Response} object containing a JSON String giving the scheduled contest start time as a Unix Epoch value, or as the string "undefined" if no start time is currently scheduled.
      */
     @GET

@@ -531,7 +531,7 @@ public class ContestService implements Feature {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getContests() {
         CLICSContestInfo [] allContests = new CLICSContestInfo[1];
-        allContests[0] = new CLICSContestInfo(model);
+        allContests[0] = new CLICSContestInfo(model, null);
         try {
             ObjectMapper mapper = JSONUtilities.getObjectMapper();
             String json = mapper.writeValueAsString(allContests);
@@ -555,7 +555,7 @@ public class ContestService implements Feature {
         if(contestId.equals(model.getContestIdentifier()) == true) {
             try {
                 ObjectMapper mapper = JSONUtilities.getObjectMapper();
-                String json = mapper.writeValueAsString(new CLICSContestInfo(model));
+                String json = mapper.writeValueAsString(new CLICSContestInfo(model, null));
                 return Response.ok(json, MediaType.APPLICATION_JSON).build();
             } catch (Exception e) {
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for contest info " + e.getMessage()).build();

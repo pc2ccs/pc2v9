@@ -16,13 +16,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.util.JSONTool;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Language;
 
 /**
  * WebService to handle languages
- * 
+ *
  * @author ICPC
  *
  */
@@ -48,7 +47,7 @@ public class LanguageService implements Feature {
     /**
      * This method returns a representation of the current model languages in JSON format. The returned value is a JSON array with one language description per array element, matching the description
      * at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
-     * 
+     *
      * @return a {@link Response} object containing the model languages in JSON form
      */
     @GET

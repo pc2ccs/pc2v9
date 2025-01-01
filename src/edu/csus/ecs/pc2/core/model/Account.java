@@ -14,26 +14,26 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * User/Login Account.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class Account implements IElementObject {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -1098364914694875689L;
 
     private ClientId clientId;
-    
+
     /**
      * Unique id, version and site number.
-     * 
+     *
      */
     private ElementId elementId;
 
     private String password;
-    
+
     /**
      * Label (workstation number)
      */
@@ -43,33 +43,33 @@ public class Account implements IElementObject {
      * Team name.
      */
     private String displayName;
-    
+
     /**
      * An alias that may be displayed to judges to keep
      * the identity of a team consistent yet anonymous.
      */
     private String aliasName = "";
-    
+
     /**
      * An external identifier, ex: an ICPC id.
-     * 
+     *
      */
     private String externalId = "";
-    
+
     /**
      * Group ids
      */
     private HashSet<ElementId> groupIds;
     private ElementId primaryGroupId;
-    
+
     private PermissionList permissionList = new PermissionList();
-    
+
     /**
      * The scoring adjustment (positive or negative)
      * aka penalty time
      */
     private int scoringAdjustment = 0;
-    
+
 //    public static final String DEFAULT_INSTITUTIONNAME = "undefined";
 //
 //    public static final String DEFAULT_INSTITUTIONSHORTNAME = "undefined";
@@ -89,18 +89,18 @@ public class Account implements IElementObject {
     private String externalName = "";
 
     private String countryCode = Constants.DEFAULT_COUNTRY_CODE;
-    
+
     private String institutionName = Constants.DEFAULT_INSTITUTIONNAME;
     private String institutionShortName= Constants.DEFAULT_INSTITUTIONSHORTNAME;
     private String institutionCode  = Constants.DEFAULT_INSTITUTIONCODE;
-    
+
     private String teamName = "";
-    
+
     private String [] memberNames = new String[0];
 
     /**
      * Create an account
-     * 
+     *
      * @param clientId
      *            ClientId
      * @param password
@@ -119,27 +119,32 @@ public class Account implements IElementObject {
         // TODO - use label from json config file
         label = "" + clientId.getClientNumber();
     }
-    
+
     public String getDefaultDisplayName(ClientId inClientId) {
         return inClientId.getClientType().toString().toLowerCase() + inClientId.getClientNumber();
     }
-    
+
+    @Override
     public String toString() {
         return displayName;
     }
 
+    @Override
     public ElementId getElementId() {
         return elementId;
     }
 
+    @Override
     public int versionNumber() {
         return elementId.getVersionNumber();
     }
 
+    @Override
     public int getSiteNumber() {
         return elementId.getSiteNumber();
     }
 
+    @Override
     public void setSiteNumber(int siteNumber) {
         elementId.setSiteNumber(siteNumber);
 
@@ -160,7 +165,7 @@ public class Account implements IElementObject {
         StringBuffer sb = new StringBuffer(password);
 
         String p = new String("");
-        
+
         for (int i = 0; i < sb.length(); i++) {
             p = p + (char)(sb.charAt(i) ^ 0xfafa);
         }
@@ -176,7 +181,7 @@ public class Account implements IElementObject {
         StringBuffer newStringBuffer = new StringBuffer();
 
         password = "";
-        
+
         for (int i = 0; i < inPassword.length(); i++) {
             newStringBuffer.append((char)(sb.charAt(i) ^ 0xfafa));
         }
@@ -191,14 +196,14 @@ public class Account implements IElementObject {
     public void setClientId(ClientId clientId) {
         this.clientId = clientId;
     }
- 
-    
+
+
     // The special case is that the previous instances could have a null value which
     // needs to be compareed as equal to an empty string.
 
     /**
      * Deep compare of Account.
-     * 
+     *
      * @param account
      * @return true if same, else false.
      */
@@ -235,7 +240,7 @@ public class Account implements IElementObject {
             if (!aliasName.equals(account.getAliasName())) {
                 return false;
             }
-            if (!label.equals(account.getLabel())) {
+            if (!getLabel().equals(account.getLabel())) {
                 return false;
             }
             if (!externalId.equals(account.getExternalId())) {
@@ -262,7 +267,7 @@ public class Account implements IElementObject {
             if (!StringUtilities.stringSame(institutionName, account.getInstitutionName())) {
                 return false;
             }
-            
+
             if (permissionList == null || account.getPermissionList() == null) {
                 // if only 1 is null then return false
                 if (!(permissionList == null && account.getPermissionList() == null)) {
@@ -283,11 +288,11 @@ public class Account implements IElementObject {
             return false;
         }
     }
-    
+
     public void clearListAndLoadPermissions(PermissionList newPermissionList){
         permissionList.clearAndLoadPermissions(newPermissionList);
     }
-    
+
     public void addPermission(Permission.Type type){
         permissionList.addPermission(type);
     }
@@ -317,7 +322,7 @@ public class Account implements IElementObject {
 
     /**
      * label, aka workstation number
-     * 
+     *
      * @return label (workstation number)
      */
     public String getLabel() {
@@ -335,7 +340,7 @@ public class Account implements IElementObject {
 
     /**
      * External id, aka ICPC Reservation Id.
-     * 
+     *
      * @return external id/reservation id.
      */
     public String getExternalId() {
@@ -370,7 +375,7 @@ public class Account implements IElementObject {
         }
         groupIds.add(groupId);
     }
-    
+
     public ElementId getPrimaryGroupId() {
         return primaryGroupId;
     }
@@ -388,7 +393,7 @@ public class Account implements IElementObject {
     }
 
     /**
-     * University Name from ICPC CMS data. 
+     * University Name from ICPC CMS data.
      */
     public String getExternalName() {
         return externalName;
@@ -396,7 +401,7 @@ public class Account implements IElementObject {
 
     /**
      * Get Institution name (long).
-     * 
+     *
      * @return Institution name.
      */
     public String getLongSchoolName() {
@@ -437,7 +442,7 @@ public class Account implements IElementObject {
 
     /**
      * Update certain fields.
-     * 
+     *
      * @param account
      */
     @SuppressWarnings("unchecked")
@@ -460,7 +465,7 @@ public class Account implements IElementObject {
         password = account.password;
         shortSchoolName = account.shortSchoolName;
         teamName = account.getTeamName();
-        
+
         institutionCode = account.getInstitutionCode();
         institutionShortName = account.getInstitutionShortName();
         institutionName = account.getInstitutionName();
@@ -475,7 +480,7 @@ public class Account implements IElementObject {
     public void setTeamName(String teamName) {
         this.teamName = teamName;
     }
-    
+
     /**
      * Team name, ex. Hornets.
      */
@@ -524,10 +529,10 @@ public class Account implements IElementObject {
     public void setScoringAdjustment(int newScoringAdjustment) {
         this.scoringAdjustment = newScoringAdjustment;
     }
-    
+
     /**
      * Is this account a team client type account?.
-     * 
+     *
      * @return true if team clienttype
      */
     public boolean isTeam() {

@@ -20,11 +20,10 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.util.JSONTool;
 
 /**
  * WebService for handling teams
- * 
+ *
  * @author ICPC
  *
  */
@@ -49,7 +48,7 @@ public class TeamService implements Feature {
 
     /**
      * This method returns a representation of the current model teams in JSON format. The returned value is a JSON array with one team description per array element.
-     * 
+     *
      * @return a {@link Response} object containing the model teams in JSON form
      */
     @GET

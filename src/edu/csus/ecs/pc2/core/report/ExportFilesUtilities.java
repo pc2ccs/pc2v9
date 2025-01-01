@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import edu.csus.ecs.pc2.clics.API202306.EventFeedJSON;
+import edu.csus.ecs.pc2.clics.API202306.JSONTool;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.FileUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -20,7 +22,6 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.standings.ContestStandings;
 import edu.csus.ecs.pc2.core.standings.ScoreboardUtilities;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
-import edu.csus.ecs.pc2.services.core.EventFeedJSON;
 
 public class ExportFilesUtilities {
 
@@ -91,7 +92,9 @@ public class ExportFilesUtilities {
         }
 
         try {
-            EventFeedJSON efEventFeedJSON = new EventFeedJSON(contest);
+            // TODO Should use whatever version is configured for this contest, if any.
+            // otherwise, the most recent? - currently 2023-06
+            EventFeedJSON efEventFeedJSON = new EventFeedJSON(new JSONTool(contest, null));
             String json = efEventFeedJSON.createJSON(contest, null, null);
             String[] eventfeedJsonLines = { json };
             FileUtilities.writeFileContents(eventfeedJsonFilename, eventfeedJsonLines);

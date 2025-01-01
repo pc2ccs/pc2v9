@@ -12,12 +12,12 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * CLICS Contest State
- * 
+ *
  * @author John Buck
  *
  */
@@ -48,31 +48,36 @@ public class CLICSContestState {
 
     /**
      * Fill in properties for contest state as per 2023-06 spec
-     * 
+     *
      * @param model place to get contest times from
+     * @param ci optional contest information.  If null, use the model's info.  This constructor
+     *      is also used by ContestInformation objects that may come from an event listener, so
+     *      we make it variable as it may not be from the current model.
      */
-    public CLICSContestState(IInternalContest model) {
-        
+    public CLICSContestState(IInternalContest model, ContestInformation ci) {
+
         if (model.getContestTime().isContestStarted()) {
-            ContestInformation ci = model.getContestInformation();
+            if(ci == null) {
+                ci = model.getContestInformation();
+            }
             ContestTime ct = model.getContestTime();
-            
+
             started = Utilities.getIso8601formatterWithMS().format(ct.getContestStartTime().getTime());
             if (model.getContestTime().isPastEndOfContest()) {
-                Calendar endedDate = JSONTool.calculateElapsedWalltime(model, ct.getContestLengthMS());
+                Calendar endedDate = IJSONTool.calculateElapsedWalltime(model, ct.getContestLengthMS());
                 if (endedDate != null) {
                     ended = Utilities.getIso8601formatterWithMS().format(endedDate.getTimeInMillis());
                 }
             }
             String scoreboardFreezeDuration = ci.getFreezeTime();
             Date thawedDate = null;
-            
+
             if (scoreboardFreezeDuration != null && scoreboardFreezeDuration.trim().length() > 0) {
                 long elapsed = ct.getElapsedSecs();
                 long freezeTimeSecs = Utilities.getFreezeTime(model);
                 // FIXME this date should be stored in ContestInformation
                 if (elapsed >= freezeTimeSecs) {
-                    Calendar freezeCal = JSONTool.calculateElapsedWalltime(model, freezeTimeSecs * 1000);
+                    Calendar freezeCal = IJSONTool.calculateElapsedWalltime(model, freezeTimeSecs * 1000);
                     if (freezeCal != null) {
                         frozen = Utilities.getIso8601formatterWithMS().format(freezeCal.getTime());
                     }

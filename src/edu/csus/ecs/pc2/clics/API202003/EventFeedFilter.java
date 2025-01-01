@@ -1,5 +1,5 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
-package edu.csus.ecs.pc2.services.web;
+package edu.csus.ecs.pc2.clics.API202003;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +11,6 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.services.core.EventFeedJSON;
 
 /**
  * Event Feed filter.
@@ -262,7 +261,7 @@ public class EventFeedFilter {
      * @param string JSON string, {"type":"languages", "id":"pc2-11", "op":"create", "data": {"id":"1","name":"Java"}}
      * @return type for event, ex. "languages" as EventFeedType.LANGUAGES.
      */
-    protected EventFeedType getEventFeedType(String string) {
+    public EventFeedType getEventFeedType(String string) {
         // {"type":"languages", "id":"pc2-11", "op":"create", "data": {"id":"1","name":"Java"}}
 
         String typeValue = getCleanValue(string, EF_TYPE_STRING);
@@ -288,7 +287,7 @@ public class EventFeedFilter {
      * @param string ex. {"event":"languages", "id":"pc2-11", "op":"create", "data": {"id":"1","name":"Java"}}
      * @return value for id, ex pc2-11
      */
-    protected String getEventFeedSequence(String string) {
+    public String getEventFeedSequence(String string) {
         // {"event":"languages", "id":"pc2-11", "op":"create", "data": {"id":"1","name":"Java"}}
         String seqVal = getCleanValue(string, EF_SEQ_STRING);
         if(seqVal == null) {

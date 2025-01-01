@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
@@ -79,22 +79,22 @@ public class CLICSTeam {
 
         id = "" + account.getClientId().getClientNumber();
 
-        if (JSONTool.notEmpty(account.getExternalId())) {
+        if (!StringUtilities.isEmpty(account.getExternalId())) {
             icpc_id = account.getExternalId();
         }
         label = account.getLabel();
         name = account.getDisplayName();
-        if (JSONTool.notEmpty(account.getInstitutionCode()) && !account.getInstitutionCode().equals("undefined")) {
-            organization_id = JSONTool.getOrganizationId(account);
+        if (!StringUtilities.isEmpty(account.getInstitutionCode()) && !account.getInstitutionCode().equals("undefined")) {
+            organization_id = IJSONTool.getOrganizationId(account);
         }
         if (account.getGroupIds() != null) {
             HashSet<ElementId> groups = account.getGroupIds();
             ArrayList<String> groupList = new ArrayList<String>();
 
             for(ElementId ele : groups) {
-                groupList.add(JSONTool.getGroupId(model.getGroup(ele)));
+                groupList.add(IJSONTool.getGroupId(model.getGroup(ele)));
             }
-            group_ids = (String [])groupList.toArray();
+            group_ids = groupList.toArray(new String[groupList.size()]);
         }
         hidden = !account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD);
     }

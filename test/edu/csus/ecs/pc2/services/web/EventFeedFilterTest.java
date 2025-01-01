@@ -1,12 +1,15 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.web;
 
+import edu.csus.ecs.pc2.clics.API202306.EventFeedFilter;
+import edu.csus.ecs.pc2.clics.API202306.EventFeedJSON;
+import edu.csus.ecs.pc2.clics.API202306.EventFeedType;
+import edu.csus.ecs.pc2.clics.API202306.JSON202306Utilities;
+import edu.csus.ecs.pc2.clics.API202306.JSONTool;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.util.AbstractTestCase;
-import edu.csus.ecs.pc2.services.core.EventFeedJSON;
-import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * Unit Test.
@@ -32,9 +35,9 @@ public class EventFeedFilterTest extends AbstractTestCase {
         SampleContest samp = new SampleContest();
         IInternalContest contest = samp.createStandardContest();
 
-        EventFeedJSON efJson = new EventFeedJSON(contest);
+        EventFeedJSON efJson = new EventFeedJSON(new JSONTool(contest, null));
         String json = efJson.createJSON(contest, null, null);
-        return json.split(JSONUtilities.NL);
+        return json.split(JSON202306Utilities.NL);
     }
 
     private void assertNumberEvents(int expectedCount, EventFeedFilter filter, String[] lines) {

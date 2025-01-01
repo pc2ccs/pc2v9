@@ -95,7 +95,7 @@ public class CLICSScoreboard {
         //          }
         time = ZonedDateTime.now( ZoneOffset.UTC ).format( DateTimeFormatter.ISO_INSTANT);
         contest_time = model.getContestTime().getElapsedTimeStr();
-        state = new CLICSContestState(model);
+        state = new CLICSContestState(model, null);
 
         ArrayList<CLICSScoreboardRow>rowsArray = new ArrayList<CLICSScoreboardRow>();
         HashMap<String, String> probEleToShort = new HashMap<String, String>();

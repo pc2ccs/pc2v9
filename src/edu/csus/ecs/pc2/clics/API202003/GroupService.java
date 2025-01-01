@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.util.JSONTool;
+import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /**
  * WebService to handle languages
@@ -45,10 +45,10 @@ public class GroupService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest groups in JSON format. 
+     * This method returns a representation of the current contest groups in JSON format.
      * The returned value is a JSON array with one language description per array element, matching the
      * description at {@link https://clics.ecs.baylor.edu/index.php/Draft_CCS_REST_interface#GET_baseurl.2Flanguages}.
-     * 
+     *
      * @return a {@link Response} object containing the contest languages in JSON form
      */
     @GET
@@ -82,7 +82,7 @@ public class GroupService implements Feature {
 
         for (int i = 0; i < groups.length; i++) {
             Group group = groups[i];
-            if (group.isDisplayOnScoreboard() && jsonTool.getGroupId(group).equals(groupId)) {
+            if (group.isDisplayOnScoreboard() && IJSONTool.getGroupId(group).equals(groupId)) {
                 return Response.ok(jsonTool.convertToJSON(group).toString(),MediaType.APPLICATION_JSON).build();
             }
         }
