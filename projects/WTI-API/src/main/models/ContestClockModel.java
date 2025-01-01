@@ -14,7 +14,8 @@ public class ContestClockModel {
 	private boolean isRunning;
 	private long contestLengthInSecs;
 	private long elapsedSecs;  			//total time in seconds that the contest has been running -- does NOT include time during any "pauses" 
-	private long wallClockStartTime;	//unix timestamp when the contest actually started -- msec since the Epoch. Does not change due to "pauses"
+	private long wallClockStartTime;	//unix timestamp when the contest actually started (msec since the Epoch),
+										// or zero if contest has not ever been started.  Does not change due to "pauses".
 	
 	public ContestClockModel(boolean isRunning, long contestLengthInSecs, long elapsedSecs, long wallClockStartTime) {
 			this.isRunning = isRunning;
