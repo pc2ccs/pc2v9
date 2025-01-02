@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -25,6 +26,7 @@ import communication.WTIWebsocket;
 import config.ServerInit;
 import edu.csus.ecs.pc2.api.IClarification;
 import edu.csus.ecs.pc2.api.IClient;
+import edu.csus.ecs.pc2.api.IContest;
 import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ILanguage;
@@ -440,6 +442,11 @@ public class ContestController extends MainController {
 			public Response contestClock(@ApiParam(value="token used by logged in users to access teams information", 
 											required = true) @HeaderParam("team_id")String key) {
 
+				if (connections == null) {
+					System.err.println ("SEVERE: ContestController.contestClock(): team connections map in MainController is null!");
+					logger.severe("ContestController.contestClock(): team connections map in MainController is null!");
+					throw new NullPointerException("Team connections map in MainController is null in ContestController.contestClock()");
+				}
 				ServerConnection userInformation = connections.get(key);
 
 				//verify the user is logged in
@@ -459,13 +466,33 @@ public class ContestController extends MainController {
 				
 				try {
 					//get the contest clock from the PC2 Server via the PC2 API ServerConnection
-					IContestClock contestClock = userInformation.getContest().getContestClock();
+//					IContestClock contestClock = userInformation.getContest().getContestClock();
 					
+					IContest contest = userInformation.getContest();
+					if (contest == null) {
+						System.err.println ("SEVERE: ContestController.contestClock(): ServerConnection.getContest() returned null!");
+						logger.severe("ContestController.contestClock(): ServerConnection.getContest() returned null!");
+						throw new NullPointerException("ServerConnection.getContest() returned null in ContestController.contestClock()");
+					}
+					IContestClock contestClock = contest.getContestClock();
+					if (contestClock == null) {
+						System.err.println ("SEVERE: ContestController.contestClock(): ServerConnection.getContest().getContestClock() returned null!");
+						logger.severe("ContestController.contestClock(): ServerConnection.getContest().getContestClock() returned null!");
+						throw new NullPointerException("ServerConnection.getContest().getContestClock() returned null in ContestController.contestClock()");
+					}
+										
 					//retrieve the relevant fields from the PC2 contest clock
 					boolean isRunning = contestClock.isContestClockRunning();
 					long contestLengthInSecs = contestClock.getContestLengthSecs();
 					long elapsedSecs = contestClock.getElapsedSecs();
-					long wallClockStartTime = contestClock.getContestStartTime().getTimeInMillis();	
+					long wallClockStartTime ;
+					//"contest start time" is a Calendar object and might be null if the contest has never been started
+					Calendar startTimeCalendar = contestClock.getContestStartTime();
+					if (startTimeCalendar == null) {
+						wallClockStartTime = 0;
+					} else {
+						wallClockStartTime = startTimeCalendar.getTimeInMillis();
+					}
 					
 					//construct a ContestClock containing the PC2 Server clock values
 					returnableContestClock = new ContestClockModel(isRunning,contestLengthInSecs, elapsedSecs, wallClockStartTime);
