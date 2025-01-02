@@ -255,6 +255,9 @@ public class Account implements IElementObject {
             if (!shortSchoolName.equals(account.getShortSchoolName())) {
                 return false;
             }
+            if (!countryCode.equals(account.getCountryCode())) {
+                return false;
+            }
 
             if (!StringUtilities.stringSame(institutionCode, account.getInstitutionCode())) {
                 return false;
