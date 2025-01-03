@@ -180,6 +180,9 @@ export class AppComponent implements OnInit {
         	}
         }
         
+		//restore the contest clock on-screen display values (elapsed and remaining)
+		this._contestService.updateContestClock();
+		
 	    // transfer to the (former) "current page".
 	    let page = getCurrentPage();
 	    if (DEBUG_MODE) {
