@@ -35,7 +35,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
  *
  * 1st line of load file are the column headers.
  * Required columns are:  account, site, and password
- * Optional columns are: Display Name, Permissions, Group, Alias, ICPC Id, Short School Name,Long School Name, Team Name, Country
+ * Optional columns are: Display Name, Permissions, Group, Alias, ICPC Id, Short School Name,Long School Name, Inst ID,Team Name, Country
  * perm* are booleans, but ignored if empty
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -137,7 +137,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             accountListBox = new MCLB();
             accountListBox.setMaximumSize(new Dimension(4096, 1024));
 
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Team Name", "Country"};
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Inst Id", "Team Name", "Country"};
             accountListBox.addColumns(cols);
 
             /**
@@ -310,7 +310,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-        // Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Team Name", "Country"};"Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias"};
+        // Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Inst Id", "Team Name", "Country"}
         try {
             int cols = accountListBox.getColumnCount();
             Object[] s = new String[cols];
@@ -407,16 +407,21 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             } else {
                 s[10] = CHANGE_BEGIN + account.getLongSchoolName() + CHANGE_END;
             }
+            if (accountOrig.getInstitutionCode().equals(account.getInstitutionCode())) {
+                s[11] = account.getInstitutionCode();
+            } else {
+                s[11] = CHANGE_BEGIN + account.getInstitutionCode() + CHANGE_END;
+            }
             // afk icpc teamName
             if (accountOrig.getExternalName().equals(account.getExternalName())) {
-                s[11] = account.getExternalName();
+                s[12] = account.getExternalName();
             } else {
-                s[11] = CHANGE_BEGIN + account.getExternalName() + CHANGE_END;
+                s[12] = CHANGE_BEGIN + account.getExternalName() + CHANGE_END;
             }
             if (accountOrig.getCountryCode().equals(account.getCountryCode())) {
-                s[11] = account.getCountryCode();
+                s[13] = account.getCountryCode();
             } else {
-                s[11] = CHANGE_BEGIN + account.getCountryCode() + CHANGE_END;
+                s[13] = CHANGE_BEGIN + account.getCountryCode() + CHANGE_END;
             }
             return s;
         } catch (Exception exception) {
