@@ -9,6 +9,7 @@ import { ContestClock } from '../models/contest-clock';
 import { ContestTimerService } from './contestTimer.service' ;
 import { Clarification } from '../models/clarification';
 import { DEBUG_MODE } from 'src/constants';
+import { RESYNC_INTERVAL_IN_MINUTES } from 'src/constants';
 
 @Injectable({
 	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
@@ -18,7 +19,7 @@ export class ContestService extends IContestService {
   standingsAreCurrent: boolean ;
   cachedStandings: Observable<String> ;
 
-  //the WTI-UI timer service which updates elapsed and remaining time when started
+  //the WTI-UI timer service which updates on-screen elapsed and remaining time when started (enabled)
   contestTimer: ContestTimerService = new ContestTimerService() ; 
   
   constructor(private _httpClient: HttpClient) {
@@ -27,6 +28,18 @@ export class ContestService extends IContestService {
 		console.log ("Executing ContestService constructor; instance ID = ", this.uniqueId) ;
 	}
     this.standingsAreCurrent = false;
+    
+    //set a timer to auto-refresh the contest clock displays, at a rate defined in src/constants
+    setInterval(
+            //execute this function at the following-specified interval:
+            () => {
+              if (DEBUG_MODE) {
+                console.log("ContestService: resyncing clocks with PC2 Server");
+              }
+              this.updateContestClock();
+            }, 
+            RESYNC_INTERVAL_IN_MINUTES * 60 * 1000	// timer interval in msec: minutes * (secs-per-min) * (msec-per-sec)
+          ); 
   }
 
   getLanguages(): Observable<ContestLanguage[]> {
