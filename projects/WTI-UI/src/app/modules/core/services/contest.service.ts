@@ -67,7 +67,6 @@ export class ContestService extends IContestService {
   
   /** This method returns an Observable "ContestClock" object -- a WTI-UI model corresponding to the PC2 "ContestTime" class,
    *  which itself encapsulates the "contest clock" on the PC2 server.
-   * TODO: should this method return the local copy of the ContestClock?
    */
   getContestClock(): Observable<ContestClock> {
     return this._httpClient.get<ContestClock>(`${environment.baseUrl}/contest/contestclock`);

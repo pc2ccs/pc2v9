@@ -190,7 +190,6 @@ export class AppComponent implements OnInit {
 	    }
 	    
 	    //navigate to the most recently saved page
-	    // TODO:  consider whether using history.pushState()/popState() is a better solution for this...
 	    this.router.navigate([page])
 	      .then(nav => {
 	         if (DEBUG_MODE) {

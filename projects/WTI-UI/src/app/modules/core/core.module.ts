@@ -93,9 +93,6 @@ export function WebsocketServiceFactory(injector: Injector,
     DisplayTimePipe,
 	//TODO:  should the following two still be declared here since they are now listed in the above "deps" list?
     UiHelperService,
-    ContestService,
-	//TODO:  should the following two still be declared here since they are now listed in the above "deps" list?
-    UiHelperService,
     ContestService
   ],
   imports: [
