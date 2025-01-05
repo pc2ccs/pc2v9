@@ -80,7 +80,9 @@ public class JSONTool implements IJSONTool {
             element = mapper.convertValue(cSub, ObjectNode.class);
             mapper.setFilters(null);
         } catch (Exception e) {
-            controller.getLog().log(Level.WARNING, "Error creating JSON for submission " + submission.getElementId().toString() + " " + e.getMessage());
+            if(controller != null) {
+                controller.getLog().log(Level.WARNING, "Error creating JSON for submission " + submission.getElementId().toString() + " " + e.getMessage());
+            }
         }
 
         return element;
@@ -186,7 +188,9 @@ public class JSONTool implements IJSONTool {
             element = mapper.convertValue(cRun, ObjectNode.class);
             mapper.setFilters(null);
         } catch (Exception e) {
-            controller.getLog().log(Level.WARNING, "Error creating JSON for judgment " + submission.getElementId().toString() + " " + e.getMessage());
+            if(controller != null) {
+                controller.getLog().log(Level.WARNING, "Error creating JSON for judgment " + submission.getElementId().toString() + " " + e.getMessage());
+            }
         }
 
         return element;

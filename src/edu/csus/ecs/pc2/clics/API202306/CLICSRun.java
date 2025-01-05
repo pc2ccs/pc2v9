@@ -1,6 +1,7 @@
 // Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 import java.util.logging.Level;
@@ -72,8 +73,10 @@ public class CLICSRun {
         if(startJudgeDate == null) {
             // Yikes! Using submission time since there is no judge start date... Something is amiss, but this is a last ditch guess
             startJudgeDate = submission.getCreateDate();
-            controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for submission " + submission.getNumber()
+            if(controller != null) {
+                controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for submission " + submission.getNumber()
                 + " is not set - using submission create date ");
+            }
         }
 
         if (submission.isJudged()) {
@@ -88,20 +91,32 @@ public class CLICSRun {
                 Date judgeDate = judgementRecord.getJudgeStartDate();
                 if(judgeDate == null) {
                     judgeDate = startJudgeDate;
-                    controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for judgement " + id
+                    if(controller != null) {
+                        controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for judgement " + id
                             + " is not set - using startJudgeDate from submission");
+                    }
                 }
                 if(judgeDate == null) {
                     // This is an absolute last resort - basically, use the judgement end time as the start time (0 elapsed *sigh*)
                     judgeDate = judgementRecord.getDate();
-                    controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for judgement " + id
+                    if(controller != null) {
+                        controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for judgement " + id
                             + " is not set - using judgement record end date");
+                    }
                 }
                 start_time = Utilities.getIso8601formatterWithMS().format(judgeDate);
-                start_contest_time = ContestTime.formatTimeMS(judgeDate.getTime() - model.getContestTime().getContestStartTime().getTime().getTime());
+                Calendar contestStartTime = model.getContestTime().getContestStartTime();
+                Date contestStartDate = null;
+                // If contest is never started, then use time of judgement - probably a JUnit test
+                if(contestStartTime == null) {
+                    contestStartDate = judgeDate;
+                } else {
+                    contestStartDate = contestStartTime.getTime();
+                }
+                start_contest_time = ContestTime.formatTimeMS(judgeDate.getTime() - contestStartDate.getTime());
 
                 end_time = Utilities.getIso8601formatterWithMS().format(judgementRecord.getDate());
-                end_contest_time = ContestTime.formatTimeMS(judgementRecord.getDate().getTime() - model.getContestTime().getContestStartTime().getTime().getTime());
+                end_contest_time = ContestTime.formatTimeMS(judgementRecord.getDate().getTime() - contestStartDate.getTime());
                 max_run_time = (judgementRecord.getExecuteMS())/1000.;
             } else {
                 // Filter out max_run_time from serialization

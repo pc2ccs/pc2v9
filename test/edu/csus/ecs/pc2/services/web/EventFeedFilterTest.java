@@ -24,18 +24,24 @@ public class EventFeedFilterTest extends AbstractTestCase {
 
         assertEquals("startid = <none set>, event types = <none set>, groupids = <none set>", filter.toString());
 
-        String[] lines = getStandardContestJSON();
+        String[] lines = getStandardContestJSON(false);
         assertEquals("Expected line count ", 143, lines.length);
 
         assertNumberEvents(143, filter, lines);
+
+        lines = getStandardContestJSON(true);
+        assertEquals("Expected line count ", 6, lines.length);
+
+        assertNumberEvents(6, filter, lines);
     }
 
-    private String[] getStandardContestJSON() throws IllegalContestState {
+    private String[] getStandardContestJSON(boolean bCollections) throws IllegalContestState {
 
         SampleContest samp = new SampleContest();
         IInternalContest contest = samp.createStandardContest();
 
         EventFeedJSON efJson = new EventFeedJSON(new JSONTool(contest, null));
+        efJson.setUseCollections(bCollections);
         String json = efJson.createJSON(contest, null, null);
         return json.split(JSON202306Utilities.NL);
     }

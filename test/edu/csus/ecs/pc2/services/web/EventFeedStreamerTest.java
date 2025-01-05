@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.web;
 
 import java.util.ArrayList;
@@ -234,7 +234,8 @@ public class EventFeedStreamerTest extends AbstractTestCase {
 
         assertTrue("Expected long json ",  json.length() > 8000);
 
-        assertCountEvent(100, EventFeedJSON.CLARIFICATIONS_KEY, json);
+        // Note that collections are in effect, so only 1 clarification collection
+        assertCountEvent(1, EventFeedJSON.CLARIFICATIONS_KEY, json);
 
     }
 
