@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.web;
 
 import edu.csus.ecs.pc2.clics.API202306.EventFeedFilter;
@@ -60,16 +60,16 @@ public class EventFeedFilterTest extends AbstractTestCase {
 
     public void testgetEventFeedType() throws Exception {
 
-        // {"event":"judgement-types", "id":"pc2-8", "op":"create", "data": {"id":"OFE", "name":"Consider switching to another major", "penalty":true, "solved":false}}
-        // {"event":"judgement-types", "id":"pc2-9", "op":"create", "data": {"id":"WA3", "name":"How did you get into this place ?", "penalty":true, "solved":false}}
-        // {"event":"judgement-types", "id":"pc2-10", "op":"create", "data": {"id":"JE", "name":"Contact Staff - you have no hope", "penalty":true, "solved":false}}
-        // {"event":"languages", "id":"pc2-11", "op":"create", "data": {"id":"1","name":"Java"}}
-        // {"event":"languages", "id":"pc2-12", "op":"create", "data": {"id":"1","name":"Java"},{"id":"2","name":"Default"}}
-        // {"event":"languages", "id":"pc2-13", "op":"create", "data": {"id":"1","name":"Java"},{"id":"2","name":"Default"},{"id":"3","name":"GNU C++ (Unix / Windows)"}}
+        // {"type":"judgement-types", "token":"pc2-8", "id":"OFE", "data": {"id":"OFE", "name":"Consider switching to another major", "penalty":true, "solved":false}}
+        // {"type":"judgement-types", "token":"pc2-9", "id":"WA3", "data": {"id":"WA3", "name":"How did you get into this place ?", "penalty":true, "solved":false}}
+        // {"type":"judgement-types", "token":"pc2-10", "id":"JE", "data": {"id":"JE", "name":"Contact Staff - you have no hope", "penalty":true, "solved":false}}
+        // {"type":"languages", "token":"pc2-11", "id":"1", "data": {"id":"1","name":"Java"}}
+        // {"type":"languages", "token":"pc2-12", "id":"1", "data": [{"id":"1","name":"Java"},{"id":"2","name":"Default"}]}
+        // {"type":"languages", "token":"pc2-13", "id":"1", "data": [{"id":"1","name":"Java"},{"id":"2","name":"Default"},{"id":"3","name":"GNU C++ (Unix / Windows)"}]}
 
         EventFeedFilter filter = new EventFeedFilter();
 
-        String string = "{\"type\":\"languages\", \"id\":\"pc2-11\", \"op\":\"create\", \"data\": {\"id\":\"1\",\"name\":\"Java\"}}";
+        String string = "{\"type\":\"languages\", \"token\":\"pc2-11\", \"id\":\"java\", \"data\": {\"id\":\"java\",\"name\":\"Java\"}}";
         assertEquals(EventFeedType.LANGUAGES, filter.getEventFeedType(string));
 
     }
@@ -77,7 +77,7 @@ public class EventFeedFilterTest extends AbstractTestCase {
     public void testgetEventFeedSequence() throws Exception {
 
         EventFeedFilter filter = new EventFeedFilter();
-        String string = "{\"event\":\"judgement-types\", \"id\":\"pc2-9\", \"op\":\"create\", \"data\": {\"id\":\"WA3\", \"name\":\"How did you get into this place ?\", \"penalty\":true, \"solved\":false}}";
+        String string = "{\"type\":\"judgement-types\", \"token\":\"pc2-9\", \"id\":\"WA3\", \"data\": {\"id\":\"WA3\", \"name\":\"How did you get into this place ?\", \"penalty\":true, \"solved\":false}}";
         assertEquals("pc2-9", filter.getEventFeedSequence(string));
     }
 }

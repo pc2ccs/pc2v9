@@ -1,6 +1,7 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -17,6 +18,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
  * @author John Buck
  *
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CLICSProblem {
 
     @JsonProperty

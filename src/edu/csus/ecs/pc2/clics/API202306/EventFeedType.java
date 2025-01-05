@@ -24,6 +24,10 @@ public enum EventFeedType {
     /**
      *
      */
+   CONTEST("contest"),
+    /**
+     *
+     */
     STATE("state"),
     /**
      *

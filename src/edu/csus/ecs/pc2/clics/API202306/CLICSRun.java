@@ -1,13 +1,15 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.logging.Level;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -60,16 +62,18 @@ public class CLICSRun {
      * @param model The contest
      * @param problem The problem
      */
-    public CLICSRun(IInternalContest model, Run submission, Set<String> exceptProps) {
+    public CLICSRun(IInternalContest model, IInternalController controller, Run submission, Set<String> exceptProps) {
         // {"id":"189549","submission_id":"wf2017-32163123xz3132yy","judgement_type_id":"CE","start_time":"2014-06-25T11:22:48.427+01",
         // "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"}
         id = submission.getElementId().toString();
         submission_id = IJSONTool.getSubmissionId(submission);
 
         Date startJudgeDate = submission.getJudgeStartDate();
-        if(startJudgeDate != null) {
-            start_time = Utilities.getIso8601formatterWithMS().format(startJudgeDate);
-            start_contest_time = ContestTime.formatTimeMS(startJudgeDate.getTime() - model.getContestTime().getContestStartTime().getTime().getTime());
+        if(startJudgeDate == null) {
+            // Yikes! Using submission time since there is no judge start date... Something is amiss, but this is a last ditch guess
+            startJudgeDate = submission.getCreateDate();
+            controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for submission " + submission.getNumber()
+                + " is not set - using submission create date ");
         }
 
         if (submission.isJudged()) {
@@ -81,15 +85,21 @@ public class CLICSRun {
 
                 // Fetch judgement_type_id from judgement acronym
                 judgement_type_id = model.getJudgement(judgementRecord.getJudgementId()).getAcronym();
-//                JB - This code is the old way it worked.  It would only get the times rounded to second.  We want actual times now.
-//                    In fact, this code is wrong because it often returns end times that are < start times, which isn't good.
-//                Calendar wallElapsed = IJSONTool.calculateElapsedWalltime(model, judgementRecord.getWhenJudgedTime() * 60000);
-//                if (wallElapsed != null) {
-//                    end_time = Utilities.getIso8601formatter().format(wallElapsed.getTime());
-//                }
-//                // is null if there are no elapsedMinutes in the contest
-//                // when judged is in minutes convert to milliseconds
-//                end_contest_time = ContestTime.formatTimeMS(judgementRecord.getWhenJudgedTime() * 60000);
+                Date judgeDate = judgementRecord.getJudgeStartDate();
+                if(judgeDate == null) {
+                    judgeDate = startJudgeDate;
+                    controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for judgement " + id
+                            + " is not set - using startJudgeDate from submission");
+                }
+                if(judgeDate == null) {
+                    // This is an absolute last resort - basically, use the judgement end time as the start time (0 elapsed *sigh*)
+                    judgeDate = judgementRecord.getDate();
+                    controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for judgement " + id
+                            + " is not set - using judgement record end date");
+                }
+                start_time = Utilities.getIso8601formatterWithMS().format(judgeDate);
+                start_contest_time = ContestTime.formatTimeMS(judgeDate.getTime() - model.getContestTime().getContestStartTime().getTime().getTime());
+
                 end_time = Utilities.getIso8601formatterWithMS().format(judgementRecord.getDate());
                 end_contest_time = ContestTime.formatTimeMS(judgementRecord.getDate().getTime() - model.getContestTime().getContestStartTime().getTime().getTime());
                 max_run_time = (judgementRecord.getExecuteMS())/1000.;
@@ -97,7 +107,10 @@ public class CLICSRun {
                 // Filter out max_run_time from serialization
                 exceptProps.add("max_run_time");
             }
+        } else if(startJudgeDate != null) {
+            start_time = Utilities.getIso8601formatterWithMS().format(startJudgeDate);
+            start_contest_time = ContestTime.formatTimeMS(startJudgeDate.getTime() - model.getContestTime().getContestStartTime().getTime().getTime());
         }
-
+        // else not much to do here if no start date.
     }
 }

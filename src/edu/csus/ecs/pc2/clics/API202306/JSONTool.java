@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.HashSet;
@@ -147,7 +147,7 @@ public class JSONTool implements IJSONTool {
     @Override
     public ObjectNode convertOrganizationsToJSON(Account account) {
         // this is a hack because we do not have organizations in the Model directly.
-        // [0]:INST-U-1329 [1]:New York University [2]:NYU
+        // [0]:1329 [1]:New York University [2]:NYU
         // but only need [1] & [2].  We get the rest from the a typical account.
         String [] fields = new String[3];
 
@@ -177,7 +177,7 @@ public class JSONTool implements IJSONTool {
         Set<String> exceptProps = new HashSet<String>();
         ObjectNode element = null;
 
-        CLICSRun cRun = new CLICSRun(model, submission, exceptProps);
+        CLICSRun cRun = new CLICSRun(model, controller, submission, exceptProps);
         try {
             // for this judgment, create filter to omit unused/bad properties (max_run_time in this case)
             SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.File;
@@ -63,7 +63,7 @@ public class EventFeedLog {
     }
 
     private String getEventFeedLogName(String id) {
-        return logsDirectory + File.separator + "Eventfeed_2023_06_Log_" + id + ".log";
+        return logsDirectory + File.separator + "Eventfeed_2023_06_" + id + ".log";
     }
 
     public String[] getLogLines() {

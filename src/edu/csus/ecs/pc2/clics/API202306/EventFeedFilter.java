@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 public class EventFeedFilter {
 
     private static final String EF_TYPE_STRING = "\"type\":";
-    private static final String EF_SEQ_STRING = "\"id\":";
+    private static final String EF_TOKEN_STRING = "\"token\":";
     private static final String DATA_OBJECT_STRING = "\"data\":";
     private static final String PROBLEM_ID_STRING = "\"id\":";
     private static final String CMS_GROUP_ID_STRING = "\"icpc_id\":";
@@ -74,9 +74,9 @@ public class EventFeedFilter {
      * @param startingEventId start after event id, null allowed to indicate to not filter
      * @param eventTypeList eventtype list, null allowed to indicate to not filter
      */
-    public EventFeedFilter(String startintEventId, String eventTypeList) {
+    public EventFeedFilter(String startingEventId, String eventTypeList) {
         super();
-        this.startingEventId = startintEventId;
+        this.startingEventId = startingEventId;
         if(eventTypeList != null) {
             this.eventTypeList = eventTypeList.toUpperCase();
         } else {
@@ -91,7 +91,7 @@ public class EventFeedFilter {
         this.eventTypeList = addEventTypeList.toUpperCase();
     }
 
-    public void addStartintEventId(String addStartingEventId) {
+    public void addStartingEventId(String addStartingEventId) {
         this.startingEventId = addStartingEventId;
     }
 
@@ -248,7 +248,7 @@ public class EventFeedFilter {
                     recType = parseEventFeedType(rec);
                 }
             }
-            String seqField = getCleanValue(string, EF_SEQ_STRING);
+            String seqField = getCleanValue(string, EF_TOKEN_STRING);
             if(seqField != null) {
                 matches &= matchesFilter(seqField, recType);
             }
@@ -288,8 +288,8 @@ public class EventFeedFilter {
      * @return value for id, ex pc2-11
      */
     public String getEventFeedSequence(String string) {
-        // {"event":"languages", "id":"pc2-11", "op":"create", "data": {"id":"1","name":"Java"}}
-        String seqVal = getCleanValue(string, EF_SEQ_STRING);
+        // {"event":"languages", "token":"pc2-11", id="java", "data": {"id":"1","name":"Java"}}
+        String seqVal = getCleanValue(string, EF_TOKEN_STRING);
         if(seqVal == null) {
             seqVal = "";
         }

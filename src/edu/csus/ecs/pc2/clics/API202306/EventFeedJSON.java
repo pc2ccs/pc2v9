@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.Arrays;
@@ -44,6 +44,7 @@ import edu.csus.ecs.pc2.core.util.IJSONTool;
 public class EventFeedJSON extends JSON202306Utilities {
 
     public static final String EVENT_ID_PREFIX = "pc2-";
+    public static final int EVENT_ID_PREFIX_LENGTH = EVENT_ID_PREFIX.length();
 
     private boolean useCollections = true;
 
@@ -373,8 +374,8 @@ public class EventFeedJSON extends JSON202306Utilities {
 
     public String getOrganizationJSON(Account account) {
         // this is a hack because we do not have organizations in the Model directly,
-        // rather, each Account actually has the full organziation info.
-        // [0]:INST-U-1329 [1]:New York University [2]:NYU
+        // rather, each Account actually has the full organization info.
+        // [0]:1329 [1]:New York University [2]:NYU
         // but only need [1] & [2].  We get the rest from the a typical account.
         String [] fields = new String[3];
 
@@ -1025,7 +1026,7 @@ public class EventFeedJSON extends JSON202306Utilities {
      * @return the sequence number of the event
      */
     public static long extractSequence(String eventId) {
-        return Long.parseLong(eventId.substring(EVENT_ID_PREFIX.length()));
+        return Long.parseLong(eventId.substring(EVENT_ID_PREFIX_LENGTH));
     }
 
     /**

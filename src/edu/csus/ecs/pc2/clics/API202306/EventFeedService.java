@@ -67,8 +67,8 @@ public class EventFeedService implements Feature {
      *
      * @param type
      *            a comma-separated query parameter identifying the type(s) of events being requested (if empty or null, indicates ALL event types)
-     * @param id
-     *            the event-id of the earliest event being requested (i.e., an indication of the requested starting point in the event stream)
+     * @param since_token
+     *            the token of the earliest event being requested (i.e., an indication of the requested starting point in the event stream)
      *
      * @return a {@link Response} object whose body contains the JSON event feed
      * @param asyncResponse
@@ -77,7 +77,7 @@ public class EventFeedService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public void streamEventFeed(@QueryParam("types") String eventTypeList, @QueryParam("id") String startingEventId, @Suspended
+    public void streamEventFeed(@QueryParam("types") String eventTypeList, @QueryParam("since_token") String startingToken, @Suspended
     final AsyncResponse asyncResponse, @Context HttpServletRequest servletRequest, @Context HttpServletResponse response, @Context SecurityContext sc) throws IOException {
 
         response.setContentType("json");
@@ -102,12 +102,12 @@ public class EventFeedService implements Feature {
             startMsg += "sending only event types '" + eventTypeList + "' ";
         }
 
-        if (startingEventId != null) {
-            if (startingEventId.startsWith("pc2-") && Utilities.isIntegerNumber(startingEventId.substring(4))) {
-                filter.addStartintEventId(startingEventId);
-                startMsg += "starting after id " + startingEventId;
+        if (startingToken != null) {
+            if (startingToken.startsWith(EventFeedJSON.EVENT_ID_PREFIX) && Utilities.isIntegerNumber(startingToken.substring(EventFeedJSON.EVENT_ID_PREFIX_LENGTH))) {
+                filter.addStartingEventId(startingToken);
+                startMsg += "starting after id " + startingToken;
             } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Not starting event feed: Invalid starting id: `"+startingEventId+"`");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Not starting event feed: Invalid starting id: `"+startingToken+"`");
                 return;
             }
         } else {

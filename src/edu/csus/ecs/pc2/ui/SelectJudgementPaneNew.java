@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -63,13 +63,13 @@ import edu.csus.ecs.pc2.ui.judge.JudgeView;
 
 /**
  * Select a Judgement Pane.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 4560827389735037513L;
 
@@ -87,7 +87,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * Submitted run files from user.
-     * 
+     *
      * This is used as an indicator as to whether this client/judge has a checked out run.
      */
     private RunFiles runFiles = null;
@@ -190,7 +190,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes
-     * 
+     *
      */
     public SelectJudgementPaneNew() {
         super();
@@ -199,7 +199,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes this
-     * 
+     *
      */
     private void initialize() {
         BorderLayout borderLayout = new BorderLayout();
@@ -215,6 +215,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         log = getController().getLog();
@@ -230,13 +231,14 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         getContest().addJudgementListener(new JudgementListenerImplementation());
     }
 
+    @Override
     public String getPluginTitle() {
         return "Select Judgement Pane";
     }
 
     /**
      * This method initializes messagePane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMessagePanel() {
@@ -254,7 +256,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes buttonPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getButtonPanel() {
@@ -280,7 +282,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes updateButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getAcceptChosenSelectionButton() {
@@ -294,6 +296,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             acceptChosenSelectionButton.setSize(new java.awt.Dimension(165, 37));
             acceptChosenSelectionButton.setMnemonic(java.awt.event.KeyEvent.VK_O);
             acceptChosenSelectionButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (confirmInconsistentJudgements()) {
                         updateRun();
@@ -319,7 +322,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * Compares the validatorJudgemnt (if available) and the manualJudgement.
-     * 
+     *
      * @return True to continue the Update, else false
      */
     private boolean confirmInconsistentJudgements() {
@@ -387,6 +390,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
                 long totalSeconds = milliDiff / 1000;
                 judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
+                judgementRecord.setJudgeStartDate(newRun.getJudgeStartDate());
             } else {
                 // judgement did not change, fix for bug 1165
                 // grab most recent active judgement
@@ -417,7 +421,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes cancelButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getCancelButton() {
@@ -426,6 +430,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             cancelButton.setText("Cancel");
             cancelButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     handleCancelButton();
                 }
@@ -488,6 +493,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         FrameUtilities.waitCursor(this);
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 populateGUI(run);
                 enableUpdateButtons(false);
@@ -556,7 +562,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 // if we do not runFiles yet, do not allow view Outputs.
                 getViewOutputsAndDataButton().setEnabled(false);
             }
-            
+
             getNotifyTeamCheckBox().setSelected(true);
         } else { // the run was null
 
@@ -618,7 +624,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * Enable buttons.
-     * 
+     *
      * @param b if false disable Close and other buttons, else enables those buttons.
      */
     public void setEnabledButtonStatus(boolean b) {
@@ -633,7 +639,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * Enable Update and other buttons.
-     * 
+     *
      * @param editedText if true and run has been loaded/set enables buttons
      */
     public void enableUpdateButtons(boolean editedText) {
@@ -656,7 +662,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * Enable or disable Update button based on comparison of run to fields.
-     * 
+     *
      */
     public void enableUpdateButton() {
 
@@ -694,7 +700,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes generalPane
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getRunInfoPanel() {
@@ -783,6 +789,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     public void showMessage(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 messageLabel.setText(message);
             }
@@ -791,7 +798,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes executeButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     public JButton getExecuteButton() {
@@ -805,8 +812,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             executeButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
             executeButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             executeButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     new Thread(new Runnable() {
+                        @Override
                         public void run() {
                             executeRun(false);
                         }
@@ -819,7 +828,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes viewSourceButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getViewSourceButton() {
@@ -828,6 +837,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             viewSourceButton.setText("View Source");
             viewSourceButton.setMnemonic(java.awt.event.KeyEvent.VK_V);
             viewSourceButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     viewSourceFile();
                 }
@@ -838,7 +848,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes extractButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getExtractButton() {
@@ -848,6 +858,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             extractButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             extractButton.setVisible(false);
             extractButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     extractRun();
                 }
@@ -860,7 +871,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         showMessage("Would have extracted run");
         // TODO code extract run
     }
-    
+
     /**
      * Takes a boolean condition whether to override stop on first failure condition
      */
@@ -877,7 +888,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
             getTestResultsFrame().clearData();
         }
-        
+
        // getManualRunResultsPanel().clear();
         setEnabledButtonStatus(false);
 
@@ -886,7 +897,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             executable.setOverrideStopOnFirstFailedTestCase(true);
         }
         executable.execute();
-        
+
         // Dump execution results files to log
         String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
         Problem juProblem = getContest().getProblem(run.getProblemId());
@@ -899,7 +910,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             Exception ex = executionData.getExecutionException();
             Language lang = getContest().getLanguage(run.getLanguageId());
 
-            //TODO: the following assignment and 'if' don't make sense (the assignment inside the 'if' is 
+            //TODO: the following assignment and 'if' don't make sense (the assignment inside the 'if' is
             //     the same as the one preceding the 'if').   jlc
             // JB - I *think* the intent was to call lang.getProgramExecuteCommandLine() if the judge
             //      command line is null.  That is, if no specific judge command, use
@@ -908,7 +919,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             if (command == null) {
                 command = lang.getJudgeProgramExecuteCommandLine();
             }
-            
+
             //TODO:  the command line needs to be adjusted to reflect the (possible) presence of a sandbox.  jlc
             String commandLine = executable.substituteAllStrings(run, command);
             log.warning("Error executing command: " + commandLine);
@@ -972,9 +983,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
         ExecutionData eData = executable.getExecutionData();
         if (eData != null && !eData.isCompileSuccess()) {
-     
+
             showValidatorControls(true);
-            
+
             Judgement judgement = JudgementUtilities.findJudgementByAcronym(getContest(), "CE");
             String judgementString = "No - Compilation Error"; // default
             ElementId elementId = null;
@@ -987,7 +998,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             }
 
             validatorAnswer.setText(judgementString);
-            
+
             judgementRecord = new JudgementRecord(elementId, getContest().getClientId(), false, true, true);
 
             judgementRecord.setValidatorResultString(judgementString);
@@ -1031,7 +1042,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 for (int i = 0; i < savedTeamOutputFileNames.size(); i++) {
                     teamOutputNames[i] = savedTeamOutputFileNames.get(i);
                     if (new File(teamOutputNames[i]).length() == 0) {
-                        teamOutputNames[i] = null; 
+                        teamOutputNames[i] = null;
                     }
                 }
             }
@@ -1042,7 +1053,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * Send execution stderr filenames to Test Results Viewer.
-     * 
+     *
      * Copies the names from the List of exectution stderr file names (which was saved by the execute() method)
      * into an array, then passes the array to the Test Results frame.
      */
@@ -1071,7 +1082,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 for (int i = 0; i < savedTeamStderrFileNames.size(); i++) {
                     teamStderrNames[i] = savedTeamStderrFileNames.get(i);
                     if (new File(teamStderrNames[i]).length() == 0) {
-                        teamStderrNames[i] = null; 
+                        teamStderrNames[i] = null;
                     }
                 }
             }
@@ -1082,19 +1093,19 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * Send validator output names to Test Results Viewer.
-     * 
+     *
      * Copies the names from the List of validator output file names (which was saved by the execute() method)
      * into an array, then passes the array to the Test Results frame.
      */
     private void sendValidatorOutputFileNames() {
 
         if (getTestResultsFrame() != null) {
-            
+
             int arraySize = 0;
             if (savedValidatorOutputFileNames!=null && savedValidatorOutputFileNames.size()>0) {
                 arraySize = savedValidatorOutputFileNames.size();
             }
-            
+
             //an array to hold the validator output file names
             String[] validatorOutputFileNames = new String[arraySize];
 
@@ -1107,13 +1118,13 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             if (savedValidatorOutputFileNames != null) {
 
                 for (int i = 0; i < savedValidatorOutputFileNames.size(); i++) {
-                    
+
                     //save the validator output file name
                     validatorOutputFileNames[i] = savedValidatorOutputFileNames.get(i);
-                    
+
                     //wipe out the entry if the file is empty (zero-length)
                     if (new File(validatorOutputFileNames[i]).length() == 0) {
-                        validatorOutputFileNames[i] = null; 
+                        validatorOutputFileNames[i] = null;
                     }
                 }
             }
@@ -1124,19 +1135,19 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * Send validator stderr file names to Test Results Viewer.
-     * 
+     *
      * Copies the names from the List of stderr file names (which was saved by the execute() method)
      * into an array, then passes the array to the Test Results frame.
      */
     private void sendValidatorStderrFileNames() {
 
         if (getTestResultsFrame() != null) {
-            
+
             int arraySize = 0;
             if (savedValidatorErrFileNames!=null && savedValidatorErrFileNames.size()>0) {
                 arraySize = savedValidatorErrFileNames.size();
             }
-            
+
             //an array to hold the validator stderr file names
             String[] validatorStdErrFileNames = new String[arraySize];
 
@@ -1149,19 +1160,19 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             if (savedValidatorErrFileNames != null) {
 
                 for (int i = 0; i < savedValidatorErrFileNames.size(); i++) {
-                    
+
                     //save the validator stderr file name
                     validatorStdErrFileNames[i] = savedValidatorErrFileNames.get(i);
-                    
+
                     //wipe out the entry if the file is empty (zero-length)
                     if (new File(validatorStdErrFileNames[i]).length() == 0) {
-                        validatorStdErrFileNames[i] = null; 
+                        validatorStdErrFileNames[i] = null;
                     }
                 }
             }
 
             getTestResultsFrame().setValidatorStderrFileNames(validatorStdErrFileNames);
-            
+
         }
     }
 
@@ -1205,6 +1216,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         runResultFiles = theRunResultFiles;
 
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 populateGUI(run);
                 enableUpdateButtons(false);
@@ -1215,7 +1227,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes judgementComboBox
-     * 
+     *
      * @return javax.swing.JComboBox
      */
     private JComboBox<Judgement> getJudgementComboBox() {
@@ -1228,6 +1240,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             judgementComboBox.setPreferredSize(new java.awt.Dimension(150, 25));
             judgementComboBox.setMaximumRowCount(15);
             judgementComboBox.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
@@ -1264,7 +1277,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes notifyTeamCheckBox
-     * 
+     *
      * @return javax.swing.JCheckBox
      */
     private JCheckBox getNotifyTeamCheckBox() {
@@ -1299,7 +1312,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * Update GUI permissions.
-     * 
+     *
      * Invoked if account permission changes.
      */
     private void updateGUIperPermissions() {
@@ -1309,17 +1322,20 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * Account Listener Implementation.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      */
     public class AccountListenerImplementation implements IAccountListener {
 
+        @Override
         public void accountAdded(AccountEvent accountEvent) {
             // ignore
         }
 
+        @Override
         public void accountModified(AccountEvent accountEvent) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     initializePermissions();
                     updateGUIperPermissions();
@@ -1327,14 +1343,17 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             });
         }
 
+        @Override
         public void accountsAdded(AccountEvent accountEvent) {
             // ignore this does not affect me
 
         }
 
+        @Override
         public void accountsModified(AccountEvent accountEvent) {
             // TODO is this not dependent on us being modified???
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     initializePermissions();
                     updateGUIperPermissions();
@@ -1342,8 +1361,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             });
         }
 
+        @Override
         public void accountsRefreshAll(AccountEvent accountEvent) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     initializePermissions();
                     updateGUIperPermissions();
@@ -1354,7 +1375,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes acceptValidatorJudgementButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getAcceptValidatorJudgementButton() {
@@ -1367,6 +1388,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             acceptValidatorJudgementButton.setLocation(new java.awt.Point(554, 27));
             acceptValidatorJudgementButton.setForeground(Color.BLUE);
             acceptValidatorJudgementButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     acceptValidatorJudgement();
                 }
@@ -1464,6 +1486,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
         long totalSeconds = milliDiff / 1000;
         judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
+        judgementRecord.setJudgeStartDate(newRun.getJudgeStartDate());
 
         JudgeView.setAlreadyJudgingRun(false);
 
@@ -1516,7 +1539,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (getTestResultsFrame().isVisible()) {
             if (getTestResultsFrame().getState() == Frame.ICONIFIED) {
                 getTestResultsFrame().setState(javax.swing.JFrame.NORMAL);
-            } 
+            }
         }
 
         Problem problem = getContest().getProblem(run.getProblemId());
@@ -1533,6 +1556,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     new Thread(new Runnable() {
+                        @Override
                         public void run() {
                             executeRun(true);
                         }
@@ -1547,7 +1571,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes shellButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getShellButton() {
@@ -1557,6 +1581,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             shellButton.setBounds(new java.awt.Rectangle(509, 93, 65, 20));
             shellButton.setVisible(false);
             shellButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     shellToExecuteDirectory();
                 }
@@ -1608,7 +1633,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes jTestPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getMainPanel() {
@@ -1624,7 +1649,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes jManualJudgementPanel
-     * 
+     *
      * @return javax.swing.JPanel
      */
     private JPanel getAssignJudgementPanel() {
@@ -1682,13 +1707,14 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
      * This method initializes detailsButton
-     * 
+     *
      * @return javax.swing.JButton
      */
     private JButton getDetailsButton() {
         if (detailsButton == null) {
             detailsButton = new JButton();
             detailsButton.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                 }
             });
@@ -1712,6 +1738,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             viewOutputsAndDataButton.setToolTipText("View/Compare Test Results and data sets");
             viewOutputsAndDataButton.setText("View Outputs & Data");
             viewOutputsAndDataButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     viewOutputsAndData();
                 }
@@ -1721,7 +1748,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -1729,18 +1756,22 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     // $HeadURL$
     private class JudgementListenerImplementation implements IJudgementListener {
 
+        @Override
         public void judgementAdded(JudgementEvent event) {
             reloadComboBoxes();
         }
 
+        @Override
         public void judgementChanged(JudgementEvent event) {
             reloadComboBoxes();
         }
 
+        @Override
         public void judgementRemoved(JudgementEvent event) {
             reloadComboBoxes();
         }
 
+        @Override
         public void judgementRefreshAll(JudgementEvent judgementEvent) {
             reloadComboBoxes();
         }
