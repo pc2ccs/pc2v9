@@ -31,7 +31,6 @@ export abstract class IContestService {
   isContestRunning = false;
   
   //the WTI-UI representation of the PC2 Server's ContestClock (PC2 class ContestTime)
-  //todo: where does this get updated when the PC2 clock changes? ;
   contestClock: ContestClock = new ContestClock();  
 
   //give each instance of IContestService a unique ID for debugging purposes

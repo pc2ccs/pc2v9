@@ -100,10 +100,13 @@ export function WebsocketServiceFactory(injector: Injector,
     DisplayTimePipe,
 	//TODO:  should the following two still be declared here since they are now listed in the above "deps" list?
     UiHelperService,
+<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
     ContestService,
 	//TODO:  should the following two still be declared here since they are now listed in the above "deps" list?
     UiHelperService,
 >>>>>>> 7a71e77 i1027: update for compatibility with PR for i871.
+=======
+>>>>>>> db34af4 i1027: source code cleanup (remove outdated comments, etc.)
     ContestService
   ],
   imports: [
