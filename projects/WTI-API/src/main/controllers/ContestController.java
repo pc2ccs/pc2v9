@@ -329,8 +329,9 @@ public class ContestController extends MainController {
 			if (userInformation == null) {
 				throw new NotLoggedInException();
 			} else {
-				// make sure that the contest is running (problems are not allowed to be seen when the contest is not running)
-				if (!userInformation.getContest().isContestClockRunning()) {
+				// make sure that the contest has been started (problems are not allowed to be seen before the contest starts --
+				//  i.e., before the contest clock has started accumulating elapsed time)
+				if (!(userInformation.getContest().getContestClock().getElapsedSecs()>0)) {
 					return Response.status(Response.Status.UNAUTHORIZED).entity(
 							new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
 							.type(MediaType.APPLICATION_JSON).build();
@@ -549,13 +550,6 @@ public class ContestController extends MainController {
 			// make sure we have connection information for this user (i.e. that the user is logged in)
 			if (userInformation == null) {
 				throw new NotLoggedInException();
-			} else {
-				// make sure that the contest is running (problems are not allowed to be seen when the contest is not running)
-				if (!userInformation.getContest().isContestClockRunning()) {
-					return Response.status(Response.Status.UNAUTHORIZED).entity(
-							new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
-							.type(MediaType.APPLICATION_JSON).build();
-				}
 			}
 		} catch (NotLoggedInException e1) {
 			return Response.status(Response.Status.UNAUTHORIZED)
