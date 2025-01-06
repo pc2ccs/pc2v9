@@ -329,17 +329,23 @@ public class ContestController extends MainController {
 			if (userInformation == null) {
 				throw new NotLoggedInException();
 			} else {
-				// make sure that the contest has been started (problems are not allowed to be seen before the contest starts --
-				//  i.e., before the contest clock has started accumulating elapsed time)
-				if (!(userInformation.getContest().getContestClock().getElapsedSecs()>0)) {
+				// make sure that the contest has been started (problems are not allowed to be seen before the contest starts)
+				// Note that starting the contest results in setting the "contest start time" in the ContestClock object to
+				// the Unix Epoch time at which the contest was started; prior to starting the contest that value will be null.
+				if (userInformation.getContest().getContestClock().getContestStartTime()==null) {
 					return Response.status(Response.Status.UNAUTHORIZED).entity(
-							new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
+							new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request - contest has not started."))
 							.type(MediaType.APPLICATION_JSON).build();
 				}
 			}
 		} catch (NotLoggedInException e1) {
 			return Response.status(Response.Status.UNAUTHORIZED)
-					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
+					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request -- not logged in."))
+					.type(MediaType.APPLICATION_JSON).build();
+		} catch (Exception e2) {
+			logger.severe("Exception in ContestController /problems endppoint: " + e2.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Exception in ContestController /problems endppoint: " + e2.getMessage()))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 
@@ -553,7 +559,7 @@ public class ContestController extends MainController {
 			}
 		} catch (NotLoggedInException e1) {
 			return Response.status(Response.Status.UNAUTHORIZED)
-					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
+					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request - not logged in."))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 
