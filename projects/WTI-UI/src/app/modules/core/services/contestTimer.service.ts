@@ -1,5 +1,21 @@
+import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { DEBUG_MODE } from 'src/constants'
 
+/**
+ * This class defines a Timer which updates at a (nominal) rate of once per second.  The Timer maintains
+ * two values: elapsed time and remaining time; these values default to initial values of zero but their
+ * values are intended to be initialized via external calls to methods setElapsedSec() and setRemainingSecs().
+ * Each time the Timer "ticks" these values are updated (incremented, for elapsed time, and decremented,
+ * for remaining time).
+ * The Timer uses a JavaScript "setInterval()" to generate update events at the nominal once-per-second
+ * rate.  Since setInterval() is documented to not be guaranteed to operate at its specified rate when
+ * the browser has lost focus or is minimized, each update event checks to see if there has been a recent 
+ * update; if not, it resets the clocks by invoking the ContestService updateContestClock() method, which
+ * resynchronizes the Timer's elapsed and remaining time from the server.
+ * 
+ * The Timer is started by calling method startTimer(); it can be stopped by calling method stopTimer().
+ * When stopped and the restarted the Timer picks up counting where it left off. 
+ */
 export class ContestTimerService {
 
   elapsedSecs = 0 ; 	//how many seconds the contest has been running (doesn't include any 'paused' time)
@@ -7,9 +23,11 @@ export class ContestTimerService {
   intervalId: ReturnType<typeof setInterval> ;  //the id of the JavaScript "interval" used to generate timer ticks
   isTimerRunning: boolean = false;
   
-  constructor() {
+  mostRecentTimerUpdate: Date = null;
+  
+  constructor(private _contestService: IContestService) {
 	if (DEBUG_MODE) {
-		console.log ("Executing ContestTimerService constructor");
+		console.log ("Executing ContestTimerService constructor using IContestService with id ", _contestService.uniqueId);
 	}
   }
 
@@ -58,6 +76,14 @@ export class ContestTimerService {
 	}
   }
 
+  /**
+   * This method starts a Timer which fires once per second, updating the "elapsedSecs" and "remainingSecs" variables each second.
+   * The method uses the JavaScript "setInterval()" method to detect passage of each second (1000 msec).
+   * Note that setInterval() is not guaranteed to continue operating at the correct rate if the browser is minimized;
+   * the method compensates for this by saving the current time at each update and then checking to be sure the
+   * current update is happening less than two seconds since the last update; if not, it invokes the 
+   * ContestService updateContestClock() method to resync the local contest clock with the server.
+   */
   startTimer() {
 	if (this.intervalId) {
       console.error("ContestTimerService.startTimer():  call to startTimer() when timer is already running");
@@ -70,13 +96,38 @@ export class ContestTimerService {
       this.intervalId = setInterval(
         //execute this function at the specified interval:
         () => {
-          //bump the elapsed & remaining counters since 1000msec (one sec) has passed
-          this.elapsedSecs += 1 ;
-		  this.remainingSecs -= 1
-/*          if (DEBUG_MODE) {
-            console.log(`Elapsed secs: ${this.elapsedSecs}; remaining secs: ${this.remainingSecs}`);
-          }
-*/
+        	
+        	//update the tracking of when the last timer update happened
+        	let now: Date = new Date();
+        	if (DEBUG_MODE) {
+        		console.log("ContestTimer.startTimer().setInterval() callback: now = ", now.getTime());
+        	}
+			if (this.mostRecentTimerUpdate == null) {
+				//we've never updated the timer; save current update time
+				if (DEBUG_MODE) {
+					console.log ("Contest.startTimer().setInterval() callback: mostRecentTimerUpate is null, setting to 'now'");
+				}
+				this.mostRecentTimerUpdate = now ;
+			}
+       	
+			//check how long it's been since a timer update has happened (it could be much longer than the 1-second implied by the setInterval()
+			// rate because that rate can be significantly slowed if the browser has been minimized)
+			let timeSpan = now.getTime() - this.mostRecentTimerUpdate.getTime();	//epoch times, in milliseconds
+			if (timeSpan > 1999) {
+				
+				//last update was more than 2 seconds ago; update the contest clock (which also updates the timer)
+				if (DEBUG_MODE) {
+					console.log("ContestTimer.startTimer().setInterval() callback: timeSpan since last update is ", timeSpan, "; clock is off by more than 2 seconds; calling ContestService.updateContestClock() to update clock from server");
+				}
+				this._contestService.updateContestClock();
+			} else {
+				//we've seen an update within the last two seconds; just update by one second
+				this.elapsedSecs += 1 ;
+				this.remainingSecs -= 1
+				if (DEBUG_MODE) {
+					console.log(`Elapsed: ${this.elapsedSecs}; Remaining: ${this.remainingSecs}; intervalId: ${this.intervalId}`);
+				}
+			}
         }, 
         1000	// 1000 milliseconds = 1 second interval
       ); 
