@@ -20,7 +20,7 @@ export class ContestService extends IContestService {
   cachedStandings: Observable<String> ;
 
   //the WTI-UI timer service which updates on-screen elapsed and remaining time when started (enabled)
-  contestTimer: ContestTimerService = new ContestTimerService() ; 
+  contestTimer: ContestTimerService = new ContestTimerService(this) ; 
   
   constructor(private _httpClient: HttpClient) {
 <<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
@@ -42,6 +42,8 @@ export class ContestService extends IContestService {
 =======
     
     //set a timer to auto-refresh the contest clock displays, at a rate defined in src/constants
+    //TODO: what happens to the timing of this update when the browser is minimized (because setInterval() runs slower when
+    // minimized)?  Need to track "most recent update"??
     setInterval(
             //execute this function at the following-specified interval:
             () => {
