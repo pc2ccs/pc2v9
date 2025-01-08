@@ -169,9 +169,9 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
 		//update the WTI-UI representations of the PC2 Contest Clock
         if (DEBUG_MODE) {
-        	console.log ("  Invoking ContestService.updateContestClock()") ;
+        	console.log ("  Invoking ContestService.updateLocalContestClockFromServer()") ;
         }
-		this._contestService.updateContestClock();
+		this._contestService.updateLocalContestClockFromServer();
 
        }, (error: any) => {
     	  if (DEBUG_MODE) {

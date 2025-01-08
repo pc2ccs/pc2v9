@@ -50,7 +50,7 @@ export class ContestService extends IContestService {
               if (DEBUG_MODE) {
                 console.log("ContestService: resyncing clocks with PC2 Server");
               }
-              this.updateContestClock();
+              this.updateLocalContestClockFromServer();
             }, 
             RESYNC_INTERVAL_IN_MINUTES * 60 * 1000	// timer interval in msec: minutes * (secs-per-min) * (msec-per-sec)
           ); 
@@ -118,7 +118,7 @@ export class ContestService extends IContestService {
 	 *  and when the subscription callback occurs it uses the received ContestClock data (an instance of 
 	 *  WTI=UI models/ContestClock) to update the WTI-UI contest clock (including the onscreen displays).  
 	 */
-	updateContestClock ()  {
+	updateLocalContestClockFromServer ()  {
 		
 		//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
 		if (DEBUG_MODE) {
@@ -128,10 +128,10 @@ export class ContestService extends IContestService {
 			.subscribe(
 				(data: any) => {
         			if (!data) { 
-						console.error ("ContestService.updateContestClock() getContestClock() subscription callback: unable to get ContestClock from PC2 API via ContestService!");
+						console.error ("ContestService.updateLocalContestClockFromServer() getContestClock() subscription callback: unable to get ContestClock from PC2 API via ContestService!");
 					} else {
 						if (DEBUG_MODE) {
-							console.log("ContestService.updateContestClock(): got callback from getContestClock() subscription; callback data =");
+							console.log("ContestService.updateLocalContestClockFromServer(): got callback from getContestClock() subscription; callback data =");
 							console.log(data);
 						}
 						//install the received contest clock data into the ContestService's ContestClock
@@ -139,7 +139,7 @@ export class ContestService extends IContestService {
 					}
       			}, 
 				(error: any) => {
-        			console.error("ContestService.updateContestClock(): getContestClock() subscription callback error: ");
+        			console.error("ContestService.updateLocalContestClockFromServer(): getContestClock() subscription callback error: ");
 					console.error (error);
       			}
 			);	

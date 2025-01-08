@@ -69,7 +69,7 @@ export abstract class IContestService {
 
   abstract getContestClock(): Observable<ContestClock>;		//note this refers to a "ContestClock" model object, not the "contestClockEvent" Subject above
   
-  abstract updateContestClock (): void;		//update the WTI-UI representation of the PC2 contest clock
+  abstract updateLocalContestClockFromServer (): void;		//update the WTI-UI representation of the PC2 contest clock
 
   abstract getElapsedSecs(): number;
 

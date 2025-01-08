@@ -62,13 +62,17 @@ export abstract class IWebsocketService {
 =======
         		  console.log ("Setting ContestService.isContestRunning to '", val, "',") ;
         		  console.log ("  invoking ContestService.contestClockEvent.next()") ;
+<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
                   console.log ("  and invoking ContestService.updateContestClock()");
 >>>>>>> d43bfce i1027: IWebsocketService: invoke updateContestClock() on 'clock' msg.
+=======
+                  console.log ("  and invoking ContestService.updateLocalContestClockFromServer()");
+>>>>>>> 7274551 i1027: rename method to updateLocalContestClockFromServer()
         	  }
 
             this._contestService.isContestRunning = val;
             this._contestService.contestClockEvent.next();
-			this._contestService.updateContestClock();
+			this._contestService.updateLocalContestClockFromServer();
           });
         break;
       }
