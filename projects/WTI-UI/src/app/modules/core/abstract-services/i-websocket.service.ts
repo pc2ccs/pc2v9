@@ -54,12 +54,12 @@ export abstract class IWebsocketService {
         		  console.log ("IWebsocketService.incomingMessage(): callback from ContestService.getIsContestRunning() returned '", val, "'");
         		  console.log ("Setting ContestService.isContestRunning to '", val, "',") ;
         		  console.log ("  invoking ContestService.contestClockEvent.next()") ;
-                  console.log ("  and invoking ContestService.updateContestClock()");
+                  console.log ("  and invoking ContestService.updateLocalContestClockFromServer()");
         	  }
 
             this._contestService.isContestRunning = val;
             this._contestService.contestClockEvent.next();
-			this._contestService.updateContestClock();
+			this._contestService.updateLocalContestClockFromServer();
           });
         break;
       }

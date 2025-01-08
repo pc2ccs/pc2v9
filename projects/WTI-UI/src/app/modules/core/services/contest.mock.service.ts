@@ -93,7 +93,7 @@ export class ContestMockService extends IContestService {
 		{isRunning:'true', contestLengthSecs:'18000', elapsedSecs:'3600', wallClockStartTime:'1734593847'});
   }
 
-  updateContestClock () {
+  updateLocalContestClockFromServer () {
 	//nothing to do -- this is a mock service
   }		
 
