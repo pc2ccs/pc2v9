@@ -10,7 +10,7 @@ import { DEBUG_MODE } from 'src/constants'
  * The Timer uses a JavaScript "setInterval()" to generate update events at the nominal once-per-second
  * rate.  Since setInterval() is documented to not be guaranteed to operate at its specified rate when
  * the browser has lost focus or is minimized, each update event checks to see if there has been a recent 
- * update; if not, it resets the clocks by invoking the ContestService updateContestClock() method, which
+ * update; if not, it resets the clocks by invoking the ContestService updateLocalContestClockFromServer() method, which
  * resynchronizes the Timer's elapsed and remaining time from the server.
  * 
  * The Timer is started by calling method startTimer(); it can be stopped by calling method stopTimer().
@@ -82,7 +82,7 @@ export class ContestTimerService {
    * Note that setInterval() is not guaranteed to continue operating at the correct rate if the browser is minimized;
    * the method compensates for this by saving the current time at each update and then checking to be sure the
    * current update is happening less than two seconds since the last update; if not, it invokes the 
-   * ContestService updateContestClock() method to resync the local contest clock with the server.
+   * ContestService updateLocalContestClockFromServer() method to resync the local contest clock with the server.
    */
   startTimer() {
 	if (this.intervalId) {
@@ -117,9 +117,10 @@ export class ContestTimerService {
 				
 				//last update was more than 2 seconds ago; update the contest clock (which also updates the timer)
 				if (DEBUG_MODE) {
-					console.log("ContestTimer.startTimer().setInterval() callback: timeSpan since last update is ", timeSpan, "; clock is off by more than 2 seconds; calling ContestService.updateContestClock() to update clock from server");
+					console.log("ContestTimer.startTimer().setInterval() callback: timeSpan since last update is ", timeSpan );
+					console.log ("clock is off by more than 2 seconds; calling ContestService.updateLocalContestClockFromServer() to update clock");
 				}
-				this._contestService.updateContestClock();
+				this._contestService.updateLocalContestClockFromServer();
 			} else {
 				//we've seen an update within the last two seconds; just update by one second
 				this.elapsedSecs += 1 ;
@@ -128,6 +129,10 @@ export class ContestTimerService {
 					console.log(`Elapsed: ${this.elapsedSecs}; Remaining: ${this.remainingSecs}; intervalId: ${this.intervalId}`);
 				}
 			}
+			
+			//record that we've now updated the contest clock display
+			this.mostRecentTimerUpdate = now ;
+			
         }, 
         1000	// 1000 milliseconds = 1 second interval
       ); 
