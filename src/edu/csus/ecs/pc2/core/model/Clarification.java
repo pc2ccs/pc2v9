@@ -1,13 +1,13 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.ArrayList;
 
 /**
  * Clarification.
- * 
+ *
  * A request for clarification from the judges.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -18,13 +18,13 @@ import java.util.ArrayList;
 public class Clarification extends Submission {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -6913818225948370496L;
 
     /**
      * Clarification States.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      */
     public enum ClarificationStates {
@@ -49,7 +49,7 @@ public class Clarification extends Submission {
          */
         ANNOUNCED,
     }
-    
+
     private boolean deleted = false;
 
     private ClientId whoCheckedItOutId = null;
@@ -95,18 +95,18 @@ public class Clarification extends Submission {
             return getFirstAnswer().getAnswer();
         }
     }
-    
+
 //    public String getDestinations() {
 //        if (answerList.size() == 0) {
 //            return null;
 //        } else {
 //            return getFirstAnswer().getDestinationsToString();
-//        }  
+//        }
 //    }
     private ClarificationAnswer getFirstAnswer() {
         return answerList.get(0);
     }
-    
+
     /**
      * @param answer
      *            The answer to set.
@@ -124,9 +124,9 @@ public class Clarification extends Submission {
         ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, client, sendToAll, contestTime);
         addAnswer(clarificationAnswer);
     }
-    
+
     /**
-     * 
+     *
      * @param answer The answer to set.
      * @param client
      * @param contestTime
@@ -148,11 +148,11 @@ public class Clarification extends Submission {
     public boolean isAnsweredorAnnounced() {
         return state == ClarificationStates.ANSWERED || state == ClarificationStates.ANNOUNCED;
     }
-    
+
     public boolean isAnnounced() {
         return state == ClarificationStates.ANNOUNCED;
     }
-    
+
     public boolean isNew() {
         return state == ClarificationStates.NEW;
     }
@@ -176,7 +176,7 @@ public class Clarification extends Submission {
             return getFirstAnswer().isSendToAll();
         }
     }
-    
+
     /**
      * Checks if clarification has destinations other than the submitter excluding is Send to All.
      * @return
@@ -187,17 +187,23 @@ public class Clarification extends Submission {
         }
         return getFirstAnswer().isThereDestinationOtherThanSubmitter();
     }
-    
+
     public ElementId[] getAllDestinationsGroup() {
+        if(answerList.size() == 0) {
+            return(null);
+        }
         return getFirstAnswer().getAllDestinationsGroup();
     }
-    
+
     public ClientId[] getAllDestinationsTeam() {
+        if(answerList.size() == 0) {
+            return(null);
+        }
         return getFirstAnswer().getAllDestinationsTeam();
     }
 
     public boolean shouldAccountReceiveThisClarification(Account account) {
-        
+
         if (isSendToAll()) {
             return true;
         }
@@ -210,7 +216,7 @@ public class Clarification extends Submission {
         }
         ElementId[] destinationGroup =  getAllDestinationsGroup();
         ClientId[] destinationTeam = getAllDestinationsTeam();
-        
+
         if (destinationTeam != null) {
             for (ClientId team: destinationTeam) {
                 if (team.equals(account.getClientId())){
@@ -218,7 +224,7 @@ public class Clarification extends Submission {
                 }
             }
         }
-        
+
         if (destinationGroup != null) {
             for (ElementId destination: destinationGroup){
                 if (account.isGroupMember(destination)) {  //checks if this announcement clar was sent to a group that this account belongs to
@@ -226,10 +232,11 @@ public class Clarification extends Submission {
                 }
             }
         }
-        //check if an account has a group that matches with a group in 
+        //check if an account has a group that matches with a group in
         return false;
-        
+
     }
+    @Override
     public String toString() {
         return "Clarification " + getNumber() + " " + getState() + " from " + getSubmitter() + " at " + getElapsedMins() + " id=" + getElementId();
     }
@@ -285,7 +292,7 @@ public class Clarification extends Submission {
 
     /**
      * Add answer to list of answers.
-     * 
+     *
      * @param clarificationAnswer
      */
     public void addAnswer(ClarificationAnswer clarificationAnswer) {
@@ -299,6 +306,6 @@ public class Clarification extends Submission {
     }
 
     public ClarificationAnswer[] getClarificationAnswers() {
-        return (ClarificationAnswer[]) answerList.toArray(new ClarificationAnswer[answerList.size()]);
+        return answerList.toArray(new ClarificationAnswer[answerList.size()]);
     }
 }

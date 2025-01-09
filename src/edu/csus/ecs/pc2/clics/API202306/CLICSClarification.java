@@ -48,6 +48,9 @@ public class CLICSClarification {
     @JsonProperty
     private String contest_time;
 
+    @JsonProperty
+    private int number;
+
     public CLICSClarification() {
         // for jackson deserialize
     }
@@ -76,6 +79,10 @@ public class CLICSClarification {
 //            }
 //        }
 
+
+        // pc2 specific number (really, ordinal or original question - for announcement's too!)
+        number = clar.getNumber();
+
         // SOMEDAY change id to a original?  WTF does that mean? ordinal would make sense. -- JB
         id = clar.getElementId().toString();
         if (clarAns != null && clarAns.getElementId() != null) {
@@ -85,11 +92,24 @@ public class CLICSClarification {
             from_team_id = "" + clar.getSubmitter().getClientNumber();
         }
         if (clarAns != null) {
-            // the request goes to a team
-            if (!clar.isSendToAll() && clar.getSubmitter().getClientType().equals(ClientType.Type.TEAM)) {
-                to_team_id = "" + clar.getSubmitter().getClientNumber();
+            // the request goes to a team?
+            if (!clar.isSendToAll()){
+                // The CLICS model does not fit in with the PC2 concept of directed responses to Groups
+                // and a list of teams.  As such, we'll always return the team that submitted the request,
+                // since they will get the response (and possibly others).
+                if(clar.getSubmitter().getClientType().equals(ClientType.Type.TEAM)) {
+                    to_team_id = "" + clar.getSubmitter().getClientNumber();
+                } else if(clarAns.getAllDestinationsTeam() != null && clarAns.getAllDestinationsTeam().length > 0){
+                    // Use first team in the list since we can only specify one team - CLICS does not allow for more than one
+                    to_team_id = "" + clarAns.getAllDestinationsTeam()[0].getClientNumber();
+                }
             }
-            reply_to_id = clar.getElementId().toString();
+            // Announcements do not have a question.
+            if(clar.isAnnounced()) {
+                reply_to_id = null;
+            } else {
+                reply_to_id = clar.getElementId().toString();
+            }
             text = clarAns.getAnswer();
             time = Utilities.getIso8601formatterWithMS().format(clarAns.getDate());
             contest_time = ContestTime.formatTimeMS(clarAns.getElapsedMS());
@@ -108,6 +128,10 @@ public class CLICSClarification {
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getFrom_team_id() {
@@ -134,8 +158,20 @@ public class CLICSClarification {
         return time;
     }
 
+    public void setTime(String time) {
+        this.time = time;
+    }
+
     public String getContest_time() {
         return contest_time;
+    }
+
+    public void setContest_time(String contest_time) {
+        this.contest_time = contest_time;
+    }
+
+    public int getNumber() {
+        return number;
     }
 
     public String toJSON() {

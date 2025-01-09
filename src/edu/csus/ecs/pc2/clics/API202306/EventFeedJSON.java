@@ -731,7 +731,10 @@ public class EventFeedJSON extends JSON202306Utilities {
                 } else {
                     dataCollection.append(",");
                 }
-                dataCollection.append(getClarificationJSON(contest, clarification, null));
+                // For annoucements, there is no question, so we don't generate an empty clarification.
+                if(!clarification.isAnnounced()) {
+                    dataCollection.append(getClarificationJSON(contest, clarification, null));
+                }
                 if (clarification.isAnsweredorAnnounced()) {
                     ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
                     dataCollection.append(",");
@@ -748,8 +751,11 @@ public class EventFeedJSON extends JSON202306Utilities {
                 if (ignoreTeam.contains(clarification.getSubmitter())) {
                     continue;
                 }
-                appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, IJSONTool.getClarificationId(clarification), getClarificationJSON(contest, clarification, null));
-                stringBuilder.append(NL);
+                // For annoucements, there is no question, so we don't generate an empty clarification.
+                if(!clarification.isAnnounced()) {
+                    appendJSONEvent(stringBuilder, CLARIFICATIONS_KEY, ++eventIdSequence, IJSONTool.getClarificationId(clarification), getClarificationJSON(contest, clarification, null));
+                    stringBuilder.append(NL);
+                }
                 if (clarification.isAnsweredorAnnounced()) {
                     ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
                     ClarificationAnswer clarAns = clarAnswers[clarAnswers.length - 1];
