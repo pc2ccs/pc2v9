@@ -491,8 +491,8 @@ public class NullController implements IInternalController {
     }
 
     @Override
-    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
-
+    public ElementId submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+        return null;
     }
 
     @Override
@@ -501,8 +501,12 @@ public class NullController implements IInternalController {
     }
 
     @Override
-    public void submitClarificationAnswer(Clarification clarification) {
+    public ElementId submitAnnouncement(ClientId clientId, Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+        return null;
+    }
 
+    @Override
+    public void submitClarificationAnswer(Clarification clarification) {
     }
 
     @Override

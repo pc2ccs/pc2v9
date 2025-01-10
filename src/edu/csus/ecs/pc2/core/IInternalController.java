@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
@@ -452,7 +452,8 @@ public interface IInternalController {
      * @param ultimateDestinationTeam same for teams
      * @return elementid of new clar
      */
-    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam);
+    public ElementId submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam);
+
     /**
      * Submit a clarification.
      *
@@ -462,6 +463,19 @@ public interface IInternalController {
      * @return elementid of new clar
      */
     ElementId submitClarification(ClientId clientId, Problem problem, String question);
+
+    /**
+     * Submit an announcement specifying client. Possibly to certain groups teams only
+     *
+     * @param client
+     * @param problem
+     * @param answer
+     * @param ultimateDestinationGroup array of where the answer for the clarification should ultimately go.
+     * such as certain groups
+     * @param ultimateDestinationTeam same for teams
+     * @return elementid of new clar
+     */
+    public ElementId submitAnnouncement(ClientId clientId, Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam);
 
     /**
      * Request clarification to answer.
@@ -479,7 +493,7 @@ public interface IInternalController {
     void cancelClarification(Clarification clarification);
 
     /**
-     * Answer a clarification.
+     * Answer a clarification using current logged in client
      *
      * @param clarification
      */

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -3882,15 +3882,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public ElementId submitClarification(Problem problem, String question) {
 
 
-        return(submitClarification(new ClientId(contest.getSiteNumber(), Type.SERVER, 0), problem, question));
+        return(submitClarification(contest.getClientId(), problem, question));
     }
 
     @Override
     public ElementId submitClarification(ClientId clientId, Problem problem, String question) {
-
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Clarification clarification = new Clarification(clientId, problem, question);
 
-        Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), clientId, clarification);
+        Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
 
         sendToLocalServer(packet);
 
@@ -3898,15 +3898,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     @Override
-    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+    public ElementId submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+        return(submitAnnouncement(contest.getClientId(), problem, answer, ultimateDestinationGroup, ultimateDestinationTeam));
+    }
+
+    @Override
+    public ElementId submitAnnouncement(ClientId clientId, Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-        Clarification clarification = new Clarification(contest.getClientId(), problem, "");
+        Clarification clarification = new Clarification(clientId, problem, "");
 
         if (ultimateDestinationGroup.length + ultimateDestinationTeam.length> 0) {
-            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, false);
+            clarification.setAnswer(answer, clientId, contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, false);
         }
         else {
-            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, true);
+            clarification.setAnswer(answer, clientId, contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, true);
         }
 
         Packet packet;
@@ -3914,6 +3919,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
 
         sendToLocalServer(packet);
+
+        return clarification.getElementId();
     }
 
     @Override
