@@ -11,6 +11,22 @@ import { Clarification } from '../models/clarification';
 import { DEBUG_MODE } from 'src/constants';
 import { RESYNC_INTERVAL_IN_MINUTES } from 'src/constants';
 
+/**
+ * This class provides a variety of "contest-related" services for clients.
+ * It provides methods for initiating HTTP calls to the WTI Server to obtain contest
+ * information (such as languages, problems, clarifications, standings, and the current
+ * contest clock value); each of these services returns an "Observable" to which the invoking
+ * client can "subscribe" to receive a callback when the actual data is available from the HTTP call.
+ * 
+ * The class also provides localized services such as:
+ * 
+ *  - keeping track of whether the current WTI-UI understanding of the contest standings (scoreboard) 
+ *  are current (it maintains a cache of standings and keeps track of events which could cause the cache to be out-of-date);
+ *  - a set of methods for providing clients with the current contest elapsed and remaining times, together with methods
+ *  to force the local copy of the contest clock to be updated from the server and methods to load a new value into the
+ *  local contest clock; 
+ *  - a local timer which forces the local (on-screen) contest clock to be resynced with the server periodically.
+ */
 @Injectable({
 	providedIn: 'root'   //forces the service to be a singleton across all app components ('root' == "root injector")
 })

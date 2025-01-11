@@ -43,6 +43,11 @@ export abstract class IWebsocketService {
         break;
       }
       case 'contest_clock': {
+    	  /* This case is invoked when the WTI Server gets a "Contest_Clock" message from the PC2 Server
+    	   * (via the PC2 API "ConfigurationItemUpdated()" listener in the WTI class "ConfigurationService").
+    	   * Such a message from the PC2 Server causes the WTI Server to send a "contest_clock" message through
+    	   * the websocket to this client. 
+    	   */
     	  if (DEBUG_MODE) {
     		  console.log ("IWebsocketService.incomingMessage(): got websocket message '", message.type);
               console.log ("IWebsocketService.incomingMessage(): invoking ContestService.getIsContestRunning() and");
