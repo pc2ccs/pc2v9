@@ -3,6 +3,15 @@ import { AuthService } from 'src/app/modules/core/auth/auth.service';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { DEBUG_MODE } from 'src/constants'
 
+/**
+ * This class defines a component which acts as the "header" for all WTI-UI pages.  Together with the
+ * corresponding app-header.component.html file, the component displays header images (such as the PC2 Balloon Logo).
+ * If there is currently a team logged in, then the header component also shows
+ * links to the various WTI-UI pages (such as Runs, Clarifications, Scoreboard, etc.), the currently logged-in team's ID,
+ * and clocks showing the current contest elapsed time and remaining time (whose values it gets from the 
+ * injected ContestService).
+ * 
+ */
 @Component({
     selector: 'app-header',
     templateUrl: './app-header.component.html',
@@ -36,19 +45,11 @@ export class AppHeaderComponent {
 
   getElapsedSecs(): number {
 	let secs = this._contestService.getElapsedSecs() ;
-/*	if (DEBUG_MODE) {
-		console.log("AppHeaderComponent.getElapsedSecs(): returning ", secs);
-	}
-*/	
     return secs;
   }
 
   getRemainingSecs(): number {
 	let secs = this._contestService.getRemainingSecs() ;
-/*	if (DEBUG_MODE) {
-		console.log("AppHeaderComponent.getRemainingSecs(): returning ", secs);
-	}
-*/
 	return secs;
   }
 }

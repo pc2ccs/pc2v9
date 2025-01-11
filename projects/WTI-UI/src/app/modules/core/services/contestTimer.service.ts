@@ -13,8 +13,11 @@ import { DEBUG_MODE } from 'src/constants'
  * update; if not, it resets the clocks by invoking the ContestService updateLocalContestClockFromServer() method, which
  * resynchronizes the Timer's elapsed and remaining time from the server.
  * 
- * The Timer is started by calling method startTimer(); it can be stopped by calling method stopTimer().
- * When stopped and the restarted the Timer picks up counting where it left off. 
+ * The Timer is started by calling method startTimer(); it can be stopped by calling method stopTimer();
+ * these methods are intended to be invoked by external code which detects when the PC2 Admin starts/stops
+ * the PC2 contest clock.
+ * 
+ * When stopped and then restarted the Timer picks up counting where it left off. 
  */
 export class ContestTimerService {
 

@@ -1,12 +1,13 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { DEBUG_MODE } from 'src/constants'
 
-//This class defines a "pipe" which accepts a time, represented as a number of seconds, and returns 
-// a formatted string representing the number of days/hours/minutes/seconds represented by the input number of seconds. 
-//"Days" are only included in the output if they are greater than zero.
-//The "pipe" is suitable for use, for example, in an Angular HTML template wanting to display an elapsed number of seconds
-// in terms of hours/mins/secs (see app-header.component.html).
-
+/** This class defines a "pipe" which accepts a time, represented as a number of seconds, and returns 
+ * a formatted string representing the number of days/hours/minutes/seconds represented by the input number of seconds. 
+ * "Days" are only included in the output if they are greater than zero.
+ * The "pipe" is suitable for use, for example, in an Angular HTML template wanting to display an elapsed number of seconds
+ * in terms of hours/mins/secs (see app-header.component.html).
+ */
+ 
 @Pipe({
   name: 'displayTime',
   standalone: true
