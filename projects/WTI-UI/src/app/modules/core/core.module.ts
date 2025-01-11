@@ -16,11 +16,8 @@ import { IWebsocketService } from './abstract-services/i-websocket.service';
 import { UiHelperService } from './services/ui-helper.service';
 import { SharedModule } from '../shared/shared.module';
 import { DEBUG_MODE } from 'src/constants';
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
 import { CommonModule } from '@angular/common';
-=======
 import { DisplayTimePipe } from './services/displayTimePipe.service';
->>>>>>> 7a71e77 i1027: update for compatibility with PR for i871.
 
 export function TeamsServiceFactory(http: HttpClient) {
   if (DEBUG_MODE) {
@@ -93,34 +90,18 @@ export function WebsocketServiceFactory(injector: Injector,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: IWebsocketService, useFactory: WebsocketServiceFactory, deps: [Injector, UiHelperService, IContestService, ITeamsService, AuthService] },
     AuthGuard,
-	//TODO:  should the following two still be declared here since they are now listed in the above "deps" list?
-    UiHelperService,
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
-=======
     DisplayTimePipe,
 	//TODO:  should the following two still be declared here since they are now listed in the above "deps" list?
     UiHelperService,
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
-    ContestService,
-	//TODO:  should the following two still be declared here since they are now listed in the above "deps" list?
-    UiHelperService,
->>>>>>> 7a71e77 i1027: update for compatibility with PR for i871.
-=======
->>>>>>> db34af4 i1027: source code cleanup (remove outdated comments, etc.)
     ContestService
   ],
   imports: [
     HttpClientModule,
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
-    SharedModule
-  ],
-=======
     SharedModule,
     DisplayTimePipe
   ],
   exports: [
     DisplayTimePipe
   ]
->>>>>>> 7a71e77 i1027: update for compatibility with PR for i871.
 })
 export class CoreModule { }
