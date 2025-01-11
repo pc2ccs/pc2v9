@@ -16,7 +16,6 @@ import { IWebsocketService } from './abstract-services/i-websocket.service';
 import { UiHelperService } from './services/ui-helper.service';
 import { SharedModule } from '../shared/shared.module';
 import { DEBUG_MODE } from 'src/constants';
-import { CommonModule } from '@angular/common';
 import { DisplayTimePipe } from './services/displayTimePipe.service';
 
 export function TeamsServiceFactory(http: HttpClient) {

@@ -9,8 +9,8 @@ import { IWebsocketService } from 'src/app/modules/core/abstract-services/i-webs
 import { Router } from '@angular/router';
 import { IContestService } from 'src/app/modules/core/abstract-services/i-contest.service';
 import { AppTitleService } from 'src/app/modules/core/services/app-title.service';
-import { DEBUG_MODE } from 'src/constants';
 import { ContestClock } from 'src/app/modules/core/models/contest-clock';
+import { DEBUG_MODE } from 'src/constants';
 
 /*
 LoginPageComponent is the initial page displayed by the WTI-UI Single-Page-Application (SPA).
@@ -48,7 +48,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
               private _websocketService: IWebsocketService,
               private _router: Router,
               private _contestService: IContestService,
-              private _appTitleService: AppTitleService) { 
+			  private _appTitleService: AppTitleService) { 
 			  
 	  if (DEBUG_MODE) {
 		  console.log ("Executing LoginPageComponent constructor") ;
@@ -99,15 +99,18 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this._authService.login(loginCreds)
       .pipe(takeUntil(this._unsubscribe))
       .subscribe((result: TeamsLoginResponse) => {
+
 			if (DEBUG_MODE) {
 				console.log ("Received callback from subscribing to AuthService.login();" ) ;
 				console.log ("  Invoking AuthService.completeLogin()") ;
 			}
         this._authService.completeLogin(result.teamId, result.teamName);
+
 			if (DEBUG_MODE) {
 				console.log ("  Invoking WebsocketService.startWebsocket()") ;
 			}
         this._websocketService.startWebsocket();
+
         	if (DEBUG_MODE) {
         		console.log ("  Invoking ContestService.getisContestRunning() and subscribing to the result") ;
         	}
@@ -126,20 +129,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 			}
             this._contestService.isContestRunning = val;
             if (DEBUG_MODE) {
-            	console.log ("Invoking ContestService.contestClock.next()") ;
+            	console.log ("Invoking ContestService.contestClockEvent.next()") ;
             }
-
 			//trigger a contestClockEvent so the SelectProblems dropdown can decide whether to display the problems or not
             this._contestService.contestClockEvent.next();
 
           });
-      }, (error: any) => {
-    	  if (DEBUG_MODE) {
-    		  console.log ("AuthService.login() subscription returned error: ", error) ;
-    	  }
-			this.invalidCreds = true;
-			this.loginStarted = false;
-		});
 
 		//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
 		if (DEBUG_MODE) {
@@ -169,6 +164,14 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         	console.log ("  Invoking ContestService.updateLocalContestClockFromServer()") ;
         }
 		this._contestService.updateLocalContestClockFromServer();
+
+       }, (error: any) => {
+			console.error ("LoginPageComponent.onSubmit(): AuthService.login() subscription callback error: ");
+			console.error(error);
+			this.invalidCreds = true;
+			this.loginStarted = false;
+       });
+
   }
 
   private buildForm(): void {
