@@ -181,6 +181,9 @@ export class AppComponent implements OnInit {
         }
         
 		//restore the contest clock on-screen display values (elapsed and remaining)
+	    if (DEBUG_MODE) {
+	    	console.log ('Updating local contest clock values from server');
+	    }
 		this._contestService.updateLocalContestClockFromServer();
 		
 	    // transfer to the (former) "current page".
