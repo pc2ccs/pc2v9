@@ -39,7 +39,6 @@ export class ContestService extends IContestService {
   contestTimer: ContestTimerService = new ContestTimerService(this) ; 
   
   constructor(private _httpClient: HttpClient) {
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
 	super();
 
 	if (DEBUG_MODE) {
@@ -47,15 +46,6 @@ export class ContestService extends IContestService {
 	}
 	
 	this.standingsAreCurrent = false;
-=======
-    super();
-	if (DEBUG_MODE) {
-		console.log ("Executing ContestService constructor; instance ID = ", this.uniqueId) ;
-	}
-    this.standingsAreCurrent = false;
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
->>>>>>> ab9b09a i1027: ContestService: make root-injectable; add ContestTimer; also:
-=======
     
     //set a timer to auto-refresh the contest clock displays, at a rate defined in src/constants
     //TODO: what happens to the timing of this update when the browser is minimized (because setInterval() runs slower when
@@ -70,7 +60,6 @@ export class ContestService extends IContestService {
             }, 
             RESYNC_INTERVAL_IN_MINUTES * 60 * 1000	// timer interval in msec: minutes * (secs-per-min) * (msec-per-sec)
           ); 
->>>>>>> b069333 i1027: add code to resync UI clocks with PC2 periodically.
   }
 
   getLanguages(): Observable<ContestLanguage[]> {

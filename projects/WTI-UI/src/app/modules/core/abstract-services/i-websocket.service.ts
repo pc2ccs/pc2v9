@@ -57,22 +57,9 @@ export abstract class IWebsocketService {
           .subscribe((val: any) => {
         	  if (DEBUG_MODE) {
         		  console.log ("IWebsocketService.incomingMessage(): callback from ContestService.getIsContestRunning() returned '", val, "'");
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
-        		  console.log ("Setting ContestService.isContestRunning to '", val, "'") ;
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
-        		  console.log ("  and invoking ContestService.contestClock.next()") ;
-=======
-        		  console.log ("  and invoking ContestService.contestClockEvent.next()") ;
->>>>>>> 5291696 i1027: IWebSocketService: make root-injectable; add debug output.
-=======
         		  console.log ("Setting ContestService.isContestRunning to '", val, "',") ;
         		  console.log ("  invoking ContestService.contestClockEvent.next()") ;
-<<<<<<< Upstream, based on c4b09354e015df5ecedbdcd004dea9810eecc455
-                  console.log ("  and invoking ContestService.updateContestClock()");
->>>>>>> d43bfce i1027: IWebsocketService: invoke updateContestClock() on 'clock' msg.
-=======
                   console.log ("  and invoking ContestService.updateLocalContestClockFromServer()");
->>>>>>> 7274551 i1027: rename method to updateLocalContestClockFromServer()
         	  }
 
             this._contestService.isContestRunning = val;

@@ -45,18 +45,6 @@ export abstract class IContestService {
 	  }
   }
 
-  //give each instance of IContestService a unique ID for debugging purposes
-  private static nextId: number = 1;
-  public uniqueId: number;
-
-  
-  constructor () {
-	  this.uniqueId = IContestService.nextId++;
-	  if (DEBUG_MODE) {
-		  console.log ("Executing IContestService constructor for unique instance ", this.uniqueId) ;
-	  }
-  }
-
   abstract getLanguages(): Observable<ContestLanguage[]>;
 
   abstract getProblems(): Observable<ContestProblem[]>;
