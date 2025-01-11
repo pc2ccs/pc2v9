@@ -32,18 +32,10 @@ export class ContestTimerService {
   }
 
   getElapsedSecs(): number {
-/*    if (DEBUG_MODE) {
-	  console.log("ContestTimerService.getElapsedSecs(): returning ", this.elapsedSecs);
-    }
-*/
     return this.elapsedSecs;
   }
 
   getRemainingSecs(): number {
-/*    if (DEBUG_MODE) {
-	  console.log("ContestTimerService.getRemainingSecs(): returning ", this.remainingSecs);
-    }
-*/
 	return this.remainingSecs;
   }
   
@@ -99,35 +91,21 @@ export class ContestTimerService {
         	
         	//update the tracking of when the last timer update happened
         	let now: Date = new Date();
-        	if (DEBUG_MODE) {
-        		console.log("ContestTimer.startTimer().setInterval() callback: now = ", now.getTime());
-        	}
 			if (this.mostRecentTimerUpdate == null) {
 				//we've never updated the timer; save current update time
-				if (DEBUG_MODE) {
-					console.log ("Contest.startTimer().setInterval() callback: mostRecentTimerUpate is null, setting to 'now'");
-				}
 				this.mostRecentTimerUpdate = now ;
 			}
        	
 			//check how long it's been since a timer update has happened (it could be much longer than the 1-second implied by the setInterval()
 			// rate because that rate can be significantly slowed if the browser has been minimized)
 			let timeSpan = now.getTime() - this.mostRecentTimerUpdate.getTime();	//epoch times, in milliseconds
-			if (timeSpan > 1999) {
-				
-				//last update was more than 2 seconds ago; update the contest clock (which also updates the timer)
-				if (DEBUG_MODE) {
-					console.log("ContestTimer.startTimer().setInterval() callback: timeSpan since last update is ", timeSpan );
-					console.log ("clock is off by more than 2 seconds; calling ContestService.updateLocalContestClockFromServer() to update clock");
-				}
+			if (timeSpan > 4999) {
+				//last update was more than 5 seconds ago; update the contest clock from the server (which also updates the timer)
 				this._contestService.updateLocalContestClockFromServer();
 			} else {
-				//we've seen an update within the last two seconds; just update by one second
+				//we've seen an update within the last five seconds; just update by one second
 				this.elapsedSecs += 1 ;
 				this.remainingSecs -= 1
-				if (DEBUG_MODE) {
-					console.log(`Elapsed: ${this.elapsedSecs}; Remaining: ${this.remainingSecs}; intervalId: ${this.intervalId}`);
-				}
 			}
 			
 			//record that we've now updated the contest clock display

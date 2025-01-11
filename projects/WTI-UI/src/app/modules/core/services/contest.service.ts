@@ -118,8 +118,7 @@ export class ContestService extends IContestService {
 						console.error ("ContestService.updateLocalContestClockFromServer() getContestClock() subscription callback: unable to get ContestClock from PC2 API via ContestService!");
 					} else {
 						if (DEBUG_MODE) {
-							console.log("ContestService.updateLocalContestClockFromServer(): got callback from getContestClock() subscription; callback data =");
-							console.log(data);
+							console.log("ContestService.updateLocalContestClockFromServer(): got callback from getContestClock() subscription.");
 						}
 						//install the received contest clock data into the ContestService's ContestClock
 						this.installNewContestClock(data);					
@@ -159,14 +158,6 @@ export class ContestService extends IContestService {
 		let elapsedSecs = parseInt(this.contestClock.elapsedSecs);
 		let contestLengthSecs = parseInt(this.contestClock.contestLengthSecs);
 		let remainingSecs = contestLengthSecs - elapsedSecs;
-		
-		if (DEBUG_MODE) {
-			console.log ("ContestService.installNewContestClock(): values pulled from newContestClock:");
-			console.log ("  timerShouldBeStarted = ", timerShouldBeStarted);
-			console.log ("  elapsedSecs = ", elapsedSecs);
-			console.log ("  contestLengthSecs = ", contestLengthSecs);
-			console.log ("  remainingSecs = ", remainingSecs);
-		}
 	
 		//shut off timer if it is running (otherwise we can't update the elapsed/remaining time values)
 		if (this.contestTimer.isTimerRunning) {
