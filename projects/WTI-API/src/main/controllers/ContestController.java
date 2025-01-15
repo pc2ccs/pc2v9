@@ -467,15 +467,18 @@ public class ContestController extends MainController {
 			IClarification[] clars = userInformation.getContest().getClarificationsWithClientId();
 			
 			//check all contest clars to see which should be returned to the team
+			// (note: based on the description of the above call to getClarificationsWithClientId(),
+			//  we should only see clars for this team in the array received... but we need to process
+			//  them all anyway, to set the display name...)
 			for(IClarification clar : clars) {
 				
-				boolean isJudge =  clar.getTeam().getType() == IClient.ClientType.JUDGE_CLIENT;
-								
-				//return to the team only those clars that came from the team, or from the judges
-				if(clar.getTeam().getLoginName().equalsIgnoreCase(userInformation.getMyClient().getLoginName()) || isJudge || clar.isSendToAll()) {
+				//return to the team only those clars that came from the team, or that were sent to "all teams"
+				if(clar.getTeam().getLoginName().equalsIgnoreCase(userInformation.getMyClient().getLoginName()) || clar.isSendToAll()) {
 				    //TODO must also include clars directed to here from group
 					
-					String displayName = (isJudge || clar.isSendToAll()) ? "All" : clar.getTeam().getDisplayName();
+					//the current clar is one that either came from the team or was sent to all teams; include it in the reponse,
+					// setting the "display name" to indicate which type it was
+					String displayName = (clar.isSendToAll()) ? "All" : clar.getTeam().getDisplayName();
 					clarifications.add(new ClarificationModel(
 						displayName, 
 						clar.getProblem().getName(), 
@@ -498,7 +501,14 @@ public class ContestController extends MainController {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.clarifications()"))
 					.type(MediaType.APPLICATION_JSON).build();
-		}		
+		}
+		catch(Exception e) {
+			logger.severe(e.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Exception in ContestController.clarifications(): " + e.getMessage()))
+					.type(MediaType.APPLICATION_JSON).build();
+		}
+		
 		
 		return Response.ok()
 				.entity(clarifications)
