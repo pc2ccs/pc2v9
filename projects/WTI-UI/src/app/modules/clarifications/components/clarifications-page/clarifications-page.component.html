@@ -6,7 +6,7 @@
         <form class='filters' [formGroup]='filterForm'>
             <h3 class='center'>Filters</h3>
             <div>
-                <h5 class='filter-label'>Recipient</h5>
+                <h5 class='filter-label'>Show Clarifications sent to:</h5>
                 <label>
                     <input type='radio' name='receipient' formControlName='receipient' value='all'>
                     All Teams
@@ -33,14 +33,12 @@
     <div class='table-container'>
         <table>
             <tr>
-                <th>Recipient</th>
                 <th>Problem</th>
                 <th>Question</th>
                 <th>Answer</th>
                 <th>Time</th>
             </tr>
             <tr *ngFor='let clarification of filteredClarifications' [class.pending]='!clarification.isAnswered'>
-                <td>{{ clarification.recipient }}</td>
                 <td>{{ clarification.problem }}</td>
                 <td>{{ clarification.question }}</td>
                 <td>
