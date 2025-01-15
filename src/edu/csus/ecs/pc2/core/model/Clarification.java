@@ -115,7 +115,7 @@ public class Clarification extends Submission {
      * @param sendToAll
      */
     public void setAnswer(String answer, ClientId client, ContestTime contestTime, boolean sendToAll) {
-        if (question.equals("")) {
+        if (question.equals("") || question.equalsIgnoreCase("announcement")) {
             state = ClarificationStates.ANNOUNCED;
         }
         else {
@@ -135,7 +135,7 @@ public class Clarification extends Submission {
      * @param sendToAll
      */
     public void setAnswer(String answer, ClientId client, ContestTime contestTime, ElementId[] destinationGroup, ClientId[] destinationTeam, boolean sendToAll) {
-        if (question.equals("")) {
+        if (question.equals("") || question.equalsIgnoreCase("announcement")) {
             state = ClarificationStates.ANNOUNCED;
         }
         else {
