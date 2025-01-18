@@ -46,6 +46,20 @@ public class CLICSContestState {
     @JsonProperty
     private String end_of_updates;
 
+    /*
+     * These are non-standard PC2 specific to support pausing the contest
+     * 'paused' is the CONTEST elapsed time at which the contest was paused.  If set, it means the contest
+     * is currently paused.
+     *
+     * 'resumed' is the real (wall) time the contest was last resumed (or started, including initial contest start).
+     * You can tell if the contest had been paused at some point if resumed != started
+     */
+    @JsonProperty
+    private String paused;
+
+    @JsonProperty
+    private String resumed;
+
     /**
      * Fill in properties for contest state as per 2023-06 spec
      *
@@ -69,6 +83,15 @@ public class CLICSContestState {
                     ended = Utilities.getIso8601formatterWithMS().format(endedDate.getTimeInMillis());
                 }
             }
+
+            if(ct.isContestRunning() == false) {
+                if(ended == null) {
+                    // This means the contest was paused - can't pause a contest if it is ended... so ended must be null
+                    paused = ContestTime.formatTimeMS(ct.getElapsedMS());
+                }
+            }
+            resumed = Utilities.getIso8601formatterWithMS().format(ct.getResumeTime().getTime());
+
             String scoreboardFreezeDuration = ci.getFreezeTime();
             Date thawedDate = null;
 

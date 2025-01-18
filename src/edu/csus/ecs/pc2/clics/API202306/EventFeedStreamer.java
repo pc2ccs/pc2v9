@@ -119,6 +119,11 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
     private String lastStateSent = null;
 
     /**
+     * Last contest json data that was sent out
+     */
+    private String lastContestSent = null;
+
+    /**
      * Class contains output stream and Event Feed Filter
      *
      * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
@@ -263,6 +268,11 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                         int beginIndex = line.indexOf("\"data\": {", 1)+ 8;
                         lastStateSent = line.substring(beginIndex, line.length()-1);
                     }
+                    if (line.startsWith("{\"type\":\"contest\",")) {
+                        int beginIndex = line.indexOf("\"data\": {", 1)+ 8;
+                        lastContestSent = line.substring(beginIndex, line.length()-1);
+                    }
+
                     if (filter.matchesFilter(line)) {
                         stream.write(line.getBytes("UTF-8"));
                         stream.write(NL.getBytes("UTF-8"));
@@ -765,14 +775,13 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
         @Override
         public void contestTimeChanged(ContestTimeEvent event) {
             // TODO seems we should only do this for our local site times...
-            String json = getJSONEvent(CONTEST_KEY, getNextEventId(), null, jsonTool.convertToJSON(contest.getContestInformation()).toString());
-            sendJSON(json + NL);
+            sendContestIfChanged(jsonTool.convertToJSON(contest.getContestInformation()).toString());
+            sendStateIfChanged(jsonTool.toStateJSON(contest.getContestInformation()).toString());
         }
 
         @Override
         public void contestStarted(ContestTimeEvent event) {
             contestTimeChanged(event);
-
         }
 
         @Override
@@ -975,6 +984,49 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
 
     public void halt() {
         running = false;
+    }
+
+
+    /**
+     * Checks if the contest json EF info has changed, and, if so, send it out
+     *
+     * @param json check this against previously sent contest info
+     */
+    private void sendContestIfChanged(String json) {
+
+        boolean sendIt = true;
+
+        if(lastContestSent == null) {
+            lastContestSent = json;
+        } else if(lastContestSent.equals(json)) {
+            sendIt = false;
+        } else {
+            lastContestSent = json;
+        }
+        if(sendIt) {
+            sendJSON(getJSONEvent(CONTEST_KEY, getNextEventId(), null, json) + NL);
+        }
+    }
+
+    /**
+     * Checks if the state json EF info has changed, and, if so, send it out
+     *
+     * @param json check this against previously sent state info
+     */
+    private void sendStateIfChanged(String json) {
+
+        boolean sendIt = true;
+
+        if(lastStateSent == null) {
+            lastStateSent = json;
+        } else if(lastStateSent.equals(json)) {
+            sendIt = false;
+        } else {
+            lastStateSent = json;
+        }
+        if(sendIt) {
+            sendJSON(getJSONEvent(STATE_KEY, getNextEventId(), null, json) + NL);
+        }
     }
 
     /**
