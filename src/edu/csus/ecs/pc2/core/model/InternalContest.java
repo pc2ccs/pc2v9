@@ -2088,9 +2088,14 @@ public class InternalContest implements IInternalContest {
     }
     
     /**
-     * Gets clarifications appropriate for the clientId.
-     * This means if the client is unable to see some of the clarifications this method will not return it. 
-     * For example certain clarifications might be only directed towards certain groups/teams. 
+     * Examines the current list of all clarifications and returns an array containing the 
+     * clarifications which are allowed to be seen by the specified clientId.
+     * For example certain clarifications might be only directed towards certain groups/teams.
+     * Note that "Announcements" are a type of Clarification; the returned array will include 
+     * any "Announcement Clarifications" that the client is allowed to see.
+     * 
+     * @return an array containing exactly (and only) the current clarifications (including 
+     *          "Announcement Clarifications") which the specified client is allowed to see.  
      */
     @Override
     public Clarification[] getClarifications(ClientId clientId) {
