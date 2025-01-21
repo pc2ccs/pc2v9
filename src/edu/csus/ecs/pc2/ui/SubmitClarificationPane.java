@@ -4,8 +4,9 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
@@ -47,15 +48,10 @@ import edu.csus.ecs.pc2.core.security.Permission;
 /**
  * Submit Clarification Pane.
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
-// $HeadURL$
 public class SubmitClarificationPane extends JPanePlugin {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 6395977089692171705L;
     
     public static final String CHECKBOX_GROUP_TEAM_PROPERTY = "groupteam";
@@ -65,12 +61,13 @@ public class SubmitClarificationPane extends JPanePlugin {
     public static final String GROUPS = "Group(s)";
     
     public static final String SPECIFIC_TEAMS = "Specific Team(s)";
- // the original height of the jcombobox was 22.  the groups jlist is 3 lines, so we added 46(?)
+    
+    // the original height of the jcombobox was 22.  the groups jlist is 3 lines, so we added 46(?)
     // this makes it easier to make the groups list box bigger without having to change all the
     // control offsets below it.
     private static final int GROUPS_LIST_HEIGHT = 68;
 
-    private Log log;  //  @jve:decl-index=0:
+    private Log log;
 
     private JPanel problemPane = null;
     
@@ -86,7 +83,7 @@ public class SubmitClarificationPane extends JPanePlugin {
 
     private JButton submitClarificationButton = null;
     
-    private JCheckBox submitAnnouncement = null;
+    private JCheckBox generateAnnouncementCheckbox = null;
       
     private boolean isTeam = false;
     
@@ -112,13 +109,13 @@ public class SubmitClarificationPane extends JPanePlugin {
      */
     protected void initialize() {
         this.setLayout(null);
-        this.setSize(new java.awt.Dimension(456, 285));
+        this.setSize(new Dimension(722, 356));
         SubmitClarificationPane current = this;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 isTeam = getContest().getClientId().getClientType().equals(ClientType.Type.TEAM);
                 if (!isTeam) {
-                    current.add(getSubmitAnnouncementCheckBox(),null);
+                    current.add(getGenerateAnnouncementCheckBox(),null);
                     current.add(getGroupsandTeamsPanel(),null);
                     current.add(getAnnouncementDestinationPane(),null);
                 }
@@ -169,7 +166,6 @@ public class SubmitClarificationPane extends JPanePlugin {
             groupsPanel.setSize(new java.awt.Dimension(336, 200));
             groupsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Groups", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-            groupsPanel.add(getGroupsandTeamsList(),null);
             groupsPanel.add(getGroupsandTeamsScrollPane(),null);
             groupsPanel.setVisible(false);
         }
@@ -253,17 +249,17 @@ public class SubmitClarificationPane extends JPanePlugin {
      * Inializes Checkbox. Checkbox can changeif this page submits an announcement or a clarification.
      * @return
      */
-    protected JCheckBox getSubmitAnnouncementCheckBox() {
-        if (submitAnnouncement == null) {
-            submitAnnouncement = new JCheckBox();
-            submitAnnouncement.setText("Generate Announcement");
-            submitAnnouncement.setBounds(19, 15, 170, 20);
+    protected JCheckBox getGenerateAnnouncementCheckBox() {
+        if (generateAnnouncementCheckbox == null) {
+            generateAnnouncementCheckbox = new JCheckBox();
+            generateAnnouncementCheckbox.setText("Generate Announcement");
+            generateAnnouncementCheckbox.setBounds(19, 15, 170, 20);
             ToolTipManager.sharedInstance().setDismissDelay(6000);
-            submitAnnouncement.setToolTipText("Announcement clarification is a clarification that directly goes to teams with an answer but without question.");
-            submitAnnouncement.addItemListener(new java.awt.event.ItemListener() {
+            generateAnnouncementCheckbox.setToolTipText("Announcement clarification is a clarification that directly goes to teams with an answer but without question.");
+            generateAnnouncementCheckbox.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(java.awt.event.ItemEvent e) {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
-                        getLargeTextBoxPane().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Answer", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                        getLargeTextBoxPane().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Announcement Text", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                                 javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
                         getSubmitClarificationButton().setText("Submit Announcement");
                         getSubmitClarificationButton().setToolTipText("Click this button to submit your Announcement");
@@ -282,7 +278,7 @@ public class SubmitClarificationPane extends JPanePlugin {
                 }
             });
         }
-        return submitAnnouncement;
+        return generateAnnouncementCheckbox;
     }
 
     /**
@@ -382,10 +378,10 @@ public class SubmitClarificationPane extends JPanePlugin {
         }
         getAnnouncementDestinationComboBox().addItem(SPECIFIC_TEAMS);
         
-        getAnnouncementDestinationComboBox().addItemListener(new ItemListener() {
+        getAnnouncementDestinationComboBox().addActionListener(new ActionListener() {
             @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
+            public void actionPerformed(ActionEvent e) {
+
                     JComboBox<?> source = (JComboBox<?>) e.getSource();
                     String selectedValue = (String) source.getSelectedItem();
                     if (selectedValue.equals(GROUPS)){
@@ -405,7 +401,7 @@ public class SubmitClarificationPane extends JPanePlugin {
                                 getGroupsandTeamsPanel().setVisible(true);
                                 getGroupsandTeamsPanel().setBorder(javax.swing.BorderFactory.createTitledBorder(null, SPECIFIC_TEAMS, javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                                         javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-                            }
+                           }
                         });
                     }
                     else {
@@ -419,7 +415,6 @@ public class SubmitClarificationPane extends JPanePlugin {
                         });
                     }
                     
-                }
             }
         });
     }
@@ -436,6 +431,11 @@ public class SubmitClarificationPane extends JPanePlugin {
             Arrays.sort(allgroups, new GroupComparator());
             for (Group group : allgroups) {
                 JCheckBox checkBox = new JCheckBox(group.getDisplayName());
+                //TODO: the following doesn't make sense; it *appears* to be adding the ElementId for EACH GROUP
+                // each time around the 'for' loop, but in fact each new putClientProperty() value REPLACES
+                // the previously-stored value (thus, only the LAST group is being stored in the hashtable).
+                // In a contest with many groups this could have a negative performance impact -- especially 
+                // if it's happening on the Swing thread...
                 checkBox.putClientProperty(CHECKBOX_GROUP_TEAM_PROPERTY, group.getElementId());
                 ((DefaultListModel<Object>) groupsandTeamsListModel).addElement(checkBox);
             }
@@ -454,6 +454,11 @@ public class SubmitClarificationPane extends JPanePlugin {
                         team.getClientId().getClientNumber()+
                         " "+
                         team.getDisplayName());
+                //TODO: the following doesn't make sense; it *appears* to be adding the clientId for EACH TEAM
+                // each time around the 'for' loop, but in fact each new putClientProperty() value REPLACES
+                // the previously-stored value (thus, only the LAST team is being stored in the hashtable).
+                // In a contest with thousands of teams this could have a negative performance impact -- especially 
+                // if it's happening on the Swing thread...
                 checkBox.putClientProperty(CHECKBOX_GROUP_TEAM_PROPERTY, team.getClientId());
                 ((DefaultListModel<Object>) groupsandTeamsListModel).addElement(checkBox);
             }
@@ -499,7 +504,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         Object[] ultimateDestinationsPacked = getGroupsandTeamsList().getSelectedValues();
         
         
-        if (getSubmitAnnouncementCheckBox().isSelected()) {
+        if (getGenerateAnnouncementCheckBox().isSelected()) {
 
             if (getProblemComboBox().getSelectedIndex() < 1) {
                 showMessage("Please select problem");
@@ -537,7 +542,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         String answerAnnouncement = largeTextArea.getText().trim();
 
         if (answerAnnouncement.length() < 1) {
-            showMessage("Please enter an answer for announcement");
+            showMessage("Please enter text for announcement");
             return;
         }
         String[] stringDestinations = new String[ultimateDestinationsPacked.length];
