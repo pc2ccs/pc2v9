@@ -463,33 +463,28 @@ public class ContestController extends MainController {
 		
 		try {
 			
-		    //This function only gets clarifications that the current Client should receive.
+		    //get the clarifications associated with the invoking client's Id.
+			//Note that this function call returns exactly, and only, clarifications that the current Client should receive.
+			//This includes clars that were submitted by the team as well as announcement clars directed to the team -- either
+			//specifically or as a result of being directed to "All Teams" or to a Group of which the team is a member.
 			IClarification[] clars = userInformation.getContest().getClarificationsWithClientId();
 			
-			//check all contest clars to see which should be returned to the team
-			// (note: based on the description of the above call to getClarificationsWithClientId(),
-			//  we should only see clars for this team in the array received... but we need to process
-			//  them all anyway, to set the display name...)
+			//encode each PC2 clar into a WTI ClarificationModel
 			for(IClarification clar : clars) {
 				
-				//return to the team only those clars that came from the team, or that were sent to "all teams"
-				if(clar.getTeam().getLoginName().equalsIgnoreCase(userInformation.getMyClient().getLoginName()) || clar.isSendToAll()) {
-				    //TODO must also include clars directed to here from group
-					
-					//the current clar is one that either came from the team or was sent to all teams; include it in the reponse,
-					// setting the "display name" to indicate which type it was
-					String displayName = (clar.isSendToAll()) ? "All" : clar.getTeam().getDisplayName();
-					clarifications.add(new ClarificationModel(
-						displayName, 
-						clar.getProblem().getName(), 
-						clar.getQuestion(), 
-						clar.getAnswer(),
-						String.format("%s-%s", clar.getSiteNumber(), clar.getNumber()),
-						clar.getSubmissionTime(), 
-						clar.isAnswered()));
-				}
+				// set the "recipient type" indicating whether this clar goes to the team because it was "sent to all" or
+				// because it was sent explicitly to this team (the "recipient type" is used by the WTI-UI to determine under
+				// what conditions to display the clar on the Clarifications page)
+				String recipientType = (clar.isSendToAll()) ? "All" : "Team";
+				clarifications.add(new ClarificationModel(
+					recipientType, 
+					clar.getProblem().getName(), 
+					clar.getQuestion(), 
+					clar.getAnswer(),
+					String.format("%s-%s", clar.getSiteNumber(), clar.getNumber()),
+					clar.getSubmissionTime(), 
+					clar.isAnswered()));
 			}
-
 		}
 		catch(NotLoggedInException e) {
 			return Response.status(Response.Status.UNAUTHORIZED)
