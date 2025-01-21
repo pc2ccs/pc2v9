@@ -1,14 +1,13 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * A answer for a clarification.
+ * An answer for a clarification, or a announcement "answer".
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
 // $HeadURL$
@@ -22,7 +21,7 @@ public class ClarificationAnswer implements Serializable{
     private boolean sendToAll = false;
 
     /**
-     * The client (usually a judge) who sent this clar.
+     * The client (usually a judge) who sent this clarification answer or announcement.
      */
     private ClientId answerClient;
 
@@ -35,13 +34,14 @@ public class ClarificationAnswer implements Serializable{
     private ElementId elementId;
     
     /**
-     * An clarification could be send to multiple groups, teams. Used when it is not sendToAll but some.
+     * A clarification could be send to multiple groups and/or a specific list of teams. 
+     * Used when it is not sendToAll but "send-to-some".
      */
-    private ElementId[] destinationsGroup = new ElementId[0];
+    private ElementId[] destinationGroups = new ElementId[0]; //groups to which the answer is to be sent
     
-    private ClientId[] destinationsTeam = new ClientId[0];
+    private ClientId[] destinationTeams = new ClientId[0];  //specific teams to which the answer is to be sent
 
-    public ClarificationAnswer(String answer, ClientId answerClient, boolean sendToAll, ElementId[] destinationsGroup, ClientId[] destinationsTeam, ContestTime contestTime) {
+    public ClarificationAnswer(String answer, ClientId answerClient, boolean sendToAll, ElementId[] destinationGroups, ClientId[] destinationTeams, ContestTime contestTime) {
         super();
 
         if (answer == null) {
@@ -56,8 +56,8 @@ public class ClarificationAnswer implements Serializable{
         this.answer = answer;
         this.answerClient = answerClient;
         this.sendToAll = sendToAll;
-        this.destinationsGroup = destinationsGroup;
-        this.destinationsTeam = destinationsTeam;
+        this.destinationGroups = destinationGroups;
+        this.destinationTeams = destinationTeams;
         setDate(contestTime);
     }
 
@@ -124,26 +124,26 @@ public class ClarificationAnswer implements Serializable{
     }
     
     public ElementId[] getAllDestinationsGroup() {
-        return destinationsGroup;
+        return destinationGroups;
     }
     
     public void setAllDestinationsTeam(ClientId[] allDestinationsTeam) {
-        this.destinationsTeam = allDestinationsTeam;
+        this.destinationTeams = allDestinationsTeam;
     }
     
     public ClientId[] getAllDestinationsTeam() {
-        return destinationsTeam;
+        return destinationTeams;
     }
     
     public void setAllDestinationsGroup(ElementId[] allDestinationsGroup) {
-        this.destinationsGroup = allDestinationsGroup;
+        this.destinationGroups = allDestinationsGroup;
     }
     
     public boolean isThereDestinationOtherThanSubmitter() {
-        if (this.destinationsGroup == null || this.destinationsGroup == null) {
+        if (this.destinationGroups == null || this.destinationGroups == null) {
             return false;
         }
-        return this.destinationsGroup.length + this.destinationsTeam.length != 0;
+        return this.destinationGroups.length + this.destinationTeams.length != 0;
     }
     
 }
