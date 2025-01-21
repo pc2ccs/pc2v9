@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
+import java.util.ArrayList;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -9,8 +11,11 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
@@ -32,6 +37,12 @@ public class CLICSClarification {
 
     @JsonProperty
     private String to_team_id;
+
+    @JsonProperty
+    private String [] to_team_ids;
+
+    @JsonProperty
+    private String [] to_group_ids;
 
     @JsonProperty
     private String reply_to_id;
@@ -94,14 +105,44 @@ public class CLICSClarification {
         if (clarAns != null) {
             // the request goes to a team?
             if (!clar.isSendToAll()){
-                // The CLICS model does not fit in with the PC2 concept of directed responses to Groups
-                // and a list of teams.  As such, we'll always return the team that submitted the request,
+                // The CLICS 2023-06 model does not fit in with the PC2 concept of directed responses to Groups
+                // and a list of teams.  As such, we'll always return the team that submitted the request, in to_team_id
                 // since they will get the response (and possibly others).
+                // We also fill in to_team_ids and to_group_ids  because a client should check these first and if non-null
+                // use the arrays and ignore to_team_id.
                 if(clar.getSubmitter().getClientType().equals(ClientType.Type.TEAM)) {
                     to_team_id = "" + clar.getSubmitter().getClientNumber();
-                } else if(clarAns.getAllDestinationsTeam() != null && clarAns.getAllDestinationsTeam().length > 0){
-                    // Use first team in the list since we can only specify one team - CLICS does not allow for more than one
-                    to_team_id = "" + clarAns.getAllDestinationsTeam()[0].getClientNumber();
+                } else {
+                    ClientId [] destTeams = clarAns.getAllDestinationsTeam();
+                    ElementId [] destGroups = clarAns.getAllDestinationsGroup();
+
+                    // first let's look at destination teams, if any
+                    if(destTeams != null && destTeams.length > 0){
+                        // Use first team in the list for backward compatibilty of only supporting a single dest team
+                        // CLICS does not (yet) allow for more than one
+                        to_team_id = "" + destTeams[0].getClientNumber();
+                        // Implement PC2 extension of proposed CLICS change - array of teams.
+                        ArrayList<String> teamIdList = new ArrayList<String>();
+                        for(ClientId destClient : destTeams) {
+                            teamIdList.add("" + destClient.getClientNumber());
+                        }
+                        to_team_ids = teamIdList.toArray(new String[teamIdList.size()]);
+                    }
+                    // next, let's look at destination groups, if any
+                    // it should be noted that if to_team_id is null at this point, it will remain null, implying
+                    // the response to the clar was sent to all teams.  It's a reasonable compromise since the 2023-06 spec
+                    // does not have a notion of group replies.
+                    if(destGroups != null && destGroups.length > 0) {
+                        ArrayList<String> groupIdList = new ArrayList<String>();
+
+                        for(ElementId groupEle : destGroups) {
+                            Group group = model.getGroup(groupEle);
+                            if(group != null) {
+                                groupIdList.add("" + group.getGroupId());
+                            }
+                            to_group_ids = groupIdList.toArray(new String[groupIdList.size()]);
+                        }
+                    }
                 }
             }
             // Announcements do not have a question.

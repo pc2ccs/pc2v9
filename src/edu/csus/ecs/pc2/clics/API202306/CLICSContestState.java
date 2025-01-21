@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.Calendar;
@@ -47,18 +47,24 @@ public class CLICSContestState {
     private String end_of_updates;
 
     /*
-     * These are non-standard PC2 specific to support pausing the contest
+     * These are non-standard PC2 specific properties to support pausing the contest
      * 'paused' is the CONTEST elapsed time at which the contest was paused.  If set, it means the contest
-     * is currently paused.
+     * is currently paused. (HH:MM:SS.uuu)
      *
      * 'resumed' is the real (wall) time the contest was last resumed (or started, including initial contest start).
-     * You can tell if the contest had been paused at some point if resumed != started
+     * You can tell if the contest had been paused at some point if resumed != started (ISO time)
      */
     @JsonProperty
     private String paused;
 
     @JsonProperty
     private String resumed;
+
+    /*
+     * Non-standard property supplying a client with the current contest time (HH:MM:SS.uuu)
+     */
+    @JsonProperty
+    private String contest_time;
 
     /**
      * Fill in properties for contest state as per 2023-06 spec
@@ -84,10 +90,11 @@ public class CLICSContestState {
                 }
             }
 
+            contest_time = ContestTime.formatTimeMS(ct.getElapsedMS());
             if(ct.isContestRunning() == false) {
                 if(ended == null) {
                     // This means the contest was paused - can't pause a contest if it is ended... so ended must be null
-                    paused = ContestTime.formatTimeMS(ct.getElapsedMS());
+                    paused = contest_time;
                 }
             }
             resumed = Utilities.getIso8601formatterWithMS().format(ct.getResumeTime().getTime());
