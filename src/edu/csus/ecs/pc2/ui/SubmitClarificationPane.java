@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -36,14 +38,19 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.GroupEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ICategoryListener;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
+import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
+import java.awt.Component;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 
 /**
  * Submit Clarification Pane.
@@ -54,18 +61,23 @@ public class SubmitClarificationPane extends JPanePlugin {
 
     private static final long serialVersionUID = 6395977089692171705L;
     
-    public static final String CHECKBOX_GROUP_TEAM_PROPERTY = "groupteam";
+//    public static final String CHECKBOX_GROUP_TEAM_PROPERTY = "groupteam";
     
     public static final String ALL_TEAMS = "All Teams";
     
-    public static final String GROUPS = "Group(s)";
+//    public static final String GROUPS = "Specific Groups";
+//    
+//    public static final String TEAMS = "Specific Teams";
     
-    public static final String SPECIFIC_TEAMS = "Specific Team(s)";
+    public static final String GROUPS_AND_TEAMS = "Specific Groups and/or Teams";
     
+//    public static final String SPECIFIC_TEAMS = "Specific Team(s)";
+    
+//    todo: need to figure out what this is about, or remove it entirely...
     // the original height of the jcombobox was 22.  the groups jlist is 3 lines, so we added 46(?)
     // this makes it easier to make the groups list box bigger without having to change all the
     // control offsets below it.
-    private static final int GROUPS_LIST_HEIGHT = 68;
+//    private static final int GROUPS_LIST_HEIGHT = 68;
 
     private Log log;
 
@@ -87,16 +99,22 @@ public class SubmitClarificationPane extends JPanePlugin {
       
     private boolean isTeam = false;
     
-    private ListModel<Object> groupsandTeamsListModel = new DefaultListModel<Object>();
+    private ListModel<Object> groupsListModel = new DefaultListModel<Object>();
+    private ListModel<Object> teamsListModel = new DefaultListModel<Object>();
     
-    private JCheckBoxJList groupsandTeamsJList = null;
+    private JCheckBoxJList groupsJList = null;
+    private JCheckBoxJList teamsJList = null;
     
-    private JScrollPane groupsandTeamsScrollPane = null;
+    private JScrollPane groupsScrollPane = null;
+    private JScrollPane teamsScrollPane = null;    
     
+    //the panels holding the groups and teams scrollpanes
     private JPanel groupsPanel = null;
+    private JPanel teamsPanel;
+
     /**
-     * This method initializes
-     * 
+     * This method initializes the SubmitClarificationPane.
+     * Note that this pane also supports submitting "Announcements".
      */
     public SubmitClarificationPane() {      
         super();
@@ -109,19 +127,18 @@ public class SubmitClarificationPane extends JPanePlugin {
      */
     protected void initialize() {
         this.setLayout(null);
-        this.setSize(new Dimension(722, 356));
-        SubmitClarificationPane current = this;
+        this.setSize(new Dimension(900, 700));
+        SubmitClarificationPane thisPane = this;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 isTeam = getContest().getClientId().getClientType().equals(ClientType.Type.TEAM);
                 if (!isTeam) {
-                    current.add(getGenerateAnnouncementCheckBox(),null);
-                    current.add(getGroupsandTeamsPanel(),null);
-                    current.add(getAnnouncementDestinationPane(),null);
+                    thisPane.add(getGenerateAnnouncementCheckBox(),null);
+                    thisPane.add(getAnnouncementDestinationPane(),null);
                 }
-                current.add(getProblemPane(), null);
-                current.add(getLargeTextBoxPane(), null);
-                current.add(getSubmitClarificationButton(), null);
+                thisPane.add(getProblemPane(), null);
+                thisPane.add(getLargeTextBoxPane(), null);
+                thisPane.add(getSubmitClarificationButton(), null);
             }
         });
     }
@@ -133,40 +150,131 @@ public class SubmitClarificationPane extends JPanePlugin {
     private JPanel getAnnouncementDestinationPane() {
         if (announcementDestinationPane == null) {
             announcementDestinationPane = new JPanel();
-            announcementDestinationPane.setLayout(new BorderLayout());
-            announcementDestinationPane.setBounds(new java.awt.Rectangle(370, 50, 336, 54));
-            announcementDestinationPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Destination", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-            announcementDestinationPane.add(getAnnouncementDestinationComboBox(), java.awt.BorderLayout.CENTER);
+            announcementDestinationPane.setBounds(new java.awt.Rectangle(370, 50, 350, 500));
+            announcementDestinationPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Announcement Destination(s)", 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            announcementDestinationPane.setLayout(new BoxLayout(announcementDestinationPane, BoxLayout.Y_AXIS));
+            announcementDestinationPane.add(getAnnouncementDestinationComboBox());
+            
+            Component verticalStrut1 = Box.createVerticalStrut(20);
+            announcementDestinationPane.add(verticalStrut1);
+            announcementDestinationPane.add(getGroupsPanel());
+            
+            Component verticalStrut2 = Box.createVerticalStrut(20);
+            announcementDestinationPane.add(verticalStrut2);
+            announcementDestinationPane.add(getTeamsPanel());
+            
             announcementDestinationPane.setVisible(false);
         }
         return announcementDestinationPane;
     }
     
     /**
-     * This method initializes announcementComboBox
+     * This method initializes the Announcement Destination combo box (the dropdown that allows choosing possible Announcement Destinations).
      * 
-     * @return javax.swing.JComboBox
+     * @return A javax.swing.JComboBox containing possible Announcement Destinations.
      */
     private JComboBox<String> getAnnouncementDestinationComboBox() {
+        
         if (announcementDestinationComboBox == null) {
-            announcementDestinationComboBox = new JComboBox<String>();
+
+            String[] destinationChoices = getDestinationComboBoxChoices();
+            DefaultComboBoxModel<String> comboModel = new DefaultComboBoxModel<String>(destinationChoices);
+            announcementDestinationComboBox = new JComboBox<String>(comboModel);
+            
+            announcementDestinationComboBox.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+
+                        JComboBox<?> source = (JComboBox<?>) e.getSource();
+                        String selectedValue = (String) source.getSelectedItem();
+                        
+                        switch (selectedValue) {
+                            
+//                            TODO: need to make "Groups" scrollpane invisible if there are no groups; 
+//                            Need to CHANGE the CONTENTS of the scrollpane if groups get added or removed dynamically (so, need to listen for the addition of a Group.class..)
+//                            Need to support "All Teams", "Groups", "Teams", and "Groups and Teams" in the dropdown, and make the JScrollPane visibility match.
+//                            if (getContest().doGroupsExist() && getContest().getNumberofGroups() != 1){
+//                                getAnnouncementDestinationComboBox().addItem(GROUPS);
+//                            }
+                            
+                            case ALL_TEAMS: 
+
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    public void run() {
+                                        getGroupsPanel().setVisible(false);
+                                        getTeamsPanel().setVisible(false);
+                                    }
+                                });
+                                break;
+ 
+//                            case GROUPS:
+//                      
+//                                SwingUtilities.invokeLater(new Runnable() {
+//                                    public void run() {
+//                                        getGroupsAndTeamsPanel().setVisible(true);
+//                                        getGroupsScrollPane().setVisible(true);
+//                                        getTeamsScrollPane().setVisible(false);
+//                                    }
+//                                });
+//                                break;
+//                            
+//                            case TEAMS:
+//
+//                                SwingUtilities.invokeLater(new Runnable() {
+//                                    public void run() {
+//                                        getGroupsAndTeamsPanel().setVisible(true);
+//                                        getTeamsScrollPane().setVisible(true);
+//                                        getGroupsScrollPane().setVisible(false);
+//                                   }
+//                                });
+//                                break;
+                                
+                            case GROUPS_AND_TEAMS:
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    public void run() {
+                                        getGroupsPanel().setVisible(true);
+                                        getTeamsPanel().setVisible(true);
+                                        getTeamsScrollPane().setVisible(true);
+                                        getGroupsScrollPane().setVisible(true);
+                                   }
+                                });
+                                break;
+                                
+                            default:
+                                //we have a dropdown box item that we don't recognize...
+                                log.warning ("Unrecognized selection from Announcement Destination ComboxBox: " + selectedValue);
+                        }
+                    }
+                });            
         }
+        
         return announcementDestinationComboBox;
     }
+
+    /**
+     * Returns an array of Strings containing all the destinations which should be listed in the "Select Destination" dropdown list.
+     */
+    private String [] getDestinationComboBoxChoices() {
+        String [] destinationItems = {ALL_TEAMS, GROUPS_AND_TEAMS} ;
+        return destinationItems;
+    }
+    
     
     /**
-     * This panel contains JCheckBoxJlist that has either groups or teams to select.
-     * @return
+     * This panel contains JCheckBoxJlists for selecting Groups.
+     * @return A JPanel containing a JScrollPane displaying a JCheckBoxJList of Groups.
      */
-    private JPanel getGroupsandTeamsPanel() {
+    private JPanel getGroupsPanel() {
         if (groupsPanel == null) {
             groupsPanel = new JPanel();
-            groupsPanel.setLocation(new java.awt.Point(370, 119));
-            groupsPanel.setSize(new java.awt.Dimension(336, 200));
-            groupsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Groups", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-            groupsPanel.add(getGroupsandTeamsScrollPane(),null);
+            //the following should (probably) be set by the layout manager
+//            groupsAndTeamsPanel.setLocation(new java.awt.Point(370, 119));
+//            groupsAndTeamsPanel.setSize(new java.awt.Dimension(336, 200));
+            groupsPanel.setLayout(new FlowLayout());
+            groupsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Groups", 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            groupsPanel.add(getGroupsScrollPane());
             groupsPanel.setVisible(false);
         }
         
@@ -174,38 +282,126 @@ public class SubmitClarificationPane extends JPanePlugin {
     }
     
     /**
-     * Initializes groupsJList that either contain nothing or groups or teams.
-     * @return
+     * This panel contains JCheckBoxJlists for selecting Teams.
+     * @return A JPanel containing a JScrollPane displaying a JCheckBoxJList of teams.
      */
-    private JCheckBoxJList getGroupsandTeamsList() {
-        
-        if (groupsandTeamsJList == null) {
-            groupsandTeamsJList = new JCheckBoxJList();
-            
-            
-            ((DefaultListModel<Object>) groupsandTeamsListModel).removeAllElements();
-                           
-            groupsandTeamsJList.setModel(groupsandTeamsListModel);
-            groupsandTeamsJList.setSize(new java.awt.Dimension(336, 200));
-
+    private JPanel getTeamsPanel() {
+        if (teamsPanel == null) {
+            teamsPanel = new JPanel();
+            //the following should (probably) be set by the layout manager
+//            groupsAndTeamsPanel.setLocation(new java.awt.Point(370, 119));
+//            groupsAndTeamsPanel.setSize(new java.awt.Dimension(336, 200));
+            teamsPanel.setLayout(new FlowLayout());
+            teamsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Teams", 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            teamsPanel.add(getTeamsScrollPane());
+            teamsPanel.setVisible(false);
         }
-        return groupsandTeamsJList;
+        
+        return teamsPanel;
     }
     
     /**
-     * This method initializes groups ScrollPane
+     * This method initializes the Groups ScrollPane to hold a "checkbox list" of groups.
      *
-     * @return javax.swing.JScrollPane
+     * @return javax.swing.JScrollPane containing groups.
      */
-    private JScrollPane getGroupsandTeamsScrollPane() {
-        if (groupsandTeamsScrollPane == null) {
-            groupsandTeamsScrollPane = new JScrollPane();
-            groupsandTeamsScrollPane.setBounds(new java.awt.Rectangle(14, 291, 272, GROUPS_LIST_HEIGHT));
-            groupsandTeamsScrollPane.setViewportView(getGroupsandTeamsList());
+    private JScrollPane getGroupsScrollPane() {
+        if (groupsScrollPane == null) {
+            groupsScrollPane = new JScrollPane();
+            
+            //TODO: need to reconsider these "bounds" in light of using a BorderLayout for the containing panel
+            //groupsScrollPane.setBounds(new java.awt.Rectangle(14, 291, 272, GROUPS_LIST_HEIGHT));
+            
+            groupsScrollPane.setViewportView(getGroupsList());
         }
-        return groupsandTeamsScrollPane;
+        return groupsScrollPane;
     }
 
+    /**
+     * This method initializes the Teams ScrollPane to contain a list of all teams.
+     *
+     * @return A javax.swing.JScrollPane containing all teams.
+     */
+    private JScrollPane getTeamsScrollPane() {
+        if (teamsScrollPane == null) {
+            teamsScrollPane = new JScrollPane();
+            
+            //TODO: need to reconsider these "bounds" in light of using a BorderLayout for the containing panel (and that this is the TEAMS scrollpane
+            //teamsScrollPane.setBounds(new java.awt.Rectangle(14, 291, 272, GROUPS_LIST_HEIGHT));
+            
+            teamsScrollPane.setViewportView(getTeamsList());
+        }
+        return teamsScrollPane;
+    }
+
+    /**
+     * Initializes groupsJList to contain a "checkbox list" of groups which can see the currently-selected problem.
+     * @return
+     */
+    private JCheckBoxJList getGroupsList() {
+        
+        if (groupsJList == null) {
+            
+            groupsJList = new JCheckBoxJList();
+            Group [] allgroups = getContest().getGroups();
+            
+            //TODO: remove any groups that aren't supposed to see the currently selected PROBLEM!!
+            
+            Arrays.sort(allgroups, new GroupComparator());
+            for (Group group : allgroups) {
+                JCheckBox checkBox = new JCheckBox(group.getDisplayName());
+                ((DefaultListModel<Object>) groupsListModel).addElement(checkBox);
+            }
+            
+            //TODO: reconsider this setSize in regard to the new layout mgr
+//            groupsJList.setSize(new java.awt.Dimension(336, 200));  
+            
+            groupsJList.setModel(groupsListModel);
+            
+            System.out.println("groupsListModel size = " + groupsListModel.getSize());
+
+        }
+        
+        return groupsJList;
+    }
+    
+    /**
+     * Initializes teamsJList to contain a "checkbox list" of groups which can see the currently-selected problem.
+     * @return
+     */
+    private JCheckBoxJList getTeamsList() {
+        
+        if (teamsJList == null) {
+            
+            teamsJList = new JCheckBoxJList();
+            Vector<Account> allTeamsVector = getContest().getAccounts(ClientType.Type.TEAM);
+            
+            //TODO: remove any teams that aren't supposed to see the currently selected PROBLEM!!
+
+            Account[] allTeams = new Account[allTeamsVector.size()];
+            allTeamsVector.toArray(allTeams);
+            Arrays.sort(allTeams, new AccountComparator());
+
+            for (Account team : allTeams) {
+                //TODO if teams string is really wrong (meaning, long? or maybe non-ASCII chars?) it could create visual problems
+                // However, the JScrollPane should at least take care of "long" names...
+                JCheckBox checkBox = new JCheckBox(team.getClientId().getClientNumber() + " " + team.getDisplayName());
+                ((DefaultListModel<Object>) teamsListModel).addElement(checkBox);
+            }
+            
+            //TODO: reconsider this setSize in regard to the new layout mgr
+//            teamsJList.setSize(new java.awt.Dimension(336, 200));
+
+            teamsJList.setModel(teamsListModel);
+            
+            System.out.println("teamsListModel size = " + teamsListModel.getSize());
+            
+        }
+        return teamsJList;
+    }
+    
+    
     @Override
     public String getPluginTitle() {
         return "Submit Clarifications Pane";
@@ -246,8 +442,8 @@ public class SubmitClarificationPane extends JPanePlugin {
     }
     
     /**
-     * Inializes Checkbox. Checkbox can changeif this page submits an announcement or a clarification.
-     * @return
+     * Inializes the "Generate Announcement" Checkbox.
+     * @return A JCheckBox whose state indicates whether this SubmitClarificationPane is attempting to generate a Clarification or an Announcement.
      */
     protected JCheckBox getGenerateAnnouncementCheckBox() {
         if (generateAnnouncementCheckbox == null) {
@@ -255,28 +451,25 @@ public class SubmitClarificationPane extends JPanePlugin {
             generateAnnouncementCheckbox.setText("Generate Announcement");
             generateAnnouncementCheckbox.setBounds(19, 15, 170, 20);
             ToolTipManager.sharedInstance().setDismissDelay(6000);
-            generateAnnouncementCheckbox.setToolTipText("Announcement clarification is a clarification that directly goes to teams with an answer but without question.");
+            generateAnnouncementCheckbox.setToolTipText("An 'Announcement' is a clarification that goes directly to selected teams and/or groups without any 'Clarification question' having been submitted first.");
             generateAnnouncementCheckbox.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(java.awt.event.ItemEvent e) {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
-                        getLargeTextBoxPane().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Announcement Text", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                                javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+                        getLargeTextBoxPane().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Announcement Text", 
+                                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
                         getSubmitClarificationButton().setText("Submit Announcement");
                         getSubmitClarificationButton().setToolTipText("Click this button to submit your Announcement");
                         getAnnouncementDestinationPane().setVisible(true);
                     } else {
-                        getLargeTextBoxPane().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Question", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                                javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+                        getLargeTextBoxPane().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Question", 
+                                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
                         getSubmitClarificationButton().setText("Submit Clarification");
                         getSubmitClarificationButton().setToolTipText("Click this button to submit your Clarification");
                         getAnnouncementDestinationPane().setVisible(false);
                         getAnnouncementDestinationComboBox().setSelectedItem("All Teams");
-
-                        
-                    }
-                    
-                }
-            });
+                    } 
+                } //end method itemStateChanged()
+            });  //end addItemLlistener()
         }
         return generateAnnouncementCheckbox;
     }
@@ -336,7 +529,6 @@ public class SubmitClarificationPane extends JPanePlugin {
             submitClarificationButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     submit();
-                    
                 }
             });
         }
@@ -365,114 +557,50 @@ public class SubmitClarificationPane extends JPanePlugin {
 
     }
     
-    /**
-     * Loads destinations such as "All Teams", "Groups" to combobox and listens if the user changes it.
-     */
-    private void reloadAnnouncementDestinations(){
     
-        getAnnouncementDestinationComboBox().removeAllItems();
-        getAnnouncementDestinationComboBox().addItem(ALL_TEAMS);
-        
-        if (getContest().doGroupsExist() && getContest().getNumberofGroups() != 1){
-            getAnnouncementDestinationComboBox().addItem(GROUPS);
-        }
-        getAnnouncementDestinationComboBox().addItem(SPECIFIC_TEAMS);
-        
-        getAnnouncementDestinationComboBox().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                    JComboBox<?> source = (JComboBox<?>) e.getSource();
-                    String selectedValue = (String) source.getSelectedItem();
-                    if (selectedValue.equals(GROUPS)){
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                reloadGroupsTeamsList();
-                                getGroupsandTeamsPanel().setVisible(true);
-                                getGroupsandTeamsPanel().setBorder(javax.swing.BorderFactory.createTitledBorder(null, GROUPS, javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                                        javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-                            }
-                        });
-                    }
-                    else if (selectedValue.equals(SPECIFIC_TEAMS)) {
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                reloadGroupsTeamsList();
-                                getGroupsandTeamsPanel().setVisible(true);
-                                getGroupsandTeamsPanel().setBorder(javax.swing.BorderFactory.createTitledBorder(null, SPECIFIC_TEAMS, javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                                        javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-                           }
-                        });
-                    }
-                    else {
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                reloadGroupsTeamsList();
-                                getGroupsandTeamsPanel().setVisible(false);
-                                getGroupsandTeamsPanel().setBorder(javax.swing.BorderFactory.createTitledBorder(null, "-", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                                        javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-                            }
-                        });
-                    }
-                    
-            }
-        });
-    }
-    
-    /**
-     * groupListModel gets filled with groups and teams or removed.
-     */
-    private void reloadGroupsTeamsList() {
-        // TODO must be modified so that Groups,teams that shouldnt be displayed stop being displayed because
-        // they do not have the problem selected could be implemented. 
-        if (getAnnouncementDestinationComboBox().getSelectedItem().equals(GROUPS)){
-            ((DefaultListModel<Object>) groupsandTeamsListModel).removeAllElements();
-            Group [] allgroups = getContest().getGroups();
-            Arrays.sort(allgroups, new GroupComparator());
-            for (Group group : allgroups) {
-                JCheckBox checkBox = new JCheckBox(group.getDisplayName());
-                //TODO: the following doesn't make sense; it *appears* to be adding the ElementId for EACH GROUP
-                // each time around the 'for' loop, but in fact each new putClientProperty() value REPLACES
-                // the previously-stored value (thus, only the LAST group is being stored in the hashtable).
-                // In a contest with many groups this could have a negative performance impact -- especially 
-                // if it's happening on the Swing thread...
-                checkBox.putClientProperty(CHECKBOX_GROUP_TEAM_PROPERTY, group.getElementId());
-                ((DefaultListModel<Object>) groupsandTeamsListModel).addElement(checkBox);
-            }
-        }
-        else if (getAnnouncementDestinationComboBox().getSelectedItem().equals(SPECIFIC_TEAMS)) {
-            ((DefaultListModel<Object>) groupsandTeamsListModel).removeAllElements();
-            Vector<Account> allTeamsVector = getContest().getAccounts(ClientType.Type.TEAM);
-            
-            Account[] allTeams = new Account[allTeamsVector.size()];
-            allTeamsVector.toArray(allTeams);
-            Arrays.sort(allTeams, new AccountComparator());
-
-            for (Account team : allTeams) {
-                //TODO if teams string is really wrong it could create visual problems
-                JCheckBox checkBox = new JCheckBox(
-                        team.getClientId().getClientNumber()+
-                        " "+
-                        team.getDisplayName());
-                //TODO: the following doesn't make sense; it *appears* to be adding the clientId for EACH TEAM
-                // each time around the 'for' loop, but in fact each new putClientProperty() value REPLACES
-                // the previously-stored value (thus, only the LAST team is being stored in the hashtable).
-                // In a contest with thousands of teams this could have a negative performance impact -- especially 
-                // if it's happening on the Swing thread...
-                checkBox.putClientProperty(CHECKBOX_GROUP_TEAM_PROPERTY, team.getClientId());
-                ((DefaultListModel<Object>) groupsandTeamsListModel).addElement(checkBox);
-            }
-        }
-        else {
-            ((DefaultListModel<Object>) groupsandTeamsListModel).removeAllElements();
-        }
-    }
+//    /**
+//     * groupListModel gets filled with groups and teams or removed.
+//     */
+//    private void reloadGroupsTeamsList() {
+//        // TODO must be modified so that Groups,teams that shouldnt be displayed stop being displayed because
+//        // they do not have the problem selected could be implemented. 
+//        if (getAnnouncementDestinationComboBox().getSelectedItem().equals(GROUPS)){
+//            ((DefaultListModel<Object>) groupsListModel).removeAllElements();
+//            Group [] allgroups = getContest().getGroups();
+//            Arrays.sort(allgroups, new GroupComparator());
+//            for (Group group : allgroups) {
+//                JCheckBox checkBox = new JCheckBox(group.getDisplayName());
+//
+//                ((DefaultListModel<Object>) groupsListModel).addElement(checkBox);
+//            }
+//        }
+//        else if (getAnnouncementDestinationComboBox().getSelectedItem().equals(TEAMS)) {
+//            ((DefaultListModel<Object>) groupsListModel).removeAllElements();
+//            Vector<Account> allTeamsVector = getContest().getAccounts(ClientType.Type.TEAM);
+//            
+//            Account[] allTeams = new Account[allTeamsVector.size()];
+//            allTeamsVector.toArray(allTeams);
+//            Arrays.sort(allTeams, new AccountComparator());
+//
+//            for (Account team : allTeams) {
+//                //TODO if teams string is really wrong it could create visual problems
+//                JCheckBox checkBox = new JCheckBox(
+//                        team.getClientId().getClientNumber()+
+//                        " "+
+//                        team.getDisplayName());
+//
+//                ((DefaultListModel<Object>) groupsListModel).addElement(checkBox);
+//            }
+//        }
+//        else {
+//            ((DefaultListModel<Object>) groupsListModel).removeAllElements();
+//        }
+//    }
 
     private void populateGUI() {
   
         reloadProblems();
-        reloadAnnouncementDestinations();
-        reloadGroupsTeamsList();
+//        reloadGroupsTeamsList();
         setButtonsActive(getContest().getContestTime().isContestRunning());
     }
 
@@ -501,8 +629,9 @@ public class SubmitClarificationPane extends JPanePlugin {
         Problem problem = ((Problem) getProblemComboBox().getSelectedItem());
         String destination = (String) getAnnouncementDestinationComboBox().getSelectedItem();
         //TODO normal questions do not need to have a destination!
-        Object[] ultimateDestinationsPacked = getGroupsandTeamsList().getSelectedValues();
+        Object[] ultimateDestinationsPacked = getGroupsAndTeamsSelectedValues();
         
+        //TODO:  Announcements should have an option of including "which problem they relate to".
         
         if (getGenerateAnnouncementCheckBox().isSelected()) {
 
@@ -511,16 +640,16 @@ public class SubmitClarificationPane extends JPanePlugin {
                 return;
             }
 
-            if (getAnnouncementDestinationComboBox().getSelectedItem().equals(GROUPS) && getGroupsandTeamsList().isSelectionEmpty()) {
-                showMessage("Please select group(s)");
-                return;
-            }
-            if (getAnnouncementDestinationComboBox().getSelectedItem().equals(SPECIFIC_TEAMS) && getGroupsandTeamsList().isSelectionEmpty()) {
-                showMessage("Please select team(s)");
-                return;
-            }
-            submitAnnouncement(problem,destination,ultimateDestinationsPacked);
-        }
+//            if (getAnnouncementDestinationComboBox().getSelectedItem().equals(GROUPS) && getGroupsList().isSelectionEmpty()) {
+//                showMessage("Please select group(s)");
+//                return;
+//            }
+//            if (getAnnouncementDestinationComboBox().getSelectedItem().equals(TEAMS) && getTeamsList().isSelectionEmpty()) {
+//                showMessage("Please select team(s)");
+//                return;
+//            }
+//            submitAnnouncement(problem,destination,ultimateDestinationsPacked);
+//        }
         else {
             if (getProblemComboBox().getSelectedIndex() < 1) {
                 showMessage("Please select problem");
@@ -528,9 +657,22 @@ public class SubmitClarificationPane extends JPanePlugin {
             }
             submitClarification(problem);
         }
+      }
         
     }
     
+    /**
+     * This method returns an array of Objects where each element is a Selected Value in either the Groups list or the Teams list.
+     * Note that Group Objects are ElementIds while Team objects are ClientIds.
+     * 
+     * @return an array containing Group ElementIds and Team ClientIds.
+     */
+    private Object[] getGroupsAndTeamsSelectedValues() {
+        throw new UnsupportedOperationException("method getGroupsAndTeamsSelectedValues() not implemented");
+        
+        //return selectedValuesArray;
+    }
+
     /**
      * Reads the user inputs and gets it from parameter to submit a announcement clarification. Asks for a confirmation in a seperate frame.
      * @param problem
@@ -538,6 +680,8 @@ public class SubmitClarificationPane extends JPanePlugin {
      * @param ultimateDestinationsPacked
      */
     protected void submitAnnouncement(Problem problem,String destination,Object[] ultimateDestinationsPacked) {
+        
+        //TODO:  Announcements should have an option of including "which problem they relate to".
         
         String answerAnnouncement = largeTextArea.getText().trim();
 
@@ -550,7 +694,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         ArrayList<ClientId> ultimateDestinationsTeam = new ArrayList<>();
         
         for (int i = 0; i < ultimateDestinationsPacked.length; i++) { //Converts ultimateDestinationsPacked to html ready string
-            Object associatedObject = (Object) ((JCheckBox) ultimateDestinationsPacked[i]).getClientProperty(CHECKBOX_GROUP_TEAM_PROPERTY);
+            Object associatedObject = (Object) ((JCheckBox) ultimateDestinationsPacked[i]);
             
             if (associatedObject instanceof ClientId) { //Team
                 ultimateDestinationsTeam.add((ClientId)associatedObject);
@@ -722,6 +866,46 @@ public class SubmitClarificationPane extends JPanePlugin {
         public void contestAutoStarted(ContestTimeEvent event) {
             contestStarted(event);
         }
+    }
+    
+    private class GroupListenerImplementation implements IGroupListener {
+
+        @Override
+        public void groupAdded(GroupEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void groupChanged(GroupEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void groupRemoved(GroupEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void groupsAdded(GroupEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void groupsChanged(GroupEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void groupRefreshAll(GroupEvent groupEvent) {
+            // TODO Auto-generated method stub
+            
+        }
+        
     }
     
     /**
@@ -901,4 +1085,4 @@ public class SubmitClarificationPane extends JPanePlugin {
     private void updateGUIperPermissions() {
         submitClarificationButton.setVisible(isAllowed(Permission.Type.SUBMIT_CLARIFICATION));
     }
-} // @jve:decl-index=0:visual-constraint="10,10"
+}
