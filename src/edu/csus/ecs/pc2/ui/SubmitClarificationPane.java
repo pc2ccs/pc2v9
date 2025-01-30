@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,6 +23,7 @@ import javax.swing.JTextArea;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
+import javax.swing.border.TitledBorder;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -49,6 +49,8 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
 import java.awt.Component;
+
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 
@@ -151,6 +153,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         if (announcementDestinationPane == null) {
             announcementDestinationPane = new JPanel();
             announcementDestinationPane.setBounds(new java.awt.Rectangle(370, 50, 350, 500));
+//            announcementDestinationPane.setLocation(new Point(370,50));
             announcementDestinationPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Announcement Destination(s)", 
                     javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             announcementDestinationPane.setLayout(new BoxLayout(announcementDestinationPane, BoxLayout.Y_AXIS));
@@ -158,10 +161,12 @@ public class SubmitClarificationPane extends JPanePlugin {
             
             Component verticalStrut1 = Box.createVerticalStrut(20);
             announcementDestinationPane.add(verticalStrut1);
+            
             announcementDestinationPane.add(getGroupsPanel());
             
             Component verticalStrut2 = Box.createVerticalStrut(20);
             announcementDestinationPane.add(verticalStrut2);
+            
             announcementDestinationPane.add(getTeamsPanel());
             
             announcementDestinationPane.setVisible(false);
@@ -237,6 +242,20 @@ public class SubmitClarificationPane extends JPanePlugin {
                                         getTeamsPanel().setVisible(true);
                                         getTeamsScrollPane().setVisible(true);
                                         getGroupsScrollPane().setVisible(true);
+                                        
+                                        System.out.println("GroupsList size on becoming visible: " +
+                                                groupsJList.getModel().getSize());
+                                        
+                                        System.out.println("GroupsList ScrollableViewportSize on becoming visible: " +
+                                                groupsJList.getPreferredScrollableViewportSize());
+                                       
+                                        System.out.println("TeamsList size on becoming visible: " +
+                                                teamsJList.getModel().getSize());
+                                        
+                                        System.out.println("TeamsList ScrollableViewportSize on becoming visible: " +
+                                                teamsJList.getPreferredScrollableViewportSize());
+                                       
+                                        
                                    }
                                 });
                                 break;
@@ -271,9 +290,9 @@ public class SubmitClarificationPane extends JPanePlugin {
             //the following should (probably) be set by the layout manager
 //            groupsAndTeamsPanel.setLocation(new java.awt.Point(370, 119));
 //            groupsAndTeamsPanel.setSize(new java.awt.Dimension(336, 200));
-            groupsPanel.setLayout(new FlowLayout());
-            groupsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Groups", 
-                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            groupsPanel.setBorder(BorderFactory.createTitledBorder(null, "Groups", 
+                    TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+            groupsPanel.setPreferredSize(new Dimension(336, 200));
             groupsPanel.add(getGroupsScrollPane());
             groupsPanel.setVisible(false);
         }
@@ -291,9 +310,9 @@ public class SubmitClarificationPane extends JPanePlugin {
             //the following should (probably) be set by the layout manager
 //            groupsAndTeamsPanel.setLocation(new java.awt.Point(370, 119));
 //            groupsAndTeamsPanel.setSize(new java.awt.Dimension(336, 200));
-            teamsPanel.setLayout(new FlowLayout());
-            teamsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Teams", 
-                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            teamsPanel.setBorder(BorderFactory.createTitledBorder(null, "Teams", 
+                    TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+            teamsPanel.setPreferredSize(new Dimension(336, 200));
             teamsPanel.add(getTeamsScrollPane());
             teamsPanel.setVisible(false);
         }
@@ -358,8 +377,6 @@ public class SubmitClarificationPane extends JPanePlugin {
 //            groupsJList.setSize(new java.awt.Dimension(336, 200));  
             
             groupsJList.setModel(groupsListModel);
-            
-            System.out.println("groupsListModel size = " + groupsListModel.getSize());
 
         }
         
@@ -395,7 +412,9 @@ public class SubmitClarificationPane extends JPanePlugin {
 
             teamsJList.setModel(teamsListModel);
             
-            System.out.println("teamsListModel size = " + teamsListModel.getSize());
+            teamsJList.setPreferredSize(new Dimension(300, 200));
+            
+            teamsJList.setVisibleRowCount(15);
             
         }
         return teamsJList;
