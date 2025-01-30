@@ -721,6 +721,7 @@ public class EventFeedJSON extends JSON202306Utilities {
         if(isUseCollections()) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
+            boolean isQuestion = false;
             dataCollection.append("[");
             for (Clarification clarification : clarifications) {
                 if (ignoreTeam.contains(clarification.getSubmitter())) {
@@ -731,13 +732,16 @@ public class EventFeedJSON extends JSON202306Utilities {
                 } else {
                     dataCollection.append(",");
                 }
-                // For annoucements, there is no question, so we don't generate an empty clarification.
-                if(!clarification.isAnnounced()) {
+                // For announcements, there is no question, so we don't generate an empty clarification.
+                isQuestion = !clarification.isAnnounced();
+                if(isQuestion) {
                     dataCollection.append(getClarificationJSON(contest, clarification, null));
                 }
                 if (clarification.isAnsweredorAnnounced()) {
                     ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
-                    dataCollection.append(",");
+                    if(isQuestion) {
+                        dataCollection.append(",");
+                    }
                     dataCollection.append(getClarificationJSON(contest, clarification, clarAnswers[clarAnswers.length - 1]));
                 }
             }

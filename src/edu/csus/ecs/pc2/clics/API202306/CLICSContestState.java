@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
@@ -120,13 +121,17 @@ public class CLICSContestState {
                 }
             }
             // FIXME this should only be showed if the contest is thawed for public users
-            if (model.getFinalizeData() != null) {
-                finalized = Utilities.getIso8601formatterWithMS().format(model.getFinalizeData().getCertificationDate());
-                // If contest was thawed after finalized, then use thaw time
-                if(thawed != null && thawedDate != null && thawedDate.after(model.getFinalizeData().getCertificationDate())) {
-                    end_of_updates = thawed;
-                } else {
-                    end_of_updates = finalized;
+            FinalizeData fData = model.getFinalizeData();
+            if (fData != null) {
+                Date fDate = fData.getCertificationDate();
+                if(fDate != null) {
+                    finalized = Utilities.getIso8601formatterWithMS().format(fDate);
+                    // If contest was thawed after finalized, then use thaw time
+                    if(thawed != null && thawedDate != null && thawedDate.after(fDate)) {
+                        end_of_updates = thawed;
+                    } else {
+                        end_of_updates = finalized;
+                    }
                 }
             }
         }
