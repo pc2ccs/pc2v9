@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui.judge;
 
 import java.awt.BorderLayout;
@@ -31,6 +31,7 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.EventFeedServerPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.GenerateAnnouncementPane;
 import edu.csus.ecs.pc2.ui.ImBoredPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPane;
@@ -38,7 +39,6 @@ import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.RunsTablePane;
 import edu.csus.ecs.pc2.ui.SubmissionBiffPane;
-import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.SubmitSampleRunsPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -93,7 +93,7 @@ public class JudgeView extends JFrame implements UIPlugin {
     }
 
     private void initialize() {
-        this.setSize(new java.awt.Dimension(800, 515));
+        this.setSize(new java.awt.Dimension(900, 700));
         this.setContentPane(getMainPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("PC^2 Judge - Not Logged In ");
@@ -212,8 +212,8 @@ public class JudgeView extends JFrame implements UIPlugin {
                 SubmitRunPane submitRunPane = new SubmitRunPane();
                 addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
 
-                SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
-                addUIPlugin(getMainTabbedPane(), "Generate Clarification", submitClarificationPane);
+                GenerateAnnouncementPane submitAnnouncementPane = new GenerateAnnouncementPane();
+                addUIPlugin(getMainTabbedPane(), "Generate Announcement", submitAnnouncementPane);
 
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
