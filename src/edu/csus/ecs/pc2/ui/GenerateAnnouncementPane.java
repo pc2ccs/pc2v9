@@ -6,8 +6,6 @@ import javax.swing.JLabel;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -24,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
@@ -68,6 +67,8 @@ public class GenerateAnnouncementPane extends JPanePlugin {
     public static final String ALL_TEAMS = "All Teams";
 
     public static final String GROUPS_AND_TEAMS = "Specific Groups and/or Teams";
+
+    private static final Object CHECKBOX_GROUP_OR_TEAM_PROPERTY = "GroupOrTeamId";
 
     private Log log;
 
@@ -172,24 +173,6 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
         return selectorsPane;
     }
-    
-    /**
-     * Specifies the GridBagLout Constraints for the Teams pane.
-     * @return a GridBagConstraint object for the Teams pane.
-     */
-    private GridBagConstraints getTeamsPaneConstraints() {
-        GridBagConstraints gc = new GridBagConstraints();
-        gc.gridx = 1;       //which "grid column" the object occupies (X position of desired column)
-        gc.gridy = 2;       //which "grid row" the object occupies (Y position of desired row)
-        gc.gridwidth = 1;   //the number of "grid columns" the object spans (default is 1...)
-        gc.gridheight = 1;  //the number of "grid rows" the object spans (default is 1...)
-        gc.insets = new Insets(2,2,2,2);  //minimum pixels outside the component but inside the grid display area
-                                            //(format is top, left, bottom, right)
-        gc.weightx = 0.4;   //medium priority for distributing space between columns
-        gc.weighty = 0.4;   //medium priority for distributing space between columns
-        return gc;
-    }
-
 
     /**
      * Initializes a pane that has the combobox to select announcement destinations such as 
@@ -202,12 +185,8 @@ public class GenerateAnnouncementPane extends JPanePlugin {
             
             destinationComboBoxPane = new JPanel();
 
-//            destinationComboBoxPane.setBorder(BorderFactory.createTitledBorder(null, "Announcement Destination(s)",
-//                    TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
-
             destinationComboBoxPane.add(new JLabel("Announcement Destination(s):  "));
             destinationComboBoxPane.add(getDestinationComboBox());
-
         }
         return destinationComboBoxPane;
     }
@@ -363,9 +342,11 @@ public class GenerateAnnouncementPane extends JPanePlugin {
             Arrays.sort(allgroups, new GroupComparator());
             for (Group group : allgroups) {
                 JCheckBox checkBox = new JCheckBox(group.getDisplayName());
+                checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, group.getElementId());
                 ((DefaultListModel<Object>) groupsListModel).addElement(checkBox);
             }
 
+            groupsJList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             groupsJList.setModel(groupsListModel);
 
         }
@@ -395,9 +376,11 @@ public class GenerateAnnouncementPane extends JPanePlugin {
                 // TODO if teams string is really wrong (meaning, long? or maybe non-ASCII chars?) it could create visual problems
                 // However, the JScrollPane should at least take care of "long" names...
                 JCheckBox checkBox = new JCheckBox(team.getClientId().getClientNumber() + " " + team.getDisplayName());
+                checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, team.getClientId());
                 ((DefaultListModel<Object>) teamsListModel).addElement(checkBox);
             }
 
+            teamsJList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             teamsJList.setModel(teamsListModel);
 
         }
@@ -405,7 +388,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes problemPane
+     * This method initializes problemPane.
      * 
      * @return javax.swing.JPanel
      */
@@ -413,8 +396,6 @@ public class GenerateAnnouncementPane extends JPanePlugin {
         if (problemPane == null) {
             problemPane = new JPanel();
 
-//            problemPane.setBorder(BorderFactory.createTitledBorder(null, "Problem", 
-//                    TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
             problemPane.add(new JLabel("Problem:   "));
             problemPane.add(getProblemComboBox());
         }
@@ -422,7 +403,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes problemComboBox
+     * This method initializes problemComboBox.
      * 
      * @return javax.swing.JComboBox
      */
@@ -443,7 +424,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
         return announcementPane;
     }
     /**
-     * This method initializes largeTextBoxPane
+     * This method initializes largeTextBoxPane.
      * 
      * @return javax.swing.JPanel
      */
@@ -575,9 +556,23 @@ public class GenerateAnnouncementPane extends JPanePlugin {
      * @return an array containing Group ElementIds and Team ClientIds.
      */
     private Object[] getGroupsAndTeamsSelectedValues() {
-        throw new UnsupportedOperationException("method getGroupsAndTeamsSelectedValues() not implemented");
 
-        // return selectedValuesArray;
+        ArrayList<Object> selectedValuesArray = new ArrayList<Object>();
+        
+        // get all the selected groups (if any)
+        for (Object obj : getGroupsList().getSelectedValues()) {
+            selectedValuesArray.add(obj);
+            System.out.println("  " + obj);
+        }
+        
+        //add all the selected teams (if any)
+        for (Object obj : getTeamsList().getSelectedValues()) {
+            selectedValuesArray.add(obj);
+            System.out.println("  " + obj);
+        }
+        
+        //return an array containing all the selected group and team objects
+        return selectedValuesArray.toArray();
     }
 
     /**
@@ -600,15 +595,16 @@ public class GenerateAnnouncementPane extends JPanePlugin {
         ArrayList<ClientId> ultimateDestinationsTeam = new ArrayList<>();
 
         for (int i = 0; i < ultimateDestinationsPacked.length; i++) { // Converts ultimateDestinationsPacked to html ready string
-            Object associatedObject = (Object) ((JCheckBox) ultimateDestinationsPacked[i]);
 
-            if (associatedObject instanceof ClientId) { // Team
-                ultimateDestinationsTeam.add((ClientId) associatedObject);
-                Account account = getContest().getAccount((ClientId) associatedObject);
+            Object groupOrTeamId = (Object) ((JCheckBox) ultimateDestinationsPacked[i]).getClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY);
+
+            if (groupOrTeamId instanceof ClientId) { // Team
+                ultimateDestinationsTeam.add((ClientId) groupOrTeamId);
+                Account account = getContest().getAccount((ClientId) groupOrTeamId);
                 stringDestinations[i] = String.valueOf(account.getDisplayName());
             } else {// ElementId for group
-                ultimateDestinationsGroup.add((ElementId) associatedObject);
-                Group group = getContest().getGroup((ElementId) associatedObject);
+                ultimateDestinationsGroup.add((ElementId) groupOrTeamId);
+                Group group = getContest().getGroup((ElementId) groupOrTeamId);
                 stringDestinations[i] = String.valueOf(group.getDisplayName());
             }
 
