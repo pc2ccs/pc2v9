@@ -373,9 +373,6 @@ public class SubmitClarificationPane extends JPanePlugin {
                 ((DefaultListModel<Object>) groupsListModel).addElement(checkBox);
             }
             
-            //TODO: reconsider this setSize in regard to the new layout mgr
-//            groupsJList.setSize(new java.awt.Dimension(336, 200));  
-            
             groupsJList.setModel(groupsListModel);
 
         }
