@@ -258,8 +258,8 @@ public class GenerateAnnouncementPane extends JPanePlugin {
                                 public void run() {
                                     getGroupsPane().setVisible(true);
                                     getTeamsPane().setVisible(true);
-                                    getTeamsScrollPane().setVisible(true);
-                                    getGroupsScrollPane().setVisible(true);
+//                                    getTeamsScrollPane().setVisible(true);
+//                                    getGroupsScrollPane().setVisible(true);
                                 }
                             });
                             break;
@@ -562,10 +562,10 @@ public class GenerateAnnouncementPane extends JPanePlugin {
         }
 
         Problem problem = ((Problem) getProblemComboBox().getSelectedItem());
-        String destination = (String) getDestinationComboBox().getSelectedItem();
+        String destinationCategories = (String) getDestinationComboBox().getSelectedItem();
         Object[] ultimateDestinationsPacked = getGroupsAndTeamsSelectedValues();
 
-        submitAnnouncement(problem, destination, ultimateDestinationsPacked);
+        submitAnnouncement(problem, destinationCategories, ultimateDestinationsPacked);
     }
 
     /**
@@ -586,10 +586,10 @@ public class GenerateAnnouncementPane extends JPanePlugin {
      * Asks for a confirmation in a separate frame before sending the announcement.
      * 
      * @param problem
-     * @param destination
+     * @param destinationCategories
      * @param ultimateDestinationsPacked
      */
-    protected void submitAnnouncement(Problem problem, String destination, Object[] ultimateDestinationsPacked) {
+    protected void submitAnnouncement(Problem problem, String destinationCategories, Object[] ultimateDestinationsPacked) {
 
         // TODO: Announcements should have an option of including "which problem they relate to".
 
@@ -622,7 +622,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
                 + "            <td style=\"width:20%\">Problem:</td>" + "            <td style = \"width:50%\"><font color=\"blue\">" + Utilities.forHTML(problem.toString()) + "</font></td>"
                 + "        </tr>" + "        <tr>" + "            <td>Announcement:</td>" + "            <td><font color=\"blue\">" + Utilities.forHTML(announcement) + "</font></td>"
                 + "        </tr>" + "        <tr>");
-        if (destination.equals(ALL_TEAMS)) {
+        if (destinationCategories.equals(ALL_TEAMS)) {
             stringBuilder.append("            <td  class=\"no-padding\">Destination:</td>" + "            <td class=\"no-padding\"><font color=\"blue\">" + Utilities.forHTML(ALL_TEAMS)
                     + "</font></td>" + "        </tr>");
         } else {
