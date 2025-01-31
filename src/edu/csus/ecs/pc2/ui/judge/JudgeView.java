@@ -213,7 +213,7 @@ public class JudgeView extends JFrame implements UIPlugin {
                 addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
 
                 GenerateAnnouncementPane generateAnnouncementPane = new GenerateAnnouncementPane();
-                addUIPlugin(getMainTabbedPane(), "Announcements", generateAnnouncementPane);
+                addUIPlugin(getMainTabbedPane(), "Announce", generateAnnouncementPane);
 
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);

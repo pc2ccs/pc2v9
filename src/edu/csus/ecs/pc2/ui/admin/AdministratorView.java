@@ -309,7 +309,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                  */
 
                 GenerateAnnouncementPane announcementPane = new GenerateAnnouncementPane();
-                addUIPlugin(getRunContestTabbedPane(), "Announcements", announcementPane);
+                addUIPlugin(getRunContestTabbedPane(), "Announce", announcementPane);
                 
                 ClarificationsTablePane clarificationsTablePane = new ClarificationsTablePane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsTablePane);
