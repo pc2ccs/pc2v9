@@ -480,6 +480,18 @@ public class GenerateAnnouncementPane extends JPanePlugin {
         return submitAnnouncementButton;
     }
 
+    private void reloadTeams() {
+        teamsJList = null;
+        //setting the global var to null and calling the getter causes recreation of the list
+        getTeamsList();
+    }
+    
+    private void reloadGroups() {
+        groupsJList = null;
+        //setting the global var to null and calling the getter causes recreation of the list
+        getGroupsList();
+    }
+    
     private void reloadProblems() {
         // TODO all problems shouldnt be listed! Selected Group effects which one that needs to be listed.
         getProblemComboBox().removeAllItems();
@@ -628,7 +640,8 @@ public class GenerateAnnouncementPane extends JPanePlugin {
                     + "</font></td>" + "        </tr>");
         }
         stringBuilder.append("    </table>" + "    </body>" + "</html>");
-        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), stringBuilder.toString(), "Submit Clarification Confirm");
+        
+        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), stringBuilder.toString(), "Send Announcement Confirm");
 
         if (result != JOptionPane.YES_OPTION) {
             return;
@@ -699,38 +712,56 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
         @Override
         public void groupAdded(GroupEvent event) {
-            // TODO Auto-generated method stub
-
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadGroups();
+                }
+            });
         }
 
         @Override
         public void groupChanged(GroupEvent event) {
-            // TODO Auto-generated method stub
-
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadGroups();
+                }
+            });
         }
 
         @Override
         public void groupRemoved(GroupEvent event) {
-            // TODO Auto-generated method stub
-
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadGroups();
+                }
+            });
         }
 
         @Override
         public void groupsAdded(GroupEvent event) {
-            // TODO Auto-generated method stub
-
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadGroups();
+                }
+            });
         }
 
         @Override
         public void groupsChanged(GroupEvent event) {
-            // TODO Auto-generated method stub
-
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadGroups();
+                }
+            });
         }
 
         @Override
         public void groupRefreshAll(GroupEvent groupEvent) {
-            // TODO Auto-generated method stub
-
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadGroups();
+                }
+            });
         }
 
     }
@@ -838,6 +869,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
         getContest().addContestTimeListener(new ContestTimeListenerImplementation());
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addCategoryListener(new CategoryListenerImplementation());
+        getContest().addGroupListener(new GroupListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -854,7 +886,16 @@ public class GenerateAnnouncementPane extends JPanePlugin {
     public class AccountListenerImplementation implements IAccountListener {
 
         public void accountAdded(AccountEvent accountEvent) {
-            // ignore, doesn't affect this pane
+            Account account = accountEvent.getAccount();
+            if (account.isTeam()) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        reloadTeams();
+                    }
+                });   
+            } else {
+                // ignore, not a team so doesn't affect this pane
+            }
         }
 
         public void accountModified(AccountEvent event) {
@@ -871,16 +912,39 @@ public class GenerateAnnouncementPane extends JPanePlugin {
                         updateGUIperPermissions();
                     }
                 });
+            } else {
+                if (account.isTeam()) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            reloadTeams();
+                        }
+                    });   
+                }
             }
         }
 
         public void accountsAdded(AccountEvent accountEvent) {
-            // ignore, does not affect this pane
+            Account[] accounts = accountEvent.getAccounts();
+            for (Account account : accounts) {
+                if (account.isTeam()) {
+                    //if a new team was added, trigger a reload
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            reloadTeams();
+                        }
+                    });   
+                    //any one new team triggers a reload of all teams (above), so we can exit.
+                    break;
+                } else {
+                    // ignore, not a team so doesn't affect this pane
+                }
+            }
         }
 
         public void accountsModified(AccountEvent accountEvent) {
             // check if it included this account
             boolean theyModifiedUs = false;
+            boolean needToReloadTeams = false;
             for (Account account : accountEvent.getAccounts()) {
                 /**
                  * If this is the account then update the GUI display per the potential change in Permissions.
@@ -888,7 +952,19 @@ public class GenerateAnnouncementPane extends JPanePlugin {
                 if (getContest().getClientId().equals(account.getClientId())) {
                     theyModifiedUs = true;
                     initializePermissions();
+                } else {
+                    if (account.isTeam()) {
+                        //set flag instead of simply invoking reloadTeams(), because we still need to loop back to check the other accounts
+                        needToReloadTeams = true;
+                    }
                 }
+            }
+            if (needToReloadTeams) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        reloadTeams();
+                    }
+                });   
             }
             final boolean finalTheyModifiedUs = theyModifiedUs;
             SwingUtilities.invokeLater(new Runnable() {
@@ -903,6 +979,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
         public void accountsRefreshAll(AccountEvent accountEvent) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
+                    reloadTeams();
                     updateGUIperPermissions();
                 }
             });
