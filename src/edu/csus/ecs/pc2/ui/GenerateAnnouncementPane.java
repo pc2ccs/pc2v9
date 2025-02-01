@@ -562,13 +562,11 @@ public class GenerateAnnouncementPane extends JPanePlugin {
         // get all the selected groups (if any)
         for (Object obj : getGroupsList().getSelectedValues()) {
             selectedValuesArray.add(obj);
-            System.out.println("  " + obj);
         }
         
         //add all the selected teams (if any)
         for (Object obj : getTeamsList().getSelectedValues()) {
             selectedValuesArray.add(obj);
-            System.out.println("  " + obj);
         }
         
         //return an array containing all the selected group and team objects
