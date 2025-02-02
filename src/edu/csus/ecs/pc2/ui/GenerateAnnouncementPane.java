@@ -54,8 +54,11 @@ import javax.swing.BoxLayout;
 import javax.swing.Box;
 
 /**
- * Displays a GUI pane which allows generating an "announcement-type" clarification and sending it to selected teams and groups. Based on work done by Kutay Karakas making similar changes to
- * {@link SubmitClarificationPane}.
+ * Displays a GUI pane which allows generating an "announcement-type" clarification and sending it to selected teams and groups. 
+ * Based on work done by Kutay Karakas making similar changes to {@link SubmitClarificationPane}.
+ * 
+ * The GUI allows selection of a specific problem (or "General"), selection of either "All Teams" or "Specific Groups and/or Teams"
+ * as the destination(s) for the announcement, and the entry of arbitrary text for the announcement.
  * 
  * @author John C., PC2 Development Team, based on work by Kutay Karakas.
  *
@@ -214,13 +217,6 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
                     switch (selectedValue) {
 
-//                                TODO: need to make "Groups" scrollpane invisible if there are no groups; 
-//                                Need to CHANGE the CONTENTS of the scrollpane if groups get added or removed dynamically (so, need to listen for the addition of a Group.class..)
-//                                Need to support "All Teams", "Groups", "Teams", and "Groups and Teams" in the dropdown, and make the JScrollPane visibility match.
-//                                if (getContest().doGroupsExist() && getContest().getNumberofGroups() != 1){
-//                                    getAnnouncementDestinationComboBox().addItem(GROUPS);
-//                                }
-
                         case ALL_TEAMS:
 
                             SwingUtilities.invokeLater(new Runnable() {
@@ -235,10 +231,14 @@ public class GenerateAnnouncementPane extends JPanePlugin {
                             
                             SwingUtilities.invokeLater(new Runnable() {
                                 public void run() {
-                                    getGroupsPane().setVisible(true);
-                                    getTeamsPane().setVisible(true);
-//                                    getTeamsScrollPane().setVisible(true);
-//                                    getGroupsScrollPane().setVisible(true);
+                                    //only show the Groups pane if there are existing groups
+                                    if (getContest().getNumberofGroups() > 0) {
+                                        getGroupsPane().setVisible(true);
+                                    }
+                                    //only show the Teams pane if there are existing team accounts
+                                    if (getContest().getAccounts(ClientType.Type.TEAM).size() > 0) {
+                                        getTeamsPane().setVisible(true);
+                                    }
                                 }
                             });
                             break;
@@ -374,7 +374,6 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
             for (Account team : allTeams) {
                 // TODO if teams string is really wrong (meaning, long? or maybe non-ASCII chars?) it could create visual problems
-                // However, the JScrollPane should at least take care of "long" names...
                 JCheckBox checkBox = new JCheckBox(team.getClientId().getClientNumber() + " " + team.getDisplayName());
                 checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, team.getClientId());
                 ((DefaultListModel<Object>) teamsListModel).addElement(checkBox);
@@ -478,18 +477,6 @@ public class GenerateAnnouncementPane extends JPanePlugin {
             });
         }
         return submitAnnouncementButton;
-    }
-
-    private void reloadTeams() {
-        teamsJList = null;
-        //setting the global var to null and calling the getter causes recreation of the list
-        getTeamsList();
-    }
-    
-    private void reloadGroups() {
-        groupsJList = null;
-        //setting the global var to null and calling the getter causes recreation of the list
-        getGroupsList();
     }
     
     private void reloadProblems() {
@@ -597,6 +584,9 @@ public class GenerateAnnouncementPane extends JPanePlugin {
     protected void submitAnnouncement(Problem problem, String destinationCategories, Object[] ultimateDestinationsPacked) {
 
         // TODO: Announcements should have an option of including "which problem they relate to".
+        // That is, there should be a mechanism for including the selected problem identification automatically
+        // in the announcement text so that the user doesn't have to include that information as part of what they type 
+        // for the announcement.  Maybe a checkbox "Include Problem ID in Announcement Text?" which defaults to "checked"?
 
         String announcement = announcementTextArea.getText().trim();
 
@@ -710,56 +700,191 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
     private class GroupListenerImplementation implements IGroupListener {
 
+        /**
+         * Adds a group to the data model backing the Groups JList which is displayed in the Groups scrollpane.
+         */
         @Override
         public void groupAdded(GroupEvent event) {
+
+            Group addedGroup = event.getGroup();
+
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    reloadGroups();
+                    // get the model which backs the JList which is displayed in the JScrollPane
+                    DefaultListModel<Object> groupsModel = (DefaultListModel<Object>) getGroupsList().getModel();
+                    // construct a checkbox for the new group
+                    JCheckBox checkBox = new JCheckBox(addedGroup.getDisplayName());
+                    checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, addedGroup.getElementId());
+                    // add the new group checkbox to the model
+                    groupsModel.addElement(checkBox);
+
                 }
             });
         }
 
+        /**
+         * Updates a group which already exists in the data model backing the Groups JList which is displayed in the Groups scrollpane.
+         */
         @Override
         public void groupChanged(GroupEvent event) {
+
+            Group updatedGroup = event.getGroup();
+
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    reloadGroups();
+                    //get the model which backs the JList which is displayed in the JScrollPane
+                    DefaultListModel<Object> groupsModel = (DefaultListModel<Object>) getGroupsList().getModel();
+                    // find the group which needs to be updated in the list model
+                    boolean found = false;
+                    for (int i = 0; i < groupsModel.getSize(); i++) {
+                        ElementId groupId = (ElementId) ((JCheckBox) groupsModel.getElementAt(i)).getClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY);
+                        if (groupId.equals(updatedGroup.getElementId())) {
+                            // found the group in the JList
+                            found = true;
+                            //construct a checkbox for the new group
+                            JCheckBox checkBox = new JCheckBox(updatedGroup.getDisplayName());
+                            checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, updatedGroup.getElementId());
+                            //replace the old group with the new group in the model
+                            groupsModel.set(i, checkBox);
+                            //we're done with the required update
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        log.warning("GenerateAnnouncement.GroupListenerImplementation.groupChanged(): Unable to find updated group in groups model: " + updatedGroup);
+                    }
+
                 }
             });
         }
 
+        /**
+         * This method listens for "remove group" messages.  Note however that in the current (2/1/2025) implementation of
+         * PC2 there is no supported mechanism for removing a group :( ...
+         */
         @Override
         public void groupRemoved(GroupEvent event) {
+            Group removedGroup = event.getGroup();
+
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    reloadGroups();
+                    //get the model which backs the JList which is displayed in the JScrollPane
+                    DefaultListModel<Object> groupsModel = (DefaultListModel<Object>) getGroupsList().getModel();
+                    // find the group which needs to be removed from the list model
+                    boolean found = false;
+                    for (int i = 0; i < groupsModel.getSize(); i++) {
+                        ElementId groupId = (ElementId) ((JCheckBox) groupsModel.getElementAt(i)).getClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY);
+                        if (groupId.equals(removedGroup.getElementId())) {
+                            // found the group in the JList
+                            found = true;
+                            //remove the group from the model
+                            groupsModel.remove(i);
+                            //we're done with the required update
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        log.warning("GenerateAnnouncement.GroupListenerImplementation.groupRemoved(): Unable to find group to be removed from groups model:" + removedGroup);
+                    }
+
                 }
             });
         }
 
+        /**
+         * Adds a set of groups to the data model backing the Groups JList displayed in the Groups scrollpane.
+         */
         @Override
         public void groupsAdded(GroupEvent event) {
+
+            Group[] addedGroups = event.getGroups();
+
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    reloadGroups();
+                    // get the model which backs the JList which is displayed in the JScrollPane
+                    DefaultListModel<Object> groupsModel = (DefaultListModel<Object>) getGroupsList().getModel();
+
+                    // add each of the new groups
+                    for (Group newGroup : addedGroups) {
+                        // construct a checkbox for the new group
+                        JCheckBox checkBox = new JCheckBox(newGroup.getDisplayName());
+                        checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, newGroup.getElementId());
+                        // add the new group to the model
+                        groupsModel.addElement(checkBox);
+                    }
                 }
             });
         }
 
         @Override
         public void groupsChanged(GroupEvent event) {
+            
+            Group[] changedGroups = event.getGroups();
+
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    reloadGroups();
+                    // get the model which backs the JList which is displayed in the JScrollPane
+                    DefaultListModel<Object> groupsModel = (DefaultListModel<Object>) getGroupsList().getModel();
+
+                    ArrayList<String> groupsNotFound = new ArrayList<String>() ;
+                    
+                    // process each of the groups needing updating
+                    for (Group groupToUpdate : changedGroups) {
+                        
+                        // find the current group in the list model
+                        boolean currentGroupFound = false;
+                        for (int i = 0; i < groupsModel.getSize(); i++) {
+                            ElementId groupId = (ElementId) ((JCheckBox) groupsModel.getElementAt(i)).getClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY);
+                            if (groupId.equals(groupToUpdate.getElementId())) {
+                                // found the current group in the JList
+                                currentGroupFound = true;
+                                // construct a checkbox for the new group
+                                JCheckBox checkBox = new JCheckBox(groupToUpdate.getDisplayName());
+                                checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, groupToUpdate.getElementId());
+                                // replace the old group with the new group in the model
+                                groupsModel.set(i, checkBox);
+                                // we're done with the current group
+                                break;
+                            }
+                        }
+                        
+                        if (!currentGroupFound) {
+                            groupsNotFound.add(groupToUpdate.toString());
+                        }
+                    }
+                    if (groupsNotFound.size()>0) {
+                        log.warning("GenerateAnnouncement.GroupListenerImplementation.groupsChanged(): Unable to find groups in model:" + groupsNotFound);
+                    }
+
                 }
             });
         }
 
+        /**
+         * Removes all existing groups from the data model backing the Groups JList displayed in the Groups scrollpane,
+         * then adds to the model the groups specified in the received event.
+         */
         @Override
         public void groupRefreshAll(GroupEvent groupEvent) {
+        	
+            Group[] addedGroups = groupEvent.getGroups();
+
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    reloadGroups();
+                    // get the model which backs the JList which is displayed in the JScrollPane
+                    DefaultListModel<Object> groupsModel = (DefaultListModel<Object>) getGroupsList().getModel();
+                    
+                    //clear the model
+                    groupsModel.removeAllElements();
+
+                    // add each of the new groups to the model
+                    for (Group newGroup : addedGroups) {
+                        // construct a checkbox for the new group
+                        JCheckBox checkBox = new JCheckBox(newGroup.getDisplayName());
+                        checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, newGroup.getElementId());
+                        // add the new group to the model
+                        groupsModel.addElement(checkBox);
+                    }
                 }
             });
         }
@@ -885,19 +1010,36 @@ public class GenerateAnnouncementPane extends JPanePlugin {
      */
     public class AccountListenerImplementation implements IAccountListener {
 
+        /**
+         * If the account specified in the received AccountEvent is a Team account, adds that team to the
+         * data model backing the Teams JList which is displayed in the Teams scrollpane.
+         */
         public void accountAdded(AccountEvent accountEvent) {
-            Account account = accountEvent.getAccount();
-            if (account.isTeam()) {
+            Account addedAccount = accountEvent.getAccount();
+            if (addedAccount.isTeam()) {
+
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        reloadTeams();
+                        // get the model which backs the JList which is displayed in the JScrollPane
+                        DefaultListModel<Object> teamsModel = (DefaultListModel<Object>) getTeamsList().getModel();
+                        // construct a checkbox for the new team
+                        JCheckBox checkBox = new JCheckBox(addedAccount.getDisplayName());
+                        checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, addedAccount.getClientId());
+                        // add the new team checkbox to the model
+                        teamsModel.addElement(checkBox);
                     }
-                });   
+                });
             } else {
                 // ignore, not a team so doesn't affect this pane
             }
         }
 
+        /**
+         * If the account specified in the received AccountEvent is "this account", updates the permissions associated with the account; 
+         * otherwise, if the specified account is a Team account, updates the team entry in the 
+         * data model backing the Teams JList which is displayed in the Teams scrollpane, or logs a warning if the team isn't 
+         * found in the data model.
+         */
         public void accountModified(AccountEvent event) {
             // check if is this account
             Account account = event.getAccount();
@@ -912,75 +1054,144 @@ public class GenerateAnnouncementPane extends JPanePlugin {
                         updateGUIperPermissions();
                     }
                 });
-            } else {
-                if (account.isTeam()) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            reloadTeams();
-                        }
-                    });   
-                }
-            }
-        }
+            } else if (account.isTeam()) {
 
-        public void accountsAdded(AccountEvent accountEvent) {
-            Account[] accounts = accountEvent.getAccounts();
-            for (Account account : accounts) {
-                if (account.isTeam()) {
-                    //if a new team was added, trigger a reload
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            reloadTeams();
-                        }
-                    });   
-                    //any one new team triggers a reload of all teams (above), so we can exit.
-                    break;
-                } else {
-                    // ignore, not a team so doesn't affect this pane
-                }
-            }
-        }
-
-        public void accountsModified(AccountEvent accountEvent) {
-            // check if it included this account
-            boolean theyModifiedUs = false;
-            boolean needToReloadTeams = false;
-            for (Account account : accountEvent.getAccounts()) {
-                /**
-                 * If this is the account then update the GUI display per the potential change in Permissions.
-                 */
-                if (getContest().getClientId().equals(account.getClientId())) {
-                    theyModifiedUs = true;
-                    initializePermissions();
-                } else {
-                    if (account.isTeam()) {
-                        //set flag instead of simply invoking reloadTeams(), because we still need to loop back to check the other accounts
-                        needToReloadTeams = true;
-                    }
-                }
-            }
-            if (needToReloadTeams) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        reloadTeams();
+                        // get the model which backs the JList which is displayed in the JScrollPane
+                        DefaultListModel<Object> teamsModel = (DefaultListModel<Object>) getTeamsList().getModel();
+                        // find the team which needs to be updated in the list model
+                        boolean found = false;
+                        for (int i = 0; i < teamsModel.getSize(); i++) {
+                            ClientId teamId = (ClientId) ((JCheckBox) teamsModel.getElementAt(i)).getClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY);
+                            if (teamId.equals(account.getClientId())) {
+                                // found the team in the JList
+                                found = true;
+                                // construct a checkbox for the new team
+                                JCheckBox checkBox = new JCheckBox(account.getDisplayName());
+                                checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, account.getClientId());
+                                // replace the old team with the new team in the model
+                                teamsModel.set(i, checkBox);
+                                // we're done with the required update
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            log.warning("GenerateAnnouncement.AccountListenerImplementation.accountModified(): Unable to find updated team in teams model: " + account);
+                        }
+
                     }
-                });   
+                });
             }
-            final boolean finalTheyModifiedUs = theyModifiedUs;
+        }
+
+        /**
+         * Examines each account in the list of accounts contained in the received AccountEvent; for every account which is a team
+         * updates the data model backing the Teams JList which is displayed in the Teams scrollpane.
+         */
+        public void accountsAdded(AccountEvent accountEvent) {
+            Account[] addedAccounts = accountEvent.getAccounts();
+            
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    if (finalTheyModifiedUs) {
-                        updateGUIperPermissions();
+                    // get the model which backs the JList which is displayed in the JScrollPane
+                    DefaultListModel<Object> teamsModel = (DefaultListModel<Object>) getTeamsList().getModel();
+
+                    // examine each of the new accounts
+                    for (Account newAccount : addedAccounts) {
+                        
+                        //only update the model if the account is a team
+                        if (newAccount.isTeam()) {
+                            // construct a checkbox for the new team
+                            JCheckBox checkBox = new JCheckBox(newAccount.getDisplayName());
+                            checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, newAccount.getClientId());
+                            // add the new team to the model
+                            teamsModel.addElement(checkBox);
+                        }
                     }
                 }
             });
         }
 
-        public void accountsRefreshAll(AccountEvent accountEvent) {
+        /**
+         * Updates the data model backing the Teams JList for all team accounts specified in the received AccountEvent; logs 
+         * a warning if any of the specified teams are not found in the data model.
+         */
+        public void accountsModified(AccountEvent accountEvent) {
+
+            Account[] changedAccounts = accountEvent.getAccounts();
+
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    reloadTeams();
-                    updateGUIperPermissions();
+                    // get the model which backs the JList which is displayed in the JScrollPane
+                    DefaultListModel<Object> teamsModel = (DefaultListModel<Object>) getTeamsList().getModel();
+
+                    ArrayList<String> teamsNotFound = new ArrayList<String>() ;
+                    
+                    // examine each of the specified (modified) accounts
+                    for (Account accountToUpdate : changedAccounts) {
+                        
+                        //we're only interested in updating Team account info in the data model
+                        if (accountToUpdate.isTeam()) {
+                            // find the current team in the list model
+                            boolean currentTeamFound = false;
+                            for (int i = 0; i < teamsModel.getSize(); i++) {
+                                ClientId clientId = (ClientId) ((JCheckBox) teamsModel.getElementAt(i)).getClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY);
+                                if (clientId.equals(accountToUpdate.getClientId())) {
+                                    // found the current team in the JList
+                                    currentTeamFound = true;
+                                    // construct a checkbox for the new team
+                                    JCheckBox checkBox = new JCheckBox(accountToUpdate.getDisplayName());
+                                    checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, accountToUpdate.getClientId());
+                                    // replace the old team with the new team in the model
+                                    teamsModel.set(i, checkBox);
+                                    // we're done with the current team
+                                    break;
+                                }
+                            }
+                            if (!currentTeamFound) {
+                                teamsNotFound.add(accountToUpdate.toString());
+                            } 
+                        }
+                    }
+                    if (teamsNotFound.size()>0) {
+                        log.warning("GenerateAnnouncement.AccountListenerImplementation.accountsModified(): Unable to find team accounts in model:" + teamsNotFound);
+                    }
+
+                }
+            });
+
+        }
+
+        /**
+         * Removes all accounts from the data model backing the Teams JList which is displayed in the Teams scrollpane;
+         * adds to the data model each Team specified in the received AccountEvent.
+         * 
+         * @param accountEvent
+         */
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            Account[] addedAccounts = accountEvent.getAccounts();
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    // get the model which backs the JList which is displayed in the JScrollPane
+                    DefaultListModel<Object> teamsModel = (DefaultListModel<Object>) getTeamsList().getModel();
+
+                    // clear the model
+                    teamsModel.removeAllElements();
+
+                    // check each of the added accounts
+                    for (Account newAccount : addedAccounts) {
+
+                        // we only want to add Team accounts to the team data model
+                        if (newAccount.isTeam()) {
+                            // construct a checkbox for the new team
+                            JCheckBox checkBox = new JCheckBox(newAccount.getDisplayName());
+                            checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, newAccount.getClientId());
+                            // add the new team to the model
+                            teamsModel.addElement(checkBox);
+                        }
+                    }
                 }
             });
         }
