@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -24,7 +25,8 @@ import org.json.XML;
 import communication.WTIWebsocket;
 import config.ServerInit;
 import edu.csus.ecs.pc2.api.IClarification;
-import edu.csus.ecs.pc2.api.IClient;
+import edu.csus.ecs.pc2.api.IContest;
+import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
@@ -48,6 +50,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
 import models.ClarificationModel;
+import models.ContestClockModel;
 import models.LanguageModel;
 import models.ProblemModel;
 import models.ServerErrorResponseModel;
@@ -325,16 +328,23 @@ public class ContestController extends MainController {
 			if (userInformation == null) {
 				throw new NotLoggedInException();
 			} else {
-				// make sure that the contest is running (problems are not allowed to be seen when the contest is not running)
-				if (!userInformation.getContest().isContestClockRunning()) {
+				// make sure that the contest has been started (problems are not allowed to be seen before the contest starts)
+				// Note that starting the contest results in setting the "contest start time" in the ContestClock object to
+				// the Unix Epoch time at which the contest was started; prior to starting the contest that value will be null.
+				if (userInformation.getContest().getContestClock().getContestStartTime()==null) {
 					return Response.status(Response.Status.UNAUTHORIZED).entity(
-							new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
+							new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request - contest has not started."))
 							.type(MediaType.APPLICATION_JSON).build();
 				}
 			}
 		} catch (NotLoggedInException e1) {
 			return Response.status(Response.Status.UNAUTHORIZED)
-					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
+					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request -- not logged in."))
+					.type(MediaType.APPLICATION_JSON).build();
+		} catch (Exception e2) {
+			logger.severe("Exception in ContestController /problems endppoint: " + e2.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "Exception in ContestController /problems endppoint: " + e2.getMessage()))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 
@@ -411,12 +421,114 @@ public class ContestController extends MainController {
 				.type(MediaType.APPLICATION_JSON).build();
 	}
 
+	
+			/***
+			 *  This method returns a "ContestClock" object encapsulating the current state of the PC2 contest clock 
+			 *  as maintained by the PC2 class "ContestTime".  
+			 *  It first checks to see that the user (team) specified by the received "key" is currently logged in. If so, the method
+			 *  returns the current contest time information, obtained from the PC2 {@link ServerConnection} for the team.
+			 * 
+			 * @param key a String containing a key which uniquely identifies the team making the request.  
+			 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
+			 * 
+			 * @return Response of:
+			 *				401 (unauthorized) if team's credentials are incorrect (i.e. the team is not logged in or is not allowed to make such a request);
+			 * 				500 (INTERNAL_SERVER_ERROR) if an error occurs in fetching the requested data from the PC2 server;
+			 * 				otherwise 200 (OK) and a JSON string containing a {@link ContestClock} is returned.
+			 */
+			@Path("/contestclock")
+			@GET
+			@ApiOperation(value = "contestclock",
+			notes = "Gets the PC2 contest clock (time info).")
+			@ApiResponses({
+				@ApiResponse(code = 200, message = "Returns a contest clock object.", response = ContestClockModel.class), 
+				@ApiResponse(code = 401, message = "Returned if invalid credentials are supplied", response = ServerErrorResponseModel.class)
+			})
+
+			public Response contestClock(@ApiParam(value="token used by logged in users to access teams information", 
+											required = true) @HeaderParam("team_id")String key) {
+
+				if (connections == null) {
+					System.err.println ("SEVERE: ContestController.contestClock(): team connections map in MainController is null!");
+					logger.severe("ContestController.contestClock(): team connections map in MainController is null!");
+					throw new NullPointerException("Team connections map in MainController is null in ContestController.contestClock()");
+				}
+				ServerConnection userInformation = connections.get(key);
+
+				//verify the user is logged in
+				try {
+					// make sure we have connection information for this user (i.e. that the user is logged in)
+					if (userInformation == null) {
+						throw new NotLoggedInException();
+					} 
+				} catch (NotLoggedInException e1) {
+					return Response.status(Response.Status.UNAUTHORIZED)
+							.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
+							.type(MediaType.APPLICATION_JSON).build();
+				}
+				
+				//the ContestClock object to be returned in the response to the HTTP request
+				ContestClockModel returnableContestClock ;
+				
+				try {
+					//get the contest clock from the PC2 Server via the PC2 API ServerConnection
+//					IContestClock contestClock = userInformation.getContest().getContestClock();
+					
+					IContest contest = userInformation.getContest();
+					if (contest == null) {
+						System.err.println ("SEVERE: ContestController.contestClock(): ServerConnection.getContest() returned null!");
+						logger.severe("ContestController.contestClock(): ServerConnection.getContest() returned null!");
+						throw new NullPointerException("ServerConnection.getContest() returned null in ContestController.contestClock()");
+					}
+					IContestClock contestClock = contest.getContestClock();
+					if (contestClock == null) {
+						System.err.println ("SEVERE: ContestController.contestClock(): ServerConnection.getContest().getContestClock() returned null!");
+						logger.severe("ContestController.contestClock(): ServerConnection.getContest().getContestClock() returned null!");
+						throw new NullPointerException("ServerConnection.getContest().getContestClock() returned null in ContestController.contestClock()");
+					}
+										
+					//retrieve the relevant fields from the PC2 contest clock
+					boolean isRunning = contestClock.isContestClockRunning();
+					long contestLengthInSecs = contestClock.getContestLengthSecs();
+					long elapsedSecs = contestClock.getElapsedSecs();
+					long wallClockStartTime ;
+					//"contest start time" is a Calendar object and might be null if the contest has never been started
+					Calendar startTimeCalendar = contestClock.getContestStartTime();
+					if (startTimeCalendar == null) {
+						wallClockStartTime = 0;
+					} else {
+						wallClockStartTime = startTimeCalendar.getTimeInMillis();
+					}
+					
+					//construct a ContestClock containing the PC2 Server clock values
+					returnableContestClock = new ContestClockModel(isRunning,contestLengthInSecs, elapsedSecs, wallClockStartTime);
+										
+				}
+				catch(NotLoggedInException e) {
+					return Response.status(Response.Status.UNAUTHORIZED)
+							.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
+							.type(MediaType.APPLICATION_JSON).build();
+				}
+				catch(NullPointerException e) {
+					logger.severe(e.getMessage());
+					return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+							.entity(new ServerErrorResponseModel(Response.Status.INTERNAL_SERVER_ERROR, "NullPointerException in ContestController.contestClock()"))
+							.type(MediaType.APPLICATION_JSON).build();
+				}		
+				
+				//return the PC2 ContestClock, mapped into JSON
+				return Response.ok()
+						.entity(returnableContestClock)
+						.type(MediaType.APPLICATION_JSON).build();
+			}
+	
 	/***
-	 *  This method returns a list of all the clarifications in the PC^2 contest submitted by the specified team.  
-	 *  It first checks to see that the user (team) specified by the received "key" is currently logged in and that the 
-	 *  contest is running (contest clarifications are only allowed to be viewed when the contest is running). If so, the method
+	 *  This method returns a list of all the clarifications in the PC^2 contest which the requesting client is allowed to see.  
+	 *  It first checks to see that the user (team) specified by the received "key" is currently logged in. If so, the method
 	 *  returns the current team's clarifications, obtained from the PC2 {@link ServerConnection} for the team.
 	 * 
+	 *  Note that only clarifications which are allowed to be viewed by the requesting client are returned.
+	 *  
 	 * @param key a String containing a key which uniquely identifies the team making the request.  
 	 * 				The value of "key" is obtained from the HTTP header parameter "team_id".
 	 * 
@@ -444,17 +556,10 @@ public class ContestController extends MainController {
 			// make sure we have connection information for this user (i.e. that the user is logged in)
 			if (userInformation == null) {
 				throw new NotLoggedInException();
-			} else {
-				// make sure that the contest is running (problems are not allowed to be seen when the contest is not running)
-				if (!userInformation.getContest().isContestClockRunning()) {
-					return Response.status(Response.Status.UNAUTHORIZED).entity(
-							new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
-							.type(MediaType.APPLICATION_JSON).build();
-				}
 			}
 		} catch (NotLoggedInException e1) {
 			return Response.status(Response.Status.UNAUTHORIZED)
-					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
+					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request - not logged in."))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
 
