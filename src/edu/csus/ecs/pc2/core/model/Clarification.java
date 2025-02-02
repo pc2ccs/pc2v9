@@ -218,9 +218,9 @@ public class Clarification extends Submission {
         
         //check to see if the specified account is in the list of "destination teams" to which 
         //this clar is targeted (in which case the clar is allowed to be seen by that account) 
-        ClientId[] destinationTeam = getAllDestinationsTeam();
-        if (destinationTeam != null) {
-            for (ClientId team: destinationTeam) {
+        ClientId[] destinationTeams = getAllDestinationsTeam();
+        if (destinationTeams != null) {
+            for (ClientId team: destinationTeams) {
                 if (team.equals(account.getClientId())){
                     return true;
                 }
