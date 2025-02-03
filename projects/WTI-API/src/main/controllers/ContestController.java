@@ -39,6 +39,7 @@ import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -551,7 +552,7 @@ public class ContestController extends MainController {
 
 		ServerConnection userInformation = connections.get(key);
 	    
-		//verify the user is logged in and the contest is running
+		//verify the user is logged in
 		try {
 			// make sure we have connection information for this user (i.e. that the user is logged in)
 			if (userInformation == null) {
@@ -569,7 +570,7 @@ public class ContestController extends MainController {
 		try {
 			
 		    //get the clarifications associated with the invoking client's Id.
-			//Note that this function call returns exactly, and only, clarifications that the current Client should receive.
+			//Note that getClarificationsWithClientId() returns exactly, and only, clarifications that the current Client should receive.
 			//This includes clars that were submitted by the team as well as announcement clars directed to the team -- either
 			//specifically or as a result of being directed to "All Teams" or to a Group of which the team is a member.
 			IClarification[] clars = userInformation.getContest().getClarificationsWithClientId();
@@ -577,16 +578,45 @@ public class ContestController extends MainController {
 			//encode each PC2 clar into a WTI ClarificationModel
 			for(IClarification clar : clars) {
 				
+				//holders for the lists of recipient teams and groups (if any)
+				ArrayList<String> teamRecipientList = new ArrayList<String>();
+				ArrayList<String> groupRecipientList = new ArrayList<String>();
+				
+				//find the teams (if any) and groups (if any) to whom the answer to this clar (if any) was sent
+				if (clar.isAnswered()) {
+
+					//add recipient team numbers to list
+					ArrayList<ClientId> teamRecipientIds = clar.getDestinationTeams();
+					for (ClientId client : teamRecipientIds) {
+						teamRecipientList.add(Integer.toString(client.getClientNumber()));
+					}
+					// add recipient group NAMES to list (the group "number" isn't useful/meaningful since it's just an internal PC2 ElementId)
+					ArrayList<ElementId> groupRecipientIds = clar.getDestinationGroups();
+					for (ElementId groupId : groupRecipientIds) {
+						String groupName = userInformation.getContest().getInternalContest().getGroup(groupId).getDisplayName();
+						groupRecipientList.add(groupName);
+					}
+				}
+				
 				// set the "recipient type" indicating whether this clar goes to the team because it was "sent to all" or
 				// because it was sent explicitly to this team (the "recipient type" is used by the WTI-UI to determine under
 				// what conditions to display the clar on the Clarifications page)
-				String recipientType = (clar.isSendToAll()) ? "All" : "Team";
+				String recipientType = "";
+				if (clar.isSendToAll()) {
+					recipientType = "All";
+				} else if (teamRecipientList.isEmpty() && groupRecipientList.isEmpty()) {
+					recipientType = "Some";
+				} else {
+					recipientType = "Team";
+				}
 				clarifications.add(new ClarificationModel(
 					recipientType, 
+					teamRecipientList,
+					groupRecipientList,
 					clar.getProblem().getName(), 
 					clar.getQuestion(), 
 					clar.getAnswer(),
-					String.format("%s-%s", clar.getSiteNumber(), clar.getNumber()),
+					String.format("%s-%s", clar.getSiteNumber(), clar.getNumber()),  //notional "id" for the clar
 					clar.getSubmissionTime(), 
 					clar.isAnswered()));
 			}
