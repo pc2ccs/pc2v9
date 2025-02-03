@@ -1,5 +1,10 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api;
+
+import java.util.ArrayList;
+
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
  * This interface describes the PC<sup>2</sup> API view of a contest <I>Clarification</i>. A <I>Clarification</i> is a submitted question by a Team to the Judges.
@@ -108,4 +113,21 @@ public interface IClarification {
      * @return True if the clarification is being sent to all teams, else false.
      */
     boolean isSendToAll();
+    
+    /**
+     * Returns an {@link ArrayList} of {@link ClientId}s of teams to whom the answer to this clarification was sent (that is, 
+     * the set of destination teams), or null if the clarification has not yet been answered.)
+     * 
+     *  @return an ArrayList of destination client ids, or null.
+     */
+    ArrayList<ClientId> getDestinationTeams() ;
+
+    /**
+     * Returns an {@link ArrayList} of {@link ElementId}s of groups to whom the answer to this clarification was sent (that is, 
+     * the set of destination groups), or null if the clarification has not yet been answered.)
+     * 
+     *  @return an ArrayList of destination group ElementIds, or null.
+     */
+    ArrayList<ElementId> getDestinationGroups() ;
+
 }
