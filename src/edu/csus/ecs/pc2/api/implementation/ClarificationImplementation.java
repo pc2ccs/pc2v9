@@ -1,19 +1,22 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.api.implementation;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import edu.csus.ecs.pc2.api.IClarification;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Implementation for IClarification.
  * 
- * 
  * @author pc2@ecs.csus.edu
- * @version $Id$
  */
 
 // $HeadURL$
@@ -38,6 +41,10 @@ public class ClarificationImplementation implements IClarification {
     private long submissionTime;
 
     private boolean sendToAll;
+    
+    private ArrayList<ClientId> destinationTeams;
+    
+    private ArrayList<ElementId> destinationGroups;
 
     public ClarificationImplementation(Clarification clarification, IInternalContest contest, IInternalController controller) {
 
@@ -54,6 +61,11 @@ public class ClarificationImplementation implements IClarification {
         siteNumber = clarification.getSiteNumber();
         submissionTime = clarification.getElapsedMins();
         sendToAll = clarification.isSendToAll();
+        
+        if (clarification.isAnsweredorAnnounced()) {
+            destinationTeams = new ArrayList<ClientId>(Arrays.asList(clarification.getAllDestinationsTeam()));
+            destinationGroups = new ArrayList<ElementId>(Arrays.asList(clarification.getAllDestinationsGroup()));
+        }
     }
 
     public String getAnswer() {
@@ -94,5 +106,15 @@ public class ClarificationImplementation implements IClarification {
     
     public boolean isSendToAll() {
         return sendToAll;
+    }
+
+    @Override
+    public ArrayList<ClientId> getDestinationTeams() {
+        return destinationTeams;
+    }
+
+    @Override
+    public ArrayList<ElementId> getDestinationGroups() {
+        return destinationGroups;
     }
 }
