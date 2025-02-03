@@ -5,11 +5,17 @@
         </div>
         <form class='filters' [formGroup]='filterForm'>
             <h3 class='center'>Filters</h3>
+            <!-- 
             <div>
                 <h5 class='filter-label'>Show Clarifications sent to:</h5>
                 <label>
                     <input type='radio' name='receipient' formControlName='receipient' value='all'>
                     All Teams
+                </label>
+                <br />
+                 <label>
+                    <input type='radio' name='receipient' formControlName='receipient' value='some'>
+                    Selected Teams
                 </label>
                 <br />
                 <label>
@@ -19,26 +25,31 @@
                 <br />
                 <label>
                     <input type='radio' name='receipient' formControlName='receipient' value=''>
-                    Both
+                    All the Above
                 </label>
             </div>
+            -->
             <div>
                 <app-problem-selector formControlName='problem'></app-problem-selector>
             </div>
+            <!-- 
             <div>
                 <button class='outline' type='button' (click)='reset()'>Clear Filters</button>
             </div>
+            -->
         </form>
     </div>
     <div class='table-container'>
         <table>
             <tr>
-                <th>Problem</th>
+                 <th>To</th>
+                 <th>Problem</th>
                 <th>Question</th>
                 <th>Answer</th>
                 <th>Time</th>
             </tr>
             <tr *ngFor='let clarification of filteredClarifications' [class.pending]='!clarification.isAnswered'>
+                <td>{{ clarification.teamRecipientList }}</td>            
                 <td>{{ clarification.problem }}</td>
                 <td>{{ clarification.question }}</td>
                 <td>
