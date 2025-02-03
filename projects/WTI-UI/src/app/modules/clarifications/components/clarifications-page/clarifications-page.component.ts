@@ -58,11 +58,12 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
   }
 
   private filterClarifications() {
-    const fitlerParams = this.filterForm.value;
+    const filterParams = this.filterForm.value;
     let filtered = this.clarifications;
-    if (fitlerParams.receipient === 'all') { filtered = filtered.filter(x => x.recipient === 'All'); }
-    if (fitlerParams.receipient === 'team') { filtered = filtered.filter(x => x.recipient !== 'All'); }
-    if (fitlerParams.problem) { filtered = filtered.filter(x => x.problem === fitlerParams.problem); }
+//    if (filterParams.receipient === 'all') { filtered = filtered.filter(x => x.recipient === 'All'); }
+//    if (filterParams.receipient === 'some') { filtered = filtered.filter(x => x.recipient === 'Some'); }
+//    if (filterParams.receipient === 'team') { filtered = filtered.filter(x => x.recipient === 'Team'); }
+    if (filterParams.problem) { filtered = filtered.filter(x => x.problem === filterParams.problem); }
 
     this.filteredClarifications = filtered;
   }
