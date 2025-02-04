@@ -221,6 +221,18 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
                             SwingUtilities.invokeLater(new Runnable() {
                                 public void run() {
+                                    
+                                    //clear group and team selections so that a submit doesn't use old selection data
+                                    DefaultListModel<Object> teamsModel = (DefaultListModel<Object>) getTeamsList().getModel();
+                                    for (int i=0; i<teamsModel.getSize(); i++) {
+                                        ((JCheckBox)teamsModel.getElementAt(i)).setSelected(false);
+                                    }
+                                    DefaultListModel<Object> groupsModel = (DefaultListModel<Object>) getGroupsList().getModel();
+                                    for (int i=0; i<groupsModel.getSize(); i++) {
+                                        ((JCheckBox)groupsModel.getElementAt(i)).setSelected(false);
+                                    }
+
+                                    //hide group & team selection scrollpanes
                                     getGroupsPane().setVisible(false);
                                     getTeamsPane().setVisible(false);
                                 }
