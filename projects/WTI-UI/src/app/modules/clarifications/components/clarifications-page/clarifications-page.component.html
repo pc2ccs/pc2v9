@@ -5,51 +5,47 @@
         </div>
         <form class='filters' [formGroup]='filterForm'>
             <h3 class='center'>Filters</h3>
-            <!-- 
             <div>
-                <h5 class='filter-label'>Show Clarifications sent to:</h5>
+                <h5 class='filter-label'>Show Clar Responses sent to:</h5>
                 <label>
-                    <input type='radio' name='receipient' formControlName='receipient' value='all'>
+                    <input type='radio' name='recipient' formControlName='recipient' value='all'>
                     All Teams
                 </label>
                 <br />
                  <label>
-                    <input type='radio' name='receipient' formControlName='receipient' value='some'>
+                    <input type='radio' name='recipient' formControlName='recipient' value='some'>
                     Selected Teams
                 </label>
                 <br />
                 <label>
-                    <input type='radio' name='receipient' formControlName='receipient' value='team'>
+                    <input type='radio' name='recipient' formControlName='recipient' value='team'>
                     My Team
                 </label>
                 <br />
                 <label>
-                    <input type='radio' name='receipient' formControlName='receipient' value=''>
+                    <input type='radio' name='recipient' formControlName='recipient' value=''>
                     All the Above
                 </label>
             </div>
-            -->
             <div>
                 <app-problem-selector formControlName='problem'></app-problem-selector>
             </div>
-            <!-- 
             <div>
                 <button class='outline' type='button' (click)='reset()'>Clear Filters</button>
             </div>
-            -->
         </form>
     </div>
     <div class='table-container'>
         <table>
             <tr>
-                 <th>To</th>
+                 <th>Answered To</th>
                  <th>Problem</th>
                 <th>Question</th>
                 <th>Answer</th>
                 <th>Time</th>
             </tr>
             <tr *ngFor='let clarification of filteredClarifications' [class.pending]='!clarification.isAnswered'>
-                <td>{{ clarification.teamRecipientList }}</td>            
+                <td>{{ clarification.recipient }}</td>            
                 <td>{{ clarification.problem }}</td>
                 <td>{{ clarification.question }}</td>
                 <td>
