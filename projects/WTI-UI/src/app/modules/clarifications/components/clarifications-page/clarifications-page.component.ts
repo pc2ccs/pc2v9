@@ -60,9 +60,9 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
   private filterClarifications() {
     const filterParams = this.filterForm.value;
     let filtered = this.clarifications;
-//    if (filterParams.receipient === 'all') { filtered = filtered.filter(x => x.recipient === 'All'); }
-//    if (filterParams.receipient === 'some') { filtered = filtered.filter(x => x.recipient === 'Some'); }
-//    if (filterParams.receipient === 'team') { filtered = filtered.filter(x => x.recipient === 'Team'); }
+    if (filterParams.recipient === 'all') { filtered = filtered.filter(x => (x.recipient === 'All' || x.recipient === "No Answer Yet")); }
+    if (filterParams.recipient === 'some') { filtered = filtered.filter(x => (x.recipient === 'Some' || x.recipient === "No Answer Yet")); }
+    if (filterParams.recipient === 'team') { filtered = filtered.filter(x => (x.recipient === 'My Team' || x.recipient === "No Answer Yet")); }
     if (filterParams.problem) { filtered = filtered.filter(x => x.problem === filterParams.problem); }
 
     this.filteredClarifications = filtered;
@@ -70,7 +70,7 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
 
   private buildForm(): void {
     this.filterForm = this._formBuilder.group({
-      receipient: [''],
+      recipient: [''],
       problem: [],
     });
 
