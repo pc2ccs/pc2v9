@@ -598,16 +598,22 @@ public class ContestController extends MainController {
 					}
 				}
 				
-				// set the "recipient type" indicating whether this clar goes to the team because it was "sent to all" or
-				// because it was sent explicitly to this team (the "recipient type" is used by the WTI-UI to determine under
-				// what conditions to display the clar on the Clarifications page)
+				// set the "recipient type" indicating whether this clar goes to the team because it was "sent to all",
+				// because it was sent to several teams including this team or a group containing this team,
+				// or it was sent only to this team. (The "recipient type" is used by the WTI-UI 
+				// to determine under what conditions to display the clar on the Clarifications page.)
 				String recipientType = "";
-				if (clar.isSendToAll()) {
-					recipientType = "All";
-				} else if (teamRecipientList.isEmpty() && groupRecipientList.isEmpty()) {
-					recipientType = "Some";
+				if (clar.isAnswered()) {
+					if (clar.isSendToAll()) {
+						recipientType = "All";
+					} else if (teamRecipientList.size() > 1 || !groupRecipientList.isEmpty()) {
+						recipientType = "Some";
+					} else {
+						recipientType = "My Team";
+					}
 				} else {
-					recipientType = "Team";
+					//clar hasn't been answered yet
+					recipientType = "No Answer Yet";
 				}
 				clarifications.add(new ClarificationModel(
 					recipientType, 
