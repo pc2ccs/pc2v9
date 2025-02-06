@@ -131,7 +131,7 @@ export class ContestService extends IContestService {
 		}
 		this.getContestClock()
 			.subscribe(
-				(data: any) => {
+				(data: ContestClock) => {
         			if (!data) { 
 						console.error ("ContestService.updateLocalContestClockFromServer() getContestClock() subscription callback: unable to get ContestClock from PC2 API via ContestService!");
 					} else {
@@ -142,7 +142,7 @@ export class ContestService extends IContestService {
 						this.installNewContestClock(data);					
 					}
       			}, 
-				(error: any) => {
+				(error: unknown) => {
         			console.error("ContestService.updateLocalContestClockFromServer(): getContestClock() subscription callback error: ");
 					console.error (error);
       			}
@@ -172,10 +172,10 @@ export class ContestService extends IContestService {
 		this.contestClock = newContestClock;
 		
 		//pull the values out of the updated clock
-		let timerShouldBeStarted = this.contestClock.isRunning ;
-		let elapsedSecs = parseInt(this.contestClock.elapsedSecs);
-		let contestLengthSecs = parseInt(this.contestClock.contestLengthSecs);
-		let remainingSecs = contestLengthSecs - elapsedSecs;
+		const timerShouldBeStarted = this.contestClock.isRunning ;
+		const elapsedSecs = parseInt(this.contestClock.elapsedSecs);
+		const contestLengthSecs = parseInt(this.contestClock.contestLengthSecs);
+		const remainingSecs = contestLengthSecs - elapsedSecs;
 	
 		//shut off timer if it is running (otherwise we can't update the elapsed/remaining time values)
 		if (this.contestTimer.isTimerRunning) {
@@ -202,7 +202,7 @@ export class ContestService extends IContestService {
 	 *  ContestTimer object.
 	 */
 	getElapsedSecs(): number {
-		let elapsedSecs = this.contestTimer.getElapsedSecs();	
+		const elapsedSecs = this.contestTimer.getElapsedSecs();	
 		return elapsedSecs ;
 	}
 	
@@ -210,7 +210,7 @@ export class ContestService extends IContestService {
 	 *  ContestTimer object.
 	 */
 	getRemainingSecs(): number {
-		let remainingSecs = this.contestTimer.getRemainingSecs();
+		const remainingSecs = this.contestTimer.getRemainingSecs();
 		return remainingSecs ;
 	}
 }
