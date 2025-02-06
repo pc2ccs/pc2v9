@@ -49,123 +49,69 @@ export class LoginPageComponent implements OnInit, OnDestroy {
               private _router: Router,
               private _contestService: IContestService,
 			  private _appTitleService: AppTitleService) { 
-			  
-	  if (DEBUG_MODE) {
-		  console.log ("Executing LoginPageComponent constructor") ;
-	  }
-	}
+  }
 
   ngOnInit(): void {
 	
-	if (DEBUG_MODE) {
-		console.log ("Executing LoginPageComponent.ngOnInit()") ;
-	}
-
 	this._appTitleService.setTitleWithTeamId("Login");
 
 	if (this._authService.token) { 
-		if (DEBUG_MODE) {
-    			console.log ("  AuthService.token returns positive Truthy value; invoking Router to navigate to ") ;
-    			console.log ("    AuthService.defaultRoute '", this._authService.defaultRoute, "'") ;
-		}
     		this._router.navigateByUrl(this._authService.defaultRoute); 
 	  }
 
-	if (DEBUG_MODE) {
-		console.log ("  Invoking buildForm() " ) ;
-	}
 	this.buildForm();
   }
 
   ngOnDestroy(): void {
-		if (DEBUG_MODE) {
-			console.log ("Executing LoginPageComponent.ngOnDestroy(); invoking _unsubscribe.next() and then _unsubscribe.complete()") ;
-		}
 		this._unsubscribe.next();
 		this._unsubscribe.complete();
   }
 
   onSubmit(): void {
-	  if (DEBUG_MODE) {
-		  console.log ("Executing LoginPageComponent.onSubmit()...") ;
-	  }
     this.loginStarted = true;
     const loginCreds = new LoginCredentials();
     loginCreds.teamName = this.formGroup.get('username').value;
     loginCreds.password = this.formGroup.get('password').value;
-    if (DEBUG_MODE) {
-    	console.log ("Invoking AuthService.login()") ;
-    }
     this._authService.login(loginCreds)
       .pipe(takeUntil(this._unsubscribe))
       .subscribe((result: TeamsLoginResponse) => {
 
-			if (DEBUG_MODE) {
-				console.log ("Received callback from subscribing to AuthService.login();" ) ;
-				console.log ("  Invoking AuthService.completeLogin()") ;
-			}
         this._authService.completeLogin(result.teamId, result.teamName);
 
-			if (DEBUG_MODE) {
-				console.log ("  Invoking WebsocketService.startWebsocket()") ;
-			}
         this._websocketService.startWebsocket();
 
-        	if (DEBUG_MODE) {
-        		console.log ("  Invoking ContestService.getisContestRunning() and subscribing to the result") ;
-        	}
         this._contestService.getIsContestRunning()
           .subscribe((val: boolean) => {
-			if (DEBUG_MODE) {
-				console.log (" Subscription callback from ContestService.getIsContestRunning() returned: ", val);
-				console.log (" ContestService object has uniqueId", this._contestService.uniqueId);
-				//JSON.stringify() can't handle recursive objects like Angular Subjects
-				//console.log (JSON.stringify(this._contestService,null,2)); //obj, replacerFunction, indent
-				console.log ("   and contents:");
-				console.log (this._contestService);
-			}
-			if (DEBUG_MODE) {
-				console.log ("Setting ContestService.isContestRunning to '", val, "'") ;
-			}
             this._contestService.isContestRunning = val;
-            if (DEBUG_MODE) {
-            	console.log ("Invoking ContestService.contestClockEvent.next()") ;
-            }
 			//trigger a contestClockEvent so the SelectProblems dropdown can decide whether to display the problems or not
             this._contestService.contestClockEvent.next();
 
           });
 
 		//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
-		if (DEBUG_MODE) {
-			console.log("  Invoking ContestService.getContestClock(), subscribing for callback result")
-		}
 		this._contestService.getContestClock() 
 			.subscribe(
-				(data: any) => {
+				(data: ContestClock) => {
         			if (!data) { 
 						console.error ("LoginPageComponent.onSubmit() ContestClock subscription callback: unable to get ContestClock from PC2 API via ContestService!");
 					} else {						
 						//copy the data fields received from the PC2 Server (via the WTI-API) into the local ContestClock object
-						this.contestClock.isRunning = data.running ;
-						this.contestClock.contestLengthSecs = data.contestLengthInSecs ;
+						this.contestClock.isRunning = data.isRunning ;
+						this.contestClock.contestLengthSecs = data.contestLengthSecs ;
 						this.contestClock.elapsedSecs = data.elapsedSecs ;
 						this.contestClock.wallClockStartTime = data.wallClockStartTime ;
 					}
       			}, 
-				(error: any) => {
+				(error: unknown) => {
         			console.error("LoginPageComponent.onSubmit(): getContestClock() subscription callback error: ");
 					console.error (error);
       			}
 			);
 
 		//update the WTI-UI representations of the PC2 Contest Clock
-        if (DEBUG_MODE) {
-        	console.log ("  Invoking ContestService.updateLocalContestClockFromServer()") ;
-        }
 		this._contestService.updateLocalContestClockFromServer();
 
-       }, (error: any) => {
+       }, (error: unknown) => {
 			console.error ("LoginPageComponent.onSubmit(): AuthService.login() subscription callback error: ");
 			console.error(error);
 			this.invalidCreds = true;
