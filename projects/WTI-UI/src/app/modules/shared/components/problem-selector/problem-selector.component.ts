@@ -5,7 +5,6 @@ import { IContestService } from 'src/app/modules/core/abstract-services/i-contes
 import { ContestClock } from 'src/app/modules/core/models/contest-clock';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { DEBUG_MODE } from 'src/constants';
 
 /**
  * This class defines a component which displays a drop-down list containing the current contest problems.
@@ -21,31 +20,27 @@ import { DEBUG_MODE } from 'src/constants';
 selector: 'app-problem-selector',
 templateUrl: './problem-selector.component.html',
 providers: [
-{
-provide: NG_VALUE_ACCESSOR,
-useExisting: forwardRef(() => ProblemSelectorComponent),
-multi: true
-}
-]
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => ProblemSelectorComponent),
+      multi: true
+    }
+  ]
 })
 export class ProblemSelectorComponent implements OnInit, OnDestroy, ControlValueAccessor {
 	private _unsubscribe = new Subject<void>();
 	@Input() allowGeneral = false;
 	problems: ContestProblem[] = [];
+	
+	//fields required to implement "ControlValueAccessor"
 	value: string;
 	onChange = (event: any) => { };
 	onTouched = (event: any) => { };
 
 	constructor(private _contestService: IContestService) { 
-		if (DEBUG_MODE) {
-			console.log ("Executing ProblemSelectorComponent constructor; IContestService id = ", this._contestService.uniqueId) ;
-		}
 	}
 
 	ngOnInit(): void {
-		if (DEBUG_MODE) {
-			console.log ("Executing ProblemSelectorComponent.ngOnInit()") ;
-		}
 		this.loadProblems();
 		if (this.allowGeneral) {
 			this.writeValue('general');
@@ -92,9 +87,6 @@ export class ProblemSelectorComponent implements OnInit, OnDestroy, ControlValue
 	 * component; otherwise it sets the list of displayed problems to an empty list (array).
 	 */
 	private loadProblems(): void {
-		if (DEBUG_MODE) {
-			console.log ("Executing ProblemSelectorComponent.loadProblems()") ;
-		}
 		//get the contest clock to see whether problems should be loaded/displayed
 		this._contestService.getContestClock()
 			.subscribe(
@@ -102,43 +94,27 @@ export class ProblemSelectorComponent implements OnInit, OnDestroy, ControlValue
 					if (!contestClock) { 
 						console.error ("ProblemSelectorComponent.loadProblems(): ContestService.getContestClock() subscription callback: unable to get ContestClock from PC2 API via ContestService!");
 					} else {
-						if (DEBUG_MODE) {
-							console.log("ProblemSelectorComponent.loadProblems(): got callback from ContestService.getContestClock() subscription; callback data =");
-							console.log(contestClock);
-						}
 						//we got back a contest clock; check if the contest has been started
 						if (this.contestHasBeenStarted(contestClock)) {	
 							//yes, contest has been started; get the problems and display them
 							this._contestService.getProblems()
 								.subscribe(
 									(data: ContestProblem[]) => {
-										if (DEBUG_MODE) {
-											console.log ("ProblemSelectorComponent.loadProblems(): subscription callback from ContestService.getProblems() returned data:");
-											console.log (data) ;
-										}
 										this.problems = data;
 									}, 
-									(error: any) => {
-										if (DEBUG_MODE) {
-											console.log ("ProblemSelectorComponent.loadProblems(): subscription callback from ContestService.getProblems() returned error");
-											console.log ("  Setting contest problem list to empty array." ) ;
-										}
+									(error: unknown) => {
 										console.warn("ProblemSelectorComponent.loadProblems(): error getting contest problems:");
 										console.warn(error);
 										this.problems = [];
 									}
 								);
 						} else {
-							if (DEBUG_MODE) {
-								console.log ("ProblemSelectorComponent.loadProblems(): contest has not been started; setting contest problem list to empty array.") ;
-								console.log ("  Setting contest problem list to empty array." ) ;
-							}
 							this.problems = [];
 						}					
 							
 					}
 				}, 
-				(error: any) => {
+				(error: unknown) => {
     				console.error("ProblemSelectorComponent.loadProblems(): ContestService.getContestClock() subscription callback error: ");
 					console.error (error);
   				}
