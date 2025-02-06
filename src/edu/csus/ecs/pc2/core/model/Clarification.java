@@ -189,11 +189,19 @@ public class Clarification extends Submission {
     }
     
     public ElementId[] getAllDestinationsGroup() {
-        return getFirstAnswer().getAllDestinationsGroup();
+        if (isAnsweredorAnnounced()) {
+            return getFirstAnswer().getAllDestinationsGroup();
+        } else {
+            return null;
+        }
     }
     
     public ClientId[] getAllDestinationsTeam() {
-        return getFirstAnswer().getAllDestinationsTeam();
+        if (isAnsweredorAnnounced()) {
+            return getFirstAnswer().getAllDestinationsTeam();
+        } else {
+            return null;
+        }
     }
 
     /**
