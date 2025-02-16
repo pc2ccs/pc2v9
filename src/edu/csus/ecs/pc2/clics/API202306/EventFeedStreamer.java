@@ -884,7 +884,6 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                     stream.flush();
                 }
             } catch (Exception e) {
-                System.out.println("INFO Unable to send JSON in sendJSON: " + e.getCause().getMessage());
                 log.log(Log.INFO, "Problem trying to send JSON '" + string + "'", e);
                 removeStream(streamAndFilter.getStream());
             }
