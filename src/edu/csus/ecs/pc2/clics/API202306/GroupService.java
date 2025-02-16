@@ -112,26 +112,6 @@ public class GroupService implements Feature {
         return(new CLICSEndpoint("groups", JSONUtilities.getJsonProperties(CLICSGroup.class)));
     }
 
-    /**
-     * Retrieve access information about this endpoint for the supplied user's security context
-     *
-     * @param sc User's security information
-     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
-     */
-    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        return(new CLICSEndpoint("groups", JSONUtilities.getJsonProperties(CLICSGroup.class)));
-    }
-
-    /**
-     * Retrieve access information about this endpoint for the supplied user's security context
-     *
-     * @param sc User's security information
-     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
-     */
-    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        return(new CLICSEndpoint("groups", JSONUtilities.getJsonProperties(CLICSGroup.class)));
-    }
-
     @Override
     public boolean configure(FeatureContext arg0) {
         // TODO Auto-generated method stub

@@ -1,9 +1,10 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,11 +32,18 @@ import com.fasterxml.jackson.databind.type.MapType;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.StringUtilities;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
+import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
@@ -53,9 +61,15 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 @Singleton
 public class ClarificationService implements Feature {
 
+    private static final int MAX_CLAR_RESPONSE_WAIT_MS = 10000;
+    private static final int CLAR_RESPONSE_CHECK_FREQ_MS = 100;
+    private static final String DEFAULT_CATEGORY = "General";
+
     private IInternalContest model;
 
     private IInternalController controller;
+
+    private Clarification waitClarification = null;
 
     public ClarificationService(IInternalContest inContest, IInternalController inController) {
         super();
@@ -93,7 +107,13 @@ public class ClarificationService implements Feature {
         // create list of clarifications to send back
         for (Clarification clarification: clarifications) {
             if (clarification.isSendToAll() || isStaff || (isTeam && isClarificationForUser(clarification, user))) {
-                clarList.add(new CLICSClarification(model, clarification));
+                if(!clarification.isAnnounced()) {
+                    clarList.add(new CLICSClarification(model, clarification));
+                }
+                if(clarification.isAnsweredorAnnounced()) {
+                    ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
+                    clarList.add(new CLICSClarification(model, clarification, clarAnswers[clarAnswers.length-1]));
+                }
             }
         }
         try {
@@ -141,7 +161,7 @@ public class ClarificationService implements Feature {
         // create list of clarifications to send back
         for (Clarification clarification: clarifications) {
             if (clarification.isSendToAll() || isStaff || (isTeam && isClarificationForUser(clarification, user))) {
-                if(clarification.getElementId().toString() .equals(clarificationId)) {
+                if(clarification.getElementId().toString().equals(clarificationId)) {
                     clarNoAnswer = clarification;
                 }
                 clarAnswers = clarification.getClarificationAnswers();
@@ -185,14 +205,14 @@ public class ClarificationService implements Feature {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addNewClarification(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
+    public synchronized Response addNewClarification(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        // only admin, hydge, or team can create a clarification.  And team can do it only if contest is started.
+        // only admin, judge, or team can create a clarification.  And team can do it only if contest is started.
         if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) && (!sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM) || !model.getContestTime().isContestStarted())) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
@@ -216,11 +236,17 @@ public class ClarificationService implements Feature {
             return Response.status(Status.BAD_REQUEST).entity("text must not be empty").build();
         }
 
-        if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && (clar.getTo_team_id() != null || clar.getTime() != null || clar.getContest_time() != null)) {
+        if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)
+            && (clar.getTo_team_id() != null || clar.getTime() != null || clar.getContest_time() != null || clar.getReply_to_id() != null)) {
             return Response.status(Status.BAD_REQUEST).entity("may not include one or more properties").build();
         }
 
         String user = sc.getUserPrincipal().getName();
+
+        // TODO: For admin, spec says they MUST specify time, but we do not support that, so log a message for now
+        if(clar.getTime() != null) {
+            controller.getLog().log(Level.WARNING, "User " + user + " attempted to submit (POST) a clarification with the time property " + clar.getTime() + "; not currently supported");
+        }
 
         // if team specifies "from id", it must be that of the current user.
         if(!StringUtilities.isEmpty(clar.getFrom_team_id())) {
@@ -233,9 +259,76 @@ public class ClarificationService implements Feature {
         }
         ClientId clientId = getClientIdFromUser(user);
         if(clientId != null && model.getAccount(clientId) != null) {
-            Problem problem = getProblemFromId(clar.getProblem_id());
+            String problemId = clar.getProblem_id();
+            Problem problem = null;
+            // If no problem_id specified, then it's a "general" clar request
+            if(problemId == null || problemId.isEmpty()) {
+                for(Problem findProb : model.getCategories()) {
+                    if(findProb.getDisplayName().equals(DEFAULT_CATEGORY)) {
+                        problem = findProb;
+                        break;
+                    }
+                }
+                if(problem == null) {
+                    // if not problem found matching default, then make one up
+                    problem = new Category(DEFAULT_CATEGORY);
+                }
+            } else {
+                problem = getProblemFromId(clar.getProblem_id());
+            }
             if(problem != null) {
-                controller.submitClarification(clientId, problem, clar.getText());
+                ClarificationAnswer clarificationAnswer = null;
+                ClarificationListener clarListener = new ClarificationListener();
+
+                // Start listening for clarification additions
+                model.addClarificationListener(clarListener);
+                // clear out response (created Clarification)
+                waitClarification = null;
+
+                // Is this a reply?  If so, we have to make it look like a new clarification was added
+                String replyId = clar.getReply_to_id();
+                if(replyId != null && !replyId.isEmpty()) {
+                    // This means we have to update an existing clar.  eg.  this is a ClarificationAnswer
+                    Clarification replyToClar = findClarificationFromId(replyId);
+                    if(replyToClar == null) {
+                        // No longer care about clar additions
+                        model.removeClarificationListener(clarListener);
+                        return Response.status(Response.Status.NOT_FOUND).build();
+                    }
+                    clarificationAnswer = new ClarificationAnswer(clar.getText(), clientId,
+                        clar.getTo_team_id() == null, model.getContestTime());
+                    replyToClar.addAnswer(clarificationAnswer);
+                    clarListener.setWaitAnswerId(replyToClar.getElementId());
+                    controller.submitClarificationAnswer(replyToClar);
+                } else if(clar.getFrom_team_id() == null){
+                    // this is an announcement since its from a judge/admin.  Really, it COULD be a question (clarification) but it does
+                    // not fit in the model of CLICS
+                    // tell listener what to wait for
+                    // TODO: allow submitAnnouncement to take 'null' for the 2 arrays.
+                    clarListener.setWaitId(controller.submitAnnouncement(clientId, problem, clar.getText(), new ElementId[0], new ClientId[0]));
+                } else {
+                    // tell listener what to wait for
+                    clarListener.setWaitId(controller.submitClarification(clientId, problem, clar.getText()));
+                }
+
+                // wait for response from submit clar so we can get the ID and times for the response
+                Clarification clarResponse = waitForClarificationResponse(user);
+                // No longer care about clar additions
+                model.removeClarificationListener(clarListener);
+
+                if(clarResponse == null) {
+                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating clarification").build();
+                }
+                // fill in fields we were waiting for
+                if(clarificationAnswer != null) {
+                    clar.setId(clarificationAnswer.getElementId().toString());
+                    clar.setTime(Utilities.getIso8601formatterWithMS().format(clarificationAnswer.getDate()));
+                    clar.setContest_time(ContestTime.formatTimeMS(clarificationAnswer.getElapsedMS()));
+                } else {
+                    clar.setId(clarResponse.getElementId().toString());
+                    clar.setTime(Utilities.getIso8601formatterWithMS().format(clarResponse.getCreateDate()));
+                    clar.setContest_time(ContestTime.formatTimeMS(clarResponse.getElapsedMS()));
+                }
                 try {
                     ObjectMapper mapper = JSONUtilities.getObjectMapper();
                     String json = mapper.writeValueAsString(clar);
@@ -254,7 +347,7 @@ public class ClarificationService implements Feature {
     }
 
     /**
-     * Put updates an existing clarification (presumably an answer)
+     * Put add a clarification with a specific id
      *
      * @param servletRequest details of request
      * @param sc requesting user's authorization info
@@ -265,7 +358,7 @@ public class ClarificationService implements Feature {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateClarification(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
+    public synchronized Response putAdminClarification(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
@@ -292,9 +385,46 @@ public class ClarificationService implements Feature {
         if(StringUtilities.isEmpty(clar.getText())) {
             return Response.status(Status.BAD_REQUEST).entity("text must not be empty").build();
         }
+        // id required for put
+        if(clar.getId() == null) {
+            // return HTTP 400 response code per CLICS spec
+            return Response.status(Status.BAD_REQUEST).entity("must include id property").build();
+        }
+        // time is also required
+        if(clar.getTime() == null || clar.getTime().isEmpty()) {
+            // return HTTP 400 response code per CLICS spec
+            return Response.status(Status.BAD_REQUEST).entity("must include time property").build();
+        }
 
-
+        controller.getLog().log(Level.WARNING, "Admin PUT clarification is not implemented due to forcing the ID");
         return Response.status(Response.Status.NOT_IMPLEMENTED).build();
+    }
+
+    /**
+     * After submitting a clarification, this waits for the response from the server since the operation
+     * is asynchronous (the server actually creates the clar)
+     *
+     * @param user The user adding the clar
+     * @return created pc2 clarification or null if it couldnt be created or it timed out
+     */
+    Clarification waitForClarificationResponse(String user) {
+
+        int waitedMS = 0;
+
+        // wait for callback to clarification listener -- but only for up to a limit
+        while (waitClarification == null && waitedMS < MAX_CLAR_RESPONSE_WAIT_MS) {
+            try {
+                Thread.sleep(CLAR_RESPONSE_CHECK_FREQ_MS);
+            } catch (InterruptedException e) {
+                controller.getLog().throwing("ClarificationService", "waitForClarificationResponse", e);
+            }
+            waitedMS += CLAR_RESPONSE_CHECK_FREQ_MS;
+        }
+
+        if(waitClarification == null) {
+            controller.getLog().log(Level.WARNING, "ClarificationService timeout waiting for new clar to be created for " + user);
+        }
+        return(waitClarification);
     }
 
     /**
@@ -305,7 +435,26 @@ public class ClarificationService implements Feature {
      * @return true if the user is allowed to see this clarification
      */
     private boolean isClarificationForUser(Clarification clarification, String user) {
-        return(clarification.getSubmitter().getName().equals(user));
+        boolean ret = false;
+
+        // Quick return for easy case
+        if(clarification.getSubmitter().getName().equals(user)) {
+            return(true);
+        }
+
+        // harder cases now check if it was targeted to the team specifically
+        ClientId [] destTeams = clarification.getAllDestinationsTeam();
+        if(destTeams != null && destTeams.length > 0) {
+            ret = isUserInDestination(user,  destTeams);
+        }
+        if(!ret) {
+            // harder still, check groups
+            ElementId [] destGroups = clarification.getAllDestinationsGroup();
+            if(destGroups != null && destGroups.length > 0) {
+                ret = this.isUserInDestinationGroup(getAccountFromUser(user), destGroups);
+            }
+        }
+        return(ret);
     }
 
     /**
@@ -399,6 +548,23 @@ public class ClarificationService implements Feature {
     }
 
     /**
+     * Returns the Account based on the user supplied.
+     *
+     * @param user
+     * @return Account for user, or null if no account found
+     */
+    private Account getAccountFromUser(String user) {
+        if(model.getAccounts() != null) {
+            for(Account acct : model.getAccounts()) {
+                if(acct.getDefaultDisplayName(acct.getClientId()).equals(user)) {
+                    return(acct);
+                }
+            }
+        }
+        return(null);
+    }
+
+    /**
      * Returns the the Problem object for supplied id (short name) or null if none found
      *
      * @param id shortname of problem
@@ -414,34 +580,116 @@ public class ClarificationService implements Feature {
     }
 
     /**
-     * Tests if the supplied user context has a role to submit clarifications as a team
+     * Check if the user is in the array of client id's supplied
      *
-     * @param sc User's security context
-     * @return true of the user can submit clarifications
+     * @param user name, eg team101
+     * @param destinations array of ClientId's to check
+     * @return true if found, false otherwise
      */
-    public static boolean isTeamSubmitClarificationAllowed(SecurityContext sc) {
-        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM));
+    boolean isUserInDestination(String user, ClientId [] destinations) {
+        boolean ret = false;
+
+        if(destinations != null) {
+            Account clientAccount;
+
+            for(ClientId destClient : destinations) {
+                clientAccount = model.getAccount(destClient);
+                if(clientAccount != null && clientAccount.getDefaultDisplayName(destClient).equals(user)) {
+                    ret = true;
+                    break;
+                }
+            }
+        }
+        return(ret);
     }
 
-
     /**
-     * Tests if the supplied user context has a role to submit clarifications
+     * Check if the user account is in the array of group ElementId's supplied
      *
-     * @param sc User's security context
-     * @return true of the user can submit clarifications
+     * @param userAccount Account for the user to check
+     * @param destinations array of Group ElementId's to check
+     * @return true if found, false otherwise
      */
-    public static boolean isAdminSubmitClarificationAllowed(SecurityContext sc) {
-        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
+    boolean isUserInDestinationGroup(Account userAccount, ElementId [] destinations) {
+        boolean ret = false;
+
+        if(userAccount != null && destinations != null) {
+            for(ElementId groupElement : destinations) {
+                if(userAccount.isGroupMember(groupElement)) {
+                    ret = true;
+                    break;
+                }
+            }
+        }
+        return(false);
     }
 
     /**
-     * Tests if the supplied user context has a role to submit clarifications on behalf of a team
+     * Try to find the Clarification from its id
      *
-     * @param sc User's security context
-     * @return true of the user can submit clarifications on behalf of a team
+     * @param szClarId This ID of the clar
+     * @return the Clarification if found or null if not found
      */
-    public static boolean isProxySubmitClarificationAllowed(SecurityContext sc) {
-        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
+    private Clarification findClarificationFromId(String clarId) {
+
+        Clarification clar = null;
+
+        // create list of clarifications to send back
+        for (Clarification clarification: model.getClarifications()) {
+            if(clarification.getElementId().toString().equals(clarId)) {
+                clar = clarification;
+                break;
+            }
+        }
+        return(clar);
+    }
+
+    /**
+     * Clarification Listener.
+     *
+     * @author pc2@ecs.csus.edu
+     */
+    protected class ClarificationListener implements IClarificationListener {
+        private ElementId waitId = null;
+        private ElementId waitAnsId = null;
+
+        @Override
+        public void clarificationAdded(ClarificationEvent event) {
+            Clarification newClar = event.getClarification();
+
+            // Only match the clar we're waiting for
+            if(waitId != null && newClar != null && waitId.equals(newClar.getElementId())) {
+                waitClarification = event.getClarification();
+            }
+        }
+
+        @Override
+        public void clarificationChanged(ClarificationEvent event) {
+            Clarification newClar = event.getClarification();
+
+            // Only match the clar we're waiting for
+            if(waitAnsId != null && newClar != null && waitAnsId.equals(newClar.getElementId())) {
+                waitClarification = event.getClarification();
+            }
+        }
+
+        @Override
+        public void clarificationRemoved(ClarificationEvent event) {
+            // ignore
+        }
+
+        @Override
+        public void refreshClarfications(ClarificationEvent event) {
+            // ignore
+        }
+
+        void setWaitId(ElementId id) {
+            waitId = id;
+        }
+
+        void setWaitAnswerId(ElementId id) {
+            waitAnsId = id;
+        }
     }
 
     @Override

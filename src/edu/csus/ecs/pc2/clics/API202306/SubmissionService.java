@@ -20,6 +20,8 @@ import java.util.StringJoiner;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -695,6 +697,15 @@ public class SubmissionService implements Feature {
     private ClientId getClientIdFromUser(String user) {
         ClientId clientId = null;
 
+        // basically, need to match lower case letters followed by digits
+        Matcher matcher = Pattern.compile("^([a-z]+)([0-9]+)$").matcher(user);
+        if(matcher.matches()) {
+            try {
+                clientId = new ClientId(model.getSiteNumber(), ClientType.Type.valueOf(matcher.group(1).toUpperCase()), Integer.parseInt(matcher.group(2)));
+            } catch (Exception e) {
+                controller.getLog().log(Log.WARNING, "Can not convert the supplied user " + user + " to a ClientId", e);
+            }
+        }
         return clientId;
     }
 
