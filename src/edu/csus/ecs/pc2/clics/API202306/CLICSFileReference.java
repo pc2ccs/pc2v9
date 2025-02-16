@@ -42,6 +42,16 @@ public class CLICSFileReference {
     @JsonProperty
     private int height;
 
+    @JsonProperty
+    private String data;
+
+    /*
+     * For Jersey deserialization
+     */
+    public CLICSFileReference() {
+
+    }
+
     /**
      * Fills in properties for a CLICS FILE reference.  Currently, we only support the required Href, Filename and Mime type.
      *
@@ -84,5 +94,24 @@ public class CLICSFileReference {
         if(height == 0) {
             exceptProps.add("height");
         }
+        if(data == null) {
+            exceptProps.add("data");
+        }
+    }
+
+    public String getHref() {
+        return href;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public String getMime() {
+        return mime;
+    }
+
+    public String getData() {
+        return data;
     }
 }

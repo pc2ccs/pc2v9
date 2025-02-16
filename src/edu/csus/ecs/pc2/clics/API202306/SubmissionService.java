@@ -10,14 +10,25 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -32,18 +43,32 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IFile;
+import edu.csus.ecs.pc2.core.model.IFileImpl;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.IJSONTool;
+import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
@@ -57,6 +82,8 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 @Provider
 @Singleton
 public class SubmissionService implements Feature {
+    // How long to wait for the submission to be entered into the system before returning error
+    private long WAIT_SUBMISSION_TIMEOUT = 20;
 
     private IInternalContest model;
 
@@ -68,6 +95,8 @@ public class SubmissionService implements Feature {
 
     private JSONTool jsonTool;
 
+    private Semaphore submissionWaitSem = null;
+
     public SubmissionService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
@@ -75,6 +104,35 @@ public class SubmissionService implements Feature {
         model.addRunListener(new RunListenerImplementation());
         jsonTool = new JSONTool(model, controller);
     }
+
+    private class PendingSubmissionInfo {
+        private ClientId submitterId;
+        private ElementId languageId;
+        private ElementId problemId;
+        private Run submission;
+
+        public PendingSubmissionInfo(ClientId submitterId, ElementId languageId, ElementId problemId) {
+            this.submitterId = submitterId;
+            this.languageId = languageId;
+            this.problemId = problemId;
+            submission = null;
+        }
+
+        boolean checkMatch(ClientId submitterId, ElementId languageId, ElementId problemId) {
+            return(submitterId.equals(this.submitterId) &&
+                   languageId.equals(this.languageId) &&
+                   problemId.equals(this.problemId));
+        }
+
+        Run getSubmission() {
+            return(submission);
+        }
+
+        void setSubmission(Run sub) {
+            submission = sub;
+        }
+    }
+    private PendingSubmissionInfo pendingSub = null;
 
     /**
      * Run Listener
@@ -86,7 +144,22 @@ public class SubmissionService implements Feature {
 
         @Override
         public void runAdded(RunEvent event) {
-            // ignore
+            // only care about added runs if we're waiting for one
+            if(pendingSub != null && submissionWaitSem != null) {
+                synchronized(pendingSub) {
+                    // only set it the first time.
+                    if(pendingSub.getSubmission() == null) {
+                        Run run = event.getRun();
+                        if(pendingSub.checkMatch(run.getSubmitter(), run.getLanguageId(), run.getProblemId())) {
+                            if(Utilities.isDebugMode()) {
+                                System.out.println("SubmissionService: Got back submission with run ID " + run.getNumber());
+                            }
+                            pendingSub.setSubmission(run);
+                            submissionWaitSem.release();
+                        }
+                    }
+                }
+            }
         }
 
         @Override
@@ -113,33 +186,87 @@ public class SubmissionService implements Feature {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getSubmissions(@Context HttpServletRequest servletRequest, @Context SecurityContext sc) {
+    public Response getSubmissions(@Context HttpServletRequest servletRequest, @PathParam("contestId") String contestId, @Context SecurityContext sc) {
+
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        ContestTime ct = model.getContestTime();
+        boolean isFrozen = (Utilities.getFreezeTime(model) <= ct.getElapsedSecs());
+        Set<String> exceptProps = new HashSet<String>();
+
+        // get an object which can be used to map the Submission descriptions into JSON form
+        ObjectMapper mapper = JSONUtilities.getObjectMapper();
+
+        // set up shortcuts for access policy
+        boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM);
+        boolean isAnalyst = sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST);
+        boolean isStaff = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
+                sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE);
+        boolean isPublic = sc.isUserInRole(WebServer.WEBAPI_ROLE_PUBLIC);
+
+        // can't see any submission before contest is started (eg. judge's submissions)
+        if(!isStaff && ct.isContestStarted() == false) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+
+        String user = sc.getUserPrincipal().getName();
+        CLICSSubmission cSub;
+        // We have to build the array of json objects by hand due to the exception filter
+        StringJoiner allSubs = new StringJoiner(",");
+
+        // teams, public can never see files or entry_point.  Analysts can't after freeze
+        // Exception: teams can see their own handled below in the loop
+        if(isTeam || isPublic || (isAnalyst && isFrozen)) {
+            exceptProps.add("files");
+            exceptProps.add("entry_point");
+        }
 
         // get the groups from the contest
         Run[] runs = model.getRuns();
 
-        // get an object which can be used to map the Submission descriptions into JSON form
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode childNode = mapper.createArrayNode();
-        //put each Submission (a.k.a. "Run") into the JSON array
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (!submission.isDeleted()) {
-                childNode.add(jsonTool.convertToJSON(submission, servletRequest, sc));
+                cSub = new CLICSSubmission(model, submission);
+                // Only teams are restricted on the language
+                if(isTeam && !submission.getSubmitter().getName().equals(user)){
+                    exceptProps.add("language_id");
+                } else {
+                    exceptProps.remove("language_id");
+                }
+                try {
+                    // for this judgment, create filter to omit unused/bad properties (max_run_time in this case)
+                    SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
+                    FilterProvider fp = new SimpleFilterProvider().addFilter("rtFilter", filter).setFailOnUnknownId(false);
+                    // generate json with only properties we want and add to CSV list.
+                    allSubs.add(mapper.writer(fp).writeValueAsString(cSub));
+                } catch (Exception e) {
+                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for submission " + submission.getNumber() + " " + e.getMessage()).build();
+                }
             }
         }
 
         // output the response to the requester (note that this actually returns it to Jersey,
         // which forwards it to the caller as the HTTP response).
-        return Response.ok(childNode.toString(), MediaType.APPLICATION_JSON).build();
+        return Response.ok("[" + allSubs.toString() + "]", MediaType.APPLICATION_JSON).build();
     }
 
     @GET
     @Produces("application/zip")
     @Path("{submissionId}/files/")
-    public Response getSubmissionFiles(@Context SecurityContext sc, @PathParam("submissionId") String submissionId) {
+    public synchronized Response getSubmissionFiles(@Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("submissionId") String submissionId) {
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
         // only admin and analyst are authorized to access this endpoint
-        if (!(sc.isUserInRole("admin") || sc.isUserInRole("analyst"))) {
+        boolean allowed = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
+            sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) ||
+            (sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST) && Utilities.getFreezeTime(model) > model.getContestTime().getElapsedSecs());
+        if (!allowed) {
             return Response.status(Status.UNAUTHORIZED).build();
         }
         // get the submissions from the contest
@@ -244,17 +371,268 @@ public class SubmissionService implements Feature {
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("{submissionId}/")
-    public Response getSubmission(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("submissionId") String submissionId) {
-        // get the submissions from the contest
+    public Response getSubmission(@Context HttpServletRequest servletRequest, @PathParam("contestId") String contestId, @Context SecurityContext sc, @PathParam("submissionId") String submissionId) {
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == false) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        ContestTime ct = model.getContestTime();
+        boolean isFrozen = (Utilities.getFreezeTime(model) <= ct.getElapsedSecs());
+        Set<String> exceptProps = new HashSet<String>();
+
+        // set up shortcuts for access policy
+        boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM);
+        boolean isAnalyst = sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST);
+        boolean isStaff = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
+                sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE);
+        boolean isPublic = sc.isUserInRole(WebServer.WEBAPI_ROLE_PUBLIC);
+
+        // can't see any submission before contest is started (eg. judge's submissions)
+        if(!isStaff && ct.isContestStarted() == false) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+
+        // teams, public can never see files or entry_point.  Analysts can't after freeze
+        // Exception: teams can see their own handled below in the loop
+        if(isTeam || isPublic || (isAnalyst && isFrozen)) {
+            exceptProps.add("files");
+            exceptProps.add("entry_point");
+        }
+
+        // get the groups from the contest
         Run[] runs = model.getRuns();
 
+        // Look for submission
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (!submission.isDeleted() && IJSONTool.getSubmissionId(submission).equals(submissionId)) {
-                return Response.ok(jsonTool.convertToJSON(submission, servletRequest, sc).toString(), MediaType.APPLICATION_JSON).build();
+                // Only teams are restricted on the language
+                if(isTeam && !submission.getSubmitter().getName().equals(sc.getUserPrincipal().getName())){
+                    exceptProps.add("language_id");
+                } else {
+                    exceptProps.remove("language_id");
+                }
+                try {
+                    ObjectMapper mapper = JSONUtilities.getObjectMapper();
+                    // for this judgment, create filter to omit unused/bad properties (max_run_time in this case)
+                    SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
+                    FilterProvider fp = new SimpleFilterProvider().addFilter("rtFilter", filter).setFailOnUnknownId(false);
+                    String json = mapper.writer(fp).writeValueAsString(new CLICSSubmission(model, submission));
+                    return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                } catch (Exception e) {
+                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for submission " + submission.getNumber() + " " + e.getMessage()).build();
+                }
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    /**
+     * Post a new submission
+     *
+     * @param servletRequest details of request
+     * @param sc requesting user's authorization info
+     * @param contestId The contest
+     * @param jsonInputString For non-admin, must not include id, to_team_id, time or contest_time.  For admin, must not include id.
+     * @return json for the clarification, including the (new) id
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public synchronized Response addNewSubmission(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
+
+        // check contest id
+        if(contestId.equals(model.getContestIdentifier()) == true) {
+            // check for empty request
+            if (jsonInputString == null || jsonInputString.length() == 0) {
+                // return HTTP 400 response code per CLICS spec
+                return Response.status(Status.BAD_REQUEST).entity("empty json").build();
+            }
+
+            CLICSSubmission sub = CLICSSubmission.fromJSON(jsonInputString);
+            if(sub == null) {
+                // return HTTP 400 response code per CLICS spec
+                return Response.status(Status.BAD_REQUEST).entity("invalid json supplied").build();
+            }
+
+            // These next three are for admin users only
+            long overrideTimeMS = -1;
+            long overrideSubmissionID = -1;
+            // Slight departure from CLICS spec here.. We allow submission ID on admin POST.
+            // Using PUT for this is wrong - that's not what PUT is for.
+            String subId = null;
+
+            Log log = controller.getLog();
+            String user = sc.getUserPrincipal().getName();
+            ClientId clientId = getClientIdFromUser(user);
+            if(clientId == null) {
+                log.info("User " + user + " attempted to POST submission from an invalid client");
+                // Client must be a valid account, not from realm.properties, we need to
+                // check permissions, this is why.
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
+            Account account = model.getAccount(clientId);
+            if(account == null) {
+                log.info("User " + user + " attempted to POST submission from a non-account");
+                // Client must be a valid account, not from realm.properties, we need to
+                // check permissions, this is why.
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
+            ContestTime ct = model.getContestTime();
+            boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM);
+            if(isTeam) {
+                // Team must be allowed to submit and
+                // Team may not provide certain properties (can supply team id if it's the caller)
+                if(!account.isAllowed(Permission.Type.SUBMIT_RUN) ||
+                   (sub.getTeam_id() != null && !sub.getTeam_id().equals("" + clientId.getClientNumber())) ||
+                    sub.getTime() != null || sub.getContest_time() != null || sub.getId() != null ||
+                    !ct.isContestRunning()) {
+                    log.info(user + " attempted to POST submission without permission");
+                    return Response.status(Response.Status.FORBIDDEN).build();
+                }
+                // Force team id for team submission
+                sub.setTeam_id("" + clientId.getClientNumber());
+            } else if(account.isAllowed(Permission.Type.SHADOW_PROXY_TEAM)) {
+                if(sub.getTime() != null || sub.getContest_time() != null || sub.getId() != null) {
+                    log.info(user + " attempted to POST submission as PROXY but specified time/contest_time");
+                    return Response.status(Response.Status.FORBIDDEN).build();
+                }
+            } else if((!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) ||
+                       (!account.isAllowed(Permission.Type.SUBMIT_RUN) && !account.isAllowed(Permission.Type.SHADOW_PROXY_TEAM))) {
+                // non admins can't post anything
+                log.info(user + " attempted to POST submission without permission");
+                return Response.status(Response.Status.FORBIDDEN).build();
+            } else {
+                // ** Departure from CLICS Spec - they say this should be done only by PUT
+                // I happen to disagree. --JB
+                // Admin user, copy properties admin is permitted to set
+                // construct the override values to be used.
+                overrideTimeMS = Utilities.convertCLICSContestTimeToMS(sub.getContest_time());
+                if(overrideTimeMS < 0) {
+                    overrideTimeMS = -1;
+                }
+                overrideSubmissionID = Utilities.stringToLong(sub.getId());
+                if(overrideSubmissionID < 0) {
+                    overrideSubmissionID = -1;
+                }
+            }
+
+            // at this point, the team_id must be valid
+            String team_id = sub.getTeam_id();
+            if(team_id == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("no team_id").build();
+            }
+            if(!isValidTeamId(team_id)){
+                return Response.status(Response.Status.BAD_REQUEST).entity("bad team_id" + team_id).build();
+            }
+
+            // Check that problem is ok
+            Problem prob = getProblemFromId(sub.getProblem_id());
+            if(prob == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("bad problem_id").build();
+            }
+            // Check that language is ok
+            Language lang = getLanguageFromId(sub.getLanguage_id());
+            if(lang == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("bad language id").build();
+            }
+            // Make sure we have files
+            CLICSFileReference [] files = sub.getFiles();
+            if(files.length == 0) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("no file specified").build();
+            }
+
+            List<IFile> srcFiles = new ArrayList<IFile>();
+            for(CLICSFileReference file : files) {
+                String fileName = file.getFilename();
+                if("".equals(fileName)) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("no file name specified").build();
+                }
+                String fileData = file.getData();
+                if(fileData == null || fileData.length() == 0) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("no file data specified for " + fileName).build();
+                }
+                IFile iFile = new IFileImpl(file.getFilename(), fileData);
+                srcFiles.add(iFile);
+            }
+            String entry = sub.getEntry_point();
+            IFile mainFile = srcFiles.get(0);
+
+            log.info("SubmissionService: Invoking submitRun() for team " + team_id
+                + " problem:" + prob.getShortName()
+                + " language:" +  lang.getID()
+                + " main file:" + mainFile.getFileName()
+                + " entry_point:" + entry
+                + " time:" + overrideTimeMS
+                + " submissionID:" + overrideSubmissionID);
+
+            try {
+                // Convert files to serialized files
+                SerializedFile mainSubmissionFile = new SerializedFile(mainFile);
+                // remainder of list are extra files
+                srcFiles.remove(0);
+                int nSrcFiles = srcFiles.size();
+                SerializedFile[] additionalFiles = new SerializedFile[nSrcFiles];
+                for (int i = 0; i < nSrcFiles; i++) {
+                    additionalFiles[i] = new SerializedFile(srcFiles.get(i));
+                }
+
+                submissionWaitSem = null;
+                pendingSub = new PendingSubmissionInfo(clientId, lang.getElementId(), prob.getElementId());
+                submissionWaitSem = new Semaphore(1);
+                // steal the one an only semaphore, a response will give it back immediately
+                submissionWaitSem.acquire();
+
+                if(Utilities.isDebugMode()) {
+                    System.out.println("SubmissionService: Submitting Run for " + clientId.getName() + " problem:" + sub.getProblem_id() + " language:" + sub.getLanguage_id());
+                }
+
+                controller.submitRun(clientId, prob, lang, entry, mainSubmissionFile, additionalFiles, overrideTimeMS, overrideSubmissionID);
+                boolean gotSub = submissionWaitSem.tryAcquire(WAIT_SUBMISSION_TIMEOUT, TimeUnit.SECONDS);
+                submissionWaitSem = null;
+                if(gotSub) {
+                    Run newRun = pendingSub.getSubmission();
+                    pendingSub = null;
+                    submissionWaitSem = null;
+                    // make sure we got a run; not sure how we couldn't have one at this point
+                    if(newRun != null) {
+                        // Normal return path.
+                        CLICSSubmission newSub = new CLICSSubmission(model, newRun);
+                        return Response.ok(newSub.toJSON(), MediaType.APPLICATION_JSON).build();
+                    }
+                }
+                if(Utilities.isDebugMode()) {
+                    System.out.println("SubmissionService: Didn't get submission back for " + clientId.getName() + " problem:" + sub.getProblem_id() + " language:" + sub.getLanguage_id());
+                }
+                // No run entered, this is really really bad
+                log.log(Level.WARNING, "No Run added after submitting CLICS API run for team " + team_id);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("unable to add submission").build();
+            } catch (Exception e) {
+                log.log(Level.WARNING, "Exception submitting CLICS API run for team " + team_id, e);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("unable to submit run" + e.toString()).build();
+            }
+        }
+
+        return Response.status(Response.Status.NOT_FOUND).entity(contestId + " not found").build();
+    }
+
+    /**
+     * Put a new submission
+     *
+     * @param servletRequest details of request
+     * @param sc requesting user's authorization info
+     * @param contestId The contest
+     * @param jsonInputString For non-admin, must not include id, to_team_id, time or contest_time.  For admin, must not include id.
+     * @return json for the clarification, including the (new) id
+     */
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response putNewSubmission(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
+
+        controller.getLog().log(Log.INFO, "User " + sc.getUserPrincipal().getName() + " tried to PUT a submission");
+        return Response.status(Response.Status.NOT_IMPLEMENTED).build();
     }
 
     private void createZip(Run submission, java.nio.file.Path tmpDir, HashMap<Integer, String> filesToWrite, String zipFileName) throws FileNotFoundException, IOException {
@@ -310,13 +688,86 @@ public class SubmissionService implements Feature {
     }
 
     /**
+     * Returns a ClientId based on the user supplied.  eg. "team99", "administrator1", etc.
+     * @param user eg. team99
+     * @return The ClientId created, or null if the user is bad
+     */
+    private ClientId getClientIdFromUser(String user) {
+        ClientId clientId = null;
+
+        return clientId;
+    }
+
+    private boolean isValidTeamId(String id) {
+        boolean valid = false;
+        try {
+            ClientId clientId = new ClientId(model.getSiteNumber(), ClientType.Type.TEAM, Integer.parseInt(id));
+            if(clientId != null && model.getAccount(clientId) != null) {
+                valid = true;
+            }
+        } catch (Exception e) {
+            controller.getLog().log(Log.WARNING, "Can not convert the supplied team id " + id + " to a ClientId", e);
+        }
+        return(valid);
+    }
+
+    /**
+     * Returns the Account based on the user supplied.
+     *
+     * @param user
+     * @return Account for user, or null if no account found
+     */
+    private Account getAccountFromUser(String user) {
+        if(model.getAccounts() != null) {
+            for(Account acct : model.getAccounts()) {
+                if(acct.getDefaultDisplayName(acct.getClientId()).equals(user)) {
+                    return(acct);
+                }
+            }
+        }
+        return(null);
+    }
+
+    /**
+     * Returns the the Problem object for supplied id (short name) or null if none found
+     *
+     * @param id shortname of problem
+     * @return Problem object or null
+     */
+    private Problem getProblemFromId(String id) {
+        for(Problem problem : model.getProblems()) {
+            if(problem.getShortName().equals(id)) {
+                return(problem);
+            }
+        }
+        return(null);
+    }
+
+    /**
+     * Returns the the Problem object for supplied id (short name) or null if none found
+     *
+     * @param id shortname of problem
+     * @return Problem object or null
+     */
+    private Language getLanguageFromId(String id) {
+        // get the languages, one-at-a-time from the model
+        for(Language language: model.getLanguages()) {
+            if (language.isActive() && language.getID().equals(id)) {
+                return language;
+            }
+        }
+        return(null);
+    }
+    /**
      * Check if the supplied user has a team or admin role, if so they can make team submissions
      *
      * @param sc User's security context
      * @return true if the user is allowed to make team submissions
      */
     public static boolean isTeamSubmitAllowed(SecurityContext sc) {
-        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM));
+        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
+               sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) ||
+               sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM));
     }
 
     /**
@@ -337,6 +788,16 @@ public class SubmissionService implements Feature {
      */
     public static boolean isAdminSubmitAllowed(SecurityContext sc) {
         return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
+    }
+
+    /**
+     * Retrieve access information about this endpoint for the supplied user's security context
+     *
+     * @param sc User's security information
+     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
+     */
+    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
+        return(new CLICSEndpoint("submissions", JSONUtilities.getJsonProperties(CLICSSubmission.class)));
     }
 
     @Override
