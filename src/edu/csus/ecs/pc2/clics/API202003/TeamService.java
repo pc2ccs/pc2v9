@@ -81,7 +81,7 @@ public class TeamService implements Feature {
             Account account = accounts[i];
             // TODO multi-site with overlapping teamNumbers?
             if (account.getPermissionList().isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && account.getClientId().getClientType().equals(ClientType.Type.TEAM)
-                    && new Integer(account.getClientId().getClientNumber()).toString().equals(teamId)) {
+                    && Integer.valueOf(account.getClientId().getClientNumber()).toString().equals(teamId)) {
                 return Response.ok(jsonTool.convertToJSON(account).toString(), MediaType.APPLICATION_JSON).build();
             }
         }

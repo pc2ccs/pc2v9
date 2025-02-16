@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202003;
 
 import java.util.Calendar;
@@ -73,7 +73,7 @@ public class JSONTool implements IJSONTool {
         element.put("id", IJSONTool.getSubmissionId(submission));
         element.put("language_id", IJSONTool.getLanguageId(model.getLanguage(submission.getLanguageId())));
         element.put("problem_id", IJSONTool.getProblemId(model.getProblem(submission.getProblemId())));
-        element.put("team_id", new Integer(submission.getSubmitter().getClientNumber()).toString());
+        element.put("team_id", Integer.valueOf(submission.getSubmitter().getClientNumber()).toString());
         element.put("time", Utilities.getIso8601formatterWithMS().format(submission.getCreateDate()));
         element.put("contest_time", Utilities.formatDuration(submission.getElapsedMS()));
         if (submission.getEntryPoint() != null) {
@@ -146,7 +146,7 @@ public class JSONTool implements IJSONTool {
         }
         element.put("id", id);
         if (clarification.getSubmitter().getClientType().equals(ClientType.Type.TEAM) && clarAnswer == null) {
-            element.put("from_team_id", new Integer(clarification.getSubmitter().getClientNumber()).toString());
+            element.put("from_team_id", Integer.valueOf(clarification.getSubmitter().getClientNumber()).toString());
         } else {
             element.set("from_team_id", null);
         }
@@ -158,7 +158,7 @@ public class JSONTool implements IJSONTool {
             if (clarification.isSendToAll() || !clarification.getSubmitter().getClientType().equals(ClientType.Type.TEAM)) {
                 element.set("to_team_id", null);
             } else {
-                element.put("to_team_id", new Integer(clarification.getSubmitter().getClientNumber()).toString());
+                element.put("to_team_id", Integer.valueOf(clarification.getSubmitter().getClientNumber()).toString());
             }
             element.put("reply_to_id", clarification.getElementId().toString());
         }
@@ -349,7 +349,7 @@ public class JSONTool implements IJSONTool {
     public ObjectNode convertToJSON(Account account) {
         ObjectNode element = mapper.createObjectNode();
         // SOMEDAY spec should be updated for overlapping multi-site team Ids, this will need to be updated at that time
-        element.put("id", new Integer(account.getClientId().getClientNumber()).toString());
+        element.put("id", Integer.valueOf(account.getClientId().getClientNumber()).toString());
         if (notEmpty(account.getExternalId())) {
             element.put("icpc_id", account.getExternalId());
         }
