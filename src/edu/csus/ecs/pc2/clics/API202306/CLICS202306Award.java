@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, Troy Boudreau and John Buck.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, Troy Boudreau and John Buck.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -11,8 +11,8 @@ import edu.csus.ecs.pc2.core.model.JSONObjectMapper;
 
 /**
  * Single CLICS Award.
- * 
- * 
+ *
+ *
  * @author John Buck
  * @author based on code by Douglas A. Lane <pc2@ecs.csus.edu>
  */
@@ -34,7 +34,7 @@ public class CLICS202306Award {
 
     /**
      * JSON array of team ids receiving this award.
-     * 
+     *
      * From 2023-06 CLICS specification:
      *   No meaning must be implied or inferred from the order of IDs
      *   If the value is null this means that the award is not currently being updated
@@ -43,12 +43,12 @@ public class CLICS202306Award {
      */
     @JsonProperty
     private String [] team_ids;
-    
+
     /**
      * Award with teams.
      * @param id  identifier for award, ex winner
      * @param citation ex. Contest winner
-     * @param team_ids lsit of ids
+     * @param team_ids list of ids
      */
     public CLICS202306Award(String id, String citation, String [] team_ids) {
         super();
@@ -56,7 +56,7 @@ public class CLICS202306Award {
         this.citation = citation;
         this.team_ids = team_ids;
     }
-    
+
     /**
      * Award with team.
      * @param id  identifier for award, ex winner
@@ -100,7 +100,7 @@ public class CLICS202306Award {
         om.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
         return om.writeValueAsString(this);
     }
-    
-    
+
+
 
 }

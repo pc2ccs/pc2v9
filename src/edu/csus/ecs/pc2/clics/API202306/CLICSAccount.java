@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.File;
@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -22,7 +21,6 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
@@ -105,7 +103,7 @@ public class CLICSAccount {
 
         try {
             ObjectMapper mapper = new ObjectMapper();
-            newaccounts = createAccountsFromCLICSAccounts(contest, mapper.readValue(jsonfile, CLICSAccount[].class), site, log);
+            newaccounts = createPC2AccountsFromCLICSAccounts(contest, mapper.readValue(jsonfile, CLICSAccount[].class), site, log);
         } catch (Exception e) {
             log.log(Log.WARNING, "could not deserialize account file " + jsonfile, e);
         }
@@ -126,7 +124,7 @@ public class CLICSAccount {
 
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            newaccounts = createAccountsFromCLICSAccounts(contest, mapper.readValue(yamlfile, CLICSAccount[].class), site, log);
+            newaccounts = createPC2AccountsFromCLICSAccounts(contest, mapper.readValue(yamlfile, CLICSAccount[].class), site, log);
         } catch (Exception e) {
             log.log(Log.WARNING, "could not deserialize account file " + yamlfile, e);
         }
@@ -147,9 +145,9 @@ public class CLICSAccount {
 
         try {
             ObjectMapper mapper = new ObjectMapper();
-            newaccounts = createAccountsFromCLICSAccounts(contest, mapper.readValue(json, CLICSAccount[].class), site, log);
+            newaccounts = createPC2AccountsFromCLICSAccounts(contest, mapper.readValue(json, CLICSAccount[].class), site, log);
         } catch (Exception e) {
-            log.log(Log.WARNING, "could not deserialize team string", e);
+            log.log(Log.WARNING, "could not deserialize account string", e);
         }
         return(newaccounts);
      }
@@ -168,15 +166,15 @@ public class CLICSAccount {
 
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            newaccounts = createAccountsFromCLICSAccounts(contest, mapper.readValue(yaml, CLICSAccount[].class), site, log);
+            newaccounts = createPC2AccountsFromCLICSAccounts(contest, mapper.readValue(yaml, CLICSAccount[].class), site, log);
         } catch (Exception e) {
-            log.log(Log.WARNING, "could not deserialize team string", e);
+            log.log(Log.WARNING, "could not deserialize account string", e);
         }
         return(newaccounts);
      }
 
     /**
-     * Converts CLICS teams into a PC2 Account array.
+     * Converts CLICS accounts into a PC2 Account array.
      *
      * @param contest The contest
      * @param accts array of CLICS accounts
@@ -184,13 +182,11 @@ public class CLICSAccount {
      * @param log For errors
      * @return an Account array of accounts converted from the CLICS accounts or null if error
      */
-    private static Account [] createAccountsFromCLICSAccounts(IInternalContest contest, CLICSAccount [] accts, int site, Log log) {
+    private static Account [] createPC2AccountsFromCLICSAccounts(IInternalContest contest, CLICSAccount [] accts, int site, Log log) {
 
         Account [] newaccounts = null;
         ArrayList<Account> accounts = new ArrayList<Account>();
         Account account;
-        JSONTool jsontool = new JSONTool(contest, null);
-        PermissionList teamPermissionList = new PermissionGroup().getPermissionList (ClientType.Type.TEAM);
         boolean error = false;
 
         // convert each clics account to a pc2 account, first looking up the existing account, if one exists
@@ -214,7 +210,6 @@ public class CLICSAccount {
                 break;
             }
             Type acctType = Type.UNKNOWN;
-            int acctNum;
             if(acct.type.equalsIgnoreCase("team")) {
                 acctType = Type.TEAM;
             } else if(acct.type.equalsIgnoreCase("admin")) {
@@ -244,52 +239,10 @@ public class CLICSAccount {
             }
             account = contest.getAccount(clientId);
             if(account == null) {
-                System.err.println("No account found for id: " + acct.id + " name " + acct.name + " username " + acct.username + " password " + acct.password);
+                log.log(Log.SEVERE, "No account found for id: " + acct.id + " name " + acct.name + " username " + acct.username + " password " + acct.password);
             } else {
                 accounts.add(account);
             }
-//            ClientId clientId = new ClientId(site, Type.TEAM, teamnum);
-//            // create barebones account
-//            account = new Account(clientId, clientId.getName(), site);
-//            account.clearListAndLoadPermissions(teamPermissionList);
-//            account.setLabel(team.label);
-//            account.setExternalId(team.icpc_id);
-//            if(!StringUtilities.isEmpty(team.display_name)) {
-//                account.setDisplayName(team.display_name);
-//            }
-//            if(!StringUtilities.isEmpty(team.name)) {
-//                account.setTeamName(team.name);
-//            }
-//            // now fill in any other fields we can
-//            if(team.group_ids != null && team.group_ids.length > 0) {
-//                Group group = jsontool.getGroupFromNumber(team.group_ids[0]);
-//                if(group == null) {
-//                    log.log(Log.SEVERE, "No group has been defined with GroupId=" + team.group_ids[0]);
-//                    error = true;
-//                    break;
-//                }
-//                account.setGroupId(group.getElementId());
-//                //TODO fix this when PC2 supports multiple groups per account
-//                if(team.group_ids.length > 1) {
-//                    log.log(Log.INFO, account.getDisplayName() + " has " + team.group_ids.length + " groups assigned - only using first one");
-//                }
-//            }
-//            if(team.hidden) {
-//                account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
-//            }
-//            // TODO Fix this when organizations are done correctly and built into the contest model
-//            if(!StringUtilities.isEmpty(team.organization_id)) {
-//                if(institutionsMap != null && institutionsMap.containsKey(team.organization_id)) {
-//                    // lookup institution info [0]=id, [1]=formal name, [2] = short name
-//                    String [] orgInfo = institutionsMap.get(team.organization_id);
-//                    if(orgInfo != null && orgInfo.length >= 3) {
-//                        account.setInstitutionCode(orgInfo[0]);
-//                        account.setInstitutionName(orgInfo[1]);
-//                        account.setInstitutionShortName(orgInfo[2]);
-//                    }
-//                }
-//            }
-//            accounts.add(account);
         }
         // if it all worked out, then create the array of accounts to be returned
         if(!error) {

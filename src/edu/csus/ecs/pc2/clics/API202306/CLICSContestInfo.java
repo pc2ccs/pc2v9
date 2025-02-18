@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.Calendar;
@@ -16,6 +16,8 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
  * CLICS Contest Info.
+ * This class describes the contest information returned by the URL/contests/ and
+ * URL/contests/<contestid>/ API endpoints.
  *
  * @author John Buck
  *
@@ -51,6 +53,16 @@ public class CLICSContestInfo {
 
     @JsonProperty
     private int penalty_time;
+
+// Properties we do not implement at the moment.  Someday.
+//    @JsonProperty
+//    private CLICSFileReference [] banner;
+//
+//    @JsonProperty
+//    private CLICSFileReference [] logo;
+//
+//    @JsonProperty
+//    private CLICSLocation location;
 
     /**
      * Fill in properties for a contest.

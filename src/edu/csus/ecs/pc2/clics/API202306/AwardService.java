@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.ArrayList;
@@ -20,11 +20,12 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAward;
 import edu.csus.ecs.pc2.core.imports.clics.CLICSAwardUtilities;
@@ -55,12 +56,12 @@ public class AwardService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest awards in JSON format. 
+     * This method returns a representation of the current contest awards in JSON format.
      * The response is a JSON array with one award description per array element, complying with 2023-06
-     * 
+     *
      * @param sc Security info for user making request
      * @param contestId The contest id
-     * @return a {@link Response} object containing the groups in JSON form
+     * @return a {@link Response} object containing the awards in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -68,11 +69,11 @@ public class AwardService implements Feature {
 
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();        
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         ArrayList<CLICS202306Award> alist = new ArrayList<CLICS202306Award>();
-        
+
         // only admin can see the unfrozen awards at the current time
         boolean obeyFreeze = (sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) == false);
         try {
@@ -80,7 +81,7 @@ public class AwardService implements Feature {
             // converted to the specific API version (currently, CLICSAward == CLICS202306Award for the most part,
             // but we want to make this easy to add new CLICS versions in the future).
             List<CLICSAward> genericCLICSAwards = CLICSAwardUtilities.createAwardsList(model, obeyFreeze);
-            
+
             if(genericCLICSAwards != null) {
                 // Convert each award to this API's idea of an award
                 for(CLICSAward award: genericCLICSAwards) {
@@ -100,12 +101,12 @@ public class AwardService implements Feature {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for awards " + e.getMessage()).build();
         }
     }
-    
+
 
     /**
-     * Returns a representation of the specified award id in the specified contestid. 
+     * Returns a representation of the specified award id in the specified contestid.
      * The response is a JSON object describing the award, complying with 2023-06
-     * 
+     *
      * @param sc Security info for user making request
      * @param contestId The contest
      * @param awardId The desired award in the contest
@@ -125,12 +126,12 @@ public class AwardService implements Feature {
                 // converted to the specific API version (currently, CLICSAward == CLICS202306Award for the most part,
                 // but we want to make this easy to add new CLICS versions in the future).
                 List<CLICSAward> genericCLICSAwards = CLICSAwardUtilities.createAwardsList(model, obeyFreeze);
-                
+
                 if(genericCLICSAwards != null) {
                     // Convert each award to this API's idea of an award
                     for(CLICSAward award: genericCLICSAwards) {
                         if(awardId.equals(award.getId())) {
-                            return Response.ok(new CLICS202306Award(awardId, award.getCitation(), award.getTeam_ids()).toJSON(), MediaType.APPLICATION_JSON).build();                            
+                            return Response.ok(new CLICS202306Award(awardId, award.getCitation(), award.getTeam_ids()).toJSON(), MediaType.APPLICATION_JSON).build();
                         }
                     }
                 }
@@ -145,7 +146,7 @@ public class AwardService implements Feature {
 
     /**
      * Post a new award.
-     * 
+     *
      * @param servletRequest details of request
      * @param sc requesting user's authorization info
      * @param contestId The contest
@@ -157,17 +158,17 @@ public class AwardService implements Feature {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{contestId}/awards")
     public Response addNewAward(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, String jsonInputString) {
-        
+
         if(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) == false) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-        
+
         return Response.status(Response.Status.NOT_IMPLEMENTED).build();
     }
-    
+
     /**
      * Put updates an existing award
-     * 
+     *
      * @param servletRequest details of request
      * @param sc requesting user's authorization info
      * @param contestId The contest
@@ -179,17 +180,17 @@ public class AwardService implements Feature {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{contestId}/awards/{awardId}")
     public Response setAwardInfo(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("awardId") String awardId, String jsonInputString) {
-        
+
         if(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) == false) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-        
+
         return Response.status(Response.Status.NOT_IMPLEMENTED).build();
     }
-    
+
     /**
      * Patch updates an existing award
-     * 
+     *
      * @param servletRequest details of request
      * @param sc requesting user's authorization info
      * @param contestId The contest
@@ -201,17 +202,17 @@ public class AwardService implements Feature {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{contestId}/awards/{awardId}")
     public Response updateAwardProperty(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("awardId") String awardId, String jsonInputString) {
-        
+
         if(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) == false) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-        
+
         return Response.status(Response.Status.NOT_IMPLEMENTED).build();
     }
-    
+
     /**
      * Deletes an existing award
-     * 
+     *
      * @param servletRequest details of request
      * @param sc requesting user's authorization info
      * @param contestId The contest
@@ -223,28 +224,28 @@ public class AwardService implements Feature {
     @Produces(MediaType.TEXT_PLAIN)
     @Path("{contestId}/awards/{awardId}")
     public Response deleteAward(@Context HttpServletRequest servletRequest, @Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("awardId") String awardId, String jsonInputString) {
-        
+
         if(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) == false) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-        
+
         return Response.status(Response.Status.NOT_IMPLEMENTED).build();
     }
 
     /**
      * Tests if the supplied user context has a role to update awards
      * (Non-spec compliant as there is no spec for this yet)
-     * 
+     *
      * @param sc User's security context
      * @return true of the user can modify awards
      */
     public static boolean isAwardsUpdateAllowed(SecurityContext sc) {
         return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
     }
-    
+
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
-     * 
+     *
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */

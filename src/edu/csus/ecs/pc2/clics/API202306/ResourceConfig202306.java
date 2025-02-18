@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 /**
  * Implementation of the CLICS 2020-03 API Specification (sort of) for the event feed
  * @author John Buck
@@ -21,23 +21,24 @@ public class ResourceConfig202306 implements ICLICSResourceConfig {
 
     public static final String CLICS_API_VERSION = "2023-06";
     public static final String CLICS_API_VERSION_URL = "https://ccs-specs.icpc.io/2023-06/contest_api";
-    
+
     private IInternalContest contest;
-    
+
     private IInternalController controller;
-    
+
     private WebServerPropertyUtils wsPropUtilities;
 
     private Log log = null;
-   
+
     /**
      * {@inheritDoc}
      */
+    @Override
     public ResourceConfig getResourceConfig(IInternalContest aContest, IInternalController aController, WebServerPropertyUtils wsPropUtil) {
 
         setContestAndController(aContest, aController);
         wsPropUtilities = wsPropUtil;
-        
+
         // create and (empty) ResourceConfig
         ResourceConfig resConfig = new ResourceConfig();
         resConfig.register(RolesAllowedDynamicFeature.class);
@@ -93,12 +94,6 @@ public class ResourceConfig202306 implements ICLICSResourceConfig {
         this.contest = inContest;
         this.controller = inController;
         this.log = controller.getLog();
-    }
-
-    private void showMessage(final String message, Exception ex) {
-        getLog().log(Log.INFO, message, ex);
-        System.out.println(new Date() + " " + message);
-        ex.printStackTrace();
     }
 
     private void showMessage(String message) {

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.ArrayList;
@@ -73,28 +73,26 @@ public class CLICSClarification {
     /**
      * Fills in the clarification properties
      *
+     * In the CLICS API questions and answers are two separate things completely.
+     * The only tenuous connection between an answer and question is that the
+     * answer has a property called "reply_to_id".
+     * This CLICSClarification class is used for both questions and answers.
+     * If the clarAns argument is null, it means it's a question and "clar"
+     * contains that question (see the comment for @param clarAns).
+     *
+     * So, ClarificationService creates a separate CLICSClarification object
+     * for the question (clarAns == null) and the answer to that question (clarAns != null).
+     *
      * @param model The contest
      * @param clar The clarification
      * @param clarAns non-null if this is an answer
      */
     public CLICSClarification(IInternalContest model, Clarification clar, ClarificationAnswer clarAns) {
 
-//        // use last answer if we were not handed the answer
-//        if(clarAns == null) {
-//            if (clar.isAnswered()) {
-//                // dump the answer
-//                ClarificationAnswer[] clarAnswers = clar.getClarificationAnswers();
-//                if(clarAnswers != null && clarAnswers.length > 0) {
-//                    clarAns = clarAnswers[clarAnswers.length-1];
-//                }
-//            }
-//        }
-
-
         // pc2 specific number (really, ordinal or original question - for announcement's too!)
         number = clar.getNumber();
 
-        // SOMEDAY change id to a original?  WTF does that mean? ordinal would make sense. -- JB
+        // SOMEDAY change id to a ordinal?
         id = clar.getElementId().toString();
         if (clarAns != null && clarAns.getElementId() != null) {
             id = clarAns.getElementId().toString();
@@ -103,7 +101,7 @@ public class CLICSClarification {
             from_team_id = "" + clar.getSubmitter().getClientNumber();
         }
         if (clarAns != null) {
-            // the request goes to a team?
+            // does the answer go to a team (as opposed to everyone)?
             if (!clar.isSendToAll()){
                 // The CLICS 2023-06 model does not fit in with the PC2 concept of directed responses to Groups
                 // and a list of teams.  As such, we'll always return the team that submitted the request, in to_team_id
@@ -162,7 +160,7 @@ public class CLICSClarification {
             contest_time = ContestTime.formatTimeMS(clar.getElapsedMS());
         }
         // if not a general clar and it's not a special category clar, then we need to supply the problem id.
-        if (!clar.getProblemId().equals(model.getGeneralProblem()) && model.getCategory(clar.getProblemId()) == null) {
+        if (!clar.getProblemId().equals(model.getGeneralProblem().getElementId()) && model.getCategory(clar.getProblemId()) == null) {
             problem_id = IJSONTool.getProblemId(model.getProblem(clar.getProblemId()));
         }
     }
@@ -221,7 +219,7 @@ public class CLICSClarification {
             ObjectMapper mapper = JSONUtilities.getObjectMapper();
             return mapper.writeValueAsString(this);
         } catch (Exception e) {
-            return "Error creating JSON for version info " + e.getMessage();
+            return "Error creating JSON for clarification " + e.getMessage();
         }
     }
 
