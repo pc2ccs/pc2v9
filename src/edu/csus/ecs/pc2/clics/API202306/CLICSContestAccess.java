@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 
 package edu.csus.ecs.pc2.clics.API202306;
 
@@ -17,7 +17,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * CLICS Contest State
+ * CLICS Contest Access
  *
  * @author John Buck
  *
@@ -52,9 +52,8 @@ public class CLICSContestAccess {
      * @param sc security info for user making request
      * @param model
      * @param controller
-     * @param contestId
      */
-    public CLICSContestAccess(SecurityContext sc, IInternalContest model, IInternalController controller, String contestId) {
+    public CLICSContestAccess(SecurityContext sc, IInternalContest model, IInternalController controller) {
         this.controller = controller;
 
         // For each role the connected user has, we enumerate what they can do with each endpoint.
@@ -95,7 +94,7 @@ public class CLICSContestAccess {
          */
         String [] serviceNames = { "Contest", "JudgementType", "Language", "Problem", "Group", "Organization",
                 "Team", "Person", "Account", "State", "Submission", "Judgement", "Run", "Clarification",
-                "Scoreboard", "EventFeed", "Award", "Commentary"
+                "Scoreboard", "EventFeed", "Award", "Commentary", "Webhooks"
         };
 
         ArrayList<CLICSEndpoint> epList = new ArrayList<CLICSEndpoint>();
@@ -108,19 +107,17 @@ public class CLICSContestAccess {
                 controller.getLog().log(Log.WARNING, "No endpoint access for service " + service);
             }
         }
-        if(!epList.isEmpty()) {
-            endpoints = epList.toArray(new CLICSEndpoint[0]);
-        }
+        endpoints = epList.toArray(new CLICSEndpoint[0]);
     }
 
     /**
      * Create a fully qualified class name for the supplied web service endpoint.
-     * eg. Group would create: edu.csus.ecs.pc2clics.API202306.GroupService
+     * eg. Group would create: edu.csus.ecs.pc2.clics.API202306.GroupService
      * Then call its getEndpointProperties(SecurityContext) static method to see what properties the
      * service supports for the supplied SecurityContext (user).
      * Note: If Java reflection makes you queasy, please stop here and just skip reading the code in this method.
      *
-     * @param epList List to add the CLICSEndpointObject to, if one was returned
+     * @param epList List to add the CLICSEndpointObject to, if one was found
      * @param serviceName The service name only (excluding the trailing "Service")
      * @param sc User's security context
      * @return true if this endpoint is accessible by the user in the SecurityContext
@@ -161,7 +158,7 @@ public class CLICSContestAccess {
             ObjectMapper mapper = JSONUtilities.getObjectMapper();
             return mapper.writeValueAsString(this);
         } catch (Exception e) {
-            return "Error creating JSON for contest state info " + e.getMessage();
+            return "Error creating JSON for contest access info " + e.getMessage();
         }
     }
 }

@@ -111,7 +111,7 @@ public class CLICSAccount {
     }
 
     /**
-     * Create account list from a accounts.yaml like file
+     * Create account list from a accounts.json like file
      *
      * @param contest the contest (needed for groups)
      * @param yamlfile yaml file to deserialize
@@ -132,10 +132,10 @@ public class CLICSAccount {
      }
 
     /**
-     * Create account list from a string containing accounts yaml
+     * Create account list from a string containing accounts json
      *
      * @param contest the contest (needed for groups)
-     * @param yaml yaml to deserialize
+     * @param json json to deserialize
      * @param site the site to create the accounts for
      * @return array of accounts to add, or null on error
      */

@@ -102,7 +102,7 @@ public class CLICSClarification {
         }
         if (clarAns != null) {
             // does the answer go to a team (as opposed to everyone)?
-            if (!clar.isSendToAll()){
+            if (!clarAns.isSendToAll()){
                 // The CLICS 2023-06 model does not fit in with the PC2 concept of directed responses to Groups
                 // and a list of teams.  As such, we'll always return the team that submitted the request, in to_team_id
                 // since they will get the response (and possibly others).
