@@ -26,8 +26,12 @@ public class CLICSEndpoint {
      *
      * @param type String representing the name of the endpoint, eg. "teams", "groups", etc.
      * @param properties List of supported properties
+     * @throws IllegalArgumentException
      */
-    public CLICSEndpoint(String type, String [] properties) {
+    public CLICSEndpoint(String type, String [] properties) throws IllegalArgumentException {
+        if(properties == null || properties.length <= 0) {
+            throw new IllegalArgumentException("null or empty properties for CLICSEndpoint");
+        }
         this.type = type;
         this.properties = properties;
     }

@@ -104,11 +104,13 @@ public class CLICSContestState {
             Date thawedDate = null;
 
             if (scoreboardFreezeDuration != null && scoreboardFreezeDuration.trim().length() > 0) {
+                // set default freeze time in seconds to be the end of the contest
                 long freezeTimeSecs = ct.getContestLengthSecs();
-                long freezeTime = Utilities.convertStringToSeconds(scoreboardFreezeDuration);
-                if (freezeTime != -1) {
+                long freezeDurationSecs = Utilities.convertStringToSeconds(scoreboardFreezeDuration);
+                // if freeze duration is valid, adjust freeze time in seconds to be when freeze starts
+                if (freezeDurationSecs != -1) {
                     // convert time since start of contest
-                    freezeTimeSecs = model.getContestTime().getContestLengthSecs() - freezeTime;
+                    freezeTimeSecs = model.getContestTime().getContestLengthSecs() - freezeDurationSecs;
                 }
                 // FIXME this date should be stored in ContestInformation
                 if (ct.getElapsedSecs() >= freezeTimeSecs) {
