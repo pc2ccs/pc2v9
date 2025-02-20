@@ -31,8 +31,8 @@ export class AppHeaderComponent {
   /* Return a string containing the "team id" -- that is, the PC2 team account number with
      the leading "team" removed */
   get teamId(): string { 
-    let acctId = this._authService.username; 
-    let teamId = acctId.substr(4);
+    const acctId = this._authService.username; 
+    const teamId = acctId.substr(4);
     return teamId;
   }
   
@@ -44,12 +44,12 @@ export class AppHeaderComponent {
 
 
   getElapsedSecs(): number {
-	let secs = this._contestService.getElapsedSecs() ;
+	const secs = this._contestService.getElapsedSecs() ;
     return secs;
   }
 
   getRemainingSecs(): number {
-	let secs = this._contestService.getRemainingSecs() ;
+	const secs = this._contestService.getRemainingSecs() ;
 	return secs;
   }
 }

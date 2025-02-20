@@ -8,7 +8,6 @@ import { ContestProblem } from '../models/contest-problem';
 import { ContestClock } from '../models/contest-clock';
 import { ContestTimerService } from './contestTimer.service' ;
 import { Clarification } from '../models/clarification';
-import { DEBUG_MODE } from 'src/constants';
 import { RESYNC_INTERVAL_IN_MINUTES } from 'src/constants';
 
 /**
@@ -41,10 +40,6 @@ export class ContestService extends IContestService {
   constructor(private _httpClient: HttpClient) {
 	super();
 
-	if (DEBUG_MODE) {
-		console.log ("Executing ContestService constructor; instance ID = ", this.uniqueId) ;
-	}
-	
 	this.standingsAreCurrent = false;
     
     //set a timer to auto-refresh the contest clock displays, at a rate defined in src/constants
@@ -53,9 +48,6 @@ export class ContestService extends IContestService {
     setInterval(
             //execute this function at the following-specified interval:
             () => {
-              if (DEBUG_MODE) {
-                console.log("ContestService: resyncing clocks with PC2 Server");
-              }
               this.updateLocalContestClockFromServer();
             }, 
             RESYNC_INTERVAL_IN_MINUTES * 60 * 1000	// timer interval in msec: minutes * (secs-per-min) * (msec-per-sec)
@@ -79,9 +71,6 @@ export class ContestService extends IContestService {
   }
 
   getIsContestRunning(): Observable<boolean> {
-	if (DEBUG_MODE) {
-		console.log ("ContestService.getIsContestRunning(): invoking HTTP get(.../contest.isRunning) WTI-API endpoint") ;
-	}
 	return this._httpClient.get<boolean>(`${environment.baseUrl}/contest/isRunning`);
   }
   
@@ -93,20 +82,10 @@ export class ContestService extends IContestService {
   }
   
   getStandings(): Observable<String> {
-	if (DEBUG_MODE) {
-		console.log("ContestService.getStandings():")
-	}
 	if (!this.standingsAreCurrent) {
-		if (DEBUG_MODE) {
-			console.log ("Standings are out of date; fetching new standings");
-		}
 		this.cachedStandings = this._httpClient.get<String>(`${environment.baseUrl}/contest/scoreboard`);
 		this.standingsAreCurrent = true ;
-	} else {
-		 if (DEBUG_MODE) {
-			 console.log("Returning cached standings");
-		 }
-	}
+	} 
 	return this.cachedStandings ;
   }
 
@@ -126,20 +105,14 @@ export class ContestService extends IContestService {
 	updateLocalContestClockFromServer ()  {
 		
 		//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
-		if (DEBUG_MODE) {
-			console.log("  Invoking ContestService.getContestClock(), subscribing for HTTP callback result")
-		}
 		this.getContestClock()
 			.subscribe(
-				(data: ContestClock) => {
-        			if (!data) { 
+				(contestClock: ContestClock) => {
+        			if (!contestClock) { 
 						console.error ("ContestService.updateLocalContestClockFromServer() getContestClock() subscription callback: unable to get ContestClock from PC2 API via ContestService!");
 					} else {
-						if (DEBUG_MODE) {
-							console.log("ContestService.updateLocalContestClockFromServer(): got callback from getContestClock() subscription.");
-						}
 						//install the received contest clock data into the ContestService's ContestClock
-						this.installNewContestClock(data);					
+						this.installNewContestClock(contestClock);					
 					}
       			}, 
 				(error: unknown) => {
@@ -155,20 +128,16 @@ export class ContestService extends IContestService {
 	 *  if the received data indicates the clock should be running it starts the ContestTimer (which then genrates a "clock tick"
 	 *  once per second to update the clock displays).
 	 */
-	installNewContestClock(data: any) {
+	installNewContestClock(data: ContestClock) {
 		
 		//copy the data fields (received from the PC2 Server via the WTI-API) into a new ContestService ContestClock object
 		let newContestClock = new ContestClock();
-		newContestClock.isRunning = data.running ;
-		newContestClock.contestLengthSecs = data.contestLengthInSecs ;
+		newContestClock.isRunning = data.isRunning ;
+		newContestClock.contestLengthSecs = data.contestLengthSecs ;
 		newContestClock.elapsedSecs = data.elapsedSecs ;
 		newContestClock.wallClockStartTime = data.wallClockStartTime ;
 
 		//save the new clock
-		if (DEBUG_MODE) {
-			console.log("ContestService (id", this.uniqueId, ").installNewContestClock(): replacing Contest Clock with:");
-			console.log(newContestClock);
-		}
 		this.contestClock = newContestClock;
 		
 		//pull the values out of the updated clock
@@ -179,9 +148,6 @@ export class ContestService extends IContestService {
 	
 		//shut off timer if it is running (otherwise we can't update the elapsed/remaining time values)
 		if (this.contestTimer.isTimerRunning) {
-			if (DEBUG_MODE) {
-				console.log("ContestService (id", this.uniqueId, ").installNewContestClock(): stopping timer");
-			}
 			this.contestTimer.stopTimer();
 		}
 		
@@ -191,9 +157,6 @@ export class ContestService extends IContestService {
 		
 		//restart the timer if the new contest clock values indicate it should be running
 		if (timerShouldBeStarted) {
-			if (DEBUG_MODE) {
-				console.log("ContestService (id", this.uniqueId, ").installNewContestClock(): starting timer");
-			}
 			this.contestTimer.startTimer();
 		}
 	}
