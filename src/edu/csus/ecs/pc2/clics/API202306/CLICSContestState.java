@@ -22,8 +22,8 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
  * @author John Buck
  *
  */
-// 2023-06 Spec specifically says to return a time or null, so always include all properties
-// But it also says the fields are optional, so, I assume, if it's null, that means the CCS
+// 2023-06 Spec specifically says each property must be null or contain a TIME value, so always include all properties
+// But the spec also says the fields are optional, so I assume, if it's null, that means the CCS
 // supports that property, which PC2 does.  If it did not support the property, then it would
 // not be included in the JSON.  (At least that is my interpretation -- JohnB)
 @JsonInclude(JsonInclude.Include.ALWAYS)
@@ -50,10 +50,10 @@ public class CLICSContestState {
     /*
      * These are non-standard PC2 specific properties to support pausing the contest
      * 'paused' is the CONTEST elapsed time at which the contest was paused.  If set, it means the contest
-     * is currently paused. (HH:MM:SS.uuu)
+     * is currently paused. (HH:MM:SS.uuu).
      *
      * 'resumed' is the real (wall) time the contest was last resumed (or started, including initial contest start).
-     * You can tell if the contest had been paused at some point if resumed != started (ISO time)
+     * You can tell if the contest had been paused at some point if resumed != started (ISO time).
      */
     @JsonProperty
     private String paused;
@@ -62,7 +62,7 @@ public class CLICSContestState {
     private String resumed;
 
     /*
-     * Non-standard property supplying a client with the current contest time (HH:MM:SS.uuu)
+     * Non-standard property supplying a client with the current contest time (HH:MM:SS.uuu).
      */
     @JsonProperty
     private String contest_time;
@@ -84,7 +84,7 @@ public class CLICSContestState {
             ContestTime ct = model.getContestTime();
 
             started = Utilities.getIso8601formatterWithMS().format(ct.getContestStartTime().getTime());
-            if (model.getContestTime().isPastEndOfContest()) {
+            if (ct.isPastEndOfContest()) {
                 Calendar endedDate = IJSONTool.calculateElapsedWalltime(model, ct.getContestLengthMS());
                 if (endedDate != null) {
                     ended = Utilities.getIso8601formatterWithMS().format(endedDate.getTimeInMillis());
@@ -104,23 +104,27 @@ public class CLICSContestState {
             Date thawedDate = null;
 
             if (scoreboardFreezeDuration != null && scoreboardFreezeDuration.trim().length() > 0) {
-                long elapsed = ct.getElapsedSecs();
-                long freezeTimeSecs = Utilities.getFreezeTime(model);
+                long freezeTimeSecs = ct.getContestLengthSecs();
+                long freezeTime = Utilities.convertStringToSeconds(scoreboardFreezeDuration);
+                if (freezeTime != -1) {
+                    // convert time since start of contest
+                    freezeTimeSecs = model.getContestTime().getContestLengthSecs() - freezeTime;
+                }
                 // FIXME this date should be stored in ContestInformation
-                if (elapsed >= freezeTimeSecs) {
+                if (ct.getElapsedSecs() >= freezeTimeSecs) {
                     Calendar freezeCal = IJSONTool.calculateElapsedWalltime(model, freezeTimeSecs * 1000);
                     if (freezeCal != null) {
                         frozen = Utilities.getIso8601formatterWithMS().format(freezeCal.getTime());
                     }
                 }
                 if (ci.isUnfrozen()) {
-                    thawedDate = model.getContestInformation().getThawed();
+                    thawedDate = ci.getThawed();
                     if (thawedDate != null) {
                         thawed = Utilities.getIso8601formatterWithMS().format(thawedDate);
                     }
                 }
             }
-            // FIXME this should only be showed if the contest is thawed for public users
+            // FIXME this should only be shown if the contest is thawed for public users
             FinalizeData fData = model.getFinalizeData();
             if (fData != null) {
                 Date fDate = fData.getCertificationDate();

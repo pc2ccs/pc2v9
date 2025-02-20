@@ -35,7 +35,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
- * WebService to handle awards endpoint
+ * WebService to handle awards endpoint.
  * @author John Buck
  *
  */

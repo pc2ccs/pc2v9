@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.File;
@@ -17,8 +17,7 @@ import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * CLICS Group description
- * Contains information about a group
+ * Contains information about a group (ICPC site).
  *
  * @author John Buck
  *
@@ -65,8 +64,9 @@ public class CLICSGroup {
      *
      * @param latitude
      * @param longitude
+     * @throws IllegalArgumentException if the values passed are invalid
      */
-    public void setLocation(double latitude, double longitude) {
+    public void setLocation(double latitude, double longitude) throws IllegalArgumentException {
         location = new CLICSLocation(latitude, longitude);
     }
 
@@ -77,7 +77,7 @@ public class CLICSGroup {
             ObjectMapper mapper = JSONUtilities.getObjectMapper();
             return mapper.writeValueAsString(this);
         } catch (Exception e) {
-            return "Error creating JSON for group info " + e.getMessage();
+            return "Error creating JSON for CLICS group info " + e.getMessage();
         }
     }
 
@@ -97,7 +97,7 @@ public class CLICSGroup {
             ObjectMapper mapper = new ObjectMapper();
             newgroups = createGroupsFromJSON(mapper.readValue(jsonfile, CLICSGroup[].class), site, log);
         } catch (Exception e) {
-            log.log(Log.WARNING, "could not deserialize group file " + jsonfile.toString(), e);
+            log.log(Log.WARNING, "could not deserialize CLICS group file " + jsonfile.toString(), e);
         }
         return(newgroups);
     }
@@ -118,7 +118,7 @@ public class CLICSGroup {
             ObjectMapper mapper = new ObjectMapper();
             newgroups = createGroupsFromJSON(mapper.readValue(json, CLICSGroup[].class), site, log);
         } catch (Exception e) {
-            log.log(Log.WARNING, "could not deserialize group", e);
+            log.log(Log.WARNING, "could not deserialize CLICS group", e);
         }
         return(newgroups);
     }
@@ -141,7 +141,7 @@ public class CLICSGroup {
         for(CLICSGroup cgroup: cgroups) {
 
             if(StringUtilities.isEmpty(cgroup.name)) {
-                log.log(Log.SEVERE, "no name property in group");
+                log.log(Log.SEVERE, "no name property in CLICS group");
                 error = true;
                 break;
             }

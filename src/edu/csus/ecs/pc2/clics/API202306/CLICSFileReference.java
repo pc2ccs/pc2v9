@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.HashSet;
@@ -14,8 +14,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * CLICS File Reference
- * Contains information about a file used in the API
+ * Contains information about a file used in the API.
  *
  * @author John Buck
  *
@@ -77,7 +76,7 @@ public class CLICSFileReference {
             mapper.setFilters(fp);
             return mapper.writeValueAsString(this);
         } catch (Exception e) {
-            return "Error creating JSON for FILE reference " + e.getMessage();
+            return "Error creating JSON for CLICS FILE reference " + e.getMessage();
         }
     }
 
