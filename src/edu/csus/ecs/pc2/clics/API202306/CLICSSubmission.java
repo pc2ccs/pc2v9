@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.HashSet;
@@ -20,8 +20,8 @@ import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * CLICS Submission from a contestant
- * Contains information about a contestant's submission
+ * Contains information about a contestant's submission.
+ * This corresponds to the object returned by the CLICS Submissions endpoint.
  *
  * @author John Buck
  *

@@ -170,7 +170,7 @@ public class JSONTool implements IJSONTool {
     }
 
     /**
-     * Create JSON for judgement of a submission in the contest
+     * Create JSON for judgment of a submission in the contest.
      *
      * @param submission
      */
@@ -179,13 +179,13 @@ public class JSONTool implements IJSONTool {
         Set<String> exceptProps = new HashSet<String>();
         ObjectNode element = null;
 
-        CLICSRun cRun = new CLICSRun(model, controller, submission, exceptProps);
+        CLICSJudgement cJudgment = new CLICSJudgement(model, controller, submission, exceptProps);
         try {
             // for this judgment, create filter to omit unused/bad properties (max_run_time in this case)
             SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
             FilterProvider fp = new SimpleFilterProvider().addFilter("rtFilter", filter).setFailOnUnknownId(false);
             mapper.setFilters(fp);
-            element = mapper.convertValue(cRun, ObjectNode.class);
+            element = mapper.convertValue(cJudgment, ObjectNode.class);
             mapper.setFilters(null);
         } catch (Exception e) {
             if(controller != null) {

@@ -12,8 +12,8 @@ import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * CLICS Problem
- * Contains information about a Problem
+ * Contains information about a Problem.
+ * This corresponds to the object returned by the CLICS Problems endpoint.
  *
  * @author John Buck
  *
@@ -90,7 +90,7 @@ public class CLICSProblem {
             ObjectMapper mapper = JSONUtilities.getObjectMapper();
             return mapper.writeValueAsString(this);
         } catch (Exception e) {
-            return "Error creating JSON for problem info " + e.getMessage();
+            return "Error creating JSON for CLICS problem info " + e.getMessage();
         }
     }
 }

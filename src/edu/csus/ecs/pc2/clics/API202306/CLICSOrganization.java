@@ -16,8 +16,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * CLICS Organization
- * Contains information about an Organization (institution)
+ * Contains information about an Organization (institution).
  *
  * @author John Buck
  *
@@ -63,12 +62,13 @@ public class CLICSOrganization {
     }
 
     /**
-     * Fill in organization information properties
+     * Fill in organization information properties.
      * TODO: fix to use organization obtained from organizations.json.  From insitutions.tsv, we get this:
      * [0]:1329 [1]:New York University [2]:NYU
-     * but only need [1].  We get the rest from the a typical account.
+     * but only need [1].  We get the rest from an account associated with this organization.
      *
-     * @param account typical account using this organization
+     * @param orgId Organization ID (usually, the CMS ID)
+     * @param account an account associated with this organization
      * @param orgFields String array of fields that correspond to institutions.tsv.  Gack!
      */
     public CLICSOrganization(String orgId, Account account, String [] orgFields) {
@@ -88,12 +88,12 @@ public class CLICSOrganization {
             ObjectMapper mapper = JSONUtilities.getObjectMapper();
             return mapper.writeValueAsString(this);
         } catch (Exception e) {
-            return "Error creating JSON for organization info " + e.getMessage();
+            return "Error creating JSON for CLICS organization info " + e.getMessage();
         }
     }
 
     /**
-     * Create Organization (institution) map from a organizations.json like file
+     * Create Organization (institution) map from a organizations.json like file.
      *
      * @param jsonfile json file to deserialize
      * @return Hashmap that maps institution id to an array[3] of Strings: id/code,formal name,name or null on error
@@ -108,13 +108,13 @@ public class CLICSOrganization {
             institutionsMap = createInstitutionsFromJSON(mapper.readValue(jsonfile, CLICSOrganization[].class), log);
         } catch (Exception e) {
             // deserialize exceptions
-            log.log(Log.WARNING, "could not deserialize organizations file " + jsonfile.toString(), e);
+            log.log(Log.WARNING, "could not deserialize CLICS organizations file " + jsonfile.toString(), e);
         }
         return(institutionsMap);
      }
 
     /**
-     * Create Organization (institution) map from a json string
+     * Create Organization (institution) map from a json string.
      *
      * @param json string to deserialize
      * @return Hashmap that maps institution id to an array[3] of Strings: id/code,formal name,name or null on error
@@ -128,13 +128,13 @@ public class CLICSOrganization {
             institutionsMap = createInstitutionsFromJSON(mapper.readValue(json, CLICSOrganization[].class), log);
             // deserialize exceptions
         } catch (Exception e) {
-            log.log(Log.WARNING, "could not deserialize organizations string", e);
+            log.log(Log.WARNING, "could not deserialize CLICS organizations string", e);
         }
         return(institutionsMap);
     }
 
     /**
-     * Convert CLICS organizations to PC2 hashma
+     * Convert CLICS organizations to PC2 hashmap.
      *
      * @param corgs array CLICS organization objects
      * @param log For errors
@@ -148,7 +148,7 @@ public class CLICSOrganization {
         for(CLICSOrganization org: corgs) {
 
             if(StringUtilities.isEmpty(org.id)) {
-                log.log(Log.SEVERE, "no id property in organization");
+                log.log(Log.SEVERE, "no id property in CLICS organization");
                 error = true;
                 break;
             }

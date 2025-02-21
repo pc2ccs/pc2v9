@@ -75,7 +75,7 @@ public class JudgementService implements Feature {
         Set<String> exceptProps = new HashSet<String>();
         StringJoiner allJudgments = new StringJoiner(",");
         ObjectMapper mapper = JSONUtilities.getObjectMapper();
-        CLICSRun cRun;
+        CLICSJudgement cJudgment;
         Run.RunStates status;
 
         for (Run run: model.getRuns()) {
@@ -91,13 +91,13 @@ public class JudgementService implements Feature {
             // Check if judged or being judged - can't generate a judgment event feed entry if not one of these states
             if(run.isJudged() || (status == RunStates.BEING_JUDGED || status == RunStates.BEING_COMPUTER_JUDGED)) {
                 exceptProps.clear();
-                cRun = new CLICSRun(model, controller, run, exceptProps);
+                cJudgment = new CLICSJudgement(model, controller, run, exceptProps);
                 try {
                     // for this judgment, create filter to omit unused/bad properties (max_run_time in this case)
                     SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
                     FilterProvider fp = new SimpleFilterProvider().addFilter("rtFilter", filter).setFailOnUnknownId(false);
                     // generate json with only properties we want and add to CSV list.
-                    allJudgments.add(mapper.writer(fp).writeValueAsString(cRun));
+                    allJudgments.add(mapper.writer(fp).writeValueAsString(cJudgment));
                 } catch (Exception e) {
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for judgment " + run.getElementId().toString() + " " + e.getMessage()).build();
                 }
@@ -139,13 +139,13 @@ public class JudgementService implements Feature {
                     // Check if judged or being judged - can't generate a judgment event feed entry if not one of these states
                     if(run.isJudged() || (status == RunStates.BEING_JUDGED || status == RunStates.BEING_COMPUTER_JUDGED)) {
                         Set<String> exceptProps = new HashSet<String>();
-                        CLICSRun cRun = new CLICSRun(model, controller, run, exceptProps);
+                        CLICSJudgement cJudgment = new CLICSJudgement(model, controller, run, exceptProps);
                         try {
                             ObjectMapper mapper = JSONUtilities.getObjectMapper();
                             // create filter to omit unused/bad properties (location, for example)
                             SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
                             FilterProvider fp = new SimpleFilterProvider().addFilter("rtFilter", filter);
-                            String json = mapper.writer(fp).writeValueAsString(cRun);
+                            String json = mapper.writer(fp).writeValueAsString(cJudgment);
                             return Response.ok(json, MediaType.APPLICATION_JSON).build();
                         } catch (Exception e) {
                             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating JSON for judgementId " + judgementId + " " + e.getMessage()).build();
@@ -164,7 +164,7 @@ public class JudgementService implements Feature {
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
     public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        return(new CLICSEndpoint("judgements", JSONUtilities.getJsonProperties(CLICSRun.class)));
+        return(new CLICSEndpoint("judgements", JSONUtilities.getJsonProperties(CLICSJudgement.class)));
     }
 
     @Override

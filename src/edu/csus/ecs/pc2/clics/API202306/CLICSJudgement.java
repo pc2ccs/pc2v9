@@ -19,15 +19,15 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /**
- * CLICS Judgment Run
- * Contains information about a Run
+ * Contains the judgment for a submission (Accepted, Wrong Answer, etc).
+ * This corresponds to the object returned by the "CLICS Judgements" endpoint.
  *
  * @author John Buck
  *
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFilter("rtFilter")
-public class CLICSRun {
+public class CLICSJudgement {
 
     @JsonProperty
     private String id;
@@ -58,12 +58,14 @@ public class CLICSRun {
     private double max_run_time;
 
     /**
-     * Fill in properties for a Problem description.
+     * Fill in properties for a judgment description.
      *
      * @param model The contest
-     * @param problem The problem
+     * @param controller
+     * @param submission the PC2 submission object
+     * @parma exceptProps Properties to be omitted from the generated json (this gets filled in here)
      */
-    public CLICSRun(IInternalContest model, IInternalController controller, Run submission, Set<String> exceptProps) {
+    public CLICSJudgement(IInternalContest model, IInternalController controller, Run submission, Set<String> exceptProps) {
         // {"id":"189549","submission_id":"wf2017-32163123xz3132yy","judgement_type_id":"CE","start_time":"2014-06-25T11:22:48.427+01",
         // "start_contest_time":"1:22:48.427","end_time":"2014-06-25T11:23:32.481+01","end_contest_time":"1:23:32.481"}
         id = submission.getElementId().toString();
@@ -74,7 +76,7 @@ public class CLICSRun {
             // Yikes! Using submission time since there is no judge start date... Something is amiss, but this is a last ditch guess
             startJudgeDate = submission.getCreateDate();
             if(controller != null) {
-                controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for submission " + submission.getNumber()
+                controller.getLog().log(Level.WARNING, "CLICSJudgement: The startJudgeDate for submission " + submission.getNumber()
                 + " is not set - using submission create date ");
             }
         }
@@ -92,7 +94,7 @@ public class CLICSRun {
                 if(judgeDate == null) {
                     judgeDate = startJudgeDate;
                     if(controller != null) {
-                        controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for judgement " + id
+                        controller.getLog().log(Level.WARNING, "CLICSJudgement: The startJudgeDate for judgement " + id
                             + " is not set - using startJudgeDate from submission");
                     }
                 }
@@ -100,7 +102,7 @@ public class CLICSRun {
                     // This is an absolute last resort - basically, use the judgement end time as the start time (0 elapsed *sigh*)
                     judgeDate = judgementRecord.getDate();
                     if(controller != null) {
-                        controller.getLog().log(Level.WARNING, "CLICSRun: The startJudgeDate for judgement " + id
+                        controller.getLog().log(Level.WARNING, "CLICSJudgement: The startJudgeDate for judgement " + id
                             + " is not set - using judgement record end date");
                     }
                 }
