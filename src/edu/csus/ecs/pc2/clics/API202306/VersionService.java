@@ -33,7 +33,7 @@ public class VersionService implements Feature {
     @SuppressWarnings("unused")
     private IInternalController controller;
 
-    private CLICSVerionInfo clicsVerionInfo = new CLICSVerionInfo(new VersionInfo());
+    private CLICSVersionInfo clicsVerionInfo = new CLICSVersionInfo(new VersionInfo());
 
     public VersionService(IInternalContest inModel, IInternalController inController) {
         super();

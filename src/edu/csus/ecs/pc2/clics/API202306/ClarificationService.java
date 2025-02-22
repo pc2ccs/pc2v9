@@ -1,9 +1,7 @@
 // Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,9 +24,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.MapType;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.StringUtilities;
@@ -50,7 +46,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
- * WebService to handle clarifications
+ * WebService to handle clarifications.
  *
  * @author John Buck
  *
@@ -82,7 +78,7 @@ public class ClarificationService implements Feature {
      *
      * @param sc security info for the user making the request
      * @param contestId Contest for which info is requested
-     * @return a {@link Response} object containing the contest languages in JSON form
+     * @return a {@link Response} object containing the clarifications in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -93,7 +89,7 @@ public class ClarificationService implements Feature {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        // get the groups from the contest
+        // get the clarifications from the contest
         Clarification[] clarifications = model.getClarifications();
 
         ArrayList<CLICSClarification> clarList = new ArrayList<CLICSClarification>();
@@ -132,7 +128,7 @@ public class ClarificationService implements Feature {
      * @param sc security info for the user making the request
      * @param contestId Contest for which info is requested
      * @param clarificationId the id of the desired clarification
-     * @return a {@link Response} object containing the contest languages in JSON form
+     * @return a {@link Response} object containing the clarification in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -143,7 +139,7 @@ public class ClarificationService implements Feature {
         if(contestId.equals(model.getContestIdentifier()) == false) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        // get the groups from the contest
+        // get the clarifications from the contest
         Clarification[] clarifications = model.getClarifications();
 
         // these are the only 2 that have special rules.
@@ -158,7 +154,7 @@ public class ClarificationService implements Feature {
         // be set to non-null
         Clarification clarNoAnswer = null;
 
-        // create list of clarifications to send back
+        // Find the clarification to send back if it's an answer
         for (Clarification clarification: clarifications) {
             if (clarification.isSendToAll() || isStaff || (isTeam && isClarificationForUser(clarification, user))) {
                 if(clarification.getElementId().toString().equals(clarificationId)) {
@@ -200,7 +196,7 @@ public class ClarificationService implements Feature {
      * @param sc requesting user's authorization info
      * @param contestId The contest
      * @param jsonInputString For non-admin, must not include id, to_team_id, time or contest_time.  For admin, must not include id.
-     * @return json for the clarification, including the (new) id
+     * @return Web Response for the clarification, including the (new) id, time and contest_time
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -238,7 +234,7 @@ public class ClarificationService implements Feature {
 
         if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)
             && (clar.getTo_team_id() != null || clar.getTime() != null || clar.getContest_time() != null || clar.getReply_to_id() != null)) {
-            return Response.status(Status.BAD_REQUEST).entity("may not include one or more properties").build();
+            return Response.status(Status.BAD_REQUEST).entity("the request includes disallowed properties").build();
         }
 
         String user = sc.getUserPrincipal().getName();
@@ -352,8 +348,8 @@ public class ClarificationService implements Feature {
      * @param servletRequest details of request
      * @param sc requesting user's authorization info
      * @param contestId The contest
-     * @param jsonInputString citation and team_ids json for the new award
-     * @return json for the award, including the id
+     * @param jsonInputString clarification request details
+     * @return currently returns an HTTP NOT_IMPLEMENTED response if everything checks out.
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -499,35 +495,6 @@ public class ClarificationService implements Feature {
     }
 
     /**
-     * Converts the input string, assumed to be a JSON string, into a {@link Map<String,String>} of JSON key-value pairs.
-     *
-     * @param contestId contest identifier
-     * @param jsonRequestString
-     *            a JSON string specifying a starttime request in CLICS format
-     * @return a Map of the JSON string key-to-value pairs as Strings, or null if the input JSON does not parse as a Map(String->String).
-     */
-    private Map<String, String> parseJSONIntoMap(String contestId, String jsonRequestString) {
-
-        // use Jackson's ObjectMapper to construct a Map of Strings-to-Strings from the JSON input
-        final ObjectMapper mapper = new ObjectMapper();
-        final MapType mapType = mapper.getTypeFactory().constructMapType(Map.class, String.class, String.class);
-        final Map<String, String> jsonDataMap;
-
-        try {
-            jsonDataMap = mapper.readValue(jsonRequestString, mapType);
-        } catch (JsonMappingException e) {
-            // error parsing JSON input
-            controller.getLog().log(Log.WARNING, contestId + ": parseJSONIntoMap(): JsonMappingException parsing JSON input '" + jsonRequestString + "'", e);
-            return null;
-        } catch (IOException e) {
-            controller.getLog().log(Log.WARNING, contestId + ": parseJSONIntoMap(): IOException parsing JSON input '" + jsonRequestString + "'", e);
-            return null;
-        }
-
-        return jsonDataMap;
-    }
-
-    /**
      * Returns a ClientId based on the user supplied.  eg. "team99", "administrator1", etc.
      * @param user eg. team99
      * @return The ClientId created, or null if the user is bad
@@ -621,20 +588,20 @@ public class ClarificationService implements Feature {
                 }
             }
         }
-        return(false);
+        return(ret);
     }
 
     /**
      * Try to find the Clarification from its id
      *
-     * @param szClarId This ID of the clar
+     * @param clarId The ID of the clar
      * @return the Clarification if found or null if not found
      */
     private Clarification findClarificationFromId(String clarId) {
 
         Clarification clar = null;
 
-        // create list of clarifications to send back
+        // search for the clarification to send back
         for (Clarification clarification: model.getClarifications()) {
             if(clarification.getElementId().toString().equals(clarId)) {
                 clar = clarification;

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.File;
@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.util.IJSONTool;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * CLICS Team object
+ * Contains information about a team as it will appear on the CLICS Teams endpoint.
  *
  * @author John Buck
  *
@@ -105,7 +105,7 @@ public class CLICSTeam {
             ObjectMapper mapper = JSONUtilities.getObjectMapper();
             return mapper.writeValueAsString(this);
         } catch (Exception e) {
-            return "Error creating JSON for team info " + e.getMessage();
+            return "Error creating JSON for CLICS team info " + e.getMessage();
         }
     }
 
@@ -127,7 +127,7 @@ public class CLICSTeam {
             ObjectMapper mapper = new ObjectMapper();
             newaccounts = createTeamsFromTeamsJSON(contest, mapper.readValue(jsonfile, CLICSTeam[].class), site, institutionsMap, log);
         } catch (Exception e) {
-            log.log(Log.WARNING, "could not deserialize team file " + jsonfile, e);
+            log.log(Log.WARNING, "could not deserialize CLICS team JSON file " + jsonfile, e);
         }
         return(newaccounts);
      }
@@ -150,7 +150,7 @@ public class CLICSTeam {
             ObjectMapper mapper = new ObjectMapper();
             newaccounts = createTeamsFromTeamsJSON(contest, mapper.readValue(json, CLICSTeam[].class), site, institutionsMap, log);
         } catch (Exception e) {
-            log.log(Log.WARNING, "could not deserialize team string", e);
+            log.log(Log.WARNING, "could not deserialize CLICS team JSON string", e);
         }
         return(newaccounts);
      }
@@ -184,7 +184,7 @@ public class CLICSTeam {
                 }
             } catch(Exception e) {
                 // Some sort of conversion error - log it and abort
-                log.log(Log.SEVERE, "unable to get team number from label or id", e);
+                log.log(Log.SEVERE, "unable to get team number from CLICS label or id", e);
                 error = true;
                 break;
             }

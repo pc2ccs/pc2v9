@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.IOException;
@@ -29,8 +29,7 @@ import edu.csus.ecs.pc2.core.standings.TeamStanding;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * CLICS Scoreboard
- * Contains information about the scoreboard
+ * Contains the CLICS representation of the scoreboard.
  *
  * @author John Buck
  *
@@ -98,20 +97,20 @@ public class CLICSScoreboard {
         state = new CLICSContestState(model, null);
 
         ArrayList<CLICSScoreboardRow>rowsArray = new ArrayList<CLICSScoreboardRow>();
-        HashMap<String, String> probEleToShort = new HashMap<String, String>();
+        HashMap<String, String> probEleToShortName = new HashMap<String, String>();
 
         // create a mapping of each problem's element ID to its shortname.
         // we will use shortname as the problem id in the problem list for each team's solutions
         for(Problem problem: model.getProblems()) {
-            probEleToShort.put(problem.getElementId().toString(), problem.getShortName());
+            probEleToShortName.put(problem.getElementId().toString(), problem.getShortName());
         }
         // list of xml entries for each team's standing
         List<TeamStanding> standings = contestStandings.getTeamStandings();
         if(standings != null) {
-            for (TeamStanding teamStanding : contestStandings.getTeamStandings()) {
-              rowsArray.add(new CLICSScoreboardRow(probEleToShort, teamStanding));
-              rows = rowsArray.toArray(new CLICSScoreboardRow[0]);
+            for (TeamStanding teamStanding : standings) {
+                rowsArray.add(new CLICSScoreboardRow(probEleToShortName, teamStanding));
             }
+            rows = rowsArray.toArray(new CLICSScoreboardRow[0]);
         } else {
             rows = new CLICSScoreboardRow[0];
         }
@@ -123,7 +122,7 @@ public class CLICSScoreboard {
             ObjectMapper mapper = JSONUtilities.getObjectMapper();
             return mapper.writeValueAsString(this);
         } catch (Exception e) {
-            return "Error creating JSON for scoreboard info " + e.getMessage();
+            return "Error creating JSON for CLICS scoreboard info " + e.getMessage();
         }
     }
 }
