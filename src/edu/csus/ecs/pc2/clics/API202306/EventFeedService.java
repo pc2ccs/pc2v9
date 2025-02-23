@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.ByteArrayOutputStream;
@@ -172,7 +172,9 @@ public class EventFeedService implements Feature {
     public static String createEventFeedJSON(IInternalContest contest, IInternalController controller, HttpServletRequest servletRequest, SecurityContext sc) {
         EventFeedStreamer streamer = new EventFeedStreamer(contest, controller, servletRequest, sc);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        // addStream() will send all past events to the client immediately (eg. a snapshot)
         streamer.addStream(stream, new EventFeedFilter());
+        // since past events have been sent out, we are done.
         streamer.removeStream(stream);
         String json = new String(stream.toByteArray());
         stream = null;

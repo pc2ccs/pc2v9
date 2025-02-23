@@ -13,7 +13,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * Event fee log.
+ * Event feed log.
  *
  * Contains all event feed log entries for current contest.
  *

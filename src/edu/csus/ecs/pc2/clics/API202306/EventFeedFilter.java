@@ -262,7 +262,7 @@ public class EventFeedFilter {
      * @return type for event, ex. "languages" as EventFeedType.LANGUAGES.
      */
     public EventFeedType getEventFeedType(String string) {
-        // {"type":"languages", "id":"pc2-11", "op":"create", "data": {"id":"1","name":"Java"}}
+        // {"type":"languages", "id":"pc2-11", "data": {"id":"1","name":"Java"}}
 
         String typeValue = getCleanValue(string, EF_TYPE_STRING);
         return(parseEventFeedType(typeValue));
@@ -284,7 +284,7 @@ public class EventFeedFilter {
 
     /**
      * Extract value for id from JSON string
-     * @param string ex. {"event":"languages", "id":"pc2-11", "op":"create", "data": {"id":"1","name":"Java"}}
+     * @param string ex. {"event":"languages", "token":"pc2-11", "id":"pc2-11", "data": {"id":"1","name":"Java"}}
      * @return value for id, ex pc2-11
      */
     public String getEventFeedSequence(String string) {

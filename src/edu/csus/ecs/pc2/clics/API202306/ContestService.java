@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.IOException;
@@ -147,7 +147,7 @@ public class ContestService implements Feature {
         if (jsonInputString == null || jsonInputString.length() == 0) {
             controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": received invalid (empty) JSON string");
             // return HTTP 400 response code per CLICS spec
-            return Response.status(Status.BAD_REQUEST).entity("Empty contest request").build();
+            return Response.status(Status.BAD_REQUEST).entity("Empty contest times request").build();
         }
 
         // we got some potentially legal input; try parsing it for valid form
@@ -155,12 +155,12 @@ public class ContestService implements Feature {
 
         // if the map is null then the parsing failed
         if (requestMap == null) {
-            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unable to parse JSON starttime string");
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unable to parse JSON contest times string");
             // return HTTP 400 response code per CLICS spec
-            return Response.status(Status.BAD_REQUEST).entity("Bad JSON starttime request").build();
+            return Response.status(Status.BAD_REQUEST).entity("Bad JSON contest times request").build();
         }
 
-        // if we get here then the JSON parsed correctly; see if it contained "starttime" as a key
+        // if we get here then the JSON parsed correctly; see if it contained contest "id" as a key
         if (!requestMap.containsKey(CONTEST_ID_KEY)) {
             controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": JSON input missing 'id' key: '" + jsonInputString + "'");
             // return HTTP 400 response code per CLICS spec
@@ -169,11 +169,7 @@ public class ContestService implements Feature {
 
         // validate id
         // TODO can the contestIdentifier be null?  Yes, but it may be something else too.  The CDS gives 'null',
-        // and it is unclear what other CCS's that we are shadowing for may provide.  It is almost
-        // certainly NOT what PC2 set up as the identifier (Default-###############).  As such, until the
-        // API endpoints are fixed to include a (configurable) contest identifier, a reasonable thing to
-        // do at this point is not validate the id at all.  Just make sure one was specified (above).  That's
-        // enough for now.
+        // and it is unclear what other CCS's that we are shadowing for may provide.
         String jsonIdShorthand = LOG_PREFIX + contestId + ": JSON '" + CONTEST_ID_KEY + "' key ";
         String idAsk = requestMap.get(CONTEST_ID_KEY);
 
@@ -199,10 +195,10 @@ public class ContestService implements Feature {
         // Flag to indicate that countdown pause time was specified
         boolean sawCountdownPauseTime = false;
 
-        // if we get here then the JSON parsed correctly; see if it contained "start_time" as a key (that is required by spec)
+        // if we get here then the JSON parsed correctly; see if it contained "start_time" as a key
         if (!requestMap.containsKey(CONTEST_START_TIME_KEY)) {
 
-            // check if thaw time is present
+            // check if thaw time is present, if start_time is not provided, scoreboard_thaw_time had better be
             if(!requestMap.containsKey(CONTEST_THAW_TIME)) {
                 // no, neither one is included.  This is an error.
                 controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": JSON input missing '" + CONTEST_START_TIME_KEY + "' key or '" + CONTEST_THAW_TIME + "' key: '" + jsonInputString + "'");
@@ -523,9 +519,11 @@ public class ContestService implements Feature {
     }
 
     /**
-     * This method returns a representation of the current contest scheduled start time in JSON format as described on the CLICS wiki.
+     * This method returns the configured contests.
      *
-     * @return a {@link Response} object containing a JSON String giving the scheduled contest start time as a Unix Epoch value, or as the string "undefined" if no start time is currently scheduled.
+     * @return a {@link Response} object containing a JSON String of the contests defined
+     *          at the moment, for PC2, we only have 1 contest defined, always.  That will
+     *          change someday.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -566,7 +564,7 @@ public class ContestService implements Feature {
     }
 
     /**
-     * Check the user has a role than change contest start time
+     * Check that the user's role permits a contest start
      *
      * @param sc Security context for the user
      * @return true if the user can perform the operation
@@ -576,7 +574,8 @@ public class ContestService implements Feature {
     }
 
     /**
-     * Check the user has a role than change contest thaw time
+     * Check that the user's role permits setting contest thaw time
+     * TODO: Should we always return false here since we don't implement this?
      *
      * @param sc Security context for the user
      * @return true if the user can perform the operation
