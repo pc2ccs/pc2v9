@@ -250,7 +250,7 @@ public class AwardService implements Feature {
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
     public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        return(new CLICSEndpoint("award", JSONUtilities.getJsonProperties(CLICS202306Award.class)));
+        return(new CLICSEndpoint("awards", JSONUtilities.getJsonProperties(CLICS202306Award.class)));
     }
 
     @Override
