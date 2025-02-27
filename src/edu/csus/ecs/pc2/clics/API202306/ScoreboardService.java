@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.IOException;
@@ -58,6 +58,7 @@ public class ScoreboardService implements Feature {
      * @param sc
      * @param contestId
      * @param group_id - optional group id query param
+     * @param division - optional division query param
      * @return {@link Response} object containing the JSON scoreboard
      */
     @GET
@@ -97,7 +98,7 @@ public class ScoreboardService implements Feature {
                         divNumber = Integer.parseInt(division);
                     } catch(Exception e) {
                         // Bad division specified
-                        return Response.status(Response.Status.NOT_FOUND).build();
+                        return Response.status(Response.Status.BAD_REQUEST).build();
                     }
                 }
 
@@ -113,7 +114,6 @@ public class ScoreboardService implements Feature {
             } else {
                 // do not show (return) the scoreboard if the contest has not
                 // been started and the requester is not special)
-                // FIXME: might be better if this returned an "empty" scoreboard?
                 return Response.status(Status.FORBIDDEN).build();
             }
         }

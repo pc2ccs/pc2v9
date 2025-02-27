@@ -1,7 +1,8 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.ArrayList;
+
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -12,11 +13,12 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -26,8 +28,8 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
- * WebService to handle runs
- * 
+ * WebService to handle CLICS runs, which are PC2 RunTestCase objects.
+ *
  * @author John Buck
  *
  */
@@ -57,21 +59,24 @@ public class RunService implements Feature {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRuns(@Context SecurityContext sc, @PathParam("contestId") String contestId) {
-        
+
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
-            return Response.status(Response.Status.NOT_FOUND).build();        
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-        
+
         long freezeTime = Utilities.getFreezeTime(model);
-        
+        boolean isAdmin = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN);
+        boolean isJudge = sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE);
+        boolean isAnalyst = sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST);
+
         ArrayList<CLICSTestCase> tclist = new ArrayList<CLICSTestCase>();
-        
+
         for (Run run: model.getRuns()) {
-            // If not admin or judge, can not see runs after freeze time
-            if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
-                // if run is after scoreboard freeze, do not return info for it
-                if (run.getElapsedMS() / 1000 > freezeTime) {
+            // Admins can see test cases all the time.
+            if (!isAdmin && !isJudge){
+                // If not an analyst, or is an analyst but after freeze: you can't see test cases
+                if(!isAnalyst || run.getElapsedMS()/1000 > freezeTime) {
                     continue;
                 }
             }
@@ -92,11 +97,11 @@ public class RunService implements Feature {
 
     /**
      * Returns a representation of the specified test case in the specified contest in JSON format. The returned value is compliant with 2023-06 API.
-     * 
+     *
      * @param sc User's info
      * @param contestId The contest
      * @param runId The run of interest
-     * @return response
+     * @return response containing the test case's information in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -106,18 +111,21 @@ public class RunService implements Feature {
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == true) {
             long freezeTime = Utilities.getFreezeTime(model);
-    
+            boolean isAnalyst = sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST);
+
+            // Only admins, judges and analysts can see run test cases
+            if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) && !isAnalyst) {
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
+
             for (Run run: model.getRuns()) {
-                // If not admin or judge, can not see runs after freeze time
-                if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
-                    // if run is after scoreboard freeze, do not return info for it
-                    if (run.getElapsedMS() / 1000 > freezeTime) {
-                        continue;
-                    }
-                }
                 if(run.isJudged() && !run.getJudgementRecord().isPreliminaryJudgement()) {
                     for(RunTestCase testCase: run.getRunTestCases()) {
                         if (testCase.getElementId().toString().equals(runId)) {
+                            // If an analyst can not see runs after freeze time
+                            if (isAnalyst && run.getElapsedMS() / 1000 > freezeTime) {
+                                return Response.status(Response.Status.FORBIDDEN).build();
+                            }
                             return Response.ok(new CLICSTestCase(model, testCase).toJSON(), MediaType.APPLICATION_JSON).build();
                         }
                     }
@@ -126,15 +134,23 @@ public class RunService implements Feature {
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
-    
+
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
-     * 
+     *
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
     public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        return(new CLICSEndpoint("runs", JSONUtilities.getJsonProperties(CLICSTestCase.class)));
+        String [] props;
+
+        if(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) || sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST)){
+            props = JSONUtilities.getJsonProperties(CLICSAccount.class);
+        } else {
+            // If you're not admin, judge or analyst, you can't see any properties for run test cases
+            props = new String[0];
+        }
+        return(new CLICSEndpoint("runs", props));
     }
 
     @Override

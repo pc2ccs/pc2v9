@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.services.core.JSONUtilities;
 import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 
 /**
- * WebService to handle problems
+ * WebService to handle problems.
  *
  * @author John Buck
  *
@@ -43,17 +43,14 @@ public class ProblemService implements Feature {
     @SuppressWarnings("unused")
     private IInternalController controller;
 
-    private JSONTool jsonTool;
-
     public ProblemService(IInternalContest inContest, IInternalController inController) {
         super();
         this.model = inContest;
         this.controller = inController;
-        jsonTool = new JSONTool(inContest, inController);
     }
 
     /**
-     * This method returns a representation of the current contest problems in JSON format. The returned value is a JSON array with one problems description per array element, compying with 2023-06
+     * This method returns a representation of the current contest problems in JSON format. The returned value is a JSON array with one problem description per array element, complying with 2023-06
      *
      * @param sc User information
      * @param contestId The contest

@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.util.ArrayList;
@@ -19,6 +19,7 @@ import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -29,7 +30,7 @@ import edu.csus.ecs.pc2.imports.ccs.ICPCTSVLoader;
 import edu.csus.ecs.pc2.services.core.JSONUtilities;
 
 /**
- * WebService for handling organizations
+ * WebService for handling organizations.
  *
  * @author John Buck
  *
@@ -42,6 +43,7 @@ public class OrganizationService implements Feature {
 
     private IInternalContest model;
 
+    @SuppressWarnings("unused")
     private IInternalController controller;
 
     public OrganizationService(IInternalContest inContest, IInternalController inController) {
@@ -55,7 +57,7 @@ public class OrganizationService implements Feature {
      * This is compliant with 2023-06
      *
      * @param contestId The contest
-     * @return a {@link Response} object containing the model teams in JSON form
+     * @return a {@link Response} object containing the model organizations in JSON form
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -75,7 +77,7 @@ public class OrganizationService implements Feature {
 
         // make up a list of CLICSOrganizations in use.
         for(Account account: model.getAccounts()) {
-            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals("undefined")) {
+            if (account.getClientId().getClientType().equals(ClientType.Type.TEAM) && !account.getInstitutionCode().equals(Constants.DEFAULT_INSTITUTIONCODE)) {
                 String orgId = IJSONTool.getOrganizationId(account);
                 if(orgSet.add(orgId)) {
                     String [] orgFields = ICPCTSVLoader.getInstitutionNames(orgId);
