@@ -129,18 +129,24 @@ export class NewRunComponent implements OnInit, OnDestroy {
 		//submit the run
 	    this._teamService.submitRun(model)
 	      .pipe(takeUntil(this._unsubscribe))
-	      .subscribe(_ => {
-	        this.clearNewSubmission();
+	      .subscribe({
+		next: value  => {
+			console.log('Received value:', value);
+	      	this.clearNewSubmission();
 	        this.close();
 	        this._uiHelper.alertOk('Run has been submitted successfully!');
 	        this._teamService.runsUpdated.next();
-	      }, (error: any) => {
-	        this._uiHelper.alertError('Error submitting problem! Check console for details');
+	    },
+	    error: (error: any) => {
+	      this._uiHelper.alertError('Error submitting problem! Check console for details');
 	        console.error(error);
-	      });
+	    },
+	    complete: () => {
+	    // Called when the observable completes
+	    console.log('Observable completed');
+	    }});
+  		}
 	}
-  }
-
   async buildFileSubmission(file: File) {
     const fileSubmission = new FileSubmission();
     const fileContents = await this.fileReader(file);

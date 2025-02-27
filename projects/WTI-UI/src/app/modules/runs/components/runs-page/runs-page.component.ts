@@ -37,7 +37,6 @@ export class RunsPageComponent implements OnInit, OnDestroy {
     // when runs are updated, trigger a reload
     this._teamService.runsUpdated
       .pipe(
-	delay(300),
 	takeUntil(this._unsubscribe))
       .subscribe(_ => {
         this.loadRuns();

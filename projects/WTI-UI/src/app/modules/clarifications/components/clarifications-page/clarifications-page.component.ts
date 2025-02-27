@@ -35,7 +35,6 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
 
     this._contestService.clarificationsUpdated
       .pipe(
-	delay(300),
 	takeUntil(this._unsubscribe))
       .subscribe(_ => {
         this.loadClars();
