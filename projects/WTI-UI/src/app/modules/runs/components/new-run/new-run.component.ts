@@ -142,7 +142,6 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	    },
 	    complete: () => {
 	    // Called when the observable completes
-	    console.log('Observable completed');
 	    }});
   		}
 	}
