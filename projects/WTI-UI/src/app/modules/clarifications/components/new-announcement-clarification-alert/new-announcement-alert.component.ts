@@ -11,13 +11,13 @@ import { takeUntil } from 'rxjs/operators';
   templateUrl: './new-announcement-alert.component.html',
   styleUrls: ['./new-announcement-alert.component.scss']
 })
-export class NewClarificationAnnoucementAlertComponent implements OnInit {
+export class NewClarificationAnnouncementAlertComponent implements OnInit {
   private _unsubscribe = new Subject<void>();
   problem: string;
   question: string;
   answer: string;
 
-  constructor(private _matDialogRef: MatDialogRef<NewClarificationAnnoucementAlertComponent>,
+  constructor(private _matDialogRef: MatDialogRef<NewClarificationAnnouncementAlertComponent>,
               private _router: Router,
               private _contestService: IContestService,
               @Inject(MAT_DIALOG_DATA) private _data: any) { }
