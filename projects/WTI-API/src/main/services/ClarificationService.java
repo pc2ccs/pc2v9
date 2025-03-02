@@ -29,7 +29,7 @@ public class ClarificationService implements IClarificationEventListener {
         String clarId = String.format("%s-%s", arg0.getSiteNumber(),arg0.getNumber());
         
         JsonObject builder = Json.createObjectBuilder()
-                .add("type", WebsocketMsgType.CLARIFICATION_ANNOUNCEMENT.name().toLowerCase())
+                .add("type", WebsocketMsgType.ANNOUNCEMENT.name().toLowerCase())
                 .add("id", clarId)
                 .add("teamId", this.teamId)
                 .build();
