@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { ITeamsService } from 'src/app/modules/core/abstract-services/i-teams.service';
-import { takeUntil, filter } from 'rxjs/operators';
-import { Subject, delay } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { Run } from 'src/app/modules/core/models/run';
 import { MatDialog } from '@angular/material/dialog';
 import { NewRunComponent } from '../new-run/new-run.component';

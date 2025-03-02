@@ -131,7 +131,6 @@ export class NewRunComponent implements OnInit, OnDestroy {
 	      .pipe(takeUntil(this._unsubscribe))
 	      .subscribe({
 		next: value  => {
-			console.log('Received value:', value);
 	      	this.clearNewSubmission();
 	        this.close();
 	        this._uiHelper.alertOk('Run has been submitted successfully!');
