@@ -66,7 +66,7 @@ public class EventFeedFilter {
      * Create filter.
      *
      * eventTypeList events are:  contests, judgement-types, languages, problems, groups, organizations,
-     * teams, team-members, submissions, judgements, runs, clarifications, awards.
+     * teams, accounts, team-members, submissions, judgements, runs, clarifications, awards.
      *
      * <br>
      * The complete list of events are at: {@link EventFeedType}

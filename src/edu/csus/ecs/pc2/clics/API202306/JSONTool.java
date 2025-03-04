@@ -165,6 +165,11 @@ public class JSONTool implements IJSONTool {
     }
 
     @Override
+    public ObjectNode convertToAccountJSON(Account account) {
+        return(mapper.convertValue(new CLICSAccount(model, null, account), ObjectNode.class));
+    }
+
+    @Override
     public ObjectNode convertToJSON(Problem problem, int ordinal) {
         return(mapper.convertValue(new CLICSProblem(model, problem, ordinal), ObjectNode.class));
     }

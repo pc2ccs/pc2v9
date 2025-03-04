@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.util;
 
 import java.util.Calendar;
@@ -94,12 +94,20 @@ public interface IJSONTool {
     public ObjectNode convertOrganizationsToJSON(Account account);
 
     /**
-     * This converts an account to a json object
+     * This converts an account to a team json object
+     *
+     * @param account - the account
+     * @return Json object for the team
+     */
+    public ObjectNode convertToJSON(Account account);
+
+    /**
+     * This converts an account to a accounts json object
      *
      * @param account - the account
      * @return Json object for the account
      */
-    public ObjectNode convertToJSON(Account account);
+    public ObjectNode convertToAccountJSON(Account account);
 
     /**
      * This converts a problem to a json object

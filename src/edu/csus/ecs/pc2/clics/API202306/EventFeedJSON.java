@@ -427,6 +427,43 @@ public class EventFeedJSON extends JSON202306Utilities {
         return new CLICSTeam(contest, account).toJSON();
     }
 
+    public String getAccountJSON(IInternalContest contest) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        Account[] accounts = contest.getAccounts();
+        Arrays.sort(accounts, new AccountComparator());
+
+        if(isUseCollections()) {
+            StringBuilder dataCollection = new StringBuilder();
+            boolean bFirst = true;
+            dataCollection.append("[");
+            for (Account account : accounts) {
+                if(bFirst) {
+                    bFirst = false;
+                } else {
+                    dataCollection.append(",");
+                }
+                dataCollection.append(getTeamJSON(contest, account));
+            }
+            if(dataCollection.length() > 1) {
+                dataCollection.append("]");
+                appendJSONEvent(stringBuilder, ACCOUNT_KEY, ++eventIdSequence, null, dataCollection.toString());
+                stringBuilder.append(NL);
+            }
+        } else {
+            for (Account account : accounts) {
+                appendJSONEvent(stringBuilder, ACCOUNT_KEY, ++eventIdSequence, IJSONTool.getAccountId(account), getAccountJSON(contest, account));
+                stringBuilder.append(NL);
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    public String getAccountJSON(IInternalContest contest, Account account) {
+        return new CLICSAccount(contest, null, account).toJSON();
+    }
+
     /**
      * Determine if the supplied account is to be shown on the scoreboard based on the groups it belongs to
      *
@@ -866,6 +903,10 @@ public class EventFeedJSON extends JSON202306Utilities {
             if (json != null) {
                 buffer.append(json);
             }
+            json = getAccountJSON(contest);
+            if (json != null) {
+                buffer.append(json);
+            }
             json = getTeamMemberJSON(contest);
             if (json != null) {
                 buffer.append(json);
@@ -897,7 +938,7 @@ public class EventFeedJSON extends JSON202306Utilities {
     /**
      * Appends named event types onto a buffer.
      *
-     * valid events are: awards, clarifications, contests, groups, judgement-types, judgements, languages, organizations, problems, runs, submissions, team-members, teams
+     * valid events are: awards, clarifications, contests, groups, judgement-types, judgements, languages, organizations, problems, runs, submissions, team-members, teams, accounts
      *
      * @param contest
      * @param buffer
@@ -937,6 +978,9 @@ public class EventFeedJSON extends JSON202306Utilities {
                     break;
                 case TEAM_KEY:
                     appendNotNull(buffer, getTeamJSON(contest));
+                    break;
+                case ACCOUNT_KEY:
+                    appendNotNull(buffer, getAccountJSON(contest));
                     break;
                 case TEAM_MEMBERS_KEY:
                     appendNotNull(buffer, getTeamMemberJSON(contest));

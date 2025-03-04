@@ -23,6 +23,8 @@ public class JSON202306Utilities extends JSONUtilities {
 
     public static final String TEAM_KEY = "teams";
 
+    public static final String ACCOUNT_KEY = "accounts";
+
     public static final String SUBMISSION_KEY = "submissions";
 
     public static final String RUN_KEY = "runs";

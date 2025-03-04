@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.StringUtilities;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
@@ -366,6 +368,18 @@ public class JSONTool implements IJSONTool {
             element.set("group_ids", groupIds);
         }
         return element;
+    }
+
+    @Override
+    public ObjectNode convertToAccountJSON(Account account) {
+        Log log;
+        if(controller != null) {
+            log = controller.getLog();
+        } else {
+            log = StaticLog.getLog();
+        }
+        log.severe("CLICS API 2020-03 does not support accounts on the event feed");
+        return null;
     }
 
     @Override

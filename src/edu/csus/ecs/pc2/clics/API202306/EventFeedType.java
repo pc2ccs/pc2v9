@@ -66,6 +66,10 @@ public enum EventFeedType {
      */
     TEAMS("teams"),
     /**
+    *
+    */
+    ACCOUNTS("accounts"),
+    /**
      *
      */
     TEAM_MEMBERS("team-members");

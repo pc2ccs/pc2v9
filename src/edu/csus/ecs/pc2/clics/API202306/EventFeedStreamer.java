@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.ByteArrayOutputStream;
@@ -380,6 +380,8 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                 // SOMEDAY send team members info
 
             }
+            String jsonAcct = getJSONEvent(ACCOUNT_KEY, getNextEventId(), IJSONTool.getAccountId(account), jsonTool.convertToAccountJSON(account).toString());
+            sendJSON(jsonAcct + NL);
         }
 
         @Override
@@ -391,21 +393,27 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                     String json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), jsonTool.convertToJSON(account).toString());
                     sendJSON(json + NL);
                 } else {
+                    // Delete message (can no longer see the team because it's no on scoreboard
                     String json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), "{\"id\": null}");
                     sendJSON(json + NL);
                 }
                 // SOMEDAY send team members info
             }
+            String jsonAcct = getJSONEvent(ACCOUNT_KEY, getNextEventId(), IJSONTool.getAccountId(account), jsonTool.convertToAccountJSON(account).toString());
+            sendJSON(jsonAcct + NL);
         }
 
         @Override
         public void accountsAdded(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
+            String json;
             for (Account account : accounts) {
                 if (isTeam(account) && contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                    String json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), jsonTool.convertToJSON(account).toString());
+                    json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), jsonTool.convertToJSON(account).toString());
                     sendJSON(json + NL);
                 }
+                json = getJSONEvent(ACCOUNT_KEY, getNextEventId(), IJSONTool.getAccountId(account), jsonTool.convertToAccountJSON(account).toString());
+                sendJSON(json + NL);
             }
         }
 
@@ -413,16 +421,19 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
         public void accountsModified(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
             Arrays.sort(accounts, new AccountComparator());
+            String json;
+
             for (Account account : accounts) {
                 if (isTeam(account)) {
                     if (contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                        String json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), jsonTool.convertToJSON(account).toString());
-                        sendJSON(json + NL);
+                        json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), jsonTool.convertToJSON(account).toString());
                     } else {
-                        String json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), "{\"id\": null}");
-                        sendJSON(json + NL);
+                        json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), "{\"id\": null}");
                     }
+                    sendJSON(json + NL);
                 }
+                json = getJSONEvent(ACCOUNT_KEY, getNextEventId(), IJSONTool.getAccountId(account), jsonTool.convertToAccountJSON(account).toString());
+                sendJSON(json + NL);
             }
         }
 

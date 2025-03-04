@@ -69,7 +69,7 @@ public class CLICSAccount {
         id = cid.getName();
         username = id;
         name = account.getDisplayName();
-        if(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN)) {
+        if(sc != null && sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN)) {
             password = account.getPassword();
         }
         type = "" + cid.getClientType();
