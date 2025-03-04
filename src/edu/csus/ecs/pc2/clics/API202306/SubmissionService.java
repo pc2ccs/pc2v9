@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import java.io.File;
@@ -566,8 +566,8 @@ public class SubmissionService implements Feature {
                 + " language:" +  lang.getID()
                 + " main file:" + mainFile.getFileName()
                 + " entry_point:" + entry
-                + " time:" + overrideTimeMS
-                + " submissionID:" + overrideSubmissionID);
+                + " overrideTime:" + overrideTimeMS
+                + " overrideSubmissionID:" + overrideSubmissionID);
 
             try {
                 // Convert files to serialized files
@@ -755,10 +755,10 @@ public class SubmissionService implements Feature {
     }
 
     /**
-     * Returns the the Problem object for supplied id (short name) or null if none found
+     * Returns the the Language object for supplied id or null if none found
      *
-     * @param id shortname of problem
-     * @return Problem object or null
+     * @param id of the language
+     * @return Language object or null
      */
     private Language getLanguageFromId(String id) {
         // get the languages, one-at-a-time from the model
