@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.shadow;
 
 import java.io.BufferedReader;
@@ -15,6 +15,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -24,6 +25,8 @@ import javax.xml.bind.DatatypeConverter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.csus.ecs.pc2.clics.CLICSJudgementType;
+import edu.csus.ecs.pc2.clics.CLICSJudgementType.CLICS_JUDGEMENT_ACRONYM;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -31,6 +34,11 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IFile;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.ui.MessageManager;
 import edu.csus.ecs.pc2.ui.MessageRecord;
@@ -52,15 +60,14 @@ import edu.csus.ecs.pc2.ui.ShadowCompareRunsPane;
  */
 public class RemoteEventFeedMonitor implements Runnable {
 
-    public static final int REMOTE_EVENT_FEED_DELAYMS = 0;
+    public static final int REMOTE_EVENT_FEED_DELAYMS = 500;
     public static final int RECONNECT_RETRY_DELAY = 5000;
     public static final boolean ATTEMPT_RECONNECTS = true;
     public static final boolean ALLOW_PRESTART_ACTIVITY = false;
 
+    private static final int MAX_LOG_NOTIFICATION_LEN = 80;
+
     private IRemoteContestAPIAdapter remoteContestAPIAdapter;
-    private URL remoteURL;
-    private String login;
-    private String password;
     private RemoteRunSubmitter submitter;
 
     private boolean keepRunning ;
@@ -96,7 +103,6 @@ public class RemoteEventFeedMonitor implements Runnable {
     //a list form of the above, created in the class constructor
     private List<String> submissionFilterIDsList;
 
-    private boolean listening;
     private IInternalController pc2Controller;
     private InputStream remoteInputStream;
     private IShadowMonitorStatus monitorStatus;
@@ -121,6 +127,12 @@ public class RemoteEventFeedMonitor implements Runnable {
      * A lock for synchronizing access to the above map.
      */
     private static Object remoteJudgementsMapLock = new Object();
+
+    private ArrayList<Map<String, Object>> eventQueue = null;
+    private int currentEvent = 0;
+    private String notifyType = null;
+    private String operationType = null;
+    private String notifyId = null;
 
     /**
      * Constructs a RemoteEventFeedMonitor with the specified values.  The RemoteEventFeedMonitor
@@ -155,9 +167,6 @@ public class RemoteEventFeedMonitor implements Runnable {
 
         this.pc2Controller = pc2Controller ;
         this.remoteContestAPIAdapter = remoteContestAPIAdapter;
-        this.remoteURL = remoteURL;
-        this.login = login;
-        this.password = password;
         this.submitter = submitter;
         this.monitorStatus = mon;
 
@@ -209,8 +218,6 @@ public class RemoteEventFeedMonitor implements Runnable {
                 }
             } else {
 
-                String event = "null event";
-
                 bOpened = true;
                 if(monitorStatus != null) {
                     // if someone is monitoring, inform them we are connected
@@ -221,14 +228,15 @@ public class RemoteEventFeedMonitor implements Runnable {
                     //wrap the event stream (which consists of newline-delimited character strings representing events)
                     // in a BufferedReader
                     BufferedReader reader = new BufferedReader(new InputStreamReader(remoteInputStream));
+                    Map<String, Object> dataMap;
 
                     //read the next event from the event feed stream
-                    event = reader.readLine();
+                    dataMap = getNextEvent(reader, log);
 
                     tossedMessages = 0;
 
                     //process the next event
-                    while ((event != null) && keepRunning) {
+                    while ((dataMap != null) && keepRunning) {
 
                         //if the remote system feeds events too fast (which happens when testing with a completed contest/eventfeed, and could
                         // in theory happen during a live contest), this RemoteEventFeedMonitor thread overwhelms the JVM scheduler, causing
@@ -251,504 +259,449 @@ public class RemoteEventFeedMonitor implements Runnable {
                         // by default, we will NOT delay.  This lets messages like organizations, runs, teams, etc, fly by quickly.
                         bDelay = false;
 
-                        //skip blank lines and any that do not start/end with "{...}"
-                        if ( event.length()>0 && event.trim().startsWith("{") && event.trim().endsWith("}") ) {
 
-                            if(lastToken != null) {
-                                msg = "Got event string (last token " + lastToken + "): " + event;
-                            } else {
-                                msg = "Got event string: " + event;
+                        boolean isContestRunning = pc2Controller.getContest().getContestTime().isContestRunning();
+                        boolean wasContestStarted = pc2Controller.getContest().getContestTime().isContestStarted();
+
+                        // we will process submissions if we are allowed precontest or the contest is running
+                        allowSubmits = allowPrestartActivity || isContestRunning;
+                        // we will process judgments if we are allowed precontest or the contest has been started at some point
+                        allowJudgments = (allowPrestartActivity || wasContestStarted) && (!remoteCCSFinalized);
+
+                        if ("submissions".equals(notifyType)) {
+
+                            if (isReadOnlyClient()) {
+                                log.info("Skipping submission event due to being logged in as a read-only client (not Feeder1)");
+                                dataMap = getNextEvent(reader, log);
+                                continue;
                             }
-                            logAndDebugPrint(log, Level.INFO, msg);
+
+                            if(!allowSubmits) {
+                                log.info("Skipping submission event since the contest has not started and allowPrestartActivity is false.");
+                                dataMap = getNextEvent(reader, log);
+                                tossedMessages++;
+                                if(monitorStatus != null) {
+                                    monitorStatus.updateShadowNumberofTossedRecords(tossedMessages);
+                                }
+                                continue;
+                            }
+
+                            //process a submission event
                             try {
 
-                                /**
-                                 *
-                                Sample submissions JSON from finals 2019 dom judge event feed.
-                                {"id":"279029","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.162+01:00","contest_time":"-17:02:04.837","id":"10547","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10547/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.191+01:00"}
-                                {"id":"279030","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.209+01:00","contest_time":"-17:02:04.790","id":"10548","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10548/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.216+01:00"}
-                                {"id":"279031","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.228+01:00","contest_time":"-17:02:04.771","id":"10549","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10549/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.235+01:00"}
-                                {"id":"279032","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.244+01:00","contest_time":"-17:02:04.755","id":"10550","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10550/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.251+01:00"}
-                                 */
+                                logAndDebugPrint(log, Level.INFO, "Processing submission event: " + dataMap.toString());
 
-                                // extract the event into a map of event element names/values
-                                Map<String, Object> eventMap = getMap(event);
+                                //get a map of the data comprising the submission
+                                Map<String, Object> submissionEventDataMap = dataMap;
 
-                                if (eventMap == null) {
-                                    // could not parse event
-                                    logAndDebugPrint(log, Level.WARNING, "Could not parse event: " + event);
+                                //get the submission ID out of the submission event data map
+                                String submissionID = (String) submissionEventDataMap.get("id");
+
+                                //check if the current submission is to be ignored due to filtering
+                                // (submissionFilterIDsList is a list of submissions we WANT TO KEEP; typically used for debugging...)
+                                if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
+
+                                    logAndDebugPrint(log, Level.INFO, "Ignoring submission " + submissionID + " due to filter");
+                                    dataMap = getNextEvent(reader, log);
+                                    continue;
+                                }
+
+                                bFound = mapSubmissions.get(submissionID);
+                                if(bFound != null && bFound.booleanValue() == true) {
+
+                                    logAndDebugPrint(log, Level.INFO, "Quickly Ignoring submission " + submissionID + " due to it already having been submitted");
+
+                                    dataMap = getNextEvent(reader, log);
+                                    continue;
+                                }
+
+                                //make sure we haven't seen this submission before (this could happen if
+                                // we've done a restart but already processed this submission on a prior shadow run)
+                                if (RunUtilities.isAlreadySubmitted(pc2Controller.getContest(),submissionID) ) {
+
+                                    logAndDebugPrint(log, Level.INFO, "Ignoring submission " + submissionID + " due to it already having been submitted");
+
+                                    dataMap = getNextEvent(reader, log);
+                                    continue;
+                                }
+
+                                // add to local map to detect quick duplicate before they get entered into the system
+                                mapSubmissions.put(submissionID, true);
+
+                                // This is the commit point for a submission, so we will want to delay at the end of the loop
+                                bDelay = true;
+
+                                //convert submission data into a ShadowRunSubmission object
+                                ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
+
+                                if (runSubmission == null) {
+
+                                    logAndDebugPrint(log, Level.SEVERE, "Error parsing submission data: " + dataMap.toString());
+                                    throw new Exception("Error parsing submission data " + dataMap.toString());
 
                                 } else {
-                                    // Get event token, if present
-                                    String evToken = (String)eventMap.get("token");
-                                    if(evToken != null && !evToken.isEmpty()) {
-                                        lastToken = evToken;
-                                        // if someone is  monitoring, let them know about the new event
-                                        if(monitorStatus != null) {
-                                            monitorStatus.updateShadowLastToken(lastToken);
+
+                                    logAndDebugPrint(log, Level.INFO, "Found run " + runSubmission.getId() + " from team " +
+                                            runSubmission.getTeam_id() + ": event= " + dataMap.toString());
+
+                                    //construct the override values to be used for the shadow submission
+                                    long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
+                                    long overrideSubmissionID = Utilities.stringToLong(runSubmission.getId());
+
+//The entire following block of commented-out code is intended to be used to support fetching submission files from the remote system by using the
+// "href" element found within the "files" element of a submission event.  However, the href element cannot be properly used
+// until the "Primary CCS URL" property is split into "Primary CCS BaseURL" and "Primary CCS ContestID Path" elements.
+// Until that update is made throughout the code, the following block is commented out and we're using a default URL
+// created by calling the RemoteContestAPIAdapter with just the submissionID; the RemoteContestAPIAdapter constructs the
+// default URL by appending "/submissions/<submissionID>/files" to the current value of "Primary CCS URL" and then
+// fetches the submission files from that URL.
+// See also the comment in interface IRemoteContestAPIAdapter; the additional (commented-out) method there must be uncommented
+// for the following block of code to work.
+
+//                                            //define the path to where the remote zip file containing the submissions files can be found
+//                                            String defaultSubmissionFilesURLString = "/submissions/" + runSubmission.getId() + "/files"; //our default path
+//                                            String submissionFilesURLString = null;  //this one we hope to pull out of the submission event, below
+//
+//
+//                                            //Note about the next set of code: the CLICS ContestAPI spec says that a submission event has numerous fields,
+//                                            // one of which is "files".  The value found in the "files" element is specified as an ARRAY of "zip file references",
+//                                            // where each "zip file reference" has the form  {href:path/to/zip,mime:application/zip}.  Thus there
+//                                            // can in principle be multiple zip files on the remote system, with each zip file containing multiple files.
+//                                            // In practice however there is no known implementation where there will be more than one such "zip file reference",
+//                                            // so what we do is fetch the array (as a List, where each list element is one "zip file reference" (consisting of
+//                                            // two parts:  href:path and mime:zip)), then pull the first element out of the array (List), pull the href
+//                                            // out of that Map, and use that to form the URL to fetch the zip file containing the submission files.  *whew*
+//
+//                                            //get from the ShadowRunSubmission object the list of references to zip files.
+//                                            List<Map<String, String>> filesList = runSubmission.getFiles();
+//
+//                                            //make sure we got a valid list from the submission
+//                                            if (filesList.size() >= 1){
+//
+//                                                //get out of the list the first zip file reference (which is a map containing "href:path" and "mime:zip" elements)
+//                                                Map<String, String> zipFileReferenceMap = filesList.get(0);
+//
+//                                                //make sure we got a valid zip file reference map (the map should contain exactly "href" and "mime" keys)
+//                                                if (zipFileReferenceMap.size() == 2){
+//                                                    String filesPath = zipFileReferenceMap.get("href");
+//                                                    if (!StringUtilities.isEmpty(filesPath)){
+//                                                        Note: the following method getRemoteBaseURL() needs to be coded -- after
+//                                                        the split of Primary CCS URL into "BaseURL" and "ContestIDPath" has been done.
+//                                                        submissionFilesURLString = getRemoteBaseURL() + "/" + filesPath;
+//                                                    }
+//                                                }
+//                                            }
+//
+//                                            //check if the above code was able to obtain a URL for the submission files zip
+//                                            if (StringUtilities.isEmpty(submissionFilesURLString)) {
+//
+//                                                //no, we couldn't get a URL from the event; use our default
+//                                                submissionFilesURLString = defaultSubmissionFilesURLString;
+//                                                System.err.println("Warning: could not find submission file URL for id = " + runSubmission.getId() + //
+//                                                        " in submission event; using '" + submissionFilesURLString + "' " + //
+//                                                        "(event=" + event + ")");
+//                                            }
+//
+//                                            List<IFile> files = null;
+//
+//                                            System.out.println("debug 22 fetching file from URL "+submissionFilesURLString);
+//                                            //get the files from the remote URL
+//                                            URL submissionFilesURL = new URL(submissionFilesURLString);
+//                                            files = remoteContestAPIAdapter.getRemoteSubmissionFiles(submissionFilesURL);
+//
+//                                            if (files == null){
+//                                                System.err.println("Unable to retrieve submission files using "+submissionFilesURL);
+//                                            } else {
+//                                                System.out.println("debug 22 getRemoteSubmissionFiles GOT "+files.size()+" files");
+//                                            }
+
+                                    //this block is a temporary substitute for the above commented-out block
+                                    List<IFile> files = null;
+
+                                    logAndDebugPrint(log, Level.INFO, "Fetching files from remote system using id "+overrideSubmissionID);
+
+                                    //try up to maxTries times to get files without having a SocketTimeout
+                                    int tryNum = 1;
+                                    int maxTries = 10;
+                                    boolean success = false ;
+                                    Exception ex = null;
+
+                                    while (!success && tryNum<=maxTries) {
+                                        try {
+                                            //request files from remote CCS
+                                            files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
+
+                                            //if we get here, no exception was thrown while getting the files
+                                            success = true;
+
+                                        } catch (Exception e) {
+
+                                            //we got an exception attempting to get the files for the submission from the remote CCS;
+                                            //see if the underlying cause of the exception was a socket timeout
+                                            Throwable cause = e.getCause();
+                                            if (cause!=null && cause instanceof SocketTimeoutException) {
+
+                                                    logAndDebugPrint(log, Level.WARNING, "SocketTimeoutException getting files for submission " +
+                                                            overrideSubmissionID + " on try " + tryNum + "; trying up to " + maxTries + " times");
+                                                    tryNum++;
+
+                                                    //save the exception so we can rethrow it if we never get "success"
+                                                    ex = e;
+
+                                            } else {
+                                                //we got an exception other than a socket timeout; rethrow it outward (which will be logged in the catch clause)
+                                                throw e;
+                                            }
                                         }
                                     }
 
-                                    // find event type
-                                    String eventType = (String) eventMap.get("type");
-
-                                    logAndDebugPrint(log, Level.INFO, "Found event of type " + eventType + ": " + event);
-
-                                    boolean isContestRunning = pc2Controller.getContest().getContestTime().isContestRunning();
-                                    boolean wasContestStarted = pc2Controller.getContest().getContestTime().isContestStarted();
-
-                                    // we will process submissions if we are allowed precontest or the contest is running
-                                    allowSubmits = allowPrestartActivity || isContestRunning;
-                                    // we will process judgments if we are allowed precontest or the contest has been started at some point
-                                    allowJudgments = (allowPrestartActivity || wasContestStarted) && (!remoteCCSFinalized);
-
-                                    if ("submissions".equals(eventType)) {
-
-                                        if (isReadOnlyClient()) {
-                                            log.info("Skipping submission event due to being logged in as a read-only client (not Feeder1)");
-                                            event = reader.readLine();
-                                            continue;
-                                        }
-
-                                        if(!allowSubmits) {
-                                            log.info("Skipping submission event since the contest has not started and allowPrestartActivity is false.");
-                                            event = reader.readLine();
-                                            tossedMessages++;
-                                            if(monitorStatus != null) {
-                                                monitorStatus.updateShadowNumberofTossedRecords(tossedMessages);
-                                            }
-                                            continue;
-                                        }
-
-                                        //process a submission event
-                                        try {
-
-                                            logAndDebugPrint(log, Level.INFO, "Processing submission event: " + event);
-
-                                            //get a map of the data comprising the submission
-                                            Map<String, Object> submissionEventDataMap = (Map<String, Object>) eventMap.get("data");
-
-                                            //get the submission ID out of the submission event data map
-                                            String submissionID = (String) submissionEventDataMap.get("id");
-
-                                            //check if the current submission is to be ignored due to filtering
-                                            // (submissionFilterIDsList is a list of submissions we WANT TO KEEP; typically used for debugging...)
-                                            if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
-
-                                                logAndDebugPrint(log, Level.INFO, "Ignoring submission " + submissionID + " due to filter");
-                                                event = reader.readLine();
-                                                continue;
-                                            }
-
-                                            bFound = mapSubmissions.get(submissionID);
-                                            if(bFound != null && bFound.booleanValue() == true) {
-
-                                                logAndDebugPrint(log, Level.INFO, "Quickly Ignoring submission " + submissionID + " due to it already having been submitted");
-
-                                                event = reader.readLine();
-                                                continue;
-                                            }
-
-                                            //make sure we haven't seen this submission before (this could happen if
-                                            // we've done a restart but already processed this submission on a prior shadow run)
-                                            if (RunUtilities.isAlreadySubmitted(pc2Controller.getContest(),submissionID) ) {
-
-                                                logAndDebugPrint(log, Level.INFO, "Ignoring submission " + submissionID + " due to it already having been submitted");
-
-                                                event = reader.readLine();
-                                                continue;
-                                            }
-
-                                            // add to local map to detect quick duplicate before they get entered into the system
-                                            mapSubmissions.put(submissionID, true);
-
-                                            // This is the commit point for a submission, so we will want to delay at the end of the loop
-                                            bDelay = true;
-
-                                            //convert submission data into a ShadowRunSubmission object
-                                            ShadowRunSubmission runSubmission = createRunSubmission(submissionEventDataMap);
-
-                                            if (runSubmission == null) {
-
-                                                logAndDebugPrint(log, Level.SEVERE, "Error parsing submission data: " + event);
-                                                throw new Exception("Error parsing submission data " + event);
-
-                                            } else {
-
-                                                logAndDebugPrint(log, Level.INFO, "Found run " + runSubmission.getId() + " from team " +
-                                                        runSubmission.getTeam_id() + ": event= " + event);
-
-                                                //construct the override values to be used for the shadow submission
-                                                long overrideTimeMS = Utilities.convertCLICSContestTimeToMS(runSubmission.getContest_time());
-                                                long overrideSubmissionID = Utilities.stringToLong(runSubmission.getId());
-
-        //The entire following block of commented-out code is intended to be used to support fetching submission files from the remote system by using the
-        // "href" element found within the "files" element of a submission event.  However, the href element cannot be properly used
-        // until the "Primary CCS URL" property is split into "Primary CCS BaseURL" and "Primary CCS ContestID Path" elements.
-        // Until that update is made throughout the code, the following block is commented out and we're using a default URL
-        // created by calling the RemoteContestAPIAdapter with just the submissionID; the RemoteContestAPIAdapter constructs the
-        // default URL by appending "/submissions/<submissionID>/files" to the current value of "Primary CCS URL" and then
-        // fetches the submission files from that URL.
-        // See also the comment in interface IRemoteContestAPIAdapter; the additional (commented-out) method there must be uncommented
-        // for the following block of code to work.
-
-    //                                            //define the path to where the remote zip file containing the submissions files can be found
-    //                                            String defaultSubmissionFilesURLString = "/submissions/" + runSubmission.getId() + "/files"; //our default path
-    //                                            String submissionFilesURLString = null;  //this one we hope to pull out of the submission event, below
-    //
-    //
-    //                                            //Note about the next set of code: the CLICS ContestAPI spec says that a submission event has numerous fields,
-    //                                            // one of which is "files".  The value found in the "files" element is specified as an ARRAY of "zip file references",
-    //                                            // where each "zip file reference" has the form  {href:path/to/zip,mime:application/zip}.  Thus there
-    //                                            // can in principle be multiple zip files on the remote system, with each zip file containing multiple files.
-    //                                            // In practice however there is no known implementation where there will be more than one such "zip file reference",
-    //                                            // so what we do is fetch the array (as a List, where each list element is one "zip file reference" (consisting of
-    //                                            // two parts:  href:path and mime:zip)), then pull the first element out of the array (List), pull the href
-    //                                            // out of that Map, and use that to form the URL to fetch the zip file containing the submission files.  *whew*
-    //
-    //                                            //get from the ShadowRunSubmission object the list of references to zip files.
-    //                                            List<Map<String, String>> filesList = runSubmission.getFiles();
-    //
-    //                                            //make sure we got a valid list from the submission
-    //                                            if (filesList.size() >= 1){
-    //
-    //                                                //get out of the list the first zip file reference (which is a map containing "href:path" and "mime:zip" elements)
-    //                                                Map<String, String> zipFileReferenceMap = filesList.get(0);
-    //
-    //                                                //make sure we got a valid zip file reference map (the map should contain exactly "href" and "mime" keys)
-    //                                                if (zipFileReferenceMap.size() == 2){
-    //                                                    String filesPath = zipFileReferenceMap.get("href");
-    //                                                    if (!StringUtilities.isEmpty(filesPath)){
-    //                                                        Note: the following method getRemoteBaseURL() needs to be coded -- after
-    //                                                        the split of Primary CCS URL into "BaseURL" and "ContestIDPath" has been done.
-    //                                                        submissionFilesURLString = getRemoteBaseURL() + "/" + filesPath;
-    //                                                    }
-    //                                                }
-    //                                            }
-    //
-    //                                            //check if the above code was able to obtain a URL for the submission files zip
-    //                                            if (StringUtilities.isEmpty(submissionFilesURLString)) {
-    //
-    //                                                //no, we couldn't get a URL from the event; use our default
-    //                                                submissionFilesURLString = defaultSubmissionFilesURLString;
-    //                                                System.err.println("Warning: could not find submission file URL for id = " + runSubmission.getId() + //
-    //                                                        " in submission event; using '" + submissionFilesURLString + "' " + //
-    //                                                        "(event=" + event + ")");
-    //                                            }
-    //
-    //                                            List<IFile> files = null;
-    //
-    //                                            System.out.println("debug 22 fetching file from URL "+submissionFilesURLString);
-    //                                            //get the files from the remote URL
-    //                                            URL submissionFilesURL = new URL(submissionFilesURLString);
-    //                                            files = remoteContestAPIAdapter.getRemoteSubmissionFiles(submissionFilesURL);
-    //
-    //                                            if (files == null){
-    //                                                System.err.println("Unable to retrieve submission files using "+submissionFilesURL);
-    //                                            } else {
-    //                                                System.out.println("debug 22 getRemoteSubmissionFiles GOT "+files.size()+" files");
-    //                                            }
-
-                                                //this block is a temporary substitute for the above commented-out block
-                                                List<IFile> files = null;
-
-                                                logAndDebugPrint(log, Level.INFO, "Fetching files from remote system using id "+overrideSubmissionID);
-
-                                                //try up to maxTries times to get files without having a SocketTimeout
-                                                int tryNum = 1;
-                                                int maxTries = 10;
-                                                boolean success = false ;
-                                                Exception ex = null;
-
-                                                while (!success && tryNum<=maxTries) {
-                                                    try {
-                                                        //request files from remote CCS
-                                                        files = remoteContestAPIAdapter.getRemoteSubmissionFiles("" + overrideSubmissionID);
-
-                                                        //if we get here, no exception was thrown while getting the files
-                                                        success = true;
-
-                                                    } catch (Exception e) {
-
-                                                        //we got an exception attempting to get the files for the submission from the remote CCS;
-                                                        //see if the underlying cause of the exception was a socket timeout
-                                                        Throwable cause = e.getCause();
-                                                        if (cause!=null && cause instanceof SocketTimeoutException) {
-
-                                                                logAndDebugPrint(log, Level.WARNING, "SocketTimeoutException getting files for submission " +
-                                                                        overrideSubmissionID + " on try " + tryNum + "; trying up to " + maxTries + " times");
-                                                                tryNum++;
-
-                                                                //save the exception so we can rethrow it if we never get "success"
-                                                                ex = e;
-
-                                                        } else {
-                                                            //we got an exception other than a socket timeout; rethrow it outward (which will be logged in the catch clause)
-                                                            throw e;
-                                                        }
-                                                    }
-                                                }
-
-                                                //if after maxTries we still weren't successful getting files, log it and rethrow the last exception
-                                                if (!success) {
-                                                    logAndDebugPrint(log, Level.SEVERE, "Unable to get files for submission " + overrideSubmissionID
-                                                            + " from remote CCS after " + maxTries + " tries; giving up.");
-                                                    throw ex;
-                                                } else {
-                                                    //we got files from the remote CCS; log how many tries it took
-                                                    String pluralizer = tryNum==1 ? " try." : " tries.";
-                                                    logAndDebugPrint(log, Level.INFO, "Got files for submission id " + overrideSubmissionID + " from remote CCS after "
-                                                            + tryNum + pluralizer);
-                                                }
-
-                                                //if we get here we at least know we got a "success" from the above communication with the remote CCS
-                                                if (files==null) {
-                                                    logAndDebugPrint(log, Level.SEVERE, "Null file list returned from remote system while processing event: " + event);
-                                                    throw new Exception("Null file list returned from remote system while processing event: " + event);
-                                                }
-
-                                                IFile mainFile = null;
-
-                                                if (files.size() <= 0) {
-
-                                                    logAndDebugPrint(log, Level.SEVERE, "Empty file list returned from remote system while processing event: " + event);
-                                                    throw new Exception("Empty file list returned from remote system while processing event: " + event);
-
-                                                } else {
-
-                                                    logAndDebugPrint(log, Level.INFO, "Received files from remote system for id " + overrideSubmissionID);
-
-                                                    mainFile = files.get(0);
-                                                }
-
-                                                List<IFile> auxFiles = null;
-                                                if (files.size() > 1) {
-                                                    auxFiles = files.subList(1, files.size());
-                                                }
-
-                                                logAndDebugPrint(log, Level.INFO, "Invoking submitter.submitRun() for team " + runSubmission.getTeam_id()
-                                                    + " problem " + runSubmission.getProblem_id()
-                                                    + " language " +  runSubmission.getLanguage_id()
-                                                    + " entry_point " + runSubmission.getEntry_point()
-                                                    + " time " + overrideTimeMS
-                                                    + " submissionID " + overrideSubmissionID);
-                                                try {
-                                                    submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(),
-                                                            runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
-                                                } catch (Exception e) {
-
-                                                    // Send message, message will add to connectStatusTable
-                                                    MessageManager.fireMessageListener(new MessageRecord("Unable to submit run " + overrideSubmissionID + " " + e.getMessage(), MessageScope.SHADOW_UI, e));
-
-                                                    // TODO design error handling reporting
-                                                    logAndDebugPrint(log, Level.WARNING, "Exception submitting run for event: " + event, e);
-                                                }
-                                            }
-
-                                        } catch (Exception e) {
-
-                                            // Send message, message will add to connectStatusTable
-                                            MessageManager.fireMessageListener(new MessageRecord("Exception processing event: " + event, MessageScope.SHADOW_UI, e));
-
-                                            // TODO design error handling reporting (logging?)
-                                            logAndDebugPrint(log, Level.WARNING, "Exception processing event: " + event, e);
-                                        }
-
-                                    } else if ("judgements".equals(eventType)) {
-
-                                        // For "judgements", we toss them if the contest was never started.
-                                        if(!allowJudgments) {
-                                            log.info("Skipping judgment event since the contest has not started and allowPrestartActivity is false.");
-                                            event = reader.readLine();
-                                            tossedMessages++;
-                                            if(monitorStatus != null) {
-                                                monitorStatus.updateShadowNumberofTossedRecords(tossedMessages);
-                                            }
-                                            continue;
-                                        }
-
-                                        // Delay on judgments
-                                        bDelay = true;
-
-                                        logAndDebugPrint(log, Level.INFO, "Found event of type " + eventType + ": " + event);
-
-                                        //process a judgment event
-                                        try {
-                                            if(isDeleteOperation(eventMap)) {
-                                                if(!deleteJudgment(eventMap)) {
-                                                    log.log(Level.WARNING, "Unable to delete judgement for event: " +event);
-                                                }
-                                            } else {
-                                                //it's not a delete; see if there is an actual judgment (acronym) in the event data
-                                                // (there might not be such an element; "create" operations do not always have a judgment)
-                                                // get a map of the data elements for the judgment
-                                                Map<String, Object> judgementEventDataMap = (Map<String, Object>) eventMap.get("data");
-
-                                                String judgement = (String) judgementEventDataMap.get("judgement_type_id");
-                                                if (judgement != null && !judgement.equals("")) {
-
-
-                                                    // there is a judgement; get the relevant IDs
-                                                    String judgementID = (String) judgementEventDataMap.get("id");
-                                                    String submissionID = (String) judgementEventDataMap.get("submission_id");
-
-                                                    //check if the submission for this judgement is to be ignored due to filtering
-                                                    // (submissionFilterIDsList is a list of submissions we WANT TO KEEP; typically used for debugging...)
-                                                   if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
-
-                                                       logAndDebugPrint(log, Level.INFO, "Ignoring judgement " + judgementID +
-                                                               " for submission " + submissionID + " due to filter");
-                                                        event = reader.readLine();
-                                                        continue;
-                                                    }
-
-                                                       //TODO: make sure this is a judgement for a submission we know about.
-                                                       //  Question: isn't it possible the remote system will send us a "judgement" before it sends us
-                                                       //  the "submission" associated with that judgement?  It seems that this is both allowed by the CLICS
-                                                       //  specification, and in fact does happen (e.g. in Kattis) when it sends "judgements" at the beginning
-                                                       //  of the event stream which specify a "create" op and have "null" for values such as "judgement_type_id".
-
-                                                    // this (appears to be) a judgement we want; save it in the global judgements map under a key of
-                                                    // the judgement ID with value "submissionID:judgement"
-    //                                                System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");
-                                                    synchronized (remoteJudgementsMapLock) {
-                                                        getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
-                                                    }
-                                                }
-                                            }
-
-                                        } catch (Exception e) {
-                                            // TODO design error handling reporting (logging?)
-                                            logAndDebugPrint(log, Level.SEVERE, "Exception processing event: " + event, e);
-                                        }
-
-                                    } else if ("state".equals(eventType)) {
-
-                                        // State messages look like this (Sample from DOMjudge Event feed Dhaka WF 2022):
-                                        // {"token":"151701","id":null,"type":"state",
-                                        //  "data":{"started":"2022-11-10T10:53:36.000+06:00","ended":null,"frozen":null,"thawed":null,"finalized":null,"end_of_updates":null},"time":"2022-11-10T10:53:36.014+06:00"}
-                                        // {"token":"229483","id":null,"type":"state",
-                                        //  "data":{"started":"2022-11-10T10:53:36.000+06:00","ended":null,"frozen":"2022-11-10T14:53:36.000+06:00","thawed":null,"finalized":null,"end_of_updates":null},"time":"2022-11-10T14:53:36.112+06:00"}
-                                        // {"token":"257177","id":null,"type":"state",
-                                        //  "data":{"started":"2022-11-10T10:53:36.000+06:00","ended":"2022-11-10T15:53:36.000+06:00","frozen":"2022-11-10T14:53:36.000+06:00","thawed":null,"finalized":null,"end_of_updates":null},"time":"2022-11-10T15:53:36.035+06:00"}
-
-                                        try {
-                                            logAndDebugPrint(log, Level.INFO, "Found event of type " + eventType + ": " + event);
-
-                                            // Can set this to indicate we want to put a message in the GUI log
-                                            String statusMessage = null;
-
-                                            //convert state data into a ShadowStateMessage object
-                                            ShadowStateMessage contestState = createStateMessage((Map<String, Object>) eventMap.get("data"));
-
-                                            // Keep track of states reported by primary.  We check the various fields in reverse occurrence order.
-                                            // As per the spec, the events must appear in order, so we check the last event first, since, if that occurs
-                                            // the other must have already happened.
-                                            if(contestState.getEndOfUpdates() != null) {
-                                                remoteCCSEOU = generalStateCheck(contestState.getEndOfUpdates(), remoteCCSEOU, "End-of-updates");
-                                            } else if(contestState.getFinalized() != null || contestState.getThawed() != null) {
-                                                remoteCCSFinalized = generalStateCheck(contestState.getFinalized(), remoteCCSFinalized, "Finalized");
-                                                remoteCCSThawed = generalStateCheck(contestState.getThawed(), remoteCCSThawed, "Thawed");
-                                            } else if(contestState.getEnded() != null) {
-                                                // Now check for end of contest from remote
-                                                Date remoteEnd = contestState.getEnded();
-                                                // Only interested if we haven't seen "ended" yet from primary ccs.
-                                                if(!remoteCCSEnded) {
-                                                    remoteCCSEnded = true;
-                                                     // can only stop contest if it is running now
-                                                    if(isContestRunning) {
-                                                        if (!isReadOnlyClient()) {
-                                                            statusMessage = "Primary ends the contest at " + getISODateString(remoteEnd);
-                                                            pc2Controller.stopAllContestTimes();
-                                                        } else {
-                                                            statusMessage = "Primary indicates contest end at " + getISODateString(remoteEnd) +
-                                                                " (R/O client)";
-                                                        }
-                                                    } else {
-                                                        statusMessage = "Primary wants to end the contest but it's stopped";
-                                                    }
-                                                }
-                                                // If anything related to the endTime decided it wants a status message in the GUI, here is where it comes out
-                                                if(statusMessage != null && monitorStatus != null) {
-                                                    logAndDebugPrint(log, Level.INFO, statusMessage);
-                                                    monitorStatus.statusMessage(statusMessage);
-                                                }
-                                            } else if(contestState.getFrozen() != null) {
-                                                remoteCCSFrozen = generalStateCheck(contestState.getFrozen(), remoteCCSFrozen, "Frozen");
-                                            } else if(contestState.getStarted() != null) {
-
-                                                Date remoteStart = contestState.getStarted();
-                                                // only interested if remote hasn't already started
-                                                if(!remoteCCSStarted) {
-                                                    Calendar calStart = pc2Controller.getContest().getContestInformation().getScheduledStartTime();
-                                                    if(calStart != null) {
-                                                        Date pc2Start = calStart.getTime();
-                                                        if(pc2Start != null) {
-                                                            if(remoteStart.compareTo(pc2Start) != 0) {
-                                                                statusMessage ="Primary specified wrong start time " +
-                                                                        getISODateString(remoteStart) +
-                                                                        " instead of configured " +
-                                                                        getISODateString(pc2Start);
-                                                                logAndDebugPrint(log, Level.WARNING, statusMessage);
-                                                            }
-                                                        }
-                                                    }
-                                                    // if the contest was started previously, then we print a warning message and a status on the GUI
-                                                    // but we do allow it to start.
-                                                    if(wasContestStarted) {
-                                                        statusMessage = "Primary restarts the contest at " + getISODateString(remoteStart);
-                                                        if(monitorStatus != null) {
-                                                            monitorStatus.statusMessage(statusMessage);
-                                                        }
-                                                        logAndDebugPrint(log, Level.INFO, statusMessage);
-                                                        statusMessage = null;
-                                                    }
-                                                    remoteCCSStarted = true;
-                                                    // Remote says it's go time.  If the contest is already started
-                                                    // (manually or previously via state event), we ignore it.
-                                                    if(!isContestRunning) {
-                                                        if (!isReadOnlyClient()) {
-                                                            statusMessage = "Primary started the contest at " + getISODateString(remoteStart);
-                                                            pc2Controller.startAllContestTimes();
-                                                        } else {
-                                                            statusMessage = "Primary indicates contest start at " + getISODateString(remoteStart) +
-                                                                " (R/O client)";
-                                                        }
-                                                    } else {
-                                                        statusMessage = "Primary indicates contest start at " + getISODateString(remoteStart) + " but it's already running";
-                                                    }
-                                                    logAndDebugPrint(log, Level.INFO, statusMessage);
-                                                }
-                                                // If anything related to the startTime decided it wants a status message in the GUI, here is where it comes out
-                                                if(statusMessage != null && monitorStatus != null) {
-                                                    monitorStatus.statusMessage(statusMessage);
-                                                }
-                                            } else {
-                                                logAndDebugPrint(log, Level.INFO, "Ignored state event with null start time");
-                                            }
-                                        } catch (Exception e) {
-                                            System.err.println("Exception handling event: " + e.toString());
-                                        }
+                                    //if after maxTries we still weren't successful getting files, log it and rethrow the last exception
+                                    if (!success) {
+                                        logAndDebugPrint(log, Level.SEVERE, "Unable to get files for submission " + overrideSubmissionID
+                                                + " from remote CCS after " + maxTries + " tries; giving up.");
+                                        throw ex;
                                     } else {
-                                        logAndDebugPrint(log, Level.INFO, "Ignoring " + eventType + " event");
+                                        //we got files from the remote CCS; log how many tries it took
+                                        String pluralizer = tryNum==1 ? " try." : " tries.";
+                                        logAndDebugPrint(log, Level.INFO, "Got files for submission id " + overrideSubmissionID + " from remote CCS after "
+                                                + tryNum + pluralizer);
+                                    }
+
+                                    //if we get here we at least know we got a "success" from the above communication with the remote CCS
+                                    if (files==null) {
+                                        logAndDebugPrint(log, Level.SEVERE, "Null file list returned from remote system while processing event: " + dataMap.toString());
+                                        throw new Exception("Null file list returned from remote system while processing event: " + dataMap.toString());
+                                    }
+
+                                    IFile mainFile = null;
+
+                                    if (files.size() <= 0) {
+
+                                        logAndDebugPrint(log, Level.SEVERE, "Empty file list returned from remote system while processing event: " + dataMap.toString());
+                                        throw new Exception("Empty file list returned from remote system while processing event: " + dataMap.toString());
+
+                                    } else {
+
+                                        logAndDebugPrint(log, Level.INFO, "Received files from remote system for id " + overrideSubmissionID);
+
+                                        mainFile = files.get(0);
+                                    }
+
+                                    List<IFile> auxFiles = null;
+                                    if (files.size() > 1) {
+                                        auxFiles = files.subList(1, files.size());
+                                    }
+
+                                    logAndDebugPrint(log, Level.INFO, "Invoking submitter.submitRun() for team " + runSubmission.getTeam_id()
+                                        + " problem " + runSubmission.getProblem_id()
+                                        + " language " +  runSubmission.getLanguage_id()
+                                        + " entry_point " + runSubmission.getEntry_point()
+                                        + " time " + overrideTimeMS
+                                        + " submissionID " + overrideSubmissionID);
+                                    try {
+                                        submitter.submitRun(runSubmission.getTeam_id(), runSubmission.getProblem_id(), runSubmission.getLanguage_id(),
+                                                runSubmission.getEntry_point(), mainFile, auxFiles, overrideTimeMS, overrideSubmissionID);
+                                    } catch (Exception e) {
+
+                                        // Send message, message will add to connectStatusTable
+                                        MessageManager.fireMessageListener(new MessageRecord("Unable to submit run " + overrideSubmissionID + " " + e.getMessage(), MessageScope.SHADOW_UI, e));
+
+                                        // TODO design error handling reporting
+                                        logAndDebugPrint(log, Level.WARNING, "Exception submitting run for event: " + dataMap.toString(), e);
                                     }
                                 }
+
+                            } catch (Exception e) {
+
+                                // Send message, message will add to connectStatusTable
+                                MessageManager.fireMessageListener(new MessageRecord("Exception processing event: " + dataMap.toString(), MessageScope.SHADOW_UI, e));
+
+                                // TODO design error handling reporting (logging?)
+                                logAndDebugPrint(log, Level.WARNING, "Exception processing event: " + dataMap.toString(), e);
+                            }
+
+                        } else if ("judgements".equals(notifyType)) {
+
+                            // For "judgements", we toss them if the contest was never started.
+                            if(!allowJudgments) {
+                                log.info("Skipping judgment event since the contest has not started and allowPrestartActivity is false.");
+                                dataMap = this.getNextEvent(reader, log);
+                                tossedMessages++;
+                                if(monitorStatus != null) {
+                                    monitorStatus.updateShadowNumberofTossedRecords(tossedMessages);
+                                }
+                                continue;
+                            }
+
+                            // Delay on judgments
+                            bDelay = true;
+
+                            if(dataMap == null) {
+                                logAndDebugPrint(log, Level.INFO, "Found event of type " + notifyType + ": null data");
+                            } else {
+                                logAndDebugPrint(log, Level.INFO, "Found event of type " + notifyType + ": " + dataMap.toString());
+                            }
+
+                            //process a judgment event
+                            try {
+                                if(isDeleteOperation(dataMap)) {
+                                    if(!deleteJudgment(dataMap)) {
+                                        log.log(Level.WARNING, "Unable to delete judgement for event: " + dataMap.toString());
+                                    }
+                                } else {
+                                    //it's not a delete; see if there is an actual judgment (acronym) in the event data
+                                    // (there might not be such an element; "create" operations do not always have a judgment)
+                                    // get a map of the data elements for the judgment
+                                    Map<String, Object> judgementEventDataMap = dataMap;
+
+                                    String judgement = (String) judgementEventDataMap.get("judgement_type_id");
+                                    if (judgement != null && !judgement.equals("")) {
+
+
+                                        // there is a judgement; get the relevant IDs
+                                        String judgementID = (String) judgementEventDataMap.get("id");
+                                        String submissionID = (String) judgementEventDataMap.get("submission_id");
+
+                                        //check if the submission for this judgement is to be ignored due to filtering
+                                        // (submissionFilterIDsList is a list of submissions we WANT TO KEEP; typically used for debugging...)
+                                       if (respectSubmissionFilter && !submissionFilterIDsList.contains(submissionID)) {
+
+                                           logAndDebugPrint(log, Level.INFO, "Ignoring judgement " + judgementID +
+                                                   " for submission " + submissionID + " due to filter");
+                                           dataMap = this.getNextEvent(reader, log);
+                                           continue;
+                                       }
+
+
+                                           //TODO: make sure this is a judgement for a submission we know about.
+                                           //  Question: isn't it possible the remote system will send us a "judgement" before it sends us
+                                           //  the "submission" associated with that judgement?  It seems that this is both allowed by the CLICS
+                                           //  specification, and in fact does happen (e.g. in Kattis) when it sends "judgements" at the beginning
+                                           //  of the event stream which specify a "create" op and have "null" for values such as "judgement_type_id".
+
+                                        // this (appears to be) a judgement we want; save it in the global judgements map under a key of
+                                        // the judgement ID with value "submissionID:judgement"
+//                                                  System.out.println ("Adding judgement " + judgementID + " for submission " + submissionID + " with judgement " + judgement + " to RemoteJudgements Map");
+                                        synchronized (remoteJudgementsMapLock) {
+                                            getRemoteJudgementsMap().put(judgementID, submissionID + ":" + judgement);
+                                        }
+                                    }
+                                }
+
                             } catch (Exception e) {
                                 // TODO design error handling reporting (logging?)
-                                logAndDebugPrint(log, Level.SEVERE, "Exception processing event: " + event, e);
+                                logAndDebugPrint(log, Level.SEVERE, "Exception processing event: " + dataMap.toString(), e);
+                            }
+
+                        } else if ("state".equals(notifyType)) {
+
+                            // State messages look like this (Sample from DOMjudge Event feed Dhaka WF 2022):
+                            // {"token":"151701","id":null,"type":"state",
+                            //  "data":{"started":"2022-11-10T10:53:36.000+06:00","ended":null,"frozen":null,"thawed":null,"finalized":null,"end_of_updates":null},"time":"2022-11-10T10:53:36.014+06:00"}
+                            // {"token":"229483","id":null,"type":"state",
+                            //  "data":{"started":"2022-11-10T10:53:36.000+06:00","ended":null,"frozen":"2022-11-10T14:53:36.000+06:00","thawed":null,"finalized":null,"end_of_updates":null},"time":"2022-11-10T14:53:36.112+06:00"}
+                            // {"token":"257177","id":null,"type":"state",
+                            //  "data":{"started":"2022-11-10T10:53:36.000+06:00","ended":"2022-11-10T15:53:36.000+06:00","frozen":"2022-11-10T14:53:36.000+06:00","thawed":null,"finalized":null,"end_of_updates":null},"time":"2022-11-10T15:53:36.035+06:00"}
+
+                            try {
+                                logAndDebugPrint(log, Level.INFO, "Found event of type " + notifyType + ": " + dataMap.toString());
+
+                                // Can set this to indicate we want to put a message in the GUI log
+                                String statusMessage = null;
+
+                                //convert state data into a ShadowStateMessage object
+                                ShadowStateMessage contestState = createStateMessage(dataMap);
+
+                                // Keep track of states reported by primary.  We check the various fields in reverse occurrence order.
+                                // As per the spec, the events must appear in order, so we check the last event first, since, if that occurs
+                                // the other must have already happened.
+                                if(contestState.getEndOfUpdates() != null) {
+                                    remoteCCSEOU = generalStateCheck(contestState.getEndOfUpdates(), remoteCCSEOU, "End-of-updates");
+                                } else if(contestState.getFinalized() != null || contestState.getThawed() != null) {
+                                    remoteCCSFinalized = generalStateCheck(contestState.getFinalized(), remoteCCSFinalized, "Finalized");
+                                    remoteCCSThawed = generalStateCheck(contestState.getThawed(), remoteCCSThawed, "Thawed");
+                                } else if(contestState.getEnded() != null) {
+                                    // Now check for end of contest from remote
+                                    Date remoteEnd = contestState.getEnded();
+                                    // Only interested if we haven't seen "ended" yet from primary ccs.
+                                    if(!remoteCCSEnded) {
+                                        remoteCCSEnded = true;
+                                         // can only stop contest if it is running now
+                                        if(isContestRunning) {
+                                            if (!isReadOnlyClient()) {
+                                                statusMessage = "Primary ends the contest at " + getISODateString(remoteEnd);
+                                                pc2Controller.stopAllContestTimes();
+                                            } else {
+                                                statusMessage = "Primary indicates contest end at " + getISODateString(remoteEnd) +
+                                                    " (R/O client)";
+                                            }
+                                        } else {
+                                            statusMessage = "Primary wants to end the contest but it's stopped";
+                                        }
+                                    }
+                                    // If anything related to the endTime decided it wants a status message in the GUI, here is where it comes out
+                                    if(statusMessage != null && monitorStatus != null) {
+                                        logAndDebugPrint(log, Level.INFO, statusMessage);
+                                        monitorStatus.statusMessage(statusMessage);
+                                    }
+                                } else if(contestState.getFrozen() != null) {
+                                    remoteCCSFrozen = generalStateCheck(contestState.getFrozen(), remoteCCSFrozen, "Frozen");
+                                } else if(contestState.getStarted() != null) {
+
+                                    Date remoteStart = contestState.getStarted();
+                                    // only interested if remote hasn't already started
+                                    if(!remoteCCSStarted) {
+                                        Calendar calStart = pc2Controller.getContest().getContestInformation().getScheduledStartTime();
+                                        if(calStart != null) {
+                                            Date pc2Start = calStart.getTime();
+                                            if(pc2Start != null) {
+                                                if(remoteStart.compareTo(pc2Start) != 0) {
+                                                    statusMessage ="Primary specified wrong start time " +
+                                                            getISODateString(remoteStart) +
+                                                            " instead of configured " +
+                                                            getISODateString(pc2Start);
+                                                    logAndDebugPrint(log, Level.WARNING, statusMessage);
+                                                }
+                                            }
+                                        }
+                                        // if the contest was started previously, then we print a warning message and a status on the GUI
+                                        // but we do allow it to start.
+                                        if(wasContestStarted) {
+                                            statusMessage = "Primary restarts the contest at " + getISODateString(remoteStart);
+                                            if(monitorStatus != null) {
+                                                monitorStatus.statusMessage(statusMessage);
+                                            }
+                                            logAndDebugPrint(log, Level.INFO, statusMessage);
+                                            statusMessage = null;
+                                        }
+                                        remoteCCSStarted = true;
+                                        // Remote says it's go time.  If the contest is already started
+                                        // (manually or previously via state event), we ignore it.
+                                        if(!isContestRunning) {
+                                            if (!isReadOnlyClient()) {
+                                                statusMessage = "Primary started the contest at " + getISODateString(remoteStart);
+                                                pc2Controller.startAllContestTimes();
+                                            } else {
+                                                statusMessage = "Primary indicates contest start at " + getISODateString(remoteStart) +
+                                                    " (R/O client)";
+                                            }
+                                        } else {
+                                            statusMessage = "Primary indicates contest start at " + getISODateString(remoteStart) + " but it's already running";
+                                        }
+                                        logAndDebugPrint(log, Level.INFO, statusMessage);
+                                    }
+                                    // If anything related to the startTime decided it wants a status message in the GUI, here is where it comes out
+                                    if(statusMessage != null && monitorStatus != null) {
+                                        monitorStatus.statusMessage(statusMessage);
+                                    }
+                                } else {
+                                    logAndDebugPrint(log, Level.INFO, "Ignored state event with null start time");
+                                }
+                            } catch (Exception e) {
+                                System.err.println("Exception handling event: " + e.toString());
                             }
                         } else {
-
-                            //we're skipping an event feed input line -- log the reason
-                            if (event.length()<=0) {
-                                log.log(Level.INFO, "Skipping event feed input line (length is " + event.length() + ")");
-                            } else if (!event.trim().startsWith("{")) {
-                                log.log(Level.INFO, "Skipping event feed input line (does not start with \"{\"): " + event.toString());
-                            } else if (!event.trim().endsWith("}")) {
-                                log.log(Level.INFO, "Skipping event feed input line (does not end with \"}\"): " + event.toString());
-                            } else {
-                                log.log(Level.WARNING, "Skipping event feed input line (sorry - no explanation for why): " + event.toString());
-                            }
+                            logAndDebugPrint(log, Level.INFO, "Ignoring " + notifyType + " event");
                         }
                         // keep track of how many records (events) we read
                         nRecords++;
@@ -760,7 +713,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                         if(bDelay) {
                             Thread.sleep(REMOTE_EVENT_FEED_DELAYMS);
                         }
-                        event = reader.readLine();
+                        dataMap = this.getNextEvent(reader, log);
 
                     } // while
                 } catch (IOException ioe) {
@@ -776,7 +729,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                     }
                 } catch (Exception e) {
                     // TODO design error handling reporting (logging?)
-                    logAndDebugPrint(log, Level.SEVERE, "Exception reading event from stream: " + event, e);
+                    logAndDebugPrint(log, Level.SEVERE, "Exception reading event from stream", e);
                 }
             } // end else
 
@@ -953,19 +906,17 @@ public class RemoteEventFeedMonitor implements Runnable {
      * @param eventMap map of all properties in the event
      * @return true if this is the event map passed in specifies a delete operation
      */
-    private boolean isDeleteOperation(Map<String, Object> eventMap)
+    private boolean isDeleteOperation(Map<String, Object> dataMap)
     {
         boolean bDelete = false;
 
-        // "op" property, if it's there - old feed format uses this
-        String operation = (String) eventMap.get("op");
-
-        if(operation != null) {
+        // Old feed?
+        if(operationType != null) {
             // Old feed
-            if(operation.equals("delete")) {
+            if(operationType.equals("delete")) {
                 bDelete = true;
             }
-        } else if((Map<String, Object>) eventMap.get("data") == null){
+        } else if(dataMap == null) {
             bDelete = true;
         }
         return(bDelete);
@@ -983,23 +934,21 @@ public class RemoteEventFeedMonitor implements Runnable {
      */
     private boolean deleteJudgment(Map<String, Object> eventMap)
     {
-        String operation = (String) eventMap.get("op");
         String idToDelete = null;
         boolean bDeleted = false;
 
         // Determine feed version, and where to get the judgement id.
         // For the 2022-07 (and 2021-11) clics spec, "operation" will always be null since the "op" field was removed
         // For the 2020-03 the "op" field will be non-null.  This is how we determine the feed type.
-       if (operation == null) {
+       if (operationType == null) {
            // 2022-07 (newer) feed - the ID of the judgment is in the notification object since there is
            // no data object.
-           idToDelete = (String)eventMap.get("id");
-       } else if(operation.equals("delete")) {
+           idToDelete = notifyId;
+       } else if(operationType.equals("delete")) {
            // 2020-03 feed, "op" field present and is an explicit delete, judgment id is in "data" object
-           Map<String, Object> judgmentEventDataMap = (Map<String, Object>) eventMap.get("data");
 
-           if(judgmentEventDataMap != null) {
-               idToDelete = (String) judgmentEventDataMap.get("id");
+           if(eventMap != null) {
+               idToDelete = (String) eventMap.get("id");
            }
        }
        // idToDelete obtained from different "id" fields above depending on feed version
@@ -1217,6 +1166,204 @@ public class RemoteEventFeedMonitor implements Runnable {
       */
      public void stop() {
          keepRunning = false;
+     }
+
+     /**
+      * Invokes the PC2 server to update the status of the specified run to match the specified judgement.
+      *
+      * @param submissionIdStr the Id of the run to be updated.
+      * @param newJudgementStr the judgement which should be applied to the specified run.
+      *
+      * @return true if the run was successfully updated; false if the run could not be updated for some reason
+      */
+     protected boolean updateRun(String submissionIdStr, String newJudgementStr) {
+         int submissionId;
+
+         Log log = pc2Controller.getLog();
+         log.log(Log.INFO, "Updating run " + submissionIdStr + " to '" + newJudgementStr + "'");
+
+         //verify the remote judgement is a valid value
+         if (!CLICSJudgementType.isCLICSAcronym(newJudgementStr)) {
+             log.log(Log.INFO, "Supplied judgement of " + newJudgementStr + " from remote is not a valid CLICS judgement type");
+             return(false);
+         }
+         //get the CLICS acronym for the specified judgement
+         CLICS_JUDGEMENT_ACRONYM newJudgement = CLICSJudgementType.getCLICSAcronymFromElementName(newJudgementStr);
+         try {
+             submissionId = Integer.parseInt(submissionIdStr);
+         } catch(Exception e) {
+             log.log(Log.WARNING, "Supplied submission Id " + submissionIdStr + " is not a valid number");
+             return(false);
+         }
+
+         IInternalContest contest = pc2Controller.getContest();
+         //get all the runs
+         Run [] allRuns = contest.getRuns();
+
+         //search for the desired run by Id
+         boolean found = false ;
+         Run targetRun = null;
+         for (Run run : allRuns) {
+             if (run.getNumber()==submissionId) {
+                 targetRun = run;
+                 found = true;
+                 break;
+             }
+         }
+
+         //if we didn't find the run, return failure
+         if (!found) {
+             log.log (Log.WARNING, "Failed to find run to be updated: submission " + submissionId + " not found in run list.");
+             return false;
+         }
+
+         //if we get here we've found the run to be updated;
+         //try to find a PC2 Judgement that matches the remote CCS's CLICS judgement
+         Judgement [] judgementsArray = contest.getJudgements();
+         for (Judgement judgement : judgementsArray) {
+
+             if (newJudgement.name().contentEquals(judgement.getAcronym())) {
+
+                 //we found a matching PC2 judgement; check if the new judgement is a "yes"
+                 boolean solved = CLICSJudgementType.isYesAcronym(newJudgement);
+
+                 //build a new JudgementRecord for PC2 containing the desired judgement values
+                 JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), contest.getClientId(), solved, false);
+
+                 //duplicate the existing RunResultFiles, with null executionData (since we haven't actually re-executed the run)
+                 RunResultFiles runResultFiles = new RunResultFiles(targetRun, targetRun.getProblemId(), judgementRecord, null);
+
+                 log.log(Log.INFO, "Sending new JudgementRecord to PC2 server for submissionId " + submissionId + ": "
+                         + " judgementId=" + judgementRecord.getJudgementId()
+                         + " elementId=" + judgementRecord.getElementId()
+                         + " isSolved=" + judgementRecord.isSolved()
+                         + " for run " + targetRun);
+
+                 //update the run in PC2
+                 judgementRecord.setSendToTeam(false);
+                 pc2Controller.submitRunJudgement(targetRun, judgementRecord, runResultFiles);
+                 return(true);
+             }
+         }
+         return false;
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getNextEvent(BufferedReader reader, Log log) throws IOException {
+         Map<String, Object> nextEvent = null;
+         String line;
+         String partialLine;
+         String id;
+         int lineLen;
+
+         for(;;) {
+             // First see if we have any on our collection list
+             if(eventQueue != null) {
+                 if(currentEvent >= eventQueue.size()) {
+                     eventQueue = null;
+                 } else {
+                     nextEvent = eventQueue.get(currentEvent++);
+                     break;
+                 }
+             }
+
+             // We need to read the next line
+             line = reader.readLine();
+             lineLen = line.length();
+
+             // Limit length we show in logs
+             if(lineLen > MAX_LOG_NOTIFICATION_LEN) {
+                 partialLine = line.substring(0, MAX_LOG_NOTIFICATION_LEN);
+             } else {
+                 partialLine = line;
+             }
+             //skip blank lines and any that do not start/end with "{...}"
+             if ( line.length() > 0 && line.trim().startsWith("{") && line.trim().endsWith("}") ) {
+
+                 if(lastToken != null) {
+                     msg = "Got event string (last token " + lastToken + "): " + partialLine;
+                 } else {
+                     msg = "Got event string: " + partialLine;
+                 }
+                 logAndDebugPrint(log, Level.INFO, msg);
+                 try {
+
+                     /**
+                      *
+                     Sample submissions JSON from finals 2019 dom judge event feed.
+                     {"id":"279029","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.162+01:00","contest_time":"-17:02:04.837","id":"10547","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10547/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.191+01:00"}
+                     {"id":"279030","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.209+01:00","contest_time":"-17:02:04.790","id":"10548","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10548/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.216+01:00"}
+                     {"id":"279031","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.228+01:00","contest_time":"-17:02:04.771","id":"10549","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10549/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.235+01:00"}
+                     {"id":"279032","type":"submissions","op":"create","data":{"language_id":"java","time":"2019-04-03T18:57:55.244+01:00","contest_time":"-17:02:04.755","id":"10550","externalid":null,"team_id":"148","problem_id":"azulejos","entry_point":null,"files":[{"href":"contests/finals/submissions/10550/files","mime":"application/zip"}]},"time":"2019-04-03T18:57:55.251+01:00"}
+                      */
+
+                     // extract the event into a map of event element names/values
+                     Map<String, Object> eventMap = getMap(line);
+
+                     if (eventMap == null) {
+                         // could not parse event
+                         logAndDebugPrint(log, Level.WARNING, "Could not parse event: " + partialLine);
+
+                     } else {
+                         // Get event token, if present
+                         String evToken = (String)eventMap.get("token");
+                         if(evToken != null && !evToken.isEmpty()) {
+                             lastToken = evToken;
+                             // if someone is  monitoring, let them know about the new event
+                             if(monitorStatus != null) {
+                                 monitorStatus.updateShadowLastToken(lastToken);
+                             }
+                         }
+
+                         // find event type
+                         notifyType = (String) eventMap.get("type");
+                         operationType = (String) eventMap.get("op");
+                         notifyId = (String)eventMap.get("id");
+
+                         logAndDebugPrint(log, Level.INFO, "Found event of type " + notifyType + ": " + partialLine);
+                         id = (String)eventMap.get("id");
+
+                         // non-null id means this is a single data object, not an array
+                         if(id != null) {
+                            nextEvent = (Map<String, Object>) eventMap.get("data");
+                            break;
+                         }
+
+                         Object oData = eventMap.get("data");
+
+                         if(oData instanceof LinkedHashMap<?,?>) {
+                             nextEvent = (Map<String, Object>) oData;
+                             break;
+                         }
+                         if(oData instanceof ArrayList<?>) {
+                             eventQueue = (ArrayList<Map<String, Object>>)oData;
+                             currentEvent = 0;
+                             continue;
+                         }
+                         System.err.println("Unknown type of oData");
+                         continue;
+                     }
+                 } catch (Exception e) {
+                     // TODO design error handling reporting (logging?)
+                     logAndDebugPrint(log, Level.SEVERE, "Exception processing event: " + partialLine, e);
+                 }
+             } else {
+
+                 //we're skipping an event feed input line -- log the reason
+                 if (lineLen <= 0) {
+                     log.log(Level.INFO, "Skipping event feed input line (length is " + lineLen + ")");
+                 } else if (!line.trim().startsWith("{")) {
+                     log.log(Level.INFO, "Skipping event feed input line (does not start with \"{\"): " + partialLine.toString());
+                 } else if (!line.trim().endsWith("}")) {
+                     log.log(Level.INFO, "Skipping event feed input line (does not end with \"}\"): " + partialLine.toString());
+                 } else {
+                     log.log(Level.WARNING, "Skipping event feed input line (sorry - no explanation for why): " + partialLine.toString());
+                 }
+             }
+         }
+         return(nextEvent);
+
      }
 
 }
