@@ -25,14 +25,15 @@ public class EventFeedFilterTest extends AbstractTestCase {
         assertEquals("startid = <none set>, event types = <none set>, groupids = <none set>", filter.toString());
 
         String[] lines = getStandardContestJSON(false);
-        assertEquals("Expected line count ", 143, lines.length);
+        // Used to be 143, but there are now 134 additional 'account' records.
+        assertEquals("Expected line count ", 277, lines.length);
 
-        assertNumberEvents(143, filter, lines);
+        assertNumberEvents(277, filter, lines);
 
         lines = getStandardContestJSON(true);
-        assertEquals("Expected line count ", 6, lines.length);
+        assertEquals("Expected line count ", 7, lines.length);
 
-        assertNumberEvents(6, filter, lines);
+        assertNumberEvents(7, filter, lines);
     }
 
     private String[] getStandardContestJSON(boolean bCollections) throws IllegalContestState {

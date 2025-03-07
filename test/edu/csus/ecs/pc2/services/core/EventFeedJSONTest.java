@@ -78,10 +78,10 @@ public class EventFeedJSONTest extends AbstractTestCase {
                     "11,2,B,35,No,No,1", // zero -- not solved
                     "12,2,B,40,No,No,1", // zero -- not solved
             };
-            // Assign half eams random team member names
+            // Assign half teams random team member names
             addTeamMembers(getContest(), getTeamAccounts(getContest()).length / 2, 5);
 
-            assertEquals("Expectig team member names", 5, getFirstAccount(getContest(), Type.TEAM).getMemberNames().length);
+            assertEquals("Expecting team member names", 5, getFirstAccount(getContest(), Type.TEAM).getMemberNames().length);
 
             assertEquals("team count", 120, getContest().getAccounts(Type.TEAM).size());
 
@@ -305,7 +305,6 @@ public class EventFeedJSONTest extends AbstractTestCase {
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(json);
-
         int count = 0;
         while (matcher.find()) {
             count++;
@@ -757,12 +756,13 @@ public class EventFeedJSONTest extends AbstractTestCase {
         EventFeedFilter filter = new EventFeedFilter(EventFeedJSON.getEventId(39), null);
         String json = eventFeedJSON.createJSON(data.getContest(), filter, null, null);
 
-        // System.out.println("debug after event 40 json = "+json);
+        //System.out.println("debug after event 40 json = "+json);
 
         assertNotNull(json);
 
-        // JB Note: was 530 but we don't have 300 persons
-        assertMatchCount(230, "\"type\"", json);
+        // JB Note: was 530 but we don't have 300 persons anymore, but we do have 133 accounts that
+        // are now part of the ef.  530 - 300 = 230 + 134 (1 admin, 120 teams, 12 judges, 1 score) = 364
+        assertMatchCount(364, "\"token\"", json);
 
     }
 

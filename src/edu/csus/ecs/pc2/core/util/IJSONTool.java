@@ -170,11 +170,11 @@ public interface IJSONTool {
 
     /**
      * Returns account ID as a string
-     * @param account to use to the client id from
+     * @param account to use to get the client id from
      * @return string representation of the ID (which is a number)
      */
     public static String getAccountId(Account account) {
-        String id = "" + account.getClientId().getClientNumber();
+        String id = account.getClientId().getName();
         return id;
     }
 

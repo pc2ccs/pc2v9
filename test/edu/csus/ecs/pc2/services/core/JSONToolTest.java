@@ -769,7 +769,8 @@ public class JSONToolTest extends AbstractTestCase {
         assertNotNull(json);
 
         // JB Note: was 530 but we dont do team members since pc2 does not have required fields for 2023-06
-        assertMatchCount(230, "\"type\"", json);
+        // we also now have 134 "account" records, so: 530-300 = 230 + 134 = 364
+        assertMatchCount(364, "\"token\"", json);
 
     }
 

@@ -38,7 +38,8 @@ public class EventFeedLogTest extends AbstractTestCase {
         eFeedLog.writeEvent(events);
 
         eFeedLog = new EventFeedLog(contest);
-        assertEquals(143, eFeedLog.getLogLines().length);
+        // was 143, but there are now 134 additional 'account' records
+        assertEquals(277, eFeedLog.getLogLines().length);
 
     }
 
@@ -65,7 +66,7 @@ public class EventFeedLogTest extends AbstractTestCase {
         eFeedLog.writeEvent(events);
 
         eFeedLog = new EventFeedLog(contest);
-        assertEquals(6, eFeedLog.getLogLines().length);
+        assertEquals(7, eFeedLog.getLogLines().length);
 
     }
 
