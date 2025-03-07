@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
@@ -13,12 +13,12 @@ import java.util.Hashtable;
 
 /**
  * Loads and access to property values (.ini file).
- * 
+ *
  * Files are in the format of Windows .ini files.<br>
  * Sections are surrounded by [], blank lines and lines starting with # are ignored. The name value pairs are delimited by = marks.
  * <p>
  * Sample:<br>
- * 
+ *
  * <pre>
  *     # Sample Comment
  *     [server]
@@ -26,15 +26,15 @@ import java.util.Hashtable;
  *     port=55002
  *     site=Northwest Division
  *     remoteHost=philly
- *     
+ *
  *     [client]
  *     site=Northwest Division
- *     
+ *
  *     # eof
  * </pre>
- * 
+ *
  * <P>
- * 
+ *
  * @version $Id$
  * @author pc2@ecs.csus.edu
  */
@@ -76,7 +76,7 @@ public class IniFile {
 
     /**
      * returns true if key is in file.
-     * 
+     *
      * @return boolean
      * @param key
      *            java.lang.String
@@ -88,12 +88,12 @@ public class IniFile {
 
     /**
      * returns true if key is in file.
-     * 
+     *
      * @param sectionName
      * @param keyName
      */
     public static boolean containsKey(String sectionName, String keyName) {
-        String key = sectionName + ":" + keyName;
+        String key = sectionName + "." + keyName;
         String k = key.trim().toLowerCase();
         return nameValueHash.containsKey(k);
     }
@@ -107,7 +107,7 @@ public class IniFile {
 
     /**
      * Write contents to PrintStream.
-     * 
+     *
      * @param ps
      *            PrintStream
      */
@@ -124,7 +124,7 @@ public class IniFile {
 
     /**
      * Get input filename.
-     * 
+     *
      * @return the name of the .ini file.
      */
     public static String getINIFilename() {
@@ -133,7 +133,7 @@ public class IniFile {
 
     /**
      * Get filename in URL form.
-     * 
+     *
      * @return the URL for the .ini file.
      */
     public static URL getIniFileURL() {
@@ -142,11 +142,11 @@ public class IniFile {
 
     /**
      * Returns the value for the specified key.
-     * 
+     *
      * For a site key in the server section use: <code>
      * getValue("server.site");  or getValue("server","site");
      * </code>
-     * 
+     *
      * @return java.lang.String
      * @param key
      *            java.lang.String a section and key value, ex. "sever.site"
@@ -166,7 +166,7 @@ public class IniFile {
     /**
      * Return value for specified key.
      * (This method is currently not used)
-     * 
+     *
      * @see #getValue(String)
      * @param sectionName
      * @param keyName
@@ -179,7 +179,7 @@ public class IniFile {
 
     /**
      * return true if .ini file is present.
-     * 
+     *
      * @see #getINIFilename()
      * @see #setIniFile(String)
      * @return true if it file is present; false otherwise.
@@ -191,7 +191,7 @@ public class IniFile {
 
     /**
      * Load the name value pairs from the input file.
-     * 
+     *
      * @see #getIniFileURL()
      * @see #iniFileURL
      */
@@ -246,7 +246,7 @@ public class IniFile {
 
     /**
      * parse and load a single line.
-     * 
+     *
      * @param line
      *            line to be parsed and loaded.
      */
@@ -284,7 +284,7 @@ public class IniFile {
 
     /**
      * This will try newIni as an URL 1st, if it is not a valid URL attempt as a regular file.
-     * 
+     *
      * @param newIni
      *            name of new .ini file.
      * @throws MalformedURLException
@@ -301,7 +301,7 @@ public class IniFile {
 
     /**
      * set a new input filename.
-     * 
+     *
      * @param newIniFile
      * @throws MalformedURLException
      */
@@ -317,7 +317,7 @@ public class IniFile {
 
     /**
      * Set a new input filename via URL.
-     * 
+     *
      * @param newIniFileURL
      *            - new URL
      */
@@ -327,7 +327,7 @@ public class IniFile {
 
     /**
      * Load the name value pairs from the input file.
-     * 
+     *
      * @see #getIniFileURL()
      * @see #iniFileURL
      */
