@@ -71,7 +71,7 @@ public class CLICSContestAccess {
         if(ClarificationService.isTeamSubmitClarificationAllowed(sc)) {
             cap.add(API_CAPABILITY_TEAM_CLAR);
         }
-        if(SubmissionService.isProxySubmitAllowed(sc)) {
+        if(SubmissionService.isProxySubmitAllowed(sc, model)) {
             cap.add(API_CAPABILITY_PROXY_SUBMIT);
         }
         if(ClarificationService.isProxySubmitClarificationAllowed(sc)) {

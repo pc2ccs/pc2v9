@@ -457,7 +457,8 @@ public interface IInternalController {
     /**
      * Submit a clarification.
      *
-     * @param clientId to submit clarification as, eg. "team99"
+     * @param clientId to submit clarification as, eg. "team99"  Needed when submitting via CLICS endpoints since
+     *          the client that is handling the endpoint is not going to be the client who submitted the clarification
      * @param problem
      * @param question
      * @return elementid of new clar
@@ -467,7 +468,8 @@ public interface IInternalController {
     /**
      * Submit an announcement specifying client. Possibly to certain groups teams only
      *
-     * @param client
+     * @param clientId to submit announcement as, eg. "team99"  Needed when submitting via CLICS endpoints since
+     *          the client that is handling the endpoint is not going to be the client who submitted the announcement
      * @param problem
      * @param answer
      * @param ultimateDestinationGroup array of where the answer for the clarification should ultimately go.

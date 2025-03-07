@@ -62,7 +62,7 @@ public interface IJSONTool {
     public ObjectNode convertToJSON(Clarification clarification, ClarificationAnswer clarAnswer);
 
     /**
-     * This converts ContestInformation to a contest state json object
+     * This converts ContestInformation to a contest state json object.
      *
      * @param ci - the contest information
      * @return Json object representing the current state
@@ -70,7 +70,7 @@ public interface IJSONTool {
     public ObjectNode toStateJSON(ContestInformation ci);
 
     /**
-     * This converts ContestInformation to a json object
+     * This converts ContestInformation to a json object.
      *
      * @param ci - the contest information
      * @return Json object for the contest information
@@ -78,7 +78,7 @@ public interface IJSONTool {
     public ObjectNode convertToJSON(ContestInformation ci);
 
     /**
-     * This converts a judgement to a json object
+     * This converts a judgement to a json object.
      *
      * @param judgement - the judgement
      * @return Json object for the judgement
@@ -86,7 +86,7 @@ public interface IJSONTool {
     public ObjectNode convertToJSON(Judgement judgement);
 
     /**
-     * This converts an account to an organization json object
+     * This converts an account's organization information into an organization json object.
      *
      * @param account - the account to use to get the organization information
      * @return Json object for the organization
@@ -94,7 +94,7 @@ public interface IJSONTool {
     public ObjectNode convertOrganizationsToJSON(Account account);
 
     /**
-     * This converts an account to a team json object
+     * This converts an account to a team json object.
      *
      * @param account - the account
      * @return Json object for the team
@@ -102,7 +102,7 @@ public interface IJSONTool {
     public ObjectNode convertToJSON(Account account);
 
     /**
-     * This converts an account to a accounts json object
+     * This converts an account to a accounts json object.
      *
      * @param account - the account
      * @return Json object for the account
@@ -110,7 +110,7 @@ public interface IJSONTool {
     public ObjectNode convertToAccountJSON(Account account);
 
     /**
-     * This converts a problem to a json object
+     * This converts a problem to a json object.
      *
      * @param problem - the problem
      * @param ordinal - the problem index
@@ -119,7 +119,8 @@ public interface IJSONTool {
     public ObjectNode convertToJSON(Problem problem, int ordinal);
 
     /**
-     * This converts a Run Test Case to a json object
+     * This routine looks up a specific Run Test Case from the array supplied and
+     * returns to a json object for that run test case.
      *
      * @param runTestCases - all the run test cases
      * @param ordinal - index of desired run test case
@@ -128,7 +129,8 @@ public interface IJSONTool {
     public ObjectNode convertToJSON(RunTestCase[] runTestCases, int ordinal);
 
     /**
-     * Create JSON for judgment.
+     * Create JSON for judgment.  If the submission hasn't been judged, that's fine,
+     * a boilerplate judgement is returned.
      *
      * @param submission/Run to fetch judgment from
      * @return Json object for the judgement
@@ -219,12 +221,13 @@ public interface IJSONTool {
     /**
      * Return wall time for input elapsed time in ms.
      *
-     * Calculates based on elapsed time plus contest start time
+     * Calculates based on elapsed time plus contest start time.  Typically used for getting
+     * the elapsed time for a submission.
      *
      * @param contest
      * @param elapsedMS
-     *            - elapsed ms when submission submitted
-     * @return wall time for run.
+     *            - elapsed ms into the contest
+     * @return wall time for supplied contest elapsedMs
      */
     public static Calendar calculateElapsedWalltime(IInternalContest contest, long elapsedMS) {
 
@@ -267,9 +270,10 @@ public interface IJSONTool {
     }
 
     /**
-     * Get languague unique ID
+     * Get language unique ID
      * @param language
-     * @return string with the id (eg. 'java', 'cpp', etc.)
+     * @return string with the id (eg. 'java', 'cpp', etc.)  if the language does not have an id defined,
+     *      the elementId is returned as a last resort.
      */
     public static String getLanguageId(Language language) {
         String key = language.getID();

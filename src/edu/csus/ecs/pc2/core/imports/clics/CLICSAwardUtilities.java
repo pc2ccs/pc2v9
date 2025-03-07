@@ -1,3 +1,4 @@
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.imports.clics;
 
 import java.io.FileOutputStream;
@@ -76,6 +77,7 @@ public class CLICSAwardUtilities {
 
     /**
      * Return a list of CLICS Awards for a contest for an administrator only (used for comparing results)
+     * At EOC when the results are compared against another CCS, we want to ignore the scoreboard freeze.
      *
      * @param contest
      * @return a List of CLICSAward objects

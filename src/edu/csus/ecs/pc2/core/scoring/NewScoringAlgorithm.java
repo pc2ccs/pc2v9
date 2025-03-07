@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
@@ -148,11 +148,11 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
      * NB. This should probably be in INewScoringAlgorithm
      *
      * @param contest
-     * @param divisionNumber
+     * @param divisionNumber of the desired division
      * @param properties
      * @param honorScoreboardFreeze
      * @param runs
-     * @return
+     * @return the ranked StandingsRecord array
      * @throws IllegalContestState
      */
     // This should probably be in INewScoringAlgorithm
@@ -168,7 +168,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
      *
      * @param contest
      * @param divisionNumber get standings for this division, null for all
-     * @param wantGroups get standings for these groups, null for all
+     * @param wantedGroups get standings for these groups, null for all
      * @param properties
      * @param honorScoreboardFreeze
      * @param runs

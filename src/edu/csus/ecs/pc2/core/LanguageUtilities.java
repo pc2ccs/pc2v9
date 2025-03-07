@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 
 /**
- * Utility methods for languages
+ * Utility methods for languages.
  *
  * @author Douglas A. Lane <pc2@ecs.csus.edu>
  */
@@ -19,6 +19,10 @@ public class LanguageUtilities {
      * include the CLICS ID (as shown above) and optionally a list of extensions supported by the
      * language.  The list below is inadequate and out of date.  For the moment, it is included for
      * backward compatibility.  JB
+     *
+     * Due to the way getExtensionsForLanguage() is implemented, identical languages must be
+     * grouped together (as in C++ below). If they are not grouped together, the routine will not find
+     * extensions for the same language that appear later in the list.
      */
     public static final  String[][] LANGUAGE_LIST = { //
             { "java", "Java" }, //
@@ -104,11 +108,12 @@ public class LanguageUtilities {
     }
 
     /**
-     * Return best guess at source code extensions for the supplied languageid
+     * Return best guess at source code extensions for the supplied languageId.
      * TODO This should be removed when the language definition (eg. system.yaml) and/or the
      * GUI allow the specification of extensions.
      *
      * @param languageId
+     * @name display name of the language (eg. "Java", "Python", ...)
      * @return String array of all extensions for this language
      */
     public static String [] getExtensionsForLanguage(String languageId, String name) {

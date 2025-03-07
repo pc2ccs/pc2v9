@@ -76,7 +76,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 /**
  * WebService to handle submissions
  *
- * @author ICPC
+ * @author John Buck
  *
  */
 @Path("/contests/{contestId}/submissions")
@@ -85,7 +85,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 @Singleton
 public class SubmissionService implements Feature {
     // How long to wait for the submission to be entered into the system before returning error
-    private long WAIT_SUBMISSION_TIMEOUT = 20;
+    private long WAIT_SUBMISSION_TIMEOUT_SECS = 20;
 
     private IInternalContest model;
 
@@ -95,8 +95,6 @@ public class SubmissionService implements Feature {
 
     private boolean serverReplied = false;
 
-    private JSONTool jsonTool;
-
     private Semaphore submissionWaitSem = null;
 
     public SubmissionService(IInternalContest inContest, IInternalController inController) {
@@ -104,7 +102,6 @@ public class SubmissionService implements Feature {
         this.model = inContest;
         this.controller = inController;
         model.addRunListener(new RunListenerImplementation());
-        jsonTool = new JSONTool(model, controller);
     }
 
     private class PendingSubmissionInfo {
@@ -226,7 +223,7 @@ public class SubmissionService implements Feature {
             exceptProps.add("entry_point");
         }
 
-        // get the groups from the contest
+        // get the runs (submissions, really) from the contest
         Run[] runs = model.getRuns();
 
         for (int i = 0; i < runs.length; i++) {
@@ -240,7 +237,7 @@ public class SubmissionService implements Feature {
                     exceptProps.remove("language_id");
                 }
                 try {
-                    // for this judgment, create filter to omit unused/bad properties (max_run_time in this case)
+                    // for this judgment, create filter to omit unused/bad properties (files and/or entry_point in this case)
                     SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
                     FilterProvider fp = new SimpleFilterProvider().addFilter("rtFilter", filter).setFailOnUnknownId(false);
                     // generate json with only properties we want and add to CSV list.
@@ -260,15 +257,28 @@ public class SubmissionService implements Feature {
     @Produces("application/zip")
     @Path("{submissionId}/files/")
     public synchronized Response getSubmissionFiles(@Context SecurityContext sc, @PathParam("contestId") String contestId, @PathParam("submissionId") String submissionId) {
+
         // check contest id
         if(contestId.equals(model.getContestIdentifier()) == false) {
             return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        // Look up to see if we have a pc2 account for the client making the request.
+        // If account remains null, then the client was in the realms.properties file
+        Account account = null;
+
+        ClientId clientId = getClientIdFromUser(sc.getUserPrincipal().getName());
+        if(clientId != null) {
+            account = model.getAccount(clientId);
         }
         // only admin and analyst are authorized to access this endpoint
         boolean allowed = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
             sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) ||
             (sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST) && Utilities.getFreezeTime(model) > model.getContestTime().getElapsedSecs());
-        if (!allowed) {
+
+        // In order to get source code for a run, the user role must be allowed AND if it's
+        // a pc2 account, the account has to have permission to fetch the run.
+        if (!allowed || (account != null && !account.isAllowed(Permission.Type.ALLOWED_TO_FETCH_RUN))) {
             return Response.status(Status.UNAUTHORIZED).build();
         }
         // get the submissions from the contest
@@ -402,7 +412,7 @@ public class SubmissionService implements Feature {
             exceptProps.add("entry_point");
         }
 
-        // get the groups from the contest
+        // get the runs (submissions, really) from the contest
         Run[] runs = model.getRuns();
 
         // Look for submission
@@ -417,7 +427,7 @@ public class SubmissionService implements Feature {
                 }
                 try {
                     ObjectMapper mapper = JSONUtilities.getObjectMapper();
-                    // for this judgment, create filter to omit unused/bad properties (max_run_time in this case)
+                    // for this judgment, create filter to omit unused/bad properties (could be files and/or entry_point)
                     SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
                     FilterProvider fp = new SimpleFilterProvider().addFilter("rtFilter", filter).setFailOnUnknownId(false);
                     String json = mapper.writer(fp).writeValueAsString(new CLICSSubmission(model, submission));
@@ -436,8 +446,9 @@ public class SubmissionService implements Feature {
      * @param servletRequest details of request
      * @param sc requesting user's authorization info
      * @param contestId The contest
-     * @param jsonInputString For non-admin, must not include id, to_team_id, time or contest_time.  For admin, must not include id.
-     * @return json for the clarification, including the (new) id
+     * @param jsonInputString For non-admin, must not include id, team_id (unless it matches the submitter,
+     *      time or contest_time.  For admin, must not include id.
+     * @return json for the new submission, including the (new) id
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -461,9 +472,6 @@ public class SubmissionService implements Feature {
             // These next three are for admin users only
             long overrideTimeMS = -1;
             long overrideSubmissionID = -1;
-            // Slight departure from CLICS spec here.. We allow submission ID on admin POST.
-            // Using PUT for this is wrong - that's not what PUT is for.
-            String subId = null;
 
             Log log = controller.getLog();
             String user = sc.getUserPrincipal().getName();
@@ -476,7 +484,7 @@ public class SubmissionService implements Feature {
             }
             Account account = model.getAccount(clientId);
             if(account == null) {
-                log.info("User " + user + " attempted to POST submission from a non-account");
+                log.info("User " + user + " attempted to POST submission from a non-existing account");
                 // Client must be a valid account, not from realm.properties, we need to
                 // check permissions, this is why.
                 return Response.status(Response.Status.FORBIDDEN).build();
@@ -497,7 +505,7 @@ public class SubmissionService implements Feature {
                 sub.setTeam_id("" + clientId.getClientNumber());
             } else if(account.isAllowed(Permission.Type.SHADOW_PROXY_TEAM)) {
                 if(sub.getTime() != null || sub.getContest_time() != null || sub.getId() != null) {
-                    log.info(user + " attempted to POST submission as PROXY but specified time/contest_time");
+                    log.info(user + " attempted to POST submission as PROXY but specified time, contest_time or id");
                     return Response.status(Response.Status.FORBIDDEN).build();
                 }
             } else if((!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) ||
@@ -508,8 +516,8 @@ public class SubmissionService implements Feature {
             } else {
                 // ** Departure from CLICS Spec - they say this should be done only by PUT
                 // I happen to disagree. --JB
-                // Admin user, copy properties admin is permitted to set
-                // construct the override values to be used.
+                // For the admin user, copy properties the admin is permitted to set.
+                // Also construct the override values to be used.
                 overrideTimeMS = Utilities.convertCLICSContestTimeToMS(sub.getContest_time());
                 if(overrideTimeMS < 0) {
                     overrideTimeMS = -1;
@@ -591,12 +599,11 @@ public class SubmissionService implements Feature {
                 }
 
                 controller.submitRun(clientId, prob, lang, entry, mainSubmissionFile, additionalFiles, overrideTimeMS, overrideSubmissionID);
-                boolean gotSub = submissionWaitSem.tryAcquire(WAIT_SUBMISSION_TIMEOUT, TimeUnit.SECONDS);
+                boolean gotSub = submissionWaitSem.tryAcquire(WAIT_SUBMISSION_TIMEOUT_SECS, TimeUnit.SECONDS);
                 submissionWaitSem = null;
                 if(gotSub) {
                     Run newRun = pendingSub.getSubmission();
                     pendingSub = null;
-                    submissionWaitSem = null;
                     // make sure we got a run; not sure how we couldn't have one at this point
                     if(newRun != null) {
                         // Normal return path.
@@ -626,7 +633,7 @@ public class SubmissionService implements Feature {
      * @param sc requesting user's authorization info
      * @param contestId The contest
      * @param jsonInputString For non-admin, must not include id, to_team_id, time or contest_time.  For admin, must not include id.
-     * @return json for the clarification, including the (new) id
+     * @return json for the submission
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -723,24 +730,7 @@ public class SubmissionService implements Feature {
     }
 
     /**
-     * Returns the Account based on the user supplied.
-     *
-     * @param user
-     * @return Account for user, or null if no account found
-     */
-    private Account getAccountFromUser(String user) {
-        if(model.getAccounts() != null) {
-            for(Account acct : model.getAccounts()) {
-                if(acct.getDefaultDisplayName(acct.getClientId()).equals(user)) {
-                    return(acct);
-                }
-            }
-        }
-        return(null);
-    }
-
-    /**
-     * Returns the the Problem object for supplied id (short name) or null if none found
+     * Returns the Problem object for supplied id (short name) or null if none found
      *
      * @param id shortname of problem
      * @return Problem object or null
@@ -782,13 +772,36 @@ public class SubmissionService implements Feature {
     }
 
     /**
-     * Check if the supplied user has a admin, if so they can make submissions on behalf of a team
+     * Check if the supplied user is an admin, if so they can make submissions on behalf of a team
      *
      * @param sc User's security context
      * @return true if the user is allowed to make team submissions
      */
-    public static boolean isProxySubmitAllowed(SecurityContext sc) {
-        return(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN));
+    public static boolean isProxySubmitAllowed(SecurityContext sc, IInternalContest model) {
+        // Look up to see if we have a pc2 account for the client making the request.
+        // If account remains null, then the client was in the realms.properties file
+        // and we can only base the value on the role
+        Account account = null;
+
+        String user = sc.getUserPrincipal().getName();
+        ClientId clientId = null;
+
+        // basically, need to match lower case letters followed by digits
+        Matcher matcher = Pattern.compile("^([a-z]+)([0-9]+)$").matcher(user);
+        if(matcher.matches()) {
+            try {
+                clientId = new ClientId(model.getSiteNumber(), ClientType.Type.valueOf(matcher.group(1).toUpperCase()), Integer.parseInt(matcher.group(2)));
+            } catch (Exception e) {
+                // Don't care - we'll base it on the role in this case (python: pass)
+            }
+        }
+        boolean isAllowed = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE);
+        if(clientId != null) {
+            account = model.getAccount(clientId);
+            if(!account.isAllowed(Permission.Type.SUBMIT_RUN) && !account.isAllowed(Permission.Type.SHADOW_PROXY_TEAM))
+                isAllowed = false;
+        }
+        return(isAllowed);
     }
 
     /**
