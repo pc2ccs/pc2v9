@@ -145,7 +145,7 @@ public class RunService implements Feature {
         String [] props;
 
         if(sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) || sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST)){
-            props = JSONUtilities.getJsonProperties(CLICSAccount.class);
+            props = JSONUtilities.getJsonProperties(CLICSTestCase.class);
         } else {
             // If you're not admin, judge or analyst, you can't see any properties for run test cases
             props = new String[0];
