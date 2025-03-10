@@ -111,7 +111,7 @@ public class CLICSAccount {
     }
 
     /**
-     * Create account list from a accounts.json like file
+     * Create account list from a yaml file
      *
      * @param contest the contest (needed for groups)
      * @param yamlfile yaml file to deserialize
@@ -198,13 +198,13 @@ public class CLICSAccount {
                 break;
             }
             if(StringUtilities.isEmpty(acct.username)) {
-                // id is required
+                // username is required
                 log.log(Log.SEVERE, "unable to get account username");
                 error = true;
                 break;
             }
             if(StringUtilities.isEmpty(acct.type)) {
-                // id is required
+                // type is required
                 log.log(Log.SEVERE, "unable to get account type");
                 error = true;
                 break;
