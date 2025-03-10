@@ -193,7 +193,7 @@ public class SubmissionService implements Feature {
         }
 
         ContestTime ct = model.getContestTime();
-        boolean isFrozen = (Utilities.getFreezeTime(model) <= ct.getElapsedSecs());
+        boolean isFrozen = (Utilities.getFreezeTime(model) <= ct.getElapsedSecs() && !model.getContestInformation().isUnfrozen());
         Set<String> exceptProps = new HashSet<String>();
 
         // get an object which can be used to map the Submission descriptions into JSON form
@@ -271,10 +271,13 @@ public class SubmissionService implements Feature {
         if(clientId != null) {
             account = model.getAccount(clientId);
         }
-        // only admin and analyst are authorized to access this endpoint
+        // only admin and analyst are authorized to access this endpoint, and analyst is restricted in that
+        // they can't see it during freeze period.
         boolean allowed = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) ||
             sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE) ||
-            (sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST) && Utilities.getFreezeTime(model) > model.getContestTime().getElapsedSecs());
+            (sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST) &&
+                Utilities.getFreezeTime(model) > model.getContestTime().getElapsedSecs() &&
+                !model.getContestInformation().isUnfrozen());
 
         // In order to get source code for a run, the user role must be allowed AND if it's
         // a pc2 account, the account has to have permission to fetch the run.
@@ -390,7 +393,7 @@ public class SubmissionService implements Feature {
         }
 
         ContestTime ct = model.getContestTime();
-        boolean isFrozen = (Utilities.getFreezeTime(model) <= ct.getElapsedSecs());
+        boolean isFrozen = (Utilities.getFreezeTime(model) <= ct.getElapsedSecs() && !model.getContestInformation().isUnfrozen());
         Set<String> exceptProps = new HashSet<String>();
 
         // set up shortcuts for access policy

@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
@@ -20,6 +21,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
@@ -61,20 +63,28 @@ public class EventFeedService implements Feature {
     /**
      * a JSON stream representation of the events occurring in the contest.
      *
-     * @param type
+     * @param types (eventTypeList)
      *            a comma-separated query parameter identifying the type(s) of events being requested (if empty or null, indicates ALL event types)
-     * @param since_token
+     * @param contestId The contest id for which the EF is desired
+     * @param since_token (startingToken)
      *            the token of the earliest event being requested (i.e., an indication of the requested starting point in the event stream)
-     *
-     * @return a {@link Response} object whose body contains the JSON event feed
+     * @param sc Security context of user making request
      * @param asyncResponse
-     * @param servletRequest
+     * @param servletRequest inforation about the request
+     * @param response Response information for jetty
+     * @return a {@link Response} object whose body contains the JSON event feed
      * @throws IOException
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public void streamEventFeed(@QueryParam("types") String eventTypeList, @QueryParam("since_token") String startingToken, @Suspended
+    public void streamEventFeed(@QueryParam("types") String eventTypeList, @PathParam("contestId") String contestId, @QueryParam("since_token") String startingToken, @Suspended
     final AsyncResponse asyncResponse, @Context HttpServletRequest servletRequest, @Context HttpServletResponse response, @Context SecurityContext sc) throws IOException {
+
+        // check contest id
+        if(contestId.equals(contest.getContestIdentifier()) == false) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "ContestId not found");
+            return;
+        }
 
         response.setContentType("json");
         response.setCharacterEncoding("UTF-8");

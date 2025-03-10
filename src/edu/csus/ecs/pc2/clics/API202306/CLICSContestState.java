@@ -130,12 +130,23 @@ public class CLICSContestState {
             FinalizeData fData = model.getFinalizeData();
             if (fData != null) {
                 Date fDate = fData.getCertificationDate();
+                // end of updates can only be set if contest is finalized.
                 if(fDate != null) {
                     finalized = Utilities.getIso8601formatterWithMS().format(fDate);
-                    // If contest was thawed after finalized, then use thaw time
-                    if(thawed != null && thawedDate != null && thawedDate.after(fDate)) {
-                        end_of_updates = thawed;
+                    // If contest was frozen, it also must be thawed before end of updates is set
+                    if(frozen != null) {
+                        // the test on thawedDate is paranoia.  It must be set above for thawed to be set,
+                        // but I wanted to make that clear here.
+                        if(thawed != null && thawedDate != null) {
+                            // if thawedDate is after finalized date, use it as end of updates, otherwise use finalized
+                            if(thawedDate.after(fDate)) {
+                                end_of_updates = thawed;
+                            } else {
+                                end_of_updates = finalized;
+                            }
+                        }
                     } else {
+                        // the contest was never frozen, but now finalized, so end of updates is set.
                         end_of_updates = finalized;
                     }
                 }

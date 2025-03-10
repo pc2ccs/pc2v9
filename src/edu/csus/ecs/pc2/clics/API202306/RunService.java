@@ -76,7 +76,7 @@ public class RunService implements Feature {
             // Admins can see test cases all the time.
             if (!isAdmin && !isJudge){
                 // If not an analyst, or is an analyst but after freeze: you can't see test cases
-                if(!isAnalyst || run.getElapsedMS()/1000 > freezeTime) {
+                if(!isAnalyst || run.getElapsedMS()/1000 > freezeTime && !model.getContestInformation().isUnfrozen()) {
                     continue;
                 }
             }
@@ -123,7 +123,7 @@ public class RunService implements Feature {
                     for(RunTestCase testCase: run.getRunTestCases()) {
                         if (testCase.getElementId().toString().equals(runId)) {
                             // If an analyst can not see runs after freeze time
-                            if (isAnalyst && run.getElapsedMS() / 1000 > freezeTime) {
+                            if (isAnalyst && run.getElapsedMS() / 1000 > freezeTime && !model.getContestInformation().isUnfrozen()) {
                                 return Response.status(Response.Status.FORBIDDEN).build();
                             }
                             return Response.ok(new CLICSTestCase(model, testCase).toJSON(), MediaType.APPLICATION_JSON).build();

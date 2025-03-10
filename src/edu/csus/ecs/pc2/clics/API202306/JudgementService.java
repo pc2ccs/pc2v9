@@ -82,7 +82,7 @@ public class JudgementService implements Feature {
             // If not admin or judge, can not see runs after freeze time
             if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
                 // if run is after scoreboard freeze, do not return info for it
-                if (run.getElapsedMS() / 1000 > freezeTime) {
+                if (run.getElapsedMS() / 1000 > freezeTime && !model.getContestInformation().isUnfrozen()) {
                     continue;
                 }
             }
@@ -128,7 +128,7 @@ public class JudgementService implements Feature {
                 // If not admin or judge, can not see runs after freeze time
                 if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
                     // if run is after scoreboard freeze, do not return info for it
-                    if (run.getElapsedMS() / 1000 > freezeTime) {
+                    if (run.getElapsedMS() / 1000 > freezeTime && !model.getContestInformation().isUnfrozen()) {
                         continue;
                     }
                 }

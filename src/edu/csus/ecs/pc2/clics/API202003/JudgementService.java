@@ -68,7 +68,7 @@ public class JudgementService implements Feature {
             Run run = runs[i];
             if (sc.isUserInRole("public")) {
                 // if run is after scoreboard freeze, and public access do not show judgement
-                if (run.getElapsedMS() / 1000 > freezeTime) {
+                if (run.getElapsedMS() / 1000 > freezeTime && !model.getContestInformation().isUnfrozen()) {
                     continue;
                 }
             }
@@ -92,7 +92,7 @@ public class JudgementService implements Feature {
             Run run = runs[i];
             if (sc.isUserInRole("public")) {
                 // if run is after scoreboard freeze, and public access do not show judgement
-                if (run.getElapsedMS() / 1000 > freezeTime) {
+                if (run.getElapsedMS() / 1000 > freezeTime && !model.getContestInformation().isUnfrozen()) {
                     continue;
                 }
             }

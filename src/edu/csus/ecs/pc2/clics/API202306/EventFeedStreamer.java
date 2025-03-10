@@ -825,32 +825,14 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
         public void contestInformationAdded(ContestInformationEvent event) {
             String json = getJSONEvent(CONTEST_KEY, getNextEventId(), null, jsonTool.convertToJSON(event.getContestInformation()).toString());
             sendJSON(json + NL);
-            String currentState = jsonTool.toStateJSON(event.getContestInformation()).toString();
-            if (lastStateSent == null) {
-                json = getJSONEvent(STATE_KEY, getNextEventId(), null, currentState);
-                sendJSON(json + NL);
-            } else {
-                if (lastStateSent != currentState) {
-                    json = getJSONEvent(STATE_KEY, getNextEventId(), null, currentState);
-                    sendJSON(json + NL);
-                }
-            }
+            sendStateIfChanged(jsonTool.toStateJSON(contest.getContestInformation()).toString());
         }
 
         @Override
         public void contestInformationChanged(ContestInformationEvent event) {
             String json = getJSONEvent(CONTEST_KEY, getNextEventId(), null, jsonTool.convertToJSON(event.getContestInformation()).toString());
             sendJSON(json + NL);
-            String currentState = jsonTool.toStateJSON(event.getContestInformation()).toString();
-            if (lastStateSent == null) {
-                json = getJSONEvent(STATE_KEY, getNextEventId(), null, currentState);
-                sendJSON(json + NL);
-            } else {
-                if (lastStateSent != currentState) {
-                    json = getJSONEvent(STATE_KEY, getNextEventId(), null, currentState);
-                    sendJSON(json + NL);
-                }
-            }
+            sendStateIfChanged(jsonTool.toStateJSON(contest.getContestInformation()).toString());
         }
 
         @Override
