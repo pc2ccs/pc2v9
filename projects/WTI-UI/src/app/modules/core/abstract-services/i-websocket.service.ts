@@ -27,6 +27,10 @@ export abstract class IWebsocketService {
         this._contestService.clarificationsUpdated.next();
         break;
       }
+      case 'refresh': {
+        this._contestService.clarificationsUpdated.next();
+        break;
+      }
       case 'announcement': {
         this._uiHelperService.incomingAnnouncement(message.id);
         this._contestService.clarificationsUpdated.next();

@@ -23,10 +23,18 @@ public class ClarificationService implements IClarificationEventListener {
         //This method is used by two (or more?) methods.
         //Whenever an announcement that this user should receive is made this method is called
         //Also whenever the team sends a clarification to be answered by the judges.
-        if ( !arg0.isAnswered()) {  //case when the team sends a clarification to be answered.
-            return;
-        }
         String clarId = String.format("%s-%s", arg0.getSiteNumber(),arg0.getNumber());
+
+	    if ( !arg0.isAnswered()) {  //case when the team sends a clarification to be answered.
+	        JsonObject builder = Json.createObjectBuilder()
+	                .add("type", WebsocketMsgType.REFRESH.name().toLowerCase())
+	                .add("id", clarId)
+	                .add("teamId", this.teamId)
+	                .build();
+	        
+	        this.client.sendMessage(builder.toString());
+	        return;
+        }
         
         JsonObject builder = Json.createObjectBuilder()
                 .add("type", WebsocketMsgType.ANNOUNCEMENT.name().toLowerCase())
@@ -58,7 +66,7 @@ public class ClarificationService implements IClarificationEventListener {
 
 	@Override
 	public void clarificationUpdated(IClarification arg0) {
-		
+
 	}
 	
 }
