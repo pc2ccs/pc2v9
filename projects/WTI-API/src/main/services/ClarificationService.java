@@ -27,7 +27,7 @@ public class ClarificationService implements IClarificationEventListener {
 
 	    if ( !arg0.isAnswered()) {  //case when the team sends a clarification to be answered.
 	        JsonObject builder = Json.createObjectBuilder()
-	                .add("type", WebsocketMsgType.REFRESH.name().toLowerCase())
+	                .add("type", WebsocketMsgType.REFRESH_CLARIFICATION_LIST.name().toLowerCase())
 	                .add("id", clarId)
 	                .add("teamId", this.teamId)
 	                .build();

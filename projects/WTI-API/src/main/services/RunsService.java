@@ -57,7 +57,13 @@ public class RunsService implements IRunEventListener {
 
 	@Override
 	public void runSubmitted(IRun arg0) {
-
+	    JsonObject builder = Json.createObjectBuilder()
+                .add("type", WebsocketMsgType.REFRESH_RUNS_LIST.name().toLowerCase())
+                .add("id", String.format("%s-%s", arg0.getSiteNumber(), arg0.getNumber()))
+                .add("teamId", this.teamId)
+                .build();
+        
+        this.client.sendMessage(builder.toString());
 	}
 
 	@Override
