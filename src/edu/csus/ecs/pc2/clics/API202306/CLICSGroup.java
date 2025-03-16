@@ -34,8 +34,10 @@ public class CLICSGroup {
     @JsonProperty
     private String name;
 
-    @JsonProperty
-    private String type;
+// It is not clear what this value should be.  Since it's optional, we are
+// not including it at the moment.
+//    @JsonProperty
+//    private String type;
 
     @JsonProperty
     private CLICSLocation location;
@@ -55,7 +57,8 @@ public class CLICSGroup {
         if (group.getGroupId() != -1) {
             icpc_id = Integer.toString(group.getGroupId());
         }
-        type = "site" + group.getSiteNumber();
+        // type is not well defined, so leave it.
+        // type = "site";
     }
 
     /**

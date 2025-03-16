@@ -265,7 +265,7 @@ public class RemoteEventFeedMonitor implements Runnable {
 
                         // we will process submissions if we are allowed precontest or the contest is running
                         allowSubmits = allowPrestartActivity || isContestRunning;
-                        // we will process judgments if we are allowed precontest or the contest has been started at some point
+                        // we will process judgments if we are allowed precontest or the contest has been started at some point but not finalized.
                         allowJudgments = (allowPrestartActivity || wasContestStarted) && (!remoteCCSFinalized);
 
                         if ("submissions".equals(notifyType)) {
@@ -277,7 +277,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                             }
 
                             if(!allowSubmits) {
-                                log.info("Skipping submission event since the contest has not started and allowPrestartActivity is false.");
+                                log.info("Skipping submission event since the contest is not running and allowPrestartActivity is false.");
                                 dataMap = getNextEvent(reader, log);
                                 tossedMessages++;
                                 if(monitorStatus != null) {
@@ -536,11 +536,7 @@ public class RemoteEventFeedMonitor implements Runnable {
                             // Delay on judgments
                             bDelay = true;
 
-                            if(dataMap == null) {
-                                logAndDebugPrint(log, Level.INFO, "Found event of type " + notifyType + ": null data");
-                            } else {
-                                logAndDebugPrint(log, Level.INFO, "Found event of type " + notifyType + ": " + dataMap.toString());
-                            }
+                            logAndDebugPrint(log, Level.INFO, "Found event of type " + notifyType + ": " + dataMap.toString());
 
                             //process a judgment event
                             try {
@@ -1170,6 +1166,8 @@ public class RemoteEventFeedMonitor implements Runnable {
 
      /**
       * Invokes the PC2 server to update the status of the specified run to match the specified judgement.
+      * This method is not currently used since it came from the Combined Contest branch.  We are leaving it here
+      * since we are going to be adding this at some point.
       *
       * @param submissionIdStr the Id of the run to be updated.
       * @param newJudgementStr the judgement which should be applied to the specified run.

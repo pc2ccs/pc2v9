@@ -246,9 +246,9 @@ public class ContestService implements Feature {
 
         // check authorization (verify requester is allowed to make this request)
         if (!isContestStartAllowed(sc)) {
-            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request");
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request by " + sc.getUserPrincipal().getName());
             // return HTTP 401 response code per CLICS spec
-            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
+            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to perform this operation").build();
         }
         // check if we have a start_time string (really? check for "null"?)
         if (startTimeValueString == null || startTimeValueString.trim().equalsIgnoreCase("null")) {
@@ -302,11 +302,11 @@ public class ContestService implements Feature {
 
             case SET_START_TO_UNDEFINED:
 
-                // check for less than 30 secs to scheduled start
+                // check for less than minimum time to scheduled start
                 if (scheduledStartTime != null && scheduledStartTime.getTimeInMillis() < (now.getTimeInMillis() + MIN_MS_TO_START_OF_CONTEST)) {
 
-                    // we have request to set start to "null", but we have a scheduled start and we're
-                    // within 10 secs of it; cannot set scheduled start time to undefined (per CLICS spec);
+                    // we have request to set start to "null", but we have a scheduled start
+                    // within mininum time to scheduled start; cannot set scheduled start time to undefined (per CLICS spec);
                     controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": received request to set start time to 'null' with less than " + minSecsToStart + " to go before start; ignored");
                     // return HTTP 403 (Forbidden) response code per CLICS spec
                     return Response.status(Status.FORBIDDEN).entity("Cannot change start time to 'null' within " + minSecsToStart + " of already-scheduled start").build();
@@ -314,12 +314,12 @@ public class ContestService implements Feature {
                 } else {
 
                     // ok to set scheduled start to "undefined"
-                    controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setStarttime(): setting contest start time to \"null\".");
+                    controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setting contest start time to \"null\".");
                     success = setScheduledStart(null, sawCountdownPauseTime);
                     if (success) {
                         return Response.ok().entity("Contest start time updated to \"null\" (no scheduled start)").build();
                     } else {
-                        controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": setStarttime(): error setting contest start time to \"undefined\".");
+                        controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": error setting contest start time to \"undefined\".");
                         return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to set start time correctly").build();
                     }
                 }
@@ -328,7 +328,7 @@ public class ContestService implements Feature {
 
             case SET_START_TO_SPECIFIED_DATE:
 
-                // check for less than 30 sec before scheduled start
+                // check for less than minimum time to scheduled start
                 if (scheduledStartTime != null && scheduledStartTime.getTimeInMillis() < (now.getTimeInMillis() + MIN_MS_TO_START_OF_CONTEST)) {
                     // we're within 30 secs of scheduled start; cannot set scheduled start time to new value (per CLICS spec);
                     controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": received request to set start time with less than " + minSecsToStart + " to go before start; ignored");
@@ -336,7 +336,7 @@ public class ContestService implements Feature {
                     return Response.status(Status.FORBIDDEN).entity("Cannot change to new start time within " + minSecsToStart + " of already-scheduled start").build();
                 }
 
-                // check for less than 30 sec in the future
+                // check for less than within mininum time before start
                 if (requestedStartTime.getTimeInMillis() < (now.getTimeInMillis() + MIN_MS_TO_START_OF_CONTEST)) {
 
                     // requested start time is less than 30sec from now; cannot set (per CLICS spec);
@@ -346,12 +346,12 @@ public class ContestService implements Feature {
                 }
 
                 // ok to set scheduled start to a specific time
-                controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setStarttime(): setting contest start time to " + requestedStartTime);
+                controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setting contest start time to " + requestedStartTime);
                 success = setScheduledStart(requestedStartTime, sawCountdownPauseTime);
                 if (success) {
                     return Response.ok().entity("/contests/" + contestId).build();
                 } else {
-                    controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": setStarttime(): error setting contest start time to requested date.");
+                    controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": error setting contest start time to requested date.");
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to set start time correctly").build();
                 }
 
@@ -359,7 +359,7 @@ public class ContestService implements Feature {
 
             default:
                 // shouldn't be able to get here!
-                controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": setStarttime(): unknown default condition: request type = " + requestType);
+                controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": unknown default condition: request type = " + requestType);
                 return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unknown condition in server: request type = " + requestType).build();
         }
     }
@@ -379,9 +379,9 @@ public class ContestService implements Feature {
 
         // check authorization (verify requester is allowed to make this request)
         if (!isContestStartAllowed(sc)) {
-            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request");
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request by " + sc.getUserPrincipal().getName());
             // return HTTP 401 response code per CLICS spec
-            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
+            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to perform this operation").build();
         }
 
         long pauseTime = Utilities.convertCLICSContestTimeToMS(countdownPauseTime);
@@ -408,9 +408,9 @@ public class ContestService implements Feature {
 
         // check authorization (verify requester is allowed to make this request)
         if (!isContestThawAllowed(sc)) {
-            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request");
+            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": unauthorized request " + sc.getUserPrincipal().getName());
             // return HTTP 401 response code per CLICS spec
-            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to access this page").build();
+            return Response.status(Status.UNAUTHORIZED).entity("You are not authorized to perform this operation").build();
         }
 
         // thaw time present, validate now

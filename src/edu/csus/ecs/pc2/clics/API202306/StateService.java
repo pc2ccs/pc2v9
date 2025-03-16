@@ -45,7 +45,7 @@ public class StateService implements Feature {
      *
      * @param sc user information
      * @param contestId The contest
-     * @return a {@link Response} object containing a JSON String giving the scheduled contest start time as a Unix Epoch value, or as the string "undefined" if no start time is currently scheduled.
+     * @return a {@link Response} object containing a JSON String giving the current contest state.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

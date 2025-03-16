@@ -591,6 +591,7 @@ public final class StringUtilities implements Serializable {
 
     /*
      * Remove all occurrences of a char in a string
+     * Note: will not work for "supplementary characters" (some Chinese Characters).
      *
      *  @param s the string to operate on
      *  @param c all occurrences of this character will be removed from
