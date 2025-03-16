@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.standings;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -17,12 +17,15 @@ public class ScoringGroup {
 
     @XmlAttribute
     private String id;
-    
+
     @XmlAttribute
     private String included; //TODO could be boolean
 
     @XmlAttribute
     private String title;
+
+    @XmlAttribute
+    private String pc2Site;
 
     public String getExternalId() {
         return externalId;
@@ -39,7 +42,7 @@ public class ScoringGroup {
     public void setId(String id) {
         this.id = id;
     }
-    
+
     public String getIncluded() {
         return included;
     }
@@ -54,6 +57,14 @@ public class ScoringGroup {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getpc2Site() {
+        return pc2Site;
+    }
+
+    public void setpc2Site(String id) {
+        this.pc2Site = pc2Site;
     }
 
 }
