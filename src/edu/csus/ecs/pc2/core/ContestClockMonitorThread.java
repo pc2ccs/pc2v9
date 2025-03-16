@@ -11,15 +11,20 @@ import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * Auto Clock Stop Thread.
- * 
- * The run() method will start loop to detect end of contest and if contest running stop contest clock for this site.
+ * Contest Clock Monitor Thread.
+ * (Formerly: AutoStopContestThread)
+ *
+ * The run() method will start a loop to detect both freeze start and end of contest and if contest running stop contest clock for this site.
  * Note that the contest clock will only be done if the current {@link ContestTime#setHaltContestAtTimeZero(boolean)}
  * is set to true.
- * 
+ *
+ * We need to monitor when the freeze starts so we can send a state update on the event feed using ContestTimeListener.
+ * We do not need to monitor if the contest is thawed, since that will be automatically triggered when the unfreeze
+ * button is pressed on the Settings tab.
+ *
  * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
  */
-public class AutoStopContestClockThread extends Thread {
+public class ContestClockMonitorThread extends Thread {
 
     /**
      * Default sleep duration.
@@ -40,19 +45,19 @@ public class AutoStopContestClockThread extends Thread {
 
     /**
      * Constructor.
-     * 
+     *
      * Use .start method to start thread.
-     * 
+     *
      * @param controller
      * @param contest
      */
-    public AutoStopContestClockThread(IInternalController controller, IInternalContest contest) {
+    public ContestClockMonitorThread(IInternalController controller, IInternalContest contest) {
         super();
         log = controller.getLog();
         this.contest = contest;
         this.controller = controller;
         contestTime = contest.getContestTime();
-        
+
         contest.addContestTimeListener(new ContestTimeListener());
     }
 
@@ -63,28 +68,38 @@ public class AutoStopContestClockThread extends Thread {
         return running;
     }
 
- 
+
     @Override
     public void run() {
-
         running = true;
+
+        // remember initial state of freeze so we don't send it more than once
+        boolean isFrozen = isContestFrozen();
 
         while (running) {
             try {
 
                 // stop only if both halt is set true and past end of contest.
-                
+
                 if (isHaltContestAtTimeZero() && contestTime.isContestRunning() && contestTime.isPastEndOfContest()) {
                     try {
 
                         int siteNumber = contestTime.getSiteNumber();
-                        info("AutoStopContestClockThread - stopping contest at site " + siteNumber + ", remaining = " + contestTime.getRemainingSecs());
+                        info("ContestClockMonitorThread - stopping contest at site " + siteNumber + ", remaining = " + contestTime.getRemainingSecs());
 
                         controller.stopContest(contestTime.getSiteNumber());
 
                     } catch (Exception ex2) {
-                        warning("Exception in AutoStopContestClockThread stopContest ", ex2);
+                        warning("Exception in ContestClockMonitorThread stopContest ", ex2);
                     }
+                }
+                // See if we transitioned to frozen state
+                if(!isFrozen && isContestFrozen()) {
+                    info("ContestClockMonitorThread - entering freeze period - time remaining = " + contestTime.getRemainingSecs());
+                    isFrozen = true;
+                    // signal a state change - we are not really changing anything, just causing the notification
+                    ContestTime ct = contest.getContestTime();
+                    controller.updateContestTime(ct);
                 }
 
                 try {
@@ -94,16 +109,16 @@ public class AutoStopContestClockThread extends Thread {
                 }
 
             } catch (Exception ex3) {
-                warning("Exception in AutoStopContestClockThread ", ex3);
+                warning("Exception in ContestClockMonitorThread ", ex3);
             }
         }
-        info("AutoStopContestClockThread - thread has been stopped ");
+        info("ContestClockMonitorThread - thread has been stopped ");
     }
 
     private boolean isHaltContestAtTimeZero() {
-        
+
 //        return contestTime.isHaltContestAtTimeZero(); // local only
-        
+
         ContestInformation contestInfo = contest.getContestInformation();
         return contestInfo.isAutoStopContest();
     }
@@ -142,7 +157,7 @@ public class AutoStopContestClockThread extends Thread {
 
     /**
      * Set period to check for end of contest.
-     * 
+     *
      * @param millis
      */
     public void setSleepMs(long millis) {
@@ -151,7 +166,7 @@ public class AutoStopContestClockThread extends Thread {
 
     /**
      * MS between checks for end of contest.
-     * 
+     *
      * @return
      */
     public long getSleepMs() {
@@ -165,14 +180,26 @@ public class AutoStopContestClockThread extends Thread {
         info("halting thread");
         running = false;
     }
-    
+
     private boolean isThisSite(int siteNumber) {
         return siteNumber == contest.getSiteNumber();
     }
 
     /**
+     * Check if the contest was frozen.  We don't care if it was unfrozen.  We only want to detect
+     * a transition between never froze and frozen.
+     *
+     * @return if the contest was frozen at some point
+     */
+    private boolean isContestFrozen() {
+        if(Utilities.isDebugMode()) {
+            System.out.println("ContestClockMonitorThread: Freeze info: FT: " + Utilities.getFreezeTime(contest) + " ET:" + contest.getContestTime().getElapsedSecs());
+        }
+        return(Utilities.getFreezeTime(contest) <= contest.getContestTime().getElapsedSecs());
+    }
+    /**
      * A listener that updates contestTime.
-     * 
+     *
      */
     class ContestTimeListener implements IContestTimeListener {
 
@@ -213,6 +240,6 @@ public class AutoStopContestClockThread extends Thread {
         public void refreshAll(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
-        
+
     }
 }

@@ -283,7 +283,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private AutoStarter autoStarter;
 
-    private AutoStopContestClockThread autoStopContestClockThread = null;
+    private ContestClockMonitorThread autoStopContestClockThread = null;
 
     /**
      * Packets which should be sent to multiple instances of logins (for example, a "RUN_SUBMSSION_CONFIRMATION"
@@ -4945,7 +4945,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void updateAutoStopClockThread() {
 
         if (autoStopContestClockThread == null) {
-            autoStopContestClockThread = new AutoStopContestClockThread(this, contest);
+            autoStopContestClockThread = new ContestClockMonitorThread(this, contest);
             autoStopContestClockThread.start();
 
             ContestTime time = contest.getContestTime();
