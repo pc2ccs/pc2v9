@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.eventFeed;
 
 import java.io.File;
@@ -17,9 +17,11 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -46,6 +48,7 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
@@ -54,10 +57,14 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.services.web.ICLICSResourceConfig;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
@@ -102,6 +109,8 @@ public class WebServer implements UIPlugin {
     private WebServerPropertyUtils wsProperties = null;
 
     private ICLICSResourceConfig apiResource = null;
+
+    private AccountListener accountListener = new AccountListener();
 
     private static final Provider bcProvider = new BouncyCastleProvider();;
 
@@ -260,6 +269,8 @@ public class WebServer implements UIPlugin {
 
             jettyServer.setHandler(context);
 
+            getContest().addAccountListener(accountListener);
+
             // ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
             // jerseyServlet.setInitOrder(0);
             //
@@ -299,23 +310,11 @@ public class WebServer implements UIPlugin {
         HashLoginService l = new HashLoginService();
 
         // First, load PC2 accounts into jetty - this will allow PC2 users to use the API with their login id
-        //    Only teams, admins and judges
+        //    Only teams, admins and judges AND they have to have the VIEW_EVENT_FEED permission
         Account[] accounts = contest.getAccounts();
-        String role;
-        Type clientType;
 
         for (Account account: accounts) {
-            clientType = account.getClientId().getClientType();
-            if (clientType == Type.TEAM) {
-                role = WEBAPI_ROLE_TEAM;
-            } else if (clientType == Type.ADMINISTRATOR) {
-                role = WEBAPI_ROLE_ADMIN;
-            } else if (clientType == Type.JUDGE) {
-                role = WEBAPI_ROLE_JUDGE;
-            } else {
-                continue;
-            }
-            l.putUser(account.getClientId().getName(), new Password(account.getPassword()), new String [] { role });
+            addAccountToLoginService(account, l);
         }
 
         // now load any special ones from the realm file
@@ -370,6 +369,64 @@ public class WebServer implements UIPlugin {
 
     }
 
+    /**
+     * Add the supplied account to the web service's basic auth list if the account
+     * has permission to use the API/Event_Feed.
+     *
+     * @param acct
+     * @param ls
+     */
+    private void addAccountToLoginService(Account acct, HashLoginService ls) {
+        if(acct.isAllowed(Permission.Type.VIEW_EVENT_FEED)) {
+            Type clientType = acct.getClientId().getClientType();
+            String role = null;
+            if (clientType == Type.TEAM) {
+                role = WEBAPI_ROLE_TEAM;
+            } else if (clientType == Type.ADMINISTRATOR) {
+                role = WEBAPI_ROLE_ADMIN;
+            } else if (clientType == Type.JUDGE) {
+                role = WEBAPI_ROLE_JUDGE;
+            }
+            if(role != null) {
+                ls.putUser(acct.getClientId().getName(),  new Password(acct.getPassword()), new String [] { role });
+            }
+        }
+    }
+
+    /**
+     * When the accountListener sees an account change, we update the user's entry in the basic auth table.
+     * The supplied account is checked - if null, nothing is done.
+     * This may involve removing an account from auth table if the VIEW_EVENT_FEED permission is removed.
+     * This may involve adding a new account to the auth table if an account with VIEW_EVENT_FEED permission is added.
+     *
+     * @param acct The account to possibly add
+     */
+
+    private void addBasicAuthInfo(Account acct) {
+        if(jettyServer != null && acct != null) {
+            // Lookup the login service from the web server
+            ServletContextHandler context = (ServletContextHandler)jettyServer.getHandler();
+            if(context != null) {
+                SecurityHandler h = context.getSecurityHandler();
+                if(h != null) {
+                    HashLoginService ls = (HashLoginService)h.getLoginService();
+                    if(ls != null) {
+                        ConcurrentMap<String, UserIdentity> cm = ls.getUsers();
+                        if(cm != null) {
+                            String user = acct.getClientId().getName();
+                            UserIdentity ui = cm.get(user);
+                            // If the user exists, remove them.  We will attempt to re-add them right after.
+                            if(ui != null) {
+                                ls.removeUser(user);
+                            }
+                            addAccountToLoginService(acct, ls);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public IInternalContest getContest() {
         return contest;
     }
@@ -405,6 +462,7 @@ public class WebServer implements UIPlugin {
     }
 
     public void stop() {
+        getContest().removeAccountListener(accountListener);
         try {
             jettyServer.stop();
         } catch (Exception e1) {
@@ -428,6 +486,48 @@ public class WebServer implements UIPlugin {
         return serverRunning;
     }
 
+
+    /**
+     * Account Listener for updating realm accounts.
+     *
+     * @author John Buck
+     */
+
+    protected class AccountListener implements IAccountListener {
+
+        @Override
+        public void accountAdded(AccountEvent accountEvent) {
+            addBasicAuthInfo(accountEvent.getAccount());
+        }
+
+        @Override
+        public void accountModified(AccountEvent accountEvent) {
+            addBasicAuthInfo(accountEvent.getAccount());
+        }
+
+        @Override
+        public void accountsAdded(AccountEvent accountEvent) {
+            Account[] accounts = accountEvent.getAccounts();
+            for (Account account : accounts) {
+                addBasicAuthInfo(account);
+            }
+        }
+
+        @Override
+        public void accountsModified(AccountEvent accountEvent) {
+            Account[] accounts = accountEvent.getAccounts();
+            Arrays.sort(accounts, new AccountComparator());
+
+            for (Account account : accounts) {
+                addBasicAuthInfo(account);
+            }
+        }
+
+        @Override
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            // ignore
+        }
+    }
 
     private ICLICSResourceConfig getAPIClass(String className) {
 
