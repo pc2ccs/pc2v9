@@ -216,9 +216,9 @@ public class SubmissionService implements Feature {
         // We have to build the array of json objects by hand due to the exception filter
         StringJoiner allSubs = new StringJoiner(",");
 
-        // teams, public can never see files or entry_point.  Analysts can't after freeze
-        // Exception: teams can see their own handled below in the loop
-        if(isTeam || isPublic || (isAnalyst && isFrozen)) {
+        // Public can never see files or entry_point.  Analysts can't after freeze.
+        // Note: teams can see their own files/entry_point/language_id handled below in the loop
+        if(isPublic || (isAnalyst && isFrozen)) {
             exceptProps.add("files");
             exceptProps.add("entry_point");
         }
@@ -230,11 +230,18 @@ public class SubmissionService implements Feature {
             Run submission = runs[i];
             if (!submission.isDeleted()) {
                 cSub = new CLICSSubmission(model, submission);
-                // Only teams are restricted on the language
-                if(isTeam && !submission.getSubmitter().getName().equals(user)){
-                    exceptProps.add("language_id");
-                } else {
-                    exceptProps.remove("language_id");
+                // Teams have restrictions on language, files and entry_point
+                if(isTeam) {
+                    // Teams can only see their own files/entry_point/language
+                    if(!submission.getSubmitter().getName().equals(user)){
+                        exceptProps.add("language_id");
+                        exceptProps.add("files");
+                        exceptProps.add("entry_point");
+                    } else {
+                        exceptProps.remove("language_id");
+                        exceptProps.remove("files");
+                        exceptProps.remove("entry_point");
+                    }
                 }
                 try {
                     // for this judgment, create filter to omit unused/bad properties (files and/or entry_point in this case)
@@ -408,9 +415,9 @@ public class SubmissionService implements Feature {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
-        // teams, public can never see files or entry_point.  Analysts can't after freeze
-        // Exception: teams can see their own handled below in the loop
-        if(isTeam || isPublic || (isAnalyst && isFrozen)) {
+        // Public can never see files or entry_point.  Analysts can't after freeze.
+        // Note: teams can see their own files/entry_point/language_id handled below in the loop
+        if(isPublic || (isAnalyst && isFrozen)) {
             exceptProps.add("files");
             exceptProps.add("entry_point");
         }
@@ -422,11 +429,18 @@ public class SubmissionService implements Feature {
         for (int i = 0; i < runs.length; i++) {
             Run submission = runs[i];
             if (!submission.isDeleted() && IJSONTool.getSubmissionId(submission).equals(submissionId)) {
-                // Only teams are restricted on the language
-                if(isTeam && !submission.getSubmitter().getName().equals(sc.getUserPrincipal().getName())){
-                    exceptProps.add("language_id");
-                } else {
-                    exceptProps.remove("language_id");
+                // Teams have restrictions on language, files and entry_point
+                if(isTeam) {
+                    // Teams can only see their own files/entry_point/language
+                    if(!submission.getSubmitter().getName().equals(sc.getUserPrincipal().getName())){
+                        exceptProps.add("language_id");
+                        exceptProps.add("files");
+                        exceptProps.add("entry_point");
+                    } else {
+                        exceptProps.remove("language_id");
+                        exceptProps.remove("files");
+                        exceptProps.remove("entry_point");
+                    }
                 }
                 try {
                     ObjectMapper mapper = JSONUtilities.getObjectMapper();
