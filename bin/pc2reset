@@ -5,18 +5,18 @@
 # Author : pc2@ecs.csus.edu
 #
 
-. `dirname $0`/pc2env
+. "$(dirname "$0")/pc2env"
 
 # clients have a logs directory or servers have a profiles directory
-if [ -d logs -o -d profiles ] ; then
-    `dirname $0`/pc2zip
-    if [ -d archive ]; then
-	rm -fr logs packets reports execute* profiles profiles.properties results
-    else
-	echo Could not find archive directory, was pc2zip successful?
-    fi
+if [ -d logs ] || [ -d profiles ]; then
+  "$(dirname "$0")/pc2zip"
+  if [ -d archive ]; then
+    rm -fr logs packets reports profiles profiles.properties results execute*
+  else
+    echo Could not find archive directory, was pc2zip successful?
+  fi
 else
-    echo Not in directory to reset, should be run from dir with logs or profiles
-fi 
+  echo Not in directory to reset, should be run from dir with logs or profiles
+fi
 
-# eof pc2reset $Id$ 
+# eof pc2reset $Id$

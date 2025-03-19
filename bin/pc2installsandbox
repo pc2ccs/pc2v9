@@ -7,7 +7,7 @@
 # Description:
 # In order to support executing submissions in a sandbox on Linux, we use cgroups v2.  Therefore,
 # the systems that are doing judging must support that.  Most newer Linux systems do.
-# 
+#
 # The cgroup used for pc2 judging, /sys/fs/cgroup/pc2. must be created and set up with the proper
 # permissions every time the system boots (cgroups are not persistent across reboots).  The pc2_cgroup.service
 # systemd service arranges for this to happen.  It is a "one-shot" service, and all it does is execute
@@ -26,98 +26,97 @@ PC2_CGROUP_PATH=$CGROUP_PATH/pc2
 
 # ------------------------------------------------------------
 
-if [ "$#" -ne 2 ] ; then
-   echo $0: Unknown command line arguments: $*
-   echo Usage: $0 pc2user pc2group
-   exit $FAIL_BAD_ARGS_ALLOWED_EXIT_CODE
-fi 
+euid=$(id -u)
+if [ "$euid" -ne 0 ]; then
+  echo "$0: This script must be run as super user" >&2
+  exit 1
+fi
+
+if [ "$#" -ne 2 ]; then
+  echo "$0: Unknown command line arguments: $*"
+  echo "Usage: $0 pc2user pc2group"
+  exit "$FAIL_BAD_ARGS_ALLOWED_EXIT_CODE"
+fi
 
 JUDGE_USER="$1"
 JUDGE_GROUP="$2"
-if ! getent passwd "$JUDGE_USER" >/dev/null 2>&1
-then
-   echo $0: No such user $JUDGE_USER.  The pc2user must be a valid login id.
-   exit $FAIL_BAD_USER_GROUP
+if ! getent passwd "$JUDGE_USER" >/dev/null 2>&1; then
+  echo "$0: No such user $JUDGE_USER. The pc2user must be a valid login id."
+  exit "$FAIL_BAD_USER_GROUP"
 fi
-if ! getent group "$JUDGE_GROUP" >/dev/null 2>&1
-then
-   echo $0: No such group $JUDGE_USER.  The pc2group must be a valid group in /etc/group.
-   exit $FAIL_BAD_USER_GROUP
+if ! getent group "$JUDGE_GROUP" >/dev/null 2>&1; then
+  echo "$0: No such group $JUDGE_USER. The pc2group must be a valid group in /etc/group."
+  exit "$FAIL_BAD_USER_GROUP"
 fi
 
 # make sure CGroups v2 is installed
-echo Verifying CGroup v2 installation...
+echo "Verifying CGroup v2 installation..."
 if [ ! -f "$CGROUP_PATH/cgroup.controllers" ]; then
-   echo $0: "It appears CGroups v2 is not installed (missing file 'cgroup.controllers' in $CGROUP_PATH)."
-   echo CGroups v2 must be installed before a PC2 sandbox can be installed
-   echo "(or if CGroups v2 is installed elsewhere from $CGROUP_PATH, edit the CGroup Path in $0)."
-   exit $FAIL_MISSING_CGROUP_CONTROLLERS_FILE
+  echo "$0: It appears CGroups v2 is not installed (missing file 'cgroup.controllers' in $CGROUP_PATH)."
+  echo "CGroups v2 must be installed before a PC2 sandbox can be installed"
+  echo "(or if CGroups v2 is installed elsewhere from $CGROUP_PATH, edit the CGroup Path in $0)."
+  exit "$FAIL_MISSING_CGROUP_CONTROLLERS_FILE"
 fi
 
-if [ ! -f "$CGROUP_PATH/cgroup.subtree_control" ]; then
-   echo $0: "It appears CGroups v2 is not installed (missing file 'cgroup.subtree_control' in $CGROUP_PATH)."
-   echo CGroups v2 must be installed before a PC2 sandbox can be installed
-   echo "(or if CGroups v2 is installed elsewhere from $CGROUP_PATH, edit the CGroup Path in $0)."
-   exit $FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE
+if ! [ -f "$CGROUP_PATH/cgroup.subtree_control" ]; then
+  echo "$0: It appears CGroups v2 is not installed (missing file 'cgroup.subtree_control' in $CGROUP_PATH)."
+  echo "CGroups v2 must be installed before a PC2 sandbox can be installed"
+  echo "(or if CGroups v2 is installed elsewhere from $CGROUP_PATH, edit the CGroup Path in $0)."
+  exit "$FAIL_MISSING_CGROUP_SUBTREE_CONTROL_FILE"
 fi
 
 # make sure the cpu and memory controllers are enabled
 
 if ! grep -q -F "cpu" "$CGROUP_PATH/cgroup.subtree_control"; then
-   echo $0: cgroup.subtree_control in $CGROUP_PATH does not enable cpu controller
-#   echo $0: Perhaps you have: echo +cpu ">$CGROUP_PATH/cgroup.subtree_control"
-   echo $0: Executing: echo +cpu ">$CGROUP_PATH/cgroup.subtree_control"
-   echo +cpu > $CGROUP_PATH/cgroup.subtree_control
+  echo "$0: cgroup.subtree_control in $CGROUP_PATH does not enable cpu controller"
+  #   echo "$0: Perhaps you have: echo +cpu >$CGROUP_PATH/cgroup.subtree_control"
+  echo "$0: Executing: echo +cpu >\"$CGROUP_PATH/cgroup.subtree_control\""
+  echo +cpu >"$CGROUP_PATH/cgroup.subtree_control"
 fi
 
 if ! grep -q -F "memory" "$CGROUP_PATH/cgroup.subtree_control"; then
-   echo $0: cgroup.subtree_control in $CGROUP_PATH does not enable memory controller
-   exit $FAIL_MEMORY_CONTROLLER_NOT_ENABLED
+  echo "$0: cgroup.subtree_control in $CGROUP_PATH does not enable memory controller"
+  exit "$FAIL_MEMORY_CONTROLLER_NOT_ENABLED"
 fi
-
 
 # we seem to have a valid CGroup installation
 echo ...done.
 
 # First, remove any existing remnants
-for dir in `ls -d $PC2_CGROUP_PATH/sandbox* 2>/dev/null`
-do
-	if test -d "$dir"
-	then
-		$DEBUG echo Removing existing $dir
-		rmdir "$dir"
-	fi
+for dir in "$PC2_CGROUP_PATH/sandbox"*; do
+  if [ -d "$dir" ]; then
+    echo "Removing existing $dir"
+    rmdir "$dir"
+  fi
 done
-if test -d $PC2_CGROUP_PATH
-then
-	rmdir $PC2_CGROUP_PATH
+if [ -d "$PC2_CGROUP_PATH" ]; then
+  rmdir "$PC2_CGROUP_PATH"
 fi
 
 # Errors will cause script to stop
 set -e
 
-# Create a pc2 cgroup to be managed by the JUDGE user and group 
-echo Creating PC2 CGroup structure...
-sudo mkdir $PC2_CGROUP_PATH
-sudo chown $JUDGE_USER:$JUDGE_GROUP $PC2_CGROUP_PATH
-sudo chmod 775 $PC2_CGROUP_PATH
+# Create a pc2 cgroup to be managed by the JUDGE user and group
+echo "Creating PC2 CGroup structure..."
+sudo mkdir "$PC2_CGROUP_PATH"
+sudo chown "$JUDGE_USER:$JUDGE_GROUP" "$PC2_CGROUP_PATH"
+sudo chmod 775 "$PC2_CGROUP_PATH"
 
 # allow the JUDGE user and group to manage the pc2 cgroup files and subgroups.
 # note we do NOT change ownership of the "resource control" interface files, like cpu.max;
 # those must remain under control of the PARENT -- root -- cgroup
 # judge accounts use group JUDGE_GROUP so everything must be group write as well.
-sudo chown $JUDGE_USER:$JUDGE_GROUP $PC2_CGROUP_PATH/cgroup.procs
-sudo chown $JUDGE_USER:$JUDGE_GROUP $PC2_CGROUP_PATH/cgroup.subtree_control
+sudo chown "$JUDGE_USER:$JUDGE_GROUP" "$PC2_CGROUP_PATH/cgroup.procs"
+sudo chown "$JUDGE_USER:$JUDGE_GROUP" "$PC2_CGROUP_PATH/cgroup.subtree_control"
 #sudo chown $JUDGE_USER:$JUDGE_GROUP $PC2_CGROUP_PATH/memory.max
-sudo chmod 664 $PC2_CGROUP_PATH/cgroup.procs $PC2_CGROUP_PATH/cgroup.subtree_control
+sudo chmod 664 "$PC2_CGROUP_PATH/cgroup.procs" "$PC2_CGROUP_PATH/cgroup.subtree_control"
 
 # Have to allow PC2 to write to the ancestor tree cgroup.procs
-sudo chown root.$JUDGE_GROUP  $CGROUP_PATH/cgroup.procs
-sudo chmod 664 $CGROUP_PATH/cgroup.procs 
+sudo chown "root.$JUDGE_GROUP" "$CGROUP_PATH/cgroup.procs"
+sudo chmod 664 "$CGROUP_PATH/cgroup.procs"
 
 # Enable the cpu and memory controllers for the pc2 cgroup.
 # Note that this must be done BEFORE creating the pc2sandbox subgroup, so that the subgroup inherits the controllers.
-echo "+cpu +memory" > $PC2_CGROUP_PATH/cgroup.subtree_control 
+echo "+cpu +memory" >"$PC2_CGROUP_PATH/cgroup.subtree_control"
 
-echo ...done.
-
+echo "...done."
