@@ -1177,6 +1177,9 @@ public class PacketHandler {
         Profile newProfile = new Profile(settings.getName());
         newProfile.setDescription(settings.getDescription());
         newProfile.setSiteNumber(contest.getSiteNumber());
+        if (!StringUtilities.isEmpty(packet.getContestIdentifier())) {
+            newProfile.setContestId(packet.getContestIdentifier());
+        }
 
         if (settings.getProfilePath() != null){
             newProfile.setProfilePath(settings.getProfilePath());
