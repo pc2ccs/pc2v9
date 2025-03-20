@@ -59,9 +59,9 @@ export class ClarificationsPageComponent implements OnInit, OnDestroy {
     let filtered = this.clarifications;
 
 
-    if (fitlerParams.receipient === 'all') { filtered = filtered.filter(x => x.recipient === 'All'); console.log('receipient is ALl');}
-    if (fitlerParams.receipient === 'team') { filtered = filtered.filter(x => x.recipient !== 'All'); console.log('receipient is a team')}
-    if (fitlerParams.problem) { filtered = filtered.filter(x => x.problem === fitlerParams.problem); console.log('receipient is a problem')}
+    if (fitlerParams.receipient === 'all') { filtered = filtered.filter(x => x.recipient === 'All');}
+    if (fitlerParams.receipient === 'team') { filtered = filtered.filter(x => x.recipient !== 'All');}
+    if (fitlerParams.problem) { filtered = filtered.filter(x => x.problem === fitlerParams.problem);}
 
     this.filteredClarifications = filtered;
   }
