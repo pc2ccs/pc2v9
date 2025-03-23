@@ -78,8 +78,8 @@ import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 //import edu.csus.ecs.pc2.core.strategies.AcceptAllStrategy;
-//import edu.csus.ecs.pc2.core.strategies.MaxSubmissionsPerMinuteStrategy;
-import edu.csus.ecs.pc2.core.strategies.RejectAllStrategy;
+import edu.csus.ecs.pc2.core.strategies.MaxSubmissionsPerMinuteStrategy;
+//import edu.csus.ecs.pc2.core.strategies.RejectAllStrategy;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.core.transport.IBtoA;
 import edu.csus.ecs.pc2.core.transport.ITransportManager;
@@ -621,7 +621,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // chosen from among a list of available strategies and specified by, e.g. a YAML file or an interactive
             // GUI (such as the PC2 Admin)
 //            IThrottleStrategy strategy = new AcceptAllStrategy();
-            IThrottleStrategy strategy = new RejectAllStrategy();
+//            IThrottleStrategy strategy = new RejectAllStrategy();
+            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,4);
 //            IThrottleStrategy strategy = new MaxSubmissionsPerMinuteStrategy(contest,MaxSubmissionsPerMinuteStrategy.DEFAULT_MAX_SUBMISSIONS_PER_MINUTE);
             
             accept = strategy.accept(run);
