@@ -15,10 +15,27 @@ import edu.csus.ecs.pc2.core.model.Run;
  *
  */
 public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
+    
+    public static int DEFAULT_MAX_SUBMISSIONS_PER_MINUTE = 10 ;
 
     private  IInternalContest contest;
     private int maxPerMinute;
     
+    /**
+     * Construct a strategy with a default limit on submissions per minute.
+     * 
+     * @param inContest the {@link IInternalContest} with which this strategy is associated.
+     */
+    public MaxSubmissionsPerMinuteStrategy (IInternalContest inContest) {
+        this.contest = inContest ;
+        this.maxPerMinute = DEFAULT_MAX_SUBMISSIONS_PER_MINUTE ;
+    }
+
+    /**
+     * Construct a strategy with a caller-specified limit on submissions per minute.
+     * 
+     * @param inContest the {@link IInternalContest} with which this strategy is associated.
+     */
     public MaxSubmissionsPerMinuteStrategy (IInternalContest inContest, int maxAllowed) {
         this.contest = inContest ;
         this.maxPerMinute = maxAllowed ;
@@ -26,7 +43,7 @@ public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
 
     @Override
     /**
-     * Rejects the specified run if the submitting team has submitted the maximum allowed number of runs in the past minute. 
+     * Rejects the specified run if the submitting team has already submitted the maximum allowed number of runs in the past minute. 
      */
     public boolean accept(Run run) {
         int numSoFar = getNumberOfRunsSubmittedInTheLastMinute(contest, run);
@@ -34,7 +51,7 @@ public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
           return true;
         else 
           return false ;
-       }
+    }
 
     /**
      * Queries the specified contest to find the runs already submitted by the submitter of the specified run,
