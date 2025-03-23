@@ -17,6 +17,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.core.exception.SubmissionRejectedException;
 import edu.csus.ecs.pc2.core.model.IFile;
 import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.ILanguage;
@@ -270,6 +271,13 @@ public class TeamsController extends MainController {
 		}
 		catch(NotLoggedInException e) {
 			return Response.status(Response.Status.UNAUTHORIZED)
+					.type(MediaType.APPLICATION_JSON)
+					.build();
+		}
+		catch (SubmissionRejectedException e) {
+			String msg = e.getMessage();
+			return Response.status(Response.Status.TOO_MANY_REQUESTS)
+					.entity(Entity.json(new ServerErrorResponseModel(Response.Status.TOO_MANY_REQUESTS, msg)))
 					.type(MediaType.APPLICATION_JSON)
 					.build();
 		}
