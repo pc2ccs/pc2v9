@@ -47,9 +47,7 @@ export class NewClarificationComponent implements OnInit, OnDestroy {
 	      this._uiHelper.alertOk('Clarification has been submitted successfully! ');
 	    },
 	    error: (error: any) => {
-	      this._uiHelper.alertError('Error submitting clarification!');
-	      console.error('error submitting new clarification');
-	      console.error(error);
+	      this._uiHelper.alertError(`Error submitting clarification! ${error}`);
 	    },
 	    complete: () => {
 	    // Called when the observable completes
