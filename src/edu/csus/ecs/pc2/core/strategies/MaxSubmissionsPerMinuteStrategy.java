@@ -1,7 +1,6 @@
 // Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.strategies;
 
-import java.util.ArrayList;
 import edu.csus.ecs.pc2.core.IThrottleStrategy;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -69,44 +68,35 @@ public class MaxSubmissionsPerMinuteStrategy implements IThrottleStrategy {
         //get the clientId for the new Run
         ClientId newSubmitter = newRun.getSubmitter();
 
-        //a list of runs submitted by the same submitter as who submitted "newRun", initially empty
-        ArrayList<Run> teamRuns = new ArrayList<Run>();
-
-        //get all the runs in the contest
-        Run[] allRuns = contest.getRuns();
-        
-        //check each contest run to see if it came from the same submitter
-        for (Run curRun : allRuns ) {
-            if (curRun.getSubmitter().equals(newSubmitter)) {
-                //add the current run to the list of runs submitted by the newRun submitter
-                teamRuns.add(curRun);
-            }
-        }
-        
-        //check if the team has actually submitted anything
-        if (teamRuns.size()==0) {
-            return 0;
-        }
-        
-        //get the current contest time
+        //get the current contest time so we can check run submission times against current time
         ContestTime contestTime = contest.getContestTime();
         long contestElapsedSecs = contestTime.getElapsedSecs();
         
-        //count the number of runs previously submitted in the last minute
+        //get all the runs in the contest
+        Run[] allRuns = contest.getRuns();
+        
+        //count the number of runs previously submitted in the last minute by the same client
         int numSubmittedInLastMinute = 0;
-        for (Run run : teamRuns) {
-            //get the submission time (in seconds) for the run
-            long runSubmisionTimeSecs = run.getOriginalElapsedMS()/1000;
+        
+        //check each contest run 
+        for (Run curRun : allRuns ) {
             
-            //check if the run submission time was within the last minute (60 seconds)
-            if (runSubmisionTimeSecs >= contestElapsedSecs-60) {
-                //the run was submitted in the last minute; count it
-                numSubmittedInLastMinute++ ;
+            //see if the current run came from the same submitter
+            if (curRun.getSubmitter().equals(newSubmitter)) {
+
+                //yes, same submitter; get the submission time (in seconds) for the current run
+                long runSubmisionTimeSecs = curRun.getOriginalElapsedMS()/1000;
+                
+                //check if the run submission time was within the last minute (60 seconds)
+                if (runSubmisionTimeSecs >= contestElapsedSecs-60) {
+                    
+                    //the run was submitted in the last minute; count it
+                    numSubmittedInLastMinute++ ;
+                }
             }
         }
         
         return numSubmittedInLastMinute ;
-
     }
 
 }
