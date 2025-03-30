@@ -394,7 +394,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                     sendJSON(json + NL);
                 } else {
                     // Delete message (can no longer see the team because it's no on scoreboard
-                    String json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), "{\"id\": null}");
+                    String json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), "null");
                     sendJSON(json + NL);
                 }
                 // SOMEDAY send team members info
@@ -428,7 +428,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                     if (contest.isAllowed(account.getClientId(), Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                         json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), jsonTool.convertToJSON(account).toString());
                     } else {
-                        json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), "{\"id\": null}");
+                        json = getJSONEvent(TEAM_KEY, getNextEventId(), IJSONTool.getAccountId(account), "null");
                     }
                     sendJSON(json + NL);
                 }
@@ -471,7 +471,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
             Account account = contest.getAccount(run.getSubmitter());
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 if (run.isDeleted()) {
-                    String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), "{\"id\": null}");
+                    String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), "null");
                     sendJSON(json + NL);
                 } else {
                     if (run.isJudged()) {
@@ -499,7 +499,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
             Account account = contest.getAccount(run.getSubmitter());
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
 
-                String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), "{\"id\": null}");
+                String json = getJSONEvent(JUDGEMENT_KEY, getNextEventId(), run.getElementId().toString(), "null");
                 sendJSON(json + NL);
             }
         }
@@ -541,7 +541,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
             ClarificationAnswer[] clarAnswers = clarification.getClarificationAnswers();
             if (clarAnswers != null) {
                 id = IJSONTool.getClarificationAnswerId(clarAnswers[clarAnswers.length - 1]);
-                json = getJSONEvent(CLARIFICATIONS_KEY, getNextEventId(), id, "{\"id\": null}");
+                json = getJSONEvent(CLARIFICATIONS_KEY, getNextEventId(), id, "null");
                 sendJSON(json + NL);
             }
         }
@@ -576,7 +576,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                 int problemNumber = getProblemIndex(contest, problem.getElementId());
                 json = getJSONEvent(PROBLEM_KEY, getNextEventId(), IJSONTool.getProblemId(problem), jsonTool.convertToJSON(problem, problemNumber).toString());
             } else {
-                json = getJSONEvent(PROBLEM_KEY, getNextEventId(), IJSONTool.getProblemId(problem), "{\"id\": null}");
+                json = getJSONEvent(PROBLEM_KEY, getNextEventId(), IJSONTool.getProblemId(problem), "null");
             }
             sendJSON(json + NL);
         }
@@ -584,7 +584,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
         @Override
         public void problemRemoved(ProblemEvent event) {
             Problem problem = event.getProblem();
-            String json = getJSONEvent(PROBLEM_KEY, getNextEventId(), IJSONTool.getProblemId(problem), "{\"id\": null}");
+            String json = getJSONEvent(PROBLEM_KEY, getNextEventId(), IJSONTool.getProblemId(problem), "null");
             sendJSON(json + NL);
         }
 
@@ -616,7 +616,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
             if (language.isActive()) {
                 json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), IJSONTool.getLanguageId(language), jsonTool.convertToJSON(language).toString());
             } else {
-                json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), IJSONTool.getLanguageId(language), "{\"id\": null}");
+                json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), IJSONTool.getLanguageId(language), "null");
             }
             sendJSON(json + NL);
         }
@@ -624,7 +624,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
         @Override
         public void languageRemoved(LanguageEvent event) {
             Language language = event.getLanguage();
-            String json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), IJSONTool.getLanguageId(language), "{\"id\": null}");
+            String json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), IJSONTool.getLanguageId(language), "null");
             sendJSON(json + NL);
         }
 
@@ -646,7 +646,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                 if (language.isActive()) {
                     json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), IJSONTool.getLanguageId(language), jsonTool.convertToJSON(language).toString());
                 } else {
-                    json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), IJSONTool.getLanguageId(language), "{\"id\": null}");
+                    json = getJSONEvent(LANGUAGE_KEY, getNextEventId(), IJSONTool.getLanguageId(language), "null");
                 }
                 sendJSON(json + NL);
             }
@@ -681,7 +681,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
             if (group.isDisplayOnScoreboard()) {
                 json = getJSONEvent(GROUPS_KEY, getNextEventId(), IJSONTool.getGroupId(group), jsonTool.convertToJSON(group).toString());
             } else {
-                json = getJSONEvent(GROUPS_KEY, getNextEventId(), IJSONTool.getGroupId(group), "{\"id\": null}");
+                json = getJSONEvent(GROUPS_KEY, getNextEventId(), IJSONTool.getGroupId(group), "null");
             }
             sendJSON(json + NL);
         }
@@ -689,7 +689,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
         @Override
         public void groupRemoved(GroupEvent event) {
             Group group = event.getGroup();
-            String json = getJSONEvent(GROUPS_KEY, getNextEventId(), IJSONTool.getGroupId(group), "{\"id\": null}");
+            String json = getJSONEvent(GROUPS_KEY, getNextEventId(), IJSONTool.getGroupId(group), "null");
             sendJSON(json + NL);
         }
 
@@ -710,7 +710,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                 if (group.isDisplayOnScoreboard()) {
                     json = getJSONEvent(GROUPS_KEY, getNextEventId(), IJSONTool.getGroupId(group), jsonTool.convertToJSON(group).toString());
                 } else {
-                    json = getJSONEvent(GROUPS_KEY, getNextEventId(), IJSONTool.getGroupId(group), "{\"id\": null}");
+                    json = getJSONEvent(GROUPS_KEY, getNextEventId(), IJSONTool.getGroupId(group), "null");
                 }
                 sendJSON(json + NL);
             }
