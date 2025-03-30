@@ -837,7 +837,7 @@ public class SubmissionService implements Feature {
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
-    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
+    public static CLICSEndpoint getEndpointProperties(IInternalContest contest, SecurityContext sc) {
         return(new CLICSEndpoint("submissions", JSONUtilities.getJsonProperties(CLICSSubmission.class)));
     }
 

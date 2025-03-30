@@ -1,6 +1,8 @@
 // Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -26,6 +28,8 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
@@ -43,6 +47,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
 @Provider
 @Singleton
 public class JudgementService implements Feature {
+    private static final int MIN_NUM_SOLVED_FREEZE = 3;
 
     private IInternalContest model;
 
@@ -77,21 +82,46 @@ public class JudgementService implements Feature {
         ObjectMapper mapper = JSONUtilities.getObjectMapper();
         CLICSJudgement cJudgment;
         Run.RunStates status;
+        HashMap<String,HashMap<ElementId,Boolean>> allTeamsSolvedMap = null;
+        HashMap<ElementId,Boolean> teamSolvedMap;
+        String user = sc.getUserPrincipal().getName();
+        String runUser;
+        boolean isAdminUser = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE);
+        boolean isAnalyst = sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST);
+        boolean includeMaxRunTime = isAdminUser;
 
         for (Run run: model.getRuns()) {
-            // If not admin or judge, can not see runs after freeze time
-            if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
-                // if run is after scoreboard freeze, do not return info for it
-                if (run.getElapsedMS() / 1000 > freezeTime && !model.getContestInformation().isUnfrozen()) {
-                    continue;
-                }
-            }
 
             status = run.getStatus();
-            // Check if judged or being judged - can't generate a judgment event feed entry if not one of these states
+            // Check if judged or being judged - can't generate a judgment entry if not one of these states
             if(run.isJudged() || (status == RunStates.BEING_JUDGED || status == RunStates.BEING_COMPUTER_JUDGED)) {
+                runUser = run.getSubmitter().getName();
+                // If not admin or judge or the team itself, can not see runs after freeze time
+                if (!isAdminUser && !user.equals(runUser)) {
+                    // if run is after scoreboard freeze, we have to check if it's for a team that solved < MIN_NUM_SOLVED_FREEZE problems
+                    if (run.getElapsedMS() / 1000 > freezeTime && !model.getContestInformation().isUnfrozen()) {
+                        if(allTeamsSolvedMap == null) {
+                            // compute solved map first time we need it, since it's expensive to do.
+                            allTeamsSolvedMap = computeNumberSolvedMap();
+                        }
+                        teamSolvedMap = allTeamsSolvedMap.get(runUser);
+                        // if the submitter of this run solved at least MIN_NUM_SOLVED_FREEZE,
+                        // then we don't return it's info unless its the actual team that's asking
+                        if(teamSolvedMap != null && teamSolvedMap.size() >= MIN_NUM_SOLVED_FREEZE) {
+                            continue;
+                        }
+                        includeMaxRunTime = false;
+                    } else if(isAnalyst) {
+                        includeMaxRunTime = true;
+                    }
+                }
+
                 exceptProps.clear();
                 cJudgment = new CLICSJudgement(model, controller, run, exceptProps);
+                // Remove max_run_time property if indicated
+                if(!includeMaxRunTime) {
+                    exceptProps.add("max_run_time");
+                }
                 try {
                     // for this judgment, create filter to omit unused/bad properties (max_run_time in this case)
                     SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept(exceptProps);
@@ -123,23 +153,46 @@ public class JudgementService implements Feature {
         if(contestId.equals(model.getContestIdentifier()) == true) {
            long freezeTime = Utilities.getFreezeTime(model);
            Run.RunStates status;
+           HashMap<String,HashMap<ElementId,Boolean>> allTeamsSolvedMap = null;
+           HashMap<ElementId,Boolean> teamSolvedMap;
+           String user = sc.getUserPrincipal().getName();
+           String runUser;
+           boolean isAdminUser = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE);
+           // admins can always see max_run_time
+           boolean includeMaxRunTime = isAdminUser;
 
            for(Run run: model.getRuns()) {
-                // If not admin or judge, can not see runs after freeze time
-                if (!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
-                    // if run is after scoreboard freeze, do not return info for it
-                    if (run.getElapsedMS() / 1000 > freezeTime && !model.getContestInformation().isUnfrozen()) {
-                        continue;
-                    }
-                }
-                // judgementId's match runId's
-                if (run.getElementId().toString().equals(judgementId)) {
-                    status = run.getStatus();
+               // judgementId's match runId's - we found the one we are looking for
+               if (run.getElementId().toString().equals(judgementId)) {
+                   status = run.getStatus();
 
-                    // Check if judged or being judged - can't generate a judgment event feed entry if not one of these states
-                    if(run.isJudged() || (status == RunStates.BEING_JUDGED || status == RunStates.BEING_COMPUTER_JUDGED)) {
+                   // Check if judged or being judged - can't generate a judgment if not one of these states
+                   if(run.isJudged() || (status == RunStates.BEING_JUDGED || status == RunStates.BEING_COMPUTER_JUDGED)) {
+                       runUser = run.getSubmitter().getName();
+                       // If not admin or judge or the team itself, can not see runs after freeze time
+                       if (!isAdminUser && !user.equals(runUser)) {
+                            // if run is after scoreboard freeze, and not unfrozen, do not return info for it
+                            if (run.getElapsedMS() / 1000 > freezeTime && !model.getContestInformation().isUnfrozen()) {
+                                // compute solved map first time we need it, since it's expensive to do.
+                                allTeamsSolvedMap = computeNumberSolvedMap();
+
+                                teamSolvedMap = allTeamsSolvedMap.get(runUser);
+                                // if the submitter of this run solved at least MIN_NUM_SOLVED_FREEZE,
+                                // then we don't return it's info unless its the actual team that's asking
+                                if(teamSolvedMap != null && teamSolvedMap.size() >= MIN_NUM_SOLVED_FREEZE) {
+                                    break;
+                                }
+                                includeMaxRunTime = false;
+                            } else if(sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST)) {
+                                includeMaxRunTime = true;
+                            }
+                        }
                         Set<String> exceptProps = new HashSet<String>();
                         CLICSJudgement cJudgment = new CLICSJudgement(model, controller, run, exceptProps);
+                        // Remove max_run_time property if indicated
+                        if(!includeMaxRunTime) {
+                            exceptProps.add("max_run_time");
+                        }
                         try {
                             ObjectMapper mapper = JSONUtilities.getObjectMapper();
                             // create filter to omit unused/bad properties (location, for example)
@@ -158,13 +211,74 @@ public class JudgementService implements Feature {
     }
 
     /**
+     * Determine number of problems each team has solved
+     *
+     * @return a map of usernames to a map of problems solved
+     */
+    private HashMap<String,HashMap<ElementId,Boolean>> computeNumberSolvedMap() {
+        HashMap<String,HashMap<ElementId,Boolean>> solvedMap = new HashMap<String,HashMap<ElementId,Boolean>>();
+
+        String teamName;
+        ElementId probId;
+        HashMap<ElementId, Boolean> probMap;
+
+        // we have to go through each run and look for solved ones
+        for(Run run: model.getRuns()) {
+            if(run.isSolved()) {
+                teamName = run.getSubmitter().getName();
+                // see if we know about this team's solved problems
+                probMap = solvedMap.get(teamName);
+                if(probMap == null) {
+                    probMap = new HashMap<ElementId, Boolean>();
+                    solvedMap.put(teamName, probMap);
+                }
+                probId = run.getProblemId();
+                // if this team did not solve the problem yet, remember it did now
+                if(probMap.get(probId) == null) {
+                    probMap.put(probId, Boolean.valueOf(true));
+                }
+            }
+        }
+        return(solvedMap);
+    }
+
+    /**
      * Retrieve access information about this endpoint for the supplied user's security context
      *
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
-    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
-        return(new CLICSEndpoint("judgements", JSONUtilities.getJsonProperties(CLICSJudgement.class)));
+    public static CLICSEndpoint getEndpointProperties(IInternalContest contest, SecurityContext sc) {
+        String [] props = JSONUtilities.getJsonProperties(CLICSJudgement.class);
+
+        // Non-admin users have restrictions:
+        // max_run_time: Public & teams can never see it, analysts only if not in freeze
+        // other properties: we always present them in the access endpoint since some
+        // judgments may be visible, even if in freeze, so we have to say these properties
+        // are available.
+        if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) && !sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE)) {
+            ArrayList<String> aprops = new ArrayList<String>();
+            boolean isAnalyst = sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST);
+            boolean isFrozen = false;
+
+            // Check if in freeze period if contest is valid and contest times are valid
+            if(contest != null) {
+                ContestTime ct = contest.getContestTime();
+                if(ct != null) {
+                    isFrozen = (Utilities.getFreezeTime(contest) <= ct.getElapsedSecs() && !contest.getContestInformation().isUnfrozen());
+                }
+            }
+            // Decide if we should remove max_run_time from the list
+            for(String prop: props) {
+                // If frozen, non-admins don't see max_run_time ever
+                if(!prop.equals("max_run_time") || (isAnalyst && !isFrozen)) {
+                    aprops.add(prop);
+                }
+            }
+            // regenerate array
+            props = aprops.toArray(new String [0]);
+        }
+        return(new CLICSEndpoint("judgements", props));
     }
 
     @Override

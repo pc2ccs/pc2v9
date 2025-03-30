@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.clics.API202306;
 
 import javax.inject.Singleton;
@@ -64,7 +64,7 @@ public class StateService implements Feature {
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
-    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
+    public static CLICSEndpoint getEndpointProperties(IInternalContest contest, SecurityContext sc) {
         return(new CLICSEndpoint("state", JSONUtilities.getJsonProperties(CLICSContestState.class)));
     }
 

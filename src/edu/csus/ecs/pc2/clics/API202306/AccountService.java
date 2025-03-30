@@ -127,7 +127,7 @@ public class AccountService implements Feature {
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
-    public static CLICSEndpoint getEndpointProperties(SecurityContext sc) {
+    public static CLICSEndpoint getEndpointProperties(IInternalContest contest, SecurityContext sc) {
         String [] props = JSONUtilities.getJsonProperties(CLICSAccount.class);
         // Non-admin users can not see password, so don't include in the access endpoint result
         if(!sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN)) {

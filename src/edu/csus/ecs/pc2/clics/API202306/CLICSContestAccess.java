@@ -45,6 +45,7 @@ public class CLICSContestAccess {
     private CLICSEndpoint [] endpoints;
 
     IInternalController controller = null;
+    IInternalContest contest = null;
 
     /**
      * Fill in properties for contest state as per 2023-06 spec
@@ -55,6 +56,7 @@ public class CLICSContestAccess {
      */
     public CLICSContestAccess(SecurityContext sc, IInternalContest model, IInternalController controller) {
         this.controller = controller;
+        this.contest = model;
 
         // For each role the connected user has, we enumerate what they can do with each endpoint.
         ArrayList<String> cap = new ArrayList<String>();
@@ -129,10 +131,12 @@ public class CLICSContestAccess {
         try {
             Class<?> newClass = Class.forName(className);
             try {
-                Method m = newClass.getMethod(ENDPOINT_ACCESS_METHOD, SecurityContext.class);
+                Method m = newClass.getMethod(ENDPOINT_ACCESS_METHOD, IInternalContest.class, SecurityContext.class);
                 if(m != null) {
+                    // arguments to EP access metho
+                    Object args[] = { contest, sc };
                     // invoke static method with the SecurityContext as an argument
-                    Object epRet = m.invoke(null, sc);
+                    Object epRet = m.invoke(null, args);
                     if(epRet instanceof CLICSEndpoint) {
                         // we got one back, so add it to the list
                         CLICSEndpoint ep = (CLICSEndpoint)epRet;
