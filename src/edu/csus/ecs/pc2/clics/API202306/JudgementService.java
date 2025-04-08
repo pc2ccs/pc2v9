@@ -88,13 +88,14 @@ public class JudgementService implements Feature {
         String runUser;
         boolean isAdminUser = sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE);
         boolean isAnalyst = sc.isUserInRole(WebServer.WEBAPI_ROLE_ANALYST);
-        boolean includeMaxRunTime = isAdminUser;
+        boolean includeMaxRunTime;
 
         for (Run run: model.getRuns()) {
 
             status = run.getStatus();
             // Check if judged or being judged - can't generate a judgment entry if not one of these states
             if(run.isJudged() || (status == RunStates.BEING_JUDGED || status == RunStates.BEING_COMPUTER_JUDGED)) {
+                includeMaxRunTime = isAdminUser;
                 runUser = run.getSubmitter().getName();
                 // If not admin or judge or the team itself, can not see runs after freeze time
                 if (!isAdminUser && !user.equals(runUser)) {
@@ -245,6 +246,10 @@ public class JudgementService implements Feature {
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
      *
+     * @param contest The contest is included in case the inclusion of a property depends on the permissions
+     *        set for the connected client.  It is included for uniformity since this method is called as a result
+     *        of introspection, and the caller does not know what the callee may need.  Therefore, the contest is
+     *        always included, as is the SecurityContext below (for the same reason).
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */

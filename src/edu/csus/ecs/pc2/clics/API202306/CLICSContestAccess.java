@@ -133,7 +133,7 @@ public class CLICSContestAccess {
             try {
                 Method m = newClass.getMethod(ENDPOINT_ACCESS_METHOD, IInternalContest.class, SecurityContext.class);
                 if(m != null) {
-                    // arguments to EP access metho
+                    // arguments to EP access method
                     Object args[] = { contest, sc };
                     // invoke static method with the SecurityContext as an argument
                     Object epRet = m.invoke(null, args);

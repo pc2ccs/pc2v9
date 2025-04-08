@@ -444,7 +444,7 @@ public class EventFeedJSON extends JSON202306Utilities {
                 } else {
                     dataCollection.append(",");
                 }
-                dataCollection.append(getTeamJSON(contest, account));
+                dataCollection.append(getAccountJSON(contest, account));
             }
             if(dataCollection.length() > 1) {
                 dataCollection.append("]");

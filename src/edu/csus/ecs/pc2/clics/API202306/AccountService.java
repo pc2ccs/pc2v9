@@ -124,6 +124,10 @@ public class AccountService implements Feature {
     /**
      * Retrieve access information about this endpoint for the supplied user's security context
      *
+     * @param contest The contest is included in case the inclusion of a property depends on the permissions
+     *        set for the connected client.  It is included for uniformity since this method is called as a result
+     *        of introspection, and the caller does not know what the callee may need.  Therefore, the contest is
+     *        always included, as is the SecurityContext below (for the same reason).
      * @param sc User's security information
      * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
      */
