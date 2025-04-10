@@ -459,7 +459,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
             Run run = event.getRun();
             Account account = contest.getAccount(run.getSubmitter());
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !run.isDeleted()) {
-
+                log.info("runAdded: " + run.toString());
                 String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), IJSONTool.getSubmissionId(run), jsonTool.convertToJSON(run, servletRequest, null).toString());
                 sendJSON(json + NL);
             }
@@ -485,8 +485,9 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                         }
 
                     } else {
-                        String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), IJSONTool.getSubmissionId(run), jsonTool.convertToJSON(run, servletRequest, null).toString());
-                        sendJSON(json + NL);
+                        log.info("runChanged: (not adding) " + run.toString());
+//                        String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), IJSONTool.getSubmissionId(run), jsonTool.convertToJSON(run, servletRequest, null).toString());
+//                        sendJSON(json + NL);
                     }
                 }
             }
