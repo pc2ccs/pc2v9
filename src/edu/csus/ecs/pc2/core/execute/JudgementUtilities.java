@@ -1,9 +1,10 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.execute;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -23,7 +24,7 @@ import edu.csus.ecs.pc2.core.model.RunTestCase;
 
 /**
  * Judgement utilities.
- * 
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -32,7 +33,7 @@ import edu.csus.ecs.pc2.core.model.RunTestCase;
 public final class JudgementUtilities {
 
     /**
-     * 
+     *
      */
     private JudgementUtilities() {
         super();
@@ -40,7 +41,7 @@ public final class JudgementUtilities {
 
     /**
      * Create judgementRecord, create record based on execution results.
-     * 
+     *
      * @param contest
      * @param run
      * @param executionData
@@ -55,7 +56,7 @@ public final class JudgementUtilities {
 
             // Some sort of JE or execution error.
 
-            // Default to a "wrong answer" judgment that cannot have its scoring properties changed 
+            // Default to a "wrong answer" judgment that cannot have its scoring properties changed
             // (i.e., always applies penalty)
 
             ElementId elementId = contest.getJudgements()[2].getElementId();
@@ -141,6 +142,19 @@ public final class JudgementUtilities {
 
         }
 
+        // Both of these should be non-null by this point
+        if(run != null && judgementRecord != null) {
+            Date judgeStartDate = run.getJudgeStartDate();
+            if(judgeStartDate == null) {
+                // Yikes.  Use submission date as a fall-back.  This is not right, but it's better than nothing
+                judgeStartDate = run.getCreateDate();
+                if(judgeStartDate == null) {
+                    // Use create time of judgement record as a last resort.  This will yield a judging elapsed time of 0 though.
+                    judgeStartDate = judgementRecord.getDate();
+                }
+            }
+            judgementRecord.setJudgeStartDate(judgeStartDate);
+        }
         return judgementRecord;
     }
 
@@ -157,7 +171,7 @@ public final class JudgementUtilities {
     }
 
     /**
-     * 
+     *
      * @param log
      * @param judgeId
      * @param run
@@ -182,13 +196,13 @@ public final class JudgementUtilities {
         //    cstdout.pc2
         //    estderr.pc2
         //    estdout.pc2
-        //    
+        //
         //    teamoutput.0.txt
         //    teamoutput.1.txt
         //    teamoutput.2.txt
-        //    
+        //
         //    NO stderr
-        //    
+        //
         //    valerr.0.txt
         //    valerr.1.txt
         //    valerr.2.txt
@@ -282,7 +296,7 @@ public final class JudgementUtilities {
 
     /**
      * Get judgements for last set of test cases.
-     * 
+     *
      * @param contest
      * @param run
      * @return empty list if no test cases judgement in run, else the list of judgements
@@ -290,7 +304,7 @@ public final class JudgementUtilities {
     public static List<Judgement> getLastTestCaseJudgementList(IInternalContest contest, Run run) {
 
         List<Judgement> list = new ArrayList<Judgement>();
-        
+
         try {
 
 
@@ -322,16 +336,16 @@ public final class JudgementUtilities {
     /**
      * Get test cases for last run
      * Based on Doug Lane's code posted to Slack.
-     * 
+     *
      * @param contest
      * @param run
      * @return null array if no test cases judgement in run, else the list of judgements
      */
     public static RunTestCase[] getLastTestCaseArray(IInternalContest contest, Run run) {
-        
+
         List<RunTestCase> list = new ArrayList<RunTestCase>();
         try {
-            
+
             // Find last test case with ordinal 1 in the list of run cases
             RunTestCase[] testCases = run.getRunTestCases();
             for (RunTestCase runTestCase : testCases) {
@@ -345,15 +359,15 @@ public final class JudgementUtilities {
             System.err.println("ERROR in getLastTestCaseArray "+e.getMessage());
             e.printStackTrace();
         }
-        return (RunTestCase[]) list.toArray(new RunTestCase[list.size()]);
+        return list.toArray(new RunTestCase[list.size()]);
     }
-    
+
     /**
      * Return a single set of judgements.
-     * 
-     * If there is more than one site connected, all judgements from all other sites are in the model. 
+     *
+     * If there is more than one site connected, all judgements from all other sites are in the model.
      * If more than one site is defined, returns the site 1 judgements.
-     * 
+     *
      * @return a list of judgements for the judges
      */
     public static List<Judgement> getSingleListofJudgements(IInternalContest contest) {
@@ -382,7 +396,7 @@ public final class JudgementUtilities {
         if (list.size() == 0) {
             /**
              * A catch all condition. If a rare condition occurs where there are no judgements added to the list, all all model's judgements.
-             * 
+             *
              * This should never happen.
              */
             list.addAll(Arrays.asList(judgements));
@@ -391,6 +405,6 @@ public final class JudgementUtilities {
 
         return list;
     }
-    
+
 
 }

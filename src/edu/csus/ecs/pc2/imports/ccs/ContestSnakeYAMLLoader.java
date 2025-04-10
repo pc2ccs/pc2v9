@@ -555,9 +555,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
                 throw new YamlLoadException(
                     "ID is not CLICS compliant.\n" +
                     "Must be:\n" +
-                    "1) Atmost 36 characters in length,\n" + 
-                    "2) Consisting only of characters [`a`-`z`, `A`-`Z`, `0`-`9`, `_`, `-`, `.`],\n" + 
-                    "3) Do not start with `-` or `.`, and\n" + 
+                    "1) Atmost 36 characters in length,\n" +
+                    "2) Consisting only of characters [`a`-`z`, `A`-`Z`, `0`-`9`, `_`, `-`, `.`],\n" +
+                    "3) Do not start with `-` or `.`, and\n" +
                     "4) Not end with `.`"
                 );
             }
@@ -566,7 +566,7 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             shortContestName = fetchValue(content, SHORT_NAME_KEY);
             shortContestName = StringUtilities.makeStringCLICSCompliant(shortContestName);
         }
-        
+
         // only if both CLICS id and `short-name` is not present do we try the key `name`
         if (StringUtilities.isEmpty(shortContestName)) {
             shortContestName = fetchValue(content, CLICS_CONTEST_NAME);
@@ -1064,17 +1064,14 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
 
     private void setScoreboardFreezeTime(IInternalContest contest, String scoreboardFreezeTime) {
         ContestInformation contestInformation = contest.getContestInformation();
-        // adapted from core.util.JSONTool
+        // adapted from core.util.IJSONTool
         // seems the yaml is converting the 1:00:00 into 3600
         if (scoreboardFreezeTime.length() > 2) {
-            if (!scoreboardFreezeTime.contains(":")) {
-                try {
-                    long seconds = Long.parseLong(scoreboardFreezeTime);
-                    scoreboardFreezeTime = ContestTime.formatTime(seconds);
-                } catch (NumberFormatException e) {
-                    syntaxError("Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds "+ e.getMessage());
-                }
+            long seconds = parseTimeIntoSeconds(scoreboardFreezeTime, -1);
+            if(seconds == -1) {
+                syntaxError("Failed to parse scoreboard freeze time `" + scoreboardFreezeTime + "`, expected seconds or HH:MM:SS");
             }
+            scoreboardFreezeTime = ContestTime.formatTime(seconds);
         }
         contestInformation.setFreezeTime(scoreboardFreezeTime);
         contest.updateContestInformation(contestInformation);
@@ -1093,9 +1090,9 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
     /**
      * Parses input string and returns number of seconds.
      *
-     * form can be integer or HH:MM:SS
-     *
-     * @param defaultLongValue
+     * form can be integer or HH:MM:SS or just the number of seconds if no ':'
+     * we convert it as a double since some contest times are specifed as
+     * eg. 5:00:00.000 and the YAML parser turns this into a double.
      *
      * @param timeString
      * @param defaultLongValue
@@ -1112,11 +1109,11 @@ public class ContestSnakeYAMLLoader implements IContestLoader {
             long secs = stringToLongSecs(timeString);
             return secs;
         } else {
-            // is a integer or long
-
+            // is a double
             try {
-                long l = Long.parseLong(timeString);
-                return l;
+                double dTime = Double.parseDouble(timeString);
+                // Not interested in fractional seconds for time.
+                return (long)dTime;
             } catch (Exception e) {
                 return defaultLongValue;
             }

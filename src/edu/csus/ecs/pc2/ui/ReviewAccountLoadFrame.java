@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2019 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -35,7 +35,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
  *
  * 1st line of load file are the column headers.
  * Required columns are:  account, site, and password
- * Optional columns are: displayname, group, permdisplay, and permlogin
+ * Optional columns are: Display Name, Permissions, Group, Alias, ICPC Id, Short School Name,Long School Name, Inst ID,Team Name, Country
  * perm* are booleans, but ignored if empty
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -128,7 +128,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes languageListBox
+     * This method initializes accountListBox
      *
      * @return edu.csus.ecs.pc2.core.log.MCLB
      */
@@ -137,11 +137,11 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             accountListBox = new MCLB();
             accountListBox.setMaximumSize(new Dimension(4096, 1024));
 
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Team Name"};
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Inst Id", "Team Name", "Country"};
             accountListBox.addColumns(cols);
 
             /**
-             * No sorting at this time, the only way to know what order the languages are is to NOT sort them. Later we can add a sorter per LanguageDisplayList somehow.
+             * No sorting at this time, the only way to know what order the accounts are is to NOT sort them. Later we can add a sorter per accountDisplayList somehow.
              */
 
             // // Sorters
@@ -310,7 +310,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-        // Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias"};
+        // Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Inst Id", "Team Name", "Country"}
         try {
             int cols = accountListBox.getColumnCount();
             Object[] s = new String[cols];
@@ -407,11 +407,21 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             } else {
                 s[10] = CHANGE_BEGIN + account.getLongSchoolName() + CHANGE_END;
             }
+            if (accountOrig.getInstitutionCode().equals(account.getInstitutionCode())) {
+                s[11] = account.getInstitutionCode();
+            } else {
+                s[11] = CHANGE_BEGIN + account.getInstitutionCode() + CHANGE_END;
+            }
             // afk icpc teamName
             if (accountOrig.getExternalName().equals(account.getExternalName())) {
-                s[11] = account.getExternalName();
+                s[12] = account.getExternalName();
             } else {
-                s[11] = CHANGE_BEGIN + account.getExternalName() + CHANGE_END;
+                s[12] = CHANGE_BEGIN + account.getExternalName() + CHANGE_END;
+            }
+            if (accountOrig.getCountryCode().equals(account.getCountryCode())) {
+                s[13] = account.getCountryCode();
+            } else {
+                s[13] = CHANGE_BEGIN + account.getCountryCode() + CHANGE_END;
             }
             return s;
         } catch (Exception exception) {

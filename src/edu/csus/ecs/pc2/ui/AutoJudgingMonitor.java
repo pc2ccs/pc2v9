@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.ui;
 
 import java.util.ArrayList;
@@ -40,12 +40,12 @@ import edu.csus.ecs.pc2.util.OSCompatibilityUtilities;
 
 /**
  * Auto Judge Monitor.
- * 
+ *
  * This class will auto judge runs. It will update the status frame as the state of judging runs changes.
  * <P>
  * The auto judging monitor starts when the {@link #startAutoJudging()} is invoked. Auto judging will only occur if autojudging is turned on in ClientSettings.
- * 
- * 
+ *
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -58,7 +58,7 @@ public class AutoJudgingMonitor implements UIPlugin {
     private IInternalController controller;
 
     private AutoJudgeStatusFrame autoJudgeStatusFrame = null;
-    
+
     private AutoJudgeNotifyMessages notifyMessager = null;
 
     private boolean currentlyAutoJudging = false;
@@ -66,7 +66,7 @@ public class AutoJudgingMonitor implements UIPlugin {
     private Log log;
 
     /**
-     * 
+     *
      */
     private Run runBeingAutoJudged = null;
 
@@ -86,11 +86,11 @@ public class AutoJudgingMonitor implements UIPlugin {
     private boolean answerReceived = false;
 
     private GregorianCalendar startTimeCalendar;
-    
+
     private boolean usingGui = true;
 
     private boolean judgingRun;
-    
+
     private Runnable controlLoop = null;
 
     private UnavailableRunsList unavailableRunsList;
@@ -104,11 +104,12 @@ public class AutoJudgingMonitor implements UIPlugin {
     private class ControlLoop implements Runnable {
 
         private boolean running = false;
+        @Override
         public void run() {
             running = true;
             while(isAutoJudgingEnabled() && !isAutoJudgeDisabledLocally()) {
                 attemptToFetchNextRun();
-            }            
+            }
             running = false;
         }
         public boolean isRunning() {
@@ -117,10 +118,10 @@ public class AutoJudgingMonitor implements UIPlugin {
     }
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 2774495762012789107L;
-    
+
     /**
      * @wbp.parser.constructor
      * @wbp.parser.entryPoint
@@ -132,7 +133,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     public AutoJudgingMonitor(boolean useGUI) {
         usingGui = useGUI;
-        
+
         if (usingGui){
             autoJudgeStatusFrame = new AutoJudgeStatusFrame();
             notifyMessager = autoJudgeStatusFrame;
@@ -141,10 +142,11 @@ public class AutoJudgingMonitor implements UIPlugin {
         }
     }
 
+    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         contest = inContest;
         controller = inController;
-        
+
         notifyMessager.setContestAndController(inContest, inController);
 
         log = controller.getLog();
@@ -158,6 +160,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         if (usingGui) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     autoJudgeStatusFrame.setTitle("Auto Judge Status " + contest.getClientId().getName());
                 }
@@ -165,18 +168,19 @@ public class AutoJudgingMonitor implements UIPlugin {
         }
     }
 
+    @Override
     public String getPluginTitle() {
         return "Auto Judging Monitor";
     }
 
-    
+
     /**
      * Get a list of problems that can not be auto-judged by the current judge.
      * The list will contain all the problems that require a sandbox or other
      * OS features that are not supported on the current OS.
      * As an example: if the system is Linux, and cgroups v2 are not configured properly,
      * all problems that require a sandbox will be on the returned list.
-     * 
+     *
      * @return List<Problem> of problems that can't be judged on this system
      *            due to OS mis-configuration, OS incompatibilty or incomplete configuration.
      */
@@ -184,13 +188,13 @@ public class AutoJudgingMonitor implements UIPlugin {
     {
         Filter filter = getAutoJudgeFilter();
         List<Problem> list = new ArrayList<Problem>();
-        
+
         // only if there's a filter do we have to check
         if(filter != null) {
-            
+
             // List of problems that can't be judged on this system
             List<Problem> plist = OSCompatibilityUtilities.getUnableToJudgeList(contest, log);
-            
+
             // See if this judge has any of these problems on its AJ list, if so create a new
             // list containing only the bad problems
             for(Problem prob: plist) {
@@ -201,10 +205,10 @@ public class AutoJudgingMonitor implements UIPlugin {
         }
         return(list);
     }
-   
+
     /**
      * Searches run database for run to auto judge.
-     * 
+     *
      * @return null if nothing to auto judge, otherwise Run
      */
     public Run findNextAutoJudgeRun() {
@@ -223,9 +227,9 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         Run[] runs = contest.getRuns();
         Arrays.sort(runs,new RunComparatorByElapsedRunIdSite());
-        
+
         //make sure that any runs which were previously put on the "unavailable runs" list but whose "expiration time"
-        // for being on that list has passed get removed from the list, so that the following loop will (again) consider them.  
+        // for being on that list has passed get removed from the list, so that the following loop will (again) consider them.
         try {
             getUnavailableRunsList().removeExpiredRuns();
         } catch (Exception e) {
@@ -246,24 +250,24 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     /**
      * get filter which contains problems to be auto judged.
-     * 
+     *
      * @return
      */
     private Filter getAutoJudgeFilter() {
 
         Filter filter = null;
-        
+
         ClientSettings clientSettings = contest.getClientSettings();
         if (clientSettings != null && clientSettings.isAutoJudging()) {
             filter = clientSettings.getAutoJudgeFilter();
         }
-        
+
         return filter;
     }
 
     /**
      * Is the auto judge configuration turned On?.
-     * 
+     *
      * @return true if not locally disabled or disabled via admin.
      */
     private boolean isAutoJudgingEnabled() {
@@ -282,7 +286,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     /**
      * Is this run to be auto judged ?
-     * 
+     *
      * @param run
      * @return
      */
@@ -332,23 +336,26 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     /**
      * Class listens for runs and auto judges.
-     * 
+     *
      * Auto judges run if run is to be auto judged.
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     class RunListenerImplementation implements IRunListener {
 
+        @Override
         public void runAdded(RunEvent event) {
             // just let the ControlLoop grab it
         }
-        
+
+        @Override
         public void refreshRuns(RunEvent event) {
             stopAutoJudging();
             startAutoJudging();
         }
 
+        @Override
         public void runChanged(RunEvent event) {
 
             // bug XXX added verification the run is directed to us
@@ -377,28 +384,28 @@ public class AutoJudgingMonitor implements UIPlugin {
                 }
             } else {
                 if (event.getAction().equals(Action.RUN_NOT_AVAILABLE)) {
-                    // we are fetching a run 
+                    // we are fetching a run
                     if (runBeingAutoJudged != null && fetchedRun == null) { // but do not have it yet
                         // and we received a not available for the run we were requesting
-                        if (event.getRun().getNumber() ==  runBeingAutoJudged.getNumber() 
+                        if (event.getRun().getNumber() ==  runBeingAutoJudged.getNumber()
                                 && event.getRun().getSiteNumber() == runBeingAutoJudged.getSiteNumber()) {
-                            
+
                             // the run we requested is not available -- log this unusual (though possibly legitimate) condition
                             log.info("Received 'RUN_NOT_AVAILABLE' message for requested run " + event.getRun().getNumber() + " from site " + event.getRun().getSiteNumber() );
-                            
-                            //add the run to the list of requested-but-unavailable runs 
+
+                            //add the run to the list of requested-but-unavailable runs
                             // (a patch to support keeping the AJ from continually re-requesting the same run; see https://github.com/pc2ccs/pc2v9/issues/480)
                             try {
                                 getUnavailableRunsList().addRun(runBeingAutoJudged);
                             } catch (Exception e1) {
                                 if (runBeingAutoJudged!=null) {
-                                    log.log(Log.WARNING, "Exception attempting to add run " + runBeingAutoJudged.getNumber() 
+                                    log.log(Log.WARNING, "Exception attempting to add run " + runBeingAutoJudged.getNumber()
                                                         + " from site " + runBeingAutoJudged.getSiteNumber() + " to UnavailableRunsList: ", e1);
                                 } else {
                                     log.log(Log.WARNING, "Exception attempting to add null run to UnavailableRunsList: ", e1);
                                 }
-                            } 
-                            
+                            }
+
                             // indicate a response to the RUN_REQUEST was received, so fetchRun can exit
                             synchronized (listening) {
                                 try {
@@ -411,25 +418,26 @@ public class AutoJudgingMonitor implements UIPlugin {
                             // now cleanup
                             cleanupLastAutoJudge();
                         }
-                    }                    
+                    }
                 }
             }
         }
 
+        @Override
         public void runRemoved(RunEvent event) {
             // ignored
         }
     }
-    
+
     /**
      * Returns the list of runs which this judge has previously requested and then received back a
-     * RUN_NOTAVAILABLE message.  
+     * RUN_NOTAVAILABLE message.
      * If the list does not already exist, an (empty) list is created and returned.
-     * 
+     *
      * @return the list of previously-requested but unavailable runs.
      */
     private UnavailableRunsList getUnavailableRunsList() {
-        
+
         if (unavailableRunsList == null) {
             unavailableRunsList = new UnavailableRunsList(contest,controller);
         }
@@ -448,29 +456,29 @@ public class AutoJudgingMonitor implements UIPlugin {
         notifyMessager.updateMessage("(Still waiting)");
         // we must release this before we get to the next attemptToFetchNewRun()
         setAlreadyJudgingRun(false);
-        
+
         // and this is what allows us to get into that next attemptToFetchNewRun()
         setCurrentlyAutoJudging(false);
     }
 
     private void setAlreadyJudgingRun(boolean b) {
-        
+
         if (usingGui){
             JudgeView.setAlreadyJudgingRun(b);
         } else {
             judgingRun = b;
         }
-        
+
     }
 
     /**
      * Judge checked out run.
-     * 
+     *
      * @param run
      * @param runFiles
      */
     private void executeAndAutoJudgeRun() {
-        
+
         long executeTimeMS = 0;
 
         setCurrentlyAutoJudging(true);
@@ -478,7 +486,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         if (usingGui){
             autoJudgeStatusFrame.setVisible(true);
         }
-        
+
         notifyMessager.updateStatusLabel("Received run");
         notifyMessager.updateMessage(getRunDescription(fetchedRun));
 
@@ -501,7 +509,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         notifyMessager.updateMessage(getRunDescription(fetchedRun));
 
         executable.execute();
-        
+
         // Dump execution results files to log
         String executeDirctoryName = JudgementUtilities.getExecuteDirectoryName(getContest().getClientId());
         Problem problem = getContest().getProblem(fetchedRun.getProblemId());
@@ -510,7 +518,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         JudgementUtilities.dumpJudgementResultsToLog(log, clientId, fetchedRun, executeDirctoryName, problem, judgements, executable.getExecutionData(), "", new Properties());
 
         ExecutionData executionData = executable.getExecutionData();
-        
+
         executeTimeMS = executionData.getExecuteTimeMS();
 
         RunResultFiles runResultFiles = null;
@@ -561,7 +569,7 @@ public class AutoJudgingMonitor implements UIPlugin {
                 // Try to find result text in judgement list
                 //  (start with a default of a non-variable-scoring "no" judgment)
                 ElementId elementId = contest.getJudgements()[2].getElementId();
-                
+
                 for (Judgement judgement : contest.getJudgements()) {
                     if (judgement.getDisplayName().trim().equalsIgnoreCase(results)) {
                         elementId = judgement.getElementId();
@@ -622,9 +630,9 @@ public class AutoJudgingMonitor implements UIPlugin {
             long totalSeconds = milliDiff / 1000;
             judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
             judgementRecord.setExecuteMS(executeTimeMS);
+            judgementRecord.setJudgeStartDate(fetchedRun.getJudgeStartDate());
 
             runResultFiles = new RunResultFiles(fetchedRun, fetchedRun.getProblemId(), judgementRecord, executable.getExecutionData());
-
             controller.submitRunJudgement(fetchedRun, judgementRecord, runResultFiles);
 
             cleanupLastAutoJudge();
@@ -641,9 +649,9 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     /**
      * Attempt to fetch a new run.
-     * 
+     *
      * Will not fetch a new run if auto judging is turned off, or if already auto judging.
-     * 
+     *
      * @param nextRun
      */
     private void attemptToFetchNextRun(Run nextRun) {
@@ -669,9 +677,9 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         // need to wait for JudgeView (eg human) too
         // WARNING: must release the JudgeView.alreadyJudgingRun, prior to getting into this
-        
+
         Boolean judgingRunStatus = isAlreadyJudgingRun();
-        
+
         synchronized (judgingRunStatus) {
             notifyMessager.updateMessage("(Waiting 2)");
             while(isAlreadyJudgingRun()) {
@@ -706,7 +714,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     private boolean isAlreadyJudgingRun() {
         if (usingGui){
-            return JudgeView.isAlreadyJudgingRun(); 
+            return JudgeView.isAlreadyJudgingRun();
         } else {
             return judgingRun;
         }
@@ -737,26 +745,31 @@ public class AutoJudgingMonitor implements UIPlugin {
     }
 
     /**
-     * 
+     *
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
     protected class ClientSettingsListenerImplementation implements IClientSettingsListener {
 
+        @Override
         public void clientSettingsAdded(ClientSettingsEvent event) {
             clientSettingsChanged(event);
         }
 
+        @Override
         public void clientSettingsChanged(ClientSettingsEvent event) {
             updateClientSettings(event.getClientSettings());
         }
 
+        @Override
         public void clientSettingsRemoved(ClientSettingsEvent event) {
             // TODO Auto-generated method stub
         }
 
+        @Override
         public void clientSettingsRefreshAll(ClientSettingsEvent clientSettingsEvent) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     if (usingGui) {
 
@@ -771,13 +784,13 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     /**
      * If settings are updated then attempt to start autojuding.
-     * 
+     *
      * @param clientSettings
      */
     public void updateClientSettings(ClientSettings clientSettings) {
         if (clientSettings.getClientId().equals(contest.getClientId())) {
             // These are my settings
-            
+
             if (clientSettings.isAutoJudging()){
                 startAutoJudging();
             } else {
@@ -794,6 +807,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         if (isAutoJudgingEnabled()) {
             if (usingGui){
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         notifyMessager.updateStatusLabel("Waiting for runs");
                         notifyMessager.updateMessage("(Still waiting)");
@@ -801,33 +815,35 @@ public class AutoJudgingMonitor implements UIPlugin {
                 });
             } else {
                 notifyMessager.updateStatusLabel("Auto-judging is ON");
-                
+
                 printSelectedProblems();
-                
+
                 notifyMessager.updateMessage("Waiting for runs");
             }
 
             if (controlLoop == null) {
                 controlLoop = new ControlLoop();
             }
-            
+
             if (usingGui){
 
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         autoJudgeStatusFrame.setVisible(true);
                     }
                 });
             }
-            
+
             if (!((ControlLoop) controlLoop).isRunning()) {
                 controlLoop.run();
             }
-            
+
         } else {
 
             if (usingGui){
                 SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                         notifyMessager.updateStatusLabel("Auto-judging is OFF");
                         notifyMessager.updateMessage("");
@@ -837,8 +853,8 @@ public class AutoJudgingMonitor implements UIPlugin {
                 notifyMessager.updateStatusLabel("Auto-judging is OFF");
             }
         }
-        
-   
+
+
 
     }
 
@@ -888,7 +904,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         if (! usingGui){
             System.out.println(s);
         }
-      
+
     }
 
     public void warn(String s) {
@@ -896,7 +912,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         if (! usingGui){
             System.err.println(s);
         }
-      
+
     }
 
     public void warn(String s, Exception exception) {
@@ -908,7 +924,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     /**
      * Has the user turned auto judging off locally?.
-     * 
+     *
      * @return true if the auto judge has been turned off locally, else false
      */
     public boolean isAutoJudgeDisabledLocally() {
@@ -918,9 +934,9 @@ public class AutoJudgingMonitor implements UIPlugin {
     public void setAutoJudgeDisabledLocally(boolean autoJudgeDisabledLocally) {
         this.autoJudgeDisabledLocally = autoJudgeDisabledLocally;
     }
-   
+
     public IInternalContest getContest() {
         return contest;
     }
-   
+
 }

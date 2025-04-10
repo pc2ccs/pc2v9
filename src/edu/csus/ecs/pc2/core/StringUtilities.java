@@ -564,11 +564,11 @@ public final class StringUtilities implements Serializable {
         if (isEmpty(shortContestName) || isStringCLICSCompliant(shortContestName)) {
             return shortContestName;
         }
-        
+
         if (shortContestName.length() > MAX_CLICS_ID_LENGTH) {
             shortContestName = shortContestName.substring(0, MAX_CLICS_ID_LENGTH);
         }
-        
+
         int shortContestNameLength = shortContestName.length();
         char firstChar = shortContestName.charAt(0);
         char lastChar = shortContestName.charAt(shortContestNameLength - 1);
@@ -579,7 +579,7 @@ public final class StringUtilities implements Serializable {
         if (!isCharInCLICSCompliantSet(lastChar, true, false)) {
             shortContestName = shortContestName.substring(0, shortContestNameLength - 1) + '_';
         }
-        
+
         for (int i = 1; i < shortContestNameLength - 1; i++) {
             char ch = shortContestName.charAt(i);
             if (!isCharInCLICSCompliantSet(ch, true, true)) {
@@ -587,5 +587,25 @@ public final class StringUtilities implements Serializable {
             }
         }
         return shortContestName;
+    }
+
+    /*
+     * Remove all occurrences of a char in a string
+     * Note: will not work for "supplementary characters" (some Chinese Characters).
+     *
+     *  @param s the string to operate on
+     *  @param c all occurrences of this character will be removed from
+     *  @returns s without any character c's
+     */
+    public static String removeAllOccurrences(String s, char c) {
+        StringBuilder sWork = new StringBuilder(s);
+        int i, nLen = sWork.length();
+
+        for(i = nLen-1; i >= 0; i--) {
+            if(sWork.charAt(i) == c) {
+                sWork.deleteCharAt(i);
+            }
+        }
+        return(sWork.toString());
     }
 }

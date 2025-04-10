@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2023 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.services.eventFeed;
 
 import java.io.File;
@@ -20,6 +20,7 @@ import java.security.cert.CertificateException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
@@ -46,65 +47,52 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.util.security.Password;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.services.web.ClarificationService;
-import edu.csus.ecs.pc2.services.web.ContestService;
-import edu.csus.ecs.pc2.services.web.EventFeedService;
-import edu.csus.ecs.pc2.services.web.FetchRunService;
-import edu.csus.ecs.pc2.services.web.GroupService;
-import edu.csus.ecs.pc2.services.web.JudgementService;
-import edu.csus.ecs.pc2.services.web.JudgementTypeService;
-import edu.csus.ecs.pc2.services.web.LanguageService;
-import edu.csus.ecs.pc2.services.web.OrganizationService;
-import edu.csus.ecs.pc2.services.web.ProblemService;
-import edu.csus.ecs.pc2.services.web.RunService;
-import edu.csus.ecs.pc2.services.web.ScoreboardService;
-import edu.csus.ecs.pc2.services.web.StarttimeService;
-import edu.csus.ecs.pc2.services.web.StateService;
-import edu.csus.ecs.pc2.services.web.SubmissionService;
-import edu.csus.ecs.pc2.services.web.TeamService;
-import edu.csus.ecs.pc2.services.web.VersionService;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.services.web.ICLICSResourceConfig;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Web Server.
- * 
+ *
  * This server listens on the input port and when a connection is made it creates a service that for each contest event will do REST web services.
- * 
+ *
  * @author pc2@ecs.csus.edu
  */
 public class WebServer implements UIPlugin {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -731087652687843222L;
 
     public static final int DEFAULT_WEB_SERVER_PORT_NUMBER = 50443;
 
+    public static final String DEFAULT_CLICS_API_VERSION = "202003";
+
+    public static final String DEFAULT_CLICS_API_PACKAGE_PREFIX = "edu.csus.ecs.pc2.clics";
+
     public static final String PC2_KEYSTORE_FILE = "cacerts.pc2";
 
-    // keys for web service properties
-
-    public static final String PORT_NUMBER_KEY = "port";
-
-    public static final String CLICS_CONTEST_API_SERVICES_ENABLED_KEY = "enableCLICSContestAPI";
-
-    public static final String STARTTIME_SERVICE_ENABLED_KEY = "enableStartTime";
-
-    public static final String FETCH_RUN_SERVICE_ENABLED_KEY = "enableFetchRun";
-
-    private Properties wsProperties = new Properties();
+    // roles
+    public static final String WEBAPI_ROLE_PUBLIC = "public";
+    public static final String WEBAPI_ROLE_BALLOON = "balloon";
+    public static final String WEBAPI_ROLE_ANALYST = "analyst";
+    public static final String WEBAPI_ROLE_BLUE = "blue";
+    public static final String WEBAPI_ROLE_ADMIN = "admin";
+    public static final String WEBAPI_ROLE_TEAM = "team";
+    public static final String WEBAPI_ROLE_JUDGE = "judge";
 
     private Server jettyServer = null;
 
@@ -115,6 +103,12 @@ public class WebServer implements UIPlugin {
     private IInternalController controller;
 
     private Log log = null;
+
+    private WebServerPropertyUtils wsProperties = null;
+
+    private ICLICSResourceConfig apiResource = null;
+
+    private AccountListener accountListener = new AccountListener();
 
     private static final Provider bcProvider = new BouncyCastleProvider();;
 
@@ -166,7 +160,7 @@ public class WebServer implements UIPlugin {
     }
 
     private void createKeyStoreAndKey(File keystoreFile) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, NoSuchProviderException {
-        
+
         try {
             KeyStore store = KeyStore.getInstance("PKCS12", "BC");
             store.load(null, null);
@@ -174,7 +168,7 @@ public class WebServer implements UIPlugin {
 
             KeyPair keyPair = generateKeyPair();
             Certificate selfSign = selfSign(keyPair, "CN=pc2ef,O=PC^2,OU=PC^2");
-            
+
             Certificate[] chain = new Certificate[1];
             chain[0] = selfSign;
             store.setKeyEntry("jetty", keyPair.getPrivate(), password, chain);
@@ -209,12 +203,12 @@ public class WebServer implements UIPlugin {
     public void startWebServer(IInternalContest aContest, IInternalController aController, Properties properties) {
 
         setContestAndController(aContest, aController);
-        wsProperties = properties;
+        wsProperties = new WebServerPropertyUtils(properties);
 
         try {
             Security.addProvider(bcProvider);
 
-            int port = getIntegerProperty(PORT_NUMBER_KEY, DEFAULT_WEB_SERVER_PORT_NUMBER);
+            int port = wsProperties.getIntegerProperty(WebServerPropertyUtils.PORT_NUMBER_KEY, DEFAULT_WEB_SERVER_PORT_NUMBER);
 
             showMessage("Binding to port " + port);
 
@@ -224,11 +218,21 @@ public class WebServer implements UIPlugin {
                 createKeyStoreAndKey(keystoreFile);
             }
 
+            String apiVer = wsProperties.getStringProperty(WebServerPropertyUtils.CLICS_API_VERSION, DEFAULT_CLICS_API_VERSION);
+            String apiPackage = wsProperties.getStringProperty(WebServerPropertyUtils.CLICS_API_PACKAGE, null);
+            if(apiPackage == null) {
+                apiPackage = DEFAULT_CLICS_API_PACKAGE_PREFIX + "." + "API" + apiVer;
+            }
+            // eg, edu.csus.ecs.pc2.clics.API202306.ResourceConfig202306, or, some user specified package.ResourceConfig202306
+            String apiClass = apiPackage + ".ResourceConfig" + apiVer;
+
+            apiResource = getAPIClass(apiClass);
+
             ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
             context.setContextPath("/");
 
             // adds Jersey ServletContainer with a ResourceConfig customized with enabled REST service classes
-            context.addServlet(new ServletHolder(new ServletContainer(getResourceConfig())), "/*");
+            context.addServlet(new ServletHolder(new ServletContainer(apiResource.getResourceConfig(getContest(), getController(), wsProperties))), "/*");
 
             jettyServer = new Server();
 
@@ -262,6 +266,8 @@ public class WebServer implements UIPlugin {
             context.setSecurityHandler(basicAuth());
 
             jettyServer.setHandler(context);
+
+            getContest().addAccountListener(accountListener);
 
             // ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
             // jerseyServlet.setInitOrder(0);
@@ -300,6 +306,16 @@ public class WebServer implements UIPlugin {
     private SecurityHandler basicAuth() {
 
         HashLoginService l = new HashLoginService();
+
+        // First, load PC2 accounts into jetty - this will allow PC2 users to use the API with their login id
+        //    Only teams, admins and judges AND they have to have the VIEW_EVENT_FEED permission
+        Account[] accounts = contest.getAccounts();
+
+        for (Account account: accounts) {
+            addAccountToLoginService(account, l);
+        }
+
+        // now load any special ones from the realm file
         File f = new File("realm.properties");
         if (f.exists() && f.isFile() && f.canRead()) {
             showMessage("Loading " + f.getAbsolutePath());
@@ -321,7 +337,10 @@ public class WebServer implements UIPlugin {
 
         Constraint constraintPublic = new Constraint();
         constraintPublic.setName(Constraint.__BASIC_AUTH);
-        constraintPublic.setRoles(new String[] { "public", "balloon", "analyst", "blue", "admin" });
+        constraintPublic.setRoles(new String[] {
+            WEBAPI_ROLE_PUBLIC, WEBAPI_ROLE_BALLOON, WEBAPI_ROLE_ANALYST, WEBAPI_ROLE_BLUE, WEBAPI_ROLE_ADMIN, WEBAPI_ROLE_TEAM, WEBAPI_ROLE_JUDGE
+        });
+
         constraintPublic.setAuthenticate(true);
 
         ConstraintMapping cmRoot = new ConstraintMapping();
@@ -349,106 +368,59 @@ public class WebServer implements UIPlugin {
     }
 
     /**
-     * This method constructs a Jersey {@link ResourceConfig} containing a Resource (Service class) for each REST service marked as "enabled" by the user on the WebServerPane GUI. Each Resource is
-     * constructed with the current contest and controller so that it has access to the contest data.
-     * 
-     * @return a ResourceConfig containing the enabled REST service resources
+     * Add the supplied account to the web service's basic auth list if the account
+     * has permission to use the API/Event_Feed.
+     *
+     * @param acct
+     * @param ls
      */
-    private ResourceConfig getResourceConfig() {
-
-        // create and (empty) ResourceConfig
-        ResourceConfig resConfig = new ResourceConfig();
-        resConfig.register(RolesAllowedDynamicFeature.class);
-
-        // add each of the enabled services to the config:
-
-        if (getBooleanProperty(STARTTIME_SERVICE_ENABLED_KEY, false)) {
-            resConfig.register(new StarttimeService(getContest(), getController()));
-            showMessage("Starting /starttime web service");
+    private void addAccountToLoginService(Account acct, HashLoginService ls) {
+        if(acct.isAllowed(Permission.Type.VIEW_EVENT_FEED) || acct.isAllowed(Permission.Type.SUBMIT_RUN)) {
+            Type clientType = acct.getClientId().getClientType();
+            String role = null;
+            if (clientType == Type.TEAM) {
+                role = WEBAPI_ROLE_TEAM;
+            } else if (clientType == Type.ADMINISTRATOR) {
+                role = WEBAPI_ROLE_ADMIN;
+            } else if (clientType == Type.JUDGE) {
+                role = WEBAPI_ROLE_JUDGE;
+            }
+            if(role != null) {
+                ls.putUser(acct.getClientId().getName(),  new Password(acct.getPassword()), new String [] { role });
+            }
         }
-
-        if (getBooleanProperty(FETCH_RUN_SERVICE_ENABLED_KEY, false)) {
-            resConfig.register(new FetchRunService(getContest(), getController()));
-            showMessage("Starting /fetchRun web service");
-        }
-
-        // CLICS Contest API services are collective -- either all enabled or all disabled (and default to enabled if unspecified)
-        if (getBooleanProperty(CLICS_CONTEST_API_SERVICES_ENABLED_KEY, true)) {
-
-            resConfig.register(new ContestService(getContest(), getController()));
-            showMessage("Starting /contest web service");
-            resConfig.register(new ScoreboardService(getContest(), getController()));
-            showMessage("Starting /contest/scoreboard web service");
-            resConfig.register(new LanguageService(getContest(), getController()));
-            showMessage("Starting /contest/languages web service");
-            resConfig.register(new TeamService(getContest(), getController()));
-            showMessage("Starting /contest/teams web service");
-            resConfig.register(new GroupService(getContest(), getController()));
-            showMessage("Starting /contest/groups web service");
-            resConfig.register(new OrganizationService(getContest(), getController()));
-            showMessage("Starting /contest/organizations web service");
-            resConfig.register(new JudgementTypeService(getContest(), getController()));
-            showMessage("Starting /contest/judgement-types web service");
-            resConfig.register(new ClarificationService(getContest(), getController()));
-            showMessage("Starting /contest/clarifications web service");
-            resConfig.register(new SubmissionService(getContest(), getController()));
-            showMessage("Starting /contest/submissions web service");
-            resConfig.register(new ProblemService(getContest(), getController()));
-            showMessage("Starting /contest/problems web service");
-            resConfig.register(new JudgementService(getContest(), getController()));
-            showMessage("Starting /contest/judgements web service");
-            resConfig.register(new RunService(getContest(), getController()));
-            showMessage("Starting /contest/runs web service");
-            resConfig.register(new EventFeedService(getContest(), getController()));
-            showMessage("Starting /contest/event-feed web service");
-            resConfig.register(new StateService(getContest(), getController()));
-            showMessage("Starting /contest/state web service");
-            resConfig.register(new VersionService(getContest(), getController()));
-            showMessage("Starting / endpoint for version web service");
-
-        }
-
-        return resConfig;
     }
 
     /**
-     * Returns the value of the specified property in the global wsProperties table, or the specified boolean value if the specified property is not found in the wsProperties table. Property values
-     * "true", "yes", "on", and "enabled" are treated as true; any other string is considered false.
-     * 
-     * @param key
-     *            - a wsProperties table property key
-     * @param b
-     *            - the value to be returned if key is not found in wsProperties
-     * 
-     * @return true if key is found in wsProperties and has a value which is any of "true", "yes", "on", or "enabled"; false if key is found in wsProperties but has any other value; b if key is not
-     *         found in wsProperties
+     * When the accountListener sees an account change, we update the user's entry in the basic auth table.
+     * The supplied account is checked - if null, nothing is done.
+     * This may involve removing an account from auth table if the VIEW_EVENT_FEED permission is removed.
+     * This may involve adding a new account to the auth table if an account with VIEW_EVENT_FEED permission is added.
+     *
+     * @param acct The account to possibly add
      */
-    protected boolean getBooleanProperty(String key, boolean b) {
 
-        String value = wsProperties.getProperty(key);
-
-        if (value == null) {
-            return b;
-        } else {
-            return "true".equalsIgnoreCase(value.trim()) || //
-                    "yes".equalsIgnoreCase(value.trim()) || //
-                    "on".equalsIgnoreCase(value.trim()) || //
-                    "enabled".equalsIgnoreCase(value.trim());
-        }
-
-    }
-
-    protected int getIntegerProperty(String key, int defaultValue) {
-
-        String value = wsProperties.getProperty(key);
-
-        if (value == null) {
-            return defaultValue;
-        } else {
-            try {
-                return Integer.parseInt(value);
-            } catch (Exception e) {
-                return defaultValue;
+    private void addBasicAuthInfo(Account acct) {
+        if(jettyServer != null && acct != null) {
+            // Lookup the login service from the web server
+            ServletContextHandler context = (ServletContextHandler)jettyServer.getHandler();
+            if(context != null) {
+                SecurityHandler h = context.getSecurityHandler();
+                if(h != null) {
+                    HashLoginService ls = (HashLoginService)h.getLoginService();
+                    if(ls != null) {
+                        ConcurrentMap<String, UserIdentity> cm = ls.getUsers();
+                        if(cm != null) {
+                            String user = acct.getClientId().getName();
+                            UserIdentity ui = cm.get(user);
+                            // If the user exists, remove them.  We will attempt to re-add them right after.
+                            if(ui != null) {
+                                ls.removeUser(user);
+                            }
+                            addAccountToLoginService(acct, ls);
+                        }
+                    }
+                }
             }
         }
     }
@@ -465,11 +437,11 @@ public class WebServer implements UIPlugin {
 
         Properties prop = new Properties();
 
-        prop.put(PORT_NUMBER_KEY, DEFAULT_WEB_SERVER_PORT_NUMBER + "");
+        prop.put(WebServerPropertyUtils.PORT_NUMBER_KEY, DEFAULT_WEB_SERVER_PORT_NUMBER + "");
 
-        prop.put(STARTTIME_SERVICE_ENABLED_KEY, "yes");
+        prop.put(WebServerPropertyUtils.STARTTIME_SERVICE_ENABLED_KEY, "yes");
 
-        prop.put(FETCH_RUN_SERVICE_ENABLED_KEY, "yes");
+        prop.put(WebServerPropertyUtils.FETCH_RUN_SERVICE_ENABLED_KEY, "yes");
 
         return prop;
     }
@@ -488,6 +460,7 @@ public class WebServer implements UIPlugin {
     }
 
     public void stop() {
+        getContest().removeAccountListener(accountListener);
         try {
             jettyServer.stop();
         } catch (Exception e1) {
@@ -509,6 +482,87 @@ public class WebServer implements UIPlugin {
         }
 
         return serverRunning;
+    }
+
+
+    /**
+     * Account Listener for updating realm accounts.
+     *
+     * @author John Buck
+     */
+
+    protected class AccountListener implements IAccountListener {
+
+        @Override
+        public void accountAdded(AccountEvent accountEvent) {
+            addBasicAuthInfo(accountEvent.getAccount());
+        }
+
+        @Override
+        public void accountModified(AccountEvent accountEvent) {
+            addBasicAuthInfo(accountEvent.getAccount());
+        }
+
+        @Override
+        public void accountsAdded(AccountEvent accountEvent) {
+            Account[] accounts = accountEvent.getAccounts();
+            for (Account account : accounts) {
+                addBasicAuthInfo(account);
+            }
+        }
+
+        @Override
+        public void accountsModified(AccountEvent accountEvent) {
+            Account[] accounts = accountEvent.getAccounts();
+
+            for (Account account : accounts) {
+                addBasicAuthInfo(account);
+            }
+        }
+
+        @Override
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            // ignore
+        }
+    }
+
+    private ICLICSResourceConfig getAPIClass(String className) {
+
+        try {
+            ICLICSResourceConfig resourceCfg = loadAPIClass(className);
+            return resourceCfg;
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            log.log(Log.WARNING, "Unable to load CLICS API class = " + className);
+        }
+
+        return null;
+    }
+
+    /**
+     * Find and create an instance of ICLICSResourceConfig from className.
+     * <P>
+     * Code snippet.
+     * <pre>
+     * String className = "edu.csus.ecs.pc2.clics.API202306";
+     * ICLICSResourceConfig iRes = loadUIClass(className);
+     * </pre>
+     *
+     * @param className
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+
+    private static ICLICSResourceConfig loadAPIClass(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+
+        Class<?> newClass = Class.forName(className);
+        Object object = newClass.newInstance();
+        if (object instanceof ICLICSResourceConfig) {
+            return (ICLICSResourceConfig) object;
+        }
+        object = null;
+        throw new SecurityException(className + " loaded, but not an instanceof ICLICSResourceConfig");
     }
 
 }

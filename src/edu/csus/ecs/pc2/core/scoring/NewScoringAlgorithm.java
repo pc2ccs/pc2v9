@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
@@ -134,7 +134,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
     @Override
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Properties properties) throws IllegalContestState {
-        return getStandingsRecords(contest, null, properties, false, null);
+        return getStandingsRecords(contest, null, null, properties, false, null);
     }
 
     private StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, List<Group> wantedGroups, Properties properties) throws IllegalContestState {
@@ -142,28 +142,33 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
     }
 
     /**
-     * Returns sorted and ranked StandingsRecord, if honorScoreboadFreeze is true then run results
+     * Returns sorted and ranked StandingsRecord for optional divisionNumber, if honorScoreboadFreeze is true then run results
      * from the freeze period will be hidden,  unless the contest is unfrozen.
      *
+     * NB. This should probably be in INewScoringAlgorithm
+     *
      * @param contest
-     * @param divisionNumber for desired standings
+     * @param divisionNumber of the desired division
      * @param properties
      * @param honorScoreboardFreeze
      * @param runs
-     * @return ranked StandingsRecords.
+     * @return the ranked StandingsRecord array
      * @throws IllegalContestState
      */
+    // This should probably be in INewScoringAlgorithm
     public StandingsRecord[] getStandingsRecords(IInternalContest contest, Integer divisionNumber, Properties properties, boolean honorScoreboardFreeze, Run [] runs) throws IllegalContestState {
-        return(getStandingsRecords(contest, divisionNumber, null, properties, honorScoreboardFreeze, runs));
+        return getStandingsRecords(contest, divisionNumber, null, properties, honorScoreboardFreeze, runs);
     }
 
     /**
-     * Returns sorted and ranked StandingsRecord, if honorScoreboadFreeze is true then run results
+     * Returns sorted and ranked StandingsRecord for optional divisionNumber and/or Group, if honorScoreboadFreeze is true then run results
      * from the freeze period will be hidden,  unless the contest is unfrozen.
      *
+     * NB. This should probably be in INewScoringAlgorithm
+     *
      * @param contest
-     * @param divisionNumber for desired standings
-     * @param wantedGroups List of groups for which standings are to be returned
+     * @param divisionNumber get standings for this division, null for all
+     * @param wantedGroups get standings for these groups, null for all
      * @param properties
      * @param honorScoreboardFreeze
      * @param runs
@@ -195,7 +200,7 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
                         continue;
                     }
                 }
-                if (!ScoreboardUtilities.isWantedTeam(av, wantedGroups)) {
+                if(!ScoreboardUtilities.isWantedTeam(av, wantedGroups)) {
                     continue;
                 }
                 accountVector.add(av);
@@ -284,15 +289,14 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
     @Override
     public String getStandings(IInternalContest contest, Properties properties, Log inputLog) throws IllegalContestState {
-        return getStandings(contest, null, null, properties, inputLog);
+        return getStandings(contest, null, null, null, properties, inputLog);
     }
 
     @Override
-    // TODO SA SOMEDAY Move this to a SA Utility Class
-    // returns XML String for standings.
     public String getStandings(IInternalContest contest, Run[] runs, Integer divisionNumber, Properties properties, Log inputLog) throws IllegalContestState {
-        return(getStandings(contest, runs, divisionNumber, null, properties, inputLog));
+        return getStandings(contest, runs, divisionNumber, null, properties, inputLog);
     }
+
     @Override
     // TODO SA SOMEDAY Move this to a SA Utility Class
     // returns XML String for standings.
@@ -565,7 +569,12 @@ public class NewScoringAlgorithm extends Plugin implements INewScoringAlgorithm 
 
         if(group != null) {
             standingsRecordMemento.putInteger("groupRank", standingsRecord.getGroupRankNumber());
+            standingsRecordMemento.putString("teamGroupName", group.getDisplayName());
+            // TODO dal CRITICAL
+            // standingsRecordMemento.putInteger("teamGroupId", group.get()+1);
+            standingsRecordMemento.putInteger("teamGroupExternalId", group.getGroupId());
         }
+
 // TODO: should change algorithm to compute the group rank for each group the team is a member of and report
 // all of them in the standings xml.  right now we only do the "primary group Id" for groupRank.
 // This is a relatively involved code change.

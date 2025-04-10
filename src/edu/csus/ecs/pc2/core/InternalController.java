@@ -1,4 +1,4 @@
-// Copyright (C) 1989-2024 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
@@ -283,7 +283,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private AutoStarter autoStarter;
 
-    private AutoStopContestClockThread autoStopContestClockThread = null;
+    private ContestClockMonitorThread contestClockMonitorThread = null;
 
     /**
      * Packets which should be sent to multiple instances of logins (for example, a "RUN_SUBMSSION_CONFIRMATION"
@@ -2729,9 +2729,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendPacketToClients(packet, ClientType.Type.TEAM);
         }
     }
-    
+
+    @Override
     public void sendToGroupsandIndividualTeams(Packet packet, ElementId[] groups, ClientId[] teams) {
-         
+
         // below is taken from sendToTeams()
         Properties properties = (Properties) packet.getContent();
         // does the packet includes problemDataFiles
@@ -2756,9 +2757,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (abort) {
             return;
         }
-        
+
         ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
-        
+
         List<ClientId> badClients = new ArrayList<ClientId>();
 
         HashSet<ClientId> setWithClientId = new HashSet<>();
@@ -2767,10 +2768,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         for (ClientId clientId : clientIds) {
             ConnectionHandlerID connectionHandlerID = null;
-               
+
             if (setWithClientId.contains(clientId)) {
                 connectionHandlerID = clientId.getConnectionHandlerID();
-                //there should never be localLoggedInClients with null ConnectionHandlerIDs; however, the addition of 
+                //there should never be localLoggedInClients with null ConnectionHandlerIDs; however, the addition of
                 // "multiple login" support may have left some place where this is inadvertently true.
                 //The following is an effort to catch/identify such situations.
                 //this was taken from sendPacketToClients()
@@ -2803,13 +2804,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         }catch (Exception e) {
                             getLog().log(Level.WARNING, "Exception attempting to send packet using Group to client " + clientId + "at connectionHandlerId " + connectionHandlerID
                                     + "as it belongs to group "+ groupElementId + ": " + packet + ": "+ e.getMessage(), e);
-                        
+
                         }
                     }
                     break;
                 }
             }
-                
+
         }
         //check if we got any bad clientIds
         if (badClients.size()>0) {
@@ -2828,7 +2829,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             throw e;
         }
     }
-    
+
     private int getPortForSite(int inSiteNumber) {
 
         try {
@@ -3877,38 +3878,50 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     }
 
+    @Override
     public ElementId submitClarification(Problem problem, String question) {
 
 
+        return(submitClarification(contest.getClientId(), problem, question));
+    }
+
+    @Override
+    public ElementId submitClarification(ClientId clientId, Problem problem, String question) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-        Clarification clarification = new Clarification(contest.getClientId(), problem, question);
+        Clarification clarification = new Clarification(clientId, problem, question);
 
         Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
 
         sendToLocalServer(packet);
-        
+
         return clarification.getElementId();
     }
-    
-    public void submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+
+    @Override
+    public ElementId submitAnnouncement(Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
+        return(submitAnnouncement(contest.getClientId(), problem, answer, ultimateDestinationGroup, ultimateDestinationTeam));
+    }
+
+    @Override
+    public ElementId submitAnnouncement(ClientId clientId, Problem problem, String answer,ElementId[] ultimateDestinationGroup, ClientId[] ultimateDestinationTeam) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-        Clarification clarification = new Clarification(contest.getClientId(), problem, "");
+        Clarification clarification = new Clarification(clientId, problem, "");
 
         if (ultimateDestinationGroup.length + ultimateDestinationTeam.length> 0) {
-            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, false);
+            clarification.setAnswer(answer, clientId, contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, false);
         }
         else {
-            clarification.setAnswer(answer, contest.getClientId(), contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, true);
+            clarification.setAnswer(answer, clientId, contest.getContestTime(), ultimateDestinationGroup, ultimateDestinationTeam, true);
         }
-        
+
         Packet packet;
         packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
-        
 
-        
         sendToLocalServer(packet);
+
+        return clarification.getElementId();
     }
-    
+
     @Override
     public void checkOutClarification(Clarification clarification, boolean readOnly) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
@@ -4931,9 +4944,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private void updateAutoStopClockThread() {
 
-        if (autoStopContestClockThread == null) {
-            autoStopContestClockThread = new AutoStopContestClockThread(this, contest);
-            autoStopContestClockThread.start();
+        if (contestClockMonitorThread == null) {
+            contestClockMonitorThread = new ContestClockMonitorThread(this, contest);
+            contestClockMonitorThread.start();
 
             ContestTime time = contest.getContestTime();
             log.info("Started auto stop clock thread, remaining time is " + time.getRemainingTimeStr());

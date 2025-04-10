@@ -1,0 +1,199 @@
+// Copyright (C) 1989-2025 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+package edu.csus.ecs.pc2.clics.API202306;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.logging.Level;
+
+import javax.inject.Singleton;
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.ext.Provider;
+
+import edu.csus.ecs.pc2.core.Constants;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+
+/**
+ * Implementation of CLICS REST event-feed.
+ *
+ * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
+ */
+@Path("/contests/{contestId}/event-feed")
+@Produces(MediaType.APPLICATION_JSON)
+@Provider
+@Singleton
+public class EventFeedService implements Feature {
+
+    private IInternalContest contest;
+
+    private IInternalController controller;
+
+    private Log log;
+
+    /**
+     * Streamer that sends all JSON to clients (and sends keep alive).
+     */
+    private static EventFeedStreamer eventFeedStreamer;
+
+    public EventFeedService(IInternalContest inContest, IInternalController inController) {
+        super();
+        this.contest = inContest;
+        this.controller = inController;
+        this.log = inController.getLog();
+    }
+
+    /**
+     * a JSON stream representation of the events occurring in the contest.
+     *
+     * @param types (eventTypeList)
+     *            a comma-separated query parameter identifying the type(s) of events being requested (if empty or null, indicates ALL event types)
+     * @param contestId The contest id for which the EF is desired
+     * @param since_token (startingToken)
+     *            the token of the earliest event being requested (i.e., an indication of the requested starting point in the event stream)
+     * @param sc Security context of user making request
+     * @param asyncResponse
+     * @param servletRequest inforation about the request
+     * @param response Response information for jetty
+     * @return a {@link Response} object whose body contains the JSON event feed
+     * @throws IOException
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public void streamEventFeed(@QueryParam("types") String eventTypeList, @PathParam("contestId") String contestId, @QueryParam("since_token") String startingToken, @Suspended
+    final AsyncResponse asyncResponse, @Context HttpServletRequest servletRequest, @Context HttpServletResponse response, @Context SecurityContext sc) throws IOException {
+
+        // check contest id
+        if(contestId.equals(contest.getContestIdentifier()) == false) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "ContestId not found");
+            return;
+        }
+
+        response.setContentType("json");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Pragma", "no-cache");
+
+        final AsyncContext asyncContext = servletRequest.getAsyncContext();
+        final ServletOutputStream servletOutputStream = asyncContext.getResponse().getOutputStream();
+
+        if (eventFeedStreamer == null) {
+            eventFeedStreamer = new EventFeedStreamer(contest, controller, servletRequest, sc);
+        }
+
+        EventFeedFilter filter = new EventFeedFilter();
+        filter.setClient(servletRequest.getRemoteUser() + "@" + servletRequest.getRemoteAddr() + ":" + servletRequest.getRemotePort());
+
+        String startMsg = "Starting Event Feeder for " + filter.getClient() + ": ";
+
+        if (eventTypeList != null) {
+            filter.addEventTypeList(eventTypeList);
+            startMsg += "sending only event types '" + eventTypeList + "' ";
+        }
+
+        if (startingToken != null) {
+            if (startingToken.startsWith(EventFeedJSON.EVENT_ID_PREFIX) && Utilities.isIntegerNumber(startingToken.substring(EventFeedJSON.EVENT_ID_PREFIX_LENGTH))) {
+                filter.addStartingEventId(startingToken);
+                startMsg += "starting after id " + startingToken;
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Not starting event feed: Invalid starting id: `"+startingToken+"`");
+                return;
+            }
+        } else {
+            startMsg += "(whole feed)";
+        }
+        info(startMsg);
+
+        /**
+         * Add stream and write past events to stream.
+         */
+        eventFeedStreamer.addStream(servletOutputStream, filter);
+
+        if (!eventFeedStreamer.isRunning()) {
+            /**
+             * Put on thread if not running on a thread.
+             */
+            new Thread(eventFeedStreamer).start();
+        }
+
+        while (true) {
+            // If the contest has been finalized or this client is not longer connected (eg not receiving the EF), we are done
+            if (eventFeedStreamer.isFinalized() || !eventFeedStreamer.isStreamActive(servletOutputStream)) {
+                break;
+            }
+            try {
+                Thread.sleep(1 * Constants.MS_PER_SECOND);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                log.log(Level.WARNING, "During sleep " + e.getMessage());
+                break;
+            }
+        }
+        info("Event Feeder client " + filter.getClient() + " is no longer connected.");
+    }
+
+    public void info(String message) {
+        if (log != null) {
+            log.log(Level.INFO, message);
+        }
+    }
+
+    /**
+     * Retrieve access information about this endpoint for the supplied user's security context
+     *
+     * @param contest The contest is included in case the inclusion of a property depends on the permissions
+     *        set for the connected client.  It is included for uniformity since this method is called as a result
+     *        of introspection, and the caller does not know what the callee may need.  Therefore, the contest is
+     *        always included, as is the SecurityContext below (for the same reason).
+     * @param sc User's security information
+     * @return CLICSEndpoint object if the user can access this endpoint's properties, null otherwise
+     */
+    public static CLICSEndpoint getEndpointProperties(IInternalContest contest, SecurityContext sc) {
+        String [] efProps = { "type", "id", "data", "token" };
+        return(new CLICSEndpoint("event-feed", efProps));
+    }
+
+    @Override
+    public boolean configure(FeatureContext arg0) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /**
+     * Create a snapshot of the JSON event feed.
+     *
+     * @param contest
+     * @param controller
+     * @return
+     */
+    public static String createEventFeedJSON(IInternalContest contest, IInternalController controller, HttpServletRequest servletRequest, SecurityContext sc) {
+        EventFeedStreamer streamer = new EventFeedStreamer(contest, controller, servletRequest, sc);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        // addStream() will send all past events to the client immediately (eg. a snapshot)
+        streamer.addStream(stream, new EventFeedFilter());
+        // since past events have been sent out, we are done.
+        streamer.removeStream(stream);
+        String json = new String(stream.toByteArray());
+        stream = null;
+        streamer = null;
+        return json;
+    }
+
+}
