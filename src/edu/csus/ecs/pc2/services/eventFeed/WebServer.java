@@ -17,7 +17,6 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
@@ -57,7 +56,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -377,7 +375,7 @@ public class WebServer implements UIPlugin {
      * @param ls
      */
     private void addAccountToLoginService(Account acct, HashLoginService ls) {
-        if(acct.isAllowed(Permission.Type.VIEW_EVENT_FEED)) {
+        if(acct.isAllowed(Permission.Type.VIEW_EVENT_FEED) || acct.isAllowed(Permission.Type.SUBMIT_RUN)) {
             Type clientType = acct.getClientId().getClientType();
             String role = null;
             if (clientType == Type.TEAM) {
@@ -516,7 +514,6 @@ public class WebServer implements UIPlugin {
         @Override
         public void accountsModified(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
-            Arrays.sort(accounts, new AccountComparator());
 
             for (Account account : accounts) {
                 addBasicAuthInfo(account);

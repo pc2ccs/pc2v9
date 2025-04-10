@@ -1,0 +1,23 @@
+#!/bin/sh
+# Copyright (C) 1989-2020 PC2 Development Team: John Clevenger, Douglas Lane, Samir Ashoo, and Troy Boudreau.
+#
+# Purpose: start pc2 submitter
+# Author : pc2@ecs.csus.edu
+#
+# Sat Jan 18 13:58:12 PDT 2020 laned fixed classpath
+
+. `dirname $0`/pc2env
+
+# MacOS or not
+if [ -f /mach_kernel ]; then
+  # set our dock name (otherwise defaults to Starter)
+  PC2XOPS="-Xdock:name=`basename $0`"
+else
+  PC2XOPS=""
+fi
+
+CLASSNAME=edu.csus.ecs.pc2.ui.team.Submitter
+
+java -Djdk.crypto.KeyAgreement.legacyKDF=true $PC2XOPS -Xms64M -Xmx768M -cp "$libdir/*" $CLASSNAME $*
+
+# eof pc2submit $Id$ 
