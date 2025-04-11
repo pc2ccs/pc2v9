@@ -10,7 +10,7 @@ export let DEBUG_MODE = true ;
 /**
  * Interval in minutes at which the WTI-UI will resync its clock displays with PC2
  */
- export const RESYNC_INTERVAL_IN_MINUTES = 15 ;
+ export const RESYNC_INTERVAL_IN_MINUTES = 5 ;
  
 /**
  * The key under which the currently-active WTI page is stored in sessionStorage.
