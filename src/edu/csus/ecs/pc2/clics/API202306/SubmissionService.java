@@ -509,13 +509,43 @@ public class SubmissionService implements Feature {
             ContestTime ct = model.getContestTime();
             boolean isTeam = sc.isUserInRole(WebServer.WEBAPI_ROLE_TEAM);
             if(isTeam) {
+                // If there's a permission error here, we keep detailed track of what was trying to be done
+                // since a team is the one trying to do it.
+                boolean bad = false;
+                StringBuilder msg = new StringBuilder("User ");
+                msg.append(user);
+                msg.append(" attempted to POST submission:");
                 // Team must be allowed to submit and
                 // Team may not provide certain properties (can supply team id if it's the caller)
-                if(!account.isAllowed(Permission.Type.SUBMIT_RUN) ||
-                   (sub.getTeam_id() != null && !sub.getTeam_id().equals("" + clientId.getClientNumber())) ||
-                    sub.getTime() != null || sub.getContest_time() != null || sub.getId() != null ||
-                    !ct.isContestRunning()) {
-                    log.info(user + " attempted to POST submission without permission");
+                if(!account.isAllowed(Permission.Type.SUBMIT_RUN)) {
+                    bad = true;
+                    msg.append(" no SUBMIT_RUN permission,");
+                }
+                if(sub.getTeam_id() != null && !sub.getTeam_id().equals("" + clientId.getClientNumber())) {
+                    bad = true;
+                    msg.append(" to team ");
+                    msg.append(sub.getTeam_id());
+                    msg.append(",");
+                }
+                if(sub.getTime() != null) {
+                    bad = true;
+                    msg.append(" time property illegal,");
+                }
+                if(sub.getContest_time() != null) {
+                    bad = true;
+                    msg.append(" contest_time property illegal,");
+                }
+                if(sub.getId() != null) {
+                    bad = true;
+                    msg.append(" id property is illegal,");
+                }
+                if(!ct.isContestRunning()) {
+                    bad = true;
+                    msg.append(" contest not running, ");
+                }
+                if(bad) {
+                    msg.append(" DENIED.");
+                    log.info(msg.toString());
                     return Response.status(Response.Status.FORBIDDEN).build();
                 }
                 // Force team id for team submission
@@ -550,7 +580,8 @@ public class SubmissionService implements Feature {
             if(team_id == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("no team_id").build();
             }
-            if(!isValidTeamId(team_id)){
+            ClientId teamClientId = getTeamClientId(team_id);
+            if(teamClientId == null){
                 return Response.status(Response.Status.BAD_REQUEST).entity("bad team_id" + team_id).build();
             }
 
@@ -606,21 +637,23 @@ public class SubmissionService implements Feature {
                 }
 
                 submissionWaitSem = null;
-                pendingSub = new PendingSubmissionInfo(clientId, lang.getElementId(), prob.getElementId());
+                pendingSub = new PendingSubmissionInfo(teamClientId, lang.getElementId(), prob.getElementId());
                 submissionWaitSem = new Semaphore(1);
                 // steal the one an only semaphore, a response will give it back immediately
                 submissionWaitSem.acquire();
 
                 if(Utilities.isDebugMode()) {
-                    System.out.println("SubmissionService: Submitting Run for " + clientId.getName() + " problem:" + sub.getProblem_id() + " language:" + sub.getLanguage_id());
+                    System.out.println("SubmissionService: " + user + " submitting Run for " + teamClientId.getName() + " problem:" + sub.getProblem_id() + " language:" + sub.getLanguage_id());
                 }
 
-                controller.submitRun(clientId, prob, lang, entry, mainSubmissionFile, additionalFiles, overrideTimeMS, overrideSubmissionID);
+                controller.submitRun(teamClientId, prob, lang, entry, mainSubmissionFile, additionalFiles, overrideTimeMS, overrideSubmissionID);
                 boolean gotSub = submissionWaitSem.tryAcquire(WAIT_SUBMISSION_TIMEOUT_SECS, TimeUnit.SECONDS);
                 submissionWaitSem = null;
                 if(gotSub) {
                     Run newRun = pendingSub.getSubmission();
-                    pendingSub = null;
+                    synchronized(pendingSub) {
+                        pendingSub = null;
+                    }
                     // make sure we got a run; not sure how we couldn't have one at this point
                     if(newRun != null) {
                         // Normal return path.
@@ -629,13 +662,13 @@ public class SubmissionService implements Feature {
                     }
                 }
                 if(Utilities.isDebugMode()) {
-                    System.out.println("SubmissionService: Didn't get submission back for " + clientId.getName() + " problem:" + sub.getProblem_id() + " language:" + sub.getLanguage_id());
+                    System.out.println("SubmissionService: User: " + user + " didn't get submission back for " + teamClientId.getName() + " problem:" + sub.getProblem_id() + " language:" + sub.getLanguage_id());
                 }
                 // No run entered, this is really really bad
-                log.log(Level.WARNING, "No Run added after submitting CLICS API run for team " + team_id);
+                log.log(Level.WARNING, "No Run added after submitting CLICS API run for team " + team_id + " by " + user);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("unable to add submission").build();
             } catch (Exception e) {
-                log.log(Level.WARNING, "Exception submitting CLICS API run for team " + team_id, e);
+                log.log(Level.WARNING, "Exception submitting CLICS API run for team " + team_id + " by " + user, e);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("unable to submit run" + e.toString()).build();
             }
         }
@@ -733,17 +766,20 @@ public class SubmissionService implements Feature {
         return clientId;
     }
 
-    private boolean isValidTeamId(String id) {
-        boolean valid = false;
+    private ClientId getTeamClientId(String id) {
+        ClientId clientId = null;
         try {
-            ClientId clientId = new ClientId(model.getSiteNumber(), ClientType.Type.TEAM, Integer.parseInt(id));
-            if(clientId != null && model.getAccount(clientId) != null) {
-                valid = true;
+            clientId = new ClientId(model.getSiteNumber(), ClientType.Type.TEAM, Integer.parseInt(id));
+            if(clientId != null) {
+                // an account must exist for this client id or it's invalid.
+                if(model.getAccount(clientId) == null) {
+                    clientId = null;
+                }
             }
         } catch (Exception e) {
             controller.getLog().log(Log.WARNING, "Can not convert the supplied team id " + id + " to a ClientId", e);
         }
-        return(valid);
+        return(clientId);
     }
 
     /**
