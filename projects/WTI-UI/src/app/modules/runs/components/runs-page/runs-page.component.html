@@ -46,7 +46,10 @@
     <div class='table-container'>
         <table>
             <tr>
+            	<!-- Omit Run Type until Test Run capability is implemented -- see Issue #1031
                 <th>Run Type</th>
+                -->
+                <th>Run ID</th>
                 <th>Language</th>
                 <th>Problem</th>
                 <th>Judgement</th>
@@ -54,7 +57,10 @@
                 <th></th>
             </tr>
             <tr *ngFor='let run of filteredRuns' [class.pending]='!run.judgement || run.isPreliminary'>
+            	<!-- Omit Run Type until Test Run capability is implemented -- see Issue #1031
                 <td>{{ run.isTestRun ? 'Test' : 'Judged' }}</td>
+                -->
+                <td>{{ run.id }}</td>
                 <td>{{ run.language }}</td>
                 <td>{{ run.problem }}</td>
                 <td>
