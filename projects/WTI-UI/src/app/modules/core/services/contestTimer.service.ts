@@ -108,7 +108,10 @@ export class ContestTimerService {
 			} else {
 				//we've seen an update within the last five seconds; just update by one second
 				this.elapsedSecs += 1 ;
-				this.remainingSecs -= 1
+				//we don't want to show a remaining time that is negative
+				if (this.remainingSecs > 0) {
+					this.remainingSecs -= 1
+				}
 			}
 			
 			//record that we've now updated the contest clock display

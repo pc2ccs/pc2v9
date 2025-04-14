@@ -144,7 +144,13 @@ export class ContestService extends IContestService {
 		const timerShouldBeStarted = this.contestClock.running ;
 		const elapsedSecs = parseInt(this.contestClock.elapsedSecs);
 		const contestLengthSecs = parseInt(this.contestClock.contestLengthSecs);
-		const remainingSecs = contestLengthSecs - elapsedSecs;
+		
+		//compute remaining secs from updated clock values, but don't let it go negative
+		// (it makes no sense to have "negative time remaining" in a contest)
+		let remainingSecs = contestLengthSecs - elapsedSecs;
+		if (remainingSecs < 0){
+			remainingSecs = 0 ;
+		}
 	
 		//shut off timer if it is running (otherwise we can't update the elapsed/remaining time values)
 		if (this.contestTimer.isTimerRunning) {
