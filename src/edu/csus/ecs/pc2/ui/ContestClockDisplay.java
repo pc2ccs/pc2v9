@@ -595,7 +595,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     // This is used for unit tests only at the moment.
     public String getScheduleOrRemainingTime(ContestTime contestTime) {
-        return(getScheduleOrRemainingTimeAndHint(contestTime)[0]);
+        return getScheduleOrRemainingTimeAndHint(contestTime)[0];
     }
 
     public String getScheduledTimeClockHint() {
