@@ -73,7 +73,8 @@ public class ResultsService implements Feature {
         if(contestId.equals(model.getContestIdentifier()) == true) {
             ContestTime contestTime = model.getContestTime();
             // verify contest has started and user is admin
-            if (contestTime.getElapsedMS() > 0 && sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN)) {
+            if (contestTime.getElapsedMS() > 0 &&
+                (sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN) || sc.isUserInRole(WebServer.WEBAPI_ROLE_JUDGE))) {
 
                 ResultsFile resultsFile = new ResultsFile();
                 String [] lines;
