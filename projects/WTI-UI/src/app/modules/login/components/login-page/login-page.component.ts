@@ -96,7 +96,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 						console.error ("LoginPageComponent.onSubmit() ContestClock subscription callback: unable to get ContestClock from PC2 API via ContestService!");
 					} else {						
 						//copy the data fields received from the PC2 Server (via the WTI-API) into the local ContestClock object
-						this.contestClock.isRunning = data.isRunning ;
+						this.contestClock.running = data.running ;
 						this.contestClock.contestLengthSecs = data.contestLengthSecs ;
 						this.contestClock.elapsedSecs = data.elapsedSecs ;
 						this.contestClock.wallClockStartTime = data.wallClockStartTime ;

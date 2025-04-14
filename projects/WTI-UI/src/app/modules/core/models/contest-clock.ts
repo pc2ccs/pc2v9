@@ -8,7 +8,7 @@
  *  they are actually used.
  */
 export class ContestClock { 
-  isRunning: string = '';			//string 'true' or 'false'
+  running: string = '';			    //string 'true' or 'false'
   contestLengthSecs: string = '';	//string representing an integer number of seconds
   elapsedSecs: string = '';         //string representing total time in seconds that the contest has been running -- does NOT include time during any "pauses"
   wallClockStartTime: string = '';  //string representing unix timestamp when the contest actually started -- msec since the Epoch.  Does not change due to "pauses"

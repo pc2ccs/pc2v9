@@ -132,7 +132,7 @@ export class ContestService extends IContestService {
 		
 		//copy the data fields (received from the PC2 Server via the WTI-API) into a new ContestService ContestClock object
 		let newContestClock = new ContestClock();
-		newContestClock.isRunning = data.isRunning ;
+		newContestClock.running = data.running ;
 		newContestClock.contestLengthSecs = data.contestLengthSecs ;
 		newContestClock.elapsedSecs = data.elapsedSecs ;
 		newContestClock.wallClockStartTime = data.wallClockStartTime ;
@@ -141,7 +141,7 @@ export class ContestService extends IContestService {
 		this.contestClock = newContestClock;
 		
 		//pull the values out of the updated clock
-		const timerShouldBeStarted = this.contestClock.isRunning ;
+		const timerShouldBeStarted = this.contestClock.running ;
 		const elapsedSecs = parseInt(this.contestClock.elapsedSecs);
 		const contestLengthSecs = parseInt(this.contestClock.contestLengthSecs);
 		const remainingSecs = contestLengthSecs - elapsedSecs;

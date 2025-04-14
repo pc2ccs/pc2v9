@@ -90,7 +90,7 @@ export class ContestMockService extends IContestService {
   getContestClock(): Observable<ContestClock> {
     return of<ContestClock>(
 		//return a contest that is running, last 5 hours, has been running one hour, and started on December 18, 2024
-		{isRunning:'true', contestLengthSecs:'18000', elapsedSecs:'3600', wallClockStartTime:'1734593847'});
+		{running:'true', contestLengthSecs:'18000', elapsedSecs:'3600', wallClockStartTime:'1734593847'});
   }
 
   updateLocalContestClockFromServer () {
