@@ -244,7 +244,10 @@ def append_to_netrc(machine, login, password, netrc_path="~/.netrc"):
 def prompt_for_creds(netrc_path, host) :
     ret = False
     print(f"\nCould not find credentials for {host} in {netrc_path}.")
-    user = os.getlogin()
+    if 'USER' in os.environ :
+        user = os.environ['USER']
+    else :
+        user = 'team'
     while True :
         uname = input(f"Please enter your user name credential (ENTER={user}): ")  or user
         if uname == '' :
@@ -277,18 +280,14 @@ def check_netrc() :
     try :
         urlCrack = urlparse(baseurl)
         if urlCrack.netloc != None :
+            # Strip off any port that may be on the network host
+            netHost = urlCrack.netloc.split(':')[0]
             netrc_path = os.path.join(os.path.expanduser("~"), ".netrc")
             try :
                 netrc_info = netrc.netrc(netrc_path)
-                # Strip off any port that may be on the network host
-                try :
-                    netHost = urlCrack.netloc.split(':')[0]
-                    nrc_user, nrc_acct, nrc_pass = netrc_info.authenticators(netHost)
-                    print(f"It appears as though the credentials for '{netHost}' are incorrect.")
-                    print(f"You must fix them in your {netrc_path}.")
-                except Exception as exc :
-                    # No entry in .netrc for host add one
-                    bAdd = True
+                nrc_user, nrc_acct, nrc_pass = netrc_info.authenticators(netHost)
+                print(f"It appears as though the credentials for '{netHost}' are incorrect.")
+                print(f"You must fix them in your {netrc_path}.")
             except Exception as exc :
                 # No .netrc file or can't open?
                 bAdd = True
@@ -481,7 +480,7 @@ def do_api_submit():
 
     subTime = submission['time']
     # Check for just an hour offset, datetime wants a full time offset
-    if re.search("[-+]\d\d$", subTime) :
+    if re.search(r"[-+]\d\d$", subTime) :
         subTime = subTime + ":00"
     time = datetime.datetime.fromisoformat(subTime).strftime('%H:%M:%S')
     sid = submission['id']
