@@ -60,7 +60,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
  * {
  *  "id":"wf2016",
  *  "start_time":null
- *  "countdown_pause_time":"2014-06-25T09:00:00+01"
+ *  "countdown_pause_time":"2016-05-19T10:00:00+07"
  * }
  *
  * or, to change thaw time:
@@ -234,7 +234,6 @@ public class ContestService implements Feature {
      * @param sc
      * @param contestId which contest
      * @param startTimeValueString new contest start time (ISO format) or null to make it undefined
-     * @param sawCountdownPauseTime
      * @return web response
      */
     private Response HandleContestStartTime(SecurityContext sc, String contestId, String startTimeValueString) {
@@ -391,14 +390,14 @@ public class ContestService implements Feature {
             // tell PC2 to stop countdown when clock is 'pauseTime' ms away from start
             boolean success = setScheduledStart(null, countdownPauseTime);
             if (success) {
-                controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": countdown paused (set contest start time to null)");
-                return Response.ok().entity("Contest countdown paused - start time updated to \"null\" (no scheduled start)").build();
+                controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": countdown paused at " + countdownPauseTime + " and set contest start time to null.");
+                return Response.ok().entity("Contest countdown paused at " + countdownPauseTime + " and start time updated to \"null\" (no scheduled start)").build();
             } else {
-                controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": can not pause countdown - error setting contest start time to \"undefined\".");
-                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to pause countdown").build();
+                controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": can not pause countdown at " + countdownPauseTime + " - error setting contest start time to \"undefined\".");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to pause countdown at " + countdownPauseTime).build();
             }
         }
-        return Response.status(Status.BAD_REQUEST).entity("Bad value for count down pause time request").build();
+        return Response.status(Status.BAD_REQUEST).entity("Bad value (" + countdownPauseTime + ") for count down pause time request").build();
     }
 
     /**
@@ -466,6 +465,10 @@ public class ContestService implements Feature {
      * This is accomplished by telling the controller to update the {@link ContestInformation} with the scheduled start date. The controller then sends a packet to the server to do that; the server in
      * turn creates a task to start the contest at the specified date/time.
      *
+     * When a contest is paused, the start date will be specified as null and the contest pause rel time will
+     * be set to the time remaining in the countdown ((h)*h:mm:ss(.uuu)).  When the contest is resumed,
+     * the date will be the new start date for the contest and the pause rel time will be null.
+     *
      * @param theDate
      *            the date/time to which the automatic start of the contest should be set, or null if the start date/time should be set to "undefined"
      * @param contestPauseRelTime Relative time before contest starts: HH:MM:SS, null if not pausing
@@ -486,7 +489,7 @@ public class ContestService implements Feature {
                 ci.setContestCountdownPauseTime(contestPauseRelTime);
             }
             // tell the Controller to update the ContestInformation
-            // note: setting a new contest start time (eg theData != null) will automatically start the countdown
+            // note: setting a new contest start time (eg theDate != null) will automatically start the countdown
             controller.updateContestInformation(ci);
             return true;
         } else {

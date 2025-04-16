@@ -173,7 +173,7 @@ public class ContestInformation implements Serializable{
 
     private boolean autoStopContest = false ;
 
-    // RELTIME (HH:MM:SS) of when contest countdown was paused (Before start)
+    // RELTIME ((h)*h:mm:ss(.uuu)) of when contest countdown was paused (Before start)
     private String contestCountdownPauseTime = null;
 
     /**

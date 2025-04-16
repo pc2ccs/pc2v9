@@ -47,8 +47,8 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     private static final long serialVersionUID = 8137635697344335832L;
 
-    private static final String NO_SCHEDULE_START_TIME = "No scheduled start";
-    private static final String NO_SCHEDULE_START_HINT = "Still no scheduled start";
+    private static final String NO_SCHEDULED_START_TIME = "No scheduled start";
+    private static final String NO_SCHEDULED_START_HINT = "Still no scheduled start";
 
     private static final String COUNTDOWN_PAUSED = "Countdown Paused";
 
@@ -515,8 +515,8 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
         if (scheduledStartTimeLabelList.size() > 0) {
 
-            String text = NO_SCHEDULE_START_TIME;
-            String hint = NO_SCHEDULE_START_HINT;
+            String text = NO_SCHEDULED_START_TIME;
+            String hint = NO_SCHEDULED_START_HINT;
 
             if (scheduledStartTime != null) {
 
@@ -537,7 +537,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
             ContestTime contestTime = contest.getContestTime();
 
-            String [] textAndHint = getScheduleOrRemainingTimeAndHint(contestTime);
+            String [] textAndHint = getScheduledOrRemainingTimeAndHint(contestTime);
 
             if(textAndHint != null && textAndHint.length == 2) {
                 for (JLabel jLabel : schedAndRemainingTimeLabelList) {
@@ -548,13 +548,22 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         }
     }
 
-    public String [] getScheduleOrRemainingTimeAndHint(ContestTime contestTime) {
+    /**
+     * Returns the text and tooltip (hint) of what should be displayed for the contest clock.
+     * If the contest is not started, it gives the count down to start of contest, unless the contest is
+     * paused, in which case it gives a message indicating the contest count down is paused.
+     * If the contest is underway, it gives the remaining time in contest.
+     *
+     * @param contestTime - provides information about clock state of the contest.
+     * @return two element string array
+     */
+    public String [] getScheduledOrRemainingTimeAndHint(ContestTime contestTime) {
 
         String [] textAndHint = new String[2];
 
         // These are always set below, but just in case someone forgets.
-        String text = NO_SCHEDULE_START_TIME;
-        String hint = NO_SCHEDULE_START_HINT;
+        String text = NO_SCHEDULED_START_TIME;
+        String hint = NO_SCHEDULED_START_HINT;
 
         boolean isContestStarted = contestTime.isContestStarted();
 
@@ -595,7 +604,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     // This is used for unit tests only at the moment.
     public String getScheduleOrRemainingTime(ContestTime contestTime) {
-        return getScheduleOrRemainingTimeAndHint(contestTime)[0];
+        return getScheduledOrRemainingTimeAndHint(contestTime)[0];
     }
 
     public String getScheduledTimeClockHint() {
