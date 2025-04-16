@@ -14,7 +14,7 @@
 
 import argparse
 import base64
-import dateutil.parser
+import datetime
 import json
 import logging
 import os
@@ -23,6 +23,7 @@ import requests.utils
 import stat
 import sys
 import time
+import re
 import urllib3
 from urllib.parse import urlparse
 import netrc
@@ -478,7 +479,11 @@ def do_api_submit():
             or not isinstance(submission['id'], str)):
         error('CLICS API returned unexpected JSON data.')
 
-    time = dateutil.parser.isoparse(submission['time']).strftime('%H:%M:%S')
+    subTime = submission['time']
+    # Check for just an hour offset, datetime wants a full time offset
+    if re.search("[-+]\d\d$", subTime) :
+        subTime = subTime + ":00"
+    time = datetime.datetime.fromisoformat(subTime).strftime('%H:%M:%S')
     sid = submission['id']
     print(f"Submission received: id = s{sid}, time = {time}")
 
