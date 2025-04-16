@@ -779,7 +779,7 @@ public class SubmissionService implements Feature {
         } catch (Exception e) {
             controller.getLog().log(Log.WARNING, "Can not convert the supplied team id " + id + " to a ClientId", e);
         }
-        return(clientId);
+        return clientId;
     }
 
     /**
