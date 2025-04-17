@@ -131,7 +131,7 @@ export class ContestService extends IContestService {
 	installNewContestClock(data: ContestClock) {
 		
 		//copy the data fields (received from the PC2 Server via the WTI-API) into a new ContestService ContestClock object
-		let newContestClock = new ContestClock();
+		const newContestClock = new ContestClock();
 		newContestClock.running = data.running ;
 		newContestClock.contestLengthSecs = data.contestLengthSecs ;
 		newContestClock.elapsedSecs = data.elapsedSecs ;
