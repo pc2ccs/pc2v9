@@ -72,10 +72,18 @@ public class CLICSAccount {
         if(sc != null && sc.isUserInRole(WebServer.WEBAPI_ROLE_ADMIN)) {
             password = account.getPassword();
         }
-        type = "" + cid.getClientType();
-        type = type.toLowerCase();
-        if(account.isTeam()) {
+        // Map known CLICS account types to clics strings since PC2 type strings
+        // are different
+        if(cid.getClientType() == Type.ADMINISTRATOR) {
+            type = "admin";
+        } else if(cid.getClientType() == Type.TEAM) {
+            type = "team";
             team_id = username;
+        } else if(cid.getClientType() == Type.JUDGE) {
+            type = "judge";
+        } else {
+            type = "" + cid.getClientType();
+            type = type.toLowerCase();
         }
     }
 
