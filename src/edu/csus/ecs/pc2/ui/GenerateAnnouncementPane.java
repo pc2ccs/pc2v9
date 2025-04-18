@@ -113,6 +113,11 @@ public class GenerateAnnouncementPane extends JPanePlugin {
     private JScrollPane announcementTextAreaScrollPane;
 
     private JPanel announcementPane;
+    private Component verticalGlue;
+    private Component verticalGlue_1;
+    private Component verticalGlue_2;
+    private Component verticalGlue_3;
+    private Component verticalGlue_4;
 
     /**
      * This method initializes the SubmitAnnouncementPane.
@@ -133,20 +138,20 @@ public class GenerateAnnouncementPane extends JPanePlugin {
             public void run() {
 
                 thisPane.setLayout(new BoxLayout(thisPane, BoxLayout.Y_AXIS));
-
-                thisPane.add(Box.createVerticalStrut(20));
+                
+                add(getVerticalGlue());
                 thisPane.add(getSelectorsPane());
                 
-                thisPane.add(Box.createVerticalStrut(20));
+                add(getVerticalGlue_1());
                 thisPane.add(getAnnouncementPane());
                 
-                thisPane.add(Box.createVerticalStrut(20));
+                thisPane.add(getVerticalGlue_2());
                 thisPane.add(getGroupsAndTeamsPane());
-
-                thisPane.add(Box.createVerticalStrut(20));
+                
+                thisPane.add(getVerticalGlue_3());
                 thisPane.add(getSubmitAnnouncementButton());
-
-                thisPane.add(Box.createVerticalStrut(20));
+                
+                thisPane.add(getVerticalGlue_4());
 
             }
 
@@ -1238,4 +1243,34 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
     }
 
+    private Component getVerticalGlue() {
+        if (verticalGlue == null) {
+        	verticalGlue = Box.createVerticalGlue();
+        }
+        return verticalGlue;
+    }
+    private Component getVerticalGlue_1() {
+        if (verticalGlue_1 == null) {
+        	verticalGlue_1 = Box.createVerticalGlue();
+        }
+        return verticalGlue_1;
+    }
+    private Component getVerticalGlue_2() {
+        if (verticalGlue_2 == null) {
+        	verticalGlue_2 = Box.createVerticalGlue();
+        }
+        return verticalGlue_2;
+    }
+    private Component getVerticalGlue_3() {
+        if (verticalGlue_3 == null) {
+        	verticalGlue_3 = Box.createVerticalGlue();
+        }
+        return verticalGlue_3;
+    }
+    private Component getVerticalGlue_4() {
+        if (verticalGlue_4 == null) {
+        	verticalGlue_4 = Box.createVerticalGlue();
+        }
+        return verticalGlue_4;
+    }
 }
