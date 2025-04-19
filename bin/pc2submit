@@ -20,6 +20,7 @@ import logging
 import os
 import requests
 import requests.utils
+from requests.auth import HTTPBasicAuth
 import stat
 import sys
 import time
@@ -84,12 +85,12 @@ def warn_user(msg: str):
     if args.quiet:
         logging.debug(f'user warning #{num_warnings}: {msg}')
     else:
-        print(f'WARNING: {msg}!')
+        print(f'Warning: {msg}!')
 
 
 def usage(msg: str) -> NoReturn:
-    logging.error(f'error: {msg}')
-    print(f"Type '{sys.argv[0]} --help' to get help.")
+    logging.error(f'Error: {msg}')
+    print(f"Type '{os.path.basename(sys.argv[0])} --help' to get help.")
     exit(1)
 
 
@@ -105,7 +106,6 @@ def print_if_json(text: str):
         print(json.dumps(data, indent=2))
     except json.decoder.JSONDecodeError:
         pass
-
 
 def read_contests() -> list:
     '''Read all contests from the API.
@@ -224,7 +224,7 @@ def append_to_netrc(machine, login, password, netrc_path="~/.netrc"):
         netrc_path (str, optional): The path to the .netrc file. Defaults to "~/.netrc".
     """
     ret = False
-    print(f"Adding entry: 'machine {machine} login {login} password *******' to {netrc_path}")
+    logging.info(f"Adding entry: 'machine {machine} login {login} password *******' to {netrc_path}")
     expanded_path = os.path.expanduser(netrc_path)
     entry = f"machine {machine} login {login} password {password}\n"
 
@@ -236,6 +236,7 @@ def append_to_netrc(machine, login, password, netrc_path="~/.netrc"):
         if not bExists :
             os.chmod(expanded_path, 0o600)
         ret = True
+        print("\nCredentials have been updated in {netrc_path}.\n")
     except IOError as e:
         print(f"Error appending to {expanded_path}: {e}")
     return ret
@@ -243,28 +244,28 @@ def append_to_netrc(machine, login, password, netrc_path="~/.netrc"):
 # Prompt user for credentials, and update .netrc
 def prompt_for_creds(netrc_path, host) :
     ret = False
-    print(f"\nCould not find credentials for {host} in {netrc_path}.")
+    print(f"\nYour credentials for {host} could not be found in {netrc_path}.")
     if 'USER' in os.environ :
         user = os.environ['USER']
     else :
         user = 'team'
     while True :
-        uname = input(f"Please enter your user name credential (ENTER={user}): ")  or user
+        uname = input(f"\nPlease enter your user name credential (ENTER={user}): ")  or user
         if uname == '' :
             print("You must enter a user name.")
             continue
         user = uname
         passwd = getpass.getpass(f"Please enter the password for {uname}: ")
-        cpassword = getpass.getpass(f"Please confirm the password for {uname}: ")
+        cpassword = getpass.getpass(f"Please re-enter the password for {uname}: ")
         if passwd != cpassword :
-            print("The passwords do not match.")
+            print("The passwords do not match.  Try again.")
             continue
-        if input(f"Are you sure the information for '{uname}' is correct? ") == 'yes' :
+        if not test_api_endpoint("contests", user, passwd) :
+            if not confirm(f"\nThose credentials did not work. Do you want to again") :
+                break
+        if confirm(f"\nAre you sure the information for '{uname}' is correct") :
+            ret = append_to_netrc(host, uname, passwd, netrc_path)
             break
-    if input(f"\nDo you want to update your '{netrc_path}' file for '{host}' and user '{uname}'? ") == 'yes' :
-        ret = append_to_netrc(host, uname, passwd, netrc_path)
-    else :
-        print("Ok, your {netrc_path} has NOT been updated.")
     return ret
     
 # Validate credentials in .netrc only if ADDSUBMITCREDENTIALS is in environment otherwise
@@ -275,7 +276,9 @@ def prompt_for_creds(netrc_path, host) :
 # and we save them in the .netrc
 def check_netrc() :
     if not ENV_SUBMITCREDENTIALS in os.environ or os.environ[ENV_SUBMITCREDENTIALS] != 'yes' :
+        logging.info(f"Not checking .netrc since {ENV_SUBMITCREDENTIALS} is not set to 'yes' in the environment")
         return False
+    
     bAdd = False
     try :
         urlCrack = urlparse(baseurl)
@@ -286,8 +289,7 @@ def check_netrc() :
             try :
                 netrc_info = netrc.netrc(netrc_path)
                 nrc_user, nrc_acct, nrc_pass = netrc_info.authenticators(netHost)
-                print(f"It appears as though the credentials for '{netHost}' are incorrect.")
-                print(f"You must fix them in your {netrc_path}.")
+                print(f"\nIt appears as though your credentials for '{netHost}' are incorrect.\n")
             except Exception as exc :
                 # No .netrc file or can't open?
                 bAdd = True
@@ -338,6 +340,34 @@ def do_api_request(name: str):
         break
     
     return json.loads(response.text)
+
+def test_api_endpoint(name: str, user: str, password: str) :
+    '''Perform an API call to the given endpoint to see if it works.
+    No errors rae printed if it doesn't.
+
+    Parameters:
+        name (str): the endpoint to call
+
+    Returns:
+        True if it worked, False if not
+    '''
+    ret = False
+    
+    if baseurl:
+        url = f'{baseurl}{api_component}{api_version}{name}'
+
+        logging.info(f'Connecting to {url}')
+
+        try:
+            response = requests.get(url, headers=headers, verify=False, auth=HTTPBasicAuth(user, password))
+            ret = True
+        except Exception as e:
+            pass
+
+        logging.debug(f"Test API call '{name}' returned: {ret} - Status: {response.status_code}")
+        if response.status_code >= 300 :
+            ret = False    
+    return ret
 
 
 def kotlin_base_entry_point(filebase: str) -> str:
@@ -390,7 +420,7 @@ def get_epilog():
             sorted_exts = ', '.join(sorted(language['extensions']))
             language_part += f"\n    {language['name']:<{max_length}} - {sorted_exts}"
 
-    submit_client = sys.argv[0]
+    submit_client = os.path.basename(sys.argv[0])
     epilog_parts = [
         "Explanation of submission options:",
         contests_part_one,
@@ -401,7 +431,7 @@ extension. For example, 'B.java' indicates the problem 'B'.''',
         language_part,
         '''The default for LANGUAGE is the extension of FILENAME. For example,
 'B.java' indicates a Java submission.''',
-        "Set URL to the base address of the webinterface without the 'team/' suffix.\n" +
+        "Set URL to the base address of the webinterface without the 'contests/' suffix.\n" +
         (f"The (pre)configured URL is '{baseurl}'\n" if baseurl else '') +
         "Credentials are read from ~/.netrc (see netrc(4) for details).",
         f'''Examples:
@@ -482,6 +512,8 @@ def do_api_submit():
     # Check for just an hour offset, datetime wants a full time offset
     if re.search(r"[-+]\d\d$", subTime) :
         subTime = subTime + ":00"
+    elif re.search(r"[Zz]$", subTime) :
+        subTime = subTime[:-1] + "+00:00"
     time = datetime.datetime.fromisoformat(subTime).strftime('%H:%M:%S')
     sid = submission['id']
     print(f"Submission received: id = s{sid}, time = {time}")
@@ -570,7 +602,8 @@ else:
 
 contests = read_contests() if baseurl else None
 if not contests and not args.help:
-    logging.warning('Could not obtain active contests.')
+    logging.warning('\nCould not obtain active contests.')
+    exit(1)
 
 my_contest: dict = {}
 my_language: dict = {}
@@ -578,14 +611,12 @@ my_problem: dict = {}
 team_id = args.team_id
 
 if not contest_id:
-    if not contests:
-        if not args.help:
-            warn_user('No active contests found (and no contest specified)')
-    elif len(contests) == 1:
-        my_contest = contests[0]
-    else:
-        shortnames = ', '.join([c['name'] for c in contests])
-        warn_user(f"Multiple active contests found, please specify one of {shortnames}")
+    if contests:
+        if len(contests) == 1:
+            my_contest = contests[0]
+        else:
+            shortnames = ', '.join([c['name'] for c in contests])
+            warn_user(f"Multiple active contests found, please specify one of {shortnames} using the --contest option")
 elif contests:
     contest_id = contest_id.lower()
     for contest in contests:
@@ -625,7 +656,7 @@ if not problems:
     logging.warning('Could not obtain problem data.')
 
 if len(args.filename) == 0:
-    usage('No file(s) specified.')
+    usage('It looks like you did not supply your source file(s) on the command line.\n')
 
 # Process all source files
 filenames = []
@@ -681,7 +712,7 @@ if '.' in filebase:
 language_id = language_id.lower()
 for language in languages:
     for extension in language['extensions']:
-        if extension.lower() == language_id:
+        if extension == language_id:
             my_language = language
             break
     if my_language:
