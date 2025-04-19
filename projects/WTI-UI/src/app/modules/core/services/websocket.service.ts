@@ -24,18 +24,27 @@ export class WebsocketService extends IWebsocketService {
     //The above was replaced with the following at the same time all services were specified as "providedIn: 'root'"
     super(_uiHelperService, _iContestService, _iTeamsService, _authService);
     if (DEBUG_MODE) {
-    	console.log('Executing WebsocketService constructor');
+    	console.log('Executing WebsocketService constructor...');
+    	console.log('...initial environment is:');
+		Object.entries(environment).forEach(([key,value]) => {
+			console.log (`  Key:  ${key},  Value:  ${value}`) ;
+		});
+
     }
   }
 
   startWebsocket(): void {
     if (DEBUG_MODE) {
     	console.log('Constructing websocket...');
+    	console.log('...current environment is:');
+		Object.entries(environment).forEach(([key,value]) => {
+			console.log (`  Key:  ${key},  Value:  ${value}`) ;
+		});
     }
     this.socket = new WebSocket(`${environment.websocketUrl}/${this._authService.token}`);
     this.socket.addEventListener('message', this.handleIncomingMessage);
     if (DEBUG_MODE) {
-    	console.log('...websocket URL =' + this.socket.url);
+    	console.log('...websocket URL = ' + this.socket.url);
     }
   }
 

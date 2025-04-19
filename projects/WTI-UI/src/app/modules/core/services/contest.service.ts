@@ -39,6 +39,12 @@ export class ContestService extends IContestService {
   
   constructor(private _httpClient: HttpClient) {
 	super();
+	console.log('Executing ContestService constructor...');
+	console.log('...initial environment is:');
+	Object.entries(environment).forEach(([key,value]) => {
+		console.log (`  Key:  ${key},  Value:  ${value}`) ;
+	});
+
 
 	this.standingsAreCurrent = false;
     

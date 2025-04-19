@@ -49,10 +49,13 @@ export class LoginPageComponent implements OnInit, OnDestroy {
               private _router: Router,
               private _contestService: IContestService,
 			  private _appTitleService: AppTitleService) { 
+	  console.log("Executing LoginPageComponent constructor");
   }
 
   ngOnInit(): void {
 	
+	  console.log ("Executing LoginPageComponent.ngOnInit()");
+	  
 	this._appTitleService.setTitleWithTeamId("Login");
 
 	if (this._authService.token) { 
@@ -68,6 +71,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
+	  console.log ("Entering LoginPageComponent.onSubmit()");
     this.loginStarted = true;
     const loginCreds = new LoginCredentials();
     loginCreds.teamName = this.formGroup.get('username').value;
@@ -76,19 +80,23 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this._unsubscribe))
       .subscribe((result: TeamsLoginResponse) => {
 
+    	  console.log("LoginPageComponent.onSubmit(): received callback from authService.login()");
+    	  console.log ("LoginPageComponent.onSubmit(): invoking authService.completeLogin()");
         this._authService.completeLogin(result.teamId, result.teamName);
-
+		  console.log ("LoginPageComponent.onSubmit(): invoking websocketService.startWebsocket()");
         this._websocketService.startWebsocket();
-
+		  console.log ("LoginPageComponent.onSubmit(): invoking contestService.getIsContestRunning()");
         this._contestService.getIsContestRunning()
           .subscribe((val: boolean) => {
-            this._contestService.isContestRunning = val;
+              console.log ("LoginPageComponent.onSubmit(): getIsContestRunning returned ", val);
+        	  this._contestService.isContestRunning = val;
 			//trigger a contestClockEvent so the SelectProblems dropdown can decide whether to display the problems or not
             this._contestService.contestClockEvent.next();
 
           });
 
 		//get the actual contest clock info from the PC2 server via the Contest Service (which gets it via the WTI Server and its PC2 API)
+		  console.log ("LoginPageComponent.onSubmit(): invoking contestService.getContestClock()");
 		this._contestService.getContestClock() 
 			.subscribe(
 				(data: ContestClock) => {
