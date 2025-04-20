@@ -261,8 +261,9 @@ def prompt_for_creds(netrc_path, host) :
             print("The passwords do not match.  Try again.")
             continue
         if not test_api_endpoint("contests", user, passwd) :
-            if not confirm(f"\nThose credentials did not work. Do you want to again") :
+            if not confirm(f"\nThose credentials did not work. Do you want to try again") :
                 break
+            continue
         if confirm(f"\nAre you sure the information for '{uname}' is correct") :
             ret = append_to_netrc(host, uname, passwd, netrc_path)
             break
