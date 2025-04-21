@@ -12,6 +12,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
@@ -33,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunTestCase;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.util.CommaSeparatedValueParser;
 import edu.csus.ecs.pc2.core.util.IJSONTool;
 
 /**
@@ -46,7 +48,11 @@ public class EventFeedJSON extends JSON202306Utilities {
     public static final String EVENT_ID_PREFIX = "pc2-";
     public static final int EVENT_ID_PREFIX_LENGTH = EVENT_ID_PREFIX.length();
 
+    public static final String CLICS_DISABLE_COLLECTIONS_KEY = "clics.disable-collections";
+    public static final String ALL_NOTIFICATION_TYPES = "all";
+
     private boolean useCollections = true;
+    private HashSet<String> disableCollections = new HashSet<String>();
 
     /**
      *
@@ -54,6 +60,13 @@ public class EventFeedJSON extends JSON202306Utilities {
     public EventFeedJSON(IJSONTool jsonTool) {
         super();
         this.jsonTool = jsonTool;
+
+        try {
+            String [] disList = CommaSeparatedValueParser.parseLine(IniFile.getValue(CLICS_DISABLE_COLLECTIONS_KEY));
+            this.disableNotificationCollections(disList);
+        } catch (Exception e) {
+            // Use default values for collections
+        }
     }
 
     /**
@@ -116,7 +129,7 @@ public class EventFeedJSON extends JSON202306Utilities {
         StringBuilder stringBuilder = new StringBuilder();
 
         Judgement[] judgements = contest.getJudgements();
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.JUDGEMENT_TYPES)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             dataCollection.append("[");
@@ -157,7 +170,7 @@ public class EventFeedJSON extends JSON202306Utilities {
         StringBuilder stringBuilder = new StringBuilder();
 
         Language[] languages = contest.getLanguages();
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.LANGUAGES)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             dataCollection.append("[");
@@ -207,7 +220,7 @@ public class EventFeedJSON extends JSON202306Utilities {
 
         Problem[] problems = contest.getProblems();
         int id = 1;
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.PROBLEMS)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             dataCollection.append("[");
@@ -252,7 +265,7 @@ public class EventFeedJSON extends JSON202306Utilities {
 
         HashSet<ElementId> usedGroups = getGroupsUsed(contest);
 
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.GROUPS)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             dataCollection.append("[");
@@ -335,7 +348,7 @@ public class EventFeedJSON extends JSON202306Utilities {
         Hashtable<String, Account> organizations = new Hashtable<String, Account>();
 
 
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.ORGANIZATIONS)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             dataCollection.append("[");
@@ -391,7 +404,7 @@ public class EventFeedJSON extends JSON202306Utilities {
 
         Account[] accounts = EventFeedJSON.getTeamAccounts(contest);
 
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.TEAMS)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             dataCollection.append("[");
@@ -434,7 +447,7 @@ public class EventFeedJSON extends JSON202306Utilities {
         Account[] accounts = contest.getAccounts();
         Arrays.sort(accounts, new AccountComparator());
 
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.ACCOUNTS)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             dataCollection.append("[");
@@ -498,7 +511,7 @@ public class EventFeedJSON extends JSON202306Utilities {
         int memberId;
         Account[] accounts = EventFeedJSON.getTeamAccounts(contest);
 
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.PERSONS)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             dataCollection.append("[");
@@ -585,7 +598,7 @@ public class EventFeedJSON extends JSON202306Utilities {
         Run[] runs = contest.getRuns();
 
         Arrays.sort(runs, new RunComparator());
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.SUBMISSIONS)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             dataCollection.append("[");
@@ -644,7 +657,7 @@ public class EventFeedJSON extends JSON202306Utilities {
 
         Arrays.sort(runs, new RunComparator());
 
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.JUDGEMENTS)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             dataCollection.append("[");
@@ -696,7 +709,7 @@ public class EventFeedJSON extends JSON202306Utilities {
 
         Arrays.sort(runs, new RunComparator());
 
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.RUNS)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             dataCollection.append("[");
@@ -755,7 +768,7 @@ public class EventFeedJSON extends JSON202306Utilities {
         Clarification[] clarifications = contest.getClarifications();
 
         Arrays.sort(clarifications, new ClarificationComparator());
-        if(isUseCollections()) {
+        if(isUseNotificationCollection(EventFeedType.CLARIFICATIONS)) {
             StringBuilder dataCollection = new StringBuilder();
             boolean bFirst = true;
             boolean isQuestion = false;
@@ -1056,13 +1069,80 @@ public class EventFeedJSON extends JSON202306Utilities {
         this.filter = filter;
     }
 
+    /**
+     * Check if we are using collections for notifications
+     *
+     * @return true if collections are enabled, false otherwise
+     */
     public boolean isUseCollections() {
         return useCollections;
     }
 
+    /**
+     * Set if we want to try to use collections when possible for notifications
+     *
+     * @param useCollections - true to try to use collections
+     */
     public void setUseCollections(boolean useCollections) {
         this.useCollections = useCollections;
     }
+
+    /**
+     * Tests if notification collections should be used for a specific notification type.
+     * This first tests is notification collections are being used in general, then if so,
+     * checks if the specific type is not disabled.
+     *
+     * @param notificationType
+     * @return
+     */
+    public boolean isUseNotificationCollection(EventFeedType notificationType) {
+        return(isUseCollections() && !disableCollections.contains(notificationType.toString()));
+    }
+
+    /**
+     * Adds the comma-separated list of notification types (EventFeedType's) to the HashSet of
+     * disabled notification types.  Any notification type in this list will not use collections
+     * on the event feed.  The special type ALL_NOTIFICATION_TYPES will disable collections for all
+     * notification and will clear the HashSet of disabled types and simply set the useCollections flag to false.
+     *
+     * @param list Comma-separated list of notification types (EventFeedType's) to not use
+     *      collections on.
+     */
+    public void disableNotificationCollections(String [] list) {
+        if(list != null) {
+            for(String notificationType : list) {
+                if(notificationType.equals(ALL_NOTIFICATION_TYPES)) {
+                    setUseCollections(false);
+                    disableCollections.clear();
+                    break;
+                }
+                disableCollections.add(notificationType);
+            }
+        }
+    }
+
+    /**
+     * Remove the comma-separated list of notification types (EventFeedType's) from the Hashset
+     * of disabled notification types.  If collections are enabled, then the types included in the
+     * supplied list will be allowed to generate collections.  The special type ALL_NOTIFICATION_TYPES will disable collections for all
+     * notification and will simply set the useCollections flag to true and clear the HashSet of
+     * disabled types.
+     *
+     * @param list Comma-separated list of notification types (EventFeedType's) to allow collections on.
+     */
+    public void enableNotificationCollections(String [] list) {
+        if(list != null) {
+            for(String notificationType : list) {
+                if(notificationType.equals(ALL_NOTIFICATION_TYPES)) {
+                    setUseCollections(true);
+                    disableCollections.clear();
+                    break;
+                }
+                disableCollections.remove(notificationType);
+            }
+        }
+    }
+
     /**
      * Get event id property for the event feed notification
      *

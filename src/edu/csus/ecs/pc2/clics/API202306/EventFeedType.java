@@ -72,7 +72,7 @@ public enum EventFeedType {
     /**
      *
      */
-    TEAM_MEMBERS("team-members");
+    PERSONS("persons");
 
     private final String name;
 
