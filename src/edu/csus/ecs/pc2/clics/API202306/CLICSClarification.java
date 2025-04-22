@@ -105,13 +105,10 @@ public class CLICSClarification {
         }
         // Announcements do not have a reply_to_id or a question, but they do have an answer
         if(clar.isAnnounced()) {
-            reply_to_id = null;
             ClarificationAnswer[] clarAnswers = clar.getClarificationAnswers();
             if(clarAnswers != null && clarAnswers.length > 0) {
                 clarAns = clarAnswers[clarAnswers.length - 1];
             }
-        } else {
-            reply_to_id = clar.getElementId().toString();
         }
         if (clarAns != null) {
             // does the answer go to a team (as opposed to everyone)?
@@ -155,6 +152,12 @@ public class CLICSClarification {
                         }
                     }
                 }
+            }
+            // Announcements do not have a question.
+            if(clar.isAnnounced()) {
+                reply_to_id = null;
+            } else {
+                reply_to_id = clar.getElementId().toString();
             }
             text = clarAns.getAnswer();
             time = Utilities.getIso8601formatterWithMS().format(clarAns.getDate());
