@@ -552,7 +552,7 @@ public class ContestController extends MainController {
 
 		ServerConnection userInformation = connections.get(key);
 	    
-		//verify the user is logged in
+		//verify that the user is logged in
 		try {
 			// make sure we have connection information for this user (i.e. that the user is logged in)
 			if (userInformation == null) {
