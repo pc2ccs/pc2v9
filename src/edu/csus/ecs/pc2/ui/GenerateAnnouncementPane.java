@@ -52,6 +52,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.Box;
+import java.awt.Dimension;
 
 /**
  * Displays a GUI pane which allows generating an "announcement-type" clarification and sending it to selected teams and groups. 
@@ -69,7 +70,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
     public static final String ALL_TEAMS = "All Teams";
 
-    public static final String GROUPS_AND_TEAMS = "Specific Groups and/or Teams";
+    public static final String SPECIFIC_GROUPS_AND_TEAMS = "Specific Groups and/or Teams";
 
     private static final Object CHECKBOX_GROUP_OR_TEAM_PROPERTY = "GroupOrTeamId";
 
@@ -113,14 +114,16 @@ public class GenerateAnnouncementPane extends JPanePlugin {
     private JScrollPane announcementTextAreaScrollPane;
 
     private JPanel announcementPane;
-    private Component verticalGlue;
-    private Component verticalGlue_1;
+
     private Component verticalGlue_2;
     private Component verticalGlue_3;
     private Component verticalGlue_4;
+    private Component rigidArea;
+    private Component rigidArea_1;
+    private Component rigidArea_2;
 
     /**
-     * This method initializes the SubmitAnnouncementPane.
+     * Construct and initialize a new SubmitAnnouncementPane.
      */
     public GenerateAnnouncementPane() {
         super();
@@ -138,12 +141,13 @@ public class GenerateAnnouncementPane extends JPanePlugin {
             public void run() {
 
                 thisPane.setLayout(new BoxLayout(thisPane, BoxLayout.Y_AXIS));
-                
-                add(getVerticalGlue());
+
+                add(getRigidArea());
                 thisPane.add(getSelectorsPane());
-                
-                add(getVerticalGlue_1());
+
+                add(getRigidArea_1());
                 thisPane.add(getAnnouncementPane());
+                add(getRigidArea_2());
                 
                 thisPane.add(getVerticalGlue_2());
                 thisPane.add(getGroupsAndTeamsPane());
@@ -165,6 +169,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
             destinationPane.add(getGroupsPane());
             destinationPane.add(Box.createHorizontalStrut(20));
             destinationPane.add(getTeamsPane());
+            destinationPane.setVisible(false);
         }
         return destinationPane;
     }
@@ -176,9 +181,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
             selectorsPane.add(getProblemPane());
             selectorsPane.add(Box.createHorizontalStrut(40));
             selectorsPane.add(getDestinationComboBoxPane());
-
         }
-
         return selectorsPane;
     }
 
@@ -193,7 +196,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
             
             destinationComboBoxPane = new JPanel();
 
-            destinationComboBoxPane.add(new JLabel("Announcement Destination(s):  "));
+            destinationComboBoxPane.add(new JLabel("Announcement Destination: "));
             destinationComboBoxPane.add(getDestinationComboBox());
         }
         return destinationComboBoxPane;
@@ -227,35 +230,28 @@ public class GenerateAnnouncementPane extends JPanePlugin {
                             SwingUtilities.invokeLater(new Runnable() {
                                 public void run() {
                                     
-                                    //clear group and team selections so that a submit doesn't use old selection data
-                                    DefaultListModel<Object> teamsModel = (DefaultListModel<Object>) getTeamsList().getModel();
-                                    for (int i=0; i<teamsModel.getSize(); i++) {
-                                        ((JCheckBox)teamsModel.getElementAt(i)).setSelected(false);
-                                    }
-                                    DefaultListModel<Object> groupsModel = (DefaultListModel<Object>) getGroupsList().getModel();
-                                    for (int i=0; i<groupsModel.getSize(); i++) {
-                                        ((JCheckBox)groupsModel.getElementAt(i)).setSelected(false);
-                                    }
-
-                                    //hide group & team selection scrollpanes
-                                    getGroupsPane().setVisible(false);
-                                    getTeamsPane().setVisible(false);
+                                    //clear group and team selections so that a subsequent submit doesn't use old selection data
+                                    clearGroupAndTeamSelections();
+                                    
+                                    //the desirable approach is to always have the groups and teams pane VISIBLE, 
+                                    //and here to simple DISABLE them (including disabling their checkboxes). 
+                                    //However, many many hours of effort failed to produce a workable version of this,
+                                    //so for now we'll just HIDE them when ALL_TEAMS is selected.
+                                    getGroupsAndTeamsPane().setVisible(false);
                                 }
                             });
                             break;
 
-                        case GROUPS_AND_TEAMS:
+                        case SPECIFIC_GROUPS_AND_TEAMS:
                             
                             SwingUtilities.invokeLater(new Runnable() {
                                 public void run() {
-                                    //only show the Groups pane if there are existing groups
-                                    if (getContest().getNumberofGroups() > 0) {
-                                        getGroupsPane().setVisible(true);
-                                    }
-                                    //only show the Teams pane if there are existing team accounts
-                                    if (getContest().getAccounts(ClientType.Type.TEAM).size() > 0) {
-                                        getTeamsPane().setVisible(true);
-                                    }
+                                    
+                                    //the desirable approach is to always have the groups and teams pane VISIBLE, 
+                                    //and here to simply ENABLE them (including enabling their checkboxes).
+                                    //However, many many hours of effort failed to produce a workable version of this,
+                                    //so for now we'll just make them VISIBLE again when SPECIFIC_GROUPS_AND_TEAMS is selected.
+                                    getGroupsAndTeamsPane().setVisible(true);
                                 }
                             });
                             break;
@@ -271,11 +267,12 @@ public class GenerateAnnouncementPane extends JPanePlugin {
         return destinationComboBox;
     }
 
+    
     /**
      * Returns an array of Strings containing all the destinations which should be listed in the "Select Destination" dropdown list.
      */
     private String[] getDestinationComboBoxChoices() {
-        String[] destinationItems = { ALL_TEAMS, GROUPS_AND_TEAMS };
+        String[] destinationItems = { ALL_TEAMS, SPECIFIC_GROUPS_AND_TEAMS };
         return destinationItems;
     }
 
@@ -291,7 +288,6 @@ public class GenerateAnnouncementPane extends JPanePlugin {
             groupsPanel.setBorder(BorderFactory.createTitledBorder(null, "Groups", 
                     TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
             groupsPanel.add(getGroupsScrollPane());
-            groupsPanel.setVisible(false);
         }
 
         return groupsPanel;
@@ -308,7 +304,6 @@ public class GenerateAnnouncementPane extends JPanePlugin {
             teamsPanel.setBorder(BorderFactory.createTitledBorder(null, "Teams", 
                     TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
             teamsPanel.add(getTeamsScrollPane());
-            teamsPanel.setVisible(false);
         }
 
         return teamsPanel;
@@ -345,7 +340,10 @@ public class GenerateAnnouncementPane extends JPanePlugin {
     /**
      * Initializes groupsJList to contain a "checkbox list" of groups which can see the currently-selected problem.
      * 
-     * @return
+     * TODO:  currently there is no check to verify that groups added to the returned list are indeed allowed
+     * to see the currently selected problem.
+     * 
+     * @return a {@link JCheckBoxJList} of groups.
      */
     private JCheckBoxJList getGroupsList() {
 
@@ -358,7 +356,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
             Arrays.sort(allgroups, new GroupComparator());
             for (Group group : allgroups) {
-                JCheckBox checkBox = new JCheckBox(group.getDisplayName());
+                JCheckBox checkBox = new JCheckBox(group.getDisplayName() + "  ");
                 checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, group.getElementId());
                 ((DefaultListModel<Object>) groupsListModel).addElement(checkBox);
             }
@@ -372,9 +370,12 @@ public class GenerateAnnouncementPane extends JPanePlugin {
     }
 
     /**
-     * Initializes teamsJList to contain a "checkbox list" of groups which can see the currently-selected problem.
+     * Initializes teamsJList to contain a "checkbox list" of teams which can see the currently-selected problem.
      * 
-     * @return
+     * TODO: currently there is no check to verify that teams added to the JList are indeed allowed to see
+     * the currently selected problem.
+     * 
+     * @return a {@link JCheckBoxJList} of teams.
      */
     private JCheckBoxJList getTeamsList() {
 
@@ -391,7 +392,7 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
             for (Account team : allTeams) {
                 // TODO if teams string is really wrong (meaning, long? or maybe non-ASCII chars?) it could create visual problems
-                JCheckBox checkBox = new JCheckBox(team.getClientId().getClientNumber() + " " + team.getDisplayName());
+                JCheckBox checkBox = new JCheckBox(team.getClientId().getClientNumber() + " " + team.getDisplayName() + " ");
                 checkBox.putClientProperty(CHECKBOX_GROUP_OR_TEAM_PROPERTY, team.getClientId());
                 ((DefaultListModel<Object>) teamsListModel).addElement(checkBox);
             }
@@ -548,16 +549,24 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
         // TODO: Announcements should have an option of including "which problem they relate to" IN THE ANNOUNCEMENT TEXT.
 
+        //ensure a problem has been selected
         if (getProblemComboBox().getSelectedIndex() <= 0) {
             showMessage("Please select a problem");
             return;
         }
 
+        //ensure some announcement text has been entered.
         if (getAnnouncementTextArea().getText().trim().length() <= 0) {
             showMessage("Please enter text for the announcement");
             return;
         }
 
+        //ensure that if "Specific Groups and/or Teams" is currently selected, then at least one group or team has been checked
+        if (getDestinationComboBox().getSelectedItem().equals(SPECIFIC_GROUPS_AND_TEAMS)  && getGroupsAndTeamsSelectedValues().length <= 0) {
+            showMessage("You must select at least one Destination group or team (or else change \"Destination\" to \"All Teams\")");
+            return;
+        }
+        
         Problem problem = ((Problem) getProblemComboBox().getSelectedItem());
         String destinationCategories = (String) getDestinationComboBox().getSelectedItem();
         Object[] ultimateDestinationsPacked = getGroupsAndTeamsSelectedValues();
@@ -590,13 +599,13 @@ public class GenerateAnnouncementPane extends JPanePlugin {
     }
 
     /**
-     * Invokes the Contest Controller to submit a announcement clarification as specified by the input parameters.
+     * Invokes the Contest Controller to submit an "announcement clarification" as specified by the input parameters.
      * Assumes that the "large text area" textbox contains a non-zero-length announcement.
-     * Asks for a confirmation in a separate frame before sending the announcement.
+     * Asks for a confirmation in a separate dialog before sending the announcement.
      * 
-     * @param problem
-     * @param destinationCategories
-     * @param ultimateDestinationsPacked
+     * @param problem the contest problem to which the announcement relates.
+     * @param destinationCategories the category of the announcement destination (e.g. "ALL TEAMS" or "Specific Groups/Teams"))
+     * @param ultimateDestinationsPacked an array whose elements identify each destination (e.g. each group or team)
      */
     protected void submitAnnouncement(Problem problem, String destinationCategories, Object[] ultimateDestinationsPacked) {
 
@@ -660,11 +669,30 @@ public class GenerateAnnouncementPane extends JPanePlugin {
                     ultimateDestinationsGroup.toArray(new ElementId[ultimateDestinationsGroup.size()]),
                     ultimateDestinationsTeam.toArray(new ClientId[ultimateDestinationsTeam.size()]));
             announcementTextArea.setText("");
+            clearGroupAndTeamSelections();
 
         } catch (Exception e) {
             showMessage("Error sending announcement, contact staff");
             log.log(Log.SEVERE, "Exception sending announcement: ", e);
         }
+    }
+
+    /**
+     * Forces all JCheckBoxes in both the Groups JCheckboxJList and the Teams JCheckboxJList to become unselected.
+     */
+    private void clearGroupAndTeamSelections() {
+        
+        DefaultListModel<Object> teamsModel = (DefaultListModel<Object>) getTeamsList().getModel();
+        for (int i=0; i<teamsModel.getSize(); i++) {
+            ((JCheckBox)teamsModel.getElementAt(i)).setSelected(false);
+        }
+        DefaultListModel<Object> groupsModel = (DefaultListModel<Object>) getGroupsList().getModel();
+        for (int i=0; i<groupsModel.getSize(); i++) {
+            ((JCheckBox)groupsModel.getElementAt(i)).setSelected(false);
+        }
+
+        //unselecting the checkboxes in the model does not automatically update the screen; need to force a repaint
+        this.repaint();
     }
 
     /**
@@ -1243,18 +1271,6 @@ public class GenerateAnnouncementPane extends JPanePlugin {
 
     }
 
-    private Component getVerticalGlue() {
-        if (verticalGlue == null) {
-        	verticalGlue = Box.createVerticalGlue();
-        }
-        return verticalGlue;
-    }
-    private Component getVerticalGlue_1() {
-        if (verticalGlue_1 == null) {
-        	verticalGlue_1 = Box.createVerticalGlue();
-        }
-        return verticalGlue_1;
-    }
     private Component getVerticalGlue_2() {
         if (verticalGlue_2 == null) {
         	verticalGlue_2 = Box.createVerticalGlue();
@@ -1272,5 +1288,23 @@ public class GenerateAnnouncementPane extends JPanePlugin {
         	verticalGlue_4 = Box.createVerticalGlue();
         }
         return verticalGlue_4;
+    }
+    private Component getRigidArea() {
+        if (rigidArea == null) {
+        	rigidArea = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea;
+    }
+    private Component getRigidArea_1() {
+        if (rigidArea_1 == null) {
+        	rigidArea_1 = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea_1;
+    }
+    private Component getRigidArea_2() {
+        if (rigidArea_2 == null) {
+        	rigidArea_2 = Box.createRigidArea(new Dimension(20, 20));
+        }
+        return rigidArea_2;
     }
 }
