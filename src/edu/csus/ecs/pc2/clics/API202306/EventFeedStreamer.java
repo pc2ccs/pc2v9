@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.SecurityContext;
@@ -128,15 +130,29 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
      *
      * @author Douglas A. Lane, PC^2 Team, pc2@ecs.csus.edu
      */
-    protected class StreamAndFilter {
+    protected class StreamAndFilter implements Runnable {
+
+        private static final int QUEUE_WAIT_TIME_MS = 1000;
 
         private OutputStream stream;
 
         private EventFeedFilter filter;
 
+        private LinkedBlockingQueue<String> outputQueue = new LinkedBlockingQueue<String>();
+
+        private boolean terminateClient = false;
+
         public StreamAndFilter(OutputStream outputStream, EventFeedFilter filter) {
             stream = outputStream;
             this.filter = filter;
+        }
+
+        public boolean wantTerminateClient() {
+            return terminateClient;
+        }
+
+        public void setTerminateClient() {
+            terminateClient = true;
         }
 
         public OutputStream getStream() {
@@ -145,6 +161,40 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
 
         public EventFeedFilter getFilter() {
             return filter;
+        }
+
+        public void put(String s){
+            try {
+                outputQueue.put(s);
+            } catch (InterruptedException e) {
+                terminateClient = true;
+            }
+        }
+
+        @Override
+        public void run() {
+            String line;
+
+            try {
+                while(!terminateClient) {
+                    line = outputQueue.poll(QUEUE_WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+                    if(line != null) {
+                        try {
+                            stream.write(line.getBytes("UTF-8"));
+                            stream.flush();
+                        } catch (Exception e) {
+                            if(line.equals(NL)) {
+                                log.log(Log.INFO, "Problem trying to send keep-alive to " + getFilter().getClient(), e);
+                            } else {
+                                log.log(Log.INFO, "Problem trying to send JSON '" + line + "' to " + getFilter().getClient(), e);
+                            }
+                            terminateClient = true;
+                        }
+                    }
+                }
+            } catch (InterruptedException e) {
+                terminateClient = true;
+            }
         }
     }
 
@@ -172,8 +222,9 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
      */
     public void addStream(OutputStream outputStream, EventFeedFilter filter) {
         StreamAndFilter sandf = new StreamAndFilter(outputStream, filter);
+        new Thread(sandf).start();
         streamsMap.put(outputStream, sandf);
-        sendEventsFromEventFeedLog(outputStream, filter);
+        sendEventsFromEventFeedLog(sandf, filter);
     }
 
     /**
@@ -185,7 +236,12 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
 
         if (isStreamActive(stream)) {
             try {
-                log.log(Log.INFO, "Closing client stream " + stream);
+                StreamAndFilter sandf = streamsMap.get(stream);
+                log.log(Log.INFO, "Stopping client thread and closing client stream " + stream);
+                // Stop thread
+                if(sandf != null) {
+                    sandf.setTerminateClient();
+                }
                 stream.close();
                 log.log(Log.INFO, "Closed client stream.");
                 streamsMap.remove(stream);
@@ -253,7 +309,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
      * @param filter
      * @param
      */
-    private void sendEventsFromEventFeedLog(OutputStream stream, EventFeedFilter filter) {
+    private void sendEventsFromEventFeedLog(StreamAndFilter sandf, EventFeedFilter filter) {
 
         /**
          * Number of lines/events in log.
@@ -274,9 +330,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                     }
 
                     if (filter.matchesFilter(line)) {
-                        stream.write(line.getBytes("UTF-8"));
-                        stream.write(NL.getBytes("UTF-8"));
-                        stream.flush();
+                        sandf.put(line + NL);
                     }
                 }
             }
@@ -864,29 +918,30 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
 
         string = replaceEventId (string, newId);
 
+        // Add notification to log before sending to clients
+        try {
+            eventFeedLog.writeEvent(string);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.log(Log.WARNING, "Problem trying to write event feed log for '" + string + "'", e);
+        }
+
+
         /**
          * Send JSON to each
          */
         for (Map.Entry<OutputStream, StreamAndFilter> entry : streamsMap.entrySet()) {
             StreamAndFilter streamAndFilter = entry.getValue();
 
-            try {
-                if (streamAndFilter.getFilter().matchesFilter(string)) {
-                    OutputStream stream = streamAndFilter.getStream();
-                    stream.write(string.getBytes("UTF-8"));
-                    stream.flush();
-                }
-            } catch (Exception e) {
-                log.log(Log.INFO, "Problem trying to send JSON '" + string + "'", e);
+            // Check if there was a problem with this client, if so, we are no longer
+            // interested in providing it with data
+            if (streamAndFilter.wantTerminateClient()) {
                 removeStream(streamAndFilter.getStream());
+            } else {
+                if (streamAndFilter.getFilter().matchesFilter(string)) {
+                    streamAndFilter.put(string);
+                }
             }
-        }
-
-        try {
-            eventFeedLog.writeEvent(string);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.log(Log.WARNING, "Problem trying to write event feed log for '" + string + "'", e);
         }
 
         lastSent = System.currentTimeMillis();
@@ -927,19 +982,15 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
             if (System.currentTimeMillis() > lastSent + KEEP_ALIVE_DELAY) {
 
                 // Send keep alive to every running stream.
-
                 for (Iterator<OutputStream> streams = streamsMap.keySet().iterator(); streams.hasNext();) {
                     OutputStream stream = streams.next();
                     StreamAndFilter streamAndFilter = streamsMap.get(stream);
 
-                    try {
-                        // OutputStream stream = streamAndFilter.getStream();
-                        stream.write(NL.getBytes());
-                        stream.flush();
-
-                    } catch (Exception e) {
-                        log.log(Log.INFO, "Problem writing keep alive newline to stream to " + streamAndFilter.getFilter().getClient(), e);
+                    // If client had a write issue, we are no longer interested in it.
+                    if(streamAndFilter.wantTerminateClient()) {
                         removeStream(streamAndFilter.getStream());
+                    } else {
+                        streamAndFilter.put(NL);;
                     }
                 }
 
