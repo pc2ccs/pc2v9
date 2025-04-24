@@ -232,7 +232,8 @@ public class EventFeedStreamerTest extends AbstractTestCase {
 
         assertNotNull(json);
 
-        assertTrue("Expected long json ",  json.length() > 8000);
+        int len = json.length();
+        assertTrue("Expected long json at least 8000 bytes (got:" + len + ")",  json.length() > 8000);
 
         // Note that collections are in effect, so only 1 clarification collection
         assertCountEvent(1, EventFeedJSON.CLARIFICATIONS_KEY, json);

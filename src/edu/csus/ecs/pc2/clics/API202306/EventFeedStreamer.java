@@ -152,6 +152,17 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
         }
 
         public void setTerminateClient() {
+            // if terminateClient is false, this means he caller is asking us
+            // to stop because they're done.  (eg. removeClient() being called)
+            // If there's data pending, we want to wait a big for it to drain.
+            if(terminateClient == false && outputQueue.isEmpty() == false) {
+                // wait for the thread to pick it up
+                try {
+                    Thread.sleep(QUEUE_WAIT_TIME_MS);
+                } catch(Exception e) {
+                    // Do nothing - If this happens, the client is dead already.
+                }
+            }
             terminateClient = true;
         }
 
