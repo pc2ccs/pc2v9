@@ -18,6 +18,8 @@ import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
@@ -61,11 +63,17 @@ public class EventFeedJSON extends JSON202306Utilities {
         super();
         this.jsonTool = jsonTool;
 
-        try {
-            String [] disList = CommaSeparatedValueParser.parseLine(IniFile.getValue(CLICS_DISABLE_COLLECTIONS_KEY));
-            this.disableNotificationCollections(disList);
-        } catch (Exception e) {
-            // Use default values for collections
+        String disCSVList = IniFile.getValue(CLICS_DISABLE_COLLECTIONS_KEY);
+        if(disCSVList != null && !disCSVList.isEmpty()) {
+            try {
+                String [] disList = CommaSeparatedValueParser.parseLine(disCSVList);
+                this.disableNotificationCollections(disList);
+            } catch (Exception e) {
+                Log log = StaticLog.getLog();
+                if(log != null) {
+                    log.warning("Error parsing INI key: " + CLICS_DISABLE_COLLECTIONS_KEY + " (" + disCSVList + "): " + e);
+                }
+            }
         }
     }
 
@@ -1089,7 +1097,7 @@ public class EventFeedJSON extends JSON202306Utilities {
 
     /**
      * Tests if notification collections should be used for a specific notification type.
-     * This first tests is notification collections are being used in general, then if so,
+     * This first tests if notification collections are being used in general, then if so,
      * checks if the specific type is not disabled.
      *
      * @param notificationType
@@ -1100,12 +1108,12 @@ public class EventFeedJSON extends JSON202306Utilities {
     }
 
     /**
-     * Adds the comma-separated list of notification types (EventFeedType's) to the HashSet of
+     * Adds the array of notification types (EventFeedType strings) to the HashSet of
      * disabled notification types.  Any notification type in this list will not use collections
      * on the event feed.  The special type ALL_NOTIFICATION_TYPES will disable collections for all
-     * notification and will clear the HashSet of disabled types and simply set the useCollections flag to false.
+     * notifications and will clear the HashSet of disabled types and simply set the useCollections flag to false.
      *
-     * @param list Comma-separated list of notification types (EventFeedType's) to not use
+     * @param list array of notification types (EventFeedType strings) to not use
      *      collections on.
      */
     public void disableNotificationCollections(String [] list) {
@@ -1122,13 +1130,14 @@ public class EventFeedJSON extends JSON202306Utilities {
     }
 
     /**
-     * Remove the comma-separated list of notification types (EventFeedType's) from the Hashset
-     * of disabled notification types.  If collections are enabled, then the types included in the
-     * supplied list will be allowed to generate collections.  The special type ALL_NOTIFICATION_TYPES will disable collections for all
+     * Remove the array of notification types (EventFeedType strings) from the Hashset
+     * of disabled notification types.  The types included in the
+     * supplied list will be allowed to generate collections, assuming collections are
+     * being used (useCollections).  The special type ALL_NOTIFICATION_TYPES will enable collections for all
      * notification and will simply set the useCollections flag to true and clear the HashSet of
      * disabled types.
      *
-     * @param list Comma-separated list of notification types (EventFeedType's) to allow collections on.
+     * @param list array of notification types (EventFeedType strings) to allow collections on.
      */
     public void enableNotificationCollections(String [] list) {
         if(list != null) {
