@@ -499,7 +499,6 @@ public class TeamsController extends MainController {
 					.entity(new ServerErrorResponseModel(Response.Status.UNAUTHORIZED, "Unauthorized user request"))
 					.type(MediaType.APPLICATION_JSON).build();
 		}
-		
 		Response submitClarResponse = this.submitClarification(teamsConn, clar);
 		logger.info("Submitted clarification to PC2 server for team " +  teamAcct + ", response = " + submitClarResponse.getStatus());
 		return submitClarResponse;
