@@ -96,7 +96,7 @@ public class CLICSContestAccess {
          */
         String [] serviceNames = { "Contest", "JudgementType", "Language", "Problem", "Group", "Organization",
                 "Team", "Person", "Account", "State", "Submission", "Judgement", "Run", "Clarification",
-                "Scoreboard", "EventFeed", "Award", "Commentary", "Webhooks"
+                "Scoreboard", "EventFeed", "Award", "Commentary", "Webhooks", "Results"
         };
 
         ArrayList<CLICSEndpoint> epList = new ArrayList<CLICSEndpoint>();
@@ -137,7 +137,7 @@ public class CLICSContestAccess {
                     Object args[] = { contest, sc };
                     // invoke static method with the SecurityContext as an argument
                     Object epRet = m.invoke(null, args);
-                    if(epRet instanceof CLICSEndpoint) {
+                    if(epRet != null && epRet instanceof CLICSEndpoint) {
                         // we got one back, so add it to the list
                         CLICSEndpoint ep = (CLICSEndpoint)epRet;
                         epList.add(ep);
