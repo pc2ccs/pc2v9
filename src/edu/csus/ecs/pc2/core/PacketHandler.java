@@ -1616,12 +1616,19 @@ public class PacketHandler {
             contest.updateRun(run, getServerClientId());
         }
 
-        // Send to team
         Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), fromId, run);
-        controller.sendToClient(confirmPacket);
+        boolean isThisServer = isServer();
+
+        // Send to remote client (on another server) or a local team
+        // Note that if this was proxy submit by say, a feeder on this server, the response
+        // will get sent below in sendToJudgesAndOthers().  We don't want
+        // to send the same packet to the same client twice.
+        if(!isThisServer || fromId.getClientType() == ClientType.Type.TEAM) {
+            controller.sendToClient(confirmPacket);
+        }
 
         // Send to clients and servers
-        if (isServer()) {
+        if (isThisServer) {
             controller.sendToJudgesAndOthers(confirmPacket, false);
             Packet dupSubmissionPacket = PacketFactory.createRunSubmissionConfirmation(contest.getClientId(), fromId, run, runFiles);
             controller.sendToServers(dupSubmissionPacket);
