@@ -103,6 +103,7 @@ public class CLICSContestInfo {
                 start_time = Utilities.getIso8601formatterWithMS().format(date);
             } else {
                 start_time = null;
+                countdown_pause_time = ci.getContestCountdownPauseTime();
             }
         }
         penalty_time = Integer.valueOf(ci.getScoringProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO, "20"));

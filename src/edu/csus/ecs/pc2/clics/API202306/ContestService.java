@@ -60,6 +60,7 @@ import edu.csus.ecs.pc2.services.eventFeed.WebServer;
  * {
  *  "id":"wf2016",
  *  "start_time":null
+ *  "countdown_pause_time":"2016-05-19T10:00:00+07"
  * }
  *
  * or, to change thaw time:
@@ -192,8 +193,6 @@ public class ContestService implements Feature {
         String startTimeValueString = null;
         // get the countdown_pause_time key, if there
         String countdownPauseTime = null;
-        // Flag to indicate that countdown pause time was specified
-        boolean sawCountdownPauseTime = false;
 
         // if we get here then the JSON parsed correctly; see if it contained "start_time" as a key
         if (!requestMap.containsKey(CONTEST_START_TIME_KEY)) {
@@ -212,7 +211,6 @@ public class ContestService implements Feature {
         startTimeValueString = requestMap.get(CONTEST_START_TIME_KEY);
 
         if(requestMap.containsKey(CONTEST_COUNTDOWN_PAUSE_TIME_KEY)) {
-            sawCountdownPauseTime = true;
             countdownPauseTime = requestMap.get(CONTEST_COUNTDOWN_PAUSE_TIME_KEY);
         }
 
@@ -226,7 +224,8 @@ public class ContestService implements Feature {
             }
             return(HandleContestCountdownPauseTime(sc, contestId, countdownPauseTime));
         }
-        return(HandleContestStartTime(sc, contestId, startTimeValueString, sawCountdownPauseTime));
+        // countdownPauseTime must be null (eg CONTEST_COUNTDOWN_PAUSE_TIME_KEY must be null)
+        return(HandleContestStartTime(sc, contestId, startTimeValueString));
     }
 
     /**
@@ -235,10 +234,9 @@ public class ContestService implements Feature {
      * @param sc
      * @param contestId which contest
      * @param startTimeValueString new contest start time (ISO format) or null to make it undefined
-     * @param sawCountdownPauseTime
      * @return web response
      */
-    private Response HandleContestStartTime(SecurityContext sc, String contestId, String startTimeValueString, boolean sawCountdownPauseTime) {
+    private Response HandleContestStartTime(SecurityContext sc, String contestId, String startTimeValueString) {
 
         StartTimeRequestType requestType = StartTimeRequestType.ILLEGAL;
         GregorianCalendar requestedStartTime = null;
@@ -315,7 +313,7 @@ public class ContestService implements Feature {
 
                     // ok to set scheduled start to "undefined"
                     controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setting contest start time to \"null\".");
-                    success = setScheduledStart(null, sawCountdownPauseTime);
+                    success = setScheduledStart(null, null);
                     if (success) {
                         return Response.ok().entity("Contest start time updated to \"null\" (no scheduled start)").build();
                     } else {
@@ -347,7 +345,7 @@ public class ContestService implements Feature {
 
                 // ok to set scheduled start to a specific time
                 controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": setting contest start time to " + requestedStartTime);
-                success = setScheduledStart(requestedStartTime, sawCountdownPauseTime);
+                success = setScheduledStart(requestedStartTime, null);
                 if (success) {
                     return Response.ok().entity("/contests/" + contestId).build();
                 } else {
@@ -389,11 +387,17 @@ public class ContestService implements Feature {
         // MIN_VALUE is returned on format error
         if(pauseTime != Long.MIN_VALUE) {
             // want to stop the countdown with this many milliseconds left
-            // TODO: tell PC2 to stop countdown when clock is 'pauseTime' ms away from start
-            controller.getLog().log(Log.WARNING, LOG_PREFIX + contestId + ": countdown_pause_time not implemented");
-            return Response.status(Status.NOT_MODIFIED).entity("Unable to set countdown_pause_time to " + pauseTime + " ms").build();
+            // tell PC2 to stop countdown when clock is 'pauseTime' ms away from start
+            boolean success = setScheduledStart(null, countdownPauseTime);
+            if (success) {
+                controller.getLog().log(Log.INFO, LOG_PREFIX + contestId + ": countdown paused at " + countdownPauseTime + " and set contest start time to null.");
+                return Response.ok().entity("Contest countdown paused at " + countdownPauseTime + " and start time updated to \"null\" (no scheduled start)").build();
+            } else {
+                controller.getLog().log(Log.SEVERE, LOG_PREFIX + contestId + ": can not pause countdown at " + countdownPauseTime + " - error setting contest start time to \"undefined\".");
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Server failed to pause countdown at " + countdownPauseTime).build();
+            }
         }
-        return Response.status(Status.BAD_REQUEST).entity("Bad value for count down pause time request").build();
+        return Response.status(Status.BAD_REQUEST).entity("Bad value (" + countdownPauseTime + ") for count down pause time request").build();
     }
 
     /**
@@ -461,12 +465,16 @@ public class ContestService implements Feature {
      * This is accomplished by telling the controller to update the {@link ContestInformation} with the scheduled start date. The controller then sends a packet to the server to do that; the server in
      * turn creates a task to start the contest at the specified date/time.
      *
+     * When a contest is paused, the start date will be specified as null and the contest pause rel time will
+     * be set to the time remaining in the countdown ((h)*h:mm:ss(.uuu)).  When the contest is resumed,
+     * the date will be the new start date for the contest and the pause rel time will be null.
+     *
      * @param theDate
      *            the date/time to which the automatic start of the contest should be set, or null if the start date/time should be set to "undefined"
-     * @param unPauseCountdown tell pc2 that the countdown pause (if in effect) should be cancelled, and countdown should resume, if there's a valid start time
+     * @param contestPauseRelTime Relative time before contest starts: HH:MM:SS, null if not pausing
      * @return true if the method was successful in setting the scheduled start time; false otherwise
      */
-    private boolean setScheduledStart(GregorianCalendar theDate, boolean unPauseCountdown) {
+    private boolean setScheduledStart(GregorianCalendar theDate, String contestPauseRelTime) {
 
         // get the local model's ContestInformation
         ContestInformation ci = model.getContestInformation();
@@ -476,9 +484,12 @@ public class ContestService implements Feature {
             if (theDate != null) {
                 // if we have a valid start date, set the contest to auto-start
                 ci.setAutoStartContest(true);
+            } else {
+                // only set pause time if start time was not specified.
+                ci.setContestCountdownPauseTime(contestPauseRelTime);
             }
-            // TODO unpause countdown - this will be a flag in "ci"
             // tell the Controller to update the ContestInformation
+            // note: setting a new contest start time (eg theDate != null) will automatically start the countdown
             controller.updateContestInformation(ci);
             return true;
         } else {
