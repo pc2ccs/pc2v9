@@ -78,7 +78,10 @@ public class CLICSClarification {
      * answer has a property called "reply_to_id".
      * This CLICSClarification class is used for both questions and answers.
      * If the clarAns argument is null, it means it's a question and "clar"
-     * contains that question (see the comment for @param clarAns).
+     * contains that question (see the comment for @param clarAns).  To complicate matters,
+     * a Clarification may also be a annoucement, in which case, there is no separate answer that
+     * would result in a clarification change event, rather the
+     * announcement text is included when the clarification is created.
      *
      * So, ClarificationService creates a separate CLICSClarification object
      * for the question (clarAns == null) and the answer to that question (clarAns != null).
@@ -99,6 +102,13 @@ public class CLICSClarification {
         }
         if (clar.getSubmitter().getClientType().equals(ClientType.Type.TEAM) && clarAns == null) {
             from_team_id = "" + clar.getSubmitter().getClientNumber();
+        }
+        // Announcements do not have a reply_to_id or a question, but they do have an answer
+        if(clar.isAnnounced()) {
+            ClarificationAnswer[] clarAnswers = clar.getClarificationAnswers();
+            if(clarAnswers != null && clarAnswers.length > 0) {
+                clarAns = clarAnswers[clarAnswers.length - 1];
+            }
         }
         if (clarAns != null) {
             // does the answer go to a team (as opposed to everyone)?
