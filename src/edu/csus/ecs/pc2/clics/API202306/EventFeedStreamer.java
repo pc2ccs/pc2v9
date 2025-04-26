@@ -459,7 +459,7 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
             Run run = event.getRun();
             Account account = contest.getAccount(run.getSubmitter());
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) && !run.isDeleted()) {
-
+                log.info("runAdded: " + run.toString());
                 String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), IJSONTool.getSubmissionId(run), jsonTool.convertToJSON(run, servletRequest, null).toString());
                 sendJSON(json + NL);
             }
@@ -485,8 +485,16 @@ public class EventFeedStreamer extends JSON202306Utilities implements Runnable, 
                         }
 
                     } else {
-                        String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), IJSONTool.getSubmissionId(run), jsonTool.convertToJSON(run, servletRequest, null).toString());
-                        sendJSON(json + NL);
+                        log.info("runChanged: (not adding) " + run.toString());
+
+                        // The following lines are commented out for now (April 14, 2025) and can probably
+                        // be removed in the future.  We are unsure why this code was here in the first place
+                        // and we feel it is wrong.  It causes 2 "submissions" events for the same
+                        // submission to appear on the event feed if an autojudge claims the submission.
+                        // We should not be indicating a new submission on the event feed for *any*
+                        // runChanged event (that I can think of). -- JohnB 4/14/2025
+//                        String json = getJSONEvent(SUBMISSION_KEY, getNextEventId(), IJSONTool.getSubmissionId(run), jsonTool.convertToJSON(run, servletRequest, null).toString());
+//                        sendJSON(json + NL);
                     }
                 }
             }
